@@ -1,0 +1,136 @@
+﻿B0*?‖.ahk‖A‖On‖
+B0*?‖.svg‖A‖On‖
+B0*‖ahk‖A‖On‖{BackSpace 3}AHK
+*‖ahk/‖C‖On‖AutoHotkey
+B0*‖bom ‖A‖On‖{Backspace 4}BOM
+*‖bom/‖C‖On‖Bill of Materials
+B0*‖c2ms ‖A‖On‖{Backspace 5}CCMS 
+*‖c2ms/‖C‖On‖Component Content Management System
+B0*‖ceo ‖A‖On‖{Backspace 4}CEO 
+*‖ceo/‖C‖On‖Chief Executive Officer
+*‖cntk/‖MC‖On‖CNTK¦Centrum Naukowo-Techniczne Kolejnictwa
+B0*‖com ‖A‖On‖{Backspace 4}COM 
+B0*‖cop‖A‖Off‖{Backspace 4}COP 
+*‖cop/‖C‖On‖Code of Practice
+B0*‖cots ‖A‖On‖{Backspace 5}COTS 
+*‖cots/‖C‖On‖Commercial Off-The-Shelf
+B0*‖dita ‖A‖On‖{Backspace 5}DITA 
+*‖dita/‖C‖On‖Darwin Information Typing Architecture
+B0*‖dnd ‖A‖On‖{Backspace 4}D&D 
+*‖dnd/‖A‖On‖Drag&Drop
+B0*‖emc ‖A‖On‖{Backspace 4}EMC 
+*‖emc/‖C‖On‖Electro-Magnetic Compatibility
+B0*‖emi ‖A‖On‖{Backspace 4}EMI 
+*‖emi/‖C‖On‖Electromagnetic Interference
+B0*‖era ‖A‖On‖{Backspace 4}ERA 
+*‖era/‖C‖On‖European Railway Agency
+B0*‖ere ‖A‖On‖{Backspace 4}ERE 
+*‖ere/‖C‖On‖Explicit Risk Estimation
+B0*‖erp ‖A‖On‖{Backspace 4}ERP 
+*‖erp/‖C‖On‖Enterprise Resource Planning
+B0*‖ertms ‖A‖On‖{Backspace 6}ERTMS 
+*‖ertms/‖C‖On‖European Rail Traffic Management System
+B0*‖etcs ‖A‖On‖{Backspace 5}ETCS 
+*‖etcs. ‖A‖On‖European Train Control System
+B0*‖fai ‖A‖On‖{Backspace 4}FAI 
+*‖fai/‖C‖On‖First Article Inspection
+B0*‖faq ‖A‖On‖{Backspace 4}FAQ 
+*‖faq/‖C‖On‖Frequently Asked Questions
+B0*‖fat ‖A‖On‖{Backspace 4}FAT 
+*‖fat/‖C‖On‖Factory Acceptance Test
+B0*‖fmea ‖A‖On‖{Backspace 5}FMEA 
+*‖fmea/‖C‖On‖Failure Mode and Effects Analysis
+B0*‖fmeca ‖A‖On‖{Backspace 6}FMECA 
+*‖fmeca/‖C‖On‖Failure Mode, Effects and Criticality Analysis
+B0*‖fracas ‖A‖On‖{Backspace 7}FRACAS 
+*‖fracas/‖C‖On‖Failure Reporting Analysis and Corrective Action System
+B0*‖fta ‖A‖On‖{Backspace 4}FTA 
+*‖fta/‖C‖On‖Fault Tree Analysis
+B0*‖ga  ‖A‖On‖{Backspace 3}GA 
+*‖ga/‖C‖On‖Generic Application
+B0*‖gnu ‖A‖On‖{Backspace 4}GNU 
+B0*‖gpl‖A‖On‖{Backspace 3}GPL 
+B0*‖gpl ‖A‖On‖{Backspace 4}GPL 
+*‖GPL/‖C‖On‖General Public License
+B0*‖gui‖A‖Off‖{BackSpace 3}GUI 
+B0*‖gui ‖A‖On‖{BackSpace 4}GUI
+*‖gui/‖C‖On‖Graphical User Interface
+B0*‖hart ‖A‖On‖{Backspace 5}HART 
+*‖hart/‖C‖On‖Highway Addressable Remote Transducer Protocol
+B0*‖has‖A‖Off‖{Backspace 4}HAS 
+*‖has/‖C‖On‖Hardware Architecture Specification
+B0*‖hdmi ‖A‖On‖{Backspace 5}HDMI 
+*‖hdmi/‖C‖On‖High-Definition Multimedia Interface
+B0*‖hds ‖A‖On‖{Backspace 4}HDS 
+*‖hds/‖C‖On‖Hardware Design Specification
+B0*‖ic ‖A‖On‖{Backspace 3}IC 
+*‖ic/‖C‖On‖Interoperability Constituent
+B0*‖ip ‖A‖On‖{Backspace 3}IP 
+*‖ip/‖C‖On‖IP Code, Ingress Protection code (https://en.wikipedia.org/wiki/IP_Code	)
+B0*‖iris ‖A‖On‖{Backspace 5}IRIS 
+*‖iris/‖C‖On‖International Railway Industry Standard for the evaluation of railway management systems
+B0*‖kpi ‖A‖On‖{Backspace 4}KPI 
+*‖kpi/‖C‖On‖Key Performance Indicator
+B0*‖lad ‖A‖On‖{Backspace 4}LAD 
+*‖lad/‖C‖On‖Logistic and Administrative Delay
+B0*‖lc2 ‖A‖On‖{Backspace 4}LLC 
+*‖lc2/‖C‖On‖Life Cycle Cost
+B0*‖lop ‖A‖On‖{Backspace 4}LoP 
+*‖lop/‖C‖On‖List of Open Points
+B0*‖mdt ‖A‖On‖{Backspace 4}MDT 
+*‖mdt/‖C‖On‖Mean Down Time
+B0*‖mtbf‖A‖On‖{Backspace 4}MTBF
+B0*‖mtbf ‖A‖Off‖{Backspace 5}MTBF 
+*‖mtbf/‖C‖On‖Mean Time Between Failures
+B0*‖mtbm ‖A‖On‖{Backspace 5}MTBM 
+*‖mtbm/‖C‖On‖Mean Time Between Maintainances
+B0*‖mttf ‖A‖On‖{Backspace 5}MTTF 
+*‖mttf/‖C‖On‖Mean Time To Failure
+B0*‖mttr ‖A‖On‖{Backspace 5}MTTR 
+*‖mttr/‖C‖On‖Mean Time To Restore
+B0*‖mut ‖A‖On‖{Backspace 4}MUT 
+*‖mut/‖C‖On‖Mean Up Time
+B0*‖ncr ‖A‖On‖{Backspace 4}NCR 
+*‖ncr/‖C‖On‖Non Conformance Report
+B0*‖nda ‖A‖On‖{Backspace 4}NDA 
+*‖nda/‖C‖On‖Non-Disclosure Agreement
+B0*‖pcb ‖A‖On‖{Backspace 4}PCB 
+*‖pcb/‖C‖On‖Printed Circuit Board
+*‖poc/‖MA‖On‖PoC ¦Proof of Concept 
+B0*‖qrams ‖A‖On‖{Backspace 6}QRAMS 
+*‖qrams/‖C‖On‖Quality, Reliability, Availability, Maintainability, Safety
+B0*‖rac ‖A‖On‖{Backspace 4}RAC 
+*‖rac/‖C‖On‖Risk Acceptance Criteria
+B0*‖ram ‖A‖On‖{Backspace 4}RAM 
+*‖ram/‖C‖On‖Reliability, Availability, Maintainability
+B0*‖rams ‖A‖On‖{Backspace 5}RAMS 
+*‖rams/‖C‖On‖Reliability, Availability, Maintainability and Safety
+B0*‖rap ‖A‖On‖{Backspace 4}RAP 
+*‖rap/‖C‖On‖Risk Acceptance Principle
+B0*‖rma‖A‖On‖{BackSpace 3}RMA
+*‖rma/‖C‖On‖Return Merchandise Authorization
+B0*‖sa ‖A‖On‖{Backspace 3}SA 
+*‖sa/‖C‖On‖Specific Application
+B0*‖sil ‖A‖On‖{Backspace 4}SIL 
+*‖sil/‖C‖On‖Safety Integrity Level
+B0*‖sla ‖A‖On‖{Backspace 4}SLA 
+*‖sla/‖C‖On‖Service-Level Agreement
+B0*‖srac ‖A‖On‖{Backspace 5}SRAC 
+*‖srac/‖C‖On‖Safety Related Application Condition
+B0*‖svg‖A‖On‖{Backspace 3}SVG
+*‖svg/‖A‖On‖Scalable Vector Graphics
+*‖tbd‖A‖On‖to be decided
+B0*‖tffr ‖A‖On‖{Backspace 5}TFFR 
+*‖tffr/‖C‖On‖Tolerable Functional Failure Rate
+B0*‖thr ‖A‖On‖{Backspace 4}THR 
+*‖thr/‖C‖On‖Tolerable Hazard Rate
+B0*‖tsi ‖A‖On‖{Backspace 4}TSI 
+*‖tsi/‖C‖On‖Technical Specifications for Interoperability
+B0*‖ups ‖A‖On‖{Backspace 4}UPS 
+*‖ups/‖C‖On‖Uninterruptable Power Supply
+B0*‖usb ‖A‖On‖{Backspace 4}USB 
+*‖usb/‖C‖On‖Universal Serial Bus
+B0*‖vat ‖A‖On‖{Backspace 4}VAT 
+*‖vat/‖C‖On‖Value Added Tax
+B0*‖vba ‖A‖On‖{Backspace 4}VBA 
+*‖vba/‖C‖On‖Visual Basic for Applications
