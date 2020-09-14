@@ -10,7 +10,7 @@ This application is written in AutoHotkey script language but does not require t
 
 # What are the hotstrings (absolute beginner quide)
 There are two notions:
-*triggering abbreviation* → *hotstring*
+**triggering abbreviation** → **hotstring**
 
 When someone enters the triggering abbreviation, it will be automatically replaced with hotstring.
 
@@ -19,6 +19,7 @@ Thanks to this application one can define as many pairs (triggering abbreviation
 # Main window
 After installation just double click on the Hotstrings icon (marked in red) in system tray ![Example of system tray](/HelpPictures/Hotstring3_SystemTray.png) or... use hotkey Ctrl + # + h (Control + Windows key + h).
 Next you'll see main GUI (Graphical User Interface) window which enable you to edit hotstrings:
+
 ![Main window](/HelpPictures/Hotstring3_MainWindow.png)
 
 ## Hotstring menu
@@ -41,4 +42,4 @@ Enable searching of hotstring in any of the categories. All .csv files (category
 Enable change of the delay between copying of the hotstring from clipboard to specific text window from which it was triggered.
 By default equal to 200 ms. Maximum value equal to 500 ms (0.5 s).
 
-*Tip:* Sometimes when long 
+**Tip:** Sometimes when long 
