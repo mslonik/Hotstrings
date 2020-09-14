@@ -9,3 +9,4 @@ AutoHotkey oriented GUI to Hotstrings with many useful features:
 # Let's get started
 After installation just double click on the Hotstrings icon in system tray ![Example of system tray](/HelpPictures/Hotstring3_SystemTray.png) or... use hotkey Ctrl + # + h (Control + Windows key + h).
 
+
