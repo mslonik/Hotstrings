@@ -19,5 +19,6 @@ B0*‖plk ‖A‖On‖{Backspace 4}PLK
 *‖srk/‖C‖On‖(urządzenia) sterowania ruchem kolejowym
 B0*‖utk ‖A‖On‖{Backspace 4}UTK 
 *‖utk/‖C‖On‖Urząd Transportu Kolejowego
-B0*‖wtwio ‖A‖On‖{Backspace 6}WTWiO 
+B0*‖wtwio‖A‖On‖{Backspace 5}WTWiO
+B0*‖wtwio ‖A‖Off‖{Backspace 6}WTWiO 
 *‖wtwio/‖C‖On‖Warunki Techniczne Wytwarzania i Odbioru

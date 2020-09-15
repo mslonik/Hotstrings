@@ -1,6 +1,4 @@
-﻿‖2d‖A‖On‖2D
-*0‖3d‖A‖On‖3D
-*‖a/‖A‖On‖Availability
+﻿*‖a/‖A‖On‖Availability
 *‖ab/‖A‖On‖ASDEK_BAZ
 *‖ac/‖C‖On‖Alternating Current
 *‖ac`t‖A‖On‖AC
@@ -74,6 +72,7 @@ B0*‖oem ‖A‖On‖{BackSpace 3}OEM
 *‖otagle‖A‖On‖O T A G L E
 *‖par/‖A‖On‖§
 ‖pas2e‖A‖On‖passé
+*‖pcn/‖MA‖On‖PCN¦Product Change Notification
 B0*‖pdf ‖A‖On‖{BackSpace 4}PDF 
 *‖pdf/‖C‖On‖Portable Document Format
 *‖php‖A‖On‖PHP
