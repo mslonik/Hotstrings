@@ -10,8 +10,8 @@ B0*‖adm‖A‖Off‖{Backspace 3}ADM
 *‖aim/‖MC‖On‖inputs and outputs module¦moduł wejść wyjść
 *b0‖anszua‖A‖On‖{Backspace 6}AnSzuA
 *‖anszuapl/‖C‖On‖system zarządzania usługami
-B0*‖asdek‖MA‖On‖{Backspace 5}ASDEK¦{Backspace 5}ASDEK/GM/GH/PHOENIX¦{Backspace 5}ASDEK/PM/GM/GH/OK/PHOENIX/GOTCHA
-*‖asdek/‖C‖On‖automatyczny system detekcji i eksploatacji kół pojazdów kolejowych
+*‖asdek ‖MA‖On‖ASDEK¦ASDEK/GM/GH/PHOENIX¦ASDEK/PM/GM/GH/OK/PHOENIX/GOTCHA
+*‖asdek/‖C‖On‖automatyczny system diagnostyki i eksploatacji kół pojazdów kolejowych
 *b0‖asm‖A‖On‖{Backspace 3}ASM
 *‖asm/‖MC‖On‖evaluation module¦moduł oceniający
 B0*‖axc ‖A‖On‖{BackSpace 3}AxC 
@@ -114,6 +114,7 @@ b0*‖uniasx‖A‖On‖{BackSpace 6}UniAS[x]
 *‖unibl/‖MC‖On‖system (uniwersalnej) blokady liniowej¦UniBL
 B0*‖unirc‖A‖On‖{BackSpace 5}UniRC
 *‖unirc/‖MC‖On‖(universal) wheel sensor rail clamp¦(uniwersalny) uchwyt czujnika koła
+*‖va-dtds/‖A‖On‖voestalpine Digital Train Detection System Protocol
 *‖vo‖MC‖Off‖voestalpine¦voestalpine Signaling Poland¦voestalpine Signaling Poland Sp. z o.o.¦voestalpine Signaling Siershahn¦Vereinigte Österreichische Eisen und Stahlwerke Alpine Montangesellschaft
 *‖vo/‖MC‖On‖voestalpine¦voestalpine Signaling Poland¦voestalpine Signaling Poland Sp. z o.o.¦voestalpine Signaling Siershahn¦Vereinigte Österreichische Eisen und Stahlwerke Alpine Montangesellschaft
 *b0‖wdd‖A‖On‖{Backspace 3}WDD

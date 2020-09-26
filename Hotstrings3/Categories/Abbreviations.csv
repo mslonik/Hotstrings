@@ -1,22 +1,22 @@
 ﻿B0*?‖.ahk‖A‖On‖
 B0*?‖.svg‖A‖On‖
-*‖2d ‖A‖On‖2D 
+O‖2d‖A‖On‖2D
 *‖3d ‖A‖On‖3D 
-*‖ac/‖C‖On‖Alternating Current
+*‖ac/‖MA‖Off‖Alternating Current¦Axle Counter
 *‖ac`t‖A‖On‖AC
-B0*‖ahk‖A‖On‖{BackSpace 3}AHK
+*‖ahk ‖A‖On‖AHK 
 *‖ahk/‖C‖On‖AutoHotkey
-B0*‖api ‖A‖On‖{BackSpace 3}API 
-*‖API/‖C‖On‖Application Programming Interface
-B0*‖bom ‖A‖On‖{Backspace 4}BOM
+*‖api ‖A‖On‖API 
+*‖api/‖C‖On‖Application Programming Interface
+*‖bom ‖A‖On‖BOM
 *‖bom/‖MA‖On‖Bill of Materials¦Byte Order Mark
 B0*‖c2ms ‖A‖On‖{Backspace 5}CCMS 
 *‖c2ms/‖C‖On‖Component Content Management System
-B0*‖cad ‖A‖On‖{BackSpace 3}CAD 
+*‖cad ‖A‖On‖CAD 
 *‖cad/‖C‖On‖Computer Aided Design
 *‖can/‖C‖On‖Controller Area Network
 B0*‖can`t‖A‖On‖{BackSpace 4}CAN
-B0*‖ceo ‖A‖On‖{Backspace 4}CEO 
+*‖ceo ‖A‖On‖CEO 
 *‖ceo/‖C‖On‖Chief Executive Officer
 B0*‖cfo ‖A‖On‖{BackSpace 3}CFO 
 *‖cfo/‖A‖On‖Chief Financial Officer
@@ -80,23 +80,11 @@ B0*‖fat ‖A‖On‖{Backspace 4}FAT
 B0*‖fmea ‖A‖On‖{Backspace 5}FMEA 
 *‖fmea/‖C‖On‖Failure Mode and Effects Analysis
 B0*‖fmeca ‖A‖On‖{Backspace 6}FMECA 
-*‖fmeca/‖C‖On‖Failure Mode, Effects and Criticality Analysis
-B0*‖fracas ‖A‖On‖{Backspace 7}FRACAS 
-*‖fracas/‖C‖On‖Failure Reporting Analysis and Corrective Action System
-B0*‖fta ‖A‖On‖{Backspace 4}FTA 
-*‖fta/‖C‖On‖Fault Tree Analysis
-B0*‖ga  ‖A‖On‖{Backspace 3}GA 
-*‖ga/‖C‖On‖Generic Application
-B0*‖gnu ‖A‖On‖{Backspace 4}GNU 
-B0*‖gpl‖A‖On‖{Backspace 3}GPL 
-B0*‖gpl ‖A‖On‖{Backspace 4}GPL 
-*‖GPL/‖C‖On‖General Public License
 B0*‖gps ‖A‖On‖{BackSpace 3}GPS 
 *‖gps/‖C‖On‖Global Positioning System
-B0*‖gsm ‖A‖On‖{BackSpace 3}GSM 
+B0O‖gsm‖A‖On‖{BackSpace 3}GSM 
 C1*‖gsm/‖C‖On‖Global System for Mobile Communications
-B0*‖gui‖A‖Off‖{BackSpace 3}GUI 
-B0*‖gui ‖A‖On‖{BackSpace 4}GUI
+*B0‖gui‖A‖On‖{BackSpace 3}GUI
 *‖gui/‖C‖On‖Graphical User Interface
 B0*‖hart ‖A‖On‖{Backspace 5}HART 
 *‖hart/‖C‖On‖Highway Addressable Remote Transducer Protocol
@@ -107,8 +95,7 @@ B0*‖hdmi ‖A‖On‖{Backspace 5}HDMI
 B0*‖hds ‖A‖On‖{Backspace 4}HDS 
 *‖hds/‖C‖On‖Hardware Design Specification
 *‖hsz31‖A‖On‖HSZ31
-B0O‖html‖A‖On‖{Backspace 4}HTML 
-B0*‖html ‖A‖Off‖{BackSpace 4}HTML 
+B0O‖html‖A‖On‖{Backspace 4}HTML
 B0*‖ic ‖A‖On‖{Backspace 3}IC 
 *‖ic/‖C‖On‖Interoperability Constituent
 B0*‖ip ‖A‖On‖{Backspace 3}IP 
@@ -123,7 +110,7 @@ B0*‖lad ‖A‖On‖{Backspace 4}LAD
 *‖lad/‖C‖On‖Logistic and Administrative Delay
 B0*‖lc2 ‖A‖On‖{Backspace 4}LLC 
 *‖lc2/‖C‖On‖Life Cycle Cost
-B0*‖lop ‖A‖On‖{Backspace 4}LoP 
+B0*‖lop ‖A‖On‖{Backspace 4}LOP 
 *‖lop/‖C‖On‖List of Open Points
 B0*‖mdt ‖A‖On‖{Backspace 4}MDT 
 *‖mdt/‖C‖On‖Mean Down Time

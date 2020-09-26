@@ -1,17 +1,12 @@
 ﻿*‖a/‖A‖On‖Availability
 *‖ab/‖A‖On‖ASDEK_BAZ
-*‖ac/‖C‖On‖Alternating Current
-*‖ac`t‖A‖On‖AC
-*‖an/‖MC‖On‖Artur Nowak¦Artura Nowaka¦Arturowi Nowakowi¦Arturem Nowakiem¦Arturze Nowaku
-B0*‖api ‖A‖On‖{BackSpace 3}API 
-*‖API/‖C‖On‖Application Programming Interface
 B0*‖axc ‖A‖On‖{BackSpace 3}AxC 
 *‖axc/‖C‖On‖Axle Counter
 B0*‖cad ‖A‖On‖{BackSpace 3}CAD 
 *‖cad/‖C‖On‖Computer Aided Design
-*‖can/‖C‖On‖Controller Area Network
-B0*‖can`t‖A‖On‖{BackSpace 4}CAN
 *‖cccms/‖MA‖On‖ CCMS¦ Component Content Management System
+B0*‖cenelec‖A‖On‖{BackSpace 7}CENELEC
+*‖cenelec/‖MC‖On‖European Committee for Electrotechnical Standardization¦Comité Européen de Normalisation Électrotechnique
 B0*‖cfo ‖A‖On‖{BackSpace 3}CFO 
 *‖cfo/‖A‖On‖Chief Financial Officer
 *‖cms/‖MC‖On‖CMS¦Content Management System
@@ -33,6 +28,7 @@ B0*‖dmti ‖A‖On‖{BackSpace 4}DMT Infra
 *‖dmti/‖C‖On‖Diagnostic and Monitoring Technologies for Infrastructure
 B0*‖dmtrs ‖A‖On‖{BackSpace 5}DMT RS 
 *‖dmtrs/‖C‖On‖Diagnostic and Monitoring Technologies for Rolling Stock
+*‖dooors/‖A‖On‖ Dynamic Object Oriented Requirements System
 B0*‖dwg ‖A‖On‖DWG 
 *‖dwg/‖A‖Off‖Drawing Exchange Format
 *‖dx4‖A‖On‖Dx4 

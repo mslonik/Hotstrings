@@ -13,11 +13,109 @@ The hotstrings defined in this application are operating system wide. It means t
 
 This application will run on Microsoft Windows family operating systems.
 
+---
+
 # What are the hotstrings (absolute beginner quide)
 There are two notions:
-**triggering abbreviation** → **hotstring**
+- triggerstring,
+- hotstring.
 
-When someone enters the triggering abbreviation, it will be automatically replaced with hotstring.
+The relationship between these two:
+**triggerstring** → **hotstring**
+So the triggerstring triggers the corresponding hotstring. 
+
+The AutoHotkey keeps in memory the pairs (triggerstring, hotstring) and "observes" the input stream of keyboard keys pressed by the user, searching for the triggestrings. If the triggestring appears, the hostring is issued. 
+
+## Options
+Variants of triggering the hotstring are controlled by the options:
+option             | triggerstring | hotstring
+-------------------|---------------|-----------
+\* / B0 / O / C / ? | triggerstring |    hotstring
+### By default 
+If there is no additional option, then the trigger is required in order to get the hotstring.
+option | triggestring      | hotstring
+-------|-------------------|-------------------
+|       | string + trigger  |        hotstring
+
+Then the trigger is defined as  -()[]{}':;"/\,.?!\`n \`t (note that \`n is Enter, \`t is Tab, and there is a plain space between \`n and \`t). At the moment Hotstring application does not allow to change the trigger. 
+
+---
+*Example of triggerstring and hotstring definition*
+option | triggerstring     | trigger: any of           | hotstring
+-------|-------------------|---------------------------|-----------
+ |     | btw               | -()[]{}':;"/\,.?!\`n \`t  | by the way
+*Example, execution*
+content stream |    triggerstring + trigger replaced by | hotstring
+---------------|----------------------------------------|-----------
+Something, something | ~~btw.~~ | by the way
+
+Something, something ~~btw.~~ by the way
+
+---
+### When the option (\*) is applied
+**triggerstring** = **string**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑
+then the 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**last character of that string can be a trigger**
+The option (\*) is called "immediate execute".
+---
+*Example of triggerstring and hotstring definition*
+option | triggerstring     | trigger: last character  | hotstring
+-------|-------------------|---------------------------|-----------
+\*     | btw/              | /                         | by the way
+*Example, execution*
+content stream |    triggerstring + trigger replaced by | hotstring
+---------------|----------------------------------------|-----------
+Something, something | ~~btw/~~ | by the way
+Something, something ~~btw/~~ by the way
+
+---
+
+### When the option (B0) is applied
+By default the **hotstring** replaces the **triggestring**, what was shown in the above examples by ~~crossing out~~ from the content stream the **triggerstring**. When (B0) option is applied, the **triggestring** is not replaced by the **hotstring** **AND** is still ready to trigger another **hotstring**. This option is very handy if there are more than one **triggerstrings** which partly overlap.
+
+---
+*Example of triggerstring and hotstring definition*
+option | triggerstring     | trigger: any of           | hotstring
+-------|-------------------|---------------------------|-----------
+B0     | btw               | -()[]{}':;"/\,.?!\`n \`t  | by the way
+*Example, execution*
+content stream |    triggerstring + trigger replaced by | hotstring
+---------------|----------------------------------------|-----------
+Something, something | btw. | by the way.
+```
+Something, something btw.by the way.
+```
+
+---
+*Example of triggerstring and hotstring definition*
+option | triggerstring     | trigger: last character   | hotstring
+-------|-------------------|---------------------------|-----------
+*B0    | btw/              | /                         | by the way
+*Example, execution*
+content stream |    triggerstring + trigger replaced by | hotstring
+---------------|----------------------------------------|-----------
+Something, something | btw/ | by the way
+```
+Something, something btw/by the way/
+```
+
+---
+*Example of triggerstring and hotstring definition*
+option | triggerstring     | trigger: last character   | hotstring
+-------|-------------------|---------------------------|-----------
+*B0    | btw               | Space                     | by the way
+*B0    | btw2              | 2                         | back to work
+*Example, execution*
+content stream |    triggerstring + trigger replaced by | hotstring
+---------------|----------------------------------------|-----------
+Something, something | btw | by the way
+| | btw2 | back to work
+```
+Something, something btw by the way btw2back to work
+```
+
+---
 
 Thanks to this application one can define as many pairs (triggering abbreviation and hotstring) as she/he likes and store them in convenient way in separate .csv files. Each file can contain hotstring belonging to specific category, e.g. emojis, physical symbols, first and second names etc.
 
