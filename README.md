@@ -94,13 +94,14 @@ The main window can be divided into the following parts:
 
 # Let's begin by defining of few first hotstrings
 At first please observe the main window again. In order to define any hotstring one have to follow top down the screen:
-![Defining of hotstring](/HelpPictures/Hotstring3_DefiningOfHotstring.png)
 - Enter triggerstring
 - Select trigger option(s)
 - Select hotstring output function
 - Enter hotstring
 - Select hotstring library
 - Set the hotstring
+
+![Defining of hotstring](/HelpPictures/Hotstring3_DefiningOfHotstring.png)
 
 We will start by definition of "by the way" hotsring with different triggerstrings and different options.
 
