@@ -7,7 +7,7 @@ AutoHotkey oriented GUI to Hotstrings with many useful features:
 - undoing of hotstrings (conversion of last entered hotstring again into triggering abbreviation),
 - ...
 
-This application is written in AutoHotkey script language but does not require this language interpreter to be installed and can be run standalone thanks to .exe file. (Nevertheless installation of [AutoHotkey](https://www.autohotkey.com/) is greatly adviced). The concept and usage of hotstrings is based on AutoHotkey [hotstring]((https://www.autohotkey.com/docs/Hotstrings.htm) notion.
+This application is written in AutoHotkey script language but does not require this language interpreter to be installed and can be run standalone thanks to .exe file. (Nevertheless installation of [AutoHotkey](https://www.autohotkey.com/) is greatly adviced). The concept and usage of hotstrings is based on AutoHotkey [hotstring](https://www.autohotkey.com/docs/Hotstrings.htm) notion.
 
 The hotstrings defined in this application are operating system wide. It means that can be triggered in any text / edit window, in any application.
 
@@ -16,15 +16,17 @@ This application will run on Microsoft Windows family operating systems.
 ---
 
 # What are the hotstrings (absolute beginner quide)
-There are two notions:
+There are two corresponding notions:
 - triggerstring,
 - hotstring.
 
-The relationship between these two:
-**triggerstring** → **hotstring**
-So the triggerstring triggers the corresponding hotstring. The triggestring is usually short. Opposite to that the hotstring usually is longer or long in comparison to triggestring. As a consequence one can save some time when uses hotstrings.
+The relationship between these two notions can be presented as follows:
 
-Wording convention: usually the corresponding pair of alphanumeric strings (triggestring, hotstring) is also called as hotstring. When it comes to confusing, both of them will be differentiated.
+**triggerstring** → **hotstring**
+
+So the triggerstring triggers the corresponding hotstring. 
+
+Wording convention: usually the corresponding pair of alphanumeric strings *(triggestring, hotstring)* is also called as *hotstring*. When it comes to confusing, both of them will be differentiated.
 
 # How the AutoHotkey and hotstrings work
 The AutoHotkey: 
@@ -37,10 +39,47 @@ If the triggestring is recognized:
 * the hotstring recognizer is reset.
 
 # Why somobody may want to use hotstrings?
-Because they can significantly make life easier and... longer? Nowadays we still frequently use keyboard as input device to so called personal computer. This computer is not so "personal" as you can't easily define system wide (working in any application) triggering abbreviation in form of jg/ → Jane Goodall or for sake of your e-mail jg@ → jane.goodall@yourhosting.com. So let's make your PC really personal again. Now with use of hotstrings and Hotstring application.
+Because they can significantly make life easier and... longer? 
+
+* The triggestring can be short. Opposite to that the hotstring can be long in comparison to triggestring. As a consequence one can save some time when uses hotstrings.
+---
+*Example:* 
+triggerstring | hotstring
+---|---
+title1 | This is very long title of technical document with lots of numeric data which are hard to remember EN 982182 : 12 and is reference in a few places in your newly edited document
+
+---
+
+* The triggerstring can be used to trigger special symbols / letters / emoji, which are not present on a keyboard. Then it can happen that the triggerstring could be longer than actual hotstring.
+---
+Example: 
+triggerstring | hotstring
+---|---
+elephant/ | 🐘
+
+---
+
+* To correct / auto correct spelling of words or enter unique letters
+---
+Example: 
+triggerstring | hotstring
+---|---
+email | e-mail
+
+
+* Nowadays we still frequently use keyboard as input device to so called personal computer. This computer is not so "personal" as you can't easily define system wide (working in any application) triggering your personal hotstrings. 
+
+---
+Example: 
+triggerstring | hotstring
+---|---
+fs@ | FirstName.SecondName@yourhosting.com
+
+
+So let's make your PC really personal again. Now with use of hotstrings and Hotstring application.
 
 # Why somebody may want to use *Hotstring* application?
-Because it doesn't require much knowledege and text editing to run your own hotstrings. Thanks to GUI (Graphical User Interface) entering and applying of new hotstrings is a breeze.
+Because it doesn't require much knowledege and text editing to run your own hotstrings. It can be run even without installation. Thanks to GUI (Graphical User Interface) you will master defining and applying of your own hotstrings in blink of an eye.
 
 # Main window of *Hotstring* application
 After installation just double click on the Hotstrings icon (marked in red) in system tray ![Example of system tray](/HelpPictures/Hotstring3_SystemTray.png) or... use hotkey Ctrl + # + h (Control + Windows key + h).
@@ -74,23 +113,10 @@ btw
 ```
 
 ## Select trigger option(s)
-Variants of triggering the hotstring are controlled by the options:
-![Select trigger option(s)](/HelpPictures/Hotstring3_SelectTriggerOption.png)
+![Default trigger option](Hotstring3_SelectTriggerOption.png) 
+By default no option is set (option string is empty). Let's leave no option set and continue. Then after triggerstring additionally one *trigger key* have to be pressed by user in order to trigger the hotstring.
 
-option             | triggerstring | hotstring
--------------------|---------------|-----------
-\* / B0 / O / C / ? | triggerstring |    hotstring
-### By default no option is set (option string is empty)
-If no option is set, then after triggerstring additionally one trigger key is required in order to get the hotstring.
-option | triggestring      | hotstring
--------|-------------------|-------------------
-|       | string + trigger  |        hotstring
-
-Then the trigger key is defined as  -()[]{}':;"/\,.?!\`n☐\`t (note that \`n is Enter, \`t is Tab, and there is a plain space between \`n and \`t marked as ☐). 
-
-At the moment Hotstring application does not allow to change the set of trigger keys. 
-
-Let's leave no option set and continue.
+The *trigger key* is defined as  -()[]{}':;"/\,.?!\`n☐\`t (note that \`n is Enter,  \`t is Tab, and there is a plain space between \`n and \`t marked as ☐). 
 
 ## Select hotstring output function
 ![Select hotstring output function](/HelpPictures/Hotstring3_SelectHostringOutputFunction.png)
@@ -126,9 +152,27 @@ content stream |    triggerstring + trigger  | replaced by hotstring
 ---------------|----------------------------------------|-----------
 Something,☐something☐| ~~btw.~~ ☐ | by☐the☐way☐
 
-Something,☐something☐ ~~btw.~~ ☐ by☐the☐way☐
+> Something,☐something☐ ~~btw.~~ ☐ by☐the☐way☐
 
----
+# Trigger options
+Variants of triggering are controlled by the options:
+![Select trigger option(s)](/HelpPictures/Hotstring3_SelectTriggerOption.png)
+
+option             | triggerstring | hotstring
+-------------------|---------------|-----------
+\* / B0 / O / C / ? | triggerstring |    hotstring
+
+### Default 
+![Default trigger option](Hotstring3_SelectTriggerOption.png) 
+By default no option is set (option string is empty). Then after triggerstring additionally one trigger key have to be pressed by user in order to trigger the hotstring.
+option | triggestring      | hotstring
+-------|-------------------|-------------------
+|       | string + trigger  |        hotstring
+
+The trigger key is defined as  -()[]{}':;"/\,.?!\`n☐\`t (note that \`n is Enter, \`t is Tab, and there is a plain space between \`n and \`t marked as ☐). 
+
+At the moment *Hotstring* application does not allow to change the set of trigger keys. 
+
 ### When the option (\*) is applied
 **triggerstring** = **string**
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑
@@ -144,7 +188,7 @@ option | triggerstring     | trigger: last character  | hotstring
 content stream |    triggerstring + trigger| replaced by hotstring
 ---------------|----------------------------------------|-----------
 Something,☐something☐ | ~~btw/~~ | by☐the☐way
-Something,☐something☐ ~~btw/~~ by☐the☐way
+> Something,☐something☐ ~~btw/~~ by☐the☐way
 
 ---
 
@@ -160,9 +204,9 @@ B0     | btw               | -()[]{}':;"/\,.?!\`n☐\`t  | by☐the☐way
 content stream |    triggerstring + trigger| replaced by hotstring
 ---------------|----------------------------------------|-----------
 Something,☐something☐ | btw. | by☐the☐way.
-```
-Something,☐something☐btw.by☐the☐way.
-```
+
+> Something,☐something☐btw.by☐the☐way.
+
 
 ---
 *Example of triggerstring and hotstring definition*
@@ -173,9 +217,9 @@ option | triggerstring     | trigger: last character   | hotstring
 content stream |    triggerstring + trigger| replaced by hotstring
 ---------------|----------------------------------------|-----------
 Something,☐something☐| btw/ | by☐the☐way
-```
-Something,☐something☐btw/by☐the☐way/
-```
+
+> Something,☐something☐btw/by☐the☐way/
+
 ---
 *Example of useful B0 hotstring*
 The B0 option is useful for example to define HTML tags. In the following example the sequence {left☐5} is used to move to the left (back) cursor after he sequence </em> is entered.
@@ -187,9 +231,9 @@ option | triggerstring     | trigger: last character   | hotstring
 content stream |    triggerstring + trigger  | replaced by hotstring
 ---------------|----------------------------------------|-----------
 Something,☐something☐| <em> | </em>
-```
-Something,☐something☐<em></em>
-```
+
+> Something,☐something☐<em></em>
+
 
 
 ---
@@ -205,9 +249,9 @@ content stream |    triggerstring + trigger replaced by | hotstring
 ---------------|----------------------------------------|-----------
 Something,☐something☐| btw☐ | by☐the☐way☐
 
-```
-Something,☐something☐ ~~btw☐~~ by☐the☐way☐
-```
+
+> Something,☐something☐ ~~btw☐~~ by☐the☐way☐
+
 The second hotstring will never be triggered, as always after triggering of the first triggestring (btw) the triggerstring is reset. The solutions to this issue are shown in the following examples.
 
 
@@ -223,9 +267,9 @@ content stream |    triggerstring + trigger replaced by | hotstring
 ---------------|----------------------------------------|-----------
 Something,☐something☐ | btw1 | by☐the☐way
 ☐ | btw2 | back☐to☐work
-```
-Something,☐something☐ ~~btw1~~ by☐the☐way☐ ~~btw2~~ back☐to☐work
-```
+
+> Something,☐something☐ ~~btw1~~ by☐the☐way☐ ~~btw2~~ back☐to☐work
+
 
 ---
 *Example 3 of overlapping triggerstrings*
