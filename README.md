@@ -160,6 +160,7 @@ You've defined your first hotstring. Have a look now into the left part of the m
 
 # Trigger options
 Variants of triggering are controlled by the options:
+
 ![Select trigger option(s)](/HelpPictures/Hotstring3_SelectTriggerOption.png)
 
 option             | triggerstring | hotstring
@@ -167,7 +168,8 @@ option             | triggerstring | hotstring
 \* / B0 / O / C / ? | triggerstring |    hotstring
 
 ### Default 
-![Default trigger option](Hotstring3_SelectTriggerOption.png) 
+![Default trigger option](/HelpPictures/Hotstring3_SelectTriggerOption.png) 
+
 By default no option is set (option string is empty). Then after triggerstring additionally one trigger key have to be pressed by user in order to trigger the hotstring.
 option | triggestring      | hotstring
 -------|-------------------|-------------------
@@ -178,11 +180,15 @@ The trigger key is defined as  -()[]{}':;"/\,.?!\`n☐\`t (note that \`n is Ente
 At the moment *Hotstring* application does not allow to change the set of trigger keys. 
 
 ### When the option (\*) is applied
+
 **triggerstring** = **string**
+
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑
+
 then the 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**last character of that string can be a trigger**
 The option (\*) is called "immediate execute".
+
 ---
 *Example of triggerstring and hotstring definition*
 option | triggerstring     | trigger: last character  | hotstring
