@@ -3,7 +3,7 @@ AutoHotkey oriented GUI to Hotstrings with many useful features:
 - applying clipboard instead of the classical simulation of keyboard (useful especially for long text strings),
 - one triggering abbreviation can call several different text strings of your choice, chosen from menu,
 - overview of existing hotstrings,
-- definitions of hotstrings are stored in .csv files, as many, as you like,
+- definitions of hotstrings are stored in .csv files, as many, as you like (each file can contain hotstring belonging to specific category, e.g. emojis, physical symbols, first and second names etc.),
 - undoing of hotstrings (conversion of last entered hotstring again into triggering abbreviation),
 - ...
 
@@ -96,8 +96,10 @@ The main window can be divided into the following parts:
 - Hotstring definition / edition [2],
 - Display of existing hotstrings [3].
 
+![Main window parts](/HelpPictures/Hotstring3_MainWindow2.png)
+
 # Let's begin by defining of few first hotstrings
-At first please observe the main window again. In order to define any hotstring one have to follow top down the screen:
+At first please observe the main window again. In order to define any hotstring one have to follow top down the screen (in blue):
 - Enter triggerstring
 - Select trigger option(s)
 - Select hotstring output function
@@ -111,53 +113,50 @@ We will start by definition of *by the way* hotsring with plain *btw* triggerstr
 
 ## Enter triggestring
 Let's put in this text edit field some text: 
+
 ![Enter triggerstring](/HelpPictures/Hotstring3_EnterTriggerstring.png)
+
 Please keep in mind that this window does not show space key, as it is blank key. But in this tutorial it will be easier to see what we're doing by using the ☐ convention from now on to show the Space (Spacebar key). So now let's put there:
 ```
 btw
 ```
 
 ## Select trigger option(s)
-![Default trigger option](Hotstring3_SelectTriggerOption.png) 
+![Default trigger option](/HelpPictures/Hotstring3_SelectTriggerOption.png) 
+
 By default no option is set (option string is empty). Let's leave no option set and continue. Then after triggerstring additionally one *trigger key* have to be pressed by user in order to trigger the hotstring.
 
 The *trigger key* is defined as  -()[]{}':;"/\,.?!\`n☐\`t (note that \`n is Enter,  \`t is Tab, and there is a plain space between \`n and \`t marked as ☐). 
 
 ## Select hotstring output function
 ![Select hotstring output function](/HelpPictures/Hotstring3_SelectHostringOutputFunction.png)
+
 Select one and only one option from the list. By default *Send by AutoHotkey* is set. Let's leave it. It means that the hotstring will be output by AutoHotkey, without menu and not by Clipboard. More about *output functions* later on.
 
 ## Enter hotstring
 ![Enter hotstring](/HelpPictures/Hotstring3_EnterHotsring.png)
+
 Let's do that:
 ```
 by the way
 ```
 ## Select hotstring library
 ![Select hotstring library](/HelpPictures/Hotstring3_SelectHostringLibrary.png) 
+
 This list contains all and only *.csv files from withing folder ..\Hotstrings3\Categories. One can have as many files (even empty!) as necessary.
 
 Let's select the AutocorrectionHotstring.csv for sake of example.
 
 ## Set the hotstring
 Select / click the *Set hostring* button. The function and meaning of two others is hopefully quite obvious. It will be explained in details later on.
+
 ![Set the hotstring](/HelpPictures/Hotstring3_HostringButtons.png) 
 
 ## Congratulations!
 You've defined your first hotstring. Have a look now into the left part of the main screen, into the *Library content*. Find there your newly defined hotstring:
+
 ![Library content](/HelpPictures/Hotstring3_LibraryContent1.png)
 
----
-*Example of triggerstring and hotstring definition*
-option | triggerstring     | trigger: any of           | hotstring
--------|-------------------|---------------------------|-----------
- |     | btw               | -()[]{}':;"/\,.?!\`n☐ \`t  | by☐the☐way
-*Example, execution*
-content stream |    triggerstring + trigger  | replaced by hotstring
----------------|----------------------------------------|-----------
-Something,☐something☐| ~~btw.~~ ☐ | by☐the☐way☐
-
-> Something,☐something☐ ~~btw.~~ ☐ by☐the☐way☐
 
 # Trigger options
 Variants of triggering are controlled by the options:
@@ -293,8 +292,23 @@ option | triggerstring     | trigger: last character   | hotstring
 
 
 ---
+*Example of triggerstring and hotstring definition*
 
-Thanks to this application one can define as many pairs (triggering abbreviation and hotstring) as she/he likes and store them in convenient way in separate .csv files. Each file can contain hotstring belonging to specific category, e.g. emojis, physical symbols, first and second names etc.
+option | triggerstring     | trigger: any of           | hotstring
+-------|-------------------|---------------------------|-----------
+ |     | btw               | -()[]{}':;"/\,.?!\`n☐ \`t  | by☐the☐way
+
+*Example, execution*
+
+content stream |    triggerstring + trigger  | replaced by hotstring
+---------------|----------------------------------------|-----------
+Something,☐something☐| ~~btw.~~ ☐ | by☐the☐way☐
+
+> Something,☐something☐ ~~btw.~~ ☐ by☐the☐way☐
+
+
+---
+
 
 
 
