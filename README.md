@@ -52,7 +52,7 @@ title1 | This is very long title of technical document with lots of numeric data
 
 * The triggerstring can be used to trigger special symbols / letters / emoji, which are not present on a keyboard. Then it can happen that the triggerstring could be longer than actual hotstring.
 ---
-Example: 
+*Example:* 
 triggerstring | hotstring
 ---|---
 elephant/ | 🐘
@@ -61,7 +61,7 @@ elephant/ | 🐘
 
 * To correct / auto correct spelling of words or enter unique letters
 ---
-Example: 
+*Example:*
 triggerstring | hotstring
 ---|---
 email | e-mail
@@ -70,7 +70,7 @@ email | e-mail
 * Nowadays we still frequently use keyboard as input device to so called personal computer. This computer is not so "personal" as you can't easily define system wide (working in any application) triggering your personal hotstrings. 
 
 ---
-Example: 
+*Example: *
 triggerstring | hotstring
 ---|---
 fs@ | FirstName.SecondName@yourhosting.com
@@ -81,16 +81,20 @@ So let's make your PC really personal again. Now with use of hotstrings and Hots
 # Why somebody may want to use *Hotstring* application?
 Because it doesn't require much knowledege and text editing to run your own hotstrings. It can be run even without installation. Thanks to GUI (Graphical User Interface) you will master defining and applying of your own hotstrings in blink of an eye.
 
+---
+---
+---
+
 # Main window of *Hotstring* application
-After installation just double click on the Hotstrings icon (marked in red) in system tray ![Example of system tray](/HelpPictures/Hotstring3_SystemTray.png) or... use hotkey Ctrl + # + h (Control + Windows key + h).
+After installation just double click on the Hotstrings icon (marked in red white letter *H* on green background) in system tray ![Example of system tray](/HelpPictures/Hotstring3_SystemTray.png) or... use hotkey *Ctrl + # + h* (Control + Windows key + h).
 Next you'll see main GUI (Graphical User Interface) window which enable you to edit hotstrings:
 
 ![Main window](/HelpPictures/Hotstring3_MainWindow.png)
 
 The main window can be divided into the following parts:
-- Hotstring menu,
-- Hotstring definition / edition,
-- Display of existing hotstrings.
+- Hotstring menu [1],
+- Hotstring definition / edition [2],
+- Display of existing hotstrings [3].
 
 # Let's begin by defining of few first hotstrings
 At first please observe the main window again. In order to define any hotstring one have to follow top down the screen:
@@ -103,7 +107,7 @@ At first please observe the main window again. In order to define any hotstring 
 
 ![Defining of hotstring](/HelpPictures/Hotstring3_DefiningOfHotstring.png)
 
-We will start by definition of "by the way" hotsring with different triggerstrings and different options.
+We will start by definition of *by the way* hotsring with plain *btw* triggerstring and no options.
 
 ## Enter triggestring
 Let's put in this text edit field some text: 
