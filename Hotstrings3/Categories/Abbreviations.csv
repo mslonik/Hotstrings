@@ -1,4 +1,4 @@
-﻿B0*?‖.ahk‖A‖On‖
+﻿B0*?‖.ahk‖A‖Off‖
 B0*?‖.svg‖A‖On‖
 O‖2d‖A‖On‖2D
 *‖3d ‖A‖On‖3D 
@@ -84,7 +84,7 @@ B0*‖gps ‖A‖On‖{BackSpace 3}GPS
 *‖gps/‖C‖On‖Global Positioning System
 B0O‖gsm‖A‖On‖{BackSpace 3}GSM 
 C1*‖gsm/‖C‖On‖Global System for Mobile Communications
-*B0‖gui‖A‖On‖{BackSpace 3}GUI
+*‖gui ‖A‖On‖GUI
 *‖gui/‖C‖On‖Graphical User Interface
 B0*‖hart ‖A‖On‖{Backspace 5}HART 
 *‖hart/‖C‖On‖Highway Addressable Remote Transducer Protocol

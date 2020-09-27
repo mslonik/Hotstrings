@@ -22,34 +22,111 @@ There are two notions:
 
 The relationship between these two:
 **triggerstring** → **hotstring**
-So the triggerstring triggers the corresponding hotstring. 
+So the triggerstring triggers the corresponding hotstring. The triggestring is usually short. Opposite to that the hotstring usually is longer or long in comparison to triggestring. As a consequence one can save some time when uses hotstrings.
 
-The AutoHotkey keeps in memory the pairs (triggerstring, hotstring) and "observes" the input stream of keyboard keys pressed by the user, searching for the triggestrings. If the triggestring appears, the hostring is issued. 
+Wording convention: usually the corresponding pair of alphanumeric strings (triggestring, hotstring) is also called as hotstring. When it comes to confusing, both of them will be differentiated.
 
-## Options
+# How the AutoHotkey and hotstrings work
+The AutoHotkey: 
+* keeps in memory the pairs (triggerstring, hotstring) 
+and 
+* applies the hotstring recognizer which filters the input stream of keys pressed by the user, searching for the triggestrings. 
+
+If the triggestring is recognized: 
+* the hostring is issued,
+* the hotstring recognizer is reset.
+
+# Why somobody may want to use hotstrings?
+Because they can significantly make life easier and... longer? Nowadays we still frequently use keyboard as input device to so called personal computer. This computer is not so "personal" as you can't easily define system wide (working in any application) triggering abbreviation in form of jg/ → Jane Goodall or for sake of your e-mail jg@ → jane.goodall@yourhosting.com. So let's make your PC really personal again. Now with use of hotstrings and Hotstring application.
+
+# Why somebody may want to use *Hotstring* application?
+Because it doesn't require much knowledege and text editing to run your own hotstrings. Thanks to GUI (Graphical User Interface) entering and applying of new hotstrings is a breeze.
+
+# Main window of *Hotstring* application
+After installation just double click on the Hotstrings icon (marked in red) in system tray ![Example of system tray](/HelpPictures/Hotstring3_SystemTray.png) or... use hotkey Ctrl + # + h (Control + Windows key + h).
+Next you'll see main GUI (Graphical User Interface) window which enable you to edit hotstrings:
+
+![Main window](/HelpPictures/Hotstring3_MainWindow.png)
+
+The main window can be divided into the following parts:
+- Hotstring menu,
+- Hotstring definition / edition,
+- Display of existing hotstrings.
+
+# Let's begin by defining of few first hotstrings
+At first please observe the main window again. In order to define any hotstring one have to follow top down the screen:
+![Defining of hotstring](/HelpPictures/Hotstring3_DefiningOfHotstring.png)
+- Enter triggerstring
+- Select trigger option(s)
+- Select hotstring output function
+- Enter hotstring
+- Select hotstring library
+- Set the hotstring
+
+We will start by definition of "by the way" hotsring with different triggerstrings and different options.
+
+## Enter triggestring
+Let's put in this text edit field some text: 
+![Enter triggerstring](/HelpPictures/Hotstring3_EnterTriggerstring.png)
+Please keep in mind that this window does not show space key, as it is blank key. But in this tutorial it will be easier to see what we're doing by using the ☐ convention from now on to show the Space (Spacebar key). So now let's put there:
+```
+btw
+```
+
+## Select trigger option(s)
 Variants of triggering the hotstring are controlled by the options:
+![Select trigger option(s)](/HelpPictures/Hotstring3_SelectTriggerOption.png)
+
 option             | triggerstring | hotstring
 -------------------|---------------|-----------
 \* / B0 / O / C / ? | triggerstring |    hotstring
-### By default 
-If there is no additional option, then the trigger is required in order to get the hotstring.
+### By default no option is set (option string is empty)
+If no option is set, then after triggerstring additionally one trigger key is required in order to get the hotstring.
 option | triggestring      | hotstring
 -------|-------------------|-------------------
 |       | string + trigger  |        hotstring
 
-Then the trigger is defined as  -()[]{}':;"/\,.?!\`n \`t (note that \`n is Enter, \`t is Tab, and there is a plain space between \`n and \`t). At the moment Hotstring application does not allow to change the trigger. 
+Then the trigger key is defined as  -()[]{}':;"/\,.?!\`n☐\`t (note that \`n is Enter, \`t is Tab, and there is a plain space between \`n and \`t marked as ☐). 
+
+At the moment Hotstring application does not allow to change the set of trigger keys. 
+
+Let's leave no option set and continue.
+
+## Select hotstring output function
+![Select hotstring output function](/HelpPictures/Hotstring3_SelectHostringOutputFunction.png)
+Select one and only one option from the list. By default *Send by AutoHotkey* is set. Let's leave it. It means that the hotstring will be output by AutoHotkey, without menu and not by Clipboard. More about *output functions* later on.
+
+## Enter hotstring
+![Enter hotstring](/HelpPictures/Hotstring3_EnterHotsring.png)
+Let's do that:
+```
+by the way
+```
+## Select hotstring library
+![Select hotstring library](/HelpPictures/Hotstring3_SelectHostringLibrary.png) 
+This list contains all and only *.csv files from withing folder ..\Hotstrings3\Categories. One can have as many files (even empty!) as necessary.
+
+Let's select the AutocorrectionHotstring.csv for sake of example.
+
+## Set the hotstring
+Select / click the *Set hostring* button. The function and meaning of two others is hopefully quite obvious. It will be explained in details later on.
+![Set the hotstring](/HelpPictures/Hotstring3_HostringButtons.png) 
+
+## Congratulations!
+You've defined your first hotstring. Have a look now into the left part of the main screen, into the *Library content*. Find there your newly defined hotstring:
+![Library content](/HelpPictures/Hotstring3_LibraryContent1.png)
 
 ---
 *Example of triggerstring and hotstring definition*
 option | triggerstring     | trigger: any of           | hotstring
 -------|-------------------|---------------------------|-----------
- |     | btw               | -()[]{}':;"/\,.?!\`n \`t  | by the way
+ |     | btw               | -()[]{}':;"/\,.?!\`n☐ \`t  | by☐the☐way
 *Example, execution*
-content stream |    triggerstring + trigger replaced by | hotstring
+content stream |    triggerstring + trigger  | replaced by hotstring
 ---------------|----------------------------------------|-----------
-Something, something | ~~btw.~~ | by the way
+Something,☐something☐| ~~btw.~~ ☐ | by☐the☐way☐
 
-Something, something ~~btw.~~ by the way
+Something,☐something☐ ~~btw.~~ ☐ by☐the☐way☐
 
 ---
 ### When the option (\*) is applied
@@ -62,12 +139,12 @@ The option (\*) is called "immediate execute".
 *Example of triggerstring and hotstring definition*
 option | triggerstring     | trigger: last character  | hotstring
 -------|-------------------|---------------------------|-----------
-\*     | btw/              | /                         | by the way
+\*     | btw/              | /                         | by☐the☐way
 *Example, execution*
-content stream |    triggerstring + trigger replaced by | hotstring
+content stream |    triggerstring + trigger| replaced by hotstring
 ---------------|----------------------------------------|-----------
-Something, something | ~~btw/~~ | by the way
-Something, something ~~btw/~~ by the way
+Something,☐something☐ | ~~btw/~~ | by☐the☐way
+Something,☐something☐ ~~btw/~~ by☐the☐way
 
 ---
 
@@ -78,60 +155,99 @@ By default the **hotstring** replaces the **triggestring**, what was shown in th
 *Example of triggerstring and hotstring definition*
 option | triggerstring     | trigger: any of           | hotstring
 -------|-------------------|---------------------------|-----------
-B0     | btw               | -()[]{}':;"/\,.?!\`n \`t  | by the way
+B0     | btw               | -()[]{}':;"/\,.?!\`n☐\`t  | by☐the☐way
 *Example, execution*
-content stream |    triggerstring + trigger replaced by | hotstring
+content stream |    triggerstring + trigger| replaced by hotstring
 ---------------|----------------------------------------|-----------
-Something, something | btw. | by the way.
+Something,☐something☐ | btw. | by☐the☐way.
 ```
-Something, something btw.by the way.
+Something,☐something☐btw.by☐the☐way.
 ```
 
 ---
 *Example of triggerstring and hotstring definition*
 option | triggerstring     | trigger: last character   | hotstring
 -------|-------------------|---------------------------|-----------
-*B0    | btw/              | /                         | by the way
+*B0    | btw/              | /                         | by☐the☐way
+*Example, execution*
+content stream |    triggerstring + trigger| replaced by hotstring
+---------------|----------------------------------------|-----------
+Something,☐something☐| btw/ | by☐the☐way
+```
+Something,☐something☐btw/by☐the☐way/
+```
+---
+*Example of useful B0 hotstring*
+The B0 option is useful for example to define HTML tags. In the following example the sequence {left☐5} is used to move to the left (back) cursor after he sequence </em> is entered.
+
+option | triggerstring     | trigger: last character   | hotstring
+-------|-------------------|---------------------------|-----------
+*B0    | <em>              | >                         | </em>{left☐5}
+*Example, execution*
+content stream |    triggerstring + trigger  | replaced by hotstring
+---------------|----------------------------------------|-----------
+Something,☐something☐| <em> | </em>
+```
+Something,☐something☐<em></em>
+```
+
+
+---
+*Example 1 of overlapping triggerstrings*
+The triggestrings of the two following examples overlap, but the first one is shorther, then the second one.
+
+option | triggerstring     | trigger:    | hotstring
+-------|-------------------|---------------------------|-----------
+|    | btw               | -()[]{}':;"/\,.?!\`n☐\`t  | by the way
+*    | btw2              | 2                         | back to work
 *Example, execution*
 content stream |    triggerstring + trigger replaced by | hotstring
 ---------------|----------------------------------------|-----------
-Something, something | btw/ | by the way
+Something,☐something☐| btw☐ | by☐the☐way☐
+
 ```
-Something, something btw/by the way/
+Something,☐something☐ ~~btw☐~~ by☐the☐way☐
+```
+The second hotstring will never be triggered, as always after triggering of the first triggestring (btw) the triggerstring is reset. The solutions to this issue are shown in the following examples.
+
+
+---
+*Example 2 of overlapping triggerstrings*
+The triggestrings of the two following examples overlap, but this time both of them are of the same length.
+option | triggerstring     | trigger: last character   | hotstring
+-------|-------------------|---------------------------|-----------
+*    | btw1               | 1                     | by the way
+*    | btw2              | 2                         | back to work
+*Example, execution*
+content stream |    triggerstring + trigger replaced by | hotstring
+---------------|----------------------------------------|-----------
+Something,☐something☐ | btw1 | by☐the☐way
+☐ | btw2 | back☐to☐work
+```
+Something,☐something☐ ~~btw1~~ by☐the☐way☐ ~~btw2~~ back☐to☐work
 ```
 
 ---
-*Example of triggerstring and hotstring definition*
+*Example 3 of overlapping triggerstrings*
+The space itself can be a part of triggestring as well. What's is important is the length of the triggerstrings. This can be useful to distinguish the abbreviation from its phrase, as in the following example.
 option | triggerstring     | trigger: last character   | hotstring
 -------|-------------------|---------------------------|-----------
-*B0    | btw               | Space                     | by the way
-*B0    | btw2              | 2                         | back to work
-*Example, execution*
-content stream |    triggerstring + trigger replaced by | hotstring
----------------|----------------------------------------|-----------
-Something, something | btw | by the way
-| | btw2 | back to work
-```
-Something, something btw by the way btw2back to work
-```
+*    | api☐               | ☐                     | API
+*    | api/              | /                         | Application☐Programming☐Interface
+
+---
+*Example 4 of overlapping triggerstrings, special feature of Hotstring application: menu*
+Thanks to Hotstrings application the one triggestring can be used to trigger menu with defined list of hotstrings. The different options are separated by "|" mark. The first option on the list is the default one. Selection of the option is made by pressing the Enter key. Cauion, it doesn't work with mouse clicks.
+option | triggerstring     | trigger: last character   | hotstring
+-------|-------------------|---------------------------|-----------
+* and menu    | api/              | /                         | API *| Application☐Programming☐Interface
+
 
 ---
 
 Thanks to this application one can define as many pairs (triggering abbreviation and hotstring) as she/he likes and store them in convenient way in separate .csv files. Each file can contain hotstring belonging to specific category, e.g. emojis, physical symbols, first and second names etc.
 
-# Why somobody may want to use hotstrings?
-Because they can significantly make life easier and better. Nowadays we still frequently use keyboard as input device to so called personal computer. This computer is not so "personal" as you can't easily define system wide (working in any application) triggering abbreviation in form of jg/ → Jane Goodall or for sake of your e-mail jg@ → jane.goodall@yourhosing.com. So let's make your PC really personal again. Now with use of hotstrings.
 
-# Main window
-After installation just double click on the Hotstrings icon (marked in red) in system tray ![Example of system tray](/HelpPictures/Hotstring3_SystemTray.png) or... use hotkey Ctrl + # + h (Control + Windows key + h).
-Next you'll see main GUI (Graphical User Interface) window which enable you to edit hotstrings:
-
-![Main window](/HelpPictures/Hotstring3_MainWindow.png)
-
-The main window can be divided into the following parts:
-- Hotstring menu,
-- Hotstring definition / edition,
-- Display of existing hotstrings.
 
 ## Hotstring menu
 ![Main menu](/HelpPictures/Hotstring3_MainMenu.png)
