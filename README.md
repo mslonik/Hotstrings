@@ -73,7 +73,7 @@ email | e-mail
 *Example: *
 triggerstring | hotstring
 ---|---
-fs@ | FirstName.SecondName@yourhosting.com
+fs@ | `FirstName.SecondName@yourhosting.com`
 
 
 So let's make your PC really personal again. Now with use of hotstrings and Hotstring application.
