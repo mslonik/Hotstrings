@@ -117,7 +117,8 @@ LoadFiles(nameoffile)
 		if ErrorLevel
 			break
 		line := StrReplace(line, "``n", "`n")
-		line := StrReplace(line, "``r", "`r")
+		line := StrReplace(line, "``r", "`r")		
+		line := StrReplace(line, "``t", "`t")
 		StartHotstring(line)
 	}
 	return
@@ -158,7 +159,7 @@ StartHotstring(txt)
 NormalWay(ReplacementString, Oflag)
 {
 	global MyHotstring
-	if (Oflag == 1)
+	if (Oflag == 0)
 		Send, % ReplacementString . A_EndChar
 	else
 		Send, %ReplacementString%
@@ -195,7 +196,7 @@ ViaClipboard(ReplacementString, Oflag)
 	{
 		Send, ^v
 	}
-	if (Oflag == 1)
+	if (Oflag == 0)
 		Send, % A_EndChar
 	Sleep, %delay% ; this sleep is required surprisingly
 	Clipboard := ClipboardBackup
@@ -323,7 +324,7 @@ TimeAndDate(ReplacementString, Oflag)
 	ReplacementString := StrReplace(ReplacementString, "A_Hour", A_Hour)
 	ReplacementString := StrReplace(ReplacementString, "A_Min", A_Min)
     Send, %ReplacementString%
-	if (Oflag == 1)
+	if (Oflag == 0)
 		Send, % A_EndChar
     SetFormat, Integer, H
 	InputLocaleID:=DllCall("GetKeyboardLayout", "UInt", 0, "UInt")
@@ -412,11 +413,11 @@ GUIInit:
     Gui, HS3:New, % "+Resize MinSize"  . 860*DPI%chMon% . "x" . 550*DPI%chMon%+20
     Gui, HS3:Margin, 12.5*DPI%chMon%, 7.5*DPI%chMon%
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " bold cBlue", Calibri
-    Gui, HS3:Add, Text, % "xm+" . 9*DPI%chMon%,Enter triggering abbreviation:
+    Gui, HS3:Add, Text, % "xm+" . 9*DPI%chMon%,Enter triggerstring:
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " norm cBlack"
     Gui, HS3:Add, Edit, % "w" . 184*DPI%chMon% . " h" . 25*DPI%chMon% . " xp+" . 227*DPI%chMon% . " yp vNewString",
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " bold cBlue"
-    Gui, HS3:Add, GroupBox, % "section xm w" . 425*DPI%chMon% . " h" . 106*DPI%chMon%, Trigger options
+    Gui, HS3:Add, GroupBox, % "section xm w" . 425*DPI%chMon% . " h" . 106*DPI%chMon%, Select trigger option(s)
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " norm cBlack"
     Gui, HS3:Add, CheckBox, % "gCapsCheck vImmediate xs+" . 12*DPI%chMon% . " ys+" . 25*DPI%chMon%, Immediate Execute (*)
     Gui, HS3:Add, CheckBox, % "gCapsCheck vCaseSensitive xp+" . 225*DPI%chMon% . " yp+" . 0*DPI%chMon%, Case Sensitive (C)
@@ -425,12 +426,12 @@ GUIInit:
     Gui, HS3:Add, CheckBox, % "gCapsCheck vNoEndChar xp-" . 225*DPI%chMon% . " yp+" . 25*DPI%chMon%, No End Char (O)
     Gui, HS3:Add, CheckBox, % "gCapsCheck vDisHS xp+" . 225*DPI%chMon% . " yp+" . 0*DPI%chMon%, Disable
 	Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
-    Gui, HS3:Add, Text,% "xm+" . 9*DPI%chMon%, Hotstring output function
+    Gui, HS3:Add, Text,% "xm+" . 9*DPI%chMon%, Select hotstring output function
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlack Norm"
-    Gui, HS3:Add, DropDownList, % "xm w" . 424*DPI%chMon% . " vByClip gByClip hwndddl", Send by Autohotkey|Send by Clipboard|Send by Menu (Clipboard)|Send by Menu (Autohotkey)|Send Time or Date
+    Gui, HS3:Add, DropDownList, % "xm w" . 424*DPI%chMon% . " vByClip gByClip hwndddl", Send by Autohotkey||Send by Clipboard|Send by Menu (Clipboard)|Send by Menu (Autohotkey)|Send Time or Date
     PostMessage, 0x153, -1, 22*DPI%chMon%,, ahk_id %ddl%
 	Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
-    Gui, HS3:Add, Text,% "xm+" . 9*DPI%chMon%, Hotstring definiton
+    Gui, HS3:Add, Text,% "xm+" . 9*DPI%chMon%, Enter hotstring
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlack Norm"
     Gui, HS3:Add, Edit, % "w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vTextInsert xm"
     Gui, HS3:Add, Edit, % "yp+" . 31*DPI%chMon% . " w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vTextInsert1 xm Disabled"
@@ -440,7 +441,7 @@ GUIInit:
     Gui, HS3:Add, Edit, % "yp+" . 31*DPI%chMon% . " w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vTextInsert5 xm Disabled"
     Gui, HS3:Add, Edit, % "yp+" . 31*DPI%chMon% . " w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vTextInsert6 xm Disabled"
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
-    Gui, HS3:Add, Text,% "xm+" . 9*DPI%chMon%, Hotstring library
+    Gui, HS3:Add, Text,% "xm+" . 9*DPI%chMon%, Select hotstring library
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlack Norm"
 	Gui, HS3:Add, DropDownList, % "w" . 424*DPI%chMon% . " vSectionCombo gSectionChoose xm hwndddl" ,
     Loop,%A_ScriptDir%\Categories\*.csv
@@ -448,10 +449,10 @@ GUIInit:
     PostMessage, 0x153, -1, 22*DPI%chMon%,, ahk_id %ddl%
     Gui, HS3:Font, bold
 
-    Gui, HS3:Add, Button, % "xm yp+" . 37*DPI%chMon% . " w" . 135*DPI%chMon% . " gAddHotstring", Set Hotstring
+    Gui, HS3:Add, Button, % "xm yp+" . 37*DPI%chMon% . " w" . 135*DPI%chMon% . " gAddHotstring", Set hotstring
 	; Gui, HS3:Add, Button, % "x+" . 10*DPI%chMon% . " yp w" . 135*DPI%chMon% . " gSaveHotstrings Disabled", Save Hotstring
-    Gui, HS3:Add, Button, % "x+" . 10*DPI%chMon% . " yp w" . 135*DPI%chMon% . " vEdit gEdit Disabled", Edit Hotstring
-	Gui, HS3:Add, Button, % "x+" . 10*DPI%chMon% . " yp w" . 135*DPI%chMon% . " vDelete gDelete Disabled", Delete Hotstring
+    Gui, HS3:Add, Button, % "x+" . 10*DPI%chMon% . " yp w" . 135*DPI%chMon% . " vEdit gEdit Disabled", Edit hotstring
+	Gui, HS3:Add, Button, % "x+" . 10*DPI%chMon% . " yp w" . 135*DPI%chMon% . " vDelete gDelete Disabled", Delete hotstring
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
     Gui, HS3:Add, Text, ym, Library content
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlack Norm"
@@ -1099,6 +1100,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 MyOK:
+MyAboutGuiEscape:
 MyAboutGuiClose: ; Launched when the window is closed by pressing its X button in the title bar
     Gui, MyAbout: Destroy
 return
@@ -1167,10 +1169,10 @@ Gui, HS3List:New, +Resize MinSize800x500
 Gui, HS3List:Add, Text, ,Search:
 Gui, HS3List:Add, Text, % "yp xm+" . 420*DPI%chMon%, Search by:
 Gui, HS3List:Add, Edit, % "xm w" . 400*DPI%chMon% . " vSearchTerm gSearch"
-Gui, HS3List:Add, Radio, % "yp xm+" . 420*DPI%chMon% . " vRText gSearchChange Checked", Text
-Gui, HS3List:Add, Radio, % "yp xm+" . 480*DPI%chMon% . " vRHS gSearchChange", Hotstring
-Gui, HS3List:Add, Radio, % "yp xm+" . 565*DPI%chMon% . " vRSection gSearchChange", Section
-Gui, HS3List:Add, ListView, xm grid vList, Section|Hotstring|On/Off|Text
+Gui, HS3List:Add, Radio, % "yp xm+" . 420*DPI%chMon% . " vRText gSearchChange Checked", Hotstring
+Gui, HS3List:Add, Radio, % "yp xm+" . 520*DPI%chMon% . " vRHS gSearchChange", Triggerstring
+Gui, HS3List:Add, Radio, % "yp xm+" . 640*DPI%chMon% . " vRSection gSearchChange", Library
+Gui, HS3List:Add, ListView, xm grid vList, Library|Triggerstring|On/Off|Hotstring
 Loop, Files, %A_ScriptDir%\Categories\*.csv
 {
     Loop
@@ -1295,4 +1297,18 @@ HS3ListGuiClose:
 	ArrayS := []
 	ArrayT := []
 	ArrayOnOff := []
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+HSDelGuiEscape:
+HSDelGuiClose:
+	Gui, HSDel:Destroy
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+MonGuiEscape:
+MonGuiClose:
+	Gui, Mon:Destroy
 return
