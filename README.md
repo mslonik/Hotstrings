@@ -183,10 +183,10 @@ At the moment *Hotstring* application does not allow to change the set of trigge
 
 **triggerstring** = **string**
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑
 
 then the 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**last character of that string can be a trigger**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**last character of that string can be a trigger**
 The option (\*) is called "immediate execute".
 
 ---
@@ -194,6 +194,7 @@ The option (\*) is called "immediate execute".
 option | triggerstring     | trigger: last character  | hotstring
 -------|-------------------|---------------------------|-----------
 \*     | btw/              | /                         | by☐the☐way
+
 *Example, execution*
 content stream |    triggerstring + trigger| replaced by hotstring
 ---------------|----------------------------------------|-----------
@@ -210,6 +211,7 @@ By default the **hotstring** replaces the **triggestring**, what was shown in th
 option | triggerstring     | trigger: any of           | hotstring
 -------|-------------------|---------------------------|-----------
 B0     | btw               | -()[]{}':;"/\,.?!\`n☐\`t  | by☐the☐way
+
 *Example, execution*
 content stream |    triggerstring + trigger| replaced by hotstring
 ---------------|----------------------------------------|-----------
@@ -222,7 +224,8 @@ Something,☐something☐ | btw. | by☐the☐way.
 *Example of triggerstring and hotstring definition*
 option | triggerstring     | trigger: last character   | hotstring
 -------|-------------------|---------------------------|-----------
-*B0    | btw/              | /                         | by☐the☐way
+\*B0    | btw/              | /                         | by☐the☐way
+
 *Example, execution*
 content stream |    triggerstring + trigger| replaced by hotstring
 ---------------|----------------------------------------|-----------
@@ -236,7 +239,8 @@ The B0 option is useful for example to define HTML tags. In the following exampl
 
 option | triggerstring     | trigger: last character   | hotstring
 -------|-------------------|---------------------------|-----------
-*B0    | <em>              | >                         | </em>{left☐5}
+\*B0    | <em>              | >                         | </em>{left☐5}
+
 *Example, execution*
 content stream |    triggerstring + trigger  | replaced by hotstring
 ---------------|----------------------------------------|-----------
@@ -253,7 +257,8 @@ The triggestrings of the two following examples overlap, but the first one is sh
 option | triggerstring     | trigger:    | hotstring
 -------|-------------------|---------------------------|-----------
 |    | btw               | -()[]{}':;"/\,.?!\`n☐\`t  | by the way
-*    | btw2              | 2                         | back to work
+\*    | btw2              | 2                         | back to work
+
 *Example, execution*
 content stream |    triggerstring + trigger replaced by | hotstring
 ---------------|----------------------------------------|-----------
@@ -270,8 +275,9 @@ The second hotstring will never be triggered, as always after triggering of the 
 The triggestrings of the two following examples overlap, but this time both of them are of the same length.
 option | triggerstring     | trigger: last character   | hotstring
 -------|-------------------|---------------------------|-----------
-*    | btw1               | 1                     | by the way
-*    | btw2              | 2                         | back to work
+\*    | btw1               | 1                     | by the way
+\*    | btw2              | 2                         | back to work
+
 *Example, execution*
 content stream |    triggerstring + trigger replaced by | hotstring
 ---------------|----------------------------------------|-----------
@@ -286,15 +292,15 @@ Something,☐something☐ | btw1 | by☐the☐way
 The space itself can be a part of triggestring as well. What's is important is the length of the triggerstrings. This can be useful to distinguish the abbreviation from its phrase, as in the following example.
 option | triggerstring     | trigger: last character   | hotstring
 -------|-------------------|---------------------------|-----------
-*    | api☐               | ☐                     | API
-*    | api/              | /                         | Application☐Programming☐Interface
+\*    | api☐               | ☐                     | API
+\*    | api/              | /                         | Application☐Programming☐Interface
 
 ---
 *Example 4 of overlapping triggerstrings, special feature of Hotstring application: menu*
 Thanks to Hotstrings application the one triggestring can be used to trigger menu with defined list of hotstrings. The different options are separated by "|" mark. The first option on the list is the default one. Selection of the option is made by pressing the Enter key. Cauion, it doesn't work with mouse clicks.
 option | triggerstring     | trigger: last character   | hotstring
 -------|-------------------|---------------------------|-----------
-* and menu    | api/              | /                         | API *| Application☐Programming☐Interface
+\* and menu    | api/              | /                         | API *| Application☐Programming☐Interface
 
 
 ---
