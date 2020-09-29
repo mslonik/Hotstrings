@@ -189,6 +189,8 @@ Variants of triggering are controlled by the options:
 * Inside Word (?)
 * Disable
 
+Concurrently all / none of above options can be set.
+
 #### Default (no trigger option selected)
 ![Default trigger option](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png) 
 
@@ -251,9 +253,6 @@ B0       | alphanumeric string  | -()[]{}':;"/\,.?!\`n☐\`t  | alphanumeric str
 
 ---
 *Example of triggerstring and hotstring definition*
-option | triggerstring     | trigger: any of           | hotstring
--------|-------------------|---------------------------|-----------
-B0     | btw               | -()[]{}':;"/\,.?!\`n☐\`t  | by☐the☐way
 
 ![Example, no Backspace](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_NoBackspace.png) 
 
