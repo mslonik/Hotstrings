@@ -1,17 +1,17 @@
-# Hotstrings
-AutoHotkey oriented GUI to Hotstrings with many useful features:
-- applying clipboard instead of the classical simulation of keyboard (useful especially for long text strings),
+# *Hotstrings* application
+Written in [AutoHotkey](https://www.autohotkey.com/) application *Hotstrings*  with many useful features:
+- quick text replacement: short alphanumeric strings (aka triggerstrings) are used to automatically replace long alphanumeric strings (aka hotstrings),
+- defined hotstrings are operating system wide; it means that can be triggered in any text / edit window, in any application.
+- GUI (Graphical User Interface) for easy definition and/or edition of hotstrings,
+- on demand applying clipboard for entering of hotstrings, what is useful especially for long text strings, as it enables entering the long hotstring in a blink of an eye,
 - one triggering abbreviation can call several different text strings of your choice, chosen from menu,
-- overview of existing hotstrings,
+- overview of existing hotstrings with search capabilities,
 - definitions of hotstrings are stored in .csv files, as many, as you like (each file can contain hotstring belonging to specific category, e.g. emojis, physical symbols, first and second names etc.),
 - undoing of hotstrings (conversion of last entered hotstring again into triggering abbreviation),
+- runs on Microsoft Windows family operating systems
 - ...
 
-This application is written in AutoHotkey script language but does not require this language interpreter to be installed and can be run standalone thanks to .exe file. (Nevertheless installation of [AutoHotkey](https://www.autohotkey.com/) is greatly adviced). The concept and usage of hotstrings is based on AutoHotkey [hotstring](https://www.autohotkey.com/docs/Hotstrings.htm) notion.
-
-The hotstrings defined in this application are operating system wide. It means that can be triggered in any text / edit window, in any application.
-
-This application will run on Microsoft Windows family operating systems.
+This application is written in AutoHotkey script language but does not require this language interpreter to be installed and can be run standalone thanks to .exe file. (Nevertheless installation of [AutoHotkey](https://www.autohotkey.com/) is greatly adviced). The concept and usage of hotstrings is based and compatible to AutoHotkey [hotstring](https://www.autohotkey.com/docs/Hotstrings.htm) notion.
 
 ---
 
@@ -230,7 +230,7 @@ option | triggerstring     | trigger: any of           | hotstring
 -------|-------------------|---------------------------|-----------
 B0     | btw               | -()[]{}':;"/\,.?!\`n☐\`t  | by☐the☐way
 
-![Example, no Backspace](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/ Hotstring3_Example_NoBackspace.png) 
+![Example, no Backspace](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_NoBackspace.png) 
 
 *Example, execution*
 content stream |    triggerstring + trigger| replaced by hotstring
