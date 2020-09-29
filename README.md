@@ -73,7 +73,7 @@ email | e-mail
 *Example: *
 triggerstring | hotstring
 ---|---
-fs@ | FirstName.SecondName@yourhosting.com
+fs@ | `FirstName.SecondName@yourhosting.com`
 
 
 So let's make your PC really personal again. Now with use of hotstrings and Hotstring application.
@@ -86,17 +86,17 @@ Because it doesn't require much knowledege and text editing to run your own hots
 ---
 
 # Main window of *Hotstring* application
-After installation just double click on the Hotstrings icon (marked in red white letter *H* on green background) in system tray ![Example of system tray](/HelpPictures/Hotstring3_SystemTray.png) or... use hotkey *Ctrl + # + h* (Control + Windows key + h).
+After installation just double click on the Hotstrings icon (marked in red white letter *H* on green background) in system tray ![Example of system tray](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SystemTray.png) or... use hotkey *Ctrl + # + h* (Control + Windows key + h).
 Next you'll see main GUI (Graphical User Interface) window which enable you to edit hotstrings:
 
-![Main window](/HelpPictures/Hotstring3_MainWindow.png)
+![Main window](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow.png)
 
 The main window can be divided into the following parts:
 - Hotstring menu [1],
 - Hotstring definition / edition [2],
 - Display of existing hotstrings [3].
 
-![Main window parts](/HelpPictures/Hotstring3_MainWindow2.png)
+![Main window parts](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow2.png)
 
 # Let's begin by defining of few first hotstrings
 At first please observe the main window again. In order to define any hotstring one have to follow top down the screen (in blue):
@@ -107,14 +107,14 @@ At first please observe the main window again. In order to define any hotstring 
 - Select hotstring library
 - Set the hotstring
 
-![Defining of hotstring](/HelpPictures/Hotstring3_DefiningOfHotstring.png)
+![Defining of hotstring](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_DefiningOfHotstring.png)
 
 We will start by definition of *by the way* hotsring with plain *btw* triggerstring and no options.
 
 ## Enter triggestring
 Let's put in this text edit field some text: 
 
-![Enter triggerstring](/HelpPictures/Hotstring3_EnterTriggerstring.png)
+![Enter triggerstring](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterTriggerstring.png)
 
 Please keep in mind that this window does not show space key, as it is blank key. But in this tutorial it will be easier to see what we're doing by using the ☐ convention from now on to show the Space (Spacebar key). So now let's put there:
 ```
@@ -122,26 +122,26 @@ btw
 ```
 
 ## Select trigger option(s)
-![Default trigger option](/HelpPictures/Hotstring3_SelectTriggerOption.png) 
+![Default trigger option](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png) 
 
 By default no option is set (option string is empty). Let's leave no option set and continue. Then after triggerstring additionally one *trigger key* have to be pressed by user in order to trigger the hotstring.
 
 The *trigger key* is defined as  -()[]{}':;"/\,.?!\`n☐\`t (note that \`n is Enter,  \`t is Tab, and there is a plain space between \`n and \`t marked as ☐). 
 
 ## Select hotstring output function
-![Select hotstring output function](/HelpPictures/Hotstring3_SelectHostringOutputFunction.png)
+![Select hotstring output function](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectHostringOutputFunction.png)
 
 Select one and only one option from the list. By default *Send by AutoHotkey* is set. Let's leave it. It means that the hotstring will be output by AutoHotkey, without menu and not by Clipboard. More about *output functions* later on.
 
 ## Enter hotstring
-![Enter hotstring](/HelpPictures/Hotstring3_EnterHotsring.png)
+![Enter hotstring](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterHotsring.png)
 
 Let's do that:
 ```
 by the way
 ```
 ## Select hotstring library
-![Select hotstring library](/HelpPictures/Hotstring3_SelectHostringLibrary.png) 
+![Select hotstring library](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectHostringLibrary.png) 
 
 This list contains all and only *.csv files from withing folder ..\Hotstrings3\Categories. One can have as many files (even empty!) as necessary.
 
@@ -150,25 +150,25 @@ Let's select the AutocorrectionHotstring.csv for sake of example.
 ## Set the hotstring
 Select / click the *Set hostring* button. The function and meaning of two others is hopefully quite obvious. It will be explained in details later on.
 
-![Set the hotstring](/HelpPictures/Hotstring3_HostringButtons.png) 
+![Set the hotstring](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_HostringButtons.png) 
 
 ## Congratulations!
 You've defined your first hotstring. Have a look now into the left part of the main screen, into the *Library content*. Find there your newly defined hotstring:
 
-![Library content](/HelpPictures/Hotstring3_LibraryContent1.png)
+![Library content](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_LibraryContent1.png)
 
 
 # Trigger options
 Variants of triggering are controlled by the options:
 
-![Select trigger option(s)](/HelpPictures/Hotstring3_SelectTriggerOption.png)
+![Select trigger option(s)](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png)
 
 option             | triggerstring | hotstring
 -------------------|---------------|-----------
 \* / B0 / O / C / ? | triggerstring |    hotstring
 
 ### Default 
-![Default trigger option](/HelpPictures/Hotstring3_SelectTriggerOption.png) 
+![Default trigger option](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png) 
 
 By default no option is set (option string is empty). Then after triggerstring additionally one trigger key have to be pressed by user in order to trigger the hotstring.
 option | triggestring      | hotstring
@@ -183,10 +183,10 @@ At the moment *Hotstring* application does not allow to change the set of trigge
 
 **triggerstring** = **string**
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑
 
 then the 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**last character of that string can be a trigger**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**last character of that string can be a trigger**
 The option (\*) is called "immediate execute".
 
 ---
@@ -194,6 +194,7 @@ The option (\*) is called "immediate execute".
 option | triggerstring     | trigger: last character  | hotstring
 -------|-------------------|---------------------------|-----------
 \*     | btw/              | /                         | by☐the☐way
+
 *Example, execution*
 content stream |    triggerstring + trigger| replaced by hotstring
 ---------------|----------------------------------------|-----------
@@ -210,6 +211,7 @@ By default the **hotstring** replaces the **triggestring**, what was shown in th
 option | triggerstring     | trigger: any of           | hotstring
 -------|-------------------|---------------------------|-----------
 B0     | btw               | -()[]{}':;"/\,.?!\`n☐\`t  | by☐the☐way
+
 *Example, execution*
 content stream |    triggerstring + trigger| replaced by hotstring
 ---------------|----------------------------------------|-----------
@@ -222,7 +224,8 @@ Something,☐something☐ | btw. | by☐the☐way.
 *Example of triggerstring and hotstring definition*
 option | triggerstring     | trigger: last character   | hotstring
 -------|-------------------|---------------------------|-----------
-*B0    | btw/              | /                         | by☐the☐way
+\*B0    | btw/              | /                         | by☐the☐way
+
 *Example, execution*
 content stream |    triggerstring + trigger| replaced by hotstring
 ---------------|----------------------------------------|-----------
@@ -236,7 +239,8 @@ The B0 option is useful for example to define HTML tags. In the following exampl
 
 option | triggerstring     | trigger: last character   | hotstring
 -------|-------------------|---------------------------|-----------
-*B0    | <em>              | >                         | </em>{left☐5}
+\*B0    | <em>              | >                         | </em>{left☐5}
+
 *Example, execution*
 content stream |    triggerstring + trigger  | replaced by hotstring
 ---------------|----------------------------------------|-----------
@@ -253,7 +257,8 @@ The triggestrings of the two following examples overlap, but the first one is sh
 option | triggerstring     | trigger:    | hotstring
 -------|-------------------|---------------------------|-----------
 |    | btw               | -()[]{}':;"/\,.?!\`n☐\`t  | by the way
-*    | btw2              | 2                         | back to work
+\*    | btw2              | 2                         | back to work
+
 *Example, execution*
 content stream |    triggerstring + trigger replaced by | hotstring
 ---------------|----------------------------------------|-----------
@@ -270,8 +275,9 @@ The second hotstring will never be triggered, as always after triggering of the 
 The triggestrings of the two following examples overlap, but this time both of them are of the same length.
 option | triggerstring     | trigger: last character   | hotstring
 -------|-------------------|---------------------------|-----------
-*    | btw1               | 1                     | by the way
-*    | btw2              | 2                         | back to work
+\*    | btw1               | 1                     | by the way
+\*    | btw2              | 2                         | back to work
+
 *Example, execution*
 content stream |    triggerstring + trigger replaced by | hotstring
 ---------------|----------------------------------------|-----------
@@ -286,15 +292,15 @@ Something,☐something☐ | btw1 | by☐the☐way
 The space itself can be a part of triggestring as well. What's is important is the length of the triggerstrings. This can be useful to distinguish the abbreviation from its phrase, as in the following example.
 option | triggerstring     | trigger: last character   | hotstring
 -------|-------------------|---------------------------|-----------
-*    | api☐               | ☐                     | API
-*    | api/              | /                         | Application☐Programming☐Interface
+\*    | api☐               | ☐                     | API
+\*    | api/              | /                         | Application☐Programming☐Interface
 
 ---
 *Example 4 of overlapping triggerstrings, special feature of Hotstring application: menu*
 Thanks to Hotstrings application the one triggestring can be used to trigger menu with defined list of hotstrings. The different options are separated by "|" mark. The first option on the list is the default one. Selection of the option is made by pressing the Enter key. Cauion, it doesn't work with mouse clicks.
 option | triggerstring     | trigger: last character   | hotstring
 -------|-------------------|---------------------------|-----------
-* and menu    | api/              | /                         | API *| Application☐Programming☐Interface
+\* and menu    | api/              | /                         | API *| Application☐Programming☐Interface
 
 
 ---
