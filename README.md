@@ -182,27 +182,44 @@ Variants of triggering are controlled by the options:
 
 ![Select trigger option(s)](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png)
 
-##### Default (no trigger option selected)
+* Immediate Execute (*)
+* No Backspace (B0)
+* No End Char (O)
+* Case Sensitive `(C)`
+* Inside Word (?)
+* Disable
+
+#### Default (no trigger option selected)
 ![Default trigger option](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png) 
 
-By default no option is set (option string is empty). Then after triggerstring additionally one trigger key have to be pressed by user in order to trigger the hotstring.
-option | triggestring      | hotstring
--------|-------------------|-------------------
-|       | string + trigger  |        hotstring
+By default for new hotstrings no option is set. Then after triggerstring additionally one trigger key have to be pressed by user in order to trigger the hotstring.
 
-The trigger key is defined as  -()[]{}':;"/\,.?!\`n☐\`t (note that \`n is Enter, \`t is Tab, and there is a plain space between \`n and \`t marked as ☐). 
+option | triggestring | trigger      | hotstring
+---|---|---|---
+|       | alphanumeric string  | -()[]{}':;"/\,.?!\`n☐\`t | alphanumeric string
+
+The trigger key is defined as any of the following keys -()[]{}':;"/\,.?!\`n☐\`t (note that \`n is Enter, \`t is Tab, and there is a plain space between \`n and \`t marked as ☐). 
 
 At the moment *Hotstrings* application does not allow to change the set of trigger keys. 
 
-##### When the option (\*) is applied
+#### Immediate Execute (\*)
+![Trigger option Immediate Execute](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Option_ImmediateExecute.png) 
 
-**triggerstring** = **string**
+The option (\*) is called "immediate execute" is entering of the last character of triggerstring immediately executes exchange of the triggerstring with the hotstring. Another words: triggerstring is erased (backspaced) and hotstring is placed there.
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑
+option | triggestring | trigger      | hotstring
+---|---|---|---
+|       | alphanumeric string  | last character of triggerstring | alphanumeric string
+
+
+
+**triggerstring** 
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑
 
 then the 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**last character of that string can be a trigger**
-The option (\*) is called "immediate execute".
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**last character of that string is a trigger**
+
 
 ---
 *Example of triggerstring and hotstring definition*
@@ -219,10 +236,18 @@ content stream |    triggerstring + trigger| replaced by hotstring
 Something,☐something☐ | ~~btw/~~ | by☐the☐way
 > Something,☐something☐ ~~btw/~~ by☐the☐way
 
+Comment: triggerstring is erased, what is shown by ~~strikethrough~~.
+
 ---
 
-##### When the option (B0) is applied
-By default the **hotstring** replaces the **triggestring**, what was shown in the above examples by ~~crossing out~~ from the content stream the **triggerstring**. When (B0) option is applied, the **triggestring** is not replaced (no BackSpace) by the **hotstring** but is followed by the **hotstring**.
+#### No Backspace (B0)
+![Trigger option No Backspace](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Option_NoBackspace.png) 
+
+By default the **hotstring** replaces the **triggestring**, what was shown in the above examples by ~~strikethrough~~ from the content stream the **triggerstring**. When (B0) option is applied, the **triggestring** is not replaced (no BackSpace) by the **hotstring** but is followed by the **hotstring**.
+
+option | triggestring | trigger      | hotstring
+---|---|---|---
+B0       | alphanumeric string  | -()[]{}':;"/\,.?!\`n☐\`t  | alphanumeric string
 
 ---
 *Example of triggerstring and hotstring definition*
@@ -256,6 +281,20 @@ Something,☐something☐| <em> | </em>
 > Something,☐something☐<em>|</em>
 
 Comment:
+
+#### No End Char (O)
+
+#### Case Sensitive `(C)`
+
+#### Inside Word (?)
+
+#### Disable
+
+---
+
+
+## Overlapping hotstrings
+One of the useful options (...) are overlapping hotstrings.
 
 ---
 *Example 1 of overlapping triggerstrings*
@@ -311,22 +350,6 @@ option | triggerstring     | trigger: last character   | hotstring
 
 
 ---
-*Example of triggerstring and hotstring definition*
-
-option | triggerstring     | trigger: any of           | hotstring
--------|-------------------|---------------------------|-----------
- |     | btw               | -()[]{}':;"/\,.?!\`n☐ \`t  | by☐the☐way
-
-*Example, execution*
-
-content stream |    triggerstring + trigger  | replaced by hotstring
----------------|----------------------------------------|-----------
-Something,☐something☐| ~~btw.~~ ☐ | by☐the☐way☐
-
-> Something,☐something☐ ~~btw.~~ ☐ by☐the☐way☐
-
-
----
 
 
 
@@ -353,64 +376,14 @@ By default equal to 200 ms. Maximum value equal to 500 ms (0.5 s).
 
 **Tip:** Sometimes when long hotstrings are triggered and clipboard is applied to immediately enter it, strange behaviour can occurre. Instead of expected hotstring the previous content of clipboard may appear. The reason is that operating system can not gurantee the time to insert the content of clipboard into specific window / editing field. In order to support operating system enlarge the delay. The shorter the delay than better, but if too short, mentioned behaviour can be observed.
 
-### Help
-Link to this file is provided.
+### About / Help
+ ![About / Help](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_About_Help.png) 
 
-### About
-**Hotstrings.ahk (script)**. 
-*Let's make your PC personal again...*
+**Hotstrings.ahk (script). Let's make your PC personal again...**. 
+
 Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). This is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). License: [GNU GPL ver. 3](https://github.com/mslonik/Hotstrings/blob/master/LICENSE). [Source code](https://github.com/mslonik/Hotstrings). [Homepage](http://mslonik.pl).
 
-## Hotstring definition / edition
-The new hotstring is defined from top to bottom of the screen. Let's see how it's made, step by step, with the following example:
-
-**triggering abbreviation **|→| **hotstring**
-------------------------|-|-------------------
-btw/ | → | by the way
-
-### Enter triggering abbreviation
-This edit field enable you to enter any triggering abbreviation. In our example it will be equal to *btw/*.
-
-**Tip:** It's worth to differentiate somehow triggering abbreviations from other words. It can be easily the case that the same word is used as the triggering abbreviation and the word itself. So to trigger on purpose it's good to add to triggering abbreviation unique sign / key, which can be easily reached and is seldomly used otherwise. The perfect candidate for that puspose is "/" (slash).
-
-### Triggering options
-
-The following options are described. After full name of each option, in parenthesis one can find short notation used in AutoHotkey for compatibility, if available.
-
-#### Immediate Execute (*)
-No ending sequence is required. Another words as soon as triggering abbreviation is finished, immediately it's exchanged into hotstring. 
-
-By default hotstrings are triggered when triggering abbreviation is finished with ending character, which by default is space ( ), dot (.), coma (,) etc. Examples:
-
- triggering abbreviation without immediate execute: btw/( )
- triggering abbreviation with immediate execute: btw/
- 
- #### No Backspace (B0)
- The triggering sequence is kept in memory and is not exchanged (erased) automatically. In order to erase the letters (but not from memory), the backspace can be used. For that purpose apply curly brackets, and within BackSpace word and number indicating how many backspaces should be applied. E.g. {BackSpace 3} ← 3x backspaces will be triggered.
- 
- **Tip:** Abbreviations and conversion of lower case to uppercase. Let's follow the following example: Jane would like to use api triggering abbreviation for both purposes:
- 1. to automatically convert this abbreviation lower case to uppercase.
- 2. to trigger the hotstring Application Programming Interface.
- 
- For that purpose Jane defined two hotstrings:
- **triggering abbreviation **|→| **hotstring**
-------------------------|-|------------------
- api | Immediate Execute, No Backspace | {BackSpace 3}API
- api/ | Immediate Execute | Application Programming Interface
- 
- These two hotstrings work as a pair: thanks to "No Backspace" option the triggering abbreviation is kept in memory. 
- 
- If Jane writes api, this abbreviation triggers immediately hotstring API. Next, if Jane decides to add "/" to hotstring API: API/, then API/ works as next triggering abbreviation which unfold to hotstring Application Programming Interface. 
- 
- **Tip:** Immediate execute is not always welcomed. It's better to use it only if chances that certain abbreviation will not occurre within other words. Good example is word led which can be used as LED (Light Emitting Diode), but is also usde in e.g. word ledge. In such a case carefully define a triggering abbreviation or use udoing method.
- 
- #### No End Char (O)
- 
- #### Case Sensitive (C)
- 
- #### Inside Word (?)
- 
- #### Disable
+Help, link to this file.
  
  # Undoing of the last hotsring
  The last hotstring can be easily undone by pressing Cltr + z hotkey or Ctrl + Backspace. 
