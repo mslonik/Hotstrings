@@ -86,14 +86,17 @@ Because it doesn't require much knowledege and text editing to run your own hots
 ---
 
 # Main window of *Hotstring* application
-After installation just double click on the Hotstrings icon (marked in red white letter *H* on green background) in system tray ![Example of system tray](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SystemTray.png) or... use hotkey *Ctrl + # + h* (Control + Windows key + h).
+After installation just double click on the Hotstrings icon (marked in red white letter *H* on green background) in system tray:
+![Example of system tray](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SystemTray.png) 
+or... use hotkey *Ctrl + # + h* (Control + Windows key + h).
+
 Next you'll see main GUI (Graphical User Interface) window which enable you to edit hotstrings:
 
 ![Main window](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow.png)
 
 The main window can be divided into the following parts:
-- Hotstring menu [1],
-- Hotstring definition / edition [2],
+- menu [1],
+- hotstring definition / edition [2],
 - Display of existing hotstrings [3].
 
 ![Main window parts](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow2.png)
@@ -109,29 +112,35 @@ At first please observe the main window again. In order to define any hotstring 
 
 ![Defining of hotstring](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_DefiningOfHotstring.png)
 
-We will start by definition of *by the way* hotsring with plain *btw* triggerstring and no options.
+We will start by defining of *by the way* hotsring with plain *btw* triggerstring and no options.
 
 ## Enter triggestring
 Let's put in this text edit field some text: 
 
 ![Enter triggerstring](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterTriggerstring.png)
 
-Please keep in mind that this window does not show space key, as it is blank key. But in this tutorial it will be easier to see what we're doing by using the ☐ convention from now on to show the Space (Spacebar key). So now let's put there:
+Please keep in mind that this edit window does not show space key, as it is blank key. But in this tutorial it will be easier to see what we're doing by using the ☐ convention from now on to show the Space (Spacebar key). So now let's put there:
 ```
 btw
 ```
+![Enter triggerstring, example](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterTriggerstring_btw.png)
+
 
 ## Select trigger option(s)
 ![Default trigger option](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png) 
 
-By default no option is set (option string is empty). Let's leave no option set and continue. Then after triggerstring additionally one *trigger key* have to be pressed by user in order to trigger the hotstring.
+By default no option is set (option string is empty). Then after triggerstring is entered, additionally one *trigger key* have to be pressed by user in order to trigger the hotstring.
 
-The *trigger key* is defined as  -()[]{}':;"/\,.?!\`n☐\`t (note that \`n is Enter,  \`t is Tab, and there is a plain space between \`n and \`t marked as ☐). 
+The *trigger key* is defined as one of the following keys: -()[]{}':;"/\,.?!\`n☐\`t (note that \`n is Enter,  \`t is Tab, and there is a plain space between \`n and \`t marked as ☐ according to our convention). 
+
+Let's leave no option set and continue.
 
 ## Select hotstring output function
 ![Select hotstring output function](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectHostringOutputFunction.png)
 
-Select one and only one option from the list. By default *Send by AutoHotkey* is set. Let's leave it. It means that the hotstring will be output by AutoHotkey, without menu and not by Clipboard. More about *output functions* later on.
+Select one and only one option from the list. By default *Send by AutoHotkey* is set. It means that the hotstring will be output by AutoHotkey, without menu and not by Clipboard. More about *output functions* later on.
+
+Let's leave it.
 
 ## Enter hotstring
 ![Enter hotstring](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterHotsring.png)
@@ -140,12 +149,16 @@ Let's do that:
 ```
 by the way
 ```
+![Enter hotstring, example](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_ByTheWay.png)
+
+
 ## Select hotstring library
 ![Select hotstring library](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectHostringLibrary.png) 
 
 This list contains all and only *.csv files from withing folder ..\Hotstrings3\Categories. One can have as many files (even empty!) as necessary.
 
 Let's select the AutocorrectionHotstring.csv for sake of example.
+![Select hotstring library](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_HotstringLibrary.png)
 
 ## Set the hotstring
 Select / click the *Set hostring* button. The function and meaning of two others is hopefully quite obvious. It will be explained in details later on.
@@ -155,7 +168,7 @@ Select / click the *Set hostring* button. The function and meaning of two others
 ## Congratulations!
 You've defined your first hotstring. Have a look now into the left part of the main screen, into the *Library content*. Find there your newly defined hotstring:
 
-![Library content](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_LibraryContent1.png)
+![Library content](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_LibraryContent.png)
 
 
 # Trigger options
