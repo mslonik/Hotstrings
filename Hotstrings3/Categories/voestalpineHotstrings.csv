@@ -90,11 +90,11 @@ B0*‖du ‖A‖On‖{Backspace 3}DUiR
 *‖so/‖C‖On‖Sopot
 *b0‖sps‖A‖On‖{Backspace 3}Documentation Sharepoint Sopot (https://team.voestalpine.net/site/4077/default.aspx)
 *‖subrack‖MC‖On‖Subrack 14¦Subrack 15¦Subrack 6
-b0*‖uniac‖A‖On‖{BackSpace 5}UniAC
+*‖uniac ‖A‖On‖UniAC
 *‖uniac/‖MC‖On‖(universal) axle counting system¦(uniwersalny) system liczenia osi
-b0*‖uniac1‖A‖On‖{BackSpace 6}UniAC[1]
+C1*‖uniac1‖A‖On‖UniAC[1]
 *‖uniac1/‖MA‖On‖{Backspace 2}(universal) axle counting system of 1st generation¦{Backspace 2}(uniwersalny) system liczenia osi pierwszej generacji
-b0*‖uniac2‖A‖On‖{BackSpace 6}UniAC[2]
+*‖uniac2‖A‖On‖UniAC[2]
 *‖uniac2/‖MA‖On‖{BackSpace 2}(universal) axle counting system of 2nd generation¦{BackSpace 2}(uniwersalny) system liczenia osi drugiej generacji
 b0*‖uniacx‖A‖On‖{BackSpace 6}UniAC[x]
 *‖uniacx/‖MA‖On‖{BackSpace 2}family of universal axle counting system¦{BackSpace 2}rodzina uniwersalnych systemów liczenia osi

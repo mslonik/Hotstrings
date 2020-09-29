@@ -44,6 +44,8 @@ ArrayHS := []
 ArrayS := []
 ArrayT := []
 ArrayOnOff := []
+ArrayO := []
+ArrayF := []
 MyHotstring 		:= ""
 if !(A_Args[7])
 	SelectedRow := 0
@@ -456,7 +458,7 @@ GUIInit:
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
     Gui, HS3:Add, Text, ym, Library content
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlack Norm"
-    Gui, HS3:Add, ListView, % "LV0x1 0x4 yp+" . 25*DPI%chMon% . " xp h" . 500*DPI%chMon% . " w" . 400*DPI%chMon% . " vHSList", Options|Trigger|Fun|On/Off|Hotstring
+    Gui, HS3:Add, ListView, % "LV0x1 0x4 yp+" . 25*DPI%chMon% . " xp h" . 500*DPI%chMon% . " w" . 400*DPI%chMon% . " vHSList", Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring
 	Gui, HS3:Add, Edit, vStringCombo xs gViewString ReadOnly Hide,
     Menu, HSMenu, Add, &Monitor, CheckMon
 	Menu, HSMenu, Add, &Search Hotstrings, Searching
@@ -465,7 +467,7 @@ GUIInit:
     Gui, HS3:Menu, HSMenu
 	StartX := Mon%chMon%Left + (Abs(Mon%chMon%Right - Mon%chMon%Left)/2) - 430*DPI%chMon%
 	StartY := Mon%chMon%Top + (Abs(Mon%chMon%Bottom - Mon%chMon%Top)/2) - (225*DPI%chMon%+31)
-	StartW := 860*DPI%chMon%
+	StartW := 960*DPI%chMon%
 	StartH := 550*DPI%chMon%+20
 	if (showGui == 1)
 	{
@@ -594,9 +596,8 @@ AddHotstring:
 
 	GuiControlGet, StringCombo
 	Select := StringCombo
-	ControlGet, Items, Line,1, StringCombo
-
-	Loop, Parse, Items, `n
+	; ControlGet, Items, Line,1, StringCombo
+	Loop, Parse, StringCombo, `n
 	{  
 		if InStr(A_LoopField, ":" . NewString . """", CaseSensitive)
 		{
@@ -606,7 +607,7 @@ AddHotstring:
 			break
 		}
 	}
-
+	
 ; Added this conditional to prevent Hotstrings from a file losing the C1 option caused by
 ; cascading ternary operators when creating the options string. CapCheck set to 1 when 
 ; a Hotstring from a file contains the C1 option.
@@ -663,8 +664,8 @@ Edit:
 		MsgBox, 0, %A_ThisLabel%, Select a row in the list-view, please!
 		Return
 	}
-	LV_GetText(Options, SelectedRow, 1)
-	LV_GetText(NewString, SelectedRow, 2)
+	LV_GetText(Options, SelectedRow, 2)
+	LV_GetText(NewString, SelectedRow, 1)
 	LV_GetText(Fun, SelectedRow, 3)
 	if (Fun = "A")
 	{
@@ -712,8 +713,8 @@ SectionChoose:
 	Loop, % SectionList.MaxIndex()
 		{
 			str1 := StrSplit(SectionList[A_Index], "‖")
-			LV_Add("", str1[1], str1[2], str1[3], str1[4], str1[5])
-			LV_ModifyCol(2, "Sort")
+			LV_Add("", str1[2], str1[1], str1[3], str1[4], str1[5])
+			LV_ModifyCol(1, "Sort")
 		}
 		LV_ModifyCol(5, "Auto")
 	SendMessage, 4125, 4, 0, SysListView321
@@ -875,7 +876,7 @@ SaveHotstrings:
 		SectionList.Push(txt)
 		; addvar := 1
 	}
-	LV_ModifyCol(2, "Sort")
+	LV_ModifyCol(1, "Sort")
 	name := SubStr(SectionCombo, 1, StrLen(SectionCombo)-4)
 	name := % name . ".csv"
 	FileDelete, Categories\%name%
@@ -978,7 +979,7 @@ Delete:
 			}
 		}
 	}
-	MsgBox Hotstring deleted!
+	MsgBox, Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
 	WinGetPos, PrevX, PrevY , , ,Hotstrings
 	Run, AutoHotkey.exe Hotstrings3.ahk GUIInit %SectionCombo% %PrevW% %PrevH% %PrevX% %PrevY% %SelectedRow% %chMon%
 return
@@ -1114,11 +1115,11 @@ HS3GuiSize:
 		showGui := 2
 	IniW := StartW
 	IniH := StartH
-	LV_Width := 400*DPI%chMon%
+	LV_Width := 500*DPI%chMon%
 	LV_Height := 520*DPI%chMon%
-	LV_ModifyCol(1,70*DPI%chMon%)
-	LV_ModifyCol(2,70*DPI%chMon%)
-	LV_ModifyCol(3,40*DPI%chMon%)	
+	LV_ModifyCol(1,100*DPI%chMon%)
+	LV_ModifyCol(2,80*DPI%chMon%)
+	LV_ModifyCol(3,70*DPI%chMon%)	
 	LV_ModifyCol(4,60*DPI%chMon%)
 	LV_ModifyCol(1,"Center")
 	LV_ModifyCol(2,"Center")
@@ -1153,6 +1154,10 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 Searching:
+WinGetPos, StartXlist, StartYlist,,,Hotstrings
+Gui, SearchLoad:New, -Resize -Border
+Gui, SearchLoad:Add, Text,, Please wait, uploading .csv files...
+Gui, SearchLoad:Show
 SysGet, N, MonitorCount
     Loop, % N
     {
@@ -1172,7 +1177,8 @@ Gui, HS3List:Add, Edit, % "xm w" . 400*DPI%chMon% . " vSearchTerm gSearch"
 Gui, HS3List:Add, Radio, % "yp xm+" . 420*DPI%chMon% . " vRText gSearchChange Checked", Hotstring
 Gui, HS3List:Add, Radio, % "yp xm+" . 520*DPI%chMon% . " vRHS gSearchChange", Triggerstring
 Gui, HS3List:Add, Radio, % "yp xm+" . 640*DPI%chMon% . " vRSection gSearchChange", Library
-Gui, HS3List:Add, ListView, xm grid vList, Library|Triggerstring|On/Off|Hotstring
+Gui, HS3List:Add, Button, % "yp-2 xm+" . 720*DPI%chMon% . " w" . 100*DPI%chMon% . " gMoveList", Move
+Gui, HS3List:Add, ListView, xm grid vList, Library|Triggerstring|Trigger Options|Output Functions|Enable/Disable|Hotstring
 Loop, Files, %A_ScriptDir%\Categories\*.csv
 {
     Loop
@@ -1182,14 +1188,16 @@ Loop, Files, %A_ScriptDir%\Categories\*.csv
 			break
         tabSearch := StrSplit(varSearch, "‖")
         name := SubStr(A_LoopFileName,1, StrLen(A_LoopFileName)-4)
-        LV_Add("", name, tabSearch[2],tabSearch[4], tabSearch[5])
-        ArrayHS.Push(tabSearch[2])
-        ArrayS.Push(name)
-        ArrayT.Push(tabSearch[5])
+        LV_Add("", name, tabSearch[1],tabSearch[2],tabSearch[3],tabSearch[4], tabSearch[5])
+		ArrayS.Push(name)
+        ArrayHS.Push(tabSearch[1])
+		ArrayO.Push(tabSearch[2])
+		ArrayF.Push(tabSearch[3])
         ArrayOnOff.Push(tabSearch[4])
+        ArrayT.Push(tabSearch[5])
     }
 }
-LV_ModifyCol(2, "Sort")
+LV_ModifyCol(1, "Sort")
 StartWlist := 800*DPI%chMon%
 StartHlist := 500*DPI%chMon%
 SetTitleMatchMode, 3
@@ -1200,7 +1208,7 @@ if ((StartXlist == "") or (StartYlist == ""))
 	StartYlist := (Mon%chMon%Top + (Abs(Mon%chMon%Bottom - Mon%chMon%Top)/2))*DPI%chMon% - StartHlist/2
 }
 Gui, HS3List:Show, % "w" . StartWlist . " h" . StartHlist . " x" . StartXlist . " y" . StartYlist, Search Hotstrings
-
+Gui, SearchLoad:Destroy
 
 Search:
 Gui, HS3List:Submit, NoHide
@@ -1217,10 +1225,10 @@ if (RText == 1)
     {
         ; If (InStr(FileName, SearchTerm) = 1) ; for matching at the start
         If InStr(FileName, SearchTerm) ; for overall matching
-            LV_Add("",ArrayS[A_Index], ArrayHS[A_Index],ArrayOnOff[A_Index],FileName)
+            LV_Add("",ArrayS[A_Index], ArrayHS[A_Index],ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],FileName)
     }
     Else
-        LV_Add("",ArrayS[A_Index], ArrayHS[A_Index],ArrayOnOff[A_Index],FileName)
+         LV_Add("",ArrayS[A_Index], ArrayHS[A_Index],ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],FileName)
     }
 }
 else if (RHS == 1)
@@ -1231,10 +1239,10 @@ else if (RHS == 1)
     {
         ; If (InStr(FileName, SearchTerm) = 1) ; for matching at the start
         If InStr(FileName, SearchTerm) ; for overall matching
-            LV_Add("",ArrayS[A_Index], FileName, ArrayOnOff[A_Index], ArrayT[A_Index])
+			LV_Add("",ArrayS[A_Index], FileName,ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],ArrayT[A_Index])
     }
     Else
-        LV_Add("",ArrayS[A_Index], FileName,ArrayOnOff[A_Index], ArrayT[A_Index])
+		LV_Add("",ArrayS[A_Index], FileName,ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],ArrayT[A_Index])
     }
 }
 else if (RSection == 1)
@@ -1245,13 +1253,28 @@ else if (RSection == 1)
     {
         ; If (InStr(FileName, SearchTerm) = 1) ; for matching at the start
         If InStr(FileName, SearchTerm) ; for overall matching
-            LV_Add("",FileName, ArrayHS[A_Index],ArrayOnOff[A_Index],ArrayT[A_Index])
+			LV_Add("",FileName, ArrayHS[A_Index],ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],ArrayT[A_Index])
     }
     Else
-        LV_Add("",FileName, ArrayHS[A_Index],ArrayOnOff[A_Index],ArrayT[A_Index])
+        LV_Add("",FileName, ArrayHS[A_Index],ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],ArrayT[A_Index])
     }
 }
 GuiControl, +Redraw, List
+return
+
+MoveList:
+	Gui, HS3List:Submit, NoHide
+	If !(SelectedRow := LV_GetNext()) {
+		MsgBox, 0, %A_ThisLabel%, Select a row in the list-view, please!
+		Return
+	}
+	LV_GetText(Triggerstring, SelectedRow,2)
+	LV_GetText(TriggOpt, SelectedRow,3)
+	LV_GetText(OutFun, SelectedRow,4)
+	LV_GetText(OnOff, SelectedRow,5)
+	LV_GetText(HSText, SelectedRow,6)
+	MovedHS := TriggOpt . "‖" . Triggerstring . "‖" . OutFun . "‖" . OnOff . "‖" . HSText
+	MsgBox, %MovedHS%
 return
 
 SearchChange:
@@ -1269,20 +1292,22 @@ HS3ListGuiSize:
 	LV_Height := 440*DPI%chMon%
 	LV_ModifyCol(1,100*DPI%chMon%)
 	LV_ModifyCol(2,100*DPI%chMon%)
-    LV_ModifyCol(3,50*DPI%chMon%)
+    LV_ModifyCol(3,120*DPI%chMon%)
 	LV_ModifyCol(1,"Center")
 	LV_ModifyCol(2,"Center")
     LV_ModifyCol(3,"Center")
+	LV_ModifyCol(4,"Center")
+    LV_ModifyCol(5,"Center")
 
 	NewHeight := LV_Height+(A_GuiHeight-IniH)
 	NewWidth := LV_Width+(A_GuiWidth-IniW)
     ColWid := (NewWidth-250)
-	LV_ModifyCol(4, "Auto")
+	LV_ModifyCol(6, "Auto")
 	SendMessage, 4125, 4, 0, SysListView321
 	wid := ErrorLevel
 	if (wid < ColWid)
 	{
-		LV_ModifyCol(4, ColWid)
+		LV_ModifyCol(6, ColWid)
 	}
 	GuiControl, Move, List, W%NewWidth% H%NewHeight%
 return
