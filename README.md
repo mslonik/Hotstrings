@@ -1,17 +1,17 @@
-# Hotstrings
-AutoHotkey oriented GUI to Hotstrings with many useful features:
-- applying clipboard instead of the classical simulation of keyboard (useful especially for long text strings),
+# *Hotstrings* application
+Written in [AutoHotkey](https://www.autohotkey.com/) application *Hotstrings*  with many useful features:
+- quick text replacement: short alphanumeric strings (aka triggerstrings) are used to automatically replace long alphanumeric strings (aka hotstrings),
+- defined hotstrings are operating system wide; it means that can be triggered in any text / edit window, in any application.
+- GUI (Graphical User Interface) for easy definition and/or edition of hotstrings,
+- on demand applying clipboard for entering of hotstrings, what is useful especially for long text strings, as it enables entering the long hotstring in a blink of an eye,
 - one triggering abbreviation can call several different text strings of your choice, chosen from menu,
-- overview of existing hotstrings,
+- overview of existing hotstrings with search capabilities,
 - definitions of hotstrings are stored in .csv files, as many, as you like (each file can contain hotstring belonging to specific category, e.g. emojis, physical symbols, first and second names etc.),
 - undoing of hotstrings (conversion of last entered hotstring again into triggering abbreviation),
+- runs on Microsoft Windows family operating systems
 - ...
 
-This application is written in AutoHotkey script language but does not require this language interpreter to be installed and can be run standalone thanks to .exe file. (Nevertheless installation of [AutoHotkey](https://www.autohotkey.com/) is greatly adviced). The concept and usage of hotstrings is based on AutoHotkey [hotstring](https://www.autohotkey.com/docs/Hotstrings.htm) notion.
-
-The hotstrings defined in this application are operating system wide. It means that can be triggered in any text / edit window, in any application.
-
-This application will run on Microsoft Windows family operating systems.
+This application is written in AutoHotkey script language but does not require this language interpreter to be installed and can be run standalone thanks to .exe file. (Nevertheless installation of [AutoHotkey](https://www.autohotkey.com/) is greatly adviced). The concept and usage of hotstrings is based and compatible to AutoHotkey [hotstring](https://www.autohotkey.com/docs/Hotstrings.htm) notion.
 
 ---
 
@@ -85,22 +85,6 @@ Because it doesn't require much knowledege and text editing to run your own hots
 ---
 ---
 
-# Main window of *Hotstring* application
-After installation just double click on the Hotstrings icon (marked in red white letter *H* on green background) in system tray:
-![Example of system tray](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SystemTray.png) 
-or... use hotkey *Ctrl + # + h* (Control + Windows key + h).
-
-Next you'll see main GUI (Graphical User Interface) window which enable you to edit hotstrings:
-
-![Main window](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow.png)
-
-The main window can be divided into the following parts:
-- menu [1],
-- hotstring definition / edition [2],
-- Display of existing hotstrings [3].
-
-![Main window parts](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow2.png)
-
 # Let's begin by defining of few first hotstrings
 At first please observe the main window again. In order to define any hotstring one have to follow top down the screen (in blue):
 - Enter triggerstring
@@ -170,17 +154,35 @@ You've defined your first hotstring. Have a look now into the left part of the m
 
 ![Library content](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_LibraryContent.png)
 
+---
+---
+---
 
-# Trigger options
+# Now let's dive into more detailed description of available functions
+After installation just double click on the Hotstrings icon (capital letter *H* as *Hotstrings* on green background) in system tray:
+![Example of system tray](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SystemTray.png) 
+or... use hotkey *Ctrl + # + h* (Control + Windows key + h).
+
+Next you'll see main GUI (Graphical User Interface) window which enable you to edit hotstrings:
+
+### Main window of *Hotstring* application
+
+![Main window](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow.png)
+
+The main window can be divided into the following parts:
+- menu [1],
+- hotstring definition / edition [2],
+- Display of existing hotstrings [3].
+
+![Main window parts](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow2.png)
+
+
+### Trigger options
 Variants of triggering are controlled by the options:
 
 ![Select trigger option(s)](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png)
 
-option             | triggerstring | hotstring
--------------------|---------------|-----------
-\* / B0 / O / C / ? | triggerstring |    hotstring
-
-### Default 
+##### Default (no trigger option selected)
 ![Default trigger option](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png) 
 
 By default no option is set (option string is empty). Then after triggerstring additionally one trigger key have to be pressed by user in order to trigger the hotstring.
@@ -190,9 +192,9 @@ option | triggestring      | hotstring
 
 The trigger key is defined as  -()[]{}':;"/\,.?!\`n☐\`t (note that \`n is Enter, \`t is Tab, and there is a plain space between \`n and \`t marked as ☐). 
 
-At the moment *Hotstring* application does not allow to change the set of trigger keys. 
+At the moment *Hotstrings* application does not allow to change the set of trigger keys. 
 
-### When the option (\*) is applied
+##### When the option (\*) is applied
 
 **triggerstring** = **string**
 
@@ -208,6 +210,9 @@ option | triggerstring     | trigger: last character  | hotstring
 -------|-------------------|---------------------------|-----------
 \*     | btw/              | /                         | by☐the☐way
 
+![Example, immediate execute](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_ImmediateExecute.png) 
+
+
 *Example, execution*
 content stream |    triggerstring + trigger| replaced by hotstring
 ---------------|----------------------------------------|-----------
@@ -216,14 +221,16 @@ Something,☐something☐ | ~~btw/~~ | by☐the☐way
 
 ---
 
-### When the option (B0) is applied
-By default the **hotstring** replaces the **triggestring**, what was shown in the above examples by ~~crossing out~~ from the content stream the **triggerstring**. When (B0) option is applied, the **triggestring** is not replaced by the **hotstring** **AND** is still ready to trigger another **hotstring**. This option is very handy if there are more than one **triggerstrings** which partly overlap.
+##### When the option (B0) is applied
+By default the **hotstring** replaces the **triggestring**, what was shown in the above examples by ~~crossing out~~ from the content stream the **triggerstring**. When (B0) option is applied, the **triggestring** is not replaced (no BackSpace) by the **hotstring** but is followed by the **hotstring**.
 
 ---
 *Example of triggerstring and hotstring definition*
 option | triggerstring     | trigger: any of           | hotstring
 -------|-------------------|---------------------------|-----------
 B0     | btw               | -()[]{}':;"/\,.?!\`n☐\`t  | by☐the☐way
+
+![Example, no Backspace](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_NoBackspace.png) 
 
 *Example, execution*
 content stream |    triggerstring + trigger| replaced by hotstring
@@ -232,19 +239,6 @@ Something,☐something☐ | btw. | by☐the☐way.
 
 > Something,☐something☐btw.by☐the☐way.
 
-
----
-*Example of triggerstring and hotstring definition*
-option | triggerstring     | trigger: last character   | hotstring
--------|-------------------|---------------------------|-----------
-\*B0    | btw/              | /                         | by☐the☐way
-
-*Example, execution*
-content stream |    triggerstring + trigger| replaced by hotstring
----------------|----------------------------------------|-----------
-Something,☐something☐| btw/ | by☐the☐way
-
-> Something,☐something☐btw/by☐the☐way/
 
 ---
 *Example of useful B0 hotstring*
@@ -259,9 +253,9 @@ content stream |    triggerstring + trigger  | replaced by hotstring
 ---------------|----------------------------------------|-----------
 Something,☐something☐| <em> | </em>
 
-> Something,☐something☐<em></em>
+> Something,☐something☐<em>|</em>
 
-
+Comment:
 
 ---
 *Example 1 of overlapping triggerstrings*
