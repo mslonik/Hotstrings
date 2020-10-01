@@ -248,6 +248,7 @@ if (Ovar == 1)
 sleep, %delay% ;Remember to sleep before restoring clipboard or it will fail
 MyHotstring := MenuListbox
 Clipboard:=ClipboardBack
+	Hotstring("Reset")
 Gui, Menu:Destroy
 Return
 #If
@@ -305,6 +306,7 @@ InputLocaleIDv := Format("{:#04x}", InputLocaleIDv)
 	}
 	
 	MyHotstring := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", false, 1, 2) + 1)
+	Hotstring("Reset")
 Gui, MenuAHK:Destroy
 Return
 #If
@@ -339,6 +341,7 @@ TimeAndDate(ReplacementString, Oflag)
 	}
 	
 	MyHotstring := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", false, 1, 2) + 1)
+	Hotstring("Reset")
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -853,7 +856,6 @@ SaveHotstrings:
 	InputFile = % A_ScriptDir . "\Categories\" . SaveFile . ".csv"
 	LString := % "‖" . NewString . "‖"
 	SaveFlag := 0
-
 	Loop, Read, %InputFile%, %OutputFile%
 	{
 		if InStr(A_LoopReadLine, LString)
@@ -864,14 +866,14 @@ SaveHotstrings:
 				IfMsgBox, No
 					return
 			}
-			LV_Modify(A_Index, "", Options, NewString, SendFun, OnOff, TextInsert)
+			LV_Modify(A_Index, "", NewString, Options, SendFun, OnOff, TextInsert)
 			SaveFlag := 1
 		}
 	}
 	; addvar := 0 ; potrzebne, bo źle pokazuje max index listy
 	if (SaveFlag == 0)
 	{
-		LV_Add("", Options, NewString, SendFun, OnOff, TextInsert)
+		LV_Add("",  NewString,Options, SendFun, OnOff, TextInsert)
 		txt := % Options . "‖" . NewString . "‖" . SendFun . "‖" . OnOff . "‖" . TextInsert
 		SectionList.Push(txt)
 		; addvar := 1
@@ -882,8 +884,8 @@ SaveHotstrings:
 	FileDelete, Categories\%name%
 	if (SectionList.MaxIndex() == "")
 	{
-		LV_GetText(txt1, 1, 1)
-		LV_GetText(txt2, 1, 2)
+		LV_GetText(txt1, 1, 2)
+		LV_GetText(txt2, 1, 1)
 		LV_GetText(txt3, 1, 3)
 		LV_GetText(txt4, 1, 4)
 		LV_GetText(txt5, 1, 5)
@@ -894,8 +896,8 @@ SaveHotstrings:
 	{
 		Loop, % SectionList.MaxIndex()-1 ;+ addvar
 		{
-			LV_GetText(txt1, A_Index, 1)
-			LV_GetText(txt2, A_Index, 2)
+			LV_GetText(txt1, A_Index, 2)
+			LV_GetText(txt2, A_Index, 1)
 			LV_GetText(txt3, A_Index, 3)
 			LV_GetText(txt4, A_Index, 4)
 			LV_GetText(txt5, A_Index, 5)
@@ -903,8 +905,8 @@ SaveHotstrings:
 			if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == ""))
 				FileAppend, %txt%, Categories\%name%, UTF-8
 		}
-		LV_GetText(txt1, SectionList.MaxIndex(),1) ; +addvar, 1)
-		LV_GetText(txt2, SectionList.MaxIndex(),2) ; +addvar, 2)
+		LV_GetText(txt1, SectionList.MaxIndex(),2) ; +addvar, 1)
+		LV_GetText(txt2, SectionList.MaxIndex(),1) ; +addvar, 2)
 		LV_GetText(txt3, SectionList.MaxIndex(),3) ; +addvar, 3)
 		LV_GetText(txt4, SectionList.MaxIndex(),4) ; +addvar, 4)
 		LV_GetText(txt5, SectionList.MaxIndex(),5) ; +addvar, 5)
@@ -944,8 +946,8 @@ Delete:
 			{
 				if !(A_Index == SelectedRow)
 				{
-					LV_GetText(txt1, A_Index, 1)
-					LV_GetText(txt2, A_Index, 2)
+					LV_GetText(txt1, A_Index, 2)
+					LV_GetText(txt2, A_Index, 1)
 					LV_GetText(txt3, A_Index, 3)
 					LV_GetText(txt4, A_Index, 4)
 					LV_GetText(txt5, A_Index, 5)
@@ -965,8 +967,8 @@ Delete:
 		{
 			if !(A_Index == SelectedRow)
 			{
-				LV_GetText(txt1, A_Index, 1)
-				LV_GetText(txt2, A_Index, 2)
+				LV_GetText(txt1, A_Index, 2)
+				LV_GetText(txt2, A_Index, 1)
 				LV_GetText(txt3, A_Index, 3)
 				LV_GetText(txt4, A_Index, 4)
 				LV_GetText(txt5, A_Index, 5)
@@ -1188,10 +1190,10 @@ Loop, Files, %A_ScriptDir%\Categories\*.csv
 			break
         tabSearch := StrSplit(varSearch, "‖")
         name := SubStr(A_LoopFileName,1, StrLen(A_LoopFileName)-4)
-        LV_Add("", name, tabSearch[1],tabSearch[2],tabSearch[3],tabSearch[4], tabSearch[5])
+        LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4], tabSearch[5])
 		ArrayS.Push(name)
-        ArrayHS.Push(tabSearch[1])
-		ArrayO.Push(tabSearch[2])
+        ArrayHS.Push(tabSearch[2])
+		ArrayO.Push(tabSearch[1])
 		ArrayF.Push(tabSearch[3])
         ArrayOnOff.Push(tabSearch[4])
         ArrayT.Push(tabSearch[5])
@@ -1262,25 +1264,148 @@ else if (RSection == 1)
 GuiControl, +Redraw, List
 return
 
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 MoveList:
 	Gui, HS3List:Submit, NoHide
 	If !(SelectedRow := LV_GetNext()) {
 		MsgBox, 0, %A_ThisLabel%, Select a row in the list-view, please!
 		Return
 	}
+	LV_GetText(FileName,SelectedRow,1)
 	LV_GetText(Triggerstring, SelectedRow,2)
 	LV_GetText(TriggOpt, SelectedRow,3)
 	LV_GetText(OutFun, SelectedRow,4)
 	LV_GetText(OnOff, SelectedRow,5)
 	LV_GetText(HSText, SelectedRow,6)
 	MovedHS := TriggOpt . "‖" . Triggerstring . "‖" . OutFun . "‖" . OnOff . "‖" . HSText
-	MsgBox, %MovedHS%
+	Gui, MoveLibs:New
+	cntMove := -1
+	Loop, %A_ScriptDir%\Categories\*.csv
+	{
+		cntMove += 1
+	}
+	Gui, MoveLibs:Add, Text,, Select the target library:
+	Gui, MoveLibs:Add, ListView,LV0x1 -Hdr r%cntMove%,Library
+	Loop, %A_ScriptDir%\Categories\*.csv
+	{
+		if (SubStr(A_LoopFileName,1,StrLen(A_LoopFileName)-4) != FileName )
+		{
+			LV_Add("",A_LoopFileName)
+		}
+	}
+	Gui, MoveLibs:Add, Button,% "gMove w" . 100*DPI%chMon%, Move
+	Gui, MoveLibs:Add, Button, % "yp x+m gCanMove w" . 100*DPI%chMon%, Cancel
+	Gui, MoveLibs:Show,, Select library
 return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+CanMove:
+Gui, MoveLibs:Destroy
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Move:
+Gui, MoveLibs:Submit, NoHide
+If !(SelectedRow := LV_GetNext()) {
+	MsgBox, 0, %A_ThisLabel%, Select a row in the list-view, please!
+	Return
+}
+LV_GetText(TargetLib, SelectedRow)
+FileRead, Text, Categories\%TargetLib%
+SectionList := StrSplit(Text, "`r`n")
+InputFile = % A_ScriptDir . "\Categories\" . TargetLib
+LString := % "‖" . Triggerstring . "‖"
+SaveFlag := 0
+Gui, HS3:Default
+GuiControl, Choose, SectionCombo, %TargetLib%
+gosub, SectionChoose
+Loop, Read, %InputFile%
+{
+	if InStr(A_LoopReadLine, LString)
+	{
+		MsgBox, 4,, The hostring "%Triggerstring%" exists in a file %TargetLib%. Do you want to proceed?
+		IfMsgBox, No
+		{
+			Gui, MoveLibs:Destroy
+			return
+		}
+		LV_Modify(A_Index, "", Triggerstring, TriggOpt, OutFun, OnOff, HSText)
+		SaveFlag := 1
+	}
+}
+if (SaveFlag == 0)
+	{
+		LV_Add("",  Triggerstring, TriggOpt, OutFun, OnOff, HSText)
+		SectionList.Push(MovedHS)
+	}
+LV_ModifyCol(1, "Sort")
+FileDelete, Categories\%TargetLib%
+if (SectionList.MaxIndex() == "")
+{
+	LV_GetText(txt1, 1, 2)
+	LV_GetText(txt2, 1, 1)
+	LV_GetText(txt3, 1, 3)
+	LV_GetText(txt4, 1, 4)
+	LV_GetText(txt5, 1, 5)
+	txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5
+	FileAppend, %txt%, Categories\%TargetLib%, UTF-8
+}
+else
+{
+	Loop, % SectionList.MaxIndex()-1
+	{
+		LV_GetText(txt1, A_Index, 2)
+		LV_GetText(txt2, A_Index, 1)
+		LV_GetText(txt3, A_Index, 3)
+		LV_GetText(txt4, A_Index, 4)
+		LV_GetText(txt5, A_Index, 5)
+		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "`r`n"
+		if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == ""))
+			FileAppend, %txt%, Categories\%TargetLib%, UTF-8
+	}
+	LV_GetText(txt1, SectionList.MaxIndex(),2) 
+	LV_GetText(txt2, SectionList.MaxIndex(),1) 
+	LV_GetText(txt3, SectionList.MaxIndex(),3) 
+	LV_GetText(txt4, SectionList.MaxIndex(),4) 
+	LV_GetText(txt5, SectionList.MaxIndex(),5) 
+	txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5
+	FileAppend, %txt%, Categories\%TargetLib%, UTF-8
+}
+InputFile := % A_ScriptDir . "\Categories\" . FileName . ".csv"
+OutputFile := % A_ScriptDir . "\Categories\temp.csv"
+cntLines := 0
+Loop, Read, %InputFile%
+{	
+	if !(InStr(A_LoopReadLine, MovedHS))
+		FileAppend, % A_LoopReadLine . "`r`n", %OutputFile%, UTF-8
+	cntLines++
+}
+FileDelete, %InputFile%
+Loop, Read, %OutputFile%
+{
+	FileAppend, % A_LoopReadLine . "`r`n", %InputFile%, UTF-8
+}
+if (cntLines == 1)
+	{
+		FileAppend,, %InputFile%, UTF-8
+	}
+FileDelete, %OutputFile%
+MsgBox Hotstring moved to the %TargetLib% file!
+	LoadFiles(TargetLib)
+Gui, MoveLibs:Destroy
+gosub, Searching
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 SearchChange:
 GuiControl,,SearchTerm, %SearchTerm%
 gosub, Search
 return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 HS3ListGuiSize:

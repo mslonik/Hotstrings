@@ -4,7 +4,7 @@ O‖2d‖A‖On‖2D
 *‖3d ‖A‖On‖3D 
 *‖ac/‖MA‖Off‖Alternating Current¦Axle Counter
 *‖ac`t‖A‖On‖AC
-*‖ahk ‖A‖On‖AHK 
+B*‖ahk ‖A‖On‖AHK 
 *‖ahk/‖C‖On‖AutoHotkey
 *‖api ‖A‖On‖API 
 *‖api/‖C‖On‖Application Programming Interface
@@ -140,7 +140,7 @@ B0*‖pkb ‖A‖On‖{Backspace 3}PKB
 *‖pkb/‖C‖On‖Produkt Krajowwy Brutto
 B0*‖plm ‖A‖On‖{BackSpace 3}PLM 
 *‖plm/‖C‖On‖Product Lifecycle Management
-*‖poc/‖MA‖On‖PoC ¦Proof of Concept 
+*‖poc/‖MC‖On‖PoC ¦Proof of Concept 
 B0*‖pwm ‖A‖On‖{Backspace 3}PWM
 *‖PWM/‖A‖On‖Pulse-Width Modulation
 B0*‖qna ‖A‖On‖{Backspace 3}Q&A 
