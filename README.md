@@ -1,6 +1,7 @@
 # *Hotstrings* application
 Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
 - quick text replacement aka hotstrings; 
+    
     *short alphanumeric strings (aka triggerstrings) are used to automatically replace long alphanumeric strings (aka hotstrings)*;
 - defined hotstrings are operating system wide; 
     *it means that can be triggered in any text / edit window, in any application*;
