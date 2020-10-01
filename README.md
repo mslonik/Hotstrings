@@ -185,12 +185,42 @@ Now let's dive into more detailed description of available functions
 ![Main window][]
 
 The main window can be divided into the following parts:
-- menu ::1::,
-- hotstring definition / edition ::2::,
-- Display of existing hotstrings ::3::.
+- menu: 1,
+- hotstring definition / edition: 2,
+- Display of existing hotstrings: 3.
 
 ![Main window parts][]
 
+## Menu
+![Main menu](/HelpPictures/Hotstring3_MainMenu.png)
+- Monitor
+- Search Hotstrings
+- Delay
+- Help
+- About
+
+In order to access menu by keyboard just press the left Alt key.
+
+### Monitor
+Enable choice of the monitor where main GUI window is shown. If GUI window is closed, application continues to run (system tray icon is still accessible). When GUI window is called again (by pressing the hotkey or by clicking with mouse) it will be displayed at monitor of your choice.
+
+### Search Hotstrings
+Enable searching of hotstring in any of the categories. All .csv files (category files) are searched. This option is helpful e.g. to find duplicates of hotstrings.
+
+### Delay
+Enable change of the delay between copying of the hotstring from clipboard to specific text window from which it was triggered.
+By default equal to 200 ms. Maximum value equal to 500 ms (0.5 s).
+
+**Tip:** Sometimes when long hotstrings are triggered and clipboard is applied to immediately enter it, strange behaviour can occurre. Instead of expected hotstring the previous content of clipboard may appear. The reason is that operating system can not gurantee the time to insert the content of clipboard into specific window / editing field. In order to support operating system enlarge the delay. The shorter the delay than better, but if too short, mentioned behaviour can be observed.
+
+### About / Help
+ ![About / Help](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_About_Help.png) 
+
+**Hotstrings.ahk (script). Let's make your PC personal again...**. 
+
+Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). This is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). License: [GNU GPL ver. 3](https://github.com/mslonik/Hotstrings/blob/master/LICENSE). [Source code](https://github.com/mslonik/Hotstrings). [Homepage](http://mslonik.pl).
+
+Help, link to this file.
 
 # Hotstring definition / edition
 
@@ -369,36 +399,7 @@ option | triggerstring     | trigger: last character   | hotstring
 
 
 
-## Hotstring menu
-![Main menu](/HelpPictures/Hotstring3_MainMenu.png)
-- Monitor
-- Search Hotstrings
-- Delay
-- Help
-- About
 
-In order to access menu by keyboard just press the left Alt key.
-
-### Monitor
-Enable choice of the monitor where main GUI window is shown. If GUI window is closed, application continues to run (system tray icon is still accessible). When GUI window is called again (by pressing the hotkey or by clicking with mouse) it will be displayed at monitor of your choice.
-
-### Search Hotstrings
-Enable searching of hotstring in any of the categories. All .csv files (category files) are searched. This option is helpful e.g. to find duplicates of hotstrings.
-
-### Delay
-Enable change of the delay between copying of the hotstring from clipboard to specific text window from which it was triggered.
-By default equal to 200 ms. Maximum value equal to 500 ms (0.5 s).
-
-**Tip:** Sometimes when long hotstrings are triggered and clipboard is applied to immediately enter it, strange behaviour can occurre. Instead of expected hotstring the previous content of clipboard may appear. The reason is that operating system can not gurantee the time to insert the content of clipboard into specific window / editing field. In order to support operating system enlarge the delay. The shorter the delay than better, but if too short, mentioned behaviour can be observed.
-
-### About / Help
- ![About / Help](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_About_Help.png) 
-
-**Hotstrings.ahk (script). Let's make your PC personal again...**. 
-
-Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). This is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). License: [GNU GPL ver. 3](https://github.com/mslonik/Hotstrings/blob/master/LICENSE). [Source code](https://github.com/mslonik/Hotstrings). [Homepage](http://mslonik.pl).
-
-Help, link to this file.
  
  # Undoing of the last hotsring
  The last hotstring can be easily undone by pressing Cltr + z hotkey or Ctrl + Backspace. 
