@@ -102,6 +102,12 @@ Because it doesn't require much knowledege and text editing to run your own hots
 ---
 
 # Let's begin by defining of few first hotstrings
+Just double click on the Hotstrings icon (capital letter *H* as *Hotstrings* on green background) in system tray:
+![Example of system tray](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SystemTray.png) 
+or... use hotkey *Ctrl + # + h* (Control + Windows key + h).
+
+Next you'll see main GUI (Graphical User Interface) window which enable you to edit hotstrings:
+
 At first please observe the main window again. In order to define any hotstring one have to follow top down the screen (in blue):
 - Enter triggerstring
 - Select trigger option(s)
@@ -117,17 +123,16 @@ We will start by defining of *by the way* hotsring with plain *btw* triggerstrin
 ## Enter triggestring
 Let's put in this text edit field some text: 
 
-![Enter triggerstring](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterTriggerstring.png)
+![Enter triggerstring][]
 
-Please keep in mind that this edit window does not show space key, as it is blank key. But in this tutorial it will be easier to see what we're doing by using the ☐ convention from now on to show the Space (Spacebar key). So now let's put there:
-```
-btw
-```
-![Enter triggerstring, example](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterTriggerstring_btw.png)
+Please keep in mind that this edit window does not show space key, as it is blank key. But in this tutorial it will be easier to see what we're doing by using the ☐ convention from now on to show the Space (Spacebar key). So now let's put 
 
+> btw
+
+![Enter triggerstring, example][]
 
 ## Select trigger option(s)
-![Default trigger option](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png) 
+![Default trigger option][] 
 
 By default no option is set (option string is empty). Then after triggerstring is entered, additionally one *trigger key* have to be pressed by user in order to trigger the hotstring.
 
@@ -136,67 +141,63 @@ The *trigger key* is defined as one of the following keys: -()[]{}':;"/\,.?!\`n�
 Let's leave no option set and continue.
 
 ## Select hotstring output function
-![Select hotstring output function](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectHostringOutputFunction.png)
+![Select hotstring output function][]
 
 Select one and only one option from the list. By default *Send by AutoHotkey* is set. It means that the hotstring will be output by AutoHotkey, without menu and not by Clipboard. More about *output functions* later on.
 
-Let's leave it.
+Let's leave it as it is.
 
 ## Enter hotstring
-![Enter hotstring](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterHotsring.png)
+![Enter hotstring][]
 
 Let's do that:
-```
-by the way
-```
-![Enter hotstring, example](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_ByTheWay.png)
 
+> by the way
+
+![Enter hotstring, example][]
 
 ## Select hotstring library
-![Select hotstring library](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectHostringLibrary.png) 
+![Select hotstring library][shl1] 
 
 This list contains all and only *.csv files from withing folder ..\Hotstrings3\Categories. One can have as many files (even empty!) as necessary.
 
 Let's select the AutocorrectionHotstring.csv for sake of example.
-![Select hotstring library](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_HotstringLibrary.png)
+![Select hotstring library][shl2]
 
 ## Set the hotstring
 Select / click the *Set hostring* button. The function and meaning of two others is hopefully quite obvious. It will be explained in details later on.
 
-![Set the hotstring](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_HostringButtons.png) 
+![Set the hotstring][] 
 
 ## Congratulations!
 You've defined your first hotstring. Have a look now into the left part of the main screen, into the *Library content*. Find there your newly defined hotstring:
 
-![Library content](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_LibraryContent.png)
+![Library content][]
 
 ---
 ---
 ---
 
-# Now let's dive into more detailed description of available functions
-After installation just double click on the Hotstrings icon (capital letter *H* as *Hotstrings* on green background) in system tray:
-![Example of system tray](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SystemTray.png) 
-or... use hotkey *Ctrl + # + h* (Control + Windows key + h).
+Now let's dive into more detailed description of available functions
 
-Next you'll see main GUI (Graphical User Interface) window which enable you to edit hotstrings:
+# Main window of *Hotstring* application
 
-### Main window of *Hotstring* application
-
-![Main window](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow.png)
+![Main window][]
 
 The main window can be divided into the following parts:
-- menu [1],
-- hotstring definition / edition [2],
-- Display of existing hotstrings [3].
+- menu ::1::,
+- hotstring definition / edition ::2::,
+- Display of existing hotstrings ::3::.
 
-![Main window parts](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow2.png)
+![Main window parts][]
 
 
-### Trigger options
+# Hotstring definition / edition
+
+## Trigger options
 Variants of triggering are controlled by the options:
 
-![Select trigger option(s)](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png)
+![Select trigger option(s)][]
 
 * Immediate Execute (*)
 * No Backspace (B0)
@@ -208,7 +209,7 @@ Variants of triggering are controlled by the options:
 Concurrently all / none of above options can be set.
 
 #### Default (no trigger option selected)
-![Default trigger option](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png) 
+![Default trigger option][] 
 
 By default for new hotstrings no option is set. Then after triggerstring additionally one trigger key have to be pressed by user in order to trigger the hotstring.
 
@@ -221,14 +222,13 @@ The trigger key is defined as any of the following keys -()[]{}':;"/\,.?!\`n☐\
 At the moment *Hotstrings* application does not allow to change the set of trigger keys. 
 
 #### Immediate Execute (\*)
-![Trigger option Immediate Execute](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Option_ImmediateExecute.png) 
+![Trigger option Immediate Execute][] 
 
 The option (\*) is called "immediate execute" is entering of the last character of triggerstring immediately executes exchange of the triggerstring with the hotstring. Another words: triggerstring is erased (backspaced) and hotstring is placed there.
 
 option | triggestring | trigger      | hotstring
 ---|---|---|---
 |       | alphanumeric string  | last character of triggerstring | alphanumeric string
-
 
 
 **triggerstring** 
@@ -245,7 +245,7 @@ option | triggerstring     | trigger: last character  | hotstring
 -------|-------------------|---------------------------|-----------
 \*     | btw/              | /                         | by☐the☐way
 
-![Example, immediate execute](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_ImmediateExecute.png) 
+![Example, immediate execute][] 
 
 
 *Example, execution*
@@ -259,7 +259,7 @@ Comment: triggerstring is erased, what is shown by ~~strikethrough~~.
 ---
 
 #### No Backspace (B0)
-![Trigger option No Backspace](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Option_NoBackspace.png) 
+![Trigger option No Backspace][] 
 
 By default the **hotstring** replaces the **triggestring**, what was shown in the above examples by ~~strikethrough~~ from the content stream the **triggerstring**. When (B0) option is applied, the **triggestring** is not replaced (no BackSpace) by the **hotstring** but is followed by the **hotstring**.
 
@@ -270,7 +270,7 @@ B0       | alphanumeric string  | -()[]{}':;"/\,.?!\`n☐\`t  | alphanumeric str
 ---
 *Example of triggerstring and hotstring definition*
 
-![Example, no Backspace](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_NoBackspace.png) 
+![Example, no Backspace][] 
 
 *Example, execution*
 content stream |    triggerstring + trigger| replaced by hotstring
@@ -295,7 +295,7 @@ Something,☐something☐| <em> | </em>
 
 > Something,☐something☐<em>|</em>
 
-Comment:
+Comment: The cursor (shown as |) has been moved backward by 5 characters and now is between the HTML tags.
 
 #### No End Char (O)
 
@@ -409,7 +409,27 @@ Help, link to this file.
 
 The originator and creator of the Hotstrings application is Jack Dunning aka [Jack][] who has created the very first version of *[Instant Hotstring][]* application. 
 
-[Defining of hotstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_DefiningOfHotstring.png
+[Defining of hotstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_DefiningOfHotstring.png "Defining of hotstring"
+[Enter triggerstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterTriggerstring.png "Enter triggerstring"
+[Enter triggerstring, example]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterTriggerstring_btw.png "Enter triggerstring, example"
+[Default trigger option]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png "Default trigger option"
+[Select hotstring output function]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectHostringOutputFunction.png "Select hotstring output function"
+[Enter hotstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterHotsring.png "Enter hotstring"
+[Enter hotstring, example]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_ByTheWay.png "Enter hotstring, example"
+[shl1]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectHostringLibrary.png "Select hotstring library"
+[shl2]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_HotstringLibrary.png "Select hotstring library"
+[Set the hotstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_HostringButtons.png "Set the hotstring" 
+[Library content]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_LibraryContent.png "Library content"
+[Select trigger option(s)]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png "Select trigger option(s)"
+[Main window parts]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow2.png "Main window parts"
+[Main window]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow.png "Main window"
+[Main window parts]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow2.png "Main window parts"
+[Select trigger option(s)]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png "Select trigger option(s)"
+[Default trigger option]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png "Default trigger option"
+[Trigger option Immediate Execute]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Option_ImmediateExecute.png "Trigger option Immediate Execute"
+[Example, immediate execute]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_ImmediateExecute.png "Example, immediate execute"
+[Trigger option No Backspace]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Option_NoBackspace.png "Trigger option No Backspace" 
+[Example, no Backspace]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_NoBackspace.png "Example, no Backspace"
 
 
 [AutoHotkey]: https://www.autohotkey.com/
