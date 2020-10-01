@@ -1,17 +1,23 @@
 # *Hotstrings* application
-Written in [AutoHotkey](https://www.autohotkey.com/) application *Hotstrings*  with many useful features:
-- quick text replacement: short alphanumeric strings (aka triggerstrings) are used to automatically replace long alphanumeric strings (aka hotstrings),
-- defined hotstrings are operating system wide; it means that can be triggered in any text / edit window, in any application.
-- GUI (Graphical User Interface) for easy definition and/or edition of hotstrings,
-- on demand applying clipboard for entering of hotstrings, what is useful especially for long text strings, as it enables entering the long hotstring in a blink of an eye,
-- one triggering abbreviation can call several different text strings of your choice, chosen from menu,
-- overview of existing hotstrings with search capabilities,
-- definitions of hotstrings are stored in .csv files, as many, as you like (each file can contain hotstring belonging to specific category, e.g. emojis, physical symbols, first and second names etc.),
-- undoing of hotstrings (conversion of last entered hotstring again into triggering abbreviation),
-- runs on Microsoft Windows family operating systems
-- ...
-
-This application is written in AutoHotkey script language but does not require this language interpreter to be installed and can be run standalone thanks to .exe file. (Nevertheless installation of [AutoHotkey](https://www.autohotkey.com/) is greatly adviced). The concept and usage of hotstrings is based and compatible to AutoHotkey [hotstring](https://www.autohotkey.com/docs/Hotstrings.htm) notion.
+Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
+- quick text replacement aka hotstrings; 
+    *short alphanumeric strings (aka triggerstrings) are used to automatically replace long alphanumeric strings (aka hotstrings)*;
+- defined hotstrings are operating system wide; 
+    *it means that can be triggered in any text / edit window, in any application*;
+- GUI (Graphical User Interface); 
+    *for easy definition and/or edition of hotstrings*;
+- clipboard ready;
+    *useful especially for long text strings, as it enables entering the long hotstring in a blink of an eye*;
+- one triggering abbreviation can call several different text strings of your choice;
+    *chosen from menu*;
+- graphical overview of existing hotstrings with search capabilities;
+- definitions of hotstrings are stored in .csv files, as many, as you like; 
+    *each file can contain hotstring belonging to specific category, e.g. emojis, physical symbols, first and second names etc.*;
+- undoing of hotstrings;
+    *conversion of last entered hotstring again into triggering abbreviation*;
+- runs on Microsoft Windows family operating systems;
+- written in AutoHotkey script language but does not require this language interpreter to be installed and can be run standalone thanks to .exe file;
+    *Nevertheless installation of [AutoHotkey][] is greatly adviced)*
 
 ---
 
@@ -37,6 +43,8 @@ and
 If the triggestring is recognized: 
 * the hostring is issued,
 * the hotstring recognizer is reset.
+
+The concept and usage of hotstrings is based and compatible to AutoHotkey [hotstring][] notion.
 
 # Why somobody may want to use hotstrings?
 Because they can significantly make life easier and... longer? 
@@ -388,3 +396,12 @@ Help, link to this file.
  The last hotstring can be easily undone by pressing Cltr + z hotkey or Ctrl + Backspace. 
  
  **Caution:** In some applications the same hotkeys are used for undoing the last action. Then the overall result sometimes is unpredictable or unwanted. In case of some trouble use undoing hotstring several times in a raw.
+
+# Credits
+
+The originator and creator of the Hotstrings application is Jack Dunning aka [Jack][] who has created the very first version of *[Instant Hotstring][]* application. 
+
+[AutoHotkey]: https://www.autohotkey.com/
+[hotstring]: https://www.autohotkey.com/docs/Hotstrings.htm/
+[Jack]: https://jacks-autohotkey-blog.com/
+[Instant Hotstring]: http://www.computoredge.com/AutoHotkey/Free_AutoHotkey_Scripts_and_Apps_for_Learning_and_Generating_Ideas.html#instanthotstrings
