@@ -1,17 +1,31 @@
 # *Hotstrings* application
-Written in [AutoHotkey](https://www.autohotkey.com/) application *Hotstrings*  with many useful features:
-- quick text replacement: short alphanumeric strings (aka triggerstrings) are used to automatically replace long alphanumeric strings (aka hotstrings),
-- defined hotstrings are operating system wide; it means that can be triggered in any text / edit window, in any application.
-- GUI (Graphical User Interface) for easy definition and/or edition of hotstrings,
-- on demand applying clipboard for entering of hotstrings, what is useful especially for long text strings, as it enables entering the long hotstring in a blink of an eye,
-- one triggering abbreviation can call several different text strings of your choice, chosen from menu,
-- overview of existing hotstrings with search capabilities,
-- definitions of hotstrings are stored in .csv files, as many, as you like (each file can contain hotstring belonging to specific category, e.g. emojis, physical symbols, first and second names etc.),
-- undoing of hotstrings (conversion of last entered hotstring again into triggering abbreviation),
-- runs on Microsoft Windows family operating systems
-- ...
+Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
+- quick text replacement aka hotstrings; 
+    
+    *short alphanumeric strings (aka triggerstrings) are used to automatically replace long alphanumeric strings (aka hotstrings)*;
+- defined hotstrings are operating system wide;
 
-This application is written in AutoHotkey script language but does not require this language interpreter to be installed and can be run standalone thanks to .exe file. (Nevertheless installation of [AutoHotkey](https://www.autohotkey.com/) is greatly adviced). The concept and usage of hotstrings is based and compatible to AutoHotkey [hotstring](https://www.autohotkey.com/docs/Hotstrings.htm) notion.
+    *it means that can be triggered in any text / edit window, in any application*;
+- GUI (Graphical User Interface); 
+
+    *for easy definition and/or edition of hotstrings*;
+- clipboard ready;
+
+    *useful especially for long text strings, as it enables entering the long hotstring in a blink of an eye*;
+- one triggering abbreviation can call several different text strings of your choice;
+
+    *chosen from menu*;
+- graphical overview of existing hotstrings with search capabilities;
+- definitions of hotstrings are stored in .csv files, as many, as you like; 
+
+    *each file can contain hotstring belonging to specific category, e.g. emojis, physical symbols, first and second names etc.*;
+- undoing of hotstrings;
+
+    *conversion of last entered hotstring again into triggering abbreviation*;
+- runs on Microsoft Windows family operating systems;
+- written in AutoHotkey script language but does not require this language interpreter to be installed and can be run standalone thanks to .exe file;
+
+    *nevertheless installation of [AutoHotkey][] is greatly adviced)*
 
 ---
 
@@ -37,6 +51,8 @@ and
 If the triggestring is recognized: 
 * the hostring is issued,
 * the hotstring recognizer is reset.
+
+The concept and usage of hotstrings is based and compatible to AutoHotkey [hotstring][] notion.
 
 # Why somobody may want to use hotstrings?
 Because they can significantly make life easier and... longer? 
@@ -86,6 +102,12 @@ Because it doesn't require much knowledege and text editing to run your own hots
 ---
 
 # Let's begin by defining of few first hotstrings
+Just double click on the Hotstrings icon (capital letter *H* as *Hotstrings* on green background) in system tray:
+![Example of system tray](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SystemTray.png) 
+or... use hotkey *Ctrl + # + h* (Control + Windows key + h).
+
+Next you'll see main GUI (Graphical User Interface) window which enable you to edit hotstrings:
+
 At first please observe the main window again. In order to define any hotstring one have to follow top down the screen (in blue):
 - Enter triggerstring
 - Select trigger option(s)
@@ -94,24 +116,23 @@ At first please observe the main window again. In order to define any hotstring 
 - Select hotstring library
 - Set the hotstring
 
-![Defining of hotstring](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_DefiningOfHotstring.png)
+![Defining of hotstring][]
 
 We will start by defining of *by the way* hotsring with plain *btw* triggerstring and no options.
 
 ## Enter triggestring
 Let's put in this text edit field some text: 
 
-![Enter triggerstring](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterTriggerstring.png)
+![Enter triggerstring][]
 
-Please keep in mind that this edit window does not show space key, as it is blank key. But in this tutorial it will be easier to see what we're doing by using the ☐ convention from now on to show the Space (Spacebar key). So now let's put there:
-```
-btw
-```
-![Enter triggerstring, example](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterTriggerstring_btw.png)
+Please keep in mind that this edit window does not show space key, as it is blank key. But in this tutorial it will be easier to see what we're doing by using the ☐ convention from now on to show the Space (Spacebar key). So now let's put 
 
+> btw
+
+![Enter triggerstring, example][]
 
 ## Select trigger option(s)
-![Default trigger option](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png) 
+![Default trigger option][] 
 
 By default no option is set (option string is empty). Then after triggerstring is entered, additionally one *trigger key* have to be pressed by user in order to trigger the hotstring.
 
@@ -120,89 +141,133 @@ The *trigger key* is defined as one of the following keys: -()[]{}':;"/\,.?!\`n�
 Let's leave no option set and continue.
 
 ## Select hotstring output function
-![Select hotstring output function](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectHostringOutputFunction.png)
+![Select hotstring output function][]
 
 Select one and only one option from the list. By default *Send by AutoHotkey* is set. It means that the hotstring will be output by AutoHotkey, without menu and not by Clipboard. More about *output functions* later on.
 
-Let's leave it.
+Let's leave it as it is.
 
 ## Enter hotstring
-![Enter hotstring](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterHotsring.png)
+![Enter hotstring][]
 
 Let's do that:
-```
-by the way
-```
-![Enter hotstring, example](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_ByTheWay.png)
 
+> by the way
+
+![Enter hotstring, example][]
 
 ## Select hotstring library
-![Select hotstring library](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectHostringLibrary.png) 
+![Select hotstring library][shl1] 
 
 This list contains all and only *.csv files from withing folder ..\Hotstrings3\Categories. One can have as many files (even empty!) as necessary.
 
 Let's select the AutocorrectionHotstring.csv for sake of example.
-![Select hotstring library](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_HotstringLibrary.png)
+![Select hotstring library][shl2]
 
 ## Set the hotstring
 Select / click the *Set hostring* button. The function and meaning of two others is hopefully quite obvious. It will be explained in details later on.
 
-![Set the hotstring](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_HostringButtons.png) 
+![Set the hotstring][] 
 
 ## Congratulations!
 You've defined your first hotstring. Have a look now into the left part of the main screen, into the *Library content*. Find there your newly defined hotstring:
 
-![Library content](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_LibraryContent.png)
+![Library content][]
 
 ---
 ---
 ---
 
-# Now let's dive into more detailed description of available functions
-After installation just double click on the Hotstrings icon (capital letter *H* as *Hotstrings* on green background) in system tray:
-![Example of system tray](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SystemTray.png) 
-or... use hotkey *Ctrl + # + h* (Control + Windows key + h).
+Now let's dive into more detailed description of available functions
 
-Next you'll see main GUI (Graphical User Interface) window which enable you to edit hotstrings:
+# Main window of *Hotstring* application
 
-### Main window of *Hotstring* application
-
-![Main window](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow.png)
+![Main window][]
 
 The main window can be divided into the following parts:
-- menu [1],
-- hotstring definition / edition [2],
-- Display of existing hotstrings [3].
+- menu: 1,
+- hotstring definition / edition: 2,
+- Display of existing hotstrings: 3.
 
-![Main window parts](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow2.png)
+![Main window parts][]
 
+## Menu
+![Main menu](/HelpPictures/Hotstring3_MainMenu.png)
+- Monitor
+- Search Hotstrings
+- Delay
+- Help
+- About
 
-### Trigger options
+In order to access menu by keyboard just press the left Alt key.
+
+### Monitor
+Enable choice of the monitor where main GUI window is shown. If GUI window is closed, application continues to run (system tray icon is still accessible). When GUI window is called again (by pressing the hotkey or by clicking with mouse) it will be displayed at monitor of your choice.
+
+### Search Hotstrings
+Enable searching of hotstring in any of the categories. All .csv files (category files) are searched. This option is helpful e.g. to find duplicates of hotstrings.
+
+### Delay
+Enable change of the delay between copying of the hotstring from clipboard to specific text window from which it was triggered.
+By default equal to 200 ms. Maximum value equal to 500 ms (0.5 s).
+
+**Tip:** Sometimes when long hotstrings are triggered and clipboard is applied to immediately enter it, strange behaviour can occurre. Instead of expected hotstring the previous content of clipboard may appear. The reason is that operating system can not gurantee the time to insert the content of clipboard into specific window / editing field. In order to support operating system enlarge the delay. The shorter the delay than better, but if too short, mentioned behaviour can be observed.
+
+### About / Help
+ ![About / Help](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_About_Help.png) 
+
+**Hotstrings.ahk (script). Let's make your PC personal again...**. 
+
+Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). This is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). License: [GNU GPL ver. 3](https://github.com/mslonik/Hotstrings/blob/master/LICENSE). [Source code](https://github.com/mslonik/Hotstrings). [Homepage](http://mslonik.pl).
+
+Help, link to this file.
+
+# Hotstring definition / edition
+
+## Trigger options
 Variants of triggering are controlled by the options:
 
-![Select trigger option(s)](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png)
+![Select trigger option(s)][]
 
-##### Default (no trigger option selected)
-![Default trigger option](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png) 
+* Immediate Execute (*)
+* No Backspace (B0)
+* No End Char (O)
+* Case Sensitive `(C)`
+* Inside Word (?)
+* Disable
 
-By default no option is set (option string is empty). Then after triggerstring additionally one trigger key have to be pressed by user in order to trigger the hotstring.
-option | triggestring      | hotstring
--------|-------------------|-------------------
-|       | string + trigger  |        hotstring
+Concurrently all / none of above options can be set.
 
-The trigger key is defined as  -()[]{}':;"/\,.?!\`n☐\`t (note that \`n is Enter, \`t is Tab, and there is a plain space between \`n and \`t marked as ☐). 
+#### Default (no trigger option selected)
+![Default trigger option][] 
+
+By default for new hotstrings no option is set. Then after triggerstring additionally one trigger key have to be pressed by user in order to trigger the hotstring.
+
+option | triggestring | trigger      | hotstring
+---|---|---|---
+|       | alphanumeric string  | -()[]{}':;"/\,.?!\`n☐\`t | alphanumeric string
+
+The trigger key is defined as any of the following keys -()[]{}':;"/\,.?!\`n☐\`t (note that \`n is Enter, \`t is Tab, and there is a plain space between \`n and \`t marked as ☐). 
 
 At the moment *Hotstrings* application does not allow to change the set of trigger keys. 
 
-##### When the option (\*) is applied
+#### Immediate Execute (\*)
+![Trigger option Immediate Execute][] 
 
-**triggerstring** = **string**
+The option (\*) is called "immediate execute" is entering of the last character of triggerstring immediately executes exchange of the triggerstring with the hotstring. Another words: triggerstring is erased (backspaced) and hotstring is placed there.
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑
+option | triggestring | trigger      | hotstring
+---|---|---|---
+|       | alphanumeric string  | last character of triggerstring | alphanumeric string
+
+
+**triggerstring** 
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑
 
 then the 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**last character of that string can be a trigger**
-The option (\*) is called "immediate execute".
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**last character of that string is a trigger**
+
 
 ---
 *Example of triggerstring and hotstring definition*
@@ -210,7 +275,7 @@ option | triggerstring     | trigger: last character  | hotstring
 -------|-------------------|---------------------------|-----------
 \*     | btw/              | /                         | by☐the☐way
 
-![Example, immediate execute](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_ImmediateExecute.png) 
+![Example, immediate execute][] 
 
 
 *Example, execution*
@@ -219,18 +284,23 @@ content stream |    triggerstring + trigger| replaced by hotstring
 Something,☐something☐ | ~~btw/~~ | by☐the☐way
 > Something,☐something☐ ~~btw/~~ by☐the☐way
 
+Comment: triggerstring is erased, what is shown by ~~strikethrough~~.
+
 ---
 
-##### When the option (B0) is applied
-By default the **hotstring** replaces the **triggestring**, what was shown in the above examples by ~~crossing out~~ from the content stream the **triggerstring**. When (B0) option is applied, the **triggestring** is not replaced (no BackSpace) by the **hotstring** but is followed by the **hotstring**.
+#### No Backspace (B0)
+![Trigger option No Backspace][] 
+
+By default the **hotstring** replaces the **triggestring**, what was shown in the above examples by ~~strikethrough~~ from the content stream the **triggerstring**. When (B0) option is applied, the **triggestring** is not replaced (no BackSpace) by the **hotstring** but is followed by the **hotstring**.
+
+option | triggestring | trigger      | hotstring
+---|---|---|---
+B0       | alphanumeric string  | -()[]{}':;"/\,.?!\`n☐\`t  | alphanumeric string
 
 ---
 *Example of triggerstring and hotstring definition*
-option | triggerstring     | trigger: any of           | hotstring
--------|-------------------|---------------------------|-----------
-B0     | btw               | -()[]{}':;"/\,.?!\`n☐\`t  | by☐the☐way
 
-![Example, no Backspace](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_NoBackspace.png) 
+![Example, no Backspace][] 
 
 *Example, execution*
 content stream |    triggerstring + trigger| replaced by hotstring
@@ -255,7 +325,21 @@ Something,☐something☐| <em> | </em>
 
 > Something,☐something☐<em>|</em>
 
-Comment:
+Comment: The cursor (shown as |) has been moved backward by 5 characters and now is between the HTML tags.
+
+#### No End Char (O)
+
+#### Case Sensitive `(C)`
+
+#### Inside Word (?)
+
+#### Disable
+
+---
+
+
+## Overlapping hotstrings
+One of the useful options (...) are overlapping hotstrings.
 
 ---
 *Example 1 of overlapping triggerstrings*
@@ -311,108 +395,45 @@ option | triggerstring     | trigger: last character   | hotstring
 
 
 ---
-*Example of triggerstring and hotstring definition*
-
-option | triggerstring     | trigger: any of           | hotstring
--------|-------------------|---------------------------|-----------
- |     | btw               | -()[]{}':;"/\,.?!\`n☐ \`t  | by☐the☐way
-
-*Example, execution*
-
-content stream |    triggerstring + trigger  | replaced by hotstring
----------------|----------------------------------------|-----------
-Something,☐something☐| ~~btw.~~ ☐ | by☐the☐way☐
-
-> Something,☐something☐ ~~btw.~~ ☐ by☐the☐way☐
-
-
----
 
 
 
 
-## Hotstring menu
-![Main menu](/HelpPictures/Hotstring3_MainMenu.png)
-- Monitor
-- Search Hotstrings
-- Delay
-- Help
-- About
 
-In order to access menu by keyboard just press the left Alt key.
-
-### Monitor
-Enable choice of the monitor where main GUI window is shown. If GUI window is closed, application continues to run (system tray icon is still accessible). When GUI window is called again (by pressing the hotkey or by clicking with mouse) it will be displayed at monitor of your choice.
-
-### Search Hotstrings
-Enable searching of hotstring in any of the categories. All .csv files (category files) are searched. This option is helpful e.g. to find duplicates of hotstrings.
-
-### Delay
-Enable change of the delay between copying of the hotstring from clipboard to specific text window from which it was triggered.
-By default equal to 200 ms. Maximum value equal to 500 ms (0.5 s).
-
-**Tip:** Sometimes when long hotstrings are triggered and clipboard is applied to immediately enter it, strange behaviour can occurre. Instead of expected hotstring the previous content of clipboard may appear. The reason is that operating system can not gurantee the time to insert the content of clipboard into specific window / editing field. In order to support operating system enlarge the delay. The shorter the delay than better, but if too short, mentioned behaviour can be observed.
-
-### Help
-Link to this file is provided.
-
-### About
-**Hotstrings.ahk (script)**. 
-*Let's make your PC personal again...*
-Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). This is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). License: [GNU GPL ver. 3](https://github.com/mslonik/Hotstrings/blob/master/LICENSE). [Source code](https://github.com/mslonik/Hotstrings). [Homepage](http://mslonik.pl).
-
-## Hotstring definition / edition
-The new hotstring is defined from top to bottom of the screen. Let's see how it's made, step by step, with the following example:
-
-**triggering abbreviation **|→| **hotstring**
-------------------------|-|-------------------
-btw/ | → | by the way
-
-### Enter triggering abbreviation
-This edit field enable you to enter any triggering abbreviation. In our example it will be equal to *btw/*.
-
-**Tip:** It's worth to differentiate somehow triggering abbreviations from other words. It can be easily the case that the same word is used as the triggering abbreviation and the word itself. So to trigger on purpose it's good to add to triggering abbreviation unique sign / key, which can be easily reached and is seldomly used otherwise. The perfect candidate for that puspose is "/" (slash).
-
-### Triggering options
-
-The following options are described. After full name of each option, in parenthesis one can find short notation used in AutoHotkey for compatibility, if available.
-
-#### Immediate Execute (*)
-No ending sequence is required. Another words as soon as triggering abbreviation is finished, immediately it's exchanged into hotstring. 
-
-By default hotstrings are triggered when triggering abbreviation is finished with ending character, which by default is space ( ), dot (.), coma (,) etc. Examples:
-
- triggering abbreviation without immediate execute: btw/( )
- triggering abbreviation with immediate execute: btw/
- 
- #### No Backspace (B0)
- The triggering sequence is kept in memory and is not exchanged (erased) automatically. In order to erase the letters (but not from memory), the backspace can be used. For that purpose apply curly brackets, and within BackSpace word and number indicating how many backspaces should be applied. E.g. {BackSpace 3} ← 3x backspaces will be triggered.
- 
- **Tip:** Abbreviations and conversion of lower case to uppercase. Let's follow the following example: Jane would like to use api triggering abbreviation for both purposes:
- 1. to automatically convert this abbreviation lower case to uppercase.
- 2. to trigger the hotstring Application Programming Interface.
- 
- For that purpose Jane defined two hotstrings:
- **triggering abbreviation **|→| **hotstring**
-------------------------|-|------------------
- api | Immediate Execute, No Backspace | {BackSpace 3}API
- api/ | Immediate Execute | Application Programming Interface
- 
- These two hotstrings work as a pair: thanks to "No Backspace" option the triggering abbreviation is kept in memory. 
- 
- If Jane writes api, this abbreviation triggers immediately hotstring API. Next, if Jane decides to add "/" to hotstring API: API/, then API/ works as next triggering abbreviation which unfold to hotstring Application Programming Interface. 
- 
- **Tip:** Immediate execute is not always welcomed. It's better to use it only if chances that certain abbreviation will not occurre within other words. Good example is word led which can be used as LED (Light Emitting Diode), but is also usde in e.g. word ledge. In such a case carefully define a triggering abbreviation or use udoing method.
- 
- #### No End Char (O)
- 
- #### Case Sensitive (C)
- 
- #### Inside Word (?)
- 
- #### Disable
  
  # Undoing of the last hotsring
  The last hotstring can be easily undone by pressing Cltr + z hotkey or Ctrl + Backspace. 
  
  **Caution:** In some applications the same hotkeys are used for undoing the last action. Then the overall result sometimes is unpredictable or unwanted. In case of some trouble use undoing hotstring several times in a raw.
+
+# Credits
+
+The originator and creator of the Hotstrings application is Jack Dunning aka [Jack][] who has created the very first version of *[Instant Hotstring][]* application. 
+
+[Defining of hotstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_DefiningOfHotstring.png "Defining of hotstring"
+[Enter triggerstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterTriggerstring.png "Enter triggerstring"
+[Enter triggerstring, example]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterTriggerstring_btw.png "Enter triggerstring, example"
+[Default trigger option]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png "Default trigger option"
+[Select hotstring output function]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectHostringOutputFunction.png "Select hotstring output function"
+[Enter hotstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterHotsring.png "Enter hotstring"
+[Enter hotstring, example]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_ByTheWay.png "Enter hotstring, example"
+[shl1]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectHostringLibrary.png "Select hotstring library"
+[shl2]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_HotstringLibrary.png "Select hotstring library"
+[Set the hotstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_HostringButtons.png "Set the hotstring" 
+[Library content]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_LibraryContent.png "Library content"
+[Select trigger option(s)]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png "Select trigger option(s)"
+[Main window parts]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow2.png "Main window parts"
+[Main window]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow.png "Main window"
+[Main window parts]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow2.png "Main window parts"
+[Select trigger option(s)]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png "Select trigger option(s)"
+[Default trigger option]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png "Default trigger option"
+[Trigger option Immediate Execute]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Option_ImmediateExecute.png "Trigger option Immediate Execute"
+[Example, immediate execute]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_ImmediateExecute.png "Example, immediate execute"
+[Trigger option No Backspace]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Option_NoBackspace.png "Trigger option No Backspace" 
+[Example, no Backspace]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_NoBackspace.png "Example, no Backspace"
+
+
+[AutoHotkey]: https://www.autohotkey.com/
+[hotstring]: https://www.autohotkey.com/docs/Hotstrings.htm/
+[Jack]: https://jacks-autohotkey-blog.com/
+[Instant Hotstring]: http://www.computoredge.com/AutoHotkey/Free_AutoHotkey_Scripts_and_Apps_for_Learning_and_Generating_Ideas.html#instanthotstrings
