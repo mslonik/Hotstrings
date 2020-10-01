@@ -3,22 +3,29 @@ Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
 - quick text replacement aka hotstrings; 
     
     *short alphanumeric strings (aka triggerstrings) are used to automatically replace long alphanumeric strings (aka hotstrings)*;
-- defined hotstrings are operating system wide; 
+- defined hotstrings are operating system wide;
+
     *it means that can be triggered in any text / edit window, in any application*;
 - GUI (Graphical User Interface); 
+
     *for easy definition and/or edition of hotstrings*;
 - clipboard ready;
+
     *useful especially for long text strings, as it enables entering the long hotstring in a blink of an eye*;
 - one triggering abbreviation can call several different text strings of your choice;
+
     *chosen from menu*;
 - graphical overview of existing hotstrings with search capabilities;
 - definitions of hotstrings are stored in .csv files, as many, as you like; 
+
     *each file can contain hotstring belonging to specific category, e.g. emojis, physical symbols, first and second names etc.*;
 - undoing of hotstrings;
+
     *conversion of last entered hotstring again into triggering abbreviation*;
 - runs on Microsoft Windows family operating systems;
 - written in AutoHotkey script language but does not require this language interpreter to be installed and can be run standalone thanks to .exe file;
-    *Nevertheless installation of [AutoHotkey][] is greatly adviced)*
+
+    *nevertheless installation of [AutoHotkey][] is greatly adviced)*
 
 ---
 
@@ -103,7 +110,7 @@ At first please observe the main window again. In order to define any hotstring 
 - Select hotstring library
 - Set the hotstring
 
-![Defining of hotstring](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_DefiningOfHotstring.png)
+![Defining of hotstring][]
 
 We will start by defining of *by the way* hotsring with plain *btw* triggerstring and no options.
 
@@ -401,6 +408,9 @@ Help, link to this file.
 # Credits
 
 The originator and creator of the Hotstrings application is Jack Dunning aka [Jack][] who has created the very first version of *[Instant Hotstring][]* application. 
+
+[Defining of hotstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_DefiningOfHotstring.png
+
 
 [AutoHotkey]: https://www.autohotkey.com/
 [hotstring]: https://www.autohotkey.com/docs/Hotstrings.htm/
