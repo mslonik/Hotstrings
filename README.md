@@ -41,10 +41,14 @@ Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
 ---
 
 # FAQ 
-(Frequently Asked Questions) about *Hotstrings*.
+(Frequently Asked Questions) about *Hotstrings*:
+
 [What are the hotstrings?](##What-are-the-hotstrings?)
+
 [How the AutoHotkey and hotstrings work?](##How-the-AutoHotkey-and-hotstrings-work?)
+
 [Why somobody may want to use hotstrings?](##Why-somobody-may-want-to-use-hotstrings?)
+
 [Why somebody may want to use *Hotstring* application?](##Why-somebody-may-want-to-use-Hotstring-application?)
 
 ## What are the hotstrings?
