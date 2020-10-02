@@ -410,6 +410,13 @@ option | triggerstring     | trigger: last character   | hotstring
 
 The originator and creator of the Hotstrings application is Jack Dunning aka [Jack][] who has created the very first version of *[Instant Hotstring][]* application. 
 
+# ToDo List
+[] Menu: configuration and the corresponding *Configuration.ini*
+    [] sandbox for hotstrings,
+    [] enable / disable "undo" (Ctrl + z) of hotstrings,
+    [] setup of "Ending character",
+    [] *Hotstrings* window size and position, including monitor, window size.
+
 [Defining of hotstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_DefiningOfHotstring.png "Defining of hotstring"
 [Enter triggerstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterTriggerstring.png "Enter triggerstring"
 [Enter triggerstring, example]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterTriggerstring_btw.png "Enter triggerstring, example"
