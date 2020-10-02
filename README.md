@@ -351,11 +351,19 @@ Something,☐something☐| <em> | </em>
 
 Comment: The cursor (shown as |) has been moved backward by 5 characters and now is between the HTML tags.
 
+---
+
 #### No End Char (O)
+
+---
 
 #### Case Sensitive `(C)`
 
+---
+
 #### Inside Word (?)
+
+---
 
 #### Disable
 
