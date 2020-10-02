@@ -34,7 +34,7 @@ Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
 
 [Let's begin by defining of few first hotstrings](#Lets-begin-by-defining-of-few-first-hotstrings)
 
-[Main window of *Hotstring* application](#Main-window-of-*Hotstring*-application)
+[Main window of *Hotstring* application](#Main-window-of-Hotstring-application)
 
 
 # FAQ 
