@@ -114,7 +114,7 @@ Because it doesn't require much knowledege and text editing to run your own hots
 ---
 ---
 
-# Let's begin 
+# Let's-begin 
 by defining of few first hotstrings
 Just double click on the Hotstrings icon (capital letter *H* as *Hotstrings* on green background) in system tray:
 
