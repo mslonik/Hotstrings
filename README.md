@@ -408,14 +408,24 @@ option | triggerstring     | trigger: last character   | hotstring
 
 # Credits
 
-The originator and creator of the Hotstrings application is Jack Dunning aka [Jack][] who has created the very first version of *[Instant Hotstring][]* application. 
+The originator and creator of the Hotstrings application is Jack Dunning aka [Jack][] who has created the very first version of *[Instant Hotstring][]* application.
+
+People from AutoHotkey community, especially those who help at [AutoHotkey forum][].
 
 # ToDo List
-[] Menu: configuration and the corresponding *Configuration.ini*
-    [] sandbox for hotstrings,
-    [] enable / disable "undo" (Ctrl + z) of hotstrings,
-    [] setup of "Ending character",
-    [] *Hotstrings* window size and position, including monitor, window size.
+- [-] Menu: configuration and the corresponding *Configuration.ini*
+    - [-] sandbox for hotstrings,
+    - [-] enable / disable "undo" (Ctrl + z) of hotstrings,
+    - [x] setup of "Ending character",
+    - [-] *Hotstrings* window size and position, including monitor, window size.
+- [-] Automatic tooltip for triggestrings.
+- [-] Interface: comments to hotstrings (stored in .csv files).
+- [-] Interface: if library content is marked, edition should be loaded automatically.
+- [-] Interface: search window, a searched result should enable direct edition.
+- [-] Hotstrings export (.csv → .ahk).
+    - [-] static hotstrings (:options:triggerstring::hotstring),
+    - [-] dynamic hotstrings (Hotstring("options", "triggestring", "hotstring")).
+- [-] Hotstrings import (.ahk → .csv) from known autocorrect libraries (English mainly).
 
 [Defining of hotstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_DefiningOfHotstring.png "Defining of hotstring"
 [Enter triggerstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterTriggerstring.png "Enter triggerstring"
@@ -444,3 +454,4 @@ The originator and creator of the Hotstrings application is Jack Dunning aka [Ja
 [hotstring]: https://www.autohotkey.com/docs/Hotstrings.htm/
 [Jack]: https://jacks-autohotkey-blog.com/
 [Instant Hotstring]: http://www.computoredge.com/AutoHotkey/Free_AutoHotkey_Scripts_and_Apps_for_Learning_and_Generating_Ideas.html#instanthotstrings
+[AutoHotkey forum]: https://www.autohotkey.com/boards/
