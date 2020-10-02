@@ -30,14 +30,14 @@ Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
 ---
 
 # Table of content
-[FAQ](#FAQ)
+1. [FAQ](#FAQ)
 
-[Let's begin by defining of few first hotstrings](#Lets-begin-by-defining-of-few-first-hotstrings)
+2. [Let's begin by defining of few first hotstrings](#Lets-begin-by-defining-of-few-first-hotstrings)
 
-[Main window of *Hotstring* application](#Main-window-of-Hotstring-application)
+3. [Main window of *Hotstring* application](#Main-window-of-Hotstring-application)
 
 
-# FAQ 
+1. # FAQ 
 (Frequently Asked Questions) about *Hotstrings*.
 
 ## What are the hotstrings? (absolute beginner quide)
@@ -112,7 +112,7 @@ Because it doesn't require much knowledege and text editing to run your own hots
 ---
 ---
 
-# Let's begin by defining of few first hotstrings
+2. # Let's begin by defining of few first hotstrings
 Just double click on the Hotstrings icon (capital letter *H* as *Hotstrings* on green background) in system tray:
 
 ![Example of system tray][]
@@ -193,7 +193,7 @@ You've defined your first hotstring. Have a look now into the left part of the m
 
 Now let's dive into more detailed description of available functions
 
-# Main window of *Hotstring* application
+3. # Main window of *Hotstring* application
 
 ![Main window][]
 
