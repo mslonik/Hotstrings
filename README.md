@@ -29,7 +29,15 @@ Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
 
 ---
 
-# What are the hotstrings (absolute beginner quide)
+# Table of content
+[FAQ](#FAQ)
+[Let's begin by defining of few first hotstrings](#Let's-begin-by-defining-of-few-first-hotstrings)
+[Main window of *Hotstring* application](#Main-window-of-*Hotstring*-application)
+
+# FAQ 
+(Frequently Asked Questions) about *Hotstrings*.
+
+## What are the hotstrings? (absolute beginner quide)
 There are two corresponding notions:
 - triggerstring,
 - hotstring.
@@ -42,7 +50,7 @@ So the triggerstring triggers the corresponding hotstring.
 
 Wording convention: usually the corresponding pair of alphanumeric strings *(triggestring, hotstring)* is also called as *hotstring*. When it comes to confusing, both of them will be differentiated.
 
-# How the AutoHotkey and hotstrings work
+## How the AutoHotkey and hotstrings work?
 The AutoHotkey: 
 * keeps in memory the pairs (triggerstring, hotstring) 
 and 
@@ -54,7 +62,7 @@ If the triggestring is recognized:
 
 The concept and usage of hotstrings is based and compatible to AutoHotkey [hotstring][] notion.
 
-# Why somobody may want to use hotstrings?
+## Why somobody may want to use hotstrings?
 Because they can significantly make life easier and... longer? 
 
 * The triggestring can be short. Opposite to that the hotstring can be long in comparison to triggestring. As a consequence one can save some time when uses hotstrings.
@@ -94,7 +102,7 @@ fs@ | `FirstName.SecondName@yourhosting.com`
 
 So let's make your PC really personal again. Now with use of hotstrings and Hotstring application.
 
-# Why somebody may want to use *Hotstring* application?
+## Why somebody may want to use *Hotstring* application?
 Because it doesn't require much knowledege and text editing to run your own hotstrings. It can be run even without installation. Thanks to GUI (Graphical User Interface) you will master defining and applying of your own hotstrings in blink of an eye.
 
 ---
@@ -103,7 +111,9 @@ Because it doesn't require much knowledege and text editing to run your own hots
 
 # Let's begin by defining of few first hotstrings
 Just double click on the Hotstrings icon (capital letter *H* as *Hotstrings* on green background) in system tray:
-![Example of system tray](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SystemTray.png) 
+
+![Example of system tray][]
+
 or... use hotkey *Ctrl + # + h* (Control + Windows key + h).
 
 Next you'll see main GUI (Graphical User Interface) window which enable you to edit hotstrings:
@@ -214,11 +224,11 @@ By default equal to 200 ms. Maximum value equal to 500 ms (0.5 s).
 **Tip:** Sometimes when long hotstrings are triggered and clipboard is applied to immediately enter it, strange behaviour can occurre. Instead of expected hotstring the previous content of clipboard may appear. The reason is that operating system can not gurantee the time to insert the content of clipboard into specific window / editing field. In order to support operating system enlarge the delay. The shorter the delay than better, but if too short, mentioned behaviour can be observed.
 
 ### About / Help
- ![About / Help](https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_About_Help.png) 
+ ![About / Help][] 
 
 **Hotstrings.ahk (script). Let's make your PC personal again...**. 
 
-Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). This is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). License: [GNU GPL ver. 3](https://github.com/mslonik/Hotstrings/blob/master/LICENSE). [Source code](https://github.com/mslonik/Hotstrings). [Homepage](http://mslonik.pl).
+Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). This is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). License: [GNU GPL ver. 3][]. [Source code][]. [Maciej's homepage][].
 
 Help, link to this file.
 
@@ -450,6 +460,8 @@ People from AutoHotkey community, especially those who help at [AutoHotkey forum
 [Example, immediate execute]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_ImmediateExecute.png "Example, immediate execute"
 [Trigger option No Backspace]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Option_NoBackspace.png "Trigger option No Backspace" 
 [Example, no Backspace]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_NoBackspace.png "Example, no Backspace"
+[Example of system tray]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SystemTray.png "Exampe of system tray" 
+[About / Help]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_About_Help.png "About / Help"
 
 
 [AutoHotkey]: https://www.autohotkey.com/
@@ -457,3 +469,6 @@ People from AutoHotkey community, especially those who help at [AutoHotkey forum
 [Jack]: https://jacks-autohotkey-blog.com/
 [Instant Hotstring]: http://www.computoredge.com/AutoHotkey/Free_AutoHotkey_Scripts_and_Apps_for_Learning_and_Generating_Ideas.html#instanthotstrings
 [AutoHotkey forum]: https://www.autohotkey.com/boards/
+[GNU GPL ver. 3]: https://github.com/mslonik/Hotstrings/blob/master/LICENSE
+[Source code]: https://github.com/mslonik/Hotstrings
+[Maciej's homepage]: http://mslonik.pl
