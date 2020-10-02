@@ -32,7 +32,7 @@ Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
 # Table of content
 [FAQ](#FAQ)
 
-[Let's begin by defining of few first hotstrings](#Let&#39s-begin-by-defining-of-few-first-hotstrings)
+[Let's begin by defining of few first hotstrings](#Lets-begin-by-defining-of-few-first-hotstrings)
 
 [Main window of *Hotstring* application](# Main window of *Hotstring* application)
 
