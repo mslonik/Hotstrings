@@ -25,7 +25,7 @@ Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
 - runs on Microsoft Windows family operating systems;
 - written in AutoHotkey script language but does not require this language interpreter to be installed and can be run standalone thanks to .exe file;
 
-    *nevertheless installation of [AutoHotkey][] is greatly adviced)*
+    *nevertheless installation of [AutoHotkey][] is greatly adviced).*
 
 ---
 
@@ -38,12 +38,16 @@ Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
 
 4. [Hotstring definition or edition](#Hotstring-definition-or-edition)
 
-
+---
 
 # FAQ 
 (Frequently Asked Questions) about *Hotstrings*.
+[What are the hotstrings?](##What-are-the-hotstrings?)
+[How the AutoHotkey and hotstrings work?](##How-the-AutoHotkey-and-hotstrings-work?)
+[Why somobody may want to use hotstrings?](##Why-somobody-may-want-to-use-hotstrings?)
+[Why somebody may want to use *Hotstring* application?](##Why-somebody-may-want-to-use-Hotstring-application?)
 
-## What are the hotstrings? (absolute beginner quide)
+## What are the hotstrings?
 There are two corresponding notions:
 - triggerstring,
 - hotstring.
@@ -100,7 +104,7 @@ email | e-mail
 * Nowadays we still frequently use keyboard as input device to so called personal computer. This computer is not so "personal" as you can't easily define system wide (working in any application) triggering your personal hotstrings. 
 
 ---
-*Example: *
+*Example:*
 triggerstring | hotstring
 ---|---
 fs@ | `FirstName.SecondName@yourhosting.com`
@@ -109,7 +113,7 @@ fs@ | `FirstName.SecondName@yourhosting.com`
 So let's make your PC really personal again. Now with use of hotstrings and Hotstring application.
 
 ## Why somebody may want to use *Hotstring* application?
-Because it doesn't require much knowledege and text editing to run your own hotstrings. It can be run even without installation. Thanks to GUI (Graphical User Interface) you will master defining and applying of your own hotstrings in blink of an eye.
+Because it doesn't require much knowledege and text editing to run your own hotstrings. *Hotstrings* application can be run even without installation (e.g. from USB pendrive). Thanks to GUI (Graphical User Interface) you will master defining and applying of your own hotstrings in a blink of an eye 😉.
 
 ---
 ---
