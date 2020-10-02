@@ -36,7 +36,7 @@ Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
 
 3. [Main window of *Hotstring* application](#Main-window-of-Hotstring-application)
 
-4. [Hotstring definition / edition](#Hotstring-definition-/-edition)
+4. [Hotstring definition / edition](#Hotstring-definition-edition)
 
 
 
