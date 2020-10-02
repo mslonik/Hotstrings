@@ -36,7 +36,7 @@ Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
 
 3. [Main window of *Hotstring* application](#Main-window-of-Hotstring-application)
 
-4. [Hotstring definition / edition](#Hotstring-definition-edition)
+4. [Hotstring definition or edition](#Hotstring-definition-or-edition)
 
 
 
@@ -238,7 +238,7 @@ Enables convenient definition and use of hotstrings (triggered by shortcuts long
 
 Help, link to this file.
 
-# Hotstring definition / edition
+# Hotstring definition or edition
 
 ## Trigger options
 Variants of triggering are controlled by the options:
