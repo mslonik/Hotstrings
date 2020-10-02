@@ -413,19 +413,21 @@ The originator and creator of the Hotstrings application is Jack Dunning aka [Ja
 People from AutoHotkey community, especially those who help at [AutoHotkey forum][].
 
 # ToDo List
-- [-] Menu: configuration and the corresponding *Configuration.ini*
-    - [-] sandbox for hotstrings,
-    - [-] enable / disable "undo" (Ctrl + z) of hotstrings,
-    - [x] setup of "Ending character",
-    - [-] *Hotstrings* window size and position, including monitor, window size.
-- [-] Automatic tooltip for triggestrings.
-- [-] Interface: comments to hotstrings (stored in .csv files).
-- [-] Interface: if library content is marked, edition should be loaded automatically.
-- [-] Interface: search window, a searched result should enable direct edition.
-- [-] Hotstrings export (.csv → .ahk).
-    - [-] static hotstrings (:options:triggerstring::hotstring),
-    - [-] dynamic hotstrings (Hotstring("options", "triggestring", "hotstring")).
-- [-] Hotstrings import (.ahk → .csv) from known autocorrect libraries (English mainly).
+- ❎ Menu: configuration and the corresponding *Configuration.ini*
+    - ❎ sandbox for hotstrings,
+    - ❎ enable / disable "undo" (Ctrl + z) of hotstrings,
+    - ☑ setup of "Ending character",
+    - ❎ *Hotstrings* window size and position, including monitor, window size.
+- ❎ Automatic tooltip for triggestrings.
+- ❎ GUI:
+    - ❎ comments to hotstrings (stored in .csv files).
+    - ❎ library content is marked, edition should be loaded automatically.
+    - ❎ search window, a searched result should enable direct edition.
+    - ❎ hotkeys to main functions
+- ❎ Hotstrings export (.csv → .ahk).
+    - ❎ static hotstrings (:options:triggerstring::hotstring),
+    - ❎ dynamic hotstrings (Hotstring("options", "triggestring", "hotstring")).
+- ❎ Hotstrings import (.ahk → .csv) from known autocorrect libraries (English mainly).
 
 [Defining of hotstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_DefiningOfHotstring.png "Defining of hotstring"
 [Enter triggerstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterTriggerstring.png "Enter triggerstring"
