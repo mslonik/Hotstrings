@@ -32,9 +32,7 @@ Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
 # Table of content
 [FAQ](#FAQ)
 
-[Example 1 Heading](#Example-1-Heading)
-
-[Lets begin by defining of few first hotstrings](#Lets-begin-by-defining-of-few-first-hotstrings)
+[Let's begin by defining of few first hotstrings](#Let&#39s-begin-by-defining-of-few-first-hotstrings)
 
 [Main window of *Hotstring* application](# Main window of *Hotstring* application)
 
@@ -114,7 +112,7 @@ Because it doesn't require much knowledege and text editing to run your own hots
 ---
 ---
 
-# Lets begin by defining of few first hotstrings
+# Let's begin by defining of few first hotstrings
 Just double click on the Hotstrings icon (capital letter *H* as *Hotstrings* on green background) in system tray:
 
 ![Example of system tray][]
