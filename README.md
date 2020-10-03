@@ -311,6 +311,16 @@ Comments:
 
 * GUI (Graphical User Interface) means that specified option is directly available in the GUI of this application.
 *  For details regarding SI / SP / SE modes see [documentation of AutoHotkey][]. Only SI mode is implemented.
+
+**Tab. 2** Comparison of **option(s)**.
+option(s) | previous endchar required? | triggestring erased?  | separate trigger?  | trigger erased? | triggerstring case sensitive?
+-------------|---------------------------------------|-----------------------------|-------------------------|------|---
+|                | yes                                             | yes                                 | yes                           |  no | no
+\*              | yes                                             | yes                                 | no                            | n.a. | no
+?                | no                                              | yes                                 | yes                           | no   | no
+B0             | yes                                             | no                                  | yes                           | no   | no
+C               | yes                                             | yes                                 | yes                           | no   | yes
+O              | yes                                             | yes                                 | yes                            | yes | no
  
 
 #### Default (no trigger option selected)
@@ -324,9 +334,6 @@ By default for new **hotstrings** no trigger option is set, what means:
 4. **Triggerstring** is ~~erased~~ and exchanged with **hotstring**. 
 5. **Trigger** is not erased.
 
-option(s) | endchar required? | triggestring                          | trigger    | hotstring
-----------|--------------------------|-----------------------------------|-------------|---
-|            | yes                              |~~alphanumeric string~~  | *endchar*  | alphanumeric string
 
 ---
 *Example of triggerstring and hotstring definition*
