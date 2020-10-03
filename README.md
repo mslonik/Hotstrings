@@ -293,12 +293,12 @@ Trigger options controls how **hotstring recognizer** works.
 Option | AutoHotkey | *Hotstrings* application | Comment
 :---| :---: | :---: | :---
 No option (default) | X | X | GUI
- Immediate Execute (*) | X | X | GUI
+Immediate Execute (*) | X | X | GUI
 Inside Word (?) | X | X | GUI
 No Backspace (B0) | X | X | GUI
-Case Sensitive (`C) | X | X | GUI
+Case Sensitive (C) | X | X | GUI
 No End Char (O) | X | X | GUI
-Raw output (`R) | X | | not implemented
+Raw output (R) | X | | not implemented
 SendInput (SI) | X | X | by default
 SendPlay (SP) | X | 
 SendEvent (SE) | X |
@@ -312,15 +312,15 @@ Comments:
 * GUI (Graphical User Interface) means that specified option is directly available in the GUI of this application.
 *  For details regarding SI / SP / SE modes see [documentation of AutoHotkey][]. Only SI mode is implemented.
 
-**Tab. 2** Comparison of **option(s)**.
-option(s) | previous endchar required? | triggestring erased?  | separate trigger?  | trigger erased? | triggerstring case sensitive?
--------------|---------------------------------------|-----------------------------|-------------------------|------|---
-|                | yes                                             | yes                                 | yes                           |  no | no
-\*              | yes                                             | yes                                 | no                            | n.a. | no
-?                | no                                              | yes                                 | yes                           | no   | no
-B0             | yes                                             | no                                  | yes                           | no   | no
-C               | yes                                             | yes                                 | yes                           | no   | yes
-O              | yes                                             | yes                                 | yes                            | yes | no
+**Tab. 2.** Comparison of **option(s)**.
+option full name |option id | previous endchar required? | triggestring erased?  | separate trigger?  | trigger erased? | triggerstring case sensitive?
+:--- | :---:            | :---:                                            | :---:                                 | :---:                          | :---: | :---:
+No option (default) |                | yes                                             | yes                                 | yes                           |  no | no
+Immediate Execute | \*              | yes                                             | yes                                 | no                            | n.a. | no
+Inside Word | ?                | no                                              | yes                                 | yes                           | no   | no
+No Backspace | B0             | yes                                             | no                                  | yes                           | no   | no
+Case Sensitive | C               | yes                                             | yes                                 | yes                           | no   | yes
+No End Char | O              | yes                                             | yes                                 | yes                            | yes | no
  
 
 #### Default (no trigger option selected)
