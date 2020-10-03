@@ -119,6 +119,9 @@ So let's make your PC really personal again. Now with use of hotstrings and Hots
 ## Why somebody may want to use *Hotstring* application?
 Because it doesn't require much knowledege and text editing to run your own hotstrings. *Hotstrings* application can be run even without installation (e.g. from USB pendrive). Thanks to GUI (Graphical User Interface) you will master defining and applying of your own hotstrings in a blink of an eye 😉.
 
+## How to reset hotstring recognizer?
+(...)
+
 ---
 ---
 ---
@@ -429,7 +432,8 @@ option | triggerstring     | trigger: last character   | hotstring
 ---
 
 
-
+# Hostrings libraries
+(...)
 
 
  
@@ -443,6 +447,15 @@ option | triggerstring     | trigger: last character   | hotstring
 The originator and creator of the Hotstrings application is Jack Dunning aka [Jack][] who has created the very first version of *[Instant Hotstring][]* application.
 
 People from AutoHotkey community, especially those who help at [AutoHotkey forum][].
+
+# Other remarks
+Other remarks helpful in everyday working with hotstrings.
+
+## Order of loading AutoHotkey scripts matters. 
+For example if you use *Diacritics.ahk* together with *Hotstrings.ahk*, there is potential collission. (...)
+
+## Not always applying clipboard output function is a good idea
+Some forms, especially at bank web pages, do not accept pasting from clipboard. Probably there are safety reasons behind that. From the other hand keep in mind that AutoHotkey itself simulates keyboard keypressing. So to get over this limitation it's enough edidt particular hotstring and switch *Select hotstring output function* from *Send by Clipboard* to *Send by AutoHotkey*.
 
 # ToDo List
 - ❎ Menu: configuration and the corresponding *Configuration.ini*
@@ -460,6 +473,7 @@ People from AutoHotkey community, especially those who help at [AutoHotkey forum
     - ❎ static hotstrings (:options:triggerstring::hotstring),
     - ❎ dynamic hotstrings (Hotstring("options", "triggestring", "hotstring")).
 - ❎ Hotstrings import (.ahk → .csv) from known autocorrect libraries (English mainly).
+- ❎ Localization (preparation of code to translation into foreign languages).
 
 [Defining of hotstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_DefiningOfHotstring.png "Defining of hotstring"
 [Enter triggerstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterTriggerstring.png "Enter triggerstring"
