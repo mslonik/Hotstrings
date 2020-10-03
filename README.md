@@ -67,36 +67,34 @@ alphanumeric string | alphanumeric string | alphanumeric string
 
 So the triggerstring triggers the corresponding hotstring, taking into consideration:
 
-* user input 
-
-*(what user writes pressing keys of keyboard)*
+* user input (what user writes pressing keys of keyboard)
 
 * options defined for particular pair (*triggerstring*, *hotstring*)
 
-*see below for more precise description*
 
-Wording convention: usually the corresponding notions *(options, triggestring, hotstring)* is also called as *hotstring*:
-
-*hotstring*: *(triggestring, hotstring)*
+Wording convention: usually the corresponding notions *(option(s), triggestring, hotstring)* is also called as *hotstring*.
 
 
 ## How the *Hotstrings* application work?
-In short, the *Hotstrings* application:
+### In short
+
+ the *Hotstrings* application:
  
-* keeps in memory definitions of hotstrings defined by user:  (option(s), triggerstring, hotstring) 
+* keeps in memory definitions of hotstrings defined by user:  **(option(s), triggerstring, hotstring)* 
 
 and 
 
 * applies the **hotstring recognizer** to input stream of keyboard pressed keys, searching for the **triggestring** according to rules defined in **option(s)**. 
 
-If the **triggestring** is recognized (user pressed appropriate sequence of keys) and it fits to *options*: 
+If the **triggestring** is recognized (user pressed appropriate sequence of keys) and it fits to **option(s)**: 
 
 * the **hostring** is issued,
 * the **hotstring recognizer** is reset.
 
 The concept and usage of hotstrings is based and compatible to AutoHotkey [hotstring][] notion.
 
-In long, the *Hotstrings* application: (...)
+### In long 
+The *Hotstrings* application: (...)
 
 ## Why somobody may want to use hotstrings?
 Because they can significantly make life easier and... longer? 
@@ -110,7 +108,6 @@ triggerstring | hotstring
 ---|---
 title1 | This is very long title of technical document with lots of numeric data which are hard to remember EN 982182 : 12 and is reference in a few places in your newly edited document
 
----
 
 * The triggerstring can be used to trigger special symbols / letters / emoji, which are not present on a keyboard. Then it can happen that the triggerstring could be longer than actual hotstring.
 
@@ -121,7 +118,6 @@ triggerstring | hotstring
 ---|---
 elephant/ | 🐘
 
----
 
 * To correct / auto correct spelling of words or enter unique letters
 
@@ -149,10 +145,8 @@ Because it doesn't require much knowledege and text editing to run your own hots
 
 The alternative, traditional way, is based on text edition, when hotstrings are prepared in AutoHotkey script (text file with .ahk extension), keeping attention to syntax of AutoHotkey syntax. Next such a script can be compiled into executive (.exe).
 
-## Why somebody may want to use *Hotstring* application?
-Because it doesn't require much knowledege and text editing to run your own hotstrings. *Hotstrings* application can be run even without installation (e.g. from USB pendrive). Thanks to GUI (Graphical User Interface) you will master defining and applying of your own hotstrings in a blink of an eye 😉.
 
-## How to reset hotstring recognizer?
+## How to reset the hotstring recognizer?
 (...)
 
 ---
@@ -182,22 +176,20 @@ At first please observe the main window again. In order to define any hotstring 
 We will start by defining of *by the way* hotsring with plain *btw* triggerstring and no options.
 
 ## Enter triggestring
-Let's put in this text edit field some text: 
+Let's input in this text edit field some text: 
 
 ![Enter triggerstring][]
 
-Please keep in mind that this edit window does not show space key, as it is blank key. But in this tutorial it will be easier to see what we're doing by using the ☐ convention from now on to show the Space (Spacebar key). So now let's put 
-
-> btw
+Please keep in mind that this edit window does not show space key, as it is blank key. But in this tutorial it will be easier to see what we're doing by using the ☐ convention from now on to show the Space (Spacebar key). So now let's input 
 
 ![Enter triggerstring, example][]
 
 ## Select trigger option(s)
 ![Default trigger option][] 
 
-By default no option is set (option string is empty). Then after triggerstring is entered, additionally one *trigger key* have to be pressed by user in order to trigger the hotstring.
+By default no option is set (option string is empty). Then after **triggerstring** is entered, additionally one **trigger key* have to be pressed by user in order to trigger the hotstring.
 
-The *trigger key* is defined as one of the following keys: -()[]{}':;"/\,.?!\`n☐\`t (note that \`n is Enter,  \`t is Tab, and there is a plain space between \`n and \`t marked as ☐ according to our convention). 
+The *trigger key* is defined as one of the following *endchar*keys: -()[]{}':;"/\,.?!\`n☐\`t (note that \`n is Enter,  \`t is Tab, and there is a plain space between \`n and \`t marked as ☐ according to our convention). 
 
 Let's leave no option set and continue.
 
@@ -211,9 +203,7 @@ Let's leave it as it is.
 ## Enter hotstring
 ![Enter hotstring][]
 
-Let's do that:
-
-> by the way
+Let's input our first *hotstring*:
 
 ![Enter hotstring, example][]
 
@@ -245,11 +235,13 @@ Now let's dive into more detailed description of available functions
 
 ![Main window][]
 
-The main window can be divided into the following parts:
+The purpose of this window is enabling hotstring definition and/or edition.
 
-- menu: 1,
-- hotstring definition / edition: 2,
-- Display of existing hotstrings: 3.
+It can be divided into the following parts:
+
+1. Menu.
+2. Hotstring definition / edition.
+3. Display of existing hotstrings.
 
 ![Main window parts][]
 
@@ -288,18 +280,18 @@ Help, link to this file.
 # Hotstring definition or edition 
 This time all 6 steps discussed in details, with examples and comments.
 
-## Triggerstring
+## Triggerstring definition
 (...)
 
 ## Trigger options overview
-Variants of triggering are controlled by the options:
+Trigger options controls how **hotstring recognizer** works.
 
 ![Select trigger option(s)][]
 
 **Tab. 1.** Trigger options compatibility between AutoHotkey and *Hotstrings* app.
 
 Option | AutoHotkey | *Hotstrings* application | Comment
-:---| :---: | ---: | :---
+:---| :---: | :---: | :---
  Immediate Execute (*) | X | X | GUI
 Inside Word (?) | X | X | GUI
 No Backspace (B0) | X | X | GUI
@@ -309,18 +301,16 @@ Raw output (`R) | X | | not implemented
 SendInput (SI) | X | X | by default
 SendPlay (SP) | X | 
 SendEvent (SE) | X |
-Text raw (T) | X | X | ??? implemented but no GUI
+Text raw (T) | X | X | ??? implemented but not accessible in GUI
 Execute (X) | X | | not implemented
 Reset recognizer (Z) | X |  | not implemented
 Disable | | X | GUI
 
 Comments:
 
-* GUI (Graphical User Interface) means that specified option is directly available in GUI for user.
+* GUI (Graphical User Interface) means that specified option is directly available in the GUI of this application.
 *  For details regarding SI / SP / SE modes see [documentation of AutoHotkey][]. Only SI mode is implemented.
-*  The *endchar* can be configured.
-
-Trigger options controls how **hotstring recognizer** works. 
+ 
 
 #### Default (no trigger option selected)
 ![Default trigger option][] 
@@ -335,7 +325,7 @@ By default for new **hotstrings** no trigger option is set, what means:
 
 option | endchar required? | triggestring                          | trigger    | hotstring
 ----------|--------------------------|-----------------------------------|-------------|---
-             | yes                              |~~alphanumeric string~~  | *endchar*  | alphanumeric string
+|            | yes                              |~~alphanumeric string~~  | *endchar*  | alphanumeric string
 
 ---
 *Example of triggerstring and hotstring definition*
