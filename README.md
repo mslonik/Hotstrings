@@ -290,22 +290,22 @@ Trigger options controls how **hotstring recognizer** works.
 
 **Tab. 1.** Trigger options compatibility between AutoHotkey and *Hotstrings* app.
 
-Option | AutoHotkey | *Hotstrings* application | Comment
-:---| :---: | :---: | :---
-No option (default) | X | X | GUI
-Immediate Execute (*) | X | X | GUI
-Inside Word (?) | X | X | GUI
-No Backspace (B0) | X | X | GUI
-Case Sensitive (C) | X | X | GUI
-No End Char (O) | X | X | GUI
-Raw output (R) | X | | not implemented
-SendInput (SI) | X | X | by default
-SendPlay (SP) | X | 
-SendEvent (SE) | X |
-Text raw (T) | X | X | ??? implemented but not accessible in GUI
-Execute (X) | X | | not implemented
-Reset recognizer (Z) | X |  | not implemented
-Disable | | X | GUI
+Option full name     | Option id | AutoHotkey | *Hotstrings* application | Comment
+:---                              | :---:           | :---:                | :---:                                      | :---
+No option (default) | |               | X                   | X                                           | GUI
+Immediate Execute | *               | X                    | X                                           | GUI
+Inside Word              | ?                | X                    | X                                          | GUI
+No Backspace           | B0             | X                   | X                                          | GUI
+Case Sensitive          | C               | X                   | X                                            | GUI
+No End Char             | O              | X                    | X                                           | GUI
+Raw output              | R               | X                    |                                              | not implemented
+SendInput                 | SI              | X                   | X                                           | by default
+SendPlay                   | SP            | X                     |                                              | 
+SendEvent                | SE             | X                     |                                              | 
+Text raw                     | T              | X                     | X                                          | ??? implemented but not accessible in GUI
+Execute                     | X               | X                      |                                           | not relevant and implemented
+Reset recognizer      | Z                | X                     |                                             | not implemented
+Disable                      |                   |                         | X                                          | GUI
 
 Comments:
 
