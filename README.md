@@ -292,7 +292,7 @@ Trigger options controls how **hotstring recognizer** works.
 
 Option full name     | Option id | AutoHotkey | *Hotstrings* application | Comment
 :---                              | :---:           | :---:                | :---:                                      | :---
-No option (default) | |               | X                   | X                                           | GUI
+No option (default) |                 | X                   | X                                           | GUI
 Immediate Execute | *               | X                    | X                                           | GUI
 Inside Word              | ?                | X                    | X                                          | GUI
 No Backspace           | B0             | X                   | X                                          | GUI
