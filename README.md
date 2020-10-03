@@ -137,7 +137,6 @@ email | e-mail
 
 ---
 *Example:*
-
 triggerstring | hotstring
 ---|---
 fs@ | `FirstName.SecondName@yourhosting.com`
@@ -146,9 +145,12 @@ fs@ | `FirstName.SecondName@yourhosting.com`
 So let's make your PC really personal again. Now with use of hotstrings and Hotstring application.
 
 ## Why somebody may want to use *Hotstrings* application?
-Because it doesn't require much knowledege and text editing to run your own hotstrings. *Hotstrings* application can be run even without installation (e.g. from USB pendrive, run **Hotstrings.exe*). Thanks to GUI (Graphical User Interface) you will master defining and applying of your own hotstrings in a blink of an eye 😉.
+Because it doesn't require much knowledege and text editing to run your own hotstrings. *Hotstrings* application can be run even without installation (e.g. from USB pendrive, run **Hotstrings.exe**). Thanks to GUI (Graphical User Interface) you will master defining and applying of your own hotstrings in a blink of an eye 😉.
 
 The alternative, traditional way, is based on text edition, when hotstrings are prepared in AutoHotkey script (text file with .ahk extension), keeping attention to syntax of AutoHotkey syntax. Next such a script can be compiled into executive (.exe).
+
+## Why somebody may want to use *Hotstring* application?
+Because it doesn't require much knowledege and text editing to run your own hotstrings. *Hotstrings* application can be run even without installation (e.g. from USB pendrive). Thanks to GUI (Graphical User Interface) you will master defining and applying of your own hotstrings in a blink of an eye 😉.
 
 ## How to reset hotstring recognizer?
 (...)
@@ -287,8 +289,7 @@ Help, link to this file.
 This time all 6 steps discussed in details, with examples and comments.
 
 ## Triggerstring
-
-
+(...)
 
 ## Trigger options overview
 Variants of triggering are controlled by the options:
@@ -480,7 +481,6 @@ Something,☐something☐ | ~~btw~~ | ~~.~~ | by☐the☐way.
 
 > Something,☐something☐ ~~btw.~~ by☐the☐way
 
-
 ---
 
 #### Case Sensitive (`C)
@@ -641,6 +641,7 @@ User of *Hotstrings* application can change this default behavior thanks to conf
 
 
 ---
+
 # Hostrings libraries
 (...)
 
