@@ -292,6 +292,7 @@ Trigger options controls how **hotstring recognizer** works.
 
 Option | AutoHotkey | *Hotstrings* application | Comment
 :---| :---: | :---: | :---
+No option (default) | X | X | GUI
  Immediate Execute (*) | X | X | GUI
 Inside Word (?) | X | X | GUI
 No Backspace (B0) | X | X | GUI
@@ -323,18 +324,18 @@ By default for new **hotstrings** no trigger option is set, what means:
 4. **Triggerstring** is ~~erased~~ and exchanged with **hotstring**. 
 5. **Trigger** is not erased.
 
-option | endchar required? | triggestring                          | trigger    | hotstring
+option(s) | endchar required? | triggestring                          | trigger    | hotstring
 ----------|--------------------------|-----------------------------------|-------------|---
 |            | yes                              |~~alphanumeric string~~  | *endchar*  | alphanumeric string
 
 ---
 *Example of triggerstring and hotstring definition*
 
-option | triggerstring     | trigger: last character  | hotstring
+option(s) | triggerstring     | trigger: last character  | hotstring
 -------|-------------------|---------------------------|-----------
-\*     | ~~btw~~        | *endchar*                   | by☐the☐way
+|     | ~~btw~~        | *endchar*                   | by☐the☐way
 
-![Example, immediate execute][] 
+![Example, no options][] 
 
 
 *Example, execution*
@@ -709,6 +710,7 @@ Some forms, especially at bank web pages, do not accept pasting from clipboard. 
 [Trigger option Inside Word]:  https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Option_InsideWord.png "Option: Inside Word"
 [Disable]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Option_Disable.png "Option: Disable (hotstring)"
 [Disable example]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_Disable.png "Example: Disable (hotstring)"
+[Example, no options]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_DefaultNoOption.png "Example: no triggerstring option is set"
 
 [AutoHotkey]: https://www.autohotkey.com/
 [hotstring]: https://www.autohotkey.com/docs/Hotstrings.htm/
