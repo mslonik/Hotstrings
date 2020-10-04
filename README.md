@@ -367,38 +367,25 @@ Trigger options controls how **hotstring recognizer** works.
 ![Select trigger option(s)][]
 
 **Tab. 1.** Trigger options compatibility between AutoHotkey and *Hotstrings* app.
-| Option full name    | Option short name | AutoHotkey | *Hotstrings* application |     Comment     |
-|---------------------|:-----------------:|:----------:|:------------------------:|:---------------:|
+|   Option full name  | Option short name | AutoHotkey | *Hotstrings* application |     Comment     |
+|:-------------------:|:-----------------:|:----------:|:------------------------:|:---------------:|
 | No option (default) |                   |      X     |             X            |       GUI       |
-| Immediate Execute   |         *         |      X     |             X            |       GUI       |
-| Inside Word         |         ?         |      X     |             X            |       GUI       |
-| No Backspace        |         B0        |      X     |             X            |       GUI       |
-| Case Sensitive      |         C         |      X     |             X            |       GUI       |
-| No Endchar          |         O         |      X     |             X            |       GUI       |
-| Execut              |         X         |      X     |                          | not implemented |
-| Reset Recognizer    |         Z         |      X     |                          | not implemented |
+|  Immediate Execute  |         *         |      X     |             X            |       GUI       |
+|     Inside Word     |         ?         |      X     |             X            |       GUI       |
+|     No Backspace    |         B0        |      X     |             X            |       GUI       |
+|    Case Sensitive   |         C         |      X     |             X            |       GUI       |
+|      No Endchar     |         O         |      X     |             X            |       GUI       |
+|        Execut       |         X         |      X     |                          | not implemented |
+|   Reset Recognizer  |         Z         |      X     |                          | not implemented |
+|       Disable       |       En/Dis      |            |             X            |       GUI       |
                                                                                  
-                                                                                 
-                                                                                 
-                                                                                 
-                                                                                 
-
-
-**Tab. 2.** Output options compatibility between AutoHotkey and *Hotstrings* app.
-| Option full name | Option short name | AutoHotkey | *Hotstrings* application | Comment                                   |
-|------------------|:-----------------:|:----------:|:------------------------:|-------------------------------------------|
-| Raw output       |         R         |      X     |                          | Not implemented                           |
-| SendInput        |         SI        |      X     |             X            |                                           |
-| SendPlay         |         SP        |      X     |                          | Not implemented                           |
-| SendEvent        |         SE        |      X     |                          | Not implemented                           |
-| Text raw         |         T         |      X     |                          | ??? implemented but not accessible in GUI |
-| Disable          |                   |            |             X            | GUI                                       |
+                                                    
 Comments:
 
 * GUI (Graphical User Interface) means that specified option is directly available in the GUI of this application.
 *  For details regarding SI / SP / SE modes see [documentation of AutoHotkey][]. Only SI mode is implemented.
 
-**Tab. 3.** Comparison of **option(s)** (valid for **trigger recognizer**).
+**Tab. 2.** Comparison of **option(s)** (valid for **trigger recognizer**).
 | option full name    | option shortname | previous endchar required? | triggestring erased? | separate trigger? | trigger erased? | triggerstring case sensitive? |
 |---------------------|:---------:|:--------------------------:|:--------------------:|:-----------------:|:---------------:|:-----------------------------:|
 | No option (default) |           |             yes            |          yes         |        yes        |        no       |               no              |
@@ -453,188 +440,238 @@ Please note that there are just 5 trigger conditions which represent answers to 
    
    By default only the option (C) let the **triggerstring** to be case sensitive.
 
+---
+
 #### Default (no trigger option selected)
 ![Example, no options][] 
 
----
+| triggerstring |  hotstring | option(s) |
+|:-------------:|:----------:|:---------:|
+|      btw      | by the way |           |
 
 *Example, execution*
+Comment: cursor position is shown as |.
 
 | input string         | previous *endchar* | triggerstring | trigger (*endchar*) | replaced by hotstring | trigger (*endchar*) |
 |----------------------|:------------------:|---------------|:-------------------:|:---------------------:|:-------------------:|
-| Something,☐something |          ☐         | ~~btw~~       |        ~~☐~~        |       by☐the☐way      |          ☐          |
+| Something,☐something |          ☐         | ~~btw~~       |        ~~☐~~        |       by☐the☐way      |          ☐\|          |
 
-> Something,☐something☐~~btw☐~~by☐the☐way☐
+> Something,☐something☐~~btw☐~~by☐the☐way☐|
 
-
+---
 
 #### Immediate Execute (\*)
 ![Example, immediate execute][] 
 
-The option (\*) is called *immediate execute* because  entering of the last character of **triggerstring** immediately executes exchange of the **triggerstring** with the **hotstring**.
+| triggerstring |  hotstring | option(s) |
+|:-------------:|:----------:|:---------:|
+|      btw/     | by the way |     \*    |
+
+The option (\*) is called *immediate execute* because  entering of the last character of **triggerstring** immediately executes exchange of the **triggerstring** with the **hotstring**. Cursor position is shown as |.
 
 *Example, execution*
 
 | input string         | previous *endchar* | triggerstring | trigger | replaced by hotstring | trigger |
 |----------------------|:------------------:|---------------|:-------:|:---------------------:|:-------:|
-| Something,☐something |          ☐         | ~~btw/~~      |         |       by☐the☐way      |         |
+| Something,☐something |          ☐         | ~~btw/~~      |         |       by☐the☐way\|      |         |
 
-> Something,☐something☐~~btw/~~ by☐the☐way
+> Something,☐something☐~~btw/~~ by☐the☐way|
 
 ---
 
 #### No Backspace (B0)
-![Trigger option No Backspace][] 
-
-By default the **hotstring** replaces the **triggestring**, what was shown in the above examples by ~~strikethrough~~ from the content stream the **triggerstring**. When (B0) option is applied, the **triggestring** is not replaced (no backspace = no erasing) by the **hotstring** but is followed by the **hotstring**:
-
-1. The **hotstring recognizer** starts only just after *endchar* is detected. So the *endchar* is required directly before the **triggersting**.
-2. **Triggerstring** is not case sensitive.
-3. After **triggerstring** additionally one **trigger** key have to be pressed by user in order to trigger the hotstring. *Trigger* key is defined by default set of *endchar*.
-4. **Triggerstring** is not erased but followed by **hotstring**. 
-5. **Trigger** is not erased.
-
-option | endchar required? | triggestring                          | trigger    | hotstring
-----------|--------------------------|-----------------------------------|-------------|---
-?           | yes                              |~~alphanumeric string~~  | *endchar* | alphanumeric string
-
-
----
-*Example of triggerstring and hotstring definition*
-
 ![Example, no Backspace][] 
 
+| triggerstring |  hotstring | option(s) |
+|:-------------:|:----------:|:---------:|
+|      btw      | by the way |     B0    |
+
+The **triggerstring** is not removed. The **hotstring** is placed just after the trigger (*endchar*). Cursor position is shown as |.
+
 *Example, execution*
 
-input stream |    triggerstring | trigger| replaced by hotstring
----------------|---------------|-------------------------|-----------
-Something,☐something☐ | btw | . | by☐the☐way.
+| input string         | previous *endchar* | triggerstring | trigger (*endchar*) | added hotstring |
+|----------------------|--------------------|---------------|:-------------------:|-----------------|
+| Something,☐something | ☐                  | btw           |          .          | by☐the☐way\|    |
 
-> Something,☐something☐btw.by☐the☐way.
+> Something,☐something☐btw.by☐the☐way|
 
 
----
+
 *Example of useful B0 hotstring*
-The B0 option is useful for example to define HTML tags. In the following example the sequence {left☐5} is used to move to the left (back) cursor after he sequence </em> is entered.
 
-option | triggerstring     | trigger: last character   | hotstring
--------|-------------------|---------------------------|-----------
-\*B0    | <em              | >                         | </em>{left☐5}
+![Example, useful B0][]
 
-*Example, execution*
+| triggerstring |    hotstring   | option(s) |
+|:-------------:|:--------------:|:---------:|
+|     \<em>     | \</em>{left☐5} |    B0*    |
 
-input stream |    triggerstring | trigger  | replaced by hotstring
----------------|----------------------------|------------|-----------
-Something,☐something☐| \<em | > | \</em>
+The B0 option is useful for example to define HTML tags. In the following example the sequence {left☐5} is used to move to the left (back) cursor (shown as |) after he sequence </em> is entered. So now the cursor is in a feasible place.
+
+| input string         | previous *endchar* | triggerstring | trigger | added hotstring |
+|----------------------|--------------------|---------------|---------|-----------------|
+| Something,☐something | ☐                  | \<em>         |         | \|\</em>        |
 
 > Something,☐something☐\<em>|\</em>
-
-
-Comment: The cursor (shown as |) has been moved backward by 5 characters and now is between the HTML tags.
 
 ---
 
 #### No End Char (O)
-![Trigger option No Endchar][] 
-
-Similar to default option, but this time the **trigger** is erased together with **triggerstring**:
-
-1. The **hotstring recognizer** starts only just after *endchar* is detected. So the *endchar* is required directly before the **triggersting**.
-2. **Triggerstring** is not case sensitive.
-3. After **triggerstring** additionally one **trigger** key have to be pressed by user in order to trigger the hotstring. *Trigger* key is defined by default set of *endchar*.
-4. **Triggerstring** is ~~erased~~ and exchanged with **hotstring**. 
-5. **Trigger** is also  ~~erased~~.
-
-option | endchar required? | triggestring                          | trigger    | hotstring
-----------|--------------------------|-----------------------------------|-------------|---
-?           | no                              |~~alphanumeric string~~  | ~~*endchar*~~ | alphanumeric string
-
----
-*Example of triggerstring and hotstring definition*
 
 ![Example No EndChar][] 
 
+| triggerstring |  hotstring | option(s) |
+|:-------------:|:----------:|:---------:|
+|      btw      | by the way |     O     |
+
+The trigger (*endchar*) is removed. Cursor position is shown as |.
+
 *Example, execution*
 
-input stream |    triggerstring |  trigger| replaced by hotstring
----------------|-----------------------|-----------------|-----------
-Something,☐something☐ | ~~btw~~ | ~~.~~ | by☐the☐way.
+|     input string     | previous *endchar* | triggerstring | trigger | replaced by hotstring |
+|:--------------------:|:------------------:|:-------------:|:-------:|:---------------------:|
+| Something,☐something |          ☐         |    ~~btw~~    |  ~~☐~~  |      by the way\|     |
 
-> Something,☐something☐ ~~btw.~~ by☐the☐way
-
----
-
-#### Case Sensitive (`C)
-![Trigger option Case Sensitive][] 
-
-Similar to default option, but this time the **triggerstring** is case sensitive:
-
-1. The **hotstring recognizer** starts only just after *endchar* is detected. So the *endchar* is required directly before the **triggersting**.
-2. **Triggerstring** is case sensitive.
-3. After **triggerstring** additionally one **trigger** key have to be pressed by user in order to trigger the hotstring. *Trigger* key is defined by default set of *endchar*.
-4. **Triggerstring** is ~~erased~~ and exchanged with **hotstring**. 
-5. **Trigger** is not erased.
-
-option | endchar required? | triggestring                          | trigger    | hotstring
-----------|--------------------------|-----------------------------------|-------------|---
-?           | yes                              |~~alphanumeric string~~  | *endchar* | alphanumeric string
+> Something,☐something☐~~btw☐~~by☐the☐way|
 
 ---
-*Example of triggerstring and hotstring definition*
 
+#### Case Sensitive (C\)
 ![Example Case Sensitive][] 
 
----
+| triggerstring |  hotstring | option(s) |
+|:-------------:|:----------:|:---------:|
+|      Btw      | by the way |     C     |
+
+Similar to default option, but this time the **triggerstring** is case sensitive. Cursor position is shown as |.
+
+
 *Example, execution*
 
-input stream |    triggerstring |  trigger| replaced by hotstring
----------------|-----------------------|-----------------|-----------
-Something,☐something☐ | ~~Btw~~ | . | by☐the☐way.
+|     input string     | previous *endchar* | triggerstring | trigger | replaced by hotstring |
+|:--------------------:|:------------------:|:-------------:|:-------:|:---------------------:|
+| Something,☐something |          ☐         |    ~~Btw~~    |  ~~☐~~  |     by the way☐\|     |
 
-> Something,☐something☐ ~~btw~~ . by☐the☐way.
+> Something,☐something☐~~Btw☐~~by☐the☐way☐|
 
 ---
 
 #### Inside Word (?)
-![Trigger option Inside Word][]
+![Example, Inside Word][]
 
-Similar to default option, but this time *endchar* directly before the **triggerstring** is not required:
+Similar to default option, but this time *endchar* directly before the **triggerstring** is not required.
 
-1. The **hotstring recognizer** observes input stream after the last *endchar* is detected. So the *endchar* is not required directly before the **triggersting**. The **triggerstring** can be triggered at any time after the last *endchar*.
-2. **Triggerstring** is not case sensitive.
-3. After **triggerstring** additionally one **trigger** key have to be pressed by user in order to trigger the hotstring. *Trigger* key is defined by default set of *endchar*.
-4. **Triggerstring** is ~~erased~~ and exchanged with **hotstring**. 
-5. **Trigger** is not erased.
-
-option | endchar required? | triggestring                          | trigger    | hotstring
-----------|--------------------------|-----------------------------------|-------------|---
-?           | no                              |~~alphanumeric string~~  | *endchar*  | alphanumeric string
-
+| triggerstring |  hotstring | option(s) |
+|:-------------:|:----------:|:---------:|
+|      btw      | by the way |     ?     |
 
 ---
 *Example, execution*
 
-input stream | endchar required? |    triggerstring |  trigger| replaced by hotstring
-------------------|---------------------------|--------------------|----------|-----------------------------
-                        |               no                 |                           |              |             
-Something,☐something | | ~~btw~~ | . | by☐the☐way.
+|     input string     | previous *endchar* | triggerstring | trigger | replaced by hotstring |
+|:--------------------:|:------------------:|:-------------:|:-------:|:---------------------:|
+| Something,☐something |                    |    ~~btw~~    |  ~~☐~~  |     by the way☐\|     |
 
-> Something,☐something~~btw~~ . by☐the☐way.
+> Something,☐something~~btw☐~~by☐the☐way☐|
 
 
 ---
 
 #### Disable
-![Disable][]
-
-The **hotstring* definition is left as on time of last edition, but switched off. So **hotstring recognizer** do not detect it anymore. The definition is left in corresponding library file (.csv). 
-
-The opposite action can take place: if user will edit definition of particular *hotstring* and uncheck the tick *disable*, then *hotstring* become active again. Next time when corresponding **triggerstring** will occurre in input stream, the **hotstring recognizer** will trigger corresponding **hotstring** according to previously defined **option(s)**.
-
 ![Disable example][]
+
+The **hotstring** definition is left in library file (.csv) in the same state as on time of last edition, but is disabled (switched off). So **hotstring recognizer** do not detect it anymore. 
+
+The opposite action can take place upon user action: if user will edit definition of particular *hotstring* and uncheck the tick *disable*, then *hotstring* becomes active again. Next time when corresponding **triggerstring** will occurre in input stream, the **hotstring recognizer** will trigger corresponding *hotstring* according to previously defined **option(s)**.
+
+
+## Hotstring output method
+
+
+**Tab. 3.** Output method compatibility between AutoHotkey and *Hotstrings* app.
+| Option full name | Option short name | AutoHotkey | *Hotstrings* application | Comment                                   |
+|------------------|:-----------------:|:----------:|:------------------------:|-------------------------------------------|
+| Raw output       |         R         |      X     |                          | Not implemented                           |
+| SendInput        |         SI        |      X     |             X            |                                           |
+| SendPlay         |         SP        |      X     |                          | Not implemented                           |
+| SendEvent        |         SE        |      X     |                          | Not implemented                           |
+| Text raw         |         T         |      X     |                          | ??? implemented but not accessible in GUI |
+| Disable          |                   |            |             X            | GUI                                       |
+
+Only one ouput method is valid at a time for particular **hotstring**.
+
+### Send by AutoHotkey
+
+### Send by Clipboard
+
+### Send by Menu (AutoHotkey)
+
+### Send by Menu (Clipboard)
+
+### Send Time or Date
+
 
 ---
 
+# Configuration
+
+## Endchar
+
+Let's imagine user input string, so stream of keyboard pressed keys: 
+
+*Example☐of☐the☐sentence☐where☐user☐would☐like☐to☐exchange☐triggerstring☐e@☐with☐his☐e-mail:☐`firstname.secondname@domain.com`*
+
+The **hostring recognizer** observes input stream which contains besides letters also other categories of characters: digits, punctuation characters, blank characters, special characters etc. Some of them belong to special group called end character or *endchar* for short. The characters belonging to the *endchar* group has the following purposes, helping to **hotstring recognizer**:
+
+1. recognize when **triggestring** begins,
+2. recognize when **triggerstring** ends,
+3. reset itself.
+
+Maybe *endchar* is not the right therm and better would be *stopchar* or *trigger separator*? For compatibility with official documentation of AutoHotkey the term *endchar* is kept in this manual.
+
+By default **triggerstring** begins after a character belonging to *endchar* but with special **option** called *inside word (?)* it can trigger **triggerstring** even between *endchar*, e.g. witin a word. It's done on purpose that *endchar* by default containts the following set of characters: 
+
+-()[]{}':;"/\,.?!\`n☐\`t 
+
+(note that \`n is Enter, \`t is Tab, and there is a plain space between \`n and \`t marked as ☐). 
+
+These characters are usually used to separate words or sentences. So often **hotstring recognizer** starts to recognize if **triggestring** is there, word by word and resets after each *endchar*. 
+
+User of *Hotstrings* application can change this default behavior thanks to configuration of *endchar*. 
+
+
+---
+
+# Hostrings libraries
+(...)
+
+
+ 
+ # Undoing of the last hotsring
+ The last hotstring can be easily undone by pressing Cltr | z hotkey or Ctrl | Backspace. 
+ 
+ **Caution:** In some applications the same hotkeys are used for undoing the last action. Then the overall result sometimes is unpredictable or unwanted. In case of some trouble use undoing hotstring several times in a raw.
+
+# Credits
+
+The originator and creator of the Hotstrings application is Jack Dunning aka [Jack][] who has created the very first version of *[Instant Hotstring][]* application.
+
+People from AutoHotkey community, especially those who help at [AutoHotkey forum][].
+
+Tools:
+
+* Markdown (MD) text editor: https://hackmd.io/
+* Table generator: https://www.tablesgenerator.com/markdown_tables#
+* ASCII diagram editor: https://textik.com/
+
+# Other remarks
+Other remarks helpful in everyday working with hotstrings.
+
+## Order of loading AutoHotkey scripts matters. 
+For example if you use *Diacritics.ahk* together with *Hotstrings.ahk*, there is potential collission. (...)
+
+## Not always applying clipboard output function is a good idea
+Some forms, especially at bank web pages, do not accept pasting from clipboard. Probably there are safety reasons behind that. From the other hand keep in mind that AutoHotkey itself simulates keyboard keypressing. So to get over this limitation it's enough edidt particular hotstring and switch *Select hotstring output function* from *Send by Clipboard* to *Send by AutoHotkey*.
 
 ## Overlapping hotstrings
 One of the useful options (...) are overlapping hotstrings.
@@ -692,67 +729,6 @@ option | triggerstring     | trigger: last character   | hotstring
 \* and menu    | api/              | /                         | API *| Application☐Programming☐Interface
 
 
----
-
-# Configuration
-
-## Endchar
-
-Let's imagine user input string, so stream of keyboard pressed keys: 
-
-*Example☐of☐the☐sentence☐where☐user☐would☐like☐to☐exchange☐triggerstring☐e@☐with☐his☐e-mail:☐`firstname.secondname@domain.com`*
-
-The **hostring recognizer** observes input stream which contains besides letters also other categories of characters: digits, punctuation characters, blank characters, special characters etc. Some of them belong to special group called end character or *endchar* for short. The characters belonging to the *endchar* group has the following purposes, helping to **hotstring recognizer**:
-
-1. recognize when **triggestring** begins,
-2. recognize when **triggerstring** ends,
-3. reset itself.
-
-Maybe *endchar* is not the right therm and better would be *stopchar* or *trigger separator*? For compatibility with official documentation of AutoHotkey the term *endchar* is kept in this manual.
-
-By default **triggerstring** begins after a character belonging to *endchar* but with special **option** called *inside word (?)* it can trigger **triggerstring** even between *endchar*, e.g. witin a word. It's done on purpose that *endchar* by default containts the following set of characters: 
-
--()[]{}':;"/\,.?!\`n☐\`t 
-
-(note that \`n is Enter, \`t is Tab, and there is a plain space between \`n and \`t marked as ☐). 
-
-These characters are usually used to separate words or sentences. So often **hotstring recognizer** starts to recognize if **triggestring** is there, word by word and resets after each *endchar*. 
-
-User of *Hotstrings* application can change this default behavior thanks to configuration of *endchar*. 
-
-
----
-
-# Hostrings libraries
-(...)
-
-
- 
- # Undoing of the last hotsring
- The last hotstring can be easily undone by pressing Cltr | z hotkey or Ctrl | Backspace. 
- 
- **Caution:** In some applications the same hotkeys are used for undoing the last action. Then the overall result sometimes is unpredictable or unwanted. In case of some trouble use undoing hotstring several times in a raw.
-
-# Credits
-
-The originator and creator of the Hotstrings application is Jack Dunning aka [Jack][] who has created the very first version of *[Instant Hotstring][]* application.
-
-People from AutoHotkey community, especially those who help at [AutoHotkey forum][].
-
-Tools:
-
-* Markdown (MD) text editor: https://hackmd.io/
-* Table generator: https://www.tablesgenerator.com/markdown_tables#
-
-# Other remarks
-Other remarks helpful in everyday working with hotstrings.
-
-## Order of loading AutoHotkey scripts matters. 
-For example if you use *Diacritics.ahk* together with *Hotstrings.ahk*, there is potential collission. (...)
-
-## Not always applying clipboard output function is a good idea
-Some forms, especially at bank web pages, do not accept pasting from clipboard. Probably there are safety reasons behind that. From the other hand keep in mind that AutoHotkey itself simulates keyboard keypressing. So to get over this limitation it's enough edidt particular hotstring and switch *Select hotstring output function* from *Send by Clipboard* to *Send by AutoHotkey*.
-
 ## Interaction of hotstrings pasted from clipboard with clipboard managers
 (...)
 
@@ -806,6 +782,8 @@ Some forms, especially at bank web pages, do not accept pasting from clipboard. 
 [Disable]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Option_Disable.png "Option: Disable (hotstring)"
 [Disable example]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_Disable.png "Example: Disable (hotstring)"
 [Example, no options]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_DefaultNoOption.png "Example: no triggerstring option is set"
+[Example, Inside Word]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_InsideWord.png "Example: Inside Word"
+[Example, useful B0]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_em.png "Useful example with B0"
 
 [AutoHotkey]: https://www.autohotkey.com/
 [hotstring]: https://www.autohotkey.com/docs/Hotstrings.htm/
