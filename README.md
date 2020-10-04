@@ -153,7 +153,7 @@ The alternative, traditional way, is based on text edition, when hotstrings are 
 ---
 ---
 
-# Let's begin by defining of few first hotstrings
+# Let's begin defining of few first hotstrings
 Just double click on the Hotstrings icon (capital letter *H* as *Hotstrings* on green background) in system tray:
 
 ![Example of system tray][]
