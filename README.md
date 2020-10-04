@@ -60,7 +60,7 @@ There are two corresponding notions:
 
 The relationship between these two notions is ruled by options and can be presented as follows:
 
-user input + hostring recognizer | options | modified input
+user input | hostring recognizer | options | modified input
 ---|---|---
 triggerstring | → | hotstring
 alphanumeric string | alphanumeric string | alphanumeric string
@@ -95,6 +95,7 @@ The concept and usage of hotstrings is based and compatible to AutoHotkey [hotst
 
 ### In long 
 The *Hotstrings* application: (...)
+
 
 ## Why somobody may want to use hotstrings?
 Because they can significantly make life easier and... longer? 
@@ -158,7 +159,7 @@ Just double click on the Hotstrings icon (capital letter *H* as *Hotstrings* on 
 
 ![Example of system tray][]
 
-or... use hotkey *Ctrl + # + h* (Control + Windows key + h).
+or... use hotkey *Ctrl | # | h* (Control | Windows key | h).
 
 Next you'll see main GUI (Graphical User Interface) window which enable you to edit hotstrings:
 
@@ -289,39 +290,46 @@ Trigger options controls how **hotstring recognizer** works.
 ![Select trigger option(s)][]
 
 **Tab. 1.** Trigger options compatibility between AutoHotkey and *Hotstrings* app.
+| Option full name    | Option short name | AutoHotkey | *Hotstrings* application |     Comment     |
+|---------------------|:-----------------:|:----------:|:------------------------:|:---------------:|
+| No option (default) |                   |      X     |             X            |       GUI       |
+| Immediate Execute   |         *         |      X     |             X            |       GUI       |
+| Inside Word         |         ?         |      X     |             X            |       GUI       |
+| No Backspace        |         B0        |      X     |             X            |       GUI       |
+| Case Sensitive      |         C         |      X     |             X            |       GUI       |
+| No Endchar          |         O         |      X     |             X            |       GUI       |
+| Execut              |         X         |      X     |                          | not implemented |
+| Reset Recognizer    |         Z         |      X     |                          | not implemented |
+                                                                                 
+                                                                                 
+                                                                                 
+                                                                                 
+                                                                                 
 
-Option full name     | Option id | AutoHotkey | *Hotstrings* application | Comment
-:---                              | :---:           | :---:                | :---:                                      | :---
-No option (default) |                 | X                   | X                                           | GUI
-Immediate Execute | *               | X                    | X                                           | GUI
-Inside Word              | ?                | X                    | X                                          | GUI
-No Backspace           | B0             | X                   | X                                          | GUI
-Case Sensitive          | C               | X                   | X                                            | GUI
-No End Char             | O              | X                    | X                                           | GUI
-Raw output              | R               | X                    |                                              | not implemented
-SendInput                 | SI              | X                   | X                                           | by default
-SendPlay                   | SP            | X                     |                                              | 
-SendEvent                | SE             | X                     |                                              | 
-Text raw                     | T              | X                     | X                                          | ??? implemented but not accessible in GUI
-Execute                     | X               | X                      |                                           | not relevant and implemented
-Reset recognizer      | Z                | X                     |                                             | not implemented
-Disable                      |                   |                         | X                                          | GUI
 
+**Tab. 2.** Output options compatibility between AutoHotkey and *Hotstrings* app.
+| Option full name | Option short name | AutoHotkey | *Hotstrings* application | Comment                                   |
+|------------------|:-----------------:|:----------:|:------------------------:|-------------------------------------------|
+| Raw output       |         R         |      X     |                          | Not implemented                           |
+| SendInput        |         SI        |      X     |             X            |                                           |
+| SendPlay         |         SP        |      X     |                          | Not implemented                           |
+| SendEvent        |         SE        |      X     |                          | Not implemented                           |
+| Text raw         |         T         |      X     |                          | ??? implemented but not accessible in GUI |
+| Disable          |                   |            |             X            | GUI                                       |
 Comments:
 
 * GUI (Graphical User Interface) means that specified option is directly available in the GUI of this application.
 *  For details regarding SI / SP / SE modes see [documentation of AutoHotkey][]. Only SI mode is implemented.
 
-**Tab. 2.** Comparison of **option(s)**.
-option full name |option id | previous endchar required? | triggestring erased?  | separate trigger?  | trigger erased? | triggerstring case sensitive?
-:--- | :---:            | :---:                                            | :---:                                 | :---:                          | :---: | :---:
-No option (default) |                | yes                                             | yes                                 | yes                           |  no | no
-Immediate Execute | \*              | yes                                             | yes                                 | no                            | n.a. | no
-Inside Word | ?                | no                                              | yes                                 | yes                           | no   | no
-No Backspace | B0             | yes                                             | no                                  | yes                           | no   | no
-Case Sensitive | C               | yes                                             | yes                                 | yes                           | no   | yes
-No End Char | O              | yes                                             | yes                                 | yes                            | yes | no
- 
+**Tab. 3.** Comparison of **option(s)** (valid for **trigger recognizer**).
+| option full name    | option id | previous endchar required? | triggestring erased? | separate trigger? | trigger erased? | triggerstring case sensitive? |
+|---------------------|:---------:|:--------------------------:|:--------------------:|:-----------------:|:---------------:|:-----------------------------:|
+| No option (default) |           |             yes            |          yes         |        yes        |        no       |               no              |
+| Immediate Execute   |     \*    |             yes            |          yes         |         no        |       n.a.      |               no              |
+| Inside Word         |     ?     |             no             |          yes         |        yes        |        no       |               no              |
+| No Backspace        |     B0    |             yes            |          no          |        yes        |        no       |               no              |
+| Case Sensitive      |     C     |             yes            |          yes         |        yes        |        no       |              yes              |
+| No End Char         |     O     |             yes            |          yes         |        yes        |       yes       |               no              | 
 
 #### Default (no trigger option selected)
 ![Default trigger option][] 
@@ -566,7 +574,7 @@ option | triggerstring     | trigger:    | hotstring
 \*    | btw2              | 2                         | back to work
 
 *Example, execution*
-content stream |    triggerstring + trigger replaced by | hotstring
+content stream |    triggerstring | trigger replaced by | hotstring
 ---------------|----------------------------------------|-----------
 Something,☐something☐| btw☐ | by☐the☐way☐
 
@@ -585,7 +593,7 @@ option | triggerstring     | trigger: last character   | hotstring
 \*    | btw2              | 2                         | back to work
 
 *Example, execution*
-content stream |    triggerstring + trigger replaced by | hotstring
+content stream |    triggerstring | trigger replaced by | hotstring
 ---------------|----------------------------------------|-----------
 Something,☐something☐ | btw1 | by☐the☐way
 ☐ | btw2 | back☐to☐work
@@ -646,7 +654,7 @@ User of *Hotstrings* application can change this default behavior thanks to conf
 
  
  # Undoing of the last hotsring
- The last hotstring can be easily undone by pressing Cltr + z hotkey or Ctrl + Backspace. 
+ The last hotstring can be easily undone by pressing Cltr | z hotkey or Ctrl | Backspace. 
  
  **Caution:** In some applications the same hotkeys are used for undoing the last action. Then the overall result sometimes is unpredictable or unwanted. In case of some trouble use undoing hotstring several times in a raw.
 
@@ -655,6 +663,11 @@ User of *Hotstrings* application can change this default behavior thanks to conf
 The originator and creator of the Hotstrings application is Jack Dunning aka [Jack][] who has created the very first version of *[Instant Hotstring][]* application.
 
 People from AutoHotkey community, especially those who help at [AutoHotkey forum][].
+
+Tools:
+
+* Markdown (MD) text editor: https://hackmd.io/
+* Table generator: https://www.tablesgenerator.com/markdown_tables#
 
 # Other remarks
 Other remarks helpful in everyday working with hotstrings.
@@ -671,7 +684,7 @@ Some forms, especially at bank web pages, do not accept pasting from clipboard. 
 # ToDo List
 - ❎ Menu: configuration and the corresponding *Configuration.ini*
     - ❎ sandbox for hotstrings,
-    - ❎ enable / disable "undo" (Ctrl + z) of hotstrings,
+    - ❎ enable / disable "undo" (Ctrl | z) of hotstrings,
     - ☑ setup of "Ending character",
     - ❎ *Hotstrings* window size and position, including monitor, window size.
 - ❎ Automatic tooltip for triggestrings.
