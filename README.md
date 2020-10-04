@@ -589,26 +589,28 @@ The opposite action can take place upon user action: if user will edit definitio
 
 
 **Tab. 3.** Output method compatibility between AutoHotkey and *Hotstrings* app.
-| Option full name | Option short name | AutoHotkey | *Hotstrings* application | Comment                                   |
-|------------------|:-----------------:|:----------:|:------------------------:|-------------------------------------------|
-| Raw output       |         R         |      X     |                          | Not implemented                           |
-| SendInput        |         SI        |      X     |             X            |                                           |
-| SendPlay         |         SP        |      X     |                          | Not implemented                           |
-| SendEvent        |         SE        |      X     |                          | Not implemented                           |
-| Text raw         |         T         |      X     |                          | ??? implemented but not accessible in GUI |
-| Disable          |                   |            |             X            | GUI                                       |
+| Option full name | Option short name | AutoHotkey | *Hotstrings* application |                  Comment                  |
+|:----------------:|:-----------------:|:----------:|:------------------------:|:-----------------------------------------:|
+|    Raw output    |         R         |      X     |                          |              Not implemented              |
+|     SendInput    |         SI        |      X     |             X            |            = Send by AutoHotkey           |
+|     SendPlay     |         SP        |      X     |                          |              Not implemented              |
+|     SendEvent    |         SE        |      X     |                          |              Not implemented              |
+|     Text raw     |         T         |      X     |                          | ??? implemented but not accessible in GUI |
+|     Clipboard    |         C         |            |             X            |                    GUI                    |
+| Menu & SendInput |        M SI       |            |             X            |                    GUI                    |
+| Menu & Clipboard |        M C        |            |             X            |                    GUI                    |
 
 Only one ouput method is valid at a time for particular **hotstring**.
 
-### Send by AutoHotkey
+### SendInput (SI) ← Send by AutoHotkey
 
-### Send by Clipboard
+### Clipboard (C\) ← Send by Clipboard
 
-### Send by Menu (AutoHotkey)
+### Menu & SendInput (M SI) ← Send by Menu (AutoHotkey)
 
-### Send by Menu (Clipboard)
+### Menu & Clipboard (M C) ← Send by Menu (Clipboard)
 
-### Send Time or Date
+### Text Raw (T) ← Send Time or Date
 
 
 ---
