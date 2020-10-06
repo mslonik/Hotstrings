@@ -1,4 +1,4 @@
-﻿*b0‖abm‖A‖On‖{Backspace 3}ABM
+﻿B*0‖abm‖A‖On‖ABM
 *‖abm/‖MC‖On‖enclosure¦kaseta
 *b0‖acm‖A‖On‖{Backspace 3}ACM
 *‖acm/‖MC‖On‖counting module¦moduł liczący
@@ -25,11 +25,12 @@ b0*x‖axmp/‖A‖On‖{BackSpace 5}AXM,{Space}AXM^=R^=,{Space}AXM^=IO^=
 B0*‖axmr‖A‖On‖{Backspace 4}AXM^=R^=
 *‖axmr/‖A‖Off‖AXM^=R^=
 *‖axmr/‖A‖Off‖AXM^=R^=
-*b0‖azc‖A‖On‖{Backspace 3}AZC
+B*0‖azc‖A‖On‖AZC
 *‖azc/‖MC‖On‖surge protection module dedicated for UniAS[x] wheel sensor family¦moduł ochrony przeciwprzepięciowej dedykowany dla rodziny czujników osi UniAS[x]
 *b0‖bbt‖A‖On‖{Backspace 3}BBT
 *‖bbt/‖C‖On‖Bearing and Brake Temperature
 *b0‖cok‖A‖On‖{Backspace 3}COK
+B*0‖cok‖MA‖On‖COK¦Czujnik Obecności Koła
 *‖cok/‖C‖On‖czujnik koła
 *b0‖cps‖A‖On‖{Backspace 3}Cooperation Platform Sopot (https://solidsystemteamwork.voestalpine.root.local/internalprojects/vaSupp/CPS/SitePages/Home.aspx)
 B0*‖dp‖A‖Off‖{Backspace 2}DPiZ
@@ -46,7 +47,9 @@ B0*‖du ‖A‖On‖{Backspace 3}DUiR
 *‖du/‖C‖On‖Dział Usług i Realizacji
 *b0‖duir‖A‖On‖{Backspace 4}DUiR
 *‖duir/‖C‖On‖Dział Usług i Realizacji
+*‖fadc/‖A‖On‖Frauscher Advanced Counter
 *‖FP52/‖MC‖On‖shape gauge with simulation side¦przymiar z symulatorem koła
+*‖frauscher‖A‖On‖Frauscher
 *‖gotcha‖C‖On‖GOTCHA
 *b0‖hbd‖A‖On‖{Backspace 3}HBD
 *‖hbd/‖C‖On‖Hot-Box Detector
@@ -64,7 +67,6 @@ B0*‖du ‖A‖On‖{Backspace 3}DUiR
 *‖magsac‖C‖On‖MAG_SAC (MAG_SUP + MAG_ADM + MAG_COM)
 *‖magsac/‖MA‖On‖{BackSpace 29}integrated diagnostic, communication and voltage supply module¦{BackSpace 29}zintegrowany moduł diagnostyczny, komunikacyjny i zasilający
 *‖magsak‖C‖On‖MAG_SAC (MAG_SUP + MAG_ADM + MAG_COM)
-*b0‖magsup‖A‖On‖{Backspace 6}MAG_SUP
 *‖magsup/‖MA‖On‖{Backspace 1}voltage supply module¦{Backspace 1}moduł zasilający
 *b0‖mb‖A‖On‖{Backspace 2}MB
 *‖mb/‖C‖Off‖Multi Beam
@@ -78,15 +80,19 @@ B0*‖du ‖A‖On‖{Backspace 3}DUiR
 *‖nout‖C‖On‖~OUT
 *‖otagle‖A‖On‖OTAGLE
 *‖phoenix‖C‖On‖PHOENIX
-*b0‖pm‖A‖On‖{Backspace 2}PM
+B*0‖pm‖A‖On‖PM
 *b0‖rnd‖A‖On‖{Backspace 3}R&D
 *‖rnd/‖C‖On‖Research & Development
 *b0‖s2d‖A‖On‖{Backspace 3}SSD
 *‖s2d/‖C‖On‖szlakowy system diagnostyki
 *‖sai/‖C‖On‖Sainerholz
+*‖sat ‖A‖On‖SAT
+*‖sat/‖C‖On‖Site Acceptance Test
 *‖SG52/‖MC‖On‖shape gauge¦przymiar
 *‖shcl/‖C‖On‖TW-2090-171R-SoftwareandHardwareCompatibilityLog.xlsx
 *‖si/‖C‖On‖Siershahn
+*‖sit ‖A‖On‖SIT
+*‖sit/‖C‖On‖System Integration Test
 *‖so/‖C‖On‖Sopot
 *b0‖sps‖A‖On‖{Backspace 3}Documentation Sharepoint Sopot (https://team.voestalpine.net/site/4077/default.aspx)
 *‖subrack‖MC‖On‖Subrack 14¦Subrack 15¦Subrack 6
@@ -94,22 +100,21 @@ B0*‖du ‖A‖On‖{Backspace 3}DUiR
 *‖uniac/‖MC‖On‖(universal) axle counting system¦(uniwersalny) system liczenia osi
 C1*‖uniac1‖A‖On‖UniAC[1]
 *‖uniac1/‖MA‖On‖{Backspace 2}(universal) axle counting system of 1st generation¦{Backspace 2}(uniwersalny) system liczenia osi pierwszej generacji
-*‖uniac2‖A‖On‖UniAC[2]
+C1*?‖uniac2‖A‖On‖UniAC[2]
 *‖uniac2/‖MA‖On‖{BackSpace 2}(universal) axle counting system of 2nd generation¦{BackSpace 2}(uniwersalny) system liczenia osi drugiej generacji
 b0*‖uniacx‖A‖On‖{BackSpace 6}UniAC[x]
 *‖uniacx/‖MA‖On‖{BackSpace 2}family of universal axle counting system¦{BackSpace 2}rodzina uniwersalnych systemów liczenia osi
-b0*‖unias‖A‖On‖{BackSpace 5}UniAS
+?O‖unias‖A‖On‖UniAS
 *‖unias/‖MC‖On‖(universal) wheel sensor¦(uniwersalny) czujnik koła
-b0*‖unias1‖A‖On‖{BackSpace 6}UniAS[1]
+*‖unias1‖A‖On‖UniAS[1]
 *‖unias1/‖MA‖On‖{BackSpace 2}(universal) UniAS[1] type wheel sensor¦{BackSpace 2}(uniwersalny) czujnik koła typu UniAS[1]
-b0*‖unias1p‖A‖On‖{BackSpace 9}UniAS[1{+}]
-*‖unias1p/‖MA‖On‖{BackSpace 2}(universal) UniAS[1{+}] type wheel sensor¦{BackSpace 2}(uniwersalny) czujnik koła typu UniAS[1{+}]
-b0*‖unias2‖A‖On‖{BackSpace 6}UniAS[2]
-*‖unias2/‖MA‖On‖{BackSpace 2}(universal) UniAS[2] type wheel sensor¦{BackSpace 2}(uniwersalny) czujnik koła typu UniAS[2]
-b0*‖unias2i‖A‖Off‖{BackSpace 9}UniAS[2i]
-*‖unias2i/‖MA‖On‖{BackSpace 2}(universal) UniAS[2i] type wheel sensor¦{BackSpace 2}(uniwersalny) czujnik koła typu UniAS[2i]
-b0*‖uniasx‖A‖On‖{BackSpace 6}UniAS[x]
-*‖uniasx/‖MA‖On‖{BackSpace 2}(universal) wheel sensor family¦{BackSpace 3}rodzina (uniwersalnych) czujników osi
+B0*‖unias1p‖A‖Off‖{BackSpace 9}UniAS[1{+}]
+*‖unias1p/‖MA‖Off‖{BackSpace 2}(universal) UniAS[1{+}] type wheel sensor¦{BackSpace 2}(uniwersalny) czujnik koła typu UniAS[1{+}]
+*?‖unias2‖A‖On‖UniAS[2]
+*‖unias2/‖MA‖Off‖{BackSpace 2}(universal) UniAS[2] type wheel sensor¦{BackSpace 2}(uniwersalny) czujnik koła typu UniAS[2]
+*‖uniasp‖A‖On‖UniAS[1{+}]
+*‖uniasx‖A‖On‖UniAS[x]
+*‖uniasx/‖MA‖Off‖{BackSpace 2}(universal) wheel sensor family¦{BackSpace 3}rodzina (uniwersalnych) czujników osi
 *b0‖unibl‖A‖On‖{Backspace 5}UniBL
 *‖unibl/‖MC‖On‖system (uniwersalnej) blokady liniowej¦UniBL
 B0*‖unirc‖A‖On‖{BackSpace 5}UniRC

@@ -1,9 +1,7 @@
 ﻿*‖a/‖A‖On‖Availability
 *‖ab/‖A‖On‖ASDEK_BAZ
-B0*‖axc ‖A‖On‖{BackSpace 3}AxC 
+B*‖axc ‖A‖On‖AxC 
 *‖axc/‖C‖On‖Axle Counter
-B0*‖cad ‖A‖On‖{BackSpace 3}CAD 
-*‖cad/‖C‖On‖Computer Aided Design
 *‖cccms/‖MA‖On‖ CCMS¦ Component Content Management System
 B0*‖cenelec‖A‖On‖{BackSpace 7}CENELEC
 *‖cenelec/‖MC‖On‖European Committee for Electrotechnical Standardization¦Comité Européen de Normalisation Électrotechnique
@@ -39,8 +37,6 @@ B0*‖dxf ‖A‖On‖DXF
 *‖ei/‖C‖On‖Emotional Intelligence
 B0*‖ems ‖A‖On‖{BackSpace 3}EMS 
 *‖ems/‖C‖On‖Electronics Manufacturing Services
-‖eq ‖A‖On‖EQ 
-*‖eq/‖C‖On‖Emotional Quotient
 *‖flowers/‖A‖On‖💐: 🌹🍀🌻🌺🌸
 B0*‖gps ‖A‖On‖{BackSpace 3}GPS 
 *‖gps/‖C‖On‖Global Positioning System

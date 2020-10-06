@@ -31,6 +31,7 @@ Menu, Tray, Add
 Menu, Tray, NoStandard
 Menu, Tray, Standard
 
+EndChars()
 ; ---------------------- SECTION OF GLOBAL VARIABLES ----------------------
 
 CapCheck := ""
@@ -47,6 +48,7 @@ ArrayOnOff := []
 ArrayO := []
 ArrayF := []
 MyHotstring 		:= ""
+global varUndo := ""
 if !(A_Args[7])
 	SelectedRow := 0
 else
@@ -77,29 +79,33 @@ LoadFiles("New.csv")
 if(PrevSec)
 	gosub GUIInit
 
+
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
 
-#if WinActive(, "Microsoft Word") or WinActive(, "Microsoft Outlook") or WinActive(, "Microsoft Excel") or WinActive("ahk_exe SciTe.exe") or WinActive("ahk_exe notepad.exe") ; nie działało w inkscapie
 ^z::			;~ Ctrl + z as in MS Word: Undo
 $!BackSpace:: 	;~ Alt + Backspace as in MS Word: rolls back last Autocorrect action
-	if (MyHotstring && (A_ThisHotkey != A_PriorHotkey))
-		{
-			
+	IniRead, Undo, Config.ini, Configuration, UndoHotstring
+	if (Undo == 1) and (MyHotstring && (A_ThisHotkey != A_PriorHotkey))
+	{
+		
 		;~ MsgBox, % "MyHotstring: " . MyHotstring . " A_ThisHotkey: " . A_ThisHotkey . " A_PriorHotkey: " . A_PriorHotkey
 		ToolTip, Undo the last hotstring., % A_CaretX, % A_CaretY - 20
-		Send, % "{BackSpace " . StrLen(MyHotstring) . "}" . SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", CaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
+		if (varUndo == "")
+			Send, % "{BackSpace " . StrLen(MyHotstring) . "}" . SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", CaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
+		else
+			Send, % "{BackSpace " . StrLen(MyHotstring) . "}" . SubStr(varUndo, InStr(varUndo, ":", CaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
 		SetTimer, TurnOffTooltip, -5000
 		MyHotstring := ""
-		}
+	}
 	else
-		{
+	{
 		ToolTip,
-		Send, !{BackSpace}
-		}
+		SendInput, %A_ThisHotkey%
+	}
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+#if WinActive(, "Microsoft Word") or WinActive(, "Microsoft Outlook") or WinActive(, "Microsoft Excel") or WinActive("ahk_exe SciTe.exe") or WinActive("ahk_exe notepad.exe") ; nie działało w inkscapie
 ^c::
 	Send, ^c
 	IfWinExist, Hotstrings
@@ -131,6 +137,7 @@ LoadFiles(nameoffile)
 StartHotstring(txt)
 {
 	static Options, NewString, OnOff, SendFun, TextInsert
+	varUndo := ""
 	txtsp := StrSplit(txt, "‖")
 	Options := txtsp[1]
 	NewString := txtsp[2]
@@ -161,6 +168,7 @@ StartHotstring(txt)
 NormalWay(ReplacementString, Oflag)
 {
 	global MyHotstring
+	varUndo := ""
 	if (Oflag == 0)
 		Send, % ReplacementString . A_EndChar
 	else
@@ -212,6 +220,7 @@ ViaClipboard(ReplacementString, Oflag)
 MenuText(TextOptions, Oflag)
 {
 	global MyHotstring, MenuListbox, Ovar
+	varUndo := A_ThisHotkey
 	WinGetPos, WinX, WinY,WinW,WinH,A
     mouseX := Round(WinX+WinW/2)
     mouseY := Round(WinY+WinH/2)
@@ -263,6 +272,7 @@ Return
 
 MenuTextAHK(TextOptions, Oflag){
 	global MyHotstring, MenuListbox, Ovar
+	varUndo := A_ThisHotkey
 	WinGetPos, WinX, WinY,WinW,WinH,A
     mouseX := Round(WinX+WinW/2)
     mouseY := Round(WinY+WinH/2)
@@ -322,6 +332,7 @@ Return
 TimeAndDate(ReplacementString, Oflag)
 {
     global MyHotstring
+	varUndo := ""
 	ReplacementString := StrReplace(ReplacementString, "A_YYYY", A_YYYY)
 	ReplacementString := StrReplace(ReplacementString, "A_MM", A_MM)
 	ReplacementString := StrReplace(ReplacementString, "A_DD", A_DD)
@@ -394,6 +405,76 @@ F_ShowMonitorNumbers()
 return
 }
 
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndChars()
+{
+	global
+
+	HotstringEndChars := ""
+	IniRead, EndingChar_Space, Config.ini, Configuration, EndingChar_Space
+	IniRead, EndingChar_Minus, Config.ini, Configuration, EndingChar_Minus
+	IniRead, EndingChar_ORoundBracket, Config.ini, Configuration, EndingChar_ORoundBracket
+	IniRead, EndingChar_CRoundBracket, Config.ini, Configuration, EndingChar_CRoundBracket
+	IniRead, EndingChar_OSquareBracket, Config.ini, Configuration, EndingChar_OSquareBracket
+	IniRead, EndingChar_CSquareBracket, Config.ini, Configuration, EndingChar_CSquareBracket
+	IniRead, EndingChar_OCurlyBracket, Config.ini, Configuration, EndingChar_OCurlyBracket
+	IniRead, EndingChar_CCurlyBracket, Config.ini, Configuration, EndingChar_CCurlyBracket
+	IniRead, EndingChar_Colon, Config.ini, Configuration, EndingChar_Colon
+	IniRead, EndingChar_Semicolon, Config.ini, Configuration, EndingChar_;
+	IniRead, EndingChar_Apostrophe, Config.ini, Configuration, EndingChar_Apostrophe
+	IniRead, EndingChar_Quote, Config.ini, Configuration, EndingChar_Quote
+	IniRead, EndingChar_Slash, Config.ini, Configuration, EndingChar_Slash
+	IniRead, EndingChar_Backslash, Config.ini, Configuration, EndingChar_Backslash
+	IniRead, EndingChar_Comma, Config.ini, Configuration, EndingChar_Comma
+	IniRead, EndingChar_Dot, Config.ini, Configuration, EndingChar_Dot
+	IniRead, EndingChar_QuestionMark, Config.ini, Configuration, EndingChar_QuestionMark
+	IniRead, EndingChar_ExclamationMark, Config.ini, Configuration, EndingChar_ExclamationMark
+	IniRead, EndingChar_Enter, Config.ini, Configuration, EndingChar_Enter
+	IniRead, EndingChar_Tab, Config.ini, Configuration, EndingChar_Tab
+	if (EndingChar_Space)
+		HotstringEndChars .= " "
+	if (EndingChar_Minus)
+		HotstringEndChars .= "-"
+	if (EndingChar_ORoundBracket)
+		HotstringEndChars .= "("
+	if (EndingChar_CRoundBracket)
+		HotstringEndChars .= ")"
+	if (EndingChar_OSquareBracket)
+		HotstringEndChars .= "["
+	if (EndingChar_CSquareBracket)
+		HotstringEndChars .= "]"
+	if (EndingChar_OCurlyBracket)
+		HotstringEndChars .= "{"
+	if (EndingChar_CCurlyBracket)
+		HotstringEndChars .= "}"
+	if (EndingChar_Colon)
+		HotstringEndChars .= ":"
+	if (EndingChar_Semicolon)
+		HotstringEndChars .= ";"
+	if (EndingChar_Apostrophe)
+		HotstringEndChars .= "'"
+	if (EndingChar_Quote)
+		HotstringEndChars .= """"
+	if (EndingChar_Slash)
+		HotstringEndChars .= "/"
+	if (EndingChar_Backslash)
+		HotstringEndChars .= "\"
+	if (EndingChar_Comma)
+		HotstringEndChars .= ","
+	if (EndingChar_Dot)
+		HotstringEndChars .= "."
+	if (EndingChar_QuestionMark)
+		HotstringEndChars .= "?"
+	if (EndingChar_ExclamationMark)
+		HotstringEndChars .= "!"
+	if (EndingChar_Enter)
+		HotstringEndChars .= "`n"
+	if (EndingChar_Tab)
+		HotstringEndChars .= "`t"
+	Hotstring("EndChars",HotstringEndChars)
+}
+
 ; --------------------------- SECTION OF LABELS ---------------------------
 
 TurnOffTooltip:
@@ -456,22 +537,139 @@ GUIInit:
 
     Gui, HS3:Add, Button, % "xm yp+" . 37*DPI%chMon% . " w" . 135*DPI%chMon% . " gAddHotstring", Set hotstring
 	; Gui, HS3:Add, Button, % "x+" . 10*DPI%chMon% . " yp w" . 135*DPI%chMon% . " gSaveHotstrings Disabled", Save Hotstring
-    Gui, HS3:Add, Button, % "x+" . 10*DPI%chMon% . " yp w" . 135*DPI%chMon% . " vEdit gEdit Disabled", Edit hotstring
+    Gui, HS3:Add, Button, % "x+" . 10*DPI%chMon% . " yp w" . 135*DPI%chMon% . " gClear", Clear
 	Gui, HS3:Add, Button, % "x+" . 10*DPI%chMon% . " yp w" . 135*DPI%chMon% . " vDelete gDelete Disabled", Delete hotstring
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
     Gui, HS3:Add, Text, ym, Library content
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlack Norm"
-    Gui, HS3:Add, ListView, % "LV0x1 0x4 yp+" . 25*DPI%chMon% . " xp h" . 500*DPI%chMon% . " w" . 400*DPI%chMon% . " vHSList", Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring
+    Gui, HS3:Add, ListView, % "LV0x1 0x4 yp+" . 25*DPI%chMon% . " xp h" . 500*DPI%chMon% . " w" . 400*DPI%chMon% . " vHSList AltSubmit gHSLV", Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring
 	Gui, HS3:Add, Edit, vStringCombo xs gViewString ReadOnly Hide,
     Menu, HSMenu, Add, &Monitor, CheckMon
+	Menu, Submenu1, Add, &Undo last hotstring,Undo
+	Menu, Submenu1, Add, &Save window position,SavePos
+	Menu, Submenu2, Add, Space, EndSpace
+	if (EndingChar_Space)
+		Menu, Submenu2, Check, Space
+	else
+		Menu, Submenu2, UnCheck, Space
+	Menu, Submenu2, Add, Minus -, EndMinus
+	if (EndingChar_Minus)
+		Menu, Submenu2, Check, Minus -
+	else
+		Menu, Submenu2, UnCheck, Minus -
+	Menu, Submenu2, Add, Opening Round Bracket (, EndORoundBracket
+	if (EndingChar_ORoundBracket)
+		Menu, Submenu2, Check, Opening Round Bracket (
+	else
+		Menu, Submenu2, UnCheck, Opening Round Bracket (
+	Menu, Submenu2, Add, Closing Round Bracket ), EndCRoundBracket
+	if (EndingChar_CRoundBracket)
+		Menu, Submenu2, Check, Closing Round Bracket )
+	else
+		Menu, Submenu2, UnCheck, Closing Round Bracket )
+	Menu, Submenu2, Add, Opening Square Bracket [, EndOSquareBracket
+	if (EndingChar_OSquareBracket)
+		Menu, Submenu2, Check, Opening Square Bracket [
+	else
+		Menu, Submenu2, UnCheck, Opening Square Bracket [
+	Menu, Submenu2, Add, Closing Square Bracket ], EndCSquareBracket
+	if (EndingChar_CSquareBracket)
+		Menu, Submenu2, Check, Closing Square Bracket ]
+	else
+		Menu, Submenu2, UnCheck, Closing Square Bracket ]
+	Menu, Submenu2, Add, Opening Curly Bracket {, EndOCurlyBracket
+	if (EndingChar_OCurlyBracket)
+		Menu, Submenu2, Check, Opening Curly Bracket {
+	else
+		Menu, Submenu2, UnCheck, Opening Curly Bracket {
+	Menu, Submenu2, Add, Closing Curly Bracket }, EndCCurlyBracket
+	if (EndingChar_CCurlyBracket)
+		Menu, Submenu2, Check, Closing Curly Bracket }
+	else
+		Menu, Submenu2, UnCheck, Closing Curly Bracket }
+	Menu, Submenu2, Add, Colon :, EndColon
+	if (EndingChar_Colon)
+		Menu, Submenu2, Check, Colon :
+	else
+		Menu, Submenu2, UnCheck, Colon :
+	Menu, Submenu2, Add, % "Semicolon `;", EndSemicolon
+	if (EndingChar_Semicolon)
+		Menu, Submenu2, Check, % "Semicolon `;"
+	else
+		Menu, Submenu2, UnCheck, % "Semicolon `;"
+	Menu, Submenu2, Add, Apostrophe ', EndApostrophe
+	if (EndingChar_Apostrophe)
+		Menu, Submenu2, Check, Apostrophe '
+	else
+		Menu, Submenu2, UnCheck, Apostrophe '
+	Menu, Submenu2, Add, % "Quote """, EndQuote
+	if (EndingChar_Quote)
+		Menu, Submenu2, Check, % "Quote """
+	else
+		Menu, Submenu2, UnCheck, % "Quote """
+	Menu, Submenu2, Add, Slash /, EndSlash
+	if (EndingChar_Slash)
+		Menu, Submenu2, Check, Slash /
+	else
+		Menu, Submenu2, UnCheck, Slash /
+	Menu, Submenu2, Add, Backslash \, EndBackslash
+	if (EndingChar_Backslash)
+		Menu, Submenu2, Check, Backslash \
+	else
+		Menu, Submenu2, UnCheck, Backslash \
+	Menu, Submenu2, Add, % "Comma ,", EndComma
+	if (EndingChar_Comma)
+		Menu, Submenu2, Check, % "Comma ,"
+	else
+		Menu, Submenu2, UnCheck, % "Comma ,"
+	Menu, Submenu2, Add, Dot ., EndDot
+	if (EndingChar_Dot)
+		Menu, Submenu2, Check, Dot .
+	else
+		Menu, Submenu2, UnCheck, Dot .
+	Menu, Submenu2, Add, Question Mark ?, EndQuestionMark
+	if (EndingChar_QuestionMark)
+		Menu, Submenu2, Check, Question Mark ?
+	else
+		Menu, Submenu2, UnCheck, Question Mark ?
+	Menu, Submenu2, Add, Exclamation Mark !, EndExclamationMark
+	if (EndingChar_ExclamationMark)
+		Menu, Submenu2, Check, Exclamation Mark !
+	else
+		Menu, Submenu2, UnCheck, Exclamation Mark !
+	Menu, Submenu2, Add, Enter , EndEnter
+	if (EndingChar_Enter)
+		Menu, Submenu2, Check, Enter
+	else
+		Menu, Submenu2, UnCheck, Enter
+	Menu, Submenu2, Add, Tab , EndTab
+	if (EndingChar_Tab)
+		Menu, Submenu2, Check, Tab
+	else
+		Menu, Submenu2, UnCheck, Tab
+	Menu, Submenu1, Add, &Toggle EndChars, :Submenu2
+	IniRead, Undo, Config.ini, Configuration, UndoHotstring
+	if (Undo == 0)
+		Menu, Submenu1, UnCheck, &Undo last hotstring
+	else
+		Menu, Submenu1, Check, &Undo last hotstring
+	Menu, HSMenu, Add, &Configure, :Submenu1
 	Menu, HSMenu, Add, &Search Hotstrings, Searching
     Menu, HSMenu, Add, &Delay, HSdelay
 	Menu, HSMenu, Add, &About/Help, About
     Gui, HS3:Menu, HSMenu
-	StartX := Mon%chMon%Left + (Abs(Mon%chMon%Right - Mon%chMon%Left)/2) - 430*DPI%chMon%
-	StartY := Mon%chMon%Top + (Abs(Mon%chMon%Bottom - Mon%chMon%Top)/2) - (225*DPI%chMon%+31)
-	StartW := 960*DPI%chMon%
-	StartH := 550*DPI%chMon%+20
+	IniRead, StartX, Config.ini, Configuration, SizeOfHotstringsWindow_X, #
+	IniRead, StartY, Config.ini, Configuration, SizeOfHotstringsWindow_Y, #
+	IniRead, StartW, Config.ini, Configuration, SizeOfHotstringsWindow_Width, #
+	IniRead, StartH, Config.ini, Configuration, SizeOfHotstringsWindow_Height, #
+	if (StartX == "")
+		StartX := Mon%chMon%Left + (Abs(Mon%chMon%Right - Mon%chMon%Left)/2) - 430*DPI%chMon%
+	if (StartY == "")
+		StartY := Mon%chMon%Top + (Abs(Mon%chMon%Bottom - Mon%chMon%Top)/2) - (225*DPI%chMon%+31)
+	if (StartW == "")
+		StartW := 960*DPI%chMon%
+	if (StartH == "")
+		StartH := 550*DPI%chMon%+20
 	if (showGui == 1)
 	{
 		Gui, HS3:Show, x%StartX% y%StartY% w%StartW% h%StartH%, Hotstrings
@@ -661,10 +859,16 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-Edit:
+Clear:
+	GuiControl,, StringCombo , 
+	gosub, ViewString
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+HSLV:
 	Gui, HS3:+OwnDialogs
 	If !(SelectedRow := LV_GetNext()) {
-		MsgBox, 0, %A_ThisLabel%, Select a row in the list-view, please!
 		Return
 	}
 	LV_GetText(Options, SelectedRow, 2)
@@ -698,11 +902,51 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+HSLV2:
+	Gui, HSList:+OwnDialogs
+	If !(SelectedRow := LV_GetNext()) {
+		Return
+	}
+	LV_GetText(Options, SelectedRow, 3)
+	LV_GetText(NewString, SelectedRow, 2)
+	LV_GetText(Fun, SelectedRow, 4)
+	if (Fun = "A")
+	{
+		SendFun := "NormalWay"
+	}
+	else if(Fun = "C")
+	{
+		SendFun := "ViaClipboard"
+	}
+	else if (Fun = "MC")
+	{
+		SendFun := "MenuText"
+	}
+	else if (Fun = "MA")
+	{
+		SendFun := "MenuTextAHK"
+	}
+	else if (Fun := "T")
+		SendFun := "TimeAndDate"
+	LV_GetText(TextInsert, SelectedRow, 6)
+	LV_GetText(OnOff, SelectedRow, 5)
+	LV_GetText(Library, SelectedRow, 1)
+	Gui, HS3: Default
+	ChooseSec := % Library . ".csv"
+	Hotstring(":"Options ":" NewString,func(SendFun).bind(TextInsert),OnOff)
+	HotString := % "Hotstring("":" . Options . ":" . NewString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
+	GuiControl,, StringCombo ,  %HotString%
+	gosub, ViewString
+	GuiControl, Choose, SectionCombo, %ChooseSec%
+	gosub, SectionChoose
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 SectionChoose:
 	Gui, HS3:Submit, NoHide
 	Gui, HS3:+OwnDialogs
 
-	GuiControl, Enable, Edit
 	GuiControl, Enable, Delete
 	
 	; if InStr(StringCombo, "Hotstring")
@@ -1115,8 +1359,14 @@ HS3GuiSize:
 		return
 	if (ErrorLevel == 0)
 		showGui := 2
-	IniW := StartW
-	IniH := StartH
+	if (A_Args[3] == "")
+		IniW := StartW
+	else
+		IniW := A_Args[3]
+	if (A_Args[4] == "")
+		IniH := StartH
+	else
+		IniH := A_Args[4]
 	LV_Width := 500*DPI%chMon%
 	LV_Height := 520*DPI%chMon%
 	LV_ModifyCol(1,100*DPI%chMon%)
@@ -1171,7 +1421,17 @@ SysGet, N, MonitorCount
     SysGet, PrimMon, MonitorPrimary
     if (chMon == 0)
         chMon := PrimMon
-Gui, HS3List:Destroy
+If (WinExist("Search Hotstring"))
+{
+	Gui, HS3List:Destroy
+	ArrayHS := []
+	ArrayS := []
+	ArrayT := []
+	ArrayOnOff := []
+	ArrayO := []
+	ArrayF := []
+}
+
 Gui, HS3List:New, +Resize MinSize800x500
 Gui, HS3List:Add, Text, ,Search:
 Gui, HS3List:Add, Text, % "yp xm+" . 420*DPI%chMon%, Search by:
@@ -1180,7 +1440,7 @@ Gui, HS3List:Add, Radio, % "yp xm+" . 420*DPI%chMon% . " vRText gSearchChange Ch
 Gui, HS3List:Add, Radio, % "yp xm+" . 520*DPI%chMon% . " vRHS gSearchChange", Triggerstring
 Gui, HS3List:Add, Radio, % "yp xm+" . 640*DPI%chMon% . " vRSection gSearchChange", Library
 Gui, HS3List:Add, Button, % "yp-2 xm+" . 720*DPI%chMon% . " w" . 100*DPI%chMon% . " gMoveList", Move
-Gui, HS3List:Add, ListView, xm grid vList, Library|Triggerstring|Trigger Options|Output Functions|Enable/Disable|Hotstring
+Gui, HS3List:Add, ListView, xm grid vList AltSubmit gHSLV2, Library|Triggerstring|Trigger Options|Output Functions|Enable/Disable|Hotstring
 Loop, Files, %A_ScriptDir%\Categories\*.csv
 {
     Loop
@@ -1396,6 +1656,7 @@ FileDelete, %OutputFile%
 MsgBox Hotstring moved to the %TargetLib% file!
 	LoadFiles(TargetLib)
 Gui, MoveLibs:Destroy
+Gui, Searching:Destroy
 gosub, Searching
 return
 
@@ -1461,4 +1722,208 @@ return
 MonGuiEscape:
 MonGuiClose:
 	Gui, Mon:Destroy
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Undo:
+	Menu, Submenu1, ToggleCheck, &Undo last hotstring
+	Undo := !(Undo)
+	IniWrite, %Undo%, Config.ini, Configuration, UndoHotstring
+return
+
+F11::
+	IniRead, Undo, Config.ini, Configuration, UndoHotstring
+	Undo := !(Undo)
+	IniWrite, %Undo%, Config.ini, Configuration, UndoHotstring
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+SavePos:
+	WinGetPos, HSX, HSY, HSW, HSH, Hotstrings
+	IniWrite, %HSX%, Config.ini, Configuration, SizeOfHotstringsWindow_X
+	IniWrite, %HSY%, Config.ini, Configuration, SizeOfHotstringsWindow_Y
+	; IniWrite, %HSW%, Config.ini, Configuration, SizeOfHotstringsWindow_Width
+	; IniWrite, %HSH%, Config.ini, Configuration, SizeOfHotstringsWindow_Height
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndSpace:
+	Menu, Submenu2, ToggleCheck, Space
+	EndingChar_Space := !(EndingChar_Space)
+	IniWrite, %EndingChar_Space%, Config.ini, Configuration, EndingChar_Space
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndMinus:
+	Menu, Submenu2, ToggleCheck, Minus -
+	EndingChar_Minus := !(EndingChar_Minus)
+	IniWrite, %EndingChar_Minus%, Config.ini, Configuration, EndingChar_Minus
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndORoundBracket:
+	Menu, Submenu2, ToggleCheck, Opening Round Bracket (
+	EndingChar_ORoundBracket := !(EndingChar_ORoundBracket)
+	IniWrite, %EndingChar_ORoundBracket%, Config.ini, Configuration, EndingChar_ORoundBracket
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndCRoundBracket:
+	Menu, Submenu2, ToggleCheck, Closing Round Bracket )
+	EndingChar_CRoundBracket := !(EndingChar_CRoundBracket)
+	IniWrite, %EndingChar_CRoundBracket%, Config.ini, Configuration, EndingChar_CRoundBracket
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndOSquareBracket:
+	Menu, Submenu2, ToggleCheck, Opening Square Bracket [
+	EndingChar_OSquareBracket := !(EndingChar_OSquareBracket)
+	IniWrite, %EndingChar_OSquareBracket%, Config.ini, Configuration, EndingChar_OSquareBracket
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndCSquareBracket:
+	Menu, Submenu2, ToggleCheck, Closing Square Bracket ]
+	EndingChar_CSquareBracket := !(EndingChar_CSquareBracket)
+	IniWrite, %EndingChar_CSquareBracket%, Config.ini, Configuration, EndingChar_CSquareBracket
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndOCurlyBracket:
+	Menu, Submenu2, ToggleCheck, Opening Curly Bracket {
+	EndingChar_OCurlyBracket := !(EndingChar_OCurlyBracket)
+	IniWrite, %EndingChar_OCurlyBracket%, Config.ini, Configuration, EndingChar_OCurlyBracket
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndCCurlyBracket:
+	Menu, Submenu2, ToggleCheck, Closing Curly Bracket }
+	EndingChar_CCurlyBracket := !(EndingChar_CCurlyBracket)
+	IniWrite, %EndingChar_CCurlyBracket%, Config.ini, Configuration, EndingChar_CCurlyBracket
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndColon:
+	Menu, Submenu2, ToggleCheck, Colon :
+	EndingChar_Colon := !(EndingChar_Colon)
+	IniWrite, %EndingChar_Colon%, Config.ini, Configuration, EndingChar_Colon
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndSemicolon:
+	Menu, Submenu2, ToggleCheck, % "Semicolon `;"
+	EndingChar_Semicolon := !(EndingChar_Semicolon)
+	IniWrite, %EndingChar_Semicolon%, Config.ini, Configuration, EndingChar_Semicolon
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndApostrophe:
+	Menu, Submenu2, ToggleCheck, Apostrophe '
+	EndingChar_Apostrophe := !(EndingChar_Apostrophe)
+	IniWrite, %EndingChar_Apostrophe%, Config.ini, Configuration, EndingChar_Apostrophe
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndQuote:
+	Menu, Submenu2, ToggleCheck, % "Quote """
+	EndingChar_Quote := !(EndingChar_Quote)
+	IniWrite, %EndingChar_Quote%, Config.ini, Configuration, EndingChar_Quote
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndSlash:
+	Menu, Submenu2, ToggleCheck, Slash /
+	EndingChar_Slash := !(EndingChar_Slash)
+	IniWrite, %EndingChar_Slash%, Config.ini, Configuration, EndingChar_Slash
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndBackslash:
+	Menu, Submenu2, ToggleCheck, Backslash \
+	EndingChar_Backslash := !(EndingChar_Backslash)
+	IniWrite, %EndingChar_Backslash%, Config.ini, Configuration, EndingChar_Backslash
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndComma:
+	Menu, Submenu2, ToggleCheck, % "Comma ,"
+	EndingChar_Comma := !(EndingChar_Comma)
+	IniWrite, %EndingChar_Comma%, Config.ini, Configuration, EndingChar_Comma
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndDot:
+	Menu, Submenu2, ToggleCheck, Dot .
+	EndingChar_Dot := !(EndingChar_Dot)
+	IniWrite, %EndingChar_Dot%, Config.ini, Configuration, EndingChar_Dot
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndQuestionMark:
+	Menu, Submenu2, ToggleCheck, Question Mark ?
+	EndingChar_QuestionMark := !(EndingChar_QuestionMark)
+	IniWrite, %EndingChar_QuestionMark%, Config.ini, Configuration, EndingChar_QuestionMark
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndExclamationMark:
+	Menu, Submenu2, ToggleCheck, Exclamation Mark !
+	EndingChar_ExclamationMark := !(EndingChar_ExclamationMark)
+	IniWrite, %EndingChar_ExclamationMark%, Config.ini, Configuration, EndingChar_ExclamationMark
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndEnter:
+	Menu, Submenu2, ToggleCheck, Enter
+	EndingChar_Enter := !(EndingChar_Enter)
+	IniWrite, %EndingChar_Enter%, Config.ini, Configuration, EndingChar_Enter
+	EndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndTab:
+	Menu, Submenu2, ToggleCheck, Tab
+	EndingChar_Tab := !(EndingChar_Tab)
+	IniWrite, %EndingChar_Tab%, Config.ini, Configuration, EndingChar_Tab
+	EndChars()
 return
