@@ -34,6 +34,27 @@ Menu, Tray, Standard
 EndChars()
 ; ---------------------- SECTION OF GLOBAL VARIABLES ----------------------
 
+NewString := ""
+Immediate := ""
+CaseSensitive := ""
+NoBackspace := ""
+InsideWord := ""
+NoEndChar := ""
+DisHS := ""
+ByClip := ""
+TextInsert := ""
+TextInsert1 := ""
+TextInsert2 := ""
+TextInsert3 := ""
+TextInsert4 := ""
+TextInsert5 := ""
+TextInsert6 := ""
+SectionCombo := ""
+Delete := ""
+Shortcuts := ""
+ViewString := ""
+HSList := ""
+Stringcombo := ""
 CapCheck := ""
 HotString := ""
 PrevSec := A_Args[2]
@@ -47,18 +68,24 @@ ArrayT := []
 ArrayOnOff := []
 ArrayO := []
 ArrayF := []
+global Triggers := []
+global strInput := ""
 MyHotstring 		:= ""
 global varUndo := ""
 if !(A_Args[7])
 	SelectedRow := 0
 else
 	SelectedRow := A_Args[7]
-delay := 200
 if !(prevMon)
 	chMon := 0
 else
 	chMon := prevMon
-delay := 200
+IniRead, delay, Config.ini, Configuration, Delay
+if (delay == "")
+{
+	delay := 200
+	IniWrite, %delay%, Config.ini, Configuration, Delay
+}
 flagMon := 0
 if !(PrevSec)
 	showGui := 1
@@ -79,15 +106,38 @@ LoadFiles("New.csv")
 if(PrevSec)
 	gosub GUIInit
 
+Loop,
+{
+	Input, out,V L1, {BS}
+	strInput .= out
+	if InStr(HotstringEndChars, out)
+		strInput := ""
+	if (StrLen(strInput) > 1)
+	{
+		HelpTrig := ""
+		Loop, % Triggers.MaxIndex()
+		{
+			If InStr(Triggers[A_Index], strInput)
+			{
+				If !(HelpTrig == "")
+					HelpTrig .= "`n"
+				HelpTrig .= Triggers[A_Index]
+			}
+		}
+		ToolTip, %HelpTrig%
+	}
+	else
+		ToolTip, 
+}
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
+~BackSpace:: StringTrimRight, strInput, strInput, 1
 
-^z::			;~ Ctrl + z as in MS Word: Undo
+$^z::			;~ Ctrl + z as in MS Word: Undo
 $!BackSpace:: 	;~ Alt + Backspace as in MS Word: rolls back last Autocorrect action
 	IniRead, Undo, Config.ini, Configuration, UndoHotstring
 	if (Undo == 1) and (MyHotstring && (A_ThisHotkey != A_PriorHotkey))
 	{
-		
 		;~ MsgBox, % "MyHotstring: " . MyHotstring . " A_ThisHotkey: " . A_ThisHotkey . " A_PriorHotkey: " . A_PriorHotkey
 		ToolTip, Undo the last hotstring., % A_CaretX, % A_CaretY - 20
 		if (varUndo == "")
@@ -100,7 +150,10 @@ $!BackSpace:: 	;~ Alt + Backspace as in MS Word: rolls back last Autocorrect act
 	else
 	{
 		ToolTip,
-		SendInput, %A_ThisHotkey%
+		If InStr(A_ThisHotkey, "^z")
+			SendInput, ^z
+		else if InStr(A_ThisHotkey, "!BackSpace")
+			SendInput, !{BackSpace}
 	}
 return
 
@@ -114,6 +167,59 @@ return
 		ControlSetText, Edit2, %Clipboard%
 	}
 return
+#if
+
+#if WinActive("Hotstrings") and WinActive("ahk_class AutoHotkeyGUI")
+F1::
+	Gui, HS3:Default
+	goto, About
+return
+
+F2::
+	Gui, HS3:Default
+	Gui, HS3:Submit, NoHide
+	if (SectionCombo == "")
+	{
+		MsgBox, Select hotstring library
+		return
+	}
+	GuiControl, Focus, HSList
+	if (LV_GetNext(0,"Focused") == 0)
+		LV_Modify(1, "+Select +Focus")
+return
+
+F3::
+	Gui, HS3:Default
+	goto, Searching
+return
+
+F5::
+	Gui, HS3:Default
+	goto, Clear
+return
+
+F7::
+	Gui, HS3:Default
+	goto, HSdelay
+return
+
+F8::
+	Gui, HS3:Default
+	goto, Delete
+return
+
+F9::
+	Gui, HS3:Default
+	goto, AddHotstring
+return
+
+#if
+
+#if WinActive("Search Hotstrings") and WinActive("ahk_class AutoHotkeyGUI")
+
+F8::
+	Gui, HS3List:Default
+	goto, MoveList
 #if
 ; ------------------------- SECTION OF FUNCTIONS --------------------------
 
@@ -159,9 +265,13 @@ StartHotstring(txt)
 	else
 		Oflag := 0
 	if !((Options == "") and (NewString == "") and (TextInsert == "") and (OnOff == ""))
+	{
 		Hotstring(":" . Options . ":" . NewString, func(SendFun).bind(TextInsert, Oflag), OnOff)
+		Triggers.Push(NewString)
+	}
 	return
 }
+
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -183,8 +293,17 @@ NormalWay(ReplacementString, Oflag)
 	{
 		Send, {LCtrl up}
 	}
-	
-	MyHotstring := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", false, 1, 2) + 1)
+	if (InStr(A_ThisHotkey, "*"))
+	{
+		if (InStr(A_ThisHotkey,"*0"))
+			MyHotstring := % ReplacementString . " "
+		else
+			MyHotstring := ReplacementString
+	}
+	else
+		MyHotstring := % ReplacementString . " "
+	if (InStr(MyHotstring, "{"))
+		MyHotstring := SubStr(MyHotstring, InStr(MyHotstring, "}")+1 , StrLen(MyHotstring)-InStr(MyHotstring, "}"))
 	Hotstring("Reset")
 }
 
@@ -235,7 +354,9 @@ MenuText(TextOptions, Oflag)
 	}
 	CoordMode, Mouse, Screen
 	MouseGetPos, MouseX, MouseY 
-	Gui, Menu:Show, x%MouseX% y%MouseY%, Hotstring listbox
+	MenuX := MouseX + 20
+	MenuY := MouseY + 20
+	Gui, Menu:Show, x%MenuX% y%MenuY%, Hotstring listbox
 	if (MyHotstring == "")
 	{
 		HK := StrSplit(A_ThisHotkey, ":")
@@ -287,7 +408,9 @@ MenuTextAHK(TextOptions, Oflag){
 	}
 	CoordMode, Mouse, Screen
 	MouseGetPos, MouseX, MouseY 
-	Gui, MenuAHK:Show, x%MouseX% y%MouseY%, HotstringAHK listbox
+	MenuX := MouseX + 20
+	MenuY := MouseY + 20
+	Gui, MenuAHK:Show, x%MenuX% y%MenuY%, HotstringAHK listbox
 if (MyHotstring == "")
 {
 	HK := StrSplit(A_ThisHotkey, ":")
@@ -485,7 +608,7 @@ return
 
 ^#h::
 GUIInit:
-    SysGet, N, MonitorCount
+	SysGet, N, MonitorCount
     Loop, % N
     {
         SysGet, Mon%A_Index%, Monitor, %A_Index%
@@ -496,7 +619,7 @@ GUIInit:
     SysGet, PrimMon, MonitorPrimary
     if (chMon == 0)
         chMon := PrimMon
-    Gui, HS3:New, % "+Resize MinSize"  . 860*DPI%chMon% . "x" . 550*DPI%chMon%+20
+    Gui, HS3:New, % "+Resize MinSize"  . 860*DPI%chMon% . "x" . 580*DPI%chMon%+20
     Gui, HS3:Margin, 12.5*DPI%chMon%, 7.5*DPI%chMon%
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " bold cBlue", Calibri
     Gui, HS3:Add, Text, % "xm+" . 9*DPI%chMon%,Enter triggerstring:
@@ -512,9 +635,9 @@ GUIInit:
     Gui, HS3:Add, CheckBox, % "gCapsCheck vNoEndChar xp-" . 225*DPI%chMon% . " yp+" . 25*DPI%chMon%, No End Char (O)
     Gui, HS3:Add, CheckBox, % "gCapsCheck vDisHS xp+" . 225*DPI%chMon% . " yp+" . 0*DPI%chMon%, Disable
 	Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
-    Gui, HS3:Add, Text,% "xm+" . 9*DPI%chMon%, Select hotstring output function
+    Gui, HS3:Add, Text,% "xm+" . 9*DPI%chMon%, Hotstring output function
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlack Norm"
-    Gui, HS3:Add, DropDownList, % "xm w" . 424*DPI%chMon% . " vByClip gByClip hwndddl", Send by Autohotkey||Send by Clipboard|Send by Menu (Clipboard)|Send by Menu (Autohotkey)|Send Time or Date
+    Gui, HS3:Add, DropDownList, % "xm w" . 424*DPI%chMon% . " vByClip gByClip hwndddl", SendInput (SI)||Clipboard (CL)|Menu & Clipboard (MCL)|Menu & SendInput (MSI)|Send Time or Date
     PostMessage, 0x153, -1, 22*DPI%chMon%,, ahk_id %ddl%
 	Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
     Gui, HS3:Add, Text,% "xm+" . 9*DPI%chMon%, Enter hotstring
@@ -539,12 +662,16 @@ GUIInit:
 	; Gui, HS3:Add, Button, % "x+" . 10*DPI%chMon% . " yp w" . 135*DPI%chMon% . " gSaveHotstrings Disabled", Save Hotstring
     Gui, HS3:Add, Button, % "x+" . 10*DPI%chMon% . " yp w" . 135*DPI%chMon% . " gClear", Clear
 	Gui, HS3:Add, Button, % "x+" . 10*DPI%chMon% . " yp w" . 135*DPI%chMon% . " vDelete gDelete Disabled", Delete hotstring
-    Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
+	gui, HS3:Add, Text, x0 h1 0x7 w10 vLine
+	Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
     Gui, HS3:Add, Text, ym, Library content
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlack Norm"
     Gui, HS3:Add, ListView, % "LV0x1 0x4 yp+" . 25*DPI%chMon% . " xp h" . 500*DPI%chMon% . " w" . 400*DPI%chMon% . " vHSList AltSubmit gHSLV", Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring
 	Gui, HS3:Add, Edit, vStringCombo xs gViewString ReadOnly Hide,
-    Menu, HSMenu, Add, &Monitor, CheckMon
+	Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlack Norm"
+	Gui, HS3:Add, Text, xm y0 vShortcuts,F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Delay | F8 Delete hotstring | F9 Set hotstring 
+
+    ; Menu, HSMenu, Add, &Monitor, CheckMon
 	Menu, Submenu1, Add, &Undo last hotstring,Undo
 	Menu, Submenu1, Add, &Save window position,SavePos
 	Menu, Submenu2, Add, Space, EndSpace
@@ -655,7 +782,7 @@ GUIInit:
 		Menu, Submenu1, Check, &Undo last hotstring
 	Menu, HSMenu, Add, &Configure, :Submenu1
 	Menu, HSMenu, Add, &Search Hotstrings, Searching
-    Menu, HSMenu, Add, &Delay, HSdelay
+    Menu, HSMenu, Add, Clipboard &Delay, HSdelay
 	Menu, HSMenu, Add, &About/Help, About
     Gui, HS3:Menu, HSMenu
 	IniRead, StartX, Config.ini, Configuration, SizeOfHotstringsWindow_X, #
@@ -669,7 +796,7 @@ GUIInit:
 	if (StartW == "")
 		StartW := 960*DPI%chMon%
 	if (StartH == "")
-		StartH := 550*DPI%chMon%+20
+		StartH := 580*DPI%chMon%+20
 	if (showGui == 1)
 	{
 		Gui, HS3:Show, x%StartX% y%StartY% w%StartW% h%StartH%, Hotstrings
@@ -697,6 +824,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ViewString:
+	Gui, HS3:Submit, NoHide
 	GuiControlGet, StringCombo
 	Select := StringCombo
 	HotString := StrSplit(Select, """")
@@ -820,13 +948,13 @@ AddHotstring:
 	GoSub OptionString   ; Writes the Hotstring options string
 
 ; Add new/changed target item in DropDownList
-	if (ByClip == "Send by Clipboard")
+	if (ByClip == "Clipboard (CL)")
 		SendFun := "ViaClipboard"
-	else if (ByClip == "Send by Autohotkey")
+	else if (ByClip == "SendInput (SI)")
 		SendFun := "NormalWay"
-	else if (ByClip == "Send by Menu (Clipboard)")
+	else if (ByClip == "Menu & Clipboard (MCL)")
 		SendFun := "MenuText"
-	else if (ByClip == "Send by Menu (Autohotkey)")
+	else if (ByClip == "Menu & SendInput (MSI)")
 		SendFun := "MenuTextAHK"
 	else if (ByClip == "Send Time or Date")
 		SendFun := "TimeAndDate"
@@ -860,7 +988,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 Clear:
-	GuiControl,, StringCombo , 
+	GuiControl,, StringCombo,
 	gosub, ViewString
 return
 
@@ -894,7 +1022,7 @@ HSLV:
 		SendFun := "TimeAndDate"
 	LV_GetText(TextInsert, SelectedRow, 5)
 	LV_GetText(OnOff, SelectedRow, 4)
-	Hotstring(":"Options ":" NewString,func(SendFun).bind(TextInsert),OnOff)
+	; Hotstring(":"Options ":" NewString,func(SendFun).bind(TextInsert),OnOff)
 	HotString := % "Hotstring("":" . Options . ":" . NewString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
 	GuiControl,, StringCombo ,  %HotString%
 	gosub, ViewString
@@ -903,7 +1031,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 HSLV2:
-	Gui, HSList:+OwnDialogs
+	Gui, HS3List:+OwnDialogs
 	If !(SelectedRow := LV_GetNext()) {
 		Return
 	}
@@ -933,7 +1061,7 @@ HSLV2:
 	LV_GetText(Library, SelectedRow, 1)
 	Gui, HS3: Default
 	ChooseSec := % Library . ".csv"
-	Hotstring(":"Options ":" NewString,func(SendFun).bind(TextInsert),OnOff)
+	; Hotstring(":"Options ":" NewString,func(SendFun).bind(TextInsert),OnOff)
 	HotString := % "Hotstring("":" . Options . ":" . NewString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
 	GuiControl,, StringCombo ,  %HotString%
 	gosub, ViewString
@@ -960,6 +1088,26 @@ SectionChoose:
 	Loop, % SectionList.MaxIndex()
 		{
 			str1 := StrSplit(SectionList[A_Index], "‖")
+			if (InStr(str1[1], "*0"))
+			{
+				str1[1] := StrReplace(str1[1], "*0")
+			}
+			if (InStr(str1[1], "O0"))
+			{
+				str1[1] := StrReplace(str1[1], "O0")
+			}
+			if (InStr(str1[1], "C0"))
+			{
+				str1[1] := StrReplace(str1[1], "C0")
+			}
+			if (InStr(str1[1], "?0"))
+			{
+				str1[1] := StrReplace(str1[1], "?0")
+			}
+			if (InStr(str1[1], "B")) and !(InStr(str1[1], "B0"))
+			{
+				str1[1] := StrReplace(str1[1], "B")
+			}
 			LV_Add("", str1[2], str1[1], str1[3], str1[4], str1[5])
 			LV_ModifyCol(1, "Sort")
 		}
@@ -1027,13 +1175,13 @@ SetOptions:
 		return
 	OptionSet := (InStr(Select,"""On""")) ? CheckOption("No", 7) : CheckOption("Yes",7)
 	if(InStr(Select,"NormalWay"))
-		GuiControl, Choose, ByClip, Send by Autohotkey
+		GuiControl, Choose, ByClip, SendInput (SI)
 	else if(InStr(Select, "ViaClipboard"))
-		GuiControl, Choose, ByClip, Send by Clipboard
+		GuiControl, Choose, ByClip, Clipboard (CL)
 	else if(InStr(Select, """MenuText"""))
-		GuiControl, Choose, ByClip, Send by Menu (Clipboard)
+		GuiControl, Choose, ByClip, Menu & Clipboard (MCL)
 	else if(InStr(Select, """MenuTextAHK"""))
-		GuiControl, Choose, ByClip, Send by Menu (Autohotkey)
+		GuiControl, Choose, ByClip, Menu & SendInput (MSI)
 	else if(InStr(Select, """TimeAndDate"""))
 		GuiControl, Choose, ByClip, Send Time or Date
 	CapCheck := 0
@@ -1090,9 +1238,29 @@ SaveHotstrings:
 	else if InStr(Items, """TimeAndDate""")
 		SendFun := "T"
 	HSSplit := StrSplit(Items, ":")
-	Options := HSSplit[2]
-	StrSp2 := StrSplit(HSSplit[3], """,")
-	NewString := StrSp2[1]
+	HSSplit2 := StrSplit(Items, """:")
+	Options := SubStr(HSSplit2[2], 1 , InStr(HSSplit2[2], ":" )-1)
+	NewString := SubStr(HSSplit2[2], InStr(HSSplit2[2], ":" )+1 , InStr(HSSplit2[2], """," )-StrLen(Options)-2)
+	if (InStr(Options, "*0"))
+	{
+		Options := StrReplace(Options, "*0")
+	}
+	if (InStr(Options, "O0"))
+	{
+		Options := StrReplace(Options, "O0")
+	}
+	if (InStr(Options, "C0"))
+	{
+		Options := StrReplace(Options, "C0")
+	}
+	if (InStr(Options, "?0"))
+	{
+		Options := StrReplace(Options, "?0")
+	}
+	if (InStr(Options, "B")) and !(InStr(Options, "B0"))
+	{
+		Options := StrReplace(Options, "B")
+	}
 	StrSp := StrSplit(Items, "bind(""")
 	StrSp1 := StrSplit(StrSp[2], """),")
 	TextInsert := StrSp1[1]
@@ -1300,10 +1468,10 @@ HSdelay:
     Gui, HSDel:New, -MinimizeBox -MaximizeBox
     Gui, HSDel:Margin, 12.5*DPI%chMon%, 7.5*DPI%chMon%
     Gui, HSDel:Font, % "s" . 12*DPI%chMon% . " norm cBlack"
-    Gui, HSDel:Add, Slider,  vMySlider gmySlider Range100-1000 ToolTipBottom Buddy1999, %delay%
-    Gui, HSDel:Add, Text,% "yp+" . 62.5*DPI%chMon% . " xm+" . 10*DPI%chMon% . " vDelayText" , Hotstring delay %delay% ms
-    Gui, HSDel:Show, % "w" . 212.5*DPI%chMon% . " h" . 112.5*DPI%chMon% . " y" . Mon%chMon%Top + (Abs(Mon%chMon%Bottom - Mon%chMon%Top)/2) - 106.25*DPI%chMon%  
-        . " x" . Mon%chMon%Left + (Abs(Mon%chMon%Right - Mon%chMon%Left)/2) - 56.25*DPI%chMon%, Set Delay
+    Gui, HSDel:Add, Slider, % "w" . 340*DPI%chMon% . " vMySlider gmySlider Range100-1000 ToolTipBottom Buddy1999", %delay%
+    Gui, HSDel:Add, Text,% "yp+" . 62.5*DPI%chMon% . " xm+" . 10*DPI%chMon% . " vDelayText" , Hotstring paste from Clipboard delay %delay% ms
+    Gui, HSDel:Show, % "w" . 380*DPI%chMon% . " h" . 112.5*DPI%chMon% . " y" . Mon%chMon%Top + (Abs(Mon%chMon%Bottom - Mon%chMon%Top)/2) - 106.25*DPI%chMon%  
+        . " x" . Mon%chMon%Left + (Abs(Mon%chMon%Right - Mon%chMon%Left)/2) - 56.25*DPI%chMon%, Set Clipboard Delay
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1311,9 +1479,10 @@ return
 MySlider:
     delay := MySlider
     if (delay = 1000)
-        GuiControl,,DelayText, Hotstring delay 1 s
+        GuiControl,,DelayText, Hotstring paste from Clipboard delay 1 s
     else
-        GuiControl,,DelayText, Hotstring delay %delay% ms
+        GuiControl,,DelayText, Hotstring paste from Clipboard delay %delay% ms
+	IniWrite, %delay%, Config.ini, Configuration, Delay
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1321,11 +1490,12 @@ return
 About:
 	Gui, MyAbout: Destroy
 	Gui, MyAbout: Font, % "bold s" . 11*DPI%chMon%
-    Gui, MyAbout: Add, Text, , Hotstrings.ahk (script). Let's make your PC personal again... 
+    Gui, MyAbout: Add, Text, , Let's make your PC personal again... 
 	Gui, MyAbout: Font, % "norm s" . 11*DPI%chMon%
 	Gui, MyAbout: Add, Text, ,Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
    	Gui, MyAbout: Font, % "CBlue bold Underline s" . 12*DPI%chMon%
-    Gui, MyAbout: Add, Text, gLink, Help
+    Gui, MyAbout: Add, Text, gLink, Application help
+	Gui, MyAbout: Add, Text, gLink2, Genuine hotstrings AutoHotkey documentation
 	Gui, MyAbout: Font, % "norm s" . 11*DPI%chMon%
 	Gui, MyAbout: Add, Button, % "Default Hidden w" . 100*DPI%chMon% . " gMyOK vOkButtonVariabl hwndOkButtonHandle", &OK
     GuiControlGet, MyGuiControlGetVariable, MyAbout: Pos, %OkButtonHandle%
@@ -1333,8 +1503,8 @@ About:
     Gui, MyAbout: Show
         , % "x" . MonitorBoundingCoordinates_Left + (Abs(MonitorBoundingCoordinates_Left - MonitorBoundingCoordinates_Right) / 2) - 335*DPI%chMon%
         . "y" . MonitorBoundingCoordinates_Top + (Abs(MonitorBoundingCoordinates_Top - MonitorBoundingCoordinates_Bottom) / 2) - 90*DPI%chMon%
-        . "w" . 670*DPI%chMon% . "h" . 180*DPI%chMon%,About
-    WinGetPos, , , MyAboutWindowWidth, ,About
+        . "w" . 670*DPI%chMon% . "h" . 220*DPI%chMon%,About/Help
+    WinGetPos, , , MyAboutWindowWidth, ,About/Help
     NewButtonXPosition := round((( MyAboutWindowWidth- 100*DPI%chMon%)/2)*DPI%chMon%)
     GuiControl, Move, %OkButtonHandle%, x%NewButtonXPosition%
     GuiControl, Show, %OkButtonHandle%
@@ -1344,8 +1514,12 @@ Link:
 Run, https://github.com/mslonik/Hotstrings
 return
 
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Link2:
+Run, https://www.autohotkey.com/docs/Hotstrings.htm
+return
 
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+~F1::
 MyOK:
 MyAboutGuiEscape:
 MyAboutGuiClose: ; Launched when the window is closed by pressing its X button in the title bar
@@ -1359,16 +1533,10 @@ HS3GuiSize:
 		return
 	if (ErrorLevel == 0)
 		showGui := 2
-	if (A_Args[3] == "")
-		IniW := StartW
-	else
-		IniW := A_Args[3]
-	if (A_Args[4] == "")
-		IniH := StartH
-	else
-		IniH := A_Args[4]
-	LV_Width := 500*DPI%chMon%
-	LV_Height := 520*DPI%chMon%
+	IniW := StartW
+	IniH := StartH
+	LV_Width := IniW - 460*DPI%chMon%
+	LV_Height := IniH - 62*DPI%chMon%
 	LV_ModifyCol(1,100*DPI%chMon%)
 	LV_ModifyCol(2,80*DPI%chMon%)
 	LV_ModifyCol(3,70*DPI%chMon%)	
@@ -1393,6 +1561,8 @@ HS3GuiSize:
 		LV_ModifyCol(5, ColWid)
 	}
 	GuiControl, Move, HSList, W%NewWidth% H%NewHeight%
+	GuiControl, Move, Shortcuts, % "y" . PrevH - 22*DPI%chMon%
+	GuiControl, Move, Line, % "w" . A_GuiWidth . " y" . PrevH - 26*DPI%chMon%
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1432,7 +1602,7 @@ If (WinExist("Search Hotstring"))
 	ArrayF := []
 }
 
-Gui, HS3List:New, +Resize MinSize800x500
+Gui, HS3List:New,% "+Resize MinSize" . 850*DPI%chMon% . "x" . 500*DPI%chMon%
 Gui, HS3List:Add, Text, ,Search:
 Gui, HS3List:Add, Text, % "yp xm+" . 420*DPI%chMon%, Search by:
 Gui, HS3List:Add, Edit, % "xm w" . 400*DPI%chMon% . " vSearchTerm gSearch"
@@ -1440,7 +1610,7 @@ Gui, HS3List:Add, Radio, % "yp xm+" . 420*DPI%chMon% . " vRText gSearchChange Ch
 Gui, HS3List:Add, Radio, % "yp xm+" . 520*DPI%chMon% . " vRHS gSearchChange", Triggerstring
 Gui, HS3List:Add, Radio, % "yp xm+" . 640*DPI%chMon% . " vRSection gSearchChange", Library
 Gui, HS3List:Add, Button, % "yp-2 xm+" . 720*DPI%chMon% . " w" . 100*DPI%chMon% . " gMoveList", Move
-Gui, HS3List:Add, ListView, xm grid vList AltSubmit gHSLV2, Library|Triggerstring|Trigger Options|Output Functions|Enable/Disable|Hotstring
+Gui, HS3List:Add, ListView, % "xm grid vList AltSubmit gHSLV2 h" . 400*DPI%chMon%, Library|Triggerstring|Trigger Options|Output Functions|Enable/Disable|Hotstring
 Loop, Files, %A_ScriptDir%\Categories\*.csv
 {
     Loop
@@ -1449,6 +1619,26 @@ Loop, Files, %A_ScriptDir%\Categories\*.csv
         if ErrorLevel
 			break
         tabSearch := StrSplit(varSearch, "‖")
+		if (InStr(tabSearch[1], "*0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "*0")
+			}
+			if (InStr(tabSearch[1], "O0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "O0")
+			}
+			if (InStr(tabSearch[1], "C0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "C0")
+			}
+			if (InStr(tabSearch[1], "?0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "?0")
+			}
+			if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "B")
+			}
         name := SubStr(A_LoopFileName,1, StrLen(A_LoopFileName)-4)
         LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4], tabSearch[5])
 		ArrayS.Push(name)
@@ -1460,7 +1650,7 @@ Loop, Files, %A_ScriptDir%\Categories\*.csv
     }
 }
 LV_ModifyCol(1, "Sort")
-StartWlist := 800*DPI%chMon%
+StartWlist := 850*DPI%chMon%
 StartHlist := 500*DPI%chMon%
 SetTitleMatchMode, 3
 WinGetPos, StartXlist, StartYlist,,,Hotstrings
@@ -1469,6 +1659,9 @@ if ((StartXlist == "") or (StartYlist == ""))
 	StartXlist := (Mon%chMon%Left + (Abs(Mon%chMon%Right - Mon%chMon%Left)/2))*DPI%chMon% - StartWlist/2
 	StartYlist := (Mon%chMon%Top + (Abs(Mon%chMon%Bottom - Mon%chMon%Top)/2))*DPI%chMon% - StartHlist/2
 }
+gui, HS3List:Add, Text, x0 h1 0x7 w10 vLine2
+Gui, HS3List:Font, % "s" . 10*DPI%chMon% . " cBlack Norm"
+Gui, HS3List:Add, Text, xm vShortcuts2, F3 Close Search hotstrings | F10 Move hotstring
 Gui, HS3List:Show, % "w" . StartWlist . " h" . StartHlist . " x" . StartXlist . " y" . StartYlist, Search Hotstrings
 Gui, SearchLoad:Destroy
 
@@ -1539,6 +1732,7 @@ MoveList:
 	LV_GetText(OnOff, SelectedRow,5)
 	LV_GetText(HSText, SelectedRow,6)
 	MovedHS := TriggOpt . "‖" . Triggerstring . "‖" . OutFun . "‖" . OnOff . "‖" . HSText
+	MovedNoOptHS := "‖" . Triggerstring . "‖" . OutFun . "‖" . OnOff . "‖" . HSText
 	Gui, MoveLibs:New
 	cntMove := -1
 	Loop, %A_ScriptDir%\Categories\*.csv
@@ -1639,7 +1833,7 @@ OutputFile := % A_ScriptDir . "\Categories\temp.csv"
 cntLines := 0
 Loop, Read, %InputFile%
 {	
-	if !(InStr(A_LoopReadLine, MovedHS))
+	if !(InStr(A_LoopReadLine, MovedNoOptHS))
 		FileAppend, % A_LoopReadLine . "`r`n", %OutputFile%, UTF-8
 	cntLines++
 }
@@ -1674,8 +1868,8 @@ HS3ListGuiSize:
 		return
     IniW := StartWlist
 	IniH := StartHlist
-	LV_Width := 780*DPI%chMon%
-	LV_Height := 440*DPI%chMon%
+	LV_Width := IniW - 30*DPI%chMon%
+	LV_Height := IniH - 100*DPI%chMon%
 	LV_ModifyCol(1,100*DPI%chMon%)
 	LV_ModifyCol(2,100*DPI%chMon%)
     LV_ModifyCol(3,120*DPI%chMon%)
@@ -1684,7 +1878,7 @@ HS3ListGuiSize:
     LV_ModifyCol(3,"Center")
 	LV_ModifyCol(4,"Center")
     LV_ModifyCol(5,"Center")
-
+	WinGetPos,,, ListW, ListH, Search Hotstrings
 	NewHeight := LV_Height+(A_GuiHeight-IniH)
 	NewWidth := LV_Width+(A_GuiWidth-IniW)
     ColWid := (NewWidth-250)
@@ -1696,10 +1890,12 @@ HS3ListGuiSize:
 		LV_ModifyCol(6, ColWid)
 	}
 	GuiControl, Move, List, W%NewWidth% H%NewHeight%
+	GuiControl, Move, Shortcuts2, % "y" . A_GuiHeight - 20*DPI%chMon%
+	GuiControl, Move, Line2, % "w" . A_GuiWidth . " y" . A_GuiHeight - 25*DPI%chMon%
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+~F3::
 HS3ListGuiEscape:
 HS3ListGuiClose:
 	Gui, HS3List:Destroy
@@ -1712,6 +1908,7 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+~F7::
 HSDelGuiEscape:
 HSDelGuiClose:
 	Gui, HSDel:Destroy
@@ -1741,11 +1938,11 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 SavePos:
-	WinGetPos, HSX, HSY, HSW, HSH, Hotstrings
+	WinGetPos, HSX, HSY,,, Hotstrings
 	IniWrite, %HSX%, Config.ini, Configuration, SizeOfHotstringsWindow_X
 	IniWrite, %HSY%, Config.ini, Configuration, SizeOfHotstringsWindow_Y
-	; IniWrite, %HSW%, Config.ini, Configuration, SizeOfHotstringsWindow_Width
-	; IniWrite, %HSH%, Config.ini, Configuration, SizeOfHotstringsWindow_Height
+	IniWrite, %PrevW%, Config.ini, Configuration, SizeOfHotstringsWindow_Width
+	IniWrite, %PrevH%, Config.ini, Configuration, SizeOfHotstringsWindow_Height
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1926,4 +2123,12 @@ EndTab:
 	EndingChar_Tab := !(EndingChar_Tab)
 	IniWrite, %EndingChar_Tab%, Config.ini, Configuration, EndingChar_Tab
 	EndChars()
+return
+
+~Enter::
+~Space::
+	If WinActive("Search Hotstrings")
+	{
+		Gui, HS3List: Destroy
+	}
 return

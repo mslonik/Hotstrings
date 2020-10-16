@@ -2,63 +2,66 @@
 B0*?‖.svg‖A‖On‖
 O‖2d‖A‖On‖2D
 *‖3d ‖A‖On‖3D 
-*‖ac/‖MA‖Off‖Alternating Current¦Axle Counter
-*‖ac`t‖A‖On‖AC
-B*‖ahk ‖A‖On‖AHK 
+*‖ac ‖A‖On‖AC
+*‖ac/‖MA‖On‖Alternating Current¦Axle Counter
+‖ahk‖A‖On‖AHK
 *‖ahk/‖C‖On‖AutoHotkey
-*‖api ‖A‖On‖API 
+‖api‖A‖On‖API 
 *‖api/‖C‖On‖Application Programming Interface
-*‖bom ‖A‖On‖BOM
+‖bom‖A‖On‖BOM
 *‖bom/‖MA‖On‖Bill of Materials¦Byte Order Mark
-B0*‖c2ms ‖A‖On‖{Backspace 5}CCMS 
-*‖c2ms/‖C‖On‖Component Content Management System
-*‖cad ‖A‖On‖CAD 
+‖cad‖A‖On‖CAD
 *‖cad/‖C‖On‖Computer Aided Design
 *‖can/‖C‖On‖Controller Area Network
-B0*‖can`t‖A‖On‖{BackSpace 4}CAN
-*‖ceo ‖A‖On‖CEO 
+B*‖can`t‖A‖On‖CAN
+‖ccms‖A‖On‖CCMS
+*‖ccms/‖A‖On‖Component Content Management System
+‖ceo‖A‖On‖CEO
 *‖ceo/‖C‖On‖Chief Executive Officer
-B0*‖cfo ‖A‖On‖{BackSpace 3}CFO 
+‖cfo‖A‖On‖CFO
 *‖cfo/‖A‖On‖Chief Financial Officer
-*‖cntk/‖MC‖On‖CNTK¦Centrum Naukowo-Techniczne Kolejnictwa
-B0*‖com ‖A‖On‖{Backspace 4}COM 
-B0*‖cop‖A‖Off‖{Backspace 4}COP 
+‖cntk‖A‖On‖CNTK
+*‖cntk/‖C‖On‖Centrum Naukowo-Techniczne Kolejnictwa
+‖com‖A‖On‖COM
+‖cop‖A‖On‖CoP
 *‖cop/‖C‖On‖Code of Practice
-B0*‖cot ‖A‖On‖{Backspace 3}CoT 
+‖cot‖A‖On‖CoT 
 *‖CoT/‖A‖On‖Clearance of Track
-B0*‖cots ‖A‖On‖{Backspace 5}COTS 
+B*‖cots ‖A‖On‖COTS 
 *‖cots/‖C‖On‖Commercial Off-The-Shelf
-B0*‖covid ‖A‖On‖{BackSpace 6}COVID-19 
+B*‖covid ‖A‖On‖COVID-19 
 *‖covid/‖C‖On‖severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2)
-B0*‖cso ‖A‖On‖{BackSpace 3}CSO 
+B*‖cso ‖A‖On‖CSO 
 *‖cso/‖A‖On‖Chief Sales Officer
+*‖csv ‖A‖On‖CSV
+*‖csv/‖A‖On‖Comma Separated Values
 *‖cu/‖C‖On‖Competence Unit
 *‖dc/‖C‖On‖Direct Current
-B0*‖dc`t‖A‖On‖{BackSpace 3}DC
-B0*‖dita ‖A‖On‖{Backspace 5}DITA 
+B*‖dc`t‖A‖On‖DC
+B*‖dita ‖A‖On‖DITA
 *‖dita/‖C‖On‖Darwin Information Typing Architecture
-B0*‖dlds ‖A‖On‖{BackSpace 4}DLD/S 
+*‖dlds ‖A‖On‖DLD/S
 *‖dlds/‖A‖On‖Drive, Locking, Detection & Signaling
 *‖dmt rs/‖C‖Off‖Diagnostic and Monitoring Technologies for Rolling Stock
-B0*‖dmti ‖A‖On‖{BackSpace 4}DMT Infra 
+B*‖dmti ‖A‖On‖DMT Infra 
 *‖dmti/‖C‖On‖Diagnostic and Monitoring Technologies for Infrastructure
-B0*‖dmtrs ‖A‖On‖{BackSpace 5}DMT RS 
+B*‖dmtrs ‖A‖On‖DMT RS 
 *‖dmtrs/‖C‖On‖Diagnostic and Monitoring Technologies for Rolling Stock
-B0*‖dnd ‖A‖On‖{Backspace 4}D&D 
+B*‖dnd ‖A‖On‖D&D 
 *‖dnd/‖A‖On‖Drag&Drop
-B0*‖dwg ‖A‖On‖DWG 
+B*‖dwg ‖A‖On‖DWG 
 *‖dwg/‖A‖Off‖Drawing Exchange Format
-B0*‖dxf ‖A‖On‖DXF 
+B*‖dxf ‖A‖On‖DXF 
 *‖dxf/‖A‖On‖Drawing Exchange Format
-‖ei ‖A‖On‖EI 
+*‖ei ‖A‖On‖EI 
 *‖ei/‖C‖On‖Emotional Intelligence
-B0*‖emc ‖A‖On‖{Backspace 4}EMC 
+B*‖emc ‖A‖On‖EMC 
 *‖emc/‖C‖On‖Electro-Magnetic Compatibility
-B0*‖emi ‖A‖On‖{Backspace 4}EMI 
+B*‖emi ‖A‖On‖EMI 
 *‖emi/‖C‖On‖Electromagnetic Interference
-B0*‖ems ‖A‖On‖{BackSpace 3}EMS 
+B*‖ems ‖A‖On‖EMS 
 *‖ems/‖C‖On‖Electronics Manufacturing Services
-‖eq ‖A‖On‖EQ 
+‖eq‖A‖On‖EQ 
 *‖eq/‖C‖On‖Emotional Quotient
 B0*‖era ‖A‖On‖{Backspace 4}ERA 
 *‖era/‖C‖On‖European Railway Agency
@@ -69,13 +72,12 @@ B0*‖erp ‖A‖On‖{Backspace 4}ERP
 B0*‖ertms ‖A‖On‖{Backspace 6}ERTMS 
 *‖ertms/‖C‖On‖European Rail Traffic Management System
 B0*‖etcs ‖A‖On‖{Backspace 5}ETCS 
-*‖etcs. ‖A‖On‖European Train Control System
 *‖etcs/‖A‖On‖European Train Control System
 B0*‖fai ‖A‖On‖{Backspace 4}FAI 
 *‖fai/‖C‖On‖First Article Inspection
 B0*‖faq ‖A‖On‖{Backspace 4}FAQ 
 *‖faq/‖C‖On‖Frequently Asked Questions
-B0*‖fat ‖A‖On‖{Backspace 4}FAT 
+B*‖fat ‖A‖On‖FAT 
 *‖fat/‖C‖On‖Factory Acceptance Test
 B0*‖fmea ‖A‖On‖{Backspace 5}FMEA 
 *‖fmea/‖C‖On‖Failure Mode and Effects Analysis
@@ -108,9 +110,12 @@ B0*‖kpi ‖A‖On‖{Backspace 4}KPI
 *‖kpi/‖C‖On‖Key Performance Indicator
 B0*‖lad ‖A‖On‖{Backspace 4}LAD 
 *‖lad/‖C‖On‖Logistic and Administrative Delay
+‖lan‖A‖On‖LAN
+*O0‖lan ‖A‖On‖LAN
+*‖lan/‖A‖On‖Local Area Network
 B0*‖lc2 ‖A‖On‖{Backspace 4}LLC 
 *‖lc2/‖C‖On‖Life Cycle Cost
-B0*‖lop ‖A‖On‖{Backspace 4}LOP 
+B0*‖lop ‖A‖On‖{Backspace 4}LOP
 *‖lop/‖C‖On‖List of Open Points
 B0*‖mdt ‖A‖On‖{Backspace 4}MDT 
 *‖mdt/‖C‖On‖Mean Down Time
@@ -197,4 +202,8 @@ B0*‖vat ‖A‖On‖{Backspace 4}VAT
 *‖vat/‖C‖On‖Value Added Tax
 B0*‖vba ‖A‖On‖{Backspace 4}VBA 
 *‖vba/‖C‖On‖Visual Basic for Applications
+*‖vpn ‖A‖On‖VPN
+*‖vpn/‖C‖On‖Virtual Private Network
+*‖wysiwyg ‖A‖On‖WYSIWYG
+*‖wysiwyg/‖A‖On‖What You See Is What You Get
 *‖yt‖C‖On‖YouTube.com
