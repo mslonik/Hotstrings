@@ -13,53 +13,43 @@ O‖2d‖A‖On‖2D
 ‖cad‖A‖On‖CAD
 *‖cad/‖C‖On‖Computer Aided Design
 *‖can/‖C‖On‖Controller Area Network
-B*‖can`t‖A‖On‖CAN
+*‖can`t‖A‖On‖CAN
 ‖ccms‖A‖On‖CCMS
 *‖ccms/‖A‖On‖Component Content Management System
 ‖ceo‖A‖On‖CEO
 *‖ceo/‖C‖On‖Chief Executive Officer
 ‖cfo‖A‖On‖CFO
 *‖cfo/‖A‖On‖Chief Financial Officer
-‖cntk‖A‖On‖CNTK
-*‖cntk/‖C‖On‖Centrum Naukowo-Techniczne Kolejnictwa
 ‖com‖A‖On‖COM
 ‖cop‖A‖On‖CoP
 *‖cop/‖C‖On‖Code of Practice
 ‖cot‖A‖On‖CoT 
 *‖CoT/‖A‖On‖Clearance of Track
-B*‖cots ‖A‖On‖COTS 
+*‖cots ‖A‖On‖COTS 
 *‖cots/‖C‖On‖Commercial Off-The-Shelf
-B*‖covid ‖A‖On‖COVID-19 
+*‖covid ‖A‖On‖COVID-19 
 *‖covid/‖C‖On‖severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2)
-B*‖cso ‖A‖On‖CSO 
+*‖cso ‖A‖On‖CSO 
 *‖cso/‖A‖On‖Chief Sales Officer
 *‖csv ‖A‖On‖CSV
 *‖csv/‖A‖On‖Comma Separated Values
-*‖cu/‖C‖On‖Competence Unit
 *‖dc/‖C‖On‖Direct Current
-B*‖dc`t‖A‖On‖DC
-B*‖dita ‖A‖On‖DITA
+*‖dc`t‖A‖On‖DC
+*‖dita ‖A‖On‖DITA
 *‖dita/‖C‖On‖Darwin Information Typing Architecture
-*‖dlds ‖A‖On‖DLD/S
-*‖dlds/‖A‖On‖Drive, Locking, Detection & Signaling
-*‖dmt rs/‖C‖Off‖Diagnostic and Monitoring Technologies for Rolling Stock
-B*‖dmti ‖A‖On‖DMT Infra 
-*‖dmti/‖C‖On‖Diagnostic and Monitoring Technologies for Infrastructure
-B*‖dmtrs ‖A‖On‖DMT RS 
-*‖dmtrs/‖C‖On‖Diagnostic and Monitoring Technologies for Rolling Stock
-B*‖dnd ‖A‖On‖D&D 
+*‖dnd ‖A‖On‖D&D 
 *‖dnd/‖A‖On‖Drag&Drop
-B*‖dwg ‖A‖On‖DWG 
+*‖dwg ‖A‖On‖DWG 
 *‖dwg/‖A‖Off‖Drawing Exchange Format
-B*‖dxf ‖A‖On‖DXF 
+*‖dxf ‖A‖On‖DXF 
 *‖dxf/‖A‖On‖Drawing Exchange Format
 *‖ei ‖A‖On‖EI 
 *‖ei/‖C‖On‖Emotional Intelligence
-B*‖emc ‖A‖On‖EMC 
+*‖emc ‖A‖On‖EMC 
 *‖emc/‖C‖On‖Electro-Magnetic Compatibility
-B*‖emi ‖A‖On‖EMI 
+*‖emi ‖A‖On‖EMI 
 *‖emi/‖C‖On‖Electromagnetic Interference
-B*‖ems ‖A‖On‖EMS 
+*‖ems ‖A‖On‖EMS 
 *‖ems/‖C‖On‖Electronics Manufacturing Services
 ‖eq‖A‖On‖EQ 
 *‖eq/‖C‖On‖Emotional Quotient
@@ -77,7 +67,7 @@ B0*‖fai ‖A‖On‖{Backspace 4}FAI
 *‖fai/‖C‖On‖First Article Inspection
 B0*‖faq ‖A‖On‖{Backspace 4}FAQ 
 *‖faq/‖C‖On‖Frequently Asked Questions
-B*‖fat ‖A‖On‖FAT 
+*‖fat ‖A‖On‖FAT 
 *‖fat/‖C‖On‖Factory Acceptance Test
 B0*‖fmea ‖A‖On‖{Backspace 5}FMEA 
 *‖fmea/‖C‖On‖Failure Mode and Effects Analysis
@@ -90,13 +80,8 @@ C1*‖gsm/‖C‖On‖Global System for Mobile Communications
 *‖gui/‖C‖On‖Graphical User Interface
 B0*‖hart ‖A‖On‖{Backspace 5}HART 
 *‖hart/‖C‖On‖Highway Addressable Remote Transducer Protocol
-B0*‖has‖A‖Off‖{Backspace 4}HAS 
-*‖has/‖C‖On‖Hardware Architecture Specification
 B0*‖hdmi ‖A‖On‖{Backspace 5}HDMI 
 *‖hdmi/‖C‖On‖High-Definition Multimedia Interface
-B0*‖hds ‖A‖On‖{Backspace 4}HDS 
-*‖hds/‖C‖On‖Hardware Design Specification
-*‖hsz31‖A‖On‖HSZ31
 B0O‖html‖A‖On‖{Backspace 4}HTML
 B0*‖ic ‖A‖On‖{Backspace 3}IC 
 *‖ic/‖C‖On‖Interoperability Constituent
@@ -111,7 +96,7 @@ B0*‖kpi ‖A‖On‖{Backspace 4}KPI
 B0*‖lad ‖A‖On‖{Backspace 4}LAD 
 *‖lad/‖C‖On‖Logistic and Administrative Delay
 ‖lan‖A‖On‖LAN
-*O0‖lan ‖A‖On‖LAN
+*‖lan ‖A‖On‖LAN
 *‖lan/‖A‖On‖Local Area Network
 B0*‖lc2 ‖A‖On‖{Backspace 4}LLC 
 *‖lc2/‖C‖On‖Life Cycle Cost
@@ -141,8 +126,7 @@ B0*‖pcb ‖A‖On‖{Backspace 4}PCB
 B0*‖pdf ‖A‖On‖{BackSpace 3}PDF 
 *‖pdf/‖C‖On‖Portable Document Format
 *‖pit‖A‖On‖PIT
-B0*‖pkb ‖A‖On‖{Backspace 3}PKB 
-*‖pkb/‖C‖On‖Produkt Krajowwy Brutto
+*‖pit/‖A‖On‖Personal Income Tax
 B0*‖plm ‖A‖On‖{BackSpace 3}PLM 
 *‖plm/‖C‖On‖Product Lifecycle Management
 *‖poc/‖MC‖On‖PoC ¦Proof of Concept 
@@ -171,8 +155,6 @@ B0*‖sa ‖A‖On‖{Backspace 3}SA
 *‖sa/‖C‖On‖Specific Application
 B0*‖sil ‖A‖On‖{Backspace 4}SIL 
 *‖sil/‖C‖On‖Safety Integrity Level
-B0*‖siwz ‖A‖On‖{BackSpace 4}SIWZ 
-*‖siwz/‖C‖On‖Specyfikacja Istotnych Warunków Zamówienia
 B0*‖sla ‖A‖On‖{Backspace 4}SLA 
 *‖sla/‖C‖On‖Service-Level Agreement
 B0*‖sql ‖A‖On‖{BackSpace 3}SQL 
