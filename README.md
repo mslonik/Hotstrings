@@ -737,15 +737,15 @@ option | triggerstring     | trigger: last character   | hotstring
 # ToDo List
 - ❎ Menu: configuration and the corresponding *Configuration.ini*
     - ❎ sandbox for hotstrings,
-    - ❎ enable / disable "undo" (Ctrl | z) of hotstrings,
+    - ☑ enable / disable "undo" (Ctrl | z) of hotstrings,
     - ☑ setup of "Ending character",
-    - ❎ *Hotstrings* window size and position, including monitor, window size.
-- ❎ Automatic tooltip for triggestrings.
+    - ☑ *Hotstrings* window size and position, including monitor, window size.
+- ☑ Automatic tooltip for triggestrings.
 - ❎ GUI:
     - ❎ comments to hotstrings (stored in .csv files).
-    - ❎ library content is marked, edition should be loaded automatically.
-    - ❎ search window, a searched result should enable direct edition.
-    - ❎ hotkeys to main functions
+    - ☑ library content is marked, edition should be loaded automatically.
+    - ☑ search window, a searched result should enable direct edition.
+    - ☑ hotkeys to main functions
 - ❎ Hotstrings export (.csv → .ahk).
     - ❎ static hotstrings (:options:triggerstring::hotstring),
     - ❎ dynamic hotstrings (Hotstring("options", "triggestring", "hotstring")).
