@@ -47,7 +47,7 @@ B0*‖html ‖A‖On‖{BackSpace 5}HTML
 *‖html/‖C‖On‖HyperText Markup Language
 ‖ie‖A‖Off‖i.e.
 *‖ie/‖MA‖On‖i.e.¦Ie-120¦Ie-120 Wymagania techniczne dla zapewnienia ochrony przed przepięciami i od wyładowań atmosferycznych urządzeń sterowania ruchem kolejowym, łączności i dSAT  - obowiązują od 1 lutego 2018 r.¦Ie-3
-*‖internet‖A‖On‖Internet
+*?‖internet‖A‖On‖Internet
 *‖iphone‖A‖On‖iPhone
 ‖iq ‖A‖On‖IQ 
 *‖iq/‖C‖On‖Inteligence Quotient
@@ -64,7 +64,8 @@ B0*‖oem ‖A‖On‖{BackSpace 3}OEM
 *‖otagle‖A‖On‖O T A G L E
 *‖par/‖A‖On‖§
 ‖pas2e‖A‖On‖passé
-*‖pcn/‖MA‖On‖PCN¦Product Change Notification
+‖pcn‖A‖On‖PCN
+B*‖pcn/‖A‖On‖Product Change Notification
 B0*‖pdf ‖A‖On‖{BackSpace 4}PDF 
 *‖pdf/‖C‖On‖Portable Document Format
 *‖php‖A‖On‖PHP

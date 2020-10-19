@@ -80,6 +80,7 @@ if !(prevMon)
 	chMon := 0
 else
 	chMon := prevMon
+IniRead, Tips, Config.ini, Configuration, Tips
 IniRead, delay, Config.ini, Configuration, Delay
 if (delay == "")
 {
@@ -112,12 +113,12 @@ Loop,
 	strInput .= out
 	if InStr(HotstringEndChars, out)
 		strInput := ""
-	if (StrLen(strInput) > 1)
+	if (StrLen(strInput) > 1) and (Tips)
 	{
 		HelpTrig := ""
 		Loop, % Triggers.MaxIndex()
 		{
-			If InStr(Triggers[A_Index], strInput)
+			If InStr(Triggers[A_Index], strInput) == 1
 			{
 				If !(HelpTrig == "")
 					HelpTrig .= "`n"
@@ -173,7 +174,7 @@ return
 F1::
 	Gui, HS3:Default
 	goto, About
-return
+; return
 
 F2::
 	Gui, HS3:Default
@@ -191,27 +192,27 @@ return
 F3::
 	Gui, HS3:Default
 	goto, Searching
-return
+; return
 
 F5::
 	Gui, HS3:Default
 	goto, Clear
-return
+; return
 
 F7::
 	Gui, HS3:Default
 	goto, HSdelay
-return
+; return
 
 F8::
 	Gui, HS3:Default
 	goto, Delete
-return
+; return
 
 F9::
 	Gui, HS3:Default
 	goto, AddHotstring
-return
+; return
 
 #if
 
@@ -255,8 +256,6 @@ StartHotstring(txt)
 		SendFun := "MenuText"
 	else if (txtsp[3] == "MA") 
 		SendFun := "MenuTextAHK"
-	else if (txtsp[3] == "T")
-		SendFun := "TimeAndDate"
 	OnOff := txtsp[4]
 	TextInsert := txtsp[5]
 	Oflag := ""
@@ -272,6 +271,29 @@ StartHotstring(txt)
 	return
 }
 
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+AHKVariables(String)
+{
+	String := StrReplace(String, "A_YYYY", A_YYYY)
+	String := StrReplace(String, "A_MMMM", A_MMMM)
+	String := StrReplace(String, "A_MMM", A_MMM)
+	String := StrReplace(String, "A_MM", A_MM)
+	String := StrReplace(String, "A_DDDD", A_DDDD)
+	String := StrReplace(String, "A_DDD", A_DDD)
+	String := StrReplace(String, "A_DD", A_DD)
+	String := StrReplace(String, "A_WDay", A_WDay)
+	String := StrReplace(String, "A_YDay", A_YDay)
+	String := StrReplace(String, "A_YWeek", A_YWeek)
+	String := StrReplace(String, "A_Hour", A_Hour)
+	String := StrReplace(String, "A_Min", A_Min)
+	String := StrReplace(String, "A_Sec", A_Sec)
+	String := StrReplace(String, "A_MSec", A_MSec)
+	String := StrReplace(String, "A_Now", A_Now)
+	String := StrReplace(String, "A_NowUTC", A_NowUTC)
+	String := StrReplace(String, "A_TickCount", A_TickCount)
+	return String
+}
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -279,6 +301,7 @@ NormalWay(ReplacementString, Oflag)
 {
 	global MyHotstring
 	varUndo := ""
+	ReplacementString := AHKVariables(ReplacementString)
 	if (Oflag == 0)
 		Send, % ReplacementString . A_EndChar
 	else
@@ -312,6 +335,7 @@ NormalWay(ReplacementString, Oflag)
 ViaClipboard(ReplacementString, Oflag)
 {
 	global MyHotstring, oWord, delay
+	ReplacementString := AHKVariables(ReplacementString)
 	ClipboardBackup := ClipboardAll
 	Clipboard := ReplacementString
 	ClipWait
@@ -340,6 +364,7 @@ MenuText(TextOptions, Oflag)
 {
 	global MyHotstring, MenuListbox, Ovar
 	varUndo := A_ThisHotkey
+	TextOptions := AHKVariables(TextOptions)
 	WinGetPos, WinX, WinY,WinW,WinH,A
     mouseX := Round(WinX+WinW/2)
     mouseY := Round(WinY+WinH/2)
@@ -394,6 +419,7 @@ Return
 MenuTextAHK(TextOptions, Oflag){
 	global MyHotstring, MenuListbox, Ovar
 	varUndo := A_ThisHotkey
+	TextOptions := AHKVariables(TextOptions)
 	WinGetPos, WinX, WinY,WinW,WinH,A
     mouseX := Round(WinX+WinW/2)
     mouseY := Round(WinY+WinH/2)
@@ -449,34 +475,6 @@ Return
 	Send, % SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", CaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
 	return
 #If
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-TimeAndDate(ReplacementString, Oflag)
-{
-    global MyHotstring
-	varUndo := ""
-	ReplacementString := StrReplace(ReplacementString, "A_YYYY", A_YYYY)
-	ReplacementString := StrReplace(ReplacementString, "A_MM", A_MM)
-	ReplacementString := StrReplace(ReplacementString, "A_DD", A_DD)
-	ReplacementString := StrReplace(ReplacementString, "A_Hour", A_Hour)
-	ReplacementString := StrReplace(ReplacementString, "A_Min", A_Min)
-    Send, %ReplacementString%
-	if (Oflag == 0)
-		Send, % A_EndChar
-    SetFormat, Integer, H
-	InputLocaleID:=DllCall("GetKeyboardLayout", "UInt", 0, "UInt")
-	Polish := Format("{:#x}", 0x415)
-	InputLocaleID := InputLocaleID / 0xFFFF
-	InputLocaleID := Format("{:#04x}", InputLocaleID)
-	if(InputLocaleID = Polish)
-	{
-		Send, {LCtrl up}
-	}
-	
-	MyHotstring := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", false, 1, 2) + 1)
-	Hotstring("Reset")
-}
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -637,7 +635,7 @@ GUIInit:
 	Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
     Gui, HS3:Add, Text,% "xm+" . 9*DPI%chMon%, Hotstring output function
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlack Norm"
-    Gui, HS3:Add, DropDownList, % "xm w" . 424*DPI%chMon% . " vByClip gByClip hwndddl", SendInput (SI)||Clipboard (CL)|Menu & Clipboard (MCL)|Menu & SendInput (MSI)|Send Time or Date
+    Gui, HS3:Add, DropDownList, % "xm w" . 424*DPI%chMon% . " vByClip gByClip hwndddl", SendInput (SI)||Clipboard (CL)|Menu & Clipboard (MCL)|Menu & SendInput (MSI)
     PostMessage, 0x153, -1, 22*DPI%chMon%,, ahk_id %ddl%
 	Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
     Gui, HS3:Add, Text,% "xm+" . 9*DPI%chMon%, Enter hotstring
@@ -673,6 +671,7 @@ GUIInit:
 
     ; Menu, HSMenu, Add, &Monitor, CheckMon
 	Menu, Submenu1, Add, &Undo last hotstring,Undo
+	Menu, Submenu1, Add, &Triggerstring tips,Tips
 	Menu, Submenu1, Add, &Save window position,SavePos
 	Menu, Submenu2, Add, Space, EndSpace
 	if (EndingChar_Space)
@@ -775,6 +774,11 @@ GUIInit:
 	else
 		Menu, Submenu2, UnCheck, Tab
 	Menu, Submenu1, Add, &Toggle EndChars, :Submenu2
+	IniRead, Tips, Config.ini, Configuration, Tips
+	if (Tips == 0)
+		Menu, Submenu1, UnCheck, &Triggerstring tips
+	else
+		Menu, Submenu1, Check, &Triggerstring tips
 	IniRead, Undo, Config.ini, Configuration, UndoHotstring
 	if (Undo == 0)
 		Menu, Submenu1, UnCheck, &Undo last hotstring
@@ -956,8 +960,6 @@ AddHotstring:
 		SendFun := "MenuText"
 	else if (ByClip == "Menu & SendInput (MSI)")
 		SendFun := "MenuTextAHK"
-	else if (ByClip == "Send Time or Date")
-		SendFun := "TimeAndDate"
 	else 
 	{
 		MsgBox, Choose the method of sending the hotstring!
@@ -1018,8 +1020,6 @@ HSLV:
 	{
 		SendFun := "MenuTextAHK"
 	}
-	else if (Fun := "T")
-		SendFun := "TimeAndDate"
 	LV_GetText(TextInsert, SelectedRow, 5)
 	LV_GetText(OnOff, SelectedRow, 4)
 	; Hotstring(":"Options ":" NewString,func(SendFun).bind(TextInsert),OnOff)
@@ -1054,8 +1054,6 @@ HSLV2:
 	{
 		SendFun := "MenuTextAHK"
 	}
-	else if (Fun := "T")
-		SendFun := "TimeAndDate"
 	LV_GetText(TextInsert, SelectedRow, 6)
 	LV_GetText(OnOff, SelectedRow, 5)
 	LV_GetText(Library, SelectedRow, 1)
@@ -1182,8 +1180,6 @@ SetOptions:
 		GuiControl, Choose, ByClip, Menu & Clipboard (MCL)
 	else if(InStr(Select, """MenuTextAHK"""))
 		GuiControl, Choose, ByClip, Menu & SendInput (MSI)
-	else if(InStr(Select, """TimeAndDate"""))
-		GuiControl, Choose, ByClip, Send Time or Date
 	CapCheck := 0
 return
 
@@ -1235,8 +1231,6 @@ SaveHotstrings:
 		SendFun := "MC"
 	else if InStr(Items, """MenuTextAHK""")
 		SendFun := "MA"
-	else if InStr(Items, """TimeAndDate""")
-		SendFun := "T"
 	HSSplit := StrSplit(Items, ":")
 	HSSplit2 := StrSplit(Items, """:")
 	Options := SubStr(HSSplit2[2], 1 , InStr(HSSplit2[2], ":" )-1)
@@ -1933,6 +1927,14 @@ F11::
 	IniRead, Undo, Config.ini, Configuration, UndoHotstring
 	Undo := !(Undo)
 	IniWrite, %Undo%, Config.ini, Configuration, UndoHotstring
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Tips:
+	Menu, Submenu1, ToggleCheck, &Triggerstring tips
+	Tips := !(Tips)
+	IniWrite, %Tips%, Config.ini, Configuration, Tips
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
