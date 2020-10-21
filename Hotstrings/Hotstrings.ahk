@@ -620,7 +620,7 @@ GUIInit:
     SysGet, PrimMon, MonitorPrimary
     if (chMon == 0)
         chMon := PrimMon
-    Gui, HS3:New, % "+Resize MinSize"  . 1050*DPI%chMon% . "x" . 640*DPI%chMon%+20
+    Gui, HS3:New, +Resize 
     Gui, HS3:Margin, 12.5*DPI%chMon%, 7.5*DPI%chMon%
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " bold cBlue", Calibri
     Gui, HS3:Add, Text, % "xm+" . 9*DPI%chMon%,Enter triggerstring:
@@ -668,11 +668,25 @@ GUIInit:
 	; Gui, HS3:Add, Button, % "x+" . 10*DPI%chMon% . " yp w" . 135*DPI%chMon% . " gSaveHotstrings Disabled", Save Hotstring
     Gui, HS3:Add, Button, % "x+" . 10*DPI%chMon% . " yp w" . 135*DPI%chMon% . " gClear", Clear
 	Gui, HS3:Add, Button, % "x+" . 10*DPI%chMon% . " yp w" . 135*DPI%chMon% . " vDelete gDelete Disabled", Delete hotstring
+	Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
+    Gui, HS3:Add, Text,% "vSandString xm+" . 9*DPI%chMon%, Sandbox
+	Gui, HS3:Add, Edit, % "xm w" . 425*DPI%chMon% . " vSandbox r5"
+	IniRead, Sandbox, Config.ini, Configuration, Sandbox
+	If (Sandbox == 0)
+	{
+		Gui, % "HS3:+MinSize"  . 1350*DPI%chMon% . "x" . 640*DPI%chMon%+20
+		GuiControl, HS3:Hide, Sandbox
+		GuiControl, HS3:Hide, SandString
+	}
+	else
+	{
+		Gui, % "HS3:+MinSize"  . 1350*DPI%chMon% . "x" . 640*DPI%chMon%+20  + 154*DPI%chMon%
+	}
 	gui, HS3:Add, Text, x0 h1 0x7 w10 vLine
 	Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
     Gui, HS3:Add, Text, ym, Library content
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlack Norm"
-    Gui, HS3:Add, ListView, % "LV0x1 0x4 yp+" . 25*DPI%chMon% . " xp h" . 500*DPI%chMon% . " w" . 400*DPI%chMon% . " vHSList AltSubmit gHSLV", Triggerstring|Trigg Opt|Out Fun|En/Dis|Comment|Hotstring
+    Gui, HS3:Add, ListView, % "LV0x1 0x4 yp+" . 25*DPI%chMon% . " xp h" . 500*DPI%chMon% . " w" . 400*DPI%chMon% . " vHSList AltSubmit gHSLV", Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
 	Gui, HS3:Add, Edit, vStringCombo xs gViewString ReadOnly Hide,
 	Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlack Norm"
 	Gui, HS3:Add, Text, xm y0 vShortcuts,F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Delay | F8 Delete hotstring | F9 Set hotstring 
@@ -681,6 +695,7 @@ GUIInit:
 	Menu, Submenu1, Add, &Undo last hotstring,Undo
 	Menu, Submenu1, Add, &Triggerstring tips,Tips
 	Menu, Submenu1, Add, &Save window position,SavePos
+	Menu, Submenu1, Add, &Launch Sandbox, Sandbox
 	Menu, Submenu2, Add, Space, EndSpace
 	if (EndingChar_Space)
 		Menu, Submenu2, Check, Space
@@ -787,6 +802,11 @@ GUIInit:
 		Menu, Submenu1, UnCheck, &Triggerstring tips
 	else
 		Menu, Submenu1, Check, &Triggerstring tips
+	IniRead, Sandbox, Config.ini, Configuration, Sandbox
+	if (Sandbox == 0)
+		Menu, Submenu1, UnCheck, &Launch Sandbox
+	else
+		Menu, Submenu1, Check, &Launch Sandbox
 	IniRead, Undo, Config.ini, Configuration, UndoHotstring
 	if (Undo == 0)
 		Menu, Submenu1, UnCheck, &Undo last hotstring
@@ -806,9 +826,12 @@ GUIInit:
 	if (StartY == "")
 		StartY := Mon%chMon%Top + (Abs(Mon%chMon%Bottom - Mon%chMon%Top)/2) - (225*DPI%chMon%+31)
 	if (StartW == "")
-		StartW := 1050*DPI%chMon%
+		StartW := 1350*DPI%chMon%
 	if (StartH == "")
-		StartH := 640*DPI%chMon%+20
+		if (Sandbox)
+			StartH := 640*DPI%chMon%+20 + 154*DPI%chMon%
+		else
+			StartH := 640*DPI%chMon%+20
 	if (showGui == 1)
 	{
 		Gui, HS3:Show, x%StartX% y%StartY% w%StartW% h%StartH%, Hotstrings
@@ -1039,8 +1062,8 @@ HSLV:
 	{
 		SendFun := "MenuTextAHK"
 	}
-	LV_GetText(TextInsert, SelectedRow, 6)
-	LV_GetText(Comment, SelectedRow, 5)
+	LV_GetText(TextInsert, SelectedRow, 5)
+	LV_GetText(Comment, SelectedRow, 6)
 	LV_GetText(OnOff, SelectedRow, 4)
 	; Hotstring(":"Options ":" NewString,func(SendFun).bind(TextInsert),OnOff)
 	HotString := % "Hotstring("":" . Options . ":" . NewString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
@@ -1100,7 +1123,7 @@ AddLib:
 	Gui, ALib:Add, Text,,Enter a name for the new library
 	Gui, ALib:Add, Edit, % "vNewLib w" . 150*DPI%chMon%,
 	Gui, ALib:Add, Text, % "x+" . 10*DPI%chMon%, .csv
-	Gui, ALib:Add, Button, % "gALibOK xm w" . 70*DPI%chMon%, OK
+	Gui, ALib:Add, Button, % "Default gALibOK xm w" . 70*DPI%chMon%, OK
 	Gui, ALib:Add, Button, % "gALibGuiClose x+" . 10*DPI%chMon% . " w" . 70*DPI%chMon%, Cancel
 	WinGetPos, PrevX, PrevY , , ,Hotstrings
 	Gui, ALib:Show, % "x" . ((PrevX+PrevW)/2)/DPI%chMon% . " y" . ((PrevY+PrevH)/2)/DPI%chMon%
@@ -1119,8 +1142,9 @@ ALibOK:
 		FileAppend,, Libraries\%NewLib%, UTF-8
 		MsgBox, The library %NewLib% has been created.
 		Gui, ALib:Destroy
-		WinGetPos, PrevX, PrevY , , ,Hotstrings
-		Run, AutoHotkey.exe Hotstrings3.ahk GUIInit %SectionCombo% %PrevW% %PrevH% %PrevX% %PrevY% %SelectedRow% %chMon%
+		GuiControl, HS3:, SectionCombo, |
+		Loop,%A_ScriptDir%\Libraries\*.csv
+        	GuiControl,HS3: , SectionCombo, %A_LoopFileName%
 	}
 	Else
 		MsgBox, A library with that name already exists!
@@ -1170,16 +1194,16 @@ SectionChoose:
 			{
 				str1[1] := StrReplace(str1[1], "B")
 			}
-			LV_Add("", str1[2], str1[1], str1[3], str1[4],str1[6], str1[5])
+			LV_Add("", str1[2], str1[1], str1[3], str1[4],str1[5], str1[6])
 			LV_ModifyCol(1, "Sort")
 		}
-		LV_ModifyCol(6, "Auto")
-	SendMessage, 4125, 4, 0, SysListView321
-	wid := ErrorLevel
-	if (wid < ColWid)
-	{
-		LV_ModifyCol(6, ColWid)
-	}
+	; 	LV_ModifyCol(5, "Auto")
+	; SendMessage, 4125, 4, 0, SysListView321
+	; wid := ErrorLevel
+	; if (wid < ColWid)
+	; {
+	; 	LV_ModifyCol(5, ColWid)
+	; }
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1358,8 +1382,8 @@ SaveHotstrings:
 		LV_GetText(txt2, 1, 1)
 		LV_GetText(txt3, 1, 3)
 		LV_GetText(txt4, 1, 4)
-		LV_GetText(txt5, 1, 6)
-		LV_GetText(txt6, 1, 5)
+		LV_GetText(txt5, 1, 5)
+		LV_GetText(txt6, 1, 6)
 		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
 		FileAppend, %txt%, Libraries\%name%, UTF-8
 	}
@@ -1371,8 +1395,8 @@ SaveHotstrings:
 			LV_GetText(txt2, A_Index, 1)
 			LV_GetText(txt3, A_Index, 3)
 			LV_GetText(txt4, A_Index, 4)
-			LV_GetText(txt5, A_Index, 6)
-			LV_GetText(txt6, A_Index, 5)
+			LV_GetText(txt5, A_Index, 5)
+			LV_GetText(txt6, A_Index, 6)
 			txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
 			if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
 				FileAppend, %txt%, Libraries\%name%, UTF-8
@@ -1381,8 +1405,8 @@ SaveHotstrings:
 		LV_GetText(txt2, SectionList.MaxIndex(),1) ; +addvar, 2)
 		LV_GetText(txt3, SectionList.MaxIndex(),3) ; +addvar, 3)
 		LV_GetText(txt4, SectionList.MaxIndex(),4) ; +addvar, 4)
-		LV_GetText(txt5, SectionList.MaxIndex(),6) ; +addvar, 5)
-		LV_GetText(txt6, SectionList.MaxIndex(),5)
+		LV_GetText(txt5, SectionList.MaxIndex(),5) ; +addvar, 5)
+		LV_GetText(txt6, SectionList.MaxIndex(),6)
 		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
 		FileAppend, %txt%, Libraries\%name%, UTF-8
 	}
@@ -1423,8 +1447,8 @@ Delete:
 					LV_GetText(txt2, A_Index, 1)
 					LV_GetText(txt3, A_Index, 3)
 					LV_GetText(txt4, A_Index, 4)
-					LV_GetText(txt5, A_Index, 6)
-					LV_GetText(txt6, A_Index, 5)
+					LV_GetText(txt5, A_Index, 5)
+					LV_GetText(txt6, A_Index, 6)
 					if (A_Index == SectionList.MaxIndex()-1)
 						txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
 					else
@@ -1445,8 +1469,8 @@ Delete:
 				LV_GetText(txt2, A_Index, 1)
 				LV_GetText(txt3, A_Index, 3)
 				LV_GetText(txt4, A_Index, 4)
-				LV_GetText(txt5, A_Index, 6)
-				LV_GetText(txt6, A_Index, 5)
+				LV_GetText(txt5, A_Index, 5)
+				LV_GetText(txt6, A_Index, 6)
 				if (A_Index == SectionList.MaxIndex())
 					txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
 				else
@@ -1458,7 +1482,7 @@ Delete:
 	}
 	MsgBox, Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
 	WinGetPos, PrevX, PrevY , , ,Hotstrings
-	Run, AutoHotkey.exe Hotstrings3.ahk GUIInit %SectionCombo% %PrevW% %PrevH% %PrevX% %PrevY% %SelectedRow% %chMon%
+	Run, AutoHotkey.exe Hotstrings.ahk GUIInit %SectionCombo% %PrevW% %PrevH% %PrevX% %PrevY% %SelectedRow% %chMon%
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -1604,12 +1628,11 @@ HS3GuiSize:
 	LV_ModifyCol(2,80*DPI%chMon%)
 	LV_ModifyCol(3,70*DPI%chMon%)	
 	LV_ModifyCol(4,60*DPI%chMon%)
-	LV_ModifyCol(5,90*DPI%chMon%)
+	LV_ModifyCol(6,300*DPI%chMon%)
 	LV_ModifyCol(1,"Center")
 	LV_ModifyCol(2,"Center")
 	LV_ModifyCol(3,"Center")
 	LV_ModifyCol(4,"Center")
-	LV_ModifyCol(5,"Center")
 
 	WinGetPos, PrevX, PrevY , , ,Hotstrings
 	PrevW := A_GuiWidth
@@ -1617,13 +1640,13 @@ HS3GuiSize:
 
 	NewHeight := LV_Height+(A_GuiHeight-IniH)
 	NewWidth := LV_Width+(A_GuiWidth-IniW)
-	ColWid := (NewWidth-195)
-	LV_ModifyCol(6, "Auto")
+	ColWid := (NewWidth-620*DPI%chMon%)
+	LV_ModifyCol(5, "Auto")
 	SendMessage, 4125, 4, 0, SysListView321
 	wid := ErrorLevel
 	if (wid < ColWid)
 	{
-		LV_ModifyCol(6, ColWid)
+		LV_ModifyCol(5, ColWid)
 	}
 	GuiControl, Move, HSList, W%NewWidth% H%NewHeight%
 	GuiControl, Move, Shortcuts, % "y" . PrevH - 22*DPI%chMon%
@@ -1676,7 +1699,7 @@ Gui, HS3List:Add, Radio, % "yp xm+" . 420*DPI%chMon% . " vRHS gSearchChange Chec
 Gui, HS3List:Add, Radio, % "yp xm+" . 540*DPI%chMon% . " vRText gSearchChange", Hotstring
 Gui, HS3List:Add, Radio, % "yp xm+" . 640*DPI%chMon% . " vRSection gSearchChange", Library
 Gui, HS3List:Add, Button, % "yp-2 xm+" . 720*DPI%chMon% . " w" . 100*DPI%chMon% . " gMoveList", Move
-Gui, HS3List:Add, ListView, % "xm grid vList +AltSubmit gHSLV2 h" . 400*DPI%chMon%, Library|Triggerstring|Trigger Options|Output Functions|Enable/Disable|Comment|Hotstring
+Gui, HS3List:Add, ListView, % "xm grid vList +AltSubmit gHSLV2 h" . 400*DPI%chMon%, Library|Triggerstring|Trigger Options|Output Functions|Enable/Disable|Hotstring|Comment
 Loop, Files, %A_ScriptDir%\Libraries\*.csv
 {
     Loop
@@ -1706,7 +1729,7 @@ Loop, Files, %A_ScriptDir%\Libraries\*.csv
 				tabSearch[1] := StrReplace(tabSearch[1], "B")
 			}
         name := SubStr(A_LoopFileName,1, StrLen(A_LoopFileName)-4)
-        LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4],tabSearch[6], tabSearch[5])
+        LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4],tabSearch[5], tabSearch[6])
 		ArrayS.Push(name)
         ArrayHS.Push(tabSearch[2])
 		ArrayO.Push(tabSearch[1])
@@ -1747,10 +1770,10 @@ if (RText == 1)
     {
         ; If (InStr(FileName, SearchTerm) = 1) ; for matching at the start
         If InStr(FileName, SearchTerm) ; for overall matching
-            LV_Add("",ArrayS[A_Index], ArrayHS[A_Index],ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],ArrayC[A_Index],FileName)
+            LV_Add("",ArrayS[A_Index], ArrayHS[A_Index],ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],FileName,ArrayC[A_Index])
     }
     Else
-         LV_Add("",ArrayS[A_Index], ArrayHS[A_Index],ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],ArrayC[A_Index],FileName)
+         LV_Add("",ArrayS[A_Index], ArrayHS[A_Index],ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],FileName,ArrayC[A_Index])
     }
 }
 else if (RHS == 1)
@@ -1761,10 +1784,10 @@ else if (RHS == 1)
     {
         ; If (InStr(FileName, SearchTerm) = 1) ; for matching at the start
         If InStr(FileName, SearchTerm) ; for overall matching
-			LV_Add("",ArrayS[A_Index], FileName,ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],ArrayC[A_Index],ArrayT[A_Index])
+			LV_Add("",ArrayS[A_Index], FileName,ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],ArrayT[A_Index],ArrayC[A_Index])
     }
     Else
-		LV_Add("",ArrayS[A_Index], FileName,ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],ArrayC[A_Index],ArrayT[A_Index])
+		LV_Add("",ArrayS[A_Index], FileName,ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],ArrayT[A_Index],ArrayC[A_Index])
     }
 }
 else if (RSection == 1)
@@ -1775,10 +1798,10 @@ else if (RSection == 1)
     {
         ; If (InStr(FileName, SearchTerm) = 1) ; for matching at the start
         If InStr(FileName, SearchTerm) ; for overall matching
-			LV_Add("",FileName, ArrayHS[A_Index],ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],ArrayC[A_Index],ArrayT[A_Index])
+			LV_Add("",FileName, ArrayHS[A_Index],ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],ArrayT[A_Index],ArrayC[A_Index])
     }
     Else
-        LV_Add("",FileName, ArrayHS[A_Index],ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],ArrayC[A_Index],ArrayT[A_Index])
+        LV_Add("",FileName, ArrayHS[A_Index],ArrayO[A_Index],ArrayF[A_Index],ArrayOnOff[A_Index],ArrayT[A_Index],ArrayC[A_Index])
     }
 }
 GuiControl, +Redraw, List
@@ -1943,24 +1966,27 @@ HS3ListGuiSize:
 	LV_Height := IniH - 100*DPI%chMon%
 	LV_ModifyCol(1,100*DPI%chMon%)
 	LV_ModifyCol(2,100*DPI%chMon%)
-    LV_ModifyCol(3,120*DPI%chMon%)
-	LV_ModifyCol(6,90*DPI%chMon%)
+    LV_ModifyCol(3,110*DPI%chMon%)
+	LV_ModifyCol(4,110*DPI%chMon%)
+    LV_ModifyCol(5,110*DPI%chMon%)
+	LV_ModifyCol(7,185*DPI%chMon%)
 	LV_ModifyCol(1,"Center")
 	LV_ModifyCol(2,"Center")
     LV_ModifyCol(3,"Center")
 	LV_ModifyCol(4,"Center")
     LV_ModifyCol(5,"Center")
-	LV_ModifyCol(6,"Center")
+	; LV_ModifyCol(6,"Center")
+	; LV_ModifyCol(7,"Center")
 	WinGetPos,,, ListW, ListH, Search Hotstrings
 	NewHeight := LV_Height+(A_GuiHeight-IniH)
 	NewWidth := LV_Width+(A_GuiWidth-IniW)
-    ColWid := (NewWidth-250)
-	LV_ModifyCol(7, "Auto")
+    ColWid := (NewWidth-740*DPI%chMon%)
+	; LV_ModifyCol(6, "Auto")
 	SendMessage, 4125, 4, 0, SysListView321
 	wid := ErrorLevel
 	if (wid < ColWid)
 	{
-		LV_ModifyCol(7, ColWid)
+		LV_ModifyCol(6, ColWid)
 	}
 	GuiControl, Move, List, W%NewWidth% H%NewHeight%
 	GuiControl, Move, Shortcuts2, % "y" . A_GuiHeight - 20*DPI%chMon%
@@ -2014,6 +2040,26 @@ Tips:
 	Menu, Submenu1, ToggleCheck, &Triggerstring tips
 	Tips := !(Tips)
 	IniWrite, %Tips%, Config.ini, Configuration, Tips
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Sandbox:
+	Menu, Submenu1, ToggleCheck, &Launch Sandbox
+	Sandbox := !(Sandbox)
+	If (Sandbox == 0)
+	{
+		Gui, % "HS3:+MinSize"  . 1350*DPI%chMon% . "x" . 640*DPI%chMon%+20
+		GuiControl, HS3:Hide, Sandbox
+		GuiControl, HS3:Hide, SandString
+	}
+	else
+	{
+		Gui, % "HS3:+MinSize"  . 1350*DPI%chMon% . "x" . 640*DPI%chMon%+20  + 154*DPI%chMon%
+		GuiControl, HS3:Show, Sandbox
+		GuiControl, HS3:Show, SandString
+	}
+	IniWrite, %Sandbox%, Config.ini, Configuration, Sandbox
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
