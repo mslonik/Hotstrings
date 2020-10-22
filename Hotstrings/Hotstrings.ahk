@@ -4,7 +4,15 @@ Purpose:     Facilitate normal operation for company desktop.
 Description: Hotkeys and hotstrings for my everyday professional activities and office cockpit.
 License:     GNU GPL v.3
 */
-
+Try
+{
+	#Requires AutoHotkey v1.1.33+
+}
+Catch
+{
+	MsgBox This script will run only on v1.1.33.00 and later v1.1.* releases.
+	ExitApp
+}
 #SingleInstance force 			; only one instance of this script may run at a time!
 #NoEnv  						; Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn  							; Enable warnings to assist with detecting common errors.
@@ -74,7 +82,8 @@ SelectedRow2 := 0
 global Triggers := []
 global strInput := ""
 MyHotstring 		:= ""
-global varUndo := ""
+global UndoHS := ""
+global UndoTrigger := ""
 if !(A_Args[7])
 	SelectedRow := 0
 else
@@ -140,14 +149,23 @@ Loop,
 $^z::			;~ Ctrl + z as in MS Word: Undo
 $!BackSpace:: 	;~ Alt + Backspace as in MS Word: rolls back last Autocorrect action
 	IniRead, Undo, Config.ini, Configuration, UndoHotstring
+	; MsgBox, %UndoHS%
 	if (Undo == 1) and (MyHotstring && (A_ThisHotkey != A_PriorHotkey))
 	{
 		;~ MsgBox, % "MyHotstring: " . MyHotstring . " A_ThisHotkey: " . A_ThisHotkey . " A_PriorHotkey: " . A_PriorHotkey
 		ToolTip, Undo the last hotstring., % A_CaretX, % A_CaretY - 20
-		if (varUndo == "")
+		if (InStr(UndoTrigger, "*0") or !(InStr(UndoTrigger, "*"))) and (InStr(UndoTrigger, "O0") or !(InStr(UndoTrigger, "O")))
+		{
+			Send, {BackSpace}
+		}
+		if (UndoHS == "")
 			Send, % "{BackSpace " . StrLen(MyHotstring) . "}" . SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", CaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
 		else
-			Send, % "{BackSpace " . StrLen(MyHotstring) . "}" . SubStr(varUndo, InStr(varUndo, ":", CaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
+			Send, % "{BackSpace " . StrLen(UndoHS) . "}" . SubStr(UndoTrigger, InStr(UndoTrigger, ":", CaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
+		if (InStr(UndoTrigger, "*0") or !(InStr(UndoTrigger, "*")))  and (InStr(UndoTrigger, "O0") or !(InStr(UndoTrigger, "O")))
+		{
+			Send, %A_EndChar%
+		}
 		SetTimer, TurnOffTooltip, -5000
 		MyHotstring := ""
 	}
@@ -247,7 +265,7 @@ LoadFiles(nameoffile)
 StartHotstring(txt)
 {
 	static Options, NewString, OnOff, SendFun, TextInsert
-	varUndo := ""
+	UndoHS := ""
 	txtsp := StrSplit(txt, "‖")
 	Options := txtsp[1]
 	NewString := txtsp[2]
@@ -303,13 +321,14 @@ AHKVariables(String)
 NormalWay(ReplacementString, Oflag)
 {
 	global MyHotstring
-	varUndo := ""
+	UndoTrigger := A_ThisHotkey
 	ReplacementString := AHKVariables(ReplacementString)
 	if (Oflag == 0)
 		Send, % ReplacementString . A_EndChar
 	else
 		Send, %ReplacementString%
-	
+	UndoHS := % ReplacementString
+	; TrayTip,, % UndoTrigger . "`n" . UndoHS,3
 	SetFormat, Integer, H
 	InputLocaleID:=DllCall("GetKeyboardLayout", "UInt", 0, "UInt")
 	Polish := Format("{:#x}", 0x415)
@@ -338,7 +357,9 @@ NormalWay(ReplacementString, Oflag)
 ViaClipboard(ReplacementString, Oflag)
 {
 	global MyHotstring, oWord, delay
+	UndoTrigger := A_ThisHotkey
 	ReplacementString := AHKVariables(ReplacementString)
+	UndoHS := ReplacementString
 	ClipboardBackup := ClipboardAll
 	Clipboard := ReplacementString
 	ClipWait
@@ -353,7 +374,8 @@ ViaClipboard(ReplacementString, Oflag)
 		Send, ^v
 	}
 	if (Oflag == 0)
-		Send, % A_EndChar
+		Send, % A_EndChar	
+	; TrayTip,, % UndoTrigger . "`n" . UndoHS,3
 	Sleep, %delay% ; this sleep is required surprisingly
 	Clipboard := ClipboardBackup
 	ClipboardBackup := ""
@@ -366,7 +388,9 @@ ViaClipboard(ReplacementString, Oflag)
 MenuText(TextOptions, Oflag)
 {
 	global MyHotstring, MenuListbox, Ovar
-	varUndo := A_ThisHotkey
+	strInput :=
+	ToolTip,
+	UndoTrigger := A_ThisHotkey
 	TextOptions := AHKVariables(TextOptions)
 	WinGetPos, WinX, WinY,WinW,WinH,A
     mouseX := Round(WinX+WinW/2)
@@ -405,6 +429,9 @@ if (Ovar == 1)
 	Send, % A_EndChar
 sleep, %delay% ;Remember to sleep before restoring clipboard or it will fail
 MyHotstring := MenuListbox
+UndoHS := MenuListbox
+	; TrayTip,, % UndoTrigger . "`n" . UndoHS,3
+
 Clipboard:=ClipboardBack
 	Hotstring("Reset")
 Gui, Menu:Destroy
@@ -421,7 +448,9 @@ Return
 
 MenuTextAHK(TextOptions, Oflag){
 	global MyHotstring, MenuListbox, Ovar
-	varUndo := A_ThisHotkey
+	strInput :=
+	ToolTip,
+	UndoTrigger := A_ThisHotkey
 	TextOptions := AHKVariables(TextOptions)
 	WinGetPos, WinX, WinY,WinW,WinH,A
     mouseX := Round(WinX+WinW/2)
@@ -456,6 +485,8 @@ Gui, MenuAHK:Submit, Hide
 Send, % MenuListbox2
 if (Ovar == 1)
 	Send, % A_EndChar
+UndoHS := MenuListbox2
+; TrayTip,, % UndoTrigger . "`n" . UndoHS,3
 SetFormat, Integer, H
 InputLocaleIDv:=DllCall("GetKeyboardLayout", "UInt", 0, "UInt")
 Polishv := Format("{:#x}", 0x415)
@@ -670,6 +701,7 @@ GUIInit:
 	Gui, HS3:Add, Button, % "x+" . 10*DPI%chMon% . " yp w" . 135*DPI%chMon% . " vDelete gDelete Disabled", Delete hotstring
 	Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
     Gui, HS3:Add, Text,% "vSandString xm+" . 9*DPI%chMon%, Sandbox
+	Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlack Norm"
 	Gui, HS3:Add, Edit, % "xm w" . 425*DPI%chMon% . " vSandbox r5"
 	IniRead, Sandbox, Config.ini, Configuration, Sandbox
 	If (Sandbox == 0)
@@ -832,12 +864,17 @@ GUIInit:
 			StartH := 640*DPI%chMon%+20 + 154*DPI%chMon%
 		else
 			StartH := 640*DPI%chMon%+20
+	if (Sandbox) and (StartH <640*DPI%chMon%+20 + 154*DPI%chMon%)
+		StartH := 640*DPI%chMon%+20 + 154*DPI%chMon%
+	Gui, HS3:Hide
 	if (showGui == 1)
 	{
 		Gui, HS3:Show, x%StartX% y%StartY% w%StartW% h%StartH%, Hotstrings
 	}
 	else if (showGui == 2)
 	{
+		if (Sandbox) and (PrevH <640*DPI%chMon%+20 + 154*DPI%chMon%)
+			PrevH := 640*DPI%chMon%+20 + 154*DPI%chMon%
 		Gui, HS3:Show, W%PrevW% H%PrevH% X%PrevX% Y%PrevY%, Hotstrings
 	}
 	else if (showGui == 3)
@@ -907,7 +944,7 @@ AddHotstring:
 		MsgBox Enter a Hotstring!
 		return
 	}
-	if InStr(ByClip,"Send by Menu")
+	if InStr(ByClip,"Menu")
 	{
 		If ((Trim(TextInsert) ="") and (Trim(TextInsert1) ="") and (Trim(TextInsert2) ="") and (Trim(TextInsert3) ="") and (Trim(TextInsert4) ="") and (Trim(TextInsert5) ="") and (Trim(TextInsert6) =""))
 		{
@@ -1194,7 +1231,7 @@ SectionChoose:
 			{
 				str1[1] := StrReplace(str1[1], "B")
 			}
-			LV_Add("", str1[2], str1[1], str1[3], str1[4],str1[5], str1[6])
+			LV_Add("", str1[2], str1[1], str1[3], str1[4],str1[5], str1[6])			
 			LV_ModifyCol(1, "Sort")
 		}
 	; 	LV_ModifyCol(5, "Auto")
@@ -1360,14 +1397,14 @@ SaveHotstrings:
 				IfMsgBox, No
 					return
 			}
-			LV_Modify(A_Index, "", NewString, Options, SendFun, OnOff, Comment, TextInsert)
+			LV_Modify(A_Index, "", NewString, Options, SendFun, OnOff, TextInsert, Comment)
 			SaveFlag := 1
 		}
 	}
 	; addvar := 0 ; potrzebne, bo źle pokazuje max index listy
 	if (SaveFlag == 0)
 	{
-		LV_Add("",  NewString,Options, SendFun, OnOff, Comment, TextInsert)
+		LV_Add("",  NewString,Options, SendFun, OnOff, TextInsert, Comment)
 		txt := % Options . "‖" . NewString . "‖" . SendFun . "‖" . OnOff . "‖" . TextInsert . "‖" . Comment
 		SectionList.Push(txt)
 		; addvar := 1
@@ -2058,6 +2095,8 @@ Sandbox:
 		Gui, % "HS3:+MinSize"  . 1350*DPI%chMon% . "x" . 640*DPI%chMon%+20  + 154*DPI%chMon%
 		GuiControl, HS3:Show, Sandbox
 		GuiControl, HS3:Show, SandString
+		if PrevH < 640*DPI%chMon%+20  + 154*DPI%chMon%
+			Gui, HS3:Show, % "h" . 640*DPI%chMon%+20  + 154*DPI%chMon%
 	}
 	IniWrite, %Sandbox%, Config.ini, Configuration, Sandbox
 return
