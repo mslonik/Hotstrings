@@ -154,7 +154,8 @@ $!BackSpace:: 	;~ Alt + Backspace as in MS Word: rolls back last Autocorrect act
 	{
 		;~ MsgBox, % "MyHotstring: " . MyHotstring . " A_ThisHotkey: " . A_ThisHotkey . " A_PriorHotkey: " . A_PriorHotkey
 		ToolTip, Undo the last hotstring., % A_CaretX, % A_CaretY - 20
-		if (InStr(UndoTrigger, "*0") or !(InStr(UndoTrigger, "*"))) and (InStr(UndoTrigger, "O0") or !(InStr(UndoTrigger, "O")))
+		TriggerOpt := SubStr(UndoTrigger, InStr(UndoTrigger, ":" ,, 1,1)+1 ,InStr(UndoTrigger, ":" ,, 1,2)-InStr(UndoTrigger, ":" ,, 1,1)-1)
+		if (InStr(TriggerOpt, "*0") or !(InStr(TriggerOpt, "*"))) and (InStr(TriggerOpt, "O0") or !(InStr(TriggerOpt, "O")))
 		{
 			Send, {BackSpace}
 		}
@@ -162,7 +163,7 @@ $!BackSpace:: 	;~ Alt + Backspace as in MS Word: rolls back last Autocorrect act
 			Send, % "{BackSpace " . StrLen(MyHotstring) . "}" . SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", CaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
 		else
 			Send, % "{BackSpace " . StrLen(UndoHS) . "}" . SubStr(UndoTrigger, InStr(UndoTrigger, ":", CaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
-		if (InStr(UndoTrigger, "*0") or !(InStr(UndoTrigger, "*")))  and (InStr(UndoTrigger, "O0") or !(InStr(UndoTrigger, "O")))
+		if (InStr(TriggerOpt, "*0") or !(InStr(TriggerOpt, "*")))  and (InStr(TriggerOpt, "O0") or !(InStr(TriggerOpt, "O")))
 		{
 			Send, %A_EndChar%
 		}
@@ -269,13 +270,13 @@ StartHotstring(txt)
 	txtsp := StrSplit(txt, "‖")
 	Options := txtsp[1]
 	NewString := txtsp[2]
-	if (txtsp[3] == "A")
+	if (txtsp[3] == "SI")
 		SendFun := "NormalWay"
-	else if (txtsp[3] == "C") 
+	else if (txtsp[3] == "CL") 
 		SendFun := "ViaClipboard"
-	else if (txtsp[3] == "MC") 
+	else if (txtsp[3] == "MCL") 
 		SendFun := "MenuText"
-	else if (txtsp[3] == "MA") 
+	else if (txtsp[3] == "MSI") 
 		SendFun := "MenuTextAHK"
 	OnOff := txtsp[4]
 	TextInsert := txtsp[5]
@@ -318,9 +319,41 @@ AHKVariables(String)
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+ChangingBrackets(string)
+{
+	occ := 1
+	Loop
+	{
+		PosStart := InStr(string,"{",0,1,occ)
+		if (PosStart)
+		{
+			PosEnd := InStr(string, "}", 0, 1, occ)
+			WBrack := SubStr(string, PosStart, PosEnd-PosStart+1)
+			If InStr(WBrack, "Backspace") or InStr(WBrack, "BS")
+			{
+				InBrack := ""
+			}
+			else
+			{
+				InBrack := SubStr(string, PosStart+1, PosEnd-PosStart-1)
+				InBrack := Trim(InBrack)
+			}
+			string := StrReplace(string, WBrack, InBrack,0,-1)
+			occ++
+		}
+		else
+			break
+	}
+	return string
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 NormalWay(ReplacementString, Oflag)
 {
 	global MyHotstring
+	strInput :=
+	ToolTip,
 	UndoTrigger := A_ThisHotkey
 	ReplacementString := AHKVariables(ReplacementString)
 	if (Oflag == 0)
@@ -328,6 +361,7 @@ NormalWay(ReplacementString, Oflag)
 	else
 		Send, %ReplacementString%
 	UndoHS := % ReplacementString
+	UndoHS := ChangingBrackets(UndoHS)
 	; TrayTip,, % UndoTrigger . "`n" . UndoHS,3
 	SetFormat, Integer, H
 	InputLocaleID:=DllCall("GetKeyboardLayout", "UInt", 0, "UInt")
@@ -357,6 +391,8 @@ NormalWay(ReplacementString, Oflag)
 ViaClipboard(ReplacementString, Oflag)
 {
 	global MyHotstring, oWord, delay
+	strInput :=
+	ToolTip,
 	UndoTrigger := A_ThisHotkey
 	ReplacementString := AHKVariables(ReplacementString)
 	UndoHS := ReplacementString
@@ -425,7 +461,7 @@ Gui, Menu:Submit, Hide
 ClipboardBack:=ClipboardAll ;backup clipboard
 Clipboard:=MenuListbox ;Shove what was selected into the clipboard
 Send, ^v ;paste the text
-if (Ovar == 1)
+if (Ovar == 0)
 	Send, % A_EndChar
 sleep, %delay% ;Remember to sleep before restoring clipboard or it will fail
 MyHotstring := MenuListbox
@@ -483,9 +519,10 @@ return
 Enter::
 Gui, MenuAHK:Submit, Hide
 Send, % MenuListbox2
-if (Ovar == 1)
+if (Ovar == 0)
 	Send, % A_EndChar
 UndoHS := MenuListbox2
+UndoHS := ChangingBrackets(UndoHS)
 ; TrayTip,, % UndoTrigger . "`n" . UndoHS,3
 SetFormat, Integer, H
 InputLocaleIDv:=DllCall("GetKeyboardLayout", "UInt", 0, "UInt")
@@ -1083,19 +1120,19 @@ HSLV:
 	LV_GetText(Options, SelectedRow, 2)
 	LV_GetText(NewString, SelectedRow, 1)
 	LV_GetText(Fun, SelectedRow, 3)
-	if (Fun = "A")
+	if (Fun = "SI")
 	{
 		SendFun := "NormalWay"
 	}
-	else if(Fun = "C")
+	else if (Fun = "CL")
 	{
 		SendFun := "ViaClipboard"
 	}
-	else if (Fun = "MC")
+	else if (Fun = "MSI")
 	{
 		SendFun := "MenuText"
 	}
-	else if (Fun = "MA")
+	else if (Fun = "MCL")
 	{
 		SendFun := "MenuTextAHK"
 	}
@@ -1124,19 +1161,19 @@ HSLV2:
 	LV_GetText(Options, SelectedRow2, 3)
 	LV_GetText(NewString, SelectedRow2, 2)
 	LV_GetText(Fun, SelectedRow2, 4)
-	if (Fun = "A")
+	if (Fun = "SI")
 	{
 		SendFun := "NormalWay"
 	}
-	else if(Fun = "C")
+	else if(Fun = "CL")
 	{
 		SendFun := "ViaClipboard"
 	}
-	else if (Fun = "MC")
+	else if (Fun = "MCL")
 	{
 		SendFun := "MenuText"
 	}
-	else if (Fun = "MA")
+	else if (Fun = "MSI")
 	{
 		SendFun := "MenuTextAHK"
 	}
@@ -1349,13 +1386,13 @@ SaveHotstrings:
 	else if InStr(Items, """Off""")
 		OnOff := "Off"
 	if InStr(Items, "ViaClipboard")
-		SendFun := "C"
+		SendFun := "CL"
 	else if InStr(Items, "NormalWay")
-		SendFun := "A"
+		SendFun := "SI"
 	else if InStr(Items, """MenuText""")
-		SendFun := "MC"
+		SendFun := "MCL"
 	else if InStr(Items, """MenuTextAHK""")
-		SendFun := "MA"
+		SendFun := "MSI"
 	HSSplit := StrSplit(Items, ":")
 	HSSplit2 := StrSplit(Items, """:")
 	Options := SubStr(HSSplit2[2], 1 , InStr(HSSplit2[2], ":" )-1)
@@ -1857,8 +1894,8 @@ MoveList:
 	LV_GetText(TriggOpt, SelectedRow,3)
 	LV_GetText(OutFun, SelectedRow,4)
 	LV_GetText(OnOff, SelectedRow,5)
-	LV_GetText(Comment, SelectedRow,6)
-	LV_GetText(HSText, SelectedRow,7)
+	LV_GetText(HSText, SelectedRow,6)
+	LV_GetText(Comment, SelectedRow,7)
 	MovedHS := TriggOpt . "‖" . Triggerstring . "‖" . OutFun . "‖" . OnOff . "‖" . HSText . "‖" . Comment
 	MovedNoOptHS := "‖" . Triggerstring . "‖" . OutFun . "‖" . OnOff . "‖" . HSText . "‖" . Comment
 	Gui, MoveLibs:New
@@ -1914,13 +1951,13 @@ Loop, Read, %InputFile%
 			Gui, MoveLibs:Destroy
 			return
 		}
-		LV_Modify(A_Index, "", Triggerstring, TriggOpt, OutFun, OnOff, Comment, HSText)
+		LV_Modify(A_Index, "", Triggerstring, TriggOpt, OutFun, OnOff, HSText, Comment)
 		SaveFlag := 1
 	}
 }
 if (SaveFlag == 0)
 	{
-		LV_Add("",  Triggerstring, TriggOpt, OutFun, OnOff,Comment,  HSText)
+		LV_Add("",  Triggerstring, TriggOpt, OutFun, OnOff,  HSText, Comment)
 		SectionList.Push(MovedHS)
 	}
 LV_ModifyCol(1, "Sort")
@@ -1931,8 +1968,8 @@ if (SectionList.MaxIndex() == "")
 	LV_GetText(txt2, 1, 1)
 	LV_GetText(txt3, 1, 3)
 	LV_GetText(txt4, 1, 4)
-	LV_GetText(txt5, 1, 6)
-	LV_GetText(txt6, 1, 5)
+	LV_GetText(txt5, 1, 5)
+	LV_GetText(txt6, 1, 6)
 	txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
 	FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
 }
@@ -1944,8 +1981,8 @@ else
 		LV_GetText(txt2, A_Index, 1)
 		LV_GetText(txt3, A_Index, 3)
 		LV_GetText(txt4, A_Index, 4)
-		LV_GetText(txt5, 1, 6)
-	LV_GetText(txt6, 1, 5)
+		LV_GetText(txt5, A_Index, 5)
+	LV_GetText(txt6, A_Index, 6)
 		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
 		if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
 			FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
@@ -1954,8 +1991,8 @@ else
 	LV_GetText(txt2, SectionList.MaxIndex(),1) 
 	LV_GetText(txt3, SectionList.MaxIndex(),3) 
 	LV_GetText(txt4, SectionList.MaxIndex(),4) 
-	LV_GetText(txt5, SectionList.MaxIndex(),6)
-	LV_GetText(txt6, SectionList.MaxIndex(),5) 
+	LV_GetText(txt5, SectionList.MaxIndex(),5)
+	LV_GetText(txt6, SectionList.MaxIndex(),6) 
 	txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
 	FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
 }
@@ -1964,14 +2001,18 @@ OutputFile := % A_ScriptDir . "\Libraries\temp.csv"
 cntLines := 0
 Loop, Read, %InputFile%
 {	
-	if !(InStr(A_LoopReadLine, MovedNoOptHS))
+	if !(InStr(A_LoopReadLine, LString))
 		FileAppend, % A_LoopReadLine . "`r`n", %OutputFile%, UTF-8
 	cntLines++
 }
 FileDelete, %InputFile%
 Loop, Read, %OutputFile%
 {
-	FileAppend, % A_LoopReadLine . "`r`n", %InputFile%, UTF-8
+	if (A_Index == 1)
+		FileAppend, % A_LoopReadLine, %InputFile%, UTF-8
+	else
+		FileAppend, % "`r`n" . A_LoopReadLine, %InputFile%, UTF-8
+
 }
 if (cntLines == 1)
 	{
@@ -2289,12 +2330,4 @@ EndTab:
 	EndingChar_Tab := !(EndingChar_Tab)
 	IniWrite, %EndingChar_Tab%, Config.ini, Configuration, EndingChar_Tab
 	EndChars()
-return
-
-~Enter::
-~Space::
-	If WinActive("Search Hotstrings")
-	{
-		Gui, HS3List: Destroy
-	}
 return

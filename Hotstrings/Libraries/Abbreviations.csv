@@ -1,191 +1,200 @@
-﻿B0*?‖.ahk‖A‖On‖‖only for extensions
-B0*?‖.svg‖A‖On‖‖
-O‖2d‖A‖On‖2D‖
-*‖3d ‖A‖On‖3D ‖
-*‖ac ‖A‖On‖AC‖
-*‖ac/‖MA‖On‖Alternating Current¦Axle Counter‖
-‖ahk‖A‖On‖AHK‖
-*‖ahk/‖C‖On‖AutoHotkey‖
-‖api‖A‖On‖API ‖
-*‖api/‖C‖On‖Application Programming Interface‖
-‖bom‖A‖On‖BOM‖
-*‖bom/‖MA‖On‖Bill of Materials¦Byte Order Mark‖
-‖cad‖A‖On‖CAD‖
-*‖cad/‖C‖On‖Computer Aided Design‖
-*‖can/‖C‖On‖Controller Area Network‖
-*‖can`t‖A‖On‖CAN‖
-‖ccms‖A‖On‖CCMS‖
-*‖ccms/‖A‖On‖Component Content Management System‖
-‖ceo‖A‖On‖CEO‖
-*‖ceo/‖C‖On‖Chief Executive Officer‖
-‖cfo‖A‖On‖CFO‖
-*‖cfo/‖A‖On‖Chief Financial Officer‖
-‖com‖A‖On‖COM‖
-‖cop‖A‖On‖CoP‖
-*‖cop/‖C‖On‖Code of Practice‖
-‖cot‖A‖On‖CoT ‖
-*‖CoT/‖A‖On‖Clearance of Track‖
-*‖cots ‖A‖On‖COTS ‖
-*‖cots/‖C‖On‖Commercial Off-The-Shelf‖
-*‖covid ‖A‖On‖COVID-19 ‖
-*‖covid/‖C‖On‖severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2)‖
-*‖cso ‖A‖On‖CSO ‖
-*‖cso/‖A‖On‖Chief Sales Officer‖
-*‖csv ‖A‖On‖CSV‖
-*‖csv/‖A‖On‖Comma Separated Values‖
-*‖dc/‖C‖On‖Direct Current‖
-*‖dc`t‖A‖On‖DC‖
-*‖dita ‖A‖On‖DITA‖
-*‖dita/‖C‖On‖Darwin Information Typing Architecture‖
-*‖dnd ‖A‖On‖D&D ‖
-*‖dnd/‖A‖On‖Drag&Drop‖
-*‖dwg ‖A‖On‖DWG ‖
-*‖dwg/‖A‖Off‖Drawing Exchange Format‖
-*‖dxf ‖A‖On‖DXF ‖
-*‖dxf/‖A‖On‖Drawing Exchange Format‖
-*‖ei ‖A‖On‖EI ‖
-*‖ei/‖C‖On‖Emotional Intelligence‖
-*‖emc ‖A‖On‖EMC ‖
-*‖emc/‖C‖On‖Electro-Magnetic Compatibility‖
-*‖emi ‖A‖On‖EMI ‖
-*‖emi/‖C‖On‖Electromagnetic Interference‖
-*‖ems ‖A‖On‖EMS ‖
-*‖ems/‖C‖On‖Electronics Manufacturing Services‖
-‖eq‖A‖On‖EQ ‖
-*‖eq/‖C‖On‖Emotional Quotient‖
-B0*‖era ‖A‖On‖{Backspace 4}ERA ‖
-*‖era/‖C‖On‖European Railway Agency‖
-B0*‖ere ‖A‖On‖{Backspace 4}ERE ‖
-*‖ere/‖C‖On‖Explicit Risk Estimation‖
-B0*‖erp ‖A‖On‖{Backspace 4}ERP ‖
-*‖erp/‖C‖On‖Enterprise Resource Planning‖
-B0*‖ertms ‖A‖On‖{Backspace 6}ERTMS ‖
-*‖ertms/‖C‖On‖European Rail Traffic Management System‖
-B0*‖etcs ‖A‖On‖{Backspace 5}ETCS ‖
-*‖etcs/‖A‖On‖European Train Control System‖
-B0*‖fai ‖A‖On‖{Backspace 4}FAI ‖
-*‖fai/‖C‖On‖First Article Inspection‖
-B0*‖faq ‖A‖On‖{Backspace 4}FAQ ‖
-*‖faq/‖C‖On‖Frequently Asked Questions‖
-*‖fat ‖A‖On‖FAT ‖
-*‖fat/‖C‖On‖Factory Acceptance Test‖
-B0*‖fmea ‖A‖On‖{Backspace 5}FMEA ‖
-*‖fmea/‖C‖On‖Failure Mode and Effects Analysis‖
-B0*‖fmeca ‖A‖On‖{Backspace 6}FMECA ‖
-B0*‖gps ‖A‖On‖{BackSpace 3}GPS ‖
-*‖gps/‖C‖On‖Global Positioning System‖
-B0O‖gsm‖A‖On‖{BackSpace 3}GSM ‖
-C1*‖gsm/‖C‖On‖Global System for Mobile Communications‖
-*‖gui ‖A‖On‖GUI‖
-*‖gui/‖C‖On‖Graphical User Interface‖
-B0*‖hart ‖A‖On‖{Backspace 5}HART ‖
-*‖hart/‖C‖On‖Highway Addressable Remote Transducer Protocol‖
-B0*‖hdmi ‖A‖On‖{Backspace 5}HDMI ‖
-*‖hdmi/‖C‖On‖High-Definition Multimedia Interface‖
-B0O‖html‖A‖On‖{Backspace 4}HTML‖
-B0*‖ic ‖A‖On‖{Backspace 3}IC ‖
-*‖ic/‖C‖On‖Interoperability Constituent‖
-B0*‖ip ‖A‖On‖{Backspace 3}IP ‖
-*‖ip/‖C‖On‖IP Code, Ingress Protection code (https://en.wikipedia.org/wiki/IP_Code	)‖
-‖iq ‖A‖On‖IQ ‖
-*‖iq/‖C‖On‖Inteligence Quotient‖
-B0*‖iris ‖A‖On‖{Backspace 5}IRIS ‖
-*‖iris/‖C‖On‖International Railway Industry Standard for the evaluation of railway management systems‖
-B0*‖kpi ‖A‖On‖{Backspace 4}KPI ‖
-*‖kpi/‖C‖On‖Key Performance Indicator‖
-B0*‖lad ‖A‖On‖{Backspace 4}LAD ‖
-*‖lad/‖C‖On‖Logistic and Administrative Delay‖
-‖lan‖A‖On‖LAN‖
-*‖lan ‖A‖On‖LAN‖
-*‖lan/‖A‖On‖Local Area Network‖
-B0*‖lc2 ‖A‖On‖{Backspace 4}LLC ‖
-*‖lc2/‖C‖On‖Life Cycle Cost‖
-B0*‖lop ‖A‖On‖{Backspace 4}LOP‖
-*‖lop/‖C‖On‖List of Open Points‖
-B0*‖mdt ‖A‖On‖{Backspace 4}MDT ‖
-*‖mdt/‖C‖On‖Mean Down Time‖
-B0*‖mtbf‖A‖On‖{Backspace 4}MTBF‖
-B0*‖mtbf ‖A‖Off‖{Backspace 5}MTBF ‖
-*‖mtbf/‖C‖On‖Mean Time Between Failures‖
-B0*‖mtbm ‖A‖On‖{Backspace 5}MTBM ‖
-*‖mtbm/‖C‖On‖Mean Time Between Maintainances‖
-B0*‖mttf ‖A‖On‖{Backspace 5}MTTF ‖
-*‖mttf/‖C‖On‖Mean Time To Failure‖
-B0*‖mttr ‖A‖On‖{Backspace 5}MTTR ‖
-*‖mttr/‖C‖On‖Mean Time To Restore‖
-B0*‖mut ‖A‖On‖{Backspace 4}MUT ‖
-*‖mut/‖C‖On‖Mean Up Time‖
-B0*‖ncr ‖A‖On‖{Backspace 4}NCR ‖
-*‖ncr/‖C‖On‖Non Conformance Report‖
-B0*‖nda ‖A‖On‖{Backspace 4}NDA ‖
-*‖nda/‖C‖On‖Non-Disclosure Agreement‖
-B0*‖oem ‖A‖On‖{BackSpace 3}OEM ‖
-*‖orcad‖A‖On‖OrCAD‖
-B0*‖pcb ‖A‖On‖{Backspace 4}PCB ‖
-*‖pcb/‖C‖On‖Printed Circuit Board‖
-B0*‖pdf ‖A‖On‖{BackSpace 3}PDF ‖
-*‖pdf/‖C‖On‖Portable Document Format‖
-*‖pit‖A‖On‖PIT‖
-*‖pit/‖A‖On‖Personal Income Tax‖
-B0*‖plm ‖A‖On‖{BackSpace 3}PLM ‖
-*‖plm/‖C‖On‖Product Lifecycle Management‖
-*‖poc/‖MC‖On‖PoC ¦Proof of Concept ‖
-B0*‖pwm ‖A‖On‖{Backspace 3}PWM‖
-*‖PWM/‖A‖On‖Pulse-Width Modulation‖
-B0*‖qna ‖A‖On‖{Backspace 3}Q&A ‖
-*‖qna/‖C‖On‖Questions and Answers‖
-B0*‖qr ‖A‖On‖{BackSpace 2}QR code ‖
-*‖qr/‖A‖On‖{BackSpace 5}Quick Response code‖
-B0*‖qrams ‖A‖On‖{Backspace 6}QRAMS ‖
-*‖qrams/‖C‖On‖Quality, Reliability, Availability, Maintainability, Safety‖
-B0*‖rac ‖A‖On‖{Backspace 4}RAC ‖
-*‖rac/‖C‖On‖Risk Acceptance Criteria‖
-B0*‖ram ‖A‖On‖{Backspace 4}RAM ‖
-*‖ram/‖C‖On‖Reliability, Availability, Maintainability‖
-B0*‖rams ‖A‖On‖{Backspace 5}RAMS ‖
-*‖rams/‖C‖On‖Reliability, Availability, Maintainability and Safety‖
-B0*‖rap ‖A‖On‖{Backspace 4}RAP ‖
-*‖rap/‖C‖On‖Risk Acceptance Principle‖
-B0*‖rma‖A‖On‖{BackSpace 3}RMA‖
-*‖rma/‖C‖On‖Return Merchandise Authorization‖
-B0*‖rms ‖A‖On‖{BackSpace 3}RMS ‖
-*‖rms/‖C‖On‖Root Mean Square‖
-*‖rpa/‖MA‖On‖RPA¦Robotics Process Automation‖
-B0*‖sa ‖A‖On‖{Backspace 3}SA ‖
-*‖sa/‖C‖On‖Specific Application‖
-B0*‖sil ‖A‖On‖{Backspace 4}SIL ‖
-*‖sil/‖C‖On‖Safety Integrity Level‖
-B0*‖sla ‖A‖On‖{Backspace 4}SLA ‖
-*‖sla/‖C‖On‖Service-Level Agreement‖
-B0*‖sql ‖A‖On‖{BackSpace 3}SQL ‖
-*‖sql/‖C‖On‖Structured Query Language‖
-B0*‖srac ‖A‖On‖{Backspace 5}SRAC ‖
-*‖srac/‖C‖On‖Safety Related Application Condition‖
-B0*‖svg‖A‖On‖{Backspace 3}SVG‖
-*‖svg/‖A‖On‖Scalable Vector Graphics‖
-*‖tbd‖A‖On‖to be decided‖
-B0*‖tffr ‖A‖On‖{Backspace 5}TFFR ‖
-*‖tffr/‖C‖On‖Tolerable Functional Failure Rate‖
-B0*‖thr ‖A‖On‖{Backspace 4}THR ‖
-*‖thr/‖C‖On‖Tolerable Hazard Rate‖
-B0*‖tsi ‖A‖On‖{Backspace 4}TSI ‖
-*‖tsi/‖C‖On‖Technical Specifications for Interoperability‖
-B0*‖ui ‖A‖On‖{BackSpace 2}UI ‖
-*‖ui/‖C‖On‖User Interface‖
-B0*‖ups ‖A‖On‖{Backspace 4}UPS ‖
-*‖ups/‖C‖On‖Uninterruptable Power Supply‖
-B0*‖usb ‖A‖On‖{Backspace 4}USB ‖
-*‖usb/‖C‖On‖Universal Serial Bus‖
-B0*‖utf ‖A‖On‖{Backspace 4}UTF‖
-*‖utf/‖C‖On‖Unicode Transformation Format‖
-B0‖ux ‖A‖On‖{Backspace 3}UX ‖
-*‖ux/‖C‖On‖User Experience‖
-B0*‖vat ‖A‖On‖{Backspace 4}VAT ‖
-*‖vat/‖C‖On‖Value Added Tax‖
-B0*‖vba ‖A‖On‖{Backspace 4}VBA ‖
-*‖vba/‖C‖On‖Visual Basic for Applications‖
-*‖vpn ‖A‖On‖VPN‖
-*‖vpn/‖C‖On‖Virtual Private Network‖
-*‖wysiwyg ‖A‖On‖WYSIWYG‖
-*‖wysiwyg/‖A‖On‖What You See Is What You Get‖
-*‖yt‖C‖On‖YouTube.com‖
+﻿B0*?‖.ahk‖SI‖On‖‖only for extensions
+B0*?‖.csv‖SI‖On‖‖
+B0*?‖.pdf‖SI‖On‖‖
+B0*?‖.svg‖SI‖On‖‖
+O‖2d‖SI‖On‖2D‖
+*‖3d ‖SI‖On‖3D ‖
+‖ac‖SI‖On‖AC‖
+*‖ac/‖MSI‖On‖Alternating Current¦Axle Counter‖
+‖ahk‖SI‖On‖AHK‖
+*‖ahk/‖CL‖On‖AutoHotkey‖
+‖api‖SI‖On‖API ‖
+*‖api/‖CL‖On‖Application Programming Interface‖
+‖bom‖SI‖On‖BOM‖
+*‖bom/‖MSI‖On‖Bill of Materials¦Byte Order Mark‖
+‖cad‖SI‖On‖CAD‖
+*‖cad/‖CL‖On‖Computer Aided Design‖
+*‖can/‖CL‖On‖Controller Area Network‖
+*‖can`t‖SI‖On‖CAN‖
+‖cat‖SI‖On‖CAT‖
+*‖cat/‖CL‖On‖Computer Assisted Translation‖
+‖ccms‖SI‖On‖CCMS‖
+*‖ccms/‖SI‖On‖Component Content Management System‖
+‖ceo‖SI‖On‖CEO‖
+*‖ceo/‖CL‖On‖Chief Executive Officer‖
+‖cfo‖SI‖On‖CFO‖
+*‖cfo/‖SI‖On‖Chief Financial Officer‖
+‖com‖SI‖On‖COM‖
+‖cop‖SI‖On‖CoP‖
+*‖cop/‖CL‖On‖Code of Practice‖
+‖cot‖SI‖On‖CoT‖
+*‖cot/‖SI‖On‖Clearance of Track‖
+‖cots‖SI‖On‖COTS‖
+*‖cots/‖CL‖On‖Commercial Off-The-Shelf‖
+‖covid‖SI‖On‖COVID-19‖
+*‖covid/‖CL‖On‖severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2)‖
+‖cso‖SI‖On‖CSO‖
+*‖cso/‖SI‖On‖Chief Sales Officer‖
+‖csv‖SI‖On‖CSV‖
+*‖csv/‖SI‖On‖Comma Separated Values‖
+‖dc‖SI‖On‖DC‖
+*‖dc/‖CL‖On‖Direct Current‖
+*‖ddns/‖MSI‖On‖DDNS¦Dynamic Domain Name System‖
+‖dita‖SI‖On‖DITA‖
+*‖dita/‖CL‖On‖Darwin Information Typing Architecture‖
+‖dnd‖SI‖On‖D&D‖
+*‖dnd/‖SI‖On‖Drag&Drop‖
+‖dwg‖SI‖On‖DWG‖
+*‖dwg/‖SI‖Off‖Drawing Exchange Format‖
+‖dxf‖SI‖On‖DXF‖
+*‖dxf/‖SI‖On‖Drawing Exchange Format‖
+‖ei‖SI‖On‖EI‖
+*‖ei/‖CL‖On‖Emotional Intelligence‖
+‖emc‖SI‖On‖EMC‖
+*‖emc ‖SI‖On‖EMC ‖
+*‖emc/‖CL‖On‖Electro-Magnetic Compatibility‖
+‖emi‖SI‖On‖EMI‖
+*‖emi/‖CL‖On‖Electromagnetic Interference‖
+‖ems‖SI‖On‖EMS‖
+*‖ems/‖CL‖On‖Electronics Manufacturing Services‖
+‖eq‖SI‖On‖EQ ‖
+*‖eq/‖CL‖On‖Emotional Quotient‖
+‖era‖SI‖On‖ERA‖
+*‖era/‖CL‖On‖European Railway Agency‖
+‖ere‖SI‖On‖ERE‖
+*‖ere/‖CL‖On‖Explicit Risk Estimation‖
+‖erp‖SI‖On‖ERP‖
+*‖erp/‖CL‖On‖Enterprise Resource Planning‖
+‖ertms‖SI‖On‖ERTMS‖
+*‖ertms/‖CL‖On‖European Rail Traffic Management System‖
+‖etcs‖SI‖On‖ETCS‖
+*‖etcs/‖SI‖On‖European Train Control System‖
+‖fai‖SI‖On‖FAI‖
+*‖fai/‖CL‖On‖First Article Inspection‖
+‖faq‖SI‖On‖FAQ‖
+*‖faq/‖CL‖On‖Frequently Asked Questions‖
+‖fat‖SI‖On‖FAT‖
+*‖fat/‖CL‖On‖Factory Acceptance Test‖
+‖fmea‖SI‖On‖FMEA‖
+*‖fmea/‖CL‖On‖Failure Mode and Effects Analysis‖
+‖fmeca‖SI‖On‖FMECA‖
+*‖fmeca/‖SI‖On‖Failure mode effects and criticality analysis‖
+‖gps‖SI‖On‖GPS‖
+*‖gps/‖CL‖On‖Global Positioning System‖
+‖gsm‖SI‖On‖GSM‖
+*‖gsm/‖CL‖On‖Global System for Mobile Communications‖
+‖gui‖SI‖On‖GUI‖
+*‖gui/‖CL‖On‖Graphical User Interface‖
+‖hart‖SI‖On‖HART‖
+*‖hart/‖CL‖On‖Highway Addressable Remote Transducer Protocol‖
+‖hdmi‖SI‖On‖HDMI‖
+*‖hdmi/‖CL‖On‖High-Definition Multimedia Interface‖
+‖html‖SI‖On‖HTML‖
+*‖html/‖SI‖On‖HyperText Markup Language‖
+‖ic‖SI‖On‖IC‖
+*‖ic/‖CL‖On‖Interoperability Constituent‖
+‖ip‖SI‖On‖IP‖
+*‖ip/‖MCL‖On‖IP Code, Ingress Protection code¦https://en.wikipedia.org/wiki/IP_Code‖
+‖iq‖SI‖On‖IQ‖
+*‖iq/‖CL‖On‖Inteligence Quotient‖
+‖iris‖SI‖On‖IRIS‖
+*‖iris/‖CL‖On‖International Railway Industry Standard for the evaluation of railway management systems‖
+‖kpi‖SI‖On‖KPI‖
+*‖kpi/‖CL‖On‖Key Performance Indicator‖
+‖lad‖SI‖On‖LAD‖
+*‖lad/‖CL‖On‖Logistic and Administrative Delay‖
+‖lan‖SI‖On‖LAN‖
+*‖lan/‖SI‖On‖Local Area Network‖
+‖lc2‖CL‖On‖LLC‖
+*‖lc2/‖CL‖On‖Life Cycle Cost‖
+‖llc‖CL‖On‖LLC‖
+*‖llc/‖CL‖On‖Life Cycle Cost‖
+‖lop‖SI‖On‖LOP‖
+*‖lop/‖CL‖On‖List of Open Points‖
+‖mdt‖SI‖On‖MDT‖
+*‖mdt/‖CL‖On‖Mean Down Time‖
+‖mtbf‖SI‖On‖MTBF‖
+*‖mtbf/‖CL‖On‖Mean Time Between Failures‖
+‖mtbm‖SI‖On‖MTBM‖
+*‖mtbm/‖CL‖On‖Mean Time Between Maintainances‖
+‖mttf‖SI‖On‖MTTF‖
+*‖mttf/‖CL‖On‖Mean Time To Failure‖
+‖mttr‖SI‖On‖MTTR‖
+*‖mttr/‖CL‖On‖Mean Time To Restore‖
+‖mut‖SI‖On‖MUT‖
+*‖mut/‖CL‖On‖Mean Up Time‖
+‖ncr‖SI‖On‖NCR‖
+*‖ncr/‖CL‖On‖Non Conformance Report‖
+‖nda‖SI‖On‖NDA‖
+*‖nda/‖CL‖On‖Non-Disclosure Agreement‖
+‖oem‖SI‖On‖OEM‖
+*‖oem/‖SI‖On‖Original Equipment Manufacturer‖
+‖pcb‖SI‖On‖PCB‖
+*‖pcb/‖CL‖On‖Printed Circuit Board‖
+‖pdf‖SI‖On‖PDF‖
+*‖pdf/‖CL‖On‖Portable Document Format‖
+‖pit‖SI‖On‖PIT‖
+*‖pit/‖SI‖On‖Personal Income Tax‖
+‖plm‖SI‖On‖PLM‖
+*‖plm/‖CL‖On‖Product Lifecycle Management‖
+‖poc‖SI‖On‖PoC‖
+*‖poc/‖CL‖On‖Proof of Concept‖
+‖pwm‖SI‖On‖PWM‖
+*‖PWM/‖SI‖On‖Pulse-Width Modulation‖
+‖qna‖SI‖On‖Q&A‖
+*‖qna/‖CL‖On‖Questions and Answers‖
+‖qr‖SI‖On‖QR code‖
+*‖qr/‖SI‖On‖Quick Response code‖
+‖qrams‖SI‖On‖QRAMS‖
+*‖qrams/‖CL‖On‖Quality, Reliability, Availability, Maintainability, Safety‖
+‖rac‖SI‖On‖RAC‖
+*‖rac/‖CL‖On‖Risk Acceptance Criteria‖
+‖ram‖SI‖On‖RAM‖
+*‖ram/‖CL‖On‖Reliability, Availability, Maintainability‖
+‖rams‖SI‖On‖RAMS‖
+*‖rams/‖CL‖On‖Reliability, Availability, Maintainability and Safety‖
+‖rap‖SI‖On‖RAP‖
+*‖rap/‖CL‖On‖Risk Acceptance Principle‖
+‖rma‖SI‖On‖RMA‖
+*‖rma/‖CL‖On‖Return Merchandise Authorization‖
+‖rms‖SI‖On‖RMS‖
+*‖rms/‖CL‖On‖Root Mean Square‖
+‖rpa‖SI‖On‖RPA‖
+*‖rpa/‖SI‖On‖Robotics Process Automation‖
+‖sa‖SI‖On‖SA‖
+*‖sa/‖CL‖On‖Specific Application‖
+‖sil‖SI‖On‖SIL‖
+*‖sil/‖CL‖On‖Safety Integrity Level‖
+‖sla‖SI‖On‖SLA‖
+*‖sla/‖CL‖On‖Service-Level Agreement‖
+‖sql‖SI‖On‖SQL‖
+*‖sql/‖CL‖On‖Structured Query Language‖
+‖srac‖SI‖On‖SRAC‖
+*‖srac/‖CL‖On‖Safety Related Application Condition‖
+‖svg‖SI‖On‖SVG‖
+*‖svg/‖SI‖On‖Scalable Vector Graphics‖
+*‖tbd‖SI‖On‖to be decided‖
+‖tffr‖SI‖On‖TFFR‖
+*‖tffr/‖CL‖On‖Tolerable Functional Failure Rate‖
+‖thr‖SI‖On‖THR‖
+*‖thr/‖CL‖On‖Tolerable Hazard Rate‖
+‖tsi‖SI‖On‖TSI‖
+*‖tsi/‖CL‖On‖Technical Specifications for Interoperability‖
+‖ui‖SI‖On‖UI‖
+*‖ui/‖CL‖On‖User Interface‖
+‖ups‖SI‖On‖UPS‖
+*‖ups/‖CL‖On‖Uninterruptable Power Supply‖
+‖usb‖SI‖On‖USB‖
+*‖usb/‖CL‖On‖Universal Serial Bus‖
+‖utf‖SI‖On‖UTF‖
+*‖utf/‖CL‖On‖Unicode Transformation Format‖
+‖ux‖SI‖On‖UX‖
+*‖ux/‖CL‖On‖User Experience‖
+‖vat‖SI‖On‖VAT‖
+*‖vat/‖CL‖On‖Value Added Tax‖
+‖vba‖SI‖On‖VBA‖
+*‖vba/‖CL‖On‖Visual Basic for Applications‖
+‖vpn‖SI‖On‖VPN‖
+*‖vpn/‖CL‖On‖Virtual Private Network‖
+‖wysiwyg‖SI‖On‖WYSIWYG‖
+*‖wysiwyg/‖SI‖On‖What You See Is What You Get‖
