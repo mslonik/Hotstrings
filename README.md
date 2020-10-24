@@ -229,14 +229,45 @@ The alternative, traditional way, is based on text edition, when hotstrings are 
 ---
 ---
 
-# Let's begin defining of the first hotstring
-Our primary goal: we would like to exchange the **triggerstring** *btw* with the **hotstring** *by the way*, because we find it more elegant.
+# Installation of *Hotstrings* application
+The *Hotstrings* application can be downloaded from [Github (Hotstrings)][]. The project structure:
 
-In order to start just double click on the Hotstrings icon (capital letter *H* as *Hotstrings* on green background) in system tray:
+
+| Level one      | Level two             | Comment                             |
+| ---:           |  ---                  | ---                                 |
+| Libraries      |                       | Folder                              |
+| \|------       | Abbreviations.csv     | Examply library file                |
+| \|------       | CapitalLetters.csv    | Examply library file                |
+| \|------       | EmojiHotstrings.csv   | Examply library file                |
+| \|------       | PhysicsHotstrings.csv | Examply library file                |
+| \|------       | TimeHotstrings.csv    | Examply library file                |
+| Config.ini     | ─                     | Configuration file                  |
+| Hotstrings.ahk | ─                     | AutoHotkey script file              |
+| Hotstrings.exe | ─                     | (Microsoft) Windows executable file |
+| LICENSE        | ─                     | [GNU GPL ver. 3] license file       |
+
+**Hint**. At the moment it's mandatory to run the *Hotstrings* application to keep above structure. It means there must be created the *Libraries* folder and *Config.ini* file must be present just aside the *Hotstrings* executable or .ahk file.
+
+**Hint**. One can run *Hotstrings* application without installation of [AutoHotkey][] environment. In that case just run *Hotstrings.exe*. Nevertheless installation of [AutoHotkey][] environment is recommended.
+
+# The first run of *Hotstrings* application
+In order to run the *Hotstrings* application after downloading of all the files just mark the *Hotstrings.ahk* file or *Hostrings.exe* file in your favorite file browser and hit <Enter>. Nothing special should happen as *Hotstrings* application starts in minimized form. The only visible occurrence is default icon visible in *System Tray*. (You can access the *System Tray* with your keyboard by pressing # + B shortcut and preśing <Enter>):
 
 ![Example of system tray][]
 
-or... use hotkey *Ctrl | # | h* (Control | Windows key | h).
+Now *Hotstrings* application runs in its default mode: **running mode**. All the (triggerstring, hotstring) pairs are activated, operating system wide. So no matter in which text window is currently active pointer, one can already benefit from defined libraries of hostrings. Enjoy!
+
+The second mode of operation requires GUI (Graphical User Interface) window, because then one can define new hotstrings or edit existing. When GUI window is active still all the (triggerstring, hotstring) pairs are ative, just GUI window is additionally available.
+
+
+# Let's begin defining of the first hotstring
+Our primary goal: we would like to define our first pair of (triggerstrin, hotstring). The **triggerstring** *btw* with the **hotstring** *by the way*, just for the sake of example: (*btw*, *by the way*).
+
+In order to start the GUI of *Hotstrings* application just double click on the *Hotstrings* icon (capital letter *H* as *Hotstrings* on green background) in system tray:
+
+![Example of system tray][] environment
+
+or... use hotkey **Ctrl + # + h** (Control + Windows modifier key + h).
 
 Next you'll see main GUI (Graphical User Interface) window which enable you to edit hotstrings:
 
@@ -796,3 +827,4 @@ option | triggerstring     | trigger: last character   | hotstring
 [GNU GPL ver. 3]: https://github.com/mslonik/Hotstrings/blob/master/LICENSE
 [Source code]: https://github.com/mslonik/Hotstrings
 [Maciej's homepage]: http://mslonik.pl
+[Github (Hotstrings)]: https://github.com/mslonik/Hotstrings
