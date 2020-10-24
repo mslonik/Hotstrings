@@ -360,53 +360,181 @@ It can be divided into the following parts:
 1. Menu.
 2. Hotstring definition / edition.
 3. Display of existing hotstrings.
+4. Shortcuts
 
 ![Main window parts][]
 
 ## Menu
 ![Main menu][]
 
-- Monitor
-- Search Hotstrings
-- Delay
-- Help
-- About
+Available menu positions:
 
-In order to access menu by keyboard just press the left Alt key.
+* Configure
+* Search Hotstrings
+* Clipboard Delay
+* About / Help
 
-### Monitor
-Enable choice of the monitor where main GUI window is shown. If GUI window is closed, application continues to run (system tray icon is still accessible). When GUI window is called again (by pressing the hotkey or by clicking with mouse) it will be displayed at monitor of your choice.
+In order to access menu by keyboard just press the left Alt key or F10 key.
+
+
+### Configure
+
+![Menu: configure][]
+
+The state of *Configure* menu is reflected in *Config.ini* file.
+
+Available options:
+
+#### Undo last hotstring
+
+This option can be toggled (*on* or *off*).
+
+*If it is on:* when hotstring is triggered, user can undo it just after, by pressing usual shortcuts: **Ctrl + z** or **Ctrl + Backspace**. When shortcut is used, the **hotstring** is removed with **triggestring**: **hotstring** ← **triggestring**.
+
+*If it is off:* when hotstring is triggered, reaction to shortcuts **Ctrl + z** or **Ctrl + Backspace** is application dependant. The *Hotstrings* application do not interfere.
+
+*Tips*
+
+It can be useful in numerous situations, e.g. if hotstring is very similar or identical to another word. Example: word 'can' and abbreviation 'CAN' (Controller Area Network).
+
+This option can interfere with inbuild undo function in some application. It is known to be a problem in Inkscape application.
+
+ **Caution:** In some applications the same hotkeys are used for undoing the last action. Then the overall result sometimes is unpredictable or unwanted. In case of some trouble use undoing hotstring several times in a raw.
+
+
+
+#### Triggerstring tips
+
+This option can be toggled (*on* or *off*).
+
+*If it is on:* when user is typing and some triggestrings are common to the actual string entered by user, additional list of available triggestrings is displayed at the tip of a cursor. Thanks to that user may consciously finish any of the available triggestrings in order to trigger on purpose any hotstring.
+
+*If it is off:* no additional list of available triggerstrings is displayed.
+
+Example: after entering 
+>th
+
+one can get:
+
+![Menu: triggerstring tip][]
+
+*Tips*
+
+If this function is enabled, it helps to remember available triggestrings.
+
+It starts to work after the second letter is entered.
+
+#### Save window position
+
+This function is activated immediately after menu position is chosen. It saves current position of *Hotstrings* window. So when next time user will call for *Hotstrings* window (e.g. by double click over *Hotstrings* icon in system tray or pressing **Ctrl + # + h** shortcut), it will open in the last saved position (on the same screen).
+
+#### Launch Sandbox
+
+This option can be toggled (*on* or *off*). The *Sanbox* stands for "safe place to play with a tool(s); the playground".
+
+*If it is on:* the *Hotstrings* window is extended below the buttons, left column, with small editing window called *Sandbox* where user can check how actually pairs (**triggerstring**, **hotstring**) work in practice. 
+
+*If it is off:* the *Hotstrings* window isn't extended anymore with *Sandbox* text editign window.
+
+Example: *Sanbox* enabled.
+
+![Menu: Launch Sandbox][]
+
+
+*Tip*
+
+Sometimes it can be helpful to check if new defined hotstring actually work as expected. In order to check it one should find any text editing window, e.g. open text editor. The *Sandbox* helps to spare some time in such situation.
+
+#### Toggle EndChars
+
+This option let user to toggle each of the **EndChars** individually.
+
+![Menu: Toggle EndChars][]
+
+*Tip*
+
+Let's imagine user input string, so stream of keyboard pressed keys: 
+
+*Example☐of☐the☐sentence☐where☐user☐would☐like☐to☐exchange☐triggerstring☐e@☐with☐his☐e-mail:☐`firstname.secondname@domain.com`*
+
+The **hostring recognizer** observes input stream which contains besides letters also other categories of characters: digits, punctuation characters, blank characters, special characters etc. Some of them belong to special group called end character or *endchar* for short. The characters belonging to the *endchar* group has the following purposes, helping to **hotstring recognizer**:
+
+1. recognize when **triggestring** begins,
+2. recognize when **triggerstring** ends,
+3. reset itself.
+
+Maybe *endchar* is not the right therm and better would be *stopchar* or *trigger separator*? For compatibility with official documentation of AutoHotkey the term *endchar* is kept in this manual.
+
+By default **triggerstring** begins after a character belonging to *endchar* but with special **trigger option** called *Inside Word (?)* it can trigger **triggerstring** even between *endchar*, e.g. witin a word. It's done on purpose that *endchar* by default containts the following set of characters: 
+
+-()[]{}':;"/\,.?!\`n☐\`t 
+
+(note that \`n is Enter, \`t is Tab, and there is a plain space between \`n and \`t marked as ☐). 
+
+These characters are usually used to separate words or sentences. So often **hotstring recognizer** starts to recognize if **triggestring** is there, word by word and resets after each *endchar*. 
+
+User of *Hotstrings* application can change this default behavior thanks to configuration of *endchar*. 
+
+
 
 ### Search Hotstrings
-Enable searching of hotstring in any of the categories. All .csv files (category files) are searched. This option is helpful e.g. to find duplicates of hotstrings.
+Enable searching of hotstring among all available libraries. New window is opened.
 
-### Delay
+![Menu: Search Hotstrings][]
+
+*Tips:*
+
+In order to quickly close this window it is enough to press <Esc> key.
+
+All .csv files (library files) are searched. This option is helpful e.g. to find duplicates of hotstrings.
+
+This window is helpful for finding duplicates of hotstrings. After some time or in particular if the same set of libraries is used by group of users, it can be the case that some of the triggerstrings are duplicated. Then is is nice to have option to find them and... move them along the existing libraries. 
+
+In order to move library in this window is available **Move** button.
+
+In order to delete duplicated (**triggerstring**, **hotstring**) definition one can mark it, next close the *Search Hotstrings* window and then choose the **Delete hotstring** button.
+
+
+### Clipboard Delay
 Enable change of the delay between copying of the hotstring from clipboard to specific text window from which it was triggered.
-By default equal to 200 ms. Maximum value equal to 500 ms (0.5 s).
+By default equal to 200 ms. The maximum value is equal to 500 ms (0.5 s).
 
-**Tip:** Sometimes when long hotstrings are triggered and clipboard is applied to immediately enter it, strange behaviour can occurre. Instead of expected hotstring the previous content of clipboard may appear. The reason is that operating system can not gurantee the time to insert the content of clipboard into specific window / editing field. In order to support operating system enlarge the delay. The shorter the delay than better, but if too short, mentioned behaviour can be observed.
+*Tip:* Sometimes when long hotstrings are triggered and clipboard is applied to immediately enter it, strange behaviour can occurre. Instead of expected hotstring the previous content of clipboard may appear. The reason is that operating system can not gurantee the time to insert the content of clipboard into specific window / editing field. In order to support operating system, enlarge the delay. The shorter the delay than better, but if too short, mentioned behaviour can be observed.
 
 ### About / Help
  ![About / Help][] 
 
 **Hotstrings.ahk (script). Let's make your PC personal again...**. 
 
-Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). This is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). License: [GNU GPL ver. 3][]. [Source code][]. [Maciej's homepage][].
+Displays the following text:
 
-Help, link to this file.
+*Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). This is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). License: [GNU GPL ver. 3][]. [Source code][]. [Maciej's homepage][].*
+
+*Tips:*
+
+**Application help**: link to this file.
+
+**Genuine hotstrings AutoHotkey documentation**: link [hotstring][].
 
 # Hotstring definition or edition 
-This time all 6 steps discussed in details, with examples and comments.
+This time all 7 steps discussed in details, with examples and comments.
 
 ## Triggerstring definition
-(...)
+
+The text edit field used to define the triggerstring.
+
+![Enter triggerstring][]
+
+In general the shorter triggerstring then the better. The triggerstring can be at most 40 characters long. This edit field works as any other ordinary window edit field, so it doesn't support e.g. text block operations.
+
+The *Hotstrings* application doesn't have protection agains duplicate (**triggerstring**, **hotstring**) pairs. User can easily duplicated them. Therefore its worth to search prior to adding new definition if it doesn't exist already.
 
 ## Trigger options overview
-Trigger options controls how **hotstring recognizer** works.
+Trigger options controls how **hotstring recognizer** works. All these options can be used concurrently. For clarity in the following descriptions each of them is described separatedly.
 
 ![Select trigger option(s)][]
 
-**Tab. 1.** Trigger options compatibility between AutoHotkey and *Hotstrings* app.
+**Tab. 1.** Trigger options compatibility between AutoHotkey [hotstring] and *Hotstrings* app.
 |   Option full name  | Option short name | AutoHotkey | *Hotstrings* application |     Comment     |
 |:-------------------:|:-----------------:|:----------:|:------------------------:|:---------------:|
 | No option (default) |                   |      X     |             X            |       GUI       |
@@ -415,7 +543,7 @@ Trigger options controls how **hotstring recognizer** works.
 |     No Backspace    |         B0        |      X     |             X            |       GUI       |
 |    Case Sensitive   |         C         |      X     |             X            |       GUI       |
 |      No Endchar     |         O         |      X     |             X            |       GUI       |
-|        Execut       |         X         |      X     |                          | not implemented |
+|        Execute       |         X         |      X     |                          | not implemented |
 |   Reset Recognizer  |         Z         |      X     |                          | not implemented |
 |       Disable       |       En/Dis      |            |             X            |       GUI       |
                                                                                  
@@ -423,9 +551,8 @@ Trigger options controls how **hotstring recognizer** works.
 Comments:
 
 * GUI (Graphical User Interface) means that specified option is directly available in the GUI of this application.
-*  For details regarding SI / SP / SE modes see [documentation of AutoHotkey][]. Only SI mode is implemented.
 
-**Tab. 2.** Comparison of **option(s)** (valid for **trigger recognizer**).
+**Tab. 2.** Comparison of implemented **option(s)** valid for **trigger recognizer**.
 | option full name    | option shortname | previous endchar required? | triggestring erased? | separate trigger? | trigger erased? | triggerstring case sensitive? |
 |---------------------|:---------:|:--------------------------:|:--------------------:|:-----------------:|:---------------:|:-----------------------------:|
 | No option (default) |           |             yes            |          yes         |        yes        |        no       |               no              |
@@ -620,7 +747,7 @@ Similar to default option, but this time *endchar* directly before the **trigger
 #### Disable
 ![Disable example][]
 
-The **hotstring** definition is left in library file (.csv) in the same state as on time of last edition, but is disabled (switched off). So **hotstring recognizer** do not detect it anymore. 
+The **hotstring** definition is left in library file (.csv) in the same state as on time of last edition, but is disabled (switched off). So **hotstring recognizer** does not detects it anymore. 
 
 The opposite action can take place upon user action: if user will edit definition of particular *hotstring* and uncheck the tick *disable*, then *hotstring* becomes active again. Next time when corresponding **triggerstring** will occurre in input stream, the **hotstring recognizer** will trigger corresponding *hotstring* according to previously defined **option(s)**.
 
@@ -628,60 +755,29 @@ The opposite action can take place upon user action: if user will edit definitio
 ## Hotstring output method
 
 
-**Tab. 3.** Output method compatibility between AutoHotkey and *Hotstrings* app.
+**Tab. 3.** Output method compatibility between AutoHotkey [hotstring] and *Hotstrings* app.
 | Option full name | Option short name | AutoHotkey | *Hotstrings* application |                  Comment                  |
 |:----------------:|:-----------------:|:----------:|:------------------------:|:-----------------------------------------:|
 |    Raw output    |         R         |      X     |                          |              Not implemented              |
-|     SendInput    |         SI        |      X     |             X            |            = Send by AutoHotkey           |
+|     SendInput    |         SI        |      X     |             X            |            GUI           |
 |     SendPlay     |         SP        |      X     |                          |              Not implemented              |
 |     SendEvent    |         SE        |      X     |                          |              Not implemented              |
-|     Text raw     |         T         |      X     |                          | ??? implemented but not accessible in GUI |
-|     Clipboard    |         C         |            |             X            |                    GUI                    |
-| Menu & SendInput |        M SI       |            |             X            |                    GUI                    |
-| Menu & Clipboard |        M C        |            |             X            |                    GUI                    |
+|     Text raw     |         T         |      X     |                          | Not implemented |
+|     Clipboard    |         CL         |            |             X            |                    GUI                    |
+| Menu & SendInput |        MSI       |            |             X            |                    GUI                    |
+| Menu & Clipboard |        MCL        |            |             X            |                    GUI                    |
 
 Only one ouput method is valid at a time for particular **hotstring**.
 
-### SendInput (SI) ← Send by AutoHotkey
+### SendInput (SI)
 
-### Clipboard (C\) ← Send by Clipboard
+### Clipboard (CL)
 
-### Menu & SendInput (M SI) ← Send by Menu (AutoHotkey)
+### Menu & SendInput (MSI)
 
-### Menu & Clipboard (M C) ← Send by Menu (Clipboard)
-
-### Text Raw (T) ← Send Time or Date
-
+### Menu & Clipboard (MCL)
 
 ---
-
-# Configuration
-
-## Endchar
-
-Let's imagine user input string, so stream of keyboard pressed keys: 
-
-*Example☐of☐the☐sentence☐where☐user☐would☐like☐to☐exchange☐triggerstring☐e@☐with☐his☐e-mail:☐`firstname.secondname@domain.com`*
-
-The **hostring recognizer** observes input stream which contains besides letters also other categories of characters: digits, punctuation characters, blank characters, special characters etc. Some of them belong to special group called end character or *endchar* for short. The characters belonging to the *endchar* group has the following purposes, helping to **hotstring recognizer**:
-
-1. recognize when **triggestring** begins,
-2. recognize when **triggerstring** ends,
-3. reset itself.
-
-Maybe *endchar* is not the right therm and better would be *stopchar* or *trigger separator*? For compatibility with official documentation of AutoHotkey the term *endchar* is kept in this manual.
-
-By default **triggerstring** begins after a character belonging to *endchar* but with special **option** called *inside word (?)* it can trigger **triggerstring** even between *endchar*, e.g. witin a word. It's done on purpose that *endchar* by default containts the following set of characters: 
-
--()[]{}':;"/\,.?!\`n☐\`t 
-
-(note that \`n is Enter, \`t is Tab, and there is a plain space between \`n and \`t marked as ☐). 
-
-These characters are usually used to separate words or sentences. So often **hotstring recognizer** starts to recognize if **triggestring** is there, word by word and resets after each *endchar*. 
-
-User of *Hotstrings* application can change this default behavior thanks to configuration of *endchar*. 
-
-
 ---
 
 # Hostrings libraries
@@ -689,10 +785,6 @@ User of *Hotstrings* application can change this default behavior thanks to conf
 
 
  
- # Undoing of the last hotsring
- The last hotstring can be easily undone by pressing Cltr | z hotkey or Ctrl | Backspace. 
- 
- **Caution:** In some applications the same hotkeys are used for undoing the last action. Then the overall result sometimes is unpredictable or unwanted. In case of some trouble use undoing hotstring several times in a raw.
 
 # Credits
 
@@ -827,6 +919,11 @@ option | triggerstring     | trigger: last character   | hotstring
 [Example, Inside Word]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_InsideWord.png "Example: Inside Word"
 [Example, useful B0]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_em.png "Useful example with B0"
 [Add a comment]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_AddComment.png "Add a comment"
+[Menu: configure]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Menu_Configure.png "Menu: Configure"
+[Menu: triggerstring tip]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_TriggerstringTip.png "Menu: Triggerstring Tip"
+[Menu: Launch Sandbox]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Sandbox.png "Menu: Launch Sandbox"
+[Menu: Toggle EndChars]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_ToggleEndEchars.png "Menu: Toggle EndChars"
+[Menu: Search Hotstrings]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Search.png "Menu: Search Hotstrings"
 
 [AutoHotkey]: https://www.autohotkey.com/
 [hotstring]: https://www.autohotkey.com/docs/Hotstrings.htm/
