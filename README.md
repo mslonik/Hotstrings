@@ -223,10 +223,12 @@ The alternative, traditional way, is based on text edition, when hotstrings are 
 
 
 ## How to reset the hotstring recognizer?
-(...)
+- pressing of some keys immediately resets the **hotstring recognizer**, e.g.: <→>, <←>, <↑>, <↓>, <PageUp>, <PageDown>, <Home>, <End>;
+- entering the **EndChar**;
+- switching to another window;
+- any click of any mouse button.
 
----
----
+
 ---
 
 # Installation of *Hotstrings* application
@@ -260,7 +262,7 @@ Now *Hotstrings* application runs in its default mode: **running mode**. All the
 The second mode of operation requires GUI (Graphical User Interface) window, because then one can define new hotstrings or edit existing. When GUI window is active still all the (triggerstring, hotstring) pairs are ative, just GUI window is additionally available.
 
 
-# Let's begin defining of the first hotstring
+## Let's define the first hotstring
 Our primary goal: we would like to define our first pair of (triggerstrin, hotstring). The **triggerstring** *btw* with the **hotstring** *by the way*, just for the sake of example: (*btw*, *by the way*).
 
 In order to start the GUI of *Hotstrings* application just double click on the *Hotstrings* icon (capital letter *H* as *Hotstrings* on green background) in system tray:
@@ -271,65 +273,72 @@ or... use hotkey **Ctrl + # + h** (Control + Windows modifier key + h).
 
 Next you'll see main GUI (Graphical User Interface) window which enable you to edit hotstrings:
 
+![Main window][]
+
+
 At first please observe the main window again. In order to define any hotstring one have to follow top down the screen (in blue):
+
+![Defining of hotstring][]
 
 1. Enter triggerstring.
 2. Select trigger option(s).
 3. Select hotstring output function.
 4. Enter hotstring.
 5. Select hotstring library.
-6. Set the hotstring.
+6. Add optional comment.
+7. Set the hotstring.
 
-![Defining of hotstring][]
 
 We will start by defining of *by the way* hotsring with plain *btw* triggerstring and no options.
 
-## Enter triggestring
-Let's input in this text edit field some text: 
-
-![Enter triggerstring][]
-
-Please keep in mind that this edit window does not show space key, as it is blank key. But in this tutorial it will be easier to see what we're doing by using the ☐ convention from now on to show the Space (Spacebar key). So now let's input 
+### 1. Enter triggestring
+Let's input in this text edit field triggerstring text: 
+> btw
 
 ![Enter triggerstring, example][]
 
-## Select trigger option(s)
+### 2. Select trigger option(s)
 ![Default trigger option][] 
 
-By default no option is set (option string is empty). Then after **triggerstring** is entered, additionally one **trigger key* have to be pressed by user in order to trigger the hotstring.
+By default no option is set (option string is empty). Then after **triggerstring** is entered, additionally one **trigger (endchar)** have to be entered by user in order to trigger the hotstring.
 
 The *trigger key* is defined as one of the following *endchar*keys: -()[]{}':;"/\,.?!\`n☐\`t (note that \`n is Enter,  \`t is Tab, and there is a plain space between \`n and \`t marked as ☐ according to our convention). 
 
-Let's leave no option set and continue.
+Let's leave no option set and continue to the next step.
 
-## Select hotstring output function
+### 3. Select hotstring output function
 ![Select hotstring output function][]
 
-Select one and only one option from the list. By default *Send by AutoHotkey* is set. It means that the hotstring will be output by AutoHotkey, without menu and not by Clipboard. More about *output functions* later on.
+Select one and only one option from this list. By default *SendInput (SI)* is set. It means that the hotstring will be output by AutoHotkey SendInput function, without menu and not by Clipboard. More about *output functions* later on.
 
 Let's leave it as it is.
 
-## Enter hotstring
-![Enter hotstring][]
+### 4. Enter hotstring
 
-Let's input our first *hotstring*:
+Let's input our first **hotstring**:
+> by the way
 
 ![Enter hotstring, example][]
 
-## Select hotstring library
-![Select hotstring library][shl1] 
+### 5. Select hotstring library
+This list contains all and only *.csv* files from withing folder *..\Hotstrings\Libraries*. One can have as many libraries (*.csv*) files as necessary.
 
-This list contains all and only *.csv* files from withing folder *..\Hotstrings3\Categories*. One can have as many libraries (*.csv*) files as necessary.
+Let's select the *AutocorrectionHotstring.csv* for sake of example. The new defined (**triggersring**, **hotstring**) pair will be added to this particular file.
 
-Let's select the *AutocorrectionHotstring.csv* for sake of example.
 ![Select hotstring library][shl2]
 
-## Set the hotstring
+### 6. Add a comment
+This step is optional. User can add additional comment to new defined hotstring. It can be ueful in some situations, e.g. if some definitions are very similar to each other. For sake of this example let's leave this edit field empty.
+
+![Add a comment][]
+
+
+### 7. Set the hotstring
 Select / click the *Set hostring* button. The function and meaning of two others is hopefully quite obvious. It will be explained in details later on.
 
 ![Set the hotstring][] 
 
-## Congratulations!
+### Congratulations!
 You've defined your first hotstring. Have a look now into the left part of the main screen, into the *Library content*. Find there your newly defined hotstring:
 
 ![Library content][]
@@ -817,6 +826,7 @@ option | triggerstring     | trigger: last character   | hotstring
 [Example, no options]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_DefaultNoOption.png "Example: no triggerstring option is set"
 [Example, Inside Word]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_InsideWord.png "Example: Inside Word"
 [Example, useful B0]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_em.png "Useful example with B0"
+[Add a comment]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_AddComment.png "Add a comment"
 
 [AutoHotkey]: https://www.autohotkey.com/
 [hotstring]: https://www.autohotkey.com/docs/Hotstrings.htm/
