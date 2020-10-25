@@ -827,7 +827,17 @@ Optional (not mandatory) part of (**triggerstring**, **hotstring**) definition. 
 
 ## Select hotstring library
 
+List of text files with extenstion .csv available in ../Libraries folder of *Hotstrings* application. The CSV = Comma Separated Values, special format where "values" are separated by certain, dedicated character, e.g. comma. It's not enough for text file to have .csv extension to be recognized by *Hotstrings* application. Such file have to have also dedicated structure.
 
+Together with *Hotstrings* application just few files are delivered. These files can be seen as set of good practices or examples in order to aid user with management of newly created (**triggerstring**, **hotstring**) pairs.
+
+The .csv files are chosen from drop-down list.
+
+There is no limitation for number of .csv files (...)
+
+If user would like to create new .csv file (...)
+
+*Tip*. Try to store (**triggerstring**, **hotstring**) which are somehow related to each other in separate .csv files. The files shouldn't be too long, because searching / management of them can be cumbersome at certain point.
 
 ## Buttons
 
@@ -835,25 +845,25 @@ Optional (not mandatory) part of (**triggerstring**, **hotstring**) definition. 
 
 These are permanently visible keyboard shortcuts. 
 
-The keyboard shortcuts active only if *Hotstrings* application window is active:
+The following keyboard shortcuts are active only if *Hotstrings* application window is active:
 
 | Keyboard shortcut / Function | Description |
 | :--- | :--- |
-| F1 About/Help | |
-| F2 Library content | |
-| F3 Search hotstrings | | 
-| F5 Clear | | 
-| F7 Delay | |
-| F8 Delete hotstring | |
-| F9 Set hotstring | |
+| F1 About/Help | see [About / Help](#About-/-Help) |
+| F2 Library content | see [Library content](#Library-content) |
+| F3 Search hotstrings | see [Search Hotstrings](#Search-Hotstrings) | 
+| F5 Clear | see | 
+| F7 Delay | see [Clipboard Delay](#Clipboard-Delay) |
+| F8 Delete hotstring | see |
+| F9 Set hotstring | see |
 
 
-The keyboard shortcuts active only if *Search Hotstrings* application window is active:
+The following keyboard shortcuts are active only if *Search Hotstrings* application window is active:
 
 | Keyboard shortcut / Function | Description |
 | :--- | :--- |
-| F3 Close Search hotstrings | |
-| F8 Move hotstring | |
+| F3 Close Search hotstrings | see [Search Hotstrings](#Search-Hotstrings) |
+| F8 Move hotstring | see [Search Hotstrings](#Search-Hotstrings) |
 
 
 ## Library content
