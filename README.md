@@ -826,20 +826,31 @@ Optional (not mandatory) part of (**triggerstring**, **hotstring**) definition. 
 *Tip*. Can be useful in some circumstances, for example to add a source of a **hotstring** definition in form of URL (a link).
 
 ## Select hotstring library
+![shl1][]
 
-List of text files with extenstion .csv available in ../Libraries folder of *Hotstrings* application. The CSV = Comma Separated Values, special format where "values" are separated by certain, dedicated character, e.g. comma. It's not enough for text file to have .csv extension to be recognized by *Hotstrings* application. Such file have to have also dedicated structure.
+List of text files with extenstion .csv available in *../Libraries* folder of *Hotstrings* application. 
 
 Together with *Hotstrings* application just few files are delivered. These files can be seen as set of good practices or examples in order to aid user with management of newly created (**triggerstring**, **hotstring**) pairs.
 
-The .csv files are chosen from drop-down list.
+The .csv files are chosen from *Hotstring library* drop-down list.
 
-There is no limitation for number of .csv files (...)
+There is no limitation for number of .csv files stored within *../Libraries* folder. All hotstrings are uploaded on time of (re)start of *Hotstrings* application.
 
-If user would like to create new .csv file (...)
+If user would like to create new .csv file, the **Add library** button should be pressed. Next name of the new .csv file have to be specified. The newly created file will be located within *../Libraries* folder.
 
 *Tip*. Try to store (**triggerstring**, **hotstring**) which are somehow related to each other in separate .csv files. The files shouldn't be too long, because searching / management of them can be cumbersome at certain point.
 
 ## Buttons
+
+![Buttons][]
+
+**Set hotstring**: sets configuration for (**triggerstring**, **hotstring**) pair. Also if (**triggerstring**, **hotstring**) pair is edited (changed) in any way, this button have to pressed in order to apply the change. Whenever this button is pressed, also corresponding library file (.csv) is updated.
+
+**Clear**: when pressed, all configuration fields of (**triggerstring**, **hotstring**) pair are cleared except of hotstring library, which will be still preselected.
+
+**Delete hotstring**: deletes selected in the right part of the screen (table: *Library content*) pair of (**triggerstring**, **hotstring**). The pair is permanently deleted, so prior to that user have to confirm her/his decision. Next, if decision is positive, the *Hotstrings* application restarts.
+
+Comment: Restart is required as a selected (**triggerstring**, **hotstring**) pair is removed from library file (.csv). In order to just switch off (e.g. temporarily) any selected pair (**triggerstring**, **hotstring**), use *Disable* setting in *Select trigger option(s)* section.
 
 ## Shortcuts
 
@@ -852,10 +863,10 @@ The following keyboard shortcuts are active only if *Hotstrings* application win
 | F1 About/Help | see [About / Help](#About-/-Help) |
 | F2 Library content | see [Library content](#Library-content) |
 | F3 Search hotstrings | see [Search Hotstrings](#Search-Hotstrings) | 
-| F5 Clear | see | 
+| F5 Clear | see [Buttons](#Buttons) |
 | F7 Delay | see [Clipboard Delay](#Clipboard-Delay) |
-| F8 Delete hotstring | see |
-| F9 Set hotstring | see |
+| F8 Delete hotstring | see [Buttons](#Buttons) |
+| F9 Set hotstring | see [Buttons](#Buttons) |
 
 
 The following keyboard shortcuts are active only if *Search Hotstrings* application window is active:
@@ -868,16 +879,23 @@ The following keyboard shortcuts are active only if *Search Hotstrings* applicat
 
 ## Library content
 
-Right part of the window in form of a table. User can move down / up over this list with keys <↑> and <↓>. Each time user moves over, the next definition is ready to be edited.
+![Library content][]
 
+Right part of the *Hotstrings* window in form of a table. It can be reached e.g. by pressing <F2> shortcut. Next user can move down / up over this list with keys <↑> and <↓>. Each time user selects row of this table, the next definition of (**triggerstring**, **hotstring**) is ready to be edited.
+
+---
 ---
 ---
 
 # Format of libraries
 
+The CSV = Comma Separated Values, special format where "values" are separated by certain, dedicated character, e.g. comma. In case of *Hotstrings* application the special Unicode character is used: ‖ (U+2016). 
 
+It is not enough for text file to have .csv extension to be recognized by *Hotstrings* application. Such file have to have also dedicated structure.
 
- 
+ | Section | Separator | Section | Separator | Section | Separator | Section | Separator | Section | Separator | Section
+ | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+ | triggerstring options | ‖ | triggerstring | ‖ | output function | ‖ | status: Enabled / Disabled | ‖ | hotstring | ‖ | optional: comment |
 
 # Credits
 
@@ -885,7 +903,7 @@ The originator and creator of the Hotstrings application is Jack Dunning aka [Ja
 
 People from AutoHotkey community, especially those who help at [AutoHotkey forum][].
 
-Tools:
+## Tools used to prepare this documentation
 
 * Markdown (MD) text editor: https://hackmd.io/
 * Table generator: https://www.tablesgenerator.com/markdown_tables#
@@ -895,69 +913,135 @@ Tools:
 Other remarks helpful in everyday working with hotstrings.
 
 ## Order of loading AutoHotkey scripts matters. 
-For example if you use *Diacritics.ahk* together with *Hotstrings.ahk*, there is potential collission. (...)
+For example if you use *Diacritics.ahk* together with *Hotstrings.ahk*, there is potential collission. It's adviced to load *Hotstrings.ahk* before *Diacritics.ahk*.
+
+## Autostart of *Hotstrings* application 
+
+Create link file (.lnk) to *Hotstrings.ahk* or *Hotstrings.exe* file: from context menu in your file manager choose "create link". Move that link file to your autostart folder. In Microsoft Windows 10: *c:\users\xxxxxx\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup*. The string *xxxxxx* represents your user name.
+
+*Tip*: You can change order of application which are started up on time of operating system automatic start (autostart) by changing of the files found in above folder e.g. by adding numbers in front of them. Example: 1_Hotstrings.lnk will guarantee that this link will be the first to be run on autostart.
 
 ## Not always applying clipboard output function is a good idea
-Some forms, especially at bank web pages, do not accept pasting from clipboard. Probably there are safety reasons behind that. From the other hand keep in mind that AutoHotkey itself simulates keyboard keypressing. So to get over this limitation it's enough edidt particular hotstring and switch *Select hotstring output function* from *Send by Clipboard* to *Send by AutoHotkey*.
 
-## Overlapping hotstrings
-One of the useful options (...) are overlapping hotstrings.
+Some forms, especially at banking web pages, do not accept pasting from clipboard. Probably there are safety reasons behind that. From the other hand the SendInput output function simulates keyboard keypressings, one by one. So to get over this limitation it's enough to edit particular hotstring and switch *Select hotstring output function* from *Clipboard (CL)* to *SendInput (SI)*.
+
+## Overlapping triggerstrings
+
+The overlapping triggerstrings are two or more different triggerstring where at least the beginning is common.
 
 ---
 *Example 1 of overlapping triggerstrings*
-The triggestrings of the two following examples overlap, but the first one is shorther, then the second one.
 
-option | triggerstring     | trigger:    | hotstring
--------|-------------------|---------------------------|-----------
-|    | btw               | -()[]{}':;"/\,.?!\`n☐\`t  | by the way
-\*    | btw2              | 2                         | back to work
+The triggestrings of the two following examples overlap but the first one is one character shorther, than the second one.
+
+No.   | option | triggerstring     | trigger:    | hotstring
+:---: | :---:  | :---:             | :---:       | :---:
+1     | \*     | btw               | 2           | by the way
+2     | \*     | btw2              | 2           | back to work
 
 *Example, execution*
-content stream |    triggerstring | trigger replaced by | hotstring
----------------|----------------------------------------|-----------
-Something,☐something☐| btw☐ | by☐the☐way☐
+
+content stream |    triggerstring | trigger  | hotstring
+:---:          |:---:             | :---:    | :---:
+Something,☐something☐| btw       | ☐        | by☐the☐way
 
 
-> Something,☐something☐ ~~btw☐~~ by☐the☐way☐
+> Something,☐something☐ ~~btw~~ by☐the☐way☐
 
-The second hotstring will never be triggered, as always after triggering of the first triggestring (btw) the triggerstring is reset. The solutions to this issue are shown in the following examples.
+*Comment*: The second hotstring will never be triggered, as always after triggering of the first trigger (w) the **hotstring recognizer** is reset. The solutions to this issue are shown in the following examples.
 
 
 ---
 *Example 2 of overlapping triggerstrings*
+
 The triggestrings of the two following examples overlap, but this time both of them are of the same length.
-option | triggerstring     | trigger: last character   | hotstring
--------|-------------------|---------------------------|-----------
-\*    | btw1               | 1                     | by the way
-\*    | btw2              | 2                         | back to work
+No.   | option | triggerstring | trigger: last character | hotstring
+:---: | :---:  | :---:         | :---:                   | :---:
+1     |  \*    | btw1          | 1                       | by the way
+2     |  \*    | btw2          | 2                       | back to work
 
 *Example, execution*
-content stream |    triggerstring | trigger replaced by | hotstring
----------------|----------------------------------------|-----------
-Something,☐something☐ | btw1 | by☐the☐way
-☐ | btw2 | back☐to☐work
+
+content stream         |    triggerstring | trigger  | hotstring
+:---:                  | :---:            | :---:    | :---:
+Something,☐something☐ | btw              |  1       | by☐the☐way
+☐                      | btw              |  2       | back☐to☐work
 
 > Something,☐something☐ ~~btw1~~ by☐the☐way☐ ~~btw2~~ back☐to☐work
+
+*Comment*: This solution is not very elegant, as one have to keep in mind two **triggerstrings** and corresponding **hotstrings**.
 
 
 ---
 *Example 3 of overlapping triggerstrings*
+
 The space itself can be a part of triggestring as well. What's is important is the length of the triggerstrings. This can be useful to distinguish the abbreviation from its phrase, as in the following example.
-option | triggerstring     | trigger: last character   | hotstring
--------|-------------------|---------------------------|-----------
-\*    | api☐               | ☐                     | API
-\*    | api/              | /                         | Application☐Programming☐Interface
+
+option | triggerstring | trigger: last character | hotstring
+:---:  | :---:         | :---:                   | :---:
+\*     | api☐          | ☐                      | API
+\*     | api/          | /                       | Application☐Programming☐Interface
+
+*Example, execution*
+
+content stream         |    triggerstring | trigger  | hotstring
+:---:                  | :---:            | :---:    | :---:
+Something,☐something☐ | api              |  ☐       | API
+☐(                     | api              |  /       | Application☐Programming☐Interface
+)                      |                  |          |
+
+> Something,☐something☐ ~~api☐~~API☐(~~api/~~Application☐Programming☐Interface)
+
 
 ---
 *Example 4 of overlapping triggerstrings, special feature of Hotstring application: menu*
-Thanks to Hotstrings application the one triggestring can be used to trigger menu with defined list of hotstrings. The different options are separated by "|" mark. The first option on the list is the default one. Selection of the option is made by pressing the Enter key. Cauion, it doesn't work with mouse clicks.
-option | triggerstring     | trigger: last character   | hotstring
--------|-------------------|---------------------------|-----------
-\* and menu    | api/              | /                         | API *| Application☐Programming☐Interface
 
+Thanks to *Hotstrings* application one triggestring can be used to trigger menu with defined list of hotstrings. The first option on the list is the default one. Selection of the hotstring is made by pressing the <↓> or <↑> keys and <Enter> key. Caution, it doesn't work with mouse clicks.
 
+option                        | triggerstring | trigger: last character | hotstring
+:---:                         | :---:         | :---:                   | :---:
+\* and Menu & Clipboard (MCL) | api/          | /                       | API \| Application☐Programming☐Interface
+
+*Example, execution*
+
+content stream         |    triggerstring | trigger  | hotstring
+:---:                  | :---:            | :---:    | :---:
+Something,☐something☐ | api              |  /       | menu: API
+☐(                     | api              |  /       | menu: Application☐Programming☐Interface
+)                      |                  |          |
+
+> Something,☐something☐~~api/~~ API☐(~~api/~~ Application☐Programming☐Interface)
+
+---
+
+Example 5 of overlapping triggerstrings, recommended
+
+Both strings will have the same length (counting triggerstring + trigger), but different options are applied.
+
+No.   | option | triggerstring | trigger: last character | hotstring
+:---: | :---:  | :---:         | :---:                   | :---:
+1     |        | api           | EndChar                 | API
+2     |  \*    | api/          | /                       | Application☐Programming☐Interface
+
+*Example, execution*
+
+content stream         |    triggerstring | trigger  | hotstring
+:---:                  | :---:            | :---:    | :---:
+Something,☐something☐ | api              |  ☐       | menu: API
+☐(                     | api              |  /       | menu: Application☐Programming☐Interface
+)                      |                  |          |
+
+> Something,☐something☐~~api☐~~ API☐(~~api/~~ Application☐Programming☐Interface)
+
+*Comment*: Now after pressing of <Space> after api triggerstring the api is naturally capitalized and if on purpose trigger (/) is appended the full meaning of abbreviation is given. Just one key have to pressed additionally.
+ 
 ## Interaction of hotstrings pasted from clipboard with clipboard managers
-(...)
+
+In case if *clipboard manager* is active (e.g. [CopyQ]), each time the hotstring which is output by clipboard is triggered 
+
+---
+---
+---
 
 # ToDo List
 - ☑ Menu: configuration and the corresponding *Configuration.ini*
@@ -1019,6 +1103,8 @@ option | triggerstring     | trigger: last character   | hotstring
 [Menu: Search Hotstrings]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Search.png "Menu: Search Hotstrings"
 [Menu: Clipboard Delay]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_ClipboardDelay.png "Menu: Clipboard Delay"
 [Output function: menu]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_OutputMenu.png "Output function: menu"
+[Buttons]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Buttons.png "Buttons"
+[Library content]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_LibraryContent.png "Library content"
 
 [AutoHotkey]: https://www.autohotkey.com/
 [hotstring]: https://www.autohotkey.com/docs/Hotstrings.htm/
@@ -1031,3 +1117,4 @@ option | triggerstring     | trigger: last character   | hotstring
 [Maciej's homepage]: http://mslonik.pl
 [Github (Hotstrings)]: https://github.com/mslonik/Hotstrings
 [declension]: https://en.wikipedia.org/wiki/Declension
+[CopyQ]: https://hluk.github.io/CopyQ/
