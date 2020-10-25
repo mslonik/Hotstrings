@@ -499,6 +499,10 @@ In order to delete duplicated (**triggerstring**, **hotstring**) definition one 
 Enable change of the delay between copying of the hotstring from clipboard to specific text window from which it was triggered.
 By default equal to 200 ms. The maximum value is equal to 500 ms (0.5 s).
 
+The separate window is opened for that purpose:
+
+![Menu: Clipboard Delay][]
+
 *Tip:* Sometimes when long hotstrings are triggered and clipboard is applied to immediately enter it, strange behaviour can occurre. Instead of expected hotstring the previous content of clipboard may appear. The reason is that operating system can not gurantee the time to insert the content of clipboard into specific window / editing field. In order to support operating system, enlarge the delay. The shorter the delay than better, but if too short, mentioned behaviour can be observed.
 
 ### About / Help
@@ -510,7 +514,7 @@ Displays the following text:
 
 *Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). This is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). License: [GNU GPL ver. 3][]. [Source code][]. [Maciej's homepage][].*
 
-*Tips:*
+*Comments:*
 
 **Application help**: link to this file.
 
@@ -771,17 +775,106 @@ Only one ouput method is valid at a time for particular **hotstring**.
 
 ### SendInput (SI)
 
+The default output function, common with AutoHotkey SendInput. The **hotstring** is send character by character. It goes very fast, but if **hotstring** is long, is noticable for user. Therefore if long **hotstring** have to be send, one can consider *Clipboard (CL)* output function.
+
 ### Clipboard (CL)
+
+The **hotstring** is copied to *clipboard* (part of memory, managed by operating system) and then pasted from clipboard to specific application, as requested by user. Thanks to that it is possible to enter even very long **hotstrings** "at once", in a blink of an eye.
+
+The downside of this method is that in Microsoft Windows operating system time required to paste content of *clipboard* is neither specified nor guaranteed. The *Hotstrings* application enable change of this time by menu: Configure → Clipboard Delay. Also check description above.
 
 ### Menu & SendInput (MSI)
 
-### Menu & Clipboard (MCL)
+Sometimes it is the case that one **triggerstring** is valid for several **hotstrings**.
 
----
----
+Example:
 
-# Hostrings libraries
+| Triggerstring | Hotstring |
+| :---: | :---: |
+| bom/ | Bill of Materials |
+| bom/ | Byte Order Mark |
+
+This output function enable convenient solution. Let's check how that particular **hotstring** definition looks like:
+
 (...)
+
+The *Hotstrings* application enable up to 7 different **hotstrings** to be triggered by one **triggerstring**. The function *Menu & SendInput (MSI)* outputs all **hotstring** by the *SendInput* (character by character). The first definition from the list is the default one.
+
+When user enters the **triggerstring** associated with several **hotstrings**, the following menu opens on a screen close to the mouse pointer:
+
+![Output function: menu][]
+
+The default **hotstring** is the first one from the top. To enter it just press <Enter>. To enter any other **hotstring** use keys <↑> <↓> and press <Enter>. Clicking by mouse is not supported. In order to cancel (undo), just press <Esc> key.
+
+*Tip*. In some languages (e.g. German, Polish) form of a noun changes depending on grammar rules called [declension]. The menu option is in particular helpful to keep correct form of a nouns for first and second names.
+
+### Menu & Clipboard (MCL)
+As above, with one exception: the **hotstrings** are output by clipboard, with all the consequences as described for *Clipboard (CL)* output function.
+
+## Enter hotstring
+
+![Enter hotstring][]
+
+The edit text field used to display / edit the **hotstring**. The single hotstring can be up to 5000 characters long.
+
+## Add a comment
+
+![Add a comment][]
+
+Optional (not mandatory) part of (**triggerstring**, **hotstring**) definition. Added to library (.csv) files and also displayed in *Library content* and *Search* window as the last column to the right.
+
+*Tip*. Can be useful in some circumstances, for example to add a source of a **hotstring** definition in form of URL (a link).
+
+## Select hotstring library
+
+List of text files with extenstion .csv available in ../Libraries folder of *Hotstrings* application. The CSV = Comma Separated Values, special format where "values" are separated by certain, dedicated character, e.g. comma. It's not enough for text file to have .csv extension to be recognized by *Hotstrings* application. Such file have to have also dedicated structure.
+
+Together with *Hotstrings* application just few files are delivered. These files can be seen as set of good practices or examples in order to aid user with management of newly created (**triggerstring**, **hotstring**) pairs.
+
+The .csv files are chosen from drop-down list.
+
+There is no limitation for number of .csv files (...)
+
+If user would like to create new .csv file (...)
+
+*Tip*. Try to store (**triggerstring**, **hotstring**) which are somehow related to each other in separate .csv files. The files shouldn't be too long, because searching / management of them can be cumbersome at certain point.
+
+## Buttons
+
+## Shortcuts
+
+These are permanently visible keyboard shortcuts. 
+
+The following keyboard shortcuts are active only if *Hotstrings* application window is active:
+
+| Keyboard shortcut / Function | Description |
+| :--- | :--- |
+| F1 About/Help | see [About / Help](#About-/-Help) |
+| F2 Library content | see [Library content](#Library-content) |
+| F3 Search hotstrings | see [Search Hotstrings](#Search-Hotstrings) | 
+| F5 Clear | see | 
+| F7 Delay | see [Clipboard Delay](#Clipboard-Delay) |
+| F8 Delete hotstring | see |
+| F9 Set hotstring | see |
+
+
+The following keyboard shortcuts are active only if *Search Hotstrings* application window is active:
+
+| Keyboard shortcut / Function | Description |
+| :--- | :--- |
+| F3 Close Search hotstrings | see [Search Hotstrings](#Search-Hotstrings) |
+| F8 Move hotstring | see [Search Hotstrings](#Search-Hotstrings) |
+
+
+## Library content
+
+Right part of the window in form of a table. User can move down / up over this list with keys <↑> and <↓>. Each time user moves over, the next definition is ready to be edited.
+
+---
+---
+
+# Format of libraries
+
 
 
  
@@ -867,14 +960,14 @@ option | triggerstring     | trigger: last character   | hotstring
 (...)
 
 # ToDo List
-- ❎ Menu: configuration and the corresponding *Configuration.ini*
-    - ❎ sandbox for hotstrings,
+- ☑ Menu: configuration and the corresponding *Configuration.ini*
+    - ☑ sandbox for hotstrings,
     - ☑ enable / disable "undo" (Ctrl | z) of hotstrings,
     - ☑ setup of "Ending character",
     - ☑ *Hotstrings* window size and position, including monitor, window size.
 - ☑ Automatic tooltip for triggestrings.
-- ❎ GUI:
-    - ❎ comments to hotstrings (stored in .csv files).
+- ☑ GUI:
+    - ☑ comments to hotstrings (stored in .csv files).
     - ☑ library content is marked, edition should be loaded automatically.
     - ☑ search window, a searched result should enable direct edition.
     - ☑ hotkeys to main functions
@@ -924,6 +1017,8 @@ option | triggerstring     | trigger: last character   | hotstring
 [Menu: Launch Sandbox]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Sandbox.png "Menu: Launch Sandbox"
 [Menu: Toggle EndChars]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_ToggleEndEchars.png "Menu: Toggle EndChars"
 [Menu: Search Hotstrings]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Search.png "Menu: Search Hotstrings"
+[Menu: Clipboard Delay]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_ClipboardDelay.png "Menu: Clipboard Delay"
+[Output function: menu]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_OutputMenu.png "Output function: menu"
 
 [AutoHotkey]: https://www.autohotkey.com/
 [hotstring]: https://www.autohotkey.com/docs/Hotstrings.htm/
@@ -935,3 +1030,4 @@ option | triggerstring     | trigger: last character   | hotstring
 [Source code]: https://github.com/mslonik/Hotstrings
 [Maciej's homepage]: http://mslonik.pl
 [Github (Hotstrings)]: https://github.com/mslonik/Hotstrings
+[declension]: https://en.wikipedia.org/wiki/Declension
