@@ -33,15 +33,15 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 # Table of content
 1. [FAQ / Introduction to hotstrings](#FAQ-/-Introduction-to-hotstrings)
  
-    1.1. [What are the hotstrings?](##What-are-the-hotstrings?)
+    1.1. [What are the hotstrings?](#What-are-the-hotstrings?)
  
-    1.2. [How the *Hotstrings* application work?](##How-the-*Hotstrings*-application-work?)
+    1.2. [How the *Hotstrings* application work?](#How-the-*Hotstrings*-application-work?)
 
-    1.3. [Why somobody may want to use hotstrings?](##Why-somobody-may-want-to-use-hotstrings?)
+    1.3. [Why somobody may want to use hotstrings?](#Why-somobody-may-want-to-use-hotstrings?)
 
-    1.4. [Why somebody may want to use *Hotstrings* application?](##Why-somebody-may-want-to-use-*Hotstrings*-application?)
+    1.4. [Why somebody may want to use *Hotstrings* application?](#Why-somebody-may-want-to-use-*Hotstrings*-application?)
     
-    1.5. [How to reset the hotstring recognizer?](##How-to-reset-the-hotstring-recognizer?)
+    1.5. [How to reset the hotstring recognizer?](#How-to-reset-the-hotstring-recognizer?)
 
 2. [Installation of *Hotstrings* application](#Installation-of-*Hotstrings*-application)
 
@@ -49,7 +49,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
 4. [Main window of *Hotstrings* application](#Main-window-of-*Hotstrings*-application)
 
-    4.1. [Menu](##Menu)
+    4.1. [Menu](#Menu)
 
         4.1.1. [Configure](###Configure)
 
@@ -57,7 +57,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
         4.1.3. [About / Help](###About-/-Help)
 
-    4.2. [Hotstring definition or edition](##Hotstring-definition-or-edition)
+    4.2. [Hotstring definition or edition](#Hotstring-definition-or-edition)
 
         4.2.1. [Triggerstring definition](###Triggerstring-definition)
 
