@@ -796,7 +796,7 @@ Example:
 
 This output function enable convenient solution. Let's check how that particular **hotstring** definition looks like:
 
-(...)
+![Hotstring Menu Example][]
 
 The *Hotstrings* application enable up to 7 different **hotstrings** to be triggered by one **triggerstring**. The function *Menu & SendInput (MSI)* outputs all **hotstring** by the *SendInput* (character by character). The first definition from the list is the default one.
 
@@ -889,13 +889,19 @@ Right part of the *Hotstrings* window in form of a table. It can be reached e.g.
 
 # Format of libraries
 
-The CSV = Comma Separated Values, special format where "values" are separated by certain, dedicated character, e.g. comma. In case of *Hotstrings* application the special Unicode character is used: ‖ (U+2016). 
+The CSV = Comma Separated Values, special format where "values" are separated by certain, dedicated character, e.g. comma. In case of *Hotstrings* application the  Unicode character "Double Vertical Line" is used: ‖ (U+2016). 
 
 It is not enough for text file to have .csv extension to be recognized by *Hotstrings* application. Such file have to have also dedicated structure.
 
  | Section | Separator | Section | Separator | Section | Separator | Section | Separator | Section | Separator | Section
  | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
- | triggerstring options | ‖ | triggerstring | ‖ | output function | ‖ | status: Enabled / Disabled | ‖ | hotstring | ‖ | optional: comment |
+ | triggerstring options | ‖ | triggerstring | ‖ | output function | ‖ | status: Enabled / Disabled | ‖ | hotstring or group of hotstrings\* | ‖ | optional: comment |
+\* group of hotstrings: if *hotstring output function* is equal to menu (Menu & Clipboard (MCL) or Menu & SendInput (MSI)) then hotstrings are separated with Unicode character "Broken Bar": ¦ (U+00A6).
+
+*Example*:
+| triggerstring options | ‖ | triggerstring | ‖ | output function | ‖ | status: Enabled / Disabled | ‖ | hotstring or group of hotstrings\* | ‖ | optional: comment |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| \* | ‖ | bom/ | ‖ | MSI | ‖ | En | ‖ | Bill of Materials¦Byte Order Mark | ‖ |
 
 # Credits
 
@@ -1037,7 +1043,7 @@ Something,☐something☐ | api              |  ☐       | menu: API
  
 ## Interaction of hotstrings pasted from clipboard with clipboard managers
 
-In case if *clipboard manager* is active (e.g. [CopyQ]), each time the hotstring which is output by clipboard is triggered 
+In case if *clipboard manager* is active (e.g. [CopyQ]), each time the **hotstring** which is output by clipboard is triggered with **triggerstring** the result is copied to buffer of *clipboard manager*.
 
 ---
 ---
@@ -1105,6 +1111,7 @@ In case if *clipboard manager* is active (e.g. [CopyQ]), each time the hotstring
 [Output function: menu]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_OutputMenu.png "Output function: menu"
 [Buttons]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Buttons.png "Buttons"
 [Library content]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_LibraryContent.png "Library content"
+[Hotstring Menu Example]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_HotstringMenu.png "Hotstring Menu Example"
 
 [AutoHotkey]: https://www.autohotkey.com/
 [hotstring]: https://www.autohotkey.com/docs/Hotstrings.htm/
