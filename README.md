@@ -311,7 +311,7 @@ Our primary goal: we would like to define our first pair of (triggerstrin, hotst
 
 In order to start the GUI of *Hotstrings* application just double click on the *Hotstrings* icon (capital letter *H* as *Hotstrings* on green background) in system tray:
 
-![Example of system tray][] environment
+![Example of system tray][] 
 
 or... use hotkey **Ctrl + # + h** (Control + Windows modifier key + h).
 
@@ -324,13 +324,13 @@ At first please observe the main window again. In order to define any hotstring 
 
 ![Defining of hotstring][]
 
-1. Enter triggerstring.
-2. Select trigger option(s).
-3. Select hotstring output function.
-4. Enter hotstring.
-5. Select hotstring library.
-6. Add optional comment.
-7. Set the hotstring.
+    1. Enter triggerstring.
+    2. Select trigger option(s).
+    3. Select hotstring output function.
+    4. Enter hotstring.
+    5. Select hotstring library.
+    6. Add optional comment.
+    7. Set the hotstring.
 
 
 We will start by defining of *by the way* hotsring with plain *btw* triggerstring and no options.
