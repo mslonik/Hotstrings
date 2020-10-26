@@ -1,12 +1,12 @@
 # *Hotstrings* application
-Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
+Written in [AutoHotkey][] script language, application *Hotstrings*  has many useful features:
 
 - quick text replacement aka hotstrings; 
     
     *short alphanumeric strings (aka triggerstrings) are used to automatically replace long alphanumeric strings (aka hotstrings)*;
 - defined hotstrings are operating system wide;
 
-    *it means that can be triggered in any text / edit window, in any application*;
+    *it means that can be triggered in any text / edit window, in any application; runs on Microsoft Windows family operating systems;*
 - GUI (Graphical User Interface); 
 
     *for easy definition and/or edition of hotstrings*;
@@ -16,14 +16,14 @@ Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
 - one triggering abbreviation can call several different text strings of your choice;
 
     *chosen from menu*;
-- graphical overview of existing hotstrings with search capabilities;
+- overview of existing hotstrings with search capabilities;
 - definitions of hotstrings are stored in .csv files, as many, as you like; 
 
     *each file can contain hotstring belonging to specific category, e.g. emojis, physical symbols, first and second names etc.*;
 - undoing of hotstrings;
 
     *conversion of last entered hotstring again into triggering abbreviation*;
-- runs on Microsoft Windows family operating systems;
+
 - written in AutoHotkey script language but does not require this language interpreter to be installed and can be run standalone thanks to .exe file;
 
     *nevertheless installation of [AutoHotkey][] is greatly adviced).*
@@ -31,26 +31,56 @@ Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
 ---
 
 # Table of content
-1. [FAQ](#FAQ)
+1. [FAQ / Introduction to hotstrings](#FAQ-/-Introduction-to-hotstrings)
+ 
+    1.1. [What are the hotstrings?](#What-are-the-hotstrings)
+ 
+    1.2. [How the *Hotstrings* application work?](#How-the-*Hotstrings*-application-work)
 
-2. [Let's begin by defining of few first hotstrings](#Lets-begin-by-defining-of-few-first-hotstrings)
+    1.3. [Why somobody may want to use hotstrings?](#Why-somobody-may-want-to-use-hotstrings)
 
-3. [Main window of *Hotstring* application](#Main-window-of-Hotstring-application)
+    1.4. [Why somebody may want to use *Hotstrings* application?](#Why-somebody-may-want-to-use-*Hotstrings*-application)
+    
+    1.5. [How to reset the hotstring recognizer?](How-to-reset-the-hotstring-recognizer)
 
-4. [Hotstring definition or edition](#Hotstring-definition-or-edition)
+2. [Installation of *Hotstrings* application](#Installation-of-*Hotstrings*-application)
+
+3. [The first run of *Hotstrings* application](#The-first-run-of-*Hotstrings*-application)
+
+4. [Main window of *Hotstrings* application](#Main-window-of-*Hotstrings*-application)
+
+    4.1. [Menu](#Menu)
+
+        4.1.1. [Configure](#Configure)
+
+        4.1.2. [Search hotstring](#Search-hotstring)
+
+        4.1.3. [About / Help](#About-/-Help)
+
+5. [Hotstring definition or edition](#Hotstring-definition-or-edition)
+
+    5.1. [Triggerstring definition](#Triggerstring-definition)
+
+    5.2. [Trigger options overview](#Trigger-options-overview)
+
+    5.3. [Hotstring output method](#Hotstring-output-method)
+
+    5.4. [Enter hotstring](#Enter-hotstring)
+
+    5.5. [Add a comment](#Add-a-comment)
+
+    5.6. [Select hotstring library](#Select-hotstring-library)
+
+    5.7. [Buttons](#Buttons)
+
+    5.8. [Shortcuts](#Shortcuts)
+
+    5.9. [Library content](#Library-content)
 
 ---
 
-# FAQ 
-(Frequently Asked Questions) about *Hotstrings*:
-
-[What are the hotstrings?](#What-are-the-hotstrings)
-
-[How the AutoHotkey and hotstrings work?](#How-the-AutoHotkey-and-hotstrings-work)
-
-[Why somobody may want to use hotstrings?](#Why-somobody-may-want-to-use-hotstrings)
-
-[Why somebody may want to use *Hotstring* application?](#Why-somebody-may-want-to-use-Hotstring-application)
+# FAQ / Introduction to hotstrings
+(Frequently Asked Questions) about *Hotstrings* application and notion of hotstrings.
 
 ## What are the hotstrings?
 There are two corresponding notions:
@@ -349,7 +379,7 @@ You've defined your first hotstring. Have a look now into the left part of the m
 
 Now let's dive into more detailed description of available functions
 
-# Main window of *Hotstring* application
+# Main window of *Hotstrings* application
 
 ![Main window][]
 
