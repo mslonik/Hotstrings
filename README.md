@@ -896,6 +896,7 @@ It is not enough for text file to have .csv extension to be recognized by *Hotst
  | Section | Separator | Section | Separator | Section | Separator | Section | Separator | Section | Separator | Section
  | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
  | triggerstring options | ‖ | triggerstring | ‖ | output function | ‖ | status: Enabled / Disabled | ‖ | hotstring or group of hotstrings\* | ‖ | optional: comment |
+
 \* group of hotstrings: if *hotstring output function* is equal to menu (Menu & Clipboard (MCL) or Menu & SendInput (MSI)) then hotstrings are separated with Unicode character "Broken Bar": ¦ (U+00A6).
 
 *Example*:
@@ -903,17 +904,6 @@ It is not enough for text file to have .csv extension to be recognized by *Hotst
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | \* | ‖ | bom/ | ‖ | MSI | ‖ | En | ‖ | Bill of Materials¦Byte Order Mark | ‖ |
 
-# Credits
-
-The originator and creator of the Hotstrings application is Jack Dunning aka [Jack][] who has created the very first version of *[Instant Hotstring][]* application.
-
-People from AutoHotkey community, especially those who help at [AutoHotkey forum][].
-
-## Tools used to prepare this documentation
-
-* Markdown (MD) text editor: https://hackmd.io/
-* Table generator: https://www.tablesgenerator.com/markdown_tables#
-* ASCII diagram editor: https://textik.com/
 
 # Other remarks
 Other remarks helpful in everyday working with hotstrings.
@@ -1048,6 +1038,23 @@ In case if *clipboard manager* is active (e.g. [CopyQ]), each time the **hotstri
 ---
 ---
 ---
+
+# Credits
+
+The originator and creator of the Hotstrings application is Jack Dunning aka [Jack][] who has created the very first version of *[Instant Hotstring][]* application.
+
+People from AutoHotkey community, especially those who help at [AutoHotkey forum][].
+
+## Tools used to prepare this documentation
+
+* Markdown (MD) text editor: https://hackmd.io/
+* Table generator: https://www.tablesgenerator.com/markdown_tables#
+* ASCII diagram editor: https://textik.com/
+
+---
+---
+---
+
 
 # ToDo List
 - ☑ Menu: configuration and the corresponding *Configuration.ini*
