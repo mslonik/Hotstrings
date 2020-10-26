@@ -38,25 +38,25 @@ Menu, Tray, Default, Edit Hotstring
 Menu, Tray, Add
 Menu, Tray, NoStandard
 Menu, Tray, Standard
-
+TrayTip,, %A_ScriptName%, 1
 EndChars()
 ; ---------------------- SECTION OF GLOBAL VARIABLES ----------------------
 
-NewString := ""
+v_TriggerString := ""
 Immediate := ""
 CaseSensitive := ""
 NoBackspace := ""
 InsideWord := ""
 NoEndChar := ""
 DisHS := ""
-ByClip := ""
-TextInsert := ""
-TextInsert1 := ""
-TextInsert2 := ""
-TextInsert3 := ""
-TextInsert4 := ""
-TextInsert5 := ""
-TextInsert6 := ""
+v_SelectFunction := ""
+v_EnterHotstring := ""
+v_EnterHotstring1 := ""
+v_EnterHotstring2 := ""
+v_EnterHotstring3 := ""
+v_EnterHotstring4 := ""
+v_EnterHotstring5 := ""
+v_EnterHotstring6 := ""
 SectionCombo := ""
 Delete := ""
 Shortcuts := ""
@@ -68,8 +68,6 @@ HotString := ""
 PrevSec := A_Args[2]
 PrevW := A_Args[3], PrevH := A_Args[4], PrevX := A_Args[5], PrevY := A_Args[6]
 prevMon := A_Args[8]
-init := 0
-WindowTransparency	:= 0
 ArrayHS := []
 ArrayS := []
 ArrayT := []
@@ -125,7 +123,7 @@ Loop,
 	strInput .= out
 	if InStr(HotstringEndChars, out)
 		strInput := ""
-	if (StrLen(strInput) > 1) and (Tips)
+	if (StrLen(strInput) > 0) and (Tips)
 	{
 		HelpTrig := ""
 		Loop, % Triggers.MaxIndex()
@@ -265,11 +263,11 @@ LoadFiles(nameoffile)
 
 StartHotstring(txt)
 {
-	static Options, NewString, OnOff, SendFun, TextInsert
+	static Options, v_TriggerString, OnOff, EnDis, SendFun, TextInsert
 	UndoHS := ""
 	txtsp := StrSplit(txt, "‖")
 	Options := txtsp[1]
-	NewString := txtsp[2]
+	v_TriggerString := txtsp[2]
 	if (txtsp[3] == "SI")
 		SendFun := "NormalWay"
 	else if (txtsp[3] == "CL") 
@@ -278,17 +276,21 @@ StartHotstring(txt)
 		SendFun := "MenuText"
 	else if (txtsp[3] == "MSI") 
 		SendFun := "MenuTextAHK"
-	OnOff := txtsp[4]
+	EnDis := txtsp[4]
+	If (EnDis == "En")
+		OnOff := "On"
+	else if (EnDis == "Dis")
+		OnOff := "Off"
 	TextInsert := txtsp[5]
 	Oflag := ""
 	If (InStr(Options,"O",0))
 		Oflag := 1
 	else
 		Oflag := 0
-	if !((Options == "") and (NewString == "") and (TextInsert == "") and (OnOff == ""))
+	if !((Options == "") and (v_TriggerString == "") and (TextInsert == "") and (OnOff == ""))
 	{
-		Hotstring(":" . Options . ":" . NewString, func(SendFun).bind(TextInsert, Oflag), OnOff)
-		Triggers.Push(NewString)
+		Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, Oflag), OnOff)
+		Triggers.Push(v_TriggerString)
 	}
 	return
 }
@@ -691,9 +693,9 @@ GUIInit:
     Gui, HS3:New, +Resize 
     Gui, HS3:Margin, 12.5*DPI%chMon%, 7.5*DPI%chMon%
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " bold cBlue", Calibri
-    Gui, HS3:Add, Text, % "xm+" . 9*DPI%chMon%,Enter triggerstring:
+    Gui, HS3:Add, Text, % "xm+" . 9*DPI%chMon%,Enter triggerstring
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " norm cBlack"
-    Gui, HS3:Add, Edit, % "w" . 184*DPI%chMon% . " h" . 25*DPI%chMon% . " xp+" . 227*DPI%chMon% . " yp vNewString",
+    Gui, HS3:Add, Edit, % "w" . 184*DPI%chMon% . " h" . 25*DPI%chMon% . " xp+" . 227*DPI%chMon% . " yp vv_TriggerString",
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " bold cBlue"
     Gui, HS3:Add, GroupBox, % "section xm w" . 425*DPI%chMon% . " h" . 106*DPI%chMon%, Select trigger option(s)
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " norm cBlack"
@@ -704,20 +706,20 @@ GUIInit:
     Gui, HS3:Add, CheckBox, % "gCapsCheck vNoEndChar xp-" . 225*DPI%chMon% . " yp+" . 25*DPI%chMon%, No End Char (O)
     Gui, HS3:Add, CheckBox, % "gCapsCheck vDisHS xp+" . 225*DPI%chMon% . " yp+" . 0*DPI%chMon%, Disable
 	Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
-    Gui, HS3:Add, Text,% "xm+" . 9*DPI%chMon%, Hotstring output function
+    Gui, HS3:Add, Text,% "xm+" . 9*DPI%chMon%, Select hotstring output function
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlack Norm"
-    Gui, HS3:Add, DropDownList, % "xm w" . 424*DPI%chMon% . " vByClip gByClip hwndddl", SendInput (SI)||Clipboard (CL)|Menu & Clipboard (MCL)|Menu & SendInput (MSI)
+    Gui, HS3:Add, DropDownList, % "xm w" . 424*DPI%chMon% . " vv_SelectFunction gL_SelectFunction hwndddl", SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
     PostMessage, 0x153, -1, 22*DPI%chMon%,, ahk_id %ddl%
 	Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
     Gui, HS3:Add, Text,% "xm+" . 9*DPI%chMon%, Enter hotstring
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlack Norm"
-    Gui, HS3:Add, Edit, % "w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vTextInsert xm"
-    Gui, HS3:Add, Edit, % "yp+" . 31*DPI%chMon% . " w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vTextInsert1 xm Disabled"
-    Gui, HS3:Add, Edit, % "yp+" . 31*DPI%chMon% . " w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vTextInsert2 xm Disabled"
-    Gui, HS3:Add, Edit, % "yp+" . 31*DPI%chMon% . " w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vTextInsert3 xm Disabled"
-    Gui, HS3:Add, Edit, % "yp+" . 31*DPI%chMon% . " w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vTextInsert4 xm Disabled"
-    Gui, HS3:Add, Edit, % "yp+" . 31*DPI%chMon% . " w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vTextInsert5 xm Disabled"
-    Gui, HS3:Add, Edit, % "yp+" . 31*DPI%chMon% . " w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vTextInsert6 xm Disabled"
+    Gui, HS3:Add, Edit, % "w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vv_EnterHotstring xm"
+    Gui, HS3:Add, Edit, % "yp+" . 31*DPI%chMon% . " w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vv_EnterHotstring1 xm Disabled"
+    Gui, HS3:Add, Edit, % "yp+" . 31*DPI%chMon% . " w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vv_EnterHotstring2 xm Disabled"
+    Gui, HS3:Add, Edit, % "yp+" . 31*DPI%chMon% . " w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vv_EnterHotstring3 xm Disabled"
+    Gui, HS3:Add, Edit, % "yp+" . 31*DPI%chMon% . " w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vv_EnterHotstring4 xm Disabled"
+    Gui, HS3:Add, Edit, % "yp+" . 31*DPI%chMon% . " w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vv_EnterHotstring5 xm Disabled"
+    Gui, HS3:Add, Edit, % "yp+" . 31*DPI%chMon% . " w" . 424*DPI%chMon% . " h" . 25*DPI%chMon% . " vv_EnterHotstring6 xm Disabled"
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlue Bold"
     Gui, HS3:Add, Text,% "xm+" . 9*DPI%chMon%, Add a comment
     Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlack Norm"
@@ -758,7 +760,7 @@ GUIInit:
     Gui, HS3:Add, ListView, % "LV0x1 0x4 yp+" . 25*DPI%chMon% . " xp h" . 500*DPI%chMon% . " w" . 400*DPI%chMon% . " vHSList AltSubmit gHSLV", Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
 	Gui, HS3:Add, Edit, vStringCombo xs gViewString ReadOnly Hide,
 	Gui, HS3:Font, % "s" . 12*DPI%chMon% . " cBlack Norm"
-	Gui, HS3:Add, Text, xm y0 vShortcuts,F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Delay | F8 Delete hotstring | F9 Set hotstring 
+	Gui, HS3:Add, Text, xm y0 vShortcuts,F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear |F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring 
 
     ; Menu, HSMenu, Add, &Monitor, CheckMon
 	Menu, Submenu1, Add, &Undo last hotstring,Undo
@@ -938,7 +940,7 @@ ViewString:
 	Select := StringCombo
 	HotString := StrSplit(Select, """")
 	HotString2 := StrSplit(HotString[2],":")
-	NewStringvar := SubStr(HotString[2], StrLen( ":" . HotString2[2] . ":" ) + 1, StrLen(HotString[2])-StrLen(  ":" . HotString2[2] . ":" ))
+	v_TriggerStringvar := SubStr(HotString[2], StrLen( ":" . HotString2[2] . ":" ) + 1, StrLen(HotString[2])-StrLen(  ":" . HotString2[2] . ":" ))
 	RText := StrSplit(Select, "bind(""")
 	if InStr(RText[2], """On""")
 	{
@@ -948,26 +950,25 @@ ViewString:
 	{    
 		OText := SubStr(RText[2], 1, StrLen(RText[2])-10)
 	}
-	GuiControl, , NewString, % NewStringvar
+	GuiControl, , v_TriggerString, % v_TriggerStringvar
 	if (InStr(Select, """MenuText""") or InStr(Select, """MenuTextAHK"""))
 	{
-		TextInsert := OText
 		OTextMenu := StrSplit(OText, "¦")
-		GuiControl, , TextInsert, % OTextMenu[1]
-		GuiControl, , TextInsert1, % OTextMenu[2]
-		GuiControl, , TextInsert2, % OTextMenu[3]
-		GuiControl, , TextInsert3, % OTextMenu[4]
-		GuiControl, , TextInsert4, % OTextMenu[5]
-		GuiControl, , TextInsert5, % OTextMenu[6]
-		GuiControl, , TextInsert6, % OTextMenu[7]
+		GuiControl, , v_EnterHotstring, % OTextMenu[1]
+		GuiControl, , v_EnterHotstring1, % OTextMenu[2]
+		GuiControl, , v_EnterHotstring2, % OTextMenu[3]
+		GuiControl, , v_EnterHotstring3, % OTextMenu[4]
+		GuiControl, , v_EnterHotstring4, % OTextMenu[5]
+		GuiControl, , v_EnterHotstring5, % OTextMenu[6]
+		GuiControl, , v_EnterHotstring6, % OTextMenu[7]
 
 	}
 	else
 	{
-		GuiControl, , TextInsert, % OText
+		GuiControl, , v_EnterHotstring, % OText
 	}
 	GoSub SetOptions 
-	gosub byclip
+	gosub L_SelectFunction
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -975,46 +976,46 @@ return
 AddHotstring:
 	Gui, HS3:+OwnDialogs
 	Gui, Submit, NoHide
-	GuiControlGet, ByClip
-	If (Trim(NewString) ="")
+	GuiControlGet, v_SelectFunction
+	If (Trim(v_TriggerString) ="")
 	{
 		MsgBox Enter a Hotstring!
 		return
 	}
-	if InStr(ByClip,"Menu")
+	if InStr(v_SelectFunction,"Menu")
 	{
-		If ((Trim(TextInsert) ="") and (Trim(TextInsert1) ="") and (Trim(TextInsert2) ="") and (Trim(TextInsert3) ="") and (Trim(TextInsert4) ="") and (Trim(TextInsert5) ="") and (Trim(TextInsert6) =""))
+		If ((Trim(v_EnterHotstring) ="") and (Trim(v_EnterHotstring1) ="") and (Trim(v_EnterHotstring2) ="") and (Trim(v_EnterHotstring3) ="") and (Trim(v_EnterHotstring4) ="") and (Trim(v_EnterHotstring5) ="") and (Trim(v_EnterHotstring6) =""))
 		{
 			MsgBox, 4,, Replacement text is blank. Do you want to proceed?
 			IfMsgBox, No
 			return
 		}
 		TextVar := ""
-		If (Trim(TextInsert) !="")
-			TextVar := % TextVar . "¦" . TextInsert
-		If (Trim(TextInsert1) !="")
-			TextVar := % TextVar . "¦" . TextInsert1
-		If (Trim(TextInsert2) !="")
-			TextVar := % TextVar . "¦" . TextInsert2
-		If (Trim(TextInsert3) !="")
-			TextVar := % TextVar . "¦" . TextInsert3
-		If (Trim(TextInsert4) !="")
-			TextVar := % TextVar . "¦" . TextInsert4
-		If (Trim(TextInsert5) !="")
-			TextVar := % TextVar . "¦" . TextInsert5
-		If (Trim(TextInsert6) !="")
-			TextVar := % TextVar . "¦" . TextInsert6
+		If (Trim(v_EnterHotstring) !="")
+			TextVar := % TextVar . "¦" . v_EnterHotstring
+		If (Trim(v_EnterHotstring1) !="")
+			TextVar := % TextVar . "¦" . v_EnterHotstring1
+		If (Trim(v_EnterHotstring2) !="")
+			TextVar := % TextVar . "¦" . v_EnterHotstring2
+		If (Trim(v_EnterHotstring3) !="")
+			TextVar := % TextVar . "¦" . v_EnterHotstring3
+		If (Trim(v_EnterHotstring4) !="")
+			TextVar := % TextVar . "¦" . v_EnterHotstring4
+		If (Trim(v_EnterHotstring5) !="")
+			TextVar := % TextVar . "¦" . v_EnterHotstring5
+		If (Trim(v_EnterHotstring6) !="")
+			TextVar := % TextVar . "¦" . v_EnterHotstring6
 		TextInsert := SubStr(TextVar, 2, StrLen(TextVar)-1)
 	}
 	else{
-		If (Trim(TextInsert) ="")
+		If (Trim(v_EnterHotstring) ="")
 		{
 			MsgBox, 4,, Replacement text is blank. Do you want to proceed?
 			IfMsgBox, No
 			Return
 		}
 	}
-	if (ByClip == "")
+	if (v_SelectFunction == "")
 	{
 		MsgBox,0x30 ,, Choose sending function!
 		return
@@ -1036,7 +1037,7 @@ AddHotstring:
 	; ControlGet, Items, Line,1, StringCombo
 	Loop, Parse, StringCombo, `n
 	{  
-		if InStr(A_LoopField, ":" . NewString . """", CaseSensitive)
+		if InStr(A_LoopField, ":" . v_TriggerString . """", CaseSensitive)
 		{
 			HotString := StrSplit(A_LoopField, ":",,3)
 			OldOptions := HotString[2]
@@ -1056,13 +1057,13 @@ AddHotstring:
 	GoSub OptionString   ; Writes the Hotstring options string
 
 ; Add new/changed target item in DropDownList
-	if (ByClip == "Clipboard (CL)")
+	if (v_SelectFunction == "Clipboard (CL)")
 		SendFun := "ViaClipboard"
-	else if (ByClip == "SendInput (SI)")
+	else if (v_SelectFunction == "SendInput (SI)")
 		SendFun := "NormalWay"
-	else if (ByClip == "Menu & Clipboard (MCL)")
+	else if (v_SelectFunction == "Menu & Clipboard (MCL)")
 		SendFun := "MenuText"
-	else if (ByClip == "Menu & SendInput (MSI)")
+	else if (v_SelectFunction == "Menu & SendInput (MSI)")
 		SendFun := "MenuTextAHK"
 	else 
 	{
@@ -1074,7 +1075,7 @@ AddHotstring:
 		OnOff := "Off"
 	else
 		OnOff := "On"
-		GuiControl,, StringCombo , % "Hotstring("":" . Options . ":" . NewString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
+		GuiControl,, StringCombo , % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
 
 ; Select target item in list
 	gosub, ViewString
@@ -1082,10 +1083,10 @@ AddHotstring:
 ; If case sensitive (C) or inside a word (?) first deactivate Hotstring
 	If (CaseSensitive or InsideWord or InStr(OldOptions,"C") 
 		or InStr(OldOptions,"?")) 
-		Hotstring(":" . OldOptions . ":" . NewString , func(SendFun).bind(TextInsert), "Off")
+		Hotstring(":" . OldOptions . ":" . v_TriggerString , func(SendFun).bind(TextInsert), "Off")
 
 ; Create Hotstring and activate
-	Hotstring(":" . Options . ":" . NewString, func(SendFun).bind(TextInsert), OnOff)
+	Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert), OnOff)
 
 	; MsgBox, Hotstring has been set.
 	gosub, SaveHotstrings
@@ -1096,12 +1097,12 @@ return
 Clear:
 	GuiControl,, StringCombo,
 	GuiControl,, Comment,
-	GuiControl,, TextInsert1,
-	GuiControl,, TextInsert2,
-	GuiControl,, TextInsert3,
-	GuiControl,, TextInsert4,
-	GuiControl,, TextInsert5,
-	GuiControl,, TextInsert6,
+	GuiControl,, v_EnterHotstring1,
+	GuiControl,, v_EnterHotstring2,
+	GuiControl,, v_EnterHotstring3,
+	GuiControl,, v_EnterHotstring4,
+	GuiControl,, v_EnterHotstring5,
+	GuiControl,, v_EnterHotstring6,
 	gosub, ViewString
 return
 
@@ -1118,7 +1119,7 @@ HSLV:
 		return
 	}
 	LV_GetText(Options, SelectedRow, 2)
-	LV_GetText(NewString, SelectedRow, 1)
+	LV_GetText(v_TriggerString, SelectedRow, 1)
 	LV_GetText(Fun, SelectedRow, 3)
 	if (Fun = "SI")
 	{
@@ -1138,9 +1139,13 @@ HSLV:
 	}
 	LV_GetText(TextInsert, SelectedRow, 5)
 	LV_GetText(Comment, SelectedRow, 6)
-	LV_GetText(OnOff, SelectedRow, 4)
-	; Hotstring(":"Options ":" NewString,func(SendFun).bind(TextInsert),OnOff)
-	HotString := % "Hotstring("":" . Options . ":" . NewString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
+	LV_GetText(EnDis, SelectedRow, 4)
+	If (EnDis == "En")
+		OnOff := "On"
+	else if (EnDis == "Dis")
+		OnOff := "Off"
+	; Hotstring(":"Options ":" v_TriggerString,func(SendFun).bind(TextInsert),OnOff)
+	HotString := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
 	GuiControl,, Comment, %Comment%
 	GuiControl,, StringCombo ,  %HotString%
 	gosub, ViewString
@@ -1159,7 +1164,7 @@ HSLV2:
 		return
 	}
 	LV_GetText(Options, SelectedRow2, 3)
-	LV_GetText(NewString, SelectedRow2, 2)
+	LV_GetText(v_TriggerString, SelectedRow2, 2)
 	LV_GetText(Fun, SelectedRow2, 4)
 	if (Fun = "SI")
 	{
@@ -1178,12 +1183,15 @@ HSLV2:
 		SendFun := "MenuTextAHK"
 	}
 	LV_GetText(TextInsert, SelectedRow2, 6)
-	LV_GetText(OnOff, SelectedRow2, 5)
+	LV_GetText(EnDis, SelectedRow2, 5)
+	If (EnDis == "En")
+		OnOff := "On"
+	else if (EnDis == "Dis")
+		OnOff := "Off"
 	LV_GetText(Library, SelectedRow2, 1)
 	Gui, HS3: Default
 	ChooseSec := % Library . ".csv"
-	; Hotstring(":"Options ":" NewString,func(SendFun).bind(TextInsert),OnOff)
-	HotString := % "Hotstring("":" . Options . ":" . NewString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
+	HotString := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
 	GuiControl,, StringCombo ,  %HotString%
 	gosub, ViewString
 	GuiControl, Choose, SectionCombo, %ChooseSec%
@@ -1282,32 +1290,32 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-ByClip:
+L_SelectFunction:
 Gui, HS3:+OwnDialogs
-GuiControlGet, ByClip
-if InStr(ByClip, "Menu")
+GuiControlGet, v_SelectFunction
+if InStr(v_SelectFunction, "Menu")
 {
-	GuiControl, Enable, TextInsert1
-	GuiControl, Enable, TextInsert2
-	GuiControl, Enable, TextInsert3
-	GuiControl, Enable, TextInsert4
-	GuiControl, Enable, TextInsert5
-	GuiControl, Enable, TextInsert6
+	GuiControl, Enable, v_EnterHotstring1
+	GuiControl, Enable, v_EnterHotstring2
+	GuiControl, Enable, v_EnterHotstring3
+	GuiControl, Enable, v_EnterHotstring4
+	GuiControl, Enable, v_EnterHotstring5
+	GuiControl, Enable, v_EnterHotstring6
 }
 else
 {
-	GuiControl, , TextInsert1,
-	GuiControl, , TextInsert2,
-	GuiControl, , TextInsert3,
-	GuiControl, , TextInsert4,
-	GuiControl, , TextInsert5,
-	GuiControl, , TextInsert6,
-	GuiControl, Disable, TextInsert1
-	GuiControl, Disable, TextInsert2
-	GuiControl, Disable, TextInsert3
-	GuiControl, Disable, TextInsert4
-	GuiControl, Disable, TextInsert5
-	GuiControl, Disable, TextInsert6
+	GuiControl, , v_EnterHotstring1,
+	GuiControl, , v_EnterHotstring2,
+	GuiControl, , v_EnterHotstring3,
+	GuiControl, , v_EnterHotstring4,
+	GuiControl, , v_EnterHotstring5,
+	GuiControl, , v_EnterHotstring6,
+	GuiControl, Disable, v_EnterHotstring1
+	GuiControl, Disable, v_EnterHotstring2
+	GuiControl, Disable, v_EnterHotstring3
+	GuiControl, Disable, v_EnterHotstring4
+	GuiControl, Disable, v_EnterHotstring5
+	GuiControl, Disable, v_EnterHotstring6
 }
 return
 
@@ -1335,13 +1343,13 @@ SetOptions:
 		return
 	OptionSet := (InStr(Select,"""On""")) ? CheckOption("No", 7) : CheckOption("Yes",7)
 	if(InStr(Select,"NormalWay"))
-		GuiControl, Choose, ByClip, SendInput (SI)
+		GuiControl, Choose, v_SelectFunction, SendInput (SI)
 	else if(InStr(Select, "ViaClipboard"))
-		GuiControl, Choose, ByClip, Clipboard (CL)
+		GuiControl, Choose, v_SelectFunction, Clipboard (CL)
 	else if(InStr(Select, """MenuText"""))
-		GuiControl, Choose, ByClip, Menu & Clipboard (MCL)
+		GuiControl, Choose, v_SelectFunction, Menu & Clipboard (MCL)
 	else if(InStr(Select, """MenuTextAHK"""))
-		GuiControl, Choose, ByClip, Menu & SendInput (MSI)
+		GuiControl, Choose, v_SelectFunction, Menu & SendInput (MSI)
 	CapCheck := 0
 return
 
@@ -1379,12 +1387,12 @@ SaveHotstrings:
 	SaveFile := SectionCombo
 	SaveFile := StrReplace(SaveFile, ".csv", "")
 	GuiControlGet, Items,, StringCombo
-	OnOff := ""
+	EnDis := ""
 	SendFun := ""
 	if InStr(Items, """On""")
-		OnOff := "On"
+		EnDis := "En"
 	else if InStr(Items, """Off""")
-		OnOff := "Off"
+		EnDis := "Dis"
 	if InStr(Items, "ViaClipboard")
 		SendFun := "CL"
 	else if InStr(Items, "NormalWay")
@@ -1396,7 +1404,7 @@ SaveHotstrings:
 	HSSplit := StrSplit(Items, ":")
 	HSSplit2 := StrSplit(Items, """:")
 	Options := SubStr(HSSplit2[2], 1 , InStr(HSSplit2[2], ":" )-1)
-	NewString := SubStr(HSSplit2[2], InStr(HSSplit2[2], ":" )+1 , InStr(HSSplit2[2], """," )-StrLen(Options)-2)
+	v_TriggerString := SubStr(HSSplit2[2], InStr(HSSplit2[2], ":" )+1 , InStr(HSSplit2[2], """," )-StrLen(Options)-2)
 	if (InStr(Options, "*0"))
 	{
 		Options := StrReplace(Options, "*0")
@@ -1422,7 +1430,7 @@ SaveHotstrings:
 	TextInsert := StrSp1[1]
 	OutputFile =% A_ScriptDir . "\Libraries\temp.csv"
 	InputFile = % A_ScriptDir . "\Libraries\" . SaveFile . ".csv"
-	LString := % "‖" . NewString . "‖"
+	LString := % "‖" . v_TriggerString . "‖"
 	SaveFlag := 0
 	Loop, Read, %InputFile%, %OutputFile%
 	{
@@ -1430,19 +1438,19 @@ SaveHotstrings:
 		{
 			if !(SelectedRow)
 			{
-				MsgBox, 4,, The hostring "%NewString%" exists in a file %SaveFile%.csv. Do you want to proceed?
+				MsgBox, 4,, The hostring "%v_TriggerString%" exists in a file %SaveFile%.csv. Do you want to proceed?
 				IfMsgBox, No
 					return
 			}
-			LV_Modify(A_Index, "", NewString, Options, SendFun, OnOff, TextInsert, Comment)
+			LV_Modify(A_Index, "", v_TriggerString, Options, SendFun, EnDis, TextInsert, Comment)
 			SaveFlag := 1
 		}
 	}
 	; addvar := 0 ; potrzebne, bo źle pokazuje max index listy
 	if (SaveFlag == 0)
 	{
-		LV_Add("",  NewString,Options, SendFun, OnOff, TextInsert, Comment)
-		txt := % Options . "‖" . NewString . "‖" . SendFun . "‖" . OnOff . "‖" . TextInsert . "‖" . Comment
+		LV_Add("",  v_TriggerString,Options, SendFun, EnDis, TextInsert, Comment)
+		txt := % Options . "‖" . v_TriggerString . "‖" . SendFun . "‖" . EnDis . "‖" . TextInsert . "‖" . Comment
 		SectionList.Push(txt)
 		; addvar := 1
 	}
@@ -1893,11 +1901,15 @@ MoveList:
 	LV_GetText(Triggerstring, SelectedRow,2)
 	LV_GetText(TriggOpt, SelectedRow,3)
 	LV_GetText(OutFun, SelectedRow,4)
-	LV_GetText(OnOff, SelectedRow,5)
+	LV_GetText(EnDis, SelectedRow,5)
+	If (EnDis == "En")
+		OnOff := "On"
+	else if (EnDis == "Dis")
+		OnOff := "Off"
 	LV_GetText(HSText, SelectedRow,6)
 	LV_GetText(Comment, SelectedRow,7)
-	MovedHS := TriggOpt . "‖" . Triggerstring . "‖" . OutFun . "‖" . OnOff . "‖" . HSText . "‖" . Comment
-	MovedNoOptHS := "‖" . Triggerstring . "‖" . OutFun . "‖" . OnOff . "‖" . HSText . "‖" . Comment
+	MovedHS := TriggOpt . "‖" . Triggerstring . "‖" . OutFun . "‖" . EnDis . "‖" . HSText . "‖" . Comment
+	MovedNoOptHS := "‖" . Triggerstring . "‖" . OutFun . "‖" . EnDis . "‖" . HSText . "‖" . Comment
 	Gui, MoveLibs:New
 	cntMove := -1
 	Loop, %A_ScriptDir%\Libraries\*.csv
@@ -1951,13 +1963,13 @@ Loop, Read, %InputFile%
 			Gui, MoveLibs:Destroy
 			return
 		}
-		LV_Modify(A_Index, "", Triggerstring, TriggOpt, OutFun, OnOff, HSText, Comment)
+		LV_Modify(A_Index, "", Triggerstring, TriggOpt, OutFun, EnDis, HSText, Comment)
 		SaveFlag := 1
 	}
 }
 if (SaveFlag == 0)
 	{
-		LV_Add("",  Triggerstring, TriggOpt, OutFun, OnOff,  HSText, Comment)
+		LV_Add("",  Triggerstring, TriggOpt, OutFun, EnDis,  HSText, Comment)
 		SectionList.Push(MovedHS)
 	}
 LV_ModifyCol(1, "Sort")
