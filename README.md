@@ -1,12 +1,12 @@
 # *Hotstrings* application
-Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
+Written in [AutoHotkey][] script language, application *Hotstrings*  has many useful features:
 
 - quick text replacement aka hotstrings; 
     
     *short alphanumeric strings (aka triggerstrings) are used to automatically replace long alphanumeric strings (aka hotstrings)*;
 - defined hotstrings are operating system wide;
 
-    *it means that can be triggered in any text / edit window, in any application*;
+    *it means that can be triggered in any text / edit window, in any application; runs on Microsoft Windows family operating systems;*
 - GUI (Graphical User Interface); 
 
     *for easy definition and/or edition of hotstrings*;
@@ -16,14 +16,14 @@ Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
 - one triggering abbreviation can call several different text strings of your choice;
 
     *chosen from menu*;
-- graphical overview of existing hotstrings with search capabilities;
+- overview of existing hotstrings with search capabilities;
 - definitions of hotstrings are stored in .csv files, as many, as you like; 
 
     *each file can contain hotstring belonging to specific category, e.g. emojis, physical symbols, first and second names etc.*;
 - undoing of hotstrings;
 
     *conversion of last entered hotstring again into triggering abbreviation*;
-- runs on Microsoft Windows family operating systems;
+
 - written in AutoHotkey script language but does not require this language interpreter to be installed and can be run standalone thanks to .exe file;
 
     *nevertheless installation of [AutoHotkey][] is greatly adviced).*
@@ -31,26 +31,70 @@ Written in [AutoHotkey][] application *Hotstrings*  with many useful features:
 ---
 
 # Table of content
-1. [FAQ](#FAQ)
+1. [FAQ / Introduction to hotstrings](#FAQ-/-Introduction-to-hotstrings)
+ 
+    1.1. [What are the hotstrings?](#What-are-the-hotstrings?)
+ 
+    1.2. [How the *Hotstrings* application work?](#How-the-*Hotstrings*-application-work?)
 
-2. [Let's begin by defining of few first hotstrings](#Lets-begin-by-defining-of-few-first-hotstrings)
+    1.3. [Why somobody may want to use hotstrings?](#Why-somobody-may-want-to-use-hotstrings?)
 
-3. [Main window of *Hotstring* application](#Main-window-of-Hotstring-application)
+    1.4. [Why somebody may want to use *Hotstrings* application?](#Why-somebody-may-want-to-use-*Hotstrings*-application?)
+    
+    1.5. [How to reset the hotstring recognizer?](#How-to-reset-the-hotstring-recognizer?)
 
-4. [Hotstring definition or edition](#Hotstring-definition-or-edition)
+2. [Installation of *Hotstrings* application](#Installation-of-*Hotstrings*-application)
+
+3. [The first run of *Hotstrings* application](#The-first-run-of-*Hotstrings*-application)
+
+4. [Main window of *Hotstrings* application](#Main-window-of-*Hotstrings*-application)
+
+    4.1. [Menu](#Menu)
+
+        4.1.1. [Configure](###Configure)
+
+        4.1.2. [Search hotstring](###Search-hotstring)
+
+        4.1.3. [About / Help](###About-/-Help)
+
+    4.2. [Hotstring definition or edition](#Hotstring-definition-or-edition)
+
+        4.2.1. [Triggerstring definition](###Triggerstring-definition)
+
+        4.2.2. [Trigger options overview](###Trigger-options-overview)
+
+        4.2.3. [Hotstring output method](###Hotstring-output-method)
+
+        4.2.4. [Enter hotstring](###Enter-hotstring)
+
+        4.2.5. [Add a comment](###Add-a-comment)
+
+        4.2.6. [Select hotstring library](###Select-hotstring-library)
+
+        4.2.7. [Buttons](###Buttons)
+
+    4.3. [Library content](#Library-content)
+
+    4.4. [Shortcuts](#Shortcuts)
+
+5. [Format of libraries](#Format-of-libraries)
+
+6. [Other remarks](#Other-remarks)
+
+    6.1. [Autostart of *Hotstrings* application](##Autostart-of-*Hotstrings*-application)
+
+    6.2. [Not always applying clipboard output function is a good idea](##Not-always-applying-clipboard-output-function-is-a-good-idea)
+
+7. [Credits](#Credits)
+
+    7.1. [Tools used to prepare this documentation](##Tools-used-to-prepare-this-documentation)
+
+8. [ToDo List](#ToDo-List)
 
 ---
 
-# FAQ 
-(Frequently Asked Questions) about *Hotstrings*:
-
-[What are the hotstrings?](#What-are-the-hotstrings)
-
-[How the AutoHotkey and hotstrings work?](#How-the-AutoHotkey-and-hotstrings-work)
-
-[Why somobody may want to use hotstrings?](#Why-somobody-may-want-to-use-hotstrings)
-
-[Why somebody may want to use *Hotstring* application?](#Why-somebody-may-want-to-use-Hotstring-application)
+# FAQ / Introduction to hotstrings
+(Frequently Asked Questions) about *Hotstrings* application and notion of hotstrings.
 
 ## What are the hotstrings?
 There are two corresponding notions:
@@ -267,7 +311,7 @@ Our primary goal: we would like to define our first pair of (triggerstrin, hotst
 
 In order to start the GUI of *Hotstrings* application just double click on the *Hotstrings* icon (capital letter *H* as *Hotstrings* on green background) in system tray:
 
-![Example of system tray][] environment
+![Example of system tray][] 
 
 or... use hotkey **Ctrl + # + h** (Control + Windows modifier key + h).
 
@@ -280,13 +324,13 @@ At first please observe the main window again. In order to define any hotstring 
 
 ![Defining of hotstring][]
 
-1. Enter triggerstring.
-2. Select trigger option(s).
-3. Select hotstring output function.
-4. Enter hotstring.
-5. Select hotstring library.
-6. Add optional comment.
-7. Set the hotstring.
+    1. Enter triggerstring.
+    2. Select trigger option(s).
+    3. Select hotstring output function.
+    4. Enter hotstring.
+    5. Select hotstring library.
+    6. Add optional comment.
+    7. Set the hotstring.
 
 
 We will start by defining of *by the way* hotsring with plain *btw* triggerstring and no options.
@@ -349,7 +393,7 @@ You've defined your first hotstring. Have a look now into the left part of the m
 
 Now let's dive into more detailed description of available functions
 
-# Main window of *Hotstring* application
+# Main window of *Hotstrings* application
 
 ![Main window][]
 
@@ -357,10 +401,10 @@ The purpose of this window is enabling hotstring definition and/or edition.
 
 It can be divided into the following parts:
 
-1. Menu.
-2. Hotstring definition / edition.
-3. Display of existing hotstrings.
-4. Shortcuts
+    1. Menu.
+    2. Hotstring definition or edition.
+    3. Display of existing hotstrings: library content.
+    4. Shortcuts.
 
 ![Main window parts][]
 
@@ -520,10 +564,10 @@ Displays the following text:
 
 **Genuine hotstrings AutoHotkey documentation**: link [hotstring][].
 
-# Hotstring definition or edition 
+## Hotstring definition or edition 
 This time all 7 steps discussed in details, with examples and comments.
 
-## Triggerstring definition
+### Triggerstring definition
 
 The text edit field used to define the triggerstring.
 
@@ -533,7 +577,7 @@ In general the shorter triggerstring then the better. The triggerstring can be a
 
 The *Hotstrings* application doesn't have protection agains duplicate (**triggerstring**, **hotstring**) pairs. User can easily duplicated them. Therefore its worth to search prior to adding new definition if it doesn't exist already.
 
-## Trigger options overview
+### Trigger options overview
 Trigger options controls how **hotstring recognizer** works. All these options can be used concurrently. For clarity in the following descriptions each of them is described separatedly.
 
 ![Select trigger option(s)][]
@@ -796,7 +840,7 @@ Example:
 
 This output function enable convenient solution. Let's check how that particular **hotstring** definition looks like:
 
-(...)
+![Hotstring Menu Example][]
 
 The *Hotstrings* application enable up to 7 different **hotstrings** to be triggered by one **triggerstring**. The function *Menu & SendInput (MSI)* outputs all **hotstring** by the *SendInput* (character by character). The first definition from the list is the default one.
 
@@ -811,13 +855,13 @@ The default **hotstring** is the first one from the top. To enter it just press 
 ### Menu & Clipboard (MCL)
 As above, with one exception: the **hotstrings** are output by clipboard, with all the consequences as described for *Clipboard (CL)* output function.
 
-## Enter hotstring
+### Enter hotstring
 
 ![Enter hotstring][]
 
 The edit text field used to display / edit the **hotstring**. The single hotstring can be up to 5000 characters long.
 
-## Add a comment
+### Add a comment
 
 ![Add a comment][]
 
@@ -825,7 +869,7 @@ Optional (not mandatory) part of (**triggerstring**, **hotstring**) definition. 
 
 *Tip*. Can be useful in some circumstances, for example to add a source of a **hotstring** definition in form of URL (a link).
 
-## Select hotstring library
+### Select hotstring library
 ![shl1][]
 
 List of text files with extenstion .csv available in *../Libraries* folder of *Hotstrings* application. 
@@ -840,7 +884,7 @@ If user would like to create new .csv file, the **Add library** button should be
 
 *Tip*. Try to store (**triggerstring**, **hotstring**) which are somehow related to each other in separate .csv files. The files shouldn't be too long, because searching / management of them can be cumbersome at certain point.
 
-## Buttons
+### Buttons
 
 ![Buttons][]
 
@@ -851,6 +895,12 @@ If user would like to create new .csv file, the **Add library** button should be
 **Delete hotstring**: deletes selected in the right part of the screen (table: *Library content*) pair of (**triggerstring**, **hotstring**). The pair is permanently deleted, so prior to that user have to confirm her/his decision. Next, if decision is positive, the *Hotstrings* application restarts.
 
 Comment: Restart is required as a selected (**triggerstring**, **hotstring**) pair is removed from library file (.csv). In order to just switch off (e.g. temporarily) any selected pair (**triggerstring**, **hotstring**), use *Disable* setting in *Select trigger option(s)* section.
+
+## Library content
+
+![Library content][]
+
+Right part of the *Hotstrings* window in form of a table. It can be reached e.g. by pressing <F2> shortcut. Next user can move down / up over this list with keys <↑> and <↓>. Each time user selects row of this table, the next definition of (**triggerstring**, **hotstring**) is ready to be edited.
 
 ## Shortcuts
 
@@ -877,37 +927,27 @@ The following keyboard shortcuts are active only if *Search Hotstrings* applicat
 | F8 Move hotstring | see [Search Hotstrings](#Search-Hotstrings) |
 
 
-## Library content
-
-![Library content][]
-
-Right part of the *Hotstrings* window in form of a table. It can be reached e.g. by pressing <F2> shortcut. Next user can move down / up over this list with keys <↑> and <↓>. Each time user selects row of this table, the next definition of (**triggerstring**, **hotstring**) is ready to be edited.
-
 ---
 ---
 ---
 
 # Format of libraries
 
-The CSV = Comma Separated Values, special format where "values" are separated by certain, dedicated character, e.g. comma. In case of *Hotstrings* application the special Unicode character is used: ‖ (U+2016). 
+The CSV = Comma Separated Values, special format where "values" are separated by certain, dedicated character, e.g. comma. In case of *Hotstrings* application the  Unicode character "Double Vertical Line" is used: ‖ (U+2016). 
 
 It is not enough for text file to have .csv extension to be recognized by *Hotstrings* application. Such file have to have also dedicated structure.
 
  | Section | Separator | Section | Separator | Section | Separator | Section | Separator | Section | Separator | Section
  | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
- | triggerstring options | ‖ | triggerstring | ‖ | output function | ‖ | status: Enabled / Disabled | ‖ | hotstring | ‖ | optional: comment |
+ | triggerstring options | ‖ | triggerstring | ‖ | output function | ‖ | status: Enabled / Disabled | ‖ | hotstring or group of hotstrings\* | ‖ | optional: comment |
 
-# Credits
+\* group of hotstrings: if *hotstring output function* is equal to menu (Menu & Clipboard (MCL) or Menu & SendInput (MSI)) then hotstrings are separated with Unicode character "Broken Bar": ¦ (U+00A6).
 
-The originator and creator of the Hotstrings application is Jack Dunning aka [Jack][] who has created the very first version of *[Instant Hotstring][]* application.
+*Example*:
+| triggerstring options | ‖ | triggerstring | ‖ | output function | ‖ | status: Enabled / Disabled | ‖ | hotstring or group of hotstrings\* | ‖ | optional: comment |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| \* | ‖ | bom/ | ‖ | MSI | ‖ | En | ‖ | Bill of Materials¦Byte Order Mark | ‖ |
 
-People from AutoHotkey community, especially those who help at [AutoHotkey forum][].
-
-## Tools used to prepare this documentation
-
-* Markdown (MD) text editor: https://hackmd.io/
-* Table generator: https://www.tablesgenerator.com/markdown_tables#
-* ASCII diagram editor: https://textik.com/
 
 # Other remarks
 Other remarks helpful in everyday working with hotstrings.
@@ -1037,11 +1077,28 @@ Something,☐something☐ | api              |  ☐       | menu: API
  
 ## Interaction of hotstrings pasted from clipboard with clipboard managers
 
-In case if *clipboard manager* is active (e.g. [CopyQ]), each time the hotstring which is output by clipboard is triggered 
+In case if *clipboard manager* is active (e.g. [CopyQ]), each time the **hotstring** which is output by clipboard is triggered with **triggerstring** the result is copied to buffer of *clipboard manager*.
 
 ---
 ---
 ---
+
+# Credits
+
+The originator and creator of the Hotstrings application is Jack Dunning aka [Jack][] who has created the very first version of *[Instant Hotstring][]* application.
+
+People from AutoHotkey community, especially those who help at [AutoHotkey forum][].
+
+## Tools used to prepare this documentation
+
+* Markdown (MD) text editor: https://hackmd.io/
+* Table generator: https://www.tablesgenerator.com/markdown_tables#
+* ASCII diagram editor: https://textik.com/
+
+---
+---
+---
+
 
 # ToDo List
 - ☑ Menu: configuration and the corresponding *Configuration.ini*
@@ -1105,6 +1162,7 @@ In case if *clipboard manager* is active (e.g. [CopyQ]), each time the hotstring
 [Output function: menu]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_OutputMenu.png "Output function: menu"
 [Buttons]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Buttons.png "Buttons"
 [Library content]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_LibraryContent.png "Library content"
+[Hotstring Menu Example]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_HotstringMenu.png "Hotstring Menu Example"
 
 [AutoHotkey]: https://www.autohotkey.com/
 [hotstring]: https://www.autohotkey.com/docs/Hotstrings.htm/
