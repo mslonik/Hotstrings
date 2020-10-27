@@ -56,6 +56,8 @@ O‖2d‖SI‖En‖2D‖
 *‖ei/‖CL‖En‖Emotional Intelligence‖
 ‖emc‖SI‖En‖EMC‖
 *‖emc/‖CL‖En‖Electro-Magnetic Compatibility‖
+‖emf‖SI‖En‖EMF‖
+*‖emf/‖CL‖En‖Enhanced Metafile‖https://en.wikipedia.org/wiki/Windows_Metafile#EMF
 ‖emi‖SI‖En‖EMI‖
 *‖emi/‖CL‖En‖Electromagnetic Interference‖
 ‖ems‖SI‖En‖EMS‖
@@ -204,6 +206,8 @@ O‖2d‖SI‖En‖2D‖
 *‖vba/‖CL‖En‖Visual Basic for Applications‖
 ‖vpn‖SI‖En‖VPN‖
 *‖vpn/‖CL‖En‖Virtual Private Network‖
+‖wmf‖SI‖En‖WMF‖
+‖wmf/‖CL‖En‖Windows Metafile‖https://en.wikipedia.org/wiki/Windows_Metafile#EMF
 ‖www‖SI‖En‖WWW‖
 *‖www/‖SI‖En‖World Wide Web‖
 ‖wysiwyg‖SI‖En‖WYSIWYG‖
