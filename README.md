@@ -39,7 +39,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
     1.3. [Why somobody may want to use hotstrings?](#Why-somobody-may-want-to-use-hotstrings)
 
-    1.4. [Why somebody may want to use *Hotstrings* application?](#Why-somebody-may-want-to-use-*Hotstrings*-application)
+    1.4. [Why somebody may want to use *Hotstrings* application?](#Why-somebody-may-want-to-use-Hotstrings-application)
     
     1.5. [How to reset the hotstring recognizer?](#How-to-reset-the-hotstring-recognizer)
 
@@ -93,7 +93,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
 ---
 
-# FAQ Introduction to hotstrings
+# FAQ / Introduction to hotstrings
 (Frequently Asked Questions) about *Hotstrings* application and notion of hotstrings.
 
 ## What are the hotstrings?
