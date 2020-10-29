@@ -566,7 +566,7 @@ Displays the following text:
 
 **Genuine hotstrings AutoHotkey documentation**: link [hotstring][].
 
-## Hotstring definition or edition 
+## [Hotstring definition or edition](#table-of-content "Return to Table of content")
 This time all 7 steps discussed in details, with examples and comments.
 
 ### [Triggerstring definition](#table-of-content "Return to Table of content")
@@ -615,7 +615,7 @@ Comments:
 Comments:
 
 Please note that there are just 5 trigger conditions which represent answers to the following questions:
-1. Is previous endchar required? 
+   1. Is previous endchar required? 
    
    If answer to this question is positive (yes), then the **hotstring recognizer** starts its work only just after the last *endchar* or reset. Another words it's only able to recognize the **triggerstring** if it starts new phrase or word. 
    
@@ -623,7 +623,7 @@ Please note that there are just 5 trigger conditions which represent answers to 
    
    By default only one option (?) let you search for **triggerstring** within the words.
    
-2. Is the **triggerstring** erased after the **hotstring**?
+   2. Is the **triggerstring** erased after the **hotstring**?
 
    If answer to this question is positive (yes), then after trigger condition is met the **triggerstring** is ~~erased~~ before **hotstring** is output.
    
