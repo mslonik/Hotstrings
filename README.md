@@ -33,63 +33,63 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 # Table of content
 1. [FAQ: Introduction to hotstrings](#faq-introduction-to-hotstrings)
  
-    1.1. [What are the hotstrings?](#What-are-the-hotstrings)
+    1.1. [What are the hotstrings?](#what-are-the-hotstrings)
  
-    1.2. [How the *Hotstrings* application work?](#How-the-Hotstrings-application-work)
+    1.2. [How the *Hotstrings* application work?](#how-the-Hotstrings-application-work)
 
-    1.3. [Why somobody may want to use hotstrings?](#Why-somobody-may-want-to-use-hotstrings)
+    1.3. [Why somobody may want to use hotstrings?](#why-somobody-may-want-to-use-hotstrings)
 
-    1.4. [Why somebody may want to use *Hotstrings* application?](#Why-somebody-may-want-to-use-Hotstrings-application)
+    1.4. [Why somebody may want to use *Hotstrings* application?](#why-somebody-may-want-to-use-Hotstrings-application)
     
-    1.5. [How to reset the hotstring recognizer?](#How-to-reset-the-hotstring-recognizer)
+    1.5. [How to reset the hotstring recognizer?](#how-to-reset-the-hotstring-recognizer)
 
-2. [Installation of *Hotstrings* application](#Installation-of-*Hotstrings*-application)
+2. [Installation of *Hotstrings* application](#installation-of-Hotstrings-application)
 
-3. [The first run of *Hotstrings* application](#The-first-run-of-*Hotstrings*-application)
+3. [The first run of *Hotstrings* application](#the-first-run-of-Hotstrings-application)
 
-4. [Main window of *Hotstrings* application](#Main-window-of-*Hotstrings*-application)
+4. [Main window of *Hotstrings* application](#main-window-of-Hotstrings-application)
 
-    4.1. [Menu](#Menu)
+   4.1. [Menu](#Menu)
 
-        4.1.1. [Configure](#Configure)
+      4.1.1. [Configure](#configure)
 
-        4.1.2. [Search hotstring](#Search-hotstring)
+      4.1.2. [Search hotstring](#search-hotstring)
 
-        4.1.3. [About / Help](#About-/-Help)
+      4.1.3. [About / Help](#about-/-help)
 
-    4.2. [Hotstring definition or edition](#Hotstring-definition-or-edition)
+   4.2. [Hotstring definition or edition](#hotstring-definition-or-edition)
 
-        4.2.1. [Triggerstring definition](#Triggerstring-definition)
+     4.2.1. [Triggerstring definition](#triggerstring-definition)
 
-        4.2.2. [Trigger options overview](#Trigger-options-overview)
+     4.2.2. [Trigger options overview](#trigger-options-overview)
 
-        4.2.3. [Hotstring output method](#Hotstring-output-method)
+     4.2.3. [Hotstring output method](#hotstring-output-method)
 
-        4.2.4. [Enter hotstring](#Enter-hotstring)
+     4.2.4. [Enter hotstring](#enter-hotstring)
 
-        4.2.5. [Add a comment](#Add-a-comment)
+     4.2.5. [Add a comment](#add-a-comment)
 
-        4.2.6. [Select hotstring library](#Select-hotstring-library)
+     4.2.6. [Select hotstring library](#select-hotstring-library)
 
-        4.2.7. [Buttons](#Buttons)
+     4.2.7. [Buttons](#buttons)
 
-    4.3. [Library content](#Library-content)
+    4.3. [Library content](#library-content)
 
-    4.4. [Shortcuts](#Shortcuts)
+    4.4. [Shortcuts](#shortcuts)
 
-5. [Format of libraries](#Format-of-libraries)
+5. [Format of libraries](#format-of-libraries)
 
-6. [Other remarks](#Other-remarks)
+6. [Other remarks](#other-remarks)
 
-    6.1. [Autostart of *Hotstrings* application](##Autostart-of-*Hotstrings*-application)
+    6.1. [Autostart of *Hotstrings* application](#autostart-of-Hotstrings-application)
 
-    6.2. [Not always applying clipboard output function is a good idea](##Not-always-applying-clipboard-output-function-is-a-good-idea)
+    6.2. [Not always applying clipboard output function is a good idea](#not-always-applying-clipboard-output-function-is-a-good-idea)
 
-7. [Credits](#Credits)
+7. [Credits](#credits)
 
-    7.1. [Tools used to prepare this documentation](##Tools-used-to-prepare-this-documentation)
+    7.1. [Tools used to prepare this documentation](#tools-used-to-prepare-this-documentation)
 
-8. [ToDo List](#ToDo-List)
+8. [ToDo List](#todo-List)
 
 ---
 
