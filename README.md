@@ -31,7 +31,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 ---
 
 # Table of content
-1. [FAQ: Introduction to hotstrings](#faq-introduction-to-hotstrings)
+1. [FAQ \ Introduction to hotstrings](#faq-`\`-introduction-to-hotstrings)
  
     1.1. [What are the hotstrings?](#what-are-the-hotstrings)
  
@@ -73,27 +73,27 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
      4.2.7. [Buttons](#buttons)
 
-    4.3. [Library content](#library-content)
+   4.3. [Library content](#library-content)
 
-    4.4. [Shortcuts](#shortcuts)
+   4.4. [Shortcuts](#shortcuts)
 
 5. [Format of libraries](#format-of-libraries)
 
 6. [Other remarks](#other-remarks)
 
-    6.1. [Autostart of *Hotstrings* application](#autostart-of-Hotstrings-application)
+   6.1. [Autostart of *Hotstrings* application](#autostart-of-Hotstrings-application)
 
-    6.2. [Not always applying clipboard output function is a good idea](#not-always-applying-clipboard-output-function-is-a-good-idea)
+   6.2. [Not always applying clipboard output function is a good idea](#not-always-applying-clipboard-output-function-is-a-good-idea)
 
 7. [Credits](#credits)
 
-    7.1. [Tools used to prepare this documentation](#tools-used-to-prepare-this-documentation)
+   7.1. [Tools used to prepare this documentation](#tools-used-to-prepare-this-documentation)
 
 8. [ToDo List](#todo-List)
 
 ---
 
-# FAQ: Introduction to hotstrings
+# FAQ \ Introduction to hotstrings
 (Frequently Asked Questions) about *Hotstrings* application and notion of hotstrings.
 
 ## What are the hotstrings?
