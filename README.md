@@ -73,19 +73,19 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2. [Trigger options overview](#trigger-options-overview)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.1. [Default (no trigger option selected)](#default-no-trigger-option-selected)
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.1. [Default (no trigger option selected)](#default-(no-trigger-option-selected))
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.2. [Immediate Execute (\*)](#immediate-execute)
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.2. [Immediate Execute (\*)](#immediate-execute)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.3. [No Backspace (B0)](#no-backspace)
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.3. [No Backspace (B0)](#no-backspace)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.4. [No End Char (O)](#no-end-char)
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.4. [No End Char (O)](#no-end-char)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.5. [Case Sensitive (C\)](#case-sensitive)
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.5. [Case Sensitive (C\)](#case-sensitive)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.6. [Inside Word (?)](#inside-word)
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.6. [Inside Word (?)](#inside-word)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.7. [Disable](#disable)
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.7. [Disable](#disable)
    
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.3. [Hotstring output method](#hotstring-output-method)
 
