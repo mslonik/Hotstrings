@@ -49,7 +49,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
 4. [Main window of *Hotstrings* application](#main-window-of-Hotstrings-application)
  
-   4.1. [Menu](#Menu)
+  4.1. [Menu](#Menu)
   
   4.1.1. [Configure](#configure)
 
