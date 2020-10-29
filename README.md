@@ -96,7 +96,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 # [FAQ: Introduction to hotstrings](#table-of-content "Return to Table of content")
 (Frequently Asked Questions) about *Hotstrings* application and notion of hotstrings.
 
-## What are the hotstrings?
+## [What are the hotstrings?](#table-of-content "Return to Table of content")
 There are two corresponding notions:
 
 - triggerstring,
@@ -119,7 +119,7 @@ So the triggerstring triggers the corresponding hotstring, taking into considera
 Wording convention: usually the corresponding notions *(option(s), triggestring, hotstring)* is also called as *hotstring*.
 
 
-## How the *Hotstrings* application work?
+## [How the *Hotstrings* application work?](#table-of-content "Return to Table of content")
 ### In short
 
  the *Hotstrings* application:
@@ -216,7 +216,7 @@ The operating system exchange information with input device character by charact
 ```
 **Pic. 1.** Long story about *Hotstrings* application.
 
-## Why somobody may want to use hotstrings?
+## [Why somobody may want to use hotstrings?](#table-of-content "Return to Table of content")
 Because they can significantly make life easier and... longer? Please see below just few supporting arguments.
 
 * The triggestring can be short. Opposite to that the hotstring can be long in comparison to triggestring. As a consequence one can save some time when uses hotstrings.
@@ -260,13 +260,13 @@ fs@ | `FirstName.SecondName@yourhosting.com`
 
 So let's make your PC really personal again. Now with use of hotstrings and Hotstring application.
 
-## Why somebody may want to use *Hotstrings* application?
+## [Why somebody may want to use *Hotstrings* application?](#table-of-content "Return to Table of content")
 Because it doesn't require much knowledege and text editing to run your own hotstrings. *Hotstrings* application can be run even without installation (e.g. from USB pendrive, run **Hotstrings.exe**). Thanks to GUI (Graphical User Interface) you will master defining and applying of your own hotstrings in a blink of an eye 😉.
 
 The alternative, traditional way, is based on text edition, when hotstrings are prepared in AutoHotkey script (text file with .ahk extension), keeping attention to syntax of AutoHotkey syntax. Next such a script can be compiled into executive (.exe).
 
 
-## How to reset the hotstring recognizer?
+## [How to reset the hotstring recognizer?](#table-of-content "Return to Table of content")
 - pressing of some keys immediately resets the **hotstring recognizer**, e.g.: \<→\>, \<←\>, \<↑\>, \<↓\>, \<PageUp\>, \<PageDown\>, \<Home\>, \<End\>;
 - entering the **EndChar**;
 - switching to another window;
@@ -275,7 +275,7 @@ The alternative, traditional way, is based on text edition, when hotstrings are 
 
 ---
 
-# Installation of *Hotstrings* application
+# [Installation of *Hotstrings* application](#table-of-content "Return to Table of content")
 The *Hotstrings* application can be downloaded from [Github (Hotstrings)][]. The project structure:
 
 
@@ -296,7 +296,7 @@ The *Hotstrings* application can be downloaded from [Github (Hotstrings)][]. The
 
 **Hint**. One can run *Hotstrings* application without installation of [AutoHotkey][] environment. In that case just run *Hotstrings.exe*. Nevertheless installation of [AutoHotkey][] environment is recommended.
 
-# The first run of *Hotstrings* application
+# [The first run of *Hotstrings* application](#table-of-content "Return to Table of content")
 In order to run the *Hotstrings* application after downloading of all the files just mark the *Hotstrings.ahk* file or *Hostrings.exe* file in your favorite file browser and hit <Enter>. Nothing special should happen as *Hotstrings* application starts in minimized form. The only visible occurrence is default icon visible in *System Tray*. (You can access the *System Tray* with your keyboard by pressing # + B shortcut and preśing <Enter>):
 
 ![Example of system tray][]
@@ -393,7 +393,7 @@ You've defined your first hotstring. Have a look now into the left part of the m
 
 Now let's dive into more detailed description of available functions
 
-# Main window of *Hotstrings* application
+# [Main window of *Hotstrings* application](#table-of-content "Return to Table of content")
 
 ![Main window][]
 
@@ -408,7 +408,8 @@ It can be divided into the following parts:
 
 ![Main window parts][]
 
-## Menu
+## [Menu](#table-of-content "Return to Table of content")
+
 ![Main menu][]
 
 Available menu positions:
@@ -421,7 +422,7 @@ Available menu positions:
 In order to access menu by keyboard just press the left Alt key or F10 key.
 
 
-### Configure
+### [Configure](#table-of-content "Return to Table of content")
 
 ![Menu: configure][]
 
@@ -521,7 +522,7 @@ User of *Hotstrings* application can change this default behavior thanks to conf
 
 
 
-### Search *Hotstrings*
+### [Search *Hotstrings*](#table-of-content "Return to Table of content")
 Enable searching of hotstring among all available libraries. New window is opened.
 
 ![Menu: Search Hotstrings][]
@@ -539,7 +540,7 @@ In order to move library in this window is available **Move** button.
 In order to delete duplicated (**triggerstring**, **hotstring**) definition one can mark it, next close the *Search Hotstrings* window and then choose the **Delete hotstring** button.
 
 
-### Clipboard Delay
+### [Clipboard Delay](#table-of-content "Return to Table of content")
 Enable change of the delay between copying of the hotstring from clipboard to specific text window from which it was triggered.
 By default equal to 200 ms. The maximum value is equal to 500 ms (0.5 s).
 
@@ -549,7 +550,8 @@ The separate window is opened for that purpose:
 
 *Tip:* Sometimes when long hotstrings are triggered and clipboard is applied to immediately enter it, strange behaviour can occurre. Instead of expected hotstring the previous content of clipboard may appear. The reason is that operating system can not gurantee the time to insert the content of clipboard into specific window / editing field. In order to support operating system, enlarge the delay. The shorter the delay than better, but if too short, mentioned behaviour can be observed.
 
-### About / Help
+### [About / Help](#table-of-content "Return to Table of content")
+ 
  ![About / Help][] 
 
 **Hotstrings.ahk (script). Let's make your PC personal again...**. 
@@ -567,7 +569,7 @@ Displays the following text:
 ## Hotstring definition or edition 
 This time all 7 steps discussed in details, with examples and comments.
 
-### Triggerstring definition
+### [Triggerstring definition](#table-of-content "Return to Table of content")
 
 The text edit field used to define the triggerstring.
 
@@ -577,7 +579,7 @@ In general the shorter triggerstring then the better. The triggerstring can be a
 
 The *Hotstrings* application doesn't have protection agains duplicate (**triggerstring**, **hotstring**) pairs. User can easily duplicated them. Therefore its worth to search prior to adding new definition if it doesn't exist already.
 
-### Trigger options overview
+### [Trigger options overview](#table-of-content "Return to Table of content")
 Trigger options controls how **hotstring recognizer** works. All these options can be used concurrently. For clarity in the following descriptions each of them is described separatedly.
 
 ![Select trigger option(s)][]
@@ -800,7 +802,7 @@ The **hotstring** definition is left in library file (.csv) in the same state as
 The opposite action can take place upon user action: if user will edit definition of particular *hotstring* and uncheck the tick *disable*, then *hotstring* becomes active again. Next time when corresponding **triggerstring** will occurre in input stream, the **hotstring recognizer** will trigger corresponding *hotstring* according to previously defined **option(s)**.
 
 
-## Hotstring output method
+## [Hotstring output method](#table-of-content "Return to Table of content")
 
 
 **Tab. 3.** Output method compatibility between AutoHotkey [hotstring] and *Hotstrings* app.
@@ -896,13 +898,13 @@ If user would like to create new .csv file, the **Add library** button should be
 
 Comment: Restart is required as a selected (**triggerstring**, **hotstring**) pair is removed from library file (.csv). In order to just switch off (e.g. temporarily) any selected pair (**triggerstring**, **hotstring**), use *Disable* setting in *Select trigger option(s)* section.
 
-## Library content
+## [Library content](#table-of-content "Return to Table of content")
 
 ![Library content][]
 
 Right part of the *Hotstrings* window in form of a table. It can be reached e.g. by pressing <F2> shortcut. Next user can move down / up over this list with keys <↑> and <↓>. Each time user selects row of this table, the next definition of (**triggerstring**, **hotstring**) is ready to be edited.
 
-## Shortcuts
+## [Shortcuts](#table-of-content "Return to Table of content")
 
 These are permanently visible keyboard shortcuts. 
 
@@ -931,7 +933,7 @@ The following keyboard shortcuts are active only if *Search Hotstrings* applicat
 ---
 ---
 
-# Format of libraries
+# [Format of libraries](#table-of-content "Return to Table of content")
 
 The CSV = Comma Separated Values, special format where "values" are separated by certain, dedicated character, e.g. comma. In case of *Hotstrings* application the  Unicode character "Double Vertical Line" is used: ‖ (U+2016). 
 
@@ -949,7 +951,7 @@ It is not enough for text file to have .csv extension to be recognized by *Hotst
 | \* | ‖ | bom/ | ‖ | MSI | ‖ | En | ‖ | Bill of Materials¦Byte Order Mark | ‖ |
 
 
-# Other remarks
+# [Other remarks](#table-of-content "Return to Table of content")
 Other remarks helpful in everyday working with hotstrings.
 
 ## Order of loading AutoHotkey scripts matters. 
@@ -1083,7 +1085,7 @@ In case if *clipboard manager* is active (e.g. [CopyQ]), each time the **hotstri
 ---
 ---
 
-# Credits
+# [Credits](#table-of-content "Return to Table of content")
 
 The originator and creator of the Hotstrings application is Jack Dunning aka [Jack][] who has created the very first version of *[Instant Hotstring][]* application.
 
@@ -1100,7 +1102,7 @@ People from AutoHotkey community, especially those who help at [AutoHotkey forum
 ---
 
 
-# ToDo List
+# [ToDo List](#table-of-content "Return to Table of content")
 - ☑ Menu: configuration and the corresponding *Configuration.ini*
     - ☑ sandbox for hotstrings,
     - ☑ enable / disable "undo" (Ctrl | z) of hotstrings,
