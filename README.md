@@ -72,7 +72,21 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.1. [Triggerstring definition](#triggerstring-definition)
 
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2. [Trigger options overview](#trigger-options-overview)
-
+   
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.1. [Default (no trigger option selected)](#default-no-trigger-option-selected)
+   
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.2. [Immediate Execute (\*)](#immediate-execute)
+   
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.3. [No Backspace (B0)](#no-backspace)
+   
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.4. [No End Char (O)](#no-end-char)
+   
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.5. [Case Sensitive (C\)](#case-sensitive)
+   
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.6. [Inside Word (?)](#inside-word)
+   
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.7. [Disable](#disable)
+   
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.3. [Hotstring output method](#hotstring-output-method)
 
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.4. [Enter hotstring](#enter-hotstring)
@@ -440,7 +454,7 @@ The state of *Configure* menu is reflected in *Config.ini* file.
 
 Available options:
 
-#### Undo last hotstring
+#### [Undo last hotstring](#table-of-content "Return to Table of content")
 
 This option can be toggled (*on* or *off*).
 
@@ -458,7 +472,7 @@ This option can interfere with inbuild undo function in some application. It is 
 
 
 
-#### Triggerstring tips
+#### [Triggerstring tips](#table-of-content "Return to Table of content")
 
 This option can be toggled (*on* or *off*).
 
@@ -479,11 +493,11 @@ If this function is enabled, it helps to remember available triggestrings.
 
 It starts to work after the second letter is entered.
 
-#### Save window position
+#### [Save window position](#table-of-content "Return to Table of content")
 
 This function is activated immediately after menu position is chosen. It saves current position of *Hotstrings* window. So when next time user will call for *Hotstrings* window (e.g. by double click over *Hotstrings* icon in system tray or pressing **Ctrl + # + h** shortcut), it will open in the last saved position (on the same screen).
 
-#### Launch Sandbox
+#### [Launch Sandbox](#table-of-content "Return to Table of content")
 
 This option can be toggled (*on* or *off*). The *Sanbox* stands for "safe place to play with a tool(s); the playground".
 
@@ -500,7 +514,7 @@ Example: *Sanbox* enabled.
 
 Sometimes it can be helpful to check if new defined hotstring actually work as expected. In order to check it one should find any text editing window, e.g. open text editor. The *Sandbox* helps to spare some time in such situation.
 
-#### Toggle EndChars
+#### [Toggle EndChars](#table-of-content "Return to Table of content")
 
 This option let user to toggle each of the **EndChars** individually.
 
@@ -669,7 +683,7 @@ Please note that there are just 5 trigger conditions which represent answers to 
 
 ---
 
-#### Default (no trigger option selected)
+#### [Default (no trigger option selected)](#table-of-content "Return to Table of content")
 ![Example, no options][] 
 
 | triggerstring |  hotstring | option(s) |
@@ -687,7 +701,7 @@ Comment: cursor position is shown as |.
 
 ---
 
-#### Immediate Execute (\*)
+#### [Immediate Execute (\*)](#table-of-content "Return to Table of content")
 ![Example, immediate execute][] 
 
 | triggerstring |  hotstring | option(s) |
@@ -706,7 +720,7 @@ The option (\*) is called *immediate execute* because  entering of the last char
 
 ---
 
-#### No Backspace (B0)
+#### [No Backspace (B0)](#table-of-content "Return to Table of content")
 ![Example, no Backspace][] 
 
 | triggerstring |  hotstring | option(s) |
@@ -743,7 +757,7 @@ The B0 option is useful for example to define HTML tags. In the following exampl
 
 ---
 
-#### No End Char (O)
+#### [No End Char (O)](#table-of-content "Return to Table of content")
 
 ![Example No EndChar][] 
 
@@ -763,7 +777,7 @@ The trigger (*endchar*) is removed. Cursor position is shown as |.
 
 ---
 
-#### Case Sensitive (C\)
+#### [Case Sensitive (C\)](#table-of-content "Return to Table of content")
 ![Example Case Sensitive][] 
 
 | triggerstring |  hotstring | option(s) |
@@ -783,7 +797,7 @@ Similar to default option, but this time the **triggerstring** is case sensitive
 
 ---
 
-#### Inside Word (?)
+#### [Inside Word (?)](#table-of-content "Return to Table of content")
 ![Example, Inside Word][]
 
 Similar to default option, but this time *endchar* directly before the **triggerstring** is not required.
@@ -804,7 +818,7 @@ Similar to default option, but this time *endchar* directly before the **trigger
 
 ---
 
-#### Disable
+#### [Disable](#table-of-content "Return to Table of content")
 ![Disable example][]
 
 The **hotstring** definition is left in library file (.csv) in the same state as on time of last edition, but is disabled (switched off). So **hotstring recognizer** does not detects it anymore. 
