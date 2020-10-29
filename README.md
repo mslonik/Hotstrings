@@ -48,7 +48,9 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 3. [The first run of *Hotstrings* application](#the-first-run-of-Hotstrings-application)
 
 4. [Main window of *Hotstrings* application](#main-window-of-Hotstrings-application)
- 4.1. [Menu](#Menu)
+ 
+   4.1. [Menu](#Menu)
+  
   4.1.1. [Configure](#configure)
 
       4.1.2. [Search *Hotstrings*](#search-hotstrings)
