@@ -93,7 +93,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
 ---
 
-# FAQ: Introduction to hotstrings
+# [FAQ: Introduction to hotstrings]
 (Frequently Asked Questions) about *Hotstrings* application and notion of hotstrings.
 
 ## What are the hotstrings?
