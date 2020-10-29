@@ -31,7 +31,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 ---
 
 # Table of content
-1. [FAQ: Introduction to hotstrings](#faq-introduction-to-hotstrings)
+1. [FAQ: Introduction to hotstrings](#faq-introduction-to-hotstrings "Return to Table of content")
  
     &nbsp;&nbsp;1.1. [What are the hotstrings?](#what-are-the-hotstrings)
  
