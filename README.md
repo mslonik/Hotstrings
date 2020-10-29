@@ -33,15 +33,15 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 # Table of content
 1. [FAQ: Introduction to hotstrings](#faq-introduction-to-hotstrings)
  
-    1.1. [What are the hotstrings?](#what-are-the-hotstrings)
+    &nbsp;&nbsp;1.1. [What are the hotstrings?](#what-are-the-hotstrings)
  
-    1.2. [How the *Hotstrings* application work?](#how-the-Hotstrings-application-work)
+    &nbsp;&nbsp;1.2. [How the *Hotstrings* application work?](#how-the-Hotstrings-application-work)
 
-    1.3. [Why somobody may want to use hotstrings?](#why-somobody-may-want-to-use-hotstrings)
+    &nbsp;&nbsp;1.3. [Why somobody may want to use hotstrings?](#why-somobody-may-want-to-use-hotstrings)
 
-    1.4. [Why somebody may want to use *Hotstrings* application?](#why-somebody-may-want-to-use-Hotstrings-application)
+    &nbsp;&nbsp;1.4. [Why somebody may want to use *Hotstrings* application?](#why-somebody-may-want-to-use-Hotstrings-application)
     
-    1.5. [How to reset the hotstring recognizer?](#how-to-reset-the-hotstring-recognizer)
+    &nbsp;&nbsp;1.5. [How to reset the hotstring recognizer?](#how-to-reset-the-hotstring-recognizer)
 
 2. [Installation of *Hotstrings* application](#installation-of-Hotstrings-application)
 
@@ -49,45 +49,45 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
 4. [Main window of *Hotstrings* application](#main-window-of-Hotstrings-application)
  
-   4.1. [Menu](#Menu)
+   &nbsp;&nbsp;4.1. [Menu](#Menu)
   
-   &nbsp;&nbsp;&nbsp;&nbsp;4.1.1. [Configure](#configure)
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.1. [Configure](#configure)
 
-   &nbsp;&nbsp;&nbsp;&nbsp;4.1.2. [Search *Hotstrings*](#search-hotstrings)
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.2. [Search *Hotstrings*](#search-hotstrings)
 
-   &nbsp;&nbsp;&nbsp;&nbsp;4.1.3. [About / Help](#about-/-help)
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.3. [About / Help](#about-/-help)
 
-   4.2. [Hotstring definition or edition](#hotstring-definition-or-edition)
+   &nbsp;&nbsp;4.2. [Hotstring definition or edition](#hotstring-definition-or-edition)
 
-     4.2.1. [Triggerstring definition](#triggerstring-definition)
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.1. [Triggerstring definition](#triggerstring-definition)
 
-     4.2.2. [Trigger options overview](#trigger-options-overview)
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2. [Trigger options overview](#trigger-options-overview)
 
-     4.2.3. [Hotstring output method](#hotstring-output-method)
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.3. [Hotstring output method](#hotstring-output-method)
 
-     4.2.4. [Enter hotstring](#enter-hotstring)
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.4. [Enter hotstring](#enter-hotstring)
 
-     4.2.5. [Add a comment](#add-a-comment)
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.5. [Add a comment](#add-a-comment)
 
-     4.2.6. [Select hotstring library](#select-hotstring-library)
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.6. [Select hotstring library](#select-hotstring-library)
 
-     4.2.7. [Buttons](#buttons)
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.7. [Buttons](#buttons)
 
-   4.3. [Library content](#library-content)
+   &nbsp;&nbsp;4.3. [Library content](#library-content)
 
-   4.4. [Shortcuts](#shortcuts)
+   &nbsp;&nbsp;4.4. [Shortcuts](#shortcuts)
 
 5. [Format of libraries](#format-of-libraries)
 
 6. [Other remarks](#other-remarks)
 
-   6.1. [Autostart of *Hotstrings* application](#autostart-of-Hotstrings-application)
+   &nbsp;&nbsp;6.1. [Autostart of *Hotstrings* application](#autostart-of-Hotstrings-application)
 
-   6.2. [Not always applying clipboard output function is a good idea](#not-always-applying-clipboard-output-function-is-a-good-idea)
+   &nbsp;&nbsp;6.2. [Not always applying clipboard output function is a good idea](#not-always-applying-clipboard-output-function-is-a-good-idea)
 
 7. [Credits](#credits)
 
-   7.1. [Tools used to prepare this documentation](#tools-used-to-prepare-this-documentation)
+   &nbsp;&nbsp;7.1. [Tools used to prepare this documentation](#tools-used-to-prepare-this-documentation)
 
 8. [ToDo List](#todo-List)
 
