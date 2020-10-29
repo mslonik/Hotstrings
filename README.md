@@ -51,11 +51,11 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
  
    4.1. [Menu](#Menu)
   
-      4.1.1. [Configure](#configure)
+   &nbsp;&nbsp;&nbsp;&nbsp;4.1.1. [Configure](#configure)
 
-      4.1.2. [Search *Hotstrings*](#search-hotstrings)
+   &nbsp;&nbsp;&nbsp;&nbsp;4.1.2. [Search *Hotstrings*](#search-hotstrings)
 
-      4.1.3. [About / Help](#about-/-help)
+   &nbsp;&nbsp;&nbsp;&nbsp;4.1.3. [About / Help](#about-/-help)
 
    4.2. [Hotstring definition or edition](#hotstring-definition-or-edition)
 
