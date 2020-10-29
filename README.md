@@ -35,7 +35,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
  
     1.1. [What are the hotstrings?](#What-are-the-hotstrings)
  
-    1.2. [How the *Hotstrings* application work?](#How-the-*Hotstrings*-application-work)
+    1.2. [How the *Hotstrings* application work?](#How-the-Hotstrings-application-work)
 
     1.3. [Why somobody may want to use hotstrings?](#Why-somobody-may-want-to-use-hotstrings)
 
