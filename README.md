@@ -53,7 +53,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
       4.1.1. [Configure](#configure)
 
-      4.1.2. [Search hotstring](#search-hotstring)
+      4.1.2. [Search *Hotstrings*](#search-hotstrings)
 
       4.1.3. [About / Help](#about-/-help)
 
@@ -521,7 +521,7 @@ User of *Hotstrings* application can change this default behavior thanks to conf
 
 
 
-### Search Hotstrings
+### Search *Hotstrings*
 Enable searching of hotstring among all available libraries. New window is opened.
 
 ![Menu: Search Hotstrings][]
