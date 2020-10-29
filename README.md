@@ -267,7 +267,7 @@ The alternative, traditional way, is based on text edition, when hotstrings are 
 
 
 ## How to reset the hotstring recognizer?
-- pressing of some keys immediately resets the **hotstring recognizer**, e.g.: <→>, <←>, <↑>, <↓>, <PageUp>, <PageDown>, <Home>, <End>;
+- pressing of some keys immediately resets the **hotstring recognizer**, e.g.: <→>, <←>, <↑>, <↓>, \<PageUp\>, \<PageDown\>, <Home>, <End>;
 - entering the **EndChar**;
 - switching to another window;
 - any click of any mouse button.
