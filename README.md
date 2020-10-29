@@ -52,6 +52,16 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
    &nbsp;&nbsp;4.1. [Menu](#Menu)
   
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.1. [Configure](#configure)
+   
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.1.1. [Undo last hotstring](#undo-last-hotstring)
+   
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.1.2. [Triggerstring tips](#triggerstring-tips)
+   
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.1.3. [Save window position](#save-window-position)
+   
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.1.4. [Launch Sandbox](#launch-sandbox)
+   
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.1.5. [Toggle EndChars](#toggle-endchars)
 
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.2. [Search *Hotstrings*](#search-hotstrings)
 
@@ -615,7 +625,7 @@ Comments:
 Comments:
 
 Please note that there are just 5 trigger conditions which represent answers to the following questions:
-   1. Is previous endchar required? 
+1. Is previous endchar required? 
    
    If answer to this question is positive (yes), then the **hotstring recognizer** starts its work only just after the last *endchar* or reset. Another words it's only able to recognize the **triggerstring** if it starts new phrase or word. 
    
@@ -623,7 +633,7 @@ Please note that there are just 5 trigger conditions which represent answers to 
    
    By default only one option (?) let you search for **triggerstring** within the words.
    
-   2. Is the **triggerstring** erased after the **hotstring**?
+2. Is the **triggerstring** erased after the **hotstring**?
 
    If answer to this question is positive (yes), then after trigger condition is met the **triggerstring** is ~~erased~~ before **hotstring** is output.
    
