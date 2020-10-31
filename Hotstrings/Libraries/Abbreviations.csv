@@ -8,7 +8,7 @@ O‖2d‖SI‖En‖2D‖
 *‖ac/‖MSI‖En‖Alternating Current¦Axle Counter‖
 ‖ahk‖SI‖En‖AHK‖
 *‖ahk/‖CL‖En‖AutoHotkey‖
-‖api‖SI‖En‖API ‖
+‖api‖SI‖En‖API‖
 *‖api/‖CL‖En‖Application Programming Interface‖
 ‖asci‖SI‖En‖ASCII‖
 *‖asci/‖CL‖En‖American Standard Code for Information Interchange‖
@@ -26,6 +26,8 @@ O‖2d‖SI‖En‖2D‖
 *‖ceo/‖CL‖En‖Chief Executive Officer‖
 ‖cfo‖SI‖En‖CFO‖
 *‖cfo/‖SI‖En‖Chief Financial Officer‖
+‖cms‖SI‖En‖CMS‖
+‖cms/‖SI‖En‖Content Management System‖
 ‖com‖SI‖En‖COM‖
 *‖com/‖MCL‖En‖a serial port interface on IBM PC-compatible computers¦Component Object Model, a Microsoft software interface technology‖https://en.wikipedia.org/wiki/Com
 ‖cop‖SI‖En‖CoP‖
@@ -40,6 +42,8 @@ O‖2d‖SI‖En‖2D‖
 *‖cso/‖SI‖En‖Chief Sales Officer‖
 ‖csv‖SI‖En‖CSV‖
 *‖csv/‖SI‖En‖Comma Separated Values‖
+‖cv‖SI‖En‖CV‖
+‖cv/‖SI‖En‖Curriculum Vitae‖course of life
 ‖dc‖SI‖En‖DC‖
 *‖dc/‖CL‖En‖Direct Current‖
 ‖ddns‖SI‖En‖DDNS‖
@@ -62,6 +66,8 @@ O‖2d‖SI‖En‖2D‖
 *‖emi/‖CL‖En‖Electromagnetic Interference‖
 ‖ems‖SI‖En‖EMS‖
 *‖ems/‖CL‖En‖Electronics Manufacturing Services‖
+‖eol‖SI‖En‖EOL‖
+‖eol/‖SI‖En‖End of Life‖
 ‖eq‖SI‖En‖EQ ‖
 *‖eq/‖CL‖En‖Emotional Quotient‖
 ‖era‖SI‖En‖ERA‖
@@ -116,6 +122,8 @@ O‖2d‖SI‖En‖2D‖
 *‖lan/‖SI‖En‖Local Area Network‖
 ‖lc2‖CL‖En‖LLC‖
 *‖lc2/‖CL‖En‖Life Cycle Cost‖
+*‖led‖SI‖En‖LED‖
+*‖LED/‖CL‖En‖Light Emitting Diode‖
 ‖llc‖CL‖En‖LLC‖
 *‖llc/‖CL‖En‖Life Cycle Cost‖
 ‖lop‖SI‖En‖LOP‖
@@ -132,6 +140,8 @@ O‖2d‖SI‖En‖2D‖
 *‖mttr/‖CL‖En‖Mean Time To Restore‖
 ‖mut‖SI‖En‖MUT‖
 *‖mut/‖CL‖En‖Mean Up Time‖
+*‖nas/‖SI‖En‖Network Attached Storage‖
+*‖nas`t‖SI‖En‖NAS‖
 ‖ncr‖SI‖En‖NCR‖
 *‖ncr/‖CL‖En‖Non Conformance Report‖
 ‖nda‖SI‖En‖NDA‖
@@ -140,6 +150,8 @@ O‖2d‖SI‖En‖2D‖
 *‖oem/‖SI‖En‖Original Equipment Manufacturer‖
 ‖pcb‖SI‖En‖PCB‖
 *‖pcb/‖CL‖En‖Printed Circuit Board‖
+‖pcn‖SI‖En‖PCN‖
+*‖pcn/‖SI‖En‖Product Change Notification‖
 ‖pdf‖SI‖En‖PDF‖
 *‖pdf/‖CL‖En‖Portable Document Format‖
 ‖pit‖SI‖En‖PIT‖
