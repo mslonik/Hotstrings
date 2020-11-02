@@ -4,6 +4,7 @@ B0*?‖.pdf‖SI‖En‖‖
 B0*?‖.svg‖SI‖En‖‖
 O‖2d‖SI‖En‖2D‖
 *‖3d ‖SI‖En‖3D ‖
+*‖a/‖SI‖En‖Availability‖
 ‖ac‖SI‖En‖AC‖
 *‖ac/‖MSI‖En‖Alternating Current¦Axle Counter‖
 ‖ahk‖SI‖En‖AHK‖
@@ -52,6 +53,7 @@ O‖2d‖SI‖En‖2D‖
 *‖dita/‖CL‖En‖Darwin Information Typing Architecture‖
 ‖dnd‖SI‖En‖D&D‖
 *‖dnd/‖SI‖En‖Drag&Drop‖
+*‖doors/‖SI‖En‖ Dynamic Object Oriented Requirements System‖https://www.ibm.com/pl-pl/products/requirements-management
 ‖dwg‖SI‖En‖DWG‖
 *‖dwg/‖SI‖Dis‖Drawing Exchange Format‖
 ‖dxf‖SI‖En‖DXF‖
@@ -154,6 +156,8 @@ O‖2d‖SI‖En‖2D‖
 *‖pcn/‖SI‖En‖Product Change Notification‖
 ‖pdf‖SI‖En‖PDF‖
 *‖pdf/‖CL‖En‖Portable Document Format‖
+‖php‖SI‖En‖PHP‖
+*‖php/‖SI‖En‖Hypertext Preprocessor‖
 ‖pit‖SI‖En‖PIT‖
 *‖pit/‖SI‖En‖Personal Income Tax‖
 ‖plm‖SI‖En‖PLM‖
@@ -168,6 +172,7 @@ O‖2d‖SI‖En‖2D‖
 *‖qr/‖SI‖En‖Quick Response code‖
 ‖qrams‖SI‖En‖QRAMS‖
 *‖qrams/‖CL‖En‖Quality, Reliability, Availability, Maintainability, Safety‖
+*‖r/‖SI‖En‖Reliability‖
 ‖rac‖SI‖En‖RAC‖
 *‖rac/‖CL‖En‖Risk Acceptance Criteria‖
 ‖ram‖SI‖En‖RAM‖
@@ -202,6 +207,8 @@ O‖2d‖SI‖En‖2D‖
 *‖tsi/‖CL‖En‖Technical Specifications for Interoperability‖
 ‖ui‖SI‖En‖UI‖
 *‖ui/‖CL‖En‖User Interface‖
+‖uic‖SI‖En‖UIC‖
+*‖uic/‖MCL‖En‖International Union of Railways¦French: Union internationale des chemins de fer‖https://uic.org/
 ‖ups‖SI‖En‖UPS‖
 *‖ups/‖CL‖En‖Uninterruptable Power Supply‖
 ‖url‖SI‖En‖URL‖
@@ -220,6 +227,8 @@ O‖2d‖SI‖En‖2D‖
 *‖vpn/‖CL‖En‖Virtual Private Network‖
 ‖wmf‖SI‖En‖WMF‖
 ‖wmf/‖CL‖En‖Windows Metafile‖https://en.wikipedia.org/wiki/Windows_Metafile#EMF
+‖wol‖SI‖En‖WoL‖
+*‖wol/‖SI‖En‖Wake-on-LAN‖
 ‖www‖SI‖En‖WWW‖
 *‖www/‖SI‖En‖World Wide Web‖
 ‖wysiwyg‖SI‖En‖WYSIWYG‖

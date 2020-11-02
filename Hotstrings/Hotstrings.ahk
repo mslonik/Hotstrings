@@ -124,6 +124,7 @@ global v_MonitorFlag := ""
 global ini_Cursor := ""
 global ini_Caret := ""
 global ini_AmountOfCharacterTips := ""
+global a_SelectedTriggers := []
 if !(A_Args[7])
 	v_SelectedRow := 0
 else
@@ -181,6 +182,17 @@ Loop,
 				HelpTrig .= a_Triggers[A_Index]
 			}
 		}
+		a_SelectedTriggers := []
+		a_SelectedTriggers := StrSplit(HelpTrig, "`n")
+		a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
+		a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
+		HelpTrig := ""
+		Loop, % a_SelectedTriggers.MaxIndex()
+		{
+			If !(HelpTrig == "")
+				HelpTrig .= "`n"
+			HelpTrig .= a_SelectedTriggers[A_Index]
+		}
 		if (ini_Caret)
 			ToolTip, %HelpTrig%, A_CaretX + 20, A_CaretY - 20
 		if (ini_Cursor)
@@ -207,6 +219,17 @@ Loop,
 					HelpTrig .= "`n"
 				HelpTrig .= a_Triggers[A_Index]
 			}
+		}
+		a_SelectedTriggers := []
+		a_SelectedTriggers := StrSplit(HelpTrig, "`n")
+		a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
+		a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
+		HelpTrig := ""
+		Loop, % a_SelectedTriggers.MaxIndex()
+		{
+			If !(HelpTrig == "")
+				HelpTrig .= "`n"
+			HelpTrig .= a_SelectedTriggers[A_Index]
 		}
 		if (ini_Caret)
 			ToolTip, %HelpTrig%, A_CaretX + 20, A_CaretY - 20
@@ -737,6 +760,85 @@ EndChars()
 	if (EndingChar_Tab)
 		HotstringEndChars .= "`t"
 	Hotstring("EndChars",HotstringEndChars)
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_SortArrayAlphabetically(a_array)
+{
+    local a_TempArray, v_ActualArray, v_TempArray, flag, cnt, no
+    a_TempArray := []
+    Loop, % a_array.MaxIndex()
+    {
+        cnt := A_Index
+        a_TempArray[cnt] := a_array[cnt]
+        Loop, % cnt - 1
+        {
+            If (Asc(a_array[cnt]) < Asc(a_TempArray[A_Index]))
+            {
+                Loop, % cnt - A_Index
+                {
+                    a_TempArray[cnt - (A_Index - 1)] := a_TempArray[cnt - A_Index]
+                }
+                a_TempArray[A_Index] := a_array[cnt]
+				break
+            }
+            else if (Asc(a_array[cnt]) == Asc(a_TempArray[A_Index]))
+            {
+                flag := 0
+                no := A_Index
+                v_ActualArray := a_array[cnt]
+                v_TempArray := a_TempArray[no]
+                Loop, % Max(StrLen(v_ActualArray), StrLen(v_TempArray))
+                {
+                    v_ActualArray := SubStr(v_ActualArray, 2)
+                    v_TempArray := SubStr(v_TempArray, 2)
+                    If (Asc(v_ActualArray) < Asc(v_TempArray))
+                    {
+                        Loop, % cnt - no
+                        {
+                            a_TempArray[cnt - A_Index + 1] := a_TempArray[cnt - A_Index]
+                        }
+                        a_TempArray[no] := a_array[cnt]
+                        flag := 1
+                        Break
+                    }
+                    else if (Asc(v_ActualArray) > Asc(v_TempArray))
+                    {
+                        Break
+                    }
+                }
+                if (flag)
+                    Break
+            }
+        }
+    }
+    return a_TempArray
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_SortArrayByLength(a_array)
+{
+    local a_TempArray, v_Length, v_ActLen
+    a_TempArray := []
+    v_Length := 0
+    Loop, % a_array.MaxIndex()
+    {
+        v_Length := Max(StrLen(a_array[A_Index]),v_Length)
+    }
+    Loop, % v_Length
+    {
+        v_ActLen := A_Index
+        Loop, % a_array.MaxIndex()
+        {
+            if StrLen(a_array[A_Index]) == v_ActLen
+            {
+                a_TempArray.Push(a_array[A_Index])
+            }
+        }
+    }
+    return a_TempArray
 }
 
 ; --------------------------- SECTION OF LABELS ---------------------------
