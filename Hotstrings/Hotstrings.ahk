@@ -125,6 +125,7 @@ global ini_Cursor := ""
 global ini_Caret := ""
 global ini_AmountOfCharacterTips := ""
 global a_SelectedTriggers := []
+global v_HotstringFlag := 0
 if !(A_Args[7])
 	v_SelectedRow := 0
 else
@@ -168,8 +169,14 @@ Loop,
 {
 	Input, out,V L1, {Esc}
 	v_InputString .= out
-	if InStr(HotstringEndChars, out)
+	if (v_HotstringFlag)
+	{
 		v_InputString := ""
+		ToolTip,
+		v_HotstringFlag := 0
+	}
+	if InStr(HotstringEndChars, out)
+		v_InputString := "" ; ms @ 2020-11-02 zerowanie powinno mieć miejsce tylko gdy v_InputString == triggerstring, patrz triggerstrings, które zawierają spację, np. a propos;  
 	if (StrLen(v_InputString) > ini_AmountOfCharacterTips - 1 ) and (ini_Tips)
 	{
 		HelpTrig := ""
@@ -332,6 +339,19 @@ F9::
 ; return
 
 #if
+
+; ms on 2020-11-02
+~Alt::
+~MButton::
+~RButton::
+~LButton::
+~LWin::
+~RWin::
+	; MsgBox, Tu jestem!
+	ToolTip,
+	v_InputString := ""
+return
+
 
 #if WinActive("Search Hotstrings") and WinActive("ahk_class AutoHotkeyGUI")
 
@@ -513,6 +533,7 @@ F_ViaClipboard(ReplacementString, Oflag)
 	ClipboardBackup := ""
 	v_TypedTriggerstring := ReplacementString
 	Hotstring("Reset")
+	v_HotstringFlag := 1
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -549,6 +570,7 @@ F_MenuText(TextOptions, Oflag)
 	}
 	GuiControl, Choose, MenuListbox, 1
 	Ovar := Oflag
+	v_HotstringFlag := 1
 return
 }
 #IfWinActive Hotstring listbox
@@ -562,8 +584,6 @@ Send, ^v ;paste the text
 sleep, %ini_Delay% ;Remember to sleep before restoring clipboard or it will fail
 v_TypedTriggerstring := MenuListbox
 v_UndoHotstring := MenuListbox
-
-
 Clipboard:=ClipboardBack
 	Hotstring("Reset")
 Gui, Menu:Destroy
@@ -609,6 +629,7 @@ if (v_TypedTriggerstring == "")
 }
 	GuiControl, Choose, MenuListbox2, 1
 	Ovar := Oflag
+	v_HotstringFlag := 1
 return
 }
 #IfWinActive HotstringAHK listbox
@@ -935,7 +956,8 @@ L_GUIInit:
 
     ; Menu, HSMenu, Add, &Monitor, CheckMon
 	Menu, Submenu1, Add, &Undo last hotstring,Undo
-	Menu, Submenu1, Add, &Triggerstring tips,Tips
+	Menu, SubmenuTips, Add, Enable/Disable, Tips
+	Menu, Submenu1, Add, &Triggerstring tips, :SubmenuTips
 	Menu, Submenu3, Add, Caret,L_CaretCursor
 	Menu, Submenu3, Add, Cursor,L_CaretCursor
 	if (ini_Cursor)
@@ -946,10 +968,10 @@ L_GUIInit:
 		Menu, Submenu3, Check, Caret
 	else
 		Menu, Submenu3, UnCheck, Caret
-	Menu, Submenu1, Add, Choose tips location, :Submenu3
+	Menu, SubmenuTips, Add, Choose tips location, :Submenu3
 	If !(ini_Tips)
 	{
-		Menu, Submenu1,Disable, Choose tips location
+		Menu, SubmenuTips,Disable, Choose tips location
 	}
 	Menu, Submenu4, Add, 1, L_AmountOfCharacterTips1
 	Menu, Submenu4, Add, 2, L_AmountOfCharacterTips2
@@ -962,10 +984,10 @@ L_GUIInit:
 		if !(A_Index == ini_AmountOfCharacterTips)
 			Menu, Submenu4, UnCheck, %A_Index%
 	}
-	Menu, Submenu1, Add, &Number of characters for tips, :Submenu4
+	Menu, SubmenuTips, Add, &Number of characters for tips, :Submenu4
 	If !(ini_Tips)
 	{
-		Menu, Submenu1,Disable, &Number of characters for tips
+		Menu, SubmenuTips,Disable, &Number of characters for tips
 	}
 	Menu, Submenu1, Add, &Save window position,SavePos
 	Menu, Submenu1, Add, &Launch Sandbox, Sandbox
@@ -1072,9 +1094,9 @@ L_GUIInit:
 	Menu, Submenu1, Add, &Toggle EndChars, :Submenu2
 	IniRead, ini_Tips, Config.ini, Configuration, Tips
 	if (ini_Tips == 0)
-		Menu, Submenu1, UnCheck, &Triggerstring tips
+		Menu, SubmenuTips, UnCheck, Enable/Disable
 	else
-		Menu, Submenu1, Check, &Triggerstring tips
+		Menu, SubmenuTips, Check, Enable/Disable
 	IniRead, Sandbox, Config.ini, Configuration, Sandbox
 	if (Sandbox == 0)
 		Menu, Submenu1, UnCheck, &Launch Sandbox
@@ -1667,7 +1689,7 @@ SaveHotstrings:
 	}
 	else
 	{
-		Loop, % SectionList.MaxIndex()-1 ;+ addvar
+		Loop, % SectionList.MaxIndex()-1
 		{
 			LV_GetText(txt1, A_Index, 2)
 			LV_GetText(txt2, A_Index, 1)
@@ -1679,11 +1701,11 @@ SaveHotstrings:
 			if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
 				FileAppend, %txt%, Libraries\%name%, UTF-8
 		}
-		LV_GetText(txt1, SectionList.MaxIndex(),2) ; +addvar, 1)
-		LV_GetText(txt2, SectionList.MaxIndex(),1) ; +addvar, 2)
-		LV_GetText(txt3, SectionList.MaxIndex(),3) ; +addvar, 3)
-		LV_GetText(txt4, SectionList.MaxIndex(),4) ; +addvar, 4)
-		LV_GetText(txt5, SectionList.MaxIndex(),5) ; +addvar, 5)
+		LV_GetText(txt1, SectionList.MaxIndex(),2)
+		LV_GetText(txt2, SectionList.MaxIndex(),1)
+		LV_GetText(txt3, SectionList.MaxIndex(),3)
+		LV_GetText(txt4, SectionList.MaxIndex(),4)
+		LV_GetText(txt5, SectionList.MaxIndex(),5)
 		LV_GetText(txt6, SectionList.MaxIndex(),6)
 		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
 		FileAppend, %txt%, Libraries\%name%, UTF-8
@@ -2049,13 +2071,14 @@ if (RText == 1)
     {
     If (SearchTerm != "")
     {
-        ; If (InStr(FileName, SearchTerm) = 1) ; for matching at the start
-        If InStr(FileName, SearchTerm) ; for overall matching
+        If (InStr(FileName, SearchTerm) = 1) ; for matching at the start
+        ; If InStr(FileName, SearchTerm) ; for overall matching
             LV_Add("",a_Library[A_Index], a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],FileName,a_Comment[A_Index])
     }
     Else
          LV_Add("",a_Library[A_Index], a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],FileName,a_Comment[A_Index])
     }
+	LV_ModifyCol(6,"Sort")
 }
 else if (RHS == 1)
 {
@@ -2063,13 +2086,14 @@ else if (RHS == 1)
     {
     If (SearchTerm != "")
     {
-        ; If (InStr(FileName, SearchTerm) = 1) ; for matching at the start
-        If InStr(FileName, SearchTerm) ; for overall matching
+        If (InStr(FileName, SearchTerm) = 1) ; for matching at the start
+        ; If InStr(FileName, SearchTerm) ; for overall matching
 			LV_Add("",a_Library[A_Index], FileName,a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index],a_Comment[A_Index])
     }
     Else
 		LV_Add("",a_Library[A_Index], FileName,a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index],a_Comment[A_Index])
     }
+	LV_ModifyCol(2,"Sort")
 }
 else if (RSection == 1)
 {
@@ -2077,13 +2101,14 @@ else if (RSection == 1)
     {
     If (SearchTerm != "")
     {
-        ; If (InStr(FileName, SearchTerm) = 1) ; for matching at the start
-        If InStr(FileName, SearchTerm) ; for overall matching
+        If (InStr(FileName, SearchTerm) = 1) ; for matching at the start
+        ; If InStr(FileName, SearchTerm) ; for overall matching
 			LV_Add("",FileName, a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index],a_Comment[A_Index])
     }
     Else
         LV_Add("",FileName, a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index],a_Comment[A_Index])
     }
+	LV_ModifyCol(1,"Sort")
 }
 GuiControl, +Redraw, List
 return
@@ -2323,9 +2348,9 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 Tips:
-	Menu, Submenu1, ToggleCheck, &Triggerstring tips
-	Menu, Submenu1, ToggleEnable, Choose tips location
-	Menu, Submenu1, ToggleEnable, &Number of characters for tips
+	Menu, SubmenuTips, ToggleCheck, Enable/Disable
+	Menu, SubmenuTips, ToggleEnable, Choose tips location
+	Menu, SubmenuTips, ToggleEnable, &Number of characters for tips
 	ini_Tips := !(ini_Tips)
 	IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
 return
