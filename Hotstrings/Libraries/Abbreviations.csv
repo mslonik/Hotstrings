@@ -92,6 +92,8 @@ O‖2d‖SI‖En‖2D‖
 *‖fmea/‖CL‖En‖Failure Mode and Effects Analysis‖
 ‖fmeca‖SI‖En‖FMECA‖
 *‖fmeca/‖SI‖En‖Failure mode effects and criticality analysis‖
+‖gdpr‖SI‖En‖GDPR‖
+*‖gdpr/‖SI‖En‖General Data Protection Regulation‖
 ‖gnu‖SI‖En‖GNU‖
 *‖gnu/‖CL‖En‖GNU's Not Unix!‖
 ‖gpl‖SI‖En‖GPL‖
@@ -193,6 +195,8 @@ O‖2d‖SI‖En‖2D‖
 *‖sil/‖CL‖En‖Safety Integrity Level‖
 ‖sla‖SI‖En‖SLA‖
 *‖sla/‖CL‖En‖Service-Level Agreement‖
+‖sms‖SI‖En‖SMS‖
+*‖sms/‖CL‖En‖Short Message Service‖
 ‖sql‖SI‖En‖SQL‖
 *‖sql/‖CL‖En‖Structured Query Language‖
 ‖srac‖SI‖En‖SRAC‖

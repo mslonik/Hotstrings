@@ -126,6 +126,9 @@ global ini_Caret := ""
 global ini_AmountOfCharacterTips := ""
 global a_SelectedTriggers := []
 global v_HotstringFlag := 0
+global v_TipsFlag := 0
+global v_MenuMax := 0
+global v_MenuMax2 := 0
 if !(A_Args[7])
 	v_SelectedRow := 0
 else
@@ -168,6 +171,10 @@ if(v_PreviousSection)
 Loop,
 {
 	Input, out,V L1, {Esc}
+	if (ErrorLevel = "NewInput")
+	{
+		MsgBox, ErrorLevel was triggered by NewInput error.
+	}
 	v_InputString .= out
 	if (v_HotstringFlag)
 	{
@@ -176,7 +183,18 @@ Loop,
 		v_HotstringFlag := 0
 	}
 	if InStr(HotstringEndChars, out)
-		v_InputString := "" ; ms @ 2020-11-02 zerowanie powinno mieć miejsce tylko gdy v_InputString == triggerstring, patrz triggerstrings, które zawierają spację, np. a propos;  
+	{
+		v_TipsFlag := 0
+		Loop, % a_Triggers.MaxIndex()
+		{
+			If InStr(a_Triggers[A_Index], v_InputString) == 1
+			{
+				v_TipsFlag := 1
+			}
+		}
+		if !(v_TipsFlag)
+			v_InputString := ""
+	}		  
 	if (StrLen(v_InputString) > ini_AmountOfCharacterTips - 1 ) and (ini_Tips)
 	{
 		HelpTrig := ""
@@ -347,6 +365,14 @@ F9::
 ~LButton::
 ~LWin::
 ~RWin::
+~Down::
+~Up::
+~Left::
+~Right::
+~PgDn::
+~PgUp::
+~Home::
+~End::
 	; MsgBox, Tu jestem!
 	ToolTip,
 	v_InputString := ""
@@ -472,6 +498,7 @@ F_NormalWay(ReplacementString, Oflag)
 {
 	v_InputString :=
 	ToolTip,
+	v_HotstringFlag := 1
 	v_UndoTriggerstring := A_ThisHotkey
 	ReplacementString := F_AHKVariables(ReplacementString)
 	if (Oflag == 0)
@@ -553,9 +580,11 @@ F_MenuText(TextOptions, Oflag)
 	Gui, Menu:New, +LastFound +AlwaysOnTop -Caption +ToolWindow
 	Gui, Menu:Margin, 0, 0
 	Gui, Menu:Add, Listbox, x0 y0 h100 w250 vMenuListbox,
+	v_MenuMax := 0
 	for k, MenuItems in StrSplit(TextOptions,"¦") ;parse the data on the weird pipe character
 	{
-		GuiControl,, MenuListbox, % MenuItems
+		GuiControl,, MenuListbox, % A_Index . ". " . MenuItems
+		v_MenuMax++
 	}
 	CoordMode, Mouse, Screen
 	MouseGetPos, MouseX, MouseY 
@@ -574,12 +603,29 @@ F_MenuText(TextOptions, Oflag)
 return
 }
 #IfWinActive Hotstring listbox
-Enter::
+~1::
+~2::
+~3::
+~4::
+~5::
+~6::
+~7::
+v_PressedKey := SubStr(A_ThisHotkey,2)
+if (v_PressedKey > v_MenuMax)
+	return
+else
+{
+	GuiControl, Choose, MenuListbox, v_PressedKey
+	Sleep, 100
+}
+Enter:: 
+v_HotstringFlag := 1
 Gui, Menu:Submit, Hide
 ClipboardBack:=ClipboardAll ;backup clipboard
+MenuListbox := SubStr(MenuListbox, InStr(MenuListbox, ".")+2)
 Clipboard:=MenuListbox ;Shove what was selected into the clipboard
 Send, ^v ;paste the text
-; if (Ovar == 0)
+if (Ovar == 0)
 	Send, % A_EndChar
 sleep, %ini_Delay% ;Remember to sleep before restoring clipboard or it will fail
 v_TypedTriggerstring := MenuListbox
@@ -612,9 +658,11 @@ F_MenuTextAHK(TextOptions, Oflag){
 	Gui, MenuAHK:New, +LastFound +AlwaysOnTop -Caption +ToolWindow
 	Gui, MenuAHK:Margin, 0, 0
 	Gui, MenuAHK:Add, Listbox, x0 y0 h100 w250 vMenuListbox2,
+	v_MenuMax2 := 0
 	for k, MenuItems in StrSplit(TextOptions,"¦") ;parse the data on the weird pipe character
 	{
-		GuiControl,, MenuListbox2, % MenuItems
+		GuiControl,, MenuListbox2, % A_Index . ". " . MenuItems
+		v_MenuMax2++
 	}
 	CoordMode, Mouse, Screen
 	MouseGetPos, MouseX, MouseY 
@@ -633,8 +681,25 @@ if (v_TypedTriggerstring == "")
 return
 }
 #IfWinActive HotstringAHK listbox
-Enter::
+~1::
+~2::
+~3::
+~4::
+~5::
+~6::
+~7::
+v_PressedKey := SubStr(A_ThisHotkey,2)
+if (v_PressedKey > v_MenuMax2)
+	return
+else
+{
+	GuiControl, Choose, MenuListbox2, v_PressedKey
+	Sleep, 100
+}
+Enter:: 
 Gui, MenuAHK:Submit, Hide
+v_HotstringFlag := 1
+MenuListbox2 := SubStr(MenuListbox2, InStr(MenuListbox2, ".")+2)
 Send, % MenuListbox2
 if (Ovar == 0)
 	Send, % A_EndChar
@@ -2352,6 +2417,7 @@ Tips:
 	Menu, SubmenuTips, ToggleEnable, Choose tips location
 	Menu, SubmenuTips, ToggleEnable, &Number of characters for tips
 	ini_Tips := !(ini_Tips)
+	MsgBox, % "ini_Tips = " . ini_Tips . "`nv_InputString = " . v_InputString
 	IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
 return
 
