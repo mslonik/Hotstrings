@@ -23,39 +23,44 @@ SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
 
 IfNotExist, Config.ini
 {
-	FileAppend, % "[Configuration]`n", Config.ini
-	FileAppend, % "SizeOfHotstringsWindow_Width=`n", Config.ini
-	FileAppend, % "SizeOfHotstringsWindow_Height=`n", Config.ini
-	FileAppend, % "SizeOfHotstringsWindow_X=`n", Config.ini
-	FileAppend, % "SizeOfHotstringsWindow_Y=`n", Config.ini
-	FileAppend, % "UndoHotstring=1`n", Config.ini
-	FileAppend, % "Delay=300`n", Config.ini
-	FileAppend, % "Sandbox=1`n", Config.ini
-	FileAppend, % "EndingChar_Space=1`n", Config.ini
-	FileAppend, % "EndingChar_Minus=1`n", Config.ini
-	FileAppend, % "EndingChar_ORoundBracket=1`n", Config.ini
-	FileAppend, % "EndingChar_CRoundBracket=1`n", Config.ini
-	FileAppend, % "EndingChar_OSquareBracket=1`n", Config.ini
-	FileAppend, % "EndingChar_CSquareBracket=1`n", Config.ini
-	FileAppend, % "EndingChar_OCurlyBracket=1`n", Config.ini
-	FileAppend, % "EndingChar_CCurlyBracket=1`n", Config.ini
-	FileAppend, % "EndingChar_Colon=1`n", Config.ini
-	FileAppend, % "EndingChar_Semicolon=1`n", Config.ini
-	FileAppend, % "EndingChar_Apostrophe=1`n", Config.ini
-	FileAppend, % "EndingChar_Quote=1`n", Config.ini
-	FileAppend, % "EndingChar_Slash=0`n", Config.ini
-	FileAppend, % "EndingChar_Backslash=1`n", Config.ini
-	FileAppend, % "EndingChar_Comma=1`n", Config.ini
-	FileAppend, % "EndingChar_Dot=1`n", Config.ini
-	FileAppend, % "EndingChar_QuestionMark=1`n", Config.ini
-	FileAppend, % "EndingChar_ExclamationMark=1`n", Config.ini
-	FileAppend, % "EndingChar_Enter=1`n", Config.ini
-	FileAppend, % "EndingChar_Tab=1`n", Config.ini
-	FileAppend, % "Sandbox=1`n", Config.ini
-	FileAppend, % "Tips=1`n", Config.ini
-	FileAppend, % "Cursor=0`n", Config.ini 					; added on 2020-10-31 by ms
-    FileAppend, % "Caret=1`n", Config.ini 					; added on 2020-10-31 by ms
-    FileAppend, % "TipsChars=1`n", Config.ini 				; added on 2020-10-31 by ms
+	ini =
+	(
+[Configuration]
+SizeOfHotstringsWindow_Width=
+SizeOfHotstringsWindow_Height=
+SizeOfHotstringsWindow_X=
+SizeOfHotstringsWindow_Y=
+UndoHotstring=1
+Delay=300
+Sandbox=1
+EndingChar_Space=1
+EndingChar_Minus=1
+EndingChar_ORoundBracket=1
+EndingChar_CRoundBracket=1
+EndingChar_OSquareBracket=1
+EndingChar_CSquareBracket=1
+EndingChar_OCurlyBracket=1
+EndingChar_CCurlyBracket=1
+EndingChar_Colon=1
+EndingChar_Semicolon=1
+EndingChar_Apostrophe=1
+EndingChar_Quote=1
+EndingChar_Slash=0
+EndingChar_Backslash=1
+EndingChar_Comma=1
+EndingChar_Dot=1
+EndingChar_QuestionMark=1
+EndingChar_ExclamationMark=1
+EndingChar_Enter=1
+EndingChar_Tab=1
+Tips=1
+Cursor=0
+Caret=1
+TipsChars=1
+MenuCursor=0
+MenuCaret=1
+)
+	FileAppend, %ini%, Config.ini
 	MsgBox, Config.ini wasn't found. The default Config.ini is now created.
 }
 
@@ -123,12 +128,18 @@ global v_ShowGui := ""
 global v_MonitorFlag := ""
 global ini_Cursor := ""
 global ini_Caret := ""
+global ini_MenuCursor := ""
+global ini_MenuCaret := ""
 global ini_AmountOfCharacterTips := ""
 global a_SelectedTriggers := []
 global v_HotstringFlag := 0
 global v_TipsFlag := 0
 global v_MenuMax := 0
 global v_MenuMax2 := 0
+global v_Tips := ""
+global v_IndexLog := 1
+global v_MouseX := ""
+global v_MouseY := ""
 if !(A_Args[7])
 	v_SelectedRow := 0
 else
@@ -137,16 +148,13 @@ if !(v_PreviousMonitor)
 	v_SelectedMonitor := 0
 else
 	v_SelectedMonitor := v_PreviousMonitor
-IniRead, ini_Tips, Config.ini, Configuration, Tips
-IniRead, ini_Cursor, Config.ini, Configuration, Cursor
-IniRead, ini_Caret, Config.ini, Configuration, Caret
-IniRead, ini_Delay, Config.ini, Configuration, Delay
-IniRead, ini_AmountOfCharacterTips, Config.ini, Configuration, TipsChars
-if (ini_Delay == "")
-{
-	ini_Delay := 200
-	IniWrite, %ini_Delay%, Config.ini, Configuration, Delay
-}
+IniRead, ini_Tips, 						Config.ini, Configuration, Tips
+IniRead, ini_Cursor, 					Config.ini, Configuration, Cursor
+IniRead, ini_Caret, 					Config.ini, Configuration, Caret
+IniRead, ini_MenuCursor, 				Config.ini, Configuration, MenuCursor
+IniRead, ini_MenuCaret, 				Config.ini, Configuration, MenuCaret
+IniRead, ini_Delay, 					Config.ini, Configuration, Delay
+IniRead, ini_AmountOfCharacterTips, 	Config.ini, Configuration, TipsChars
 v_MonitorFlag := 0
 if !(v_PreviousSection)
 	v_ShowGui := 1
@@ -164,9 +172,12 @@ Loop, Files, Libraries\*.csv
 }
 F_LoadFiles("PersonalHotstrings.csv")
 F_LoadFiles("New.csv")
-SetTimer, L_DPIScaling, 1000
+; SetTimer, L_DPIScaling, 1000
 if(v_PreviousSection)
 	gosub L_GUIInit
+; FileCreateDir, Logs
+; v_LogFileName := % "Logs\Logs" . A_DD . A_MM . "_" . A_Hour . A_Min . ".txt"
+; FileAppend,, %v_LogFileName%
 
 Loop,
 {
@@ -197,37 +208,52 @@ Loop,
 	}		  
 	if (StrLen(v_InputString) > ini_AmountOfCharacterTips - 1 ) and (ini_Tips)
 	{
-		HelpTrig := ""
+		v_Tips := ""
 		Loop, % a_Triggers.MaxIndex()
 		{
 			If InStr(a_Triggers[A_Index], v_InputString) == 1
 			{
-				If !(HelpTrig == "")
-					HelpTrig .= "`n"
-				HelpTrig .= a_Triggers[A_Index]
+				If !(v_Tips == "")
+					v_Tips .= "`n"
+				v_Tips .= a_Triggers[A_Index]
 			}
 		}
+		If (v_Tips == "") and InStr(HotstringEndChars,SubStr(v_InputString,-1,1))
+        {
+            v_InputString := out
+            Loop, % a_Triggers.MaxIndex()
+            {
+                If InStr(a_Triggers[A_Index], v_InputString) == 1
+                {
+                    If !(v_Tips == "")
+                        v_Tips .= "`n"
+                    v_Tips .= a_Triggers[A_Index]
+                }
+            }
+        }
 		a_SelectedTriggers := []
-		a_SelectedTriggers := StrSplit(HelpTrig, "`n")
+		a_SelectedTriggers := StrSplit(v_Tips, "`n")
 		a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
 		a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
-		HelpTrig := ""
+		v_Tips := ""
 		Loop, % a_SelectedTriggers.MaxIndex()
 		{
-			If !(HelpTrig == "")
-				HelpTrig .= "`n"
-			HelpTrig .= a_SelectedTriggers[A_Index]
+			If !(v_Tips == "")
+				v_Tips .= "`n"
+			v_Tips .= a_SelectedTriggers[A_Index]
 		}
 		if (ini_Caret)
-			ToolTip, %HelpTrig%, A_CaretX + 20, A_CaretY - 20
+			ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
 		if (ini_Cursor)
 		{
 			MouseGetPos, v_MouseX, v_MouseY
-			ToolTip, %HelpTrig%, v_MouseX + 20, v_MouseY - 20
+			ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
 		}
 	}
 	else
 		ToolTip, 
+;	FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_AmountOfCharacterTips . "|" . ini_Tips . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
+;	v_IndexLog++
 }
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
@@ -235,37 +261,39 @@ Loop,
 	StringTrimRight, v_InputString, v_InputString, 1
 	if (StrLen(v_InputString) > ini_AmountOfCharacterTips - 1) and (ini_Tips)
 	{
-		HelpTrig := ""
+		v_Tips := ""
 		Loop, % a_Triggers.MaxIndex()
 		{
 			If InStr(a_Triggers[A_Index], v_InputString) == 1
 			{
-				If !(HelpTrig == "")
-					HelpTrig .= "`n"
-				HelpTrig .= a_Triggers[A_Index]
+				If !(v_Tips == "")
+					v_Tips .= "`n"
+				v_Tips .= a_Triggers[A_Index]
 			}
 		}
 		a_SelectedTriggers := []
-		a_SelectedTriggers := StrSplit(HelpTrig, "`n")
+		a_SelectedTriggers := StrSplit(v_Tips, "`n")
 		a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
 		a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
-		HelpTrig := ""
+		v_Tips := ""
 		Loop, % a_SelectedTriggers.MaxIndex()
 		{
-			If !(HelpTrig == "")
-				HelpTrig .= "`n"
-			HelpTrig .= a_SelectedTriggers[A_Index]
+			If !(v_Tips == "")
+				v_Tips .= "`n"
+			v_Tips .= a_SelectedTriggers[A_Index]
 		}
 		if (ini_Caret)
-			ToolTip, %HelpTrig%, A_CaretX + 20, A_CaretY - 20
+			ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
 		if (ini_Cursor)
 		{
 			MouseGetPos, v_MouseX, v_MouseY
-			ToolTip, %HelpTrig%, v_MouseX + 20, v_MouseY - 20
+			ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
 		}
 	}
 	else
 		ToolTip,
+;	FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_AmountOfCharacterTips . "|" . ini_Tips . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
+;	v_IndexLog++
 return
 
 $^z::			;~ Ctrl + z as in MS Word: Undo
@@ -301,18 +329,16 @@ $!BackSpace:: 	;~ Alt + Backspace as in MS Word: rolls back last Autocorrect act
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#if WinActive(, "Microsoft Word") or WinActive(, "Microsoft Outlook") or WinActive(, "Microsoft Excel") or WinActive("ahk_exe SciTe.exe") or WinActive("ahk_exe notepad.exe") ; nie działało w inkscapie
-^c::
-	Send, ^c
-	IfWinExist, Hotstrings
-	{
-		Sleep, %ini_Delay%
-		ControlSetText, Edit2, %Clipboard%
-	}
+
+#if WinExist("Hotstrings") and WinExist("ahk_class AutoHotkeyGUI")
+~^c::
+	Sleep, %ini_Delay%
+	ControlSetText, Edit2, %Clipboard%
 return
 #if
 
 #if WinActive("Hotstrings") and WinActive("ahk_class AutoHotkeyGUI")
+
 F1::
 	Gui, HS3:Default
 	goto, About
@@ -373,6 +399,7 @@ F9::
 ~PgUp::
 ~Home::
 ~End::
+~Esc::
 	; MsgBox, Tu jestem!
 	ToolTip,
 	v_InputString := ""
@@ -586,10 +613,18 @@ F_MenuText(TextOptions, Oflag)
 		GuiControl,, MenuListbox, % A_Index . ". " . MenuItems
 		v_MenuMax++
 	}
-	CoordMode, Mouse, Screen
-	MouseGetPos, MouseX, MouseY 
-	MenuX := MouseX + 20
-	MenuY := MouseY + 20
+	if (ini_MenuCaret)
+	{
+		MenuX := A_CaretX + 20
+		MenuY := A_CaretY - 20
+	}
+	if (ini_MenuCursor)
+	{
+		CoordMode, Mouse, Screen
+		MouseGetPos, v_MouseX, v_MouseY
+		MenuX := v_MouseX + 20
+		MenuY := v_MouseY + 20
+	}
 	Gui, Menu:Show, x%MenuX% y%MenuY%, Hotstring listbox
 	if (v_TypedTriggerstring == "")
 	{
@@ -664,10 +699,18 @@ F_MenuTextAHK(TextOptions, Oflag){
 		GuiControl,, MenuListbox2, % A_Index . ". " . MenuItems
 		v_MenuMax2++
 	}
-	CoordMode, Mouse, Screen
-	MouseGetPos, MouseX, MouseY 
-	MenuX := MouseX + 20
-	MenuY := MouseY + 20
+	if (ini_MenuCaret)
+	{
+		MenuX := A_CaretX + 20
+		MenuY := A_CaretY - 20
+	}
+	if (ini_MenuCursor)
+	{
+		CoordMode, Mouse, Screen
+		MouseGetPos, v_MouseX, v_MouseY
+		MenuX := v_MouseX + 20
+		MenuY := v_MouseY + 20
+	}
 	Gui, MenuAHK:Show, x%MenuX% y%MenuY%, HotstringAHK listbox
 if (v_TypedTriggerstring == "")
 {
@@ -785,26 +828,26 @@ EndChars()
 	global
 
 	HotstringEndChars := ""
-	IniRead, EndingChar_Space, Config.ini, Configuration, EndingChar_Space
-	IniRead, EndingChar_Minus, Config.ini, Configuration, EndingChar_Minus
-	IniRead, EndingChar_ORoundBracket, Config.ini, Configuration, EndingChar_ORoundBracket
-	IniRead, EndingChar_CRoundBracket, Config.ini, Configuration, EndingChar_CRoundBracket
-	IniRead, EndingChar_OSquareBracket, Config.ini, Configuration, EndingChar_OSquareBracket
-	IniRead, EndingChar_CSquareBracket, Config.ini, Configuration, EndingChar_CSquareBracket
-	IniRead, EndingChar_OCurlyBracket, Config.ini, Configuration, EndingChar_OCurlyBracket
-	IniRead, EndingChar_CCurlyBracket, Config.ini, Configuration, EndingChar_CCurlyBracket
-	IniRead, EndingChar_Colon, Config.ini, Configuration, EndingChar_Colon
-	IniRead, EndingChar_Semicolon, Config.ini, Configuration, EndingChar_;
-	IniRead, EndingChar_Apostrophe, Config.ini, Configuration, EndingChar_Apostrophe
-	IniRead, EndingChar_Quote, Config.ini, Configuration, EndingChar_Quote
-	IniRead, EndingChar_Slash, Config.ini, Configuration, EndingChar_Slash
-	IniRead, EndingChar_Backslash, Config.ini, Configuration, EndingChar_Backslash
-	IniRead, EndingChar_Comma, Config.ini, Configuration, EndingChar_Comma
-	IniRead, EndingChar_Dot, Config.ini, Configuration, EndingChar_Dot
-	IniRead, EndingChar_QuestionMark, Config.ini, Configuration, EndingChar_QuestionMark
-	IniRead, EndingChar_ExclamationMark, Config.ini, Configuration, EndingChar_ExclamationMark
-	IniRead, EndingChar_Enter, Config.ini, Configuration, EndingChar_Enter
-	IniRead, EndingChar_Tab, Config.ini, Configuration, EndingChar_Tab
+	IniRead, EndingChar_Space, 				Config.ini, Configuration, EndingChar_Space
+	IniRead, EndingChar_Minus, 				Config.ini, Configuration, EndingChar_Minus
+	IniRead, EndingChar_ORoundBracket, 		Config.ini, Configuration, EndingChar_ORoundBracket
+	IniRead, EndingChar_CRoundBracket, 		Config.ini, Configuration, EndingChar_CRoundBracket
+	IniRead, EndingChar_OSquareBracket, 	Config.ini, Configuration, EndingChar_OSquareBracket
+	IniRead, EndingChar_CSquareBracket, 	Config.ini, Configuration, EndingChar_CSquareBracket
+	IniRead, EndingChar_OCurlyBracket, 		Config.ini, Configuration, EndingChar_OCurlyBracket
+	IniRead, EndingChar_CCurlyBracket, 		Config.ini, Configuration, EndingChar_CCurlyBracket
+	IniRead, EndingChar_Colon, 				Config.ini, Configuration, EndingChar_Colon
+	IniRead, EndingChar_Semicolon, 			Config.ini, Configuration, EndingChar_Semicolon
+	IniRead, EndingChar_Apostrophe, 		Config.ini, Configuration, EndingChar_Apostrophe
+	IniRead, EndingChar_Quote, 				Config.ini, Configuration, EndingChar_Quote
+	IniRead, EndingChar_Slash, 				Config.ini, Configuration, EndingChar_Slash
+	IniRead, EndingChar_Backslash, 			Config.ini, Configuration, EndingChar_Backslash
+	IniRead, EndingChar_Comma, 				Config.ini, Configuration, EndingChar_Comma
+	IniRead, EndingChar_Dot, 				Config.ini, Configuration, EndingChar_Dot
+	IniRead, EndingChar_QuestionMark, 		Config.ini, Configuration, EndingChar_QuestionMark
+	IniRead, EndingChar_ExclamationMark, 	Config.ini, Configuration, EndingChar_ExclamationMark
+	IniRead, EndingChar_Enter, 				Config.ini, Configuration, EndingChar_Enter
+	IniRead, EndingChar_Tab, 				Config.ini, Configuration, EndingChar_Tab
 	if (EndingChar_Space)
 		HotstringEndChars .= " "
 	if (EndingChar_Minus)
@@ -1022,6 +1065,18 @@ L_GUIInit:
     ; Menu, HSMenu, Add, &Monitor, CheckMon
 	Menu, Submenu1, Add, &Undo last hotstring,Undo
 	Menu, SubmenuTips, Add, Enable/Disable, Tips
+	Menu, PositionMenu, Add, Caret, L_MenuCaretCursor
+	Menu, PositionMenu, Add, Cursor, L_MenuCaretCursor
+	Menu, SubmenuMenu, Add, Choose menu position,:PositionMenu
+	Menu, Submenu1, Add,% "Hotstring menu (MSI, MCL)", :SubmenuMenu
+	if (ini_MenuCursor)
+		Menu, PositionMenu, Check, Cursor
+	else
+		Menu, PositionMenu, UnCheck, Cursor
+	if (ini_MenuCaret)
+		Menu, PositionMenu, Check, Caret
+	else
+		Menu, PositionMenu, UnCheck, Caret
 	Menu, Submenu1, Add, &Triggerstring tips, :SubmenuTips
 	Menu, Submenu3, Add, Caret,L_CaretCursor
 	Menu, Submenu3, Add, Cursor,L_CaretCursor
@@ -1848,58 +1903,58 @@ Delete:
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-SaveMon:
-	v_MonitorFlag := 0
-	if (v_PreviousMonitor != v_SelectedMonitor)
-		v_ShowGui := 3
-	gosub, L_GUIInit
-return
+; SaveMon:
+	; v_MonitorFlag := 0
+	; if (v_PreviousMonitor != v_SelectedMonitor)
+		; v_ShowGui := 3
+	; gosub, L_GUIInit
+; return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-CheckMon:
-    Gui, Mon:Submit, NoHide
-    Gui, Mon:Destroy
-    Gui, Mon:New, +AlwaysOnTop
-	if (v_MonitorFlag != 1)
-	{
-		v_PreviousMonitor := v_SelectedMonitor
-		v_MonitorFlag := 1
-	}
-    SysGet, N, MonitorCount
-    SysGet, PrimMon, MonitorPrimary
-    if (v_SelectedMonitor == 0)
-        v_SelectedMonitor := PrimMon
-    MFS := 10*DPI%v_SelectedMonitor%
-    Gui, Mon:Margin, 12.5*DPI%v_SelectedMonitor%, 7.5*DPI%v_SelectedMonitor%
-    Gui, Mon:Font, s%MFS%
-    Gui, Mon:Add, Text, % " w" . 500*DPI%v_SelectedMonitor%, Choose a monitor where GUI will be located:
-    Loop, % N
-    {
-        if (A_Index == v_SelectedMonitor)
-        {
-            Gui, Mon:Add, Radio,%  "xm+" . 50*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " gCheckMon AltSubmit vv_SelectedMonitor Checked", % "Monitor #" . A_Index . (A_Index = PrimMon ? " (primary)" : "")
-        }
-        else
-        {
-            Gui, Mon:Add, Radio, % "xm+" . 50*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " gCheckMon AltSubmit", % "Monitor #" . A_Index . (A_Index = PrimMon ? " (primary)" : "")
-        }
-    }
-    Gui, Mon:Add, Button, % "Default xm+" . 30*DPI%v_SelectedMonitor% . " y+" . 15*DPI%v_SelectedMonitor% . " h" . 30*DPI%v_SelectedMonitor% . " gCheckMonitorNumbering", &Check Monitor Numbering
-    Gui, Mon:Add, Button, % "x+" . 30*DPI%v_SelectedMonitor% . " h" . 30*DPI%v_SelectedMonitor% . " yp gSaveMon", &Save
-    SysGet, MonitorBoundingCoordinates_, Monitor, % v_SelectedMonitor
-    Gui, Mon: Show
-        , % "x" . MonitorBoundingCoordinates_Left + (Abs(MonitorBoundingCoordinates_Left - MonitorBoundingCoordinates_Right) / 2) - 200*DPI%v_SelectedMonitor%
-        . "y" . MonitorBoundingCoordinates_Top + (Abs(MonitorBoundingCoordinates_Top - MonitorBoundingCoordinates_Bottom) / 2) - 80*DPI%v_SelectedMonitor%
-        . "w" . 400*DPI%v_SelectedMonitor% . "h" . 150*DPI%v_SelectedMonitor%, Configure Monitor
-return
+; CheckMon:
+    ; Gui, Mon:Submit, NoHide
+    ; Gui, Mon:Destroy
+    ; Gui, Mon:New, +AlwaysOnTop
+	; if (v_MonitorFlag != 1)
+	; {
+		; v_PreviousMonitor := v_SelectedMonitor
+		; v_MonitorFlag := 1
+	; }
+    ; SysGet, N, MonitorCount
+    ; SysGet, PrimMon, MonitorPrimary
+    ; if (v_SelectedMonitor == 0)
+        ; v_SelectedMonitor := PrimMon
+    ; MFS := 10*DPI%v_SelectedMonitor%
+    ; Gui, Mon:Margin, 12.5*DPI%v_SelectedMonitor%, 7.5*DPI%v_SelectedMonitor%
+    ; Gui, Mon:Font, s%MFS%
+    ; Gui, Mon:Add, Text, % " w" . 500*DPI%v_SelectedMonitor%, Choose a monitor where GUI will be located:
+    ; Loop, % N
+    ; {
+        ; if (A_Index == v_SelectedMonitor)
+        ; {
+            ; Gui, Mon:Add, Radio,%  "xm+" . 50*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " gCheckMon AltSubmit vv_SelectedMonitor Checked", % "Monitor #" . A_Index . (A_Index = PrimMon ? " (primary)" : "")
+        ; }
+        ; else
+        ; {
+            ; Gui, Mon:Add, Radio, % "xm+" . 50*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " gCheckMon AltSubmit", % "Monitor #" . A_Index . (A_Index = PrimMon ? " (primary)" : "")
+        ; }
+    ; }
+    ; Gui, Mon:Add, Button, % "Default xm+" . 30*DPI%v_SelectedMonitor% . " y+" . 15*DPI%v_SelectedMonitor% . " h" . 30*DPI%v_SelectedMonitor% . " gCheckMonitorNumbering", &Check Monitor Numbering
+    ; Gui, Mon:Add, Button, % "x+" . 30*DPI%v_SelectedMonitor% . " h" . 30*DPI%v_SelectedMonitor% . " yp gSaveMon", &Save
+    ; SysGet, MonitorBoundingCoordinates_, Monitor, % v_SelectedMonitor
+    ; Gui, Mon: Show
+        ; , % "x" . MonitorBoundingCoordinates_Left + (Abs(MonitorBoundingCoordinates_Left - MonitorBoundingCoordinates_Right) / 2) - 200*DPI%v_SelectedMonitor%
+        ; . "y" . MonitorBoundingCoordinates_Top + (Abs(MonitorBoundingCoordinates_Top - MonitorBoundingCoordinates_Bottom) / 2) - 80*DPI%v_SelectedMonitor%
+        ; . "w" . 400*DPI%v_SelectedMonitor% . "h" . 150*DPI%v_SelectedMonitor%, Configure Monitor
+; return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-CheckMonitorNumbering:
-    F_ShowMonitorNumbers()
-    SetTimer, DestroyGuis, -3000
-return
+; CheckMonitorNumbering:
+    ; F_ShowMonitorNumbers()
+    ; SetTimer, DestroyGuis, -3000
+; return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -2063,9 +2118,9 @@ Gui, HS3List:New,% "+Resize MinSize" . 940*DPI%v_SelectedMonitor% . "x" . 500*DP
 Gui, HS3List:Add, Text, ,Search:
 Gui, HS3List:Add, Text, % "yp xm+" . 420*DPI%v_SelectedMonitor%, Search by:
 Gui, HS3List:Add, Edit, % "xm w" . 400*DPI%v_SelectedMonitor% . " vSearchTerm gSearch"
-Gui, HS3List:Add, Radio, % "yp xm+" . 420*DPI%v_SelectedMonitor% . " vRHS gSearchChange Checked", Triggerstring
-Gui, HS3List:Add, Radio, % "yp xm+" . 540*DPI%v_SelectedMonitor% . " vRText gSearchChange", Hotstring
-Gui, HS3List:Add, Radio, % "yp xm+" . 640*DPI%v_SelectedMonitor% . " vRSection gSearchChange", Library
+Gui, HS3List:Add, Radio, % "yp xm+" . 420*DPI%v_SelectedMonitor% . " vRadioGroup gSearchChange Checked", Triggerstring
+Gui, HS3List:Add, Radio, % "yp xm+" . 540*DPI%v_SelectedMonitor% . " gSearchChange", Hotstring
+Gui, HS3List:Add, Radio, % "yp xm+" . 640*DPI%v_SelectedMonitor% . " gSearchChange", Library
 Gui, HS3List:Add, Button, % "yp-2 xm+" . 720*DPI%v_SelectedMonitor% . " w" . 100*DPI%v_SelectedMonitor% . " gMoveList", Move
 Gui, HS3List:Add, ListView, % "xm grid vList +AltSubmit gHSLV2 h" . 400*DPI%v_SelectedMonitor%, Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment
 Loop, Files, %A_ScriptDir%\Libraries\*.csv
@@ -2130,7 +2185,7 @@ return
 GuiControlGet, SearchTerm
 GuiControl, -Redraw, List
 LV_Delete()
-if (RText == 1)
+if (RadioGroup == 1)
 {
     For Each, FileName In a_Triggerstring
     {
@@ -2145,7 +2200,7 @@ if (RText == 1)
     }
 	LV_ModifyCol(6,"Sort")
 }
-else if (RHS == 1)
+else if (RadioGroup == 2)
 {
     For Each, FileName In a_Hotstring
     {
@@ -2160,7 +2215,7 @@ else if (RHS == 1)
     }
 	LV_ModifyCol(2,"Sort")
 }
-else if (RSection == 1)
+else if (RadioGroup == 3)
 {
     For Each, FileName In a_Library
     {
@@ -2417,7 +2472,6 @@ Tips:
 	Menu, SubmenuTips, ToggleEnable, Choose tips location
 	Menu, SubmenuTips, ToggleEnable, &Number of characters for tips
 	ini_Tips := !(ini_Tips)
-	MsgBox, % "ini_Tips = " . ini_Tips . "`nv_InputString = " . v_InputString
 	IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
 return
 
@@ -2636,7 +2690,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 L_DPIScaling:
-	SetTimer, L_DPIScaling, 1000
+	SetTimer, L_DPIScaling, Off
 	if WinExist("Hotstrings") and WinExist("ahk_class AutoHotkeyGUI")
 	{
 
@@ -2698,4 +2752,13 @@ L_AmountOfCharacterTips:
 		if !(A_Index == ini_AmountOfCharacterTips)
 			Menu, Submenu4, UnCheck, %A_Index%
 	}
+return
+
+L_MenuCaretCursor:
+	Menu, PositionMenu, ToggleCheck, Caret
+	Menu, PositionMenu, ToggleCheck, Cursor
+	ini_MenuCaret := !(ini_MenuCaret)
+	ini_MenuCursor := !(ini_MenuCursor)
+	IniWrite, %ini_MenuCaret%, Config.ini, Configuration, MenuCaret
+	IniWrite, %ini_MenuCursor%, Config.ini, Configuration, MenuCursor
 return
