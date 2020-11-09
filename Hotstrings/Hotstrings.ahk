@@ -172,12 +172,12 @@ Loop, Files, Libraries\*.csv
 }
 F_LoadFiles("PersonalHotstrings.csv")
 F_LoadFiles("New.csv")
-; SetTimer, L_DPIScaling, 1000
+; SetTimer, L_DPIScaling, 100
 if(v_PreviousSection)
 	gosub L_GUIInit
-; FileCreateDir, Logs
-; v_LogFileName := % "Logs\Logs" . A_DD . A_MM . "_" . A_Hour . A_Min . ".txt"
-; FileAppend,, %v_LogFileName%
+FileCreateDir, Logs
+v_LogFileName := % "Logs\Logs" . A_DD . A_MM . "_" . A_Hour . A_Min . ".txt"
+FileAppend,, %v_LogFileName%
 
 Loop,
 {
@@ -191,7 +191,8 @@ Loop,
 	{
 		v_InputString := ""
 		ToolTip,
-		v_HotstringFlag := 0
+		if !(WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
+			v_HotstringFlag := 0
 	}
 	if InStr(HotstringEndChars, out)
 	{
@@ -243,7 +244,10 @@ Loop,
 			v_Tips .= a_SelectedTriggers[A_Index]
 		}
 		if (ini_Caret)
+		{
+			CoordMode, Caret, Screen
 			ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
+		}
 		if (ini_Cursor)
 		{
 			MouseGetPos, v_MouseX, v_MouseY
@@ -252,8 +256,8 @@ Loop,
 	}
 	else
 		ToolTip, 
-;	FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_AmountOfCharacterTips . "|" . ini_Tips . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
-;	v_IndexLog++
+	FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_AmountOfCharacterTips . "|" . ini_Tips . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
+	v_IndexLog++
 }
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
@@ -283,7 +287,10 @@ Loop,
 			v_Tips .= a_SelectedTriggers[A_Index]
 		}
 		if (ini_Caret)
+		{
+			CoordMode, Caret, Screen
 			ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
+		}
 		if (ini_Cursor)
 		{
 			MouseGetPos, v_MouseX, v_MouseY
@@ -292,8 +299,8 @@ Loop,
 	}
 	else
 		ToolTip,
-;	FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_AmountOfCharacterTips . "|" . ini_Tips . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
-;	v_IndexLog++
+	FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_AmountOfCharacterTips . "|" . ini_Tips . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
+	v_IndexLog++
 return
 
 $^z::			;~ Ctrl + z as in MS Word: Undo
@@ -615,10 +622,11 @@ F_MenuText(TextOptions, Oflag)
 	}
 	if (ini_MenuCaret)
 	{
+		CoordMode, Caret, Screen
 		MenuX := A_CaretX + 20
 		MenuY := A_CaretY - 20
 	}
-	if (ini_MenuCursor)
+	if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
 	{
 		CoordMode, Mouse, Screen
 		MouseGetPos, v_MouseX, v_MouseY
@@ -626,6 +634,7 @@ F_MenuText(TextOptions, Oflag)
 		MenuY := v_MouseY + 20
 	}
 	Gui, Menu:Show, x%MenuX% y%MenuY%, Hotstring listbox
+	SoundBeep, 700, 100
 	if (v_TypedTriggerstring == "")
 	{
 		HK := StrSplit(A_ThisHotkey, ":")
@@ -701,10 +710,11 @@ F_MenuTextAHK(TextOptions, Oflag){
 	}
 	if (ini_MenuCaret)
 	{
+		CoordMode, Caret, Screen
 		MenuX := A_CaretX + 20
 		MenuY := A_CaretY - 20
 	}
-	if (ini_MenuCursor)
+	if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
 	{
 		CoordMode, Mouse, Screen
 		MouseGetPos, v_MouseX, v_MouseY
@@ -712,12 +722,13 @@ F_MenuTextAHK(TextOptions, Oflag){
 		MenuY := v_MouseY + 20
 	}
 	Gui, MenuAHK:Show, x%MenuX% y%MenuY%, HotstringAHK listbox
-if (v_TypedTriggerstring == "")
-{
-	HK := StrSplit(A_ThisHotkey, ":")
-	ThisHotkey := SubStr(A_ThisHotkey, StrLen(HK[2])+3, StrLen(A_ThisHotkey)-StrLen(HK[2])-2)
-	Send, % ThisHotkey
-}
+	SoundBeep, 700, 100
+	if (v_TypedTriggerstring == "")
+	{
+		HK := StrSplit(A_ThisHotkey, ":")
+		ThisHotkey := SubStr(A_ThisHotkey, StrLen(HK[2])+3, StrLen(A_ThisHotkey)-StrLen(HK[2])-2)
+		Send, % ThisHotkey
+	}
 	GuiControl, Choose, MenuListbox2, 1
 	Ovar := Oflag
 	v_HotstringFlag := 1
@@ -1460,7 +1471,7 @@ HSLV:
 	If !(v_SelectedRow := LV_GetNext()) {
 		Return
 	}
-	if (v_PreviousSelectedRow == v_SelectedRow)
+	if (v_PreviousSelectedRow == v_SelectedRow) and !(v_TriggerString == "")
 	{
 		return
 	}
@@ -1545,6 +1556,18 @@ HSLV2:
 	gosub, ViewString
 	GuiControl, Choose, v_SelectHotstringLibrary, %ChooseSec%
 	gosub, SectionChoose
+	v_SearchedTriggerString := v_TriggerString
+	Loop
+	{
+		LV_GetText(v_TriggerString,A_Index,1)
+		if (v_TriggerString == v_SearchedTriggerString)
+		{
+			v_SelectedRow := A_Index
+			LV_Modify(v_SelectedRow, "Vis")
+			LV_Modify(v_SelectedRow, "+Select +Focus")
+			break
+		}
+	}
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2185,7 +2208,7 @@ return
 GuiControlGet, SearchTerm
 GuiControl, -Redraw, List
 LV_Delete()
-if (RadioGroup == 1)
+if (RadioGroup == 2)
 {
     For Each, FileName In a_Triggerstring
     {
@@ -2200,7 +2223,7 @@ if (RadioGroup == 1)
     }
 	LV_ModifyCol(6,"Sort")
 }
-else if (RadioGroup == 2)
+else if (RadioGroup == 1)
 {
     For Each, FileName In a_Hotstring
     {
@@ -2690,7 +2713,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 L_DPIScaling:
-	SetTimer, L_DPIScaling, Off
+	; SetTimer, L_DPIScaling, Off
 	if WinExist("Hotstrings") and WinExist("ahk_class AutoHotkeyGUI")
 	{
 

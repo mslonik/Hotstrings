@@ -33,3 +33,5 @@ Hotstrings/Libraries/voestalpineHotstrings.csv
 Hotstrings/Libraries/fikumiku.csv
 Hotstrings/Config.ini
 Hotstrings/Config.ini
+*.txt
+Hotstrings/HotstringsLite.ahk
