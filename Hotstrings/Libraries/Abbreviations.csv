@@ -13,6 +13,8 @@ O‖2d‖SI‖En‖2D‖
 *‖api/‖CL‖En‖Application Programming Interface‖
 ‖asci‖SI‖En‖ASCII‖
 *‖asci/‖CL‖En‖American Standard Code for Information Interchange‖
+‖ato‖SI‖En‖ATO‖
+*‖ato/‖CL‖En‖Assembly To Order‖
 ‖bom‖SI‖En‖BOM‖
 *‖bom/‖MSI‖En‖Bill of Materials¦Byte Order Mark‖
 ‖cad‖SI‖En‖CAD‖
@@ -82,6 +84,8 @@ O‖2d‖SI‖En‖2D‖
 *‖ertms/‖CL‖En‖European Rail Traffic Management System‖
 ‖etcs‖SI‖En‖ETCS‖
 *‖etcs/‖SI‖En‖European Train Control System‖
+‖eto‖SI‖En‖ETO‖
+*‖eto/‖CL‖En‖Engineer To Order‖
 ‖fai‖SI‖En‖FAI‖
 *‖fai/‖CL‖En‖First Article Inspection‖
 ‖faq‖SI‖En‖FAQ‖
@@ -138,6 +142,8 @@ O‖2d‖SI‖En‖2D‖
 *‖mtbf/‖CL‖En‖Mean Time Between Failures‖
 ‖mtbm‖SI‖En‖MTBM‖
 *‖mtbm/‖CL‖En‖Mean Time Between Maintainances‖
+‖mto‖SI‖En‖MTO‖
+*‖mto/‖CL‖En‖Make To Order‖
 ‖mttf‖SI‖En‖MTTF‖
 *‖mttf/‖CL‖En‖Mean Time To Failure‖
 ‖mttr‖SI‖En‖MTTR‖

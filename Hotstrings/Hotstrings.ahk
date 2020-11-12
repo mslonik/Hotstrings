@@ -69,17 +69,32 @@ IfNotExist, Libraries\PersonalHotstrings.csv
 IfNotExist, Libraries\New.csv
 	FileAppend,, Libraries\New.csv, UTF-8
 
-Menu, Tray, Add, Edit Hotstring, L_GUIInit
-Menu, Tray, Add, Search Hotstrings, L_Searching
-; Menu, Tray, Add, About, About
-Menu, Tray, Default, Edit Hotstring
-Menu, Tray, Add
-Menu, Tray, NoStandard
-Menu, Tray, Standard
-TrayTip,, %A_ScriptName%, 1
+if !(A_Args[1] == "l")
+{
+	Menu, Tray, Add, Edit Hotstring, L_GUIInit
+	Menu, Tray, Add, Search Hotstrings, L_Searching
+	Menu, Tray, Default, Edit Hotstring
+	Menu, Tray, Add
+	Menu, Tray, NoStandard
+	Menu, Tray, Standard
+}
 EndChars()
 ; ---------------------- SECTION OF GLOBAL VARIABLES ----------------------
 
+global v_Param := A_Args[1]
+global v_PreviousSection := A_Args[3]
+global v_PreviousWidth := A_Args[4]
+global v_PreviousHeight := A_Args[5]
+global v_PreviousX := A_Args[6]
+global v_PreviousY := A_Args[7]
+global v_PreviousMonitor := A_Args[9]
+global v_EnterHotstring := ""
+global v_EnterHotstring1 := ""
+global v_EnterHotstring2 := ""
+global v_EnterHotstring3 := ""
+global v_EnterHotstring4 := ""
+global v_EnterHotstring5 := ""
+global v_EnterHotstring6 := ""
 global v_TriggerString := ""
 global v_OptionImmediateExecute := ""
 global v_OptionCaseSensitive := ""
@@ -88,13 +103,6 @@ global v_OptionInsideWord := ""
 global v_OptionNoEndChar := ""
 global v_OptionDisable := ""
 global v_SelectFunction := ""
-global v_EnterHotstring := ""
-global v_EnterHotstring1 := ""
-global v_EnterHotstring2 := ""
-global v_EnterHotstring3 := ""
-global v_EnterHotstring4 := ""
-global v_EnterHotstring5 := ""
-global v_EnterHotstring6 := ""
 global v_SelectHotstringLibrary := ""
 global v_DeleteHotstring := ""
 global v_ShortcutsMainInterface := ""
@@ -102,12 +110,6 @@ global v_LibraryContent := ""
 global v_ViewString := ""
 global v_CaseSensitiveC1 := ""
 global a_String := ""
-global v_PreviousSection := A_Args[2]
-global v_PreviousWidth := A_Args[3]
-global v_PreviousHeight := A_Args[4]
-global v_PreviousX := A_Args[5]
-global v_PreviousY := A_Args[6]
-global v_PreviousMonitor := A_Args[8]
 global a_Hotstring := []
 global a_Library := []
 global a_Triggerstring := []
@@ -140,10 +142,14 @@ global v_Tips := ""
 global v_IndexLog := 1
 global v_MouseX := ""
 global v_MouseY := ""
-if !(A_Args[7])
+global ini_MenuSound := ""
+global v_FlagSound := 0
+global v_SearchTerm := ""
+global v_RadioGroup := ""
+if !(A_Args[8])
 	v_SelectedRow := 0
 else
-	v_SelectedRow := A_Args[7]
+	v_SelectedRow := A_Args[8]
 if !(v_PreviousMonitor)
 	v_SelectedMonitor := 0
 else
@@ -155,11 +161,18 @@ IniRead, ini_MenuCursor, 				Config.ini, Configuration, MenuCursor
 IniRead, ini_MenuCaret, 				Config.ini, Configuration, MenuCaret
 IniRead, ini_Delay, 					Config.ini, Configuration, Delay
 IniRead, ini_AmountOfCharacterTips, 	Config.ini, Configuration, TipsChars
+IniRead, ini_MenuSound,					Config.ini, Configuration, MenuSound
 v_MonitorFlag := 0
 if !(v_PreviousSection)
 	v_ShowGui := 1
 else
 	v_ShowGui := 2
+if (v_Param == "d")
+	TrayTip,, %A_ScriptName% - Debug, 1
+else if (v_Param == "l")
+	TrayTip,, %A_ScriptName% - Lite, 1
+else	
+	TrayTip,, %A_ScriptName%, 1
 
 ; ---------------------------- INITIALIZATION -----------------------------
 
@@ -175,9 +188,12 @@ F_LoadFiles("New.csv")
 ; SetTimer, L_DPIScaling, 100
 if(v_PreviousSection)
 	gosub L_GUIInit
-FileCreateDir, Logs
-v_LogFileName := % "Logs\Logs" . A_DD . A_MM . "_" . A_Hour . A_Min . ".txt"
-FileAppend,, %v_LogFileName%
+if (v_Param == "d")
+{
+	FileCreateDir, Logs
+	v_LogFileName := % "Logs\Logs" . A_DD . A_MM . "_" . A_Hour . A_Min . ".txt"
+	FileAppend,, %v_LogFileName%
+}
 
 Loop,
 {
@@ -186,121 +202,150 @@ Loop,
 	{
 		MsgBox, ErrorLevel was triggered by NewInput error.
 	}
-	v_InputString .= out
-	if (v_HotstringFlag)
+	if (WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
 	{
-		v_InputString := ""
-		ToolTip,
-		if !(WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
-			v_HotstringFlag := 0
-	}
-	if InStr(HotstringEndChars, out)
-	{
-		v_TipsFlag := 0
-		Loop, % a_Triggers.MaxIndex()
+		if (ini_MenuSound)
 		{
-			If InStr(a_Triggers[A_Index], v_InputString) == 1
-			{
-				v_TipsFlag := 1
-			}
-		}
-		if !(v_TipsFlag)
-			v_InputString := ""
-	}		  
-	if (StrLen(v_InputString) > ini_AmountOfCharacterTips - 1 ) and (ini_Tips)
-	{
-		v_Tips := ""
-		Loop, % a_Triggers.MaxIndex()
-		{
-			If InStr(a_Triggers[A_Index], v_InputString) == 1
-			{
-				If !(v_Tips == "")
-					v_Tips .= "`n"
-				v_Tips .= a_Triggers[A_Index]
-			}
-		}
-		If (v_Tips == "") and InStr(HotstringEndChars,SubStr(v_InputString,-1,1))
-        {
-            v_InputString := out
-            Loop, % a_Triggers.MaxIndex()
-            {
-                If InStr(a_Triggers[A_Index], v_InputString) == 1
-                {
-                    If !(v_Tips == "")
-                        v_Tips .= "`n"
-                    v_Tips .= a_Triggers[A_Index]
-                }
-            }
-        }
-		a_SelectedTriggers := []
-		a_SelectedTriggers := StrSplit(v_Tips, "`n")
-		a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
-		a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
-		v_Tips := ""
-		Loop, % a_SelectedTriggers.MaxIndex()
-		{
-			If !(v_Tips == "")
-				v_Tips .= "`n"
-			v_Tips .= a_SelectedTriggers[A_Index]
-		}
-		if (ini_Caret)
-		{
-			CoordMode, Caret, Screen
-			ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
-		}
-		if (ini_Cursor)
-		{
-			MouseGetPos, v_MouseX, v_MouseY
-			ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
+			if (v_FlagSound == 0)
+				SoundBeep, 400, 200
+			v_FlagSound := 0
 		}
 	}
 	else
-		ToolTip, 
-	FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_AmountOfCharacterTips . "|" . ini_Tips . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
-	v_IndexLog++
+	{
+		v_InputString .= out
+		if (v_HotstringFlag)
+		{
+			v_InputString := ""
+			ToolTip,
+			if !(WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
+				v_HotstringFlag := 0
+		}
+		if InStr(HotstringEndChars, out)
+		{
+			v_TipsFlag := 0
+			Loop, % a_Triggers.MaxIndex()
+			{
+				If InStr(a_Triggers[A_Index], v_InputString) == 1
+				{
+					v_TipsFlag := 1
+				}
+			}
+			if !(v_TipsFlag)
+				v_InputString := ""
+		}		  
+		if (StrLen(v_InputString) > ini_AmountOfCharacterTips - 1 ) and (ini_Tips)
+		{
+			v_Tips := ""
+			Loop, % a_Triggers.MaxIndex()
+			{
+				If InStr(a_Triggers[A_Index], v_InputString) == 1
+				{
+				If !(v_Tips == "")
+						v_Tips .= "`n"
+					v_Tips .= a_Triggers[A_Index]
+				}
+			}
+			If (v_Tips == "") and InStr(HotstringEndChars,SubStr(v_InputString,-1,1))
+			{
+				v_InputString := out
+				Loop, % a_Triggers.MaxIndex()
+				{
+					If InStr(a_Triggers[A_Index], v_InputString) == 1
+					{
+						If !(v_Tips == "")
+							v_Tips .= "`n"
+						v_Tips .= a_Triggers[A_Index]
+					}
+				}
+			}
+			a_SelectedTriggers := []
+			a_SelectedTriggers := StrSplit(v_Tips, "`n")
+			a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
+			a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
+			v_Tips := ""
+			Loop, % a_SelectedTriggers.MaxIndex()
+			{
+				If !(v_Tips == "")
+					v_Tips .= "`n"
+				v_Tips .= a_SelectedTriggers[A_Index]
+			}
+			if (ini_Caret)
+			{
+				CoordMode, Caret, Screen
+				ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
+			}
+			if (ini_Cursor)
+			{
+				MouseGetPos, v_MouseX, v_MouseY
+				ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
+			}
+		}
+		else
+			ToolTip, 
+		if (v_Param == "d")
+		{
+			FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_AmountOfCharacterTips . "|" . ini_Tips . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
+			v_IndexLog++
+		}
+	}
 }
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
 ~BackSpace:: 
-	StringTrimRight, v_InputString, v_InputString, 1
-	if (StrLen(v_InputString) > ini_AmountOfCharacterTips - 1) and (ini_Tips)
+	if (WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
 	{
-		v_Tips := ""
-		Loop, % a_Triggers.MaxIndex()
+		if (ini_MenuSound)
 		{
-			If InStr(a_Triggers[A_Index], v_InputString) == 1
-			{
-				If !(v_Tips == "")
-					v_Tips .= "`n"
-				v_Tips .= a_Triggers[A_Index]
-			}
-		}
-		a_SelectedTriggers := []
-		a_SelectedTriggers := StrSplit(v_Tips, "`n")
-		a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
-		a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
-		v_Tips := ""
-		Loop, % a_SelectedTriggers.MaxIndex()
-		{
-			If !(v_Tips == "")
-				v_Tips .= "`n"
-			v_Tips .= a_SelectedTriggers[A_Index]
-		}
-		if (ini_Caret)
-		{
-			CoordMode, Caret, Screen
-			ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
-		}
-		if (ini_Cursor)
-		{
-			MouseGetPos, v_MouseX, v_MouseY
-			ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
+			if (v_FlagSound == 0)
+				SoundBeep, 400, 200
+			v_FlagSound := 0
 		}
 	}
 	else
-		ToolTip,
-	FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_AmountOfCharacterTips . "|" . ini_Tips . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
-	v_IndexLog++
+	{
+		StringTrimRight, v_InputString, v_InputString, 1
+		if (StrLen(v_InputString) > ini_AmountOfCharacterTips - 1) and (ini_Tips)
+		{
+			v_Tips := ""
+			Loop, % a_Triggers.MaxIndex()
+			{
+				If InStr(a_Triggers[A_Index], v_InputString) == 1
+				{
+					If !(v_Tips == "")
+						v_Tips .= "`n"
+					v_Tips .= a_Triggers[A_Index]
+				}
+			}
+			a_SelectedTriggers := []
+			a_SelectedTriggers := StrSplit(v_Tips, "`n")
+			a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
+			a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
+			v_Tips := ""
+			Loop, % a_SelectedTriggers.MaxIndex()
+			{
+				If !(v_Tips == "")
+					v_Tips .= "`n"
+				v_Tips .= a_SelectedTriggers[A_Index]
+			}
+			if (ini_Caret)
+			{
+				CoordMode, Caret, Screen
+				ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
+			}
+			if (ini_Cursor)
+			{
+				MouseGetPos, v_MouseX, v_MouseY
+				ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
+			}
+		}
+		else
+		if (v_Param == "d")
+		{
+			FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_AmountOfCharacterTips . "|" . ini_Tips . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
+			v_IndexLog++
+		}
+	}
 return
 
 $^z::			;~ Ctrl + z as in MS Word: Undo
@@ -322,7 +367,7 @@ $!BackSpace:: 	;~ Alt + Backspace as in MS Word: rolls back last Autocorrect act
 		{
 			Send, %A_EndChar%
 		}
-		SetTimer, TurnOffTooltip, -5000
+		SetTimer, TurnOffTooltip, -5000, -1 ; Priorytet -1 sprawia, że nie będzie on psuł działanie innego timera
 		v_TypedTriggerstring := ""
 	}
 	else
@@ -613,6 +658,8 @@ F_MenuText(TextOptions, Oflag)
 	v_TypedTriggerstring := ""
 	Gui, Menu:New, +LastFound +AlwaysOnTop -Caption +ToolWindow
 	Gui, Menu:Margin, 0, 0
+	Gui, Menu:Font, cGray s8
+	Gui, Menu:Color,,FFFFEF
 	Gui, Menu:Add, Listbox, x0 y0 h100 w250 vMenuListbox,
 	v_MenuMax := 0
 	for k, MenuItems in StrSplit(TextOptions,"¦") ;parse the data on the weird pipe character
@@ -634,7 +681,9 @@ F_MenuText(TextOptions, Oflag)
 		MenuY := v_MouseY + 20
 	}
 	Gui, Menu:Show, x%MenuX% y%MenuY%, Hotstring listbox
-	SoundBeep, 700, 100
+	if (ini_MenuSound)
+		SoundBeep, 400, 200
+	v_FlagSound := 1
 	if (v_TypedTriggerstring == "")
 	{
 		HK := StrSplit(A_ThisHotkey, ":")
@@ -701,6 +750,8 @@ F_MenuTextAHK(TextOptions, Oflag){
 	v_TypedTriggerstring := ""
 	Gui, MenuAHK:New, +LastFound +AlwaysOnTop -Caption +ToolWindow
 	Gui, MenuAHK:Margin, 0, 0
+	Gui, MenuAHK:Font, cGray s8
+	Gui, MenuAHK:Color,,FFFFEF
 	Gui, MenuAHK:Add, Listbox, x0 y0 h100 w250 vMenuListbox2,
 	v_MenuMax2 := 0
 	for k, MenuItems in StrSplit(TextOptions,"¦") ;parse the data on the weird pipe character
@@ -722,7 +773,9 @@ F_MenuTextAHK(TextOptions, Oflag){
 		MenuY := v_MouseY + 20
 	}
 	Gui, MenuAHK:Show, x%MenuX% y%MenuY%, HotstringAHK listbox
-	SoundBeep, 700, 100
+	if (ini_MenuSound)
+		SoundBeep, 400, 200
+	v_FlagSound := 1
 	if (v_TypedTriggerstring == "")
 	{
 		HK := StrSplit(A_ThisHotkey, ":")
@@ -989,6 +1042,8 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+ #if, v_Param != "l"
+
 ^#h::
 L_GUIInit:
 	SysGet, N, MonitorCount
@@ -1079,6 +1134,11 @@ L_GUIInit:
 	Menu, PositionMenu, Add, Caret, L_MenuCaretCursor
 	Menu, PositionMenu, Add, Cursor, L_MenuCaretCursor
 	Menu, SubmenuMenu, Add, Choose menu position,:PositionMenu
+	Menu, SubmenuMenu, Add, Enable &sound if overrun, L_MenuSound
+	if (ini_MenuSound)
+		Menu, SubmenuMenu, Check, Enable &sound if overrun
+	else
+		Menu, SubmenuMenu, UnCheck, Enable &sound if overrun
 	Menu, Submenu1, Add,% "Hotstring menu (MSI, MCL)", :SubmenuMenu
 	if (ini_MenuCursor)
 		Menu, PositionMenu, Check, Cursor
@@ -1247,6 +1307,11 @@ L_GUIInit:
 	IniRead, StartY, Config.ini, Configuration, SizeOfHotstringsWindow_Y, #
 	IniRead, StartW, Config.ini, Configuration, SizeOfHotstringsWindow_Width, #
 	IniRead, StartH, Config.ini, Configuration, SizeOfHotstringsWindow_Height, #
+	v_FlagMax := 0
+	if (StartW == "") or (StartH == "")
+	{
+		v_FlagMax := 1
+	}
 	if (StartX == "")
 		StartX := Mon%v_SelectedMonitor%Left + (Abs(Mon%v_SelectedMonitor%Right - Mon%v_SelectedMonitor%Left)/2) - 430*DPI%v_SelectedMonitor%
 	if (StartY == "")
@@ -1263,7 +1328,13 @@ L_GUIInit:
 	Gui, HS3:Hide
 	if (v_ShowGui == 1)
 	{
-		Gui, HS3:Show, x%StartX% y%StartY% w%StartW% h%StartH%, Hotstrings
+		if (v_FlagMax)
+		{
+			Gui, HS3:Show, x%StartX% y%StartY% w%StartW% h%StartH% Hide, Hotstrings
+			Gui, HS3:Show, Maximize, Hotstrings
+		}
+		else
+			Gui, HS3:Show, x%StartX% y%StartY% w%StartW% h%StartH%, Hotstrings
 	}
 	else if (v_ShowGui == 2)
 	{
@@ -1273,13 +1344,19 @@ L_GUIInit:
 	}
 	else if (v_ShowGui == 3)
 	{
-		Gui, HS3:Show, x%StartX% y%StartY% w%StartW% h%StartH%, Hotstrings
+		if (v_FlagMax)
+		{
+			Gui, HS3:Show, x%StartX% y%StartY% w%StartW% h%StartH% Hide, Hotstrings
+			Gui, HS3:Show, Maximize, Hotstrings
+		}
+		else
+			Gui, HS3:Show, x%StartX% y%StartY% w%StartW% h%StartH%, Hotstrings
 	}
 	if (v_PreviousSection != "")
 	{
 		GuiControl, Choose, v_SelectHotstringLibrary, %v_PreviousSection%
 		gosub SectionChoose
-		if(A_Args[7] > 0)
+		if(A_Args[8] > 0)
 		{
 			LV_Modify(v_SelectedRow, "Vis")
 			LV_Modify(v_SelectedRow, "+Select +Focus")
@@ -1457,6 +1534,7 @@ Clear:
 	GuiControl,, v_EnterHotstring5,
 	GuiControl,, v_EnterHotstring6,
 	GuiControl,, v_SelectHotstringLibrary, |
+	GuiControl, Choose, v_SelectFunction, SendInput (SI)
 	Loop,%A_ScriptDir%\Libraries\*.csv
         GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName%
 	gosub, SectionChoose
@@ -1922,7 +2000,7 @@ Delete:
 	}
 	MsgBox, Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
 	WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
-	Run, AutoHotkey.exe Hotstrings.ahk L_GUIInit %v_SelectHotstringLibrary% %v_PreviousWidth% %v_PreviousHeight% %v_PreviousX% %v_PreviousY% %v_SelectedRow% %v_SelectedMonitor%
+	Run, AutoHotkey.exe Hotstrings.ahk v_Param L_GUIInit %v_SelectHotstringLibrary% %v_PreviousWidth% %v_PreviousHeight% %v_PreviousX% %v_PreviousY% %v_SelectedRow% %v_SelectedMonitor%
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -2140,8 +2218,8 @@ If (WinExist("Search Hotstring"))
 Gui, HS3List:New,% "+Resize MinSize" . 940*DPI%v_SelectedMonitor% . "x" . 500*DPI%v_SelectedMonitor%
 Gui, HS3List:Add, Text, ,Search:
 Gui, HS3List:Add, Text, % "yp xm+" . 420*DPI%v_SelectedMonitor%, Search by:
-Gui, HS3List:Add, Edit, % "xm w" . 400*DPI%v_SelectedMonitor% . " vSearchTerm gSearch"
-Gui, HS3List:Add, Radio, % "yp xm+" . 420*DPI%v_SelectedMonitor% . " vRadioGroup gSearchChange Checked", Triggerstring
+Gui, HS3List:Add, Edit, % "xm w" . 400*DPI%v_SelectedMonitor% . " vv_SearchTerm gSearch"
+Gui, HS3List:Add, Radio, % "yp xm+" . 420*DPI%v_SelectedMonitor% . " vv_RadioGroup gSearchChange Checked", Triggerstring
 Gui, HS3List:Add, Radio, % "yp xm+" . 540*DPI%v_SelectedMonitor% . " gSearchChange", Hotstring
 Gui, HS3List:Add, Radio, % "yp xm+" . 640*DPI%v_SelectedMonitor% . " gSearchChange", Library
 Gui, HS3List:Add, Button, % "yp-2 xm+" . 720*DPI%v_SelectedMonitor% . " w" . 100*DPI%v_SelectedMonitor% . " gMoveList", Move
@@ -2198,6 +2276,14 @@ if ((StartXlist == "") or (StartYlist == ""))
 gui, HS3List:Add, Text, x0 h1 0x7 w10 vLine2
 Gui, HS3List:Font, % "s" . 10*DPI%v_SelectedMonitor% . " cBlack Norm"
 Gui, HS3List:Add, Text, xm vShortcuts2, F3 Close Search hotstrings | F8 Move hotstring
+if !(v_SearchTerm == "")
+	GuiControl,,v_SearchTerm,%v_SearchTerm%
+if (v_RadioGroup == 1)
+	GuiControl,, Triggerstring, 1
+else if (v_RadioGroup == 2)
+	GuiControl,, Hotstring, 1
+else if (v_RadioGroup == 3)
+	GuiControl,, Library, 1
 Gui, HS3List:Show, % "w" . StartWlist . " h" . StartHlist . " x" . StartXlist . " y" . StartYlist, Search Hotstrings
 Gui, SearchLoad:Destroy
 
@@ -2205,17 +2291,17 @@ Search:
 Gui, HS3List:Submit, NoHide
 if getkeystate("CapsLock","T")
 return
-GuiControlGet, SearchTerm
+GuiControlGet, v_SearchTerm
 GuiControl, -Redraw, List
 LV_Delete()
-if (RadioGroup == 2)
+if (v_RadioGroup == 2)
 {
     For Each, FileName In a_Triggerstring
     {
-    If (SearchTerm != "")
+    If (v_SearchTerm != "")
     {
-        If (InStr(FileName, SearchTerm) = 1) ; for matching at the start
-        ; If InStr(FileName, SearchTerm) ; for overall matching
+        If (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
+        ; If InStr(FileName, v_SearchTerm) ; for overall matching
             LV_Add("",a_Library[A_Index], a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],FileName,a_Comment[A_Index])
     }
     Else
@@ -2223,14 +2309,14 @@ if (RadioGroup == 2)
     }
 	LV_ModifyCol(6,"Sort")
 }
-else if (RadioGroup == 1)
+else if (v_RadioGroup == 1)
 {
     For Each, FileName In a_Hotstring
     {
-    If (SearchTerm != "")
+    If (v_SearchTerm != "")
     {
-        If (InStr(FileName, SearchTerm) = 1) ; for matching at the start
-        ; If InStr(FileName, SearchTerm) ; for overall matching
+        If (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
+        ; If InStr(FileName, v_SearchTerm) ; for overall matching
 			LV_Add("",a_Library[A_Index], FileName,a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index],a_Comment[A_Index])
     }
     Else
@@ -2238,14 +2324,14 @@ else if (RadioGroup == 1)
     }
 	LV_ModifyCol(2,"Sort")
 }
-else if (RadioGroup == 3)
+else if (v_RadioGroup == 3)
 {
     For Each, FileName In a_Library
     {
-    If (SearchTerm != "")
+    If (v_SearchTerm != "")
     {
-        If (InStr(FileName, SearchTerm) = 1) ; for matching at the start
-        ; If InStr(FileName, SearchTerm) ; for overall matching
+        If (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
+        ; If InStr(FileName, v_SearchTerm) ; for overall matching
 			LV_Add("",FileName, a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index],a_Comment[A_Index])
     }
     Else
@@ -2408,7 +2494,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 SearchChange:
-GuiControl,,SearchTerm, %SearchTerm%
+GuiControl,,v_SearchTerm, %v_SearchTerm%
 gosub, Search
 return
 
@@ -2452,11 +2538,12 @@ return
 HS3ListGuiEscape:
 HS3ListGuiClose:
 	Gui, HS3List:Destroy
-	SearchTerm := ""
+	v_SearchTerm := ""
 	a_Hotstring := []
 	a_Library := []
 	a_Triggerstring := []
 	a_EnableDisable := []
+	v_RadioGroup := ""
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2785,3 +2872,11 @@ L_MenuCaretCursor:
 	IniWrite, %ini_MenuCaret%, Config.ini, Configuration, MenuCaret
 	IniWrite, %ini_MenuCursor%, Config.ini, Configuration, MenuCursor
 return
+
+L_MenuSound:
+	Menu, SubmenuMenu, ToggleCheck, Enable &sound if overrun
+	ini_MenuSound := !(ini_MenuSound)
+	IniWrite, %ini_MenuSound%, Config.ini, Configuration, MenuSound
+return
+
+#if
