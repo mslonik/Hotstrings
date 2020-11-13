@@ -64,10 +64,8 @@ MenuCaret=1
 	MsgBox, Config.ini wasn't found. The default Config.ini is now created.
 }
 
-IfNotExist, Libraries\PersonalHotstrings.csv
-	FileAppend,, Libraries\PersonalHotstrings.csv, UTF-8
-IfNotExist, Libraries\New.csv
-	FileAppend,, Libraries\New.csv, UTF-8
+IfNotExist, Libraries\PriorityLibrary.csv
+	FileAppend,, Libraries\PriorityLibrary.csv, UTF-8
 
 if !(A_Args[1] == "l")
 {
@@ -178,13 +176,12 @@ else
 
 Loop, Files, Libraries\*.csv
 {
-	if !((A_LoopFileName == "PersonalHotstrings.csv") or (A_LoopFileName == "New.csv"))
+	if !(A_LoopFileName == "PriorityLibrary.csv")
 	{
 		F_LoadFiles(A_LoopFileName)
 	}
 }
-F_LoadFiles("PersonalHotstrings.csv")
-F_LoadFiles("New.csv")
+F_LoadFiles("PriorityLibrary.csv")
 ; SetTimer, L_DPIScaling, 100
 if(v_PreviousSection)
 	gosub L_GUIInit
@@ -1034,6 +1031,49 @@ F_SortArrayByLength(a_array)
     return a_TempArray
 }
 
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_ImportLibrary(filename)
+{
+    SplitPath, filename, ShortFileName
+    v_OutputFile := % A_ScriptDir . "\Libraries\" . SubStr(ShortFileName, 1, StrLen(ShortFileName)-3) . "csv"
+    Loop,
+    {
+        If FileExist(v_OutputFile) and (A_Index == 1)
+            v_OutputFile := % SubStr(v_OutputFile, 1, StrLen(v_OutputFile)-4) . "_(" . A_Index . ").csv"
+        else if FileExist(v_OutputFile) and (A_Index != 1)
+            v_OutputFile := % SubStr(v_OutputFile, 1, InStr(v_OutputFile, "(" ,,0,1)) . A_Index . ").csv" 
+        else
+            break
+    }
+    FileAppend,, %v_OutputFile%, UTF-8
+    Loop
+	{
+		FileReadLine, line, %filename%, %A_Index%
+		if ErrorLevel
+			break  
+        a_Hotstring := StrSplit(line, ":")
+        v_Options := a_Hotstring[2]
+        v_Trigger := a_Hotstring[3]
+        v_Hotstring := a_Hotstring[5]
+        FileAppend, % v_Options . "‖" . v_Trigger . "‖SI‖En‖" . v_Hotstring  . "‖`n", %v_OutputFile%, UTF-8
+	}
+	a_Triggers := []
+	Loop, Files, Libraries\*.csv
+	{
+		if !(A_LoopFileName == "PriorityLibrary.csv")
+		{
+			F_LoadFiles(A_LoopFileName)
+		}
+	}
+	F_LoadFiles("PriorityLibrary.csv")
+	GuiControl, , v_SelectHotstringLibrary, |
+	Loop,%A_ScriptDir%\Libraries\*.csv
+        GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName%
+    MsgBox, Library has been created.
+    return
+}
+
 ; --------------------------- SECTION OF LABELS ---------------------------
 
 TurnOffTooltip:
@@ -1300,6 +1340,7 @@ L_GUIInit:
 		Menu, Submenu1, Check, &Undo last hotstring
 	Menu, HSMenu, Add, &Configure, :Submenu1
 	Menu, HSMenu, Add, &Search Hotstrings, L_Searching
+	Menu, HSMenu, Add, &Import library, L_ImportLibrary
     Menu, HSMenu, Add, Clipboard &Delay, HSdelay
 	Menu, HSMenu, Add, &About/Help, About
     Gui, HS3:Menu, HSMenu
@@ -1932,7 +1973,15 @@ SaveHotstrings:
 		FileAppend, %txt%, Libraries\%name%, UTF-8
 	}
 	MsgBox Hotstring added to the %SaveFile%.csv file!
-	F_LoadFiles(name)	
+	a_Triggers := []
+	Loop, Files, Libraries\*.csv
+	{
+		if !(A_LoopFileName == "PriorityLibrary.csv")
+		{
+			F_LoadFiles(A_LoopFileName)
+		}
+	}
+	F_LoadFiles("PriorityLibrary.csv")	
 Return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2485,7 +2534,15 @@ if (cntLines == 1)
 	}
 FileDelete, %OutputFile%
 MsgBox Hotstring moved to the %TargetLib% file!
-	F_LoadFiles(TargetLib)
+a_Triggers := []
+Loop, Files, Libraries\*.csv
+{
+	if !(A_LoopFileName == "PriorityLibrary.csv")
+	{
+		F_LoadFiles(A_LoopFileName)
+	}
+}
+F_LoadFiles("PriorityLibrary.csv")
 Gui, MoveLibs:Destroy
 Gui, HS3List:Destroy
 gosub, L_Searching
@@ -2877,6 +2934,11 @@ L_MenuSound:
 	Menu, SubmenuMenu, ToggleCheck, Enable &sound if overrun
 	ini_MenuSound := !(ini_MenuSound)
 	IniWrite, %ini_MenuSound%, Config.ini, Configuration, MenuSound
+return
+
+L_ImportLibrary:
+	FileSelectFile, v_LibraryName, 3, %A_ScriptDir%,, AHK Files (*.ahk)]
+	F_ImportLibrary(v_LibraryName)
 return
 
 #if
