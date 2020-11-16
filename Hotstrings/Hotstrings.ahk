@@ -655,7 +655,7 @@ F_MenuText(TextOptions, Oflag)
 	v_TypedTriggerstring := ""
 	Gui, Menu:New, +LastFound +AlwaysOnTop -Caption +ToolWindow
 	Gui, Menu:Margin, 0, 0
-	Gui, Menu:Font, cGray s8
+	Gui, Menu:Font, cBlack s8
 	Gui, Menu:Color,,FFFFEF
 	Gui, Menu:Add, Listbox, x0 y0 h100 w250 vMenuListbox,
 	v_MenuMax := 0
@@ -747,7 +747,7 @@ F_MenuTextAHK(TextOptions, Oflag){
 	v_TypedTriggerstring := ""
 	Gui, MenuAHK:New, +LastFound +AlwaysOnTop -Caption +ToolWindow
 	Gui, MenuAHK:Margin, 0, 0
-	Gui, MenuAHK:Font, cGray s8
+	Gui, MenuAHK:Font, cBlack s8
 	Gui, MenuAHK:Color,,FFFFEF
 	Gui, MenuAHK:Add, Listbox, x0 y0 h100 w250 vMenuListbox2,
 	v_MenuMax2 := 0
@@ -1035,6 +1035,17 @@ F_SortArrayByLength(a_array)
 
 F_ImportLibrary(filename)
 {
+	static MyProgress, MyText
+	global v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight
+	Gui, Import:New, -Border
+	Gui, Import:Add, Progress, w200 h20 cBlue vMyProgress, 0
+	Gui, Import:Add,Text,w200 vMyText, Library import. Please wait...
+	Gui, Import:Show, hide, Import
+	WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
+	DetectHiddenWindows, On
+	WinGetPos, , , ImportWindowWidth, ImportWindowHeight,Import
+	DetectHiddenWindows, Off
+	Gui, Import:Show,% "x" . v_WindowX + (v_WindowWidth - ImportWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - ImportWindowHeight)/2 ,Import
     SplitPath, filename, ShortFileName
     v_OutputFile := % A_ScriptDir . "\Libraries\" . SubStr(ShortFileName, 1, StrLen(ShortFileName)-3) . "csv"
     Loop,
@@ -1046,6 +1057,10 @@ F_ImportLibrary(filename)
         else
             break
     }
+	Loop, Read, %filename%
+	{
+		v_TotalLines := A_Index
+	}
     FileAppend,, %v_OutputFile%, UTF-8
     Loop
 	{
@@ -1056,8 +1071,15 @@ F_ImportLibrary(filename)
         v_Options := a_Hotstring[2]
         v_Trigger := a_Hotstring[3]
         v_Hotstring := a_Hotstring[5]
-        FileAppend, % v_Options . "‖" . v_Trigger . "‖SI‖En‖" . v_Hotstring  . "‖`n", %v_OutputFile%, UTF-8
+		if (A_Index == 1)
+			FileAppend, % v_Options . "‖" . v_Trigger . "‖SI‖En‖" . v_Hotstring  . "‖", %v_OutputFile%, UTF-8
+		else
+			FileAppend, % "`n" . v_Options . "‖" . v_Trigger . "‖SI‖En‖" . v_Hotstring  . "‖", %v_OutputFile%, UTF-8
+		v_Progress := (A_Index/v_TotalLines)*100
+		GuiControl,, MyProgress, %v_Progress%
+		GuiControl,, MyText, % "Imported " . A_Index . " of " . v_TotalLines . " hotstrings"
 	}
+	GuiControl,, MyText, Library import. Please wait...
 	a_Triggers := []
 	Loop, Files, Libraries\*.csv
 	{
@@ -1067,10 +1089,12 @@ F_ImportLibrary(filename)
 		}
 	}
 	F_LoadFiles("PriorityLibrary.csv")
+	Gui, HS3:Default
 	GuiControl, , v_SelectHotstringLibrary, |
 	Loop,%A_ScriptDir%\Libraries\*.csv
         GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName%
-    MsgBox, Library has been created.
+	Gui, Import:Destroy
+    MsgBox, Library has been imported.
     return
 }
 
@@ -1116,7 +1140,7 @@ L_GUIInit:
     Gui, HS3:Add, Text,% "xm+" . 9*DPI%v_SelectedMonitor%, Select hotstring output function
     Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
     Gui, HS3:Add, DropDownList, % "xm w" . 424*DPI%v_SelectedMonitor% . " vv_SelectFunction gL_SelectFunction hwndddl", SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
-    PostMessage, 0x153, -1, 22*DPI%v_SelectedMonitor%,, ahk_id %ddl%
+    PostMessage, 0x153, -1, 25*DPI%v_SelectedMonitor%,, ahk_id %ddl%
 	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlue Bold"
     Gui, HS3:Add, Text,% "xm+" . 9*DPI%v_SelectedMonitor%, Enter hotstring
     Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
@@ -1138,7 +1162,7 @@ L_GUIInit:
 	Gui, HS3:Add, DropDownList, % "w" . 424*DPI%v_SelectedMonitor% . " vv_SelectHotstringLibrary gSectionChoose xm hwndddl" ,
     Loop,%A_ScriptDir%\Libraries\*.csv
         GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName%
-    PostMessage, 0x153, -1, 22*DPI%v_SelectedMonitor%,, ahk_id %ddl%
+    PostMessage, 0x153, -1, 25*DPI%v_SelectedMonitor%,, ahk_id %ddl%
     Gui, HS3:Font, bold
 
     Gui, HS3:Add, Button, % "xm yp+" . 37*DPI%v_SelectedMonitor% . " w" . 135*DPI%v_SelectedMonitor% . " gAddHotstring", Set hotstring
@@ -1605,11 +1629,11 @@ HSLV:
 	{
 		SendFun := "F_ViaClipboard"
 	}
-	else if (Fun = "MSI")
+	else if (Fun = "MCL")
 	{
 		SendFun := "F_MenuText"
 	}
-	else if (Fun = "MCL")
+	else if (Fun = "MSI")
 	{
 		SendFun := "F_MenuTextAHK"
 	}
@@ -1766,8 +1790,8 @@ SectionChoose:
 				str1[1] := StrReplace(str1[1], "B")
 			}
 			LV_Add("", str1[2], str1[1], str1[3], str1[4],str1[5], str1[6])			
-			LV_ModifyCol(1, "Sort")
 		}
+	LV_ModifyCol(1, "Sort")
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2938,7 +2962,8 @@ return
 
 L_ImportLibrary:
 	FileSelectFile, v_LibraryName, 3, %A_ScriptDir%,, AHK Files (*.ahk)]
-	F_ImportLibrary(v_LibraryName)
+	if !(v_LibraryName == "")
+		F_ImportLibrary(v_LibraryName)
 return
 
 #if
