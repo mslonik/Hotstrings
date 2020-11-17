@@ -182,6 +182,7 @@ Loop, Files, Libraries\*.csv
 	}
 }
 F_LoadFiles("PriorityLibrary.csv")
+TrayTip,%A_ScriptName%, Hotstrings have been loaded ,1
 ; SetTimer, L_DPIScaling, 100
 if(v_PreviousSection)
 	gosub L_GUIInit
@@ -337,6 +338,9 @@ Loop,
 			}
 		}
 		else
+		{
+			ToolTip,
+		}
 		if (v_Param == "d")
 		{
 			FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_AmountOfCharacterTips . "|" . ini_Tips . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
@@ -406,6 +410,8 @@ F2::
 		LV_Modify(1, "+Select +Focus")
 return
 
+^f::
+^s::
 F3::
 	Gui, HS3:Default
 	goto, L_Searching
@@ -728,7 +734,7 @@ Return
 #IfWinExist Hotstring listbox
 	Esc::
 	Gui, Menu:Destroy
-	Send, % SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
+	SendRaw, % SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
 	return
 #If
 
@@ -1079,7 +1085,7 @@ F_ImportLibrary(filename)
 		GuiControl,, MyProgress, %v_Progress%
 		GuiControl,, MyText, % "Imported " . A_Index . " of " . v_TotalLines . " hotstrings"
 	}
-	GuiControl,, MyText, Library import. Please wait...
+	GuiControl,, MyText, Loading libraries. Please wait...
 	a_Triggers := []
 	Loop, Files, Libraries\*.csv
 	{
@@ -1089,6 +1095,7 @@ F_ImportLibrary(filename)
 		}
 	}
 	F_LoadFiles("PriorityLibrary.csv")
+	TrayTip,%A_ScriptName%, Hotstrings have been loaded ,1
 	Gui, HS3:Default
 	GuiControl, , v_SelectHotstringLibrary, |
 	Loop,%A_ScriptDir%\Libraries\*.csv
@@ -1096,6 +1103,50 @@ F_ImportLibrary(filename)
 	Gui, Import:Destroy
     MsgBox, Library has been imported.
     return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_ExportLibrary(filename)
+{
+	SplitPath, filename, ShortFileName
+	v_LibrariesDir := % A_ScriptDir . "\ExportedLibraries"
+	if !InStr(FileExist(v_LibrariesDir),"D")
+		FileCreateDir, %v_LibrariesDir%
+    v_OutputFile := % A_ScriptDir . "\ExportedLibraries\" . SubStr(ShortFileName, 1, StrLen(ShortFileName)-3) . "ahk"
+    Loop,
+    {
+        If FileExist(v_OutputFile) and (A_Index == 1)
+            v_OutputFile := % SubStr(v_OutputFile, 1, StrLen(v_OutputFile)-4) . "_(" . A_Index . ").ahk"
+        else if FileExist(v_OutputFile) and (A_Index != 1)
+            v_OutputFile := % SubStr(v_OutputFile, 1, InStr(v_OutputFile, "(" ,,0,1)) . A_Index . ").ahk" 
+        else
+            break
+    }
+	v_TotalLines := 0
+	Loop, Read, %filename%
+	{
+		v_TotalLines := A_Index
+	}
+	if (v_TotalLines == 0)
+	{
+		MsgBox, Selected file is empty.
+		return
+	}
+	FileAppend, "#SingleInstance, Force", %v_OutputFile%, UTF-8
+	Loop
+	{
+		FileReadLine, line, %filename%, %A_Index%
+		if ErrorLevel
+			break  
+        a_Hotstring := StrSplit(line, "‖")
+        v_Options := a_Hotstring[1]
+        v_Trigger := a_Hotstring[2]
+        v_Hotstring := a_Hotstring[5]
+		FileAppend, % "`n:" . v_Options . ":" . v_Trigger . "::" . v_Hotstring, %v_OutputFile%, UTF-8
+		}
+	return
+	MsgBox, Library has been exported.
 }
 
 ; --------------------------- SECTION OF LABELS ---------------------------
@@ -1365,6 +1416,7 @@ L_GUIInit:
 	Menu, HSMenu, Add, &Configure, :Submenu1
 	Menu, HSMenu, Add, &Search Hotstrings, L_Searching
 	Menu, HSMenu, Add, &Import library, L_ImportLibrary
+	Menu, HSMenu, Add, &Export library, L_ExportLibrary
     Menu, HSMenu, Add, Clipboard &Delay, HSdelay
 	Menu, HSMenu, Add, &About/Help, About
     Gui, HS3:Menu, HSMenu
@@ -1940,7 +1992,7 @@ SaveHotstrings:
 	SaveFlag := 0
 	Loop, Read, %InputFile%, %OutputFile%
 	{
-		if InStr(A_LoopReadLine, LString)
+		if (InStr(A_LoopReadLine, LString, 1) and InStr(Options, "C")) or (InStr(A_LoopReadLine, LString) and !(InStr(Options, "C")))
 		{
 			if !(v_SelectedRow)
 			{
@@ -2006,6 +2058,7 @@ SaveHotstrings:
 		}
 	}
 	F_LoadFiles("PriorityLibrary.csv")	
+	TrayTip,%A_ScriptName%, Hotstrings have been loaded ,1
 Return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2567,6 +2620,7 @@ Loop, Files, Libraries\*.csv
 	}
 }
 F_LoadFiles("PriorityLibrary.csv")
+TrayTip,%A_ScriptName%, Hotstrings have been loaded ,1
 Gui, MoveLibs:Destroy
 Gui, HS3List:Destroy
 gosub, L_Searching
@@ -2615,6 +2669,8 @@ HS3ListGuiSize:
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+~^f::
+~^s::
 ~F3::
 HS3ListGuiEscape:
 HS3ListGuiClose:
@@ -2964,6 +3020,12 @@ L_ImportLibrary:
 	FileSelectFile, v_LibraryName, 3, %A_ScriptDir%,, AHK Files (*.ahk)]
 	if !(v_LibraryName == "")
 		F_ImportLibrary(v_LibraryName)
+return
+
+L_ExportLibrary:
+	FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries",, CSV Files (*.csv)]
+	if !(v_LibraryName == "")
+		F_ExportLibrary(v_LibraryName)
 return
 
 #if
