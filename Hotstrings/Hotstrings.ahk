@@ -59,9 +59,35 @@ Caret=1
 TipsChars=1
 MenuCursor=0
 MenuCaret=1
+[TipsLibraries]
 )
 	FileAppend, %ini%, Config.ini
 	MsgBox, Config.ini wasn't found. The default Config.ini is now created.
+}
+
+IniRead, v_TipsConfig, Config.ini, TipsLibraries
+a_TipsConfig := StrSplit(v_TipsConfig, "`n")
+Loop, % a_TipsConfig.MaxIndex()
+{
+	v_ConfigLibrary := SubStr(a_TipsConfig[A_Index],1,InStr(a_TipsConfig[A_Index],"=")-1)
+	Loop, Files, Libraries\*.csv
+	{
+		v_ConfigFlag := 1
+		if (A_LoopFileName == v_ConfigLibrary)
+		{
+			v_ConfigFlag := 0
+			break
+		}
+	}
+	if (v_ConfigFlag)
+	{
+		IniDelete, Config.ini, TipsLibraries, %v_ConfigLibrary%
+	}
+}
+Loop, Files, Libraries\*.csv
+{
+	if !(InStr(v_TipsConfig,A_LoopFileName))
+		IniWrite, 1, Config.ini, TipsLibraries, %A_LoopFileName%
 }
 
 IfNotExist, Libraries\PriorityLibrary.csv
@@ -480,6 +506,9 @@ F_LoadFiles(nameoffile)
 		line := StrReplace(line, "``r", "`r")		
 		line := StrReplace(line, "``t", "`t")
 		F_StartHotstring(line)
+		IniRead, v_Library, Config.ini, TipsLibraries, %nameoffile%
+		if (v_Library)
+			a_Triggers.Push(v_TriggerString)
 	}
 	return
 }
@@ -488,7 +517,8 @@ F_LoadFiles(nameoffile)
 
 F_StartHotstring(txt)
 {
-	static Options, v_TriggerString, OnOff, EnDis, SendFun, TextInsert
+	global v_TriggerString
+	static Options, OnOff, EnDis, SendFun, TextInsert
 	v_UndoHotstring := ""
 	txtsp := StrSplit(txt, "‖")
 	Options := txtsp[1]
@@ -515,7 +545,6 @@ F_StartHotstring(txt)
 	if !((Options == "") and (v_TriggerString == "") and (TextInsert == "") and (OnOff == ""))
 	{
 		Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, Oflag), OnOff)
-		a_Triggers.Push(v_TriggerString)
 	}
 	return
 }
@@ -1109,6 +1138,18 @@ F_ImportLibrary(filename)
 
 F_ExportLibrary(filename)
 {
+	static MyProgress, MyText
+	global v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight
+	Gui, Export:New, -Border
+	Gui, Export:Add, Progress, w200 h20 cBlue vMyProgress, 0
+	Gui, Export:Add,Text,w200 vMyText, Library export. Please wait...
+	Gui, Export:Show, hide, Export
+	WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
+	DetectHiddenWindows, On
+	WinGetPos, , , ExportWindowWidth, ExportWindowHeight,Export
+	DetectHiddenWindows, Off
+	Gui, Export:Show,% "x" . v_WindowX + (v_WindowWidth - ExportWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - ExportWindowHeight)/2 ,Export
+    
 	SplitPath, filename, ShortFileName
 	v_LibrariesDir := % A_ScriptDir . "\ExportedLibraries"
 	if !InStr(FileExist(v_LibrariesDir),"D")
@@ -1142,11 +1183,26 @@ F_ExportLibrary(filename)
         a_Hotstring := StrSplit(line, "‖")
         v_Options := a_Hotstring[1]
         v_Trigger := a_Hotstring[2]
-        v_Hotstring := a_Hotstring[5]
-		FileAppend, % "`n:" . v_Options . ":" . v_Trigger . "::" . v_Hotstring, %v_OutputFile%, UTF-8
+		if InStr(a_Hotstring[3],"M")
+		{
+			a_MenuHotstring := StrSplit(a_Hotstring[5],"¦")
+			Loop, % a_MenuHotstring.MaxIndex()
+			{
+				FileAppend, % "`n:" . v_Options . ":" . v_Trigger . "::" . a_MenuHotstring[A_Index] . "; warning, code generated automatically for definitions based on menu, see documentation of Hotstrings app for details", %v_OutputFile%, UTF-8
+			}
 		}
+		else
+		{
+			v_Hotstring := a_Hotstring[5]
+			FileAppend, % "`n:" . v_Options . ":" . v_Trigger . "::" . v_Hotstring, %v_OutputFile%, UTF-8
+		}
+        v_Progress := (A_Index/v_TotalLines)*100
+		GuiControl,, MyProgress, %v_Progress%
+		GuiControl,, MyText, % "Exported " . A_Index . " of " . v_TotalLines . " hotstrings"
+		}
+	Gui, Export:Destroy
+	MsgBox, Library has been exported.`nThe file path is: %v_OutputFile%
 	return
-	MsgBox, Library has been exported.
 }
 
 ; --------------------------- SECTION OF LABELS ---------------------------
@@ -1284,7 +1340,7 @@ L_GUIInit:
 	Menu, Submenu4, Add, 3, L_AmountOfCharacterTips3
 	Menu, Submenu4, Add, 4, L_AmountOfCharacterTips4
 	Menu, Submenu4, Add, 5, L_AmountOfCharacterTips5
-	Menu, Submenu4, Check, % ini_AmountOfCharacterTips ; ms on 2020-10-31
+	Menu, Submenu4, Check, % ini_AmountOfCharacterTips
 	Loop, 5
 	{
 		if !(A_Index == ini_AmountOfCharacterTips)
@@ -1415,8 +1471,19 @@ L_GUIInit:
 		Menu, Submenu1, Check, &Undo last hotstring
 	Menu, HSMenu, Add, &Configure, :Submenu1
 	Menu, HSMenu, Add, &Search Hotstrings, L_Searching
-	Menu, HSMenu, Add, &Import library, L_ImportLibrary
-	Menu, HSMenu, Add, &Export library, L_ExportLibrary
+	Menu, LibrariesSubmenu, Add, &Import from .ahk to .csv, L_ImportLibrary
+	Menu, LibrariesSubmenu, Add, &Export from .csv to .ahk, L_ExportLibrary
+	Loop,%A_ScriptDir%\Libraries\*.csv
+	{
+		Menu, ToggleLibrariesSubmenu, Add, %A_LoopFileName%, L_ToggleTipsLibrary
+		IniRead, v_LibraryFlag, Config.ini, TipsLibraries, %A_LoopFileName%
+		if (v_LibraryFlag)
+			Menu, ToggleLibrariesSubmenu, Check, %A_LoopFileName%
+		else
+			Menu, ToggleLibrariesSubmenu, UnCheck, %A_LoopFileName%	
+	}
+	Menu, LibrariesSubmenu, Add, Enable/disable triggerstring tips, :ToggleLibrariesSubmenu 
+	Menu, HSMenu, Add, &Libraries configuration, :LibrariesSubmenu
     Menu, HSMenu, Add, Clipboard &Delay, HSdelay
 	Menu, HSMenu, Add, &About/Help, About
     Gui, HS3:Menu, HSMenu
@@ -3026,6 +3093,23 @@ L_ExportLibrary:
 	FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries",, CSV Files (*.csv)]
 	if !(v_LibraryName == "")
 		F_ExportLibrary(v_LibraryName)
+return
+
+L_ToggleTipsLibrary:
+Menu, ToggleLibrariesSubmenu, ToggleCheck, %A_ThisMenuitem%
+IniRead, v_LibraryFlag, Config.ini, TipsLibraries, %A_ThisMenuitem%
+v_LibraryFlag := !(v_LibraryFlag)
+IniWrite, %v_LibraryFlag%, Config.ini, TipsLibraries, %A_ThisMenuitem%
+a_Triggers := []
+Loop, Files, Libraries\*.csv
+{
+	if !(A_LoopFileName == "PriorityLibrary.csv")
+	{
+		F_LoadFiles(A_LoopFileName)
+	}
+}
+F_LoadFiles("PriorityLibrary.csv")
+TrayTip,%A_ScriptName%, Hotstrings have been loaded ,1
 return
 
 #if
