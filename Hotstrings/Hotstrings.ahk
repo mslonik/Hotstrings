@@ -192,11 +192,11 @@ if !(v_PreviousSection)
 else
 	v_ShowGui := 2
 if (v_Param == "d")
-	TrayTip,, %A_ScriptName% - Debug, 1
+	TrayTip, %A_ScriptName% - Debug,Loading hotstrings from libraries.., 1
 else if (v_Param == "l")
-	TrayTip,, %A_ScriptName% - Lite, 1
+	TrayTip, %A_ScriptName% - Lite,Loading hotstrings from libraries..., 1
 else	
-	TrayTip,, %A_ScriptName%, 1
+	TrayTip, %A_ScriptName%,Loading hotstrings from libraries..., 1
 
 ; ---------------------------- INITIALIZATION -----------------------------
 
@@ -690,8 +690,8 @@ F_MenuText(TextOptions, Oflag)
 	v_TypedTriggerstring := ""
 	Gui, Menu:New, +LastFound +AlwaysOnTop -Caption +ToolWindow
 	Gui, Menu:Margin, 0, 0
-	Gui, Menu:Font, cBlack s8
-	Gui, Menu:Color,,FFFFEF
+	Gui, Menu:Font, c766D69 s8
+	Gui, Menu:Color,,FFFFFF
 	Gui, Menu:Add, Listbox, x0 y0 h100 w250 vMenuListbox,
 	v_MenuMax := 0
 	for k, MenuItems in StrSplit(TextOptions,"¦") ;parse the data on the weird pipe character
@@ -782,8 +782,8 @@ F_MenuTextAHK(TextOptions, Oflag){
 	v_TypedTriggerstring := ""
 	Gui, MenuAHK:New, +LastFound +AlwaysOnTop -Caption +ToolWindow
 	Gui, MenuAHK:Margin, 0, 0
-	Gui, MenuAHK:Font, cBlack s8
-	Gui, MenuAHK:Color,,FFFFEF
+	Gui, MenuAHK:Font, c766D69 s8
+	Gui, MenuAHK:Color,,FFFFFF
 	Gui, MenuAHK:Add, Listbox, x0 y0 h100 w250 vMenuListbox2,
 	v_MenuMax2 := 0
 	for k, MenuItems in StrSplit(TextOptions,"¦") ;parse the data on the weird pipe character
@@ -1041,6 +1041,104 @@ F_SortArrayAlphabetically(a_array)
     return a_TempArray
 }
 
+F_SortHotstringsAlphabetically(filename)
+{
+	local v_Text, v_Text2, a_TempArray, a_TriggerArray, line, v_Trigger, a_TriggerArray, a_SortedTriggers, a_SortedHotstrings, cnt, no, v_AscTrigger, v_AscArray, flag, v_ActualArray, v_TempArray
+	a_TempArray := []
+	a_TriggerArray := []
+	a_SortedTriggers := []
+	a_SortedHotstrings := []
+	Loop
+	{
+		FileReadLine, line, %filename%, %A_Index%
+		if ErrorLevel
+			break
+		a_TempArray.Push(line)
+		a_ActualArray := StrSplit(line,"‖")
+		v_Trigger := a_ActualArray[2]
+		a_TriggerArray.Push(v_Trigger)
+	}
+	Loop, % a_TriggerArray.MaxIndex()
+	{
+		cnt := A_Index
+		a_SortedTriggers[cnt] := a_TriggerArray[cnt]
+		a_SortedHotstrings[cnt] := a_TempArray[cnt]
+		Loop, % cnt - 1
+        {
+			v_AscTrigger := Asc(a_TriggerArray[cnt])
+			if (v_AscTrigger >= 65) and (v_AscTrigger <= 90)
+			{
+				v_AscTrigger := v_AscTrigger+32
+			}
+			v_AscArray := Asc(a_SortedTriggers[A_Index])
+			if (v_AscArray >= 65) and (v_AscArray <= 90)
+			{
+				v_AscArray := v_AscArray+32
+			}
+            If (v_AscTrigger < v_AscArray)
+            {
+                Loop, % cnt - A_Index
+                {
+                    a_SortedTriggers[cnt - (A_Index - 1)] := a_SortedTriggers[cnt - A_Index]
+					a_SortedHotstrings[cnt - (A_Index - 1)] := a_SortedHotstrings[cnt - A_Index]
+                }
+                a_SortedTriggers[A_Index] := a_TriggerArray[cnt]
+				a_SortedHotstrings[A_Index] := a_TempArray[cnt]
+				break
+            }
+            else if (v_AscTrigger == v_AscArray)
+            {
+                flag := 0
+                no := A_Index
+                v_ActualArray := a_TriggerArray[cnt]
+                v_TempArray := a_SortedTriggers[no]
+                Loop, % Max(StrLen(v_ActualArray), StrLen(v_TempArray))
+                {
+                    v_ActualArray := SubStr(v_ActualArray, 2)
+                    v_TempArray := SubStr(v_TempArray, 2)
+					v_AscActualArray := Asc(v_ActualArray)
+					if (v_AscActualArray >= 65) and (v_AscActualArray <= 90)
+					{
+						v_AscActualArray := v_AscActualArray+32
+					}
+					v_AscTempArray := Asc(v_TempArray)
+					if (v_AscTempArray >= 65) and (v_AscTempArray <= 90)
+					{
+						v_AscTempArray := v_AscTempArray+32
+					}
+                    If (v_AscActualArray < v_AscTempArray)
+                    {
+                        Loop, % cnt - no
+                        {
+                            a_SortedTriggers[cnt - A_Index + 1] := a_SortedTriggers[cnt - A_Index]
+							a_SortedHotstrings[cnt - A_Index + 1] := a_SortedHotstrings[cnt - A_Index]
+                        }
+                        a_SortedTriggers[no] := a_TriggerArray[cnt]
+						a_SortedHotstrings[no] := a_TempArray[cnt]
+                        flag := 1
+                        Break
+                    }
+                    else if (v_AscActualArray > v_AscTempArray)
+                    {
+                        Break
+                    }
+                }
+                if (flag)
+                    Break
+            }
+        }
+	}
+	v_Text := a_SortedHotstrings[1]
+	Loop, % a_SortedHotstrings.MaxIndex() - 1
+	{
+		v_Text2 := % "`n" . a_SortedHotstrings[A_Index+1]
+		v_Text .= v_Text2
+	}
+	FileDelete, %filename%
+	FileAppend, %v_Text%, %filename%, UTF-8
+	return 
+}
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 F_SortArrayByLength(a_array)
@@ -1114,8 +1212,10 @@ F_ImportLibrary(filename)
 		GuiControl,, MyProgress, %v_Progress%
 		GuiControl,, MyText, % "Imported " . A_Index . " of " . v_TotalLines . " hotstrings"
 	}
+	F_SortHotstringsAlphabetically(v_OutputFile)
 	GuiControl,, MyText, Loading libraries. Please wait...
 	a_Triggers := []
+	TrayTip, %A_ScriptName%,Loading hotstrings from libraries..., 1
 	Loop, Files, Libraries\*.csv
 	{
 		if !(A_LoopFileName == "PriorityLibrary.csv")
@@ -1136,7 +1236,7 @@ F_ImportLibrary(filename)
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_ExportLibrary(filename)
+F_ExportLibraryStatic(filename)
 {
 	static MyProgress, MyText
 	global v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight
@@ -1174,7 +1274,7 @@ F_ExportLibrary(filename)
 		MsgBox, Selected file is empty.
 		return
 	}
-	FileAppend, "#SingleInstance, Force", %v_OutputFile%, UTF-8
+	FileAppend, % "; This file is result of automatic export from Hotstrings.ahk application.`n#SingleInstance, Force", %v_OutputFile%, UTF-8
 	Loop
 	{
 		FileReadLine, line, %filename%, %A_Index%
@@ -1188,13 +1288,86 @@ F_ExportLibrary(filename)
 			a_MenuHotstring := StrSplit(a_Hotstring[5],"¦")
 			Loop, % a_MenuHotstring.MaxIndex()
 			{
-				FileAppend, % "`n:" . v_Options . ":" . v_Trigger . "::" . a_MenuHotstring[A_Index] . "; warning, code generated automatically for definitions based on menu, see documentation of Hotstrings app for details", %v_OutputFile%, UTF-8
+				FileAppend, % "`n:" . v_Options . ":" . v_Trigger . "::" . a_MenuHotstring[A_Index] . " " . ";" . " warning, code generated automatically for definitions based on menu, see documentation of Hotstrings app for details", %v_OutputFile%, UTF-8
 			}
 		}
 		else
 		{
 			v_Hotstring := a_Hotstring[5]
 			FileAppend, % "`n:" . v_Options . ":" . v_Trigger . "::" . v_Hotstring, %v_OutputFile%, UTF-8
+		}
+        v_Progress := (A_Index/v_TotalLines)*100
+		GuiControl,, MyProgress, %v_Progress%
+		GuiControl,, MyText, % "Exported " . A_Index . " of " . v_TotalLines . " hotstrings"
+		}
+	Gui, Export:Destroy
+	MsgBox, Library has been exported.`nThe file path is: %v_OutputFile%
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_ExportLibraryDynamic(filename)
+{
+	static MyProgress, MyText
+	global v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight
+	Gui, Export:New, -Border
+	Gui, Export:Add, Progress, w200 h20 cBlue vMyProgress, 0
+	Gui, Export:Add,Text,w200 vMyText, Library export. Please wait...
+	Gui, Export:Show, hide, Export
+	WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
+	DetectHiddenWindows, On
+	WinGetPos, , , ExportWindowWidth, ExportWindowHeight,Export
+	DetectHiddenWindows, Off
+	Gui, Export:Show,% "x" . v_WindowX + (v_WindowWidth - ExportWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - ExportWindowHeight)/2 ,Export
+    
+	SplitPath, filename, ShortFileName
+	v_LibrariesDir := % A_ScriptDir . "\ExportedLibraries"
+	if !InStr(FileExist(v_LibrariesDir),"D")
+		FileCreateDir, %v_LibrariesDir%
+    v_OutputFile := % A_ScriptDir . "\ExportedLibraries\" . SubStr(ShortFileName, 1, StrLen(ShortFileName)-3) . "ahk"
+    Loop,
+    {
+        If FileExist(v_OutputFile) and (A_Index == 1)
+            v_OutputFile := % SubStr(v_OutputFile, 1, StrLen(v_OutputFile)-4) . "_(" . A_Index . ").ahk"
+        else if FileExist(v_OutputFile) and (A_Index != 1)
+            v_OutputFile := % SubStr(v_OutputFile, 1, InStr(v_OutputFile, "(" ,,0,1)) . A_Index . ").ahk" 
+        else
+            break
+    }
+	v_TotalLines := 0
+	Loop, Read, %filename%
+	{
+		v_TotalLines := A_Index
+	}
+	if (v_TotalLines == 0)
+	{
+		MsgBox, Selected file is empty.
+		return
+	}
+	FileAppend, % "; This file is result of automatic export from Hotstrings.ahk application.`n#SingleInstance, Force", %v_OutputFile%, UTF-8
+	Loop
+	{
+		FileReadLine, line, %filename%, %A_Index%
+		if ErrorLevel
+			break  
+        a_Hotstring := StrSplit(line, "‖")
+        v_Options := a_Hotstring[1]
+        v_Trigger := a_Hotstring[2]
+		if InStr(a_Hotstring[3],"M")
+		{
+			a_MenuHotstring := StrSplit(a_Hotstring[5],"¦")
+			Loop, % a_MenuHotstring.MaxIndex()
+			{
+				if (a_MenuHotstring[A_Index] != "")
+					FileAppend, % "`nHotstring("":" . v_Options . ":" . v_Trigger . """, """ . a_MenuHotstring[A_Index] . """, On) " . ";" . " warning, code generated automatically for definitions based on menu, see documentation of Hotstrings app for details", %v_OutputFile%, UTF-8
+			}
+		}
+		else
+		{
+			v_Hotstring := a_Hotstring[5]
+			if (v_Hotstring != "")
+				FileAppend, % "`nHotstring("":" . v_Options . ":" . v_Trigger . """, """ . v_Hotstring . """, On)", %v_OutputFile%, UTF-8
 		}
         v_Progress := (A_Index/v_TotalLines)*100
 		GuiControl,, MyProgress, %v_Progress%
@@ -1247,7 +1420,7 @@ L_GUIInit:
     Gui, HS3:Add, Text,% "xm+" . 9*DPI%v_SelectedMonitor%, Select hotstring output function
     Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
     Gui, HS3:Add, DropDownList, % "xm w" . 424*DPI%v_SelectedMonitor% . " vv_SelectFunction gL_SelectFunction hwndddl", SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
-    PostMessage, 0x153, -1, 25*DPI%v_SelectedMonitor%,, ahk_id %ddl%
+    PostMessage, 0x153, -1, 30*DPI%v_SelectedMonitor%,, ahk_id %ddl%
 	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlue Bold"
     Gui, HS3:Add, Text,% "xm+" . 9*DPI%v_SelectedMonitor%, Enter hotstring
     Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
@@ -1269,7 +1442,7 @@ L_GUIInit:
 	Gui, HS3:Add, DropDownList, % "w" . 424*DPI%v_SelectedMonitor% . " vv_SelectHotstringLibrary gSectionChoose xm hwndddl" ,
     Loop,%A_ScriptDir%\Libraries\*.csv
         GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName%
-    PostMessage, 0x153, -1, 25*DPI%v_SelectedMonitor%,, ahk_id %ddl%
+    PostMessage, 0x153, -1, 30*DPI%v_SelectedMonitor%,, ahk_id %ddl%
     Gui, HS3:Font, bold
 
     Gui, HS3:Add, Button, % "xm yp+" . 37*DPI%v_SelectedMonitor% . " w" . 135*DPI%v_SelectedMonitor% . " gAddHotstring", Set hotstring
@@ -1472,7 +1645,9 @@ L_GUIInit:
 	Menu, HSMenu, Add, &Configure, :Submenu1
 	Menu, HSMenu, Add, &Search Hotstrings, L_Searching
 	Menu, LibrariesSubmenu, Add, &Import from .ahk to .csv, L_ImportLibrary
-	Menu, LibrariesSubmenu, Add, &Export from .csv to .ahk, L_ExportLibrary
+	Menu, ExportSubmenu, Add, &Static hotstrings,  L_ExportLibraryStatic
+	Menu, ExportSubmenu, Add, &Dynamic hotstrings,  L_ExportLibraryDynamic
+	Menu, LibrariesSubmenu, Add, &Export from .csv to .ahk,:ExportSubmenu
 	Loop,%A_ScriptDir%\Libraries\*.csv
 	{
 		Menu, ToggleLibrariesSubmenu, Add, %A_LoopFileName%, L_ToggleTipsLibrary
@@ -2117,6 +2292,7 @@ SaveHotstrings:
 	}
 	MsgBox Hotstring added to the %SaveFile%.csv file!
 	a_Triggers := []
+	TrayTip, %A_ScriptName%,Loading hotstrings from libraries..., 1
 	Loop, Files, Libraries\*.csv
 	{
 		if !(A_LoopFileName == "PriorityLibrary.csv")
@@ -2679,6 +2855,7 @@ if (cntLines == 1)
 FileDelete, %OutputFile%
 MsgBox Hotstring moved to the %TargetLib% file!
 a_Triggers := []
+TrayTip, %A_ScriptName%,Loading hotstrings from libraries..., 1
 Loop, Files, Libraries\*.csv
 {
 	if !(A_LoopFileName == "PriorityLibrary.csv")
@@ -3084,15 +3261,21 @@ L_MenuSound:
 return
 
 L_ImportLibrary:
-	FileSelectFile, v_LibraryName, 3, %A_ScriptDir%,, AHK Files (*.ahk)]
+	FileSelectFile, v_LibraryName, 3, %A_ScriptDir%,Choose library file (.ahk) for import, AHK Files (*.ahk)]
 	if !(v_LibraryName == "")
 		F_ImportLibrary(v_LibraryName)
 return
 
-L_ExportLibrary:
-	FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries",, CSV Files (*.csv)]
+L_ExportLibraryStatic:
+	FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries",Choose library file (.csv) for export, CSV Files (*.csv)]
 	if !(v_LibraryName == "")
-		F_ExportLibrary(v_LibraryName)
+		F_ExportLibraryStatic(v_LibraryName)
+return
+
+L_ExportLibraryDynamic:
+	FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries",Choose library file (.csv) for export, CSV Files (*.csv)]
+	if !(v_LibraryName == "")
+		F_ExportLibraryDynamic(v_LibraryName)
 return
 
 L_ToggleTipsLibrary:
@@ -3101,6 +3284,7 @@ IniRead, v_LibraryFlag, Config.ini, TipsLibraries, %A_ThisMenuitem%
 v_LibraryFlag := !(v_LibraryFlag)
 IniWrite, %v_LibraryFlag%, Config.ini, TipsLibraries, %A_ThisMenuitem%
 a_Triggers := []
+TrayTip, %A_ScriptName%,Loading hotstrings from libraries..., 1
 Loop, Files, Libraries\*.csv
 {
 	if !(A_LoopFileName == "PriorityLibrary.csv")
