@@ -170,6 +170,8 @@ global ini_MenuSound := ""
 global v_FlagSound := 0
 global v_SearchTerm := ""
 global v_RadioGroup := ""
+global v_HotstringCnt := ""
+global v_HS3ListFlag := 0
 if !(A_Args[8])
 	v_SelectedRow := 0
 else
@@ -200,6 +202,7 @@ else
 
 ; ---------------------------- INITIALIZATION -----------------------------
 
+v_HotstringCnt := 0
 Loop, Files, Libraries\*.csv
 {
 	if !(A_LoopFileName == "PriorityLibrary.csv")
@@ -497,6 +500,8 @@ F8::
 
 F_LoadFiles(nameoffile)
 {
+	global v_LoadedHotstrings
+	
 	Loop
 	{
 		FileReadLine, line, Libraries\%nameoffile%, %A_Index%
@@ -509,7 +514,9 @@ F_LoadFiles(nameoffile)
 		IniRead, v_Library, Config.ini, TipsLibraries, %nameoffile%
 		if (v_Library)
 			a_Triggers.Push(v_TriggerString)
-	}
+		v_HotstringCnt++
+		GuiControl,, v_LoadedHotstrings, Loaded hotstrings: %v_HotstringCnt%
+		}
 	return
 }
 
@@ -1216,6 +1223,7 @@ F_ImportLibrary(filename)
 	GuiControl,, MyText, Loading libraries. Please wait...
 	a_Triggers := []
 	TrayTip, %A_ScriptName%,Loading hotstrings from libraries..., 1
+	v_HotstringCnt := 0
 	Loop, Files, Libraries\*.csv
 	{
 		if !(A_LoopFileName == "PriorityLibrary.csv")
@@ -1471,6 +1479,7 @@ L_GUIInit:
 	Gui, HS3:Add, Edit, vv_ViewString xs gViewString ReadOnly Hide,
 	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
 	Gui, HS3:Add, Text, xm y0 vv_ShortcutsMainInterface,F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear |F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring 
+	GUI, HS3:Add, Text, y0 x800 vv_LoadedHotstrings, Loaded hotstrings: %v_HotstringCnt%
 
     ; Menu, HSMenu, Add, &Monitor, CheckMon
 	Menu, Submenu1, Add, &Undo last hotstring,Undo
@@ -2293,6 +2302,7 @@ SaveHotstrings:
 	MsgBox Hotstring added to the %SaveFile%.csv file!
 	a_Triggers := []
 	TrayTip, %A_ScriptName%,Loading hotstrings from libraries..., 1
+	v_HotstringCnt := 0
 	Loop, Files, Libraries\*.csv
 	{
 		if !(A_LoopFileName == "PriorityLibrary.csv")
@@ -2316,6 +2326,7 @@ Delete:
 	Msgbox, 0x4,, Selected Hotstring will be deleted. Do you want to proceed?
 	IfMsgBox, No
 		return
+	TrayTip, %A_ScriptName%, Deleting hotstring..., 1
 	name := v_SelectHotstringLibrary
 	FileDelete, Libraries\%name%
 	if (v_SelectedRow == SectionList.MaxIndex())
@@ -2542,6 +2553,7 @@ HS3GuiSize:
 	}
 	GuiControl, Move, v_LibraryContent, W%NewWidth% H%NewHeight%
 	GuiControl, Move, v_ShortcutsMainInterface, % "y" . v_PreviousHeight - 22*DPI%v_SelectedMonitor%
+	GuiControl, Move, v_LoadedHotstrings, % "y" . v_PreviousHeight - 22*DPI%v_SelectedMonitor% . " x" . v_PreviousWidth - 200*DPI%v_SelectedMonitor%
 	GuiControl, Move, Line, % "w" . A_GuiWidth . " y" . v_PreviousHeight - 26*DPI%v_SelectedMonitor%
 return
 
@@ -2556,107 +2568,120 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 L_Searching:
-WinGetPos, StartXlist, StartYlist,,,Hotstrings
-Gui, SearchLoad:New, -Resize -Border
-Gui, SearchLoad:Add, Text,, Please wait, uploading .csv files...
-Gui, SearchLoad:Show
-SysGet, N, MonitorCount
-    Loop, % N
-    {
-        SysGet, Mon%A_Index%, Monitor, %A_Index%
-        W%A_Index% := Mon%A_Index%Right - Mon%A_Index%Left
-        H%A_Index% := Mon%A_Index%Bottom - Mon%A_Index%Top
-        DPI%A_Index% := round(W%A_Index%/1920*(96/A_ScreenDPI),2)
-    }
-    SysGet, PrimMon, MonitorPrimary
-    if (v_SelectedMonitor == 0)
-        v_SelectedMonitor := PrimMon
-If (WinExist("Search Hotstring"))
+if (v_HS3ListFlag)
+	GUI, HS3List:Show
+else
 {
-	Gui, HS3List:Destroy
-}
-	a_Hotstring := []
-	a_Library := []
-	a_Triggerstring := []
-	a_EnableDisable := []
-	a_TriggerOptions := []
-	a_OutputFunction := []
-	a_Comment := []
+	WinGetPos, StartXlist, StartYlist,,,Hotstrings
+	Gui, SearchLoad:New, -Resize -Border
+	Gui, SearchLoad:Add, Text,, Please wait, uploading .csv files...
+	Gui, SearchLoad:Show, hide, UploadingSearch
+	WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
+	DetectHiddenWindows, On
+	WinGetPos, , , UploadingWindowWidth, UploadingWindowHeight,UploadingSearch
+	DetectHiddenWindows, Off
+	Gui, SearchLoad:Show,% "x" . v_WindowX + (v_WindowWidth - UploadingWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - UploadingWindowHeight)/2 ,UploadingSearch
+		
+	SysGet, N, MonitorCount
+		Loop, % N
+		{
+			SysGet, Mon%A_Index%, Monitor, %A_Index%
+			W%A_Index% := Mon%A_Index%Right - Mon%A_Index%Left
+			H%A_Index% := Mon%A_Index%Bottom - Mon%A_Index%Top
+			DPI%A_Index% := round(W%A_Index%/1920*(96/A_ScreenDPI),2)
+		}
+		SysGet, PrimMon, MonitorPrimary
+		if (v_SelectedMonitor == 0)
+			v_SelectedMonitor := PrimMon
+	If (WinExist("Search Hotstring"))
+	{
+		Gui, HS3List:Hide
+	}
+		a_Hotstring := []
+		a_Library := []
+		a_Triggerstring := []
+		a_EnableDisable := []
+		a_TriggerOptions := []
+		a_OutputFunction := []
+		a_Comment := []
 
 
-Gui, HS3List:New,% "+Resize MinSize" . 940*DPI%v_SelectedMonitor% . "x" . 500*DPI%v_SelectedMonitor%
-Gui, HS3List:Add, Text, ,Search:
-Gui, HS3List:Add, Text, % "yp xm+" . 420*DPI%v_SelectedMonitor%, Search by:
-Gui, HS3List:Add, Edit, % "xm w" . 400*DPI%v_SelectedMonitor% . " vv_SearchTerm gSearch"
-Gui, HS3List:Add, Radio, % "yp xm+" . 420*DPI%v_SelectedMonitor% . " vv_RadioGroup gSearchChange Checked", Triggerstring
-Gui, HS3List:Add, Radio, % "yp xm+" . 540*DPI%v_SelectedMonitor% . " gSearchChange", Hotstring
-Gui, HS3List:Add, Radio, % "yp xm+" . 640*DPI%v_SelectedMonitor% . " gSearchChange", Library
-Gui, HS3List:Add, Button, % "yp-2 xm+" . 720*DPI%v_SelectedMonitor% . " w" . 100*DPI%v_SelectedMonitor% . " gMoveList", Move
-Gui, HS3List:Add, ListView, % "xm grid vList +AltSubmit gHSLV2 h" . 400*DPI%v_SelectedMonitor%, Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment
-Loop, Files, %A_ScriptDir%\Libraries\*.csv
-{
-    Loop
-    {
-        FileReadLine, varSearch, %A_LoopFileFullPath%, %A_Index%
-        if ErrorLevel
-			break
-        tabSearch := StrSplit(varSearch, "‖")
-		if (InStr(tabSearch[1], "*0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "*0")
-			}
-			if (InStr(tabSearch[1], "O0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "O0")
-			}
-			if (InStr(tabSearch[1], "C0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "C0")
-			}
-			if (InStr(tabSearch[1], "?0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "?0")
-			}
-			if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "B")
-			}
-        name := SubStr(A_LoopFileName,1, StrLen(A_LoopFileName)-4)
-        LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4],tabSearch[5], tabSearch[6])
-		a_Library.Push(name)
-        a_Hotstring.Push(tabSearch[2])
-		a_TriggerOptions.Push(tabSearch[1])
-		a_OutputFunction.Push(tabSearch[3])
-        a_EnableDisable.Push(tabSearch[4])
-		a_Comment.Push(tabSearch[6])
-        a_Triggerstring.Push(tabSearch[5])
-    }
+	Gui, HS3List:New,% "+Resize MinSize" . 940*DPI%v_SelectedMonitor% . "x" . 500*DPI%v_SelectedMonitor%
+	v_HS3ListFlag := 1
+	Gui, HS3List:Add, Text, ,Search:
+	Gui, HS3List:Add, Text, % "yp xm+" . 420*DPI%v_SelectedMonitor%, Search by:
+	Gui, HS3List:Add, Edit, % "xm w" . 400*DPI%v_SelectedMonitor% . " vv_SearchTerm gSearch"
+	Gui, HS3List:Add, Radio, % "yp xm+" . 420*DPI%v_SelectedMonitor% . " vv_RadioGroup gSearchChange Checked", Triggerstring
+	Gui, HS3List:Add, Radio, % "yp xm+" . 540*DPI%v_SelectedMonitor% . " gSearchChange", Hotstring
+	Gui, HS3List:Add, Radio, % "yp xm+" . 640*DPI%v_SelectedMonitor% . " gSearchChange", Library
+	Gui, HS3List:Add, Button, % "yp-2 xm+" . 720*DPI%v_SelectedMonitor% . " w" . 100*DPI%v_SelectedMonitor% . " gMoveList", Move
+	Gui, HS3List:Add, ListView, % "xm grid vList +AltSubmit gHSLV2 h" . 400*DPI%v_SelectedMonitor%, Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment
+	Loop, Files, %A_ScriptDir%\Libraries\*.csv
+	{
+		Loop
+		{
+			FileReadLine, varSearch, %A_LoopFileFullPath%, %A_Index%
+			if ErrorLevel
+				break
+			tabSearch := StrSplit(varSearch, "‖")
+			if (InStr(tabSearch[1], "*0"))
+				{
+					tabSearch[1] := StrReplace(tabSearch[1], "*0")
+				}
+				if (InStr(tabSearch[1], "O0"))
+				{
+					tabSearch[1] := StrReplace(tabSearch[1], "O0")
+				}
+				if (InStr(tabSearch[1], "C0"))
+				{
+					tabSearch[1] := StrReplace(tabSearch[1], "C0")
+				}
+				if (InStr(tabSearch[1], "?0"))
+				{
+					tabSearch[1] := StrReplace(tabSearch[1], "?0")
+				}
+				if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
+				{
+					tabSearch[1] := StrReplace(tabSearch[1], "B")
+				}
+			name := SubStr(A_LoopFileName,1, StrLen(A_LoopFileName)-4)
+			LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4],tabSearch[5], tabSearch[6])
+			a_Library.Push(name)
+			a_Hotstring.Push(tabSearch[2])
+			a_TriggerOptions.Push(tabSearch[1])
+			a_OutputFunction.Push(tabSearch[3])
+			a_EnableDisable.Push(tabSearch[4])
+			a_Comment.Push(tabSearch[6])
+			a_Triggerstring.Push(tabSearch[5])
+		}
+	}
+	LV_ModifyCol(1, "Sort")
+	StartWlist := 940*DPI%v_SelectedMonitor%
+	StartHlist := 500*DPI%v_SelectedMonitor%
+	SetTitleMatchMode, 3
+	WinGetPos, StartXlist, StartYlist,,,Hotstrings
+	if ((StartXlist == "") or (StartYlist == ""))
+	{
+		StartXlist := (Mon%v_SelectedMonitor%Left + (Abs(Mon%v_SelectedMonitor%Right - Mon%v_SelectedMonitor%Left)/2))*DPI%v_SelectedMonitor% - StartWlist/2
+		StartYlist := (Mon%v_SelectedMonitor%Top + (Abs(Mon%v_SelectedMonitor%Bottom - Mon%v_SelectedMonitor%Top)/2))*DPI%v_SelectedMonitor% - StartHlist/2
+	}
+	gui, HS3List:Add, Text, x0 h1 0x7 w10 vLine2
+	Gui, HS3List:Font, % "s" . 10*DPI%v_SelectedMonitor% . " cBlack Norm"
+	Gui, HS3List:Add, Text, xm vShortcuts2, F3 Close Search hotstrings | F8 Move hotstring
+	if !(v_SearchTerm == "")
+		GuiControl,,v_SearchTerm,%v_SearchTerm%
+	if (v_RadioGroup == 1)
+		GuiControl,, Triggerstring, 1
+	else if (v_RadioGroup == 2)
+		GuiControl,, Hotstring, 1
+	else if (v_RadioGroup == 3)
+		GuiControl,, Library, 1
+	Gui, HS3List:Show, % "w" . StartWlist . " h" . StartHlist . " x" . StartXlist . " y" . StartYlist, Search Hotstrings
+	Gui, SearchLoad:Destroy
 }
-LV_ModifyCol(1, "Sort")
-StartWlist := 940*DPI%v_SelectedMonitor%
-StartHlist := 500*DPI%v_SelectedMonitor%
-SetTitleMatchMode, 3
-WinGetPos, StartXlist, StartYlist,,,Hotstrings
-if ((StartXlist == "") or (StartYlist == ""))
-{
-	StartXlist := (Mon%v_SelectedMonitor%Left + (Abs(Mon%v_SelectedMonitor%Right - Mon%v_SelectedMonitor%Left)/2))*DPI%v_SelectedMonitor% - StartWlist/2
-	StartYlist := (Mon%v_SelectedMonitor%Top + (Abs(Mon%v_SelectedMonitor%Bottom - Mon%v_SelectedMonitor%Top)/2))*DPI%v_SelectedMonitor% - StartHlist/2
-}
-gui, HS3List:Add, Text, x0 h1 0x7 w10 vLine2
-Gui, HS3List:Font, % "s" . 10*DPI%v_SelectedMonitor% . " cBlack Norm"
-Gui, HS3List:Add, Text, xm vShortcuts2, F3 Close Search hotstrings | F8 Move hotstring
-if !(v_SearchTerm == "")
-	GuiControl,,v_SearchTerm,%v_SearchTerm%
-if (v_RadioGroup == 1)
-	GuiControl,, Triggerstring, 1
-else if (v_RadioGroup == 2)
-	GuiControl,, Hotstring, 1
-else if (v_RadioGroup == 3)
-	GuiControl,, Library, 1
-Gui, HS3List:Show, % "w" . StartWlist . " h" . StartHlist . " x" . StartXlist . " y" . StartYlist, Search Hotstrings
-Gui, SearchLoad:Destroy
 
 Search:
+Gui, Hs3List:Default
 Gui, HS3List:Submit, NoHide
 if getkeystate("CapsLock","T")
 return
@@ -2749,7 +2774,12 @@ MoveList:
 	}
 	Gui, MoveLibs:Add, Button,% "gMove w" . 100*DPI%v_SelectedMonitor%, Move
 	Gui, MoveLibs:Add, Button, % "yp x+m gCanMove w" . 100*DPI%v_SelectedMonitor%, Cancel
-	Gui, MoveLibs:Show,, Select library
+	Gui, MoveLibs:Show,hide, Select library
+	WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
+	DetectHiddenWindows, On
+	WinGetPos, , , SelectLibraryWindowWidth, SelectLibraryWindowHeight,Select library
+	DetectHiddenWindows, Off
+	Gui, MoveLibs:Show,% "x" . v_WindowX + (v_WindowWidth - SelectLibraryWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - SelectLibraryWindowHeight)/2 ,Select library
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2856,6 +2886,7 @@ FileDelete, %OutputFile%
 MsgBox Hotstring moved to the %TargetLib% file!
 a_Triggers := []
 TrayTip, %A_ScriptName%,Loading hotstrings from libraries..., 1
+v_HotstringCnt := 0
 Loop, Files, Libraries\*.csv
 {
 	if !(A_LoopFileName == "PriorityLibrary.csv")
@@ -2866,7 +2897,7 @@ Loop, Files, Libraries\*.csv
 F_LoadFiles("PriorityLibrary.csv")
 TrayTip,%A_ScriptName%, Hotstrings have been loaded ,1
 Gui, MoveLibs:Destroy
-Gui, HS3List:Destroy
+Gui, HS3List:Hide
 gosub, L_Searching
 return
 
@@ -2918,13 +2949,13 @@ return
 ~F3::
 HS3ListGuiEscape:
 HS3ListGuiClose:
-	Gui, HS3List:Destroy
-	v_SearchTerm := ""
-	a_Hotstring := []
-	a_Library := []
-	a_Triggerstring := []
-	a_EnableDisable := []
-	v_RadioGroup := ""
+	Gui, HS3List:Hide
+	; v_SearchTerm := ""
+	; a_Hotstring := []
+	; a_Library := []
+	; a_Triggerstring := []
+	; a_EnableDisable := []
+	; v_RadioGroup := ""
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3285,6 +3316,7 @@ v_LibraryFlag := !(v_LibraryFlag)
 IniWrite, %v_LibraryFlag%, Config.ini, TipsLibraries, %A_ThisMenuitem%
 a_Triggers := []
 TrayTip, %A_ScriptName%,Loading hotstrings from libraries..., 1
+v_HotstringCnt := 0
 Loop, Files, Libraries\*.csv
 {
 	if !(A_LoopFileName == "PriorityLibrary.csv")
