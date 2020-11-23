@@ -157,6 +157,8 @@ global ini_Caret := ""
 global ini_MenuCursor := ""
 global ini_MenuCaret := ""
 global ini_AmountOfCharacterTips := ""
+global ini_TipsSortAlphabetically := ""
+global ini_TipsSortByLength := ""
 global a_SelectedTriggers := []
 global v_HotstringFlag := 0
 global v_TipsFlag := 0
@@ -188,6 +190,8 @@ IniRead, ini_MenuCaret, 				Config.ini, Configuration, MenuCaret
 IniRead, ini_Delay, 					Config.ini, Configuration, Delay
 IniRead, ini_AmountOfCharacterTips, 	Config.ini, Configuration, TipsChars
 IniRead, ini_MenuSound,					Config.ini, Configuration, MenuSound
+IniRead, ini_TipsSortAlphabetically,	Config.ini, Configuration, TipsSortAlphatebically
+IniRead, ini_TipsSortByLength,			Config.ini, Configuration, TipsSortByLength
 v_MonitorFlag := 0
 if !(v_PreviousSection)
 	v_ShowGui := 1
@@ -288,8 +292,10 @@ Loop,
 			}
 			a_SelectedTriggers := []
 			a_SelectedTriggers := StrSplit(v_Tips, "`n")
-			a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
-			a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
+			if (ini_TipsSortAlphabetically)
+				a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
+			if (ini_TipsSortByLength)
+				a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
 			v_Tips := ""
 			Loop, % a_SelectedTriggers.MaxIndex()
 			{
@@ -346,8 +352,10 @@ Loop,
 			}
 			a_SelectedTriggers := []
 			a_SelectedTriggers := StrSplit(v_Tips, "`n")
-			a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
-			a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
+			if (ini_TipsSortAlphabetically)
+				a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
+			if (ini_TipsSortByLength)
+				a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
 			v_Tips := ""
 			Loop, % a_SelectedTriggers.MaxIndex()
 			{
@@ -1533,6 +1541,16 @@ L_GUIInit:
 	{
 		Menu, SubmenuTips,Disable, &Number of characters for tips
 	}
+	Menu, SubmenuTips, Add, Sort tips &alphabetically, L_SortTipsAlphabetically
+	if (ini_TipsSortAlphabetically)
+		Menu, SubmenuTips, Check, Sort tips &alphabetically
+	else
+		Menu, SubmenuTips, UnCheck, Sort tips &alphabetically
+	Menu, SubmenuTips, Add, Sort tips by &length, L_SortTipsByLength
+	if (ini_TipsSortByLength)
+		Menu, SubmenuTips, Check, Sort tips by &length
+	else
+		Menu, SubmenuTips, UnCheck, Sort tips by &length
 	Menu, Submenu1, Add, &Save window position,SavePos
 	Menu, Submenu1, Add, &Launch Sandbox, Sandbox
 	Menu, Submenu2, Add, Space, EndSpace
@@ -1651,7 +1669,7 @@ L_GUIInit:
 		Menu, Submenu1, UnCheck, &Undo last hotstring
 	else
 		Menu, Submenu1, Check, &Undo last hotstring
-	Menu, HSMenu, Add, &Configure, :Submenu1
+	Menu, HSMenu, Add, &Configuration, :Submenu1
 	Menu, HSMenu, Add, &Search Hotstrings, L_Searching
 	Menu, LibrariesSubmenu, Add, &Import from .ahk to .csv, L_ImportLibrary
 	Menu, ExportSubmenu, Add, &Static hotstrings,  L_ExportLibraryStatic
@@ -2327,13 +2345,25 @@ Delete:
 	IfMsgBox, No
 		return
 	TrayTip, %A_ScriptName%, Deleting hotstring..., 1
+	Gui, ProgressDelete:New, -Border -Resize
+	Gui, ProgressDelete:Add, Progress, w200 h20 cBlue vProgressDelete, 0
+	Gui, ProgressDelete:Add,Text,w200 vTextDelete, Deleting hotstring. Please wait...
+	Gui, ProgressDelete:Show, hide, ProgressDelete
+	WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
+	DetectHiddenWindows, On
+	WinGetPos, , , DeleteWindowWidth, DeleteWindowHeight,ProgressDelete
+	DetectHiddenWindows, Off
+	Gui, ProgressDelete:Show,% "x" . v_WindowX + (v_WindowWidth - DeleteWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - DeleteWindowHeight)/2 ,ProgressDelete
 	name := v_SelectHotstringLibrary
 	FileDelete, Libraries\%name%
+	cntDelete := 0
+	Gui, HS3:Default
 	if (v_SelectedRow == SectionList.MaxIndex())
 	{
 		if (SectionList.MaxIndex() == 1)
 		{
 			FileAppend,, Libraries\%name%, UTF-8
+			GuiControl,, ProgressDelete, 100
 		}
 		else
 		{
@@ -2353,6 +2383,10 @@ Delete:
 						txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
 					if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
 						FileAppend, %txt%, Libraries\%name%, UTF-8
+					v_DeleteProgress := (A_Index/(SectionList.MaxIndex()-1))*100
+					Gui, ProgressDelete:Default
+					GuiControl,, ProgressDelete, %v_DeleteProgress%
+					Gui, HS3:Default
 				}
 			}
 		}
@@ -2375,9 +2409,14 @@ Delete:
 					txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
 				if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
 					FileAppend, %txt%, Libraries\%name%, UTF-8
+				v_DeleteProgress := (A_Index/(SectionList.MaxIndex()-1))*100
+				Gui, ProgressDelete:Default
+				GuiControl,, ProgressDelete, %v_DeleteProgress%
+				Gui, HS3:Default
 			}
 		}
 	}
+	Gui, ProgressDelete:Destroy
 	MsgBox, Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
 	WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
 	Run, AutoHotkey.exe Hotstrings.ahk v_Param L_GUIInit %v_SelectHotstringLibrary% %v_PreviousWidth% %v_PreviousHeight% %v_PreviousX% %v_PreviousY% %v_SelectedRow% %v_SelectedMonitor%
@@ -2575,6 +2614,9 @@ else
 	WinGetPos, StartXlist, StartYlist,,,Hotstrings
 	Gui, SearchLoad:New, -Resize -Border
 	Gui, SearchLoad:Add, Text,, Please wait, uploading .csv files...
+	Gui, SearchLoad:Add, Progress, w300 h20 HwndhPB2 -0x1, 50
+	WinSet, Style, +0x8, % "ahk_id " hPB2
+	SendMessage, 0x40A, 1, 20,, % "ahk_id " hPB2
 	Gui, SearchLoad:Show, hide, UploadingSearch
 	WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
 	DetectHiddenWindows, On
@@ -3326,6 +3368,18 @@ Loop, Files, Libraries\*.csv
 }
 F_LoadFiles("PriorityLibrary.csv")
 TrayTip,%A_ScriptName%, Hotstrings have been loaded ,1
+return
+
+L_SortTipsAlphabetically:
+Menu, SubmenuTips, ToggleCheck, Sort tips &alphabetically
+ini_TipsSortAlphabetically := !(ini_TipsSortAlphabetically)
+IniWrite, %ini_TipsSortAlphabetically%, Config.ini, Configuration, TipsSortAlphatebically
+return
+
+L_SortTipsByLength:
+Menu, SubmenuTips, ToggleCheck, Sort tips by &length
+ini_TipsSortByLength := !(ini_TipsSortByLength)
+IniWrite, %ini_TipsSortByLength%, Config.ini, Configuration, TipsSortByLength
 return
 
 #if
