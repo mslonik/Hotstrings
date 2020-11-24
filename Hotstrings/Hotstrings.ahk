@@ -215,6 +215,52 @@ Loop, Files, Libraries\*.csv
 	}
 }
 F_LoadFiles("PriorityLibrary.csv")
+a_Hotstring := []
+a_Library := []
+a_Triggerstring := []
+a_EnableDisable := []
+a_TriggerOptions := []
+a_OutputFunction := []
+a_Comment := []
+Loop, Files, %A_ScriptDir%\Libraries\*.csv
+{
+	Loop
+	{
+		FileReadLine, varSearch, %A_LoopFileFullPath%, %A_Index%
+		if ErrorLevel
+			break
+		tabSearch := StrSplit(varSearch, "‖")
+		if (InStr(tabSearch[1], "*0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "*0")
+			}
+			if (InStr(tabSearch[1], "O0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "O0")
+			}
+			if (InStr(tabSearch[1], "C0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "C0")
+			}
+			if (InStr(tabSearch[1], "?0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "?0")
+			}
+			if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "B")
+			}
+		name := SubStr(A_LoopFileName,1, StrLen(A_LoopFileName)-4)
+		; LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4],tabSearch[5], tabSearch[6])
+		a_Library.Push(name)
+		a_Hotstring.Push(tabSearch[2])
+		a_TriggerOptions.Push(tabSearch[1])
+		a_OutputFunction.Push(tabSearch[3])
+		a_EnableDisable.Push(tabSearch[4])
+		a_Comment.Push(tabSearch[6])
+		a_Triggerstring.Push(tabSearch[5])
+	}
+}
 TrayTip,%A_ScriptName%, Hotstrings have been loaded ,1
 ; SetTimer, L_DPIScaling, 100
 if(v_PreviousSection)
@@ -2639,13 +2685,13 @@ else
 	{
 		Gui, HS3List:Hide
 	}
-		a_Hotstring := []
-		a_Library := []
-		a_Triggerstring := []
-		a_EnableDisable := []
-		a_TriggerOptions := []
-		a_OutputFunction := []
-		a_Comment := []
+		; a_Hotstring := []
+		; a_Library := []
+		; a_Triggerstring := []
+		; a_EnableDisable := []
+		; a_TriggerOptions := []
+		; a_OutputFunction := []
+		; a_Comment := []
 
 
 	Gui, HS3List:New,% "+Resize MinSize" . 940*DPI%v_SelectedMonitor% . "x" . 500*DPI%v_SelectedMonitor%
@@ -2658,45 +2704,49 @@ else
 	Gui, HS3List:Add, Radio, % "yp xm+" . 640*DPI%v_SelectedMonitor% . " gSearchChange", Library
 	Gui, HS3List:Add, Button, % "yp-2 xm+" . 720*DPI%v_SelectedMonitor% . " w" . 100*DPI%v_SelectedMonitor% . " gMoveList", Move
 	Gui, HS3List:Add, ListView, % "xm grid vList +AltSubmit gHSLV2 h" . 400*DPI%v_SelectedMonitor%, Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment
-	Loop, Files, %A_ScriptDir%\Libraries\*.csv
+	Loop, % a_Library.MaxIndex()
 	{
-		Loop
-		{
-			FileReadLine, varSearch, %A_LoopFileFullPath%, %A_Index%
-			if ErrorLevel
-				break
-			tabSearch := StrSplit(varSearch, "‖")
-			if (InStr(tabSearch[1], "*0"))
-				{
-					tabSearch[1] := StrReplace(tabSearch[1], "*0")
-				}
-				if (InStr(tabSearch[1], "O0"))
-				{
-					tabSearch[1] := StrReplace(tabSearch[1], "O0")
-				}
-				if (InStr(tabSearch[1], "C0"))
-				{
-					tabSearch[1] := StrReplace(tabSearch[1], "C0")
-				}
-				if (InStr(tabSearch[1], "?0"))
-				{
-					tabSearch[1] := StrReplace(tabSearch[1], "?0")
-				}
-				if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
-				{
-					tabSearch[1] := StrReplace(tabSearch[1], "B")
-				}
-			name := SubStr(A_LoopFileName,1, StrLen(A_LoopFileName)-4)
-			LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4],tabSearch[5], tabSearch[6])
-			a_Library.Push(name)
-			a_Hotstring.Push(tabSearch[2])
-			a_TriggerOptions.Push(tabSearch[1])
-			a_OutputFunction.Push(tabSearch[3])
-			a_EnableDisable.Push(tabSearch[4])
-			a_Comment.Push(tabSearch[6])
-			a_Triggerstring.Push(tabSearch[5])
-		}
+		LV_Add("", a_Library[A_Index], a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index], a_Comment[A_Index])
 	}
+	; Loop, Files, %A_ScriptDir%\Libraries\*.csv
+	; {
+	; 	Loop
+	; 	{
+	; 		FileReadLine, varSearch, %A_LoopFileFullPath%, %A_Index%
+	; 		if ErrorLevel
+	; 			break
+	; 		tabSearch := StrSplit(varSearch, "‖")
+	; 		if (InStr(tabSearch[1], "*0"))
+	; 			{
+	; 				tabSearch[1] := StrReplace(tabSearch[1], "*0")
+	; 			}
+	; 			if (InStr(tabSearch[1], "O0"))
+	; 			{
+	; 				tabSearch[1] := StrReplace(tabSearch[1], "O0")
+	; 			}
+	; 			if (InStr(tabSearch[1], "C0"))
+	; 			{
+	; 				tabSearch[1] := StrReplace(tabSearch[1], "C0")
+	; 			}
+	; 			if (InStr(tabSearch[1], "?0"))
+	; 			{
+	; 				tabSearch[1] := StrReplace(tabSearch[1], "?0")
+	; 			}
+	; 			if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
+	; 			{
+	; 				tabSearch[1] := StrReplace(tabSearch[1], "B")
+	; 			}
+	; 		name := SubStr(A_LoopFileName,1, StrLen(A_LoopFileName)-4)
+	; 		LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4],tabSearch[5], tabSearch[6])
+	; 		a_Library.Push(name)
+	; 		a_Hotstring.Push(tabSearch[2])
+	; 		a_TriggerOptions.Push(tabSearch[1])
+	; 		a_OutputFunction.Push(tabSearch[3])
+	; 		a_EnableDisable.Push(tabSearch[4])
+	; 		a_Comment.Push(tabSearch[6])
+	; 		a_Triggerstring.Push(tabSearch[5])
+	; 	}
+	; }
 	LV_ModifyCol(1, "Sort")
 	StartWlist := 940*DPI%v_SelectedMonitor%
 	StartHlist := 500*DPI%v_SelectedMonitor%
