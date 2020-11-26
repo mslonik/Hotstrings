@@ -59,12 +59,17 @@ Caret=1
 TipsChars=1
 MenuCursor=0
 MenuCaret=1
+TipsSortAlphatebically=1
+TipsSortByLength=1
+Language=EN
 [TipsLibraries]
 )
 	FileAppend, %ini%, Config.ini
 	MsgBox, Config.ini wasn't found. The default Config.ini is now created.
 }
-
+global v_Language := ""
+global v_LanguageFile := ""
+#Include, LanguageOptions.ahk
 IniRead, v_TipsConfig, Config.ini, TipsLibraries
 a_TipsConfig := StrSplit(v_TipsConfig, "`n")
 Loop, % a_TipsConfig.MaxIndex()
@@ -95,9 +100,9 @@ IfNotExist, Libraries\PriorityLibrary.csv
 
 if !(A_Args[1] == "l")
 {
-	Menu, Tray, Add, Edit Hotstring, L_GUIInit
-	Menu, Tray, Add, Search Hotstrings, L_Searching
-	Menu, Tray, Default, Edit Hotstring
+	Menu, Tray, Add, %t_EditHotstring%, L_GUIInit
+	Menu, Tray, Add, %t_SearchHotstrings%, L_Searching
+	Menu, Tray, Default, %t_EditHotstring%
 	Menu, Tray, Add
 	Menu, Tray, NoStandard
 	Menu, Tray, Standard
@@ -198,11 +203,11 @@ if !(v_PreviousSection)
 else
 	v_ShowGui := 2
 if (v_Param == "d")
-	TrayTip, %A_ScriptName% - Debug,Loading hotstrings from libraries.., 1
+	TrayTip, %A_ScriptName% - Debug,%t_LoadingHotstringsFromLibraries%, 1
 else if (v_Param == "l")
-	TrayTip, %A_ScriptName% - Lite,Loading hotstrings from libraries..., 1
+	TrayTip, %A_ScriptName% - Lite,%t_LoadingHotstringsFromLibraries%, 1
 else	
-	TrayTip, %A_ScriptName%,Loading hotstrings from libraries..., 1
+	TrayTip, %A_ScriptName%,%t_LoadingHotstringsFromLibraries%, 1
 
 ; ---------------------------- INITIALIZATION -----------------------------
 
@@ -261,8 +266,7 @@ Loop, Files, %A_ScriptDir%\Libraries\*.csv
 		a_Triggerstring.Push(tabSearch[5])
 	}
 }
-TrayTip,%A_ScriptName%, Hotstrings have been loaded ,1
-; SetTimer, L_DPIScaling, 100
+TrayTip,%A_ScriptName%, %t_HotstringsHaveBeenLoaded% ,1
 if(v_PreviousSection)
 	gosub L_GUIInit
 if (v_Param == "d")
@@ -277,7 +281,7 @@ Loop,
 	Input, out,V L1, {Esc}
 	if (ErrorLevel = "NewInput")
 	{
-		MsgBox, ErrorLevel was triggered by NewInput error.
+		MsgBox, %t_ErrorLevelWasTriggeredByNewInputError%
 	}
 	if (WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
 	{
@@ -437,7 +441,7 @@ $!BackSpace:: 	;~ Alt + Backspace as in MS Word: rolls back last Autocorrect act
 	IniRead, Undo, Config.ini, Configuration, UndoHotstring
 	if (Undo == 1) and (v_TypedTriggerstring && (A_ThisHotkey != A_PriorHotkey))
 	{
-		ToolTip, Undo the last hotstring., % A_CaretX, % A_CaretY - 20
+		ToolTip, %t_UndoTheLastHotstring%, % A_CaretX, % A_CaretY - 20
 		TriggerOpt := SubStr(v_UndoTriggerstring, InStr(v_UndoTriggerstring, ":" ,, 1,1)+1 ,InStr(v_UndoTriggerstring, ":" ,, 1,2)-InStr(v_UndoTriggerstring, ":" ,, 1,1)-1)
 		if (InStr(TriggerOpt, "*0") or !(InStr(TriggerOpt, "*"))) and (InStr(TriggerOpt, "O0") or !(InStr(TriggerOpt, "O")))
 		{
@@ -485,7 +489,7 @@ F2::
 	Gui, HS3:Submit, NoHide
 	if (v_SelectHotstringLibrary == "")
 	{
-		MsgBox, Select hotstring library
+		MsgBox, %t_SelectHotstringLibrary%
 		return
 	}
 	GuiControl, Focus, v_LibraryContent
@@ -538,7 +542,6 @@ F9::
 ~Home::
 ~End::
 ~Esc::
-	; MsgBox, Tu jestem!
 	ToolTip,
 	v_InputString := ""
 return
@@ -569,7 +572,7 @@ F_LoadFiles(nameoffile)
 		if (v_Library)
 			a_Triggers.Push(v_TriggerString)
 		v_HotstringCnt++
-		GuiControl,, v_LoadedHotstrings, Loaded hotstrings: %v_HotstringCnt%
+		GuiControl,, v_LoadedHotstrings,% t_LoadedHotstrings . " " v_HotstringCnt
 		}
 	return
 }
@@ -897,20 +900,19 @@ else
 	Sleep, 100
 }
 Enter:: 
-Gui, MenuAHK:Submit, Hide
-v_HotstringFlag := 1
-MenuListbox2 := SubStr(MenuListbox2, InStr(MenuListbox2, ".")+2)
-Send, % MenuListbox2
-if (Ovar == 0)
-	Send, % A_EndChar
-v_UndoHotstring := MenuListbox2
-v_UndoHotstring := F_ChangingBrackets(v_UndoHotstring)
-SetFormat, Integer, H
-InputLocaleIDv:=DllCall("GetKeyboardLayout", "UInt", 0, "UInt")
-Polishv := Format("{:#x}", 0x415)
-InputLocaleIDv := InputLocaleIDv / 0xFFFF
-InputLocaleIDv := Format("{:#04x}", InputLocaleIDv)
-;MsgBox, % InputLocaleID . " `" . Polish
+	Gui, MenuAHK:Submit, Hide
+	v_HotstringFlag := 1
+	MenuListbox2 := SubStr(MenuListbox2, InStr(MenuListbox2, ".")+2)
+	Send, % MenuListbox2
+	if (Ovar == 0)
+		Send, % A_EndChar
+	v_UndoHotstring := MenuListbox2
+	v_UndoHotstring := F_ChangingBrackets(v_UndoHotstring)
+	SetFormat, Integer, H
+	InputLocaleIDv:=DllCall("GetKeyboardLayout", "UInt", 0, "UInt")
+	Polishv := Format("{:#x}", 0x415)
+	InputLocaleIDv := InputLocaleIDv / 0xFFFF
+	InputLocaleIDv := Format("{:#04x}", InputLocaleIDv)
 	if(InputLocaleIDv = Polishv)
 	{
 		Send, {LCtrl up}
@@ -918,7 +920,7 @@ InputLocaleIDv := Format("{:#04x}", InputLocaleIDv)
 	
 	v_TypedTriggerstring := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", false, 1, 2) + 1)
 	Hotstring("Reset")
-Gui, MenuAHK:Destroy
+	Gui, MenuAHK:Destroy
 Return
 #If
 #IfWinExist HotstringAHK listbox
@@ -1233,7 +1235,7 @@ F_ImportLibrary(filename)
 	global v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight
 	Gui, Import:New, -Border
 	Gui, Import:Add, Progress, w200 h20 cBlue vMyProgress, 0
-	Gui, Import:Add,Text,w200 vMyText, Library import. Please wait...
+	Gui, Import:Add,Text,w200 vMyText, %t_LibraryImportPleaseWait%
 	Gui, Import:Show, hide, Import
 	WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
 	DetectHiddenWindows, On
@@ -1274,9 +1276,9 @@ F_ImportLibrary(filename)
 		GuiControl,, MyText, % "Imported " . A_Index . " of " . v_TotalLines . " hotstrings"
 	}
 	F_SortHotstringsAlphabetically(v_OutputFile)
-	GuiControl,, MyText, Loading libraries. Please wait...
+	GuiControl,, MyText, %t_LoadingLibrariesPleaseWait%
 	a_Triggers := []
-	TrayTip, %A_ScriptName%,Loading hotstrings from libraries..., 1
+	TrayTip, %A_ScriptName%,%t_LoadingHotstringsFromLibraries%, 1
 	v_HotstringCnt := 0
 	Loop, Files, Libraries\*.csv
 	{
@@ -1286,13 +1288,13 @@ F_ImportLibrary(filename)
 		}
 	}
 	F_LoadFiles("PriorityLibrary.csv")
-	TrayTip,%A_ScriptName%, Hotstrings have been loaded ,1
+	TrayTip,%A_ScriptName%, %t_HotstringsHaveBeenLoaded%,1
 	Gui, HS3:Default
 	GuiControl, , v_SelectHotstringLibrary, |
 	Loop,%A_ScriptDir%\Libraries\*.csv
         GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName%
 	Gui, Import:Destroy
-    MsgBox, Library has been imported.
+    MsgBox, %t_LibraryHasBeenImported%
     return
 }
 
@@ -1304,7 +1306,7 @@ F_ExportLibraryStatic(filename)
 	global v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight
 	Gui, Export:New, -Border
 	Gui, Export:Add, Progress, w200 h20 cBlue vMyProgress, 0
-	Gui, Export:Add,Text,w200 vMyText, Library export. Please wait...
+	Gui, Export:Add,Text,w200 vMyText, %t_LibraryExportPleaseWait%
 	Gui, Export:Show, hide, Export
 	WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
 	DetectHiddenWindows, On
@@ -1333,7 +1335,7 @@ F_ExportLibraryStatic(filename)
 	}
 	if (v_TotalLines == 0)
 	{
-		MsgBox, Selected file is empty.
+		MsgBox, %t_SelectedFileIsEmpty%
 		return
 	}
 	FileAppend, % "; This file is result of automatic export from Hotstrings.ahk application.`n#SingleInstance, Force", %v_OutputFile%, UTF-8
@@ -1363,7 +1365,7 @@ F_ExportLibraryStatic(filename)
 		GuiControl,, MyText, % "Exported " . A_Index . " of " . v_TotalLines . " hotstrings"
 		}
 	Gui, Export:Destroy
-	MsgBox, Library has been exported.`nThe file path is: %v_OutputFile%
+	MsgBox, % t_LibraryHasBeenExported . "`n" . t_ThePathFileIs . " " . %v_OutputFile%
 	return
 }
 
@@ -1375,7 +1377,7 @@ F_ExportLibraryDynamic(filename)
 	global v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight
 	Gui, Export:New, -Border
 	Gui, Export:Add, Progress, w200 h20 cBlue vMyProgress, 0
-	Gui, Export:Add,Text,w200 vMyText, Library export. Please wait...
+	Gui, Export:Add,Text,w200 vMyText, %t_LibraryExportPleaseWait%
 	Gui, Export:Show, hide, Export
 	WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
 	DetectHiddenWindows, On
@@ -1404,7 +1406,7 @@ F_ExportLibraryDynamic(filename)
 	}
 	if (v_TotalLines == 0)
 	{
-		MsgBox, Selected file is empty.
+		MsgBox, %t_SelectedFileIsEmpty%
 		return
 	}
 	FileAppend, % "; This file is result of automatic export from Hotstrings.ahk application.`n#SingleInstance, Force", %v_OutputFile%, UTF-8
@@ -1436,10 +1438,27 @@ F_ExportLibraryDynamic(filename)
 		GuiControl,, MyText, % "Exported " . A_Index . " of " . v_TotalLines . " hotstrings"
 		}
 	Gui, Export:Destroy
-	MsgBox, Library has been exported.`nThe file path is: %v_OutputFile%
+	MsgBox, % t_LibraryHasBeenExported . "`n" . t_ThePathFileIs . " " . v_OutputFile
 	return
 }
 
+
+F_ShowUnicodeSigns(string)
+{
+    vSize := StrPut(string, "CP0")
+    VarSetCapacity(vUtf8, vSize)
+    vSize := StrPut(string, &vUtf8, vSize, "CP0")
+    Return StrGet(&vUtf8, "UTF-8") 
+}
+
+F_ReadText(string)
+{
+	local Label
+	LabeL := SubStr(string,3)
+	IniRead, string, %v_LanguageFile%, Strings, %Label%
+	string := F_ShowUnicodeSigns(string)
+	return string
+}
 ; --------------------------- SECTION OF LABELS ---------------------------
 
 TurnOffTooltip:
@@ -1466,25 +1485,25 @@ L_GUIInit:
     Gui, HS3:New, +Resize 
     Gui, HS3:Margin, 12.5*DPI%v_SelectedMonitor%, 7.5*DPI%v_SelectedMonitor%
     Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " bold cBlue", Calibri
-    Gui, HS3:Add, Text, % "xm+" . 9*DPI%v_SelectedMonitor%,Enter triggerstring
+    Gui, HS3:Add, Text, % "xm+" . 9*DPI%v_SelectedMonitor%,%t_EnterTriggerstring%
     Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " norm cBlack"
     Gui, HS3:Add, Edit, % "w" . 184*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " xp+" . 227*DPI%v_SelectedMonitor% . " yp vv_TriggerString",
     Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " bold cBlue"
-    Gui, HS3:Add, GroupBox, % "section xm w" . 425*DPI%v_SelectedMonitor% . " h" . 106*DPI%v_SelectedMonitor%, Select trigger option(s)
+    Gui, HS3:Add, GroupBox, % "section xm w" . 425*DPI%v_SelectedMonitor% . " h" . 106*DPI%v_SelectedMonitor%, %t_SelectTriggerOptions%
     Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " norm cBlack"
-    Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionImmediateExecute xs+" . 12*DPI%v_SelectedMonitor% . " ys+" . 25*DPI%v_SelectedMonitor%, Immediate Execute (*)
-    Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionCaseSensitive xp+" . 225*DPI%v_SelectedMonitor% . " yp+" . 0*DPI%v_SelectedMonitor%, Case Sensitive (C)
-    Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionNoBackspace xp-" . 225*DPI%v_SelectedMonitor% . " yp+" . 25*DPI%v_SelectedMonitor%, No Backspace (B0)
-    Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionInsideWord xp+" . 225*DPI%v_SelectedMonitor% . " yp+" . 0*DPI%v_SelectedMonitor%, Inside Word (?)
-    Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionNoEndChar xp-" . 225*DPI%v_SelectedMonitor% . " yp+" . 25*DPI%v_SelectedMonitor%, No End Char (O)
-    Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionDisable xp+" . 225*DPI%v_SelectedMonitor% . " yp+" . 0*DPI%v_SelectedMonitor%, Disable
+    Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionImmediateExecute xs+" . 12*DPI%v_SelectedMonitor% . " ys+" . 25*DPI%v_SelectedMonitor%, %t_ImmediateExecute%
+    Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionCaseSensitive xp+" . 225*DPI%v_SelectedMonitor% . " yp+" . 0*DPI%v_SelectedMonitor%, %t_CaseSensitive%
+    Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionNoBackspace xp-" . 225*DPI%v_SelectedMonitor% . " yp+" . 25*DPI%v_SelectedMonitor%, %t_NoBackspace%
+    Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionInsideWord xp+" . 225*DPI%v_SelectedMonitor% . " yp+" . 0*DPI%v_SelectedMonitor%, %t_InsideWord%
+    Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionNoEndChar xp-" . 225*DPI%v_SelectedMonitor% . " yp+" . 25*DPI%v_SelectedMonitor%, %t_NoEndChar%
+    Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionDisable xp+" . 225*DPI%v_SelectedMonitor% . " yp+" . 0*DPI%v_SelectedMonitor%, %t_Disable%
 	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlue Bold"
-    Gui, HS3:Add, Text,% "xm+" . 9*DPI%v_SelectedMonitor%, Select hotstring output function
+    Gui, HS3:Add, Text,% "xm+" . 9*DPI%v_SelectedMonitor%, %t_SelectHotstringOutputFunction%
     Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
     Gui, HS3:Add, DropDownList, % "xm w" . 424*DPI%v_SelectedMonitor% . " vv_SelectFunction gL_SelectFunction hwndddl", SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
     PostMessage, 0x153, -1, 30*DPI%v_SelectedMonitor%,, ahk_id %ddl%
 	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlue Bold"
-    Gui, HS3:Add, Text,% "xm+" . 9*DPI%v_SelectedMonitor%, Enter hotstring
+    Gui, HS3:Add, Text,% "xm+" . 9*DPI%v_SelectedMonitor%, %t_EnterHotstring%
     Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
     Gui, HS3:Add, Edit, % "w" . 424*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring xm"
     Gui, HS3:Add, Edit, % "yp+" . 31*DPI%v_SelectedMonitor% . " w" . 424*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring1 xm Disabled"
@@ -1494,24 +1513,23 @@ L_GUIInit:
     Gui, HS3:Add, Edit, % "yp+" . 31*DPI%v_SelectedMonitor% . " w" . 424*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring5 xm Disabled"
     Gui, HS3:Add, Edit, % "yp+" . 31*DPI%v_SelectedMonitor% . " w" . 424*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring6 xm Disabled"
     Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlue Bold"
-    Gui, HS3:Add, Text,% "xm+" . 9*DPI%v_SelectedMonitor%, Add a comment
+    Gui, HS3:Add, Text,% "xm+" . 9*DPI%v_SelectedMonitor%, %t_AddAComment%
     Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
 	Gui, HS3:Add, Edit, % "w" . 424*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " limit64 vComment xm"
 	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlue Bold"
-    Gui, HS3:Add, Text,% "xm+" . 9*DPI%v_SelectedMonitor%, Select hotstring library
-	Gui, HS3:Add, Button, % "gAddLib x+" . 120*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor%, Add library
+    Gui, HS3:Add, Text,% "xm+" . 9*DPI%v_SelectedMonitor%, %t_SelectHotstringLibrary%
+	Gui, HS3:Add, Button, % "gAddLib x+" . 120*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor%, %t_AddLibrary%
     Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
 	Gui, HS3:Add, DropDownList, % "w" . 424*DPI%v_SelectedMonitor% . " vv_SelectHotstringLibrary gSectionChoose xm hwndddl" ,
     Loop,%A_ScriptDir%\Libraries\*.csv
         GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName%
     PostMessage, 0x153, -1, 30*DPI%v_SelectedMonitor%,, ahk_id %ddl%
     Gui, HS3:Font, bold
-
-    Gui, HS3:Add, Button, % "xm yp+" . 37*DPI%v_SelectedMonitor% . " w" . 135*DPI%v_SelectedMonitor% . " gAddHotstring", Set hotstring
-	Gui, HS3:Add, Button, % "x+" . 10*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " gClear", Clear
-	Gui, HS3:Add, Button, % "x+" . 10*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " vv_DeleteHotstring gDelete Disabled", Delete hotstring
+    Gui, HS3:Add, Button, % "xm yp+" . 37*DPI%v_SelectedMonitor% . " w" . 135*DPI%v_SelectedMonitor% . " gAddHotstring", %t_SetHotstring%
+	Gui, HS3:Add, Button, % "x+" . 10*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " gClear", %t_Clear%
+	Gui, HS3:Add, Button, % "x+" . 10*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " vv_DeleteHotstring gDelete Disabled", %t_DeleteHotstring%
 	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlue Bold"
-    Gui, HS3:Add, Text,% "vSandString xm+" . 9*DPI%v_SelectedMonitor%, Sandbox
+    Gui, HS3:Add, Text,% "vSandString xm+" . 9*DPI%v_SelectedMonitor%, %t_Sandbox%
 	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
 	Gui, HS3:Add, Edit, % "xm w" . 425*DPI%v_SelectedMonitor% . " vSandbox r5"
 	IniRead, Sandbox, Config.ini, Configuration, Sandbox
@@ -1529,47 +1547,47 @@ L_GUIInit:
 	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlue Bold"
     Gui, HS3:Add, Text, ym, Library content
     Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
-    Gui, HS3:Add, ListView, % "LV0x1 0x4 yp+" . 25*DPI%v_SelectedMonitor% . " xp h" . 500*DPI%v_SelectedMonitor% . " w" . 400*DPI%v_SelectedMonitor% . " vv_LibraryContent AltSubmit gHSLV", Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
+    Gui, HS3:Add, ListView, % "LV0x1 0x4 yp+" . 25*DPI%v_SelectedMonitor% . " xp h" . 500*DPI%v_SelectedMonitor% . " w" . 400*DPI%v_SelectedMonitor% . " vv_LibraryContent AltSubmit gHSLV", %t_TriggerstringTriggOptOutFunEnDisHotstringComment%
 	Gui, HS3:Add, Edit, vv_ViewString xs gViewString ReadOnly Hide,
 	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
-	Gui, HS3:Add, Text, xm y0 vv_ShortcutsMainInterface,F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear |F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring 
-	GUI, HS3:Add, Text, y0 x800 vv_LoadedHotstrings, Loaded hotstrings: %v_HotstringCnt%
+	Gui, HS3:Add, Text, xm y0 vv_ShortcutsMainInterface,%t_F1AboutHelpF2LibraryContentF3SearchHotstringsF5ClearF7ClipboardDelayF8DeleteHotstringF9SetHotstring%
+	GUI, HS3:Add, Text, y0 x800 vv_LoadedHotstrings, % t_LoadedHotstrings . " " . v_HotstringCnt
 
     ; Menu, HSMenu, Add, &Monitor, CheckMon
-	Menu, Submenu1, Add, &Undo last hotstring,Undo
-	Menu, SubmenuTips, Add, Enable/Disable, Tips
-	Menu, PositionMenu, Add, Caret, L_MenuCaretCursor
-	Menu, PositionMenu, Add, Cursor, L_MenuCaretCursor
-	Menu, SubmenuMenu, Add, Choose menu position,:PositionMenu
-	Menu, SubmenuMenu, Add, Enable &sound if overrun, L_MenuSound
+	Menu, Submenu1, Add, %t_UndoLastHotstring%,Undo
+	Menu, SubmenuTips, Add, %t_EnableDisable%, Tips
+	Menu, PositionMenu, Add, %t_Caret%, L_MenuCaretCursor
+	Menu, PositionMenu, Add, %t_Cursor%, L_MenuCaretCursor
+	Menu, SubmenuMenu, Add, %t_ChooseMenuPosition%,:PositionMenu
+	Menu, SubmenuMenu, Add, %t_EnableSoundIfOverrun%, L_MenuSound
 	if (ini_MenuSound)
-		Menu, SubmenuMenu, Check, Enable &sound if overrun
+		Menu, SubmenuMenu, Check, %t_EnableSoundIfOverrun%
 	else
-		Menu, SubmenuMenu, UnCheck, Enable &sound if overrun
-	Menu, Submenu1, Add,% "Hotstring menu (MSI, MCL)", :SubmenuMenu
+		Menu, SubmenuMenu, UnCheck, %t_EnableSoundIfOverrun%
+	Menu, Submenu1, Add,% t_HotstringMenuMSIMCL, :SubmenuMenu
 	if (ini_MenuCursor)
-		Menu, PositionMenu, Check, Cursor
+		Menu, PositionMenu, Check, %t_Cursor%
 	else
-		Menu, PositionMenu, UnCheck, Cursor
+		Menu, PositionMenu, UnCheck, %t_Cursor%
 	if (ini_MenuCaret)
-		Menu, PositionMenu, Check, Caret
+		Menu, PositionMenu, Check, %t_Caret%
 	else
-		Menu, PositionMenu, UnCheck, Caret
-	Menu, Submenu1, Add, &Triggerstring tips, :SubmenuTips
-	Menu, Submenu3, Add, Caret,L_CaretCursor
-	Menu, Submenu3, Add, Cursor,L_CaretCursor
+		Menu, PositionMenu, UnCheck, %t_Caret%
+	Menu, Submenu1, Add, %t_TriggerstringTips%, :SubmenuTips
+	Menu, Submenu3, Add, %t_Caret%,L_CaretCursor
+	Menu, Submenu3, Add, %t_Cursor%,L_CaretCursor
 	if (ini_Cursor)
-		Menu, Submenu3, Check, Cursor
+		Menu, Submenu3, Check, %t_Cursor%
 	else
-		Menu, Submenu3, UnCheck, Cursor
+		Menu, Submenu3, UnCheck, %t_Cursor%
 	if (ini_Caret)
-		Menu, Submenu3, Check, Caret
+		Menu, Submenu3, Check, %t_Caret%
 	else
-		Menu, Submenu3, UnCheck, Caret
-	Menu, SubmenuTips, Add, Choose tips location, :Submenu3
+		Menu, Submenu3, UnCheck, %t_Caret%
+	Menu, SubmenuTips, Add, %t_ChooseTipsLocation%, :Submenu3
 	If !(ini_Tips)
 	{
-		Menu, SubmenuTips,Disable, Choose tips location
+		Menu, SubmenuTips,Disable, %t_ChooseTipsLocation%
 	}
 	Menu, Submenu4, Add, 1, L_AmountOfCharacterTips1
 	Menu, Submenu4, Add, 2, L_AmountOfCharacterTips2
@@ -1582,145 +1600,145 @@ L_GUIInit:
 		if !(A_Index == ini_AmountOfCharacterTips)
 			Menu, Submenu4, UnCheck, %A_Index%
 	}
-	Menu, SubmenuTips, Add, &Number of characters for tips, :Submenu4
+	Menu, SubmenuTips, Add, %t_NumberOfCharactersForTips%, :Submenu4
 	If !(ini_Tips)
 	{
-		Menu, SubmenuTips,Disable, &Number of characters for tips
+		Menu, SubmenuTips,Disable, %t_NumberOfCharactersForTips%s
 	}
-	Menu, SubmenuTips, Add, Sort tips &alphabetically, L_SortTipsAlphabetically
+	Menu, SubmenuTips, Add, %t_SortTipsAlphabetically%, L_SortTipsAlphabetically
 	if (ini_TipsSortAlphabetically)
-		Menu, SubmenuTips, Check, Sort tips &alphabetically
+		Menu, SubmenuTips, Check, %t_SortTipsAlphabetically%
 	else
-		Menu, SubmenuTips, UnCheck, Sort tips &alphabetically
-	Menu, SubmenuTips, Add, Sort tips by &length, L_SortTipsByLength
+		Menu, SubmenuTips, UnCheck, %t_SortTipsAlphabetically%
+	Menu, SubmenuTips, Add, %t_SortTipsByLength%, L_SortTipsByLength
 	if (ini_TipsSortByLength)
-		Menu, SubmenuTips, Check, Sort tips by &length
+		Menu, SubmenuTips, Check, %t_SortTipsByLength%
 	else
-		Menu, SubmenuTips, UnCheck, Sort tips by &length
-	Menu, Submenu1, Add, &Save window position,SavePos
-	Menu, Submenu1, Add, &Launch Sandbox, Sandbox
-	Menu, Submenu2, Add, Space, EndSpace
+		Menu, SubmenuTips, UnCheck, %t_SortTipsByLength%
+	Menu, Submenu1, Add, %t_SaveWindowPosition%,SavePos
+	Menu, Submenu1, Add, %t_LaunchSandbox%, Sandbox
+	Menu, Submenu2, Add, %t_Space%, EndSpace
 	if (EndingChar_Space)
-		Menu, Submenu2, Check, Space
+		Menu, Submenu2, Check, %t_Space%
 	else
-		Menu, Submenu2, UnCheck, Space
-	Menu, Submenu2, Add, Minus -, EndMinus
+		Menu, Submenu2, UnCheck, %t_Space%
+	Menu, Submenu2, Add, %t_Minus%, EndMinus
 	if (EndingChar_Minus)
-		Menu, Submenu2, Check, Minus -
+		Menu, Submenu2, Check, %t_Minus%
 	else
-		Menu, Submenu2, UnCheck, Minus -
-	Menu, Submenu2, Add, Opening Round Bracket (, EndORoundBracket
+		Menu, Submenu2, UnCheck, %t_Minus%
+	Menu, Submenu2, Add, %t_OpeningRoundBracket%, EndORoundBracket
 	if (EndingChar_ORoundBracket)
-		Menu, Submenu2, Check, Opening Round Bracket (
+		Menu, Submenu2, Check, %t_OpeningRoundBracket%
 	else
-		Menu, Submenu2, UnCheck, Opening Round Bracket (
-	Menu, Submenu2, Add, Closing Round Bracket ), EndCRoundBracket
+		Menu, Submenu2, UnCheck, %t_OpeningRoundBracket%
+	Menu, Submenu2, Add, %t_ClosingRoundBracket%, EndCRoundBracket
 	if (EndingChar_CRoundBracket)
-		Menu, Submenu2, Check, Closing Round Bracket )
+		Menu, Submenu2, Check, %t_ClosingRoundBracket%
 	else
-		Menu, Submenu2, UnCheck, Closing Round Bracket )
-	Menu, Submenu2, Add, Opening Square Bracket [, EndOSquareBracket
+		Menu, Submenu2, UnCheck, %t_ClosingRoundBracket%
+	Menu, Submenu2, Add, %t_OpeningSquareBracket%, EndOSquareBracket
 	if (EndingChar_OSquareBracket)
-		Menu, Submenu2, Check, Opening Square Bracket [
+		Menu, Submenu2, Check, %t_OpeningSquareBracket%
 	else
-		Menu, Submenu2, UnCheck, Opening Square Bracket [
-	Menu, Submenu2, Add, Closing Square Bracket ], EndCSquareBracket
+		Menu, Submenu2, UnCheck, %t_OpeningSquareBracket%
+	Menu, Submenu2, Add, %t_ClosingSquareBracket%, EndCSquareBracket
 	if (EndingChar_CSquareBracket)
-		Menu, Submenu2, Check, Closing Square Bracket ]
+		Menu, Submenu2, Check, %t_ClosingSquareBracket%
 	else
-		Menu, Submenu2, UnCheck, Closing Square Bracket ]
-	Menu, Submenu2, Add, Opening Curly Bracket {, EndOCurlyBracket
+		Menu, Submenu2, UnCheck, %t_ClosingSquareBracket%
+	Menu, Submenu2, Add, %t_OpeningCurlyBracket%, EndOCurlyBracket
 	if (EndingChar_OCurlyBracket)
-		Menu, Submenu2, Check, Opening Curly Bracket {
+		Menu, Submenu2, Check, %t_OpeningCurlyBracket%
 	else
-		Menu, Submenu2, UnCheck, Opening Curly Bracket {
-	Menu, Submenu2, Add, Closing Curly Bracket }, EndCCurlyBracket
+		Menu, Submenu2, UnCheck, %t_OpeningCurlyBracket%
+	Menu, Submenu2, Add, %t_ClosingCurlyBracket%, EndCCurlyBracket
 	if (EndingChar_CCurlyBracket)
-		Menu, Submenu2, Check, Closing Curly Bracket }
+		Menu, Submenu2, Check, %t_ClosingCurlyBracket%
 	else
-		Menu, Submenu2, UnCheck, Closing Curly Bracket }
-	Menu, Submenu2, Add, Colon :, EndColon
+		Menu, Submenu2, UnCheck, %t_ClosingCurlyBracket%
+	Menu, Submenu2, Add, %t_Colon%, EndColon
 	if (EndingChar_Colon)
-		Menu, Submenu2, Check, Colon :
+		Menu, Submenu2, Check, %t_Colon%
 	else
-		Menu, Submenu2, UnCheck, Colon :
-	Menu, Submenu2, Add, % "Semicolon `;", EndSemicolon
+		Menu, Submenu2, UnCheck, t_Colon
+	Menu, Submenu2, Add, % t_Semicolon, EndSemicolon
 	if (EndingChar_Semicolon)
-		Menu, Submenu2, Check, % "Semicolon `;"
+		Menu, Submenu2, Check, % t_Semicolon
 	else
-		Menu, Submenu2, UnCheck, % "Semicolon `;"
-	Menu, Submenu2, Add, Apostrophe ', EndApostrophe
+		Menu, Submenu2, UnCheck, % t_Semicolon
+	Menu, Submenu2, Add, %t_Apostrophe%, EndApostrophe
 	if (EndingChar_Apostrophe)
-		Menu, Submenu2, Check, Apostrophe '
+		Menu, Submenu2, Check, %t_Apostrophe%
 	else
-		Menu, Submenu2, UnCheck, Apostrophe '
-	Menu, Submenu2, Add, % "Quote """, EndQuote
+		Menu, Submenu2, UnCheck, %t_Apostrophe%
+	Menu, Submenu2, Add, % t_Quote, EndQuote
 	if (EndingChar_Quote)
-		Menu, Submenu2, Check, % "Quote """
+		Menu, Submenu2, Check, % t_Quote
 	else
-		Menu, Submenu2, UnCheck, % "Quote """
-	Menu, Submenu2, Add, Slash /, EndSlash
+		Menu, Submenu2, UnCheck, % t_Quote
+	Menu, Submenu2, Add, %t_Slash%, EndSlash
 	if (EndingChar_Slash)
-		Menu, Submenu2, Check, Slash /
+		Menu, Submenu2, Check, %t_Slash%
 	else
-		Menu, Submenu2, UnCheck, Slash /
-	Menu, Submenu2, Add, Backslash \, EndBackslash
+		Menu, Submenu2, UnCheck, %t_Slash%
+	Menu, Submenu2, Add, %t_Backslash%, EndBackslash
 	if (EndingChar_Backslash)
-		Menu, Submenu2, Check, Backslash \
+		Menu, Submenu2, Check, %t_Backslash%
 	else
-		Menu, Submenu2, UnCheck, Backslash \
-	Menu, Submenu2, Add, % "Comma ,", EndComma
+		Menu, Submenu2, UnCheck, %t_Backslash%
+	Menu, Submenu2, Add, % t_Comma, EndComma
 	if (EndingChar_Comma)
-		Menu, Submenu2, Check, % "Comma ,"
+		Menu, Submenu2, Check, % t_Comma
 	else
-		Menu, Submenu2, UnCheck, % "Comma ,"
-	Menu, Submenu2, Add, Dot ., EndDot
+		Menu, Submenu2, UnCheck, % t_Comma
+	Menu, Submenu2, Add, %t_Dot%, EndDot
 	if (EndingChar_Dot)
-		Menu, Submenu2, Check, Dot .
+		Menu, Submenu2, Check, %t_Dot%
 	else
-		Menu, Submenu2, UnCheck, Dot .
-	Menu, Submenu2, Add, Question Mark ?, EndQuestionMark
+		Menu, Submenu2, UnCheck, %t_Dot%
+	Menu, Submenu2, Add, %t_QuestionMark%, EndQuestionMark
 	if (EndingChar_QuestionMark)
-		Menu, Submenu2, Check, Question Mark ?
+		Menu, Submenu2, Check, %t_QuestionMark%
 	else
-		Menu, Submenu2, UnCheck, Question Mark ?
-	Menu, Submenu2, Add, Exclamation Mark !, EndExclamationMark
+		Menu, Submenu2, UnCheck, %t_QuestionMark%
+	Menu, Submenu2, Add, %t_ExclamationMark%, EndExclamationMark
 	if (EndingChar_ExclamationMark)
-		Menu, Submenu2, Check, Exclamation Mark !
+		Menu, Submenu2, Check, %t_ExclamationMark%
 	else
-		Menu, Submenu2, UnCheck, Exclamation Mark !
-	Menu, Submenu2, Add, Enter , EndEnter
+		Menu, Submenu2, UnCheck, %t_ExclamationMark%
+	Menu, Submenu2, Add, %t_Enter%, EndEnter
 	if (EndingChar_Enter)
-		Menu, Submenu2, Check, Enter
+		Menu, Submenu2, Check, %t_Enter%
 	else
-		Menu, Submenu2, UnCheck, Enter
-	Menu, Submenu2, Add, Tab , EndTab
+		Menu, Submenu2, UnCheck, %t_Enter%
+	Menu, Submenu2, Add, %t_Tab%, EndTab
 	if (EndingChar_Tab)
-		Menu, Submenu2, Check, Tab
+		Menu, Submenu2, Check, %t_Tab%
 	else
-		Menu, Submenu2, UnCheck, Tab
-	Menu, Submenu1, Add, &Toggle EndChars, :Submenu2
+		Menu, Submenu2, UnCheck, %t_Tab%
+	Menu, Submenu1, Add, %t_ToggleEndChars%, :Submenu2
 	IniRead, ini_Tips, Config.ini, Configuration, Tips
 	if (ini_Tips == 0)
-		Menu, SubmenuTips, UnCheck, Enable/Disable
+		Menu, SubmenuTips, UnCheck, %t_EnableDisable%
 	else
-		Menu, SubmenuTips, Check, Enable/Disable
+		Menu, SubmenuTips, Check, %t_EnableDisable%
 	IniRead, Sandbox, Config.ini, Configuration, Sandbox
 	if (Sandbox == 0)
-		Menu, Submenu1, UnCheck, &Launch Sandbox
+		Menu, Submenu1, UnCheck, %t_LaunchSandbox%
 	else
-		Menu, Submenu1, Check, &Launch Sandbox
+		Menu, Submenu1, Check, %t_LaunchSandbox%
 	IniRead, Undo, Config.ini, Configuration, UndoHotstring
 	if (Undo == 0)
-		Menu, Submenu1, UnCheck, &Undo last hotstring
+		Menu, Submenu1, UnCheck, %t_UndoLastHotstring%
 	else
-		Menu, Submenu1, Check, &Undo last hotstring
-	Menu, HSMenu, Add, &Configuration, :Submenu1
-	Menu, HSMenu, Add, &Search Hotstrings, L_Searching
-	Menu, LibrariesSubmenu, Add, &Import from .ahk to .csv, L_ImportLibrary
-	Menu, ExportSubmenu, Add, &Static hotstrings,  L_ExportLibraryStatic
-	Menu, ExportSubmenu, Add, &Dynamic hotstrings,  L_ExportLibraryDynamic
-	Menu, LibrariesSubmenu, Add, &Export from .csv to .ahk,:ExportSubmenu
+		Menu, Submenu1, Check, %t_UndoLastHotstring%
+	Menu, HSMenu, Add, %t_Configuration%, :Submenu1
+	Menu, HSMenu, Add, %t_SearchHotstrings%, L_Searching
+	Menu, LibrariesSubmenu, Add, %t_ImportFromAhkToCsv%, L_ImportLibrary
+	Menu, ExportSubmenu, Add, %t_StaticHotstrings%,  L_ExportLibraryStatic
+	Menu, ExportSubmenu, Add, %t_DynamicHotstrings%,  L_ExportLibraryDynamic
+	Menu, LibrariesSubmenu, Add, %t_ExportFromCsvToAhk%,:ExportSubmenu
 	Loop,%A_ScriptDir%\Libraries\*.csv
 	{
 		Menu, ToggleLibrariesSubmenu, Add, %A_LoopFileName%, L_ToggleTipsLibrary
@@ -1730,10 +1748,10 @@ L_GUIInit:
 		else
 			Menu, ToggleLibrariesSubmenu, UnCheck, %A_LoopFileName%	
 	}
-	Menu, LibrariesSubmenu, Add, Enable/disable triggerstring tips, :ToggleLibrariesSubmenu 
-	Menu, HSMenu, Add, &Libraries configuration, :LibrariesSubmenu
-    Menu, HSMenu, Add, Clipboard &Delay, HSdelay
-	Menu, HSMenu, Add, &About/Help, About
+	Menu, LibrariesSubmenu, Add, %t_EnableDisableTriggerstringTips%, :ToggleLibrariesSubmenu 
+	Menu, HSMenu, Add, %t_LibrariesConfiguration%, :LibrariesSubmenu
+    Menu, HSMenu, Add, %t_ClipboardDelay%, HSdelay
+	Menu, HSMenu, Add, %t_AboutHelp%, About
     Gui, HS3:Menu, HSMenu
 	IniRead, StartX, Config.ini, Configuration, SizeOfHotstringsWindow_X, #
 	IniRead, StartY, Config.ini, Configuration, SizeOfHotstringsWindow_Y, #
@@ -1844,14 +1862,14 @@ AddHotstring:
 	GuiControlGet, v_SelectFunction
 	If (Trim(v_TriggerString) ="")
 	{
-		MsgBox Enter a Hotstring!
+		MsgBox, %t_EnterHotstring%
 		return
 	}
 	if InStr(v_SelectFunction,"Menu")
 	{
 		If ((Trim(v_EnterHotstring) ="") and (Trim(v_EnterHotstring1) ="") and (Trim(v_EnterHotstring2) ="") and (Trim(v_EnterHotstring3) ="") and (Trim(v_EnterHotstring4) ="") and (Trim(v_EnterHotstring5) ="") and (Trim(v_EnterHotstring6) =""))
 		{
-			MsgBox, 4,, Replacement text is blank. Do you want to proceed?
+			MsgBox, 4,, %t_ReplacementTextIsBlankDoYouWantToProceed%
 			IfMsgBox, No
 			return
 		}
@@ -1875,7 +1893,7 @@ AddHotstring:
 	else{
 		If (Trim(v_EnterHotstring) ="")
 		{
-			MsgBox, 4,, Replacement text is blank. Do you want to proceed?
+			MsgBox, 4,, %t_ReplacementTextIsBlankDoYouWantToProceed%
 			IfMsgBox, No
 			Return
 		}
@@ -1886,12 +1904,12 @@ AddHotstring:
 	}
 	if (v_SelectFunction == "")
 	{
-		MsgBox,0x30 ,, Choose sending function!
+		MsgBox,0x30 ,, %t_ChooseSendingFunction%
 		return
 	}
 	if (v_SelectHotstringLibrary == "")
 	{
-		MsgBox, Choose section before saving!
+		MsgBox, %t_ChooseSectionBeforeSaving%
 		return
 	}
 	
@@ -1931,7 +1949,7 @@ AddHotstring:
 		SendFun := "F_MenuTextAHK"
 	else 
 	{
-		MsgBox, Choose the method of sending the hotstring!
+		MsgBox, %t_ChooseTheMethodOfSendingTheHotstring%
 		return
 	}
 
@@ -2084,11 +2102,11 @@ return
 
 AddLib:
 	Gui, ALib:New, -Border
-	Gui, ALib:Add, Text,,Enter a name for the new library
+	Gui, ALib:Add, Text,,%t_EnterANameForTheNewLibrary%
 	Gui, ALib:Add, Edit, % "vNewLib w" . 150*DPI%v_SelectedMonitor%,
 	Gui, ALib:Add, Text, % "x+" . 10*DPI%v_SelectedMonitor%, .csv
 	Gui, ALib:Add, Button, % "Default gALibOK xm w" . 70*DPI%v_SelectedMonitor%, OK
-	Gui, ALib:Add, Button, % "gALibGuiClose x+" . 10*DPI%v_SelectedMonitor% . " w" . 70*DPI%v_SelectedMonitor%, Cancel
+	Gui, ALib:Add, Button, % "gALibGuiClose x+" . 10*DPI%v_SelectedMonitor% . " w" . 70*DPI%v_SelectedMonitor%, %t_Cancel%
 	WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
 	Gui, ALib:Show, % "x" . ((v_PreviousX+v_PreviousWidth)/2)/DPI%v_SelectedMonitor% . " y" . ((v_PreviousY+v_PreviousHeight)/2)/DPI%v_SelectedMonitor%
 return
@@ -2097,7 +2115,7 @@ ALibOK:
 	Gui,ALib:Submit, NoHide
 	if (NewLib == "")
 	{
-		MsgBox, Enter a name for the new library!
+		MsgBox, %t_EnterANameForTheNewLibrary%
 		return
 	}
 	NewLib .= ".csv"
@@ -2106,14 +2124,15 @@ ALibOK:
 	IfNotExist, Libraries\%NewLib%
 	{
 		FileAppend,, Libraries\%NewLib%, UTF-8
-		MsgBox, The library %NewLib% has been created.
+		IniRead, t_TheLibraryHasBeenCreated, English.ini, Strings, TheLibraryHasBeenCreated
+		MsgBox, % t_TheLibrary . " " . NewLib . " " . t_HasBeenCreated
 		Gui, ALib:Destroy
 		GuiControl, HS3:, v_SelectHotstringLibrary, |
 		Loop,%A_ScriptDir%\Libraries\*.csv
         	GuiControl,HS3: , v_SelectHotstringLibrary, %A_LoopFileName%
 	}
 	Else
-		MsgBox, A library with that name already exists!
+		MsgBox, %t_ALibraryWithThatNameAlreadyExists%
 return
 
 ALibGuiEscape:
@@ -2311,7 +2330,7 @@ SaveHotstrings:
 		{
 			if !(v_SelectedRow)
 			{
-				MsgBox, 4,, The hostring "%v_TriggerString%" exists in a file %SaveFile%.csv. Do you want to proceed?
+				MsgBox, 4,, % t_TheHostring . " """ .  v_TriggerString . """ " .  t_ExistsInAFile . " " . SaveFile . t_CsvDoYouWantToProceed
 				IfMsgBox, No
 					return
 			}
@@ -2365,7 +2384,7 @@ SaveHotstrings:
 	}
 	MsgBox Hotstring added to the %SaveFile%.csv file!
 	a_Triggers := []
-	TrayTip, %A_ScriptName%,Loading hotstrings from libraries..., 1
+	TrayTip, %A_ScriptName%,%t_LoadingHotstringsFromLibraries%, 1
 	v_HotstringCnt := 0
 	Loop, Files, Libraries\*.csv
 	{
@@ -2375,7 +2394,7 @@ SaveHotstrings:
 		}
 	}
 	F_LoadFiles("PriorityLibrary.csv")	
-	TrayTip,%A_ScriptName%, Hotstrings have been loaded ,1
+	TrayTip,%A_ScriptName%, %t_HotstringsHaveBeenLoaded% ,1
 Return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2384,16 +2403,16 @@ Delete:
 	Gui, HS3:+OwnDialogs
 	
 	If !(v_SelectedRow := LV_GetNext()) {
-		MsgBox, 0, %A_ThisLabel%, Select a row in the list-view, please!
+		MsgBox, 0, %A_ThisLabel%, %t_SelectARowInTheListViewPlease%
 		Return
 	}
-	Msgbox, 0x4,, Selected Hotstring will be deleted. Do you want to proceed?
+	Msgbox, 0x4,, %t_SelectedHotstringWillBeDeletedDoYouWantToProceed%
 	IfMsgBox, No
 		return
-	TrayTip, %A_ScriptName%, Deleting hotstring..., 1
+	TrayTip, %A_ScriptName%, %t_DeletingHotstring%, 1
 	Gui, ProgressDelete:New, -Border -Resize
 	Gui, ProgressDelete:Add, Progress, w200 h20 cBlue vProgressDelete, 0
-	Gui, ProgressDelete:Add,Text,w200 vTextDelete, Deleting hotstring. Please wait...
+	Gui, ProgressDelete:Add,Text,w200 vTextDelete, %t_DeletingHotstringPleaseWait%
 	Gui, ProgressDelete:Show, hide, ProgressDelete
 	WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
 	DetectHiddenWindows, On
@@ -2463,65 +2482,10 @@ Delete:
 		}
 	}
 	Gui, ProgressDelete:Destroy
-	MsgBox, Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
+	MsgBox, %t_HotstringHasBeenDeletedNowApplicationWillRestartItselfInOrderToApplyChangesReloadTheLibrariesCsv%
 	WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
 	Run, AutoHotkey.exe Hotstrings.ahk v_Param L_GUIInit %v_SelectHotstringLibrary% %v_PreviousWidth% %v_PreviousHeight% %v_PreviousX% %v_PreviousY% %v_SelectedRow% %v_SelectedMonitor%
 return
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-; SaveMon:
-	; v_MonitorFlag := 0
-	; if (v_PreviousMonitor != v_SelectedMonitor)
-		; v_ShowGui := 3
-	; gosub, L_GUIInit
-; return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-; CheckMon:
-    ; Gui, Mon:Submit, NoHide
-    ; Gui, Mon:Destroy
-    ; Gui, Mon:New, +AlwaysOnTop
-	; if (v_MonitorFlag != 1)
-	; {
-		; v_PreviousMonitor := v_SelectedMonitor
-		; v_MonitorFlag := 1
-	; }
-    ; SysGet, N, MonitorCount
-    ; SysGet, PrimMon, MonitorPrimary
-    ; if (v_SelectedMonitor == 0)
-        ; v_SelectedMonitor := PrimMon
-    ; MFS := 10*DPI%v_SelectedMonitor%
-    ; Gui, Mon:Margin, 12.5*DPI%v_SelectedMonitor%, 7.5*DPI%v_SelectedMonitor%
-    ; Gui, Mon:Font, s%MFS%
-    ; Gui, Mon:Add, Text, % " w" . 500*DPI%v_SelectedMonitor%, Choose a monitor where GUI will be located:
-    ; Loop, % N
-    ; {
-        ; if (A_Index == v_SelectedMonitor)
-        ; {
-            ; Gui, Mon:Add, Radio,%  "xm+" . 50*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " gCheckMon AltSubmit vv_SelectedMonitor Checked", % "Monitor #" . A_Index . (A_Index = PrimMon ? " (primary)" : "")
-        ; }
-        ; else
-        ; {
-            ; Gui, Mon:Add, Radio, % "xm+" . 50*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " gCheckMon AltSubmit", % "Monitor #" . A_Index . (A_Index = PrimMon ? " (primary)" : "")
-        ; }
-    ; }
-    ; Gui, Mon:Add, Button, % "Default xm+" . 30*DPI%v_SelectedMonitor% . " y+" . 15*DPI%v_SelectedMonitor% . " h" . 30*DPI%v_SelectedMonitor% . " gCheckMonitorNumbering", &Check Monitor Numbering
-    ; Gui, Mon:Add, Button, % "x+" . 30*DPI%v_SelectedMonitor% . " h" . 30*DPI%v_SelectedMonitor% . " yp gSaveMon", &Save
-    ; SysGet, MonitorBoundingCoordinates_, Monitor, % v_SelectedMonitor
-    ; Gui, Mon: Show
-        ; , % "x" . MonitorBoundingCoordinates_Left + (Abs(MonitorBoundingCoordinates_Left - MonitorBoundingCoordinates_Right) / 2) - 200*DPI%v_SelectedMonitor%
-        ; . "y" . MonitorBoundingCoordinates_Top + (Abs(MonitorBoundingCoordinates_Top - MonitorBoundingCoordinates_Bottom) / 2) - 80*DPI%v_SelectedMonitor%
-        ; . "w" . 400*DPI%v_SelectedMonitor% . "h" . 150*DPI%v_SelectedMonitor%, Configure Monitor
-; return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-; CheckMonitorNumbering:
-    ; F_ShowMonitorNumbers()
-    ; SetTimer, DestroyGuis, -3000
-; return
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 DestroyGuis:
@@ -2554,9 +2518,9 @@ return
 MySlider:
     ini_Delay := MySlider
     if (ini_Delay = 1000)
-        GuiControl,,DelayText, Hotstring paste from Clipboard delay 1 s
+        GuiControl,,DelayText, %t_HotstringPasteFromClipboardDelay1s%
     else
-        GuiControl,,DelayText, Hotstring paste from Clipboard delay %ini_Delay% ms
+        GuiControl,,DelayText, % t_HotstringPasteFromClipboardDelay . " " . ini_Delay . " ms"
 	IniWrite, %ini_Delay%, Config.ini, Configuration, Delay
 return
 
@@ -2565,12 +2529,12 @@ return
 About:
 	Gui, MyAbout: Destroy
 	Gui, MyAbout: Font, % "bold s" . 11*DPI%v_SelectedMonitor%
-    Gui, MyAbout: Add, Text, , Let's make your PC personal again... 
+    Gui, MyAbout: Add, Text, , %t_LetsMakeYourPCPersonalAgain%
 	Gui, MyAbout: Font, % "norm s" . 11*DPI%v_SelectedMonitor%
-	Gui, MyAbout: Add, Text, ,Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
+	Gui, MyAbout: Add, Text, ,%t_EnablesConvenientDefinitionAndUseOfHotstringsTriggeredByShortcutsLongerTextStringsThisIs3rdEditionOfThisApplication2020ByJakubMasiakAndMaciejSlojewskiLicenseGNUGPLVer3%
    	Gui, MyAbout: Font, % "CBlue bold Underline s" . 12*DPI%v_SelectedMonitor%
-    Gui, MyAbout: Add, Text, gLink, Application help
-	Gui, MyAbout: Add, Text, gLink2, Genuine hotstrings AutoHotkey documentation
+    Gui, MyAbout: Add, Text, gLink, %t_ApplicationHelp%
+	Gui, MyAbout: Add, Text, gLink2, %t_GenuineHotstringsAutoHotkeyDocumentation%
 	Gui, MyAbout: Font, % "norm s" . 11*DPI%v_SelectedMonitor%
 	Gui, MyAbout: Add, Button, % "Default Hidden w" . 100*DPI%v_SelectedMonitor% . " gMyOK vOkButtonVariabl hwndOkButtonHandle", &OK
     GuiControlGet, MyGuiControlGetVariable, MyAbout: Pos, %OkButtonHandle%
@@ -2659,7 +2623,7 @@ else
 {
 	WinGetPos, StartXlist, StartYlist,,,Hotstrings
 	Gui, SearchLoad:New, -Resize -Border
-	Gui, SearchLoad:Add, Text,, Please wait, uploading .csv files...
+	Gui, SearchLoad:Add, Text,, %t_PleaseWaitUploadingCsvFiles%
 	Gui, SearchLoad:Add, Progress, w300 h20 HwndhPB2 -0x1, 50
 	WinSet, Style, +0x8, % "ahk_id " hPB2
 	SendMessage, 0x40A, 1, 20,, % "ahk_id " hPB2
@@ -2685,68 +2649,20 @@ else
 	{
 		Gui, HS3List:Hide
 	}
-		; a_Hotstring := []
-		; a_Library := []
-		; a_Triggerstring := []
-		; a_EnableDisable := []
-		; a_TriggerOptions := []
-		; a_OutputFunction := []
-		; a_Comment := []
-
-
 	Gui, HS3List:New,% "+Resize MinSize" . 940*DPI%v_SelectedMonitor% . "x" . 500*DPI%v_SelectedMonitor%
 	v_HS3ListFlag := 1
 	Gui, HS3List:Add, Text, ,Search:
-	Gui, HS3List:Add, Text, % "yp xm+" . 420*DPI%v_SelectedMonitor%, Search by:
+	Gui, HS3List:Add, Text, % "yp xm+" . 420*DPI%v_SelectedMonitor%, %t_SearchBy%
 	Gui, HS3List:Add, Edit, % "xm w" . 400*DPI%v_SelectedMonitor% . " vv_SearchTerm gSearch"
-	Gui, HS3List:Add, Radio, % "yp xm+" . 420*DPI%v_SelectedMonitor% . " vv_RadioGroup gSearchChange Checked", Triggerstring
-	Gui, HS3List:Add, Radio, % "yp xm+" . 540*DPI%v_SelectedMonitor% . " gSearchChange", Hotstring
-	Gui, HS3List:Add, Radio, % "yp xm+" . 640*DPI%v_SelectedMonitor% . " gSearchChange", Library
-	Gui, HS3List:Add, Button, % "yp-2 xm+" . 720*DPI%v_SelectedMonitor% . " w" . 100*DPI%v_SelectedMonitor% . " gMoveList", Move
-	Gui, HS3List:Add, ListView, % "xm grid vList +AltSubmit gHSLV2 h" . 400*DPI%v_SelectedMonitor%, Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment
+	Gui, HS3List:Add, Radio, % "yp xm+" . 420*DPI%v_SelectedMonitor% . " vv_RadioGroup gSearchChange Checked", %t_Triggerstring%
+	Gui, HS3List:Add, Radio, % "yp xm+" . 540*DPI%v_SelectedMonitor% . " gSearchChange", %t_Hotstring%
+	Gui, HS3List:Add, Radio, % "yp xm+" . 640*DPI%v_SelectedMonitor% . " gSearchChange", %t_Library%
+	Gui, HS3List:Add, Button, % "yp-2 xm+" . 720*DPI%v_SelectedMonitor% . " w" . 100*DPI%v_SelectedMonitor% . " gMoveList", %t_Move%
+	Gui, HS3List:Add, ListView, % "xm grid vList +AltSubmit gHSLV2 h" . 400*DPI%v_SelectedMonitor%, %t_LibraryTriggerstringTriggerOptionsOutputFunctionEnableDisableHotstringComment%
 	Loop, % a_Library.MaxIndex()
 	{
 		LV_Add("", a_Library[A_Index], a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index], a_Comment[A_Index])
 	}
-	; Loop, Files, %A_ScriptDir%\Libraries\*.csv
-	; {
-	; 	Loop
-	; 	{
-	; 		FileReadLine, varSearch, %A_LoopFileFullPath%, %A_Index%
-	; 		if ErrorLevel
-	; 			break
-	; 		tabSearch := StrSplit(varSearch, "‖")
-	; 		if (InStr(tabSearch[1], "*0"))
-	; 			{
-	; 				tabSearch[1] := StrReplace(tabSearch[1], "*0")
-	; 			}
-	; 			if (InStr(tabSearch[1], "O0"))
-	; 			{
-	; 				tabSearch[1] := StrReplace(tabSearch[1], "O0")
-	; 			}
-	; 			if (InStr(tabSearch[1], "C0"))
-	; 			{
-	; 				tabSearch[1] := StrReplace(tabSearch[1], "C0")
-	; 			}
-	; 			if (InStr(tabSearch[1], "?0"))
-	; 			{
-	; 				tabSearch[1] := StrReplace(tabSearch[1], "?0")
-	; 			}
-	; 			if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
-	; 			{
-	; 				tabSearch[1] := StrReplace(tabSearch[1], "B")
-	; 			}
-	; 		name := SubStr(A_LoopFileName,1, StrLen(A_LoopFileName)-4)
-	; 		LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4],tabSearch[5], tabSearch[6])
-	; 		a_Library.Push(name)
-	; 		a_Hotstring.Push(tabSearch[2])
-	; 		a_TriggerOptions.Push(tabSearch[1])
-	; 		a_OutputFunction.Push(tabSearch[3])
-	; 		a_EnableDisable.Push(tabSearch[4])
-	; 		a_Comment.Push(tabSearch[6])
-	; 		a_Triggerstring.Push(tabSearch[5])
-	; 	}
-	; }
 	LV_ModifyCol(1, "Sort")
 	StartWlist := 940*DPI%v_SelectedMonitor%
 	StartHlist := 500*DPI%v_SelectedMonitor%
@@ -2759,7 +2675,7 @@ else
 	}
 	gui, HS3List:Add, Text, x0 h1 0x7 w10 vLine2
 	Gui, HS3List:Font, % "s" . 10*DPI%v_SelectedMonitor% . " cBlack Norm"
-	Gui, HS3List:Add, Text, xm vShortcuts2, F3 Close Search hotstrings | F8 Move hotstring
+	Gui, HS3List:Add, Text, xm vShortcuts2, %t_F3CloseSearchHotstringsF8MoveHotstring%
 	if !(v_SearchTerm == "")
 		GuiControl,,v_SearchTerm,%v_SearchTerm%
 	if (v_RadioGroup == 1)
@@ -2833,7 +2749,7 @@ return
 MoveList:
 	Gui, HS3List:Submit, NoHide
 	If !(v_SelectedRow := LV_GetNext()) {
-		MsgBox, 0, %A_ThisLabel%, Select a row in the list-view, please!
+		MsgBox, 0, %A_ThisLabel%, %t_SelectARowInTheListViewPlease%
 		Return
 	}
 	LV_GetText(FileName,v_SelectedRow,1)
@@ -2855,7 +2771,7 @@ MoveList:
 	{
 		cntMove += 1
 	}
-	Gui, MoveLibs:Add, Text,, Select the target library:
+	Gui, MoveLibs:Add, Text,, %t_SelectTheTargetLibrary%
 	Gui, MoveLibs:Add, ListView,LV0x1 -Hdr r%cntMove%,Library
 	Loop, %A_ScriptDir%\Libraries\*.csv
 	{
@@ -2864,8 +2780,8 @@ MoveList:
 			LV_Add("",A_LoopFileName)
 		}
 	}
-	Gui, MoveLibs:Add, Button,% "gMove w" . 100*DPI%v_SelectedMonitor%, Move
-	Gui, MoveLibs:Add, Button, % "yp x+m gCanMove w" . 100*DPI%v_SelectedMonitor%, Cancel
+	Gui, MoveLibs:Add, Button,% "gMove w" . 100*DPI%v_SelectedMonitor%, %t_Move%
+	Gui, MoveLibs:Add, Button, % "yp x+m gCanMove w" . 100*DPI%v_SelectedMonitor%, %t_Cancel%
 	Gui, MoveLibs:Show,hide, Select library
 	WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
 	DetectHiddenWindows, On
@@ -2885,7 +2801,7 @@ return
 Move:
 Gui, MoveLibs:Submit, NoHide
 If !(v_SelectedRow := LV_GetNext()) {
-	MsgBox, 0, %A_ThisLabel%, Select a row in the list-view, please!
+	MsgBox, 0, %A_ThisLabel%, %t_SelectARowInTheListViewPlease%
 	Return
 }
 LV_GetText(TargetLib, v_SelectedRow)
@@ -2901,7 +2817,7 @@ Loop, Read, %InputFile%
 {
 	if InStr(A_LoopReadLine, LString)
 	{
-		MsgBox, 4,, The hostring "%Triggerstring%" exists in a file %TargetLib%. Do you want to proceed?
+		MsgBox, 4,, % t_TheHostring . " """ . Triggerstring """ " . t_ExistsInAFile . " " . TargetLib . t_DoYouWantToProceed
 		IfMsgBox, No
 		{
 			Gui, MoveLibs:Destroy
@@ -2975,9 +2891,9 @@ if (cntLines == 1)
 		FileAppend,, %InputFile%, UTF-8
 	}
 FileDelete, %OutputFile%
-MsgBox Hotstring moved to the %TargetLib% file!
+MsgBox,% t_HotstringMovedToThe . " " . TargetLib . " " . t_File
 a_Triggers := []
-TrayTip, %A_ScriptName%,Loading hotstrings from libraries..., 1
+TrayTip, %A_ScriptName%,%t_LoadingHotstringsFromLibraries%, 1
 v_HotstringCnt := 0
 Loop, Files, Libraries\*.csv
 {
@@ -2987,7 +2903,7 @@ Loop, Files, Libraries\*.csv
 	}
 }
 F_LoadFiles("PriorityLibrary.csv")
-TrayTip,%A_ScriptName%, Hotstrings have been loaded ,1
+TrayTip,%A_ScriptName%, %t_HotstringsHaveBeenLoaded% ,1
 Gui, MoveLibs:Destroy
 Gui, HS3List:Hide
 gosub, L_Searching
@@ -3068,7 +2984,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 Undo:
-	Menu, Submenu1, ToggleCheck, &Undo last hotstring
+	Menu, Submenu1, ToggleCheck, %t_UndoLastHotstring%
 	Undo := !(Undo)
 	IniWrite, %Undo%, Config.ini, Configuration, UndoHotstring
 return
@@ -3082,9 +2998,9 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 Tips:
-	Menu, SubmenuTips, ToggleCheck, Enable/Disable
-	Menu, SubmenuTips, ToggleEnable, Choose tips location
-	Menu, SubmenuTips, ToggleEnable, &Number of characters for tips
+	Menu, SubmenuTips, ToggleCheck, %t_EnableDisable%
+	Menu, SubmenuTips, ToggleEnable, %t_ChooseTipsLocation%
+	Menu, SubmenuTips, ToggleEnable, %t_NumberOfCharactersForTips%
 	ini_Tips := !(ini_Tips)
 	IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
 return
@@ -3092,7 +3008,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 Sandbox:
-	Menu, Submenu1, ToggleCheck, &Launch Sandbox
+	Menu, Submenu1, ToggleCheck, %t_LaunchSandbox%
 	Sandbox := !(Sandbox)
 	If (Sandbox == 0)
 	{
@@ -3124,7 +3040,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndSpace:
-	Menu, Submenu2, ToggleCheck, Space
+	Menu, Submenu2, ToggleCheck, %t_Space%
 	EndingChar_Space := !(EndingChar_Space)
 	IniWrite, %EndingChar_Space%, Config.ini, Configuration, EndingChar_Space
 	EndChars()
@@ -3133,7 +3049,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndMinus:
-	Menu, Submenu2, ToggleCheck, Minus -
+	Menu, Submenu2, ToggleCheck, %t_Minus%
 	EndingChar_Minus := !(EndingChar_Minus)
 	IniWrite, %EndingChar_Minus%, Config.ini, Configuration, EndingChar_Minus
 	EndChars()
@@ -3142,7 +3058,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndORoundBracket:
-	Menu, Submenu2, ToggleCheck, Opening Round Bracket (
+	Menu, Submenu2, ToggleCheck, %t_OpeningRoundBracket%
 	EndingChar_ORoundBracket := !(EndingChar_ORoundBracket)
 	IniWrite, %EndingChar_ORoundBracket%, Config.ini, Configuration, EndingChar_ORoundBracket
 	EndChars()
@@ -3151,7 +3067,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndCRoundBracket:
-	Menu, Submenu2, ToggleCheck, Closing Round Bracket )
+	Menu, Submenu2, ToggleCheck, %t_ClosingRoundBracket%
 	EndingChar_CRoundBracket := !(EndingChar_CRoundBracket)
 	IniWrite, %EndingChar_CRoundBracket%, Config.ini, Configuration, EndingChar_CRoundBracket
 	EndChars()
@@ -3160,7 +3076,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndOSquareBracket:
-	Menu, Submenu2, ToggleCheck, Opening Square Bracket [
+	Menu, Submenu2, ToggleCheck, %t_OpeningSquareBracket%
 	EndingChar_OSquareBracket := !(EndingChar_OSquareBracket)
 	IniWrite, %EndingChar_OSquareBracket%, Config.ini, Configuration, EndingChar_OSquareBracket
 	EndChars()
@@ -3169,7 +3085,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndCSquareBracket:
-	Menu, Submenu2, ToggleCheck, Closing Square Bracket ]
+	Menu, Submenu2, ToggleCheck, %t_ClosingSquareBracket%
 	EndingChar_CSquareBracket := !(EndingChar_CSquareBracket)
 	IniWrite, %EndingChar_CSquareBracket%, Config.ini, Configuration, EndingChar_CSquareBracket
 	EndChars()
@@ -3178,7 +3094,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndOCurlyBracket:
-	Menu, Submenu2, ToggleCheck, Opening Curly Bracket {
+	Menu, Submenu2, ToggleCheck, %t_OpeningCurlyBracket%
 	EndingChar_OCurlyBracket := !(EndingChar_OCurlyBracket)
 	IniWrite, %EndingChar_OCurlyBracket%, Config.ini, Configuration, EndingChar_OCurlyBracket
 	EndChars()
@@ -3187,7 +3103,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndCCurlyBracket:
-	Menu, Submenu2, ToggleCheck, Closing Curly Bracket }
+	Menu, Submenu2, ToggleCheck, %t_ClosingCurlyBracket%
 	EndingChar_CCurlyBracket := !(EndingChar_CCurlyBracket)
 	IniWrite, %EndingChar_CCurlyBracket%, Config.ini, Configuration, EndingChar_CCurlyBracket
 	EndChars()
@@ -3196,7 +3112,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndColon:
-	Menu, Submenu2, ToggleCheck, Colon :
+	Menu, Submenu2, ToggleCheck,%t_Colon%
 	EndingChar_Colon := !(EndingChar_Colon)
 	IniWrite, %EndingChar_Colon%, Config.ini, Configuration, EndingChar_Colon
 	EndChars()
@@ -3205,7 +3121,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndSemicolon:
-	Menu, Submenu2, ToggleCheck, % "Semicolon `;"
+	Menu, Submenu2, ToggleCheck, % t_Semicolon
 	EndingChar_Semicolon := !(EndingChar_Semicolon)
 	IniWrite, %EndingChar_Semicolon%, Config.ini, Configuration, EndingChar_Semicolon
 	EndChars()
@@ -3214,7 +3130,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndApostrophe:
-	Menu, Submenu2, ToggleCheck, Apostrophe '
+	Menu, Submenu2, ToggleCheck, %t_Apostrophe%
 	EndingChar_Apostrophe := !(EndingChar_Apostrophe)
 	IniWrite, %EndingChar_Apostrophe%, Config.ini, Configuration, EndingChar_Apostrophe
 	EndChars()
@@ -3223,7 +3139,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndQuote:
-	Menu, Submenu2, ToggleCheck, % "Quote """
+	Menu, Submenu2, ToggleCheck, % t_Quote
 	EndingChar_Quote := !(EndingChar_Quote)
 	IniWrite, %EndingChar_Quote%, Config.ini, Configuration, EndingChar_Quote
 	EndChars()
@@ -3232,7 +3148,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndSlash:
-	Menu, Submenu2, ToggleCheck, Slash /
+	Menu, Submenu2, ToggleCheck, %t_Slash%
 	EndingChar_Slash := !(EndingChar_Slash)
 	IniWrite, %EndingChar_Slash%, Config.ini, Configuration, EndingChar_Slash
 	EndChars()
@@ -3241,7 +3157,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndBackslash:
-	Menu, Submenu2, ToggleCheck, Backslash \
+	Menu, Submenu2, ToggleCheck, %t_Backslash%
 	EndingChar_Backslash := !(EndingChar_Backslash)
 	IniWrite, %EndingChar_Backslash%, Config.ini, Configuration, EndingChar_Backslash
 	EndChars()
@@ -3250,7 +3166,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndComma:
-	Menu, Submenu2, ToggleCheck, % "Comma ,"
+	Menu, Submenu2, ToggleCheck, % t_Comma
 	EndingChar_Comma := !(EndingChar_Comma)
 	IniWrite, %EndingChar_Comma%, Config.ini, Configuration, EndingChar_Comma
 	EndChars()
@@ -3259,7 +3175,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndDot:
-	Menu, Submenu2, ToggleCheck, Dot .
+	Menu, Submenu2, ToggleCheck, %t_Dot%
 	EndingChar_Dot := !(EndingChar_Dot)
 	IniWrite, %EndingChar_Dot%, Config.ini, Configuration, EndingChar_Dot
 	EndChars()
@@ -3268,7 +3184,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndQuestionMark:
-	Menu, Submenu2, ToggleCheck, Question Mark ?
+	Menu, Submenu2, ToggleCheck, %t_QuestionMark%
 	EndingChar_QuestionMark := !(EndingChar_QuestionMark)
 	IniWrite, %EndingChar_QuestionMark%, Config.ini, Configuration, EndingChar_QuestionMark
 	EndChars()
@@ -3277,7 +3193,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndExclamationMark:
-	Menu, Submenu2, ToggleCheck, Exclamation Mark !
+	Menu, Submenu2, ToggleCheck, %t_ExclamationMark%
 	EndingChar_ExclamationMark := !(EndingChar_ExclamationMark)
 	IniWrite, %EndingChar_ExclamationMark%, Config.ini, Configuration, EndingChar_ExclamationMark
 	EndChars()
@@ -3286,7 +3202,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndEnter:
-	Menu, Submenu2, ToggleCheck, Enter
+	Menu, Submenu2, ToggleCheck, %t_Enter%
 	EndingChar_Enter := !(EndingChar_Enter)
 	IniWrite, %EndingChar_Enter%, Config.ini, Configuration, EndingChar_Enter
 	EndChars()
@@ -3295,7 +3211,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndTab:
-	Menu, Submenu2, ToggleCheck, Tab
+	Menu, Submenu2, ToggleCheck, %t_Tab%
 	EndingChar_Tab := !(EndingChar_Tab)
 	IniWrite, %EndingChar_Tab%, Config.ini, Configuration, EndingChar_Tab
 	EndChars()
@@ -3325,8 +3241,8 @@ L_DPIScaling:
 return
 
 L_CaretCursor:
-	Menu, Submenu3, ToggleCheck, Caret
-	Menu, Submenu3, ToggleCheck, Cursor
+	Menu, Submenu3, ToggleCheck, %t_Caret%
+	Menu, Submenu3, ToggleCheck, %t_Cursor%
 	ini_Caret := !(ini_Caret)
 	ini_Cursor := !(ini_Cursor)
 	IniWrite, %ini_Caret%, Config.ini, Configuration, Caret
@@ -3369,8 +3285,8 @@ L_AmountOfCharacterTips:
 return
 
 L_MenuCaretCursor:
-	Menu, PositionMenu, ToggleCheck, Caret
-	Menu, PositionMenu, ToggleCheck, Cursor
+	Menu, PositionMenu, ToggleCheck, %t_Caret%
+	Menu, PositionMenu, ToggleCheck, %t_Cursor%
 	ini_MenuCaret := !(ini_MenuCaret)
 	ini_MenuCursor := !(ini_MenuCursor)
 	IniWrite, %ini_MenuCaret%, Config.ini, Configuration, MenuCaret
@@ -3378,25 +3294,25 @@ L_MenuCaretCursor:
 return
 
 L_MenuSound:
-	Menu, SubmenuMenu, ToggleCheck, Enable &sound if overrun
+	Menu, SubmenuMenu, ToggleCheck, %t_EnableSoundIfOverrun%
 	ini_MenuSound := !(ini_MenuSound)
 	IniWrite, %ini_MenuSound%, Config.ini, Configuration, MenuSound
 return
 
 L_ImportLibrary:
-	FileSelectFile, v_LibraryName, 3, %A_ScriptDir%,Choose library file (.ahk) for import, AHK Files (*.ahk)]
+	FileSelectFile, v_LibraryName, 3, %A_ScriptDir%,%t_ChooseLibraryFileAhkForImport%, AHK Files (*.ahk)]
 	if !(v_LibraryName == "")
 		F_ImportLibrary(v_LibraryName)
 return
 
 L_ExportLibraryStatic:
-	FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries",Choose library file (.csv) for export, CSV Files (*.csv)]
+	FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries",%t_ChooseLibraryFileCsvForExport%, CSV Files (*.csv)]
 	if !(v_LibraryName == "")
 		F_ExportLibraryStatic(v_LibraryName)
 return
 
 L_ExportLibraryDynamic:
-	FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries",Choose library file (.csv) for export, CSV Files (*.csv)]
+	FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries",%t_ChooseLibraryFileCsvForExport%, CSV Files (*.csv)]
 	if !(v_LibraryName == "")
 		F_ExportLibraryDynamic(v_LibraryName)
 return
@@ -3407,7 +3323,7 @@ IniRead, v_LibraryFlag, Config.ini, TipsLibraries, %A_ThisMenuitem%
 v_LibraryFlag := !(v_LibraryFlag)
 IniWrite, %v_LibraryFlag%, Config.ini, TipsLibraries, %A_ThisMenuitem%
 a_Triggers := []
-TrayTip, %A_ScriptName%,Loading hotstrings from libraries..., 1
+TrayTip, %A_ScriptName%,%t_LoadingHotstringsFromLibraries%, 1
 v_HotstringCnt := 0
 Loop, Files, Libraries\*.csv
 {
@@ -3417,17 +3333,17 @@ Loop, Files, Libraries\*.csv
 	}
 }
 F_LoadFiles("PriorityLibrary.csv")
-TrayTip,%A_ScriptName%, Hotstrings have been loaded ,1
+TrayTip,%A_ScriptName%, %t_HotstringsHaveBeenLoaded% ,1
 return
 
 L_SortTipsAlphabetically:
-Menu, SubmenuTips, ToggleCheck, Sort tips &alphabetically
+Menu, SubmenuTips, ToggleCheck, %t_SortTipsAlphabetically%
 ini_TipsSortAlphabetically := !(ini_TipsSortAlphabetically)
 IniWrite, %ini_TipsSortAlphabetically%, Config.ini, Configuration, TipsSortAlphatebically
 return
 
 L_SortTipsByLength:
-Menu, SubmenuTips, ToggleCheck, Sort tips by &length
+Menu, SubmenuTips, ToggleCheck, %t_SortTipsByLength%
 ini_TipsSortByLength := !(ini_TipsSortByLength)
 IniWrite, %ini_TipsSortByLength%, Config.ini, Configuration, TipsSortByLength
 return

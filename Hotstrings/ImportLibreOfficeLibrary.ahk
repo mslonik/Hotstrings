@@ -41,11 +41,11 @@ Loop,
             hotstring := strings[4]
             if (flag)
             {
-                textline := % "*‖" . trigger . "‖SI‖En‖" . hotstring . "‖"
+                textline := % "‖" . trigger . "‖SI‖En‖" . hotstring . "‖"
                 flag := 0
             }
             else
-                textline := % "`n*‖" . trigger . "‖SI‖En‖" . hotstring . "‖"
+                textline := % "`n‖" . trigger . "‖SI‖En‖" . hotstring . "‖"
             FileAppend, %textline%, %A_ScriptDir%\Libraries\%Filename%, UTF-8
         }
     }
