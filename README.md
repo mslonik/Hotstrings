@@ -957,7 +957,98 @@ The following keyboard shortcuts are active only if *Search Hotstrings* applicat
 ---
 ---
 
-# [Format of libraries](#table-of-content "Return to Table of content")
+## Libraries
+
+A library is any set of **(triggerstring, hotstring)** pairs, saved for future use in form of a file. By default *Hotstrings* application is delivered with few libraries. Anytime user applies changes to existing definitions or adds new, result of her/his work is saved in any of the chosen libraries.
+
+It is advised to group definitions **(triggerstring, hotstring)** in dedicated files, not all in one file.
+
+### Abbreviations.csv
+
+This library contains collection of frequently used abbreviations (e.g. *ASCII*) and corresponding expansion of abbreviations (e.g. *American Standard Code for Information Interchange*). **Triggerstrings** of almost all abbreviations are defined without triggerstring options, but they can be entered without pressing <Shift> key, just with small letters and then will be automatically capitalized. It speeds up a lot process of text entering, as capital letter in fact requires two key presses instead of just one.
+
+The convention used in this library:
+ * to get existing abbreviation in capital letters, just enter it and add **EndChar**, e.g. <Spacebar>: *ascii☐*,
+ * to get expansion of existing abbreviation just enter it and add </> at the very end: *ascii/ *
+
+|     input string     | previous *endchar* | triggerstring | trigger | replaced by hotstring |
+|:--------------------:|:------------------:|:-------------:|:-------:|:---------------------:|
+| Something,☐something |                    |    ~~ascii~~    |  ~~☐~~  |     ASCII☐     |
+
+> Something,☐something~~ascii☐~~ASCII☐
+
+
+|     input string     | previous *endchar* | triggerstring | trigger | replaced by hotstring |
+|:--------------------:|:------------------:|:-------------:|:-------:|:---------------------:|
+| Something,☐something |                    |    ~~ascii~~    |  ~~/~~  |     American Standard Code for Information Interchange    |
+
+> Something,☐something~~ascii/~~American Standard Code for Information Interchange
+
+### AccentsDiacritics.csv
+
+This library contains collection of accents (diacritic) letters, small and capital, e.g. *ä, Ä, ø, Ø, ř, Ř*.  If somebody plans to use just some accents without permanent switching to other keyboard layout, then it could be handy to quickly enter diacritics with trick available in triggerstrins of this library. In order to enter small or capital accent letter just enter latin leter and add <^> (caret) immediately after. One will get menu with choice of some available accents related to base latin letter.
+
+**Triggerstrings** are defined with additional options:
+
+* Immediate execute (*)
+
+* Case sensitive (C) 
+
+* Inside word (?)
+
+The convention used in this library:
+ * to get accented letter (diacritic)  just enter corresponding base letter and add **^**, e.g. *r^*.
+
+|     input string     | previous *endchar* | triggerstring | trigger | replaced by hotstring |
+|:--------------------:|:------------------:|:-------------:|:-------:|:---------------------:|
+| Something,☐something |                    |    ~~r~~    |  ~~^~~  |     ř    |
+
+> Something,☐something~~r^~~ř
+
+*Tips*: There are available other AutoHotkey tools which enable entering of accented letters (diacritics). To name just two:
+
+* [Diacritic.ahk] by mslonik (🐘): enable entering of accent / diacritic letters without touching of AltGr (right Alt key).
+
+* [Accents] by Skrommel: press a key three times or more to apply accents.
+
+### Autocorrect.csv
+
+This library containts exact representation of famous *[AutoCorrect.ahk]*. The *Autocorrect.ahk* has been imported to *Hotstrings* application, so its format was altered from .ahk to .csv. Additionally to make import possible, AutoHotkey code (the first couple of lines from this script) was stripped away before import. As a result only plain AutoHotkey hotstring definitions have been left and imported to *Hotstring* application.
+
+Its principal purpose is as part of the spell checker to correct common spelling or typing errors, saving time for the user. 
+
+As *Hotstring* application uses dynamic definitions only, all 4 800 definitions from *Autocorrect.csv* are dynamic, can be edited, disabled and so on at eny given moment. What can be interesting, process of uploading those definitions into computer memory is noticeable and take significant amount of time.
+
+*Tips*:
+
+* Use of this library could be subject of dispute as it let you repeat common typing errors without process of learning.
+
+* In *Hotstrings* application by default triggerstring tips are enabled. The purpose of triggerstring tips is to support memory of user and show her/him which **triggerstring** are available / can be triggered. The *Autocorrect.csv* library contains literally tousends of mispellings. They take away precious space in triggerstring tip lists and also slow down a lot process of sorting triggerstring tips. Therefore it is advisable to switch off triggerstring tips for this library. Just enter menu: *Libraries configuration* →  *Enable/disable triggerstring tips* →  untick *Autocorrect.csv*.
+
+### CapitalLetters.csv
+
+This library contains proper names, which uses capital letters. The purpose of this library is to let user use just small letters also for such proper names. E.g. *github* is proper name of web portal which provides hosting for software development. Proper name is not *github* but *GitHub*. The library supports memory of user and changes automatically such strings into proper names with great speed.
+
+As proper names most of the time are unique text strings and cannot be confused with words, definitions are triggered with *Immediate Execute (\*)* option.
+
+*Tip*: If company uses unique abbreviation just to name its product, it could be advisable to add its definitions as separate *Hotstrings* library.
+
+### EmojiHotstrings.csv
+
+This library contains emojis and sequences of emojis in a form which supports to some degree remembering them. Examples: 
+
+* if one would like to put emoji of a cat (animal), can just add one more key </> to such a word to get Unicode representation (emoji icon) of this animal: 🐈.
+
+* sequence of emojis for flowers can be shown just adding one more key </> to the word flowers: 💐: 🌹🍀🌻🌺🌸.
+
+*Tip*: In Microsoft Windows 10 operating system emojis are available system wide thanks to shortcut <#> + <.> where <#> stands for Windows meta key.
+
+### PhysicsHotstrings
+
+This library contains 
+
+
+## [Format of libraries](#table-of-content "Return to Table of content")
 
 The libraries are avaiłable in text format (human-readable) called CSV. All library files have therefore extension .csv. The CSV = Comma Separated Values, special format where "values" are separated by certain, dedicated character, e.g. comma. In case of *Hotstrings* application the  Unicode character "Double Vertical Line" is used: ‖ (U+2016). 
 
@@ -973,6 +1064,11 @@ It is not enough for text file to have .csv extension to be recognized by *Hotst
 | triggerstring options | ‖ | triggerstring | ‖ | output function | ‖ | status: Enabled / Disabled | ‖ | hotstring or group of hotstrings\* | ‖ | optional: comment |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | \* | ‖ | bom/ | ‖ | MSI | ‖ | En | ‖ | Bill of Materials¦Byte Order Mark | ‖ |
+
+## Import of libraries
+
+
+## Export of libraries
 
 
 # [Other remarks](#table-of-content "Return to Table of content")
@@ -1202,3 +1298,6 @@ People from AutoHotkey community, especially those who help at [AutoHotkey forum
 [Github (Hotstrings)]: https://github.com/mslonik/Hotstrings
 [declension]: https://en.wikipedia.org/wiki/Declension
 [CopyQ]: https://hluk.github.io/CopyQ/
+[Diacritics.ahk]: https://github.com/mslonik/Autohotkey-scripts
+[Accents]: https://www.dcmembers.com/skrommel/download/accents/
+[Autocorrect.ahk]: https://www.autohotkey.com/download/AutoCorrect.ahk
