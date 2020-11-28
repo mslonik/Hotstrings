@@ -105,13 +105,13 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
 6. [Other remarks](#other-remarks)
 
-   &nbsp;&nbsp;6.1. [Autostart of *Hotstrings* application](#autostart-of-Hotstrings-application)
+  6.1. [Autostart of *Hotstrings* application](#autostart-of-Hotstrings-application)
 
-   &nbsp;&nbsp;6.2. [Not always applying clipboard output function is a good idea](#not-always-applying-clipboard-output-function-is-a-good-idea)
+  6.2. [Not always applying clipboard output function is a good idea](#not-always-applying-clipboard-output-function-is-a-good-idea)
 
 7. [Credits](#credits)
 
-   &nbsp;&nbsp;7.1. [Tools used to prepare this documentation](#tools-used-to-prepare-this-documentation)
+  7.1. [Tools used to prepare this documentation](#tools-used-to-prepare-this-documentation)
 
 8. [ToDo List](#todo-List)
 
@@ -959,7 +959,7 @@ The following keyboard shortcuts are active only if *Search Hotstrings* applicat
 
 # [Format of libraries](#table-of-content "Return to Table of content")
 
-The CSV = Comma Separated Values, special format where "values" are separated by certain, dedicated character, e.g. comma. In case of *Hotstrings* application the  Unicode character "Double Vertical Line" is used: ‖ (U+2016). 
+The libraries are avaiłable in text format (human-readable) called CSV. All library files have therefore extension .csv. The CSV = Comma Separated Values, special format where "values" are separated by certain, dedicated character, e.g. comma. In case of *Hotstrings* application the  Unicode character "Double Vertical Line" is used: ‖ (U+2016). 
 
 It is not enough for text file to have .csv extension to be recognized by *Hotstrings* application. Such file have to have also dedicated structure.
 

@@ -61,7 +61,7 @@ MenuCursor=0
 MenuCaret=1
 TipsSortAlphatebically=1
 TipsSortByLength=1
-Language=EN
+Language=English.ini
 [TipsLibraries]
 )
 	FileAppend, %ini%, Config.ini
@@ -1365,7 +1365,7 @@ F_ExportLibraryStatic(filename)
 		GuiControl,, MyText, % "Exported " . A_Index . " of " . v_TotalLines . " hotstrings"
 		}
 	Gui, Export:Destroy
-	MsgBox, % t_LibraryHasBeenExported . "`n" . t_ThePathFileIs . " " . %v_OutputFile%
+	MsgBox, % t_LibraryHasBeenExported . "`n" . t_ThePathFileIs . " " . v_OutputFile
 	return
 }
 
@@ -1733,6 +1733,15 @@ L_GUIInit:
 		Menu, Submenu1, UnCheck, %t_UndoLastHotstring%
 	else
 		Menu, Submenu1, Check, %t_UndoLastHotstring%
+	Loop,%A_ScriptDir%\Languages\*.ini
+	{
+		Menu, SubmenuLanguage, Add, %A_LoopFileName%, L_ChangeLanguage
+		if (v_Language == A_LoopFileName)
+			Menu, SubmenuLanguage, Check, %A_LoopFileName%
+		else
+			Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
+	}
+	Menu, Submenu1, Add, %t_ChangeLanguage%, :SubmenuLanguage
 	Menu, HSMenu, Add, %t_Configuration%, :Submenu1
 	Menu, HSMenu, Add, %t_SearchHotstrings%, L_Searching
 	Menu, LibrariesSubmenu, Add, %t_ImportFromAhkToCsv%, L_ImportLibrary
@@ -3346,6 +3355,21 @@ L_SortTipsByLength:
 Menu, SubmenuTips, ToggleCheck, %t_SortTipsByLength%
 ini_TipsSortByLength := !(ini_TipsSortByLength)
 IniWrite, %ini_TipsSortByLength%, Config.ini, Configuration, TipsSortByLength
+return
+
+L_ChangeLanguage:
+v_Language := A_ThisMenuitem
+IniWrite, %v_Language%, Config.ini, Configuration, Language
+Loop,%A_ScriptDir%\Languages\*.ini
+{
+	Menu, SubmenuLanguage, Add, %A_LoopFileName%, L_ChangeLanguage
+	if (v_Language == A_LoopFileName)
+		Menu, SubmenuLanguage, Check, %A_LoopFileName%
+	else
+		Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
+}
+MsgBox, % t_ApplicationLanguageChangedTo . " " . SubStr(v_Language, 1, StrLen(v_Language)-4) . "`n" . t_TheApplicationWillBereloadedWithTheNewLanguageFile
+Reload
 return
 
 #if
