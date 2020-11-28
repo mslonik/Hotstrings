@@ -33,15 +33,15 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 # Table of content
 1. [FAQ: Introduction to hotstrings](#faq-introduction-to-hotstrings)
  
-    &nbsp;&nbsp;1.1. [What are the hotstrings?](#what-are-the-hotstrings)
+  1.1. [What are the hotstrings?](#what-are-the-hotstrings)
  
-    &nbsp;&nbsp;1.2. [How the *Hotstrings* application work?](#how-the-Hotstrings-application-work)
+  1.2. [How the *Hotstrings* application work?](#how-the-Hotstrings-application-work)
 
-    &nbsp;&nbsp;1.3. [Why somobody may want to use hotstrings?](#why-somobody-may-want-to-use-hotstrings)
+  1.3. [Why somobody may want to use hotstrings?](#why-somobody-may-want-to-use-hotstrings)
 
-    &nbsp;&nbsp;1.4. [Why somebody may want to use *Hotstrings* application?](#why-somebody-may-want-to-use-Hotstrings-application)
+  1.4. [Why somebody may want to use *Hotstrings* application?](#why-somebody-may-want-to-use-Hotstrings-application)
     
-    &nbsp;&nbsp;1.5. [How to reset the hotstring recognizer?](#how-to-reset-the-hotstring-recognizer)
+  1.5. [How to reset the hotstring recognizer?](#how-to-reset-the-hotstring-recognizer)
 
 2. [Installation of *Hotstrings* application](#installation-of-Hotstrings-application)
 
@@ -49,57 +49,57 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
 4. [Main window of *Hotstrings* application](#main-window-of-Hotstrings-application)
  
-   &nbsp;&nbsp;4.1. [Menu](#Menu)
+  4.1. [Menu](#Menu)
   
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.1. [Configure](#configure)
+    4.1.1. [Configure](#configure)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.1.1. [Undo last hotstring](#undo-last-hotstring)
+      4.1.1.1. [Undo last hotstring](#undo-last-hotstring)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.1.2. [Triggerstring tips](#triggerstring-tips)
+      4.1.1.2. [Triggerstring tips](#triggerstring-tips)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.1.3. [Save window position](#save-window-position)
+      4.1.1.3. [Save window position](#save-window-position)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.1.4. [Launch Sandbox](#launch-sandbox)
+      4.1.1.4. [Launch Sandbox](#launch-sandbox)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.1.5. [Toggle EndChars](#toggle-endchars)
+      4.1.1.5. [Toggle EndChars](#toggle-endchars)
 
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.2. [Search *Hotstrings*](#search-hotstrings)
+    4.1.2. [Search *Hotstrings*](#search-hotstrings)
 
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.3. [About / Help](#about-/-help)
+    4.1.3. [About / Help](#about-/-help)
 
-   &nbsp;&nbsp;4.2. [Hotstring definition or edition](#hotstring-definition-or-edition)
+  4.2. [Hotstring definition or edition](#hotstring-definition-or-edition)
 
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.1. [Triggerstring definition](#triggerstring-definition)
+    4.2.1. [Triggerstring definition](#triggerstring-definition)
 
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2. [Trigger options overview](#trigger-options-overview)
+    4.2.2. [Trigger options overview](#trigger-options-overview)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.1. [Default (no trigger option selected)](#default-no-trigger-option-selected)
+      4.2.2.1. [Default (no trigger option selected)](#default-no-trigger-option-selected)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.2. [Immediate Execute (\*)](#immediate-execute)
+      4.2.2.2. [Immediate Execute (\*)](#immediate-execute)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.3. [No Backspace (B0)](#no-backspace)
+      4.2.2.3. [No Backspace (B0)](#no-backspace)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.4. [No End Char (O)](#no-end-char)
+      4.2.2.4. [No End Char (O)](#no-end-char)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.5. [Case Sensitive (C\)](#case-sensitive)
+      4.2.2.5. [Case Sensitive (C\)](#case-sensitive)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.6. [Inside Word (?)](#inside-word)
+      4.2.2.6. [Inside Word (?)](#inside-word)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.2.7. [Disable](#disable)
+      4.2.2.7. [Disable](#disable)
    
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.3. [Hotstring output method](#hotstring-output-method)
+    4.2.3. [Hotstring output method](#hotstring-output-method)
 
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.4. [Enter hotstring](#enter-hotstring)
+    4.2.4. [Enter hotstring](#enter-hotstring)
 
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.5. [Add a comment](#add-a-comment)
+    4.2.5. [Add a comment](#add-a-comment)
 
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.6. [Select hotstring library](#select-hotstring-library)
+    4.2.6. [Select hotstring library](#select-hotstring-library)
 
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.2.7. [Buttons](#buttons)
+    4.2.7. [Buttons](#buttons)
 
-   &nbsp;&nbsp;4.3. [Library content](#library-content)
+  4.3. [Library content](#library-content)
 
-   &nbsp;&nbsp;4.4. [Shortcuts](#shortcuts)
+  4.4. [Shortcuts](#shortcuts)
 
 5. [Format of libraries](#format-of-libraries)
 
@@ -1138,11 +1138,11 @@ People from AutoHotkey community, especially those who help at [AutoHotkey forum
     - ☑ library content is marked, edition should be loaded automatically.
     - ☑ search window, a searched result should enable direct edition.
     - ☑ hotkeys to main functions
-- ❎ Hotstrings export (.csv → .ahk).
-    - ❎ static hotstrings (:options:triggerstring::hotstring),
-    - ❎ dynamic hotstrings (Hotstring("options", "triggestring", "hotstring")).
-- ❎ Hotstrings import (.ahk → .csv) from known autocorrect libraries (English mainly).
-- ❎ Localization (preparation of code to translation into foreign languages).
+- ☑ Hotstrings export (.csv → .ahk).
+    - ☑ static hotstrings (:options:triggerstring::hotstring),
+    - ☑ dynamic hotstrings (Hotstring("options", "triggestring", "hotstring")).
+- ☑ Hotstrings import (.ahk → .csv) from known autocorrect libraries (English mainly).
+- ☑ Localization (preparation of code to translation into foreign languages).
 
 [Defining of hotstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_DefiningOfHotstring.png "Defining of hotstring"
 [Enter triggerstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_EnterTriggerstring.png "Enter triggerstring"
