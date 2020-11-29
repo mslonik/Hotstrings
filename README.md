@@ -959,9 +959,38 @@ The following keyboard shortcuts are active only if *Search Hotstrings* applicat
 
 ## Libraries
 
+Library is just a collection of **(triggerstring, hotstring)**.
+
+If *Hotstrings* applciation can be compared to a car, then library is a fuel to this car. 
+
 A library is any set of **(triggerstring, hotstring)** pairs, saved for future use in form of a file. By default *Hotstrings* application is delivered with few libraries. Anytime user applies changes to existing definitions or adds new, result of her/his work is saved in any of the chosen libraries.
 
-It is advised to group definitions **(triggerstring, hotstring)** in dedicated files, not all in one file.
+The *Hotstrings* application can be downloaded with just few examples of libraries. All libraries stored in */Libraries* folder are uploaded in alphabetical order on application start time. 
+
+Among all libraries one plays spcific role. The *Hotstrings* application recognizes library name *PriorityLibrary.csv*. That library is uploaded as the last one in the order. See description of this library for further details. 
+
+
+*Tips*:
+
+ * The *Hotstrings* application is just another tool which makes management of big collections of **(triggerstring, hotstring)** easier. It means that it could be more useful to keep big files in form of static, native libraries (.ahk) whereas some other, which are frequently changed, in format of *Hotstrings* (.csv). 
+
+ *  Editing of iles / properties of  **(triggerstring, hotstring)** is easier with *Hotstring* applicatiion then ever before.
+
+ * It is advised to group definitions **(triggerstring, hotstring)** in dedicated files, not all in one file.
+
+ * If user of Windows 10 have enabled  notifications & actions from *AutoHotkey Unicode* (Settings → System → Notifications & actions →  Get notifications from these senders → AutoHotkey Unicode) then the *TrayTip*  will occure on time of startup, when the first library is uploaded. And when the last library definition is uploaded, the corresponding *TrayTip* is displayed. When big in volume libraries are uploaded (~tousands of libraries), it could take several seconds to be accomplished.
+
+![TrayTip start][]
+
+![TrayTip finish][]
+
+### PriorityLibrary.csv
+
+This library contains collection of  **(triggerstring, hotstring)** definitions which are uploaded as the last in order. All the library files (.csv) are uploaded in alphabetical order, but then the *PriorityLibrary.csv* is uploaded as the last one. Thanks to that the definitions from that library "cover" any other existing definition. 
+
+*Tips*:
+
+ * This feature can be helpful if library files are centrally stored, e.g. in version control system of any kind (e.g. Git, SVN, Sharepoint etc.) and automatically managed and uploaded on start-up of your PC, what can be a routine administered beyond your control. Nevertheless you don't like some specific definitions. Then you can rule them out thanks to this library: define your own definition of the same **triggerstring** with different **hotstring**, e.g. void.
 
 ### Abbreviations.csv
 
@@ -1007,7 +1036,7 @@ The convention used in this library:
 
 *Tips*: There are available other AutoHotkey tools which enable entering of accented letters (diacritics). To name just two:
 
-* [Diacritic.ahk] by mslonik (🐘): enable entering of accent / diacritic letters without touching of AltGr (right Alt key).
+* [Diacritic] by mslonik (🐘): enable entering of accent / diacritic letters without touching of AltGr (right Alt key).
 
 * [Accents] by Skrommel: press a key three times or more to apply accents.
 
@@ -1043,10 +1072,17 @@ This library contains emojis and sequences of emojis in a form which supports to
 
 *Tip*: In Microsoft Windows 10 operating system emojis are available system wide thanks to shortcut <#> + <.> where <#> stands for Windows meta key.
 
-### PhysicsHotstrings
+### PhysicsHotstrings.csv
 
-This library contains 
+This library contains various abbreviations useful to enter special characters used in physics and mathematics, but not only. 
 
+*Tip*: Big "office" suits (Microsoft Word, Libre Office) contain big collections of definitions dedicated to mathematics and physics. Please consider importing them for the same purpose.
+
+### TimeHotstrings.csv
+
+This library contains  example definitions related to date/time. The AutoHotkey [Date and Time] constants can be used to define new **(triggerstring, hotstring)** definitions of this kind.
+
+*Tip*: I like whne file name starts in from date. To make sorting of filenames easier I abbreviate it in form "yyyymmdd_". For that purpose I have prepared definition which works good in file manager of my choice (Total Commander).
 
 ## [Format of libraries](#table-of-content "Return to Table of content")
 
@@ -1067,9 +1103,39 @@ It is not enough for text file to have .csv extension to be recognized by *Hotst
 
 ## Import of libraries
 
+Existing collections of **(trriggerstring, hotstring)** definitions in form of static auto-replace .ahk files can be imported into *Hotstrings* application. Before you start, make sure that such a file contains only definitions. It means that if .ahk file contains additionaly some lines of code, that code have to be stripped out first. A good example is process of importing [Autocorrect.ahk]. 
+
+If the file is correctly imported (converted from .ahk to .csv format), then it is automatically loaded and added to list "Select hotstring library".
+
+*Tips*:
+
+ * One can find collections of existing auto-replace .ahk files on Internet.
+ * In so called application office suits are autocorrect collections (Libre Office, Microsoft Office), which can be exported from those and imported to *Hotstrings* application. This can be especially useful for foreign  languages, which are not so greatly supported with [Autocorrect.ahk].
+ * Big collection of autocorrect definitions for various languages in Libre Office is available at GitHub: [Libre Office dictionaries].
+ 
 
 ## Export of libraries
 
+Existing collections of **(trriggerstring, hotstring)** definitions in *Hotstrings* format (.csv) can be exported to format of AutoHotkey (.ahk), both: static auto-replace .ahk files and dynamic auto-replace .ahk files; dynamic auto-replace definitions uses *Hotsting()* AutoHotkey function.
+
+*Warning!* The *Hotstrings* application offer few advantages over AutoHotkey format, e.g. one **triggerstring** can be associated with few **hotstrings** (so called MSI, MCL definitions). If this is a case and you would like to export such definition, only one of them will be active. The rest will be commented out.
+
+*Tips*:
+ * Only *Hotstring* application provides additional functionalities enabling quick and easy editing of existing **(trriggerstring, hotstring)** definitions with GUI, optional hotstrings associated with the same triggerstring, triggerstring tips. But if these options aren't necessary to you, you can convert existing collections into AutoHotkey format and upload them as any other script.
+
+## Enable/disable of triggerstring tips
+
+The triggerstring tips are enabled by default (see menu: *Configuration → Triggerstring tips →  Enable/Disable*) and generated / sorted dynamically on time of writing. When numerous set of libraries are uploaded, the time necessary to display triggerstring tips can significantly increase. It is possible to filter out triggerstring tips for specific libraries, just enter menu: *Libraries configuration → Enable/disable triggerstring tips* and tick out undesired library.
+
+## Loaded hotstrings counter
+
+The GUI of *Hotstrings* application enable quick hint about amount of loaded hotstrings. In bottom right corner of the *Hotstrings* window is visible counter *Loaded hotstrings*.
+
+![Loaded hotstrings counter][]
+
+
+# Localization
+(…) to be continued...
 
 # [Other remarks](#table-of-content "Return to Table of content")
 Other remarks helpful in everyday working with hotstrings.
@@ -1285,6 +1351,9 @@ People from AutoHotkey community, especially those who help at [AutoHotkey forum
 [Buttons]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Buttons.png "Buttons"
 [Library content]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_LibraryContent.png "Library content"
 [Hotstring Menu Example]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_HotstringMenu.png "Hotstring Menu Example"
+[TrayTip start]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstrings_TrayTip_Start.png "TrayTip when application starts uploading of libraries"
+[TrayTip finish]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstrings_TrayTip_Finish.png "TrayTip when application finishes uploading of libraries"
+[Loaded hotstrings counter]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstrings_LoadedHotstringsCounter.png "Loaded hotstrings counter"
 
 [AutoHotkey]: https://www.autohotkey.com/
 [hotstring]: https://www.autohotkey.com/docs/Hotstrings.htm/
@@ -1298,6 +1367,8 @@ People from AutoHotkey community, especially those who help at [AutoHotkey forum
 [Github (Hotstrings)]: https://github.com/mslonik/Hotstrings
 [declension]: https://en.wikipedia.org/wiki/Declension
 [CopyQ]: https://hluk.github.io/CopyQ/
-[Diacritics.ahk]: https://github.com/mslonik/Autohotkey-scripts
+[Diacritic]: https://github.com/mslonik/Autohotkey-scripts
 [Accents]: https://www.dcmembers.com/skrommel/download/accents/
 [Autocorrect.ahk]: https://www.autohotkey.com/download/AutoCorrect.ahk
+[Date and Time]: https://www.autohotkey.com/docs/Variables.htm#date
+[Libre Office dictionaries]: https://github.com/LibreOffice/dictionaries
