@@ -959,26 +959,28 @@ The following keyboard shortcuts are active only if *Search Hotstrings* applicat
 
 ## Libraries
 
-Library is just a collection of **(triggerstring, hotstring)**.
+Library is just a collection of **(triggerstring, hotstring)** definitions, saved for future use in form of a file.
 
-If *Hotstrings* applciation can be compared to a car, then library is a fuel to this car. 
+If *Hotstrings* application can be compared to a car, then library is a fuel to this car. 
 
-A library is any set of **(triggerstring, hotstring)** pairs, saved for future use in form of a file. By default *Hotstrings* application is delivered with few libraries. Anytime user applies changes to existing definitions or adds new, result of her/his work is saved in any of the chosen libraries.
+By default *Hotstrings* application is delivered with few example libraries, listed in the following chpaters. Anytime user applies changes to existing definitions or adds new, result of her/his work is saved in any of the chosen libraries.
 
-The *Hotstrings* application can be downloaded with just few examples of libraries. All libraries stored in */Libraries* folder are uploaded in alphabetical order on application start time. 
+The *Hotstrings* application can be downloaded with just few examples of libraries. All libraries stored in */Libraries* folder are uploaded in alphabetical order, when  application starts. 
 
 Among all libraries one plays spcific role. The *Hotstrings* application recognizes library name *PriorityLibrary.csv*. That library is uploaded as the last one in the order. See description of this library for further details. 
 
 
 *Tips*:
 
- * The *Hotstrings* application is just another tool which makes management of big collections of **(triggerstring, hotstring)** easier. It means that it could be more useful to keep big files in form of static, native libraries (.ahk) whereas some other, which are frequently changed, in format of *Hotstrings* (.csv). 
+ * The *Hotstrings* application is just the tool which makes management of big collections of **(triggerstring, hotstring)** easier. It means that it could be more useful to keep big files in form of static, native libraries (.ahk) whereas some other, which are frequently changed, in format of *Hotstrings* (.csv). Remove unwanted / not used libraries from folder */Libraries* to any other folder.
 
- *  Editing of iles / properties of  **(triggerstring, hotstring)** is easier with *Hotstring* applicatiion then ever before.
+ *  Editing of files / properties of  **(triggerstring, hotstring)** is easier with *Hotstring* application then ever before. You don't have to manually edit .ahk files anymore, instead of that use full power of *Hotstrings* GUI.
 
- * It is advised to group definitions **(triggerstring, hotstring)** in dedicated files, not all in one file.
+ * It is advised to group definitions **(triggerstring, hotstring)** in dedicated files, and not to keep them all in one file. Maybe at the beginning it looks tempting, but in fact, from long time perspective, is a mistake. 
+ 
+ * Reminder: one can move single definitionsbetween libraries. Look into description of *Move* function, *Search* GUI window.
 
- * If user of Windows 10 have enabled  notifications & actions from *AutoHotkey Unicode* (Settings → System → Notifications & actions →  Get notifications from these senders → AutoHotkey Unicode) then the *TrayTip*  will occure on time of startup, when the first library is uploaded. And when the last library definition is uploaded, the corresponding *TrayTip* is displayed. When big in volume libraries are uploaded (~tousands of libraries), it could take several seconds to be accomplished.
+ * If user of Windows 10 have enabled  *notifications & actions* for AutoHotkey scripts (*Settings → System → Notifications & actions →  Get notifications from these senders → AutoHotkey Unicode*) then the *TrayTip*  will occure on time of startup, when the first library is uploaded. And when the last library definition is uploaded, the corresponding *TrayTip* is displayed. When big in volume libraries are uploaded (~tousands of libraries), it could take several seconds to be accomplished.
 
 ![TrayTip start][]
 
@@ -986,19 +988,19 @@ Among all libraries one plays spcific role. The *Hotstrings* application recogni
 
 ### PriorityLibrary.csv
 
-This library contains collection of  **(triggerstring, hotstring)** definitions which are uploaded as the last in order. All the library files (.csv) are uploaded in alphabetical order, but then the *PriorityLibrary.csv* is uploaded as the last one. Thanks to that the definitions from that library "cover" any other existing definition. 
+This library contains collection of  **(triggerstring, hotstring)** definitions which are uploaded as the last in order. Another words, all the library files (.csv) are uploaded from */Library* subfolder in alphabetical order, but then the *PriorityLibrary.csv* is uploaded as the last one. Thanks to that the definitions from that library "cover" any other existing definition. 
 
 *Tips*:
 
- * This feature can be helpful if library files are centrally stored, e.g. in version control system of any kind (e.g. Git, SVN, Sharepoint etc.) and automatically managed and uploaded on start-up of your PC, what can be a routine administered beyond your control. Nevertheless you don't like some specific definitions. Then you can rule them out thanks to this library: define your own definition of the same **triggerstring** with different **hotstring**, e.g. void.
+ * This feature can be helpful if library files are centrally stored, e.g. in version control system of any kind (e.g. Git, SVN, Sharepoint etc.) and automatically managed and uploaded on start-up of your PC, what in your work environment can be a routine administered beyond your control. Nevertheless you don't like some specific definitions. Then you can rule them out thanks to this library: define your own definition of the same **triggerstring** with different **hotstring**, e.g. void.
 
 ### Abbreviations.csv
 
 This library contains collection of frequently used abbreviations (e.g. *ASCII*) and corresponding expansion of abbreviations (e.g. *American Standard Code for Information Interchange*). **Triggerstrings** of almost all abbreviations are defined without triggerstring options, but they can be entered without pressing <Shift> key, just with small letters and then will be automatically capitalized. It speeds up a lot process of text entering, as capital letter in fact requires two key presses instead of just one.
 
 The convention used in this library:
- * to get existing abbreviation in capital letters, just enter it and add **EndChar**, e.g. <Spacebar>: *ascii☐*,
- * to get expansion of existing abbreviation just enter it and add </> at the very end: *ascii/ *
+ * to get existing abbreviation in capital letters, just enter it and add **EndChar**, e.g. \<Spacebar\>: *ascii☐*,
+ * to get expansion of existing abbreviation just enter it and add \</\> at the very end: *ascii/ *
 
 |     input string     | previous *endchar* | triggerstring | trigger | replaced by hotstring |
 |:--------------------:|:------------------:|:-------------:|:-------:|:---------------------:|
@@ -1015,7 +1017,7 @@ The convention used in this library:
 
 ### AccentsDiacritics.csv
 
-This library contains collection of accents (diacritic) letters, small and capital, e.g. *ä, Ä, ø, Ø, ř, Ř*.  If somebody plans to use just some accents without permanent switching to other keyboard layout, then it could be handy to quickly enter diacritics with trick available in triggerstrins of this library. In order to enter small or capital accent letter just enter latin leter and add <^> (caret) immediately after. One will get menu with choice of some available accents related to base latin letter.
+This library contains collection of accents (diacritic) letters, small and capital, e.g. *ä, Ä, ø, Ø, ř, Ř*.  If somebody plans to use just some accents without permanent switching to other keyboard layout, then it could be handy to quickly enter diacritics with trick available in triggerstrings of this library. In order to enter small or capital accent letter just enter latin leter and add <^> (caret) immediately after. One will get menu with choice of some available accents related to base latin letter.
 
 **Triggerstrings** are defined with additional options:
 
@@ -1050,21 +1052,23 @@ As *Hotstring* application uses dynamic definitions only, all 4 800 definitions 
 
 *Tips*:
 
-* Use of this library could be subject of dispute as it let you repeat common typing errors without process of learning.
+* Use of this library could be subject of dispute as it let you repeat common typing errors without process of learning (self-improvement).
 
-* In *Hotstrings* application by default triggerstring tips are enabled. The purpose of triggerstring tips is to support memory of user and show her/him which **triggerstring** are available / can be triggered. The *Autocorrect.csv* library contains literally tousends of mispellings. They take away precious space in triggerstring tip lists and also slow down a lot process of sorting triggerstring tips. Therefore it is advisable to switch off triggerstring tips for this library. Just enter menu: *Libraries configuration* →  *Enable/disable triggerstring tips* →  untick *Autocorrect.csv*.
+* In *Hotstrings* application by default triggerstring tips are enabled. The purpose of triggerstring tips is to support memory of user and show you which **triggerstring** are available / can be triggered. The *Autocorrect.csv* library contains literally tousends of mispellings. They take away precious space in triggerstring tip lists and also slow down a lot process of sorting triggerstring tips. Therefore it is advisable to switch off triggerstring tips for this library. Just enter menu: *Libraries configuration* →  *Enable/disable triggerstring tips* →  untick *Autocorrect.csv*.
 
 ### CapitalLetters.csv
 
-This library contains proper names, which uses capital letters. The purpose of this library is to let user use just small letters also for such proper names. E.g. *github* is proper name of web portal which provides hosting for software development. Proper name is not *github* but *GitHub*. The library supports memory of user and changes automatically such strings into proper names with great speed.
+This library contains proper names, which uses capital letters. The purpose of this library is to let you use just small letters also for such proper names. E.g. *github* is proper name of web portal which provides hosting for software development. Proper name is not *github* but *GitHub*. The library supports memory of user and changes automatically such strings into proper names with great speed.
 
-As proper names most of the time are unique text strings and cannot be confused with words, definitions are triggered with *Immediate Execute (\*)* option.
+As proper names most of the time are unique text strings and cannot be confused with common, dictionary words, definitions are triggered with *Immediate Execute (\*)* option.
 
 *Tip*: If company uses unique abbreviation just to name its product, it could be advisable to add its definitions as separate *Hotstrings* library.
 
 ### EmojiHotstrings.csv
 
-This library contains emojis and sequences of emojis in a form which supports to some degree remembering them. Examples: 
+This library contains emojis and sequences of emojis in a form which supports to some degree remembering them. 
+
+Examples: 
 
 * if one would like to put emoji of a cat (animal), can just add one more key </> to such a word to get Unicode representation (emoji icon) of this animal: 🐈.
 
@@ -1082,7 +1086,7 @@ This library contains various abbreviations useful to enter special characters u
 
 This library contains  example definitions related to date/time. The AutoHotkey [Date and Time] constants can be used to define new **(triggerstring, hotstring)** definitions of this kind.
 
-*Tip*: I like whne file name starts in from date. To make sorting of filenames easier I abbreviate it in form "yyyymmdd_". For that purpose I have prepared definition which works good in file manager of my choice (Total Commander).
+*Tip*: I like when certain file names, e.g. pictures, starts from date. To make sorting of filenames easier I abbreviate it in form "yyyymmdd_". For that purpose I have prepared definition which works good in file manager of my choice (*Total Commander*).
 
 ## [Format of libraries](#table-of-content "Return to Table of content")
 
@@ -1109,19 +1113,19 @@ If the file is correctly imported (converted from .ahk to .csv format), then it 
 
 *Tips*:
 
- * One can find collections of existing auto-replace .ahk files on Internet.
- * In so called application office suits are autocorrect collections (Libre Office, Microsoft Office), which can be exported from those and imported to *Hotstrings* application. This can be especially useful for foreign  languages, which are not so greatly supported with [Autocorrect.ahk].
+ * One can find collections of existing auto-replace .ahk files on Internet. Up to now there is no central place where collections are stored, sorry.
+ * In so called application office suits are autocorrect collections (*Libre Office*, *Microsoft Office*), which can be exported from those and imported to *Hotstrings* application. This can be especially useful for foreign  languages, which are not so greatly supported as it is in case of English language with [Autocorrect.ahk].
  * Big collection of autocorrect definitions for various languages in Libre Office is available at GitHub: [Libre Office dictionaries].
  
 
 ## Export of libraries
 
-Existing collections of **(trriggerstring, hotstring)** definitions in *Hotstrings* format (.csv) can be exported to format of AutoHotkey (.ahk), both: static auto-replace .ahk files and dynamic auto-replace .ahk files; dynamic auto-replace definitions uses *Hotsting()* AutoHotkey function.
+Existing collections of **(trriggerstring, hotstring)** definitions in *Hotstrings* format (.csv) can be exported to format of AutoHotkey (.ahk). Both: static auto-replace .ahk files and dynamic auto-replace .ahk files are supported; dynamic auto-replace definitions uses *Hotsting()* AutoHotkey function.
 
-*Warning!* The *Hotstrings* application offer few advantages over AutoHotkey format, e.g. one **triggerstring** can be associated with few **hotstrings** (so called MSI, MCL definitions). If this is a case and you would like to export such definition, only one of them will be active. The rest will be commented out.
+*Warning!* The *Hotstrings* application offer few advantages over AutoHotkey format, e.g. one **triggerstring** can be associated with few **hotstrings** (so called MSI, MCL definitions). If this is a case and you would like to export such definition, only one of them will be active. The rest will be commented out for your convenience.
 
 *Tips*:
- * Only *Hotstring* application provides additional functionalities enabling quick and easy editing of existing **(trriggerstring, hotstring)** definitions with GUI, optional hotstrings associated with the same triggerstring, triggerstring tips. But if these options aren't necessary to you, you can convert existing collections into AutoHotkey format and upload them as any other script.
+ * Only *Hotstring* application provides additional functionalities enabling quick and easy editing of existing **(trriggerstring, hotstring)** definitions with GUI, optional hotstrings associated with the same triggerstring, triggerstring tips to name just a few. But if these options aren't necessary to you, you can convert existing collections into AutoHotkey format and upload them as any other script.
 
 ## Enable/disable of triggerstring tips
 
