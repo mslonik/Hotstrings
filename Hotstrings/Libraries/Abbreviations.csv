@@ -17,6 +17,8 @@ O‖2d‖SI‖En‖2D‖
 *‖ascii/‖SI‖En‖American Standard Code for Information Interchange‖
 ‖ato‖SI‖En‖ATO‖
 *‖ato/‖CL‖En‖Assembly To Order‖
+‖bios‖SI‖En‖BIOS‖
+*‖bios/‖SI‖En‖Basic Input/Output System‖https://en.wikipedia.org/wiki/BIOS
 ‖bom‖SI‖En‖BOM‖
 *‖bom/‖MSI‖En‖Bill of Materials¦Byte Order Mark‖
 ‖cad‖SI‖En‖CAD‖
@@ -217,6 +219,8 @@ O‖2d‖SI‖En‖2D‖
 *‖thr/‖CL‖En‖Tolerable Hazard Rate‖
 ‖tsi‖SI‖En‖TSI‖
 *‖tsi/‖CL‖En‖Technical Specifications for Interoperability‖
+‖uefi‖SI‖En‖UEFI‖
+‖uefi/‖SI‖En‖Unified Extensible Firmware Interface‖https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interf
 ‖ui‖SI‖En‖UI‖
 *‖ui/‖CL‖En‖User Interface‖
 ‖uic‖SI‖En‖UIC‖

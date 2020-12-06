@@ -1141,6 +1141,9 @@ The GUI of *Hotstrings* application enable quick hint about amount of loaded hot
 # Localization
 (…) to be continued...
 
+# Command line options
+(…) to be continued...
+
 # [Other remarks](#table-of-content "Return to Table of content")
 Other remarks helpful in everyday working with hotstrings.
 
