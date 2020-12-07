@@ -75,7 +75,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
    
       4.2.2.1. [Default (no trigger option selected)](#default-no-trigger-option-selected)
    
-      4.2.2.2. [Immediate Execute (\*)](#immediate-execute)
+      4.2.2.2. [Immediate Execute] (\*)(#immediate-execute)
    
       4.2.2.3. [No Backspace (B0)](#no-backspace)
    
@@ -701,7 +701,7 @@ Comment: cursor position is shown as |.
 
 ---
 
-#### [Immediate Execute (\*)](#table-of-content "Return to Table of content")
+#### [Immediate Execute] (\*)(#table-of-content "Return to Table of content")
 ![Example, immediate execute][] 
 
 | triggerstring |  hotstring | option(s) |
