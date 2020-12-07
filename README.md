@@ -701,7 +701,7 @@ Comment: cursor position is shown as |.
 
 ---
 
-#### [Immediate Execute] (\*)(#table-of-content "Return to Table of content")
+#### [Immediate Execute (*)](#table-of-content "Return to Table of content")
 ![Example, immediate execute][] 
 
 | triggerstring |  hotstring | option(s) |
