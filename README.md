@@ -125,21 +125,25 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
   5.11. [Export of libraries](#export-of-libraries)
 
-  5.12. [Enable/disable of triggerstring tips](#enable/disable-of-triggerstring-tips)
+  5.12. [Enable/disable of triggerstring tips](#enable-/-disable-of-triggerstring-tips)
 
   5.13. [Loaded hotstrings counter](#loaded-hotstrings-counter)
 
-7. [Other remarks](#other-remarks)
+6. [Localization](#localization)
 
-  7.1. [Autostart of *Hotstrings* application](#autostart-of-Hotstrings-application)
+7. [Command line options](#command-line-options)
 
-  7.2. [Not always applying clipboard output function is a good idea](#not-always-applying-clipboard-output-function-is-a-good-idea)
+8. [Other remarks](#other-remarks)
 
-8. [Credits](#credits)
+  8.1. [Autostart of *Hotstrings* application](#autostart-of-Hotstrings-application)
 
-  8.1. [Tools used to prepare this documentation](#tools-used-to-prepare-this-documentation)
+  8.2. [Not always applying clipboard output function is a good idea](#not-always-applying-clipboard-output-function-is-a-good-idea)
 
-9. [ToDo List](#todo-List)
+9. [Credits](#credits)
+
+  9.1. [Tools used to prepare this documentation](#tools-used-to-prepare-this-documentation)
+
+10. [ToDo List](#todo-List)
 
 ---
 
