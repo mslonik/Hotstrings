@@ -125,7 +125,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
   5.11. [Export of libraries](#export-of-libraries)
 
-  5.12. [Enable/disable of triggerstring tips](#enable-/-disable-of-triggerstring-tips)
+  5.12. [Enable or disable triggerstring tips](#enable-or-disable-of-triggerstring-tips)
 
   5.13. [Loaded hotstrings counter](#loaded-hotstrings-counter)
 
@@ -1157,7 +1157,7 @@ Existing collections of **(trriggerstring, hotstring)** definitions in *Hotstrin
 *Tips*:
  * Only *Hotstring* application provides additional functionalities enabling quick and easy editing of existing **(trriggerstring, hotstring)** definitions with GUI, optional hotstrings associated with the same triggerstring, triggerstring tips to name just a few. But if these options aren't necessary to you, you can convert existing collections into AutoHotkey format and upload them as any other script.
 
-## [Enable/disable of triggerstring tips](#table-of-content "Return to Table of content")
+## [Enable or disable triggerstring tips](#table-of-content "Return to Table of content")
 
 The triggerstring tips are enabled by default (see menu: *Configuration → Triggerstring tips →  Enable/Disable*) and generated / sorted dynamically on time of writing. When numerous set of libraries are uploaded, the time necessary to display triggerstring tips can significantly increase. It is possible to filter out triggerstring tips for specific libraries, just enter menu: *Libraries configuration → Enable/disable triggerstring tips* and tick out undesired library.
 
