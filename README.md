@@ -105,19 +105,19 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
   5.1. [PriorityLibrary.csv](#prioritylibrarycsv)
 
-  5.2. [Abbreviations.csv](#abbreviations-.csv)
+  5.2. [Abbreviations.csv](#abbreviationscsv)
 
-  5.3. [AccentsDiacritics.csv](#accentsdiacritics-.csv)
+  5.3. [AccentsDiacritics.csv](#accentsdiacriticscsv)
 
-  5.4. [Autocorrect.csv](#autocorrect-.csv)
+  5.4. [Autocorrect.csv](#autocorrectcsv)
 
-  5.5. [CapitalLetters.csv](#capitalletters-.csv)
+  5.5. [CapitalLetters.csv](#capitalletterscsv)
 
-  5.6. [EmojiHotstrings.csv](#emojihotstrings-.csv)
+  5.6. [EmojiHotstrings.csv](#emojihotstringscsv)
 
-  5.7. [PhysicsHotstrings.csv](#physicshotstrings-.csv)
+  5.7. [PhysicsHotstrings.csv](#physicshotstringscsv)
 
-  5.8. [TimeHotstrings.csv](#timehotstrings-.csv)
+  5.8. [TimeHotstrings.csv](#timehotstringscsv)
 
 6. [Format of libraries](#format-of-libraries)
 
