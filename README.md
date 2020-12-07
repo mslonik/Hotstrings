@@ -797,7 +797,7 @@ Similar to default option, but this time the **triggerstring** is case sensitive
 
 ---
 
-#### [Inside Word (?)](#table-of-content "Return to Table of content")
+#### [Inside Word (U+003F)](#table-of-content "Return to Table of content")
 ![Example, Inside Word][]
 
 Similar to default option, but this time *endchar* directly before the **triggerstring** is not required.
