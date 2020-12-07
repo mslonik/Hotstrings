@@ -119,7 +119,15 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
   5.8. [TimeHotstrings.csv](#timehotstringscsv)
 
-6. [Format of libraries](#format-of-libraries)
+  5.9. [Format of libraries](#format-of-libraries)
+
+  5.10. [Import of libraries](#import-of-libraries)
+
+  5.11. [Export of libraries](#export-of-libraries)
+
+  5.12. [Enable/disable of triggerstring tips](#enable/disable-of-triggerstring-tips)
+
+  5.13. [Loaded hotstrings counter](#loaded-hotstrings-counter)
 
 7. [Other remarks](#other-remarks)
 
@@ -1123,7 +1131,7 @@ It is not enough for text file to have .csv extension to be recognized by *Hotst
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | \* | ‖ | bom/ | ‖ | MSI | ‖ | En | ‖ | Bill of Materials¦Byte Order Mark | ‖ |
 
-## Import of libraries
+## [Import of libraries](#table-of-content "Return to Table of content")
 
 Existing collections of **(trriggerstring, hotstring)** definitions in form of static auto-replace .ahk files can be imported into *Hotstrings* application. Before you start, make sure that such a file contains only definitions. It means that if .ahk file contains additionaly some lines of code, that code have to be stripped out first. A good example is process of importing [Autocorrect.ahk]. 
 
@@ -1136,7 +1144,7 @@ If the file is correctly imported (converted from .ahk to .csv format), then it 
  * Big collection of autocorrect definitions for various languages in Libre Office is available at GitHub: [Libre Office dictionaries].
  
 
-## Export of libraries
+## [Export of libraries](#table-of-content "Return to Table of content")
 
 Existing collections of **(trriggerstring, hotstring)** definitions in *Hotstrings* format (.csv) can be exported to format of AutoHotkey (.ahk). Both: static auto-replace .ahk files and dynamic auto-replace .ahk files are supported; dynamic auto-replace definitions uses *Hotsting()* AutoHotkey function.
 
@@ -1145,21 +1153,21 @@ Existing collections of **(trriggerstring, hotstring)** definitions in *Hotstrin
 *Tips*:
  * Only *Hotstring* application provides additional functionalities enabling quick and easy editing of existing **(trriggerstring, hotstring)** definitions with GUI, optional hotstrings associated with the same triggerstring, triggerstring tips to name just a few. But if these options aren't necessary to you, you can convert existing collections into AutoHotkey format and upload them as any other script.
 
-## Enable/disable of triggerstring tips
+## [Enable/disable of triggerstring tips](#table-of-content "Return to Table of content")
 
 The triggerstring tips are enabled by default (see menu: *Configuration → Triggerstring tips →  Enable/Disable*) and generated / sorted dynamically on time of writing. When numerous set of libraries are uploaded, the time necessary to display triggerstring tips can significantly increase. It is possible to filter out triggerstring tips for specific libraries, just enter menu: *Libraries configuration → Enable/disable triggerstring tips* and tick out undesired library.
 
-## Loaded hotstrings counter
+## [Loaded hotstrings counter](#table-of-content "Return to Table of content")
 
 The GUI of *Hotstrings* application enable quick hint about amount of loaded hotstrings. In bottom right corner of the *Hotstrings* window is visible counter *Loaded hotstrings*.
 
 ![Loaded hotstrings counter][]
 
 
-# Localization
+# [Localization](#table-of-content "Return to Table of content")
 (…) to be continued...
 
-# Command line options
+# [Command line options](#table-of-content "Return to Table of content")
 (…) to be continued...
 
 # [Other remarks](#table-of-content "Return to Table of content")
