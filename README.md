@@ -101,19 +101,37 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
   4.4. [Shortcuts](#shortcuts)
 
-5. [Format of libraries](#format-of-libraries)
+5. [Libraries](#libraries)
 
-6. [Other remarks](#other-remarks)
+  5.1. [PriorityLibrary.csv](#priority-library-csv)
 
-  6.1. [Autostart of *Hotstrings* application](#autostart-of-Hotstrings-application)
+  5.2. [Abbreviations.csv](#abbreviations-csv)
 
-  6.2. [Not always applying clipboard output function is a good idea](#not-always-applying-clipboard-output-function-is-a-good-idea)
+  5.3. [AccentsDiacritics.csv](#accentsdiacritics-csv)
 
-7. [Credits](#credits)
+  5.4. [Autocorrect.csv](#autocorrect-csv)
 
-  7.1. [Tools used to prepare this documentation](#tools-used-to-prepare-this-documentation)
+  5.5. [CapitalLetters.csv](#capitalletters-csv)
 
-8. [ToDo List](#todo-List)
+  5.6. [EmojiHotstrings.csv](#emojihotstrings-csv)
+
+  5.7. [PhysicsHotstrings.csv](#physicshotstrings-csv)
+
+  5.8. [TimeHotstrings.csv](#timehotstrings-csv)
+
+6. [Format of libraries](#format-of-libraries)
+
+7. [Other remarks](#other-remarks)
+
+  7.1. [Autostart of *Hotstrings* application](#autostart-of-Hotstrings-application)
+
+  7.2. [Not always applying clipboard output function is a good idea](#not-always-applying-clipboard-output-function-is-a-good-idea)
+
+8. [Credits](#credits)
+
+  8.1. [Tools used to prepare this documentation](#tools-used-to-prepare-this-documentation)
+
+9. [ToDo List](#todo-List)
 
 ---
 
@@ -957,7 +975,7 @@ The following keyboard shortcuts are active only if *Search Hotstrings* applicat
 ---
 ---
 
-## Libraries
+## [Libraries](#table-of-content "Return to Table of content")
 
 Library is just a collection of **(triggerstring, hotstring)** definitions, saved for future use in form of a file.
 
@@ -986,7 +1004,7 @@ Among all libraries one plays spcific role. The *Hotstrings* application recogni
 
 ![TrayTip finish][]
 
-### PriorityLibrary.csv
+### [PriorityLibrary.csv](#table-of-content "Return to Table of content")
 
 This library contains collection of  **(triggerstring, hotstring)** definitions which are uploaded as the last in order. Another words, all the library files (.csv) are uploaded from */Library* subfolder in alphabetical order, but then the *PriorityLibrary.csv* is uploaded as the last one. Thanks to that the definitions from that library "cover" any other existing definition. 
 
@@ -994,7 +1012,7 @@ This library contains collection of  **(triggerstring, hotstring)** definitions 
 
  * This feature can be helpful if library files are centrally stored, e.g. in version control system of any kind (e.g. Git, SVN, Sharepoint etc.) and automatically managed and uploaded on start-up of your PC, what in your work environment can be a routine administered beyond your control. Nevertheless you don't like some specific definitions. Then you can rule them out thanks to this library: define your own definition of the same **triggerstring** with different **hotstring**, e.g. void.
 
-### Abbreviations.csv
+### [Abbreviations.csv](#table-of-content "Return to Table of content")
 
 This library contains collection of frequently used abbreviations (e.g. *ASCII*) and corresponding expansion of abbreviations (e.g. *American Standard Code for Information Interchange*). **Triggerstrings** of almost all abbreviations are defined without triggerstring options, but they can be entered without pressing <Shift> key, just with small letters and then will be automatically capitalized. It speeds up a lot process of text entering, as capital letter in fact requires two key presses instead of just one.
 
@@ -1015,7 +1033,7 @@ The convention used in this library:
 
 > Something,☐something~~ascii/~~American Standard Code for Information Interchange
 
-### AccentsDiacritics.csv
+### [AccentsDiacritics.csv](#table-of-content "Return to Table of content")
 
 This library contains collection of accents (diacritic) letters, small and capital, e.g. *ä, Ä, ø, Ø, ř, Ř*.  If somebody plans to use just some accents without permanent switching to other keyboard layout, then it could be handy to quickly enter diacritics with trick available in triggerstrings of this library. In order to enter small or capital accent letter just enter latin leter and add <^> (caret) immediately after. One will get menu with choice of some available accents related to base latin letter.
 
@@ -1042,7 +1060,7 @@ The convention used in this library:
 
 * [Accents] by Skrommel: press a key three times or more to apply accents.
 
-### Autocorrect.csv
+### [Autocorrect.csv](#table-of-content "Return to Table of content")
 
 This library containts exact representation of famous *[AutoCorrect.ahk]*. The *Autocorrect.ahk* has been imported to *Hotstrings* application, so its format was altered from .ahk to .csv. Additionally to make import possible, AutoHotkey code (the first couple of lines from this script) was stripped away before import. As a result only plain AutoHotkey hotstring definitions have been left and imported to *Hotstring* application.
 
@@ -1056,7 +1074,7 @@ As *Hotstring* application uses dynamic definitions only, all 4 800 definitions 
 
 * In *Hotstrings* application by default triggerstring tips are enabled. The purpose of triggerstring tips is to support memory of user and show you which **triggerstring** are available / can be triggered. The *Autocorrect.csv* library contains literally tousends of mispellings. They take away precious space in triggerstring tip lists and also slow down a lot process of sorting triggerstring tips. Therefore it is advisable to switch off triggerstring tips for this library. Just enter menu: *Libraries configuration* →  *Enable/disable triggerstring tips* →  untick *Autocorrect.csv*.
 
-### CapitalLetters.csv
+### [CapitalLetters.csv](#table-of-content "Return to Table of content")
 
 This library contains proper names, which uses capital letters. The purpose of this library is to let you use just small letters also for such proper names. E.g. *github* is proper name of web portal which provides hosting for software development. Proper name is not *github* but *GitHub*. The library supports memory of user and changes automatically such strings into proper names with great speed.
 
@@ -1064,7 +1082,7 @@ As proper names most of the time are unique text strings and cannot be confused 
 
 *Tip*: If company uses unique abbreviation just to name its product, it could be advisable to add its definitions as separate *Hotstrings* library.
 
-### EmojiHotstrings.csv
+### [EmojiHotstrings.csv](#table-of-content "Return to Table of content")
 
 This library contains emojis and sequences of emojis in a form which supports to some degree remembering them. 
 
@@ -1076,13 +1094,13 @@ Examples:
 
 *Tip*: In Microsoft Windows 10 operating system emojis are available system wide thanks to shortcut <#> + <.> where <#> stands for Windows meta key.
 
-### PhysicsHotstrings.csv
+### [PhysicsHotstrings.csv](#table-of-content "Return to Table of content")
 
 This library contains various abbreviations useful to enter special characters used in physics and mathematics, but not only. 
 
 *Tip*: Big "office" suits (Microsoft Word, Libre Office) contain big collections of definitions dedicated to mathematics and physics. Please consider importing them for the same purpose.
 
-### TimeHotstrings.csv
+### [TimeHotstrings.csv](#table-of-content "Return to Table of content")
 
 This library contains  example definitions related to date/time. The AutoHotkey [Date and Time] constants can be used to define new **(triggerstring, hotstring)** definitions of this kind.
 
