@@ -83,7 +83,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
    
       4.2.2.5. [Case Sensitive (C\)](#case-sensitive-c)
    
-      4.2.2.6. [Inside Word (?)](#inside-word)
+      4.2.2.6. [Inside Word (question mark)](#inside-word-question-mark)
    
       4.2.2.7. [Disable](#disable)
    
@@ -103,21 +103,21 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
 5. [Libraries](#libraries)
 
-  5.1. [PriorityLibrary.csv](#priority-library-csv)
+  5.1. [PriorityLibrary.csv](#priority-library-.csv)
 
-  5.2. [Abbreviations.csv](#abbreviations-csv)
+  5.2. [Abbreviations.csv](#abbreviations-.csv)
 
-  5.3. [AccentsDiacritics.csv](#accentsdiacritics-csv)
+  5.3. [AccentsDiacritics.csv](#accentsdiacritics-.csv)
 
-  5.4. [Autocorrect.csv](#autocorrect-csv)
+  5.4. [Autocorrect.csv](#autocorrect-.csv)
 
-  5.5. [CapitalLetters.csv](#capitalletters-csv)
+  5.5. [CapitalLetters.csv](#capitalletters-.csv)
 
-  5.6. [EmojiHotstrings.csv](#emojihotstrings-csv)
+  5.6. [EmojiHotstrings.csv](#emojihotstrings-.csv)
 
-  5.7. [PhysicsHotstrings.csv](#physicshotstrings-csv)
+  5.7. [PhysicsHotstrings.csv](#physicshotstrings-.csv)
 
-  5.8. [TimeHotstrings.csv](#timehotstrings-csv)
+  5.8. [TimeHotstrings.csv](#timehotstrings-.csv)
 
 6. [Format of libraries](#format-of-libraries)
 
@@ -815,7 +815,7 @@ Similar to default option, but this time the **triggerstring** is case sensitive
 
 ---
 
-#### [Inside Word (?)](#table-of-content "Return to Table of content")
+#### [Inside Word (question mark)](#table-of-content "Return to Table of content")
 ![Example, Inside Word][]
 
 Similar to default option, but this time *endchar* directly before the **triggerstring** is not required.
