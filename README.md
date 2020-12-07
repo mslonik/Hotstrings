@@ -436,13 +436,12 @@ Select / click the *Set hostring* button. The function and meaning of two others
 
 ![Set the hotstring][] 
 
-![Animated Gif1][]
-
 ### Congratulations!
 You've defined your first hotstring. Have a look now into the left part of the main screen, into the *Library content*. Find there your newly defined hotstring:
 
 ![Library content][]
 
+![Animated Gif1][]
 ---
 ---
 ---
