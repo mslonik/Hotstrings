@@ -355,7 +355,7 @@ In order to run the *Hotstrings* application after downloading of all the files 
 
 ![Example of system tray][]
 
-Now *Hotstrings* application runs in its default mode: **running mode**. All the (triggerstring, hotstring) pairs are activated, operating system wide. So no matter in which text window is currently active pointer, one can already benefit from defined libraries of hostrings. Enjoy!
+Now *Hotstrings* application runs in its default mode: **running mode**. All the (triggerstring, hotstring) pairs are activated, operating system wide. So no matter in which text window is currently active pointer, one can already benefit from loaded (if any) libraries of hostrings. Enjoy!
 
 The second mode of operation requires GUI (Graphical User Interface) window, because then one can define new hotstrings or edit existing. When GUI window is active still all the (triggerstring, hotstring) pairs are ative, just GUI window is additionally available.
 
@@ -435,6 +435,8 @@ This step is optional. User can add additional comment to new defined hotstring.
 Select / click the *Set hostring* button. The function and meaning of two others is hopefully quite obvious. It will be explained in details later on.
 
 ![Set the hotstring][] 
+
+![Animated Gif1][]
 
 ### Congratulations!
 You've defined your first hotstring. Have a look now into the left part of the main screen, into the *Library content*. Find there your newly defined hotstring:
@@ -1353,6 +1355,7 @@ People from AutoHotkey community, especially those who help at [AutoHotkey forum
 [shl1]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectHostringLibrary.png "Select hotstring library"
 [shl2]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_HotstringLibrary.png "Select hotstring library"
 [Set the hotstring]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_HostringButtons.png "Set the hotstring" 
+[Animated Gif1]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstrings_EntryExample2.gif "Animated example"
 [Library content]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_Example_LibraryContent.png "Library content"
 [Select trigger option(s)]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_SelectTriggerOption.png "Select trigger option(s)"
 [Main window parts]: https://raw.githubusercontent.com/mslonik/Hotstrings/master/HelpPictures/Hotstring3_MainWindow2.png "Main window parts"
