@@ -75,7 +75,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
    
       4.2.2.1. [Default (no trigger option selected)](#default-no-trigger-option-selected)
    
-      4.2.2.2. [Immediate Execute (*)](#immediate-execute-\*)
+      4.2.2.2. [Immediate Execute (asterisk)](#immediate-execute-asterisk)
    
       4.2.2.3. [No Backspace (B0)](#no-backspace-b0)
    
@@ -83,7 +83,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
    
       4.2.2.5. [Case Sensitive (C\)](#case-sensitive-c)
    
-      4.2.2.6. [Inside Word (&#63;)](#inside-word-&#63)
+      4.2.2.6. [Inside Word (question mark)](#inside-word-question-mark)
    
       4.2.2.7. [Disable](#disable)
    
@@ -701,7 +701,7 @@ Comment: cursor position is shown as |.
 
 ---
 
-#### [Immediate Execute (*)](#table-of-content "Return to Table of content")
+#### [Immediate Execute (asterisk)](#table-of-content "Return to Table of content")
 ![Example, immediate execute][] 
 
 | triggerstring |  hotstring | option(s) |
@@ -797,7 +797,7 @@ Similar to default option, but this time the **triggerstring** is case sensitive
 
 ---
 
-#### [Inside Word (&#63;)](#table-of-content "Return to Table of content")
+#### [Inside Word (question mark)](#table-of-content "Return to Table of content")
 ![Example, Inside Word][]
 
 Similar to default option, but this time *endchar* directly before the **triggerstring** is not required.
