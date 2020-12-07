@@ -3135,11 +3135,11 @@ Undo:
 	IniWrite, %Undo%, Config.ini, Configuration, UndoHotstring
 return
 
-F11::
-	IniRead, Undo, Config.ini, Configuration, UndoHotstring
-	Undo := !(Undo)
-	IniWrite, %Undo%, Config.ini, Configuration, UndoHotstring
-return
+; F11::
+;	IniRead, Undo, Config.ini, Configuration, UndoHotstring
+;	Undo := !(Undo)
+;	IniWrite, %Undo%, Config.ini, Configuration, UndoHotstring
+; return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
