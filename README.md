@@ -83,7 +83,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
    
       4.2.2.5. [Case Sensitive (C\)](#case-sensitive-c)
    
-      4.2.2.6. [Inside Word (?)](#inside-word-\?)
+      4.2.2.6. [Inside Word (U+003F)](#inside-word-U+003F)
    
       4.2.2.7. [Disable](#disable)
    
