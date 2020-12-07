@@ -83,7 +83,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
    
       4.2.2.5. [Case Sensitive (C\)](#case-sensitive-c)
    
-      4.2.2.6. [Inside Word (U+003F)](#inside-word-U+003F)
+      4.2.2.6. [Inside Word (&#63;)](#inside-word-&#63)
    
       4.2.2.7. [Disable](#disable)
    
@@ -797,7 +797,7 @@ Similar to default option, but this time the **triggerstring** is case sensitive
 
 ---
 
-#### [Inside Word (U+003F)](#table-of-content "Return to Table of content")
+#### [Inside Word (&#63;)](#table-of-content "Return to Table of content")
 ![Example, Inside Word][]
 
 Similar to default option, but this time *endchar* directly before the **triggerstring** is not required.
