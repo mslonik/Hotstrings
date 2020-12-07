@@ -77,11 +77,11 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
    
       4.2.2.2. [Immediate Execute (*)](#immediate-execute)
    
-      4.2.2.3. [No Backspace (B0)](#no-backspace)
+      4.2.2.3. [No Backspace (B0)](#no-backspace-b0)
    
-      4.2.2.4. [No End Char (O)](#no-end-char)
+      4.2.2.4. [No End Char (O)](#no-end-char-o)
    
-      4.2.2.5. [Case Sensitive (C\)](#case-sensitive)
+      4.2.2.5. [Case Sensitive (C\)](#case-sensitive-c)
    
       4.2.2.6. [Inside Word (?)](#inside-word)
    
