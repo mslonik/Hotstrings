@@ -125,7 +125,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
   5.11. [Export of libraries](#export-of-libraries)
 
-  5.12. [Enable or disable triggerstring tips](#enable-or-disable-of-triggerstring-tips)
+  5.12. [Enable or disable triggerstring tips](#enable-or-disable-triggerstring-tips)
 
   5.13. [Loaded hotstrings counter](#loaded-hotstrings-counter)
 
