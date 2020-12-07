@@ -103,7 +103,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
 5. [Libraries](#libraries)
 
-  5.1. [PriorityLibrary.csv](#priority-library-.csv)
+  5.1. [PriorityLibrary.csv](#priority-librarycsv)
 
   5.2. [Abbreviations.csv](#abbreviations-.csv)
 
