@@ -133,11 +133,19 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
 7. [Command line options](#command-line-options)
 
+  7.1. [Light mode](#light-mode)
+
+  7.2. [Debug mode](#debug-mode)
+
 8. [Other remarks](#other-remarks)
 
-  8.1. [Autostart of *Hotstrings* application](#autostart-of-Hotstrings-application)
+  8.1. [Order of loading AutoHotkey scripts matter](#order-of-loading-autohotkey-scripts-matter)
 
-  8.2. [Not always applying clipboard output function is a good idea](#not-always-applying-clipboard-output-function-is-a-good-idea)
+  8.2. [Autostart of *Hotstrings* application](#autostart-of-Hotstrings-application)(#)
+
+  8.3. [Not always applying clipboard output function is a good idea](#not-always-applying-clipboard-output-function-is-a-good-idea)
+
+  8.4. [Overlapping triggerstrings](#overlapping-triggerstrins)
 
 9. [Credits](#credits)
 
@@ -1179,37 +1187,65 @@ Variable example | Equal sign | Corresponding text string example
 
 In order to prepare language file specific for your mother language: 
 
-    a. prepare copy of default language file (*English.ini*) e.g. by copying and pasting it in the same folder (*Languages*),
-	b. change file name of copied file to name of your mother language,
-	c. open it in your favorite editor and translate *corresponding text strings*,
-	d. save the .ini file and restart *Hotstrings* application,
-	e. from *Hotstrings* menu choose *Configuration → Change language →* and tick your newly prepared language file.
-	f. application will restart in order to apply the changes.
+ 1. prepare copy of default language file (*English.ini*) e.g. by copying and pasting it in the same folder (*Languages*),
+2. change file name of copied file to name of your mother language,
+3. open it in your favorite editor and translate *corresponding text strings*,
+4. save the .ini file and restart *Hotstrings* application,
+5. from *Hotstrings* menu choose *Configuration → Change language →* and tick your newly prepared language file.
+6. application will restart in order to apply the changes.
 
 Applied change is kept in *Configuration.ini*. Another words it is preserved between application restarts.
 
 **Warning**: Text strings are stored within .ini file, with all consequences specific for AutoHotkey. It means that .ini files are not Unicode compliant (not UTF friendly). In order to keep your specific accents (diacritics) save .ini file in corresponding code page. The *Hotstrings* application can handle specific letters with dedicated function which translates from specific code page to Unicode.  
 
 # [Command line options](#table-of-content "Return to Table of content")
-(…) to be continued...
+
+*Hotstrings* application can be run with parameters. It means that you can start it providin name of the parameters just after name of application in command line, e.g.:
+
+> c:\temp\Hotstrings> Hotstrings.ahk <parameter>
+
+or 
+
+> c:\temp\Hotstrings> Hotstrings <parameter>
+
+*Tip*:  Running with parameter can be in particular useful when *Hotstrings* application is run as a link or from within another script file, e.g. batch file.
+
+## [Light mode](#table-of-content "Return to Table of content")
+
+Parameter name: **l**
+
+In this mode application is run without GUI. Another words there is no chance to change any **(triggerstring, hotstring)** or any other configuration setting. 
+
+There is no way to change the mode of operation to default one (with GUI enabled). Just exit the application and start it over in default mode.
+
+*Tip*: This mode can be useful in some seldom situations when it is required to limit user choices, e.g. forcing usage of specific libraries and disable altering of library content.
+
+
+## [Debug mode](#table-of-content "Return to Table of content")
+
+Parameter name: **d**
+
+For internal use only. In this mode application creates additional folder: *../Hotstrings/Logs/* where are stored files: *LogsA_DD A_MM_A_HourA_Min .txt*. These files log information about consecutive *triggerstring tips*.
 
 # [Other remarks](#table-of-content "Return to Table of content")
+
 Other remarks helpful in everyday working with hotstrings.
 
-## Order of loading AutoHotkey scripts matters. 
-For example if you use *Diacritics.ahk* together with *Hotstrings.ahk*, there is potential collission. It's adviced to load *Hotstrings.ahk* before *Diacritics.ahk*.
+## [Order of loading AutoHotkey scripts matter](#table-of-content "Return to Table of content")
 
-## Autostart of *Hotstrings* application 
+For example if you use *[Diacritics]* (.ahk) together with *Hotstrings* (.ahk), there is potential collission. It's adviced to load *Hotstrings* prior to *Diacritics*.
+
+## [Autostart of *Hotstrings* application](#table-of-content "Return to Table of content") 
 
 Create link file (.lnk) to *Hotstrings.ahk* or *Hotstrings.exe* file: from context menu in your file manager choose "create link". Move that link file to your autostart folder. In Microsoft Windows 10: *c:\users\xxxxxx\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup*. The string *xxxxxx* represents your user name.
 
 *Tip*: You can change order of application which are started up on time of operating system automatic start (autostart) by changing of the files found in above folder e.g. by adding numbers in front of them. Example: 1_Hotstrings.lnk will guarantee that this link will be the first to be run on autostart.
 
-## Not always applying clipboard output function is a good idea
+## [Not always applying clipboard output function is a good idea](#table-of-content "Return to Table of content")
 
 Some forms, especially at banking web pages, do not accept pasting from clipboard. Probably there are safety reasons behind that. From the other hand the SendInput output function simulates keyboard keypressings, one by one. So to get over this limitation it's enough to edit particular hotstring and switch *Select hotstring output function* from *Clipboard (CL)* to *SendInput (SI)*.
 
-## Overlapping triggerstrings
+## [Overlapping triggerstrings](#table-of-content "Return to Table of content")
 
 The overlapping triggerstrings are two or more different triggerstring where at least the beginning is common.
 
