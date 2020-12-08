@@ -71,7 +71,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
     4.2.1. [Triggerstring definition](#triggerstring-definition)
 
-    4.2.2. [Trigger options overview](#trigger-options-overview)
+    4.2.2. [Select trigger option(s)](#select-trigger-options)
    
       4.2.2.1. [Default (no trigger option selected)](#default-no-trigger-option-selected)
    
@@ -87,7 +87,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
    
       4.2.2.7. [Disable](#disable)
    
-    4.2.3. [Hotstring output method](#hotstring-output-method)
+    4.2.3. [Select hotstring output method](#select-hotstring-output-method)
 
     4.2.4. [Enter hotstring](#enter-hotstring)
 
@@ -633,7 +633,7 @@ Displays the following text:
 
 This time all 7 steps discussed in details, with examples and comments.
 
-### [Triggerstring definition](#table-of-content "Return to Table of content")
+### [Enter triggerstring](#table-of-content "Return to Table of content")
 
 The text edit field used to define the triggerstring.
 
@@ -641,9 +641,9 @@ The text edit field used to define the triggerstring.
 
 In general the shorter triggerstring then the better. The triggerstring can be at most 40 characters long. This edit field works as any other ordinary window edit field, so it doesn't support e.g. text block operations.
 
-The *Hotstrings* application doesn't have protection agains duplicate (**triggerstring**, **hotstring**) pairs. User can easily duplicated them. Therefore its worth to search prior to adding new definition if it doesn't exist already.
+The *Hotstrings* application doesn't have protection agains duplicate (**triggerstring**, **hotstring**) pairs: user can accidently duplicate them, adding the same definition to different libraries. Therefore its worth to search prior to adding new definition if it doesn't exist already.
 
-### [Trigger options overview](#table-of-content "Return to Table of content")
+### [Select trigger option(s)](#table-of-content "Return to Table of content")
 Trigger options controls how **hotstring recognizer** works. All these options can be used concurrently. For clarity in the following descriptions each of them is described separatedly.
 
 ![Select trigger option(s)][]
@@ -866,7 +866,7 @@ The **hotstring** definition is left in library file (.csv) in the same state as
 The opposite action can take place upon user action: if user will edit definition of particular *hotstring* and uncheck the tick *disable*, then *hotstring* becomes active again. Next time when corresponding **triggerstring** will occurre in input stream, the **hotstring recognizer** will trigger corresponding *hotstring* according to previously defined **option(s)**.
 
 
-## [Hotstring output method](#table-of-content "Return to Table of content")
+## [Select hotstring output method](#table-of-content "Return to Table of content")
 
 
 **Tab. 3.** Output method compatibility between AutoHotkey [hotstring] and *Hotstrings* app.
