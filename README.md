@@ -921,13 +921,13 @@ The default **hotstring** is the first one from the top. To enter it just press 
 ### Menu & Clipboard (MCL)
 As above, with one exception: the **hotstrings** are output by clipboard, with all the consequences as described for *Clipboard (CL)* output function.
 
-### Enter hotstring
+### [Enter hotstring](#table-of-content "Return to Table of content")
 
 ![Enter hotstring][]
 
 The edit text field used to display / edit the **hotstring**. The single hotstring can be up to 5000 characters long.
 
-### Add a comment
+### [Add a comment](#table-of-content "Return to Table of content")
 
 ![Add a comment][]
 
@@ -935,7 +935,7 @@ Optional (not mandatory) part of (**triggerstring**, **hotstring**) definition. 
 
 *Tip*. Can be useful in some circumstances, for example to add a source of a **hotstring** definition in form of URL (a link).
 
-### Select hotstring library
+### [Select hotstring library](#table-of-content "Return to Table of content")
 ![shl1][]
 
 List of text files with extenstion .csv available in *../Libraries* folder of *Hotstrings* application. 
@@ -950,7 +950,7 @@ If user would like to create new .csv file, the **Add library** button should be
 
 *Tip*. Try to store (**triggerstring**, **hotstring**) which are somehow related to each other in separate .csv files. The files shouldn't be too long, because searching / management of them can be cumbersome at certain point.
 
-### Buttons
+### [Buttons](#table-of-content "Return to Table of content")
 
 ![Buttons][]
 
