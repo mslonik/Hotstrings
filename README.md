@@ -69,7 +69,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
   4.2. [Definition or edition of (triggerstring, hotstring)](#definition-or-edition-of-triggerstring-hotstring)
 
-    4.2.1. [Triggerstring definition](#triggerstring-definition)
+    4.2.1. [Enter triggerstring](#enter-triggerstring)
 
     4.2.2. [Select trigger option(s)](#select-trigger-options)
    
