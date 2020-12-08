@@ -141,7 +141,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
   8.1. [Order of loading AutoHotkey scripts matter](#order-of-loading-autohotkey-scripts-matter)
 
-  8.2. [Autostart of *Hotstrings* application](#autostart-of-Hotstrings-application)(#)
+  8.2. [Autostart of *Hotstrings* application](#autostart-of-Hotstrings-application)
 
   8.3. [Not always applying clipboard output function is a good idea](#not-always-applying-clipboard-output-function-is-a-good-idea)
 
@@ -1233,7 +1233,7 @@ Other remarks helpful in everyday working with hotstrings.
 
 ## [Order of loading AutoHotkey scripts matter](#table-of-content "Return to Table of content")
 
-For example if you use *[Diacritics]* (.ahk) together with *Hotstrings* (.ahk), there is potential collission. It's adviced to load *Hotstrings* prior to *Diacritics*.
+For example if you use *[Diacritic]* (.ahk) together with *Hotstrings* (.ahk), there is potential collission. It's adviced to load *Hotstrings* prior to *Diacritic*.
 
 ## [Autostart of *Hotstrings* application](#table-of-content "Return to Table of content") 
 
