@@ -67,7 +67,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
     4.1.3. [About / Help](#about-/-help)
 
-  4.2. [Definition or edition of (triggerstring, hotstring)](#definition-or-edition of-triggerstring-hotstring)
+  4.2. [Definition or edition of triggerstring, hotstring](#definition-or-edition of-triggerstring-hotstring)
 
     4.2.1. [Triggerstring definition](#triggerstring-definition)
 
