@@ -67,7 +67,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
     4.1.3. [About / Help](#about-/-help)
 
-  4.2. [Hotstring definition or edition](#hotstring-definition-or-edition)
+  4.2. [Definition or edition of (triggerstring, hotstring)](#definition-or-edition of-triggerstring-hotstring)
 
     4.2.1. [Triggerstring definition](#triggerstring-definition)
 
@@ -145,7 +145,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
   8.3. [Not always applying clipboard output function is a good idea](#not-always-applying-clipboard-output-function-is-a-good-idea)
 
-  8.4. [Overlapping triggerstrings](#overlapping-triggerstrins)
+  8.4. [Overlapping triggerstrings](#overlapping-triggerstrings)
 
 9. [Credits](#credits)
 
@@ -627,9 +627,10 @@ Displays the following text:
 
 **Application help**: link to this file.
 
-**Genuine hotstrings AutoHotkey documentation**: link [hotstring][].
+**Genuine hotstrings AutoHotkey documentation**: link to [hotstring][] documentation.
 
-## [Hotstring definition or edition](#table-of-content "Return to Table of content")
+## [Definition or edition of (triggerstring, hotstring)](#table-of-content "Return to Table of content")
+
 This time all 7 steps discussed in details, with examples and comments.
 
 ### [Triggerstring definition](#table-of-content "Return to Table of content")
