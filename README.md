@@ -1027,7 +1027,7 @@ This library contains collection of  **(triggerstring, hotstring)** definitions 
 
 ### [Abbreviations.csv](#table-of-content "Return to Table of content")
 
-This library contains collection of frequently used abbreviations (e.g. *ASCII*) and corresponding expansion of abbreviations (e.g. *American Standard Code for Information Interchange*). **Triggerstrings** of almost all abbreviations are defined without triggerstring options, but they can be entered without pressing <Shift> key, just with small letters and then will be automatically capitalized. It speeds up a lot process of text entering, as capital letter in fact requires two key presses instead of just one.
+This library contains a stub  collection of frequently used abbreviations (e.g. *ASCII*) and corresponding expansion of abbreviations (e.g. *American Standard Code for Information Interchange*). **Triggerstrings** of almost all abbreviations are defined without triggerstring options, but they can be entered without pressing <Shift> key, just with small letters and then will be automatically capitalized. It speeds up a lot process of text entering, as capital letter in fact requires two key presses instead of just one.
 
 The convention used in this library:
  * to get existing abbreviation in capital letters, just enter it and add **EndChar**, e.g. \<Spacebar\>: *ascii☐*,
@@ -1048,7 +1048,7 @@ The convention used in this library:
 
 ### [AccentsDiacritics.csv](#table-of-content "Return to Table of content")
 
-This library contains collection of accents (diacritic) letters, small and capital, e.g. *ä, Ä, ø, Ø, ř, Ř*.  If somebody plans to use just some accents without permanent switching to other keyboard layout, then it could be handy to quickly enter diacritics with trick available in triggerstrings of this library. In order to enter small or capital accent letter just enter latin leter and add <^> (caret) immediately after. One will get menu with choice of some available accents related to base latin letter.
+This library contains a collection of accents (diacritic) letters, small and capital, e.g. *ä, Ä, ø, Ø, ř, Ř*.  If somebody plans to use just some accents without permanent switching to other keyboard layout, then it could be handy to quickly enter diacritics with trick available in triggerstrings of this library. In order to enter small or capital accent letter just enter latin leter and add <^> (caret) immediately after. One will get menu with choice of some available accents related to base latin letter.
 
 **Triggerstrings** are defined with additional options:
 
@@ -1170,7 +1170,25 @@ The GUI of *Hotstrings* application enable quick hint about amount of loaded hot
 
 
 # [Localization](#table-of-content "Return to Table of content")
-(…) to be continued...
+
+[Language localization] is easy in *Hotstrings* application. In folder *../Hotstrings/Languages* you can find by default file *English.ini*. This file contains definition of all *text strings* used by *Hotstrings* application in the following form:
+
+Variable example | Equal sign | Corresponding text string example
+ :---: | :---: | :---:
+ ChangeLanguage | = | Change language
+
+In order to prepare language file specific for your mother language: 
+
+    a. prepare copy of default language file (*English.ini*) e.g. by copying and pasting it in the same folder (*Languages*),
+	b. change file name of copied file to name of your mother language,
+	c. open it in your favorite editor and translate *corresponding text strings*,
+	d. save the .ini file and restart *Hotstrings* application,
+	e. from *Hotstrings* menu choose *Configuration → Change language →* and tick your newly prepared language file.
+	f. application will restart in order to apply the changes.
+
+Applied change is kept in *Configuration.ini*. Another words it is preserved between application restarts.
+
+**Warning**: Text strings are stored within .ini file, with all consequences specific for AutoHotkey. It means that .ini files are not Unicode compliant (not UTF friendly). In order to keep your specific accents (diacritics) save .ini file in corresponding code page. The *Hotstrings* application can handle specific letters with dedicated function which translates from specific code page to Unicode.  
 
 # [Command line options](#table-of-content "Return to Table of content")
 (…) to be continued...
@@ -1411,3 +1429,4 @@ People from AutoHotkey community, especially those who help at [AutoHotkey forum
 [Autocorrect.ahk]: https://www.autohotkey.com/download/AutoCorrect.ahk
 [Date and Time]: https://www.autohotkey.com/docs/Variables.htm#date
 [Libre Office dictionaries]: https://github.com/LibreOffice/dictionaries
+[Language localization]: https://en.wikipedia.org/wiki/Language_localisation

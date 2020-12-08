@@ -90,6 +90,8 @@ O‖2d‖SI‖En‖2D‖
 *‖etcs/‖SI‖En‖European Train Control System‖
 ‖eto‖SI‖En‖ETO‖
 *‖eto/‖CL‖En‖Engineer To Order‖
+‖eu‖SI‖En‖EU‖
+*‖eu/‖SI‖En‖European Union‖
 ‖fai‖SI‖En‖FAI‖
 *‖fai/‖CL‖En‖First Article Inspection‖
 ‖faq‖SI‖En‖FAQ‖
@@ -176,6 +178,8 @@ O‖2d‖SI‖En‖2D‖
 *‖plm/‖CL‖En‖Product Lifecycle Management‖
 ‖poc‖SI‖En‖PoC‖
 *‖poc/‖CL‖En‖Proof of Concept‖
+‖poe‖SI‖En‖PoE‖
+*‖poe/‖SI‖En‖Power over Ethernet‖
 ‖pwm‖SI‖En‖PWM‖
 *‖PWM/‖SI‖En‖Pulse-Width Modulation‖
 ‖qna‖SI‖En‖Q&A‖
