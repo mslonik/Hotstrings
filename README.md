@@ -166,6 +166,7 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 # [FAQ: Introduction to hotstrings](#table-of-content "Return to Table of content")
 (Frequently Asked Questions) about *Hotstrings* application and notion of hotstrings.
 
+
 ## [What are the hotstrings?](#table-of-content "Return to Table of content")
 There are two corresponding notions:
 
@@ -174,27 +175,26 @@ There are two corresponding notions:
 
 The relationship between these two notions is ruled by options and can be presented as follows:
 
-user input | hostring recognizer | options | modified input
+user input | options | hostring recognizer | modified input
 :---:|:---:|:---: | :---: |
-triggerstring | → | options | hotstring
-alphanumeric string | → | alphanumeric string | alphanumeric string
+triggerstring | (trigger) options | → | hotstring
+alphanumeric string | alphanumeric string | → | alphanumeric string
 
-So the triggerstring triggers the corresponding hotstring, taking into consideration:
+So the *hostring recognizer* triggers the corresponding hotstring, taking into consideration:
 
 * user input (what user writes pressing keys of keyboard)
 
 * options defined for particular pair (*triggerstring*, *hotstring*)
 
-
-Wording convention: usually the corresponding notions *(option(s), triggestring, hotstring)* is also called as *hotstring*.
+Wording convention: usually the corresponding notions *(option(s), triggestring, hotstring)* are also called as *hotstring*.
 
 
 ## [How the *Hotstrings* application work?](#table-of-content "Return to Table of content")
 ### In short
 
- the *Hotstrings* application:
+ The *Hotstrings* application:
  
-* keeps in memory definitions of hotstrings defined by user:  **(option(s), triggerstring, hotstring)* 
+* keeps in memory definitions of hotstrings defined by user:  **(triggerstring, (trigger) option(s), hotstring)** 
 
 and 
 
@@ -215,21 +215,20 @@ Please carefully analyse the **Pic. 1**. From the bottom up:
 2. The input / output devices are connected to computer which contains: 
 
    i. operating system (set or universe of various applications),
-   
    ii. applications (set or universe of various applications).
-3. We pay special attention in: 
+   
+3. We pay special attention to: 
 
    i. operating system: *Input Buffer*.
-   
-   ii. applications: *Hotkeys* and Microsoft Word.
+   ii. applications: *Hotstrings* and *Microsoft Word*.
 
-The operating system exchange information with input device character by character. Let's observe, what is going on (1-5 on the picture):
+The operating system exchange information with input device, character by character. Let's observe, what is going on (1-5 on the picture):
 
 1. *Input*: user presses a key of keyboard. This key is send from input device to *Input Buffer*.
 2. *Hotkeys* applications picks up information about new information in *Input Buffer*. It examines current content of the buffer with **hotstring recognizer**.
-3. If **hotstring recognizer** recognizes one of the **triggerstrings** and conditions to trigger are met, the content of *Input Buffer* is altered accordingly (e.g. some characters are deleted, some are inserted).
-4. Other applications, like Microsoft Word, get information from operating system and see altered input.
-5. Next Microsoft Word do some operations if required and output is send to *Output* (e.g. computer monitor).
+3. If **hotstring recognizer** recognizes one of the **triggerstrings** and conditions to trigger are met (determined by **option(s)**), the content of *Input Buffer* is altered accordingly (e.g. some characters are deleted, some are inserted).
+4. Other applications, like *Microsoft Word*, get information from operating system and display / react to altered input accordingly.
+5. Next *Microsoft Word* do some operations if required and output is send to *Output* (e.g. computer monitor).
 
 ```
                   +---------------------------------------------------------------------------------+
@@ -240,7 +239,7 @@ The operating system exchange information with input device character by charact
  APPLICATIONS     |                                                        |                  |     |
                   |                                                        |    Microsoft Word|     |
                   |+--------------------------+                            |                  |     |
-                  || Hotkeys                  |                            +----^-------|-----+     |
+                  || Hotstrings               |                            +----^-------|-----+     |
                   ||                          |                                 |       |           |
                   ||                          |                                 |       |           |
                   ||                          |                                 |       |           |
