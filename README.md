@@ -208,7 +208,7 @@ If the **triggestring** is recognized (user pressed appropriate sequence of keys
 The concept and usage of hotstrings is based and compatible to AutoHotkey [hotstring][] notion.
 
 ### In long 
-Please carefully analyse the **[Pic. 1](#picture-1)**. From the bottom up:
+Please carefully analyse the **[Pic. 1](#picture-1-long-story-about-hotstrings-application)**. From the bottom up:
 
 1. User sits in the front of input and output devices. Let's assume for this moment that input device is just a keyboard and output device is just a computer monitor.
 
@@ -283,9 +283,7 @@ The operating system exchange information with input device, character by charac
                                                              -/  \---                                
                                                            -/        \-                              
 ```
-##### Picture 1
-
-Long story about *Hotstrings* application.
+##### Picture 1. Long story about *Hotstrings* application.
 
 ## [Why somobody may want to use hotstrings?](#table-of-content "Return to Table of content")
 Because they can significantly make life easier and... longer? Please see below just few supporting arguments.
