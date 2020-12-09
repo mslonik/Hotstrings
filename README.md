@@ -89,6 +89,14 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
    
     4.2.3. [Select hotstring output method](#select-hotstring-output-method)
 
+      4.2.3.1. [SendInput (SI)](#sendinput-si)
+
+      4.2.3.2. [Clipboard (CL)](#clipboard-cl)
+
+      4.2.3.3. [Menu & SendInput (MSI)](#menu-&-sendinput-msi)
+
+      4.2.3.4. [Menu & Clipboard (MCL)](#menu-&-clipboard-mcl)
+
     4.2.4. [Enter hotstring](#enter-hotstring)
 
     4.2.5. [Add a comment](#add-a-comment)
@@ -883,17 +891,17 @@ The opposite action can take place upon user action: if user will edit definitio
 
 Only one ouput method is valid at a time for particular **hotstring**.
 
-### SendInput (SI)
+### [SendInput (SI)](#table-of-content "Return to Table of content")
 
 The default output function, common with AutoHotkey SendInput. The **hotstring** is send character by character. It goes very fast, but if **hotstring** is long, is noticable for user. Therefore if long **hotstring** have to be send, one can consider *Clipboard (CL)* output function.
 
-### Clipboard (CL)
+### [Clipboard (CL)](#table-of-content "Return to Table of content")
 
 The **hotstring** is copied to *clipboard* (part of memory, managed by operating system) and then pasted from clipboard to specific application, as requested by user. Thanks to that it is possible to enter even very long **hotstrings** "at once", in a blink of an eye.
 
 The downside of this method is that in Microsoft Windows operating system time required to paste content of *clipboard* is neither specified nor guaranteed. The *Hotstrings* application enable change of this time by menu: Configure → Clipboard Delay. Also check description above.
 
-### Menu & SendInput (MSI)
+### [Menu & SendInput (MSI)](#table-of-content "Return to Table of content")
 
 Sometimes it is the case that one **triggerstring** is valid for several **hotstrings**.
 
@@ -918,14 +926,20 @@ The default **hotstring** is the first one from the top. To enter it just press 
 
 *Tip*. In some languages (e.g. German, Polish) form of a noun changes depending on grammar rules called [declension]. The menu option is in particular helpful to keep correct form of a nouns for first and second names.
 
-### Menu & Clipboard (MCL)
+### [Menu & Clipboard (MCL)](#table-of-content "Return to Table of content")
 As above, with one exception: the **hotstrings** are output by clipboard, with all the consequences as described for *Clipboard (CL)* output function.
 
 ### [Enter hotstring](#table-of-content "Return to Table of content")
 
 ![Enter hotstring][]
 
-The edit text field used to display / edit the **hotstring**. The single hotstring can be up to 5000 characters long.
+The edit text field used to display / edit the **hotstring**. The single hotstring can be up to 5000 characters long. 
+
+When *Hotstrings* application GUI window is available (no matter in mimized state or not) and you press <Ctrl> + <c> shortcut (copy), then copied content is automatically pasted to this field.
+
+If **hotstring** output function is set to function **SendInput (SI)** (or **Menu & SendInput (MSI)**) , then ss a consequence special characters such as {Enter} or {+} are supported. See [key names] for complete list.
+
+If **hotstring** output function is set to function **Clipboard (CL)** (or **Menu & Clipboard (MCL)**), then hotstring, including special characters is send raw, e.g. {Enter} is send with opening and closing curly bracket.
 
 ### [Add a comment](#table-of-content "Return to Table of content")
 
@@ -1467,3 +1481,4 @@ People from AutoHotkey community, especially those who help at [AutoHotkey forum
 [Date and Time]: https://www.autohotkey.com/docs/Variables.htm#date
 [Libre Office dictionaries]: https://github.com/LibreOffice/dictionaries
 [Language localization]: https://en.wikipedia.org/wiki/Language_localisation
+[key names]: https://www.autohotkey.com/docs/commands/Send.htm#keynames
