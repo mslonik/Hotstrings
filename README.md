@@ -175,9 +175,9 @@ There are two corresponding notions:
 The relationship between these two notions is ruled by options and can be presented as follows:
 
 user input | hostring recognizer | options | modified input
----|---|---
-triggerstring | → | hotstring
-alphanumeric string | alphanumeric string | alphanumeric string
+:---:|:---:|:---: | :---: |
+triggerstring | → | options | hotstring
+alphanumeric string | → | alphanumeric string | alphanumeric string
 
 So the triggerstring triggers the corresponding hotstring, taking into consideration:
 
@@ -1231,7 +1231,7 @@ or
 
 ## [Light mode](#table-of-content "Return to Table of content")
 
-Parameter name: **l**
+Parameter name: **l** (small letter l as in word "light")
 
 In this mode application is run without GUI. Another words there is no chance to change any **(triggerstring, hotstring)** or any other configuration setting. 
 
