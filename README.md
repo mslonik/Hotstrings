@@ -901,7 +901,7 @@ The **hotstring** is copied to *clipboard* (part of memory, managed by operating
 
 The downside of this method is that in Microsoft Windows operating system time required to paste content of *clipboard* is neither specified nor guaranteed. The *Hotstrings* application enable change of this time by menu: Configure → Clipboard Delay. Also check description above.
 
-### [Menu & SendInput (MSI)](#table-of-content "Return to Table of content")
+### [Menu and SendInput (MSI)](#table-of-content "Return to Table of content")
 
 Sometimes it is the case that one **triggerstring** is valid for several **hotstrings**.
 
@@ -926,7 +926,7 @@ The default **hotstring** is the first one from the top. To enter it just press 
 
 *Tip*. In some languages (e.g. German, Polish) form of a noun changes depending on grammar rules called [declension]. The menu option is in particular helpful to keep correct form of a nouns for first and second names.
 
-### [Menu & Clipboard (MCL)](#table-of-content "Return to Table of content")
+### [Menu and Clipboard (MCL)](#table-of-content "Return to Table of content")
 As above, with one exception: the **hotstrings** are output by clipboard, with all the consequences as described for *Clipboard (CL)* output function.
 
 ### [Enter hotstring](#table-of-content "Return to Table of content")
