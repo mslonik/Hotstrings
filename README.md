@@ -937,7 +937,11 @@ The edit text field used to display / edit the **hotstring**. The single hotstri
 
 When *Hotstrings* application GUI window is available (no matter in mimized state or not) and you press <Ctrl> + <c> shortcut (copy), then copied content is automatically pasted to this field.
 
-If **hotstring** output function is set to function **SendInput (SI)** (or **Menu & SendInput (MSI)**) , then ss a consequence special characters such as {Enter} or {+} are supported. See [key names] for complete list.
+If **hotstring** output function is set to function **SendInput (SI)** (or **Menu & SendInput (MSI)**) , then ss a consequence special characters such as {Enter} or {+} are supported. See [key names] for complete list. 
+
+In particular Unicode characters (e.g. emojis) can be entered both ways: explicite (e.g. 🐘) or as hexadecimal Unicode character: {U+1F418}.
+
+*Tip*: Advice: for Unicode characters it is good to keep double representation, when defining **hotstring**: if you choose explicite Unicode character as **hotstring**, add its hexadecimal version to *comment section* of the definition and other way around: if you choose hexadecimal form, add explicite version to *comment section*. This way you will never loose track of your special characters.
 
 If **hotstring** output function is set to function **Clipboard (CL)** (or **Menu & Clipboard (MCL)**), then hotstring, including special characters is send raw, e.g. {Enter} is send with opening and closing curly bracket.
 
@@ -1217,11 +1221,11 @@ Applied change is kept in *Configuration.ini*. Another words it is preserved bet
 
 *Hotstrings* application can be run with parameters. It means that you can start it providin name of the parameters just after name of application in command line, e.g.:
 
-> c:\temp\Hotstrings> Hotstrings.ahk <parameter>
+> c:\temp\Hotstrings> Hotstrings.ahk \<parameter\>
 
 or 
 
-> c:\temp\Hotstrings> Hotstrings <parameter>
+> c:\temp\Hotstrings> Hotstrings \<parameter\>
 
 *Tip*:  Running with parameter can be in particular useful when *Hotstrings* application is run as a link or from within another script file, e.g. batch file.
 
