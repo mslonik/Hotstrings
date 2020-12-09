@@ -93,9 +93,9 @@ Written in [AutoHotkey][] script language, application *Hotstrings*  has many us
 
       4.2.3.2. [Clipboard (CL)](#clipboard-cl)
 
-      4.2.3.3. [Menu & SendInput (MSI)](#menu-&-sendinput-msi)
+      4.2.3.3. [Menu & SendInput (MSI)](#menu-sendinput-msi)
 
-      4.2.3.4. [Menu & Clipboard (MCL)](#menu-&-clipboard-mcl)
+      4.2.3.4. [Menu & Clipboard (MCL)](#menu-clipboard-mcl)
 
     4.2.4. [Enter hotstring](#enter-hotstring)
 
