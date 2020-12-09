@@ -295,8 +295,9 @@ Because they can significantly make life easier and... longer? Please see below 
 
 triggerstring | hotstring
 ---|---
-title1 | This is very long title of technical document with lots of numeric data which are hard to remember EN 982182 : 12 and is reference in a few places in your newly edited document
+title1 | This is very long title of technical document with lots of numeric data which are hard to remember EN 982182 : 12 and is referenced in a few places in your newly edited document
 
+---
 
 * The triggerstring can be used to trigger special symbols / letters / emoji, which are not present on a keyboard. Then it can happen that the triggerstring could be longer than actual hotstring.
 
@@ -307,8 +308,9 @@ triggerstring | hotstring
 ---|---
 elephant/ | 🐘
 
+---
 
-* To correct / auto correct spelling of words or enter unique letters
+* To correct / auto correct spelling of words or enter unique letters.
 
 ---
 *Example:*
@@ -317,6 +319,7 @@ triggerstring | hotstring
 ---|---
 email | e-mail
 
+---
 
 * Nowadays we still frequently use keyboard as input device to so called personal computer. This computer is not so "personal" as you can't easily define system wide (working in any application) triggering your personal hotstrings. 
 
@@ -326,13 +329,15 @@ triggerstring | hotstring
 ---|---
 fs@ | `FirstName.SecondName@yourhosting.com`
 
+---
 
-So let's make your PC really personal again. Now with use of hotstrings and Hotstring application.
+So *let's make your PC really personal (again)*. Now with use of hotstrings and Hotstring application.
+
 
 ## [Why somebody may want to use *Hotstrings* application?](#table-of-content "Return to Table of content")
 Because it doesn't require much knowledege and text editing to run your own hotstrings. *Hotstrings* application can be run even without installation (e.g. from USB pendrive, run **Hotstrings.exe**). Thanks to GUI (Graphical User Interface) you will master defining and applying of your own hotstrings in a blink of an eye 😉.
 
-The alternative, traditional way, is based on text edition, when hotstrings are prepared in AutoHotkey script (text file with .ahk extension), keeping attention to syntax of AutoHotkey syntax. Next such a script can be compiled into executive (.exe).
+The alternative, traditional way, is based on text file edition, when hotstrings are prepared in AutoHotkey script (text file with .ahk extension), keeping attention to syntax of AutoHotkey syntax. Definitely this is at most flexible way, but do we need that to define auto-replace hotstrings?
 
 
 ## [How to reset the hotstring recognizer?](#table-of-content "Return to Table of content")
