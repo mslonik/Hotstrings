@@ -16,7 +16,7 @@ O‖2d‖SI‖En‖2D‖
 ‖ascii‖SI‖En‖ASCII‖
 *‖ascii/‖SI‖En‖American Standard Code for Information Interchange‖
 ‖ato‖SI‖En‖ATO‖
-*‖ato/‖CL‖En‖Assembly To Order‖
+*‖ato/‖MCL‖En‖Assembly To Order¦Automatic Train Operation‖
 ‖bios‖SI‖En‖BIOS‖
 *‖bios/‖SI‖En‖Basic Input/Output System‖https://en.wikipedia.org/wiki/BIOS
 ‖bom‖SI‖En‖BOM‖
@@ -60,6 +60,8 @@ O‖2d‖SI‖En‖2D‖
 ‖dnd‖SI‖En‖D&D‖
 *‖dnd/‖SI‖En‖Drag&Drop‖
 *‖doors/‖SI‖En‖ Dynamic Object Oriented Requirements System‖https://www.ibm.com/pl-pl/products/requirements-management
+‖dvd‖SI‖En‖DVD‖
+*‖dvd/‖SI‖En‖Digital Versatile Disc‖
 ‖dwg‖SI‖En‖DWG‖
 *‖dwg/‖SI‖Dis‖Drawing Exchange Format‖
 ‖dxf‖SI‖En‖DXF‖

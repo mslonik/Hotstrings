@@ -12,7 +12,7 @@
 *‖@kasowaniesekcji‖SI‖En‖KasowanieSekcji{F3}‖
 *‖@kontrolaniezajetosci‖SI‖En‖KontrolaNiezajetosci{F3}‖
 *‖@legendainstrukcje‖SI‖En‖LegendaInstrukcje{F3}‖
-*‖@newlist‖MCL‖En‖NewList1{F3}¦NewList2{F3}¦NewList3{F3}¦NewList4{F3}‖
+*‖@newlist‖MSI‖En‖NewList1{F3}¦NewList2{F3}¦NewList3{F3}¦NewList4{F3}‖
 *‖@newnextlistpelna‖SI‖En‖NewNextListPelna{F3}‖
 *‖@newnumlist‖MSI‖En‖NewNumList{F3}¦NewNumListWciecie{F3}‖
 *‖@nextlist‖MSI‖En‖NextList1{F3}¦NextList2{F3}¦NextList3{F3}¦NextList4{F3}‖
@@ -21,7 +21,6 @@
 *‖@obslugaeksp‖SI‖En‖ObslugaEksp{F3}‖
 *‖@ostatniastronaobrazek‖SI‖En‖OstatniaStronaObrazek{F3}‖
 *‖@podpistab‖SI‖En‖PodpisTab{F3}‖
-*‖@podziękowania‖SI‖En‖Podziękowania{F3}‖
 *‖@producent‖SI‖En‖Producent{F3}‖
 *‖@referencje‖MSI‖En‖Referencje{F3}¦ReferencjePod{F3}‖
 *‖@ryzykoreszt‖SI‖En‖RyzykoReszt{F3}‖

@@ -1,0 +1,51 @@
+﻿‖CF01I0‖SI‖En‖Module identification (Info only)‖
+‖CF03Ix‖SI‖En‖RTC changed (info only)‖
+‖CF04W1‖SI‖En‖Event logger failure. Restart AXM module. If the error persists, replace the module.‖
+‖CF04W2‖SI‖En‖Event logger failure. Restart AXM module. If the error persists, replace the module.‖
+‖CF04W4‖SI‖En‖Event logger failure. Restart AXM module. If the error persists, replace the module.‖
+‖CF04W8‖SI‖En‖Event logger failure. Restart AXM module. If the error persists, replace the module.‖
+‖CF05W0‖SI‖En‖Proper initialization of Safety Channel.‖
+‖CF06W0‖SI‖En‖Communication error. Restart AXM module. If the error persists, replace the module.‖
+‖CF07W6‖SI‖En‖Black Channel communication error. Restart AXM module. If the error persists, replace the module.‖
+‖CF07W7‖SI‖En‖Black Channel communication error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08F1‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08F2‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08F3‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08F4‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08F5‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08F6‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08F7‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08F8‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08F9‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08FA‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08FB‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08FC‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08FD‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08FE‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08FF‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08FG‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08FH‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08FI‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08FJ‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF08FK‖SI‖En‖Initialization error. Restart AXM module. If the error persists, replace the module.‖
+‖CF09F0‖SI‖En‖Internal CENELEC test failure. Restart AXM module. If the error persists, replace the module.‖
+‖CF10F0‖SI‖En‖Check function failure (head interface test). Restart AXM module. If the error persists, replace the module.‖
+‖CF11F0‖SI‖En‖Voltage supply out of range. Restart AXM module. If the error persists, replace the module.‖
+‖CF12F1‖SI‖En‖No configuration on backplane. Replace the backplane or contact the manufacturer.‖
+‖CF12F2‖SI‖En‖Configuration function failure. Restart AXM module. If the error persists, replace the module.‖
+‖CF12F3‖SI‖En‖Configuration function failure. Restart AXM module. If the error persists, replace the module.‖
+‖CF13F1‖SI‖En‖Invalid software version. Contact the manufacturer to program correct Safety Channel software.‖
+‖CF13F2‖SI‖En‖Invalid software version. Contact the manufacturer to program correct Safety Channel software.‖
+‖CF14F0‖SI‖En‖Module failure: ICH timeout. Restart AXM module. If the error persists, replace the module.‖
+‖CF15F0‖SI‖En‖Module failure: software exception. Restart AXM module. If the error persists, replace the module.‖
+‖CF16F0‖SI‖En‖Control function failure: cooperation with R or IO extension. Restart AXM module. If the error persists, replace the module.‖
+‖CF17F0‖SI‖En‖Control function failure: software watchdog stopped. Restart AXM module. If the error persists, replace the module.‖
+‖CF18W1‖SI‖En‖Internal on-board failure. Restart AXM module. If the error persists, replace the module.‖
+‖CF18W2‖SI‖En‖Internal on-board failure. Restart AXM module. If the error persists, replace the module.‖
+‖CF19W0‖SI‖En‖Communication failure. Restart AXM module. If the error persists, replace the module.‖
+‖CF19W1‖SI‖En‖Communication failure. Restart AXM module. If the error persists, replace the module.‖
+‖CF20W0‖SI‖En‖Proper initialization.‖
+‖CF21W1‖SI‖En‖Black Channel communication failure. Restart AXM module. If the error persists, replace the module.‖
+‖CF21W2‖SI‖En‖Black Channel communication failure. Restart AXM module. If the error persists, replace the module.‖
+‖CF22W0‖SI‖En‖Cryptography module test failure. Restart AXM module. If the error persists, replace the module.‖
+‖CF23F0‖SI‖En‖Cryptography module failure. Restart AXM module. If the error persists, replace the module.‖
