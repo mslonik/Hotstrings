@@ -8,13 +8,13 @@ O‖2d‖SI‖En‖2D‖
 ‖ac‖SI‖En‖AC‖
 *‖ac/‖MSI‖En‖Alternating Current¦Axle Counter‖
 ‖ahk‖SI‖En‖AHK‖
-*‖ahk/‖CL‖En‖AutoHotkey‖
+*‖ahk/‖CL‖En‖AutoHotkey‖https://www.autohotkey.com/
 ‖api‖SI‖En‖API‖
-*‖api/‖CL‖En‖Application Programming Interface‖
+*‖api/‖CL‖En‖Application Programming Interface‖https://en.wikipedia.org/wiki/API
 ‖asci‖SI‖En‖ASCII‖
 *‖asci/‖CL‖En‖American Standard Code for Information Interchange‖
 ‖ascii‖SI‖En‖ASCII‖
-*‖ascii/‖SI‖En‖American Standard Code for Information Interchange‖
+*‖ascii/‖SI‖En‖American Standard Code for Information Interchange‖https://en.wikipedia.org/wiki/ASCII
 ‖ato‖SI‖En‖ATO‖
 *‖ato/‖MCL‖En‖Assembly To Order¦Automatic Train Operation‖
 ‖bios‖SI‖En‖BIOS‖
@@ -22,11 +22,13 @@ O‖2d‖SI‖En‖2D‖
 ‖bom‖SI‖En‖BOM‖
 *‖bom/‖MSI‖En‖Bill of Materials¦Byte Order Mark‖
 ‖cad‖SI‖En‖CAD‖
-*‖cad/‖CL‖En‖Computer Aided Design‖
-*‖can/‖CL‖En‖Controller Area Network‖
+*‖cad/‖CL‖En‖Computer Aided Design‖https://en.wikipedia.org/wiki/Computer-aided_design
+‖cam‖SI‖En‖CAM‖
+*‖cam/‖SI‖En‖Computer Aided Manufacturing‖https://en.wikipedia.org/wiki/Computer-aided_manufacturing
+*‖can/‖CL‖En‖Controller Area Network‖https://en.wikipedia.org/wiki/CAN_bus
 *‖can`t‖SI‖En‖CAN‖
 ‖cat‖SI‖En‖CAT‖
-*‖cat/‖CL‖En‖Computer Assisted Translation‖
+*‖cat/‖CL‖En‖Computer Assisted Translation‖https://en.wikipedia.org/wiki/Computer-assisted_translation
 ‖ccms‖SI‖En‖CCMS‖
 *‖ccms/‖SI‖En‖Component Content Management System‖
 ‖ceo‖SI‖En‖CEO‖
@@ -48,20 +50,24 @@ O‖2d‖SI‖En‖2D‖
 ‖cso‖SI‖En‖CSO‖
 *‖cso/‖SI‖En‖Chief Sales Officer‖
 ‖csv‖SI‖En‖CSV‖
-*‖csv/‖SI‖En‖Comma Separated Values‖
+*‖csv/‖SI‖En‖Comma Separated Values‖https://en.wikipedia.org/wiki/Comma-separated_values
 ‖cv‖SI‖En‖CV‖
 ‖cv/‖SI‖En‖Curriculum Vitae‖course of life
 ‖dc‖SI‖En‖DC‖
 *‖dc/‖CL‖En‖Direct Current‖
 ‖ddns‖SI‖En‖DDNS‖
-*‖ddns/‖CL‖En‖Dynamic Domain Name System‖
+*‖ddns/‖CL‖En‖Dynamic DNS‖https://en.wikipedia.org/wiki/Dynamic_DNS
+‖dhcp‖SI‖En‖DHCP‖
+*‖dhcp/‖SI‖En‖Dynamic Host Configuration Protocol‖https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protoco
 ‖dita‖SI‖En‖DITA‖
-*‖dita/‖CL‖En‖Darwin Information Typing Architecture‖
+*‖dita/‖CL‖En‖Darwin Information Typing Architecture‖https://en.wikipedia.org/wiki/Darwin_Information_Typing_Architec
 ‖dnd‖SI‖En‖D&D‖
 *‖dnd/‖SI‖En‖Drag&Drop‖
+‖dns‖SI‖En‖DNS‖
+‖dns/‖SI‖En‖Domain Name System‖https://en.wikipedia.org/wiki/Domain_Name_System
 *‖doors/‖SI‖En‖ Dynamic Object Oriented Requirements System‖https://www.ibm.com/pl-pl/products/requirements-management
 ‖dvd‖SI‖En‖DVD‖
-*‖dvd/‖SI‖En‖Digital Versatile Disc‖
+*‖dvd/‖SI‖En‖Digital Versatile Disc‖https://en.wikipedia.org/wiki/DVD
 ‖dwg‖SI‖En‖DWG‖
 *‖dwg/‖SI‖Dis‖Drawing Exchange Format‖
 ‖dxf‖SI‖En‖DXF‖
@@ -144,6 +150,8 @@ O‖2d‖SI‖En‖2D‖
 *‖llc/‖CL‖En‖Life Cycle Cost‖
 ‖lop‖SI‖En‖LOP‖
 *‖lop/‖CL‖En‖List of Open Points‖
+‖mac‖SI‖En‖MAC‖
+*‖mac/‖SI‖En‖Media Access control Address ‖https://en.wikipedia.org/wiki/MAC_address
 ‖mdt‖SI‖En‖MDT‖
 *‖mdt/‖CL‖En‖Mean Down Time‖
 ‖mtbf‖SI‖En‖MTBF‖
@@ -156,6 +164,8 @@ O‖2d‖SI‖En‖2D‖
 *‖mttf/‖CL‖En‖Mean Time To Failure‖
 ‖mttr‖SI‖En‖MTTR‖
 *‖mttr/‖CL‖En‖Mean Time To Restore‖
+‖mtu‖SI‖En‖MTU‖
+*‖mtu/‖SI‖En‖Maximum Transmission Unit‖https://en.wikipedia.org/wiki/Maximum_transmission_unit
 ‖mut‖SI‖En‖MUT‖
 *‖mut/‖CL‖En‖Mean Up Time‖
 *‖nas/‖SI‖En‖Network Attached Storage‖
@@ -164,6 +174,8 @@ O‖2d‖SI‖En‖2D‖
 *‖ncr/‖CL‖En‖Non Conformance Report‖
 ‖nda‖SI‖En‖NDA‖
 *‖nda/‖CL‖En‖Non-Disclosure Agreement‖
+*‖nic/‖SI‖En‖Network Interface Card‖
+*‖nic`t‖SI‖En‖NIC‖
 ‖oem‖SI‖En‖OEM‖
 *‖oem/‖SI‖En‖Original Equipment Manufacturer‖
 ‖pcb‖SI‖En‖PCB‖
@@ -245,6 +257,8 @@ O‖2d‖SI‖En‖2D‖
 *‖vat/‖CL‖En‖Value Added Tax‖
 ‖vba‖SI‖En‖VBA‖
 *‖vba/‖CL‖En‖Visual Basic for Applications‖
+‖vlan‖SI‖En‖VLAN‖
+*‖vlan/‖SI‖En‖Virtual LAN‖https://en.wikipedia.org/wiki/Virtual_LAN
 ‖vpn‖SI‖En‖VPN‖
 *‖vpn/‖CL‖En‖Virtual Private Network‖
 ‖wmf‖SI‖En‖WMF‖
