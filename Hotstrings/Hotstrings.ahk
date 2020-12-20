@@ -1,12 +1,12 @@
 ﻿/*
-Author:      Jakub Masiak, Maciej Słojewski, mslonik, http://mslonik.pl
-Purpose:     Facilitate normal operation for company desktop.
-Description: Hotstrings for everyday professional activities and office cockpit.
-License:     GNU GPL v.3
+	Author:      Jakub Masiak, Maciej Słojewski (mslonik, http://mslonik.pl)
+	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
+	Description: Hotstrings as in AutoHotkey (shortcuts), but editable with GUI and many more options.
+	License:     GNU GPL v.3
 */
 Try
 {
-	#Requires AutoHotkey v1.1.33+
+	#Requires AutoHotkey v1.1.33+ 
 }
 Catch
 {
