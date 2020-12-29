@@ -4,19 +4,11 @@
 	Description: Hotstrings as in AutoHotkey (shortcuts), but editable with GUI and many more options.
 	License:     GNU GPL v.3
 */
-Try
-{
-	#Requires AutoHotkey v1.1.33+ 
-}
-Catch
-{
-	MsgBox This script will run only on v1.1.33.00 and later v1.1.* releases.
-	ExitApp
-}
+
+#Requires AutoHotkey v1.1.33+ 
 #SingleInstance force 			; only one instance of this script may run at a time!
 #NoEnv  						; Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn  							; Enable warnings to assist with detecting common errors.
-; #Persistent
 SendMode Input  				; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
 ; ---------------------- HOTSTRINGS -----------------------------------

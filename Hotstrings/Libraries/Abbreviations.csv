@@ -36,7 +36,7 @@ O‖2d‖SI‖En‖2D‖
 ‖cfo‖SI‖En‖CFO‖
 *‖cfo/‖SI‖En‖Chief Financial Officer‖
 ‖cms‖SI‖En‖CMS‖
-‖cms/‖SI‖En‖Content Management System‖
+*‖cms/‖SI‖En‖Content Management System‖
 ‖com‖SI‖En‖COM‖
 *‖com/‖MCL‖En‖a serial port interface on IBM PC-compatible computers¦Component Object Model, a Microsoft software interface technology‖https://en.wikipedia.org/wiki/Com
 ‖cop‖SI‖En‖CoP‖
@@ -213,6 +213,8 @@ O‖2d‖SI‖En‖2D‖
 *‖rams/‖CL‖En‖Reliability, Availability, Maintainability and Safety‖
 ‖rap‖SI‖En‖RAP‖
 *‖rap/‖CL‖En‖Risk Acceptance Principle‖
+‖rgb‖SI‖En‖RGB‖
+*‖rgb/‖SI‖En‖Red Green Blue‖https://en.wikipedia.org/wiki/RGB_color_model
 ‖rma‖SI‖En‖RMA‖
 *‖rma/‖CL‖En‖Return Merchandise Authorization‖
 ‖rms‖SI‖En‖RMS‖
