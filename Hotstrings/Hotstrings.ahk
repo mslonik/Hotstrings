@@ -5,13 +5,14 @@
 	License:     GNU GPL v.3
 */
 
+; -----------Beginning of auto-execute section of the script
+
 #Requires AutoHotkey v1.1.33+ 
 #SingleInstance force 			; only one instance of this script may run at a time!
 #NoEnv  						; Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn  							; Enable warnings to assist with detecting common errors.
 SendMode Input  				; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
-; ---------------------- HOTSTRINGS -----------------------------------
 
 IfNotExist, Config.ini
 {
@@ -59,10 +60,11 @@ Language=English.ini
 	FileAppend, %ini%, Config.ini
 	MsgBox, Config.ini wasn't found. The default Config.ini is now created.
 }
-global v_Language := ""
-global v_LanguageFile := ""
 
-; - - - - - - - - LANGUAGE OPTIONS - - - - - - -
+; - - - - - - - - LOCALIZATION OPTIONS - - - - - - -
+
+global v_Language 		:= ""
+global v_LanguageFile 	:= ""
 
 IniRead, v_Language, Config.ini, Configuration, Language
 v_LanguageFile := % "Languages/" . v_Language
