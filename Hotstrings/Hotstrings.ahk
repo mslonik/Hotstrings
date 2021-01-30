@@ -1871,7 +1871,7 @@ L_GUIInit:
 	Menu, SubmenuTips, Add, %t_NumberOfCharactersForTips%, :Submenu4
 	If !(ini_Tips)
 	{
-		Menu, SubmenuTips,Disable, %t_NumberOfCharactersForTips%s
+		Menu, SubmenuTips,Disable, %t_NumberOfCharactersForTips%
 	}
 	Menu, SubmenuTips, Add, %t_SortTipsAlphabetically%, L_SortTipsAlphabetically
 	if (ini_TipsSortAlphabetically)
