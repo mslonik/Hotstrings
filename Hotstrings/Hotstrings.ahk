@@ -1298,7 +1298,7 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_F_EndChars()
+F_EndChars()
 {
 	global
 
