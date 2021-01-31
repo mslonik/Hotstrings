@@ -16,6 +16,12 @@
 SendMode Input  				; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
 
+; 1. Prepare variables which can be used to create the default .ini files (Config.ini and English.ini).
+; 2. Try to load up configuration files. If those files do not exist, create them.
+; 3. Load configuration files into configuration variables. The configuration variable names start with "ini_" prefix.
+; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
+
+; 1. Prepare variables which can be used to create the default .ini files (Config.ini and English.ini).
 ConfigIni = 					; variable which is used as default content of Config.ini
 	(
 [Configuration]
@@ -61,128 +67,128 @@ Language=English.ini
 EnglishIni =  						; variable which is used as default content of Languages/English.ini
 	(Join`n ` 
 [Strings]
-EditHotstring=Edit Hotstring
-SearchHotstrings=Search Hotstrings
-LoadingHotstringsFromLibraries=Loading hotstrings from libraries...
-HotstringsHaveBeenLoaded=Hotstrings have been loaded
-ErrorLevelWasTriggeredByNewInputError=ErrorLevel was triggered by NewInput error.
-UndoTheLastHotstring=Undo the last hotstring.
-SelectHotstringLibrary=Select hotstring library
-LibraryImportPleaseWait=Library import. Please wait...
-LoadingLibrariesPleaseWait=Loading libraries. Please wait...
-LibraryHasBeenImported=Library has been imported.
-LibraryExportPleaseWait=Library export. Please wait...
-LibraryHasBeenExported=Library has been exported.
-SelectedFileIsEmpty=Selected file is empty.
-ThePathFileIs=The file path is:
-EnterTriggerstring=Enter triggerstring
-SelectTriggerOptions=Select trigger option(s)
-ImmediateExecute=Immediate Execute (*)
-CaseSensitive=Case Sensitive (C)
-NoBackspace=No Backspace (B0)
-InsideWord=Inside Word (?)
-NoEndChar=No End Char (O)
-Disable=Disable
-SelectHotstringOutputFunction=Select hotstring output function
-EnterHotstring=Enter hotstring
+AboutHelp=&About/Help
 AddAComment=Add a comment
 AddLibrary=Add library
-SetHotstring=Set hotstring
-Clear=Clear
-DeleteHotstring=Delete hotstring
-Sandbox=Sandbox
-TriggerstringTriggOptOutFunEnDisHotstringComment=Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
-F1AboutHelpF2LibraryContentF3SearchHotstringsF5ClearF7ClipboardDelayF8DeleteHotstringF9SetHotstring=F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring
-LoadedHotstrings=Loaded hotstrings:
-UndoLastHotstring=&Undo last hotstring
-EnableDisable=Enable/Disable
-Caret=Caret
-Cursor=Cursor
-ChooseMenuPosition=Choose menu position
-EnableSoundIfOverrun=Enable &sound if overrun
-HotstringMenuMSIMCL=Hotstring menu (MSI, MCL)
-TriggerstringTips=&Triggerstring tips
-ChooseTipsLocation=Choose tips location
-NumberOfCharactersForTips=&Number of characters for tips
-SortTipsAlphabetically=Sort tips &alphabetically
-SortTipsByLength=Sort tips by &length
-SaveWindowPosition=&Save window position
-LaunchSandbox=&Launch Sandbox
-Space=Space
-Minus=Minus -
-OpeningRoundBracket=Opening Round Bracket (
-ClosingRoundBracket=Closing Round Bracket )
-OpeningSquareBracket=Opening Square Bracket [
-ClosingSquareBracket=Closing Square Bracket ]
-OpeningCurlyBracket=Opening Curly Bracket {
-ClosingCurlyBracket=Closing Curly Bracket }
-Colon=Colon :
-Semicolon=Semicolon ;
-Apostrophe=Apostrophe '
-Quote=Quote "
-Slash=Slash /
-Backslash=Backslash \
-Comma=Comma ,
-Dot=Dot .
-QuestionMark=Question Mark ?
-ExclamationMark=Exclamation Mark !
-Enter=Enter
-Tab=Tab
-ToggleEndChars=&Toggle EndChars
-Configuration=&Configuration
-SearchHotstrings=&Search Hotstrings
-ImportFromAhkToCsv=&Import from .ahk to .csv
-StaticHotstrings=&Static hotstrings
-DynamicHotstrings=&Dynamic hotstrings
-ExportFromCsvToAhk=&Export from .csv to .ahk
-EnableDisableTriggerstringTips=Enable/disable triggerstring tips
-LibrariesConfiguration=&Libraries configuration
-ClipboardDelay=Clipboard &Delay
-AboutHelp=&About/Help
-ReplacementTextIsBlankDoYouWantToProceed=Replacement text is blank. Do you want to proceed?
-ChooseSendingFunction=Choose sending function!
-ChooseSectionBeforeSaving=Choose section before saving!
-ChooseTheMethodOfSendingTheHotstring=Choose the method of sending the hotstring!
-EnterANameForTheNewLibrary=Enter a name for the new library
-Cancel=Cancel
-TheLibrary=The library 
-HasBeenCreated=has been created.
 ALibraryWithThatNameAlreadyExists=A library with that name already exists!
-TheHostring=The hostring
-ExistsInAFile=exists in a file
-CsvDoYouWantToProceed=.csv. Do you want to proceed?
-SelectARowInTheListViewPlease=Select a row in the list-view, please!
-SelectedHotstringWillBeDeletedDoYouWantToProceed=Selected Hotstring will be deleted. Do you want to proceed?
-DeletingHotstring=Deleting hotstring...
-DeletingHotstringPleaseWait=Deleting hotstring. Please wait...
-HotstringHasBeenDeletedNowApplicationWillRestartItselfInOrderToApplyChangesReloadTheLibrariesCsv=Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
-HotstringPasteFromClipboardDelay1s=Hotstring paste from Clipboard delay 1 s
-HotstringPasteFromClipboardDelay=Hotstring paste from Clipboard delay
-LetsMakeYourPCPersonalAgain=Let's make your PC personal again...
-EnablesConvenientDefinitionAndUseOfHotstringsTriggeredByShortcutsLongerTextStringsThisIs3rdEditionOfThisApplication2020ByJakubMasiakAndMaciejSlojewskiLicenseGNUGPLVer3=Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
+Apostrophe=Apostrophe '
 ApplicationHelp=Application help
-GenuineHotstringsAutoHotkeyDocumentation=Genuine hotstrings AutoHotkey documentation
-PleaseWaitUploadingCsvFiles=Please wait, uploading .csv files...
-SearchBy=Search by:
-Triggerstring=Triggerstring
-Hotstring=Hotstring
-Library=Library
-Move=Move
-LibraryTriggerstringTriggerOptionsOutputFunctionEnableDisableHotstringComment=Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment
-F3CloseSearchHotstringsF8MoveHotstring=F3 Close Search hotstrings | F8 Move hotstring
-SelectTheTargetLibrary=Select the target library:
-DoYouWantToProceed=. Do you want to proceed?
-HotstringMovedToThe=Hotstring moved to the
-File=file!
+ApplicationLanguageChangedTo=Application language changed to:
+Backslash=Backslash \
+Cancel=Cancel
+Caret=Caret
+CaseSensitive=Case Sensitive (C)
+ChangeLanguage=Change Language
 ChooseLibraryFileAhkForImport=Choose library file (.ahk) for import
 ChooseLibraryFileCsvForExport=Choose library file (.csv) for export
-ChangeLanguage=Change Language
-ApplicationLanguageChangedTo=Application language changed to:
+ChooseMenuPosition=Choose menu position
+ChooseSectionBeforeSaving=Choose section before saving!
+ChooseSendingFunction=Choose sending function!
+ChooseTheMethodOfSendingTheHotstring=Choose the method of sending the hotstring!
+ChooseTipsLocation=Choose tips location
+Clear=Clear
+ClipboardDelay=Clipboard &Delay
+ClosingCurlyBracket=Closing Curly Bracket }
+ClosingRoundBracket=Closing Round Bracket )
+ClosingSquareBracket=Closing Square Bracket ]
+Colon=Colon :
+Comma=Comma ,
+Configuration=&Configuration
+CsvDoYouWantToProceed=.csv. Do you want to proceed?
+Cursor=Cursor
+DeleteHotstring=Delete hotstring
+DeletingHotstring=Deleting hotstring...
+DeletingHotstringPleaseWait=Deleting hotstring. Please wait...
+Disable=Disable
+Dot=Dot .
+DoYouWantToProceed=. Do you want to proceed?
+DynamicHotstrings=&Dynamic hotstrings
+EditHotstring=Edit Hotstring
+EnableDisable=Enable/Disable
+EnableDisableTriggerstringTips=Enable/disable triggerstring tips
+EnablesConvenientDefinitionAndUseOfHotstringsTriggeredByShortcutsLongerTextStringsThisIs3rdEditionOfThisApplication2020ByJakubMasiakAndMaciejSlojewskiLicenseGNUGPLVer3=Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
+EnableSoundIfOverrun=Enable &sound if overrun
+Enter=Enter
+EnterANameForTheNewLibrary=Enter a name for the new library
+EnterHotstring=Enter hotstring
+EnterTriggerstring=Enter triggerstring
+ErrorLevelWasTriggeredByNewInputError=ErrorLevel was triggered by NewInput error.
+ExclamationMark=Exclamation Mark !
+ExistsInAFile=exists in a file
+ExportFromCsvToAhk=&Export from .csv to .ahk
+F1AboutHelpF2LibraryContentF3SearchHotstringsF5ClearF7ClipboardDelayF8DeleteHotstringF9SetHotstring=F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring
+F3CloseSearchHotstringsF8MoveHotstring=F3 Close Search hotstrings | F8 Move hotstring
+File=file!
+GenuineHotstringsAutoHotkeyDocumentation=Genuine hotstrings AutoHotkey documentation
+HasBeenCreated=has been created.
+Hotstring=Hotstring
+HotstringHasBeenDeletedNowApplicationWillRestartItselfInOrderToApplyChangesReloadTheLibrariesCsv=Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
+HotstringMenuMSIMCL=Hotstring menu (MSI, MCL)
+HotstringMovedToThe=Hotstring moved to the
+HotstringPasteFromClipboardDelay1s=Hotstring paste from Clipboard delay 1 s
+HotstringPasteFromClipboardDelay=Hotstring paste from Clipboard delay
+HotstringsHaveBeenLoaded=Hotstrings have been loaded
+ImmediateExecute=Immediate Execute (*)
+ImportFromAhkToCsv=&Import from .ahk to .csv
+InsideWord=Inside Word (?)
+LaunchSandbox=&Launch Sandbox
+LetsMakeYourPCPersonalAgain=Let's make your PC personal again...
+LibrariesConfiguration=&Libraries configuration
+Library=Library
+LibraryExportPleaseWait=Library export. Please wait...
+LibraryHasBeenExported=Library has been exported.
+LibraryHasBeenImported=Library has been imported.
+LibraryImportPleaseWait=Library import. Please wait...
+LibraryTriggerstringTriggerOptionsOutputFunctionEnableDisableHotstringComment=Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment
+LoadedHotstrings=Loaded hotstrings:
+LoadingHotstringsFromLibraries=Loading hotstrings from libraries...
+LoadingLibrariesPleaseWait=Loading libraries. Please wait...
+Minus=Minus -
+Move=Move
+NoBackspace=No Backspace (B0)
+NoEndChar=No End Char (O)
+NumberOfCharactersForTips=&Number of characters for tips
+OpeningCurlyBracket=Opening Curly Bracket {
+OpeningRoundBracket=Opening Round Bracket (
+OpeningSquareBracket=Opening Square Bracket [
+PleaseWaitUploadingCsvFiles=Please wait, uploading .csv files...
+QuestionMark=Question Mark ?
+Quote=Quote "
+ReplacementTextIsBlankDoYouWantToProceed=Replacement text is blank. Do you want to proceed?
+Sandbox=Sandbox
+SaveWindowPosition=&Save window position
+SearchBy=Search by:
+SearchHotstrings=&Search Hotstrings
+SearchHotstrings=Search Hotstrings
+SelectARowInTheListViewPlease=Select a row in the list-view, please!
+SelectedFileIsEmpty=Selected file is empty.
+SelectedHotstringWillBeDeletedDoYouWantToProceed=Selected Hotstring will be deleted. Do you want to proceed?
+SelectHotstringLibrary=Select hotstring library
+SelectHotstringOutputFunction=Select hotstring output function
+SelectTheTargetLibrary=Select the target library:
+SelectTriggerOptions=Select trigger option(s)
+Semicolon=Semicolon ;
+SetHotstring=Set hotstring
+Slash=Slash /
+SortTipsAlphabetically=Sort tips &alphabetically
+SortTipsByLength=Sort tips by &length
+Space=Space
+StaticHotstrings=&Static hotstrings
+Tab=Tab
 TheApplicationWillBereloadedWithTheNewLanguageFile=The application will be reloaded with the new language file.
+TheHostring=The hostring
+TheLibrary=The library 
+ThePathFileIs=The file path is:
+ToggleEndChars=&Toggle EndChars
+Triggerstring=Triggerstring
+TriggerstringTips=&Triggerstring tips
+TriggerstringTriggOptOutFunEnDisHotstringComment=Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
+L_UndoLastHotstring=&Undo last hotstring
+L_UndoTheLastHotstring=Undo the last hotstring.
 	)
 
-; - - - - - - - - CHECK IF INI FILES EXIST - - - - - - -
 
+; 2. Try to load up configuration files. If those files do not exist, create them.
 if (!FileExist("Config.ini"))
 {
 	MsgBox, 0x30, % A_ScriptName . " Warning", Config.ini wasn't found. The default Config.ini is now created in location %A_ScriptDir%.
@@ -205,131 +211,131 @@ else  if (!FileExist(A_ScriptDir . "\Languages\" . v_Language))		; else if there
 	MsgBox, 0x30,, ERROR!`nThere is no %v_Language% file in Languages subfolder!`nThe default %A_ScriptDir%\Languages\English.ini file is now created.
 	FileAppend, %EnglishIni%, %A_ScriptDir%\Languages\English.ini	; Future: check against errors
 	v_Language 		:= "English.ini"					
-;	vLanguageFile 		:= "Languages/English.ini"				; do usunięcia
 }
 
+; 3. Load configuration files into configuration variables. The configuration variable names start with "ini_" prefix.
 ;Read all variables from specified language .ini file. As .ini files are ANSI compliant and not UTF-8 compliant, in order to get UTF-8 strings, 
 ;each variable is read by F_ReadText function which do ANSI -> UTF-8 conversion. In order to distinguish GUI text from any other string or variable used in this script, the GUI strings are 
 ;defined with prefix "t_".
-;global t_EditHotstring,t_SearchHotstrings, t_LoadingHotstringsFromLibraries, t_HotstringsHaveBeenLoaded, t_ErrorLevelWasTriggeredByNewInputError, t_UndoTheLastHotstring, t_SelectHotstringLibrary, t_LibraryImportPleaseWait, t_LoadingLibrariesPleaseWait, t_LibraryHasBeenImported, t_SelectedFileIsEmpty, t_LibraryExportPleaseWait, t_LibraryHasBeenExported, t_ThePathFileIs, t_EnterTriggerstring, t_SelectTriggerOptions, t_ImmediateExecute, t_CaseSensitive, t_NoBackspace, t_InsideWord, t_NoEndChar, t_Disable, t_SelectHotstringOutputFunction, t_EnterHotstring, t_AddAComment, t_AddLibrary, t_SetHotstring, t_Clear, t_DeleteHotstring, t_Sandbox, t_TriggerstringTriggOptOutFunEnDisHotstringComment, t_F1AboutHelpF2LibraryContentF3SearchHotstringsF5ClearF7ClipboardDelayF8DeleteHotstringF9SetHotstring, t_LoadedHotstrings, t_UndoLastHotstring, t_EnableDisable, t_Caret, t_Cursor, t_ChooseMenuPosition, t_EnableSoundIfOverrun, t_HotstringMenuMSIMCL, t_TriggerstringTips, t_ChooseTipsLocation, t_NumberOfCharactersForTips, t_SortTipsAlphabetically, t_SortTipsByLength, t_SaveWindowPosition, t_LaunchSandbox, t_Space, t_Minus, t_OpeningRoundBracket, t_ClosingRoundBracket, t_OpeningSquareBracket, t_ClosingSquareBracket, t_OpeningCurlyBracket, t_ClosingCurlyBracket, t_Colon, t_Semicolon, t_Apostrophe, t_Apostrophe, t_Quote, t_Slash, t_Backslash, t_Comma, t_Dot, t_QuestionMark, t_ExclamationMark, t_Enter, t_Tab, t_ToggleEndChars, t_Configuration, t_SearchHotstrings, t_ImportFromAhkToCsv, t_StaticHotstrings, t_DynamicHotstrings, t_ExportFromCsvToAhk, t_EnableDisableTriggerstringTips, t_LibrariesConfiguration, t_ClipboardDelay, t_AboutHelp, t_ReplacementTextIsBlankDoYouWantToProceed, t_ChooseSendingFunction, t_ChooseSectionBeforeSaving, t_ChooseTheMethodOfSendingTheHotstring, t_EnterANameForTheNewLibrary, t_Cancel, t_TheLibrary, t_HasBeenCreated, t_ALibraryWithThatNameAlreadyExists, t_TheHostring, t_ExistsInAFile, t_CsvDoYouWantToProceed, t_SelectARowInTheListViewPlease, t_SelectedHotstringWillBeDeletedDoYouWantToProceed, t_DeletingHotstring, t_DeletingHotstringPleaseWait, t_HotstringHasBeenDeletedNowApplicationWillRestartItselfInOrderToApplyChangesReloadTheLibrariesCsv, t_HotstringPasteFromClipboardDelay1s, t_HotstringPasteFromClipboardDelay, t_LetsMakeYourPCPersonalAgain, t_EnablesConvenientDefinitionAndUseOfHotstringsTriggeredByShortcutsLongerTextStringsThisIs3rdEditionOfThisApplication2020ByJakubMasiakAndMaciejSlojewskiLicenseGNUGPLVer3, t_ApplicationHelp, t_GenuineHotstringsAutoHotkeyDocumentation, t_PleaseWaitUploadingCsvFiles, t_SearchBy, t_Triggerstring, t_Hotstring, t_Library, t_Move, t_LibraryTriggerstringTriggerOptionsOutputFunctionEnableDisableHotstringComment, t_F3CloseSearchHotstringsF8MoveHotstring, t_SelectTheTargetLibrary, t_HotstringMovedToThe, t_File, t_ChooseLibraryFileAhkForImport, t_ChooseLibraryFileCsvForExport, t_ChangeLanguage, t_ApplicationLanguageChangedTo, t_TheApplicationWillBereloadedWithTheNewLanguageFile
-global t_EditHotstring := 						F_ReadText("t_EditHotstring")
-global t_SearchHotstrings := 						F_ReadText("t_SearchHotstrings")
-global t_LoadingHotstringsFromLibraries := 			F_ReadText("t_LoadingHotstringsFromLibraries")
-global t_HotstringsHaveBeenLoaded := 				F_ReadText("t_HotstringsHaveBeenLoaded")
-global t_ErrorLevelWasTriggeredByNewInputError := 	F_ReadText("t_ErrorLevelWasTriggeredByNewInputError")
-global t_UndoTheLastHotstring := 					F_ReadText("t_UndoTheLastHotstring")
-global t_SelectHotstringLibrary := 				F_ReadText("t_SelectHotstringLibrary")
-global t_LibraryImportPleaseWait := 				F_ReadText("t_LibraryImportPleaseWait")
-global t_LoadingLibrariesPleaseWait := 				F_ReadText("t_LoadingLibrariesPleaseWait")
-global t_LibraryHasBeenImported := 				F_ReadText("t_LibraryHasBeenImported")
-global t_LibraryExportPleaseWait := 				F_ReadText("t_LibraryExportPleaseWait")
-global t_LibraryHasBeenExported := 				F_ReadText("t_LibraryHasBeenExported")
-global t_SelectedFileIsEmpty := 					F_ReadText("t_SelectedFileIsEmpty")
-global t_ThePathFileIs := 						F_ReadText("t_ThePathFileIs")
-global t_EnterTriggerstring := 					F_ReadText("t_EnterTriggerstring")
-global t_SelectTriggerOptions := 					F_ReadText("t_SelectTriggerOptions")
-global t_ImmediateExecute := 						F_ReadText("t_ImmediateExecute")
-global t_CaseSensitive := 						F_ReadText("t_CaseSensitive")
-global t_NoBackspace := 							F_ReadText("t_NoBackspace")
-global t_InsideWord := 							F_ReadText("t_InsideWord")
-global t_NoEndChar := 							F_ReadText("t_NoEndChar")
-global t_Disable := 							F_ReadText("t_Disable")
-global t_SelectHotstringOutputFunction := 			F_ReadText("t_SelectHotstringOutputFunction")
-global t_EnterHotstring := 						F_ReadText("t_EnterHotstring")
+;glbobal t_EditHotstringearchHotstrings, t_LoadingHotstringsFromLibraries, t_HotstringsHaveBeenLoaded, t_ErrorLevelWasTriggeredByNewInputError, t_UndoTheLastHotstring, t_SelectHotstringLibrary, t_LibraryImportPleaseWait, t_LoadingLibrariesPleaseWait, t_LibraryHasBeenImported, t_SelectedFileIsEmpty, t_LibraryExportPleaseWait, t_LibraryHasBeenExported, t_ThePathFileIs, t_EnterTriggerstring, t_SelectTriggerOptions, t_ImmediateExecute, t_CaseSensitive, t_NoBackspace, t_InsideWord, t_NoEndChar, t_Disable, t_SelectHotstringOutputFunction, t_EnterHotstring, t_AddAComment, t_AddLibrary, t_SetHotstring, t_Clear, t_DeleteHotstring, andbox, t_TriggerstringTriggOptOutFunEnDisHotstringComment, t_F1AboutHelpF2LibraryContentF3SearchHotstringsF5ClearF7ClipboardDelayF8DeleteHotstringF9SetHotstring, t_LoadedHotstrings, t_UndoLastHotstring, t_EnableDisable, t_Caret, t_Cursor, t_ChooseMenuPosition, t_EnableSoundIfOverrun, t_HotstringMenuMSIMCL, t_TriggerstringTips, t_ChooseTipsLocation, t_NumberOfCharactersForTips, t_SortTipsAlphabetically, t_SortTipsByLength, t_SaveWindowPosition, t_LaunchSandbox, t_Space, t_Minus, t_OpeningRoundBracket, t_ClosingRoundBracket, t_OpeningSquareBracket, t_ClosingSquareBracket, t_OpeningCurlyBracket, t_ClosingCurlyBracket, t_Colon, t_Semicolon, t_Apostrophe, t_Apostrophe, t_Quote, t_Slash, t_Backslash, t_Comma, t_Dot, t_QuestionMark, t_ExclamationMark, t_Enter, t_Tab, t_ToggleEndChars, t_Configuration, t_SearchHotstrings, t_ImportFromAhkToCsv, t_StaticHotstrings, t_DynamicHotstrings, t_ExportFromCsvToAhk, t_EnableDisableTriggerstringTips, t_LibrariesConfiguration, t_ClipboardDelay, t_AboutHelp, t_ReplacementTextIsBlankDoYouWantToProceed, t_ChooseSendingFunction, t_ChooseSectionBeforeSaving, t_ChooseTheMethodOfSendingTheHotstring, t_EnterANameForTheNewLibrary, t_Cancel, t_TheLibrary, t_HasBeenCreated, t_ALibraryWithThatNameAlreadyExists, t_TheHostring, t_ExistsInAFile, t_CsvDoYouWantToProceed, t_SelectARowInTheListViewPlease, t_SelectedHotstringWillBeDeletedDoYouWantToProceed, t_DeletingHotstring, t_DeletingHotstringPleaseWait, t_HotstringHasBeenDeletedNowApplicationWillRestartItselfInOrderToApplyChangesReloadTheLibrariesCsv, t_HotstringPasteFromClipboardDelay1s, t_HotstringPasteFromClipboardDelay, t_LetsMakeYourPCPersonalAgain, t_EnablesConvenientDefinitionAndUseOfHotstringsTriggeredByShortcutsLongerTextStringsThisIs3rdEditionOfThisApplication2020ByJakubMasiakAndMaciejSlojewskiLicenseGNUGPLVer3, t_ApplicationHelp, t_GenuineHotstringsAutoHotkeyDocumentation, t_PleaseWaitUploadingCsvFiles, t_SearchBy, t_Triggerstring, t_Hotstring, t_Library, t_Move, t_LibraryTriggerstringTriggerOptionsOutputFunctionEnableDisableHotstringComment, t_F3CloseSearchHotstringsF8MoveHotstring, t_SelectTheTargetLibrary, t_HotstringMovedToThe, t_File, t_ChooseLibraryFileAhkForImport, t_ChooseLibraryFileCsvForExport, t_ChangeLanguage, t_ApplicationLanguageChangedTo, t_TheApplicationWillBereloadedWithTheNewLanguageFile
+global t_AboutHelp := 							F_ReadText("t_AboutHelp")
 global t_AddAComment := 							F_ReadText("t_AddAComment")
 global t_AddLibrary := 							F_ReadText("t_AddLibrary")
-global t_SetHotstring := 						F_ReadText("t_SetHotstring")
-global t_Clear := 								F_ReadText("t_Clear")
-global t_DeleteHotstring := 						F_ReadText("t_DeleteHotstring")
-global t_Sandbox := 							F_ReadText("t_Sandbox")
-global t_TriggerstringTriggOptOutFunEnDisHotstringComment := F_ReadText("t_TriggerstringTriggOptOutFunEnDisHotstringComment")
-global t_F1AboutHelpF2LibraryContentF3SearchHotstringsF5ClearF7ClipboardDelayF8DeleteHotstringF9SetHotstring := F_ReadText("t_F1AboutHelpF2LibraryContentF3SearchHotstringsF5ClearF7ClipboardDelayF8DeleteHotstringF9SetHotstring")
-global t_LoadedHotstrings := 						F_ReadText("t_LoadedHotstrings")
-global t_UndoLastHotstring := 					F_ReadText("t_UndoLastHotstring")
-global t_EnableDisable := 						F_ReadText("t_EnableDisable")
-global t_Caret := 								F_ReadText("t_Caret")
-global t_Cursor := 								F_ReadText("t_Cursor")
-global t_ChooseMenuPosition := 					F_ReadText("t_ChooseMenuPosition")
-global t_EnableSoundIfOverrun := 					F_ReadText("t_EnableSoundIfOverrun")
-global t_HotstringMenuMSIMCL := 					F_ReadText("t_HotstringMenuMSIMCL")
-global t_TriggerstringTips := 					F_ReadText("t_TriggerstringTips")
-global t_ChooseTipsLocation := 					F_ReadText("t_ChooseTipsLocation")
-global t_NumberOfCharactersForTips := 				F_ReadText("t_NumberOfCharactersForTips")
-global t_SortTipsAlphabetically := 				F_ReadText("t_SortTipsAlphabetically")
-global t_SortTipsByLength := 						F_ReadText("t_SortTipsByLength")
-global t_SaveWindowPosition := 					F_ReadText("t_SaveWindowPosition")
-global t_LaunchSandbox := 						F_ReadText("t_LaunchSandbox")
-global t_Space := 								F_ReadText("t_Space")
-global t_Minus := 								F_ReadText("t_Minus")
-global t_OpeningRoundBracket := 					F_ReadText("t_OpeningRoundBracket")
-global t_ClosingRoundBracket := 					F_ReadText("t_ClosingRoundBracket")
-global t_OpeningSquareBracket := 					F_ReadText("t_OpeningSquareBracket")
-global t_ClosingSquareBracket := 					F_ReadText("t_ClosingSquareBracket")
-global t_OpeningCurlyBracket := 					F_ReadText("t_OpeningCurlyBracket")
-global t_ClosingCurlyBracket := 					F_ReadText("t_ClosingCurlyBracket")
-global t_Colon := 								F_ReadText("t_Colon")
-global t_Semicolon := 							F_ReadText("t_Semicolon")
-global t_Apostrophe := 							F_ReadText("t_Apostrophe")
-global t_Quote := 								F_ReadText("t_Quote")
-global t_Slash := 								F_ReadText("t_Slash")
-global t_Backslash := 							F_ReadText("t_Backslash")
-global t_Comma := 								F_ReadText("t_Comma")
-global t_Dot := 								F_ReadText("t_Dot")
-global t_QuestionMark := 						F_ReadText("t_QuestionMark")
-global t_ExclamationMark := 						F_ReadText("t_ExclamationMark")
-global t_Enter := 								F_ReadText("t_Enter")
-global t_Tab := 								F_ReadText("t_Tab")
-global t_ToggleEndChars := 						F_ReadText("t_ToggleEndChars")
-global t_Configuration := 						F_ReadText("t_Configuration")
-global t_SearchHotstrings := 						F_ReadText("t_SearchHotstrings")
-global t_ImportFromAhkToCsv := 					F_ReadText("t_ImportFromAhkToCsv")
-global t_StaticHotstrings := 						F_ReadText("t_StaticHotstrings")
-global t_DynamicHotstrings := 					F_ReadText("t_DynamicHotstrings")
-global t_ExportFromCsvToAhk := 					F_ReadText("t_ExportFromCsvToAhk")
-global t_EnableDisableTriggerstringTips := 			F_ReadText("t_EnableDisableTriggerstringTips")
-global t_LibrariesConfiguration := 				F_ReadText("t_LibrariesConfiguration")
-global t_ClipboardDelay := 						F_ReadText("t_ClipboardDelay")
-global t_AboutHelp := 							F_ReadText("t_AboutHelp")
-global t_ReplacementTextIsBlankDoYouWantToProceed :=  	F_ReadText("t_ReplacementTextIsBlankDoYouWantToProceed")
-global t_ChooseSendingFunction := 					F_ReadText("t_ChooseSendingFunction")
-global t_ChooseSectionBeforeSaving := 				F_ReadText("t_ChooseSectionBeforeSaving")
-global t_ChooseTheMethodOfSendingTheHotstring := 		F_ReadText("t_ChooseTheMethodOfSendingTheHotstring")
-global t_EnterANameForTheNewLibrary := 				F_ReadText("t_EnterANameForTheNewLibrary")
-global t_Cancel := 								F_ReadText("t_Cancel")
-global t_TheLibrary := 							F_ReadText("t_TheLibrary")
-global t_HasBeenCreated := 						F_ReadText("t_HasBeenCreated")
 global t_ALibraryWithThatNameAlreadyExists := 		F_ReadText("t_ALibraryWithThatNameAlreadyExists")
-global t_TheHostring := 							F_ReadText("t_TheHostring")
-global t_ExistsInAFile := 						F_ReadText("t_ExistsInAFile")
-global t_CsvDoYouWantToProceed := 					F_ReadText("t_CsvDoYouWantToProceed")
-global t_SelectARowInTheListViewPlease := 			F_ReadText("t_SelectARowInTheListViewPlease")
-global t_SelectedHotstringWillBeDeletedDoYouWantToProceed := F_ReadText("t_SelectedHotstringWillBeDeletedDoYouWantToProceed")
-global t_DeletingHotstring := 					F_ReadText("t_DeletingHotstring")
-global t_DeletingHotstringPleaseWait := 			F_ReadText("t_DeletingHotstringPleaseWait")
-global t_HotstringHasBeenDeletedNowApplicationWillRestartItselfInOrderToApplyChangesReloadTheLibrariesCsv := F_ReadText("t_HotstringHasBeenDeletedNowApplicationWillRestartItselfInOrderToApplyChangesReloadTheLibrariesCsv")
-global t_HotstringPasteFromClipboardDelay1s := 		F_ReadText("t_HotstringPasteFromClipboardDelay1s")
-global t_HotstringPasteFromClipboardDelay := 		F_ReadText("t_HotstringPasteFromClipboardDelay")
-global t_LetsMakeYourPCPersonalAgain := 			F_ReadText("t_LetsMakeYourPCPersonalAgain")
-global t_EnablesConvenientDefinitionAndUseOfHotstringsTriggeredByShortcutsLongerTextStringsThisIs3rdEditionOfThisApplication2020ByJakubMasiakAndMaciejSlojewskiLicenseGNUGPLVer3 := F_ReadText("t_EnablesConvenientDefinitionAndUseOfHotstringsTriggeredByShortcutsLongerTextStringsThisIs3rdEditionOfThisApplication2020ByJakubMasiakAndMaciejSlojewskiLicenseGNUGPLVer3")
+global t_Apostrophe := 							F_ReadText("t_Apostrophe")
 global t_ApplicationHelp := 						F_ReadText("t_ApplicationHelp")
-global t_GenuineHotstringsAutoHotkeyDocumentation := 	F_ReadText("t_GenuineHotstringsAutoHotkeyDocumentation")
-global t_PleaseWaitUploadingCsvFiles := 			F_ReadText("t_PleaseWaitUploadingCsvFiles")
-global t_SearchBy := 							F_ReadText("t_SearchBy")
-global t_Triggerstring := 						F_ReadText("t_Triggerstring")
-global t_Hotstring := 							F_ReadText("t_Hotstring")
-global t_Library := 							F_ReadText("t_Library")
-global t_Move := 								F_ReadText("t_Move")
-global t_LibraryTriggerstringTriggerOptionsOutputFunctionEnableDisableHotstringComment := F_ReadText("t_LibraryTriggerstringTriggerOptionsOutputFunctionEnableDisableHotstringComment")
-global t_F3CloseSearchHotstringsF8MoveHotstring := 	F_ReadText("t_F3CloseSearchHotstringsF8MoveHotstring")
-global t_SelectTheTargetLibrary := 				F_ReadText("t_SelectTheTargetLibrary")
-global t_DoYouWantToProceed := 					F_ReadText("t_DoYouWantToProceed")
-global t_HotstringMovedToThe := 					F_ReadText("t_HotstringMovedToThe")
-global t_File := 								F_ReadText("t_File")
+global t_ApplicationLanguageChangedTo := 			F_ReadText("t_ApplicationLanguageChangedTo")
+global t_Backslash := 							F_ReadText("t_Backslash")
+global t_Cancel := 								F_ReadText("t_Cancel")
+global t_Caret := 								F_ReadText("t_Caret")
+global t_CaseSensitive := 						F_ReadText("t_CaseSensitive")
+global t_ChangeLanguage := 						F_ReadText("t_ChangeLanguage")
 global t_ChooseLibraryFileAhkForImport := 			F_ReadText("t_ChooseLibraryFileAhkForImport")
 global t_ChooseLibraryFileCsvForExport := 			F_ReadText("t_ChooseLibraryFileCsvForExport")
-global t_ChangeLanguage := 						F_ReadText("t_ChangeLanguage")
-global t_ApplicationLanguageChangedTo := 			F_ReadText("t_ApplicationLanguageChangedTo")
+global t_ChooseMenuPosition := 					F_ReadText("t_ChooseMenuPosition")
+global t_ChooseSectionBeforeSaving := 				F_ReadText("t_ChooseSectionBeforeSaving")
+global t_ChooseSendingFunction := 					F_ReadText("t_ChooseSendingFunction")
+global t_ChooseTheMethodOfSendingTheHotstring := 		F_ReadText("t_ChooseTheMethodOfSendingTheHotstring")
+global t_ChooseTipsLocation := 					F_ReadText("t_ChooseTipsLocation")
+global t_Clear := 								F_ReadText("t_Clear")
+global t_ClipboardDelay := 						F_ReadText("t_ClipboardDelay")
+global t_ClosingCurlyBracket := 					F_ReadText("t_ClosingCurlyBracket")
+global t_ClosingRoundBracket := 					F_ReadText("t_ClosingRoundBracket")
+global t_ClosingSquareBracket := 					F_ReadText("t_ClosingSquareBracket")
+global t_Colon := 								F_ReadText("t_Colon")
+global t_Comma := 								F_ReadText("t_Comma")
+global t_Configuration := 						F_ReadText("t_Configuration")
+global t_CsvDoYouWantToProceed := 					F_ReadText("t_CsvDoYouWantToProceed")
+global t_Cursor := 								F_ReadText("t_Cursor")
+global t_DeleteHotstring := 						F_ReadText("t_DeleteHotstring")
+global t_DeletingHotstring := 					F_ReadText("t_DeletingHotstring")
+global t_DeletingHotstringPleaseWait := 			F_ReadText("t_DeletingHotstringPleaseWait")
+global t_Disable := 							F_ReadText("t_Disable")
+global t_Dot := 								F_ReadText("t_Dot")
+global t_DoYouWantToProceed := 					F_ReadText("t_DoYouWantToProceed")
+global t_DynamicHotstrings := 					F_ReadText("t_DynamicHotstrings")
+global t_EditHotstring := 						F_ReadText("t_EditHotstring")
+global t_EnableDisable := 						F_ReadText("t_EnableDisable")
+global t_EnableDisableTriggerstringTips := 			F_ReadText("t_EnableDisableTriggerstringTips")
+global t_EnablesConvenientDefinitionAndUseOfHotstringsTriggeredByShortcutsLongerTextStringsThisIs3rdEditionOfThisApplication2020ByJakubMasiakAndMaciejSlojewskiLicenseGNUGPLVer3 := F_ReadText("t_EnablesConvenientDefinitionAndUseOfHotstringsTriggeredByShortcutsLongerTextStringsThisIs3rdEditionOfThisApplication2020ByJakubMasiakAndMaciejSlojewskiLicenseGNUGPLVer3")
+global t_EnableSoundIfOverrun := 					F_ReadText("t_EnableSoundIfOverrun")
+global t_Enter := 								F_ReadText("t_Enter")
+global t_EnterANameForTheNewLibrary := 				F_ReadText("t_EnterANameForTheNewLibrary")
+global t_EnterHotstring := 						F_ReadText("t_EnterHotstring")
+global t_EnterTriggerstring := 					F_ReadText("t_EnterTriggerstring")
+global t_ErrorLevelWasTriggeredByNewInputError := 	F_ReadText("t_ErrorLevelWasTriggeredByNewInputError")
+global t_ExclamationMark := 						F_ReadText("t_ExclamationMark")
+global t_ExistsInAFile := 						F_ReadText("t_ExistsInAFile")
+global t_ExportFromCsvToAhk := 					F_ReadText("t_ExportFromCsvToAhk")
+global t_F1AboutHelpF2LibraryContentF3SearchHotstringsF5ClearF7ClipboardDelayF8DeleteHotstringF9SetHotstring := F_ReadText("t_F1AboutHelpF2LibraryContentF3SearchHotstringsF5ClearF7ClipboardDelayF8DeleteHotstringF9SetHotstring")
+global t_F3CloseSearchHotstringsF8MoveHotstring := 	F_ReadText("t_F3CloseSearchHotstringsF8MoveHotstring")
+global t_File := 								F_ReadText("t_File")
+global t_GenuineHotstringsAutoHotkeyDocumentation := 	F_ReadText("t_GenuineHotstringsAutoHotkeyDocumentation")
+global t_HasBeenCreated := 						F_ReadText("t_HasBeenCreated")
+global t_Hotstring := 							F_ReadText("t_Hotstring")
+global t_HotstringHasBeenDeletedNowApplicationWillRestartItselfInOrderToApplyChangesReloadTheLibrariesCsv := F_ReadText("t_HotstringHasBeenDeletedNowApplicationWillRestartItselfInOrderToApplyChangesReloadTheLibrariesCsv")
+global t_HotstringMenuMSIMCL := 					F_ReadText("t_HotstringMenuMSIMCL")
+global t_HotstringMovedToThe := 					F_ReadText("t_HotstringMovedToThe")
+global t_HotstringPasteFromClipboardDelay := 		F_ReadText("t_HotstringPasteFromClipboardDelay")
+global t_HotstringPasteFromClipboardDelay1s := 		F_ReadText("t_HotstringPasteFromClipboardDelay1s")
+global t_HotstringsHaveBeenLoaded := 				F_ReadText("t_HotstringsHaveBeenLoaded")
+global t_ImmediateExecute := 						F_ReadText("t_ImmediateExecute")
+global t_ImportFromAhkToCsv := 					F_ReadText("t_ImportFromAhkToCsv")
+global t_InsideWord := 							F_ReadText("t_InsideWord")
+global t_LaunchSandbox :=						F_ReadText("t_LaunchSandbox")
+global t_LetsMakeYourPCPersonalAgain := 			F_ReadText("t_LetsMakeYourPCPersonalAgain")
+global t_LibrariesConfiguration := 				F_ReadText("t_LibrariesConfiguration")
+global t_Library := 							F_ReadText("t_Library")
+global t_LibraryExportPleaseWait := 				F_ReadText("t_LibraryExportPleaseWait")
+global t_LibraryHasBeenExported := 				F_ReadText("t_LibraryHasBeenExported")
+global t_LibraryHasBeenImported := 				F_ReadText("t_LibraryHasBeenImported")
+global t_LibraryImportPleaseWait := 				F_ReadText("t_LibraryImportPleaseWait")
+global t_LibraryTriggerstringTriggerOptionsOutputFunctionEnableDisableHotstringComment := F_ReadText("t_LibraryTriggerstringTriggerOptionsOutputFunctionEnableDisableHotstringComment")
+global t_LoadedHotstrings := 						F_ReadText("t_LoadedHotstrings")
+global t_LoadingHotstringsFromLibraries := 			F_ReadText("t_LoadingHotstringsFromLibraries")
+global t_LoadingLibrariesPleaseWait := 				F_ReadText("t_LoadingLibrariesPleaseWait")
+global t_Minus := 								F_ReadText("t_Minus")
+global t_Move := 								F_ReadText("t_Move")
+global t_NoBackspace := 							F_ReadText("t_NoBackspace")
+global t_NoEndChar := 							F_ReadText("t_NoEndChar")
+global t_NumberOfCharactersForTips := 				F_ReadText("t_NumberOfCharactersForTips")
+global t_OpeningCurlyBracket := 					F_ReadText("t_OpeningCurlyBracket")
+global t_OpeningRoundBracket := 					F_ReadText("t_OpeningRoundBracket")
+global t_OpeningSquareBracket := 					F_ReadText("t_OpeningSquareBracket")
+global t_PleaseWaitUploadingCsvFiles := 			F_ReadText("t_PleaseWaitUploadingCsvFiles")
+global t_QuestionMark := 						F_ReadText("t_QuestionMark")
+global t_Quote := 								F_ReadText("t_Quote")
+global t_ReplacementTextIsBlankDoYouWantToProceed :=  	F_ReadText("t_ReplacementTextIsBlankDoYouWantToProceed")
+global t_Sandbox :=								F_ReadText("t_Sandbox")
+global t_SaveWindowPosition := 					F_ReadText("t_SaveWindowPosition")
+global t_SearchBy := 							F_ReadText("t_SearchBy")
+global t_SearchHotstrings := 						F_ReadText("t_SearchHotstrings")
+global t_SearchHotstrings := 						F_ReadText("t_SearchHotstrings")
+global t_SelectARowInTheListViewPlease := 			F_ReadText("t_SelectARowInTheListViewPlease")
+global t_SelectedFileIsEmpty := 					F_ReadText("t_SelectedFileIsEmpty")
+global t_SelectedHotstringWillBeDeletedDoYouWantToProceed := F_ReadText("t_SelectedHotstringWillBeDeletedDoYouWantToProceed")
+global t_SelectHotstringLibrary := 				F_ReadText("t_SelectHotstringLibrary")
+global t_SelectHotstringOutputFunction := 			F_ReadText("t_SelectHotstringOutputFunction")
+global t_SelectTheTargetLibrary := 				F_ReadText("t_SelectTheTargetLibrary")
+global t_SelectTriggerOptions := 					F_ReadText("t_SelectTriggerOptions")
+global t_Semicolon := 							F_ReadText("t_Semicolon")
+global t_SetHotstring := 						F_ReadText("t_SetHotstring")
+global t_Slash := 								F_ReadText("t_Slash")
+global t_SortTipsAlphabetically := 				F_ReadText("t_SortTipsAlphabetically")
+global t_SortTipsByLength := 						F_ReadText("t_SortTipsByLength")
+global t_Space := 								F_ReadText("t_Space")
+global t_StaticHotstrings := 						F_ReadText("t_StaticHotstrings")
+global t_Tab := 								F_ReadText("t_Tab")
 global t_TheApplicationWillBereloadedWithTheNewLanguageFile := F_ReadText("t_TheApplicationWillBereloadedWithTheNewLanguageFile")
+global t_TheHostring := 							F_ReadText("t_TheHostring")
+global t_TheLibrary := 							F_ReadText("t_TheLibrary")
+global t_ThePathFileIs := 						F_ReadText("t_ThePathFileIs")
+global t_ToggleEndChars := 						F_ReadText("t_ToggleEndChars")
+global t_Triggerstring := 						F_ReadText("t_Triggerstring")
+global t_TriggerstringTips := 					F_ReadText("t_TriggerstringTips")
+global t_TriggerstringTriggOptOutFunEnDisHotstringComment := F_ReadText("t_TriggerstringTriggOptOutFunEnDisHotstringComment")
+global t_UndoLastHotstring := 					F_ReadText("t_UndoLastHotstring")
+global t_UndoTheLastHotstring := 					F_ReadText("t_UndoTheLastHotstring")
 
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global v_Param 				:= A_Args[1]
@@ -402,8 +408,24 @@ global v_UndoHotstring 			:= ""
 global v_UndoTriggerstring 		:= ""
 global v_ViewString 			:= ""
 
+IniRead, ini_Tips, 						Config.ini, Configuration, Tips
+IniRead, ini_Cursor, 					Config.ini, Configuration, Cursor
+IniRead, ini_Caret, 					Config.ini, Configuration, Caret
+IniRead, ini_MenuCursor, 				Config.ini, Configuration, MenuCursor
+IniRead, ini_MenuCaret, 					Config.ini, Configuration, MenuCaret
+IniRead, ini_Delay, 					Config.ini, Configuration, Delay
+IniRead, ini_AmountOfCharacterTips, 		Config.ini, Configuration, TipsChars
+IniRead, ini_MenuSound,					Config.ini, Configuration, MenuSound
+IniRead, ini_TipsSortAlphabetically,		Config.ini, Configuration, TipsSortAlphatebically
+IniRead, ini_TipsSortByLength,			Config.ini, Configuration, TipsSortByLength
+
+IniRead, ini_Undo, 						Config.ini, Configuration, UndoHotstring
+IniRead, ini_Tips, 						Config.ini, Configuration, Tips
+IniRead, ini_Sandbox, 					Config.ini, Configuration, Sandbox
+
+IniRead, v_TipsConfig, 					Config.ini, TipsLibraries		; Read into v_TipsConfig section TipsLibraries from the file Config.ini which is a list of library files (.csv) stored in Libraries subfolder
+
 ; Check if tips should be displayed for Libraries files (.csv)
-IniRead, v_TipsConfig, Config.ini, TipsLibraries		; Read into v_TipsConfig section TipsLibraries from the file Config.ini which is a list of library files (.csv) stored in Libraries subfolder
 ;MsgBox, , v_TipsConfig, %v_TipsConfig%
 a_TipsConfig := StrSplit(v_TipsConfig, "`n")			; Separates a string into an array of substrings using the specified delimiters.
 
@@ -434,7 +456,7 @@ Loop, Files, Libraries\*.csv						; Look again in Libraries subfolder. Search fo
 IfNotExist, Libraries\PriorityLibrary.csv
 	FileAppend,, Libraries\PriorityLibrary.csv, UTF-8
 
-; Makes sure that "PriorityLibrary.csv" will be loaded as the last one <- with the highest priority.
+; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
 Loop, Files, Libraries\*.csv
 {
 	if !(A_LoopFileName == "PriorityLibrary.csv")
@@ -442,11 +464,15 @@ Loop, Files, Libraries\*.csv
 		F_LoadFiles(A_LoopFileName)
 	}
 }
+
+; Makes sure that "PriorityLibrary.csv" will be loaded as the last one <- with the highest priority.
 F_LoadFiles("PriorityLibrary.csv")
 
 ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
-EndChars()
+F_EndChars()
 
+
+; Future: Check if other A_Args except A_Args[1] are useful for any purpose.
 
 if !(A_Args[8])
 	v_SelectedRow := 0
@@ -456,18 +482,6 @@ if !(v_PreviousMonitor)
 	v_SelectedMonitor := 0
 else
 	v_SelectedMonitor := v_PreviousMonitor
-
-;#[current]
-IniRead, ini_Tips, 						Config.ini, Configuration, Tips
-IniRead, ini_Cursor, 					Config.ini, Configuration, Cursor
-IniRead, ini_Caret, 					Config.ini, Configuration, Caret
-IniRead, ini_MenuCursor, 				Config.ini, Configuration, MenuCursor
-IniRead, ini_MenuCaret, 					Config.ini, Configuration, MenuCaret
-IniRead, ini_Delay, 					Config.ini, Configuration, Delay
-IniRead, ini_AmountOfCharacterTips, 		Config.ini, Configuration, TipsChars
-IniRead, ini_MenuSound,					Config.ini, Configuration, MenuSound
-IniRead, ini_TipsSortAlphabetically,		Config.ini, Configuration, TipsSortAlphatebically
-IniRead, ini_TipsSortByLength,			Config.ini, Configuration, TipsSortByLength
 
 ; v_MonitorFlag := 0 ; Comment added on 2021-01-30
 
@@ -482,7 +496,7 @@ if !(v_Param == "l") 										; if Hotstrings.ahk wasn't run with "l" parameter
 {
 	Menu, Tray, Add, 		%t_EditHotstring%, 		L_GUIInit
 	Menu, Tray, Add, 		%t_SearchHotstrings%, 	L_Searching
-		Menu, Tray, Default, 	%t_EditHotstring%
+	Menu, Tray, Default, 	%t_EditHotstring%
 	Menu, Tray, Add										; separator line
 	Menu, Tray, NoStandard									; remove all the rest of standard tray menu
 	Menu, Tray, Standard									; add it again at the bottom
@@ -508,7 +522,6 @@ v_HotstringCnt := 0; Comment added on 2021-01-30
 	a_Triggerstring 	:= []
 */
 
-;tu jestem
 Loop, Files, %A_ScriptDir%\Libraries\*.csv
 {
 	Loop
@@ -550,7 +563,9 @@ Loop, Files, %A_ScriptDir%\Libraries\*.csv
 }
 TrayTip, %A_ScriptName%, %t_HotstringsHaveBeenLoaded%, 1
 if (v_PreviousSection)
-	gosub L_GUIInit	
+	Gosub L_GUIInit ; end of initialization
+
+;If the script is run with command line parameter "d" like debug, prepare new folder and create file named as specified in the following pattern.
 if (v_Param == "d")
 {	
 	FileCreateDir, Logs
@@ -558,18 +573,22 @@ if (v_Param == "d")
 	FileAppend,, %v_LogFileName%
 }
 
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; Beginning of the main loop of application.
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Loop,
 {
-	Input, out,V L1, {Esc}
+	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
 	if (ErrorLevel = "NewInput")
-	{
 		MsgBox, %t_ErrorLevelWasTriggeredByNewInputError%
-	}
+	
+	; if exist window with hotstring tips, output sound
 	if (WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
 	{
 		if (ini_MenuSound)
 		{
 			if (v_FlagSound == 0)
+				; Future: configurable parameters of the sound
 				SoundBeep, 400, 200
 			v_FlagSound := 0
 		}
@@ -609,7 +628,7 @@ Loop,
 					v_Tips .= a_Triggers[A_Index]
 				}
 			}
-			If (v_Tips == "") and InStr(HotstringEndChars,SubStr(v_InputString,-1,1))
+			If (v_Tips == "") and InStr(HotstringEndChars, SubStr(v_InputString, -1, 1))
 			{
 				v_InputString := out
 				Loop, % a_Triggers.MaxIndex()
@@ -648,6 +667,7 @@ Loop,
 		}
 		else
 			ToolTip, 
+		
 		if (v_Param == "d")
 		{
 			FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_AmountOfCharacterTips . "|" . ini_Tips . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
@@ -655,6 +675,11 @@ Loop,
 		}
 	}
 }
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; Beginning of the main loop of application.
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
 ~BackSpace:: 
@@ -718,10 +743,11 @@ Loop,
 	}
 return
 
-$^z::			;~ Ctrl + z as in MS Word: Undo
-$!BackSpace:: 	;~ Alt + Backspace as in MS Word: rolls back last Autocorrect action
-	IniRead, Undo, Config.ini, Configuration, UndoHotstring
-	if (Undo == 1) and (v_TypedTriggerstring && (A_ThisHotkey != A_PriorHotkey))
+$^z::			;~ Ctrl + z as in MS Word: Undo; $ prevents autotriggering as the same hotkey is send with SendInput function
+$!BackSpace:: 		;~ Alt + Backspace as in MS Word: rolls back last Autocorrect action ; $ prevents autotriggering as the same hotkey is send with SendInput function
+	;Future: why each time this variable is read from Config.ini?
+	;IniRead, v_Undo, Config.ini, Configuration, UndoHotstring
+	if (ini_Undo == 1) and (v_TypedTriggerstring && (A_ThisHotkey != A_PriorHotkey))
 	{
 		ToolTip, %t_UndoTheLastHotstring%, % A_CaretX, % A_CaretY - 20
 		TriggerOpt := SubStr(v_UndoTriggerstring, InStr(v_UndoTriggerstring, ":" ,, 1,1)+1 ,InStr(v_UndoTriggerstring, ":" ,, 1,2)-InStr(v_UndoTriggerstring, ":" ,, 1,1)-1)
@@ -1052,6 +1078,8 @@ F_MenuText(TextOptions, Oflag)
 		CoordMode, Caret, Screen
 		MenuX := A_CaretX + 20
 		MenuY := A_CaretY - 20
+	
+	
 	}
 	if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
 	{
@@ -1067,7 +1095,9 @@ F_MenuText(TextOptions, Oflag)
 	if (v_TypedTriggerstring == "")
 	{
 		HK := StrSplit(A_ThisHotkey, ":")
-		ThisHotkey := SubStr(A_ThisHotkey, StrLen(HK[2])+3, StrLen(A_ThisHotkey)-StrLen(HK[2])-2)
+
+
+ThisHotkey := SubStr(A_ThisHotkey, StrLen(HK[2])+3, StrLen(A_ThisHotkey)-StrLen(HK[2])-2)
 		Send, % ThisHotkey
 	}
 	GuiControl, Choose, MenuListbox, 1
@@ -1100,7 +1130,9 @@ Clipboard:=MenuListbox ;Shove what was selected into the clipboard
 Send, ^v ;paste the text
 if (Ovar == 0)
 	Send, % A_EndChar
-sleep, %ini_Delay% ;Remember to sleep before restoring clipboard or it will fail
+sleep
+
+, %ini_Delay% ;Remember to sleep before restoring clipboard or it will fail
 v_TypedTriggerstring := MenuListbox
 v_UndoHotstring := MenuListbox
 Clipboard:=ClipboardBack
@@ -1266,7 +1298,7 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-EndChars()
+F_F_EndChars()
 {
 	global
 
@@ -1758,6 +1790,7 @@ return
 
 ^#h::
 L_GUIInit:
+	;Future: no IniRead each time when this GUI is opened / created / displayed.
 	SysGet, N, MonitorCount
 	Loop, % N
 	{
@@ -1774,103 +1807,105 @@ L_GUIInit:
         ;DPI%A_Index% := %A_ScreenDPI%	; to nie działa
         ;DPI%A_Index% := % A_ScreenDPI	; to działa
         ;DPI%A_Index% := A_ScreenDPI	; to działa
-        DPI%A_Index% := 1.0			; przeskalowuje w górę, nieznacznie
+        DPI%A_Index% := 1.0			; added on 2021-01-31 in order to clean up GUI sizing
         ;DPI%A_Index% := "155"		; to działa
         ;DPI%A_Index% := 155			; to działa
 	   ;MsgBox, , DPI per monitor, % DPI%A_Index%		; to działa
      }
     SysGet, PrimMon, MonitorPrimary
+    
+;I couldn't find how to get system settings for size of menu font. Quick & dirty solution: manual setting of all fonts with variable v_FontSize.
+;Future: v_FontSize as configurable parameter.
+    v_FontSize := 10
+    
     if (v_SelectedMonitor == 0)
         v_SelectedMonitor := PrimMon
-	Gui, HS3:New, +Resize 
-	Gui, HS3:Margin, 12.5*DPI%v_SelectedMonitor%, 7.5*DPI%v_SelectedMonitor%
-	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " bold cBlue", Calibri	; original
-	;Gui, HS3:Font, % "s" . 10*DPI%v_SelectedMonitor% . " bold cBlue", Calibri
-	Gui, HS3:Add, Text, % "xm+" . 9*DPI%v_SelectedMonitor%,%t_EnterTriggerstring%
-	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " norm cBlack"		; original
-	;Gui, HS3:Font, % "s" . 10*DPI%v_SelectedMonitor% . " norm cBlack"
-	Gui, HS3:Add, Edit, % "w" . 184*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " xp+" . 227*DPI%v_SelectedMonitor% . " yp vv_TriggerString",
-	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " bold cBlue"	; original
-	;Gui, HS3:Font, % "s" . 10*DPI%v_SelectedMonitor% . " bold cBlue"
-	Gui, HS3:Add, GroupBox, % "section xm w" . 425*DPI%v_SelectedMonitor% . " h" . 106*DPI%v_SelectedMonitor%, %t_SelectTriggerOptions%
-	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " norm cBlack"	; original
-	;Gui, HS3:Font, % "s" . 10*DPI%v_SelectedMonitor% . " norm cBlack"
-	Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionImmediateExecute xs+" . 12*DPI%v_SelectedMonitor% . " ys+" . 25*DPI%v_SelectedMonitor%, %t_ImmediateExecute%
-	Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionCaseSensitive xp+" . 225*DPI%v_SelectedMonitor% . " yp+" . 0*DPI%v_SelectedMonitor%, %t_CaseSensitive%
-	Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionNoBackspace xp-" . 225*DPI%v_SelectedMonitor% . " yp+" . 25*DPI%v_SelectedMonitor%, %t_NoBackspace%
-	Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionInsideWord xp+" . 225*DPI%v_SelectedMonitor% . " yp+" . 0*DPI%v_SelectedMonitor%, %t_InsideWord%
-	Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionNoEndChar xp-" . 225*DPI%v_SelectedMonitor% . " yp+" . 25*DPI%v_SelectedMonitor%, %t_NoEndChar%
-	Gui, HS3:Add, CheckBox, % "gCapsCheck vv_OptionDisable xp+" . 225*DPI%v_SelectedMonitor% . " yp+" . 0*DPI%v_SelectedMonitor%, %t_Disable%
-	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlue Bold"
-	Gui, HS3:Add, Text,% "xm+" . 9*DPI%v_SelectedMonitor%, %t_SelectHotstringOutputFunction%
-	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
-	Gui, HS3:Add, DropDownList, % "xm w" . 424*DPI%v_SelectedMonitor% . " vv_SelectFunction gL_SelectFunction hwndddl", SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
+	Gui, HS3:New, 		+Resize ; Makes the window resizable and enables its maximize button in the title bar.
+	Gui, HS3:Margin, 	12.5*DPI%v_SelectedMonitor%, 7.5*DPI%v_SelectedMonitor%	; Sets the number of pixels of space to leave at the left/right and top/bottom sides of the window when auto-positioning any control that lacks an explicit X or Y coordinate.
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " bold cBlue", Calibri
+	Gui, HS3:Add, 		Text, % "xm+" . 9*DPI%v_SelectedMonitor%, %t_EnterTriggerstring%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " norm cBlack"
+	Gui, HS3:Add, 		Edit, % "w" . 184*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " xp+" . 227*DPI%v_SelectedMonitor% . " yp vv_TriggerString"
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " bold cBlue"
+	Gui, HS3:Add, 		GroupBox, % "section xm w" . 425*DPI%v_SelectedMonitor% . " h" . 106*DPI%v_SelectedMonitor%, %t_SelectTriggerOptions%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " norm cBlack"
+	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionImmediateExecute xs+" . 12*DPI%v_SelectedMonitor% 	. " ys+" . 25*DPI%v_SelectedMonitor%, 	%t_ImmediateExecute%
+	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionCaseSensitive xp+" 	. 225*DPI%v_SelectedMonitor% 	. " yp+" . 0*DPI%v_SelectedMonitor%, 	%t_CaseSensitive%
+	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionNoBackspace xp-" 	. 225*DPI%v_SelectedMonitor% 	. " yp+" . 25*DPI%v_SelectedMonitor%, 	%t_NoBackspace%
+	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionInsideWord xp+" 		. 225*DPI%v_SelectedMonitor% 	. " yp+" . 0*DPI%v_SelectedMonitor%, 	%t_InsideWord%
+	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionNoEndChar xp-" 		. 225*DPI%v_SelectedMonitor% 	. " yp+" . 25*DPI%v_SelectedMonitor%, 	%t_NoEndChar%
+	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionDisable xp+" 		. 225*DPI%v_SelectedMonitor% 	. " yp+" . 0*DPI%v_SelectedMonitor%, 	%t_Disable%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
+	Gui, HS3:Add, 		Text,% "xm+" . 9*DPI%v_SelectedMonitor%, %t_SelectHotstringOutputFunction%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
+	Gui, HS3:Add, 		DropDownList, % "xm w" . 424*DPI%v_SelectedMonitor% . " vv_SelectFunction gL_SelectFunction hwndddl", SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
 	PostMessage, 0x153, -1, 30*DPI%v_SelectedMonitor%,, ahk_id %ddl%
-	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlue Bold"
-	Gui, HS3:Add, Text,% "xm+" . 9*DPI%v_SelectedMonitor%, %t_EnterHotstring%
-	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
-	Gui, HS3:Add, Edit, % "w" . 424*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring xm"
-	Gui, HS3:Add, Edit, % "yp+" . 31*DPI%v_SelectedMonitor% . " w" . 424*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring1 xm Disabled"
-	Gui, HS3:Add, Edit, % "yp+" . 31*DPI%v_SelectedMonitor% . " w" . 424*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring2 xm Disabled"
-	Gui, HS3:Add, Edit, % "yp+" . 31*DPI%v_SelectedMonitor% . " w" . 424*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring3 xm Disabled"
-	Gui, HS3:Add, Edit, % "yp+" . 31*DPI%v_SelectedMonitor% . " w" . 424*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring4 xm Disabled"
-	Gui, HS3:Add, Edit, % "yp+" . 31*DPI%v_SelectedMonitor% . " w" . 424*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring5 xm Disabled"
-	Gui, HS3:Add, Edit, % "yp+" . 31*DPI%v_SelectedMonitor% . " w" . 424*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring6 xm Disabled"
-	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlue Bold"
-	Gui, HS3:Add, Text,% "xm+" . 9*DPI%v_SelectedMonitor%, %t_AddAComment%
-	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
-	Gui, HS3:Add, Edit, % "w" . 424*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " limit64 vComment xm"
-	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlue Bold"
-	Gui, HS3:Add, Text,% "xm+" . 9*DPI%v_SelectedMonitor%, %t_SelectHotstringLibrary%
-	Gui, HS3:Add, Button, % "gAddLib x+" . 120*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor%, %t_AddLibrary%
-	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
-	Gui, HS3:Add, DropDownList, % "w" . 424*DPI%v_SelectedMonitor% . " vv_SelectHotstringLibrary gSectionChoose xm hwndddl" ,
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
+	Gui, HS3:Add, 		Text, % "xm+" . 9*DPI%v_SelectedMonitor%, %t_EnterHotstring%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
+	Gui, HS3:Add, 		Edit, % "w" 	. 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% 	. " vv_EnterHotstring xm"
+	Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring1 xm Disabled"
+	Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring2 xm Disabled"
+	Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring3 xm Disabled"
+	Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring4 xm Disabled"
+	Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring5 xm Disabled"
+	Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring6 xm Disabled"
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
+	Gui, HS3:Add, 		Text, % "xm+" . 9*DPI%v_SelectedMonitor%, %t_AddAComment%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
+	Gui, HS3:Add, 		Edit, % "w" . 424*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " limit64 vComment xm"
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
+	Gui, HS3:Add, 		Text, % "xm+" . 9*DPI%v_SelectedMonitor%, %t_SelectHotstringLibrary%
+	Gui, HS3:Add, 		Button, % "gAddLib x+" . 120*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor%, %t_AddLibrary%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
+	Gui, HS3:Add, 		DropDownList, % "w" . 424*DPI%v_SelectedMonitor% . " vv_SelectHotstringLibrary gSectionChoose xm hwndddl" ,
 
 	Loop, %A_ScriptDir%\Libraries\*.csv
 		GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName%
 
 	PostMessage, 0x153, -1, 30*DPI%v_SelectedMonitor%,, ahk_id %ddl%
-	Gui, HS3:Font, bold
-	Gui, HS3:Add, Button, % "xm yp+" . 37*DPI%v_SelectedMonitor% . " w" . 135*DPI%v_SelectedMonitor% . " gAddHotstring", %t_SetHotstring%
-	Gui, HS3:Add, Button, % "x+" . 10*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " gClear", %t_Clear%
-	Gui, HS3:Add, Button, % "x+" . 10*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " vv_DeleteHotstring gDelete Disabled", %t_DeleteHotstring%
-	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlue Bold"
-	Gui, HS3:Add, Text,% "vSandString xm+" . 9*DPI%v_SelectedMonitor%, %t_Sandbox%
-	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
-	Gui, HS3:Add, Edit, % "xm w" . 425*DPI%v_SelectedMonitor% . " vSandbox r5"
-	IniRead, Sandbox, Config.ini, Configuration, Sandbox
-	If (Sandbox == 0)
+	Gui, HS3:Font, 	bold
+	Gui, HS3:Add, 		Button, 	% "xm yp+" . 37*DPI%v_SelectedMonitor% . " w" . 135*DPI%v_SelectedMonitor% . " gAddHotstring", %t_SetHotstring%
+	Gui, HS3:Add, 		Button, 	% "x+" . 10*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " gClear", %t_Clear%
+	Gui, HS3:Add, 		Button, 	% "x+" . 10*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " vv_DeleteHotstring gDelete Disabled", %t_DeleteHotstring%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
+	Gui, HS3:Add, 		Text, 	% "vSandString xm+" . 9*DPI%v_SelectedMonitor%, %t_Sandbox%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
+	GUI, HS3:Add, 		Edit, 	% "xm w" . 425*DPI%v_SelectedMonitor% . " vSandbox r5" ; r5 = 5x rows of text
+	;IniRead, ini_Sandbox, Config.ini, Configuration, Sandbox
+	if (ini_Sandbox == 0)
 	{
-		Gui, % "HS3:+MinSize"  . 1350*DPI%v_SelectedMonitor% . "x" . 640*DPI%v_SelectedMonitor%+20
-		GuiControl, HS3:Hide, Sandbox
-		GuiControl, HS3:Hide, SandString
+		Gui, 		% "HS3:+MinSize"  . 1350*DPI%v_SelectedMonitor% . "x" . 640*DPI%v_SelectedMonitor%+20
+		GuiControl, 	HS3:Hide, Sandbox
+		GuiControl, 	HS3:Hide, SandString
 	}
 	else
 	{
 		Gui, % "HS3:+MinSize"  . 1350*DPI%v_SelectedMonitor% . "x" . 640*DPI%v_SelectedMonitor%+20  + 154*DPI%v_SelectedMonitor%
 	}
 	Gui, HS3:Add, 	Text, x0 h1 0x7 w10 vLine
-	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlue Bold"
-     Gui, HS3:Add, 	Text, ym, Library content
-     Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
+	Gui, HS3:Font, % "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
+     ;Add to translation file
+	Gui, HS3:Add, 	Text, ym, Library content
+     Gui, HS3:Font, % "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
      Gui, HS3:Add, 	ListView, % "LV0x1 0x4 yp+" . 25*DPI%v_SelectedMonitor% . " xp h" . 500*DPI%v_SelectedMonitor% . " w" . 400*DPI%v_SelectedMonitor% . " vv_LibraryContent AltSubmit gHSLV", %t_TriggerstringTriggOptOutFunEnDisHotstringComment%
 	Gui, HS3:Add, 	Edit, vv_ViewString xs gViewString ReadOnly Hide,
-	Gui, HS3:Font, % "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm"
+	Gui, HS3:Font, % "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
 	Gui, HS3:Add, 	Text, xm y0 vv_ShortcutsMainInterface,%t_F1AboutHelpF2LibraryContentF3SearchHotstringsF5ClearF7ClipboardDelayF8DeleteHotstringF9SetHotstring%
 	GUI, HS3:Add, 	Text, y0 x800 vv_LoadedHotstrings, % t_LoadedHotstrings . " " . v_HotstringCnt
 
     ; Menu, HSMenu, Add, &Monitor, CheckMon
-	Menu, Submenu1, Add, %t_UndoLastHotstring%,Undo
-	Menu, SubmenuTips, Add, %t_EnableDisable%, Tips
-	Menu, PositionMenu, Add, %t_Caret%, L_MenuCaretCursor
-	Menu, PositionMenu, Add, %t_Cursor%, L_MenuCaretCursor
-	Menu, SubmenuMenu, Add, %t_ChooseMenuPosition%,:PositionMenu
-	Menu, SubmenuMenu, Add, %t_EnableSoundIfOverrun%, L_MenuSound
+	Menu, Submenu1, 	Add, %t_UndoLastHotstring%,	L_Undo
+	Menu, SubmenuTips, 	Add, %t_EnableDisable%, 		Tips
+	Menu, PositionMenu, Add, %t_Caret%, 			L_MenuCaretCursor
+	Menu, PositionMenu, Add, %t_Cursor%, 			L_MenuCaretCursor
+	Menu, SubmenuMenu, 	Add, %t_ChooseMenuPosition%,	:PositionMenu
+	Menu, SubmenuMenu, 	Add, %t_EnableSoundIfOverrun%, L_MenuSound
 	if (ini_MenuSound)
 		Menu, SubmenuMenu, Check, %t_EnableSoundIfOverrun%
 	else
 		Menu, SubmenuMenu, UnCheck, %t_EnableSoundIfOverrun%
-	Menu, Submenu1, Add,% t_HotstringMenuMSIMCL, :SubmenuMenu
+	Menu, Submenu1, 	Add, % t_HotstringMenuMSIMCL, :SubmenuMenu
 	if (ini_MenuCursor)
 		Menu, PositionMenu, Check, %t_Cursor%
 	else
@@ -1879,9 +1914,9 @@ L_GUIInit:
 		Menu, PositionMenu, Check, %t_Caret%
 	else
 		Menu, PositionMenu, UnCheck, %t_Caret%
-	Menu, Submenu1, Add, %t_TriggerstringTips%, :SubmenuTips
-	Menu, Submenu3, Add, %t_Caret%,L_CaretCursor
-	Menu, Submenu3, Add, %t_Cursor%,L_CaretCursor
+	Menu, Submenu1, 	Add, %t_TriggerstringTips%, 	:SubmenuTips
+	Menu, Submenu3, 	Add, %t_Caret%,			L_CaretCursor
+	Menu, Submenu3, 	Add, %t_Cursor%,			L_CaretCursor
 	if (ini_Cursor)
 		Menu, Submenu3, Check, %t_Cursor%
 	else
@@ -1890,26 +1925,26 @@ L_GUIInit:
 		Menu, Submenu3, Check, %t_Caret%
 	else
 		Menu, Submenu3, UnCheck, %t_Caret%
-	Menu, SubmenuTips, Add, %t_ChooseTipsLocation%, :Submenu3
+	Menu, SubmenuTips, 	Add, %t_ChooseTipsLocation%, 	:Submenu3
 	If !(ini_Tips)
 	{
-		Menu, SubmenuTips,Disable, %t_ChooseTipsLocation%
+		Menu, SubmenuTips, Disable, %t_ChooseTipsLocation%
 	}
-	Menu, Submenu4, Add, 1, L_AmountOfCharacterTips1
-	Menu, Submenu4, Add, 2, L_AmountOfCharacterTips2
-	Menu, Submenu4, Add, 3, L_AmountOfCharacterTips3
-	Menu, Submenu4, Add, 4, L_AmountOfCharacterTips4
-	Menu, Submenu4, Add, 5, L_AmountOfCharacterTips5
-	Menu, Submenu4, Check, % ini_AmountOfCharacterTips
+	Menu, Submenu4, 	Add, 1, 					L_AmountOfCharacterTips1
+	Menu, Submenu4, 	Add, 2, 					L_AmountOfCharacterTips2
+	Menu, Submenu4, 	Add, 3, 					L_AmountOfCharacterTips3
+	Menu, Submenu4, 	Add, 4, 					L_AmountOfCharacterTips4
+	Menu, Submenu4, 	Add, 5, 					L_AmountOfCharacterTips5
+	Menu, Submenu4, 	Check, 					% ini_AmountOfCharacterTips
 	Loop, 5
 	{
 		if !(A_Index == ini_AmountOfCharacterTips)
 			Menu, Submenu4, UnCheck, %A_Index%
 	}
-	Menu, SubmenuTips, Add, %t_NumberOfCharactersForTips%, :Submenu4
+	Menu, SubmenuTips, 	Add, %t_NumberOfCharactersForTips%, :Submenu4
 	If !(ini_Tips)
 	{
-		Menu, SubmenuTips,Disable, %t_NumberOfCharactersForTips%
+		Menu, SubmenuTips, Disable, %t_NumberOfCharactersForTips%
 	}
 	Menu, SubmenuTips, Add, %t_SortTipsAlphabetically%, L_SortTipsAlphabetically
 	if (ini_TipsSortAlphabetically)
@@ -1921,9 +1956,9 @@ L_GUIInit:
 		Menu, SubmenuTips, Check, %t_SortTipsByLength%
 	else
 		Menu, SubmenuTips, UnCheck, %t_SortTipsByLength%
-	Menu, Submenu1, Add, %t_SaveWindowPosition%,SavePos
-	Menu, Submenu1, Add, %t_LaunchSandbox%, Sandbox
-	Menu, Submenu2, Add, %t_Space%, EndSpace
+	Menu, Submenu1, Add, %t_SaveWindowPosition%, SavePos
+	Menu, Submenu1, Add, %t_LaunchSandbox%, 	L_Sandbox
+	Menu, Submenu2, Add, %t_Space%, 			EndSpace
 	if (EndingChar_Space)
 		Menu, Submenu2, Check, %t_Space%
 	else
@@ -2024,18 +2059,18 @@ L_GUIInit:
 	else
 		Menu, Submenu2, UnCheck, %t_Tab%
 	Menu, Submenu1, Add, %t_ToggleEndChars%, :Submenu2
-	IniRead, ini_Tips, Config.ini, Configuration, Tips
+	;IniRead, ini_Tips, Config.ini, Configuration, Tips
 	if (ini_Tips == 0)
 		Menu, SubmenuTips, UnCheck, %t_EnableDisable%
 	else
 		Menu, SubmenuTips, Check, %t_EnableDisable%
-	IniRead, Sandbox, Config.ini, Configuration, Sandbox
-	if (Sandbox == 0)
+	;IniRead, Sanddbox, Config.ini, Configuration, Sandbox
+	if (ini_Sandbox == 0)
 		Menu, Submenu1, UnCheck, %t_LaunchSandbox%
 	else
 		Menu, Submenu1, Check, %t_LaunchSandbox%
-	IniRead, Undo, Config.ini, Configuration, UndoHotstring
-	if (Undo == 0)
+	;IniRead, ini_Undo, Config.ini, Configuration, UndoHotstring
+	if (ini_Undo == 0)
 		Menu, Submenu1, UnCheck, %t_UndoLastHotstring%
 	else
 		Menu, Submenu1, Check, %t_UndoLastHotstring%
@@ -2049,14 +2084,15 @@ L_GUIInit:
 			Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
 	}
 	
-	Menu, Submenu1, Add, %t_ChangeLanguage%, :SubmenuLanguage
-	Menu, HSMenu, Add, %t_Configuration%, :Submenu1
-	Menu, HSMenu, Add, %t_SearchHotstrings%, L_Searching
-	Menu, LibrariesSubmenu, Add, %t_ImportFromAhkToCsv%, L_ImportLibrary
-	Menu, ExportSubmenu, Add, %t_StaticHotstrings%,  L_ExportLibraryStatic
-	Menu, ExportSubmenu, Add, %t_DynamicHotstrings%,  L_ExportLibraryDynamic
-	Menu, LibrariesSubmenu, Add, %t_ExportFromCsvToAhk%,:ExportSubmenu
-	Loop,%A_ScriptDir%\Libraries\*.csv
+	Menu, Submenu1, 		Add, %t_ChangeLanguage%, 	:SubmenuLanguage
+	Menu, HSMenu, 			Add, %t_Configuration%, 		:Submenu1
+	Menu, HSMenu, 			Add, %t_SearchHotstrings%, 	L_Searching
+	Menu, LibrariesSubmenu, 	Add, %t_ImportFromAhkToCsv%, 	L_ImportLibrary
+	Menu, ExportSubmenu, 	Add, %t_StaticHotstrings%,  	L_ExportLibraryStatic
+	Menu, ExportSubmenu, 	Add, %t_DynamicHotstrings%,  	L_ExportLibraryDynamic
+	Menu, LibrariesSubmenu, 	Add, %t_ExportFromCsvToAhk%,	:ExportSubmenu
+	
+	Loop, %A_ScriptDir%\Libraries\*.csv
 	{
 		Menu, ToggleLibrariesSubmenu, Add, %A_LoopFileName%, L_ToggleTipsLibrary
 		IniRead, v_LibraryFlag, Config.ini, TipsLibraries, %A_LoopFileName%
@@ -2065,20 +2101,19 @@ L_GUIInit:
 		else
 			Menu, ToggleLibrariesSubmenu, UnCheck, %A_LoopFileName%	
 	}
-	Menu, LibrariesSubmenu, Add, %t_EnableDisableTriggerstringTips%, :ToggleLibrariesSubmenu 
-	Menu, HSMenu, Add, %t_LibrariesConfiguration%, :LibrariesSubmenu
-     Menu, HSMenu, Add, %t_ClipboardDelay%, HSdelay
-	Menu, HSMenu, Add, %t_AboutHelp%, About
-	Gui, HS3:Menu, HSMenu
+	Menu, 	LibrariesSubmenu, 	Add, %t_EnableDisableTriggerstringTips%, 	:ToggleLibrariesSubmenu 
+	Menu, 	HSMenu, 			Add, %t_LibrariesConfiguration%, 			:LibrariesSubmenu
+     Menu, 	HSMenu, 			Add, %t_ClipboardDelay%, 				HSdelay
+	Menu, 	HSMenu, 			Add, %t_AboutHelp%, 					About
+	Gui, 	HS3:Menu, HSMenu
+	;Future: shift the following lines containing IniRead to Iniread section of the file.
 	IniRead, StartX, Config.ini, Configuration, SizeOfHotstringsWindow_X, #
 	IniRead, StartY, Config.ini, Configuration, SizeOfHotstringsWindow_Y, #
 	IniRead, StartW, Config.ini, Configuration, SizeOfHotstringsWindow_Width, #
 	IniRead, StartH, Config.ini, Configuration, SizeOfHotstringsWindow_Height, #
 	v_FlagMax := 0
 	if (StartW == "") or (StartH == "")
-	{
 		v_FlagMax := 1
-	}
 	if (StartX == "")
 		StartX := Mon%v_SelectedMonitor%Left + (Abs(Mon%v_SelectedMonitor%Right - Mon%v_SelectedMonitor%Left)/2) - 430*DPI%v_SelectedMonitor%
 	if (StartY == "")
@@ -2086,11 +2121,11 @@ L_GUIInit:
 	if (StartW == "")
 		StartW := 1350*DPI%v_SelectedMonitor%
 	if (StartH == "")
-		if (Sandbox)
+		if (ini_Sandbox)
 			StartH := 640*DPI%v_SelectedMonitor%+20 + 154*DPI%v_SelectedMonitor%
 		else
 			StartH := 640*DPI%v_SelectedMonitor%+20
-	if (Sandbox) and (StartH <640*DPI%v_SelectedMonitor%+20 + 154*DPI%v_SelectedMonitor%)
+	if (ini_Sandbox) and (StartH < 640*DPI%v_SelectedMonitor%+20 + 154*DPI%v_SelectedMonitor%)
 		StartH := 640*DPI%v_SelectedMonitor%+20 + 154*DPI%v_SelectedMonitor%
 	Gui, HS3:Hide
 	if (v_ShowGui == 1)
@@ -2105,7 +2140,7 @@ L_GUIInit:
 	}
 	else if (v_ShowGui == 2)
 	{
-		if (Sandbox) and (v_PreviousHeight <640*DPI%v_SelectedMonitor%+20 + 154*DPI%v_SelectedMonitor%)
+		if (ini_Sandbox) and (v_PreviousHeight < 640*DPI%v_SelectedMonitor%+20 + 154*DPI%v_SelectedMonitor%)
 			v_PreviousHeight := 640*DPI%v_SelectedMonitor%+20 + 154*DPI%v_SelectedMonitor%
 		Gui, HS3:Show, W%v_PreviousWidth% H%v_PreviousHeight% X%v_PreviousX% Y%v_PreviousY%, Hotstrings
 	}
@@ -2441,7 +2476,6 @@ ALibOK:
 	IfNotExist, Libraries\%NewLib%
 	{
 		FileAppend,, Libraries\%NewLib%, UTF-8
-		IniRead, t_TheLibraryHasBeenCreated, English.ini, Strings, TheLibraryHasBeenCreated
 		MsgBox, % t_TheLibrary . " " . NewLib . " " . t_HasBeenCreated
 		Gui, ALib:Destroy
 		GuiControl, HS3:, v_SelectHotstringLibrary, |
@@ -3299,10 +3333,10 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-Undo:
+L_Undo:
 	Menu, Submenu1, ToggleCheck, %t_UndoLastHotstring%
-	Undo := !(Undo)
-	IniWrite, %Undo%, Config.ini, Configuration, UndoHotstring
+	ini_Undo := !(ini_Undo)
+	IniWrite, %ini_Undo%, Config.ini, Configuration, UndoHotstring
 return
 
 ; F11::
@@ -3323,10 +3357,10 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-Sandbox:
+L_Sandbox:
 	Menu, Submenu1, ToggleCheck, %t_LaunchSandbox%
-	Sandbox := !(Sandbox)
-	If (Sandbox == 0)
+	ini_Sandbox := !(ini_Sandbox)
+	if (ini_Sandbox == 0)
 	{
 		Gui, % "HS3:+MinSize"  . 1350*DPI%v_SelectedMonitor% . "x" . 640*DPI%v_SelectedMonitor%+20
 		GuiControl, HS3:Hide, Sandbox
@@ -3337,10 +3371,10 @@ Sandbox:
 		Gui, % "HS3:+MinSize"  . 1350*DPI%v_SelectedMonitor% . "x" . 640*DPI%v_SelectedMonitor%+20  + 154*DPI%v_SelectedMonitor%
 		GuiControl, HS3:Show, Sandbox
 		GuiControl, HS3:Show, SandString
-		if v_PreviousHeight < 640*DPI%v_SelectedMonitor%+20  + 154*DPI%v_SelectedMonitor%
+		if (v_PreviousHeight < 640*DPI%v_SelectedMonitor%+20  + 154*DPI%v_SelectedMonitor%)
 			Gui, HS3:Show, % "h" . 640*DPI%v_SelectedMonitor%+20  + 154*DPI%v_SelectedMonitor%
 	}
-	IniWrite, %Sandbox%, Config.ini, Configuration, Sandbox
+	Iniwrite, %ini_Sandbox%, Config.ini, Configuration, Sandbox
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3359,7 +3393,7 @@ EndSpace:
 	Menu, Submenu2, ToggleCheck, %t_Space%
 	EndingChar_Space := !(EndingChar_Space)
 	IniWrite, %EndingChar_Space%, Config.ini, Configuration, EndingChar_Space
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3368,7 +3402,7 @@ EndMinus:
 	Menu, Submenu2, ToggleCheck, %t_Minus%
 	EndingChar_Minus := !(EndingChar_Minus)
 	IniWrite, %EndingChar_Minus%, Config.ini, Configuration, EndingChar_Minus
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3377,7 +3411,7 @@ EndORoundBracket:
 	Menu, Submenu2, ToggleCheck, %t_OpeningRoundBracket%
 	EndingChar_ORoundBracket := !(EndingChar_ORoundBracket)
 	IniWrite, %EndingChar_ORoundBracket%, Config.ini, Configuration, EndingChar_ORoundBracket
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3386,7 +3420,7 @@ EndCRoundBracket:
 	Menu, Submenu2, ToggleCheck, %t_ClosingRoundBracket%
 	EndingChar_CRoundBracket := !(EndingChar_CRoundBracket)
 	IniWrite, %EndingChar_CRoundBracket%, Config.ini, Configuration, EndingChar_CRoundBracket
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3395,7 +3429,7 @@ EndOSquareBracket:
 	Menu, Submenu2, ToggleCheck, %t_OpeningSquareBracket%
 	EndingChar_OSquareBracket := !(EndingChar_OSquareBracket)
 	IniWrite, %EndingChar_OSquareBracket%, Config.ini, Configuration, EndingChar_OSquareBracket
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3404,7 +3438,7 @@ EndCSquareBracket:
 	Menu, Submenu2, ToggleCheck, %t_ClosingSquareBracket%
 	EndingChar_CSquareBracket := !(EndingChar_CSquareBracket)
 	IniWrite, %EndingChar_CSquareBracket%, Config.ini, Configuration, EndingChar_CSquareBracket
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3413,7 +3447,7 @@ EndOCurlyBracket:
 	Menu, Submenu2, ToggleCheck, %t_OpeningCurlyBracket%
 	EndingChar_OCurlyBracket := !(EndingChar_OCurlyBracket)
 	IniWrite, %EndingChar_OCurlyBracket%, Config.ini, Configuration, EndingChar_OCurlyBracket
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3422,7 +3456,7 @@ EndCCurlyBracket:
 	Menu, Submenu2, ToggleCheck, %t_ClosingCurlyBracket%
 	EndingChar_CCurlyBracket := !(EndingChar_CCurlyBracket)
 	IniWrite, %EndingChar_CCurlyBracket%, Config.ini, Configuration, EndingChar_CCurlyBracket
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3431,7 +3465,7 @@ EndColon:
 	Menu, Submenu2, ToggleCheck,%t_Colon%
 	EndingChar_Colon := !(EndingChar_Colon)
 	IniWrite, %EndingChar_Colon%, Config.ini, Configuration, EndingChar_Colon
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3440,7 +3474,7 @@ EndSemicolon:
 	Menu, Submenu2, ToggleCheck, % t_Semicolon
 	EndingChar_Semicolon := !(EndingChar_Semicolon)
 	IniWrite, %EndingChar_Semicolon%, Config.ini, Configuration, EndingChar_Semicolon
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3449,7 +3483,7 @@ EndApostrophe:
 	Menu, Submenu2, ToggleCheck, %t_Apostrophe%
 	EndingChar_Apostrophe := !(EndingChar_Apostrophe)
 	IniWrite, %EndingChar_Apostrophe%, Config.ini, Configuration, EndingChar_Apostrophe
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3458,7 +3492,7 @@ EndQuote:
 	Menu, Submenu2, ToggleCheck, % t_Quote
 	EndingChar_Quote := !(EndingChar_Quote)
 	IniWrite, %EndingChar_Quote%, Config.ini, Configuration, EndingChar_Quote
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3467,7 +3501,7 @@ EndSlash:
 	Menu, Submenu2, ToggleCheck, %t_Slash%
 	EndingChar_Slash := !(EndingChar_Slash)
 	IniWrite, %EndingChar_Slash%, Config.ini, Configuration, EndingChar_Slash
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3476,7 +3510,7 @@ EndBackslash:
 	Menu, Submenu2, ToggleCheck, %t_Backslash%
 	EndingChar_Backslash := !(EndingChar_Backslash)
 	IniWrite, %EndingChar_Backslash%, Config.ini, Configuration, EndingChar_Backslash
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3485,7 +3519,7 @@ EndComma:
 	Menu, Submenu2, ToggleCheck, % t_Comma
 	EndingChar_Comma := !(EndingChar_Comma)
 	IniWrite, %EndingChar_Comma%, Config.ini, Configuration, EndingChar_Comma
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3494,7 +3528,7 @@ EndDot:
 	Menu, Submenu2, ToggleCheck, %t_Dot%
 	EndingChar_Dot := !(EndingChar_Dot)
 	IniWrite, %EndingChar_Dot%, Config.ini, Configuration, EndingChar_Dot
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3503,7 +3537,7 @@ EndQuestionMark:
 	Menu, Submenu2, ToggleCheck, %t_QuestionMark%
 	EndingChar_QuestionMark := !(EndingChar_QuestionMark)
 	IniWrite, %EndingChar_QuestionMark%, Config.ini, Configuration, EndingChar_QuestionMark
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3512,7 +3546,7 @@ EndExclamationMark:
 	Menu, Submenu2, ToggleCheck, %t_ExclamationMark%
 	EndingChar_ExclamationMark := !(EndingChar_ExclamationMark)
 	IniWrite, %EndingChar_ExclamationMark%, Config.ini, Configuration, EndingChar_ExclamationMark
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3521,7 +3555,7 @@ EndEnter:
 	Menu, Submenu2, ToggleCheck, %t_Enter%
 	EndingChar_Enter := !(EndingChar_Enter)
 	IniWrite, %EndingChar_Enter%, Config.ini, Configuration, EndingChar_Enter
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3530,7 +3564,7 @@ EndTab:
 	Menu, Submenu2, ToggleCheck, %t_Tab%
 	EndingChar_Tab := !(EndingChar_Tab)
 	IniWrite, %EndingChar_Tab%, Config.ini, Configuration, EndingChar_Tab
-	EndChars()
+	F_EndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
