@@ -511,8 +511,8 @@ else if (v_Param == "l")
 	TrayTip, %A_ScriptName% - Lite mode, 	%t_LoadingHotstringsFromLibraries%, 1
 else	
 	TrayTip, %A_ScriptName%,				%t_LoadingHotstringsFromLibraries%, 1
-
-/* Comment added on 2021-01-30
+ 
+/*Comment added on 2021-01-30
 	v_HotstringCnt := 0; Comment added on 2021-01-30
 	
  	a_Comment 		:= []
@@ -685,133 +685,133 @@ Loop,
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
 ~BackSpace:: 
-if (WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
-{
-	if (ini_MenuSound)
+	if (WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
 	{
-		if (v_FlagSound == 0)
-			SoundBeep, 400, 200
-		v_FlagSound := 0
-	}
-}
-else
-{
-	StringTrimRight, v_InputString, v_InputString, 1
-	if (StrLen(v_InputString) > ini_AmountOfCharacterTips - 1) and (ini_Tips)
-	{
-		v_Tips := ""
-		Loop, % a_Triggers.MaxIndex()
+		if (ini_MenuSound)
 		{
-			If InStr(a_Triggers[A_Index], v_InputString) == 1
-			{
-				If !(v_Tips == "")
-					v_Tips .= "`n"
-				v_Tips .= a_Triggers[A_Index]
-			}
-		}
-		a_SelectedTriggers := []
-		a_SelectedTriggers := StrSplit(v_Tips, "`n")
-		if (ini_TipsSortAlphabetically)
-			a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
-		if (ini_TipsSortByLength)
-			a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
-		v_Tips := ""
-		Loop, % a_SelectedTriggers.MaxIndex()
-		{
-			If !(v_Tips == "")
-				v_Tips .= "`n"
-			v_Tips .= a_SelectedTriggers[A_Index]
-		}
-		if (ini_Caret)
-		{
-			CoordMode, Caret, Screen
-			ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
-		}
-		if (ini_Cursor)
-		{
-			MouseGetPos, v_MouseX, v_MouseY
-			ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
+			if (v_FlagSound == 0)
+				SoundBeep, 400, 200
+			v_FlagSound := 0
 		}
 	}
 	else
 	{
-		ToolTip,
+		StringTrimRight, v_InputString, v_InputString, 1
+		if (StrLen(v_InputString) > ini_AmountOfCharacterTips - 1) and (ini_Tips)
+		{
+			v_Tips := ""
+			Loop, % a_Triggers.MaxIndex()
+			{
+				If InStr(a_Triggers[A_Index], v_InputString) == 1
+				{
+					If !(v_Tips == "")
+						v_Tips .= "`n"
+					v_Tips .= a_Triggers[A_Index]
+				}
+			}
+			a_SelectedTriggers := []
+			a_SelectedTriggers := StrSplit(v_Tips, "`n")
+			if (ini_TipsSortAlphabetically)
+				a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
+			if (ini_TipsSortByLength)
+				a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
+			v_Tips := ""
+			Loop, % a_SelectedTriggers.MaxIndex()
+			{
+				If !(v_Tips == "")
+					v_Tips .= "`n"
+				v_Tips .= a_SelectedTriggers[A_Index]
+			}
+			if (ini_Caret)
+			{
+				CoordMode, Caret, Screen
+				ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
+			}
+			if (ini_Cursor)
+			{
+				MouseGetPos, v_MouseX, v_MouseY
+				ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
+			}
+		}
+		else
+		{
+			ToolTip,
+		}
+		if (v_Param == "d")
+		{
+			FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_AmountOfCharacterTips . "|" . ini_Tips . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
+			v_IndexLog++
+		}
 	}
-	if (v_Param == "d")
-	{
-		FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_AmountOfCharacterTips . "|" . ini_Tips . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
-		v_IndexLog++
-	}
-}
 return
 
 $^z::			;~ Ctrl + z as in MS Word: Undo; $ prevents autotriggering as the same hotkey is send with SendInput function
 $!BackSpace:: 		;~ Alt + Backspace as in MS Word: rolls back last Autocorrect action ; $ prevents autotriggering as the same hotkey is send with SendInput function
-	;Future: why each time this variable is read from Config.ini?
-	;IniRead, v_Undo, Config.ini, Configuration, UndoHotstring
-if (ini_Undo == 1) and (v_TypedTriggerstring && (A_ThisHotkey != A_PriorHotkey))
-{
-	ToolTip, %t_UndoTheLastHotstring%, % A_CaretX, % A_CaretY - 20
-	TriggerOpt := SubStr(v_UndoTriggerstring, InStr(v_UndoTriggerstring, ":" ,, 1,1)+1 ,InStr(v_UndoTriggerstring, ":" ,, 1,2)-InStr(v_UndoTriggerstring, ":" ,, 1,1)-1)
-	if (InStr(TriggerOpt, "*0") or !(InStr(TriggerOpt, "*"))) and (InStr(TriggerOpt, "O0") or !(InStr(TriggerOpt, "O")))
+	if (ini_Undo == 1) and (v_TypedTriggerstring && (A_ThisHotkey != A_PriorHotkey))
 	{
-		Send, {BackSpace}
+		ToolTip, %t_UndoTheLastHotstring%, % A_CaretX, % A_CaretY - 20
+		TriggerOpt := SubStr(v_UndoTriggerstring, InStr(v_UndoTriggerstring, ":" ,, 1,1)+1 ,InStr(v_UndoTriggerstring, ":" ,, 1,2)-InStr(v_UndoTriggerstring, ":" ,, 1,1)-1)
+		if (InStr(TriggerOpt, "*0") or !(InStr(TriggerOpt, "*"))) and (InStr(TriggerOpt, "O0") or !(InStr(TriggerOpt, "O")))
+		{
+			Send, {BackSpace}
+		}
+		if (v_UndoHotstring == "")
+			Send, % "{BackSpace " . StrLen(v_TypedTriggerstring) . "}" . SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
+		else
+			Send, % "{BackSpace " . StrLen(v_UndoHotstring) . "}" . SubStr(v_UndoTriggerstring, InStr(v_UndoTriggerstring, ":", v_OptionCaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
+		if (InStr(TriggerOpt, "*0") or !(InStr(TriggerOpt, "*")))  and (InStr(TriggerOpt, "O0") or !(InStr(TriggerOpt, "O")))
+		{
+			Send, %A_EndChar%
+		}
+		SetTimer, TurnOffTooltip, -5000, -1 ; Priorytet -1 sprawia, że nie będzie on psuł działanie innego timera
+		v_TypedTriggerstring := ""
 	}
-	if (v_UndoHotstring == "")
-		Send, % "{BackSpace " . StrLen(v_TypedTriggerstring) . "}" . SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
 	else
-		Send, % "{BackSpace " . StrLen(v_UndoHotstring) . "}" . SubStr(v_UndoTriggerstring, InStr(v_UndoTriggerstring, ":", v_OptionCaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
-	if (InStr(TriggerOpt, "*0") or !(InStr(TriggerOpt, "*")))  and (InStr(TriggerOpt, "O0") or !(InStr(TriggerOpt, "O")))
 	{
-		Send, %A_EndChar%
+		ToolTip,
+		If InStr(A_ThisHotkey, "^z")
+			SendInput, ^z
+		else if InStr(A_ThisHotkey, "!BackSpace")
+			SendInput, !{BackSpace}
 	}
-	SetTimer, TurnOffTooltip, -5000, -1 ; Priorytet -1 sprawia, że nie będzie on psuł działanie innego timera
-	v_TypedTriggerstring := ""
-}
-else
-{
-	ToolTip,
-	If InStr(A_ThisHotkey, "^z")
-		SendInput, ^z
-	else if InStr(A_ThisHotkey, "!BackSpace")
-		SendInput, !{BackSpace}
-}
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if WinExist("Hotstrings") and WinExist("ahk_class AutoHotkeyGUI")
+#if WinExist("Hotstrings") and WinExist("ahk_class AutoHotkeyGUI") ; the following hotkeys will be active only if Hotstrings windows exist at the moment.
+
 ~^c::			; copy to edit field "Enter hotstring" content of Clipboard.
-Sleep, %ini_Delay%
-ControlSetText, Edit2, %Clipboard%
-return
+	Sleep, %ini_Delay%
+	ControlSetText, Edit2, %Clipboard%
+	return
 #if
 
-#if WinActive("Hotstrings") and WinActive("ahk_class AutoHotkeyGUI")
+#if WinActive("Hotstrings") and WinActive("ahk_class AutoHotkeyGUI") ; the following hotkeys will be active only if Hotstrings windows are active at the moment. 
 
 F1::
-Gui, HS3:Default
-Goto, L_About
-; return
-
+	Gui, HS3:Default
+	Goto, L_About
+	; return
+	
 F2::
-Gui, HS3:Default
-Gui, HS3:Submit, NoHide
-if (v_SelectHotstringLibrary == "")
-{
-	MsgBox, %t_SelectHotstringLibrary%
-	return
-}
-GuiControl, Focus, v_LibraryContent
-if (LV_GetNext(0,"Focused") == 0)
-	LV_Modify(1, "+Select +Focus")
+	Gui, HS3:Default
+	Gui, HS3:Submit, NoHide
+	if (v_SelectHotstringLibrary == "")
+	{
+		;Future: center this MsgBox on current screen.
+		MsgBox, %t_SelectHotstringLibrary%
+		return
+	}
+	GuiControl, Focus, v_LibraryContent
+	if (LV_GetNext(0,"Focused") == 0)
+		LV_Modify(1, "+Select +Focus")
 return
 
 ^f::
 ^s::
 F3::
-Gui, HS3:Default
-goto, L_Searching
+	Gui, HS3:Default
+	Goto, L_Searching
 ; return
 
 F5::
@@ -867,7 +867,7 @@ goto, MoveList
 
 F_LoadFiles(nameoffile)
 {
-	global v_LoadedHotstrings
+ 	global v_LoadedHotstrings
 	global v_HotstringCnt
 	global a_Triggers
 	
@@ -882,8 +882,8 @@ F_LoadFiles(nameoffile)
 		F_StartHotstring(line)
 		IniRead, v_Library, Config.ini, TipsLibraries, %nameoffile%
 		if (v_Library)
-			a_Triggers.Push(v_TriggerString)
-		v_HotstringCnt++
+ 			a_Triggers.Push(v_TriggerString)
+ 		v_HotstringCnt++
 		GuiControl,,v_LoadedHotstrings,% t_LoadedHotstrings . " " v_HotstringCnt
 	}
 	return
@@ -891,8 +891,7 @@ F_LoadFiles(nameoffile)
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_StartHotstring(txt)
-{
+F_StartHotstring(txt) {
 	global v_TriggerString
 	static Options, OnOff, EnDis, SendFun, TextInsert
 	v_UndoHotstring := ""
@@ -1596,17 +1595,7 @@ F_ImportLibrary(filename)
 	F_SortHotstringsAlphabetically(v_OutputFile)
 	GuiControl,, MyText, %t_LoadingLibrariesPleaseWait%
 	a_Triggers := []
-	TrayTip, %A_ScriptName%,%t_LoadingHotstringsFromLibraries%, 1
-	v_HotstringCnt :=0
-	Loop, Files, Libraries\*.csv
-	{
-		if !(A_LoopFileName == "PriorityLibrary.csv")
-		{
-			F_LoadFiles(A_LoopFileName)
-		}
-	}
-	F_LoadFiles("PriorityLibrary.csv")
-	TrayTip,%A_ScriptName%, %t_HotstringsHaveBeenLoaded%,1
+	F_LoadHotstringsFromLibraries()
 	Gui, HS3:Default
 	GuiControl, , v_SelectHotstringLibrary, |
 	Loop,%A_ScriptDir%\Libraries\*.csv
@@ -1783,6 +1772,26 @@ F_ReadText(string)
 	return string
 }
 
+F_LoadHotstringsFromLibraries()
+{
+	global t_LoadingHotstringsFromLibraries, t_HotstringsHaveBeenLoaded, v_HotstringCnt
+	
+	TrayTip, %A_ScriptName%, %t_LoadingHotstringsFromLibraries%, 1
+	v_HotstringCnt := 0
+	Loop, Files, Libraries\*.csv
+	{
+		if !(A_LoopFileName == "PriorityLibrary.csv")
+		{
+			F_LoadFiles(A_LoopFileName)
+		}
+	}
+	F_LoadFiles("PriorityLibrary.csv")
+	TrayTip, %A_ScriptName%, %t_HotstringsHaveBeenLoaded%, 1
+}
+
+
+
+
 ; --------------------------- SECTION OF LABELS ---------------------------
 
 
@@ -1901,12 +1910,12 @@ Gui, HS3:Add, 	Text, xm y0 vv_ShortcutsMainInterface,%t_F1AboutHelpF2LibraryCont
 GUI, HS3:Add, 	Text, y0 x800 vv_LoadedHotstrings, % t_LoadedHotstrings . " " . v_HotstringCnt
 
     ; Menu, HSMenu, Add, &Monitor, CheckMon
-Menu, Submenu1, 	Add, %t_UndoLastHotstring%,	L_Undo
-Menu, SubmenuTips, 	Add, %t_EnableDisable%, 		Tips
-Menu, PositionMenu, Add, %t_Caret%, 			L_MenuCaretCursor
-Menu, PositionMenu, Add, %t_Cursor%, 			L_MenuCaretCursor
-Menu, SubmenuMenu, 	Add, %t_ChooseMenuPosition%,	:PositionMenu
-Menu, SubmenuMenu, 	Add, %t_EnableSoundIfOverrun%, L_MenuSound
+Menu, Submenu1, 	Add, %t_UndoLastHotstring%,		L_Undo
+Menu, SubmenuTips, 	Add, %t_EnableDisable%, 			Tips
+Menu, PositionMenu, Add, %t_Caret%, 				L_MenuCaretCursor
+Menu, PositionMenu, Add, %t_Cursor%, 				L_MenuCaretCursor
+Menu, SubmenuMenu, 	Add, %t_ChooseMenuPosition%,		:PositionMenu
+Menu, SubmenuMenu, 	Add, %t_EnableSoundIfOverrun%,	L_MenuSound
 if (ini_MenuSound)
 	Menu, SubmenuMenu, Check, %t_EnableSoundIfOverrun%
 else
@@ -2741,18 +2750,8 @@ else
 }
 MsgBox Hotstring added to the %SaveFile%.csv file!
 a_Triggers := []
-TrayTip, %A_ScriptName%,%t_LoadingHotstringsFromLibraries%, 1
-v_HotstringCnt :=0
-Loop, Files, Libraries\*.csv
-{
-	if !(A_LoopFileName == "PriorityLibrary.csv")
-	{
-		F_LoadFiles(A_LoopFileName)
-	}
-}
-F_LoadFiles("PriorityLibrary.csv")	
-TrayTip,%A_ScriptName%, %t_HotstringsHaveBeenLoaded% ,1
-Return
+F_LoadHotstringsFromLibraries()
+return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -2885,20 +2884,12 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 L_About:
-	;v_FontSize := 10
 	Gui, MyAbout: Destroy
 	Gui, MyAbout: Font, % "bold s" . v_FontSize*DPI%v_SelectedMonitor%, Calibri
 	Gui, MyAbout: Add, Text, , %t_LetsMakeYourPCPersonalAgain%
 	Gui, MyAbout: Font, % "norm s" . v_FontSize*DPI%v_SelectedMonitor%
 	temp := SubStr(t_EnablesConvenientDefinition, 1)
 	Gui, MyAbout: Add, Text, , %t_EnablesConvenientDefinition%
-	;MsgBox, ,, %t_LetsMakeYourPCPersonalAgain%
-	;MsgBox, ,, %t_EnablesConvenientDefinition%
-	;MsgBox, ,, %temp%
-	;MsgBox, ,, % t_EnablesConvenientDefinition
-	;MsgBox, ,, % %t_EnablesConvenientDefinition%
-	;MsgBox,,, Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3. ; this works fine
-	;Gui, MyAbout: Add, Text, , Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3. ; this works fine
 	Gui, MyAbout: Font, % "CBlue bold Underline s" . v_FontSize*DPI%v_SelectedMonitor%
 	Gui, MyAbout: Add, Text, gLink, %t_ApplicationHelp%
 	Gui, MyAbout: Add, Text, gLink2, %t_GenuineHotstringsAutoHotkeyDocumentation%
@@ -2917,19 +2908,19 @@ L_About:
 return  
 
 Link:
-Run, https://github.com/mslonik/Hotstrings
+	Run, https://github.com/mslonik/Hotstrings
 return
 
 Link2:
-Run, https://www.autohotkey.com/docs/Hotstrings.htm
+	Run, https://www.autohotkey.com/docs/Hotstrings.htm
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ~F1::
-MyOK:
-MyAboutGuiEscape:
-MyAboutGuiClose: ; Launched when the window is closed by pressing its X button in the title bar
-Gui, MyAbout: Destroy
+	MyOK:
+	MyAboutGuiEscape:
+	MyAboutGuiClose: ; Launched when the window is closed by pressing its X button in the title bar
+	Gui, MyAbout: Destroy
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2983,77 +2974,81 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+; Here I use 2x GUIs: SearchLoad which shows progress on time of library loading process and HS3List which is in fact Search GUI name.
+; Not clear why v_HS3ListFlag is used.
 L_Searching:
-if (v_HS3ListFlag)
-	GUI, HS3List:Show
-else
-{
-	WinGetPos, StartXlist, StartYlist,,,Hotstrings
-	Gui, SearchLoad:New, -Resize -Border
-	Gui, SearchLoad:Add, Text,, %t_PleaseWaitUploadingCsvFiles%
-	Gui, SearchLoad:Add, Progress, w300 h20 HwndhPB2 -0x1, 50
-	WinSet, Style, +0x8, % "ahk_id " hPB2
-	SendMessage, 0x40A, 1, 20,, % "ahk_id " hPB2
-	Gui, SearchLoad:Show, hide, UploadingSearch
-	WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
-	DetectHiddenWindows, On
-	WinGetPos, , , UploadingWindowWidth, UploadingWindowHeight,UploadingSearch
-	DetectHiddenWindows, Off
-	Gui, SearchLoad:Show,% "x" . v_WindowX + (v_WindowWidth - UploadingWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - UploadingWindowHeight)/2 ,UploadingSearch
-	
-	SysGet, N, MonitorCount
-	Loop, % N
+	if (v_HS3ListFlag)
+		Gui, HS3List:Show
+	else
 	{
-		SysGet, Mon%A_Index%, Monitor, %A_Index%
-		W%A_Index% := Mon%A_Index%Right - Mon%A_Index%Left
-		H%A_Index% := Mon%A_Index%Bottom - Mon%A_Index%Top
-		DPI%A_Index% := round(W%A_Index%/1920*(96/A_ScreenDPI),2)
+		WinGetPos, StartXlist, StartYlist,,,Hotstrings
+		Gui, SearchLoad:New, -Resize -Border
+		Gui, SearchLoad:Add, Text,, %t_PleaseWaitUploadingCsvFiles%
+		Gui, SearchLoad:Add, Progress, w300 h20 HwndhPB2 -0x1, 50
+		WinSet, Style, +0x8, % "ahk_id " hPB2
+		SendMessage, 0x40A, 1, 20,, % "ahk_id " hPB2		; CBEM_HASEDITCHANGED := 0x40A
+		Gui, SearchLoad:Show, hide, UploadingSearch
+		WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
+		DetectHiddenWindows, On
+		WinGetPos, , , UploadingWindowWidth, UploadingWindowHeight,UploadingSearch
+		DetectHiddenWindows, Off
+		Gui, SearchLoad:Show, % "x" . v_WindowX + (v_WindowWidth - UploadingWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - UploadingWindowHeight)/2, UploadingSearch
+		
+		SysGet, N, MonitorCount
+		Loop, % N
+		{
+			SysGet, Mon%A_Index%, Monitor, %A_Index%
+			W%A_Index% := Mon%A_Index%Right - Mon%A_Index%Left
+			H%A_Index% := Mon%A_Index%Bottom - Mon%A_Index%Top
+			DPI%A_Index% := round(W%A_Index%/1920*(96/A_ScreenDPI),2)	; Future: DPI := 1
+		}
+		SysGet, PrimMon, MonitorPrimary
+		if (v_SelectedMonitor == 0)
+			v_SelectedMonitor := PrimMon
+		/*
+			if (WinExist("Search Hotstring"))	; I have serious doubts if those lines are useful
+			{
+				Gui, HS3List:Hide
+			}
+		*/
+		Gui, HS3List:New, % "+Resize MinSize" . 940*DPI%v_SelectedMonitor% . "x" . 500*DPI%v_SelectedMonitor%
+		v_HS3ListFlag := 1
+		Gui, HS3List:Add, Text, ,Search:
+		Gui, HS3List:Add, Text, 		% "yp xm+" . 420*DPI%v_SelectedMonitor%, %t_SearchBy%
+		Gui, HS3List:Add, Edit, 		% "xm w" . 400*DPI%v_SelectedMonitor% . " vv_SearchTerm gSearch"
+		Gui, HS3List:Add, Radio, 	% "yp xm+" . 420*DPI%v_SelectedMonitor% . " vv_RadioGroup gSearchChange Checked", %t_Triggerstring%
+		Gui, HS3List:Add, Radio, 	% "yp xm+" . 540*DPI%v_SelectedMonitor% . " gSearchChange", %t_Hotstring%
+		Gui, HS3List:Add, Radio, 	% "yp xm+" . 640*DPI%v_SelectedMonitor% . " gSearchChange", %t_Library%
+		Gui, HS3List:Add, Button, 	% "yp-2 xm+" . 720*DPI%v_SelectedMonitor% . " w" . 100*DPI%v_SelectedMonitor% . " gMoveList", %t_Move%
+		Gui, HS3List:Add, ListView, 	% "xm grid vList +AltSubmit gHSLV2 h" . 400*DPI%v_SelectedMonitor%, %t_LibraryTriggerstringTriggerOptionsOutputFunctionEnableDisableHotstringComment%
+		Loop, % a_Library.MaxIndex()
+		{
+			LV_Add("", a_Library[A_Index], a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index], a_Comment[A_Index])
+		}
+		LV_ModifyCol(1, "Sort")
+		StartWlist := 940*DPI%v_SelectedMonitor%
+		StartHlist := 500*DPI%v_SelectedMonitor%
+		SetTitleMatchMode, 3
+		WinGetPos, StartXlist, StartYlist,,,Hotstrings
+		if ((StartXlist == "") or (StartYlist == ""))
+		{
+			StartXlist := (Mon%v_SelectedMonitor%Left + (Abs(Mon%v_SelectedMonitor%Right - Mon%v_SelectedMonitor%Left)/2))*DPI%v_SelectedMonitor% - StartWlist/2
+			StartYlist := (Mon%v_SelectedMonitor%Top + (Abs(Mon%v_SelectedMonitor%Bottom - Mon%v_SelectedMonitor%Top)/2))*DPI%v_SelectedMonitor% - StartHlist/2
+		}
+		Gui, HS3List:Add, Text, x0 h1 0x7 w10 vLine2
+		Gui, HS3List:Font, % "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
+		Gui, HS3List:Add, Text, xm vShortcuts2, %t_F3CloseSearchHotstringsF8MoveHotstring%
+		if !(v_SearchTerm == "")
+			GuiControl,, v_SearchTerm, %v_SearchTerm%
+		if (v_RadioGroup == 1)
+			GuiControl,, Triggerstring, 1
+		else if (v_RadioGroup == 2)
+			GuiControl,, Hotstring, 1
+		else if (v_RadioGroup == 3)
+			GuiControl,, Library, 1
+		Gui, HS3List:Show, % "w" . StartWlist . " h" . StartHlist . " x" . StartXlist . " y" . StartYlist, Search Hotstrings
+		Gui, SearchLoad:Destroy
 	}
-	SysGet, PrimMon, MonitorPrimary
-	if (v_SelectedMonitor == 0)
-		v_SelectedMonitor := PrimMon
-	If (WinExist("Search Hotstring"))
-	{
-		Gui, HS3List:Hide
-	}
-	Gui, HS3List:New,% "+Resize MinSize" . 940*DPI%v_SelectedMonitor% . "x" . 500*DPI%v_SelectedMonitor%
-	v_HS3ListFlag := 1
-	Gui, HS3List:Add, Text, ,Search:
-	Gui, HS3List:Add, Text, % "yp xm+" . 420*DPI%v_SelectedMonitor%, %t_SearchBy%
-	Gui, HS3List:Add, Edit, % "xm w" . 400*DPI%v_SelectedMonitor% . " vv_SearchTerm gSearch"
-	Gui, HS3List:Add, Radio, % "yp xm+" . 420*DPI%v_SelectedMonitor% . " vv_RadioGroup gSearchChange Checked", %t_Triggerstring%
-	Gui, HS3List:Add, Radio, % "yp xm+" . 540*DPI%v_SelectedMonitor% . " gSearchChange", %t_Hotstring%
-	Gui, HS3List:Add, Radio, % "yp xm+" . 640*DPI%v_SelectedMonitor% . " gSearchChange", %t_Library%
-	Gui, HS3List:Add, Button, % "yp-2 xm+" . 720*DPI%v_SelectedMonitor% . " w" . 100*DPI%v_SelectedMonitor% . " gMoveList", %t_Move%
-	Gui, HS3List:Add, ListView, % "xm grid vList +AltSubmit gHSLV2 h" . 400*DPI%v_SelectedMonitor%, %t_LibraryTriggerstringTriggerOptionsOutputFunctionEnableDisableHotstringComment%
-	Loop, % a_Library.MaxIndex()
-	{
-		LV_Add("", a_Library[A_Index], a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index], a_Comment[A_Index])
-	}
-	LV_ModifyCol(1, "Sort")
-	StartWlist := 940*DPI%v_SelectedMonitor%
-	StartHlist := 500*DPI%v_SelectedMonitor%
-	SetTitleMatchMode, 3
-	WinGetPos, StartXlist, StartYlist,,,Hotstrings
-	if ((StartXlist == "") or (StartYlist == ""))
-	{
-		StartXlist := (Mon%v_SelectedMonitor%Left + (Abs(Mon%v_SelectedMonitor%Right - Mon%v_SelectedMonitor%Left)/2))*DPI%v_SelectedMonitor% - StartWlist/2
-		StartYlist := (Mon%v_SelectedMonitor%Top + (Abs(Mon%v_SelectedMonitor%Bottom - Mon%v_SelectedMonitor%Top)/2))*DPI%v_SelectedMonitor% - StartHlist/2
-	}
-	gui, HS3List:Add, Text, x0 h1 0x7 w10 vLine2
-	Gui, HS3List:Font, % "s" . 10*DPI%v_SelectedMonitor% . " cBlack Norm"
-	Gui, HS3List:Add, Text, xm vShortcuts2, %t_F3CloseSearchHotstringsF8MoveHotstring%
-	if !(v_SearchTerm == "")
-		GuiControl,,v_SearchTerm,%v_SearchTerm%
-	if (v_RadioGroup == 1)
-		GuiControl,, Triggerstring, 1
-	else if (v_RadioGroup == 2)
-		GuiControl,, Hotstring, 1
-	else if (v_RadioGroup == 3)
-		GuiControl,, Library, 1
-	Gui, HS3List:Show, % "w" . StartWlist . " h" . StartHlist . " x" . StartXlist . " y" . StartYlist, Search Hotstrings
-	Gui, SearchLoad:Destroy
-}
 
 Search:
 Gui, Hs3List:Default
@@ -3114,173 +3109,166 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 MoveList:
-Gui, HS3List:Submit, NoHide
-If !(v_SelectedRow := LV_GetNext()) {
-	MsgBox, 0, %A_ThisLabel%, %t_SelectARowInTheListViewPlease%
-	Return
-}
-LV_GetText(FileName,v_SelectedRow,1)
-LV_GetText(Triggerstring, v_SelectedRow,2)
-LV_GetText(TriggOpt, v_SelectedRow,3)
-LV_GetText(OutFun, v_SelectedRow,4)
-LV_GetText(EnDis, v_SelectedRow,5)
-If (EnDis == "En")
-	OnOff := "On"
-else if (EnDis == "Dis")
-	OnOff := "Off"
-LV_GetText(HSText, v_SelectedRow,6)
-LV_GetText(Comment, v_SelectedRow,7)
-MovedHS := TriggOpt . "‖" . Triggerstring . "‖" . OutFun . "‖" . EnDis . "‖" . HSText . "‖" . Comment
-MovedNoOptHS := "‖" . Triggerstring . "‖" . OutFun . "‖" . EnDis . "‖" . HSText . "‖" . Comment
-Gui, MoveLibs:New
-cntMove := -1
-Loop, %A_ScriptDir%\Libraries\*.csv
-{
-	cntMove += 1
-}
-Gui, MoveLibs:Add, Text,, %t_SelectTheTargetLibrary%
-Gui, MoveLibs:Add, ListView,LV0x1 -Hdr r%cntMove%,Library
-Loop, %A_ScriptDir%\Libraries\*.csv
-{
-	if (SubStr(A_LoopFileName,1,StrLen(A_LoopFileName)-4) != FileName )
-	{
-		LV_Add("",A_LoopFileName)
+	Gui, HS3List:Submit, NoHide
+	If !(v_SelectedRow := LV_GetNext()) {
+		MsgBox, 0, %A_ThisLabel%, %t_SelectARowInTheListViewPlease%
+		Return
 	}
-}
-Gui, MoveLibs:Add, Button,% "gMove w" . 100*DPI%v_SelectedMonitor%, %t_Move%
-Gui, MoveLibs:Add, Button, % "yp x+m gCanMove w" . 100*DPI%v_SelectedMonitor%, %t_Cancel%
-Gui, MoveLibs:Show,hide, Select library
-WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
-DetectHiddenWindows, On
-WinGetPos, , , SelectLibraryWindowWidth, SelectLibraryWindowHeight,Select library
-DetectHiddenWindows, Off
-Gui, MoveLibs:Show,% "x" . v_WindowX + (v_WindowWidth - SelectLibraryWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - SelectLibraryWindowHeight)/2 ,Select library
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-CanMove:
-Gui, MoveLibs:Destroy
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-Move:
-Gui, MoveLibs:Submit, NoHide
-If !(v_SelectedRow := LV_GetNext()) {
-	MsgBox, 0, %A_ThisLabel%, %t_SelectARowInTheListViewPlease%
-	Return
-}
-LV_GetText(TargetLib, v_SelectedRow)
-FileRead, Text, Libraries\%TargetLib%
-SectionList := StrSplit(Text, "`r`n")
-InputFile = % A_ScriptDir . "\Libraries\" . TargetLib
-LString := % "‖" . Triggerstring . "‖"
-SaveFlag := 0
-Gui, HS3:Default
-GuiControl, Choose, v_SelectHotstringLibrary, %TargetLib%
-gosub, SectionChoose
-Loop, Read, %InputFile%
-{
-	if InStr(A_LoopReadLine, LString)
+	LV_GetText(FileName,		v_SelectedRow, 1)
+	LV_GetText(Triggerstring, 	v_SelectedRow, 2)
+	LV_GetText(TriggOpt, 		v_SelectedRow, 3)
+	LV_GetText(OutFun, 			v_SelectedRow, 4)
+	LV_GetText(EnDis, 			v_SelectedRow, 5)
+	If (EnDis == "En")
+		OnOff := "On"
+	else if (EnDis == "Dis")
+		OnOff := "Off"
+	LV_GetText(HSText, 			v_SelectedRow, 6)
+	LV_GetText(Comment, 		v_SelectedRow, 7)
+	MovedHS 		:= TriggOpt . "‖" . Triggerstring . "‖" . OutFun . "‖" . EnDis . "‖" . HSText . "‖" . Comment
+	MovedNoOptHS 	:= "‖" . Triggerstring . "‖" . OutFun . "‖" . EnDis . "‖" . HSText . "‖" . Comment
+	Gui, MoveLibs:New
+	cntMove := -1
+	Loop, %A_ScriptDir%\Libraries\*.csv
 	{
-		MsgBox, 4,, % t_TheHostring . " """ . Triggerstring """ " . t_ExistsInAFile . " " . TargetLib . t_DoYouWantToProceed
-		IfMsgBox, No
+		cntMove += 1
+	}
+	Gui, MoveLibs:Add, Text,, %t_SelectTheTargetLibrary%
+	Gui, MoveLibs:Add, ListView, LV0x1 -Hdr r%cntMove%, Library
+	Loop, %A_ScriptDir%\Libraries\*.csv
+	{
+		if (SubStr(A_LoopFileName,1,StrLen(A_LoopFileName)-4) != FileName )
 		{
-			Gui, MoveLibs:Destroy
-			return
+			LV_Add("", A_LoopFileName)
 		}
-		LV_Modify(A_Index, "", Triggerstring, TriggOpt, OutFun, EnDis, HSText, Comment)
-		SaveFlag := 1
 	}
-}
-if (SaveFlag == 0)
-{
-	LV_Add("",  Triggerstring, TriggOpt, OutFun, EnDis,  HSText, Comment)
-	SectionList.Push(MovedHS)
-}
-LV_ModifyCol(1, "Sort")
-FileDelete, Libraries\%TargetLib%
-if (SectionList.MaxIndex() == "")
-{
-	LV_GetText(txt1, 1, 2)
-	LV_GetText(txt2, 1, 1)
-	LV_GetText(txt3, 1, 3)
-	LV_GetText(txt4, 1, 4)
-	LV_GetText(txt5, 1, 5)
-	LV_GetText(txt6, 1, 6)
-	txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-	FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
-}
-else
-{
-	Loop, % SectionList.MaxIndex()-1
-	{
-		LV_GetText(txt1, A_Index, 2)
-		LV_GetText(txt2, A_Index, 1)
-		LV_GetText(txt3, A_Index, 3)
-		LV_GetText(txt4, A_Index, 4)
-		LV_GetText(txt5, A_Index, 5)
-		LV_GetText(txt6, A_Index, 6)
-		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
-		if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
-			FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
-	}
-	LV_GetText(txt1, SectionList.MaxIndex(),2) 
-	LV_GetText(txt2, SectionList.MaxIndex(),1) 
-	LV_GetText(txt3, SectionList.MaxIndex(),3) 
-	LV_GetText(txt4, SectionList.MaxIndex(),4) 
-	LV_GetText(txt5, SectionList.MaxIndex(),5)
-	LV_GetText(txt6, SectionList.MaxIndex(),6) 
-	txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-	FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
-}
-InputFile := % A_ScriptDir . "\Libraries\" . FileName . ".csv"
-OutputFile := % A_ScriptDir . "\Libraries\temp.csv"
-cntLines := 0
-Loop, Read, %InputFile%
-{	
-	if !(InStr(A_LoopReadLine, LString))
-		FileAppend, % A_LoopReadLine . "`r`n", %OutputFile%, UTF-8
-	cntLines++
-}
-FileDelete, %InputFile%
-Loop, Read, %OutputFile%
-{
-	if (A_Index == 1)
-		FileAppend, % A_LoopReadLine, %InputFile%, UTF-8
-	else
-		FileAppend, % "`r`n" . A_LoopReadLine, %InputFile%, UTF-8
-	
-}
-if (cntLines == 1)
-{
-	FileAppend,, %InputFile%, UTF-8
-}
-FileDelete, %OutputFile%
-MsgBox,% t_HotstringMovedToThe . " " . TargetLib . " " . t_File
-a_Triggers := []
-TrayTip, %A_ScriptName%,%t_LoadingHotstringsFromLibraries%, 1
-v_HotstringCnt :=
-Loop, Files, Libraries\*.csv
-{
-	if !(A_LoopFileName == "PriorityLibrary.csv")
-	{
-		F_LoadFiles(A_LoopFileName)
-	}
-}
-F_LoadFiles("PriorityLibrary.csv")
-TrayTip,%A_ScriptName%, %t_HotstringsHaveBeenLoaded% ,1
-Gui, MoveLibs:Destroy
-Gui, HS3List:Hide
-gosub, L_Searching
+	Gui, MoveLibs:Add, Button, % "gMove w" . 100*DPI%v_SelectedMonitor%, %t_Move%
+	Gui, MoveLibs:Add, Button, % "yp x+m gCancelMove w" . 100*DPI%v_SelectedMonitor%, %t_Cancel%
+	Gui, MoveLibs:Show, hide, Select library
+	WinGetPos, v_WindowX, v_WindowY, v_WindowWidth, v_WindowHeight, Hotstrings
+	DetectHiddenWindows, On
+	WinGetPos, , , SelectLibraryWindowWidth, SelectLibraryWindowHeight, Select library
+	DetectHiddenWindows, Off
+	Gui, MoveLibs:Show, % "x" . v_WindowX + (v_WindowWidth - SelectLibraryWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - SelectLibraryWindowHeight)/2, Select library
 return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+CancelMove:
+	Gui, MoveLibs:Destroy
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; This function contains serious bug which cuts down libraries. Example: move of Unicode definitions from library CapitalLetters.csv to library BrandAndProperNames.csv
+Move:
+	Gui, MoveLibs:Submit, NoHide
+	If !(v_SelectedRow := LV_GetNext()) 
+	{
+		MsgBox, 0, %A_ThisLabel%, %t_SelectARowInTheListViewPlease% ; Future: center on current screen.
+		return
+	}
+	LV_GetText(TargetLib, v_SelectedRow)
+	FileRead, Text, Libraries\%TargetLib%
+	SectionList := StrSplit(Text, "`r`n")
+	InputFile = % A_ScriptDir . "\Libraries\" . TargetLib
+	LString := % "‖" . Triggerstring . "‖"
+	SaveFlag := 0	; !!!
+	Gui, HS3:Default
+	GuiControl, Choose, v_SelectHotstringLibrary, %TargetLib%
+	Gosub, SectionChoose
+	Loop, Read, %InputFile%
+	{
+		if InStr(A_LoopReadLine, LString)
+		{
+			MsgBox, 4,, % t_TheHostring . " """ . Triggerstring """ " . t_ExistsInAFile . " " . TargetLib . t_DoYouWantToProceed
+			IfMsgBox, No
+			{
+				Gui, MoveLibs:Destroy
+				return
+			}
+			LV_Modify(A_Index, "", Triggerstring, TriggOpt, OutFun, EnDis, HSText, Comment)
+			SaveFlag := 1
+		}
+	}
+	if (SaveFlag == 0)
+	{
+		LV_Add("",  Triggerstring, TriggOpt, OutFun, EnDis,  HSText, Comment)
+		SectionList.Push(MovedHS)
+	}
+	LV_ModifyCol(1, "Sort")
+	FileDelete, Libraries\%TargetLib%
+	if (SectionList.MaxIndex() == "")
+	{
+		LV_GetText(txt1, 1, 2)
+		LV_GetText(txt2, 1, 1)
+		LV_GetText(txt3, 1, 3)
+		LV_GetText(txt4, 1, 4)
+		LV_GetText(txt5, 1, 5)
+		LV_GetText(txt6, 1, 6)
+		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
+		FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
+	}
+	else
+	{
+		Loop, % SectionList.MaxIndex()-1
+		{
+			LV_GetText(txt1, A_Index, 2)
+			LV_GetText(txt2, A_Index, 1)
+			LV_GetText(txt3, A_Index, 3)
+			LV_GetText(txt4, A_Index, 4)
+			LV_GetText(txt5, A_Index, 5)
+			LV_GetText(txt6, A_Index, 6)
+			txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
+			if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
+				FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
+		}
+		LV_GetText(txt1, SectionList.MaxIndex(),2) 
+		LV_GetText(txt2, SectionList.MaxIndex(),1) 
+		LV_GetText(txt3, SectionList.MaxIndex(),3) 
+		LV_GetText(txt4, SectionList.MaxIndex(),4) 
+		LV_GetText(txt5, SectionList.MaxIndex(),5)
+		LV_GetText(txt6, SectionList.MaxIndex(),6) 
+		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
+		FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
+	}
+	InputFile 	:= % A_ScriptDir . "\Libraries\" . FileName . ".csv"
+	OutputFile 	:= % A_ScriptDir . "\Libraries\temp.csv"
+	cntLines 		:= 0
+	Loop, Read, %InputFile%
+	{	
+		if !(InStr(A_LoopReadLine, LString))
+			FileAppend, % A_LoopReadLine . "`r`n", %OutputFile%, UTF-8
+		cntLines++
+	}
+	FileDelete, %InputFile%
+	Loop, Read, %OutputFile%
+	{
+		if (A_Index == 1)
+			FileAppend, % A_LoopReadLine, %InputFile%, UTF-8
+		else
+			FileAppend, % "`r`n" . A_LoopReadLine, %InputFile%, UTF-8
+		
+	}
+	if (cntLines == 1)
+	{
+		FileAppend,, %InputFile%, UTF-8
+	}
+	FileDelete, %OutputFile%
+	MsgBox, % t_HotstringMovedToThe . " " . TargetLib . " " . t_File
+	a_Triggers := []
+	F_LoadHotstringsFromLibraries()
+	Gui, MoveLibs:Destroy
+	Gui, HS3List:Hide
+	v_HS3ListFlag := 0	; added on 2021-02-02. Now Search Hotstring window should be loaded again with last search result.
+	Gosub, L_Searching
+;return ; This line will be never reached
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 SearchChange:
-GuiControl,,v_SearchTerm, %v_SearchTerm%
-gosub, Search
+	gosub, Search
+	GuiControl,, v_SearchTerm, %v_SearchTerm%
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3685,22 +3673,12 @@ if !(v_LibraryName == "")
 return
 
 L_ToggleTipsLibrary:
-Menu, ToggleLibrariesSubmenu, ToggleCheck, %A_ThisMenuitem%
-IniRead, v_LibraryFlag, Config.ini, TipsLibraries, %A_ThisMenuitem%
-v_LibraryFlag := !(v_LibraryFlag)
-IniWrite, %v_LibraryFlag%, Config.ini, TipsLibraries, %A_ThisMenuitem%
-a_Triggers := []
-TrayTip, %A_ScriptName%,%t_LoadingHotstringsFromLibraries%, 1
-v_HotstringCnt :=
-Loop, Files, Libraries\*.csv
-{
-	if !(A_LoopFileName == "PriorityLibrary.csv")
-	{
-		F_LoadFiles(A_LoopFileName)
-	}
-}
-F_LoadFiles("PriorityLibrary.csv")
-TrayTip,%A_ScriptName%, %t_HotstringsHaveBeenLoaded% ,1
+	Menu, ToggleLibrariesSubmenu, ToggleCheck, %A_ThisMenuitem%
+	IniRead, v_LibraryFlag, Config.ini, TipsLibraries, %A_ThisMenuitem%
+	v_LibraryFlag := !(v_LibraryFlag)
+	IniWrite, %v_LibraryFlag%, Config.ini, TipsLibraries, %A_ThisMenuitem%
+	a_Triggers := []
+	F_LoadHotstringsFromLibraries()
 return
 
 L_SortTipsAlphabetically:
