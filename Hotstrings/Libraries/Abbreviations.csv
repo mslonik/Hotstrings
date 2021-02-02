@@ -2,9 +2,11 @@
 B0*?‖.csv‖SI‖En‖‖
 B0*?‖.pdf‖SI‖En‖‖
 B0*?‖.svg‖SI‖En‖‖
-O‖2d‖SI‖En‖2D‖
-*‖3d ‖SI‖En‖3D ‖
+O‖2d‖MSI‖En‖2D¦two-dimensional‖
+*‖3d ‖MSI‖En‖3D ¦three-dimensional‖
 *‖a/‖SI‖En‖Availability‖
+*‖a3‖MSI‖En‖A3‖size of paper sheet in Europe 
+*‖a4‖MSI‖En‖A4‖size of paper sheet in Europe 
 ‖ac‖SI‖En‖AC‖
 *‖ac/‖MSI‖En‖Alternating Current¦Axle Counter‖
 ‖ahk‖SI‖En‖AHK‖
@@ -49,6 +51,8 @@ O‖2d‖SI‖En‖2D‖
 *‖cots/‖CL‖En‖Commercial Off-The-Shelf‖
 ‖covid‖MSI‖En‖COVID-19¦👑🦠‖U+1F451 | U+83CC
 *‖covid/‖CL‖En‖severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2)‖
+‖crm‖SI‖En‖CRM‖
+*‖crm/‖SI‖En‖Customer Relationship Management‖
 ‖cso‖SI‖En‖CSO‖
 *‖cso/‖SI‖En‖Chief Sales Officer‖
 ‖csv‖SI‖En‖CSV‖
@@ -61,6 +65,7 @@ O‖2d‖SI‖En‖2D‖
 *‖ddns/‖CL‖En‖Dynamic DNS‖https://en.wikipedia.org/wiki/Dynamic_DNS
 ‖dhcp‖SI‖En‖DHCP‖
 *‖dhcp/‖SI‖En‖Dynamic Host Configuration Protocol‖https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protoco
+*‖din‖SI‖En‖DIN‖
 ‖dita‖SI‖En‖DITA‖
 *‖dita/‖CL‖En‖Darwin Information Typing Architecture‖https://en.wikipedia.org/wiki/Darwin_Information_Typing_Architec
 ‖dnd‖SI‖En‖D&D‖
@@ -68,12 +73,16 @@ O‖2d‖SI‖En‖2D‖
 ‖dns‖SI‖En‖DNS‖
 ‖dns/‖SI‖En‖Domain Name System‖https://en.wikipedia.org/wiki/Domain_Name_System
 *‖doors/‖SI‖En‖ Dynamic Object Oriented Requirements System‖https://www.ibm.com/pl-pl/products/requirements-management
+‖dsl‖SI‖En‖DSL‖
+*‖dsl/‖SI‖En‖Digital Subscriber Line‖https://en.wikipedia.org/wiki/Digital_subscriber_line
 ‖dvd‖SI‖En‖DVD‖
 *‖dvd/‖SI‖En‖Digital Versatile Disc‖https://en.wikipedia.org/wiki/DVD
 ‖dwg‖SI‖En‖DWG‖
 *‖dwg/‖SI‖Dis‖Drawing Exchange Format‖
 ‖dxf‖SI‖En‖DXF‖
 *‖dxf/‖SI‖En‖Drawing Exchange Format‖
+‖ebit‖SI‖En‖EBIT‖
+*‖ebit/‖SI‖En‖Earnings Before Interest and Taxes‖
 ‖ei‖SI‖En‖EI‖
 *‖ei/‖CL‖En‖Emotional Intelligence‖
 ‖emc‖SI‖En‖EMC‖
@@ -112,8 +121,12 @@ O‖2d‖SI‖En‖2D‖
 *‖fmea/‖CL‖En‖Failure Mode and Effects Analysis‖
 ‖fmeca‖SI‖En‖FMECA‖
 *‖fmeca/‖SI‖En‖Failure mode effects and criticality analysis‖
+‖fo‖SI‖En‖FO‖
+*‖fo/‖SI‖En‖Fiber Optics‖
 ‖gdpr‖SI‖En‖GDPR‖
 *‖gdpr/‖SI‖En‖General Data Protection Regulation‖
+‖gmt‖SI‖En‖GMT‖
+*‖gmt/‖MSI‖En‖Greenwich Mean Time¦Poland: GMT + 01:00¦Polska: GMT + 01:00‖https://en.wikipedia.org/wiki/Greenwich_Mean_Time
 ‖gnu‖SI‖En‖GNU‖
 *‖gnu/‖MCL‖En‖GNU's Not Unix!¦https://en.wikipedia.org/wiki/GNU‖https://en.wikipedia.org/wiki/GNU
 ‖gpl‖SI‖En‖GPL‖
@@ -138,6 +151,8 @@ O‖2d‖SI‖En‖2D‖
 *‖iq/‖CL‖En‖Inteligence Quotient‖
 ‖iris‖SI‖En‖IRIS‖
 *‖iris/‖CL‖En‖International Railway Industry Standard for the evaluation of railway management systems‖
+‖iso‖SI‖En‖ISO‖
+*‖iso/‖SI‖En‖International Standard Organisation‖
 *‖javascript‖SI‖En‖JavaScript‖
 ‖kpi‖SI‖En‖KPI‖
 *‖kpi/‖CL‖En‖Key Performance Indicator‖
@@ -238,6 +253,8 @@ O‖2d‖SI‖En‖2D‖
 *‖srac/‖CL‖En‖Safety Related Application Condition‖
 ‖svg‖SI‖En‖SVG‖
 *‖svg/‖SI‖En‖Scalable Vector Graphics‖
+‖tco‖SI‖En‖TCO‖
+‖tco/‖SI‖En‖Total Cost of Ownership‖
 ‖tffr‖SI‖En‖TFFR‖
 *‖tffr/‖CL‖En‖Tolerable Functional Failure Rate‖
 ‖thr‖SI‖En‖THR‖

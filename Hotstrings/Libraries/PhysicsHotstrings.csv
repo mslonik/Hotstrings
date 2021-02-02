@@ -37,6 +37,8 @@
 *‖space/‖MSI‖En‖{U+2000}¦{U+2003}¦{U+2004}¦{U+2005}¦{U+2006}¦&nbsp;¦&emsp;‖useful in Mardown https://unicode-table.com/en/blocks/general-pu
 *‖stopc/‖CL‖En‖°‖
 *‖theta/‖CL‖En‖θ‖
+*‖vac‖SI‖En‖V{U+00A0}AC‖
+*‖vdc‖SI‖En‖V{U+00A0}DC‖
 *‖wiekszyrowny‖CL‖En‖≥‖
 *‖większyrówny‖CL‖En‖≥‖
 *‖~~‖CL‖En‖≈‖
