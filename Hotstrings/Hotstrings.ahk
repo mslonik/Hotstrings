@@ -474,7 +474,8 @@ F_LoadFiles("PriorityLibrary.csv")
 F_EndChars()
 
 
-; Future: Check if other A_Args except A_Args[1] are useful for any purpose.
+; When Hotstrings app is reloaded, it is run with set of A_Args.
+; Future: add meaning of those parameters.
 
 if !(A_Args[8])
 	v_SelectedRow := 0
@@ -504,66 +505,9 @@ if !(v_Param == "l") 										; if Hotstrings.ahk wasn't run with "l" parameter
 	Menu, Tray, Standard									; add it again at the bottom
 }
 
-; Prepare TrayTip message taking into account value of command line parameter.
-if (v_Param == "d")
-	TrayTip, %A_ScriptName% - Debug mode, 	%t_LoadingHotstringsFromLibraries%, 1
-else if (v_Param == "l")
-	TrayTip, %A_ScriptName% - Lite mode, 	%t_LoadingHotstringsFromLibraries%, 1
-else	
-	TrayTip, %A_ScriptName%,				%t_LoadingHotstringsFromLibraries%, 1
- 
-/*Comment added on 2021-01-30
-	v_HotstringCnt := 0; Comment added on 2021-01-30
-	
- 	a_Comment 		:= []
-	a_EnableDisable 	:= []
-	a_Hotstring 		:= []
-	a_Library 		:= []
-	a_OutputFunction 	:= []
-	a_TriggerOptions 	:= []
-	a_Triggerstring 	:= []
-*/
+F_LoadLibrariesToTables()
 
-Loop, Files, %A_ScriptDir%\Libraries\*.csv
-{
-	Loop
-	{
-		FileReadLine, varSearch, %A_LoopFileFullPath%, %A_Index%
-		if (ErrorLevel)
-			break
-		tabSearch := StrSplit(varSearch, "‖")
-		if (InStr(tabSearch[1], "*0"))
-		{
-			tabSearch[1] := StrReplace(tabSearch[1], "*0")
-		}
-		if (InStr(tabSearch[1], "O0"))
-		{
-			tabSearch[1] := StrReplace(tabSearch[1], "O0")
-		}
-		if (InStr(tabSearch[1], "C0"))
-		{
-			tabSearch[1] := StrReplace(tabSearch[1], "C0")
-		}
-		if (InStr(tabSearch[1], "?0"))
-		{
-			tabSearch[1] := StrReplace(tabSearch[1], "?0")
-		}
-		if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
-		{
-			tabSearch[1] := StrReplace(tabSearch[1], "B")
-		}
-		name := SubStr(A_LoopFileName, 1, StrLen(A_LoopFileName)-4)
-		; LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4],tabSearch[5], tabSearch[6])
-		a_Library.Push(name)
-		a_TriggerOptions.Push(tabSearch[1])
-		a_Hotstring.Push(tabSearch[2])
-		a_OutputFunction.Push(tabSearch[3])
-		a_EnableDisable.Push(tabSearch[4])
-		a_Triggerstring.Push(tabSearch[5])
-		a_Comment.Push(tabSearch[6])
-	}
-}
-TrayTip, %A_ScriptName%, %t_HotstringsHaveBeenLoaded%, 1
+
 if (v_PreviousSection)
 	Gosub L_GUIInit ; end of initialization
 
@@ -678,7 +622,7 @@ Loop,
 	}
 }
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-; Beginning of the main loop of application.
+; The end of the main loop of application.
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
@@ -864,6 +808,61 @@ Gui, HS3List:Default
 goto, MoveList
 #if
 ; ------------------------- SECTION OF FUNCTIONS --------------------------
+
+F_LoadLibrariesToTables()
+{
+	; Prepare TrayTip message taking into account value of command line parameter.
+	if (v_Param == "d")
+		TrayTip, %A_ScriptName% - Debug mode, 	%t_LoadingHotstringsFromLibraries%, 1
+	else if (v_Param == "l")
+		TrayTip, %A_ScriptName% - Lite mode, 	%t_LoadingHotstringsFromLibraries%, 1
+	else	
+		TrayTip, %A_ScriptName%,				%t_LoadingHotstringsFromLibraries%, 1
+	
+	;Here content of libraries is loaded into set of tables
+	Loop, Files, %A_ScriptDir%\Libraries\*.csv ;#[Ladowanie tablic]
+	{
+		Loop
+		{
+			FileReadLine, varSearch, %A_LoopFileFullPath%, %A_Index%
+			if (ErrorLevel)
+				break
+			tabSearch := StrSplit(varSearch, "‖")
+			if (InStr(tabSearch[1], "*0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "*0")
+			}
+			if (InStr(tabSearch[1], "O0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "O0")
+			}
+			if (InStr(tabSearch[1], "C0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "C0")
+			}
+			if (InStr(tabSearch[1], "?0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "?0")
+			}
+			if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "B")
+			}
+			name := SubStr(A_LoopFileName, 1, StrLen(A_LoopFileName)-4)
+			; LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4],tabSearch[5], tabSearch[6])
+			a_Library.Push(name)
+			a_TriggerOptions.Push(tabSearch[1])
+			a_Hotstring.Push(tabSearch[2])
+			a_OutputFunction.Push(tabSearch[3])
+			a_EnableDisable.Push(tabSearch[4])
+			a_Triggerstring.Push(tabSearch[5])
+			a_Comment.Push(tabSearch[6])
+		}
+	}
+	TrayTip, %A_ScriptName%, %t_HotstringsHaveBeenLoaded%, 1
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 F_LoadFiles(nameoffile)
 {
@@ -1805,109 +1804,108 @@ return
 
 ^#h::
 L_GUIInit:
-	;Future: no IniRead each time when this GUI is opened / created / displayed.
-SysGet, N, MonitorCount
-Loop, % N
-{
-	SysGet, Mon%A_Index%, Monitor, %A_Index%
-	W%A_Index% := Mon%A_Index%Right - Mon%A_Index%Left
-	H%A_Index% := Mon%A_Index%Bottom - Mon%A_Index%Top
-	   ;MsgBox,, HA_Index, % H%A_Index% ; to działa
-        ;DPI%A_Index% := round(W%A_Index%/1920*(96/A_ScreenDPI), 2) ; original
-        ;DPI%A_Index% := round(W%A_Index%/1920*(96/%A_ScreenDPI%), 2)
-	   ;MsgBox, , A_ScreenDPI, % 96 / 144	; to działa
-	   ;MsgBox, , A_ScreenDPI, % 96 / A_ScreenDPI	; to działa
-        ;DPI%A_Index% := % 96 / A_ScreenDPI	; to działa
-        ;DPI%A_Index% := 96 / %A_ScreenDPI%	; to nie działa
-        ;DPI%A_Index% := %A_ScreenDPI%	; to nie działa
-        ;DPI%A_Index% := % A_ScreenDPI	; to działa
-        ;DPI%A_Index% := A_ScreenDPI	; to działa
-	DPI%A_Index% := 1.0			; added on 2021-01-31 in order to clean up GUI sizing
-        ;DPI%A_Index% := "155"		; to działa
-        ;DPI%A_Index% := 155			; to działa
-	   ;MsgBox, , DPI per monitor, % DPI%A_Index%		; to działa
-}
-SysGet, PrimMon, MonitorPrimary
-
-;I couldn't find how to get system settings for size of menu font. Quick & dirty solution: manual setting of all fonts with variable v_FontSize.
-;Future: v_FontSize as configurable parameter.
-global    v_FontSize := 10
-
-if (v_SelectedMonitor == 0)
-	v_SelectedMonitor := PrimMon
-Gui, HS3:New, 		+Resize ; Makes the window resizable and enables its maximize button in the title bar.
-Gui, HS3:Margin, 	12.5*DPI%v_SelectedMonitor%, 7.5*DPI%v_SelectedMonitor%	; Sets the number of pixels of space to leave at the left/right and top/bottom sides of the window when auto-positioning any control that lacks an explicit X or Y coordinate.
-Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " bold cBlue", Calibri
-Gui, HS3:Add, 		Text, % "xm+" . 9*DPI%v_SelectedMonitor%, %t_EnterTriggerstring%
-Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " norm cBlack"
-Gui, HS3:Add, 		Edit, % "w" . 184*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " xp+" . 227*DPI%v_SelectedMonitor% . " yp vv_TriggerString"
-Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " bold cBlue"
-Gui, HS3:Add, 		GroupBox, % "section xm w" . 425*DPI%v_SelectedMonitor% . " h" . 106*DPI%v_SelectedMonitor%, %t_SelectTriggerOptions%
-Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " norm cBlack"
-Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionImmediateExecute xs+" . 12*DPI%v_SelectedMonitor% 	. " ys+" . 25*DPI%v_SelectedMonitor%, 	%t_ImmediateExecute%
-Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionCaseSensitive xp+" 	. 225*DPI%v_SelectedMonitor% 	. " yp+" . 0*DPI%v_SelectedMonitor%, 	%t_CaseSensitive%
-Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionNoBackspace xp-" 	. 225*DPI%v_SelectedMonitor% 	. " yp+" . 25*DPI%v_SelectedMonitor%, 	%t_NoBackspace%
-Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionInsideWord xp+" 		. 225*DPI%v_SelectedMonitor% 	. " yp+" . 0*DPI%v_SelectedMonitor%, 	%t_InsideWord%
-Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionNoEndChar xp-" 		. 225*DPI%v_SelectedMonitor% 	. " yp+" . 25*DPI%v_SelectedMonitor%, 	%t_NoEndChar%
-Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionDisable xp+" 		. 225*DPI%v_SelectedMonitor% 	. " yp+" . 0*DPI%v_SelectedMonitor%, 	%t_Disable%
-Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
-Gui, HS3:Add, 		Text,% "xm+" . 9*DPI%v_SelectedMonitor%, %t_SelectHotstringOutputFunction%
-Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
-Gui, HS3:Add, 		DropDownList, % "xm w" . 424*DPI%v_SelectedMonitor% . " vv_SelectFunction gL_SelectFunction hwndddl", SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
-PostMessage, 0x153, -1, 30*DPI%v_SelectedMonitor%,, ahk_id %ddl%
-Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
-Gui, HS3:Add, 		Text, % "xm+" . 9*DPI%v_SelectedMonitor%, %t_EnterHotstring%
-Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
-Gui, HS3:Add, 		Edit, % "w" 	. 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% 	. " vv_EnterHotstring xm"
-Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring1 xm Disabled"
-Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring2 xm Disabled"
-Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring3 xm Disabled"
-Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring4 xm Disabled"
-Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring5 xm Disabled"
-Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring6 xm Disabled"
-Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
-Gui, HS3:Add, 		Text, % "xm+" . 9*DPI%v_SelectedMonitor%, %t_AddAComment%
-Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
-Gui, HS3:Add, 		Edit, % "w" . 424*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " limit64 vComment xm"
-Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
-Gui, HS3:Add, 		Text, % "xm+" . 9*DPI%v_SelectedMonitor%, %t_SelectHotstringLibrary%
-Gui, HS3:Add, 		Button, % "gAddLib x+" . 120*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor%, %t_AddLibrary%
-Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
-Gui, HS3:Add, 		DropDownList, % "w" . 424*DPI%v_SelectedMonitor% . " vv_SelectHotstringLibrary gSectionChoose xm hwndddl" ,
-
-Loop, %A_ScriptDir%\Libraries\*.csv
-	GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName%
-
-PostMessage, 0x153, -1, 30*DPI%v_SelectedMonitor%,, ahk_id %ddl%
-Gui, HS3:Font, 	bold
-Gui, HS3:Add, 		Button, 	% "xm yp+" . 37*DPI%v_SelectedMonitor% . " w" . 135*DPI%v_SelectedMonitor% . " gAddHotstring", %t_SetHotstring%
-Gui, HS3:Add, 		Button, 	% "x+" . 10*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " gClear", %t_Clear%
-Gui, HS3:Add, 		Button, 	% "x+" . 10*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " vv_DeleteHotstring gDelete Disabled", %t_DeleteHotstring%
-Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
-Gui, HS3:Add, 		Text, 	% "vSandString xm+" . 9*DPI%v_SelectedMonitor%, %t_Sandbox%
-Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
-GUI, HS3:Add, 		Edit, 	% "xm w" . 425*DPI%v_SelectedMonitor% . " vSandbox r5" ; r5 = 5x rows of text
+	SysGet, N, MonitorCount
+	Loop, % N
+	{
+		SysGet, Mon%A_Index%, Monitor, %A_Index%
+		W%A_Index% := Mon%A_Index%Right - Mon%A_Index%Left
+		H%A_Index% := Mon%A_Index%Bottom - Mon%A_Index%Top
+		;MsgBox,, HA_Index, % H%A_Index% ; to działa
+		;DPI%A_Index% := round(W%A_Index%/1920*(96/A_ScreenDPI), 2) ; original
+		;DPI%A_Index% := round(W%A_Index%/1920*(96/%A_ScreenDPI%), 2)
+		;MsgBox, , A_ScreenDPI, % 96 / 144	; to działa
+		;MsgBox, , A_ScreenDPI, % 96 / A_ScreenDPI	; to działa
+		;DPI%A_Index% := % 96 / A_ScreenDPI	; to działa
+		;DPI%A_Index% := 96 / %A_ScreenDPI%	; to nie działa
+		;DPI%A_Index% := %A_ScreenDPI%	; to nie działa
+		;DPI%A_Index% := % A_ScreenDPI	; to działa
+		;DPI%A_Index% := A_ScreenDPI	; to działa
+		DPI%A_Index% := 1			; added on 2021-01-31 in order to clean up GUI sizing
+		;DPI%A_Index% := "155"		; to działa
+		;DPI%A_Index% := 155			; to działa
+		;MsgBox, , DPI per monitor, % DPI%A_Index%		; to działa
+	}
+	SysGet, PrimMon, MonitorPrimary
+	
+	;I couldn't find how to get system settings for size of menu font. Quick & dirty solution: manual setting of all fonts with variable v_FontSize.
+	;Future: v_FontSize as configurable parameter.
+	global    v_FontSize := 10
+	
+	if (v_SelectedMonitor == 0)
+		v_SelectedMonitor := PrimMon
+	Gui, HS3:New, 		+Resize ; Makes the window resizable and enables its maximize button in the title bar.
+	Gui, HS3:Margin, 	12.5*DPI%v_SelectedMonitor%, 7.5*DPI%v_SelectedMonitor%	; Sets the number of pixels of space to leave at the left/right and top/bottom sides of the window when auto-positioning any control that lacks an explicit X or Y coordinate.
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " bold cBlue", Calibri
+	Gui, HS3:Add, 		Text, % "xm+" . 9*DPI%v_SelectedMonitor%, %t_EnterTriggerstring%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " norm cBlack", Calibri
+	Gui, HS3:Add, 		Edit, % "w" . 184*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " xp+" . 227*DPI%v_SelectedMonitor% . " yp vv_TriggerString"
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " bold cBlue"
+	Gui, HS3:Add, 		GroupBox, % "section xm w" . 425*DPI%v_SelectedMonitor% . " h" . 106*DPI%v_SelectedMonitor%, %t_SelectTriggerOptions%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " norm cBlack"
+	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionImmediateExecute xs+" . 12*DPI%v_SelectedMonitor% 	. " ys+" . 25*DPI%v_SelectedMonitor%, 	%t_ImmediateExecute%
+	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionCaseSensitive xp+" 	. 225*DPI%v_SelectedMonitor% 	. " yp+" . 0*DPI%v_SelectedMonitor%, 	%t_CaseSensitive%
+	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionNoBackspace xp-" 	. 225*DPI%v_SelectedMonitor% 	. " yp+" . 25*DPI%v_SelectedMonitor%, 	%t_NoBackspace%
+	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionInsideWord xp+" 		. 225*DPI%v_SelectedMonitor% 	. " yp+" . 0*DPI%v_SelectedMonitor%, 	%t_InsideWord%
+	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionNoEndChar xp-" 		. 225*DPI%v_SelectedMonitor% 	. " yp+" . 25*DPI%v_SelectedMonitor%, 	%t_NoEndChar%
+	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionDisable xp+" 		. 225*DPI%v_SelectedMonitor% 	. " yp+" . 0*DPI%v_SelectedMonitor%, 	%t_Disable%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
+	Gui, HS3:Add, 		Text,% "xm+" . 9*DPI%v_SelectedMonitor%, %t_SelectHotstringOutputFunction%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
+	Gui, HS3:Add, 		DropDownList, % "xm w" . 424*DPI%v_SelectedMonitor% . " vv_SelectFunction gL_SelectFunction hwndddl", SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
+	PostMessage, 0x153, -1, 30*DPI%v_SelectedMonitor%,, ahk_id %ddl%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
+	Gui, HS3:Add, 		Text, % "xm+" . 9*DPI%v_SelectedMonitor%, %t_EnterHotstring%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
+	Gui, HS3:Add, 		Edit, % "w" 	. 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% 	. " vv_EnterHotstring xm"
+	Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring1 xm Disabled"
+	Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring2 xm Disabled"
+	Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring3 xm Disabled"
+	Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring4 xm Disabled"
+	Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring5 xm Disabled"
+	Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring6 xm Disabled"
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
+	Gui, HS3:Add, 		Text, % "xm+" . 9*DPI%v_SelectedMonitor%, %t_AddAComment%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
+	Gui, HS3:Add, 		Edit, % "w" . 424*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " limit64 vComment xm"
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
+	Gui, HS3:Add, 		Text, % "xm+" . 9*DPI%v_SelectedMonitor%, %t_SelectHotstringLibrary%
+	Gui, HS3:Add, 		Button, % "gAddLib x+" . 120*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor%, %t_AddLibrary%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
+	Gui, HS3:Add, 		DropDownList, % "w" . 424*DPI%v_SelectedMonitor% . " vv_SelectHotstringLibrary gSectionChoose xm hwndddl" ,
+	
+	Loop, %A_ScriptDir%\Libraries\*.csv
+		GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName%
+	
+	PostMessage, 0x153, -1, 30*DPI%v_SelectedMonitor%,, ahk_id %ddl%
+	Gui, HS3:Font, 	bold
+	Gui, HS3:Add, 		Button, 	% "xm yp+" . 37*DPI%v_SelectedMonitor% . " w" . 135*DPI%v_SelectedMonitor% . " gAddHotstring", %t_SetHotstring%
+	Gui, HS3:Add, 		Button, 	% "x+" . 10*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " gClear", %t_Clear%
+	Gui, HS3:Add, 		Button, 	% "x+" . 10*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " vv_DeleteHotstring gDelete Disabled", %t_DeleteHotstring%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
+	Gui, HS3:Add, 		Text, 	% "vSandString xm+" . 9*DPI%v_SelectedMonitor%, %t_Sandbox%
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
+	GUI, HS3:Add, 		Edit, 	% "xm w" . 425*DPI%v_SelectedMonitor% . " vSandbox r5" ; r5 = 5x rows of text
 	;IniRead, ini_Sandbox, Config.ini, Configuration, Sandbox
-if (ini_Sandbox == 0)
-{
-	Gui, 		% "HS3:+MinSize"  . 1350*DPI%v_SelectedMonitor% . "x" . 640*DPI%v_SelectedMonitor%+20
-	GuiControl, 	HS3:Hide, Sandbox
-	GuiControl, 	HS3:Hide, SandString
-}
-else
-{
-	Gui, % "HS3:+MinSize"  . 1350*DPI%v_SelectedMonitor% . "x" . 640*DPI%v_SelectedMonitor%+20  + 154*DPI%v_SelectedMonitor%
-}
-Gui, HS3:Add, 	Text, x0 h1 0x7 w10 vLine
-Gui, HS3:Font, % "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
-     ;Add to translation file
-Gui, HS3:Add, 	Text, ym, Library content
-Gui, HS3:Font, % "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
-Gui, HS3:Add, 	ListView, % "LV0x1 0x4 yp+" . 25*DPI%v_SelectedMonitor% . " xp h" . 500*DPI%v_SelectedMonitor% . " w" . 400*DPI%v_SelectedMonitor% . " vv_LibraryContent AltSubmit gHSLV", %t_TriggerstringTriggOptOutFunEnDisHotstringComment%
-Gui, HS3:Add, 	Edit, vv_ViewString xs gViewString ReadOnly Hide,
-Gui, HS3:Font, % "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
-Gui, HS3:Add, 	Text, xm y0 vv_ShortcutsMainInterface,%t_F1AboutHelpF2LibraryContentF3SearchHotstringsF5ClearF7ClipboardDelayF8DeleteHotstringF9SetHotstring%
-GUI, HS3:Add, 	Text, y0 x800 vv_LoadedHotstrings, % t_LoadedHotstrings . " " . v_HotstringCnt
+	if (ini_Sandbox == 0)
+	{
+		Gui, 		% "HS3:+MinSize"  . 1350*DPI%v_SelectedMonitor% . "x" . 640*DPI%v_SelectedMonitor%+20
+		GuiControl, 	HS3:Hide, Sandbox
+		GuiControl, 	HS3:Hide, SandString
+	}
+	else
+	{
+		Gui, % "HS3:+MinSize"  . 1350*DPI%v_SelectedMonitor% . "x" . 640*DPI%v_SelectedMonitor%+20  + 154*DPI%v_SelectedMonitor%
+	}
+	Gui, HS3:Add, 	Text, x0 h1 0x7 w10 vLine
+	Gui, HS3:Font, % "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
+		;Add to translation file
+	Gui, HS3:Add, 	Text, ym, Library content
+	Gui, HS3:Font, % "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
+	Gui, HS3:Add, 	ListView, % "LV0x1 0x4 yp+" . 25*DPI%v_SelectedMonitor% . " xp h" . 500*DPI%v_SelectedMonitor% . " w" . 400*DPI%v_SelectedMonitor% . " vv_LibraryContent AltSubmit gHSLV", %t_TriggerstringTriggOptOutFunEnDisHotstringComment%
+	Gui, HS3:Add, 	Edit, vv_ViewString xs gViewString ReadOnly Hide,
+	Gui, HS3:Font, % "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
+	Gui, HS3:Add, 	Text, xm y0 vv_ShortcutsMainInterface,%t_F1AboutHelpF2LibraryContentF3SearchHotstringsF5ClearF7ClipboardDelayF8DeleteHotstringF9SetHotstring%
+	GUI, HS3:Add, 	Text, y0 x800 vv_LoadedHotstrings, % t_LoadedHotstrings . " " . v_HotstringCnt
 
     ; Menu, HSMenu, Add, &Monitor, CheckMon
 Menu, Submenu1, 	Add, %t_UndoLastHotstring%,		L_Undo
@@ -2919,49 +2917,49 @@ return
 ~F1::
 	MyOK:
 	MyAboutGuiEscape:
-	MyAboutGuiClose: ; Launched when the window is closed by pressing its X button in the title bar
+	MyAboutGuiClose: ; Launched when the window is closed by pressing its X button in the title bar.
 	Gui, MyAbout: Destroy
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-HS3GuiSize:
-if (ErrorLevel == 1)
-	return
-if (ErrorLevel == 0)
-	v_ShowGui := 2
-IniW := StartW
-IniH := StartH
-LV_Width := IniW - 460*DPI%v_SelectedMonitor%
-LV_Height := IniH - 62*DPI%v_SelectedMonitor%
-LV_ModifyCol(1,100*DPI%v_SelectedMonitor%)
-LV_ModifyCol(2,80*DPI%v_SelectedMonitor%)
-LV_ModifyCol(3,70*DPI%v_SelectedMonitor%)	
-LV_ModifyCol(4,60*DPI%v_SelectedMonitor%)
-LV_ModifyCol(6,300*DPI%v_SelectedMonitor%)
-LV_ModifyCol(1,"Center")
-LV_ModifyCol(2,"Center")
-LV_ModifyCol(3,"Center")
-LV_ModifyCol(4,"Center")
-
-WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
-v_PreviousWidth := A_GuiWidth
-v_PreviousHeight := A_GuiHeight
-
-NewHeight := LV_Height+(A_GuiHeight-IniH)
-NewWidth := LV_Width+(A_GuiWidth-IniW)
-ColWid := (NewWidth-620*DPI%v_SelectedMonitor%)
-LV_ModifyCol(5, "Auto")
-SendMessage, 4125, 4, 0, SysListView321
-wid := ErrorLevel
-if (wid < ColWid)
-{
-	LV_ModifyCol(5, ColWid)
-}
-GuiControl, Move, v_LibraryContent, W%NewWidth% H%NewHeight%
-GuiControl, Move, v_ShortcutsMainInterface, % "y" . v_PreviousHeight - 22*DPI%v_SelectedMonitor%
-GuiControl, Move, v_LoadedHotstrings, % "y" . v_PreviousHeight - 22*DPI%v_SelectedMonitor% . " x" . v_PreviousWidth - 200*DPI%v_SelectedMonitor%
-GuiControl, Move, Line, % "w" . A_GuiWidth . " y" . v_PreviousHeight - 26*DPI%v_SelectedMonitor%
+HS3GuiSize:		; Launched when the window is resized, minimized, maximized, or restored.
+	if (ErrorLevel == 1)
+		return
+	if (ErrorLevel == 0)
+		v_ShowGui := 2
+	IniW := StartW
+	IniH := StartH
+	LV_Width 	:= IniW - 460*DPI%v_SelectedMonitor%
+	LV_Height := IniH - 62*DPI%v_SelectedMonitor%
+	LV_ModifyCol(1,100*DPI%v_SelectedMonitor%)
+	LV_ModifyCol(2,80*DPI%v_SelectedMonitor%)
+	LV_ModifyCol(3,70*DPI%v_SelectedMonitor%)	
+	LV_ModifyCol(4,60*DPI%v_SelectedMonitor%)
+	LV_ModifyCol(6,300*DPI%v_SelectedMonitor%)
+	LV_ModifyCol(1,"Center")
+	LV_ModifyCol(2,"Center")
+	LV_ModifyCol(3,"Center")
+	LV_ModifyCol(4,"Center")
+	
+	WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
+	v_PreviousWidth := A_GuiWidth
+	v_PreviousHeight := A_GuiHeight
+	
+	NewHeight := LV_Height+(A_GuiHeight-IniH)
+	NewWidth 	:= LV_Width+(A_GuiWidth-IniW)
+	ColWid := (NewWidth-620*DPI%v_SelectedMonitor%)
+	LV_ModifyCol(5, "Auto")
+	SendMessage, 4125, 4, 0, SysListView321
+	wid := ErrorLevel
+	if (wid < ColWid)
+	{
+		LV_ModifyCol(5, ColWid)
+	}
+	GuiControl, Move, v_LibraryContent, W%NewWidth% H%NewHeight%
+	GuiControl, Move, v_ShortcutsMainInterface, % "y" . v_PreviousHeight - 22*DPI%v_SelectedMonitor%
+	GuiControl, Move, v_LoadedHotstrings, % "y" . v_PreviousHeight - 22*DPI%v_SelectedMonitor% . " x" . v_PreviousWidth - 200*DPI%v_SelectedMonitor%
+	GuiControl, Move, Line, % "w" . A_GuiWidth . " y" . v_PreviousHeight - 26*DPI%v_SelectedMonitor%
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2977,7 +2975,7 @@ return
 ; Here I use 2x GUIs: SearchLoad which shows progress on time of library loading process and HS3List which is in fact Search GUI name.
 ; Not clear why v_HS3ListFlag is used.
 L_Searching:
-	if (v_HS3ListFlag)
+ 	if (v_HS3ListFlag)
 		Gui, HS3List:Show
 	else
 	{
@@ -3046,70 +3044,70 @@ L_Searching:
 			GuiControl,, Hotstring, 1
 		else if (v_RadioGroup == 3)
 			GuiControl,, Library, 1
-		Gui, HS3List:Show, % "w" . StartWlist . " h" . StartHlist . " x" . StartXlist . " y" . StartYlist, Search Hotstrings
+		Gui, HS3List:Show, % "w" . StartWlist . " h" . StartHlist . " x" . StartXlist . " y" . StartYlist, Search Hotstrings 
 		Gui, SearchLoad:Destroy
 	}
 
 Search:
-Gui, Hs3List:Default
-Gui, HS3List:Submit, NoHide
-if getkeystate("CapsLock","T")
-	return
-GuiControlGet, v_SearchTerm
-GuiControl, -Redraw, List
-LV_Delete()
-if (v_RadioGroup == 2)
-{
-	For Each, FileName In a_Triggerstring
+	Gui, Hs3List:Default
+	Gui, HS3List:Submit, NoHide
+	if getkeystate("CapsLock","T")
+		return
+	GuiControlGet, v_SearchTerm
+	GuiControl, -Redraw, List
+	LV_Delete()
+	if (v_RadioGroup == 2)
 	{
-		If (v_SearchTerm != "")
+		For Each, FileName In a_Triggerstring
 		{
-        ; If (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
-			If InStr(FileName, v_SearchTerm) ; for overall matching
+			If (v_SearchTerm != "")
+			{
+		; If (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
+				If InStr(FileName, v_SearchTerm) ; for overall matching
+					LV_Add("",a_Library[A_Index], a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],FileName,a_Comment[A_Index])
+			}
+			Else
 				LV_Add("",a_Library[A_Index], a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],FileName,a_Comment[A_Index])
 		}
-		Else
-			LV_Add("",a_Library[A_Index], a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],FileName,a_Comment[A_Index])
+		LV_ModifyCol(6,"Sort")
 	}
-	LV_ModifyCol(6,"Sort")
-}
-else if (v_RadioGroup == 1)
-{
-	For Each, FileName In a_Hotstring
+	else if (v_RadioGroup == 1)
 	{
-		If (v_SearchTerm != "")
+		For Each, FileName In a_Hotstring
 		{
-			If (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
-        ; If InStr(FileName, v_SearchTerm) ; for overall matching
+			If (v_SearchTerm != "")
+			{
+				If (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
+		; If InStr(FileName, v_SearchTerm) ; for overall matching
+					LV_Add("",a_Library[A_Index], FileName,a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index],a_Comment[A_Index])
+			}
+			Else
 				LV_Add("",a_Library[A_Index], FileName,a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index],a_Comment[A_Index])
 		}
-		Else
-			LV_Add("",a_Library[A_Index], FileName,a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index],a_Comment[A_Index])
+		LV_ModifyCol(2,"Sort")
 	}
-	LV_ModifyCol(2,"Sort")
-}
-else if (v_RadioGroup == 3)
-{
-	For Each, FileName In a_Library
+	else if (v_RadioGroup == 3)
 	{
-		If (v_SearchTerm != "")
+		For Each, FileName In a_Library
 		{
-			If (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
-        ; If InStr(FileName, v_SearchTerm) ; for overall matching
+			If (v_SearchTerm != "")
+			{
+				If (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
+		; If InStr(FileName, v_SearchTerm) ; for overall matching
+					LV_Add("",FileName, a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index],a_Comment[A_Index])
+			}
+			Else
 				LV_Add("",FileName, a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index],a_Comment[A_Index])
 		}
-		Else
-			LV_Add("",FileName, a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index],a_Comment[A_Index])
+		LV_ModifyCol(1,"Sort")
 	}
-	LV_ModifyCol(1,"Sort")
-}
-GuiControl, +Redraw, List
+	GuiControl, +Redraw, List 
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 MoveList:
-	Gui, HS3List:Submit, NoHide
+	Gui, HS3List:Submit, NoHide 
 	If !(v_SelectedRow := LV_GetNext()) {
 		MsgBox, 0, %A_ThisLabel%, %t_SelectARowInTheListViewPlease%
 		Return
@@ -3160,7 +3158,7 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; This function contains serious bug which cuts down libraries. Example: move of Unicode definitions from library CapitalLetters.csv to library BrandAndProperNames.csv
+; This function have to be further investigated.
 Move:
 	Gui, MoveLibs:Submit, NoHide
 	If !(v_SelectedRow := LV_GetNext()) 
@@ -3253,22 +3251,23 @@ Move:
 	if (cntLines == 1)
 	{
 		FileAppend,, %InputFile%, UTF-8
-	}
-	FileDelete, %OutputFile%
-	MsgBox, % t_HotstringMovedToThe . " " . TargetLib . " " . t_File
-	a_Triggers := []
-	F_LoadHotstringsFromLibraries()
-	Gui, MoveLibs:Destroy
-	Gui, HS3List:Hide
-	v_HS3ListFlag := 0	; added on 2021-02-02. Now Search Hotstring window should be loaded again with last search result.
-	Gosub, L_Searching
+}
+FileDelete, %OutputFile%
+MsgBox, % t_HotstringMovedToThe . " " . TargetLib . " " . t_File
+a_Triggers := [] 
+F_LoadHotstringsFromLibraries() 
+Gui, MoveLibs:Destroy
+Gui, HS3List:Hide	;*[Hotstrings]
+;v_HS3ListFlag := 0	; added on 2021-02-02. Now Search Hotstring window should be loaded again with last search result.
+F_LoadLibrariesToTables()
+Gosub, L_Searching 
 ;return ; This line will be never reached
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 SearchChange:
-	gosub, Search
-	GuiControl,, v_SearchTerm, %v_SearchTerm%
+gosub, Search
+GuiControl,, v_SearchTerm, %v_SearchTerm%
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
