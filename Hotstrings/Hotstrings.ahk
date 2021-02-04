@@ -810,7 +810,9 @@ goto, MoveList
 ; ------------------------- SECTION OF FUNCTIONS --------------------------
 
 F_LoadLibrariesToTables()
-{
+{ 
+	local name
+
 	; Prepare TrayTip message taking into account value of command line parameter.
 	if (v_Param == "d")
 		TrayTip, %A_ScriptName% - Debug mode, 	%t_LoadingHotstringsFromLibraries%, 1
@@ -2975,7 +2977,7 @@ return
 ; Here I use 2x GUIs: SearchLoad which shows progress on time of library loading process and HS3List which is in fact Search GUI name.
 ; Not clear why v_HS3ListFlag is used.
 L_Searching:
- 	if (v_HS3ListFlag)
+ 	if (v_HS3ListFlag) ;*[One]
 		Gui, HS3List:Show
 	else
 	{
@@ -3255,11 +3257,11 @@ Move:
 FileDelete, %OutputFile%
 MsgBox, % t_HotstringMovedToThe . " " . TargetLib . " " . t_File
 a_Triggers := [] 
-F_LoadHotstringsFromLibraries() 
 Gui, MoveLibs:Destroy
-Gui, HS3List:Hide	;*[Hotstrings]
+Gui, HS3List:Hide	
 ;v_HS3ListFlag := 0	; added on 2021-02-02. Now Search Hotstring window should be loaded again with last search result.
 F_LoadLibrariesToTables()
+F_LoadHotstringsFromLibraries() 
 Gosub, L_Searching 
 ;return ; This line will be never reached
 
