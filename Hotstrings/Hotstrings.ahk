@@ -400,6 +400,7 @@ global v_SelectedRow 			:= 0
 global v_SelectedRow2 			:= 0
 global v_SelectFunction 			:= ""
 global v_SelectHotstringLibrary 	:= ""
+global v_SelectedMonitor			:= 0
 global v_ShortcutsMainInterface 	:= ""
 global v_ShowGui 				:= ""
 global v_Tips 					:= ""
@@ -410,25 +411,26 @@ global v_UndoHotstring 			:= ""
 global v_UndoTriggerstring 		:= ""
 global v_ViewString 			:= ""
 
+IniRead, ini_Undo, 						Config.ini, Configuration, UndoHotstring
+IniRead, ini_Delay, 					Config.ini, Configuration, Delay
+IniRead, ini_Sandbox, 					Config.ini, Configuration, Sandbox
+;IniRead, ini_MenuSound,					Config.ini, Configuration, MenuSound	; Future
+
+; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
+F_EndChars()
+
 IniRead, ini_Tips, 						Config.ini, Configuration, Tips
 IniRead, ini_Cursor, 					Config.ini, Configuration, Cursor
 IniRead, ini_Caret, 					Config.ini, Configuration, Caret
+IniRead, ini_AmountOfCharacterTips, 		Config.ini, Configuration, TipsChars
 IniRead, ini_MenuCursor, 				Config.ini, Configuration, MenuCursor
 IniRead, ini_MenuCaret, 					Config.ini, Configuration, MenuCaret
-IniRead, ini_Delay, 					Config.ini, Configuration, Delay
-IniRead, ini_AmountOfCharacterTips, 		Config.ini, Configuration, TipsChars
-IniRead, ini_MenuSound,					Config.ini, Configuration, MenuSound
 IniRead, ini_TipsSortAlphabetically,		Config.ini, Configuration, TipsSortAlphatebically
 IniRead, ini_TipsSortByLength,			Config.ini, Configuration, TipsSortByLength
-
-IniRead, ini_Undo, 						Config.ini, Configuration, UndoHotstring
-IniRead, ini_Tips, 						Config.ini, Configuration, Tips
-IniRead, ini_Sandbox, 					Config.ini, Configuration, Sandbox
 
 IniRead, v_TipsConfig, 					Config.ini, TipsLibraries		; Read into v_TipsConfig section TipsLibraries from the file Config.ini which is a list of library files (.csv) stored in Libraries subfolder
 
 ; Check if tips should be displayed for Libraries files (.csv)
-;MsgBox, , v_TipsConfig, %v_TipsConfig%
 a_TipsConfig := StrSplit(v_TipsConfig, "`n")			; Separates a string into an array of substrings using the specified delimiters.
 
 Loop, % a_TipsConfig.MaxIndex()					; Loop over the entire array
@@ -455,23 +457,10 @@ Loop, Files, Libraries\*.csv						; Look again in Libraries subfolder. Search fo
 }
 
 ; Priority library has special meaning. It is constant library filename, created if not exist.
-IfNotExist, Libraries\PriorityLibrary.csv
+if (!FileExist("\Languages\PriorityLibrary.csv"))
 	FileAppend,, Libraries\PriorityLibrary.csv, UTF-8
 
-; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
-Loop, Files, Libraries\*.csv
-{
-	if !(A_LoopFileName == "PriorityLibrary.csv")
-	{
-		F_LoadFiles(A_LoopFileName)
-	}
-}
 
-; Makes sure that "PriorityLibrary.csv" will be loaded as the last one <- with the highest priority.
-F_LoadFiles("PriorityLibrary.csv")
-
-; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
-F_EndChars()
 
 
 ; When Hotstrings app is reloaded, it is run with set of A_Args.
@@ -485,8 +474,6 @@ if !(v_PreviousMonitor)
 	v_SelectedMonitor := 0
 else
 	v_SelectedMonitor := v_PreviousMonitor
-
-; v_MonitorFlag := 0 ; Comment added on 2021-01-30
 
 
 if !(v_PreviousSection)
@@ -505,7 +492,10 @@ if !(v_Param == "l") 										; if Hotstrings.ahk wasn't run with "l" parameter
 	Menu, Tray, Standard									; add it again at the bottom
 }
 
-F_LoadLibrariesToTables()
+; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
+F_LoadHotstringsFromLibraries() 
+
+F_LoadLibrariesToTables() 
 
 
 if (v_PreviousSection)
@@ -872,6 +862,7 @@ F_LoadFiles(nameoffile)
 	global v_HotstringCnt
 	global a_Triggers
 	
+	IniRead, v_Library, Config.ini, TipsLibraries, %nameoffile%
 	Loop
 	{
 		FileReadLine, line, Libraries\%nameoffile%, %A_Index%
@@ -881,11 +872,10 @@ F_LoadFiles(nameoffile)
 		line := StrReplace(line, "``r", "`r")		
 		line := StrReplace(line, "``t", "`t")
 		F_StartHotstring(line)
-		IniRead, v_Library, Config.ini, TipsLibraries, %nameoffile%
 		if (v_Library)
  			a_Triggers.Push(v_TriggerString)
  		v_HotstringCnt++
-		GuiControl,,v_LoadedHotstrings,% t_LoadedHotstrings . " " v_HotstringCnt
+		GuiControl,, v_LoadedHotstrings, % t_LoadedHotstrings . " " v_HotstringCnt
 	}
 	return
 }
@@ -1777,7 +1767,7 @@ F_LoadHotstringsFromLibraries()
 {
 	global t_LoadingHotstringsFromLibraries, t_HotstringsHaveBeenLoaded, v_HotstringCnt
 	
-	TrayTip, %A_ScriptName%, %t_LoadingHotstringsFromLibraries%, 1
+	;TrayTip, %A_ScriptName%, %t_LoadingHotstringsFromLibraries%, 1
 	v_HotstringCnt := 0
 	Loop, Files, Libraries\*.csv
 	{
@@ -1787,7 +1777,7 @@ F_LoadHotstringsFromLibraries()
 		}
 	}
 	F_LoadFiles("PriorityLibrary.csv")
-	TrayTip, %A_ScriptName%, %t_HotstringsHaveBeenLoaded%, 1
+	;TrayTip, %A_ScriptName%, %t_HotstringsHaveBeenLoaded%, 1
 }
 
 
@@ -2425,7 +2415,7 @@ if (Fun = "SI")
 {
 	SendFun := "F_NormalWay"
 }
-else if(Fun = "CL")
+else if (Fun = "CL")
 {
 	SendFun := "F_ViaClipboard"
 }
@@ -2968,8 +2958,8 @@ return
 
 HS3GuiEscape:
 HS3GuiClose:
-WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
-Gui, HS3:Destroy
+	WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
+	Gui, HS3:Destroy
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2977,7 +2967,7 @@ return
 ; Here I use 2x GUIs: SearchLoad which shows progress on time of library loading process and HS3List which is in fact Search GUI name.
 ; Not clear why v_HS3ListFlag is used.
 L_Searching:
- 	if (v_HS3ListFlag) ;*[One]
+ 	if (v_HS3ListFlag) 
 		Gui, HS3List:Show
 	else
 	{
@@ -3020,8 +3010,8 @@ L_Searching:
 		Gui, HS3List:Add, Radio, 	% "yp xm+" . 540*DPI%v_SelectedMonitor% . " gSearchChange", %t_Hotstring%
 		Gui, HS3List:Add, Radio, 	% "yp xm+" . 640*DPI%v_SelectedMonitor% . " gSearchChange", %t_Library%
 		Gui, HS3List:Add, Button, 	% "yp-2 xm+" . 720*DPI%v_SelectedMonitor% . " w" . 100*DPI%v_SelectedMonitor% . " gMoveList", %t_Move%
-		Gui, HS3List:Add, ListView, 	% "xm grid vList +AltSubmit gHSLV2 h" . 400*DPI%v_SelectedMonitor%, %t_LibraryTriggerstringTriggerOptionsOutputFunctionEnableDisableHotstringComment%
-		Loop, % a_Library.MaxIndex()
+		Gui, HS3List:Add, ListView, 	% "xm grid vList +AltSubmit gHSLV2 h" . 400*DPI%v_SelectedMonitor%, %t_LibraryTriggerstringTriggerOptionsOutputFunctionEnableDisableHotstringComment% ; !!!
+		Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
 		{
 			LV_Add("", a_Library[A_Index], a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index], a_Comment[A_Index])
 		}
@@ -3035,7 +3025,7 @@ L_Searching:
 			StartXlist := (Mon%v_SelectedMonitor%Left + (Abs(Mon%v_SelectedMonitor%Right - Mon%v_SelectedMonitor%Left)/2))*DPI%v_SelectedMonitor% - StartWlist/2
 			StartYlist := (Mon%v_SelectedMonitor%Top + (Abs(Mon%v_SelectedMonitor%Bottom - Mon%v_SelectedMonitor%Top)/2))*DPI%v_SelectedMonitor% - StartHlist/2
 		}
-		Gui, HS3List:Add, Text, x0 h1 0x7 w10 vLine2
+		;Gui, HS3List:Add, Text, x0 h1 0x7 w10 vLine2
 		Gui, HS3List:Font, % "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
 		Gui, HS3List:Add, Text, xm vShortcuts2, %t_F3CloseSearchHotstringsF8MoveHotstring%
 		if !(v_SearchTerm == "")
@@ -3051,7 +3041,7 @@ L_Searching:
 	}
 
 Search:
-	Gui, Hs3List:Default
+	Gui, HS3List:Default
 	Gui, HS3List:Submit, NoHide
 	if getkeystate("CapsLock","T")
 		return
@@ -3086,7 +3076,7 @@ Search:
 			Else
 				LV_Add("",a_Library[A_Index], FileName,a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index],a_Comment[A_Index])
 		}
-		LV_ModifyCol(2,"Sort")
+		LV_ModifyCol(2,"Sort") 
 	}
 	else if (v_RadioGroup == 3)
 	{
@@ -3104,6 +3094,7 @@ Search:
 		LV_ModifyCol(1,"Sort")
 	}
 	GuiControl, +Redraw, List 
+	;*[Three] 
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3258,10 +3249,10 @@ FileDelete, %OutputFile%
 MsgBox, % t_HotstringMovedToThe . " " . TargetLib . " " . t_File
 a_Triggers := [] 
 Gui, MoveLibs:Destroy
-Gui, HS3List:Hide	
+Gui, HS3List:Hide	;*[One] 
 ;v_HS3ListFlag := 0	; added on 2021-02-02. Now Search Hotstring window should be loaded again with last search result.
-F_LoadLibrariesToTables()
 F_LoadHotstringsFromLibraries() 
+F_LoadLibrariesToTables()
 Gosub, L_Searching 
 ;return ; This line will be never reached
 
