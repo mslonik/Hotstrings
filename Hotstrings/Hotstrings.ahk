@@ -3258,7 +3258,7 @@ a_OutputFunction	:= []
 a_EnableDisable	:= []
 a_Triggerstring	:= []
 a_Comment			:= []
-F_LoadLibrariesToTables()
+F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
 Gosub, L_Searching 
 ;return ; This line will be never reached
 
