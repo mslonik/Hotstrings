@@ -494,7 +494,6 @@ if !(v_Param == "l") 										; if Hotstrings.ahk wasn't run with "l" parameter
 
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
 F_LoadHotstringsFromLibraries() 
-
 F_LoadLibrariesToTables() 
 
 
@@ -3009,7 +3008,7 @@ L_Searching:
 		Gui, HS3List:Add, Radio, 	% "yp xm+" . 420*DPI%v_SelectedMonitor% . " vv_RadioGroup gSearchChange Checked", %t_Triggerstring%
 		Gui, HS3List:Add, Radio, 	% "yp xm+" . 540*DPI%v_SelectedMonitor% . " gSearchChange", %t_Hotstring%
 		Gui, HS3List:Add, Radio, 	% "yp xm+" . 640*DPI%v_SelectedMonitor% . " gSearchChange", %t_Library%
-		Gui, HS3List:Add, Button, 	% "yp-2 xm+" . 720*DPI%v_SelectedMonitor% . " w" . 100*DPI%v_SelectedMonitor% . " gMoveList", %t_Move%
+		Gui, HS3List:Add, Button, 	% "yp-2 xm+" . 720*DPI%v_SelectedMonitor% . " w" . 100*DPI%v_SelectedMonitor% . " gMoveList Default", %t_Move%
 		Gui, HS3List:Add, ListView, 	% "xm grid vList +AltSubmit gHSLV2 h" . 400*DPI%v_SelectedMonitor%, %t_LibraryTriggerstringTriggerOptionsOutputFunctionEnableDisableHotstringComment% ; !!!
 		Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
 		{
@@ -3133,7 +3132,7 @@ MoveList:
 			LV_Add("", A_LoopFileName)
 		}
 	}
-	Gui, MoveLibs:Add, Button, % "gMove w" . 100*DPI%v_SelectedMonitor%, %t_Move%
+	Gui, MoveLibs:Add, Button, % "Default gMove w" . 100*DPI%v_SelectedMonitor%, %t_Move%
 	Gui, MoveLibs:Add, Button, % "yp x+m gCancelMove w" . 100*DPI%v_SelectedMonitor%, %t_Cancel%
 	Gui, MoveLibs:Show, hide, Select library
 	WinGetPos, v_WindowX, v_WindowY, v_WindowWidth, v_WindowHeight, Hotstrings
@@ -3247,11 +3246,18 @@ Move:
 }
 FileDelete, %OutputFile%
 MsgBox, % t_HotstringMovedToThe . " " . TargetLib . " " . t_File
-a_Triggers := [] 
 Gui, MoveLibs:Destroy
 Gui, HS3List:Hide	;*[One] 
-;v_HS3ListFlag := 0	; added on 2021-02-02. Now Search Hotstring window should be loaded again with last search result.
-F_LoadHotstringsFromLibraries() 
+
+;Clearing of arrays before fill up by function F_LoadHotstringsFromLibraries().
+a_Triggers := [] 
+a_Library			:= []
+a_TriggerOptions	:= []
+a_Hotstring		:= []
+a_OutputFunction	:= []
+a_EnableDisable	:= []
+a_Triggerstring	:= []
+a_Comment			:= []
 F_LoadLibrariesToTables()
 Gosub, L_Searching 
 ;return ; This line will be never reached
@@ -3695,7 +3701,7 @@ L_ChangeLanguage:
 		if (v_Language == A_LoopFileName)
 			Menu, SubmenuLanguage, Check, %A_LoopFileName%
 		else
-			Menu, SubmenuLanguage, UnCheck, %A_LoopFileNam%
+			Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
 	}
 	MsgBox, % t_ApplicationLanguageChangedTo . " " . SubStr(v_Language, 1, StrLen(v_Language)-4) . "`n" . t_TheApplicationWillBereloadedWithTheNewLanguageFile
 Reload
