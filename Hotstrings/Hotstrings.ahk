@@ -487,6 +487,7 @@ else
 
 
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
+;*[One] 
 v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
 F_LoadHotstringsFromLibraries() 
 F_LoadLibrariesToTables() 
@@ -871,12 +872,12 @@ F_LoadFiles(nameoffile)
 	Loop
 	{
 		FileReadLine, line, Libraries\%nameoffile%, %A_Index%
-		if ErrorLevel
+		if (ErrorLevel)
 			break
 		line := StrReplace(line, "``n", "`n")
 		line := StrReplace(line, "``r", "`r")		
 		line := StrReplace(line, "``t", "`t")
-		F_StartHotstring(line)
+		F_StartHotstring(line, nameoffile)
 		if (v_Library)
  			a_Triggers.Push(v_TriggerString)
  		v_HotstringCnt++
@@ -887,13 +888,24 @@ F_LoadFiles(nameoffile)
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_StartHotstring(txt) {
+F_StartHotstring(txt, nameoffile) {
 	global v_TriggerString
 	static Options, OnOff, EnDis, SendFun, TextInsert
+	
 	v_UndoHotstring := ""
-	txtsp := StrSplit(txt, "‖")
-	Options := txtsp[1]
-	v_TriggerString := txtsp[2]
+	v_TriggerString := ""
+	
+	txtsp 			:= StrSplit(txt, "‖")
+	Options 			:= txtsp[1]
+	v_TriggerString 	:= txtsp[2]
+	if (!v_TriggerString) ; Future: add those strings to translation.
+	{
+		MsgBox, 262420, % A_ScriptName . "Error reading library file", % "On time of parsing the library file:`n`n" . nameoffile . "`n`nthe following line is found:`n" . txt . "`n`nThis line do not comply to format required by this application.`n`nContinue reading the library file?`nIf you answer ""No"" then application wiłl exit!"
+		IfMsgBox, No
+			ExitApp, 1
+		IfMsgBox, Yes
+			return
+	}
 	if (txtsp[3] == "SI")
 		SendFun := "F_NormalWay"
 	else if (txtsp[3] == "CL") 
@@ -2692,7 +2704,7 @@ Loop, Read, %InputFile%, %OutputFile%
 		SaveFlag := 1
 	}
 }
-if (SaveFlag == 0) ;*[One] 
+if (SaveFlag == 0) 
 {
 	LV_Add("",  v_TriggerString,Options, SendFun, EnDis, TextInsert, Comment)
 	txt := % Options . "‖" . v_TriggerString . "‖" . SendFun . "‖" . EnDis . "‖" . TextInsert . "‖" . Comment
