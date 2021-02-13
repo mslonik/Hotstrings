@@ -377,6 +377,8 @@ global v_EnterHotstring4 		:= ""
 global v_EnterHotstring5 		:= ""
 global v_EnterHotstring6 		:= ""
 global v_FlagSound 				:= 0
+;I couldn't find how to get system settings for size of menu font. Quick & dirty solution: manual setting of all fonts with variable v_FontSize.
+global v_FontSize 				:= 10 ;Future: v_FontSize as configurable parameter.
 global v_HotstringCnt 			:= 0
 global v_HotstringFlag 			:= 0
 global v_HS3ListFlag 			:= 0
@@ -1260,11 +1262,13 @@ F_CheckOption(State,Button)
 
 F_CheckBoxColor(State,Button)
 {
-	global v_SelectedMonitor
+	;global v_SelectedMonitor
 	If (State = 1)
-		Gui, HS3:Font,% "s" . 12*DPI%v_SelectedMonitor% . " cRed Norm", Calibri
+		;Gui, HS3:Font,% "s" . 12*DPI%v_SelectedMonitor% . " cRed Norm", Calibri
+		Gui, HS3:Font,% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cRed Norm", Calibri
 	Else 
-		Gui, HS3:Font,% "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm", Calibri
+		;Gui, HS3:Font,% "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm", Calibri
+		Gui, HS3:Font,% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm", Calibri
 	GuiControl, HS3:Font, %Button%
 }
 
@@ -1801,26 +1805,10 @@ L_GUIInit:
 		SysGet, Mon%A_Index%, Monitor, %A_Index%
 		W%A_Index% := Mon%A_Index%Right - Mon%A_Index%Left
 		H%A_Index% := Mon%A_Index%Bottom - Mon%A_Index%Top
-		;MsgBox,, HA_Index, % H%A_Index% ; to działa
 		;DPI%A_Index% := round(W%A_Index%/1920*(96/A_ScreenDPI), 2) ; original
-		;DPI%A_Index% := round(W%A_Index%/1920*(96/%A_ScreenDPI%), 2)
-		;MsgBox, , A_ScreenDPI, % 96 / 144	; to działa
-		;MsgBox, , A_ScreenDPI, % 96 / A_ScreenDPI	; to działa
-		;DPI%A_Index% := % 96 / A_ScreenDPI	; to działa
-		;DPI%A_Index% := 96 / %A_ScreenDPI%	; to nie działa
-		;DPI%A_Index% := %A_ScreenDPI%	; to nie działa
-		;DPI%A_Index% := % A_ScreenDPI	; to działa
-		;DPI%A_Index% := A_ScreenDPI	; to działa
 		DPI%A_Index% := 1			; added on 2021-01-31 in order to clean up GUI sizing
-		;DPI%A_Index% := "155"		; to działa
-		;DPI%A_Index% := 155			; to działa
-		;MsgBox, , DPI per monitor, % DPI%A_Index%		; to działa
 	}
 	SysGet, PrimMon, MonitorPrimary
-	
-	;I couldn't find how to get system settings for size of menu font. Quick & dirty solution: manual setting of all fonts with variable v_FontSize.
-	;Future: v_FontSize as configurable parameter.
-	global    v_FontSize := 10
 	
 	if (v_SelectedMonitor == 0)
 		v_SelectedMonitor := PrimMon
@@ -1889,7 +1877,7 @@ L_GUIInit:
 	}
 	Gui, HS3:Add, 	Text, x0 h1 0x7 w10 vLine
 	Gui, HS3:Font, % "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
-		;Add to translation file
+		;Future: Add Library content to translation file
 	Gui, HS3:Add, 	Text, ym, Library content
 	Gui, HS3:Font, % "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
 	Gui, HS3:Add, 	ListView, % "LV0x1 0x4 yp+" . 25*DPI%v_SelectedMonitor% . " xp h" . 500*DPI%v_SelectedMonitor% . " w" . 400*DPI%v_SelectedMonitor% . " vv_LibraryContent AltSubmit gHSLV", %t_TriggerstringTriggOptOutFunEnDisHotstringComment%
@@ -2212,7 +2200,7 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-AddHotstring:
+AddHotstring: 
 Gui, HS3:+OwnDialogs
 Gui, Submit, NoHide
 GuiControlGet, v_SelectFunction
@@ -2586,7 +2574,7 @@ OptionSet := Instr(Hotstring2[2],"?") ? F_CheckOption("Yes",5) : F_CheckOption("
 OptionSet := (Instr(Hotstring2[2],"O0") or (InStr(Hotstring2[2],"O") = 0)) ? F_CheckOption("No",6) : F_CheckOption("Yes",6)
 GuiControlGet, v_ViewString
 Select := v_ViewString
-if Select = 
+if Select = ; !!!
 	return
 OptionSet := (InStr(Select,"""On""")) ? F_CheckOption("No", 7) : F_CheckOption("Yes",7)
 if(InStr(Select,"F_NormalWay"))
@@ -2672,13 +2660,15 @@ if (InStr(Options, "B")) and !(InStr(Options, "B0"))
 {
 	Options := StrReplace(Options, "B")
 }
-StrSp := StrSplit(Items, "bind(""")
-StrSp1 := StrSplit(StrSp[2], """),")
-TextInsert := StrSp1[1]
-OutputFile =% A_ScriptDir . "\Libraries\temp.csv"
-InputFile = % A_ScriptDir . "\Libraries\" . SaveFile . ".csv"
-LString := % "‖" . v_TriggerString . "‖"
-SaveFlag := 0
+
+StrSp 		:= StrSplit(Items, "bind(""")
+StrSp1 		:= StrSplit(StrSp[2], """),")
+TextInsert 	:= StrSp1[1]
+OutputFile 	:= % A_ScriptDir . "\Libraries\temp.csv"	; changed on 2021-02-13
+InputFile 	:= % A_ScriptDir . "\Libraries\" . SaveFile . ".csv"
+LString 		:= % "‖" . v_TriggerString . "‖"
+SaveFlag 		:= 0
+
 Loop, Read, %InputFile%, %OutputFile%
 {
 	if (InStr(A_LoopReadLine, LString, 1) and InStr(Options, "C")) or (InStr(A_LoopReadLine, LString) and !(InStr(Options, "C")))
@@ -2693,7 +2683,7 @@ Loop, Read, %InputFile%, %OutputFile%
 		SaveFlag := 1
 	}
 }
-if (SaveFlag == 0)
+if (SaveFlag == 0) ;*[One] 
 {
 	LV_Add("",  v_TriggerString,Options, SendFun, EnDis, TextInsert, Comment)
 	txt := % Options . "‖" . v_TriggerString . "‖" . SendFun . "‖" . EnDis . "‖" . TextInsert . "‖" . Comment
@@ -2739,7 +2729,11 @@ else
 }
 MsgBox Hotstring added to the %SaveFile%.csv file!
 a_Triggers := []
-F_LoadHotstringsFromLibraries()
+;Gui, A_Gui:+Disabled
+Gui, HS3:+Disabled
+F_LoadHotstringsFromLibraries() ; Future: check if this line is necessary. This function iterates over all libraries, but in fact just one definition have been added.
+;Gui, A_Gui:-Disabled
+GUI, HS3:-Disabled
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2845,6 +2839,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 HSdelay:
+; Future: Add those strings to translations.
 Gui, HSDel:New, -MinimizeBox -MaximizeBox
 Gui, HSDel:Margin, 12.5*DPI%v_SelectedMonitor%, 7.5*DPI%v_SelectedMonitor%
 Gui, HSDel:Font, % "s" . 12*DPI%v_SelectedMonitor% . " norm cBlack"
@@ -3093,7 +3088,6 @@ Search:
 		LV_ModifyCol(1,"Sort")
 	}
 	GuiControl, +Redraw, List 
-	;*[Three] 
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3247,9 +3241,9 @@ Move:
 FileDelete, %OutputFile%
 MsgBox, % t_HotstringMovedToThe . " " . TargetLib . " " . t_File
 Gui, MoveLibs:Destroy
-Gui, HS3List:Hide	;*[One] 
+Gui, HS3List:Hide	
 
-;Clearing of arrays before fill up by function F_LoadHotstringsFromLibraries().
+;Clearing of arrays before fill up by function F_LoadLibrariesToTables().
 a_Triggers := [] 
 a_Library			:= []
 a_TriggerOptions	:= []
@@ -3676,7 +3670,9 @@ L_ToggleTipsLibrary:
 	v_LibraryFlag := !(v_LibraryFlag)
 	IniWrite, %v_LibraryFlag%, Config.ini, TipsLibraries, %A_ThisMenuitem%
 	a_Triggers := []
+	Gui, A_Gui:+Disabled
 	F_LoadHotstringsFromLibraries()
+	Gui, A_Gui:-Disabled
 return
 
 L_SortTipsAlphabetically:
