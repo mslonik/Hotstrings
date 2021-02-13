@@ -1,4 +1,4 @@
-﻿/*
+﻿/* 
 	Author:      Jakub Masiak, Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings as in AutoHotkey (shortcuts), but editable with GUI and many more options.
@@ -412,6 +412,8 @@ global v_TypedTriggerstring 		:= ""
 global v_UndoHotstring 			:= ""
 global v_UndoTriggerstring 		:= ""
 global v_ViewString 			:= ""
+global v_BlockHotkeysFlag		:= 0
+
 
 IniRead, ini_Undo, 						Config.ini, Configuration, UndoHotstring
 IniRead, ini_Delay, 					Config.ini, Configuration, Delay
@@ -495,9 +497,10 @@ if !(v_Param == "l") 										; if Hotstrings.ahk wasn't run with "l" parameter
 }
 
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
+v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
 F_LoadHotstringsFromLibraries() 
 F_LoadLibrariesToTables() 
-
+v_BlockHotkeysFlag := 0
 
 if (v_PreviousSection)
 	Gosub L_GUIInit ; end of initialization
@@ -1794,8 +1797,8 @@ ToolTip ,
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#if, v_Param != "l"
+;v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
+#If v_Param != "l" and v_BlockHotkeysFlag == 0
 
 ^#h::
 L_GUIInit:
@@ -2731,7 +2734,7 @@ MsgBox Hotstring added to the %SaveFile%.csv file!
 a_Triggers := []
 ;Gui, A_Gui:+Disabled
 Gui, HS3:+Disabled
-F_LoadHotstringsFromLibraries() ; Future: check if this line is necessary. This function iterates over all libraries, but in fact just one definition have been added.
+F_LoadHotstringsFromLibraries() ; Future: check if this line is necessary
 ;Gui, A_Gui:-Disabled
 GUI, HS3:-Disabled
 return
@@ -3702,4 +3705,4 @@ L_ChangeLanguage:
 	MsgBox, % t_ApplicationLanguageChangedTo . " " . SubStr(v_Language, 1, StrLen(v_Language)-4) . "`n" . t_TheApplicationWillBereloadedWithTheNewLanguageFile
 Reload
 ; return			; this line will not be reached
-#if
+#If
