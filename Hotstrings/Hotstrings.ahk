@@ -191,6 +191,80 @@ L_UndoLastHotstring=&Undo last hotstring
 L_UndoTheLastHotstring=Undo the last hotstring.
 	)
 
+global v_Param 				:= A_Args[1]
+global v_PreviousSection 		:= A_Args[3]
+global v_PreviousWidth 			:= A_Args[4]
+global v_PreviousHeight 			:= A_Args[5]
+global v_PreviousX 				:= A_Args[6]
+global v_PreviousY 				:= A_Args[7]
+global v_PreviousMonitor 		:= A_Args[9]
+global a_Comment 				:= []
+global a_EnableDisable 			:= []
+global a_Hotstring 				:= []
+global a_Library 				:= []
+global a_OutputFunction 			:= []
+global a_SelectedTriggers 		:= []
+global a_String 				:= ""
+global a_TriggerOptions 			:= []
+global a_Triggers 				:= []
+global a_Triggerstring 			:= []
+global ini_AmountOfCharacterTips 	:= ""
+global ini_Caret 				:= ""
+global ini_Cursor 				:= ""
+global ini_Delay 				:= ""
+global ini_MenuCaret 			:= ""
+global ini_MenuCursor 			:= ""
+global ini_MenuSound 			:= ""
+global ini_Tips 				:= ""
+global ini_TipsSortAlphabetically 	:= ""
+global ini_TipsSortByLength 		:= ""
+global v_CaseSensitiveC1 		:= ""
+global v_BlockHotkeysFlag		:= 0
+global v_DeleteHotstring 		:= ""
+global v_EnterHotstring 			:= ""
+global v_EnterHotstring1 		:= ""
+global v_EnterHotstring2 		:= ""
+global v_EnterHotstring3 		:= ""
+global v_EnterHotstring4 		:= ""
+global v_EnterHotstring5 		:= ""
+global v_EnterHotstring6 		:= ""
+global v_FlagSound 				:= 0
+;I couldn't find how to get system settings for size of menu font. Quick & dirty solution: manual setting of all fonts with variable v_FontSize.
+global v_FontSize 				:= 10 ;Future: v_FontSize as configurable parameter.
+global v_HotstringCnt 			:= 0
+global v_HotstringFlag 			:= 0
+global v_HS3ListFlag 			:= 0
+global v_IndexLog 				:= 1
+global v_InputString 			:= ""
+global v_Language 				:= ""	; OutputVar for IniRead funtion
+global v_LibraryContent 			:= ""
+global v_MenuMax 				:= 0
+global v_MenuMax2 				:= 0
+global v_MonitorFlag 			:= 0
+global v_MouseX 				:= ""
+global v_MouseY 				:= ""
+global v_OptionCaseSensitive 		:= ""
+global v_OptionDisable 			:= ""
+global v_OptionImmediateExecute 	:= ""
+global v_OptionInsideWord 		:= ""
+global v_OptionNoBackspace 		:= ""
+global v_OptionNoEndChar 		:= ""
+global v_RadioGroup 			:= ""
+global v_SearchTerm 			:= ""
+global v_SelectedRow 			:= 0
+global v_SelectedRow2 			:= 0
+global v_SelectFunction 			:= ""
+global v_SelectHotstringLibrary 	:= ""
+global v_SelectedMonitor			:= 0
+global v_ShortcutsMainInterface 	:= ""
+global v_ShowGui 				:= ""
+global v_Tips 					:= ""
+global v_TipsFlag 				:= 0
+global v_TriggerString 			:= ""
+global v_TypedTriggerstring 		:= ""
+global v_UndoHotstring 			:= ""
+global v_UndoTriggerstring 		:= ""
+global v_ViewString 			:= ""
 
 ; 2. Try to load up configuration files. If those files do not exist, create them.
 if (!FileExist("Config.ini"))
@@ -199,7 +273,6 @@ if (!FileExist("Config.ini"))
 	FileAppend, %ConfigIni%, Config.ini
 }
 
-global v_Language 		:= ""	; OutputVar for IniRead funtion
 
 IniRead v_Language, Config.ini, Configuration, Language				; Load from Config.ini file specific parameter: language into variable v_Language, e.g. v_Language = English.ini
 
@@ -340,79 +413,6 @@ global t_UndoLastHotstring := 					F_ReadText("t_UndoLastHotstring")
 global t_UndoTheLastHotstring := 					F_ReadText("t_UndoTheLastHotstring")
 
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-global v_Param 				:= A_Args[1]
-global v_PreviousSection 		:= A_Args[3]
-global v_PreviousWidth 			:= A_Args[4]
-global v_PreviousHeight 			:= A_Args[5]
-global v_PreviousX 				:= A_Args[6]
-global v_PreviousY 				:= A_Args[7]
-global v_PreviousMonitor 		:= A_Args[9]
-global a_Comment 				:= []
-global a_EnableDisable 			:= []
-global a_Hotstring 				:= []
-global a_Library 				:= []
-global a_OutputFunction 			:= []
-global a_SelectedTriggers 		:= []
-global a_String 				:= ""
-global a_TriggerOptions 			:= []
-global a_Triggers 				:= []
-global a_Triggerstring 			:= []
-global ini_AmountOfCharacterTips 	:= ""
-global ini_Caret 				:= ""
-global ini_Cursor 				:= ""
-global ini_Delay 				:= ""
-global ini_MenuCaret 			:= ""
-global ini_MenuCursor 			:= ""
-global ini_MenuSound 			:= ""
-global ini_Tips 				:= ""
-global ini_TipsSortAlphabetically 	:= ""
-global ini_TipsSortByLength 		:= ""
-global v_CaseSensitiveC1 		:= ""
-global v_DeleteHotstring 		:= ""
-global v_EnterHotstring 			:= ""
-global v_EnterHotstring1 		:= ""
-global v_EnterHotstring2 		:= ""
-global v_EnterHotstring3 		:= ""
-global v_EnterHotstring4 		:= ""
-global v_EnterHotstring5 		:= ""
-global v_EnterHotstring6 		:= ""
-global v_FlagSound 				:= 0
-;I couldn't find how to get system settings for size of menu font. Quick & dirty solution: manual setting of all fonts with variable v_FontSize.
-global v_FontSize 				:= 10 ;Future: v_FontSize as configurable parameter.
-global v_HotstringCnt 			:= 0
-global v_HotstringFlag 			:= 0
-global v_HS3ListFlag 			:= 0
-global v_IndexLog 				:= 1
-global v_InputString 			:= ""
-global v_LibraryContent 			:= ""
-global v_MenuMax 				:= 0
-global v_MenuMax2 				:= 0
-global v_MonitorFlag 			:= 0
-global v_MouseX 				:= ""
-global v_MouseY 				:= ""
-global v_OptionCaseSensitive 		:= ""
-global v_OptionDisable 			:= ""
-global v_OptionImmediateExecute 	:= ""
-global v_OptionInsideWord 		:= ""
-global v_OptionNoBackspace 		:= ""
-global v_OptionNoEndChar 		:= ""
-global v_RadioGroup 			:= ""
-global v_SearchTerm 			:= ""
-global v_SelectedRow 			:= 0
-global v_SelectedRow2 			:= 0
-global v_SelectFunction 			:= ""
-global v_SelectHotstringLibrary 	:= ""
-global v_SelectedMonitor			:= 0
-global v_ShortcutsMainInterface 	:= ""
-global v_ShowGui 				:= ""
-global v_Tips 					:= ""
-global v_TipsFlag 				:= 0
-global v_TriggerString 			:= ""
-global v_TypedTriggerstring 		:= ""
-global v_UndoHotstring 			:= ""
-global v_UndoTriggerstring 		:= ""
-global v_ViewString 			:= ""
-global v_BlockHotkeysFlag		:= 0
 
 
 IniRead, ini_Undo, 						Config.ini, Configuration, UndoHotstring
@@ -485,7 +485,14 @@ if !(v_PreviousSection)
 else
 	v_ShowGui := 2
 
-; Prepare (System)Tray icon
+
+; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
+v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
+F_LoadHotstringsFromLibraries() 
+F_LoadLibrariesToTables() 
+v_BlockHotkeysFlag := 0
+
+; After definitions of (triggerstring, hotstring) are uploaded to memory, prepare (System)Tray icon
 if !(v_Param == "l") 										; if Hotstrings.ahk wasn't run with "l" parameter (standing for "light / lightweight", prepare tray menu.
 {
 	Menu, Tray, Add, 		%t_EditHotstring%, 		L_GUIInit
@@ -495,12 +502,6 @@ if !(v_Param == "l") 										; if Hotstrings.ahk wasn't run with "l" parameter
 	Menu, Tray, NoStandard									; remove all the rest of standard tray menu
 	Menu, Tray, Standard									; add it again at the bottom
 }
-
-; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
-v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
-F_LoadHotstringsFromLibraries() 
-F_LoadLibrariesToTables() 
-v_BlockHotkeysFlag := 0
 
 if (v_PreviousSection)
 	Gosub L_GUIInit ; end of initialization
