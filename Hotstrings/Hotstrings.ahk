@@ -1803,6 +1803,8 @@ return
 
 ^#h::
 L_GUIInit:
+
+; The section below shall be shifted to initialization
 	SysGet, N, MonitorCount
 	Loop, % N
 	{
@@ -1813,9 +1815,12 @@ L_GUIInit:
 		DPI%A_Index% := 1			; added on 2021-01-31 in order to clean up GUI sizing
 	}
 	SysGet, PrimMon, MonitorPrimary
-	
 	if (v_SelectedMonitor == 0)
 		v_SelectedMonitor := PrimMon
+; End of this section
+
+; Future: read system font size. All parts of GUI should be scaled proportionally to system font size. 
+; For system font size see https://www.autohotkey.com/boards/viewtopic.php?t=6750
 	Gui, HS3:New, 		+Resize ; Makes the window resizable and enables its maximize button in the title bar.
 	Gui, HS3:Margin, 	12.5*DPI%v_SelectedMonitor%, 7.5*DPI%v_SelectedMonitor%	; Sets the number of pixels of space to leave at the left/right and top/bottom sides of the window when auto-positioning any control that lacks an explicit X or Y coordinate.
 	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " bold cBlue", Calibri
@@ -1879,7 +1884,7 @@ L_GUIInit:
 	{
 		Gui, % "HS3:+MinSize"  . 1350*DPI%v_SelectedMonitor% . "x" . 640*DPI%v_SelectedMonitor%+20  + 154*DPI%v_SelectedMonitor%
 	}
-	Gui, HS3:Add, 	Text, x0 h1 0x7 w10 vLine
+	;Gui, HS3:Add, 	Text, x0 h1 0x7 w10 vLine
 	Gui, HS3:Font, % "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
 		;Future: Add Library content to translation file
 	Gui, HS3:Add, 	Text, ym, Library content
