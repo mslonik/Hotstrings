@@ -1853,7 +1853,6 @@ v_hNext		:= 0
 
 ;1. General settings of GUI: resizeability, scaleability, window handle etc.
 Gui, 		HS3:New, 		+Resize -DPIScale +HwndHS3Hwnd +Border, % A_ScriptName
-Gui, 		HS3:Show, 	Hide
 Gui, 		HS3:Margin,	% v_xmarg, % v_ymarg
 Gui,			HS3:Color,	% v_WindowColor, % v_ControlColor
 Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm cWhite", % v_FontType
@@ -2081,34 +2080,37 @@ GuiControl, Move, % IdText8, % "x" . v_xNext . A_Space . "y" . v_yNext
 
 GuiControl, Hide, % IdText9
 
+;5.2.3. Sandbox
 v_yNext += HofText + v_ymarg
 v_xNext := LeftColumnW + v_xmarg
 GuiControl, Move, % IdText10, % "x" . v_xNext . A_Space . "y" . v_yNext
-
 v_yNext += HofText
 v_xNext := LeftColumnW + v_xmarg
 v_wNext := RightColumnW
 GuiControl, Move, % IdEdit10, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
 
 
-;Koniec wcinki
-	
-	Loop, %A_ScriptDir%\Libraries\*.csv
-		GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName%
-	
+Gui, 		HS3:Show, 	Hide AutoSize Center
+;End of new code
+
+Loop, %A_ScriptDir%\Libraries\*.csv
+	GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName%
+
+if (ini_Sandbox == 0)
+{
+		;Gui, 		% "HS3:+MinSize"  . 1350*DPI%v_SelectedMonitor% . "x" . 640*DPI%v_SelectedMonitor%+20
+		; Hide Sandbox
+	GuiControl, 	Hide, % IdText10
+	GuiControl, 	Hide, % IdEdit10
+}
 	/*
-		if (ini_Sandbox == 0)
-		{
-			Gui, 		% "HS3:+MinSize"  . 1350*DPI%v_SelectedMonitor% . "x" . 640*DPI%v_SelectedMonitor%+20
-			GuiControl, 	HS3:Hide, Sandbox
-			GuiControl, 	HS3:Hide, SandString
-		}
 		else
 		{
 			Gui, % "HS3:+MinSize"  . 1350*DPI%v_SelectedMonitor% . "x" . 640*DPI%v_SelectedMonitor%+20  + 154*DPI%v_SelectedMonitor%
 		}
 	*/
 ;*[Two]
+;Gui, 		HS3:Show, AutoSize Center
 Gui, HS3:Add, 	Text, y0 x800 vv_LoadedHotstrings, % t_LoadedHotstrings . " " . v_HotstringCnt
 
     ; Menu, HSMenu, Add, &Monitor, CheckMon
@@ -2329,9 +2331,11 @@ v_FlagMax := 0
 if (StartW == "") or (StartH == "")
 	v_FlagMax := 1
 if (StartX == "")
-	StartX := Mon%v_SelectedMonitor%Left + (Abs(Mon%v_SelectedMonitor%Right - Mon%v_SelectedMonitor%Left)/2) - 430*DPI%v_SelectedMonitor%
+	;StartX := Mon%v_SelectedMonitor%Left + (Abs(Mon%v_SelectedMonitor%Right - Mon%v_SelectedMonitor%Left)/2) - 430*DPI%v_SelectedMonitor%
+	StartX := Mon%v_SelectedMonitor%Left
 if (StartY == "")
-	StartY := Mon%v_SelectedMonitor%Top + (Abs(Mon%v_SelectedMonitor%Bottom - Mon%v_SelectedMonitor%Top)/2) - (225*DPI%v_SelectedMonitor%+31)
+	;StartY := Mon%v_SelectedMonitor%Top + (Abs(Mon%v_SelectedMonitor%Bottom - Mon%v_SelectedMonitor%Top)/2) - (225*DPI%v_SelectedMonitor%+31)
+	StartY := Mon%v_SelectedMonitor%Top
 if (StartW == "")
 	StartW := 1350*DPI%v_SelectedMonitor%
 if (StartH == "")
