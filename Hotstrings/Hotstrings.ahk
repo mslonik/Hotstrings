@@ -245,12 +245,12 @@ global v_MenuMax2 				:= 0
 global v_MonitorFlag 			:= 0
 global v_MouseX 				:= ""
 global v_MouseY 				:= ""
-global v_OptionCaseSensitive 		:= ""
-global v_OptionDisable 			:= ""
-global v_OptionImmediateExecute 	:= ""
-global v_OptionInsideWord 		:= ""
-global v_OptionNoBackspace 		:= ""
-global v_OptionNoEndChar 		:= ""
+global v_OptionCaseSensitive 		:= 0	;The checkbox's associated output variable (if any) receives the number 1 for checked, 0 for unchecked, and -1 for gray/indeterminate
+global v_OptionDisable 			:= 0 ;The checkbox's associated output variable (if any) receives the number 1 for checked, 0 for unchecked, and -1 for gray/indeterminate
+global v_OptionImmediateExecute 	:= 0 ;The checkbox's associated output variable (if any) receives the number 1 for checked, 0 for unchecked, and -1 for gray/indeterminate
+global v_OptionInsideWord 		:= 0 ;The checkbox's associated output variable (if any) receives the number 1 for checked, 0 for unchecked, and -1 for gray/indeterminate
+global v_OptionNoBackspace 		:= 0 ;The checkbox's associated output variable (if any) receives the number 1 for checked, 0 for unchecked, and -1 for gray/indeterminate
+global v_OptionNoEndChar 		:= 0 ;The checkbox's associated output variable (if any) receives the number 1 for checked, 0 for unchecked, and -1 for gray/indeterminate
 global v_RadioGroup 			:= ""
 global v_SearchTerm 			:= ""
 global v_SelectedRow2 			:= 0
@@ -2432,7 +2432,7 @@ if (v_ResizingFlag) ;if run for the very first time
 	v_ResizingFlag := 0
 }
 else
-	Gui, %HS3Hwnd%: Restore
+	Gui, %HS3Hwnd%: Show, restore
 
 if (v_PreviousSection != "") ; it means: if Hotstrings app was restarted
 {
@@ -2660,26 +2660,66 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-Clear:
-GuiControl,, v_ViewString,
-GuiControl,, Comment,
-GuiControl,, v_EnterHotstring1,
-GuiControl,, v_EnterHotstring2,
-GuiControl,, v_EnterHotstring3,
-GuiControl,, v_EnterHotstring4,
-GuiControl,, v_EnterHotstring5,
-GuiControl,, v_EnterHotstring6,
-GuiControl,, v_SelectHotstringLibrary, |
-GuiControl, Choose, v_SelectFunction, SendInput (SI)
+Clear: ;tu jestem
+;*[One]
+Gui,		%HS3Hwnd%: Font, % "c" . v_FontColor
+GuiControl, Font, % IdCheckBox1
+GuiControl,, % IdEdit1,  ;v_TriggerString
+GuiControl, Font, % IdCheckBox1
+GuiControl,, % IdCheckBox1, 0
+GuiControl, Font, % IdCheckBox2
+GuiControl,, % IdCheckBox2, 0
+GuiControl, Font, % IdCheckBox3
+GuiControl,, % IdCheckBox3, 0
+GuiControl, Font, % IdCheckBox4
+GuiControl,, % IdCheckBox4, 0
+GuiControl, Font, % IdCheckBox5
+GuiControl,, % IdCheckBox5, 0
+GuiControl, Font, % IdCheckBox6
+GuiControl,, % IdCheckBox6, 0
+GuiControl, Choose, % IdDDL1, SendInput (SI) ;v_SelectFunction 
+GuiControl,, % IdEdit2,  ;v_EnterHotstring
+GuiControl,, % IdEdit3, ;v_EnterHotstring1
+GuiControl, Disable, % IdEdit3 ;v_EnterHotstring1
+GuiControl,, % IdEdit4, ;v_EnterHotstring2
+GuiControl, Disable, % IdEdit4 ;v_EnterHotstring2
+GuiControl,, % IdEdit5, ;v_EnterHotstring3
+GuiControl, Disable, % IdEdit5 ;v_EnterHotstring3
+GuiControl,, % IdEdit6, ;v_EnterHotstring4
+GuiControl, Disable, % IdEdit6 ;v_EnterHotstring4
+GuiControl,, % IdEdit7, ;v_EnterHotstring5
+GuiControl, Disable, % IdEdit7 ;v_EnterHotstring5
+GuiControl,, % IdEdit8, ;v_EnterHotstring6
+GuiControl, Disable, % IdEdit8 ;v_EnterHotstring6
+GuiControl,, % IdEdit9,  ;Comment
+GuiControl,, % IdDDL2, | ;v_SelectHotstringLibrary o make the control empty, specify only a pipe character (|)
 Loop,%A_ScriptDir%\Libraries\*.csv
-	GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName%
-gosub, SectionChoose
-gosub, ViewString
+	GuiControl,, % IdDDL2, %A_LoopFileName%
+GuiControl, Disable, % IdButton4
+LV_Delete()
+GuiControl,, % IdEdit10,  ;Sandbox
+
+/*
+	GuiControl,, v_ViewString,
+	GuiControl,, Comment,
+	GuiControl,, v_EnterHotstring1,
+	GuiControl,, v_EnterHotstring2,
+	GuiControl,, v_EnterHotstring3,
+	GuiControl,, v_EnterHotstring4,
+	GuiControl,, v_EnterHotstring5,
+	GuiControl,, v_EnterHotstring6,
+	GuiControl,, v_SelectHotstringLibrary, |
+	GuiControl, Choose, v_SelectFunction, SendInput (SI)
+	Loop,%A_ScriptDir%\Libraries\*.csv
+		GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName%
+	gosub, SectionChoose
+	gosub, ViewString
+*/
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-HSLV: ;tu jestem
+HSLV: 
 Gui, HS3:+OwnDialogs
  v_PreviousSelectedRow := v_SelectedRow ;this line rather as finishing this label section
 If !(v_SelectedRow := LV_GetNext()) {
@@ -2763,7 +2803,7 @@ else
 
 ;GoSub SetOptions 
 ;SetOptions:
-;*[One]
+
 /*
 	OptionSet := Instr(Hotstring2[2],"*0") or InStr(Hotstring2[2],"*") = 0 ? F_CheckOption("No", 2) :  F_CheckOption("Yes", 2)
 	OptionSet := ((Instr(Hotstring2[2],"C0")) or (Instr(Hotstring2[2],"C1")) or (Instr(Hotstring2[2],"C") = 0)) ? F_CheckOption("No", 3) : F_CheckOption("Yes", 3)
@@ -2800,26 +2840,23 @@ InStr(v_String, """On""") ? F_CheckOption("No", 6) : F_CheckOption("Yes", 6)
 ;GuiControlGet, v_ViewString
 ;Select := v_ViewString
 
-Select := v_String
+;Select := v_String
 /*
 	if (Select == "")
 		return
 */
 
 ; tutaj
-if(InStr(Select,"F_NormalWay"))
+if(InStr(v_String,"F_NormalWay"))
 	GuiControl, Choose, v_SelectFunction, SendInput (SI)
-else if(InStr(Select, "F_ViaClipboard"))
+else if(InStr(v_String, "F_ViaClipboard"))
 	GuiControl, Choose, v_SelectFunction, Clipboard (CL)
-else if(InStr(Select, """F_MenuText"""))
+else if(InStr(v_String, """F_MenuText"""))
 	GuiControl, Choose, v_SelectFunction, Menu & Clipboard (MCL)
-else if(InStr(Select, """F_MenuTextAHK"""))
+else if(InStr(v_String, """F_MenuTextAHK"""))
 	GuiControl, Choose, v_SelectFunction, Menu & SendInput (MSI)
 v_CaseSensitiveC1 := 0
-;return
 gosub L_SelectFunction
-
-
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2979,14 +3016,12 @@ if InStr(v_SelectFunction, "Menu")
 }
 else
 {
-	/*
-		GuiControl, , v_EnterHotstring1,
-		GuiControl, , v_EnterHotstring2,
-		GuiControl, , v_EnterHotstring3,
-		GuiControl, , v_EnterHotstring4,
-		GuiControl, , v_EnterHotstring5,
-		GuiControl, , v_EnterHotstring6,
-	*/
+	GuiControl, , v_EnterHotstring1
+	GuiControl, , v_EnterHotstring2
+	GuiControl, , v_EnterHotstring3
+	GuiControl, , v_EnterHotstring4
+	GuiControl, , v_EnterHotstring5
+	GuiControl, , v_EnterHotstring6
 	GuiControl, Disable, v_EnterHotstring1
 	GuiControl, Disable, v_EnterHotstring2
 	GuiControl, Disable, v_EnterHotstring3
