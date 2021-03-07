@@ -584,7 +584,7 @@ Gui, 		HS3:Add,		CheckBox, 	x0 y0 HwndIdCheckBox4 gCapsCheck vv_OptionInsideWord
 Gui, 		HS3:Add,		CheckBox, 	x0 y0 HwndIdCheckBox5 gCapsCheck vv_OptionNoEndChar, 		%t_NoEndChar%
 Gui, 		HS3:Add, 		CheckBox, 	x0 y0 HwndIdCheckBox6 gCapsCheck vv_OptionDisable, 		%t_Disable%
 
-Gui,			HS3:Add,		GroupBox, 	x0 y0 HwndIdGroupBox1 vv_GroupBoxSelectTriggerOptions, 		%t_SelectTriggerOptions%
+Gui,			HS3:Add,		GroupBox, 	x0 y0 HwndIdGroupBox1, 								%t_SelectTriggerOptions%
 
 Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm" . A_Space . "c" . v_FontColorHighlighted, % v_FontType
 Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText3 vv_TextSelectHotstringsOutFun, 			%t_SelectHotstringOutputFunction%
@@ -711,7 +711,6 @@ GuiControl, Move, % IdCheckBox5, % "x" . v_xNext . A_Space . "y" . v_yNext
 v_xNext += SpaceBetweenColumns + wleftminicolumn
 GuiControl, Move, % IdCheckBox6, % "x" . v_xNext . A_Space . "y" . v_yNext
 
-;*[Two]
 ;Gui, 		%HS3Hwnd%:Show, AutoSize Center
 
 ;5.1.3. Select hotstring output function
@@ -1870,12 +1869,12 @@ F_CheckOption(State,Button)
 F_CheckBoxColor(State,Button)
 {
 	;global v_SelectedMonitor
-	If (State = 1)
+	if (State = 1)
 		;Gui, HS3:Font,% "s" . 12*DPI%v_SelectedMonitor% . " cRed Norm", Calibri
-		Gui, HS3:Font,% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cRed Norm", Calibri
-	Else 
+		Gui, HS3:Font, % "s" . v_FontSize . A_Space . "cRed Norm", Calibri
+	else 
 		;Gui, HS3:Font,% "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm", Calibri
-		Gui, HS3:Font,% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm", Calibri
+		Gui, HS3:Font, % "s" . v_FontSize . A_Space . "c" . v_FontColor . A_Space . "Norm", Calibri
 	GuiControl, HS3:Font, %Button%
 }
 
@@ -2411,7 +2410,6 @@ return
 
 ^#h::		; Event
 L_GUIInit:
-;*[One]
 if (v_ResizingFlag) ;if run for the very first time
 {
 	if (ini_StartX == "") or (ini_StartY == "") or (ini_StartW == "") or (ini_StartH == "")
@@ -2714,6 +2712,7 @@ else
 {
 	SendFun := "F_NormalWay"
 }
+
 LV_GetText(EnDis, 		v_SelectedRow, 4)
 LV_GetText(TextInsert, 	v_SelectedRow, 5)
 LV_GetText(Comment, 	v_SelectedRow, 6)
@@ -2764,17 +2763,50 @@ else
 
 ;GoSub SetOptions 
 ;SetOptions:
-OptionSet := Instr(Hotstring2[2],"*0") or InStr(Hotstring2[2],"*") = 0 ? F_CheckOption("No",2) :  F_CheckOption("Yes",2)
-OptionSet := ((Instr(Hotstring2[2],"C0")) or (Instr(Hotstring2[2],"C1")) or (Instr(Hotstring2[2],"C") = 0)) ? F_CheckOption("No",3) : F_CheckOption("Yes",3)
-OptionSet := Instr(Hotstring2[2],"B0") ? F_CheckOption("Yes",4) : F_CheckOption("No",4)
-OptionSet := Instr(Hotstring2[2],"?") ? F_CheckOption("Yes",5) : F_CheckOption("No",5)
-OptionSet := (Instr(Hotstring2[2],"O0") or (InStr(Hotstring2[2],"O") = 0)) ? F_CheckOption("No",6) : F_CheckOption("Yes",6)
+;*[One]
+/*
+	OptionSet := Instr(Hotstring2[2],"*0") or InStr(Hotstring2[2],"*") = 0 ? F_CheckOption("No", 2) :  F_CheckOption("Yes", 2)
+	OptionSet := ((Instr(Hotstring2[2],"C0")) or (Instr(Hotstring2[2],"C1")) or (Instr(Hotstring2[2],"C") = 0)) ? F_CheckOption("No", 3) : F_CheckOption("Yes", 3)
+	OptionSet := Instr(Hotstring2[2],"B0") ? F_CheckOption("Yes",4) : F_CheckOption("No", 4)
+	OptionSet := Instr(Hotstring2[2],"?") ? F_CheckOption("Yes",5) : F_CheckOption("No", 5)
+	OptionSet := (Instr(Hotstring2[2],"O0") or (InStr(Hotstring2[2],"O") = 0)) ? F_CheckOption("No",6) : F_CheckOption("Yes", 6)
+	OptionSet := (InStr(Select,"""On""")) ? F_CheckOption("No", 7) : F_CheckOption("Yes", 7)
+*/
+
+/*
+	temp1 := Instr(Hotstring2[2],"*0")
+	temp2 := InStr(Hotstring2[2],"*")
+	
+	temp3 := Instr(Hotstring2[2],"C0")
+	temp4 := Instr(Hotstring2[2],"C1")
+	temp5 := Instr(Hotstring2[2],"C")
+	
+	temp6 := Instr(Hotstring2[2],"B0")
+	
+	temp7 := Instr(Hotstring2[2],"?")
+	
+	temp8 := Instr(Hotstring2[2],"O0")
+	temp9 := InStr(Hotstring2[2],"O") 
+	
+	temp10 := InStr(v_String, """On""")
+*/
+
+Instr(Hotstring2[2],"*0") or (InStr(Hotstring2[2],"*") = 0) ? F_CheckOption("No", 1) :  F_CheckOption("Yes", 1)
+((Instr(Hotstring2[2],"C0")) or (Instr(Hotstring2[2],"C1")) or (Instr(Hotstring2[2],"C") = 0)) ? F_CheckOption("No", 2) : F_CheckOption("Yes", 2)
+Instr(Hotstring2[2],"B0") ? F_CheckOption("Yes", 3) : F_CheckOption("No", 3)
+Instr(Hotstring2[2],"?") ? F_CheckOption("Yes", 4) : F_CheckOption("No", 4)
+(Instr(Hotstring2[2],"O0") or (InStr(Hotstring2[2],"O") = 0)) ? F_CheckOption("No", 5) : F_CheckOption("Yes", 5)
+InStr(v_String, """On""") ? F_CheckOption("No", 6) : F_CheckOption("Yes", 6)
 ;GuiControlGet, v_ViewString
 ;Select := v_ViewString
+
 Select := v_String
-if (Select == "")
-	return
-OptionSet := (InStr(Select,"""On""")) ? F_CheckOption("No", 7) : F_CheckOption("Yes",7)
+/*
+	if (Select == "")
+		return
+*/
+
+; tutaj
 if(InStr(Select,"F_NormalWay"))
 	GuiControl, Choose, v_SelectFunction, SendInput (SI)
 else if(InStr(Select, "F_ViaClipboard"))
@@ -3336,7 +3368,7 @@ F_AutoXYWH("wh", IdListView1)
 GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 v_yNext := v_ymarg + HofText + v_OutVarTempH + v_ymarg
 v_xNext := LeftColumnW + v_xmarg
-LV_ModifyCol(1, Round(0.1 * v_OutVarTempW), "zmiana1")
+LV_ModifyCol(1, Round(0.1 * v_OutVarTempW))
 LV_ModifyCol(2, Round(0.1 * v_OutVarTempW))
 LV_ModifyCol(3, Round(0.1 * v_OutVarTempW))	
 LV_ModifyCol(4, Round(0.1 * v_OutVarTempW))
