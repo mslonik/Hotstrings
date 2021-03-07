@@ -273,8 +273,10 @@ global v_FontSize 				:= 10 ;points
 global v_xmarg					:= 10 ;pixels
 global v_ymarg					:= 10 ;pixels
 global v_FontType				:= "Calibri"
-global v_WindowColor			:= "Gray"
-global v_ControlColor 			:= "White"
+global v_FontColor				:= "Black"
+global v_FontColorHighlighted		:= "Blue"
+global v_WindowColor			:= "Default"
+global v_ControlColor 			:= "Default"
 ;Variables used for GUI settings
 v_xNext		:= 0
 v_yNext		:= 0
@@ -556,7 +558,7 @@ SysGet, PrimMon, MonitorPrimary
 if (v_SelectedMonitor == 0)
 	v_SelectedMonitor := PrimMon
 
-;*[One]
+
 
 ;1. General settings of GUI: resizeability, scaleability, window handle etc.
 ;-DPIScale doesn't work in Microsoft Windows 10
@@ -568,13 +570,13 @@ Gui, 		HS3:Margin,	% v_xmarg, % v_ymarg
 Gui,			HS3:Color,	% v_WindowColor, % v_ControlColor
 
 ;2. Prepare all text objects according to mock-up.
-Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm cBlue", % v_FontType
+Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm" . A_Space . "c" . v_FontColorHighlighted, % v_FontType
 Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText1, 									%t_EnterTriggerstring%
-Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm cWhite", % v_FontType
+Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm" . A_Space . "c" . v_FontColor, % v_FontType
 
 Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString 
 
-;Gui,			HS3:Add,		Text, 		HwndIdText2 vv_SelectTriggerOptions, 				%t_SelectTriggerOptions%
+;Gui,			HS3:Add,		Text, 		x0 y0 HwndIdText2 vv_SelectTriggerOptions, 				%t_SelectTriggerOptions%
 Gui, 		HS3:Add, 		CheckBox, 	x0 y0 HwndIdCheckBox1 gCapsCheck vv_OptionImmediateExecute,	%t_ImmediateExecute%
 Gui, 		HS3:Add,		CheckBox, 	x0 y0 HwndIdCheckBox2 gCapsCheck vv_OptionCaseSensitive,	%t_CaseSensitive%
 Gui, 		HS3:Add,		CheckBox, 	x0 y0 HwndIdCheckBox3 gCapsCheck vv_OptionNoBackspace,		%t_NoBackspace%
@@ -584,15 +586,15 @@ Gui, 		HS3:Add, 		CheckBox, 	x0 y0 HwndIdCheckBox6 gCapsCheck vv_OptionDisable, 
 
 Gui,			HS3:Add,		GroupBox, 	x0 y0 HwndIdGroupBox1 vv_GroupBoxSelectTriggerOptions, 		%t_SelectTriggerOptions%
 
-Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm cBlue", % v_FontType
+Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm" . A_Space . "c" . v_FontColorHighlighted, % v_FontType
 Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText3 vv_TextSelectHotstringsOutFun, 			%t_SelectHotstringOutputFunction%
-Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm cWhite", % v_FontType
+Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm" . A_Space . "c" . v_FontColor, % v_FontType
 
 Gui, 		HS3:Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gL_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
 
-Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm cBlue", % v_FontType
+Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm" . A_Space . "c" . v_FontColorHighlighted, % v_FontType
 Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText4 vv_TextEnterHotstring, 				%t_EnterHotstring%
-Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm cWhite", % v_FontType
+Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm" . A_Space . "c" . v_FontColor, % v_FontType
 
 Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit2 vv_EnterHotstring
 Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit3 vv_EnterHotstring1  Disabled
@@ -602,37 +604,37 @@ Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit6 vv_EnterHotstring4  Disabled
 Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit7 vv_EnterHotstring5  Disabled
 Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit8 vv_EnterHotstring6  Disabled
 
-Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm cBlue", % v_FontType
+Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm" . A_Space . "c" . v_FontColorHighlighted, % v_FontType
 Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText5 vv_TextAddComment, 					%t_AddAComment%
-Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm cWhite", % v_FontType
+Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm" . A_Space . "c" . v_FontColor, % v_FontType
 
 Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit9 vComment Limit64 ; future: change name to vv_Comment, align with other 
 
-Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm cBlue", % v_FontType
+Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm" . A_Space . "c" . v_FontColorHighlighted, % v_FontType
 Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText6 vv_TextSelectHotstringLibrary, 			%t_SelectHotstringLibrary%
-Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm cWhite", % v_FontType
+Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm" . A_Space . "c" . v_FontColor, % v_FontType
 
 Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton1 gAddLib, 							%t_AddLibrary%
 Gui,			HS3:Add,		DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gSectionChoose
 
-Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "bold cWhite", % v_FontType
+;Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "bold cBlack", % v_FontType
 Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton2 gAddHotstring, 						%t_SetHotstring%
 Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton3 gClear,							%t_Clear%
 Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton4 gDelete vv_DeleteHotstring Disabled, 	%t_DeleteHotstring%
-Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm cWhite", % v_FontType
+Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm" . A_Space . "c" . v_FontColor, % v_FontType
 
-Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm cBlue", % v_FontType
+Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm" . A_Space . "c" . v_FontColorHighlighted, % v_FontType
 Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText7,		 							%t_LibraryContent%
-Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm cWhite", % v_FontType
+Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm" . A_Space . "c" . v_FontColor, % v_FontType
 
 Gui,			HS3:Add, 		Text, 		x0 y0 HwndIdText9, 									%t_TriggerstringTriggOptOutFunEnDisHotstringComment%
 Gui, 		HS3:Add, 		ListView, 	x0 y0 HwndIdListView1 LV0x1 vv_LibraryContent AltSubmit gHSLV, %t_TriggerstringTriggOptOutFunEnDisHotstringComment%
 
 Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText8 vv_ShortcutsMainInterface, 				%t_F1AboutHelpF2LibraryContentF3SearchHotstringsF5ClearF7ClipboardDelayF8DeleteHotstringF9SetHotstring%
 
-Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm cBlue", % v_FontType
+Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm" . A_Space . "c" . v_FontColorHighlighted, % v_FontType
 Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText10 vSandString, 						%t_Sandbox%
-Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm cWhite", % v_FontType
+Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm" . A_Space . "c" . v_FontColor, % v_FontType
 
 Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit10 vSandbox r3 						; r3 = 3x rows of text
 ;Gui, 		HS3:Add, 		Edit, 		HwndIdEdit11 vv_ViewString gViewString ReadOnly Hide
@@ -666,6 +668,7 @@ RightColumnW := v_OutVarTemp3
 
 ;5. Move text objects to correct position
 ;5.1. Left column
+;5.1.1. Enter triggerstring
 v_yNext += v_ymarg
 v_xNext += v_xmarg
 GuiControl, Move, % IdText1, % "x" . v_xNext . A_Space . "y" . v_yNext
@@ -675,6 +678,7 @@ v_xNext := v_xmarg + v_OutVarTemp1W + v_xmarg
 v_wNext := LeftColumnW - v_xNext
 GuiControl, Move, % IdEdit1, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
 
+;5.1.2. Triggerstring options
 v_yNext += Max(v_OutVarTemp1H, v_OutVarTemp2H)
 v_xNext := v_xmarg
 v_OutVarTemp := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W)
@@ -707,6 +711,10 @@ GuiControl, Move, % IdCheckBox5, % "x" . v_xNext . A_Space . "y" . v_yNext
 v_xNext += SpaceBetweenColumns + wleftminicolumn
 GuiControl, Move, % IdCheckBox6, % "x" . v_xNext . A_Space . "y" . v_yNext
 
+;*[Two]
+;Gui, 		%HS3Hwnd%:Show, AutoSize Center
+
+;5.1.3. Select hotstring output function
 v_yNext += HofCheckBox + v_ymarg
 v_xNext := v_xmarg
 GuiControl, Move, % IdText3, % "x" . v_xNext . A_Space . "y" . v_yNext
@@ -756,7 +764,7 @@ v_xNext := v_xmarg
 v_wNext := LeftColumnW - v_xNext
 GuiControl, Move, % IdDDL2, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
 
-;Gui, 		%HS3Hwnd%:Show, AutoSize Center
+
 v_yNext += HofDropDownList + v_ymarg
 v_xNext := v_xmarg
 GuiControlGet, v_OutVarTemp1, Pos, % IdButton2
@@ -786,7 +794,6 @@ if (ini_Sandbox)
 else
 	v_hNext := LeftColumnH - (HofText * 2 + v_ymarg * 2)
 GuiControl, Move, % IdListView1, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext . A_Space . "h" . v_hNext
-;Gui, 		%HS3Hwnd%:Show, AutoSize Center
 
 ;5.2.3. Position of the long text F1 ... F2 ...
 GuiControlGet, v_OutVarTemp, Pos, % IdListView1
@@ -2404,17 +2411,26 @@ return
 
 ^#h::		; Event
 L_GUIInit:
-;*[Three]
+;*[One]
 if (v_ResizingFlag) ;if run for the very first time
 {
 	if (ini_StartX == "") or (ini_StartY == "") or (ini_StartW == "") or (ini_StartH == "")
 	{
-		;why double???
+		;why double Show is necessary if FontSize == 16???
 		Gui, 		%HS3Hwnd%:Show, AutoSize Center
 		Gui, 		%HS3Hwnd%:Show, AutoSize Center
 	}
 	else
 		Gui,			%HS3Hwnd%: Show, % "X" . ini_StartX . A_Space . "Y" . ini_StartY . A_Space . "W" . ini_StartW . A_Space . "H" . ini_StartH
+	
+	Gui, %HS3Hwnd%: Default ; this line is necessary to enable handling of List Views.
+	GuiControlGet, v_OutVarTemp, Pos, % IdListView1
+	LV_ModifyCol(1, Round(0.1 * v_OutVarTempW))
+	LV_ModifyCol(2, Round(0.1 * v_OutVarTempW))
+	LV_ModifyCol(3, Round(0.1 * v_OutVarTempW))	
+	LV_ModifyCol(4, Round(0.1 * v_OutVarTempW))
+	LV_ModifyCol(5, Round(0.4 * v_OutVarTempW))
+	LV_ModifyCol(6, Round(0.2 * v_OutVarTempW) - 3)
 	v_ResizingFlag := 0
 }
 else
@@ -2468,7 +2484,7 @@ return
 			Gui,	HS3: Show, AutoSize Center
 			Gui,	HS3: Show, AutoSize Center
 		}
-		else ; tu jestem
+		else 
 			;Gui, HS3:Show, x%ini_StartX% y%ini_StartY% w%ini_StartW% h%ini_StartH%, Hotstrings
 			Gui,	HS3: Show, AutoSize Center
 		Gui,	HS3: Show, AutoSize Center
@@ -2487,43 +2503,45 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-ViewString:
-Gui, HS3:Submit, NoHide
-GuiControlGet, v_ViewString
-Select := v_ViewString
-a_String := StrSplit(Select, """")
-HotString2 := StrSplit(a_String[2],":")
-v_TriggerStringvar := SubStr(a_String[2], StrLen( ":" . HotString2[2] . ":" ) + 1, StrLen(a_String[2])-StrLen(  ":" . HotString2[2] . ":" ))
-RText := StrSplit(Select, "bind(""")
-if InStr(RText[2], """On""")
-{
-	OText := SubStr(RText[2], 1, StrLen(RText[2])-9)
-}
-else
-{    
-	OText := SubStr(RText[2], 1, StrLen(RText[2])-10)
-}
-GuiControl, , v_TriggerString, % v_TriggerStringvar
-if (InStr(Select, """F_MenuText""") or InStr(Select, """F_MenuTextAHK"""))
-{
-	OTextMenu := StrSplit(OText, "¦")
-	GuiControl, , v_EnterHotstring, % OTextMenu[1]
-	GuiControl, , v_EnterHotstring1, % OTextMenu[2]
-	GuiControl, , v_EnterHotstring2, % OTextMenu[3]
-	GuiControl, , v_EnterHotstring3, % OTextMenu[4]
-	GuiControl, , v_EnterHotstring4, % OTextMenu[5]
-	GuiControl, , v_EnterHotstring5, % OTextMenu[6]
-	GuiControl, , v_EnterHotstring6, % OTextMenu[7]
+/*
+	ViewString:
+	Gui, HS3:Submit, NoHide
+	GuiControlGet, v_ViewString
+	Select := v_ViewString
+	a_String := StrSplit(Select, """")
+	HotString2 := StrSplit(a_String[2],":")
+	v_TriggerStringvar := SubStr(a_String[2], StrLen( ":" . HotString2[2] . ":" ) + 1, StrLen(a_String[2])-StrLen(  ":" . HotString2[2] . ":" ))
+	RText := StrSplit(Select, "bind(""")
+	if InStr(RText[2], """On""")
+	{
+		OText := SubStr(RText[2], 1, StrLen(RText[2])-9)
+	}
+	else
+	{    
+		OText := SubStr(RText[2], 1, StrLen(RText[2])-10)
+	}
+	GuiControl, , v_TriggerString, % v_TriggerStringvar
+	if (InStr(Select, """F_MenuText""") or InStr(Select, """F_MenuTextAHK"""))
+	{
+		OTextMenu := StrSplit(OText, "¦")
+		GuiControl, , v_EnterHotstring, % OTextMenu[1]
+		GuiControl, , v_EnterHotstring1, % OTextMenu[2]
+		GuiControl, , v_EnterHotstring2, % OTextMenu[3]
+		GuiControl, , v_EnterHotstring3, % OTextMenu[4]
+		GuiControl, , v_EnterHotstring4, % OTextMenu[5]
+		GuiControl, , v_EnterHotstring5, % OTextMenu[6]
+		GuiControl, , v_EnterHotstring6, % OTextMenu[7]
+		
+	}
+	else
+	{
+		GuiControl, , v_EnterHotstring, % OText
+	}
+	GoSub SetOptions 
+	gosub L_SelectFunction
+	return
 	
-}
-else
-{
-	GuiControl, , v_EnterHotstring, % OText
-}
-GoSub SetOptions 
-gosub L_SelectFunction
-return
-
+*/
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 AddHotstring: 
@@ -2663,9 +2681,9 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-HSLV:
+HSLV: ;tu jestem
 Gui, HS3:+OwnDialogs
-v_PreviousSelectedRow := v_SelectedRow
+ v_PreviousSelectedRow := v_SelectedRow ;this line rather as finishing this label section
 If !(v_SelectedRow := LV_GetNext()) {
 	Return
 }
@@ -2673,9 +2691,9 @@ if (v_PreviousSelectedRow == v_SelectedRow) and !(v_TriggerString == "")
 {
 	return
 }
-LV_GetText(Options, v_SelectedRow, 2)
-LV_GetText(v_TriggerString, v_SelectedRow, 1)
-LV_GetText(Fun, v_SelectedRow, 3)
+LV_GetText(v_TriggerString, 	v_SelectedRow, 1)
+LV_GetText(Options, 		v_SelectedRow, 2)
+LV_GetText(Fun, 			v_SelectedRow, 3)
 if (Fun = "SI")
 {
 	SendFun := "F_NormalWay"
@@ -2696,17 +2714,80 @@ else
 {
 	SendFun := "F_NormalWay"
 }
-LV_GetText(TextInsert, v_SelectedRow, 5)
-LV_GetText(Comment, v_SelectedRow, 6)
-LV_GetText(EnDis, v_SelectedRow, 4)
+LV_GetText(EnDis, 		v_SelectedRow, 4)
+LV_GetText(TextInsert, 	v_SelectedRow, 5)
+LV_GetText(Comment, 	v_SelectedRow, 6)
 If (EnDis == "En")
 	OnOff := "On"
 else if (EnDis == "Dis")
 	OnOff := "Off"
 v_String := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
 GuiControl,, Comment, %Comment%
-GuiControl,, v_ViewString ,  %v_String%
-gosub, ViewString
+;GuiControl,, v_ViewString,  %v_String%
+;gosub, ViewString
+
+
+;Gui, HS3:Submit, NoHide
+;GuiControlGet, v_ViewString
+;Select := v_ViewString
+;a_String := StrSplit(Select, """")
+ViewString:
+a_String := StrSplit(v_String, """")
+HotString2 := StrSplit(a_String[2],":")
+v_TriggerStringvar := SubStr(a_String[2], StrLen( ":" . HotString2[2] . ":" ) + 1, StrLen(a_String[2])-StrLen(  ":" . HotString2[2] . ":" ))
+RText := StrSplit(v_String, "bind(""")
+if InStr(RText[2], """On""")
+{
+	OText := SubStr(RText[2], 1, StrLen(RText[2])-9)
+}
+else
+{    
+	OText := SubStr(RText[2], 1, StrLen(RText[2])-10)
+}
+GuiControl, , v_TriggerString, % v_TriggerStringvar
+if (InStr(v_String, """F_MenuText""") or InStr(v_String, """F_MenuTextAHK"""))
+{
+	OTextMenu := StrSplit(OText, "¦")
+	GuiControl, , v_EnterHotstring,  % OTextMenu[1]
+	GuiControl, , v_EnterHotstring1, % OTextMenu[2]
+	GuiControl, , v_EnterHotstring2, % OTextMenu[3]
+	GuiControl, , v_EnterHotstring3, % OTextMenu[4]
+	GuiControl, , v_EnterHotstring4, % OTextMenu[5]
+	GuiControl, , v_EnterHotstring5, % OTextMenu[6]
+	GuiControl, , v_EnterHotstring6, % OTextMenu[7]
+	
+}
+else
+{
+	GuiControl, , v_EnterHotstring, % OText
+}
+
+;GoSub SetOptions 
+;SetOptions:
+OptionSet := Instr(Hotstring2[2],"*0") or InStr(Hotstring2[2],"*") = 0 ? F_CheckOption("No",2) :  F_CheckOption("Yes",2)
+OptionSet := ((Instr(Hotstring2[2],"C0")) or (Instr(Hotstring2[2],"C1")) or (Instr(Hotstring2[2],"C") = 0)) ? F_CheckOption("No",3) : F_CheckOption("Yes",3)
+OptionSet := Instr(Hotstring2[2],"B0") ? F_CheckOption("Yes",4) : F_CheckOption("No",4)
+OptionSet := Instr(Hotstring2[2],"?") ? F_CheckOption("Yes",5) : F_CheckOption("No",5)
+OptionSet := (Instr(Hotstring2[2],"O0") or (InStr(Hotstring2[2],"O") = 0)) ? F_CheckOption("No",6) : F_CheckOption("Yes",6)
+;GuiControlGet, v_ViewString
+;Select := v_ViewString
+Select := v_String
+if (Select == "")
+	return
+OptionSet := (InStr(Select,"""On""")) ? F_CheckOption("No", 7) : F_CheckOption("Yes",7)
+if(InStr(Select,"F_NormalWay"))
+	GuiControl, Choose, v_SelectFunction, SendInput (SI)
+else if(InStr(Select, "F_ViaClipboard"))
+	GuiControl, Choose, v_SelectFunction, Clipboard (CL)
+else if(InStr(Select, """F_MenuText"""))
+	GuiControl, Choose, v_SelectFunction, Menu & Clipboard (MCL)
+else if(InStr(Select, """F_MenuTextAHK"""))
+	GuiControl, Choose, v_SelectFunction, Menu & SendInput (MSI)
+v_CaseSensitiveC1 := 0
+;return
+gosub L_SelectFunction
+
+
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2811,11 +2892,12 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-SectionChoose:
+SectionChoose: 
 Gui, HS3:Submit, NoHide
 Gui, HS3:+OwnDialogs
 
-GuiControl, Enable, Delete
+GuiControl, Enable, % IdButton4 ; button Delete hotstring (F8)
+Gui, ListView, % IdListView1 ; identify which ListView
 LV_Delete()
 FileRead, Text, Libraries\%v_SelectHotstringLibrary%
 
@@ -2865,12 +2947,14 @@ if InStr(v_SelectFunction, "Menu")
 }
 else
 {
-	GuiControl, , v_EnterHotstring1,
-	GuiControl, , v_EnterHotstring2,
-	GuiControl, , v_EnterHotstring3,
-	GuiControl, , v_EnterHotstring4,
-	GuiControl, , v_EnterHotstring5,
-	GuiControl, , v_EnterHotstring6,
+	/*
+		GuiControl, , v_EnterHotstring1,
+		GuiControl, , v_EnterHotstring2,
+		GuiControl, , v_EnterHotstring3,
+		GuiControl, , v_EnterHotstring4,
+		GuiControl, , v_EnterHotstring5,
+		GuiControl, , v_EnterHotstring6,
+	*/
 	GuiControl, Disable, v_EnterHotstring1
 	GuiControl, Disable, v_EnterHotstring2
 	GuiControl, Disable, v_EnterHotstring3
@@ -2892,27 +2976,29 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-SetOptions:
-OptionSet := Instr(Hotstring2[2],"*0") or InStr(Hotstring2[2],"*") = 0 ? F_CheckOption("No",2) :  F_CheckOption("Yes",2)
-OptionSet := ((Instr(Hotstring2[2],"C0")) or (Instr(Hotstring2[2],"C1")) or (Instr(Hotstring2[2],"C") = 0)) ? F_CheckOption("No",3) : F_CheckOption("Yes",3)
-OptionSet := Instr(Hotstring2[2],"B0") ? F_CheckOption("Yes",4) : F_CheckOption("No",4)
-OptionSet := Instr(Hotstring2[2],"?") ? F_CheckOption("Yes",5) : F_CheckOption("No",5)
-OptionSet := (Instr(Hotstring2[2],"O0") or (InStr(Hotstring2[2],"O") = 0)) ? F_CheckOption("No",6) : F_CheckOption("Yes",6)
-GuiControlGet, v_ViewString
-Select := v_ViewString
-if Select = ; !!!
+/*
+	SetOptions:
+	OptionSet := Instr(Hotstring2[2],"*0") or InStr(Hotstring2[2],"*") = 0 ? F_CheckOption("No",2) :  F_CheckOption("Yes",2)
+	OptionSet := ((Instr(Hotstring2[2],"C0")) or (Instr(Hotstring2[2],"C1")) or (Instr(Hotstring2[2],"C") = 0)) ? F_CheckOption("No",3) : F_CheckOption("Yes",3)
+	OptionSet := Instr(Hotstring2[2],"B0") ? F_CheckOption("Yes",4) : F_CheckOption("No",4)
+	OptionSet := Instr(Hotstring2[2],"?") ? F_CheckOption("Yes",5) : F_CheckOption("No",5)
+	OptionSet := (Instr(Hotstring2[2],"O0") or (InStr(Hotstring2[2],"O") = 0)) ? F_CheckOption("No",6) : F_CheckOption("Yes",6)
+	GuiControlGet, v_ViewString
+	Select := v_ViewString
+	if Select = ; !!!
+		return
+	OptionSet := (InStr(Select,"""On""")) ? F_CheckOption("No", 7) : F_CheckOption("Yes",7)
+	if(InStr(Select,"F_NormalWay"))
+		GuiControl, Choose, v_SelectFunction, SendInput (SI)
+	else if(InStr(Select, "F_ViaClipboard"))
+		GuiControl, Choose, v_SelectFunction, Clipboard (CL)
+	else if(InStr(Select, """F_MenuText"""))
+		GuiControl, Choose, v_SelectFunction, Menu & Clipboard (MCL)
+	else if(InStr(Select, """F_MenuTextAHK"""))
+		GuiControl, Choose, v_SelectFunction, Menu & SendInput (MSI)
+	v_CaseSensitiveC1 := 0
 	return
-OptionSet := (InStr(Select,"""On""")) ? F_CheckOption("No", 7) : F_CheckOption("Yes",7)
-if(InStr(Select,"F_NormalWay"))
-	GuiControl, Choose, v_SelectFunction, SendInput (SI)
-else if(InStr(Select, "F_ViaClipboard"))
-	GuiControl, Choose, v_SelectFunction, Clipboard (CL)
-else if(InStr(Select, """F_MenuText"""))
-	GuiControl, Choose, v_SelectFunction, Menu & Clipboard (MCL)
-else if(InStr(Select, """F_MenuTextAHK"""))
-	GuiControl, Choose, v_SelectFunction, Menu & SendInput (MSI)
-v_CaseSensitiveC1 := 0
-return
+*/
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -3242,18 +3328,20 @@ if (v_ResizingFlag)
 	return
 F_AutoXYWH("wh", IdListView1)
 
-Gui, ListView, %IdListView1% ; identify which ListView
+;MsgBox, , Przed nadaniem wartości domyślnej, % A_DefaultListView . "`n" . IdListView1
+;Gui, ListView, % IdListView1 ; identify which ListView
+;MsgBox, , Po nadaniu wartości domyślnej, % A_DefaultListView . "`n" . IdListView1
 
 	;5.2.3. Position of the long text F1 ... F2 ...
 GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 v_yNext := v_ymarg + HofText + v_OutVarTempH + v_ymarg
 v_xNext := LeftColumnW + v_xmarg
-LV_ModifyCol(1, Round(0.2 * v_OutVarTempW))
+LV_ModifyCol(1, Round(0.1 * v_OutVarTempW), "zmiana1")
 LV_ModifyCol(2, Round(0.1 * v_OutVarTempW))
-LV_ModifyCol(3, Round(0.2 * v_OutVarTempW))	
+LV_ModifyCol(3, Round(0.1 * v_OutVarTempW))	
 LV_ModifyCol(4, Round(0.1 * v_OutVarTempW))
-LV_ModifyCol(5, Round(0.1 * v_OutVarTempW))
-LV_ModifyCol(6, Round(0.3 * v_OutVarTempW) - 3)
+LV_ModifyCol(5, Round(0.4 * v_OutVarTempW))
+LV_ModifyCol(6, Round(0.2 * v_OutVarTempW) - 3)
 GuiControl, Move, % IdText8, % "x" . v_xNext . A_Space . "y" . v_yNext
 
 if (!ini_Sandbox) ;if flag ini_Sandbox isn't set, hide text objects related to sandbox
