@@ -265,7 +265,7 @@ global v_TypedTriggerstring 		:= ""
 global v_UndoHotstring 			:= ""
 global v_UndoTriggerstring 		:= ""
 global v_ViewString 			:= ""
-
+global v_ConfigFlag 			:= 0
 
 ;Future: configuration parameters
 global v_FontSize 				:= 10 ;points
@@ -458,37 +458,67 @@ IniRead, ini_TipsSortByLength,			Config.ini, Configuration, TipsSortByLength
 
 IniRead, v_TipsConfig, 					Config.ini, TipsLibraries		; Read into v_TipsConfig section TipsLibraries from the file Config.ini which is a list of library files (.csv) stored in Libraries subfolder
 
-; Check if tips should be displayed for Libraries files (.csv)
-a_TipsConfig := StrSplit(v_TipsConfig, "`n")			; Separates a string into an array of substrings using the specified delimiters.
 
+;Check if Libraries subfolder is empty. If it does, display warning.
+v_IsLibraryEmpty := true
+Loop, Files, Libraries\*.csv
+{
+	v_IsLibraryEmpty := false
+	break
+}
+if (v_IsLibraryEmpty)
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . " warning", % "Libraries folder: " . A_ScriptDir . "/Libraries is empty. No (triggerstring, hotstring) definition will be loaded." ;Future: prepare for translation
+
+;Check if Config.ini contains in section [TipsLibraries] file names which actually aren't present in Libraries subfolder. If it does, remove them from Config.ini
+a_TipsConfig := StrSplit(v_TipsConfig, "`n")			; Separates a string into an array of substrings using the specified delimiters.
 Loop, % a_TipsConfig.MaxIndex()					; Loop over the entire array
 {
 	v_ConfigLibrary := SubStr(a_TipsConfig[A_Index], 1, InStr(a_TipsConfig[A_Index], "=") - 1)	; returns from the beginning till "=" sign
-	;MsgBox, , v_ConfigLibrary, %v_ConfigLibrary%
 	Loop, Files, Libraries\*.csv
 	{
-		v_ConfigFlag := 1
+		v_ConfigFlag := false
 		if (A_LoopFileName == v_ConfigLibrary)
 		{
-			v_ConfigFlag := 0
+			v_ConfigFlag := true
 			break
 		}
 	}
-	if (v_ConfigFlag)							; if in Config.ini there is a file which is not actually present in Libraries subfolder
+	if (!v_ConfigFlag)							; if in Config.ini there is a file which is not actually present in Libraries subfolder
 		IniDelete, Config.ini, TipsLibraries, %v_ConfigLibrary% ; remove such file from Conig.ini
 }
 
-Loop, Files, Libraries\*.csv						; Look again in Libraries subfolder. Search for each filename in section [TipsLibraries]. If not found add it to Config.ini and enable by default.
+; Priority library has special meaning. It is constant library filename, created if not exist.
+if (!FileExist("Libraries\PriorityLibrary.csv"))
 {
-	if !(InStr(v_TipsConfig, A_LoopFileName))
-		IniWrite, 1, Config.ini, TipsLibraries, %A_LoopFileName%
+	FileAppend,, Libraries\PriorityLibrary.csv, UTF-8
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . " warning", % "The default library file (PriorityLibrary.csv) was created in " . A_ScriptDir . "/Libraries folder." ;Future: prepare for translation
 }
 
-; Priority library has special meaning. It is constant library filename, created if not exist.
-if (!FileExist("\Languages\PriorityLibrary.csv"))
-	FileAppend,, Libraries\PriorityLibrary.csv, UTF-8
+;Load again section [TipsLibraries] from Config.ini
+IniRead, v_TipsConfig, 					Config.ini, TipsLibraries
 
+; Look in Libraries subfolder. Check if each file found there is already present in section [TipsLibraries]. If not add it to Config.ini and enable by default.
+a_TipsConfig := StrSplit(v_TipsConfig, "`n")			; Separates a string into an array of substrings using the specified delimiters.
+Loop, Files, Libraries\*.csv
+{
+	v_NewLibrary := true
+	
+	;MsgBox, , v_ConfigLibrary, %v_ConfigLibrary%
+	Loop, % a_TipsConfig.MaxIndex()					; Loop over the entire array
+	{
+		v_ConfigLibrary := SubStr(a_TipsConfig[A_Index], 1, InStr(a_TipsConfig[A_Index], "=") - 1)	; returns from the beginning till "=" sign
+		if (A_LoopFileName == v_ConfigLibrary)
+		{
+			v_NewLibrary := false
+			break
+		}
+	}
+	if (v_NewLibrary)							; if in Config.ini there is a file which is not actually present in Libraries subfolder
+		Iniwrite, 1, Config.ini, TipsLibraries,  %A_LoopFileName% ;add new library file and enable tips
+}
 
+;Load again section [TipsLibraries] from Config.ini
+IniRead, v_TipsConfig, 					Config.ini, TipsLibraries
 
 
 ; Hotstrings app could be reloaded by itself, (see label Delete:). In such a case 9 command line parameters are passed
@@ -1044,7 +1074,6 @@ Menu, 	HSMenu, 			Add, %t_ClipboardDelay%, 				HSdelay
 Menu, 	HSMenu, 			Add, %t_AboutHelp%, 					L_About
 Gui, 	HS3:Menu, HSMenu
 
-v_ResizingFlag := 1
 
 ;return ; end of defining the Hotstrings Gui
 
@@ -1055,6 +1084,7 @@ v_ResizingFlag := 1
 Loop,
 {
 	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
+	;*[One] tu jestem sprawdzić, czemu przestały działać podpowiedzi 
 	if (ErrorLevel = "NewInput")
 		MsgBox, %t_ErrorLevelWasTriggeredByNewInputError%
 	
@@ -2659,11 +2689,10 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-Clear: ;tu jestem
-;*[One]
+Clear: 
 Gui,		%HS3Hwnd%: Font, % "c" . v_FontColor
 GuiControl, Font, % IdCheckBox1
-GuiControl,, % IdEdit1,  ;v_TriggerString
+GuiControl,, % IdEdit1,  				;v_TriggerString
 GuiControl, Font, % IdCheckBox1
 GuiControl,, % IdCheckBox1, 0
 GuiControl, Font, % IdCheckBox2
@@ -2677,26 +2706,26 @@ GuiControl,, % IdCheckBox5, 0
 GuiControl, Font, % IdCheckBox6
 GuiControl,, % IdCheckBox6, 0
 GuiControl, Choose, % IdDDL1, SendInput (SI) ;v_SelectFunction 
-GuiControl,, % IdEdit2,  ;v_EnterHotstring
-GuiControl,, % IdEdit3, ;v_EnterHotstring1
-GuiControl, Disable, % IdEdit3 ;v_EnterHotstring1
-GuiControl,, % IdEdit4, ;v_EnterHotstring2
-GuiControl, Disable, % IdEdit4 ;v_EnterHotstring2
-GuiControl,, % IdEdit5, ;v_EnterHotstring3
-GuiControl, Disable, % IdEdit5 ;v_EnterHotstring3
-GuiControl,, % IdEdit6, ;v_EnterHotstring4
-GuiControl, Disable, % IdEdit6 ;v_EnterHotstring4
-GuiControl,, % IdEdit7, ;v_EnterHotstring5
-GuiControl, Disable, % IdEdit7 ;v_EnterHotstring5
-GuiControl,, % IdEdit8, ;v_EnterHotstring6
-GuiControl, Disable, % IdEdit8 ;v_EnterHotstring6
-GuiControl,, % IdEdit9,  ;Comment
-GuiControl,, % IdDDL2, | ;v_SelectHotstringLibrary o make the control empty, specify only a pipe character (|)
+GuiControl,, % IdEdit2,  				;v_EnterHotstring
+GuiControl,, % IdEdit3, 					;v_EnterHotstring1
+GuiControl, Disable, % IdEdit3 			;v_EnterHotstring1
+GuiControl,, % IdEdit4, 					;v_EnterHotstring2
+GuiControl, Disable, % IdEdit4 			;v_EnterHotstring2
+GuiControl,, % IdEdit5, 					;v_EnterHotstring3
+GuiControl, Disable, % IdEdit5 			;v_EnterHotstring3
+GuiControl,, % IdEdit6, 					;v_EnterHotstring4
+GuiControl, Disable, % IdEdit6 			;v_EnterHotstring4
+GuiControl,, % IdEdit7, 					;v_EnterHotstring5
+GuiControl, Disable, % IdEdit7 			;v_EnterHotstring5
+GuiControl,, % IdEdit8, 					;v_EnterHotstring6
+GuiControl, Disable, % IdEdit8 			;v_EnterHotstring6
+GuiControl,, % IdEdit9,  				;Comment
+GuiControl,, % IdDDL2, | 				;v_SelectHotstringLibrary o make the control empty, specify only a pipe character (|)
 Loop,%A_ScriptDir%\Libraries\*.csv
 	GuiControl,, % IdDDL2, %A_LoopFileName%
 GuiControl, Disable, % IdButton4
 LV_Delete()
-GuiControl,, % IdEdit10,  ;Sandbox
+GuiControl,, % IdEdit10,  				;Sandbox
 
 /*
 	GuiControl,, v_ViewString,
