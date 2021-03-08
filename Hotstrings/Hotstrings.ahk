@@ -187,8 +187,7 @@ ToggleEndChars=&Toggle EndChars
 Triggerstring=Triggerstring
 TriggerstringTips=&Triggerstring tips
 TriggerstringTriggOptOutFunEnDisHotstringComment=Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
-L_UndoLastHotstring=&Undo last hotstring
-L_UndoTheLastHotstring=Undo the last hotstring.
+UndoLastHotstring=&Undo the last hotstring
 LibraryContent=Library content (F2)
 	)
 
