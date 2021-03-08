@@ -1,8 +1,8 @@
 ﻿*‖+-‖CL‖En‖±‖
-‖-‖MSI‖En‖-¦−¦–¦—‖U+2010, U+2212, U+2013, U+2014
 *‖-+‖CL‖En‖±‖
 *‖--‖CL‖En‖─‖
 *‖->‖MCL‖En‖→¦←¦↔‖
+*‖-`t‖MSI‖En‖-¦−¦–¦—‖U+2010, U+2212, U+2013, U+2014
 *‖/=‖CL‖En‖≠‖
 *‖<=‖CL‖En‖≤‖
 *‖>=‖CL‖En‖≥‖
@@ -18,19 +18,19 @@
 *‖gamma/‖CL‖En‖γ‖
 *‖kamp‖CL‖En‖kA‖
 *‖kohm‖CL‖Dis‖kΩ‖
-*‖kropkam‖CL‖En‖·‖
+*‖kropkam‖MSI‖En‖·¦×‖
 *‖kv‖CL‖En‖kV‖
 *‖lambda/‖CL‖En‖λ‖
 *‖mamp‖CL‖En‖MSI‖
 *‖micro/‖CL‖En‖µ‖
 *‖minusplus‖CL‖En‖±‖
-*‖mkropka‖CL‖En‖·‖
+*‖mkropka‖MSI‖En‖·¦×‖U+00B7 | U+00D7
 *‖mminus‖CL‖En‖−‖
 *‖mniejszyrowny‖CL‖En‖≤‖
 *‖mniejszyrówny‖CL‖En‖≤‖
 *‖oddo‖CL‖En‖÷‖
 *?‖ohm‖CL‖En‖Ω‖
-*‖omega/‖CL‖En‖ω‖
+*‖omega/‖SI‖En‖ω‖
 *‖par/‖SI‖En‖§‖
 *‖pi/‖CL‖En‖π‖
 *‖plusminus‖CL‖En‖±‖

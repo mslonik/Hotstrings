@@ -1,7 +1,7 @@
 ﻿*‖africa‖MSI‖En‖Africa‖
 *‖america‖MSI‖En‖America‖
+‖easm‖CL‖En‖EASM‖
 *‖easm ‖CL‖En‖EASM ‖
-*‖easm/‖CL‖En‖EASM‖
 *‖east‖MSI‖En‖East‖
 *‖europe‖MSI‖En‖Europe‖
 ‖excel‖SI‖En‖Excel‖
@@ -18,6 +18,12 @@
 *‖south‖MSI‖En‖South‖
 ‖svn‖SI‖En‖SVN‖
 *‖svn/‖CL‖En‖versioning and revision control system‖
+*‖sweden‖SI‖En‖Sweden‖
+*‖swidish‖SI‖En‖Swidish‖
 *‖uic60‖CL‖En‖UIC60‖
 *‖unicode‖SI‖En‖Unicode‖
+‖usa‖SI‖En‖USA‖
+*‖usa/‖SI‖En‖United States of America‖
 *‖west‖MSI‖En‖West‖
+*‖wrzeszcz‖SI‖En‖Wrzeszcz‖
+*‖zeltweg‖SI‖En‖Zeltweg‖

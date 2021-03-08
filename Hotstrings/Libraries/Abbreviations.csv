@@ -3,14 +3,20 @@ B0*?‖.csv‖SI‖En‖‖
 B0*?‖.pdf‖SI‖En‖‖
 B0*?‖.svg‖SI‖En‖‖
 O‖2d‖MSI‖En‖2D¦two-dimensional‖
+‖2fa‖SI‖En‖2FA‖
+*‖2fa/‖SI‖En‖Two-Factor Authentication‖
 *‖3d ‖MSI‖En‖3D ¦three-dimensional‖
 *‖a/‖SI‖En‖Availability‖
-*‖a3‖MSI‖En‖A3‖size of paper sheet in Europe 
-*‖a4‖MSI‖En‖A4‖size of paper sheet in Europe 
+*‖a3‖MSI‖En‖A3¦297 × 420 [mm]‖size of paper sheet in Europe 
+*‖a4‖MSI‖En‖A4¦210 × 297 [mm]‖
 ‖ac‖SI‖En‖AC‖
 *‖ac/‖MSI‖En‖Alternating Current¦Axle Counter‖
+‖acl‖SI‖En‖ACL‖
+*‖acl/‖SI‖En‖Access Control List‖
 ‖ahk‖SI‖En‖AHK‖
 *‖ahk/‖CL‖En‖AutoHotkey‖https://www.autohotkey.com/
+‖ansi‖SI‖En‖ANSI‖
+*‖ansi/‖SI‖En‖American National Standards Institute‖https://en.wikipedia.org/wiki/American_National_Standards_Instit
 ‖api‖SI‖En‖API‖
 *‖api/‖CL‖En‖Application Programming Interface‖https://en.wikipedia.org/wiki/API
 ‖ar‖SI‖En‖AR‖
@@ -75,6 +81,8 @@ O‖2d‖MSI‖En‖2D¦two-dimensional‖
 *‖doors/‖SI‖En‖ Dynamic Object Oriented Requirements System‖https://www.ibm.com/pl-pl/products/requirements-management
 ‖dsl‖SI‖En‖DSL‖
 *‖dsl/‖SI‖En‖Digital Subscriber Line‖https://en.wikipedia.org/wiki/Digital_subscriber_line
+‖dslr‖SI‖En‖DSLR‖
+*‖dslr/‖SI‖En‖Digital Single-Lens Reflex camera‖https://en.wikipedia.org/wiki/Digital_single-lens_reflex_camera
 ‖dvd‖SI‖En‖DVD‖
 *‖dvd/‖SI‖En‖Digital Versatile Disc‖https://en.wikipedia.org/wiki/DVD
 ‖dwg‖SI‖En‖DWG‖
@@ -111,6 +119,8 @@ O‖2d‖MSI‖En‖2D¦two-dimensional‖
 *‖eto/‖CL‖En‖Engineer To Order‖
 ‖eu‖SI‖En‖EU‖
 *‖eu/‖SI‖En‖European Union‖
+‖eut‖SI‖En‖EUT‖
+*‖eut/‖SI‖En‖Equipment Under Test‖
 ‖fai‖SI‖En‖FAI‖
 *‖fai/‖CL‖En‖First Article Inspection‖
 ‖faq‖SI‖En‖FAQ‖
@@ -123,6 +133,8 @@ O‖2d‖MSI‖En‖2D¦two-dimensional‖
 *‖fmeca/‖SI‖En‖Failure mode effects and criticality analysis‖
 ‖fo‖SI‖En‖FO‖
 *‖fo/‖SI‖En‖Fiber Optics‖
+‖ga‖SI‖En‖GA‖Generic Application
+*‖ga/‖SI‖En‖Generic Application‖
 ‖gdpr‖SI‖En‖GDPR‖
 *‖gdpr/‖SI‖En‖General Data Protection Regulation‖
 ‖gmt‖SI‖En‖GMT‖
@@ -143,8 +155,12 @@ O‖2d‖MSI‖En‖2D¦two-dimensional‖
 *‖hdmi/‖CL‖En‖High-Definition Multimedia Interface‖
 ‖html‖SI‖En‖HTML‖
 *‖html/‖SI‖En‖HyperText Markup Language‖
+‖hw‖SI‖En‖HW‖
+*‖hw/‖SI‖En‖hardware‖
 ‖ic‖SI‖En‖IC‖
 *‖ic/‖CL‖En‖Interoperability Constituent‖
+‖ide‖SI‖En‖IDE‖
+*‖ide/‖SI‖En‖Integrated Development Environment‖
 ‖ip‖SI‖En‖IP‖
 *‖ip/‖MCL‖En‖IP Code, Ingress Protection code¦https://en.wikipedia.org/wiki/IP_Code‖
 ‖iq‖SI‖En‖IQ‖
@@ -168,10 +184,14 @@ O‖2d‖MSI‖En‖2D¦two-dimensional‖
 *‖llc/‖CL‖En‖Life Cycle Cost‖
 ‖lop‖SI‖En‖LOP‖
 *‖lop/‖CL‖En‖List of Open Points‖
+‖lte‖SI‖En‖LTE‖
+*‖lte/‖SI‖En‖Long-Term Evolution‖
 ‖mac‖SI‖En‖MAC‖
 *‖mac/‖SI‖En‖Media Access control Address ‖https://en.wikipedia.org/wiki/MAC_address
 ‖mdt‖SI‖En‖MDT‖
 *‖mdt/‖CL‖En‖Mean Down Time‖
+‖mfa‖SI‖En‖MFA‖
+‖mfa/‖SI‖En‖Multi Factor Authentication‖
 ‖mtbf‖SI‖En‖MTBF‖
 *‖mtbf/‖CL‖En‖Mean Time Between Failures‖
 ‖mtbm‖SI‖En‖MTBM‖
@@ -214,6 +234,8 @@ O‖2d‖MSI‖En‖2D¦two-dimensional‖
 *‖poc/‖CL‖En‖Proof of Concept‖
 ‖poe‖SI‖En‖PoE‖
 *‖poe/‖SI‖En‖Power over Ethernet‖
+‖ppi‖SI‖En‖PPI‖
+*‖ppi/‖SI‖En‖Point Per Inch‖
 ‖pwm‖SI‖En‖PWM‖
 *‖PWM/‖SI‖En‖Pulse-Width Modulation‖
 ‖qna‖SI‖En‖Q&A‖
@@ -225,6 +247,8 @@ O‖2d‖MSI‖En‖2D¦two-dimensional‖
 *‖r/‖SI‖En‖Reliability‖
 ‖rac‖SI‖En‖RAC‖
 *‖rac/‖CL‖En‖Risk Acceptance Criteria‖
+‖ral‖SI‖En‖RAL‖
+*‖ral/‖SI‖En‖Reichs-Ausschuß für Lieferbedingungen (National Committee for Delivery and Quality Assurance)‖
 ‖ram‖SI‖En‖RAM‖
 *‖ram/‖CL‖En‖Reliability, Availability, Maintainability‖
 ‖rams‖SI‖En‖RAMS‖
@@ -237,22 +261,30 @@ O‖2d‖MSI‖En‖2D¦two-dimensional‖
 *‖rma/‖CL‖En‖Return Merchandise Authorization‖
 ‖rms‖SI‖En‖RMS‖
 *‖rms/‖CL‖En‖Root Mean Square‖
+‖rohs‖SI‖En‖RoHS‖
+*‖rohs/‖SI‖En‖Restriction of Hazardous Substances Directive‖https://en.wikipedia.org/wiki/Restriction_of_Hazardous_Substance
 ‖rpa‖SI‖En‖RPA‖
 *‖rpa/‖SI‖En‖Robotics Process Automation‖
 ‖sa‖SI‖En‖SA‖
 *‖sa/‖CL‖En‖Specific Application‖
+‖seo‖SI‖En‖SEO‖
+*‖seo/‖SI‖En‖Search Engine Optimization‖
 ‖sil‖SI‖En‖SIL‖
 *‖sil/‖CL‖En‖Safety Integrity Level‖
 ‖sla‖SI‖En‖SLA‖
 *‖sla/‖CL‖En‖Service-Level Agreement‖
 ‖sms‖SI‖En‖SMS‖
 *‖sms/‖CL‖En‖Short Message Service‖
+‖snmp‖SI‖En‖SNMP‖
+*‖snmp/‖SI‖En‖Simple Network Management Protocol‖https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol
 ‖sql‖SI‖En‖SQL‖
 *‖sql/‖CL‖En‖Structured Query Language‖
 ‖srac‖SI‖En‖SRAC‖
 *‖srac/‖CL‖En‖Safety Related Application Condition‖
 ‖svg‖SI‖En‖SVG‖
 *‖svg/‖SI‖En‖Scalable Vector Graphics‖
+‖sw‖SI‖En‖SW‖
+*‖sw/‖SI‖En‖software‖
 ‖tco‖SI‖En‖TCO‖
 ‖tco/‖SI‖En‖Total Cost of Ownership‖
 ‖tffr‖SI‖En‖TFFR‖
@@ -287,6 +319,10 @@ O‖2d‖MSI‖En‖2D¦two-dimensional‖
 *‖vlan/‖SI‖En‖Virtual LAN‖https://en.wikipedia.org/wiki/Virtual_LAN
 ‖vpn‖SI‖En‖VPN‖
 *‖vpn/‖CL‖En‖Virtual Private Network‖
+‖vps‖SI‖En‖VPS‖
+*‖vps/‖SI‖En‖Virtual Private Server‖
+‖vr‖CL‖En‖VR‖
+*‖vr/‖CL‖En‖Virtual Reality‖
 ‖wmf‖SI‖En‖WMF‖
 ‖wmf/‖CL‖En‖Windows Metafile‖https://en.wikipedia.org/wiki/Windows_Metafile#EMF
 ‖wol‖SI‖En‖WoL‖
