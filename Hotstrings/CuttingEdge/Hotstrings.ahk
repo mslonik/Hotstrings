@@ -1008,6 +1008,7 @@ Menu, 	LibrariesSubmenu, 	Add, %t_EnableDisableTriggerstringTips%, 	:ToggleLibra
 Menu, 	HSMenu, 			Add, %t_LibrariesConfiguration%, 			:LibrariesSubmenu
 Menu, 	HSMenu, 			Add, %t_ClipboardDelay%, 				HSdelay
 Menu, 	HSMenu, 			Add, %t_AboutHelp%, 					L_About
+;*[One] tu jestem sprawdzić, czemu przestały działać podpowiedzi 
 Gui, 	HS3:Menu, HSMenu
 
 
@@ -1020,7 +1021,7 @@ Gui, 	HS3:Menu, HSMenu
 Loop,
 {
 	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
-	;*[One] tu jestem sprawdzić, czemu przestały działać podpowiedzi 
+	;MsgBox, , Tu jestem, Tu jestem
 	if (ErrorLevel = "NewInput")
 		MsgBox, %t_ErrorLevelWasTriggeredByNewInputError%
 	
@@ -1098,11 +1099,15 @@ Loop,
 			}
 			if (ini_Caret)
 			{
-				CoordMode, Caret, Screen
+				;CoordMode, Caret, Screen
+				CoordMode, Caret, Client
 				ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
 			}
 			if (ini_Cursor)
 			{
+				;CoordMode, Mouse, Screen
+				;CoordMode, Mouse
+				CoordMode, Mouse, Client
 				MouseGetPos, v_MouseX, v_MouseY
 				ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
 			}
@@ -1164,11 +1169,14 @@ Loop,
 			}
 			if (ini_Caret)
 			{
-				CoordMode, Caret, Screen
+				;CoordMode, Caret, Screen
+				CoordMode, Caret, Client
 				ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
 			}
 			if (ini_Cursor)
 			{
+				;CoordMode, Mouse, Screen
+				CoordMode, Mouse, Client
 				MouseGetPos, v_MouseX, v_MouseY
 				ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
 			}
@@ -1278,9 +1286,11 @@ goto, AddHotstring
 
 ; ms on 2020-11-02
 ~Alt::
-~MButton::
-~RButton::
-~LButton::
+/*
+	~MButton::
+	~RButton::
+	~LButton::
+*/
 ~LWin::
 ~RWin::
 ~Down::
@@ -1711,7 +1721,8 @@ F_MenuText(TextOptions, Oflag)
 	}
 	if (ini_MenuCaret)
 	{
-		CoordMode, Caret, Screen
+		;CoordMode, Caret, Screen
+		CoordMode, Caret, Client
 		MenuX := A_CaretX + 20
 		MenuY := A_CaretY - 20
 		
@@ -1719,7 +1730,8 @@ F_MenuText(TextOptions, Oflag)
 	}
 	if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
 	{
-		CoordMode, Mouse, Screen
+		;CoordMode, Mouse, Screen
+		CoordMode, Mouse, Client
 		MouseGetPos, v_MouseX, v_MouseY
 		MenuX := v_MouseX + 20
 		MenuY := v_MouseY + 20
@@ -1812,13 +1824,15 @@ F_MenuTextAHK(TextOptions, Oflag){
 	}
 	if (ini_MenuCaret)
 	{
-		CoordMode, Caret, Screen
+		;CoordMode, Caret, Screen
+		CoordMode, Caret, Client
 		MenuX := A_CaretX + 20
 		MenuY := A_CaretY - 20
 	}
 	if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
 	{
-		CoordMode, Mouse, Screen
+		;CoordMode, Mouse, Screen
+		CoordMode, Mouse, Client
 		MouseGetPos, v_MouseX, v_MouseY
 		MenuX := v_MouseX + 20
 		MenuY := v_MouseY + 20
