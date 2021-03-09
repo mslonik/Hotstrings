@@ -281,7 +281,6 @@ v_xNext		:= 0
 v_yNext		:= 0
 v_wNext		:= 0
 v_hNext		:= 0
-
 ;Flags to control application
 global v_ResizingFlag 			:= 1 ; when Hotstrings Gui is displayed for the very first time
 
@@ -298,14 +297,14 @@ IniRead v_Language, Config.ini, Configuration, Language				; Load from Config.in
 
 if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "Languages" subfolder 
 {
-	MsgBox, 0x30,, ERROR!`nThere is no Languages subfolder and no language file exists!`nThe default %A_ScriptDir%\Languages\English.ini file is now created
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . " warning", There is no Languages subfolder and no language file exists!`nThe default %A_ScriptDir%\Languages\English.ini file is now created
 	.`nMind that Config.ini Language variable is equal to %v_Language%.
 	FileCreateDir, %A_ScriptDir%\Languages							; Future: check against errors
 	FileAppend, %EnglishIni%, %A_ScriptDir%\Languages\English.ini		; Future: check against erros.
 }
 else  if (!FileExist(A_ScriptDir . "\Languages\" . v_Language))			; else if there is no v_language .ini file, e.g. v_langugae == Polish.ini and there is no such file in Languages folder
 {
-	MsgBox, 0x30,, ERROR!`nThere is no %v_Language% file in Languages subfolder!`nThe default %A_ScriptDir%\Languages\English.ini file is now created.
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . " warning", There is no %v_Language% file in Languages subfolder!`nThe default %A_ScriptDir%\Languages\English.ini file is now created.
 	FileAppend, %EnglishIni%, %A_ScriptDir%\Languages\English.ini		; Future: check against erros.
 	v_Language 		:= "English.ini"					
 }
@@ -445,7 +444,7 @@ IniRead, ini_Sandbox, 					Config.ini, Configuration, Sandbox
 ;IniRead, ini_MenuSound,					Config.ini, Configuration, MenuSound	; Future
 
 ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
-F_EndChars()
+F_LoadEndChars()
 
 IniRead, ini_Tips, 						Config.ini, Configuration, Tips
 IniRead, ini_Cursor, 					Config.ini, Configuration, Cursor
@@ -456,70 +455,7 @@ IniRead, ini_MenuCaret, 					Config.ini, Configuration, MenuCaret
 IniRead, ini_TipsSortAlphabetically,		Config.ini, Configuration, TipsSortAlphatebically
 IniRead, ini_TipsSortByLength,			Config.ini, Configuration, TipsSortByLength
 
-IniRead, v_TipsConfig, 					Config.ini, TipsLibraries		; Read into v_TipsConfig section TipsLibraries from the file Config.ini which is a list of library files (.csv) stored in Libraries subfolder
-
-
-;Check if Libraries subfolder is empty. If it does, display warning.
-v_IsLibraryEmpty := true
-Loop, Files, Libraries\*.csv
-{
-	v_IsLibraryEmpty := false
-	break
-}
-if (v_IsLibraryEmpty)
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . " warning", % "Libraries folder: " . A_ScriptDir . "/Libraries is empty. No (triggerstring, hotstring) definition will be loaded." ;Future: prepare for translation
-
-;Check if Config.ini contains in section [TipsLibraries] file names which actually aren't present in Libraries subfolder. If it does, remove them from Config.ini
-a_TipsConfig := StrSplit(v_TipsConfig, "`n")			; Separates a string into an array of substrings using the specified delimiters.
-Loop, % a_TipsConfig.MaxIndex()					; Loop over the entire array
-{
-	v_ConfigLibrary := SubStr(a_TipsConfig[A_Index], 1, InStr(a_TipsConfig[A_Index], "=") - 1)	; returns from the beginning till "=" sign
-	Loop, Files, Libraries\*.csv
-	{
-		v_ConfigFlag := false
-		if (A_LoopFileName == v_ConfigLibrary)
-		{
-			v_ConfigFlag := true
-			break
-		}
-	}
-	if (!v_ConfigFlag)							; if in Config.ini there is a file which is not actually present in Libraries subfolder
-		IniDelete, Config.ini, TipsLibraries, %v_ConfigLibrary% ; remove such file from Conig.ini
-}
-
-; Priority library has special meaning. It is constant library filename, created if not exist.
-if (!FileExist("Libraries\PriorityLibrary.csv"))
-{
-	FileAppend,, Libraries\PriorityLibrary.csv, UTF-8
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . " warning", % "The default library file (PriorityLibrary.csv) was created in " . A_ScriptDir . "/Libraries folder." ;Future: prepare for translation
-}
-
-;Load again section [TipsLibraries] from Config.ini
-IniRead, v_TipsConfig, 					Config.ini, TipsLibraries
-
-; Look in Libraries subfolder. Check if each file found there is already present in section [TipsLibraries]. If not add it to Config.ini and enable by default.
-a_TipsConfig := StrSplit(v_TipsConfig, "`n")			; Separates a string into an array of substrings using the specified delimiters.
-Loop, Files, Libraries\*.csv
-{
-	v_NewLibrary := true
-	
-	;MsgBox, , v_ConfigLibrary, %v_ConfigLibrary%
-	Loop, % a_TipsConfig.MaxIndex()					; Loop over the entire array
-	{
-		v_ConfigLibrary := SubStr(a_TipsConfig[A_Index], 1, InStr(a_TipsConfig[A_Index], "=") - 1)	; returns from the beginning till "=" sign
-		if (A_LoopFileName == v_ConfigLibrary)
-		{
-			v_NewLibrary := false
-			break
-		}
-	}
-	if (v_NewLibrary)							; if in Config.ini there is a file which is not actually present in Libraries subfolder
-		Iniwrite, 1, Config.ini, TipsLibraries,  %A_LoopFileName% ;add new library file and enable tips
-}
-
-;Load again section [TipsLibraries] from Config.ini
-IniRead, v_TipsConfig, 					Config.ini, TipsLibraries
-
+F_LoadTipsLibraries() ; load from / to Config.ini
 
 ; Hotstrings app could be reloaded by itself, (see label Delete:). In such a case 9 command line parameters are passed
 ;if !(A_Args[8])
@@ -1369,6 +1305,83 @@ goto, MoveList
 #if
 ; ------------------------- SECTION OF FUNCTIONS --------------------------
 
+F_LoadTipsLibraries() ; Load from / to Config.ini from Libraries folder
+{
+	IniRead, v_TipsConfig, 					Config.ini, TipsLibraries		; Read into v_TipsConfig section TipsLibraries from the file Config.ini which is a list of library files (.csv) stored in Libraries subfolder
+	
+	;Check if Libraries subfolder exists. If not, create it and display warning.
+	v_IsLibraryEmpty := true
+	if (!Instr(FileExist(A_ScriptDir . "\Libraries"), "D"))				; if  there is no "Libraries" subfolder 
+	{
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . " warning", There is no Libraries subfolder and no lbrary (*.csv) file exist!`nThe  %A_ScriptDir%\Libraries\ folder is now created.
+		FileCreateDir, %A_ScriptDir%\Libraries							; Future: check against errors
+	}
+	else
+	{
+		;Check if Libraries subfolder is empty. If it does, display warning.
+		Loop, Files, Libraries\*.csv
+		{
+			v_IsLibraryEmpty := false
+			break
+		}
+	}
+	if (v_IsLibraryEmpty)
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . " warning", % "Libraries folder: " . A_ScriptDir . "\Libraries is empty. No (triggerstring, hotstring) definition will be loaded." ;Future: prepare for translation
+	
+	;Check if Config.ini contains in section [TipsLibraries] file names which actually aren't present in Libraries subfolder. If it does, remove them from Config.ini
+	a_TipsConfig := StrSplit(v_TipsConfig, "`n")			; Separates a string into an array of substrings using the specified delimiters.
+	Loop, % a_TipsConfig.MaxIndex()					; Loop over the entire array
+	{
+		v_ConfigLibrary := SubStr(a_TipsConfig[A_Index], 1, InStr(a_TipsConfig[A_Index], "=") - 1)	; returns from the beginning till "=" sign
+		Loop, Files, Libraries\*.csv
+		{
+			v_ConfigFlag := false
+			if (A_LoopFileName == v_ConfigLibrary)
+			{
+				v_ConfigFlag := true
+				break
+			}
+		}
+		if (!v_ConfigFlag)							; if in Config.ini there is a file which is not actually present in Libraries subfolder
+			IniDelete, Config.ini, TipsLibraries, %v_ConfigLibrary% ; remove such file from Conig.ini
+	}
+	
+	; Priority library has special meaning. It is constant library filename, created if not exist.
+	if (!FileExist("Libraries\PriorityLibrary.csv"))
+	{
+		FileAppend,, Libraries\PriorityLibrary.csv, UTF-8
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . " warning", % "The default library file (PriorityLibrary.csv) was created in " . A_ScriptDir . "\Libraries folder." ;Future: prepare for translation
+	}
+	
+	;Load again section [TipsLibraries] from Config.ini
+	IniRead, v_TipsConfig, 					Config.ini, TipsLibraries
+	
+	; Look in Libraries subfolder. Check if each file found there is already present in section [TipsLibraries] of Config.ini file. If not add it to Config.ini and enable it by default.
+	a_TipsConfig := StrSplit(v_TipsConfig, "`n")			; Separates a string into an array of substrings using the specified delimiters.
+	Loop, Files, Libraries\*.csv
+	{
+		v_NewLibrary := true
+		
+		;MsgBox, , v_ConfigLibrary, %v_ConfigLibrary%
+		Loop, % a_TipsConfig.MaxIndex()					; Loop over the entire array
+		{
+			v_ConfigLibrary := SubStr(a_TipsConfig[A_Index], 1, InStr(a_TipsConfig[A_Index], "=") - 1)	; returns from the beginning till "=" sign
+			if (A_LoopFileName == v_ConfigLibrary)
+			{
+				v_NewLibrary := false
+				break
+			}
+		}
+		if (v_NewLibrary)							; if in Config.ini there is a file which is not actually present in Libraries subfolder
+			Iniwrite, 1, Config.ini, TipsLibraries,  %A_LoopFileName% ;add new library file and enable tips
+	}
+	
+	;Load again section [TipsLibraries] from Config.ini
+	IniRead, v_TipsConfig, 					Config.ini, TipsLibraries
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 F_LoadLibrariesToTables()
 { 
 	local name
@@ -1928,7 +1941,7 @@ F_ShowMonitorNumbers()
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_EndChars()
+F_LoadEndChars() ;Load from Config.ini
 {
 	global
 	
@@ -3970,7 +3983,7 @@ EndSpace:
 Menu, Submenu2, ToggleCheck, %t_Space%
 EndingChar_Space := !(EndingChar_Space)
 IniWrite, %EndingChar_Space%, Config.ini, Configuration, EndingChar_Space
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3979,7 +3992,7 @@ EndMinus:
 Menu, Submenu2, ToggleCheck, %t_Minus%
 EndingChar_Minus := !(EndingChar_Minus)
 IniWrite, %EndingChar_Minus%, Config.ini, Configuration, EndingChar_Minus
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3988,7 +4001,7 @@ EndORoundBracket:
 Menu, Submenu2, ToggleCheck, %t_OpeningRoundBracket%
 EndingChar_ORoundBracket := !(EndingChar_ORoundBracket)
 IniWrite, %EndingChar_ORoundBracket%, Config.ini, Configuration, EndingChar_ORoundBracket
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3997,7 +4010,7 @@ EndCRoundBracket:
 Menu, Submenu2, ToggleCheck, %t_ClosingRoundBracket%
 EndingChar_CRoundBracket := !(EndingChar_CRoundBracket)
 IniWrite, %EndingChar_CRoundBracket%, Config.ini, Configuration, EndingChar_CRoundBracket
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4006,7 +4019,7 @@ EndOSquareBracket:
 Menu, Submenu2, ToggleCheck, %t_OpeningSquareBracket%
 EndingChar_OSquareBracket := !(EndingChar_OSquareBracket)
 IniWrite, %EndingChar_OSquareBracket%, Config.ini, Configuration, EndingChar_OSquareBracket
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4015,7 +4028,7 @@ EndCSquareBracket:
 Menu, Submenu2, ToggleCheck, %t_ClosingSquareBracket%
 EndingChar_CSquareBracket := !(EndingChar_CSquareBracket)
 IniWrite, %EndingChar_CSquareBracket%, Config.ini, Configuration, EndingChar_CSquareBracket
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4024,7 +4037,7 @@ EndOCurlyBracket:
 Menu, Submenu2, ToggleCheck, %t_OpeningCurlyBracket%
 EndingChar_OCurlyBracket := !(EndingChar_OCurlyBracket)
 IniWrite, %EndingChar_OCurlyBracket%, Config.ini, Configuration, EndingChar_OCurlyBracket
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4033,7 +4046,7 @@ EndCCurlyBracket:
 Menu, Submenu2, ToggleCheck, %t_ClosingCurlyBracket%
 EndingChar_CCurlyBracket := !(EndingChar_CCurlyBracket)
 IniWrite, %EndingChar_CCurlyBracket%, Config.ini, Configuration, EndingChar_CCurlyBracket
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4042,7 +4055,7 @@ EndColon:
 Menu, Submenu2, ToggleCheck,%t_Colon%
 EndingChar_Colon := !(EndingChar_Colon)
 IniWrite, %EndingChar_Colon%, Config.ini, Configuration, EndingChar_Colon
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4051,7 +4064,7 @@ EndSemicolon:
 Menu, Submenu2, ToggleCheck, % t_Semicolon
 EndingChar_Semicolon := !(EndingChar_Semicolon)
 IniWrite, %EndingChar_Semicolon%, Config.ini, Configuration, EndingChar_Semicolon
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4060,7 +4073,7 @@ EndApostrophe:
 Menu, Submenu2, ToggleCheck, %t_Apostrophe%
 EndingChar_Apostrophe := !(EndingChar_Apostrophe)
 IniWrite, %EndingChar_Apostrophe%, Config.ini, Configuration, EndingChar_Apostrophe
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4069,7 +4082,7 @@ EndQuote:
 Menu, Submenu2, ToggleCheck, % t_Quote
 EndingChar_Quote := !(EndingChar_Quote)
 IniWrite, %EndingChar_Quote%, Config.ini, Configuration, EndingChar_Quote
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4078,7 +4091,7 @@ EndSlash:
 Menu, Submenu2, ToggleCheck, %t_Slash%
 EndingChar_Slash := !(EndingChar_Slash)
 IniWrite, %EndingChar_Slash%, Config.ini, Configuration, EndingChar_Slash
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4087,7 +4100,7 @@ EndBackslash:
 Menu, Submenu2, ToggleCheck, %t_Backslash%
 EndingChar_Backslash := !(EndingChar_Backslash)
 IniWrite, %EndingChar_Backslash%, Config.ini, Configuration, EndingChar_Backslash
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4096,7 +4109,7 @@ EndComma:
 Menu, Submenu2, ToggleCheck, % t_Comma
 EndingChar_Comma := !(EndingChar_Comma)
 IniWrite, %EndingChar_Comma%, Config.ini, Configuration, EndingChar_Comma
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4105,7 +4118,7 @@ EndDot:
 Menu, Submenu2, ToggleCheck, %t_Dot%
 EndingChar_Dot := !(EndingChar_Dot)
 IniWrite, %EndingChar_Dot%, Config.ini, Configuration, EndingChar_Dot
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4114,7 +4127,7 @@ EndQuestionMark:
 Menu, Submenu2, ToggleCheck, %t_QuestionMark%
 EndingChar_QuestionMark := !(EndingChar_QuestionMark)
 IniWrite, %EndingChar_QuestionMark%, Config.ini, Configuration, EndingChar_QuestionMark
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4123,7 +4136,7 @@ EndExclamationMark:
 Menu, Submenu2, ToggleCheck, %t_ExclamationMark%
 EndingChar_ExclamationMark := !(EndingChar_ExclamationMark)
 IniWrite, %EndingChar_ExclamationMark%, Config.ini, Configuration, EndingChar_ExclamationMark
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4132,7 +4145,7 @@ EndEnter:
 Menu, Submenu2, ToggleCheck, %t_Enter%
 EndingChar_Enter := !(EndingChar_Enter)
 IniWrite, %EndingChar_Enter%, Config.ini, Configuration, EndingChar_Enter
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4141,7 +4154,7 @@ EndTab:
 Menu, Submenu2, ToggleCheck, %t_Tab%
 EndingChar_Tab := !(EndingChar_Tab)
 IniWrite, %EndingChar_Tab%, Config.ini, Configuration, EndingChar_Tab
-F_EndChars()
+F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
