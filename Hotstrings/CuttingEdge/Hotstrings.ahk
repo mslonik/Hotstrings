@@ -265,6 +265,7 @@ global v_TypedTriggerstring 		:= ""
 global v_UndoHotstring 			:= ""
 global v_UndoTriggerstring 		:= ""
 global v_ViewString 			:= ""
+global v_String				:= ""
 global v_ConfigFlag 			:= 0
 
 ;Future: configuration parameters
@@ -583,7 +584,7 @@ Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton1 gAddLib, 							%t_AddLibrary%
 Gui,			HS3:Add,		DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gSectionChoose
 
 ;Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "bold cBlack", % v_FontType
-Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton2 gAddHotstring, 						%t_SetHotstring%
+Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton2 gAddHotstring,						%t_SetHotstring%
 Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton3 gClear,							%t_Clear%
 Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton4 gDelete vv_DeleteHotstring Disabled, 	%t_DeleteHotstring%
 Gui,			HS3:Font,		% "s" . v_FontSize . A_Space . "norm" . A_Space . "c" . v_FontColor, % v_FontType
@@ -1008,11 +1009,11 @@ Menu, 	LibrariesSubmenu, 	Add, %t_EnableDisableTriggerstringTips%, 	:ToggleLibra
 Menu, 	HSMenu, 			Add, %t_LibrariesConfiguration%, 			:LibrariesSubmenu
 Menu, 	HSMenu, 			Add, %t_ClipboardDelay%, 				HSdelay
 Menu, 	HSMenu, 			Add, %t_AboutHelp%, 					L_About
-;*[One] tu jestem sprawdzić, czemu przestały działać podpowiedzi 
 Gui, 	HS3:Menu, HSMenu
 
 
-;return ; end of defining the Hotstrings Gui
+
+;end of defining the Hotstrings Gui
 
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1021,7 +1022,6 @@ Gui, 	HS3:Menu, HSMenu
 Loop,
 {
 	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
-	;MsgBox, , Tu jestem, Tu jestem
 	if (ErrorLevel = "NewInput")
 		MsgBox, %t_ErrorLevelWasTriggeredByNewInputError%
 	
@@ -1286,11 +1286,9 @@ goto, AddHotstring
 
 ; ms on 2020-11-02
 ~Alt::
-/*
-	~MButton::
-	~RButton::
-	~LButton::
-*/
+~MButton::
+~RButton::
+~LButton::
 ~LWin::
 ~RWin::
 ~Down::
@@ -2598,44 +2596,47 @@ return
 */
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+;#[AddHotstring]
 AddHotstring: 
+;*[One] 
 Gui, HS3:+OwnDialogs
 Gui, Submit, NoHide
-GuiControlGet, v_SelectFunction
-If (Trim(v_TriggerString) ="")
+;GuiControlGet, v_SelectFunction
+if (Trim(v_TriggerString) = "")
 {
-	MsgBox, %t_EnterHotstring%
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information",  %t_EnterHotstring% ;Future: translate "information"
 	return
 }
-if InStr(v_SelectFunction,"Menu")
+if InStr(v_SelectFunction, "Menu")
 {
-	If ((Trim(v_EnterHotstring) ="") and (Trim(v_EnterHotstring1) ="") and (Trim(v_EnterHotstring2) ="") and (Trim(v_EnterHotstring3) ="") and (Trim(v_EnterHotstring4) ="") and (Trim(v_EnterHotstring5) ="") and (Trim(v_EnterHotstring6) =""))
+	if ((Trim(v_EnterHotstring) = "") and (Trim(v_EnterHotstring1) = "") and (Trim(v_EnterHotstring2) = "") and (Trim(v_EnterHotstring3) = "") and (Trim(v_EnterHotstring4) = "") and (Trim(v_EnterHotstring5) = "") and (Trim(v_EnterHotstring6) = ""))
 	{
-		MsgBox, 4,, %t_ReplacementTextIsBlankDoYouWantToProceed%
+		MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ": information", %t_ReplacementTextIsBlankDoYouWantToProceed% ;Future: translate "information"
 		IfMsgBox, No
 			return
 	}
 	TextVar := ""
-	If (Trim(v_EnterHotstring) !="")
+	if (Trim(v_EnterHotstring) != "")
 		TextVar := % TextVar . "¦" . v_EnterHotstring
-	If (Trim(v_EnterHotstring1) !="")
+	if (Trim(v_EnterHotstring1) != "")
 		TextVar := % TextVar . "¦" . v_EnterHotstring1
-	If (Trim(v_EnterHotstring2) !="")
+	if (Trim(v_EnterHotstring2) != "")
 		TextVar := % TextVar . "¦" . v_EnterHotstring2
-	If (Trim(v_EnterHotstring3) !="")
+	if (Trim(v_EnterHotstring3) != "")
 		TextVar := % TextVar . "¦" . v_EnterHotstring3
-	If (Trim(v_EnterHotstring4) !="")
+	if (Trim(v_EnterHotstring4) != "")
 		TextVar := % TextVar . "¦" . v_EnterHotstring4
-	If (Trim(v_EnterHotstring5) !="")
+	if (Trim(v_EnterHotstring5) != "")
 		TextVar := % TextVar . "¦" . v_EnterHotstring5
-	If (Trim(v_EnterHotstring6) !="")
+	if (Trim(v_EnterHotstring6) != "")
 		TextVar := % TextVar . "¦" . v_EnterHotstring6
 	TextInsert := SubStr(TextVar, 2, StrLen(TextVar)-1)
 }
-else{
-	If (Trim(v_EnterHotstring) ="")
+else
+{
+	if (Trim(v_EnterHotstring) = "")
 	{
-		MsgBox, 4,, %t_ReplacementTextIsBlankDoYouWantToProceed%
+		MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ": information", %t_ReplacementTextIsBlankDoYouWantToProceed% ;Future: translate "information"
 		IfMsgBox, No
 			Return
 	}
@@ -2644,28 +2645,35 @@ else{
 		TextInsert := v_EnterHotstring
 	}
 }
-if (v_SelectFunction == "")
-{
-	MsgBox,0x30 ,, %t_ChooseSendingFunction%
-	return
-}
+
+/* It's now impossible to meet this condition
+	if (v_SelectFunction == "")
+	{
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ": warning", %t_ChooseSendingFunction% ;Future: translate "warnńg"
+		return
+	}
+*/
+
 if (v_SelectHotstringLibrary == "")
 {
-	MsgBox, %t_ChooseSectionBeforeSaving%
+	MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ": information", %t_ChooseSectionBeforeSaving% ;Future: translate "information"
 	return
 }
-
+;tu jestem
 OldOptions := ""
 
-GuiControlGet, v_ViewString
-Select := v_ViewString
-Loop, Parse, v_ViewString, `n
+;GuiControlGet, v_ViewString
+;Select := v_ViewString
+
+;Loop, Parse, v_ViewString, `n
+Loop, Parse, v_String, `n
 {  
 	if InStr(A_LoopField, ":" . v_TriggerString . """", v_OptionCaseSensitive)
 	{
 		a_String := StrSplit(A_LoopField, ":",,3)
 		OldOptions := a_String[2]
-		GuiControl,, v_ViewString, ""
+		;GuiControl,, v_ViewString, ""
+		GuiControl,, v_String, ""
 		break
 	}
 }
@@ -2689,20 +2697,23 @@ else if (v_SelectFunction == "Menu & Clipboard (MCL)")
 	SendFun := "F_MenuText"
 else if (v_SelectFunction == "Menu & SendInput (MSI)")
 	SendFun := "F_MenuTextAHK"
-else 
-{
-	MsgBox, %t_ChooseTheMethodOfSendingTheHotstring%
-	return
-}
+/*
+	else 
+	{
+		MsgBox, %t_ChooseTheMethodOfSendingTheHotstring%
+		return
+	}
+*/
 
 if (v_OptionDisable == 1)
 	OnOff := "Off"
 else
 	OnOff := "On"
-GuiControl,, v_ViewString , % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
+;GuiControl,, v_ViewString , % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
+v_String := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
 
 ; Select target item in list
-gosub, ViewString
+;gosub, ViewString
 
 ; If case sensitive (C) or inside a word (?) first deactivate Hotstring
 If (v_OptionCaseSensitive or v_OptionInsideWord or InStr(OldOptions,"C") 
@@ -2901,7 +2912,6 @@ InStr(v_String, """On""") ? F_CheckOption("No", 6) : F_CheckOption("Yes", 6)
 		return
 */
 
-; tutaj
 if(InStr(v_String,"F_NormalWay"))
 	GuiControl, Choose, v_SelectFunction, SendInput (SI)
 else if(InStr(v_String, "F_ViaClipboard"))
@@ -3155,7 +3165,8 @@ SaveHotstrings:
 Gui, HS3:+OwnDialogs
 SaveFile := v_SelectHotstringLibrary
 SaveFile := StrReplace(SaveFile, ".csv", "")
-GuiControlGet, Items,, v_ViewString
+;GuiControlGet, Items,, v_ViewString
+Items := v_String
 EnDis := ""
 SendFun := ""
 if InStr(Items, """On""")
@@ -3261,7 +3272,7 @@ else
 	txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
 	FileAppend, %txt%, Libraries\%name%, UTF-8
 }
-MsgBox Hotstring added to the %SaveFile%.csv file!
+MsgBox Hotstring added to the %SaveFile%.csv file! ; Future: add to translation.
 a_Triggers := []
 ;Gui, A_Gui:+Disabled
 Gui, HS3:+Disabled
