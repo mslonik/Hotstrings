@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 	Author:      Jakub Masiak, Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings as in AutoHotkey (shortcuts), but editable with GUI and many more options.
@@ -187,8 +187,7 @@ ToggleEndChars=&Toggle EndChars
 Triggerstring=Triggerstring
 TriggerstringTips=&Triggerstring tips
 TriggerstringTriggOptOutFunEnDisHotstringComment=Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
-L_UndoLastHotstring=&Undo last hotstring
-L_UndoTheLastHotstring=Undo the last hotstring.
+UndoLastHotstring=&Undo last hotstring
 	)
 
 global v_Param 				:= A_Args[1]
@@ -1841,21 +1840,21 @@ L_GUIInit:
 	Gui, HS3:Add, 		Edit, % "w" . 184*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " xp+" . 227*DPI%v_SelectedMonitor% . " yp vv_TriggerString"
 	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " bold cBlue"
 	Gui, HS3:Add, 		GroupBox, % "section xm w" . 425*DPI%v_SelectedMonitor% . " h" . 106*DPI%v_SelectedMonitor%, %t_SelectTriggerOptions%
-	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " norm cBlack"
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " norm cBlack", Calibri
 	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionImmediateExecute xs+" . 12*DPI%v_SelectedMonitor% 	. " ys+" . 25*DPI%v_SelectedMonitor%, 	%t_ImmediateExecute%
 	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionCaseSensitive xp+" 	. 225*DPI%v_SelectedMonitor% 	. " yp+" . 0*DPI%v_SelectedMonitor%, 	%t_CaseSensitive%
 	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionNoBackspace xp-" 	. 225*DPI%v_SelectedMonitor% 	. " yp+" . 25*DPI%v_SelectedMonitor%, 	%t_NoBackspace%
 	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionInsideWord xp+" 		. 225*DPI%v_SelectedMonitor% 	. " yp+" . 0*DPI%v_SelectedMonitor%, 	%t_InsideWord%
 	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionNoEndChar xp-" 		. 225*DPI%v_SelectedMonitor% 	. " yp+" . 25*DPI%v_SelectedMonitor%, 	%t_NoEndChar%
 	Gui, HS3:Add, 		CheckBox, % "gCapsCheck vv_OptionDisable xp+" 		. 225*DPI%v_SelectedMonitor% 	. " yp+" . 0*DPI%v_SelectedMonitor%, 	%t_Disable%
-	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold", Calibri
 	Gui, HS3:Add, 		Text,% "xm+" . 9*DPI%v_SelectedMonitor%, %t_SelectHotstringOutputFunction%
-	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm", Calibri
 	Gui, HS3:Add, 		DropDownList, % "xm w" . 424*DPI%v_SelectedMonitor% . " vv_SelectFunction gL_SelectFunction hwndddl", SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
 	PostMessage, 0x153, -1, 30*DPI%v_SelectedMonitor%,, ahk_id %ddl%
-	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold", Calibri
 	Gui, HS3:Add, 		Text, % "xm+" . 9*DPI%v_SelectedMonitor%, %t_EnterHotstring%
-	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm", Calibri
 	Gui, HS3:Add, 		Edit, % "w" 	. 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% 	. " vv_EnterHotstring xm"
 	Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring1 xm Disabled"
 	Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring2 xm Disabled"
@@ -1863,14 +1862,14 @@ L_GUIInit:
 	Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring4 xm Disabled"
 	Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring5 xm Disabled"
 	Gui, HS3:Add, 		Edit, % "yp+" 	. 31*DPI%v_SelectedMonitor% 	. " w" . 424*DPI%v_SelectedMonitor% 	. " h" . 25*DPI%v_SelectedMonitor% . " vv_EnterHotstring6 xm Disabled"
-	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold", Calibri
 	Gui, HS3:Add, 		Text, % "xm+" . 9*DPI%v_SelectedMonitor%, %t_AddAComment%
-	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm", Calibri
 	Gui, HS3:Add, 		Edit, % "w" . 424*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor% . " limit64 vComment xm"
-	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold"
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlue Bold", Calibri
 	Gui, HS3:Add, 		Text, % "xm+" . 9*DPI%v_SelectedMonitor%, %t_SelectHotstringLibrary%
 	Gui, HS3:Add, 		Button, % "gAddLib x+" . 120*DPI%v_SelectedMonitor% . " yp w" . 135*DPI%v_SelectedMonitor% . " h" . 25*DPI%v_SelectedMonitor%, %t_AddLibrary%
-	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
+	Gui, HS3:Font, 	% "s" . v_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm", Calibri
 	Gui, HS3:Add, 		DropDownList, % "w" . 424*DPI%v_SelectedMonitor% . " vv_SelectHotstringLibrary gSectionChoose xm hwndddl" ,
 	
 	Loop, %A_ScriptDir%\Libraries\*.csv
