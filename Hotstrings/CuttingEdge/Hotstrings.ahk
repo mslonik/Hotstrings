@@ -748,6 +748,7 @@ v_xNext += v_OutVarTemp2W + c_xmarg
 GuiControl, Move, % IdButton4, % "x" . v_xNext . A_Space . "y" . v_yNext
 v_yNext += HofButton
 LeftColumnH := v_yNext
+OutputDebug, % "LeftColumnH raz:" . A_Space . LeftColumnH
 
 ;5.2. Button between left and right column
 
@@ -1134,6 +1135,9 @@ Loop,
 
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
+
+Pause::Pause, Off
+
 ~BackSpace:: 
 	if (WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
 	{
@@ -3527,50 +3531,56 @@ else ;no toggling, continue resizing
 	
 	if (ini_Sandbox) ;no hiding and showing, only relative shifting
 	{
-		OutputDebug, % "ini_Sandbox:" . A_Space . ini_Sandbox
-		;if (c_ymarg + HofText + v_OutVarTempH > LeftColumnH + c_ymarg + HofText + c_HofSandbox)
-		if (c_ymarg + HofText + v_OutVarTemp2H >= LeftColumnH)
+		;OutputDebug, % "ini_Sandbox:" . A_Space . ini_Sandbox . A_Space . "v_OutVarTemp2H" . A_Space v_OutVarTemp2H . A_Space . "c_ymarg" . A_Space . c_ymarg . A_Space . "HofText" . A_Space . HofText
+		OutputDebug, % "IsSandboxMoved" . A_Space . IsSandboxMoved . A_Space . "MoveSandbox" . A_Space . MoveSandbox 
+		if (!IsSandboxMoved) and (c_ymarg + HofText + v_OutVarTemp2H >= LeftColumnH)
 			MoveSandbox := true
-		else
+		if (IsSandboxMoved) and  (c_ymarg + HofText + v_OutVarTemp2H < LeftColumnH + c_ymarg + HofText + c_HofSandbox)
 			MoveSandbox := false
 		
-		OutputDebug, % "MoveSandbox:" . A_Space . MoveSandbox
-		if (MoveSandbox) and (!IsSandboxMoved) ;już idzie w dół, ale jeszcze się nie przesunęło w lewo
+		;OutputDebug, % "MoveSandbox:" . A_Space . MoveSandbox . A_Space . "LeftColumnH:" . A_Space . LeftColumnH
+		if (MoveSandbox) and (!IsSandboxMoved) 
 		{
 			;*[One]
 			OutputDebug, % "MoveSandbox:" . A_Space . MoveSandbox . A_Space . "IsSandboxMoved:" . A_Space . IsSandboxMoved
 			GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
 			GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
 			v_hNext := v_OutVarTemp2H + HofText + c_HofSandbox + c_ymarg
-			;GuiControl, MoveDraw, % IdListView1, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext . "h" . v_hNext
 			GuiControl, MoveDraw, % IdListView1, % "h" v_hNext
 			OutputDebug, % "v_OutVarTempY:" . A_Space . v_OutVarTemp2Y . A_Space . "v_hNext:" . A_Space . v_hNext . A_Space . "c_ymarg:" . A_Space . c_ymarg
 			GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_hNext + c_ymarg ;Position of the long text F1 ... F2 ...
 			F_AutoXYWH("reset")	
 			IsSandboxMoved := true
 			OutputDebug, % "MoveSandbox:" . A_Space . MoveSandbox . A_Space . "IsSandboxMoved:" . A_Space . IsSandboxMoved
-			return
+			return 
 		}
-		if (!MoveSandbox) ;idzie w górę i jeszcze się nie przesunęło (!)
+		if (MoveSandbox) and (IsSandboxMoved) 
 		{
-			GuiControl, MoveDraw, % IdText10, % "x" . v_xNext "y" . v_yNext
-			v_yNext += HofText
-			GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext "y" . v_yNext "w" . v_wNext
-			v_yNext += c_HofSandbox + c_ymarg
-			GuiControl, MoveDraw, % IdText8, % "x" . v_xNext "y" . v_yNext ;Position of the long text F1 ... F2 ...
+			OutputDebug, % "MoveSandbox:" . A_Space . MoveSandbox . A_Space . "IsSandboxMoved:" . A_Space . IsSandboxMoved . A_Space . "here"
+			GuiControlGet, v_OutVarTemp2, % IdListView1
+			GuiControl, MoveDraw, % IdText8, % "y" v_outvartemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
 		}
-		if (IsSandboxMoved) ;już się przesunęło i idzie w dół
-			GuiControl, MoveDraw, % IdText8, % "y" . v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
-		
-		if (!MoveSandbox) and (IsSandboxMoved) ;idzie w górę, ale jeszcze się nie przesunęło w prawo
+		if (!MoveSandbox) and (IsSandboxMoved) 
 		{
-			;v_hNext := v_OutVarTemp1H - (HofText + c_HofSandbox + c_ymarg)
+			OutputDebug, % "MoveSandbox:" . A_Space . MoveSandbox . A_Space . "IsSandboxMoved:" . A_Space . IsSandboxMoved
 			GuiControlGet, v_OutVarTemp2, % IdListView1
 			GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H - (HofText + c_HofSandbox + c_ymarg)
-			
 			GuiControl, MoveDraw, % IdText10, % "x" LeftColumnW + c_xmarg "y" c_ymarg + HofText + v_OutVarTemp2H - (HofText + c_HofSandbox + c_ymarg) + c_ymarg
 			GuiControl, MoveDraw, % IdEdit10, % "x" LeftColumnW + c_xmarg "y" c_ymarg + HofText + v_OutVarTemp2H - (HofText + c_HofSandbox + c_ymarg) + c_ymarg + HofText "w" v_OutVarTemp2W
+			GuiControl, MoveDraw, % IdText8, % "y" c_ymarg + HofText + v_OutVarTemp2H - (HofText + c_HofSandbox + c_ymarg) + c_ymarg + HofText + c_ymarg ;Position of the long text F1 ... F2 ...
+			F_AutoXYWH("reset")
 			IsSandboxMoved := false
+			return
+		}
+		
+		if (!MoveSandbox) and (!IsSandboxMoved) 
+		{
+			OutputDebug, % "MoveSandbox:" . A_Space . MoveSandbox . A_Space . "IsSandboxMoved:" . A_Space . IsSandboxMoved
+			GuiControlGet, v_OutVarTemp2, % IdListView1
+			
+			GuiControl, MoveDraw, % IdText10, % "y" v_outvartemp2Y + v_OutVarTemp2H + c_ymarg
+			GuiControl, MoveDraw, % IdEdit10, % "y" v_outvartemp2Y + v_OutVarTemp2H + c_ymarg + HofText 
+			GuiControl, MoveDraw, % IdText8,  % "y" v_outvartemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox
 			;Pause, On
 		}
 	}
