@@ -284,9 +284,9 @@ v_wNext		:= 0
 v_hNext		:= 0
 ;Flags to control application
 global v_ResizingFlag 			:= 1 ; when Hotstrings Gui is displayed for the very first time
-global MoveSandbox				:= false
 global IsSandboxMoved			:= false
 global CntGuiSize				:= 0
+global v_ToggleRightColumn		:= 0 ;memory of last state of the IdButton5 (ToggleRightColumn)
 
 ; 2. Try to load up configuration files. If those files do not exist, create them.
 if (!FileExist("Config.ini"))
@@ -592,6 +592,9 @@ Gui,			HS3:Add,		DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gSecti
 Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton2 gAddHotstring,						%t_SetHotstring%
 Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton3 gClear,							%t_Clear%
 Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton4 gDelete vv_DeleteHotstring Disabled, 	%t_DeleteHotstring%
+
+Gui,			HS3:Add,		Button,		x0 y0 HwndIdButton5 gToggleRightColumn vv_ToggleRightColumn,			⯇
+
 Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 
 Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
@@ -610,7 +613,7 @@ Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_Font
 Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit10 vSandbox r3 						; r3 = 3x rows of text
 ;Gui, 		HS3:Add, 		Edit, 		HwndIdEdit11 vv_ViewString gViewString ReadOnly Hide
 
-;3. Determine height of main types of text objects
+;3. Determine weight / height of main types of text objects
 GuiControlGet, v_OutVarTemp, Pos, % IdText1
 HofText			:= v_OutVarTempH
 GuiControlGet, v_OutVarTemp, Pos, % IdEdit1
@@ -625,6 +628,8 @@ GuiControlGet, v_OutVarTemp, Pos, % IdDDL1
 HofDropDownList 	:= v_OutVarTempH
 GuiControlGet, v_OutVarTemp, Pos, % IdEdit10
 c_HofSandbox		:= v_OutVarTempH
+GuiControlGet, v_OutVarTemp, Pos, % IdButton5
+c_WofMiddleButton   := v_OutVarTempW
 
 ;4. Determine constraints, according to mock-up
 GuiControlGet, v_OutVarTemp1, Pos, % IdButton2
@@ -642,8 +647,8 @@ RightColumnW := v_OutVarTemp3
 ;5. Move text objects to correct position
 ;5.1. Left column
 ;5.1.1. Enter triggerstring
-v_yNext += c_ymarg
-v_xNext += c_xmarg
+v_yNext := c_ymarg
+v_xNext := c_xmarg
 GuiControl, Move, % IdText1, % "x" . v_xNext . A_Space . "y" . v_yNext
 GuiControlGet, v_OutVarTemp1, Pos, % IdText1
 GuiControlGet, v_OutVarTemp2, Pos, % IdEdit1
@@ -748,22 +753,25 @@ v_xNext += v_OutVarTemp2W + c_xmarg
 GuiControl, Move, % IdButton4, % "x" . v_xNext . A_Space . "y" . v_yNext
 v_yNext += HofButton
 LeftColumnH := v_yNext
-OutputDebug, % "LeftColumnH raz:" . A_Space . LeftColumnH
+OutputDebug, % "LeftColumnH:" . A_Space . LeftColumnH
 
 ;5.2. Button between left and right column
-
+v_yNext := c_ymarg
+v_xNext := LeftColumnW + c_xmarg
+v_hNext := LeftColumnH - c_ymarg
+GuiControl, Move, % IdButton5, % "x" v_xNext "y" v_yNext "h" v_hNext
 
 ;5.3. Right column
 ;5.3.1. Position the text "Library content"
 v_yNext := c_ymarg
-v_xNext := LeftColumnW + c_xmarg
+v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
 GuiControl, Move, % IdText7, % "x" . v_xNext . A_Space . "y" . v_yNext
 
 ;5.3.2. Position the only one List View 
 GuiControlGet, v_OutVarTemp1, Pos, % IdEdit10 ; height of Sandbox edit field
 GuiControlGet, v_OutVarTemp2, Pos, % IdListView1
 v_yNext += HofText
-v_xNext := LeftColumnW + c_xmarg
+;v_xNext := LeftColumnW + c_xmarg
 v_wNext := RightColumnW
 if (ini_Sandbox)
 	v_hNext := LeftColumnH - (v_OutVarTemp1H + HofText * 3 + c_ymarg * 3)
@@ -782,17 +790,17 @@ GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 if (ini_Sandbox)
 {
 	v_yNext += v_OutVarTempH + c_ymarg
-	v_xNext := LeftColumnW + c_xmarg
+	;v_xNext := LeftColumnW + c_xmarg
 	GuiControl, Move, % IdText10, % "x" v_xNext "y" v_yNext
 ;5.2.4. Sandbox edit text field
 	v_yNext += HofText
-	v_xNext := LeftColumnW + c_xmarg
+	;v_xNext := LeftColumnW + c_xmarg
 	v_wNext := RightColumnW
 	GuiControl, Move, % IdEdit10, % "x" v_xNext "y" v_yNext "w" v_wNext
 }
 
 ;5.3.5. Position of the long text F1 ... F2 ...
-v_xNext := LeftColumnW + c_xmarg
+;v_xNext := LeftColumnW + c_xmarg
 v_yNext += c_HofSandbox + c_ymarg
 GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext
 
@@ -3382,6 +3390,30 @@ WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
 Run, AutoHotkey.exe Hotstrings.ahk %v_Param% %v_SelectHotstringLibrary% %v_PreviousWidth% %v_PreviousHeight% %v_PreviousX% %v_PreviousY% %v_SelectedRow% %v_SelectedMonitor%	
 return
 
+
+ToggleRightColumn: ;Label of Button IdButton5, to toggle left part of gui 
+if !(v_ToggleRightColumn) ;hide
+{
+	GuiControl, Hide, % IdText7		;Library content (F2)
+	GuiControl, Hide, % IdListView1 	;ListView
+	GuiControl, Hide, % IdText10  	;Sandbox text
+	GuiControl, Hide, % IdEdit10  	;Sandbox Edit box
+	GuiControl, Hide, % IdText8		;Long text
+	GuiControl,, % IdButton5,  ⯈
+}
+else					;show
+{
+	GuiControl, Show, % IdText7		;Library content (F2)
+	GuiControl, Show, % IdListView1 	;ListView
+	GuiControl, Show, % IdText10  	;Sandbox text
+	GuiControl, Show, % IdEdit10  	;Sandbox Edit box
+	GuiControl, Show, % IdText8		;Long text
+
+	GuiControl,, % IdButton5, ⯇
+}
+v_ToggleRightColumn := !v_ToggleRightColumn
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
 
 DestroyGuis:
@@ -3533,6 +3565,7 @@ if (b_SandboxResize != ini_Sandbox) ; if configuration of HS3 window was toggled
 else ;no toggling of Sandbox, continue resizing
 {
 	F_AutoXYWH("*wh", IdListView1)
+	F_AutoXYWH("*h", IdButton5)
 	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;Check position of ListView1 again after resizing
 	if (v_OutVarTemp2W != v_OutVarTemp1W)
 	{
@@ -3562,8 +3595,8 @@ else ;no toggling of Sandbox, continue resizing
 		if (c_ymarg + HofText + v_OutVarTemp2H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox) and (IsSandboxMoved) ; left -> right, reduce
 		{
 			GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H - (c_ymarg + HofText + c_HofSandbox)
-			GuiControl, MoveDraw, % IdText10, % "x" LeftColumnW + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - (HofText + c_HofSandbox)
-			GuiControl, MoveDraw, % IdEdit10, % "x" LeftColumnW + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox "w" v_OutVarTemp2W
+			GuiControl, MoveDraw, % IdText10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - (HofText + c_HofSandbox)
+			GuiControl, MoveDraw, % IdEdit10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox "w" v_OutVarTemp2W
 			GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
 			IsSandboxMoved := false
 			OutputDebug, % "Left:" . A_Space . c_ymarg + HofText + v_OutVarTemp2H . A_Space . "Right:" . A_Space . LeftColumnH + c_ymarg + HofText + c_HofSandbox . A_Space . "IsSandboxMoved:" . A_Space . IsSandboxMoved . A_Space . "reset"
@@ -3573,7 +3606,6 @@ else ;no toggling of Sandbox, continue resizing
 
 		if (c_ymarg + HofText + v_OutVarTemp2H > LeftColumnH) and (IsSandboxMoved) ;vertical 1
 		{
-			OutputDebug, % "MoveSandbox:" . A_Space . MoveSandbox . A_Space . "IsSandboxMoved:" . A_Space . IsSandboxMoved . A_Space . "here"
 			GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTempY + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
 		}
 		
