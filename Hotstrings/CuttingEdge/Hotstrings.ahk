@@ -775,26 +775,26 @@ else
 }
 GuiControl, Move, % IdListView1, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext . A_Space . "h" . v_hNext
 
-;5.3.3. Position of the long text F1 ... F2 ...
-GuiControlGet, v_OutVarTemp, Pos, % IdListView1
-v_yNext += v_OutVarTempH + c_ymarg
-v_xNext := LeftColumnW + c_xmarg
-GuiControl, Move, % IdText8, % "x" . v_xNext . A_Space . "y" . v_yNext
-
 GuiControl, Hide, % IdText9
 
-;5.3.4. Text Sandbox
+;5.3.3. Text Sandbox
+GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 if (ini_Sandbox)
 {
-	v_yNext += HofText + c_ymarg
+	v_yNext += v_OutVarTempH + c_ymarg
 	v_xNext := LeftColumnW + c_xmarg
-	GuiControl, Move, % IdText10, % "x" . v_xNext . A_Space . "y" . v_yNext
-;5.2.5. Sandbox edit text field
+	GuiControl, Move, % IdText10, % "x" v_xNext "y" v_yNext
+;5.2.4. Sandbox edit text field
 	v_yNext += HofText
 	v_xNext := LeftColumnW + c_xmarg
 	v_wNext := RightColumnW
-	GuiControl, Move, % IdEdit10, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
+	GuiControl, Move, % IdEdit10, % "x" v_xNext "y" v_yNext "w" v_wNext
 }
+
+;5.3.5. Position of the long text F1 ... F2 ...
+v_xNext := LeftColumnW + c_xmarg
+v_yNext += c_HofSandbox + c_ymarg
+GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext
 
 ; end of new code
 
