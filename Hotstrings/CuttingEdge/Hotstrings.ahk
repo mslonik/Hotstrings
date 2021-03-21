@@ -2621,6 +2621,7 @@ AddHotstring:
 Gui, HS3:+OwnDialogs
 Gui, Submit, NoHide
 ;GuiControlGet, v_SelectFunction
+;*[One]
 if (Trim(v_TriggerString) = "")
 {
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information",  %t_EnterHotstring% ;Future: translate "information"
@@ -2632,24 +2633,24 @@ if InStr(v_SelectFunction, "Menu")
 	{
 		MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ": information", %t_ReplacementTextIsBlankDoYouWantToProceed% ;Future: translate "information"
 		IfMsgBox, No
-			return
+		return
 	}
-	TextVar := ""
+	TextInsert := ""
 	if (Trim(v_EnterHotstring) != "")
-		TextVar := % TextVar . "¦" . v_EnterHotstring
+		TextInsert := % TextInsert . "¦" . v_EnterHotstring
 	if (Trim(v_EnterHotstring1) != "")
-		TextVar := % TextVar . "¦" . v_EnterHotstring1
+		TextInsert := % TextInsert . "¦" . v_EnterHotstring1
 	if (Trim(v_EnterHotstring2) != "")
-		TextVar := % TextVar . "¦" . v_EnterHotstring2
+		TextInsert := % TextInsert . "¦" . v_EnterHotstring2
 	if (Trim(v_EnterHotstring3) != "")
-		TextVar := % TextVar . "¦" . v_EnterHotstring3
+		TextInsert := % TextInsert . "¦" . v_EnterHotstring3
 	if (Trim(v_EnterHotstring4) != "")
-		TextVar := % TextVar . "¦" . v_EnterHotstring4
+		TextInsert := % TextInsert . "¦" . v_EnterHotstring4
 	if (Trim(v_EnterHotstring5) != "")
-		TextVar := % TextVar . "¦" . v_EnterHotstring5
+		TextInsert := % TextInsert . "¦" . v_EnterHotstring5
 	if (Trim(v_EnterHotstring6) != "")
-		TextVar := % TextVar . "¦" . v_EnterHotstring6
-	TextInsert := SubStr(TextVar, 2, StrLen(TextVar)-1)
+		TextInsert := % TextInsert . "¦" . v_EnterHotstring6
+	TextInsert := SubStr(TextInsert, 2, StrLen(TextInsert)-1)
 }
 else
 {
@@ -2665,14 +2666,6 @@ else
 	}
 }
 
-/* It's now impossible to meet this condition
-	if (v_SelectFunction == "")
-	{
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ": warning", %t_ChooseSendingFunction% ;Future: translate "warnńg"
-		return
-	}
-*/
-
 if (v_SelectHotstringLibrary == "")
 {
 	MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ": information", %t_ChooseSectionBeforeSaving% ;Future: translate "information"
@@ -2685,25 +2678,29 @@ OldOptions := ""
 ;Select := v_ViewString
 
 ;Loop, Parse, v_ViewString, `n
-Loop, Parse, v_String, `n
-{  
-	if InStr(A_LoopField, ":" . v_TriggerString . """", v_OptionCaseSensitive)
-	{
-		a_String := StrSplit(A_LoopField, ":",,3)
-		OldOptions := a_String[2]
-		;GuiControl,, v_ViewString, ""
-		GuiControl,, v_String, ""
-		break
+/*
+	Loop, Parse, v_String, `n
+	{  
+		if InStr(A_LoopField, ":" . v_TriggerString . """", v_OptionCaseSensitive)
+		{
+			a_String := StrSplit(A_LoopField, ":",,3)
+			OldOptions := a_String[2]
+			;GuiControl,, v_ViewString, ""
+			;GuiControl,, v_String, ""
+			break
+		}
 	}
-}
-
-; Added this conditional to prevent Hotstrings from a file losing the C1 option caused by
-; cascading ternary operators when creating the options string. CapCheck set to 1 when 
-; a Hotstring from a file contains the C1 option.
-
-If (v_CaseSensitiveC1 = 1) and ((OldOptions = "") or (InStr(OldOptions,"C1"))) and (Instr(a_String[2],"C1"))
-	OldOptions := StrReplace(OldOptions,"C1") . "C"
-v_CaseSensitiveC1 := 0
+*/
+/*
+	
+	; Added this conditional to prevent Hotstrings from a file losing the C1 option caused by
+	; cascading ternary operators when creating the options string. CapCheck set to 1 when 
+	; a Hotstring from a file contains the C1 option.
+	
+	If (v_CaseSensitiveC1 = 1) and ((OldOptions = "") or (InStr(OldOptions,"C1"))) and (Instr(a_String[2],"C1"))
+		OldOptions := StrReplace(OldOptions,"C1") . "C"
+	v_CaseSensitiveC1 := 0
+*/
 
 GoSub OptionString   ; Writes the Hotstring options string
 
@@ -2716,13 +2713,6 @@ else if (v_SelectFunction == "Menu & Clipboard (MCL)")
 	SendFun := "F_MenuText"
 else if (v_SelectFunction == "Menu & SendInput (MSI)")
 	SendFun := "F_MenuTextAHK"
-/*
-	else 
-	{
-		MsgBox, %t_ChooseTheMethodOfSendingTheHotstring%
-		return
-	}
-*/
 
 if (v_OptionDisable == 1)
 	OnOff := "Off"
@@ -2734,10 +2724,12 @@ v_String := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" 
 ; Select target item in list
 ;gosub, ViewString
 
-; If case sensitive (C) or inside a word (?) first deactivate Hotstring
-If (v_OptionCaseSensitive or v_OptionInsideWord or InStr(OldOptions,"C") 
-		or InStr(OldOptions,"?")) 
-	Hotstring(":" . OldOptions . ":" . v_TriggerString , func(SendFun).bind(TextInsert), "Off")
+/*
+	; If case sensitive (C) or inside a word (?) first deactivate Hotstring
+	If (v_OptionCaseSensitive or v_OptionInsideWord or InStr(OldOptions,"C") 
+			or InStr(OldOptions,"?")) 
+		Hotstring(":" . OldOptions . ":" . v_TriggerString , func(SendFun).bind(TextInsert), "Off")
+*/
 
 ; Create Hotstring and activate
 Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert), OnOff)
@@ -3162,8 +3154,7 @@ Options := v_OptionCaseSensitive = 1 ? Options . "C"
 		: (Instr(OldOptions,"C")) ? Options . "C1" : Options
 
 Options := v_OptionNoBackspace = 1 ?  Options . "B0" 
-		: (v_OptionNoBackspace = 0) and (Instr(OldOptions,"B0"))
-		? Options . "B" : Options
+		: (v_OptionNoBackspace = 0) and (Instr(OldOptions,"B0")) ? Options . "B" : Options
 
 Options := (v_OptionImmediateExecute = 1) ?  Options . "*" 
 		: (Instr(OldOptions,"*0")) ?  Options
@@ -3200,7 +3191,7 @@ else if InStr(Items, """F_MenuText""")
 	SendFun := "MCL"
 else if InStr(Items, """F_MenuTextAHK""")
 	SendFun := "MSI"
-HSSplit := StrSplit(Items, ":")
+;HSSplit := StrSplit(Items, ":") ;never used again
 HSSplit2 := StrSplit(Items, """:")
 Options := SubStr(HSSplit2[2], 1 , InStr(HSSplit2[2], ":" )-1)
 v_TriggerString := SubStr(HSSplit2[2], InStr(HSSplit2[2], ":" )+1 , InStr(HSSplit2[2], """," )-StrLen(Options)-2)
@@ -3250,11 +3241,11 @@ Loop, Read, %InputFile%, %OutputFile%
 if (SaveFlag == 0) 
 {
 	LV_Add("",  v_TriggerString,Options, SendFun, EnDis, TextInsert, v_Comment)
-	txt := % Options . "‖" . v_TriggerString . "‖" . SendFun . "‖" . EnDis . "‖" . TextInsert . "‖" . v_Comment
+	txt := % Options . "‖" . v_TriggerString . "‖" . SendFun . "‖" . EnDis . "‖" . TextInsert . "‖" . v_Comment ;tylko to się liczy
 	SectionList.Push(txt)
 }
 LV_ModifyCol(1, "Sort")
-name := SubStr(v_SelectHotstringLibrary, 1, StrLen(v_SelectHotstringLibrary)-4)
+name := SubStr(v_SelectHotstringLibrary, 1, StrLen(v_SelectHotstringLibrary)-4) ;to już jest w pierwszych wierszach tego pliku!!!
 name := % name . ".csv"
 FileDelete, Libraries\%name%
 if (SectionList.MaxIndex() == "")
@@ -3269,7 +3260,7 @@ if (SectionList.MaxIndex() == "")
 	FileAppend, %txt%, Libraries\%name%, UTF-8
 }
 else
-{
+{ ;no idea why this is duplicated...
 	Loop, % SectionList.MaxIndex()-1
 	{
 		LV_GetText(txt1, A_Index, 2)
@@ -3291,11 +3282,11 @@ else
 	txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
 	FileAppend, %txt%, Libraries\%name%, UTF-8
 }
-MsgBox Hotstring added to the %SaveFile%.csv file! ; Future: add to translation.
+MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ": information", Hotstring added to the %SaveFile%.csv file! ; Future: add to translation.
 a_Triggers := []
 ;Gui, A_Gui:+Disabled
 Gui, HS3:+Disabled
-F_LoadHotstringsFromLibraries() ; Future: check if this line is necessary
+F_LoadHotstringsFromLibraries() ; Future: check if this line is necessary, nope, but refill other tables
 ;Gui, A_Gui:-Disabled
 GUI, HS3:-Disabled
 return
@@ -3390,7 +3381,7 @@ WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
 Run, AutoHotkey.exe Hotstrings.ahk %v_Param% %v_SelectHotstringLibrary% %v_PreviousWidth% %v_PreviousHeight% %v_PreviousX% %v_PreviousY% %v_SelectedRow% %v_SelectedMonitor%	
 return
 
-
+;In AutoHotkey there is no Guicontrol, Delete sub-command. As a consequence even if specific control is hidden (Guicontrol, Hide), the Gui size isn't changed, size is not decreased, as space for hidden control is maintained. To solve this issue, the separate gui have to be prepared. This requires a lot of work and is a matter of far future.
 ToggleRightColumn: ;Label of Button IdButton5, to toggle left part of gui 
 if !(v_ToggleRightColumn) ;hide
 {
@@ -3520,7 +3511,6 @@ GuiControlGet, v_OutVarTemp1, Pos, % IdListView1 ;This line will be used for "if
 
 if (b_SandboxResize != ini_Sandbox) ; if configuration of HS3 window was toggled at least once, toggle Sandbox
 {
-	;*[One]
 	if (ini_Sandbox) ;reduce size of List View and draw sandbox
 	{
 		if (c_ymarg + HofText + v_OutVarTemp1H > LeftColumnH)
@@ -3626,6 +3616,7 @@ else ;no toggling of Sandbox, continue resizing
 
 OutputDebug, % "End:" . A_Space . CntGuiSize 
 Critical, Off
+;*[Two]
 return
 
 
