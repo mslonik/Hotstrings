@@ -3507,15 +3507,14 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+;Future: for some reasons size of Gui window can change rapidly by 20-30 px. It could be fixed by software routine, which checks if size  wasn't changed between last F_AutoXYWH("reset") and next function call.
 HS3GuiSize() ;Gui event
 {
-	;global b_SandboxResize, c_HofSandbox, c_WofMiddleButton, HofText, IdButton5, IdEdit10, IdListView1, IdText10, IdText8, LeftColumnH, LeftColumnW
-	global
-	local v_OutVarTemp1, v_OutVarTemp2
+	local ;force local mode
+	global b_SandboxResize, c_HofSandbox, c_WofMiddleButton, HofText, IdButton5, IdEdit10, IdListView1, IdText10, IdText8, LeftColumnH, LeftColumnW, CntGuiSize, v_ResizingFlag, ini_Sandbox, c_ymarg, IsSandboxMoved, c_xmarg
 	
-	Critical, On
 	OutputDebug, % "Beginning:" . A_Space . ++CntGuiSize 
-	OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "A_GuiWidth:" . A_Space .  A_GuiHeight
+	OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "A_GuiHeight:" . A_Space .  A_GuiHeight
 	
 	if (A_EventInfo = 1) ; The window has been minimized.
 		return
@@ -3620,7 +3619,7 @@ HS3GuiSize() ;Gui event
 			
 			if (c_ymarg + HofText + v_OutVarTemp2H > LeftColumnH) and (IsSandboxMoved) ;vertical 1
 			{
-				GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTempY + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
+				GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
 			}
 			
 			if (c_ymarg + HofText + v_OutVarTemp2H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox) and (!IsSandboxMoved) ;vertical 2
@@ -3639,7 +3638,6 @@ HS3GuiSize() ;Gui event
 	}
 	
 	OutputDebug, % "End:" . A_Space . CntGuiSize 
-	Critical, Off
 	return
 ;*[Two]
 }
