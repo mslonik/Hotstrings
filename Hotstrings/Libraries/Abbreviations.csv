@@ -1,5 +1,6 @@
 ﻿B0*?‖.ahk‖SI‖En‖‖only for extensions
 B0*?‖.csv‖SI‖En‖‖
+B0*?‖.easm‖SI‖En‖‖only for extensions
 B0*?‖.pdf‖SI‖En‖‖
 B0*?‖.svg‖SI‖En‖‖
 O‖2d‖MSI‖En‖2D¦two-dimensional‖
@@ -13,6 +14,8 @@ O‖2d‖MSI‖En‖2D¦two-dimensional‖
 *‖ac/‖MSI‖En‖Alternating Current¦Axle Counter‖
 ‖acl‖SI‖En‖ACL‖
 *‖acl/‖SI‖En‖Access Control List‖
+‖adc‖SI‖En‖ADC‖
+*‖adc/‖SI‖En‖Aanalog to Digital Converter‖
 ‖ahk‖SI‖En‖AHK‖
 *‖ahk/‖CL‖En‖AutoHotkey‖https://www.autohotkey.com/
 ‖ansi‖SI‖En‖ANSI‖
@@ -57,6 +60,8 @@ O‖2d‖MSI‖En‖2D¦two-dimensional‖
 *‖cots/‖CL‖En‖Commercial Off-The-Shelf‖
 ‖covid‖MSI‖En‖COVID-19¦👑🦠‖U+1F451 | U+83CC
 *‖covid/‖CL‖En‖severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2)‖
+‖crc‖SI‖En‖CRC‖
+*‖crc/‖SI‖En‖Cyclic Redundancy Check‖
 ‖crm‖SI‖En‖CRM‖
 *‖crm/‖SI‖En‖Customer Relationship Management‖
 ‖cso‖SI‖En‖CSO‖
@@ -89,6 +94,7 @@ O‖2d‖MSI‖En‖2D¦two-dimensional‖
 *‖dwg/‖SI‖Dis‖Drawing Exchange Format‖
 ‖dxf‖SI‖En‖DXF‖
 *‖dxf/‖SI‖En‖Drawing Exchange Format‖
+*‖easm ‖CL‖En‖EASM ‖
 ‖ebit‖SI‖En‖EBIT‖
 *‖ebit/‖SI‖En‖Earnings Before Interest and Taxes‖
 ‖ei‖SI‖En‖EI‖
@@ -180,6 +186,8 @@ O‖2d‖MSI‖En‖2D¦two-dimensional‖
 *‖lc2/‖CL‖En‖Life Cycle Cost‖
 *‖led‖SI‖En‖LED‖
 *‖LED/‖CL‖En‖Light Emitting Diode‖
+‖lgbt‖SI‖En‖LGBT‖
+*‖lgbt/‖SI‖En‖Lesbian Gay Bisexual Transgender‖
 ‖llc‖CL‖En‖LLC‖
 *‖llc/‖CL‖En‖Life Cycle Cost‖
 ‖lop‖SI‖En‖LOP‖
@@ -188,6 +196,10 @@ O‖2d‖MSI‖En‖2D¦two-dimensional‖
 *‖lte/‖SI‖En‖Long-Term Evolution‖
 ‖mac‖SI‖En‖MAC‖
 *‖mac/‖SI‖En‖Media Access control Address ‖https://en.wikipedia.org/wiki/MAC_address
+‖mba‖SI‖En‖MBA‖
+*‖mba/‖SI‖En‖Master of Business Administration‖
+‖md5‖SI‖En‖MD5‖
+*‖md5/‖MSI‖En‖Message-Digest Algorithm¦hash function producing a 128-bit hash value‖https://en.wikipedia.org/wiki/MD5
 ‖mdt‖SI‖En‖MDT‖
 *‖mdt/‖CL‖En‖Mean Down Time‖
 ‖mfa‖SI‖En‖MFA‖
@@ -281,6 +293,8 @@ O‖2d‖MSI‖En‖2D¦two-dimensional‖
 *‖sql/‖CL‖En‖Structured Query Language‖
 ‖srac‖SI‖En‖SRAC‖
 *‖srac/‖CL‖En‖Safety Related Application Condition‖
+‖suv‖SI‖En‖SUV‖
+*‖suv/‖SI‖En‖Sport Utility Vehicle‖
 ‖svg‖SI‖En‖SVG‖
 *‖svg/‖SI‖En‖Scalable Vector Graphics‖
 ‖sw‖SI‖En‖SW‖
