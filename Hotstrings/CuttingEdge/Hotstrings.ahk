@@ -315,6 +315,7 @@ else  if (!FileExist(A_ScriptDir . "\Languages\" . v_Language))			; else if ther
 ; 3. Load configuration files into configuration variables. The configuration variable names start with "ini_" prefix.
 ;Read all variables from specified language .ini file. In order to distinguish GUI text from any other string or variable used in this script, the GUI strings are defined with prefix "t_".
 
+;Future: build object, where pair is created: default string in English <-> string from Language.ini.
 global t_AboutHelp := 							F_ReadText("t_AboutHelp")
 global t_AddAComment := 							F_ReadText("t_AddAComment")
 global t_AddLibrary := 							F_ReadText("t_AddLibrary")
@@ -490,6 +491,91 @@ v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (t
 F_LoadHotstringsFromLibraries() 
 F_LoadLibrariesToTables() 
 v_BlockHotkeysFlag := 0
+
+	/*
+		;to trzeba puścić w pętli z tablicą
+		IniRead, v_Library, Config.ini, TipsLibraries, %nameoffile%
+		
+		
+		v_HotstringCnt := 0
+		
+		; Prepare TrayTip message taking into account value of command line parameter.
+		if (v_Param == "d")
+			TrayTip, %A_ScriptName% - Debug mode, 	%t_LoadingHotstringsFromLibraries%, 1
+		else if (v_Param == "l")
+			TrayTip, %A_ScriptName% - Lite mode, 	%t_LoadingHotstringsFromLibraries%, 1
+		else	
+			TrayTip, %A_ScriptName%,				%t_LoadingHotstringsFromLibraries%, 1
+		
+		
+		Loop, Files, %A_ScriptDir%\Libraries\*.csv
+		{
+			if !(A_LoopFileName == "PriorityLibrary.csv")
+				F_LoadFile(A_LoopFileName)
+		}
+		F_LoadFile("PriorityLibrary.csv")
+	
+		TrayTip, %A_ScriptName%, %t_HotstringsHaveBeenLoaded%, 1
+	
+	
+	F_LoadFile(nameoffile)
+	{
+		
+		Loop
+		{
+			FileReadLine, line, %A_ScriptDir%\Libraries\%nameoffile%, %A_Index%
+			if (ErrorLevel)
+				break
+			tabSearch := StrSplit(line, "‖")	
+			name := SubStr(A_LoopFileName, 1, A_LoopFileExt + 1)
+			
+	*/
+/*			
+		line := StrReplace(line, "``n", "`n")
+		line := StrReplace(line, "``r", "`r")		
+		line := StrReplace(line, "``t", "`t")
+		if (InStr(tabSearch[1], "*0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "*0")
+			}
+		if (InStr(tabSearch[1], "O0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "O0")
+			}
+		if (InStr(tabSearch[1], "C0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "C0")
+			}
+		if (InStr(tabSearch[1], "?0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "?0")
+			}
+		if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "B")
+			}		
+*/			
+
+/*
+	
+			a_Library.Push(name) ; ???
+			a_TriggerOptions.Push(tabSearch[1])
+			a_Hotstring.Push(tabSearch[2])
+			a_OutputFunction.Push(tabSearch[3])
+			a_EnableDisable.Push(tabSearch[4])
+			a_Triggerstring.Push(tabSearch[5]) ; ???
+			a_Comment.Push(tabSearch[6])
+			a_Triggers.Push(v_TriggerString) ; ???
+	
+			F_ini_StartHotstring(line, nameoffile)
+			v_HotstringCnt++
+			GuiControl,, v_LoadedHotstrings, % t_LoadedHotstrings . A_Space . v_HotstringCnt
+		}
+		return
+	}
+*/
+
+
 
 ; After definitions of (triggerstring, hotstring) are uploaded to memory, prepare (System)Tray icon
 if !(v_Param == "l") 										; if Hotstrings.ahk wasn't run with "l" parameter (standing for "light / lightweight", prepare tray menu.
@@ -3308,6 +3394,18 @@ Gui, HS3:+Disabled
 F_LoadHotstringsFromLibraries() ; Future: check if this line is necessary, nope, but refill other tables
 ;Gui, A_Gui:-Disabled
 Gui, HS3:-Disabled
+
+
+			/*
+				a_TriggerOptions.Push(tabSearch[1])
+				a_Hotstring.Push(tabSearch[2])
+				a_OutputFunction.Push(tabSearch[3])
+				a_EnableDisable.Push(tabSearch[4])
+				a_Triggerstring.Push(tabSearch[5])
+				a_Comment.Push(tabSearch[6])
+			*/
+
+
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3796,7 +3894,7 @@ HS3GuiSize() ;Gui event
 		Gui, SearchLoad:Destroy
 	}
 	
-	Search:
+Search:
 	Gui, HS3List:Default
 	Gui, HS3List:Submit, NoHide
 	if getkeystate("CapsLock","T")
@@ -3850,7 +3948,7 @@ HS3GuiSize() ;Gui event
 		LV_ModifyCol(1,"Sort")
 	}
 	GuiControl, +Redraw, List 
-	return
+return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
