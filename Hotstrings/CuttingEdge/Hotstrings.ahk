@@ -203,6 +203,7 @@ global a_Comment 				:= []
 global a_EnableDisable 			:= []
 global a_Hotstring 				:= []
 global a_Library 				:= []
+global a_LibraryCnt				:= [] ;Hotstring counter for specific libraries
 global a_OutputFunction 			:= []
 global a_SelectedTriggers 		:= []
 global a_String 				:= ""
@@ -277,11 +278,7 @@ global c_FontColor				:= "Black"
 global c_FontColorHighlighted		:= "Blue"
 global c_WindowColor			:= "Default"
 global c_ControlColor 			:= "Default"
-;Variables used for GUI settings
-v_xNext		:= 0
-v_yNext		:= 0
-v_wNext		:= 0
-v_hNext		:= 0
+
 ;Flags to control application
 global v_ResizingFlag 			:= 1 ; when Hotstrings Gui is displayed for the very first time
 global IsSandboxMoved			:= false
@@ -487,93 +484,39 @@ else
 
 
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
-v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
-F_LoadHotstringsFromLibraries() 
-F_LoadLibrariesToTables() 
-v_BlockHotkeysFlag := 0
-
-	/*
-		;to trzeba puścić w pętli z tablicą
-		IniRead, v_Library, Config.ini, TipsLibraries, %nameoffile%
-		
-		
-		v_HotstringCnt := 0
-		
-		; Prepare TrayTip message taking into account value of command line parameter.
-		if (v_Param == "d")
-			TrayTip, %A_ScriptName% - Debug mode, 	%t_LoadingHotstringsFromLibraries%, 1
-		else if (v_Param == "l")
-			TrayTip, %A_ScriptName% - Lite mode, 	%t_LoadingHotstringsFromLibraries%, 1
-		else	
-			TrayTip, %A_ScriptName%,				%t_LoadingHotstringsFromLibraries%, 1
-		
-		
-		Loop, Files, %A_ScriptDir%\Libraries\*.csv
-		{
-			if !(A_LoopFileName == "PriorityLibrary.csv")
-				F_LoadFile(A_LoopFileName)
-		}
-		F_LoadFile("PriorityLibrary.csv")
-	
-		TrayTip, %A_ScriptName%, %t_HotstringsHaveBeenLoaded%, 1
-	
-	
-	F_LoadFile(nameoffile)
-	{
-		
-		Loop
-		{
-			FileReadLine, line, %A_ScriptDir%\Libraries\%nameoffile%, %A_Index%
-			if (ErrorLevel)
-				break
-			tabSearch := StrSplit(line, "‖")	
-			name := SubStr(A_LoopFileName, 1, A_LoopFileExt + 1)
-			
-	*/
-/*			
-		line := StrReplace(line, "``n", "`n")
-		line := StrReplace(line, "``r", "`r")		
-		line := StrReplace(line, "``t", "`t")
-		if (InStr(tabSearch[1], "*0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "*0")
-			}
-		if (InStr(tabSearch[1], "O0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "O0")
-			}
-		if (InStr(tabSearch[1], "C0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "C0")
-			}
-		if (InStr(tabSearch[1], "?0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "?0")
-			}
-		if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "B")
-			}		
-*/			
-
 /*
-	
-			a_Library.Push(name) ; ???
-			a_TriggerOptions.Push(tabSearch[1])
-			a_Hotstring.Push(tabSearch[2])
-			a_OutputFunction.Push(tabSearch[3])
-			a_EnableDisable.Push(tabSearch[4])
-			a_Triggerstring.Push(tabSearch[5]) ; ???
-			a_Comment.Push(tabSearch[6])
-			a_Triggers.Push(v_TriggerString) ; ???
-	
-			F_ini_StartHotstring(line, nameoffile)
-			v_HotstringCnt++
-			GuiControl,, v_LoadedHotstrings, % t_LoadedHotstrings . A_Space . v_HotstringCnt
-		}
-		return
-	}
+	v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
+	F_LoadHotstringsFromLibraries() 
+	F_LoadLibrariesToTables() 
+	v_BlockHotkeysFlag := 0
 */
+
+
+F_HS3_CreateObjects()
+F_HS3_DefineConstants()
+F_HS3_DetermineConstraints()
+
+	; Prepare TrayTip message taking into account value of command line parameter.
+	if (v_Param == "d")
+		TrayTip, %A_ScriptName% - Debug mode, 	%t_LoadingHotstringsFromLibraries%, 1
+	else if (v_Param == "l")
+		TrayTip, %A_ScriptName% - Lite mode, 	%t_LoadingHotstringsFromLibraries%, 1
+	else	
+		TrayTip, %A_ScriptName%,				%t_LoadingHotstringsFromLibraries%, 1
+	
+
+	v_HotstringCnt := 0
+	Loop, Files, %A_ScriptDir%\Libraries\*.csv
+	{
+		if !(A_LoopFileName == "PriorityLibrary.csv")
+			F_LoadFile(A_LoopFileName)
+	}
+	F_LoadFile("PriorityLibrary.csv")
+
+	TrayTip, %A_ScriptName%, %t_HotstringsHaveBeenLoaded%, 1
+	;Gui, HS3:Show
+	;Pause
+
 
 
 
@@ -615,16 +558,10 @@ SysGet, PrimMon, MonitorPrimary
 if (v_SelectedMonitor == 0)
 	v_SelectedMonitor := PrimMon
 
-F_HS3_CreateObjects()
-F_HS3_DefineConstants()
-F_HS3_DetermineConstraints()
-
 
 Loop, %A_ScriptDir%\Libraries\*.csv
 	GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName% ; GuiControl (Blank): Puts new contents into control
 
-
-;Gui, HS3:Add, 	Text, y0 x800 vv_LoadedHotstrings, % t_LoadedHotstrings . " " . v_HotstringCnt
 
     ; Menu, HSMenu, Add, &Monitor, CheckMon
 Menu, Submenu1, 	Add, %t_UndoLastHotstring%,		L_Undo
@@ -1147,10 +1084,78 @@ goto, MoveList
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
 
+F_LoadFile(nameoffile)
+{
+	global ;assume-global mode
+	local name := "", tabSearch := "", line := ""
+
+	Loop
+	{
+		FileReadLine, line, %A_ScriptDir%\Libraries\%nameoffile%, %A_Index%
+		if (ErrorLevel)
+			break
+		tabSearch := StrSplit(line, "‖")	
+		name := SubStr(A_LoopFileName, 1, -4) ;filename without extension
+		
+/*			
+		line := StrReplace(line, "``n", "`n")
+		line := StrReplace(line, "``r", "`r")		
+		line := StrReplace(line, "``t", "`t")
+		if (InStr(tabSearch[1], "*0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "*0")
+			}
+		if (InStr(tabSearch[1], "O0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "O0")
+			}
+		if (InStr(tabSearch[1], "C0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "C0")
+			}
+		if (InStr(tabSearch[1], "?0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "?0")
+			}
+		if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "B")
+			}		
+*/			
+
+		a_Library.Push(name) ; function Search
+		a_TriggerOptions.Push(tabSearch[1])
+		a_Hotstring.Push(tabSearch[2])
+		a_OutputFunction.Push(tabSearch[3])
+		a_EnableDisable.Push(tabSearch[4])
+		a_Triggerstring.Push(tabSearch[5]) 
+		a_Comment.Push(tabSearch[6])
+		;a_Triggers.Push(v_TriggerString) ; ???
+
+		F_ini_StartHotstring(line, nameoffile)
+		v_HotstringCnt++
+		;MsgBox, , v_LoadedHotstrings, % v_LoadedHotstrings
+		;Gui, HS3:Show
+		;v_LoadedHotstrings := SubStr(v_LoadedHotstrings, 1, -4) . v_HotstringCnt
+		;GuiControl,, v_LoadedHotstrings, % t_LoadedHotstrings . A_Space . v_HotstringCnt
+		;GuiControl,, v_LoadedHotstrings ; •(Blank): Puts new contents into the control.
+		;GuiControl,, % IdText2, % v_HotstringCnt ;To działa
+		GuiControl,, % IdText2, % v_LoadedHotstrings . A_Space . v_HotstringCnt ; •(Blank): Puts new contents into the control.
+		;GuiControl,, % IdText2, % "Total:" A_Space . v_HotstringCnt ; •(Blank): Puts new contents into the control.
+			;*[One]	
+		;Gui, HS3: Show
+	}
+	a_LibraryCnt.Push(v_HotstringCnt)
+	return
+}
+
+; ------------------------------------------------------------------------------------------------------------------------------------
+
 F_HS3_CreateObjects()
 {
 	global ;assume-global mode
 	local x0 := 0, y0 := 0
+
 
 ;1. Definition of HS3 GUI.
 ;-DPIScale doesn't work in Microsoft Windows 10
@@ -1165,6 +1170,9 @@ Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_Font
 Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText1, 									%t_EnterTriggerstring%
 ;GuiControl, 	Hide, 		% IdText1
 Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+
+Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText2 vv_LoadedHotstrings, % "Total: 1234" ;Future: to be translated
+v_LoadedHotstrings := "Total:    "
 
 Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString 
 ;GuiControl,	Hide,		% IdEdit1
@@ -1265,13 +1273,13 @@ Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_Font
 Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit10 vv_Sandbox r3 						; r3 = 3x rows of text
 ;GuiControl,	Hide,		% IdEdit10
 ;Gui, 		HS3:Add, 		Edit, 		HwndIdEdit11 vv_ViewString gViewString ReadOnly Hide
+Gui,			HS3:Add,		Text,		x0 y0 HwndIdText11 vv_DefinitionsInLibrary, % "Hotstrings: 1234"
 }
 
 ; ------------------------------------------------------------------------------------------------------------------------------------
 
 F_HS3_DefineConstants()
 {
-	;*[One]	
 	global ;assume-global mode
 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 	local v_OutVarTemp := 0, v_OutVarTempX := 0, v_OutVarTempY := 0, v_OutVarTempW := 0, v_OutVarTempH := 0
@@ -1457,9 +1465,19 @@ F_HS3_DetermineConstraints()
 	v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
 	GuiControl, Move, % IdText7, % "x" v_xNext "y" v_yNext
 	
+;5.3.2. Position of hotstring statistics (in this library: IdText11 / total: IdText2)
+	GuiControlGet, v_OutVarTemp, Pos, % IdText7
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdText11, % "x" v_xNext "y" v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdText11
+	v_LoadedHotstrings := SubStr(v_LoadedHotstrings, 1, -4)
+	v_xNext += v_OutVarTempW + c_xmarg
+	GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext
+
 ;5.3.2. Position the only one List View 
 	GuiControlGet, v_OutVarTemp1, Pos, % IdEdit10 ; height of Sandbox edit field
 	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1
+	v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
 	v_yNext += HofText
 ;v_xNext := LeftColumnW + c_xmarg
 	v_wNext := RightColumnW
@@ -1637,9 +1655,11 @@ F_LoadLibrariesToTables()
 
 F_LoadFiles(nameoffile)
 {
- 	global v_LoadedHotstrings
-	global v_HotstringCnt
-	global a_Triggers
+ 	;global v_LoadedHotstrings
+	;global v_HotstringCnt
+	;global a_Triggers
+	global 
+	local line := ""
 	
 	IniRead, v_Library, Config.ini, TipsLibraries, %nameoffile%
 	Loop
@@ -2391,7 +2411,10 @@ F_SortArrayByLength(a_array)
 F_ImportLibrary(filename)
 {
 	static MyProgress, MyText
-	global v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight
+	;global v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight
+	global
+	local line := ""
+	
 	Gui, Import:New, -Border
 	Gui, Import:Add, Progress, w200 h20 cBlue vMyProgress, 0
 	Gui, Import:Add,Text,w200 vMyText, %t_LibraryImportPleaseWait%
@@ -2452,7 +2475,10 @@ F_ImportLibrary(filename)
 F_ExportLibraryStatic(filename)
 {
 	static MyProgress, MyText
-	global v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight
+	;global v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight
+	global
+	local line := ""
+	
 	Gui, Export:New, -Border
 	Gui, Export:Add, Progress, w200 h20 cBlue vMyProgress, 0
 	Gui, Export:Add,Text,w200 vMyText, %t_LibraryExportPleaseWait%
@@ -2523,7 +2549,10 @@ F_ExportLibraryStatic(filename)
 F_ExportLibraryDynamic(filename)
 {
 	static MyProgress, MyText
-	global v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight
+	;global v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight
+	global
+	local line := ""
+	
 	Gui, Export:New, -Border
 	Gui, Export:Add, Progress, w200 h20 cBlue vMyProgress, 0
 	Gui, Export:Add,Text,w200 vMyText, %t_LibraryExportPleaseWait%
@@ -3818,6 +3847,7 @@ HS3GuiSize() ;Gui event
 		}
 	}
 	
+	GuiControl,, % IdText2, % v_LoadedHotstrings . A_Space . v_HotstringCnt ; •(Blank): Puts new contents into the control.
 	OutputDebug, % "End:" . A_Space . CntGuiSize 
 	return
 ;*[Two]
