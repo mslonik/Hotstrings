@@ -1130,21 +1130,13 @@ F_LoadFile(nameoffile)
 		a_EnableDisable.Push(tabSearch[4])
 		a_Triggerstring.Push(tabSearch[5]) 
 		a_Comment.Push(tabSearch[6])
-		;a_Triggers.Push(v_TriggerString) ; ???
+		a_Triggers.Push(v_TriggerString) ; a_Triggers is used in main loop of application for generating tips
 
 		F_ini_StartHotstring(line, nameoffile)
 		v_HotstringCnt++
-		;MsgBox, , v_LoadedHotstrings, % v_LoadedHotstrings
-		;Gui, HS3:Show
-		;v_LoadedHotstrings := SubStr(v_LoadedHotstrings, 1, -4) . v_HotstringCnt
-		;GuiControl,, v_LoadedHotstrings, % t_LoadedHotstrings . A_Space . v_HotstringCnt
-		;GuiControl,, v_LoadedHotstrings ; •(Blank): Puts new contents into the control.
-		;GuiControl,, % IdText2, % v_HotstringCnt ;To działa
 		GuiControl, Text, % IdText2, % v_LoadedHotstrings . A_Space . v_HotstringCnt ; •(Blank): Puts new contents into the control.
-		OutputDebug, % "Content of IdText2 GuiControl:" . A_Space . v_LoadedHotstrings . A_Space . v_HotstringCnt
-		;GuiControl,, % IdText2, % "Total:" A_Space . v_HotstringCnt ; •(Blank): Puts new contents into the control.
-			;*[One]	
-		;Gui, HS3: Show
+		;OutputDebug, % "Content of IdText2 GuiControl:" . A_Space . v_LoadedHotstrings . A_Space . v_HotstringCnt
+
 	}
 	a_LibraryCnt.Push(v_HotstringCnt)
 	return
@@ -1690,7 +1682,8 @@ F_LoadFiles(nameoffile)
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_ini_StartHotstring(txt, nameoffile) {
+F_ini_StartHotstring(txt, nameoffile) 
+{
 	global v_TriggerString
 	static Options, OnOff, EnDis, SendFun, TextInsert
 	
@@ -1842,7 +1835,8 @@ F_ChangingBrackets(string)
 
 F_NormalWay(ReplacementString, Oflag)
 {
-	v_InputString :=
+	;*[Two]	
+	v_InputString := ""
 	ToolTip,
 	v_HotstringFlag := 1
 	v_UndoTriggerstring := A_ThisHotkey
@@ -1881,7 +1875,7 @@ F_NormalWay(ReplacementString, Oflag)
 F_ViaClipboard(ReplacementString, Oflag)
 {
 	global oWord, ini_Delay
-	v_InputString :=
+	v_InputString := ""
 	ToolTip,
 	v_UndoTriggerstring := A_ThisHotkey
 	ReplacementString := F_AHKVariables(ReplacementString)
@@ -1914,7 +1908,7 @@ F_ViaClipboard(ReplacementString, Oflag)
 F_MenuText(TextOptions, Oflag)
 {
 	global MenuListbox, Ovar
-	v_InputString :=
+	v_InputString := ""
 	ToolTip,
 	v_UndoTriggerstring := A_ThisHotkey
 	TextOptions := F_AHKVariables(TextOptions)
@@ -2015,9 +2009,10 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_MenuTextAHK(TextOptions, Oflag){
+F_MenuTextAHK(TextOptions, Oflag)
+{
 	global MenuListbox, Ovar
-	v_InputString :=
+	v_InputString := ""
 	ToolTip,
 	v_UndoTriggerstring := A_ThisHotkey
 	TextOptions := F_AHKVariables(TextOptions)
@@ -2878,7 +2873,6 @@ if (v_SelectHotstringLibrary == "")
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information", %t_ChooseSectionBeforeSaving% ;Future: translate "information"
 	return
 }
-;tu jestem
 OldOptions := ""
 
 ;GuiControlGet, v_ViewString
@@ -2926,6 +2920,7 @@ if (v_OptionDisable == 1)
 else
 	OnOff := "On"
 ;GuiControl,, v_ViewString , % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
+;*[Two]
 v_String := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
 
 ; Select target item in list
@@ -2938,9 +2933,46 @@ v_String := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" 
 		Hotstring(":" . OldOptions . ":" . v_TriggerString , func(SendFun).bind(TextInsert), "Off")
 */
 
+;tu jestem
+;from F_ini_StartHotstring()
+if (InStr(Options,"O",0))
+	;Oflag := 1
+	Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, true), OnOff)
+else
+	;Oflag := 0
 ; Create Hotstring and activate it
-Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert), OnOff)
+;if !((Options == "") and (v_TriggerString == "") and (TextInsert == "") and (OnOff == ""))
+;{
+	Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, false), OnOff)
+;}
+	
+
+
+
+; Create Hotstring and activate it
+;Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert), OnOff)
 gosub, SaveHotstrings
+
+;a_Triggers := []
+;Gui, A_Gui:+Disabled
+;Gui, HS3:+Disabled
+;F_LoadHotstringsFromLibraries() ; Future: check if this line is necessary, nope, but refill other tables
+;Gui, A_Gui:-Disabled
+;Gui, HS3:-Disabled
+
+
+			/*
+				a_Library.Push(name) ; function Search
+				a_TriggerOptions.Push(tabSearch[1])
+				a_Hotstring.Push(tabSearch[2])
+				a_OutputFunction.Push(tabSearch[3])
+				a_EnableDisable.Push(tabSearch[4])
+				a_Triggerstring.Push(tabSearch[5])
+				a_Comment.Push(tabSearch[6])
+			*/
+
+
+
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3465,10 +3497,7 @@ if (SaveFlag == 0)
 	SectionList.Push(txt)
 }
 LV_ModifyCol(1, "Sort")
-;name := SubStr(v_SelectHotstringLibrary, 1, StrLen(v_SelectHotstringLibrary)-4) ;to już jest w pierwszych wierszach tego pliku!!!
-;name := % name . ".csv"
-;FileDelete, Libraries\%name%
-FileDelete, Libraries\%v_SelectHotstringLibrary%
+FileDelete, %InputFile%
 if (SectionList.MaxIndex() == "") ;in order to speed up it's checked if library isn't empty.
 {
 	LV_GetText(txt1, 1, 2)
@@ -3507,26 +3536,7 @@ else
 	;FileAppend, %txt%, Libraries\%name%, UTF-8
 	FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
 }
-;MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ": information", Hotstring added to the %SaveFile%.csv file! ; Future: add to translation.
 MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information", Hotstring added to the %v_SelectHotstringLibrary% file! ; Future: add to translation.
-a_Triggers := []
-;Gui, A_Gui:+Disabled
-Gui, HS3:+Disabled
-F_LoadHotstringsFromLibraries() ; Future: check if this line is necessary, nope, but refill other tables
-;Gui, A_Gui:-Disabled
-Gui, HS3:-Disabled
-
-
-			/*
-				a_TriggerOptions.Push(tabSearch[1])
-				a_Hotstring.Push(tabSearch[2])
-				a_OutputFunction.Push(tabSearch[3])
-				a_EnableDisable.Push(tabSearch[4])
-				a_Triggerstring.Push(tabSearch[5])
-				a_Comment.Push(tabSearch[6])
-			*/
-
-
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3861,7 +3871,7 @@ HS3GuiSize() ;Gui event
 	;GuiControl,, % IdText2, % v_LoadedHotstrings . A_Space . v_HotstringCnt ; •(Blank): Puts new contents into the control.
 	OutputDebug, % "End:" . A_Space . CntGuiSize 
 	return
-;*[Two]
+	;*[Three]
 }
 
 
