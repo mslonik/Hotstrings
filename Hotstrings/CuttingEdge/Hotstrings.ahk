@@ -1140,7 +1140,8 @@ F_LoadFile(nameoffile)
 		;GuiControl,, v_LoadedHotstrings, % t_LoadedHotstrings . A_Space . v_HotstringCnt
 		;GuiControl,, v_LoadedHotstrings ; •(Blank): Puts new contents into the control.
 		;GuiControl,, % IdText2, % v_HotstringCnt ;To działa
-		GuiControl,, % IdText2, % v_LoadedHotstrings . A_Space . v_HotstringCnt ; •(Blank): Puts new contents into the control.
+		GuiControl, Text, % IdText2, % v_LoadedHotstrings . A_Space . v_HotstringCnt ; •(Blank): Puts new contents into the control.
+		OutputDebug, % "Content of IdText2 GuiControl:" . A_Space . v_LoadedHotstrings . A_Space . v_HotstringCnt
 		;GuiControl,, % IdText2, % "Total:" A_Space . v_HotstringCnt ; •(Blank): Puts new contents into the control.
 			;*[One]	
 		;Gui, HS3: Show
@@ -1171,8 +1172,7 @@ Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText1, 									%t_EnterTriggerstring%
 ;GuiControl, 	Hide, 		% IdText1
 Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 
-Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText2 vv_LoadedHotstrings, % "Total: 1234" ;Future: to be translated
-v_LoadedHotstrings := "Total:    "
+Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText2 vv_LoadedHotstrings, % "Total:     0" ;Future: to be translated
 
 Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString 
 ;GuiControl,	Hide,		% IdEdit1
@@ -1273,7 +1273,7 @@ Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_Font
 Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit10 vv_Sandbox r3 						; r3 = 3x rows of text
 ;GuiControl,	Hide,		% IdEdit10
 ;Gui, 		HS3:Add, 		Edit, 		HwndIdEdit11 vv_ViewString gViewString ReadOnly Hide
-Gui,			HS3:Add,		Text,		x0 y0 HwndIdText11 vv_DefinitionsInLibrary, % "Hotstrings: 1234"
+Gui,			HS3:Add,		Text,		x0 y0 HwndIdText11 vv_DefinitionsInLibrary, % "Hotstrings:    0"
 }
 
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -1470,8 +1470,7 @@ F_HS3_DetermineConstraints()
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdText11, % "x" v_xNext "y" v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdText11
-	v_LoadedHotstrings := SubStr(v_LoadedHotstrings, 1, -4)
-	v_xNext += v_OutVarTempW + c_xmarg
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext
 
 ;5.3.2. Position the only one List View 
@@ -1513,6 +1512,16 @@ F_HS3_DetermineConstraints()
 	GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext
 
 	;Gui, 		%HS3Hwnd%:Show, AutoSize Center
+	
+;6. Counters
+;6.1. Total counter:
+	GuiControlGet, v_LoadedHotstrings,, % IdText2
+	OutputDebug, % "v_LoadedHotstrings from control:" . A_Space . v_LoadedHotstrings
+	v_LoadedHotstrings := SubStr(v_LoadedHotstrings, 1, -4)
+	OutputDebug, % "v_LoadedHotstrings to control:" . A_Space . v_LoadedHotstrings
+	GuiControl, Text, % IdText2, % v_LoadedHotstrings 
+	GuiControlGet, v_LoadedHotstrings,, % IdText2
+	OutputDebug, % "v_LoadedHotstrings from control:" . A_Space . v_LoadedHotstrings
 }
 	
 	
@@ -3720,8 +3729,10 @@ return
 ;Future: for some reasons size of Gui window can change rapidly by 20-30 px. It could be fixed by software routine, which checks if size  wasn't changed between last F_AutoXYWH("reset") and next function call.
 HS3GuiSize() ;Gui event
 {
-	local ;force local mode
-	global b_SandboxResize, c_HofSandbox, c_WofMiddleButton, HofText, IdButton5, IdEdit10, IdListView1, IdText10, IdText8, LeftColumnH, LeftColumnW, CntGuiSize, v_ResizingFlag, ini_Sandbox, c_ymarg, IsSandboxMoved, c_xmarg
+	global ;assume-global mode
+;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
+	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
+		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0
 	
 	OutputDebug, % "Beginning:" . A_Space . ++CntGuiSize 
 	OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "A_GuiHeight:" . A_Space .  A_GuiHeight
@@ -3847,7 +3858,7 @@ HS3GuiSize() ;Gui event
 		}
 	}
 	
-	GuiControl,, % IdText2, % v_LoadedHotstrings . A_Space . v_HotstringCnt ; •(Blank): Puts new contents into the control.
+	;GuiControl,, % IdText2, % v_LoadedHotstrings . A_Space . v_HotstringCnt ; •(Blank): Puts new contents into the control.
 	OutputDebug, % "End:" . A_Space . CntGuiSize 
 	return
 ;*[Two]
