@@ -265,7 +265,7 @@ global v_TriggerString 			:= ""
 global v_TypedTriggerstring 		:= ""
 global v_UndoHotstring 			:= ""
 global v_UndoTriggerstring 		:= ""
-global v_ViewString 			:= ""
+;global v_ViewString 			:= ""
 global v_String				:= ""
 global v_ConfigFlag 			:= 0
 
@@ -2921,7 +2921,7 @@ else
 	OnOff := "On"
 ;GuiControl,, v_ViewString , % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
 ;*[Two]
-v_String := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
+;v_String := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
 
 ; Select target item in list
 ;gosub, ViewString
@@ -2933,45 +2933,12 @@ v_String := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" 
 		Hotstring(":" . OldOptions . ":" . v_TriggerString , func(SendFun).bind(TextInsert), "Off")
 */
 
-;tu jestem
-;from F_ini_StartHotstring()
-if (InStr(Options,"O",0))
-	;Oflag := 1
+if (InStr(Options,"O", 0))
 	Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, true), OnOff)
 else
-	;Oflag := 0
-; Create Hotstring and activate it
-;if !((Options == "") and (v_TriggerString == "") and (TextInsert == "") and (OnOff == ""))
-;{
 	Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, false), OnOff)
-;}
 	
-
-
-
-; Create Hotstring and activate it
-;Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert), OnOff)
 gosub, SaveHotstrings
-
-;a_Triggers := []
-;Gui, A_Gui:+Disabled
-;Gui, HS3:+Disabled
-;F_LoadHotstringsFromLibraries() ; Future: check if this line is necessary, nope, but refill other tables
-;Gui, A_Gui:-Disabled
-;Gui, HS3:-Disabled
-
-
-			/*
-				a_Library.Push(name) ; function Search
-				a_TriggerOptions.Push(tabSearch[1])
-				a_Hotstring.Push(tabSearch[2])
-				a_OutputFunction.Push(tabSearch[3])
-				a_EnableDisable.Push(tabSearch[4])
-				a_Triggerstring.Push(tabSearch[5])
-				a_Comment.Push(tabSearch[6])
-			*/
-
-
 
 return
 
@@ -3086,7 +3053,7 @@ GuiControl,, v_Comment, %Comment%
 ;GuiControlGet, v_ViewString
 ;Select := v_ViewString
 ;a_String := StrSplit(Select, """")
-ViewString:
+;ViewString:
 a_String := StrSplit(v_String, """")
 HotString2 := StrSplit(a_String[2],":")
 v_TriggerStringvar := SubStr(a_String[2], StrLen( ":" . HotString2[2] . ":" ) + 1, StrLen(a_String[2])-StrLen(  ":" . HotString2[2] . ":" ))
@@ -3214,9 +3181,9 @@ else if (EnDis == "Dis")
 LV_GetText(Library, v_SelectedRow2, 1)
 Gui, HS3: Default
 ChooseSec := % Library . ".csv"
-v_String := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
-GuiControl,, v_ViewString ,  %v_String%
-gosub, ViewString
+;v_String := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
+;GuiControl,, v_ViewString ,  %v_String%
+;gosub, ViewString
 GuiControl, Choose, v_SelectHotstringLibrary, %ChooseSec%
 gosub, SectionChoose
 v_SearchedTriggerString := v_TriggerString
@@ -3412,58 +3379,60 @@ Return
 
 SaveHotstrings:
 Gui, HS3:+OwnDialogs
-;SaveFile := v_SelectHotstringLibrary
-;SaveFile := StrReplace(SaveFile, ".csv", "")
-;GuiControlGet, Items,, v_ViewString
-;Items := v_String
-EnDis := ""
-SendFun := ""
-;if InStr(Items, """On""")
-if InStr(v_String, """On""")
-	EnDis := "En"
-;else if InStr(Items, """Off""")
-else if InStr(v_String, """Off""")
-	EnDis := "Dis"
-;if InStr(Items, "F_ViaClipboard")
-if InStr(v_String, "F_ViaClipboard")
-	SendFun := "CL"
-;else if InStr(Items, "F_NormalWay")
-else if InStr(v_String, "F_NormalWay")
-	SendFun := "SI"
-;else if InStr(Items, """F_MenuText""")
-else if InStr(v_String, """F_MenuText""")
-	SendFun := "MCL"
-;else if InStr(Items, """F_MenuTextAHK""")
-else if InStr(v_String, """F_MenuTextAHK""")
-	SendFun := "MSI"
-;HSSplit := StrSplit(Items, ":") ;never used again
-;HSSplit2 := StrSplit(Items, """:")
+
 
 /*
-	HSSplit2 := StrSplit(v_String, """:")
-	Options := SubStr(HSSplit2[2], 1 , InStr(HSSplit2[2], ":" )-1)
-	v_TriggerString := SubStr(HSSplit2[2], InStr(HSSplit2[2], ":" )+1 , InStr(HSSplit2[2], """," )-StrLen(Options)-2)
-	if (InStr(Options, "*0"))
-	{
-		Options := StrReplace(Options, "*0")
-	}
-	if (InStr(Options, "O0"))
-	{
-		Options := StrReplace(Options, "O0")
-	}
-	if (InStr(Options, "C0"))
-	{
-		Options := StrReplace(Options, "C0")
-	}
-	if (InStr(Options, "?0"))
-	{
-		Options := StrReplace(Options, "?0")
-	}
-	if (InStr(Options, "B")) and !(InStr(Options, "B0"))
-	{
-		Options := StrReplace(Options, "B")
-	}
+	if (v_SelectFunction == "Clipboard (CL)")
+		SendFun := "F_ViaClipboard"
+	else if (v_SelectFunction == "SendInput (SI)")
+		SendFun := "F_NormalWay"
+	else if (v_SelectFunction == "Menu & Clipboard (MCL)")
+		SendFun := "F_MenuText"
+	else if (v_SelectFunction == "Menu & SendInput (MSI)")
+		SendFun := "F_MenuTextAHK"
+	
+	if (v_OptionDisable == 1)
+		OnOff := "Off"
+	else
+		OnOff := "On"
+	v_String := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
 */
+
+
+EnDis := ""
+SendFun := ""
+/*
+	if InStr(v_String, """On""")
+		EnDis := "En"
+	else InStr(v_String, """Off""")
+		EnDis := "Dis"
+*/
+if (v_OptionDisable)
+	EnDis := "En"
+else
+	EnDis := "Dis"
+
+
+/*
+	if InStr(v_String, "F_ViaClipboard")
+		SendFun := "CL"
+	else if InStr(v_String, "F_NormalWay")
+		SendFun := "SI"
+	else if InStr(v_String, """F_MenuText""")
+		SendFun := "MCL"
+	else if InStr(v_String, """F_MenuTextAHK""")
+		SendFun := "MSI"
+*/
+
+	if (v_SelectFunction == "Clipboard (CL)")
+		SendFun := "CL"
+	else if (v_SelectFunction == "SendInput (SI)")
+		SendFun := "SI"
+	else if (v_SelectFunction == "Menu & Clipboard (MCL)")
+		SendFun := "MCL"
+	else if (v_SelectFunction == "Menu & SendInput (MSI)")
+		SendFun := "MSI"
+
 
 ;StrSp 		:= StrSplit(Items, "bind(""")
 ;StrSp 		:= StrSplit(v_String, "bind(""")
