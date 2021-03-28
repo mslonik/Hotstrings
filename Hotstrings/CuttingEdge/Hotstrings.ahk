@@ -3002,74 +3002,58 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-HSLV: 
+HSLV: ; copy content of List View 1 to editable fields of HS3 Gui
 Gui, HS3:+OwnDialogs
- v_PreviousSelectedRow := v_SelectedRow ;this line rather as finishing this label section
-If !(v_SelectedRow := LV_GetNext()) {
-	Return
-}
-if (v_PreviousSelectedRow == v_SelectedRow) and !(v_TriggerString == "")
-{
-	return
-}
+/*
+	v_PreviousSelectedRow := v_SelectedRow ;this line rather as finishing this label section
+	If !(v_SelectedRow := LV_GetNext()) {
+		Return
+	}
+	if (v_PreviousSelectedRow == v_SelectedRow) and !(v_TriggerString == "")
+	{
+		return
+	}
+*/
 LV_GetText(v_TriggerString, 	v_SelectedRow, 1)
+;GuiControl, , v_TriggerString, % v_TriggerStringvar
+GuiControl, , % IdEdit1, % v_TriggerString
+
 LV_GetText(Options, 		v_SelectedRow, 2)
+Instr(Options,"*0") or (InStr(Options,"*") = 0) 							? F_CheckOption("No", 1) 	: F_CheckOption("Yes", 1)
+((Instr(Options,"C0")) or (Instr(Options,"C1")) or (Instr(Options,"C") = 0)) 	? F_CheckOption("No", 2) 	: F_CheckOption("Yes", 2)
+Instr(Options,"B0") 												? F_CheckOption("Yes", 3) 	: F_CheckOption("No", 3)
+Instr(Options,"?") 													? F_CheckOption("Yes", 4) 	: F_CheckOption("No", 4)
+(Instr(Options,"O0") or (InStr(Options,"O") = 0)) 						? F_CheckOption("No", 5) 	: F_CheckOption("Yes", 5)
+
 LV_GetText(Fun, 			v_SelectedRow, 3)
 if (Fun = "SI")
 {
-	SendFun := "F_NormalWay"
+	;SendFun := "F_NormalWay"
+	GuiControl, Choose, v_SelectFunction, SendInput (SI)
 }
 else if (Fun = "CL")
 {
-	SendFun := "F_ViaClipboard"
+	;SendFun := "F_ViaClipboard"
+	GuiControl, Choose, v_SelectFunction, Clipboard (CL)
 }
 else if (Fun = "MCL")
 {
-	SendFun := "F_MenuText"
+	;SendFun := "F_MenuText"
+	GuiControl, Choose, v_SelectFunction, Menu & Clipboard (MCL)
 }
 else if (Fun = "MSI")
 {
-	SendFun := "F_MenuTextAHK"
-}
-else
-{
-	SendFun := "F_NormalWay"
+	;SendFun := "F_MenuTextAHK"
+	GuiControl, Choose, v_SelectFunction, Menu & SendInput (MSI)
 }
 
 LV_GetText(EnDis, 		v_SelectedRow, 4)
+InStr(EnDis, "En") ? F_CheckOption("No", 6) : F_CheckOption("Yes", 6)
+
 LV_GetText(TextInsert, 	v_SelectedRow, 5)
-LV_GetText(Comment, 	v_SelectedRow, 6)
-If (EnDis == "En")
-	OnOff := "On"
-else if (EnDis == "Dis")
-	OnOff := "Off"
-v_String := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
-GuiControl,, v_Comment, %Comment%
-;GuiControl,, v_ViewString,  %v_String%
-;gosub, ViewString
-
-
-;Gui, HS3:Submit, NoHide
-;GuiControlGet, v_ViewString
-;Select := v_ViewString
-;a_String := StrSplit(Select, """")
-;ViewString:
-a_String := StrSplit(v_String, """")
-HotString2 := StrSplit(a_String[2],":")
-v_TriggerStringvar := SubStr(a_String[2], StrLen( ":" . HotString2[2] . ":" ) + 1, StrLen(a_String[2])-StrLen(  ":" . HotString2[2] . ":" ))
-RText := StrSplit(v_String, "bind(""")
-if InStr(RText[2], """On""")
+if ((Fun = "MCL") or (Fun = "MSI"))
 {
-	OText := SubStr(RText[2], 1, StrLen(RText[2])-9)
-}
-else
-{    
-	OText := SubStr(RText[2], 1, StrLen(RText[2])-10)
-}
-GuiControl, , v_TriggerString, % v_TriggerStringvar
-if (InStr(v_String, """F_MenuText""") or InStr(v_String, """F_MenuTextAHK"""))
-{
-	OTextMenu := StrSplit(OText, "¦")
+	OTextMenu := StrSplit(TextInsert, "¦")
 	GuiControl, , v_EnterHotstring,  % OTextMenu[1]
 	GuiControl, , v_EnterHotstring1, % OTextMenu[2]
 	GuiControl, , v_EnterHotstring2, % OTextMenu[3]
@@ -3081,63 +3065,60 @@ if (InStr(v_String, """F_MenuText""") or InStr(v_String, """F_MenuTextAHK"""))
 }
 else
 {
-	GuiControl, , v_EnterHotstring, % OText
+	GuiControl, , v_EnterHotstring, % TextInsert
 }
 
-;GoSub SetOptions 
-;SetOptions:
+
+LV_GetText(Comment, 	v_SelectedRow, 6)
+GuiControl,, v_Comment, %Comment%
 
 /*
-	OptionSet := Instr(Hotstring2[2],"*0") or InStr(Hotstring2[2],"*") = 0 ? F_CheckOption("No", 2) :  F_CheckOption("Yes", 2)
-	OptionSet := ((Instr(Hotstring2[2],"C0")) or (Instr(Hotstring2[2],"C1")) or (Instr(Hotstring2[2],"C") = 0)) ? F_CheckOption("No", 3) : F_CheckOption("Yes", 3)
-	OptionSet := Instr(Hotstring2[2],"B0") ? F_CheckOption("Yes",4) : F_CheckOption("No", 4)
-	OptionSet := Instr(Hotstring2[2],"?") ? F_CheckOption("Yes",5) : F_CheckOption("No", 5)
-	OptionSet := (Instr(Hotstring2[2],"O0") or (InStr(Hotstring2[2],"O") = 0)) ? F_CheckOption("No",6) : F_CheckOption("Yes", 6)
-	OptionSet := (InStr(Select,"""On""")) ? F_CheckOption("No", 7) : F_CheckOption("Yes", 7)
+	If (EnDis == "En")
+		OnOff := "On"
+	else if (EnDis == "Dis")
+		OnOff := "Off"
+	v_String := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
+	
+	a_String := StrSplit(v_String, """")
+	HotString2 := StrSplit(a_String[2],":")
+	v_TriggerStringvar := SubStr(a_String[2], StrLen( ":" . HotString2[2] . ":" ) + 1, StrLen(a_String[2])-StrLen(  ":" . HotString2[2] . ":" ))
+	RText := StrSplit(v_String, "bind(""")
+	if InStr(RText[2], """On""")
+	{
+		OText := SubStr(RText[2], 1, StrLen(RText[2])-9)
+	}
+	else
+	{    
+		OText := SubStr(RText[2], 1, StrLen(RText[2])-10)
+	}
+	;GuiControl, , v_TriggerString, % v_TriggerStringvar
+	if (InStr(v_String, """F_MenuText""") or InStr(v_String, """F_MenuTextAHK"""))
+	{
+		OTextMenu := StrSplit(OText, "¦")
+		GuiControl, , v_EnterHotstring,  % OTextMenu[1]
+		GuiControl, , v_EnterHotstring1, % OTextMenu[2]
+		GuiControl, , v_EnterHotstring2, % OTextMenu[3]
+		GuiControl, , v_EnterHotstring3, % OTextMenu[4]
+		GuiControl, , v_EnterHotstring4, % OTextMenu[5]
+		GuiControl, , v_EnterHotstring5, % OTextMenu[6]
+		GuiControl, , v_EnterHotstring6, % OTextMenu[7]
+		
+	}
+	else
+	{
+		GuiControl, , v_EnterHotstring, % OText
+	}
+	
+	
+	Instr(Hotstring2[2],"*0") or (InStr(Hotstring2[2],"*") = 0) ? F_CheckOption("No", 1) :  F_CheckOption("Yes", 1)
+	((Instr(Hotstring2[2],"C0")) or (Instr(Hotstring2[2],"C1")) or (Instr(Hotstring2[2],"C") = 0)) ? F_CheckOption("No", 2) : F_CheckOption("Yes", 2)
+	Instr(Hotstring2[2],"B0") ? F_CheckOption("Yes", 3) : F_CheckOption("No", 3)
+	Instr(Hotstring2[2],"?") ? F_CheckOption("Yes", 4) : F_CheckOption("No", 4)
+	(Instr(Hotstring2[2],"O0") or (InStr(Hotstring2[2],"O") = 0)) ? F_CheckOption("No", 5) : F_CheckOption("Yes", 5)
+	InStr(v_String, """On""") ? F_CheckOption("No", 6) : F_CheckOption("Yes", 6)
 */
 
-/*
-	temp1 := Instr(Hotstring2[2],"*0")
-	temp2 := InStr(Hotstring2[2],"*")
-	
-	temp3 := Instr(Hotstring2[2],"C0")
-	temp4 := Instr(Hotstring2[2],"C1")
-	temp5 := Instr(Hotstring2[2],"C")
-	
-	temp6 := Instr(Hotstring2[2],"B0")
-	
-	temp7 := Instr(Hotstring2[2],"?")
-	
-	temp8 := Instr(Hotstring2[2],"O0")
-	temp9 := InStr(Hotstring2[2],"O") 
-	
-	temp10 := InStr(v_String, """On""")
-*/
-
-Instr(Hotstring2[2],"*0") or (InStr(Hotstring2[2],"*") = 0) ? F_CheckOption("No", 1) :  F_CheckOption("Yes", 1)
-((Instr(Hotstring2[2],"C0")) or (Instr(Hotstring2[2],"C1")) or (Instr(Hotstring2[2],"C") = 0)) ? F_CheckOption("No", 2) : F_CheckOption("Yes", 2)
-Instr(Hotstring2[2],"B0") ? F_CheckOption("Yes", 3) : F_CheckOption("No", 3)
-Instr(Hotstring2[2],"?") ? F_CheckOption("Yes", 4) : F_CheckOption("No", 4)
-(Instr(Hotstring2[2],"O0") or (InStr(Hotstring2[2],"O") = 0)) ? F_CheckOption("No", 5) : F_CheckOption("Yes", 5)
-InStr(v_String, """On""") ? F_CheckOption("No", 6) : F_CheckOption("Yes", 6)
-;GuiControlGet, v_ViewString
-;Select := v_ViewString
-
-;Select := v_String
-/*
-	if (Select == "")
-		return
-*/
-
-if(InStr(v_String,"F_NormalWay"))
-	GuiControl, Choose, v_SelectFunction, SendInput (SI)
-else if(InStr(v_String, "F_ViaClipboard"))
-	GuiControl, Choose, v_SelectFunction, Clipboard (CL)
-else if(InStr(v_String, """F_MenuText"""))
-	GuiControl, Choose, v_SelectFunction, Menu & Clipboard (MCL)
-else if(InStr(v_String, """F_MenuTextAHK"""))
-	GuiControl, Choose, v_SelectFunction, Menu & SendInput (MSI)
-v_CaseSensitiveC1 := 0
+;v_CaseSensitiveC1 := 0
 gosub L_SelectFunction
 return
 
