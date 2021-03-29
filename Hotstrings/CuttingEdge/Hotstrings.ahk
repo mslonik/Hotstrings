@@ -283,7 +283,7 @@ global c_ControlColor 			:= "Default"
 global v_ResizingFlag 			:= 1 ; when Hotstrings Gui is displayed for the very first time
 global IsSandboxMoved			:= false
 global CntGuiSize				:= 0
-global v_ToggleRightColumn		:= 0 ;memory of last state of the IdButton5 (ToggleRightColumn)
+global v_ToggleRightColumn		:= false ;memory of last state of the IdButton5 (ToggleRightColumn)
 
 ; 2. Try to load up configuration files. If those files do not exist, create them.
 if (!FileExist("Config.ini"))
@@ -1242,7 +1242,7 @@ Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton3 gClear,							%t_Clear%
 Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton4 gDelete vv_DeleteHotstring Disabled, 	%t_DeleteHotstring%
 ;GuiControl,	Hide,		% IdButton4
 
-Gui,			HS3:Add,		Button,		x0 y0 HwndIdButton5 gToggleRightColumn vv_ToggleRightColumn,			⯇
+Gui,			HS3:Add,		Button,		x0 y0 HwndIdButton5 gF_ToggleRightColumn vv_ToggleRightColumn,			⯇
 ;GuiControl,	Hide,		% IdButton5
 
 ;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
@@ -3559,33 +3559,38 @@ F_AddHotstring()
 	Delete:
 	Gui, HS3:+OwnDialogs
 	
-	If !(v_SelectedRow := LV_GetNext()) {
+	if !(v_SelectedRow := LV_GetNext()) 
+	{
 		MsgBox, 0, %A_ThisLabel%, %t_SelectARowInTheListViewPlease%
-		Return
+		return
 	}
-	Msgbox, 0x4,, %t_SelectedHotstringWillBeDeletedDoYouWantToProceed%
+	Msgbox, 4,, %t_SelectedHotstringWillBeDeletedDoYouWantToProceed%
 	IfMsgBox, No
 		return
 	TrayTip, %A_ScriptName%, %t_DeletingHotstring%, 1
-	Gui, ProgressDelete:New, -Border -Resize
-	Gui, ProgressDelete:Add, Progress, w200 h20 cBlue vProgressDelete, 0
-	Gui, ProgressDelete:Add,Text,w200 vTextDelete, %t_DeletingHotstringPleaseWait%
-	Gui, ProgressDelete:Show, hide, ProgressDelete
-	WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
-	DetectHiddenWindows, On
-	WinGetPos, , , DeleteWindowWidth, DeleteWindowHeight,ProgressDelete
-	DetectHiddenWindows, Off
-	Gui, ProgressDelete:Show,% "x" . v_WindowX + (v_WindowWidth - DeleteWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - DeleteWindowHeight)/2 ,ProgressDelete
+
+	/*
+		Gui, ProgressDelete:New, -Border -Resize
+		Gui, ProgressDelete:Add, Progress, w200 h20 cBlue vProgressDelete, 0
+		Gui, ProgressDelete:Add,Text,w200 vTextDelete, %t_DeletingHotstringPleaseWait%
+		Gui, ProgressDelete:Show, hide, ProgressDelete
+		WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
+		DetectHiddenWindows, On
+		WinGetPos, , , DeleteWindowWidth, DeleteWindowHeight,ProgressDelete
+		DetectHiddenWindows, Off
+		Gui, ProgressDelete:Show,% "x" . v_WindowX + (v_WindowWidth - DeleteWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - DeleteWindowHeight)/2 ,ProgressDelete
+	*/
+	
 	name := v_SelectHotstringLibrary
 	FileDelete, Libraries\%name%
 	cntDelete := 0
-	Gui, HS3:Default
+	;Gui, HS3:Default
 	if (v_SelectedRow == SectionList.MaxIndex())
 	{
 		if (SectionList.MaxIndex() == 1)
 		{
 			FileAppend,, Libraries\%name%, UTF-8
-			GuiControl,, ProgressDelete, 100
+			;GuiControl,, ProgressDelete, 100
 		}
 		else
 		{
@@ -3605,10 +3610,10 @@ F_AddHotstring()
 						txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
 					if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
 						FileAppend, %txt%, Libraries\%name%, UTF-8
-					v_DeleteProgress := (A_Index/(SectionList.MaxIndex()-1))*100
-					Gui, ProgressDelete:Default
-					GuiControl,, ProgressDelete, %v_DeleteProgress%
-					Gui, HS3:Default
+					;v_DeleteProgress := (A_Index/(SectionList.MaxIndex()-1))*100
+					;Gui, ProgressDelete:Default
+					;GuiControl,, ProgressDelete, %v_DeleteProgress%
+					;Gui, HS3:Default
 				}
 			}
 		}
@@ -3631,21 +3636,24 @@ F_AddHotstring()
 					txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
 				if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
 					FileAppend, %txt%, Libraries\%name%, UTF-8
-				v_DeleteProgress := (A_Index/(SectionList.MaxIndex()-1))*100
-				Gui, ProgressDelete:Default
-				GuiControl,, ProgressDelete, %v_DeleteProgress%
-				Gui, HS3:Default
+				;v_DeleteProgress := (A_Index/(SectionList.MaxIndex()-1))*100
+				;Gui, ProgressDelete:Default
+				;GuiControl,, ProgressDelete, %v_DeleteProgress%
+				;Gui, HS3:Default
 			}
 		}
 	}
-	Gui, ProgressDelete:Destroy
-	MsgBox, %t_HotstringHasBeenDeletedNowApplicationWillRestartItselfInOrderToApplyChangesReloadTheLibrariesCsv%
-	WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
-	Run, AutoHotkey.exe Hotstrings.ahk %v_Param% %v_SelectHotstringLibrary% %v_PreviousWidth% %v_PreviousHeight% %v_PreviousX% %v_PreviousY% %v_SelectedRow% %v_SelectedMonitor%	
+	;Gui, ProgressDelete:Destroy
+	;MsgBox, %t_HotstringHasBeenDeletedNowApplicationWillRestartItselfInOrderToApplyChangesReloadTheLibrariesCsv%
+	;WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
+	;Run, AutoHotkey.exe Hotstrings.ahk %v_Param% %v_SelectHotstringLibrary% %v_PreviousWidth% %v_PreviousHeight% %v_PreviousX% %v_PreviousY% %v_SelectedRow% %v_SelectedMonitor%	
 	return
 	
 ;In AutoHotkey there is no Guicontrol, Delete sub-command. As a consequence even if specific control is hidden (Guicontrol, Hide), the Gui size isn't changed, size is not decreased, as space for hidden control is maintained. To solve this issue, the separate gui have to be prepared. This requires a lot of work and is a matter of far future.
-	ToggleRightColumn: ;Label of Button IdButton5, to toggle left part of gui 
+F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui 
+{
+	global ;assume-global mode
+	
 	if !(v_ToggleRightColumn) ;hide
 	{
 		GuiControl, Hide, % IdText7		;Library content (F2)
@@ -3664,15 +3672,16 @@ F_AddHotstring()
 		GuiControl, Show, % IdText8		;Long text
 		
 		GuiControl,, % IdButton5, ⯇
-	}
-	v_ToggleRightColumn := !v_ToggleRightColumn
-	return
-	
+}
+v_ToggleRightColumn := !v_ToggleRightColumn
+return
+}
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
-	
-	DestroyGuis:
-	Loop, %N%
-	{
+
+DestroyGuis:
+Loop, %N%
+{
 		Gui, %A_Index%:Destroy
 	}
 	Gui, Font ; restore the font to the system's default GUI typeface, size and colour.
