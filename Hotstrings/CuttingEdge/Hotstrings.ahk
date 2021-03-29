@@ -98,7 +98,7 @@ ClosingSquareBracket=Closing Square Bracket ]
 Colon=Colon :
 Comma=Comma ,
 Configuration=&Configuration
-CsvDoYouWantToProceed=.csv. Do you want to proceed?
+CsvDoYouWantToProceed=Do you want to proceed?
 Cursor=Cursor
 DeleteHotstring=Delete hotstring (F8)
 DeletingHotstring=Deleting hotstring...
@@ -1135,8 +1135,8 @@ F_LoadFile(nameoffile)
 		a_Triggers.Push(tabSearch[2]) ; a_Triggers is used in main loop of application for generating tips
 
 		F_ini_StartHotstring(line, nameoffile)
-		v_HotstringCnt++
-		GuiControl, Text, % IdText2, % v_LoadedHotstrings . A_Space . v_HotstringCnt ; •(Blank): Puts new contents into the control.
+		;v_HotstringCnt++
+		GuiControl, Text, % IdText2, % v_LoadedHotstrings . A_Space . ++v_HotstringCnt ; •(Blank): Puts new contents into the control.
 		;OutputDebug, % "Content of IdText2 GuiControl:" . A_Space . v_LoadedHotstrings . A_Space . v_HotstringCnt
 
 	}
@@ -2822,6 +2822,7 @@ return
 
 ;#[AddHotstring]
 ;AddHotstring: 
+;1. Read all inputs. 2. Create Hotstring definition according to inputs. 3. Read the library file into List View. 4. Delete library file. 5. Sort List View. 6. Save List View into the library file.
 F_AddHotstring()
 {
 	global ;assume-global mode
@@ -2881,7 +2882,7 @@ F_AddHotstring()
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information", %t_ChooseSectionBeforeSaving% ;Future: translate "information"
 		return
 	}
-;*[One]
+
 	
 	/*
 		
@@ -2944,6 +2945,8 @@ F_AddHotstring()
 	else
 		Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, false), OnOff)
 	
+	Hotstring("Reset") ;reset hotstring recognizer
+	;v_InputString := "" ;reset for main script routine
 ;gosub, SaveHotstrings
 	
 	
@@ -2967,19 +2970,16 @@ F_AddHotstring()
 	OutputFile 	:= % A_ScriptDir . "\Libraries\temp.csv"	; changed on 2021-02-13
 	InputFile 	:= % A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary 
 	LString 		:= % "‖" . v_TriggerString . "‖"
-	ModifiedFlag	:= false ;if true, duplicate definition is found, if false, definition is new
+	ModifiedFlag	:= false ;if true, duplicate triggerstring definition is found, if false, definition is new
 	
 	Loop, Read, %InputFile%, %OutputFile% ;read all definitions from this library file 
 	{
+		;*[One]
 		if (InStr(A_LoopReadLine, LString, 1) and InStr(Options, "C")) or (InStr(A_LoopReadLine, LString) and !(InStr(Options, "C")))
 		{
-			if !(v_SelectedRow)
-			{
-			;MsgBox, 4,, % t_TheHostring . " """ .  v_TriggerString . """ " .  t_ExistsInAFile . " " . SaveFile . t_CsvDoYouWantToProceed
-				MsgBox, 4,, % t_TheHostring . A_Space . """ .  v_TriggerString . """ . A_Space .  t_ExistsInAFile . A_Space . v_SelectHotstringLibrary . t_CsvDoYouWantToProceed
-				IfMsgBox, No
-					return
-			}
+			MsgBox, 4,, % t_TheHostring . A_Space . """" .  v_TriggerString . """" . A_Space .  t_ExistsInAFile . A_Space . v_SelectHotstringLibrary . "." . A_Space . t_CsvDoYouWantToProceed
+			IfMsgBox, No
+				return
 			LV_Modify(A_Index, "", v_TriggerString, Options, SendFun, EnDis, TextInsert, v_Comment)
 			ModifiedFlag := true
 		}
@@ -2989,6 +2989,7 @@ F_AddHotstring()
 		LV_Add("",  v_TriggerString, Options, SendFun, EnDis, TextInsert, v_Comment)
 		txt := % Options . "‖" . v_TriggerString . "‖" . SendFun . "‖" . EnDis . "‖" . TextInsert . "‖" . v_Comment ;tylko to się liczy
 		SectionList.Push(txt)
+		a_Triggers.Push(v_TriggerString) ;added to table of hotstring recognizer (a_Triggers)
 	}
 	LV_ModifyCol(1, "Sort")
 	FileDelete, %InputFile%
