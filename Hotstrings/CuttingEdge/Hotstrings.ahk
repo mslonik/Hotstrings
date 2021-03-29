@@ -201,7 +201,7 @@ global v_SelectedRow 			:= A_Args[7]
 global v_PreviousMonitor 		:= A_Args[8]
 global a_Comment 				:= []
 global a_EnableDisable 			:= []
-global a_Hotstring 				:= []
+global a_Hotstring				:= []
 global a_Library 				:= []
 global a_LibraryCnt				:= [] ;Hotstring counter for specific libraries
 global a_OutputFunction 			:= []
@@ -1125,12 +1125,13 @@ F_LoadFile(nameoffile)
 
 		a_Library.Push(name) ; function Search
 		a_TriggerOptions.Push(tabSearch[1])
-		a_Hotstring.Push(tabSearch[2])
+		a_Triggerstring.Push(tabSearch[2]) 
 		a_OutputFunction.Push(tabSearch[3])
 		a_EnableDisable.Push(tabSearch[4])
-		a_Triggerstring.Push(tabSearch[5]) 
+		a_Hotstring.Push(tabSearch[5]) 
 		a_Comment.Push(tabSearch[6])
-		a_Triggers.Push(v_TriggerString) ; a_Triggers is used in main loop of application for generating tips
+		;a_Triggers.Push(v_TriggerString) ; a_Triggers is used in main loop of application for generating tips
+		a_Triggers.Push(tabSearch[2]) ; a_Triggers is used in main loop of application for generating tips
 
 		F_ini_StartHotstring(line, nameoffile)
 		v_HotstringCnt++
@@ -1642,10 +1643,10 @@ F_LoadLibrariesToTables()
 			; LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4],tabSearch[5], tabSearch[6])
 			a_Library.Push(name)
 			a_TriggerOptions.Push(tabSearch[1])
-			a_Hotstring.Push(tabSearch[2])
+			a_Triggerstring.Push(tabSearch[2])
 			a_OutputFunction.Push(tabSearch[3])
 			a_EnableDisable.Push(tabSearch[4])
-			a_Triggerstring.Push(tabSearch[5])
+			a_Hotstring.Push(tabSearch[5])
 			a_Comment.Push(tabSearch[6])
 		}
 	}
@@ -1835,7 +1836,6 @@ F_ChangingBrackets(string)
 
 F_NormalWay(ReplacementString, Oflag)
 {
-	;*[Two]	
 	v_InputString := ""
 	ToolTip,
 	v_HotstringFlag := 1
@@ -3003,6 +3003,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 HSLV: ; copy content of List View 1 to editable fields of HS3 Gui
+;*[One]	
 Gui, HS3:+OwnDialogs
 /*
 	v_PreviousSelectedRow := v_SelectedRow ;this line rather as finishing this label section
@@ -3014,6 +3015,9 @@ Gui, HS3:+OwnDialogs
 		return
 	}
 */
+if !(v_SelectedRow := LV_GetNext())
+		return
+
 LV_GetText(v_TriggerString, 	v_SelectedRow, 1)
 ;GuiControl, , v_TriggerString, % v_TriggerStringvar
 GuiControl, , % IdEdit1, % v_TriggerString
@@ -3951,7 +3955,7 @@ HS3GuiSize() ;Gui event
 		Gui, HS3List:Add, ListView, 	% "xm grid vList +AltSubmit gHSLV2 h" . 400*DPI%v_SelectedMonitor%, %t_LibraryTriggerstringTriggerOptionsOutputFunctionEnableDisableHotstringComment% ; !!!
 		Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
 		{
-			LV_Add("", a_Library[A_Index], a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index], a_Comment[A_Index])
+			LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Hotstring[A_Index], a_Comment[A_Index])
 		}
 		LV_ModifyCol(1, "Sort")
 		ini_StartWlist := 940*DPI%v_SelectedMonitor%
@@ -3988,31 +3992,31 @@ Search:
 	LV_Delete()
 	if (v_RadioGroup == 2)
 	{
-		For Each, FileName In a_Triggerstring
+		For Each, FileName In a_Hotstring
 		{
 			If (v_SearchTerm != "")
 			{
 		; If (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
 				If InStr(FileName, v_SearchTerm) ; for overall matching
-					LV_Add("",a_Library[A_Index], a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],FileName,a_Comment[A_Index])
+					LV_Add("",a_Library[A_Index], a_Triggerstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],FileName,a_Comment[A_Index])
 			}
 			Else
-				LV_Add("",a_Library[A_Index], a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],FileName,a_Comment[A_Index])
+				LV_Add("",a_Library[A_Index], a_Triggerstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],FileName,a_Comment[A_Index])
 		}
 		LV_ModifyCol(6,"Sort")
 	}
 	else if (v_RadioGroup == 1)
 	{
-		For Each, FileName In a_Hotstring
+		For Each, FileName In a_Triggerstring
 		{
 			If (v_SearchTerm != "")
 			{
 				If (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
 		; If InStr(FileName, v_SearchTerm) ; for overall matching
-					LV_Add("",a_Library[A_Index], FileName,a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index],a_Comment[A_Index])
+					LV_Add("",a_Library[A_Index], FileName,a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Hotstring[A_Index],a_Comment[A_Index])
 			}
 			Else
-				LV_Add("",a_Library[A_Index], FileName,a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index],a_Comment[A_Index])
+				LV_Add("",a_Library[A_Index], FileName,a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Hotstring[A_Index],a_Comment[A_Index])
 		}
 		LV_ModifyCol(2,"Sort") 
 	}
@@ -4024,10 +4028,10 @@ Search:
 			{
 				If (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
 		; If InStr(FileName, v_SearchTerm) ; for overall matching
-					LV_Add("",FileName, a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index],a_Comment[A_Index])
+					LV_Add("",FileName, a_Triggerstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Hotstring[A_Index],a_Comment[A_Index])
 			}
 			Else
-				LV_Add("",FileName, a_Hotstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Triggerstring[A_Index],a_Comment[A_Index])
+				LV_Add("",FileName, a_Triggerstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Hotstring[A_Index],a_Comment[A_Index])
 		}
 		LV_ModifyCol(1,"Sort")
 	}
