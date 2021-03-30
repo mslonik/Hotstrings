@@ -1042,7 +1042,8 @@ goto, HSdelay
 
 F8::
 Gui, HS3:Default
-goto, Delete
+;goto, Delete
+F_Delete()
 ; return
 
 F9::
@@ -1239,7 +1240,7 @@ Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton2 gF_AddHotstring,						%t_SetHots
 ;GuiControl,	Hide,		% IdButton2
 Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton3 gClear,							%t_Clear%
 ;GuiControl,	Hide,		% IdButton3
-Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton4 gDelete vv_DeleteHotstring Disabled, 	%t_DeleteHotstring%
+Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton4 gF_Delete vv_DeleteHotstring Disabled, 	%t_DeleteHotstring%
 ;GuiControl,	Hide,		% IdButton4
 
 Gui,			HS3:Add,		Button,		x0 y0 HwndIdButton5 gF_ToggleRightColumn vv_ToggleRightColumn,			⯇
@@ -2966,15 +2967,15 @@ F_AddHotstring()
 	else if (v_SelectFunction == "Menu & SendInput (MSI)")
 		SendFun := "MSI"
 	
-	
-	OutputFile 	:= % A_ScriptDir . "\Libraries\temp.csv"	; changed on 2021-02-13
-	InputFile 	:= % A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary 
-	LString 		:= % "‖" . v_TriggerString . "‖"
+
+	OutputFile 	:= A_ScriptDir . "\Libraries\temp.csv"	; changed on 2021-02-13
+	InputFile 	:= A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary 
+	LString 		:= "‖" . v_TriggerString . "‖"
 	ModifiedFlag	:= false ;if true, duplicate triggerstring definition is found, if false, definition is new
 	
 	Loop, Read, %InputFile%, %OutputFile% ;read all definitions from this library file 
 	{
-		;*[One]
+	
 		if (InStr(A_LoopReadLine, LString, 1) and InStr(Options, "C")) or (InStr(A_LoopReadLine, LString) and !(InStr(Options, "C")))
 		{
 			MsgBox, 4,, % t_TheHostring . A_Space . """" .  v_TriggerString . """" . A_Space .  t_ExistsInAFile . A_Space . v_SelectHotstringLibrary . "." . A_Space . t_CsvDoYouWantToProceed
@@ -3306,7 +3307,7 @@ F_AddHotstring()
 		FileAppend,, Libraries\%NewLib%, UTF-8
 		MsgBox, % t_TheLibrary . " " . NewLib . " " . t_HasBeenCreated
 		Gui, ALib:Destroy
-		GuiControl, HS3:, v_SelectHotstringLibrary, |
+		GuiControl, HS3:, v_SelectHotstringLibrary, | ;To make the control empty, specify only a pipe character (|).
 		Loop,%A_ScriptDir%\Libraries\*.csv
 			GuiControl,HS3: , v_SelectHotstringLibrary, %A_LoopFileName%
 	}
@@ -3556,7 +3557,12 @@ F_AddHotstring()
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	Delete:
+F_Delete()
+{
+	global ;assume-global mode
+	local 	LibraryFullPathAndName := "" 
+			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
+	
 	Gui, HS3:+OwnDialogs
 	
 	if !(v_SelectedRow := LV_GetNext()) 
@@ -3568,7 +3574,7 @@ F_AddHotstring()
 	IfMsgBox, No
 		return
 	TrayTip, %A_ScriptName%, %t_DeletingHotstring%, 1
-
+	
 	/*
 		Gui, ProgressDelete:New, -Border -Resize
 		Gui, ProgressDelete:Add, Progress, w200 h20 cBlue vProgressDelete, 0
@@ -3580,16 +3586,19 @@ F_AddHotstring()
 		DetectHiddenWindows, Off
 		Gui, ProgressDelete:Show,% "x" . v_WindowX + (v_WindowWidth - DeleteWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - DeleteWindowHeight)/2 ,ProgressDelete
 	*/
-	
-	name := v_SelectHotstringLibrary
-	FileDelete, Libraries\%name%
-	cntDelete := 0
+	;*[One]
+	LibraryFullPathAndName := A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary
+	FileDelete, % LibraryFullPathAndName
+	;cntDelete := 0
 	;Gui, HS3:Default
+	
+	;LV_ModifyCol(1, "Sort")
+	
 	if (v_SelectedRow == SectionList.MaxIndex())
 	{
 		if (SectionList.MaxIndex() == 1)
 		{
-			FileAppend,, Libraries\%name%, UTF-8
+			FileAppend,, % LibraryFullPathAndName, UTF-8
 			;GuiControl,, ProgressDelete, 100
 		}
 		else
@@ -3609,7 +3618,7 @@ F_AddHotstring()
 					else
 						txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
 					if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
-						FileAppend, %txt%, Libraries\%name%, UTF-8
+						FileAppend, %txt%, % LibraryFullPathAndName, UTF-8
 					;v_DeleteProgress := (A_Index/(SectionList.MaxIndex()-1))*100
 					;Gui, ProgressDelete:Default
 					;GuiControl,, ProgressDelete, %v_DeleteProgress%
@@ -3635,7 +3644,7 @@ F_AddHotstring()
 				else
 					txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
 				if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
-					FileAppend, %txt%, Libraries\%name%, UTF-8
+					FileAppend, %txt%, % LibraryFullPathAndName, UTF-8
 				;v_DeleteProgress := (A_Index/(SectionList.MaxIndex()-1))*100
 				;Gui, ProgressDelete:Default
 				;GuiControl,, ProgressDelete, %v_DeleteProgress%
@@ -3643,12 +3652,15 @@ F_AddHotstring()
 			}
 		}
 	}
+	LV_Delete(v_SelectedRow)
+	TrayTip, %A_ScriptName%, Specified definition of hotstring has been deleted, 1 ;Future: add to translate 
 	;Gui, ProgressDelete:Destroy
 	;MsgBox, %t_HotstringHasBeenDeletedNowApplicationWillRestartItselfInOrderToApplyChangesReloadTheLibrariesCsv%
 	;WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
 	;Run, AutoHotkey.exe Hotstrings.ahk %v_Param% %v_SelectHotstringLibrary% %v_PreviousWidth% %v_PreviousHeight% %v_PreviousX% %v_PreviousY% %v_SelectedRow% %v_SelectedMonitor%	
 	return
-	
+}
+
 ;In AutoHotkey there is no Guicontrol, Delete sub-command. As a consequence even if specific control is hidden (Guicontrol, Hide), the Gui size isn't changed, size is not decreased, as space for hidden control is maintained. To solve this issue, the separate gui have to be prepared. This requires a lot of work and is a matter of far future.
 F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui 
 {
@@ -3672,16 +3684,16 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 		GuiControl, Show, % IdText8		;Long text
 		
 		GuiControl,, % IdButton5, ⯇
+	}
+	v_ToggleRightColumn := !v_ToggleRightColumn
+	return
 }
-v_ToggleRightColumn := !v_ToggleRightColumn
-return
-}
-
+	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
-
-DestroyGuis:
-Loop, %N%
-{
+	
+	DestroyGuis:
+	Loop, %N%
+	{
 		Gui, %A_Index%:Destroy
 	}
 	Gui, Font ; restore the font to the system's default GUI typeface, size and colour.
