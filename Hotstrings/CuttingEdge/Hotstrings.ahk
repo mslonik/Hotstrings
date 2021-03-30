@@ -284,6 +284,7 @@ global v_ResizingFlag 			:= 1 ; when Hotstrings Gui is displayed for the very fi
 global IsSandboxMoved			:= false
 global CntGuiSize				:= 0
 global v_ToggleRightColumn		:= false ;memory of last state of the IdButton5 (ToggleRightColumn)
+global v_LibHotstringCnt			:= 0 ;no of (triggerstring, hotstring) definitions in single library
 
 ; 2. Try to load up configuration files. If those files do not exist, create them.
 if (!FileExist("Config.ini"))
@@ -816,7 +817,7 @@ Loop,
 			v_TipsFlag := 0
 			Loop, % a_Triggers.MaxIndex()
 			{
-				If InStr(a_Triggers[A_Index], v_InputString) == 1
+				if (InStr(a_Triggers[A_Index], v_InputString))
 				{
 					v_TipsFlag := 1
 				}
@@ -829,9 +830,9 @@ Loop,
 			v_Tips := ""
 			Loop, % a_Triggers.MaxIndex()
 			{
-				If InStr(a_Triggers[A_Index], v_InputString) == 1
+				if (InStr(a_Triggers[A_Index], v_InputString))
 				{
-					If !(v_Tips == "")
+					if !(v_Tips == "")
 						v_Tips .= "`n"
 					v_Tips .= a_Triggers[A_Index]
 				}
@@ -1044,13 +1045,13 @@ F8::
 Gui, HS3:Default
 ;goto, Delete
 F_Delete()
-; return
+return
 
 F9::
 Gui, HS3:Default
 ;goto, AddHotstring
 F_AddHotstring()
-; return
+return
 
 #if
 
@@ -1269,7 +1270,7 @@ Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_Font
 Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit10 vv_Sandbox r3 						; r3 = 3x rows of text
 ;GuiControl,	Hide,		% IdEdit10
 ;Gui, 		HS3:Add, 		Edit, 		HwndIdEdit11 vv_ViewString gViewString ReadOnly Hide
-Gui,			HS3:Add,		Text,		x0 y0 HwndIdText11 vv_DefinitionsInLibrary, % "Hotstrings:    0"
+Gui,			HS3:Add,		Text,		x0 y0 HwndIdText11 vv_NoOfHotstringsInLibrary, % "Hotstrings:    0"
 }
 
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -1512,12 +1513,16 @@ F_HS3_DetermineConstraints()
 ;6. Counters
 ;6.1. Total counter:
 	GuiControlGet, v_LoadedHotstrings,, % IdText2
-	OutputDebug, % "v_LoadedHotstrings from control:" . A_Space . v_LoadedHotstrings
+	;OutputDebug, % "v_LoadedHotstrings from control:" . A_Space . v_LoadedHotstrings
 	v_LoadedHotstrings := SubStr(v_LoadedHotstrings, 1, -4)
-	OutputDebug, % "v_LoadedHotstrings to control:" . A_Space . v_LoadedHotstrings
+	;OutputDebug, % "v_LoadedHotstrings to control:" . A_Space . v_LoadedHotstrings
 	GuiControl, Text, % IdText2, % v_LoadedHotstrings 
-	GuiControlGet, v_LoadedHotstrings,, % IdText2
-	OutputDebug, % "v_LoadedHotstrings from control:" . A_Space . v_LoadedHotstrings
+	;GuiControlGet, v_LoadedHotstrings,, % IdText2
+	;OutputDebug, % "v_LoadedHotstrings from control:" . A_Space . v_LoadedHotstrings
+;6.2. Counter of hotstrings in specificlibrary
+	GuiControlGet, v_NoOfHotstringsInLibrary,, % IdText11
+	v_NoOfHotstringsInLibrary := SubStr(v_NoOfHotstringsInLibrary, 1, -4)
+	GuiControl, Text, % IdText11, % v_NoOfHotstringsInLibrary
 }
 	
 	
@@ -3111,9 +3116,10 @@ F_AddHotstring()
 	*/
 	if !(v_SelectedRow := LV_GetNext())
 		return
+	;*[One]
 	
 	LV_GetText(v_TriggerString, 	v_SelectedRow, 1)
-;GuiControl, , v_TriggerString, % v_TriggerStringvar
+	;GuiControl, , v_TriggerString, % v_TriggerStringvar
 	GuiControl, , % IdEdit1, % v_TriggerString
 	
 	LV_GetText(Options, 		v_SelectedRow, 2)
@@ -3359,6 +3365,10 @@ F_AddHotstring()
 		LV_Add("", str1[2], str1[1], str1[3], str1[4],str1[5], str1[6])			
 	}
 	LV_ModifyCol(1, "Sort")
+	
+	v_LibHotstringCnt := LV_GetCount()
+	GuiControl, Text, % IdText11, % v_NoOfHotstringsInLibrary . A_Space . v_LibHotstringCnt
+	
 	return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3559,6 +3569,12 @@ F_AddHotstring()
 	
 F_Delete()
 {
+	;1. Remove selected library file.
+	;2. Create library file of the same name as selected. its content will contain List View but without selected row.
+	;3. Remove selected row from List View.
+	;4. Disable selected hotstring.
+	;5. Remove trigger hint.
+	;6. Decrement library counter.
 	global ;assume-global mode
 	local 	LibraryFullPathAndName := "" 
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
@@ -3567,10 +3583,12 @@ F_Delete()
 	
 	if !(v_SelectedRow := LV_GetNext()) 
 	{
-		MsgBox, 0, %A_ThisLabel%, %t_SelectARowInTheListViewPlease%
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information",  %t_SelectARowInTheListViewPlease% ;Future: translate "information"
+		;MsgBox, 0, %A_ThisLabel%, %t_SelectARowInTheListViewPlease%
 		return
 	}
-	Msgbox, 4,, %t_SelectedHotstringWillBeDeletedDoYouWantToProceed%
+	MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ": information", %t_SelectedHotstringWillBeDeletedDoYouWantToProceed% ;Future: translate "information"
+	;Msgbox, 4,, %t_SelectedHotstringWillBeDeletedDoYouWantToProceed%
 	IfMsgBox, No
 		return
 	TrayTip, %A_ScriptName%, %t_DeletingHotstring%, 1
@@ -3586,14 +3604,14 @@ F_Delete()
 		DetectHiddenWindows, Off
 		Gui, ProgressDelete:Show,% "x" . v_WindowX + (v_WindowWidth - DeleteWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - DeleteWindowHeight)/2 ,ProgressDelete
 	*/
-	;*[One]
+	
+	;1. Remove selected library file.
 	LibraryFullPathAndName := A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary
 	FileDelete, % LibraryFullPathAndName
 	;cntDelete := 0
 	;Gui, HS3:Default
 	
-	;LV_ModifyCol(1, "Sort")
-	
+	;2. Create library file of the same name as selected. its content will contain LV but without selected row.
 	if (v_SelectedRow == SectionList.MaxIndex())
 	{
 		if (SectionList.MaxIndex() == 1)
@@ -3652,7 +3670,21 @@ F_Delete()
 			}
 		}
 	}
+	;3. Remove selected row from List View.
 	LV_Delete(v_SelectedRow)
+	;4. Disable selected hotstring.
+
+	Try
+		Hotstring(":" . Options . ":" . v_TriggerString, , "Off")
+	Catch
+		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_ThisFunc, % "Error, something went wrong with hotstring deletion:" . A_Space . v_TriggerString . A_Space . "Library name:" . A_Space . v_SelectHotstringLibrary ;Future: translate this.
+
+	;5. Remove trigger hint.
+	Loop, % a_Triggers.MaxIndex()
+		{
+			if (InStr(a_Triggers[A_Index], v_TriggerString))
+				a_Triggers.RemoveAt(A_Index)
+		}
 	TrayTip, %A_ScriptName%, Specified definition of hotstring has been deleted, 1 ;Future: add to translate 
 	;Gui, ProgressDelete:Destroy
 	;MsgBox, %t_HotstringHasBeenDeletedNowApplicationWillRestartItselfInOrderToApplyChangesReloadTheLibrariesCsv%
