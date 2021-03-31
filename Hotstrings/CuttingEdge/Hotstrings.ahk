@@ -64,7 +64,7 @@ MenuCursor=0
 MenuCaret=1
 TipsSortAlphatebically=1
 TipsSortByLength=1
-Language=English.ini
+Language=English.txt
 [TipsLibraries]
 	)
 
@@ -286,6 +286,7 @@ global CntGuiSize				:= 0
 global v_ToggleRightColumn		:= false ;memory of last state of the IdButton5 (ToggleRightColumn)
 global v_LibHotstringCnt			:= 0 ;no of (triggerstring, hotstring) definitions in single library
 
+
 ; 2. Try to load up configuration files. If those files do not exist, create them.
 if (!FileExist("Config.ini"))
 {
@@ -302,20 +303,25 @@ if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "L
 	.`nMind that Config.ini Language variable is equal to %v_Language%.
 	FileCreateDir, %A_ScriptDir%\Languages							; Future: check against errors
 	FileAppend, %EnglishIni%, %A_ScriptDir%\Languages\English.ini		; Future: check against erros.
+	F_LoadCreateTranslationTxt("create")
 }
 else  if (!FileExist(A_ScriptDir . "\Languages\" . v_Language))			; else if there is no v_language .ini file, e.g. v_langugae == Polish.ini and there is no such file in Languages folder
 {
 	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . " warning", There is no %v_Language% file in Languages subfolder!`nThe default %A_ScriptDir%\Languages\English.ini file is now created.
+	;tu jestem
 	FileAppend, %EnglishIni%, %A_ScriptDir%\Languages\English.ini		; Future: check against erros.
+	F_LoadCreateTranslationTxt("create")
 	v_Language 		:= "English.ini"					
 }
+else
+	F_LoadCreateTranslationTxt("load")
 
 ; 3. Load configuration files into configuration variables. The configuration variable names start with "ini_" prefix.
 ;Read all variables from specified language .ini file. In order to distinguish GUI text from any other string or variable used in this script, the GUI strings are defined with prefix "t_".
 
 ;Future: build object, where pair is created: default string in English <-> string from Language.ini.
-global t_AboutHelp := 							F_ReadText("t_AboutHelp")
-global t_AddAComment := 							F_ReadText("t_AddAComment")
+;global t_AboutHelp := 							F_ReadText("t_AboutHelp")
+;global t_AddAComment := 							F_ReadText("t_AddAComment")
 global t_AddLibrary := 							F_ReadText("t_AddLibrary")
 global t_ALibraryWithThatNameAlreadyExists := 		F_ReadText("t_ALibraryWithThatNameAlreadyExists")
 global t_Apostrophe := 							F_ReadText("t_Apostrophe")
@@ -774,7 +780,7 @@ Loop, %A_ScriptDir%\Libraries\*.csv
 Menu, 	LibrariesSubmenu, 	Add, %t_EnableDisableTriggerstringTips%, 	:ToggleLibrariesSubmenu 
 Menu, 	HSMenu, 			Add, %t_LibrariesConfiguration%, 			:LibrariesSubmenu
 Menu, 	HSMenu, 			Add, %t_ClipboardDelay%, 				HSdelay
-Menu, 	HSMenu, 			Add, %t_AboutHelp%, 					L_About
+Menu, 	HSMenu, 			Add, % TransA["&About/Help"], 					L_About
 Gui, 	HS3:Menu, HSMenu
 
 
@@ -1086,15 +1092,15 @@ goto, MoveList
 #if
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
-F_LoadTranslationIni()
+F_LoadCreateTranslationTxt(decision*)
 {
 	
 	;EnglishIni =  	; variable which is used as default content of Languages/English.ini. Join lines with `n separator and escape all ` occurrences. Thanks to that string lines where 'n is present 'aren't separated.
 	;(Join`n `
 ;[Strings]
 	global ;assume-global mode
-
-TransA := {"&About/Help" 										: "&About/Help"
+	
+	TransA := {"&About/Help" 										: "&About/Help"
 		,"Add comment (optional)" 								: "Add comment (optional)"
 		,"Add library" 										: "Add library"
 		,"A library with that name already exists!" 					: "A library with that name already exists!"
@@ -1194,7 +1200,7 @@ TransA := {"&About/Help" 										: "&About/Help"
 		,"Select hotstring output function" 						: "Select hotstring output function"
 		,"Select the target library:" 							: "Select the target library:"
 		,"Select trigger option(s)" 								: "Select trigger option(s)"
-		;,"Semicolon ;" 										: "Semicolon ;"
+		,"Semicolon `;" 										: "Semicolon `;"
 		,"Set hotstring (F9)" 									: "Set hotstring (F9)"
 		,"Slash /" 											: "Slash /"
 		,"Sort tips &alphabetically" 								: "Sort tips &alphabetically"
@@ -1212,15 +1218,40 @@ TransA := {"&About/Help" 										: "&About/Help"
 		,"Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment" 	: "Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"
 		,"&Undo the last hotstring" 								: "&Undo the last hotstring"
 		,"Library content (F2)"									: "Library content (F2)"}
-
+	
+	local key := "", val := "", tick := false
+	
+	
+	if (decision = "create")
+		for key, val in TransA
+			FileAppend, % key . A_Space . "=" . A_Space . val . "`n", %A_ScriptDir%\Languages\English.txt, UTF-8 
+	
+	if (decision = "load")
+		Loop, Read, %A_ScriptDir%\Languages\%v_Language%
+		{
+			tick := false
+			Loop, Parse, A_LoopReadLine, "=", %A_Space%
+			{
+				if !(tick)
+				{
+					key := A_LoopField
+					tick := true
+				}
+				else
+				{
+					val := A_LoopField
+					tick := false
+				}
+			}
+		TransA[key] := val
+		}
+	
 	return
 }
+; ------------------------------------------------------------------------------------------------------------------------------------
 	
-	
-	
-	
-	F_LoadFile(nameoffile)
-	{
+F_LoadFile(nameoffile)
+{
 		global ;assume-global mode
 		local name := "", tabSearch := "", line := ""
 		
@@ -1276,7 +1307,7 @@ TransA := {"&About/Help" 										: "&About/Help"
 		}
 		a_LibraryCnt.Push(v_HotstringCnt)
 		return
-	}
+}
 	
 ; ------------------------------------------------------------------------------------------------------------------------------------
 	
@@ -1350,7 +1381,7 @@ TransA := {"&About/Help" 										: "&About/Help"
 ;GuiControl,	Hide,		% IdEdit8
 		
 		Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-		Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText5 vv_TextAddComment, 					%t_AddAComment%
+		Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText5 vv_TextAddComment, 					% TransA["Add comment (optional)"]
 ;GuiControl,	Hide,		% IdText5
 		Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 		
@@ -3717,7 +3748,7 @@ TransA := {"&About/Help" 										: "&About/Help"
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_DeleteHotstring()
+F_DeleteHotstring()
 	{
 	;1. Remove selected library file.
 	;2. Create library file of the same name as selected. its content will contain List View but without selected row.
@@ -3940,7 +3971,7 @@ TransA := {"&About/Help" 										: "&About/Help"
 	NewButtonXPosition := round((( MyAboutWindowWidth- 100*DPI%v_SelectedMonitor%)/2)*DPI%v_SelectedMonitor%)
 	GuiControl, Move, %OkButtonHandle%, x%NewButtonXPosition%
 	GuiControl, Show, %OkButtonHandle%
-	Gui, MyAbout: Show, % "x" . v_WindowX + (v_WindowWidth - MyAboutWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - MyAboutWindowHeight)/2, % SubStr(t_AboutHelp, 2)
+	Gui, MyAbout: Show, % "x" . v_WindowX + (v_WindowWidth - MyAboutWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - MyAboutWindowHeight)/2, % SubStr(TransA["&About/Help"], 2)
 	return  
 	
 	Link:
