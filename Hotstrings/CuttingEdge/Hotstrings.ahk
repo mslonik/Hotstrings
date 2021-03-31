@@ -1044,7 +1044,7 @@ goto, HSdelay
 F8::
 Gui, HS3:Default
 ;goto, Delete
-F_Delete()
+F_DeleteHotstring()
 return
 
 F9::
@@ -1232,7 +1232,7 @@ Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_Font
 
 Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton1 gAddLib, 							%t_AddLibrary%
 ;GuiControl,	Hide,		% IdButton1
-Gui,			HS3:Add,		DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gSectionChoose
+Gui,			HS3:Add,		DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SectionChoose
 ;GuiControl,	Hide,		% IdDDL2
 
 ;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
@@ -1241,7 +1241,7 @@ Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton2 gF_AddHotstring,						%t_SetHots
 ;GuiControl,	Hide,		% IdButton2
 Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton3 gClear,							%t_Clear%
 ;GuiControl,	Hide,		% IdButton3
-Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton4 gF_Delete vv_DeleteHotstring Disabled, 	%t_DeleteHotstring%
+Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton4 gF_DeleteHotstring vv_DeleteHotstring Disabled, 	%t_DeleteHotstring%
 ;GuiControl,	Hide,		% IdButton4
 
 Gui,			HS3:Add,		Button,		x0 y0 HwndIdButton5 gF_ToggleRightColumn vv_ToggleRightColumn,			⯇
@@ -2721,7 +2721,7 @@ else
 if (v_PreviousSection != "") ; it means: if Hotstrings app was restarted
 {
 	GuiControl, Choose, v_SelectHotstringLibrary, %v_PreviousSection%
-	Gosub SectionChoose
+	F_SectionChoose()
 	if(v_SelectedRow > 0)
 	{
 		LV_Modify(v_SelectedRow, "Vis")
@@ -2828,14 +2828,21 @@ return
 
 ;#[AddHotstring]
 ;AddHotstring: 
-;1. Read all inputs. 2. Create Hotstring definition according to inputs. 3. Read the library file into List View. 4. Delete library file. 5. Sort List View. 6. Save List View into the library file.
+;1. Read all inputs. 
+;2. Create Hotstring definition according to inputs. 
+;3. Read the library file into List View. 
+;4. Sort List View. 
+;5. Delete library file. 
+;6. Save List View into the library file.
+;7. Increment library counter.
 F_AddHotstring()
 {
 	global ;assume-global mode
 	local 	TextInsert := "", OldOptions := "", Options := "", SendFun := "", OnOff := "", EnDis := "", OutputFile := "", InputFile := "", LString := "", ModifiedFlag := false
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
-
+	
 	Gui, HS3:+OwnDialogs
+	;1. Read all inputs. 
 	Gui, Submit, NoHide
 ;GuiControlGet, v_SelectFunction
 	
@@ -2888,7 +2895,7 @@ F_AddHotstring()
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information", %t_ChooseSectionBeforeSaving% ;Future: translate "information"
 		return
 	}
-
+	
 	
 	/*
 		
@@ -2946,16 +2953,15 @@ F_AddHotstring()
 			Hotstring(":" . OldOptions . ":" . v_TriggerString , func(SendFun).bind(TextInsert), "Off")
 	*/
 	
+	;2. Create Hotstring definition according to inputs. 
 	if (InStr(Options,"O", 0))
 		Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, true), OnOff)
 	else
 		Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, false), OnOff)
 	
 	Hotstring("Reset") ;reset hotstring recognizer
-	;v_InputString := "" ;reset for main script routine
-;gosub, SaveHotstrings
 	
-	
+	;3. Read the library file into List View. 
 	SendFun := ""
 	if (v_OptionDisable)
 		EnDis := "Dis"
@@ -2972,7 +2978,6 @@ F_AddHotstring()
 	else if (v_SelectFunction == "Menu & SendInput (MSI)")
 		SendFun := "MSI"
 	
-
 	OutputFile 	:= A_ScriptDir . "\Libraries\temp.csv"	; changed on 2021-02-13
 	InputFile 	:= A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary 
 	LString 		:= "‖" . v_TriggerString . "‖"
@@ -2980,7 +2985,7 @@ F_AddHotstring()
 	
 	Loop, Read, %InputFile%, %OutputFile% ;read all definitions from this library file 
 	{
-	
+		
 		if (InStr(A_LoopReadLine, LString, 1) and InStr(Options, "C")) or (InStr(A_LoopReadLine, LString) and !(InStr(Options, "C")))
 		{
 			MsgBox, 4,, % t_TheHostring . A_Space . """" .  v_TriggerString . """" . A_Space .  t_ExistsInAFile . A_Space . v_SelectHotstringLibrary . "." . A_Space . t_CsvDoYouWantToProceed
@@ -2997,8 +3002,12 @@ F_AddHotstring()
 		SectionList.Push(txt)
 		a_Triggers.Push(v_TriggerString) ;added to table of hotstring recognizer (a_Triggers)
 	}
+	;4. Sort List View. 
 	LV_ModifyCol(1, "Sort")
+	;5. Delete library file. 
 	FileDelete, %InputFile%
+	
+	;6. Save List View into the library file.
 	if (SectionList.MaxIndex() == "") ;in order to speed up it's checked if library isn't empty.
 	{
 		LV_GetText(txt1, 1, 2)
@@ -3037,6 +3046,9 @@ F_AddHotstring()
 	;FileAppend, %txt%, Libraries\%name%, UTF-8
 		FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
 	}
+	;7. Increment library counter.
+	GuiControl, Text, % IdText11, % v_NoOfHotstringsInLibrary . A_Space . ++v_LibHotstringCnt	
+
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information", Hotstring added to the %v_SelectHotstringLibrary% file! ; Future: add to translation.
 	
 	return
@@ -3270,7 +3282,8 @@ F_AddHotstring()
 ;GuiControl,, v_ViewString ,  %v_String%
 ;gosub, ViewString
 	GuiControl, Choose, v_SelectHotstringLibrary, %ChooseSec%
-	gosub, SectionChoose
+	F_SectionChoose()
+	;gosub, SectionChoose
 	v_SearchedTriggerString := v_TriggerString
 	Loop
 	{
@@ -3328,7 +3341,11 @@ F_AddHotstring()
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	SectionChoose: 
+F_SectionChoose()
+{
+	global ;assume-global mode
+	local str1 := []
+	
 	Gui, HS3:Submit, NoHide
 	Gui, HS3:+OwnDialogs
 	
@@ -3363,21 +3380,22 @@ F_AddHotstring()
 			str1[1] := StrReplace(str1[1], "B")
 		}
 		LV_Add("", str1[2], str1[1], str1[3], str1[4],str1[5], str1[6])			
-	}
-	LV_ModifyCol(1, "Sort")
-	
-	v_LibHotstringCnt := LV_GetCount()
-	GuiControl, Text, % IdText11, % v_NoOfHotstringsInLibrary . A_Space . v_LibHotstringCnt
-	
-	return
-	
+}
+LV_ModifyCol(1, "Sort")
+
+v_LibHotstringCnt := LV_GetCount()
+GuiControl, Text, % IdText11, % v_NoOfHotstringsInLibrary . A_Space . v_LibHotstringCnt
+
+return
+}
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	L_SelectFunction:
-	Gui, HS3:+OwnDialogs
-	GuiControlGet, v_SelectFunction
-	if InStr(v_SelectFunction, "Menu")
-	{
+
+L_SelectFunction:
+Gui, HS3:+OwnDialogs
+GuiControlGet, v_SelectFunction
+if InStr(v_SelectFunction, "Menu")
+{
 		GuiControl, Enable, v_EnterHotstring1
 		GuiControl, Enable, v_EnterHotstring2
 		GuiControl, Enable, v_EnterHotstring3
@@ -3567,7 +3585,7 @@ F_AddHotstring()
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-F_Delete()
+F_DeleteHotstring()
 {
 	;1. Remove selected library file.
 	;2. Create library file of the same name as selected. its content will contain List View but without selected row.
@@ -3673,23 +3691,27 @@ F_Delete()
 	;3. Remove selected row from List View.
 	LV_Delete(v_SelectedRow)
 	;4. Disable selected hotstring.
-
+	
 	Try
 		Hotstring(":" . Options . ":" . v_TriggerString, , "Off")
 	Catch
 		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_ThisFunc, % "Error, something went wrong with hotstring deletion:" . A_Space . v_TriggerString . A_Space . "Library name:" . A_Space . v_SelectHotstringLibrary ;Future: translate this.
-
+	
 	;5. Remove trigger hint.
 	Loop, % a_Triggers.MaxIndex()
-		{
-			if (InStr(a_Triggers[A_Index], v_TriggerString))
-				a_Triggers.RemoveAt(A_Index)
-		}
+	{
+		if (InStr(a_Triggers[A_Index], v_TriggerString))
+			a_Triggers.RemoveAt(A_Index)
+	}
 	TrayTip, %A_ScriptName%, Specified definition of hotstring has been deleted, 1 ;Future: add to translate 
 	;Gui, ProgressDelete:Destroy
 	;MsgBox, %t_HotstringHasBeenDeletedNowApplicationWillRestartItselfInOrderToApplyChangesReloadTheLibrariesCsv%
 	;WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
 	;Run, AutoHotkey.exe Hotstrings.ahk %v_Param% %v_SelectHotstringLibrary% %v_PreviousWidth% %v_PreviousHeight% %v_PreviousX% %v_PreviousY% %v_SelectedRow% %v_SelectedMonitor%	
+	
+	;6. Decrement library counter.
+	GuiControl, Text, % IdText11, % v_NoOfHotstringsInLibrary . A_Space . --v_LibHotstringCnt
+	
 	return
 }
 
@@ -4222,7 +4244,8 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 	SaveFlag := 0	; !!!
 	Gui, HS3:Default
 	GuiControl, Choose, v_SelectHotstringLibrary, %TargetLib%
-	Gosub, SectionChoose
+	F_SectionChoose()
+	;Gosub, SectionChoose
 	Loop, Read, %InputFile%
 	{
 		if InStr(A_LoopReadLine, LString)
