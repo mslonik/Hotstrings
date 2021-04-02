@@ -570,11 +570,11 @@ Loop, %A_ScriptDir%\Libraries\*.csv
 
 
     ; Menu, HSMenu, Add, &Monitor, CheckMon
-Menu, Submenu1, 	Add, % TransA["&Undo last hotstring"],					L_Undo
-Menu, SubmenuTips, 	Add, % TransA["Enable/Disable"], 				Tips
-Menu, PositionMenu, Add, % TransA["Caret"], 						L_MenuCaretCursor
-Menu, PositionMenu, Add, % TransA["Cursor"], 					L_MenuCaretCursor
-Menu, SubmenuMenu, 	Add, % TransA["Choose menu position"],			:PositionMenu
+Menu, Submenu1, 	Add, % TransA["&Undo the last hotstring"],		L_Undo
+Menu, SubmenuTips, 	Add, % TransA["Enable/Disable"], 			Tips
+Menu, PositionMenu, Add, % TransA["Caret"], 					L_MenuCaretCursor
+Menu, PositionMenu, Add, % TransA["Cursor"], 				L_MenuCaretCursor
+Menu, SubmenuMenu, 	Add, % TransA["Choose menu position"],		:PositionMenu
 Menu, SubmenuMenu, 	Add, % TransA["Enable &sound if overrun"],	L_MenuSound
 if (ini_MenuSound)
 	Menu, SubmenuMenu, Check, % TransA["Enable &sound if overrun"]
@@ -718,37 +718,37 @@ if (EndingChar_QuestionMark)
 	Menu, Submenu2, Check, % TransA["Question Mark ?"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Question Mark ?"]
-Menu, Submenu2, Add, % TranslateA["Exclamation Mark !"], EndExclamationMark
+Menu, Submenu2, Add, % TransA["Exclamation Mark !"], EndExclamationMark
 if (EndingChar_ExclamationMark)
-	Menu, Submenu2, Check, % TranslateA["Exclamation Mark !"]
+	Menu, Submenu2, Check, % TransA["Exclamation Mark !"]
 else
-	Menu, Submenu2, UnCheck, % TranslateA["Exclamation Mark !"]
-Menu, Submenu2, Add, % TranslateA["Enter"], EndEnter
+	Menu, Submenu2, UnCheck, % TransA["Exclamation Mark !"]
+Menu, Submenu2, Add, % TransA["Enter"], EndEnter
 if (EndingChar_Enter)
-	Menu, Submenu2, Check, % TranslateA["Enter"]
+	Menu, Submenu2, Check, % TransA["Enter"]
 else
-	Menu, Submenu2, UnCheck, % TranslateA["Enter"]
+	Menu, Submenu2, UnCheck, % TransA["Enter"]
 Menu, Submenu2, Add, % TransA["Tab"], EndTab
 if (EndingChar_Tab)
 	Menu, Submenu2, Check, % TransA["Tab"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Tab"]
 Menu, Submenu1, Add, % TransA["&Toggle EndChars"], :Submenu2
-	;IniRead, ini_Tips, Config.ini, Configuration, Tips
+
 if (ini_Tips == 0)
 	Menu, SubmenuTips, UnCheck, % TransA["Enable/Disable"]
 else
 	Menu, SubmenuTips, Check, % TransA["Enable/Disable"]
-	;IniRead, Sanddbox, Config.ini, Configuration, Sandbox
+
 if (ini_Sandbox == 0)
 	Menu, Submenu1, UnCheck, % TransA["&Launch Sandbox"]
 else
 	Menu, Submenu1, Check, % TransA["&Launch Sandbox"]
-	;IniRead, ini_Undo, Config.ini, Configuration, UndoHotstring
+
 if (ini_Undo == 0)
-	Menu, Submenu1, UnCheck, % TransA["&Undo last hotstring"]
+	Menu, Submenu1, UnCheck, % TransA["&Undo the last hotstring"]
 else
-	Menu, Submenu1, Check, % TransA["&Undo last hotstring"]
+	Menu, Submenu1, Check, % TransA["&Undo the last hotstring"]
 
 Loop, %A_ScriptDir%\Languages\*.ini
 {
@@ -759,13 +759,13 @@ Loop, %A_ScriptDir%\Languages\*.ini
 		Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
 }
 
-Menu, Submenu1, 		Add, % TransA["Change Language"], 	:SubmenuLanguage
-Menu, HSMenu, 			Add, % TransA["&Configuration"], 		:Submenu1
-Menu, HSMenu, 			Add, % TransA["&Search Hotstrings"], 	L_Searching
-Menu, LibrariesSubmenu, 	Add, % TransA["t_ImportFromAhkToCsv"], 	L_ImportLibrary
-Menu, ExportSubmenu, 	Add, % TransA["&Static hotstrings"],  	L_ExportLibraryStatic
-Menu, ExportSubmenu, 	Add, % TransA["&Dynamic hotstrings"],  	L_ExportLibraryDynamic
-Menu, LibrariesSubmenu, 	Add, % TranslateA["&Export from .csv to .ahk"],	:ExportSubmenu
+Menu, Submenu1, 		Add, % TransA["Change Language"], 			:SubmenuLanguage
+Menu, HSMenu, 			Add, % TransA["&Configuration"], 			:Submenu1
+Menu, HSMenu, 			Add, % TransA["&Search Hotstrings"], 		L_Searching
+Menu, LibrariesSubmenu, 	Add, % TransA["t_ImportFromAhkToCsv"], 		L_ImportLibrary
+Menu, ExportSubmenu, 	Add, % TransA["&Static hotstrings"],  		L_ExportLibraryStatic
+Menu, ExportSubmenu, 	Add, % TransA["&Dynamic hotstrings"],  		L_ExportLibraryDynamic
+Menu, LibrariesSubmenu, 	Add, % TransA["&Export from .csv to .ahk"],	:ExportSubmenu
 
 Loop, %A_ScriptDir%\Libraries\*.csv
 {
@@ -794,7 +794,7 @@ Loop,
 {
 	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
 	if (ErrorLevel = "NewInput")
-		MsgBox, % TranslateA["ErrorLevel was triggered by NewInput error."]
+		MsgBox, % TransA["ErrorLevel was triggered by NewInput error."]
 	
 	; if exist window with hotstring tips, output sound
 	if (WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
@@ -971,7 +971,7 @@ $^z::			;~ Ctrl + z as in MS Word: Undo; $ prevents autotriggering as the same h
 $!BackSpace:: 		;~ Alt + Backspace as in MS Word: rolls back last Autocorrect action ; $ prevents autotriggering as the same hotkey is send with SendInput function
 	if (ini_Undo == 1) and (v_TypedTriggerstring && (A_ThisHotkey != A_PriorHotkey))
 	{
-		ToolTip, % TransA["&Undo last hotstring"], % A_CaretX, % A_CaretY - 20
+		ToolTip, % TransA["&Undo the last hotstring"], % A_CaretX, % A_CaretY - 20
 		TriggerOpt := SubStr(v_UndoTriggerstring, InStr(v_UndoTriggerstring, ":" ,, 1,1)+1 ,InStr(v_UndoTriggerstring, ":" ,, 1,2)-InStr(v_UndoTriggerstring, ":" ,, 1,1)-1)
 		if (InStr(TriggerOpt, "*0") or !(InStr(TriggerOpt, "*"))) and (InStr(TriggerOpt, "O0") or !(InStr(TriggerOpt, "O")))
 		{
@@ -1137,89 +1137,87 @@ F_LoadCreateTranslationTxt(decision*)
 			,"&Dynamic hotstrings" 									: "&Dynamic hotstrings"
 			,"Edit Hotstring" 										: "Edit Hotstring"
 			,"Enable/Disable" 										: "Enable/Disable"
-			,"Enable/disable triggerstring tips" 						: "Enable/disable triggerstring tips"
-			,"Enables Convenient Definition" 							: "Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3." : "Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3."
+			,"Enable/disable triggerstring tips" 						: "Enable/disable triggerstring tips"	
+			,"Enables Convenient Definition" 							: "Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3."
 			,"Enable &sound if overrun" 								: "Enable &sound if overrun"
 			,"Enter" 												: "Enter"
-			,"Enter a name for the new library" 						: "Enter a name for the new library"}
-	/*
+			,"Enter a name for the new library" 						: "Enter a name for the new library"
 			,"Enter hotstring" 										: "Enter hotstring"
 			,"Enter triggerstring" 									: "Enter triggerstring"
 			,"ErrorLevel was triggered by NewInput error." 				: "ErrorLevel was triggered by NewInput error."
 			,"Exclamation Mark !" 									: "Exclamation Mark !"
 			,"exists in a file" 									: "exists in a file"
 			,"&Export from .csv to .ahk" 								: "&Export from .csv to .ahk"
+			,"F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring" : "F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring"
+			,"F3 Close Search hotstrings | F8 Move hotstring" 			: "F3 Close Search hotstrings | F8 Move hotstring"
+			,"file!" 												: "file!"
+			,"Genuine hotstrings AutoHotkey documentation" 				: "Genuine hotstrings AutoHotkey documentation"
+			,"has been created." 									: "has been created."
+			,"Hotstring" 											: "Hotstring"
+			,"Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)" : "Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)"
+			,"Hotstring menu (MSI, MCL)" 								: "Hotstring menu (MSI, MCL)"
+			,"Hotstring moved to the" 								: "Hotstring moved to the"
+			,"Hotstring paste from Clipboard delay 1 s" 					: "Hotstring paste from Clipboard delay 1 s"
+			,"Hotstring paste from Clipboard delay" 					: "Hotstring paste from Clipboard delay"
+			,"Hotstrings have been loaded" 							: "Hotstrings have been loaded"
+			,"Immediate Execute (*)" 								: "Immediate Execute (*)"
+			,"&Import from .ahk to .csv" 								: "&Import from .ahk to .csv"
+			,"Inside Word (?)" 										: "Inside Word (?)"
+			,"&Launch Sandbox" 										: "&Launch Sandbox"
+			,"Let's make your PC personal again..." 					: "Let's make your PC personal again..."
+			,"&Libraries configuration" 								: "&Libraries configuration"
+			,"Library" 											: "Library"
+			,"Library export. Please wait..." 							: "Library export. Please wait..."
+			,"Library has been exported." 							: "Library has been exported."
+			,"Library has been imported." 							: "Library has been imported."
+			,"Library import. Please wait..." 							: "Library import. Please wait..."
+			,"Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment" : "Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment"
+			,"Loaded hotstrings:" 									: "Loaded hotstrings:"
+			,"Loading hotstrings from libraries..." 					: "Loading hotstrings from libraries..."
+			,"Loading libraries. Please wait..." 						: "Loading libraries. Please wait..."
+			,"Minus -" 											: "Minus -"
+			,"Move" 												: "Move"
+			,"No Backspace (B0)" 									: "No Backspace (B0)"
+			,"No End Char (O)" 										: "No End Char (O)"
+			,"&Number of characters for tips" 							: "&Number of characters for tips"
+			,"Opening Curly Bracket {" 								: "Opening Curly Bracket {"
+			,"Opening Round Bracket (" 								: "Opening Round Bracket ("
+			,"Opening Square Bracket [" 								: "Opening Square Bracket ["
+			,"Please wait, uploading .csv files..." 					: "Please wait, uploading .csv files..."
+			,"Question Mark ?" 										: "Question Mark ?"
+			,"Quote """ 											: "Quote """
+			,"Replacement text is blank. Do you want to proceed?" 			: "Replacement text is blank. Do you want to proceed?"
+			,"Sandbox" 											: "Sandbox"
+			,"&Save window position" 								: "&Save window position"
+			,"Search by:" 											: "Search by:"
+			,"&Search Hotstrings" 									: "&Search Hotstrings"
+			,"Select a row in the list-view, please!" 					: "Select a row in the list-view, please!"
+			,"Selected file is empty." 								: "Selected file is empty."
+			,"Selected Hotstring will be deleted. Do you want to proceed?" 	: "Selected Hotstring will be deleted. Do you want to proceed?"
+			,"Select hotstring library" 								: "Select hotstring library"
+			,"Select hotstring output function" 						: "Select hotstring output function"
+			,"Select the target library:" 							: "Select the target library:"
+			,"Select trigger option(s)" 								: "Select trigger option(s)"
+			,"Semicolon `;" 										: "Semicolon `;"
+			,"Set hotstring (F9)" 									: "Set hotstring (F9)"
+			,"Slash /" 											: "Slash /"
+			,"Sort tips &alphabetically" 								: "Sort tips &alphabetically"
+			,"Sort tips by &length" 									: "Sort tips by &length"
+			,"Space" 												: "Space"
+			,"&Static hotstrings" 									: "&Static hotstrings"
+			,"Tab" 												: "Tab"
+			,"The application will be reloaded with the new language file." 	: "The application will be reloaded with the new language file."
+			,"The hostring" 										: "The hostring"
+			,"The library " 										: "The library "
+			,"The file path is:" 									: "The file path is:"
+			,"&Toggle EndChars" 									: "&Toggle EndChars"
+			,"Triggerstring" 										: "Triggerstring"
+			,"&Triggerstring tips" 									: "&Triggerstring tips"
+			,"Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment" 	: "Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"
+			,"&Undo the last hotstring" 								: "&Undo the last hotstring"
+			,"Library content (F2)"									: "Library content (F2)"}
 		
-				,"F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring" : "F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring"
-				,"F3 Close Search hotstrings | F8 Move hotstring" 			: "F3 Close Search hotstrings | F8 Move hotstring"
-				,"file!" 												: "file!"
-				,"Genuine hotstrings AutoHotkey documentation" 				: "Genuine hotstrings AutoHotkey documentation"
-				,"has been created." 									: "has been created."
-				,"Hotstring" 											: "Hotstring"
-				,"Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)" : "Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)"
-				,"Hotstring menu (MSI, MCL)" 								: "Hotstring menu (MSI, MCL)"
-				,"Hotstring moved to the" 								: "Hotstring moved to the"
-				,"Hotstring paste from Clipboard delay 1 s" 					: "Hotstring paste from Clipboard delay 1 s"
-				,"Hotstring paste from Clipboard delay" 					: "Hotstring paste from Clipboard delay"
-				,"Hotstrings have been loaded" 							: "Hotstrings have been loaded"
-				,"Immediate Execute (*)" 								: "Immediate Execute (*)"
-				,"&Import from .ahk to .csv" 								: "&Import from .ahk to .csv"
-				,"Inside Word (?)" 										: "Inside Word (?)"
-				,"&Launch Sandbox" 										: "&Launch Sandbox"
-				,"Let's make your PC personal again..." 					: "Let's make your PC personal again..."
-				,"&Libraries configuration" 								: "&Libraries configuration"
-				,"Library" 											: "Library"
-				,"Library export. Please wait..." 							: "Library export. Please wait..."
-				,"Library has been exported." 							: "Library has been exported."
-				,"Library has been imported." 							: "Library has been imported."
-				,"Library import. Please wait..." 							: "Library import. Please wait..."
-				,"Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment" : "Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment"
-				,"Loaded hotstrings:" 									: "Loaded hotstrings:"
-				,"Loading hotstrings from libraries..." 					: "Loading hotstrings from libraries..."
-				,"Loading libraries. Please wait..." 						: "Loading libraries. Please wait..."
-				,"Minus -" 											: "Minus -"
-				,"Move" 												: "Move"
-				,"No Backspace (B0)" 									: "No Backspace (B0)"
-				,"No End Char (O)" 										: "No End Char (O)"
-				,"&Number of characters for tips" 							: "&Number of characters for tips"
-				,"Opening Curly Bracket {" 								: "Opening Curly Bracket {"
-				,"Opening Round Bracket (" 								: "Opening Round Bracket ("
-				,"Opening Square Bracket [" 								: "Opening Square Bracket ["
-				,"Please wait, uploading .csv files..." 					: "Please wait, uploading .csv files..."
-				,"Question Mark ?" 										: "Question Mark ?"
-				,"Quote """ 											: "Quote """
-				,"Replacement text is blank. Do you want to proceed?" 			: "Replacement text is blank. Do you want to proceed?"
-				,"Sandbox" 											: "Sandbox"
-				,"&Save window position" 								: "&Save window position"
-				,"Search by:" 											: "Search by:"
-				,"&Search Hotstrings" 									: "&Search Hotstrings"
-				,"Select a row in the list-view, please!" 					: "Select a row in the list-view, please!"
-				,"Selected file is empty." 								: "Selected file is empty."
-				,"Selected Hotstring will be deleted. Do you want to proceed?" 	: "Selected Hotstring will be deleted. Do you want to proceed?"
-				,"Select hotstring library" 								: "Select hotstring library"
-				,"Select hotstring output function" 						: "Select hotstring output function"
-				,"Select the target library:" 							: "Select the target library:"
-				,"Select trigger option(s)" 								: "Select trigger option(s)"
-				,"Semicolon `;" 										: "Semicolon `;"
-				,"Set hotstring (F9)" 									: "Set hotstring (F9)"
-				,"Slash /" 											: "Slash /"
-				,"Sort tips &alphabetically" 								: "Sort tips &alphabetically"
-				,"Sort tips by &length" 									: "Sort tips by &length"
-				,"Space" 												: "Space"
-				,"&Static hotstrings" 									: "&Static hotstrings"
-				,"Tab" 												: "Tab"
-				,"The application will be reloaded with the new language file." 	: "The application will be reloaded with the new language file."
-				,"The hostring" 										: "The hostring"
-				,"The library " 										: "The library "
-				,"The file path is:" 									: "The file path is:"
-				,"&Toggle EndChars" 									: "&Toggle EndChars"
-				,"Triggerstring" 										: "Triggerstring"
-				,"&Triggerstring tips" 									: "&Triggerstring tips"
-				,"Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment" 	: "Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"
-				,"&Undo the last hotstring" 								: "&Undo the last hotstring"
-				,"Library content (F2)"									: "Library content (F2)"}
-		
-	*/
+	
 	local key := "", val := "", tick := false
 	
 	
@@ -3012,7 +3010,7 @@ F_AddHotstring()
 	
 	if (Trim(v_TriggerString) = "")
 	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information",  % TranslateA["Enter hotstring"] ;Future: translate "information"
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information",  % TransA["Enter hotstring"] ;Future: translate "information"
 		return
 	}
 	if InStr(v_SelectFunction, "Menu")
@@ -3152,7 +3150,7 @@ F_AddHotstring()
 		
 		if (InStr(A_LoopReadLine, LString, 1) and InStr(Options, "C")) or (InStr(A_LoopReadLine, LString) and !(InStr(Options, "C")))
 		{
-			MsgBox, 4,, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TranslateA["exists in a file"] . A_Space . v_SelectHotstringLibrary . "." . A_Space . TransA["Do you want to proceed?"]
+			MsgBox, 4,, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in a file"] . A_Space . v_SelectHotstringLibrary . "." . A_Space . TransA["Do you want to proceed?"]
 			IfMsgBox, No
 				return
 			LV_Modify(A_Index, "", v_TriggerString, Options, SendFun, EnDis, TextInsert, v_Comment)
@@ -3466,7 +3464,7 @@ return
 
 AddLib:
 Gui, ALib:New, -Border
-Gui, ALib:Add, Text,, % TranslateA["Enter a name for the new library"]
+Gui, ALib:Add, Text,, % TransA["Enter a name for the new library"]
 Gui, ALib:Add, Edit, % "vNewLib w" . 150*DPI%v_SelectedMonitor%,
 Gui, ALib:Add, Text, % "x+" . 10*DPI%v_SelectedMonitor%, .csv
 Gui, ALib:Add, Button, % "Default gALibOK xm w" . 70*DPI%v_SelectedMonitor%, OK
@@ -3479,7 +3477,7 @@ ALibOK:
 Gui,ALib:Submit, NoHide
 if (NewLib == "")
 {
-	MsgBox, % TranslateA["Enter a name for the new library"]
+	MsgBox, % TransA["Enter a name for the new library"]
 	return
 }
 NewLib .= ".csv"
@@ -3688,8 +3686,8 @@ return
 		{
 			if !(v_SelectedRow)
 			{
-				;MsgBox, 4,, % t_TheHostring . " """ .  v_TriggerString . """ " .  TranslateA["exists in a file"] . " " . SaveFile . t_CsvDoYouWantToProceed
-				MsgBox, 4,, % t_TheHostring . " """ .  v_TriggerString . """ " .  TranslateA["exists in a file"] . " " . v_SelectHotstringLibrary . t_CsvDoYouWantToProceed
+				;MsgBox, 4,, % t_TheHostring . " """ .  v_TriggerString . """ " .  TransA["exists in a file"] . " " . SaveFile . t_CsvDoYouWantToProceed
+				MsgBox, 4,, % t_TheHostring . " """ .  v_TriggerString . """ " .  TransA["exists in a file"] . " " . v_SelectHotstringLibrary . t_CsvDoYouWantToProceed
 				IfMsgBox, No
 					return
 			}
@@ -3955,11 +3953,11 @@ Gui, MyAbout: Destroy
 Gui, MyAbout: Font, % "bold s" . c_FontSize*DPI%v_SelectedMonitor%, Calibri
 Gui, MyAbout: Add, Text, , % TransA["Let's make your PC personal again..."]
 Gui, MyAbout: Font, % "norm s" . c_FontSize*DPI%v_SelectedMonitor%
-temp := SubStr(TranslateA["Enables Convenient Definition"], 1)
-Gui, MyAbout: Add, Text, , % TranslateA["Enables Convenient Definition"]
+temp := SubStr(TransA["Enables Convenient Definition"], 1)
+Gui, MyAbout: Add, Text, , % TransA["Enables Convenient Definition"]
 Gui, MyAbout: Font, % "CBlue bold Underline s" . c_FontSize*DPI%v_SelectedMonitor%
 Gui, MyAbout: Add, Text, gLink, % TransA["Application help"]
-Gui, MyAbout: Add, Text, gLink2, % TranslateA["Genuine hotstrings AutoHotkey documentation"]
+Gui, MyAbout: Add, Text, gLink2, % TransA["Genuine hotstrings AutoHotkey documentation"]
 Gui, MyAbout: Font, % "norm s" . c_FontSize*DPI%v_SelectedMonitor%
 Gui, MyAbout: Add, Button, % "Default Hidden w" . 100*DPI%v_SelectedMonitor% . " gMyOK vOkButtonVariabl hwndOkButtonHandle", &OK
 GuiControlGet, MyGuiControlGetVariable, MyAbout: Pos, %OkButtonHandle%
@@ -4271,7 +4269,7 @@ else
 	}
 		;Gui, HS3List:Add, Text, x0 h1 0x7 w10 vLine2
 	Gui, HS3List:Font, % "s" . c_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
-	Gui, HS3List:Add, Text, xm vShortcuts2, % TranslateA["F3 Close Search hotstrings | F8 Move hotstring"]
+	Gui, HS3List:Add, Text, xm vShortcuts2, % TransA["F3 Close Search hotstrings | F8 Move hotstring"]
 	if !(v_SearchTerm == "")
 		GuiControl,, v_SearchTerm, %v_SearchTerm%
 	if (v_RadioGroup == 1)
@@ -4416,7 +4414,7 @@ Loop, Read, %InputFile%
 {
 	if InStr(A_LoopReadLine, LString)
 	{
-		MsgBox, 4,, % TransA["The hostring"] . " """ . Triggerstring """ " . TranslateA["exists in a file"] . " " . TargetLib . TransA[". Do you want to proceed?"]
+		MsgBox, 4,, % TransA["The hostring"] . " """ . Triggerstring """ " . TransA["exists in a file"] . " " . TargetLib . TransA[". Do you want to proceed?"]
 		IfMsgBox, No
 		{
 			Gui, MoveLibs:Destroy
@@ -4490,7 +4488,7 @@ if (cntLines == 1)
 	FileAppend,, %InputFile%, UTF-8
 }
 FileDelete, %OutputFile%
-MsgBox, % TransA["Hotstring moved to the"] . " " . TargetLib . " " . TranslateA["file!"]
+MsgBox, % TransA["Hotstring moved to the"] . " " . TargetLib . " " . TransA["file!"]
 Gui, MoveLibs:Destroy
 Gui, HS3List:Hide	
 
@@ -4582,7 +4580,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 L_Undo:
-Menu, Submenu1, ToggleCheck, % TransA["&Undo last hotstring"]
+Menu, Submenu1, ToggleCheck, % TransA["&Undo the last hotstring"]
 ini_Undo := !(ini_Undo)
 IniWrite, %ini_Undo%, Config.ini, Configuration, UndoHotstring
 return
@@ -4782,7 +4780,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndExclamationMark:
-Menu, Submenu2, ToggleCheck, % TranslateA["Exclamation Mark !"]
+Menu, Submenu2, ToggleCheck, % TransA["Exclamation Mark !"]
 EndingChar_ExclamationMark := !(EndingChar_ExclamationMark)
 IniWrite, %EndingChar_ExclamationMark%, Config.ini, Configuration, EndingChar_ExclamationMark
 F_LoadEndChars()
@@ -4791,7 +4789,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndEnter:
-Menu, Submenu2, ToggleCheck, % TranslateA["Enter"]
+Menu, Submenu2, ToggleCheck, % TransA["Enter"]
 EndingChar_Enter := !(EndingChar_Enter)
 IniWrite, %EndingChar_Enter%, Config.ini, Configuration, EndingChar_Enter
 F_LoadEndChars()
@@ -4883,7 +4881,7 @@ IniWrite, %ini_MenuCursor%, Config.ini, Configuration, MenuCursor
 return
 
 L_MenuSound:
-Menu, SubmenuMenu, ToggleCheck, % TranslateA["Enable &sound if overrun"]
+Menu, SubmenuMenu, ToggleCheck, % TransA["Enable &sound if overrun"]
 ini_MenuSound := !(ini_MenuSound)
 IniWrite, %ini_MenuSound%, Config.ini, Configuration, MenuSound
 return
