@@ -185,7 +185,6 @@ if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "L
 else  if (!FileExist(A_ScriptDir . "\Languages\" . v_Language))			; else if there is no v_language .ini file, e.g. v_langugae == Polish.ini and there is no such file in Languages folder
 {
 	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . " warning", There is no %v_Language% file in Languages subfolder!`nThe default %A_ScriptDir%\Languages\English.ini file is now created.
-	;tu jestem
 	FileAppend, %EnglishIni%, %A_ScriptDir%\Languages\English.ini		; Future: check against erros.
 	F_LoadCreateTranslationTxt("create")
 	v_Language 		:= "English.ini"					
@@ -2564,17 +2563,19 @@ F_ExportLibraryDynamic(filename)
 	}
 	
 */
- ;#[F_ReadText]
-F_ReadText(string)
-{
-	local Key
-	Key := SubStr(string, 3)		; Retrives all characters starting from 3rd position in string: omits "t_" at the beginning of each string.
-	IniRead, string, Languages\%v_Language%, Strings, %Key% 
-	if (InStr(string, "``n"))		; If `n string is escaped (so it equals to ``n string), convert it to normal `n string.
-		string := StrReplace(string, "``n", "`n")
-	;string := F_ShowUnicodeSigns(string)
-	return string
-}
+
+/*
+	F_ReadText(string)
+	{
+		local Key
+		Key := SubStr(string, 3)		; Retrives all characters starting from 3rd position in string: omits "t_" at the beginning of each string.
+		IniRead, string, Languages\%v_Language%, Strings, %Key% 
+		if (InStr(string, "``n"))		; If `n string is escaped (so it equals to ``n string), convert it to normal `n string.
+			string := StrReplace(string, "``n", "`n")
+		;string := F_ShowUnicodeSigns(string)
+		return string
+	}
+*/
 
 F_LoadHotstringsFromLibraries()
 {
@@ -3706,29 +3707,37 @@ IniWrite, %ini_Delay%, Config.ini, Configuration, Delay
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+;tu jestem
 L_About:
 Gui, MyAbout: Destroy
-Gui, MyAbout: Font, % "bold s" . c_FontSize*DPI%v_SelectedMonitor%, Calibri
+;Gui, MyAbout: Font, % "bold s" . c_FontSize*DPI%v_SelectedMonitor%, Calibri
+Gui, MyAbout: Font, % "bold s" . c_FontSize, Calibri
 Gui, MyAbout: Add, Text, , % TransA["Let's make your PC personal again..."]
-Gui, MyAbout: Font, % "norm s" . c_FontSize*DPI%v_SelectedMonitor%
-temp := SubStr(TransA["Enables Convenient Definition"], 1)
+;Gui, MyAbout: Font, % "norm s" . c_FontSize*DPI%v_SelectedMonitor%
+Gui, MyAbout: Font, % "norm s" . c_FontSize
 Gui, MyAbout: Add, Text, , % TransA["Enables Convenient Definition"]
-Gui, MyAbout: Font, % "CBlue bold Underline s" . c_FontSize*DPI%v_SelectedMonitor%
+;Gui, MyAbout: Font, % "CBlue bold Underline s" . c_FontSize*DPI%v_SelectedMonitor%
+Gui, MyAbout: Font, % "CBlue bold Underline s" . c_FontSize
 Gui, MyAbout: Add, Text, gLink, % TransA["Application help"]
 Gui, MyAbout: Add, Text, gLink2, % TransA["Genuine hotstrings AutoHotkey documentation"]
-Gui, MyAbout: Font, % "norm s" . c_FontSize*DPI%v_SelectedMonitor%
-Gui, MyAbout: Add, Button, % "Default Hidden w" . 100*DPI%v_SelectedMonitor% . " gMyOK vOkButtonVariabl hwndOkButtonHandle", &OK
+;Gui, MyAbout: Font, % "norm s" . c_FontSize*DPI%v_SelectedMonitor%
+Gui, MyAbout: Font, % "norm s" . c_FontSize
+;Gui, MyAbout: Add, Button, % "Default Hidden w" . 100*DPI%v_SelectedMonitor% . " gMyOK vOkButtonVariabl hwndOkButtonHandle", &OK
+Gui, MyAbout: Add, Button, % "Default Hidden w" . 100 . " gMyOK vOkButtonVariabl hwndOkButtonHandle", &OK
 GuiControlGet, MyGuiControlGetVariable, MyAbout: Pos, %OkButtonHandle%
-WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
-Gui, MyAbout:Show,% "hide w" . 670*DPI%v_SelectedMonitor% . "h" . 220*DPI%v_SelectedMonitor%, About/Help
+WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth, v_WindowHeight, Hotstrings
+;Gui, MyAbout:Show,% "hide w" . 670*DPI%v_SelectedMonitor% . "h" . 220*DPI%v_SelectedMonitor%, About/Help
+Gui, MyAbout:Show, % "hide w" . 670 . "h" . 220, % TransA["&About/Help"]
 DetectHiddenWindows, On
-WinGetPos, , , MyAboutWindowWidth, MyAboutWindowHeight,About/Help
+WinGetPos, , , MyAboutWindowWidth, MyAboutWindowHeight, % TransA["&About/Help"]
 DetectHiddenWindows, Off
-NewButtonXPosition := round((( MyAboutWindowWidth- 100*DPI%v_SelectedMonitor%)/2)*DPI%v_SelectedMonitor%)
+;NewButtonXPosition := round((( MyAboutWindowWidth- 100*DPI%v_SelectedMonitor%)/2)*DPI%v_SelectedMonitor%)
+;NewButtonXPosition := round((MyAboutWindowWidth- 100)/2)
+NewButtonXPosition := round(MyAboutWindowWidth/2)
 GuiControl, Move, %OkButtonHandle%, x%NewButtonXPosition%
 GuiControl, Show, %OkButtonHandle%
-Gui, MyAbout: Show, % "x" . v_WindowX + (v_WindowWidth - MyAboutWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - MyAboutWindowHeight)/2, % SubStr(TransA["&About/Help"], 2)
+;Gui, MyAbout: Show, % "x" . v_WindowX + (v_WindowWidth - MyAboutWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - MyAboutWindowHeight)/2, % TransA["&About/Help"]
+Gui, MyAbout: Show
 return  
 
 Link:
