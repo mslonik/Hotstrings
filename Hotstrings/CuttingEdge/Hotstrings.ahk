@@ -66,6 +66,7 @@ MenuCaret=1
 TipsSortAlphatebically=1
 TipsSortByLength=1
 Language=English.txt
+[Libraries]
 [TipsLibraries]
 	)
 
@@ -192,7 +193,7 @@ else  if (!FileExist(A_ScriptDir . "\Languages\" . v_Language))			; else if ther
 else
 	F_LoadCreateTranslationTxt("load")
 
-; 3. Load configuration files into configuration variables. The configuration variable names start with "ini_" prefix.
+; 3. Load content of configuration file into configuration variables. The configuration variable names start with "ini_" prefix.
 ;Read all variables from specified language .ini file. In order to distinguish GUI text from any other string or variable used in this script, the GUI strings are defined with prefix "t_".
 
 
@@ -223,7 +224,7 @@ IniRead, ini_MenuCaret, 					Config.ini, Configuration, MenuCaret
 IniRead, ini_TipsSortAlphabetically,		Config.ini, Configuration, TipsSortAlphatebically
 IniRead, ini_TipsSortByLength,			Config.ini, Configuration, TipsSortByLength
 
-F_LoadTipsLibraries() ; load from / to Config.ini
+F_LoadTipsLibraries() ; load from / to Config.ini tu jestem
 
 ; Hotstrings app could be reloaded by itself, (see label Delete:). In such a case 9 command line parameters are passed
 ;if !(A_Args[8])
@@ -269,15 +270,15 @@ F_HS3_DetermineConstraints()
 		TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
 	
 
-	v_HotstringCnt := 0
-	Loop, Files, %A_ScriptDir%\Libraries\*.csv
+v_HotstringCnt := 0
+Loop, Files, %A_ScriptDir%\Libraries\*.csv
 	{
 		if !(A_LoopFileName == "PriorityLibrary.csv")
 			F_LoadFile(A_LoopFileName)
 	}
-	F_LoadFile("PriorityLibrary.csv")
+F_LoadFile("PriorityLibrary.csv")
 
-	TrayTip, %A_ScriptName%, % TransA["Hotstrings have been loaded"], 1
+TrayTip, %A_ScriptName%, % TransA["Hotstrings have been loaded"], 1
 	;Gui, HS3:Show
 	;Pause
 
@@ -555,14 +556,26 @@ Loop, %A_ScriptDir%\Languages\*.txt
 
 Loop, %A_ScriptDir%\Libraries\*.csv
 {
-	Menu, ToggleLibrariesSubmenu, Add, %A_LoopFileName%, L_ToggleTipsLibrary
+	Menu, ToggleLibTrigTipsSubmenu, Add, %A_LoopFileName%, L_ToggleTipsLibrary
 	IniRead, v_LibraryFlag, Config.ini, TipsLibraries, %A_LoopFileName%
 	if (v_LibraryFlag)
-		Menu, ToggleLibrariesSubmenu, Check, %A_LoopFileName%
+		Menu, ToggleLibTrigTipsSubmenu, Check, %A_LoopFileName%
 	else
-		Menu, ToggleLibrariesSubmenu, UnCheck, %A_LoopFileName%	
+		Menu, ToggleLibTrigTipsSubmenu, UnCheck, %A_LoopFileName%	
 }
-Menu, 	LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	:ToggleLibrariesSubmenu 
+
+Loop, %A_ScriptDir%\Libraries\*.csv
+{
+	Menu, EnableDisableLibraries, Add, %A_LoopFileName%, F_EnableDisableLibraries
+	IniRead, v_LibraryFlag, Config.ini, Libraries, %A_LoopFileName%
+	if (v_LibraryFlag)
+		Menu, EnableDisableLibraries, Check, %A_LoopFileName%
+	else
+		Menu, EnableDisableLibraries, UnCheck, %A_LoopFileName%	
+}
+
+Menu,	LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"],			:EnableDisableLibraries
+Menu, 	LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	:ToggleLibTrigTipsSubmenu
 Menu, 	HSMenu, 			Add, % TransA["Libraries configuration"], 			:LibrariesSubmenu
 Menu, 	HSMenu, 			Add, % TransA["Clipboard Delay"], 					HSdelay
 Menu, 	HSMenu, 			Add, % TransA["About/Help"], 						F_GuiAbout
@@ -880,6 +893,53 @@ goto, MoveList
 #if
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_EnableDisableLibraries() ;tu jestem
+{
+	global ;assume-global mode
+	local v_LibraryFlag := 0, v_WhichLibraries := "", v_LibTemp := "", v_LibFlagTemp := ""
+	
+;*[One]
+	Menu, EnableDisableLibraries, ToggleCheck, %A_ThisMenuItem%
+	IniRead, v_LibraryFlag,	Config.ini, Libraries, %A_ThisMenuitem%		; Read into v_TipsConfig section TipsLibraries from the file Config.ini which is a list of library files (.csv) stored in Libraries subfolder
+	v_LibraryFlag := !(v_LibraryFlag)
+	Iniwrite, %v_LibraryFlag%,	Config.ini, Libraries, %A_ThisMenuItem%
+	
+	v_HotstringCnt := 0
+	IniRead, v_WhichLibraries, Config.ini, Libraries
+	
+	if (v_Param == "d")
+		TrayTip, %A_ScriptName% - Debug mode, 	% TransA["Loading hotstrings from libraries..."], 1
+	else if (v_Param == "l")
+		TrayTip, %A_ScriptName% - Lite mode, 	% TransA["Loading hotstrings from libraries..."], 1
+	else	
+		TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
+
+	Loop, Parse, v_WhichLibraries, `n
+	{
+		v_LibTemp 	:= SubStr(A_LoopField, 1, InStr(A_LoopField, "=") - 1)
+		v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=") + 1)
+		if (!(v_LibTemp == A_ThisMenuItem) and !(v_LibTemp == "PriorityLibrary.csv") and (v_LibFlagTemp))
+			F_LoadFile(v_LibTemp)
+	}
+	v_LibTemp := InStr(v_WhichLibraries, "PriorityLibrary.csv")
+	if (v_LibTemp)
+	{
+		v_LibFlagTemp := SubStr(v_WhichLibraries, InStr(v_WhichLibraries, "=",, v_LibTemp) + 1)
+		if ((v_LibFlagTemp) and (A_ThisMenuItem == "PriorityLibrary.csv") and (v_LibraryFlag))
+		{
+			F_LoadFile("PriorityLibrary.csv")
+			return
+		}
+		if (v_LibFlagTemp)
+			F_LoadFile(v_LibTemp)
+	}
+	TrayTip, %A_ScriptName%, % TransA["Hotstrings have been loaded"], 1
+	
+	return
+}
+
+; ------------------------------------------------------------------------------------------------------------------------------------
+
 F_LoadCreateTranslationTxt(decision*)
 {
 	
@@ -926,6 +986,7 @@ F_LoadCreateTranslationTxt(decision*)
 			,"Dynamic hotstrings" 									: "&Dynamic hotstrings"
 			,"Edit Hotstring" 										: "Edit Hotstring"
 			,"Enable/Disable" 										: "Enable/Disable"
+			,"Enable/disable libraries"								: "Enable/disable &libraries"
 			,"Enable/disable triggerstring tips" 						: "Enable/disable triggerstring tips"	
 			,"Enables Convenient Definition" 							: "Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3."
 			,"Enable sound if overrun" 								: "Enable &sound if overrun"
@@ -1480,7 +1541,6 @@ F_HS3_DetermineConstraints()
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-;tu jestem
 F_GuiAbout_CreateObjects()
 {
 	global ;assume-global mode
@@ -1577,7 +1637,7 @@ F_GuiAbout()
 			NewStr := SubStr(TransA["About/Help"], FoundPos + 1)
 	}
 	
-	;*[One]
+	
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
 	if !(WinExist("ahk_id" . MyAboutGuiHwnd))
 		Gui, MyAbout: Show, Hide Center AutoSize
@@ -1598,6 +1658,9 @@ F_GuiAbout()
 
 F_LoadTipsLibraries() ; Load from / to Config.ini from Libraries folder
 {
+	global ;assume-global mode
+	local a_TipsConfig := [], v_IsLibraryEmpty := true, v_ConfigLibrary := "", v_ConfigFlag := false
+	
 	IniRead, v_TipsConfig, 					Config.ini, TipsLibraries		; Read into v_TipsConfig section TipsLibraries from the file Config.ini which is a list of library files (.csv) stored in Libraries subfolder
 	
 	;Check if Libraries subfolder exists. If not, create it and display warning.
@@ -1667,7 +1730,7 @@ F_LoadTipsLibraries() ; Load from / to Config.ini from Libraries folder
 			Iniwrite, 1, Config.ini, TipsLibraries,  %A_LoopFileName% ;add new library file and enable tips
 	}
 	
-	;Load again section [TipsLibraries] from Config.ini
+	;Load again section [TipsLibraries] from Config.ini which is now at the end consistent with content of the Libraries folder.
 	IniRead, v_TipsConfig, 					Config.ini, TipsLibraries
 }
 
@@ -4827,7 +4890,7 @@ if !(v_LibraryName == "")
 return
 
 L_ToggleTipsLibrary:
-Menu, ToggleLibrariesSubmenu, ToggleCheck, %A_ThisMenuitem%
+Menu, ToggleLibTrigTipsSubmenu, ToggleCheck, %A_ThisMenuitem%
 IniRead, v_LibraryFlag, Config.ini, TipsLibraries, %A_ThisMenuitem%
 v_LibraryFlag := !(v_LibraryFlag)
 IniWrite, %v_LibraryFlag%, Config.ini, TipsLibraries, %A_ThisMenuitem%
