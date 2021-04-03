@@ -288,7 +288,7 @@ F_HS3_DetermineConstraints()
 if !(v_Param == "l") 										; if Hotstrings.ahk wasn't run with "l" parameter (standing for "light / lightweight", prepare tray menu.
 {
 	Menu, Tray, Add, 		% TransA["Edit Hotstring"], 		L_GUIInit
-	Menu, Tray, Add, 		% TransA["&Search Hotstrings"], 	L_Searching
+	Menu, Tray, Add, 		% TransA["Search Hotstrings"], 	L_Searching
 	Menu, Tray, Default, 	% TransA["Edit Hotstring"]
 	Menu, Tray, Add										; separator line
 	Menu, Tray, NoStandard									; remove all the rest of standard tray menu
@@ -328,16 +328,16 @@ Loop, %A_ScriptDir%\Libraries\*.csv
 
 
     ; Menu, HSMenu, Add, &Monitor, CheckMon
-Menu, Submenu1, 	Add, % TransA["&Undo the last hotstring"],		L_Undo
+Menu, Submenu1, 	Add, % TransA["Undo the last hotstring"],	L_Undo
 Menu, SubmenuTips, 	Add, % TransA["Enable/Disable"], 			Tips
 Menu, PositionMenu, Add, % TransA["Caret"], 					L_MenuCaretCursor
 Menu, PositionMenu, Add, % TransA["Cursor"], 				L_MenuCaretCursor
 Menu, SubmenuMenu, 	Add, % TransA["Choose menu position"],		:PositionMenu
-Menu, SubmenuMenu, 	Add, % TransA["Enable &sound if overrun"],	L_MenuSound
+Menu, SubmenuMenu, 	Add, % TransA["Enable sound if overrun"],	L_MenuSound
 if (ini_MenuSound)
-	Menu, SubmenuMenu, Check, % TransA["Enable &sound if overrun"]
+	Menu, SubmenuMenu, Check, % TransA["Enable sound if overrun"]
 else
-	Menu, SubmenuMenu, UnCheck, % TransA["Enable &sound if overrun"]
+	Menu, SubmenuMenu, UnCheck, % TransA["Enable sound if overrun"]
 Menu, Submenu1, 	Add, % TransA["Hotstring menu (MSI, MCL)"], :SubmenuMenu
 if (ini_MenuCursor)
 	Menu, PositionMenu, Check, % TransA["Cursor"]
@@ -347,7 +347,7 @@ if (ini_MenuCaret)
 	Menu, PositionMenu, Check, % TransA["Caret"]
 else
 	Menu, PositionMenu, UnCheck, % TransA["Caret"]
-Menu, Submenu1, 	Add, % TransA["&Triggerstring tips"], 	:SubmenuTips
+Menu, Submenu1, 	Add, % TransA["Triggerstring tips"], 	:SubmenuTips
 Menu, Submenu3, 	Add, % TransA["Caret"],		L_CaretCursor
 Menu, Submenu3, 	Add, % TransA["Cursor"],			L_CaretCursor
 if (ini_Cursor)
@@ -374,24 +374,24 @@ Loop, 5
 	if !(A_Index == ini_AmountOfCharacterTips)
 		Menu, Submenu4, UnCheck, %A_Index%
 }
-Menu, SubmenuTips, 	Add, % TransA["&Number of characters for tips"], :Submenu4
+Menu, SubmenuTips, 	Add, % TransA["Number of characters for tips"], :Submenu4
 If !(ini_Tips)
 {
-	Menu, SubmenuTips, Disable, % TransA["&Number of characters for tips"]
+	Menu, SubmenuTips, Disable, % TransA["Number of characters for tips"]
 }
-Menu, SubmenuTips, Add, % TransA["Sort tips &alphabetically"], L_SortTipsAlphabetically
+Menu, SubmenuTips, Add, % TransA["Sort tips alphabetically"], L_SortTipsAlphabetically
 if (ini_TipsSortAlphabetically)
-	Menu, SubmenuTips, Check, % TransA["Sort tips &alphabetically"]
+	Menu, SubmenuTips, Check, % TransA["Sort tips alphabetically"]
 else
-	Menu, SubmenuTips, UnCheck, % TransA["Sort tips &alphabetically"]
-Menu, SubmenuTips, Add, % TransA["Sort tips by &length"], L_SortTipsByLength
+	Menu, SubmenuTips, UnCheck, % TransA["Sort tips alphabetically"]
+Menu, SubmenuTips, Add, % TransA["Sort tips by length"], L_SortTipsByLength
 if (ini_TipsSortByLength)
-	Menu, SubmenuTips, Check, % TransA["Sort tips by &length"]
+	Menu, SubmenuTips, Check, % TransA["Sort tips by length"]
 else
-	Menu, SubmenuTips, UnCheck, % TransA["Sort tips by &length"]
-Menu, Submenu1, Add, % TransA["&Save window position"], SavePos
-Menu, Submenu1, Add, % TransA["&Launch Sandbox"], 	L_Sandbox
-Menu, Submenu2, Add, % TransA["Space"], 			EndSpace
+	Menu, SubmenuTips, UnCheck, % TransA["Sort tips by length"]
+Menu, Submenu1, Add, % TransA["Save window position"], 	SavePos
+Menu, Submenu1, Add, % TransA["Launch Sandbox"], 			L_Sandbox
+Menu, Submenu2, Add, % TransA["Space"], 				EndSpace
 if (EndingChar_Space)
 	Menu, Submenu2, Check, % TransA["Space"]
 else
@@ -491,7 +491,7 @@ if (EndingChar_Tab)
 	Menu, Submenu2, Check, % TransA["Tab"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Tab"]
-Menu, Submenu1, Add, % TransA["&Toggle EndChars"], :Submenu2
+Menu, Submenu1, Add, % TransA["Toggle EndChars"], :Submenu2
 
 if (ini_Tips == 0)
 	Menu, SubmenuTips, UnCheck, % TransA["Enable/Disable"]
@@ -499,14 +499,14 @@ else
 	Menu, SubmenuTips, Check, % TransA["Enable/Disable"]
 
 if (ini_Sandbox == 0)
-	Menu, Submenu1, UnCheck, % TransA["&Launch Sandbox"]
+	Menu, Submenu1, UnCheck, % TransA["Launch Sandbox"]
 else
-	Menu, Submenu1, Check, % TransA["&Launch Sandbox"]
+	Menu, Submenu1, Check, % TransA["Launch Sandbox"]
 
 if (ini_Undo == 0)
-	Menu, Submenu1, UnCheck, % TransA["&Undo the last hotstring"]
+	Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring"]
 else
-	Menu, Submenu1, Check, % TransA["&Undo the last hotstring"]
+	Menu, Submenu1, Check, % TransA["Undo the last hotstring"]
 
 Loop, %A_ScriptDir%\Languages\*.ini
 {
@@ -518,12 +518,12 @@ Loop, %A_ScriptDir%\Languages\*.ini
 }
 
 Menu, Submenu1, 		Add, % TransA["Change Language"], 			:SubmenuLanguage
-Menu, HSMenu, 			Add, % TransA["&Configuration"], 			:Submenu1
-Menu, HSMenu, 			Add, % TransA["&Search Hotstrings"], 		L_Searching
-Menu, LibrariesSubmenu, 	Add, % TransA["t_ImportFromAhkToCsv"], 		L_ImportLibrary
-Menu, ExportSubmenu, 	Add, % TransA["&Static hotstrings"],  		L_ExportLibraryStatic
-Menu, ExportSubmenu, 	Add, % TransA["&Dynamic hotstrings"],  		L_ExportLibraryDynamic
-Menu, LibrariesSubmenu, 	Add, % TransA["&Export from .csv to .ahk"],	:ExportSubmenu
+Menu, HSMenu, 			Add, % TransA["Configuration"], 			:Submenu1
+Menu, HSMenu, 			Add, % TransA["Search Hotstrings"], 		L_Searching
+Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],	L_ImportLibrary
+Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  		L_ExportLibraryStatic
+Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  		L_ExportLibraryDynamic
+Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],	:ExportSubmenu
 
 Loop, %A_ScriptDir%\Libraries\*.csv
 {
@@ -535,9 +535,9 @@ Loop, %A_ScriptDir%\Libraries\*.csv
 		Menu, ToggleLibrariesSubmenu, UnCheck, %A_LoopFileName%	
 }
 Menu, 	LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	:ToggleLibrariesSubmenu 
-Menu, 	HSMenu, 			Add, % TransA["&Libraries configuration"], 			:LibrariesSubmenu
-Menu, 	HSMenu, 			Add, % TransA["Clipboard &Delay"], 				HSdelay
-Menu, 	HSMenu, 			Add, % TransA["&About/Help"], 					L_About
+Menu, 	HSMenu, 			Add, % TransA["Libraries configuration"], 			:LibrariesSubmenu
+Menu, 	HSMenu, 			Add, % TransA["Clipboard Delay"], 					HSdelay
+Menu, 	HSMenu, 			Add, % TransA["About/Help"], 						L_About
 Gui, 	HS3:Menu, HSMenu
 
 
@@ -729,7 +729,7 @@ $^z::			;~ Ctrl + z as in MS Word: Undo; $ prevents autotriggering as the same h
 $!BackSpace:: 		;~ Alt + Backspace as in MS Word: rolls back last Autocorrect action ; $ prevents autotriggering as the same hotkey is send with SendInput function
 	if (ini_Undo == 1) and (v_TypedTriggerstring && (A_ThisHotkey != A_PriorHotkey))
 	{
-		ToolTip, % TransA["&Undo the last hotstring"], % A_CaretX, % A_CaretY - 20
+		ToolTip, % TransA["Undo the last hotstring"], % A_CaretX, % A_CaretY - 20
 		TriggerOpt := SubStr(v_UndoTriggerstring, InStr(v_UndoTriggerstring, ":" ,, 1,1)+1 ,InStr(v_UndoTriggerstring, ":" ,, 1,2)-InStr(v_UndoTriggerstring, ":" ,, 1,1)-1)
 		if (InStr(TriggerOpt, "*0") or !(InStr(TriggerOpt, "*"))) and (InStr(TriggerOpt, "O0") or !(InStr(TriggerOpt, "O")))
 		{
@@ -857,7 +857,7 @@ F_LoadCreateTranslationTxt(decision*)
 ;[Strings]
 	global ;assume-global mode
 	
-	TransA := {"&About/Help" 										: "&About/Help"
+	TransA := {"About/Help"	 										: "&About/Help"
 			,"Add comment (optional)" 								: "Add comment (optional)"
 			,"Add library" 										: "Add library"
 			,"A library with that name already exists!" 					: "A library with that name already exists!"
@@ -877,13 +877,13 @@ F_LoadCreateTranslationTxt(decision*)
 			,"Choose the method of sending the hotstring!" 				: "Choose the method of sending the hotstring!"
 			,"Choose tips location" 									: "Choose tips location"
 			,"Clear (F5)" 											: "Clear (F5)"
-			,"Clipboard &Delay" 									: "Clipboard &Delay"
+			,"Clipboard Delay" 										: "Clipboard &Delay"
 			,"Closing Curly Bracket }" 								: "Closing Curly Bracket }"
 			,"Closing Round Bracket )" 								: "Closing Round Bracket )"
 			,"Closing Square Bracket ]" 								: "Closing Square Bracket ]"
 			,"Colon :" 											: "Colon :"
 			,"Comma ," 											: "Comma ,"
-			,"&Configuration" 										: "&Configuration"
+			,"Configuration" 										: "&Configuration"
 			,"Do you want to proceed?" 								: "Do you want to proceed?"
 			,"Cursor" 											: "Cursor"
 			,"Delete hotstring (F8)" 								: "Delete hotstring (F8)"
@@ -892,12 +892,12 @@ F_LoadCreateTranslationTxt(decision*)
 			,"Disable" 											: "Disable"
 			,"Dot ." 												: "Dot ."
 			,". Do you want to proceed?" 								: ". Do you want to proceed?"
-			,"&Dynamic hotstrings" 									: "&Dynamic hotstrings"
+			,"Dynamic hotstrings" 									: "&Dynamic hotstrings"
 			,"Edit Hotstring" 										: "Edit Hotstring"
 			,"Enable/Disable" 										: "Enable/Disable"
 			,"Enable/disable triggerstring tips" 						: "Enable/disable triggerstring tips"	
 			,"Enables Convenient Definition" 							: "Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3."
-			,"Enable &sound if overrun" 								: "Enable &sound if overrun"
+			,"Enable sound if overrun" 								: "Enable &sound if overrun"
 			,"Enter" 												: "Enter"
 			,"Enter a name for the new library" 						: "Enter a name for the new library"
 			,"Enter hotstring" 										: "Enter hotstring"
@@ -905,7 +905,7 @@ F_LoadCreateTranslationTxt(decision*)
 			,"ErrorLevel was triggered by NewInput error." 				: "ErrorLevel was triggered by NewInput error."
 			,"Exclamation Mark !" 									: "Exclamation Mark !"
 			,"exists in a file" 									: "exists in a file"
-			,"&Export from .csv to .ahk" 								: "&Export from .csv to .ahk"
+			,"Export from .csv to .ahk" 								: "&Export from .csv to .ahk"
 			,"F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring" : "F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring"
 			,"F3 Close Search hotstrings | F8 Move hotstring" 			: "F3 Close Search hotstrings | F8 Move hotstring"
 			,"file!" 												: "file!"
@@ -919,11 +919,11 @@ F_LoadCreateTranslationTxt(decision*)
 			,"Hotstring paste from Clipboard delay" 					: "Hotstring paste from Clipboard delay"
 			,"Hotstrings have been loaded" 							: "Hotstrings have been loaded"
 			,"Immediate Execute (*)" 								: "Immediate Execute (*)"
-			,"&Import from .ahk to .csv" 								: "&Import from .ahk to .csv"
+			,"Import from .ahk to .csv" 								: "&Import from .ahk to .csv"
 			,"Inside Word (?)" 										: "Inside Word (?)"
-			,"&Launch Sandbox" 										: "&Launch Sandbox"
+			,"Launch Sandbox" 										: "&Launch Sandbox"
 			,"Let's make your PC personal again..." 					: "Let's make your PC personal again..."
-			,"&Libraries configuration" 								: "&Libraries configuration"
+			,"Libraries configuration" 								: "&Libraries configuration"
 			,"Library" 											: "Library"
 			,"Library export. Please wait..." 							: "Library export. Please wait..."
 			,"Library has been exported." 							: "Library has been exported."
@@ -937,7 +937,7 @@ F_LoadCreateTranslationTxt(decision*)
 			,"Move" 												: "Move"
 			,"No Backspace (B0)" 									: "No Backspace (B0)"
 			,"No End Char (O)" 										: "No End Char (O)"
-			,"&Number of characters for tips" 							: "&Number of characters for tips"
+			,"Number of characters for tips" 							: "&Number of characters for tips"
 			,"Opening Curly Bracket {" 								: "Opening Curly Bracket {"
 			,"Opening Round Bracket (" 								: "Opening Round Bracket ("
 			,"Opening Square Bracket [" 								: "Opening Square Bracket ["
@@ -946,9 +946,9 @@ F_LoadCreateTranslationTxt(decision*)
 			,"Quote """ 											: "Quote """
 			,"Replacement text is blank. Do you want to proceed?" 			: "Replacement text is blank. Do you want to proceed?"
 			,"Sandbox" 											: "Sandbox"
-			,"&Save window position" 								: "&Save window position"
+			,"Save window position"	 								: "&Save window position"
 			,"Search by:" 											: "Search by:"
-			,"&Search Hotstrings" 									: "&Search Hotstrings"
+			,"Search Hotstrings" 									: "&Search Hotstrings"
 			,"Select a row in the list-view, please!" 					: "Select a row in the list-view, please!"
 			,"Selected file is empty." 								: "Selected file is empty."
 			,"Selected Hotstring will be deleted. Do you want to proceed?" 	: "Selected Hotstring will be deleted. Do you want to proceed?"
@@ -959,20 +959,20 @@ F_LoadCreateTranslationTxt(decision*)
 			,"Semicolon `;" 										: "Semicolon `;"
 			,"Set hotstring (F9)" 									: "Set hotstring (F9)"
 			,"Slash /" 											: "Slash /"
-			,"Sort tips &alphabetically" 								: "Sort tips &alphabetically"
-			,"Sort tips by &length" 									: "Sort tips by &length"
+			,"Sort tips alphabetically" 								: "Sort tips &alphabetically"
+			,"Sort tips by length" 									: "Sort tips by &length"
 			,"Space" 												: "Space"
-			,"&Static hotstrings" 									: "&Static hotstrings"
+			,"Static hotstrings" 									: "&Static hotstrings"
 			,"Tab" 												: "Tab"
 			,"The application will be reloaded with the new language file." 	: "The application will be reloaded with the new language file."
 			,"The hostring" 										: "The hostring"
 			,"The library " 										: "The library "
 			,"The file path is:" 									: "The file path is:"
-			,"&Toggle EndChars" 									: "&Toggle EndChars"
+			,"Toggle EndChars"	 									: "&Toggle EndChars"
 			,"Triggerstring" 										: "Triggerstring"
-			,"&Triggerstring tips" 									: "&Triggerstring tips"
+			,"Triggerstring tips" 									: "&Triggerstring tips"
 			,"Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment" 	: "Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"
-			,"&Undo the last hotstring" 								: "&Undo the last hotstring"
+			,"Undo the last hotstring" 								: "&Undo the last hotstring"
 			,"Library content (F2)"									: "Library content (F2)"}
 		
 	
@@ -3723,20 +3723,20 @@ Gui, MyAbout: Add, Text, gLink2, % TransA["Genuine hotstrings AutoHotkey documen
 ;Gui, MyAbout: Font, % "norm s" . c_FontSize*DPI%v_SelectedMonitor%
 Gui, MyAbout: Font, % "norm s" . c_FontSize
 ;Gui, MyAbout: Add, Button, % "Default Hidden w" . 100*DPI%v_SelectedMonitor% . " gMyOK vOkButtonVariabl hwndOkButtonHandle", &OK
-Gui, MyAbout: Add, Button, % "Default Hidden w" . 100 . " gMyOK vOkButtonVariabl hwndOkButtonHandle", &OK
+Gui, MyAbout: Add, Button, % "Default Hidden w" . 100 . " gMyOK vOkButtonVariabl hwndOkButtonHandle", &OK ;Future: translate
 GuiControlGet, MyGuiControlGetVariable, MyAbout: Pos, %OkButtonHandle%
 WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth, v_WindowHeight, Hotstrings
 ;Gui, MyAbout:Show,% "hide w" . 670*DPI%v_SelectedMonitor% . "h" . 220*DPI%v_SelectedMonitor%, About/Help
-Gui, MyAbout:Show, % "hide w" . 670 . "h" . 220, % TransA["&About/Help"]
+Gui, MyAbout:Show, % "hide w" . 670 . "h" . 220, % TransA["About/Help"]
 DetectHiddenWindows, On
-WinGetPos, , , MyAboutWindowWidth, MyAboutWindowHeight, % TransA["&About/Help"]
+WinGetPos, , , MyAboutWindowWidth, MyAboutWindowHeight, % TransA["About/Help"]
 DetectHiddenWindows, Off
 ;NewButtonXPosition := round((( MyAboutWindowWidth- 100*DPI%v_SelectedMonitor%)/2)*DPI%v_SelectedMonitor%)
 ;NewButtonXPosition := round((MyAboutWindowWidth- 100)/2)
 NewButtonXPosition := round(MyAboutWindowWidth/2)
 GuiControl, Move, %OkButtonHandle%, x%NewButtonXPosition%
 GuiControl, Show, %OkButtonHandle%
-;Gui, MyAbout: Show, % "x" . v_WindowX + (v_WindowWidth - MyAboutWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - MyAboutWindowHeight)/2, % TransA["&About/Help"]
+;Gui, MyAbout: Show, % "x" . v_WindowX + (v_WindowWidth - MyAboutWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - MyAboutWindowHeight)/2, % TransA["About/Help"]
 Gui, MyAbout: Show
 return  
 
@@ -4348,7 +4348,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 L_Undo:
-Menu, Submenu1, ToggleCheck, % TransA["&Undo the last hotstring"]
+Menu, Submenu1, ToggleCheck, % TransA["Undo the last hotstring"]
 ini_Undo := !(ini_Undo)
 IniWrite, %ini_Undo%, Config.ini, Configuration, UndoHotstring
 return
@@ -4364,7 +4364,7 @@ return
 Tips:
 Menu, SubmenuTips, ToggleCheck, % TransA["Enable/Disable"]
 Menu, SubmenuTips, ToggleEnable, % TransA["Choose tips location"]
-Menu, SubmenuTips, ToggleEnable, % TransA["&Number of characters for tips"]
+Menu, SubmenuTips, ToggleEnable, % TransA["Number of characters for tips"]
 ini_Tips := !(ini_Tips)
 IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
 return
@@ -4372,7 +4372,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 L_Sandbox:
-Menu, Submenu1, ToggleCheck, % TransA["&Launch Sandbox"]
+Menu, Submenu1, ToggleCheck, % TransA["Launch Sandbox"]
 	;Critical, On
 ini_Sandbox := !(ini_Sandbox)
 b_SandboxResize := !ini_Sandbox
@@ -4649,7 +4649,7 @@ IniWrite, %ini_MenuCursor%, Config.ini, Configuration, MenuCursor
 return
 
 L_MenuSound:
-Menu, SubmenuMenu, ToggleCheck, % TransA["Enable &sound if overrun"]
+Menu, SubmenuMenu, ToggleCheck, % TransA["Enable sound if overrun"]
 ini_MenuSound := !(ini_MenuSound)
 IniWrite, %ini_MenuSound%, Config.ini, Configuration, MenuSound
 return
@@ -4684,13 +4684,13 @@ Gui, A_Gui:-Disabled
 return
 
 L_SortTipsAlphabetically:
-Menu, SubmenuTips, ToggleCheck, % TransA["Sort tips &alphabetically"]
+Menu, SubmenuTips, ToggleCheck, % TransA["Sort tips alphabetically"]
 ini_TipsSortAlphabetically := !(ini_TipsSortAlphabetically)
 IniWrite, %ini_TipsSortAlphabetically%, Config.ini, Configuration, TipsSortAlphatebically
 return
 
 L_SortTipsByLength:
-Menu, SubmenuTips, ToggleCheck, % TransA["Sort tips by &length"]
+Menu, SubmenuTips, ToggleCheck, % TransA["Sort tips by length"]
 ini_TipsSortByLength := !(ini_TipsSortByLength)
 IniWrite, %ini_TipsSortByLength%, Config.ini, Configuration, TipsSortByLength
 return
