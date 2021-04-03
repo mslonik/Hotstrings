@@ -56,6 +56,7 @@ EndingChar_QuestionMark=1
 EndingChar_ExclamationMark=1
 EndingChar_Enter=1
 EndingChar_Tab=1
+EndingChar_Underscore=0
 Tips=1
 Cursor=0
 Caret=1
@@ -176,18 +177,17 @@ IniRead v_Language, Config.ini, Configuration, Language				; Load from Config.in
 
 if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "Languages" subfolder 
 {
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . "Warning", There is no Languages subfolder and no language file exists!`nThe default %A_ScriptDir%\Languages\English.ini file is now created
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . "Warning", There is no Languages subfolder and no language file exists!`nThe default %v_Language% file is now created in the following subfolder
+	:`n%A_ScriptDir%\Languages\
 	.`nMind that Config.ini Language variable is equal to %v_Language%.
 	FileCreateDir, %A_ScriptDir%\Languages							; Future: check against errors
-	FileAppend, %EnglishIni%, %A_ScriptDir%\Languages\English.ini		; Future: check against erros.
 	F_LoadCreateTranslationTxt("create")
 }
 else  if (!FileExist(A_ScriptDir . "\Languages\" . v_Language))			; else if there is no v_language .ini file, e.g. v_langugae == Polish.ini and there is no such file in Languages folder
 {
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . "Warning", There is no %v_Language% file in Languages subfolder!`nThe default %A_ScriptDir%\Languages\English.ini file is now created.
-	FileAppend, %EnglishIni%, %A_ScriptDir%\Languages\English.ini		; Future: check against erros.
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . "Warning", There is no %v_Language% file in Languages subfolder!`nThe default %v_Language% file is now created in the following subfolder
+	:`n%A_ScriptDir%\Languages\
 	F_LoadCreateTranslationTxt("create")
-	v_Language 		:= "English.ini"					
 }
 else
 	F_LoadCreateTranslationTxt("load")
@@ -391,106 +391,133 @@ else
 	Menu, SubmenuTips, UnCheck, % TransA["Sort tips by length"]
 Menu, Submenu1, Add, % TransA["Save window position"], 	SavePos
 Menu, Submenu1, Add, % TransA["Launch Sandbox"], 			L_Sandbox
+
 Menu, Submenu2, Add, % TransA["Space"], 				EndSpace
 if (EndingChar_Space)
 	Menu, Submenu2, Check, % TransA["Space"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Space"]
+
 Menu, Submenu2, Add, % TransA["Minus -"], EndMinus
 if (EndingChar_Minus)
 	Menu, Submenu2, Check, % TransA["Minus -"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Minus -"]
+
 Menu, Submenu2, Add, % TransA["Opening Round Bracket ("], EndORoundBracket
 if (EndingChar_ORoundBracket)
 	Menu, Submenu2, Check, % TransA["Opening Round Bracket ("]
 else
 	Menu, Submenu2, UnCheck, % TransA["Opening Round Bracket ("]
+
 Menu, Submenu2, Add, % TransA["Closing Round Bracket )"], EndCRoundBracket
 if (EndingChar_CRoundBracket)
 	Menu, Submenu2, Check, % TransA["Closing Round Bracket )"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Closing Round Bracket )"]
+
 Menu, Submenu2, Add, % TransA["Opening Square Bracket ["], EndOSquareBracket
 if (EndingChar_OSquareBracket)
 	Menu, Submenu2, Check, % TransA["Opening Square Bracket ["]
 else
 	Menu, Submenu2, UnCheck, % TransA["Opening Square Bracket ["]
+
 Menu, Submenu2, Add, % TransA["Closing Square Bracket ]"], EndCSquareBracket
 if (EndingChar_CSquareBracket)
 	Menu, Submenu2, Check, % TransA["Closing Square Bracket ]"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Closing Square Bracket ]"]
+
 Menu, Submenu2, Add, % TransA["Opening Curly Bracket {"], EndOCurlyBracket
 if (EndingChar_OCurlyBracket)
 	Menu, Submenu2, Check, % TransA["Opening Curly Bracket {"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Opening Curly Bracket {"]
+
 Menu, Submenu2, Add, % TransA["Closing Curly Bracket }"], EndCCurlyBracket
 if (EndingChar_CCurlyBracket)
 	Menu, Submenu2, Check, % TransA["Closing Curly Bracket }"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Closing Curly Bracket }"]
+
 Menu, Submenu2, Add, % TransA["Colon :"], EndColon
 if (EndingChar_Colon)
 	Menu, Submenu2, Check, % TransA["Colon :"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Colon :"]
+
 Menu, Submenu2, Add, % TransA["Semicolon `;"], EndSemicolon
 if (EndingChar_Semicolon)
 	Menu, Submenu2, Check, % TransA["Semicolon `;"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Semicolon `;"]
+
 Menu, Submenu2, Add, % TransA["Apostrophe '"], EndApostrophe
 if (EndingChar_Apostrophe)
 	Menu, Submenu2, Check, % TransA["Apostrophe '"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Apostrophe '"]
+
 Menu, Submenu2, Add, % TransA["Quote """], EndQuote
 if (EndingChar_Quote)
 	Menu, Submenu2, Check, % TransA["Quote """]
 else
 	Menu, Submenu2, UnCheck, % TransA["Quote """]
+
 Menu, Submenu2, Add, % TransA["Slash /"], EndSlash
 if (EndingChar_Slash)
 	Menu, Submenu2, Check, % TransA["Slash /"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Slash /"]
+
 Menu, Submenu2, Add, % TransA["Backslash \"], EndBackslash
 if (EndingChar_Backslash)
 	Menu, Submenu2, Check, % TransA["Backslash \"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Backslash \"]
+
 Menu, Submenu2, Add, % TransA["Comma ,"], EndComma
 if (EndingChar_Comma)
 	Menu, Submenu2, Check, % TransA["Comma ,"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Comma ,"]
+
 Menu, Submenu2, Add, % TransA["Dot ."], EndDot
 if (EndingChar_Dot)
 	Menu, Submenu2, Check, % TransA["Dot ."]
 else
 	Menu, Submenu2, UnCheck, % TransA["Dot ."]
+
 Menu, Submenu2, Add, % TransA["Question Mark ?"], EndQuestionMark
 if (EndingChar_QuestionMark)
 	Menu, Submenu2, Check, % TransA["Question Mark ?"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Question Mark ?"]
+
 Menu, Submenu2, Add, % TransA["Exclamation Mark !"], EndExclamationMark
 if (EndingChar_ExclamationMark)
 	Menu, Submenu2, Check, % TransA["Exclamation Mark !"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Exclamation Mark !"]
+
 Menu, Submenu2, Add, % TransA["Enter"], EndEnter
 if (EndingChar_Enter)
 	Menu, Submenu2, Check, % TransA["Enter"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Enter"]
+
 Menu, Submenu2, Add, % TransA["Tab"], EndTab
 if (EndingChar_Tab)
 	Menu, Submenu2, Check, % TransA["Tab"]
 else
 	Menu, Submenu2, UnCheck, % TransA["Tab"]
+
+Menu, Submenu2, Add, % TransA["Underscore"], EndUnderscore
+if (EndingChar_Underscore)
+	Menu, Submenu2, Check, % TransA["Underscore"]
+else
+	Menu, Submenu2, UnCheck, % TransA["Underscore"]
+
 Menu, Submenu1, Add, % TransA["Toggle EndChars"], :Submenu2
 
 if (ini_Tips == 0)
@@ -977,6 +1004,7 @@ F_LoadCreateTranslationTxt(decision*)
 			,"Triggerstring" 										: "Triggerstring"
 			,"Triggerstring tips" 									: "&Triggerstring tips"
 			,"Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment" 	: "Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"
+			,"Underscore"											: "Underscore"
 			,"Undo the last hotstring" 								: "&Undo the last hotstring"
 			,"Library content (F2)"									: "Library content (F2)"}
 		
@@ -2237,6 +2265,7 @@ F_LoadEndChars() ;Load from Config.ini
 	IniRead, EndingChar_ExclamationMark, 		Config.ini, Configuration, EndingChar_ExclamationMark
 	IniRead, EndingChar_Enter, 				Config.ini, Configuration, EndingChar_Enter
 	IniRead, EndingChar_Tab, 				Config.ini, Configuration, EndingChar_Tab
+	IniRead, EndingChar_Underscore,			Config.ini, Configuration, EndingChar_Underscore
 	if (EndingChar_Space)
 		HotstringEndChars .= " "
 	if (EndingChar_Minus)
@@ -2277,6 +2306,8 @@ F_LoadEndChars() ;Load from Config.ini
 		HotstringEndChars .= "`n"
 	if (EndingChar_Tab)
 		HotstringEndChars .= "`t"
+	if (EndingChar_Underscore)
+		HotstringEndChars .= "_"
 	Hotstring("EndChars", HotstringEndChars)
 }
 
@@ -4683,6 +4714,15 @@ EndTab:
 Menu, Submenu2, ToggleCheck, % TransA["Tab"]
 EndingChar_Tab := !(EndingChar_Tab)
 IniWrite, %EndingChar_Tab%, Config.ini, Configuration, EndingChar_Tab
+F_LoadEndChars()
+return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+EndUnderscore:
+Menu, Submenu2, ToggleCheck, % TransA["Underscore"]
+EndingChar_Underscore := !(EndingChar_Underscore)
+Iniwrite, %EndingChar_Underscore%, Config.ini, Configuration, EndingChar_Underscore
 F_LoadEndChars()
 return
 
