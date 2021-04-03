@@ -167,7 +167,7 @@ global v_LibHotstringCnt			:= 0 ;no of (triggerstring, hotstring) definitions in
 ; 2. Try to load up configuration files. If those files do not exist, create them.
 if (!FileExist("Config.ini"))
 {
-	MsgBox, 0x30, % A_ScriptName . " Warning", Config.ini wasn't found. The default Config.ini is now created in location %A_ScriptDir%.
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . "Warning", Config.ini wasn't found. The default Config.ini is now created in location %A_ScriptDir%.
 	FileAppend, %ConfigIni%, Config.ini
 }
 
@@ -176,7 +176,7 @@ IniRead v_Language, Config.ini, Configuration, Language				; Load from Config.in
 
 if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "Languages" subfolder 
 {
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . " warning", There is no Languages subfolder and no language file exists!`nThe default %A_ScriptDir%\Languages\English.ini file is now created
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . "Warning", There is no Languages subfolder and no language file exists!`nThe default %A_ScriptDir%\Languages\English.ini file is now created
 	.`nMind that Config.ini Language variable is equal to %v_Language%.
 	FileCreateDir, %A_ScriptDir%\Languages							; Future: check against errors
 	FileAppend, %EnglishIni%, %A_ScriptDir%\Languages\English.ini		; Future: check against erros.
@@ -184,7 +184,7 @@ if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "L
 }
 else  if (!FileExist(A_ScriptDir . "\Languages\" . v_Language))			; else if there is no v_language .ini file, e.g. v_langugae == Polish.ini and there is no such file in Languages folder
 {
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . " warning", There is no %v_Language% file in Languages subfolder!`nThe default %A_ScriptDir%\Languages\English.ini file is now created.
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . "Warning", There is no %v_Language% file in Languages subfolder!`nThe default %A_ScriptDir%\Languages\English.ini file is now created.
 	FileAppend, %EnglishIni%, %A_ScriptDir%\Languages\English.ini		; Future: check against erros.
 	F_LoadCreateTranslationTxt("create")
 	v_Language 		:= "English.ini"					
@@ -508,15 +508,7 @@ if (ini_Undo == 0)
 else
 	Menu, Submenu1, Check, % TransA["Undo the last hotstring"]
 
-Loop, %A_ScriptDir%\Languages\*.ini
-{
-	Menu, SubmenuLanguage, Add, %A_LoopFileName%, L_ChangeLanguage
-	if (v_Language == A_LoopFileName)
-		Menu, SubmenuLanguage, Check, %A_LoopFileName%
-	else
-		Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
-}
-
+Menu, SubmenuLanguage,	Add
 Menu, Submenu1, 		Add, % TransA["Change Language"], 			:SubmenuLanguage
 Menu, HSMenu, 			Add, % TransA["Configuration"], 			:Submenu1
 Menu, HSMenu, 			Add, % TransA["Search Hotstrings"], 		L_Searching
@@ -524,6 +516,15 @@ Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],	L_ImportLibr
 Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  		L_ExportLibraryStatic
 Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  		L_ExportLibraryDynamic
 Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],	:ExportSubmenu
+
+Loop, %A_ScriptDir%\Languages\*.txt 
+{
+	Menu, SubmenuLanguage, Add, %A_LoopFileName%, L_ChangeLanguage
+	if (v_Language == A_LoopFileName)
+		Menu, SubmenuLanguage, Check, %A_LoopFileName%
+	else
+		Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
+}
 
 Loop, %A_ScriptDir%\Libraries\*.csv
 {
@@ -537,10 +538,12 @@ Loop, %A_ScriptDir%\Libraries\*.csv
 Menu, 	LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	:ToggleLibrariesSubmenu 
 Menu, 	HSMenu, 			Add, % TransA["Libraries configuration"], 			:LibrariesSubmenu
 Menu, 	HSMenu, 			Add, % TransA["Clipboard Delay"], 					HSdelay
-Menu, 	HSMenu, 			Add, % TransA["About/Help"], 						L_About
+Menu, 	HSMenu, 			Add, % TransA["About/Help"], 						F_GuiAbout
 Gui, 	HS3:Menu, HSMenu
 
 
+F_GuiAbout_CreateObjects()
+F_GuiAbout_DetermineConstraints()
 
 ;end of defining the Hotstrings Gui
 
@@ -770,8 +773,9 @@ return
 
 F1::
 	Gui, HS3:Default
-	Goto, L_About
-	; return
+	F_GuiAbout()
+	;Goto, L_About
+	 return
 	
 F2::
 	Gui, HS3:Default
@@ -938,6 +942,7 @@ F_LoadCreateTranslationTxt(decision*)
 			,"No Backspace (B0)" 									: "No Backspace (B0)"
 			,"No End Char (O)" 										: "No End Char (O)"
 			,"Number of characters for tips" 							: "&Number of characters for tips"
+			,"OK"												: "&OK"
 			,"Opening Curly Bracket {" 								: "Opening Curly Bracket {"
 			,"Opening Round Bracket (" 								: "Opening Round Bracket ("
 			,"Opening Square Bracket [" 								: "Opening Square Bracket ["
@@ -983,7 +988,7 @@ F_LoadCreateTranslationTxt(decision*)
 		for key, val in TransA
 			FileAppend, % key . A_Space . "=" . A_Space . val . "`n", %A_ScriptDir%\Languages\English.txt, UTF-8 
 	
-	;*[One]
+	
 	if (decision[1] = "load")
 		Loop, Read, %A_ScriptDir%\Languages\%v_Language%
 		{
@@ -1079,7 +1084,7 @@ F_HS3_CreateObjects()
 ;-DPIScale doesn't work in Microsoft Windows 10
 ;+Border doesn't work in Microsoft Windows 10
 ;OwnDialogs
-	Gui, 		HS3:New, 		+Resize +HwndHS3Hwnd +OwnDialogs -MaximizeBox, % SubStr(A_ScriptName, 1, -4)
+	Gui, 		HS3:New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs -MaximizeBox, % SubStr(A_ScriptName, 1, -4)
 	Gui, 		HS3:Margin,	% c_xmarg, % c_ymarg
 	Gui,			HS3:Color,	% c_WindowColor, % c_ControlColor
 	
@@ -1304,7 +1309,7 @@ F_HS3_DetermineConstraints()
 	GuiControl, Move, % IdCheckBox6, % "x" v_xNext "y" v_yNext
 	;GuiControl, Show, % IdCheckBox6
 	
-;Gui, 		%HS3Hwnd%:Show, AutoSize Center
+;Gui, 		%HS3GuiHwnd%:Show, AutoSize Center
 	
 ;5.1.3. Select hotstring output function
 	v_yNext += HofCheckBox + c_ymarg * 2
@@ -1428,7 +1433,7 @@ F_HS3_DetermineConstraints()
 	v_yNext += c_HofSandbox + c_ymarg
 	GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext
 	
-	;Gui, 		%HS3Hwnd%:Show, AutoSize Center
+	;Gui, 		%HS3GuiHwnd%:Show, AutoSize Center
 	
 ;6. Counters
 ;6.1. Total counter:
@@ -1445,7 +1450,121 @@ F_HS3_DetermineConstraints()
 	GuiControl, Text, % IdText11, % v_NoOfHotstringsInLibrary
 }
 
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+;tu jestem
+F_GuiAbout_CreateObjects()
+{
+	global ;assume-global mode
+	
+	;1. Prepare MyAbout Gui
+	Gui, MyAbout: New, 		-Resize +HwndMyAboutGuiHwnd +Owner -MaximizeBox -MinimizeBox
+	Gui, MyAbout: Margin,	% c_xmarg, % c_ymarg
+	Gui,	MyAbout: Color,	% c_WindowColor, % c_ControlColor
+	
+	;2. Prepare all text objects according to mock-up.
+	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, 					% c_FontType
+	Gui, MyAbout: Add, 		Text, x0 y0 HwndIdLine1, 													% TransA["Let's make your PC personal again..."]
+	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType
+	Gui, MyAbout: Add, 		Text, x0 y0 HwndIdLine2, 													% TransA["Enables Convenient Definition"]
+	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "bold underline" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, MyAbout: Add, 		Text, x0 y0 HwndIdLink1 gLink1,												% TransA["Application help"]
+	Gui, MyAbout: Add, 		Text, x0 y0 HwndIdLink2 gLink2,												% TransA["Genuine hotstrings AutoHotkey documentation"]
+	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType
+	Gui, MyAbout: Add, 		Button, x0 y0 HwndIdAboutOkButton gAboutOkButton,									% TransA["OK"]
+	
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_GuiAbout_DetermineConstraints()
+{
+	global ;assume-global mode
+;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
+		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
+		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
+							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+		,HwndIdLongest, IdLongest
+	
+;4. Determine constraints, according to mock-up
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdLine1, % "x" v_xNext "y" v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdLine1
+	v_yNext += v_OutVarTempH + c_ymarg
+	GuiControl, Move, % IdLine2, % "x" v_xNext "y" v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdLine2
+	v_yNext += v_OutVarTempH + c_ymarg
+	GuiControl, Move, % IdLink1, % "x" v_xNext "y" v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdLink1
+	v_yNext += v_OutVarTempH + c_ymarg
+	GuiControl, Move, % IdLink2, % "x" v_xNext "y" v_yNext
+
+	;Find the longest substring:
+	Loop, Parse, % TransA["Enables Convenient Definition"], % "`n"
+	{
+		v_OutVarTemp1 := StrLen(Trim(A_LoopField))
+		if (v_OutVarTemp1 > v_OutVarTemp)
+			v_OutVarTemp := v_OutVarTemp1
+	}
+	Loop, Parse, % TransA["Enables Convenient Definition"], % "`n"
+	{
+		if (StrLen(Trim(A_LoopField)) = v_OutVarTemp)
+		{
+			Gui, MyAbout: Add, Text, x0 y0 HwndIdLongest, % Trim(A_LoopField)
+			GuiControl, Hide, % IdLongest
+			Break
+		}
+	}
+	
+	GuiControlGet, v_OutVarTemp1, Pos, % IdLongest ; weight of the longest text
+	GuiControlGet, v_OutVarTemp2, Pos, % IdAboutOkButton 
+	v_wNext := v_OutVarTemp2W + 2 * c_xmarg
+	v_xNext := (v_OutVarTemp1W / 2) - (v_wNext / 2)
+	v_yNext += v_OutVarTemp2H + c_ymarg
+	GuiControl, Move, % IdAboutOkButton, % "x" v_xNext "y" v_yNext "w" v_wNext
+	
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiAbout()
+{
+	global ;assume-global mode
+	local FoundPos := "", NewStr := ""
+		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,NewWinPosX := 0, NewWinPosY := 0
+	
+	;Find the longest text string:
+	FoundPos := Instr(TransA["About/Help"], "&")
+	if (FoundPos)
+	{
+		if (FoundPos > 1)
+			NewStr := SubStr(TransA["About/Help"], FoundPos - 1) . SubStr(TransA["About/Help"], FoundPos + 1)
+		else
+			NewStr := SubStr(TransA["About/Help"], FoundPos + 1)
+	}
+	
+	;*[One]
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
+	if !(WinExist("ahk_id" . MyAboutGuiHwnd))
+		Gui, MyAbout: Show, Hide Center AutoSize
+	
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . MyAboutGuiHwnd
+	DetectHiddenWindows, Off
+	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+	OutputDebug, % "Window2W:" . A_Space . Window2W . A_Space . "Window2H:" . A_Space . Window2H
+	OutputDebug, % "NewWinPosX:" . A_Space . NewWinPosX . A_Space . "NewWinPosY:" . A_Space . NewWinPosY
+	Gui, MyAbout: Show, % "Center" . A_Space . "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % SubStr(A_ScriptName, 1, -4) . A_Space . NewStr
+	
+	return  
+}
 
 ; ------------------------------------------------------------------------------------------------------------------------------------
 
@@ -2621,13 +2740,13 @@ if (v_ResizingFlag) ;if run for the very first time
 	if (ini_StartX == "") or (ini_StartY == "") or (ini_StartW == "") or (ini_StartH == "")
 	{
 		;why double Show is necessary if FontSize == 16???
-		Gui, 		%HS3Hwnd%:Show, AutoSize Center
-		Gui, 		%HS3Hwnd%:Show, AutoSize Center
+		Gui, 		%HS3GuiHwnd%:Show, AutoSize Center
+		Gui, 		%HS3GuiHwnd%:Show, AutoSize Center
 	}
 	else
-		Gui,			%HS3Hwnd%: Show, % "X" . ini_StartX . A_Space . "Y" . ini_StartY . A_Space . "W" . ini_StartW . A_Space . "H" . ini_StartH
+		Gui,			%HS3GuiHwnd%: Show, % "X" . ini_StartX . A_Space . "Y" . ini_StartY . A_Space . "W" . ini_StartW . A_Space . "H" . ini_StartH
 	
-	Gui, %HS3Hwnd%: Default ; this line is necessary to enable handling of List Views.
+	Gui, %HS3GuiHwnd%: Default ; this line is necessary to enable handling of List Views.
 	GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 	LV_ModifyCol(1, Round(0.1 * v_OutVarTempW))
 	LV_ModifyCol(2, Round(0.1 * v_OutVarTempW))
@@ -2638,7 +2757,7 @@ if (v_ResizingFlag) ;if run for the very first time
 	v_ResizingFlag := 0
 }
 else
-	Gui, %HS3Hwnd%: Show, restore
+	Gui, %HS3GuiHwnd%: Show, restore
 
 if (v_PreviousSection != "") ; it means: if Hotstrings app was restarted
 {
@@ -2979,7 +3098,7 @@ F_AddHotstring()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 Clear: 
-Gui,		%HS3Hwnd%: Font, % "c" . c_FontColor
+Gui,		%HS3GuiHwnd%: Font, % "c" . c_FontColor
 GuiControl, Font, % IdCheckBox1
 GuiControl,, % IdEdit1,  				;v_TriggerString
 GuiControl, Font, % IdCheckBox1
@@ -3706,41 +3825,36 @@ else
 IniWrite, %ini_Delay%, Config.ini, Configuration, Delay
 return
 
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;tu jestem
-L_About:
-Gui, MyAbout: Destroy
-;Gui, MyAbout: Font, % "bold s" . c_FontSize*DPI%v_SelectedMonitor%, Calibri
-Gui, MyAbout: Font, % "bold s" . c_FontSize, Calibri
-Gui, MyAbout: Add, Text, , % TransA["Let's make your PC personal again..."]
-;Gui, MyAbout: Font, % "norm s" . c_FontSize*DPI%v_SelectedMonitor%
-Gui, MyAbout: Font, % "norm s" . c_FontSize
-Gui, MyAbout: Add, Text, , % TransA["Enables Convenient Definition"]
-;Gui, MyAbout: Font, % "CBlue bold Underline s" . c_FontSize*DPI%v_SelectedMonitor%
-Gui, MyAbout: Font, % "CBlue bold Underline s" . c_FontSize
-Gui, MyAbout: Add, Text, gLink, % TransA["Application help"]
-Gui, MyAbout: Add, Text, gLink2, % TransA["Genuine hotstrings AutoHotkey documentation"]
-;Gui, MyAbout: Font, % "norm s" . c_FontSize*DPI%v_SelectedMonitor%
-Gui, MyAbout: Font, % "norm s" . c_FontSize
-;Gui, MyAbout: Add, Button, % "Default Hidden w" . 100*DPI%v_SelectedMonitor% . " gMyOK vOkButtonVariabl hwndOkButtonHandle", &OK
-Gui, MyAbout: Add, Button, % "Default Hidden w" . 100 . " gMyOK vOkButtonVariabl hwndOkButtonHandle", &OK ;Future: translate
-GuiControlGet, MyGuiControlGetVariable, MyAbout: Pos, %OkButtonHandle%
-WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth, v_WindowHeight, Hotstrings
-;Gui, MyAbout:Show,% "hide w" . 670*DPI%v_SelectedMonitor% . "h" . 220*DPI%v_SelectedMonitor%, About/Help
-Gui, MyAbout:Show, % "hide w" . 670 . "h" . 220, % TransA["About/Help"]
-DetectHiddenWindows, On
-WinGetPos, , , MyAboutWindowWidth, MyAboutWindowHeight, % TransA["About/Help"]
-DetectHiddenWindows, Off
-;NewButtonXPosition := round((( MyAboutWindowWidth- 100*DPI%v_SelectedMonitor%)/2)*DPI%v_SelectedMonitor%)
-;NewButtonXPosition := round((MyAboutWindowWidth- 100)/2)
-NewButtonXPosition := round(MyAboutWindowWidth/2)
-GuiControl, Move, %OkButtonHandle%, x%NewButtonXPosition%
-GuiControl, Show, %OkButtonHandle%
-;Gui, MyAbout: Show, % "x" . v_WindowX + (v_WindowWidth - MyAboutWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - MyAboutWindowHeight)/2, % TransA["About/Help"]
-Gui, MyAbout: Show
-return  
 
-Link:
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+;L_About:
+;Gui, MyAbout: Destroy
+;Gui, MyAbout: Font, % "bold s" . c_FontSize, Calibri
+;Gui, MyAbout: Add, Text, , % TransA["Let's make your PC personal again..."]
+;Gui, MyAbout: Font, % "norm s" . c_FontSize
+;Gui, MyAbout: Add, Text, , % TransA["Enables Convenient Definition"]
+;Gui, MyAbout: Font, % "CBlue bold Underline s" . c_FontSize
+;Gui, MyAbout: Add, Text, gLink1, % TransA["Application help"]
+;Gui, MyAbout: Add, Text, gLink2, % TransA["Genuine hotstrings AutoHotkey documentation"]
+;Gui, MyAbout: Font, % "norm s" . c_FontSize
+;GuiAboutOkButtonMyOK vOkButtonVariabl hwndOkButtonHandle", &OK ;Future: translate
+;GuiControlGet, MyGuiControlGetVariable, MyAbout: Pos, %OkButtonHandle%
+;WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth, v_WindowHeight, Hotstrings
+;Gui, MyAbout:Show, % "hide w" . 670 . "h" . 220, % TransA["About/Help"]
+;DetectHiddenWindows, On
+;WinGetPos, , , MyAboutWindowWidth, MyAboutWindowHeight, % TransA["About/Help"]
+;DetectHiddenWindows, Off
+;NewButtonXPosition := round((MyAboutWindowWidth- 100)/2)
+;NewButtonXPosition := round(MyAboutWindowWidth/2)
+;GuiControl, Move, %OkButtonHandle%, x%NewButtonXPosition%
+;GuiControl, Show, %OkButtonHandle%
+;Gui, MyAbout: Show, % "x" . v_WindowX + (v_WindowWidth - MyAboutWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - MyAboutWindowHeight)/2, % TransA["About/Help"]
+;Gui, MyAbout: Show
+;return  
+
+Link1:
 Run, https://github.com/mslonik/Hotstrings
 return
 
@@ -3750,10 +3864,10 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ~F1::
-MyOK:
+AboutOkButton:
 MyAboutGuiEscape:
 MyAboutGuiClose: ; Launched when the window is closed by pressing its X button in the title bar.
-Gui, MyAbout: Destroy
+Gui, MyAbout: Hide
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3962,8 +4076,8 @@ HS3GuiSize() ;Gui event
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 HS3GuiEscape:
-Gui, 		%HS3Hwnd%: Minimize
-Gui,			%HS3Hwnd%: Show, Hide
+Gui, 		%HS3GuiHwnd%: Minimize
+Gui,			%HS3GuiHwnd%: Show, Hide
 return
 
 ; Future: save window position
@@ -4707,7 +4821,7 @@ Loop, %A_ScriptDir%\Languages\*.ini
 	else
 		Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
 }
-MsgBox, % TransA["Application language changed to:"] . " " . SubStr(v_Language, 1, StrLen(v_Language)-4) . "`n" . TransA["The application will be reloaded with the new language file."]
+MsgBox, % TransA["Application language changed to:"] . A_Space . SubStr(v_Language, 1, StrLen(v_Language)-4) . "`n" . TransA["The application will be reloaded with the new language file."]
 Reload
 ; return			; this line will not be reached
 #If
