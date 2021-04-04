@@ -66,8 +66,8 @@ MenuCaret=1
 TipsSortAlphatebically=1
 TipsSortByLength=1
 Language=English.txt
-[Libraries]
-[TipsLibraries]
+[LoadLibraries]
+[ShowTipsLibraries]
 	)
 
 global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user
@@ -224,7 +224,7 @@ IniRead, ini_MenuCaret, 					Config.ini, Configuration, MenuCaret
 IniRead, ini_TipsSortAlphabetically,		Config.ini, Configuration, TipsSortAlphatebically
 IniRead, ini_TipsSortByLength,			Config.ini, Configuration, TipsSortByLength
 
-F_ValidateIniTipsLibraries() ; load from / to Config.ini tu jestem
+F_ValidateIniLibSections() ; load from / to Config.ini tu jestem
 
 ; Hotstrings app could be reloaded by itself, (see label Delete:). In such a case 9 command line parameters are passed
 ;if !(A_Args[8])
@@ -1656,16 +1656,15 @@ F_GuiAbout()
 
 ; ------------------------------------------------------------------------------------------------------------------------------------
 
-F_ValidateIniTipsLibraries() ; Load from / to Config.ini from Libraries folder
+F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 {
 	global ;assume-global mode
-	local a_TipsConfig := [], v_IsLibraryEmpty := true, v_ConfigLibrary := "", v_ConfigFlag := false
-		,o_Libraries := {}, ini_Libraries := {}, v_LibTemp := "", key := 0, value := "", temp_ini_Libraries := "", v_LibFlagTemp := ""
-		,ffound := false
+	local v_IsLibraryEmpty := true, v_ConfigLibrary := "", v_ConfigFlag := false
+		,o_Libraries := {}, ini_LoadLib := {}, ini_ShowTipsLib := {}, v_LibFileName := "", key := 0, value := "", TempLoadLib := "", TempShowTipsLib := "", v_LibFlagTemp := ""
+		,FlagFound := false, PriorityFlag := false, ValueTemp := 0, SectionTemp := ""
 	
 	
-	IniRead, ini_TipsConfig, Config.ini, TipsLibraries		; Read into v_TipsConfig section TipsLibraries from the file Config.ini which is a list of library files (.csv) stored in Libraries subfolder
-	IniRead, temp_ini_Libraries,	Config.ini, Libraries
+	IniRead, TempLoadLib,	Config.ini, LoadLibraries
 	
 	;Check if Libraries subfolder exists. If not, create it and display warning.
 	v_IsLibraryEmpty := true
@@ -1686,116 +1685,87 @@ F_ValidateIniTipsLibraries() ; Load from / to Config.ini from Libraries folder
 	if (v_IsLibraryEmpty)
 		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . " warning", % "Libraries folder: " . A_ScriptDir . "\Libraries is empty. No (triggerstring, hotstring) definition will be loaded." ;Future: prepare for translation
 	
-	;Read library files into object.
+	;Read names library files (*.csv) from Library subfolder into object.
 	if !(v_IsLibraryEmpty)
 		Loop, Files, Libraries\*.csv
 			o_Libraries.Push(A_LoopFileName)
 	
 	;Check if Config.ini contains in section [Libraries] file names which are actually in library subfolder. Synchronize [Libraries] section with content of subfolder.
-	;Parse the temp_ini_Libraries.
-	;*[One]
+	;Parse the TempLoadLib.
+	IniRead, TempLoadLib, Config.ini, LoadLibraries
 	for key, value in o_Libraries
 	{
-		Loop, Parse, temp_ini_Libraries, `n
+		FlagFound := false
+		Loop, Parse, TempLoadLib, `n
 		{
-			v_LibTemp 	:= SubStr(A_LoopField, 1, InStr(A_LoopField, "=") - 1)
-			v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=",, v_LibTemp) + 1)
-			if (value == v_LibTemp)
-				{
-					ini_Libraries[value] := v_LibFlagTemp
-					ffound := true
-				}
+			v_LibFileName 	:= SubStr(A_LoopField, 1, InStr(A_LoopField, "=") - 1)
+			v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=",, v_LibFileName) + 1)
+			if (value == v_LibFileName)
+			{
+				ini_LoadLib[value] := v_LibFlagTemp
+				FlagFound := true
+			}
 		}	
-		if !(ffound)
-			ini_Libraries[value] := 1
+		if !(FlagFound)
+			ini_LoadLib[value] := 1
 	}
 	
-	
-	/*
-		if (!(temp_ini_Libraries = "ERROR") and (temp_ini_Libraries))
-			Loop, Parse, temp_ini_Libraries, `n
-			{
-				v_LibTemp 	:= SubStr(A_LoopField, 1, InStr(A_LoopField, "=") - 1)
-				v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=",, v_LibTemp) + 1)
-				for key, value in o_Libraries
-					if (value == v_LibTemp)
-					{
-						ini_Libraries[value] := v_LibFlagTemp
-						ffound := true
-					}
-				if !(ffound)
-					ini_Libraries[value] := 1
-			}
+	;Delete and recreate [Libraries] section of Config.ini mirroring ini_LoadLib associative table. "PriorityLibrary.csv" as the last one.
+	IniDelete, Config.ini, LoadLibraries
+	for key, value in ini_LoadLib
+	{
+		if (key != "PriorityLibrary.csv")
+			SectionTemp .= key . "=" . value . "`n"
 		else
 		{
-			for key, value in o_Libraries
-			{
-				IniWrite, 1, Config.ini, Libraries, %value%
-				ini_Libraries[value] := 1
-			}
-			return
+			PriorityFlag := true
+			ValueTemp := value
+		}
 	}
-	*/
+	if (PriorityFlag)
+		SectionTemp .= "PriorityLibrary.csv" . "=" . ValueTemp
 	
-	for key, value in ini_Libraries
-		IniWrite, %key%, Config.ini, Libraries, %value%
+	IniWrite, % SectionTemp, Config.ini, LoadLibraries
 	
-	
-	
-	
-	
-	/*
-		;Check if Config.ini contains in section [TipsLibraries] file names which actually aren't present in Libraries subfolder. If it does, remove them from Config.ini
-		a_TipsConfig := StrSplit(v_TipsConfig, "`n")			; Separates a string into an array of substrings using the specified delimiters.
-		Loop, % a_TipsConfig.MaxIndex()					; Loop over the entire array
-		{
-			v_ConfigLibrary := SubStr(a_TipsConfig[A_Index], 1, InStr(a_TipsConfig[A_Index], "=") - 1)	; returns from the beginning till "=" sign
-			Loop, Files, Libraries\*.csv
-			{
-				v_ConfigFlag := false
-				if (A_LoopFileName == v_ConfigLibrary)
-				{
-					v_ConfigFlag := true
-					break
-				}
-			}
-			if (!v_ConfigFlag)							; if in Config.ini there is a file which is not actually present in Libraries subfolder
-				IniDelete, Config.ini, TipsLibraries, %v_ConfigLibrary% ; remove such file from Conig.ini
-		}
-		
-		; Priority library has special meaning. It is constant library filename, created if not exist.
-		if (!FileExist("Libraries\PriorityLibrary.csv"))
-		{
-			FileAppend,, Libraries\PriorityLibrary.csv, UTF-8
-			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . " warning", % "The default library file (PriorityLibrary.csv) was created in " . A_ScriptDir . "\Libraries folder." ;Future: prepare for translation
-		}
-	*/
-	
-	;Load again section [TipsLibraries] from Config.ini
-	IniRead, v_TipsConfig, 					Config.ini, TipsLibraries
-	
-	; Look in Libraries subfolder. Check if each file found there is already present in section [TipsLibraries] of Config.ini file. If not add it to Config.ini and enable it by default.
-	a_TipsConfig := StrSplit(v_TipsConfig, "`n")			; Separates a string into an array of substrings using the specified delimiters.
-	Loop, Files, Libraries\*.csv
+	SectionTemp := ""
+	;Check if Config.ini contains in section [ShowTipsLibraries] file names which are actually in library subfolder. Synchronize [Libraries] section with content of subfolder.
+	;Parse the TempLoadLib.
+	IniRead, TempShowTipsLib, Config.ini, ShowTipsLibraries
+	for key, value in o_Libraries
 	{
-		v_NewLibrary := true
-		
-		;MsgBox, , v_ConfigLibrary, %v_ConfigLibrary%
-		Loop, % a_TipsConfig.MaxIndex()					; Loop over the entire array
+		FlagFound := false
+		Loop, Parse, TempShowTipsLib, `n
 		{
-			v_ConfigLibrary := SubStr(a_TipsConfig[A_Index], 1, InStr(a_TipsConfig[A_Index], "=") - 1)	; returns from the beginning till "=" sign
-			if (A_LoopFileName == v_ConfigLibrary)
+			v_LibFileName 	:= SubStr(A_LoopField, 1, InStr(A_LoopField, "=") - 1)
+			v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=",, v_LibFileName) + 1)
+			if (value == v_LibFileName)
 			{
-				v_NewLibrary := false
-				break
+				ini_ShowTipsLib[value] := v_LibFlagTemp
+				FlagFound := true
 			}
-		}
-		if (v_NewLibrary)							; if in Config.ini there is a file which is not actually present in Libraries subfolder
-			Iniwrite, 1, Config.ini, TipsLibraries,  %A_LoopFileName% ;add new library file and enable tips
+		}	
+		if !(FlagFound)
+			ini_ShowTipsLib[value] := 1
 	}
 	
-	;Load again section [TipsLibraries] from Config.ini which is now at the end consistent with content of the Libraries folder.
-	IniRead, v_TipsConfig, 					Config.ini, TipsLibraries
+	;Delete and recreate [ShowTipsLibraries] section of Config.ini mirroring ini_ShowTipsLib associative table. "PriorityLibrary.csv" as the last one.
+	IniDelete, Config.ini, ShowTipsLibraries
+	for key, value in ini_ShowTipsLib
+	{
+		if (key != "PriorityLibrary.csv")
+			SectionTemp .= key . "=" . value . "`n"
+		else
+		{
+			PriorityFlag := true
+			ValueTemp := value
+		}
+	}
+	if (PriorityFlag)
+		SectionTemp .= "PriorityLibrary.csv" . "=" . ValueTemp
+	
+	IniWrite, % SectionTemp, Config.ini, ShowTipsLibraries
+	;*[One]
+	return
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
