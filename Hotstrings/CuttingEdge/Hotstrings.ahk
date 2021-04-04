@@ -164,7 +164,9 @@ global IsSandboxMoved			:= false
 global CntGuiSize				:= 0
 global v_ToggleRightColumn		:= false ;memory of last state of the IdButton5 (ToggleRightColumn)
 global v_LibHotstringCnt			:= 0 ;no of (triggerstring, hotstring) definitions in single library
-
+global PriorityFlag				:= false
+global ini_LoadLib 				:= {}	; this associative array is used to store information about Libraries\*.csv files to be loaded
+global ini_ShowTipsLib 			:= {}	; this associative array is used to store information about triggerstring tips to be loaded 
 
 ; 2. Try to load up configuration files. If those files do not exist, create them.
 if (!FileExist("Config.ini"))
@@ -224,7 +226,7 @@ IniRead, ini_MenuCaret, 					Config.ini, Configuration, MenuCaret
 IniRead, ini_TipsSortAlphabetically,		Config.ini, Configuration, TipsSortAlphatebically
 IniRead, ini_TipsSortByLength,			Config.ini, Configuration, TipsSortByLength
 
-F_ValidateIniLibSections() ; load from / to Config.ini tu jestem
+F_ValidateIniLibSections() ; load from / to Config.ini
 
 ; Hotstrings app could be reloaded by itself, (see label Delete:). In such a case 9 command line parameters are passed
 ;if !(A_Args[8])
@@ -261,28 +263,9 @@ F_HS3_CreateObjects()
 F_HS3_DefineConstants()
 F_HS3_DetermineConstraints()
 
-	; Prepare TrayTip message taking into account value of command line parameter.
-	if (v_Param == "d")
-		TrayTip, %A_ScriptName% - Debug mode, 	% TransA["Loading hotstrings from libraries..."], 1
-	else if (v_Param == "l")
-		TrayTip, %A_ScriptName% - Lite mode, 	% TransA["Loading hotstrings from libraries..."], 1
-	else	
-		TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
-	
-
-v_HotstringCnt := 0
-Loop, Files, %A_ScriptDir%\Libraries\*.csv
-	{
-		if !(A_LoopFileName == "PriorityLibrary.csv")
-			F_LoadFile(A_LoopFileName)
-	}
-F_LoadFile("PriorityLibrary.csv")
-
-TrayTip, %A_ScriptName%, % TransA["Hotstrings have been loaded"], 1
-	;Gui, HS3:Show
-	;Pause
-
-
+;tu jestem
+F_UpdateSelHotLibDDL()
+F_LoadHotstringsFromLibraries()
 
 
 ; After definitions of (triggerstring, hotstring) are uploaded to memory, prepare (System)Tray icon
@@ -322,10 +305,6 @@ Loop, % N
 SysGet, PrimMon, MonitorPrimary
 if (v_SelectedMonitor == 0)
 	v_SelectedMonitor := PrimMon
-
-
-Loop, %A_ScriptDir%\Libraries\*.csv
-	GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName% ; GuiControl (Blank): Puts new contents into control
 
 
     ; Menu, HSMenu, Add, &Monitor, CheckMon
@@ -564,14 +543,14 @@ Loop, %A_ScriptDir%\Libraries\*.csv
 		Menu, ToggleLibTrigTipsSubmenu, UnCheck, %A_LoopFileName%	
 }
 
-Loop, %A_ScriptDir%\Libraries\*.csv
+;tu jestem
+for key, value in ini_LoadLib
 {
-	Menu, EnableDisableLibraries, Add, %A_LoopFileName%, F_EnableDisableLibraries
-	IniRead, v_LibraryFlag, Config.ini, Libraries, %A_LoopFileName%
-	if (v_LibraryFlag)
-		Menu, EnableDisableLibraries, Check, %A_LoopFileName%
+	Menu, EnableDisableLibraries, Add, %key%, F_EnableDisableLibraries
+	if (value)
+		Menu, EnableDisableLibraries, Check, %key%
 	else
-		Menu, EnableDisableLibraries, UnCheck, %A_LoopFileName%	
+		Menu, EnableDisableLibraries, UnCheck, %key%	
 }
 
 Menu,	LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"],			:EnableDisableLibraries
@@ -891,7 +870,110 @@ F8::
 Gui, HS3List:Default
 goto, MoveList
 #if
+	
+
+
+#IfWinActive Hotstring listbox
+~1::
+~2::
+~3::
+~4::
+~5::
+~6::
+~7::
+v_PressedKey := SubStr(A_ThisHotkey,2)
+if (v_PressedKey > v_MenuMax)
+	return
+else
+{
+	GuiControl, Choose, MenuListbox, v_PressedKey
+	Sleep, 100
+}
+Enter:: 
+v_HotstringFlag := 1
+Gui, Menu:Submit, Hide
+ClipboardBack:=ClipboardAll ;backup clipboard
+MenuListbox := SubStr(MenuListbox, InStr(MenuListbox, ".")+2)
+Clipboard:=MenuListbox ;Shove what was selected into the clipboard
+Send, ^v ;paste the text
+if (Ovar == 0)
+	Send, % A_EndChar
+sleep
+
+, %ini_Delay% ;Remember to sleep before restoring clipboard or it will fail
+v_TypedTriggerstring := MenuListbox
+v_UndoHotstring := MenuListbox
+Clipboard:=ClipboardBack
+Hotstring("Reset")
+Gui, Menu:Destroy
+Return
+#If
+#IfWinExist Hotstring listbox
+Esc::
+Gui, Menu:Destroy
+SendRaw, % SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
+return
+#If
+
+
+
+
+
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+
+;tu jestem
+F_LoadHotstringsFromLibraries()
+{
+	global ; assume-global mode
+	local key := "", value := ""
+	
+	; Prepare TrayTip message taking into account value of command line parameter.
+	if (v_Param == "d")
+		TrayTip, %A_ScriptName% - Debug mode, 	% TransA["Loading hotstrings from libraries..."], 1
+	else if (v_Param == "l")
+		TrayTip, %A_ScriptName% - Lite mode, 	% TransA["Loading hotstrings from libraries..."], 1
+	else	
+		TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
+	
+	; Load (triggerstring, hotstring) definitions if enabled and triggerstring tips if enabled.
+	v_HotstringCnt := 0
+	for key, value in ini_LoadLib
+	{
+		if ((key != "PriorityLibrary.csv") and (value))
+			F_LoadFile(key)
+		if ((key == "PriorityLibrary.csv") and (value))
+			PriorityFlag := true
+	}
+	if (PriorityFlag)
+	{
+		F_LoadFile("PriorityLibrary.csv")
+		PriorityFlag := false
+	}
+	
+	TrayTip, %A_ScriptName%, % TransA["Hotstrings have been loaded"], 1
+	return
+}
+
+; ------------------------------------------------------------------------------------------------------------------------------------
+
+F_UpdateSelHotLibDDL()
+;Load content of DDL2 and mark disabled libraries
+{
+	global ;assume-global mode
+	local key := "", value := ""
+	
+	GuiControl, , v_SelectHotstringLibrary, |
+	for key, value in ini_LoadLib
+	{
+		if !(value)
+			GuiControl, , v_SelectHotstringLibrary, % key . A_Space . TransA["DISABLED"]
+		else
+			GuiControl, , v_SelectHotstringLibrary, % key
+	}
+	return
+}
+
+; ------------------------------------------------------------------------------------------------------------------------------------
 
 F_EnableDisableLibraries() ;tu jestem
 {
@@ -900,41 +982,14 @@ F_EnableDisableLibraries() ;tu jestem
 	
 
 	Menu, EnableDisableLibraries, ToggleCheck, %A_ThisMenuItem%
-	IniRead, v_LibraryFlag,	Config.ini, Libraries, %A_ThisMenuitem%		; Read into v_TipsConfig section TipsLibraries from the file Config.ini which is a list of library files (.csv) stored in Libraries subfolder
+	IniRead, v_LibraryFlag,	Config.ini, LoadLibraries, %A_ThisMenuitem%		; Read into v_TipsConfig section TipsLibraries from the file Config.ini which is a list of library files (.csv) stored in Libraries subfolder
 	v_LibraryFlag := !(v_LibraryFlag)
-	Iniwrite, %v_LibraryFlag%,	Config.ini, Libraries, %A_ThisMenuItem%
+	Iniwrite, %v_LibraryFlag%,	Config.ini, LoadLibraries, %A_ThisMenuItem%
 	
-	v_HotstringCnt := 0
-	IniRead, v_WhichLibraries, Config.ini, Libraries
-	
-	if (v_Param == "d")
-		TrayTip, %A_ScriptName% - Debug mode, 	% TransA["Loading hotstrings from libraries..."], 1
-	else if (v_Param == "l")
-		TrayTip, %A_ScriptName% - Lite mode, 	% TransA["Loading hotstrings from libraries..."], 1
-	else	
-		TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
+	F_ValidateIniLibSections()
+	F_UpdateSelHotLibDDL()
+	F_LoadHotstringsFromLibraries()
 
-	Loop, Parse, v_WhichLibraries, `n
-	{
-		v_LibTemp 	:= SubStr(A_LoopField, 1, InStr(A_LoopField, "=") - 1)
-		v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=") + 1)
-		if (!(v_LibTemp == A_ThisMenuItem) and !(v_LibTemp == "PriorityLibrary.csv") and (v_LibFlagTemp))
-			F_LoadFile(v_LibTemp)
-	}
-	v_LibTemp := InStr(v_WhichLibraries, "PriorityLibrary.csv")
-	if (v_LibTemp)
-	{
-		v_LibFlagTemp := SubStr(v_WhichLibraries, InStr(v_WhichLibraries, "=",, v_LibTemp) + 1)
-		if ((v_LibFlagTemp) and (A_ThisMenuItem == "PriorityLibrary.csv") and (v_LibraryFlag))
-		{
-			F_LoadFile("PriorityLibrary.csv")
-			return
-		}
-		if (v_LibFlagTemp)
-			F_LoadFile(v_LibTemp)
-	}
-	TrayTip, %A_ScriptName%, % TransA["Hotstrings have been loaded"], 1
-	
 	return
 }
 
@@ -981,6 +1036,7 @@ F_LoadCreateTranslationTxt(decision*)
 			,"Deleting hotstring..." 								: "Deleting hotstring..."
 			,"Deleting hotstring. Please wait..." 						: "Deleting hotstring. Please wait..."
 			,"Disable" 											: "Disable"
+			,"DISABLED"											: "DISABLED"
 			,"Dot ." 												: "Dot ."
 			,". Do you want to proceed?" 								: ". Do you want to proceed?"
 			,"Dynamic hotstrings" 									: "&Dynamic hotstrings"
@@ -1105,8 +1161,13 @@ F_LoadCreateTranslationTxt(decision*)
 F_LoadFile(nameoffile)
 {
 	global ;assume-global mode
-	local name := "", tabSearch := "", line := ""
-	
+	local name := "", tabSearch := "", line := "", FlagLoadTriggerTips := false
+		,key := "", value := ""
+
+	for key, value in ini_ShowTipsLib
+		if ((key == nameoffile) and (value))
+			FlagLoadTriggerTips := true
+
 	Loop
 	{
 		FileReadLine, line, %A_ScriptDir%\Libraries\%nameoffile%, %A_Index%
@@ -1115,31 +1176,44 @@ F_LoadFile(nameoffile)
 		tabSearch := StrSplit(line, "‖")	
 		name := SubStr(A_LoopFileName, 1, -4) ;filename without extension
 		
-		/*			
-			line := StrReplace(line, "``n", "`n")
-			line := StrReplace(line, "``r", "`r")		
-			line := StrReplace(line, "``t", "`t")
-			if (InStr(tabSearch[1], "*0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "*0")
-			}
-			if (InStr(tabSearch[1], "O0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "O0")
-			}
-			if (InStr(tabSearch[1], "C0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "C0")
-			}
-			if (InStr(tabSearch[1], "?0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "?0")
-			}
-			if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "B")
-			}		
-		*/			
+		a_Library.Push(name) ; function Search
+		a_TriggerOptions.Push(tabSearch[1])
+		a_Triggerstring.Push(tabSearch[2]) 
+		a_OutputFunction.Push(tabSearch[3])
+		a_EnableDisable.Push(tabSearch[4])
+		a_Hotstring.Push(tabSearch[5]) 
+		a_Comment.Push(tabSearch[6])
+		
+		if (FlagLoadTriggerTips)
+				a_Triggers.Push(tabSearch[2]) ; a_Triggers is used in main loop of application for generating tips
+		
+		F_ini_StartHotstring(line, nameoffile)
+		GuiControl, Text, % IdText2, % v_LoadedHotstrings . A_Space . ++v_HotstringCnt ; •(Blank): Puts new contents into the control.
+		;OutputDebug, % "Content of IdText2 GuiControl:" . A_Space . v_LoadedHotstrings . A_Space . v_HotstringCnt
+	}
+	a_LibraryCnt.Push(v_HotstringCnt)
+	return
+}
+
+; ------------------------------------------------------------------------------------------------------------------------------------
+
+F_RemoveFile(nameoffile)
+{
+	global ;assume-global mode
+	local name := "", tabSearch := "", line := "", FlagLoadTriggerTips := false
+		,key := "", value := ""
+
+	for key, value in ini_ShowTipsLib
+		if ((key == nameoffile) and (value))
+			FlagLoadTriggerTips := true
+
+	Loop
+	{
+		FileReadLine, line, %A_ScriptDir%\Libraries\%nameoffile%, %A_Index%
+		if (ErrorLevel)
+			break
+		tabSearch := StrSplit(line, "‖")	
+		name := SubStr(A_LoopFileName, 1, -4) ;filename without extension
 		
 		a_Library.Push(name) ; function Search
 		a_TriggerOptions.Push(tabSearch[1])
@@ -1148,20 +1222,21 @@ F_LoadFile(nameoffile)
 		a_EnableDisable.Push(tabSearch[4])
 		a_Hotstring.Push(tabSearch[5]) 
 		a_Comment.Push(tabSearch[6])
-		;a_Triggers.Push(v_TriggerString) ; a_Triggers is used in main loop of application for generating tips
-		a_Triggers.Push(tabSearch[2]) ; a_Triggers is used in main loop of application for generating tips
+		
+		if (FlagLoadTriggerTips)
+				a_Triggers.Push(tabSearch[2]) ; a_Triggers is used in main loop of application for generating tips
 		
 		F_ini_StartHotstring(line, nameoffile)
-		;v_HotstringCnt++
 		GuiControl, Text, % IdText2, % v_LoadedHotstrings . A_Space . ++v_HotstringCnt ; •(Blank): Puts new contents into the control.
 		;OutputDebug, % "Content of IdText2 GuiControl:" . A_Space . v_LoadedHotstrings . A_Space . v_HotstringCnt
-		
 	}
 	a_LibraryCnt.Push(v_HotstringCnt)
 	return
 }
 
 ; ------------------------------------------------------------------------------------------------------------------------------------
+
+
 
 F_HS3_CreateObjects()
 {
@@ -1660,9 +1735,9 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 {
 	global ;assume-global mode
 	local v_IsLibraryEmpty := true, v_ConfigLibrary := "", v_ConfigFlag := false
-		,o_Libraries := {}, ini_LoadLib := {}, ini_ShowTipsLib := {}, v_LibFileName := "", key := 0, value := "", TempLoadLib := "", TempShowTipsLib := "", v_LibFlagTemp := ""
+		,o_Libraries := {}, v_LibFileName := "", key := 0, value := "", TempLoadLib := "", TempShowTipsLib := "", v_LibFlagTemp := ""
 		,FlagFound := false, PriorityFlag := false, ValueTemp := 0, SectionTemp := ""
-	
+		; global / outout variables: ini_LoadLib := {}, ini_ShowTipsLib := {},
 	
 	IniRead, TempLoadLib,	Config.ini, LoadLibraries
 	
@@ -2135,50 +2210,6 @@ F_MenuText(TextOptions, Oflag)
 	return
 }
 
-;Future: move this section of code to Hotkeys
-
-#IfWinActive Hotstring listbox
-~1::
-~2::
-~3::
-~4::
-~5::
-~6::
-~7::
-v_PressedKey := SubStr(A_ThisHotkey,2)
-if (v_PressedKey > v_MenuMax)
-	return
-else
-{
-	GuiControl, Choose, MenuListbox, v_PressedKey
-	Sleep, 100
-}
-Enter:: 
-v_HotstringFlag := 1
-Gui, Menu:Submit, Hide
-ClipboardBack:=ClipboardAll ;backup clipboard
-MenuListbox := SubStr(MenuListbox, InStr(MenuListbox, ".")+2)
-Clipboard:=MenuListbox ;Shove what was selected into the clipboard
-Send, ^v ;paste the text
-if (Ovar == 0)
-	Send, % A_EndChar
-sleep
-
-, %ini_Delay% ;Remember to sleep before restoring clipboard or it will fail
-v_TypedTriggerstring := MenuListbox
-v_UndoHotstring := MenuListbox
-Clipboard:=ClipboardBack
-Hotstring("Reset")
-Gui, Menu:Destroy
-Return
-#If
-#IfWinExist Hotstring listbox
-Esc::
-Gui, Menu:Destroy
-SendRaw, % SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
-return
-#If
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 F_MenuTextAHK(TextOptions, Oflag)
@@ -2309,7 +2340,7 @@ F_CheckBoxColor(State,Button)
 	;global v_SelectedMonitor
 	if (State = 1)
 		;Gui, HS3:Font,% "s" . 12*DPI%v_SelectedMonitor% . " cRed Norm", Calibri
-		Gui, HS3:Font, % "s" . c_FontSize . A_Space . "cRed Norm", Calibri
+		Gui, HS3:Font, % "s" . c_FontSize . A_Space . "cGreen Norm", Calibri
 	else 
 		;Gui, HS3:Font,% "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm", Calibri
 		Gui, HS3:Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", Calibri
@@ -2639,7 +2670,7 @@ F_ImportLibrary(filename)
 	F_SortHotstringsAlphabetically(v_OutputFile)
 	GuiControl,, MyText, % TransA["Loading libraries. Please wait..."]
 	a_Triggers := []
-	F_LoadHotstringsFromLibraries()
+	;F_LoadHotstringsFromLibraries()
 	Gui, HS3:Default
 	GuiControl, , v_SelectHotstringLibrary, |
 	Loop,%A_ScriptDir%\Libraries\*.csv
@@ -2799,47 +2830,8 @@ F_ExportLibraryDynamic(filename)
 	return
 }
 
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-/*
-	F_ShowUnicodeSigns(string)
-	{
-		vSize := StrPut(string, "CP0")
-		VarSetCapacity(vUtf8, vSize)
-		vSize := StrPut(string, &vUtf8, vSize, "CP0")
-		Return StrGet(&vUtf8, "UTF-8") 
-	}
-	
-*/
-
-/*
-	F_ReadText(string)
-	{
-		local Key
-		Key := SubStr(string, 3)		; Retrives all characters starting from 3rd position in string: omits "t_" at the beginning of each string.
-		IniRead, string, Languages\%v_Language%, Strings, %Key% 
-		if (InStr(string, "``n"))		; If `n string is escaped (so it equals to ``n string), convert it to normal `n string.
-			string := StrReplace(string, "``n", "`n")
-		;string := F_ShowUnicodeSigns(string)
-		return string
-	}
-*/
-
-F_LoadHotstringsFromLibraries()
-{
-		;global t_LoadingHotstringsFromLibraries, t_HotstringsHaveBeenLoaded, v_HotstringCnt
-	
-	;TrayTip, %A_ScriptName%, %t_LoadingHotstringsFromLibraries%, 1
-	v_HotstringCnt := 0
-	Loop, Files, Libraries\*.csv
-	{
-		if !(A_LoopFileName == "PriorityLibrary.csv")
-		{
-			F_LoadFiles(A_LoopFileName)
-		}
-	}
-	F_LoadFiles("PriorityLibrary.csv")
-	;TrayTip, %A_ScriptName%, %t_HotstringsHaveBeenLoaded%, 1
-}
 
 
 
@@ -2885,7 +2877,7 @@ if (v_ResizingFlag) ;if run for the very first time
 	v_ResizingFlag := 0
 }
 else
-	Gui, %HS3GuiHwnd%: Show, restore
+	Gui, %HS3GuiHwnd%: Show, Restore
 
 if (v_PreviousSection != "") ; it means: if Hotstrings app was restarted
 {
@@ -4930,7 +4922,7 @@ v_LibraryFlag := !(v_LibraryFlag)
 IniWrite, %v_LibraryFlag%, Config.ini, TipsLibraries, %A_ThisMenuitem%
 a_Triggers := []
 Gui, A_Gui:+Disabled
-F_LoadHotstringsFromLibraries()
+;F_LoadHotstringsFromLibraries()
 Gui, A_Gui:-Disabled
 return
 
