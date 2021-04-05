@@ -171,7 +171,7 @@ global ini_ShowTipsLib 			:= {}	; this associative array is used to store inform
 ; 2. Try to load up configuration files. If those files do not exist, create them.
 if (!FileExist("Config.ini"))
 {
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Warning"], % TransA["Config.ini wasn't found. The default Config.ini is now created in location"] . A_Space . A_ScriptDir
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini is now created in location"] . A_Space . A_ScriptDir
 	FileAppend, %ConfigIni%, Config.ini
 }
 
@@ -180,14 +180,14 @@ IniRead v_Language, Config.ini, Configuration, Language				; Load from Config.in
 
 if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "Languages" subfolder 
 {
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Warning"], % TransA["There is no Languages subfolder and no language file exists!`nThe default"] . A_Space . v_Language 
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["There is no Languages subfolder and no language file exists!`nThe default"] . A_Space . v_Language 
 	. A_Space . TransA["file is now created in the following subfolder:`n"] A_ScriptDir TransA["\Languages\`nMind that Config.ini Language variable is equal to"] . A_Space . v_Language
 	FileCreateDir, %A_ScriptDir%\Languages							; Future: check against errors
 	F_LoadCreateTranslationTxt("create")
 }
 else  if (!FileExist(A_ScriptDir . "\Languages\" . v_Language))			; else if there is no v_language .ini file, e.g. v_langugae == Polish.ini and there is no such file in Languages folder
 {
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Warning"], % TransA["There is no"] . A_Space . v_Language . A_Space . TransA["file in Languages subfolder!`nThe default"] 
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["There is no"] . A_Space . v_Language . A_Space . TransA["file in Languages subfolder!`nThe default"] 
 	. A_Space	. v_Language . A_Space . TransA["file is now created in the following subfolder:`n"] A_ScriptDir . "\Languages\"
 	F_LoadCreateTranslationTxt("create")
 }
@@ -258,9 +258,9 @@ else
 */
 
 
-F_HS3_CreateObjects()
-F_HS3_DefineConstants()
-F_HS3_DetermineConstraints()
+F_GuiMain_CreateObject()
+F_GuiMain_DefineConstants()
+F_GuiMain_DetermineConstants()
 
 ;tu jestem
 F_UpdateSelHotLibDDL()
@@ -1127,7 +1127,7 @@ F_LoadCreateTranslationTxt(decision*)
 			,"Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment" 	: "Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"
 			,"Underscore"											: "Underscore"
 			,"Undo the last hotstring" 								: "&Undo the last hotstring"
-			,"Warning"											: "Warning"
+			,"warning"											: "warning"
 			,"\Languages\`nMind that Config.ini Language variable is equal to" : "\Languages\`nMind that Config.ini Language variable is equal to"}
 	
 	local key := "", val := "", tick := false
@@ -1242,7 +1242,7 @@ F_RemoveFile(nameoffile)
 
 
 
-F_HS3_CreateObjects()
+F_GuiMain_CreateObject()
 {
 	global ;assume-global mode
 	local x0 := 0, y0 := 0
@@ -1316,7 +1316,7 @@ F_HS3_CreateObjects()
 ;GuiControl,	Hide,		% IdText5
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
-	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit9 vv_Comment Limit64 ; future: change name to vv_Comment, align with other 
+	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit9 vv_Comment Limit64 
 ;GuiControl,	Hide,		% IdEdit9
 	
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
@@ -1368,7 +1368,7 @@ F_HS3_CreateObjects()
 
 ; ------------------------------------------------------------------------------------------------------------------------------------
 
-F_HS3_DefineConstants()
+F_GuiMain_DefineConstants()
 {
 	global ;assume-global mode
 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
@@ -1395,7 +1395,7 @@ F_HS3_DefineConstants()
 
 ; ------------------------------------------------------------------------------------------------------------------------------------
 
-F_HS3_DetermineConstraints()
+F_GuiMain_DetermineConstants()
 {
 	global ;assume-global mode
 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.
@@ -1749,7 +1749,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	v_IsLibraryEmpty := true
 	if (!Instr(FileExist(A_ScriptDir . "\Libraries"), "D"))				; if  there is no "Libraries" subfolder 
 	{
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . " warning", There is no Libraries subfolder and no lbrary (*.csv) file exist!`nThe  %A_ScriptDir%\Libraries\ folder is now created.
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], There is no Libraries subfolder and no lbrary (*.csv) file exist!`nThe  %A_ScriptDir%\Libraries\ folder is now created.
 		FileCreateDir, %A_ScriptDir%\Libraries							; Future: check against errors
 	}
 	else
@@ -1762,7 +1762,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 		}
 	}
 	if (v_IsLibraryEmpty)
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . " warning", % "Libraries folder: " . A_ScriptDir . "\Libraries is empty. No (triggerstring, hotstring) definition will be loaded." ;Future: prepare for translation
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % "Libraries folder: " . A_ScriptDir . "\Libraries is empty. No (triggerstring, hotstring) definition will be loaded." ;Future: prepare for translation
 	
 	;Read names library files (*.csv) from Library subfolder into object.
 	if !(v_IsLibraryEmpty)
@@ -1906,31 +1906,30 @@ F_LoadLibrariesToTables()
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_LoadFiles(nameoffile)
-{
- 	;global v_LoadedHotstrings
-	;global v_HotstringCnt
-	;global a_Triggers
-	global 
-	local line := ""
-	
-	IniRead, v_Library, Config.ini, TipsLibraries, %nameoffile%
-	Loop
+/*
+	F_LoadFiles(nameoffile)
 	{
-		FileReadLine, line, Libraries\%nameoffile%, %A_Index%
-		if (ErrorLevel)
-			break
-		line := StrReplace(line, "``n", "`n")
-		line := StrReplace(line, "``r", "`r")		
-		line := StrReplace(line, "``t", "`t")
-		F_ini_StartHotstring(line, nameoffile)
-		if (v_Library)
-			a_Triggers.Push(v_TriggerString)
-		v_HotstringCnt++
-		GuiControl,, v_LoadedHotstrings, % TransA["Loaded hotstrings:"] . A_Space . v_HotstringCnt
+		global 
+		local line := ""
+		
+		IniRead, v_Library, Config.ini, TipsLibraries, %nameoffile%
+		Loop
+		{
+			FileReadLine, line, Libraries\%nameoffile%, %A_Index%
+			if (ErrorLevel)
+				break
+			line := StrReplace(line, "``n", "`n")
+			line := StrReplace(line, "``r", "`r")		
+			line := StrReplace(line, "``t", "`t")
+			F_ini_StartHotstring(line, nameoffile)
+			if (v_Library)
+				a_Triggers.Push(v_TriggerString)
+			v_HotstringCnt++
+			GuiControl,, v_LoadedHotstrings, % TransA["Loaded hotstrings:"] . A_Space . v_HotstringCnt
+		}
+		return
 	}
-	return
-}
+*/
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
