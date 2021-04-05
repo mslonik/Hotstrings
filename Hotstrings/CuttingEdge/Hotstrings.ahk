@@ -248,24 +248,16 @@ else
 		v_ShowGui := 2
 */
 
-
-; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
-/*
-	v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
-	F_LoadHotstringsFromLibraries() 
-	F_LoadLibrariesToTables() 
-	v_BlockHotkeysFlag := 0
-*/
-
-
 F_GuiMain_CreateObject()
 F_GuiMain_DefineConstants()
 F_GuiMain_DetermineConstants()
 
+; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
 ;tu jestem
 F_UpdateSelHotLibDDL()
+v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
 F_LoadHotstringsFromLibraries()
-
+v_BlockHotkeysFlag := 0
 
 ; After definitions of (triggerstring, hotstring) are uploaded to memory, prepare (System)Tray icon
 if !(v_Param == "l") 										; if Hotstrings.ahk wasn't run with "l" parameter (standing for "light / lightweight", prepare tray menu.
@@ -532,27 +524,26 @@ Loop, %A_ScriptDir%\Languages\*.txt
 		Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
 }
 
-Loop, %A_ScriptDir%\Libraries\*.csv
-{
-	Menu, ToggleLibTrigTipsSubmenu, Add, %A_LoopFileName%, L_ToggleTipsLibrary
-	IniRead, v_LibraryFlag, Config.ini, TipsLibraries, %A_LoopFileName%
-	if (v_LibraryFlag)
-		Menu, ToggleLibTrigTipsSubmenu, Check, %A_LoopFileName%
-	else
-		Menu, ToggleLibTrigTipsSubmenu, UnCheck, %A_LoopFileName%	
-}
-
 ;tu jestem
 for key, value in ini_LoadLib
 {
-	Menu, EnableDisableLibraries, Add, %key%, F_EnableDisableLibraries
+	Menu, EnDisLib, Add, %key%, F_EnDisLib
 	if (value)
-		Menu, EnableDisableLibraries, Check, %key%
+		Menu, EnDisLib, Check, %key%
 	else
-		Menu, EnableDisableLibraries, UnCheck, %key%	
+		Menu, EnDisLib, UnCheck, %key%	
 }
 
-Menu,	LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"],			:EnableDisableLibraries
+for key, value in ini_ShowTipsLib
+{
+	Menu, ToggleLibTrigTipsSubmenu, Add, %key%, F_ToggleTipsLibrary
+	if (value)
+		Menu, ToggleLibTrigTipsSubmenu, Check, %key%
+	else
+		Menu, ToggleLibTrigTipsSubmenu, UnCheck, %key%
+}
+
+Menu,	LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"],			:EnDisLib
 Menu, 	LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	:ToggleLibTrigTipsSubmenu
 Menu, 	HSMenu, 			Add, % TransA["Libraries configuration"], 			:LibrariesSubmenu
 Menu, 	HSMenu, 			Add, % TransA["Clipboard Delay"], 					HSdelay
@@ -562,8 +553,6 @@ Gui, 	HS3:Menu, HSMenu
 
 F_GuiAbout_CreateObjects()
 F_GuiAbout_DetermineConstraints()
-
-;end of defining the Hotstrings Gui
 
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -974,21 +963,38 @@ F_UpdateSelHotLibDDL()
 
 ; ------------------------------------------------------------------------------------------------------------------------------------
 
-F_EnableDisableLibraries() ;tu jestem
+F_ToggleTipsLibrary()
 {
 	global ;assume-global mode
-	local v_LibraryFlag := 0, v_WhichLibraries := "", v_LibTemp := "", v_LibFlagTemp := ""
+	local v_LibraryFlag := 0 
 	
+	Menu, ToggleLibTrigTipsSubmenu, ToggleCheck, %A_ThisMenuitem%
+	IniRead, v_LibraryFlag, Config.ini, ShowTipsLibraries, %A_ThisMenuitem%
+	v_LibraryFlag := !(v_LibraryFlag)
+	IniWrite, %v_LibraryFlag%, Config.ini, ShowTipsLibraries, %A_ThisMenuitem%
+	
+	F_ValidateIniLibSections()
+	a_Triggers := []
+	F_LoadHotstringsFromLibraries()
+	return
+}
 
-	Menu, EnableDisableLibraries, ToggleCheck, %A_ThisMenuItem%
-	IniRead, v_LibraryFlag,	Config.ini, LoadLibraries, %A_ThisMenuitem%		; Read into v_TipsConfig section TipsLibraries from the file Config.ini which is a list of library files (.csv) stored in Libraries subfolder
+; ------------------------------------------------------------------------------------------------------------------------------------
+
+F_EnDisLib() ;tu jestem
+{
+	global ;assume-global mode
+	local v_LibraryFlag := 0 ;, v_WhichLibraries := "", v_LibTemp := "", v_LibFlagTemp := ""
+
+	Menu, EnDisLib, ToggleCheck, %A_ThisMenuItem%
+	IniRead, v_LibraryFlag,	Config.ini, LoadLibraries, %A_ThisMenuitem%
 	v_LibraryFlag := !(v_LibraryFlag)
 	Iniwrite, %v_LibraryFlag%,	Config.ini, LoadLibraries, %A_ThisMenuItem%
 	
 	F_ValidateIniLibSections()
 	F_UpdateSelHotLibDDL()
 	F_LoadHotstringsFromLibraries()
-
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], If any library was unchecked, its hotstring definitions remain active. Please reload the application. 
 	return
 }
 
@@ -1160,6 +1166,15 @@ F_LoadCreateTranslationTxt(decision*)
 	
 	return
 }
+; ------------------------------------------------------------------------------------------------------------------------------------
+;Future. Rationale: when specific library is unchecked in menu, its hotstrings should be unloaded (and triggers). What is done currently is only "loading of all libraries again", but in such
+;a case all existing hotstring definitions remain not changed in memory. So currently script should be reloaded.
+F_UnloadFile(nameoffile)
+{
+	
+	return
+}
+
 ; ------------------------------------------------------------------------------------------------------------------------------------
 
 F_LoadFile(nameoffile)
@@ -4916,17 +4931,6 @@ L_ExportLibraryDynamic:
 FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries", % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
 if !(v_LibraryName == "")
 	F_ExportLibraryDynamic(v_LibraryName)
-return
-
-L_ToggleTipsLibrary:
-Menu, ToggleLibTrigTipsSubmenu, ToggleCheck, %A_ThisMenuitem%
-IniRead, v_LibraryFlag, Config.ini, TipsLibraries, %A_ThisMenuitem%
-v_LibraryFlag := !(v_LibraryFlag)
-IniWrite, %v_LibraryFlag%, Config.ini, TipsLibraries, %A_ThisMenuitem%
-a_Triggers := []
-Gui, A_Gui:+Disabled
-;F_LoadHotstringsFromLibraries()
-Gui, A_Gui:-Disabled
 return
 
 L_SortTipsAlphabetically:
