@@ -1038,7 +1038,6 @@ F_LoadCreateTranslationTxt(decision*)
 			,"Disable" 											: "Disable"
 			,"DISABLED"											: "DISABLED"
 			,"Dot ." 												: "Dot ."
-			,". Do you want to proceed?" 								: ". Do you want to proceed?"
 			,"Dynamic hotstrings" 									: "&Dynamic hotstrings"
 			,"Edit Hotstring" 										: "Edit Hotstring"
 			,"Enable/Disable" 										: "Enable/Disable"
@@ -1923,7 +1922,7 @@ F_LoadFiles(nameoffile)
 		if (v_Library)
 			a_Triggers.Push(v_TriggerString)
 		v_HotstringCnt++
-		GuiControl,, v_LoadedHotstrings, % TransA["Loaded hotstrings:"] . " " v_HotstringCnt
+		GuiControl,, v_LoadedHotstrings, % TransA["Loaded hotstrings:"] . A_Space . v_HotstringCnt
 	}
 	return
 }
@@ -2106,12 +2105,12 @@ F_NormalWay(ReplacementString, Oflag)
 	if (InStr(A_ThisHotkey, "*"))
 	{
 		if (InStr(A_ThisHotkey,"*0"))
-			v_TypedTriggerstring := % ReplacementString . " "
+			v_TypedTriggerstring := % ReplacementString . A_Space
 		else
 			v_TypedTriggerstring := ReplacementString
 	}
 	else
-		v_TypedTriggerstring := % ReplacementString . " "
+		v_TypedTriggerstring := % ReplacementString . A_Space
 	if (InStr(v_TypedTriggerstring, "{"))
 		v_TypedTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, "}")+1 , StrLen(v_TypedTriggerstring)-InStr(v_TypedTriggerstring, "}"))
 	Hotstring("Reset")
@@ -2737,7 +2736,7 @@ F_ExportLibraryStatic(filename)
 			a_MenuHotstring := StrSplit(a_Hotstring[5],"¦")
 			Loop, % a_MenuHotstring.MaxIndex()
 			{
-				FileAppend, % "`n:" . v_Options . ":" . v_Trigger . "::" . a_MenuHotstring[A_Index] . " " . ";" . " warning, code generated automatically for definitions based on menu, see documentation of Hotstrings app for details", %v_OutputFile%, UTF-8
+				FileAppend, % "`n:" . v_Options . ":" . v_Trigger . "::" . a_MenuHotstring[A_Index] . A_Space . ";" . " warning, code generated automatically for definitions based on menu, see documentation of Hotstrings app for details", %v_OutputFile%, UTF-8
 			}
 		}
 		else
@@ -2750,7 +2749,7 @@ F_ExportLibraryStatic(filename)
 		GuiControl,, MyText, % "Exported " . A_Index . " of " . v_TotalLines . " hotstrings"
 	}
 	Gui, Export:Destroy
-	MsgBox, % TransA["Library has been exported."] . "`n" . TransA["The file path is:"] . " " . v_OutputFile
+	MsgBox, % TransA["Library has been exported."] . "`n" . TransA["The file path is:"] . A_Space . v_OutputFile
 	return
 }
 
@@ -3941,7 +3940,7 @@ ini_Delay := MySlider
 if (ini_Delay = 1000)
 	GuiControl,, DelayText, % TransA["Hotstring paste from Clipboard delay 1 s"]
 else
-	GuiControl,, DelayText, % TransA["Hotstring paste from Clipboard delay"] . " " . ini_Delay . " ms"
+	GuiControl,, DelayText, % TransA["Hotstring paste from Clipboard delay"] . A_Space . ini_Delay . " ms"
 IniWrite, %ini_Delay%, Config.ini, Configuration, Delay
 return
 
@@ -4416,7 +4415,7 @@ Loop, Read, %InputFile%
 {
 	if InStr(A_LoopReadLine, LString)
 	{
-		MsgBox, 4,, % TransA["The hostring"] . " """ . Triggerstring """ " . TransA["exists in a file"] . " " . TargetLib . TransA[". Do you want to proceed?"]
+		MsgBox, 4,, % TransA["The hostring"] . A_Space . """" . Triggerstring . A_Space .  """" . TransA["exists in a file"] . A_Space . TargetLib . A_Space . TransA["Do you want to proceed?"]
 		IfMsgBox, No
 		{
 			Gui, MoveLibs:Destroy
@@ -4490,7 +4489,7 @@ if (cntLines == 1)
 	FileAppend,, %InputFile%, UTF-8
 }
 FileDelete, %OutputFile%
-MsgBox, % TransA["Hotstring moved to the"] . " " . TargetLib . " " . TransA["file!"]
+MsgBox, % TransA["Hotstring moved to the"] . A_Space . TargetLib . A_Space . TransA["file!"]
 Gui, MoveLibs:Destroy
 Gui, HS3List:Hide	
 
