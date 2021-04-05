@@ -171,7 +171,7 @@ global ini_ShowTipsLib 			:= {}	; this associative array is used to store inform
 ; 2. Try to load up configuration files. If those files do not exist, create them.
 if (!FileExist("Config.ini"))
 {
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . "Warning", Config.ini wasn't found. The default Config.ini is now created in location %A_ScriptDir%.
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Warning"], % TransA["Config.ini wasn't found. The default Config.ini is now created in location"] . A_Space . A_ScriptDir
 	FileAppend, %ConfigIni%, Config.ini
 }
 
@@ -180,16 +180,15 @@ IniRead v_Language, Config.ini, Configuration, Language				; Load from Config.in
 
 if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "Languages" subfolder 
 {
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . "Warning", There is no Languages subfolder and no language file exists!`nThe default %v_Language% file is now created in the following subfolder
-	:`n%A_ScriptDir%\Languages\
-	.`nMind that Config.ini Language variable is equal to %v_Language%.
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Warning"], % TransA["There is no Languages subfolder and no language file exists!`nThe default"] . A_Space . v_Language 
+	. A_Space . TransA["file is now created in the following subfolder:`n"] A_ScriptDir TransA["\Languages\`nMind that Config.ini Language variable is equal to"] . A_Space . v_Language
 	FileCreateDir, %A_ScriptDir%\Languages							; Future: check against errors
 	F_LoadCreateTranslationTxt("create")
 }
 else  if (!FileExist(A_ScriptDir . "\Languages\" . v_Language))			; else if there is no v_language .ini file, e.g. v_langugae == Polish.ini and there is no such file in Languages folder
 {
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . "Warning", There is no %v_Language% file in Languages subfolder!`nThe default %v_Language% file is now created in the following subfolder
-	:`n%A_ScriptDir%\Languages\
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Warning"], % TransA["There is no"] . A_Space . v_Language . A_Space . TransA["file in Languages subfolder!`nThe default"] 
+	. A_Space	. v_Language . A_Space . TransA["file is now created in the following subfolder:`n"] A_ScriptDir . "\Languages\"
 	F_LoadCreateTranslationTxt("create")
 }
 else
@@ -1029,6 +1028,7 @@ F_LoadCreateTranslationTxt(decision*)
 			,"Closing Square Bracket ]" 								: "Closing Square Bracket ]"
 			,"Colon :" 											: "Colon :"
 			,"Comma ," 											: "Comma ,"
+			,"Config.ini wasn't found. The default Config.ini is now created in location" : "Config.ini wasn't found. The default Config.ini is now created in location"
 			,"Configuration" 										: "&Configuration"
 			,"Do you want to proceed?" 								: "Do you want to proceed?"
 			,"Cursor" 											: "Cursor"
@@ -1056,6 +1056,8 @@ F_LoadCreateTranslationTxt(decision*)
 			,"F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring" : "F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring"
 			,"F3 Close Search hotstrings | F8 Move hotstring" 			: "F3 Close Search hotstrings | F8 Move hotstring"
 			,"file!" 												: "file!"
+			,"file in Languages subfolder!`nThe default"					: "file in Languages subfolder!`nThe default"
+			,"file is now created in the following subfolder:`n"			: "file is now created in the following subfolder:`n"
 			,"Genuine hotstrings AutoHotkey documentation" 				: "Genuine hotstrings AutoHotkey documentation"
 			,"has been created." 									: "has been created."
 			,"Hotstring" 											: "Hotstring"
@@ -1071,6 +1073,7 @@ F_LoadCreateTranslationTxt(decision*)
 			,"Launch Sandbox" 										: "&Launch Sandbox"
 			,"Let's make your PC personal again..." 					: "Let's make your PC personal again..."
 			,"Libraries configuration" 								: "&Libraries configuration"
+			,"Library content (F2)"									: "Library content (F2)"
 			,"Library" 											: "Library"
 			,"Library export. Please wait..." 							: "Library export. Please wait..."
 			,"Library has been exported." 							: "Library has been exported."
@@ -1116,14 +1119,16 @@ F_LoadCreateTranslationTxt(decision*)
 			,"The hostring" 										: "The hostring"
 			,"The library " 										: "The library "
 			,"The file path is:" 									: "The file path is:"
+			,"There is no"											: "There is no"
+			,"There is no Languages subfolder and no language file exists!`nThe default" : "There is no Languages subfolder and no language file exists!`nThe default"
 			,"Toggle EndChars"	 									: "&Toggle EndChars"
 			,"Triggerstring" 										: "Triggerstring"
 			,"Triggerstring tips" 									: "&Triggerstring tips"
 			,"Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment" 	: "Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"
 			,"Underscore"											: "Underscore"
 			,"Undo the last hotstring" 								: "&Undo the last hotstring"
-			,"Library content (F2)"									: "Library content (F2)"}
-		
+			,"Warning"											: "Warning"
+			,"\Languages\`nMind that Config.ini Language variable is equal to" : "\Languages\`nMind that Config.ini Language variable is equal to"}
 	
 	local key := "", val := "", tick := false
 	
