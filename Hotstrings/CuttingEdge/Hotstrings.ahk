@@ -173,7 +173,7 @@ global TransA					:= {}	; ; this associative array is used to store translations
 
 F_LoadCreateTranslationTxt() ;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet.
 ; 2. Try to load up configuration files. If those files do not exist, create them.
-;*[One]
+
 if (!FileExist("Config.ini"))
 {
 	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini is now created in location"] . A_Space . A_ScriptDir
@@ -558,6 +558,7 @@ F_GuiAbout_DetermineConstraints()
 ; Beginning of the main loop of application.
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Loop,
+;*[One]	
 {
 	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
 	if (ErrorLevel = "NewInput")
@@ -584,12 +585,12 @@ Loop,
 			if !(WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
 				v_HotstringFlag := 0
 		}
-		if InStr(HotstringEndChars, out)
+		if (InStr(HotstringEndChars, out))
 		{
 			v_TipsFlag := 0
 			Loop, % a_Triggers.MaxIndex()
 			{
-				if (InStr(a_Triggers[A_Index], v_InputString))
+				if (InStr(a_Triggers[A_Index], v_InputString) = 1) ;if in string a_Triggers is found v_InputString from the first position 
 				{
 					v_TipsFlag := 1
 				}
@@ -602,7 +603,7 @@ Loop,
 			v_Tips := ""
 			Loop, % a_Triggers.MaxIndex()
 			{
-				if (InStr(a_Triggers[A_Index], v_InputString))
+				if (InStr(a_Triggers[A_Index], v_InputString) = 1) ;if in string a_Triggers is found v_InputString from the first position 
 				{
 					if !(v_Tips == "")
 						v_Tips .= "`n"
@@ -614,7 +615,7 @@ Loop,
 				v_InputString := out
 				Loop, % a_Triggers.MaxIndex()
 				{
-					If InStr(a_Triggers[A_Index], v_InputString) == 1
+					If (InStr(a_Triggers[A_Index], v_InputString) == 1)
 					{
 						If !(v_Tips == "")
 							v_Tips .= "`n"
@@ -885,16 +886,15 @@ Clipboard:=MenuListbox ;Shove what was selected into the clipboard
 Send, ^v ;paste the text
 if (Ovar == 0)
 	Send, % A_EndChar
-sleep
-
-, %ini_Delay% ;Remember to sleep before restoring clipboard or it will fail
+Sleep, %ini_Delay% ;Remember to sleep before restoring clipboard or it will fail
 v_TypedTriggerstring := MenuListbox
-v_UndoHotstring := MenuListbox
-Clipboard:=ClipboardBack
+v_UndoHotstring 	 := MenuListbox
+Clipboard 		 := ClipboardBack
 Hotstring("Reset")
 Gui, Menu:Destroy
 Return
 #If
+	
 #IfWinExist Hotstring listbox
 Esc::
 Gui, Menu:Destroy
@@ -911,7 +911,6 @@ F_SaveGUIPos() ;Save to Config.ini
 	local WinX := 0, WinY := 0, WinW := 0, WinH := 0
 	
 	WinGetPos, WinX, WinY, WinW, WinH, % "ahk_id" . HS3GuiHwnd
-	MsgBox, , Position:, % WinX . A_Space . WinY . A_Space . WinW . A_Space . WinH
 	IniWrite, % WinX, Config.ini, GraphicalUserInterface, MainWindowTopLeft_X
 	IniWrite, % WinY, Config.ini, GraphicalUserInterface, MainWindowTopLeft_Y
 	IniWrite, % WinW, Config.ini, GraphicalUserInterface, MainWindow_Width
@@ -1289,7 +1288,7 @@ Position of main window is saved in Config.ini.				= Position of main window is 
 	
 	
 	
-	F_GuiMain_CreateObject()
+F_GuiMain_CreateObject()
 	{
 		global ;assume-global mode
 		local x0 := 0, y0 := 0
@@ -1667,7 +1666,7 @@ Position of main window is saved in Config.ini.				= Position of main window is 
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_GuiAbout_CreateObjects()
+F_GuiAbout_CreateObjects()
 	{
 		global ;assume-global mode
 		
@@ -1693,7 +1692,7 @@ Position of main window is saved in Config.ini.				= Position of main window is 
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_GuiAbout_DetermineConstraints()
+F_GuiAbout_DetermineConstraints()
 	{
 		global ;assume-global mode
 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.
@@ -2318,7 +2317,7 @@ F_GuiAbout()
 	}
 	
 ;Future: move this section of code to Hotkeys
-	#IfWinActive HotstringAHK listbox
+#IfWinActive HotstringAHK listbox
 	~1::
 	~2::
 	~3::
@@ -2357,13 +2356,14 @@ F_GuiAbout()
 	Hotstring("Reset")
 	Gui, MenuAHK:Destroy
 	Return
-	#If
-	#IfWinExist HotstringAHK listbox
+#If
+
+#IfWinExist HotstringAHK listbox
 	Esc::
 	Gui, MenuAHK:Destroy
 	Send, % SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
 	return
-	#If
+#If
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
@@ -2896,7 +2896,7 @@ F_GuiAbout()
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
-	#If v_Param != "l" and v_BlockHotkeysFlag == 0
+#If (v_Param != "l") and !(v_BlockHotkeysFlag)
 	
 	
 	
@@ -2908,16 +2908,19 @@ L_GUIInit:
 	
 if (v_ResizingFlag) ;if run for the very first time
 	{
-	if (ini_StartX == "") or (ini_StartY == "") or (ini_StartW == "") or (ini_StartH == "")
+		if (ini_StartX == "") or (ini_StartY == "") or (ini_StartW == "") or (ini_StartH == "")
 		{
 		;why double Show is necessary if FontSize == 16???
-			Gui, 		%HS3GuiHwnd%:Show, AutoSize Center
-			Gui, 		%HS3GuiHwnd%:Show, AutoSize Center
+			Gui, 		HS3: Show, AutoSize Center
+			Gui, 		HS3: Show, AutoSize Center
 		}
 		else
-			Gui,			%HS3GuiHwnd%: Show, % "X" . ini_StartX . A_Space . "Y" . ini_StartY . A_Space . "W" . ini_StartW . A_Space . "H" . ini_StartH
+		{
+			Gui,			HS3: Show, % "X" . ini_StartX . A_Space . "Y" . ini_StartY . A_Space . "W" . ini_StartW . A_Space . "H" . ini_StartH
+			MsgBox, , Po odzyskaniu, % ini_StartX . A_Space . ini_StartY . A_Space . ini_StartW . A_Space . ini_StartH . "`n" . A_DefaultGui
+		}
 		
-		Gui, %HS3GuiHwnd%: Default ; this line is necessary to enable handling of List Views.
+		;Gui, HS3: Default ; this line is necessary to enable handling of List Views.
 		GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 		LV_ModifyCol(1, Round(0.1 * v_OutVarTempW))
 		LV_ModifyCol(2, Round(0.1 * v_OutVarTempW))
@@ -2928,7 +2931,8 @@ if (v_ResizingFlag) ;if run for the very first time
 		v_ResizingFlag := 0
 	}
 	else
-		Gui, %HS3GuiHwnd%: Show, Restore
+		;dodać sprawdzenie, czy odczytane współrzędne nie są poza zakresem dostępnym na tym komputerze w momencie uruchomienia
+		Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
 return
 	
 	
@@ -3257,7 +3261,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
 	Clear: 
-	Gui,		%HS3GuiHwnd%: Font, % "c" . c_FontColor
+	Gui,		HS3: Font, % "c" . c_FontColor
 	GuiControl, Font, % IdCheckBox1
 	GuiControl,, % IdEdit1,  				;v_TriggerString
 	GuiControl, Font, % IdCheckBox1
@@ -3294,22 +3298,6 @@ return
 	LV_Delete()
 	GuiControl,, % IdEdit10,  				;Sandbox
 	
-	/*
-		GuiControl,, v_ViewString,
-		GuiControl,, v_Comment,
-		GuiControl,, v_EnterHotstring1,
-		GuiControl,, v_EnterHotstring2,
-		GuiControl,, v_EnterHotstring3,
-		GuiControl,, v_EnterHotstring4,
-		GuiControl,, v_EnterHotstring5,
-		GuiControl,, v_EnterHotstring6,
-		GuiControl,, v_SelectHotstringLibrary, |
-		GuiControl, Choose, v_SelectFunction, SendInput (SI)
-		Loop,%A_ScriptDir%\Libraries\*.csv
-			GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName%
-		gosub, SectionChoose
-		gosub, ViewString
-	*/
 	return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3947,13 +3935,15 @@ return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
 	
-	DestroyGuis:
-	Loop, %N%
-	{
-		Gui, %A_Index%:Destroy
-	}
-	Gui, Font ; restore the font to the system's default GUI typeface, size and colour.
-	return
+	/*
+		DestroyGuis:
+		Loop, %N%
+		{
+			Gui, %A_Index%:Destroy
+		}
+		Gui, Font ; restore the font to the system's default GUI typeface, size and colour.
+		return
+	*/
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
@@ -3984,35 +3974,7 @@ return
 	IniWrite, %ini_Delay%, Config.ini, Configuration, Delay
 	return
 	
-	
-	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-;L_About:
-;Gui, MyAbout: Destroy
-;Gui, MyAbout: Font, % "bold s" . c_FontSize, Calibri
-;Gui, MyAbout: Add, Text, , % TransA["Let's make your PC personal again..."]
-;Gui, MyAbout: Font, % "norm s" . c_FontSize
-;Gui, MyAbout: Add, Text, , % TransA["Enables Convenient Definition"]
-;Gui, MyAbout: Font, % "CBlue bold Underline s" . c_FontSize
-;Gui, MyAbout: Add, Text, gLink1, % TransA["Application help"]
-;Gui, MyAbout: Add, Text, gLink2, % TransA["Genuine hotstrings AutoHotkey documentation"]
-;Gui, MyAbout: Font, % "norm s" . c_FontSize
-;GuiAboutOkButtonMyOK vOkButtonVariabl hwndOkButtonHandle", &OK ;Future: translate
-;GuiControlGet, MyGuiControlGetVariable, MyAbout: Pos, %OkButtonHandle%
-;WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth, v_WindowHeight, Hotstrings
-;Gui, MyAbout:Show, % "hide w" . 670 . "h" . 220, % TransA["About/Help"]
-;DetectHiddenWindows, On
-;WinGetPos, , , MyAboutWindowWidth, MyAboutWindowHeight, % TransA["About/Help"]
-;DetectHiddenWindows, Off
-;NewButtonXPosition := round((MyAboutWindowWidth- 100)/2)
-;NewButtonXPosition := round(MyAboutWindowWidth/2)
-;GuiControl, Move, %OkButtonHandle%, x%NewButtonXPosition%
-;GuiControl, Show, %OkButtonHandle%
-;Gui, MyAbout: Show, % "x" . v_WindowX + (v_WindowWidth - MyAboutWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - MyAboutWindowHeight)/2, % TransA["About/Help"]
-;Gui, MyAbout: Show
-;return  
-	
 	Link1:
 	Run, https://github.com/mslonik/Hotstrings
 	return
@@ -4234,16 +4196,16 @@ return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	HS3GuiEscape:
-	Gui, 		%HS3GuiHwnd%: Minimize
-	Gui,			%HS3GuiHwnd%: Show, Hide
-	return
+HS3GuiEscape:
+	Gui, 		HS3: Minimize
+	Gui,			HS3: Show, Hide
+return
 	
 ; Future: save window position
-	HS3GuiClose:
+HS3GuiClose:
 	WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
-	Gui, HS3:Destroy
-	return
+	Gui, HS3: Destroy
+return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
@@ -4950,14 +4912,14 @@ if WinExist("Hotstrings") and WinExist("ahk_class AutoHotkeyGUI")
 	IniWrite, %ini_TipsSortAlphabetically%, Config.ini, Configuration, TipsSortAlphatebically
 	return
 	
-	L_SortTipsByLength:
+L_SortTipsByLength:
 	Menu, SubmenuTips, ToggleCheck, % TransA["Sort tips by length"]
 	ini_TipsSortByLength := !(ini_TipsSortByLength)
 	IniWrite, %ini_TipsSortByLength%, Config.ini, Configuration, TipsSortByLength
 	return
 	
-	
-	L_ChangeLanguage:
+
+L_ChangeLanguage:
 	v_Language := A_ThisMenuitem
 	IniWrite, %v_Language%, Config.ini, Configuration, Language
 	Loop, %A_ScriptDir%\Languages\*.ini
