@@ -911,10 +911,10 @@ F_SaveGUIPos() ;Save to Config.ini
 	local WinX := 0, WinY := 0, WinW := 0, WinH := 0
 	
 	WinGetPos, WinX, WinY, WinW, WinH, % "ahk_id" . HS3GuiHwnd
-	IniWrite, % WinX, Config.ini, GraphicalUserInterface, MainWindowTopLeft_X
-	IniWrite, % WinY, Config.ini, GraphicalUserInterface, MainWindowTopLeft_Y
-	IniWrite, % WinW, Config.ini, GraphicalUserInterface, MainWindow_Width
-	IniWrite, % WinH, Config.ini, GraphicalUserInterface, MainWindow_Height
+	IniWrite, % WinX, 			Config.ini, GraphicalUserInterface, MainWindowTopLeft_X
+	IniWrite, % WinY, 			Config.ini, GraphicalUserInterface, MainWindowTopLeft_Y
+	IniWrite, % HS3_GuiWidth, 	Config.ini, GraphicalUserInterface, MainWindow_Width
+	IniWrite, % HS3_GuiHeight, 	Config.ini, GraphicalUserInterface, MainWindow_Height
 	
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Position of main window is saved in Config.ini."]
 	return
@@ -2917,7 +2917,6 @@ if (v_ResizingFlag) ;if run for the very first time
 		else
 		{
 			Gui,			HS3: Show, % "X" . ini_StartX . A_Space . "Y" . ini_StartY . A_Space . "W" . ini_StartW . A_Space . "H" . ini_StartH
-			MsgBox, , Po odzyskaniu, % ini_StartX . A_Space . ini_StartY . A_Space . ini_StartW . A_Space . ini_StartH . "`n" . A_DefaultGui
 		}
 		
 		;Gui, HS3: Default ; this line is necessary to enable handling of List Views.
@@ -3994,142 +3993,147 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
 ;Future: for some reasons size of Gui window can change rapidly by 20-30 px. It could be fixed by software routine, which checks if size  wasn't changed between last F_AutoXYWH("reset") and next function call.
-	HS3GuiSize() ;Gui event
-	{
-		global ;assume-global mode
+HS3GuiSize() ;Gui event
+{
 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
-		local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
+	;global ;assume-global mode
+	global 
+	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
 		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0
-		
-		OutputDebug, % "Beginning:" . A_Space . ++CntGuiSize 
-		OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "A_GuiHeight:" . A_Space .  A_GuiHeight
-		
-		if (A_EventInfo = 1) ; The window has been minimized.
-			return
-		if (v_ResizingFlag) ;Special case: FontSize set to 16 and some procedures are run twice
+	
+	HS3_GuiWidth  := 0,	HS3_GuiHeight := 0
+	
+	OutputDebug, % "Beginning:" . A_Space . ++CntGuiSize 
+	OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "A_GuiHeight:" . A_Space .  A_GuiHeight
+	
+	if (A_EventInfo = 1) ; The window has been minimized.
+		return
+	if (v_ResizingFlag) ;Special case: FontSize set to 16 and some procedures are run twice
+	{
+		HS3_GuiWidth  := A_GuiWidth
+		HS3_GuiHeight := A_GuiHeight
+		OutputDebug, return because of "v_ResizingFlag"
+		return
+	}
+	if (A_EventInfo = 2)
+	{
+		MsgBox, , maximized
+		OutputDebug, return because of "A_EventInfo = 2"
+		return
+	}
+	
+	GuiControlGet, v_OutVarTemp1, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.
+	
+	if (b_SandboxResize != ini_Sandbox) ; if configuration of HS3 window was toggled at least once, toggle Sandbox
+	{
+		if (ini_Sandbox) ;reduce size of List View and draw sandbox
 		{
-			OutputDebug, return because of "v_ResizingFlag"
-			return
-		}
-		if (A_EventInfo = 2)
-		{
-			MsgBox, , maximized
-			OutputDebug, return because of "A_EventInfo = 2"
-			return
-		}
-		
-		GuiControlGet, v_OutVarTemp1, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.
-		
-		if (b_SandboxResize != ini_Sandbox) ; if configuration of HS3 window was toggled at least once, toggle Sandbox
-		{
-			if (ini_Sandbox) ;reduce size of List View and draw sandbox
+			if (c_ymarg + HofText + v_OutVarTemp1H > LeftColumnH)
 			{
-				if (c_ymarg + HofText + v_OutVarTemp1H > LeftColumnH)
-				{
-					GuiControl, Show, % IdText10 ;sandobx text
-					GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
-					GuiControl, Show, % IdEdit10 ;sandbox edit field
-					GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
-					IsSandboxMoved := true
-				}
-				if (c_ymarg + HofText + v_OutVarTemp1H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox)
-				{
-					GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp1H - (HofText + c_HofSandbox + c_ymarg)
-					GuiControl, Show, % IdText10 ;sandobx text
-					GuiControl, MoveDraw, % IdText10, % "x" v_OutVarTemp1X  "y" v_OutVarTemp1Y + v_OutVarTemp1H - (HofText + c_HofSandbox + c_ymarg) + c_ymarg
-					GuiControl, Show, % IdEdit10 ;sandbox edit field
-					GuiControl, MoveDraw, % IdEdit10, % "x" v_OutVarTemp1X "y" v_OutVarTemp1Y + v_OutVarTemp1H - (HofText + c_HofSandbox + c_ymarg) + c_ymarg + HofText "w" v_OutVarTemp1W
-					GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp1Y + v_OutVarTemp1H + c_ymarg ;Position of the long text F1 ... F2 ...
-					IsSandboxMoved := false
-				}
+				GuiControl, Show, % IdText10 ;sandobx text
+				GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
+				GuiControl, Show, % IdEdit10 ;sandbox edit field
+				GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
+				IsSandboxMoved := true
 			}
-			else ;increase size of List View and hide sandbox
+			if (c_ymarg + HofText + v_OutVarTemp1H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox)
 			{
-				if (c_ymarg + HofText + v_OutVarTemp1H > LeftColumnH)
-				{
-					GuiControl, Hide, % IdText10 ;sandobx text
-					GuiControl, Hide, % IdEdit10 ;sandbox edit field
-				}
-				if (c_ymarg + HofText + v_OutVarTemp1H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox)
-				{
-					GuiControl, Hide, % IdText10 ;sandobx text
-					GuiControl, Hide, % IdEdit10 ;sandbox edit field
-					GuiControl, MoveDraw, % IdListView1, % "h" . v_OutVarTemp1H + HofText + c_HofSandbox + c_ymarg
-					GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp1Y + v_OutVarTemp1H + HofText + c_HofSandbox + c_ymarg + c_ymarg ;Position of the long text F1 ... F2 ...
-				}
+				GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp1H - (HofText + c_HofSandbox + c_ymarg)
+				GuiControl, Show, % IdText10 ;sandobx text
+				GuiControl, MoveDraw, % IdText10, % "x" v_OutVarTemp1X  "y" v_OutVarTemp1Y + v_OutVarTemp1H - (HofText + c_HofSandbox + c_ymarg) + c_ymarg
+				GuiControl, Show, % IdEdit10 ;sandbox edit field
+				GuiControl, MoveDraw, % IdEdit10, % "x" v_OutVarTemp1X "y" v_OutVarTemp1Y + v_OutVarTemp1H - (HofText + c_HofSandbox + c_ymarg) + c_ymarg + HofText "w" v_OutVarTemp1W
+				GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp1Y + v_OutVarTemp1H + c_ymarg ;Position of the long text F1 ... F2 ...
+				IsSandboxMoved := false
 			}
-			b_SandboxResize := ini_Sandbox
-			F_AutoXYWH("reset")
-			OutputDebug, return by if (ini_Sandbox)
-			return
+		}
+		else ;increase size of List View and hide sandbox
+		{
+			if (c_ymarg + HofText + v_OutVarTemp1H > LeftColumnH)
+			{
+				GuiControl, Hide, % IdText10 ;sandobx text
+				GuiControl, Hide, % IdEdit10 ;sandbox edit field
+			}
+			if (c_ymarg + HofText + v_OutVarTemp1H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox)
+			{
+				GuiControl, Hide, % IdText10 ;sandobx text
+				GuiControl, Hide, % IdEdit10 ;sandbox edit field
+				GuiControl, MoveDraw, % IdListView1, % "h" . v_OutVarTemp1H + HofText + c_HofSandbox + c_ymarg
+				GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp1Y + v_OutVarTemp1H + HofText + c_HofSandbox + c_ymarg + c_ymarg ;Position of the long text F1 ... F2 ...
+			}
+		}
+		b_SandboxResize := ini_Sandbox
+		F_AutoXYWH("reset")
+		OutputDebug, return by if (ini_Sandbox)
+		return
+	}	
+	else ;no toggling of Sandbox, continue resizing
+	{
+		F_AutoXYWH("*wh", IdListView1)
+		F_AutoXYWH("*h", IdButton5)
+		GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;Check position of ListView1 again after resizing
+		if (v_OutVarTemp2W != v_OutVarTemp1W)
+		{
+			LV_ModifyCol(1, Round(0.1 * v_OutVarTemp2W))
+			LV_ModifyCol(2, Round(0.1 * v_OutVarTemp2W))
+			LV_ModifyCol(3, Round(0.1 * v_OutVarTemp2W))	
+			LV_ModifyCol(4, Round(0.1 * v_OutVarTemp2W))
+			LV_ModifyCol(5, Round(0.4 * v_OutVarTemp2W))
+			LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W) - 3)
 		}	
-		else ;no toggling of Sandbox, continue resizing
+		
+		if (ini_Sandbox) ;no hiding and showing, only relative shifting
 		{
-			F_AutoXYWH("*wh", IdListView1)
-			F_AutoXYWH("*h", IdButton5)
-			GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;Check position of ListView1 again after resizing
-			if (v_OutVarTemp2W != v_OutVarTemp1W)
+			if (c_ymarg + HofText + v_OutVarTemp2H > LeftColumnH) and (!IsSandboxMoved) ;left <- right, increase
 			{
-				LV_ModifyCol(1, Round(0.1 * v_OutVarTemp2W))
-				LV_ModifyCol(2, Round(0.1 * v_OutVarTemp2W))
-				LV_ModifyCol(3, Round(0.1 * v_OutVarTemp2W))	
-				LV_ModifyCol(4, Round(0.1 * v_OutVarTemp2W))
-				LV_ModifyCol(5, Round(0.4 * v_OutVarTemp2W))
-				LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W) - 3)
-			}	
-			
-			if (ini_Sandbox) ;no hiding and showing, only relative shifting
-			{
-				if (c_ymarg + HofText + v_OutVarTemp2H > LeftColumnH) and (!IsSandboxMoved) ;left <- right, increase
-				{
-					
-					GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox
-					GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
-					GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
-					GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
-					IsSandboxMoved := true
-					OutputDebug, % "Left:" . A_Space . c_ymarg + HofText + v_OutVarTemp2H . A_Space . "Right:" . A_Space .  LeftColumnH . A_Space . "IsSandboxMoved:" . A_Space . IsSandboxMoved . A_Space . "return"
-					F_AutoXYWH("reset")	
-			;Pause, On
-					return 
-				}
-				if (c_ymarg + HofText + v_OutVarTemp2H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox) and (IsSandboxMoved) ; left -> right, reduce
-				{
-					GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H - (c_ymarg + HofText + c_HofSandbox)
-					GuiControl, MoveDraw, % IdText10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - (HofText + c_HofSandbox)
-					GuiControl, MoveDraw, % IdEdit10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox "w" v_OutVarTemp2W
-					GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
-					IsSandboxMoved := false
-					OutputDebug, % "Left:" . A_Space . c_ymarg + HofText + v_OutVarTemp2H . A_Space . "Right:" . A_Space . LeftColumnH + c_ymarg + HofText + c_HofSandbox . A_Space . "IsSandboxMoved:" . A_Space . IsSandboxMoved . A_Space . "reset"
-					F_AutoXYWH("reset")
-					return
-				}
 				
-				if (c_ymarg + HofText + v_OutVarTemp2H > LeftColumnH) and (IsSandboxMoved) ;vertical 1
-				{
-					GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
-				}
-				
-				if (c_ymarg + HofText + v_OutVarTemp2H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox) and (!IsSandboxMoved) ;vertical 2
-				{
-					OutputDebug, % "Left:" . A_Space . c_ymarg + HofText + v_OutVarTemp2H . A_Space . "Right:" . A_Space . LeftColumnH + c_ymarg + HofText + c_HofSandbox . A_Space . "IsSandboxMoved:" . A_Space . IsSandboxMoved . A_Space . "top -> down"
-					GuiControl, MoveDraw, % IdText10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
-					GuiControl, MoveDraw, % IdEdit10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText 
-					GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg
+				GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox
+				GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
+				GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
+				GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
+				IsSandboxMoved := true
+				OutputDebug, % "Left:" . A_Space . c_ymarg + HofText + v_OutVarTemp2H . A_Space . "Right:" . A_Space .  LeftColumnH . A_Space . "IsSandboxMoved:" . A_Space . IsSandboxMoved . A_Space . "return"
+				F_AutoXYWH("reset")	
 			;Pause, On
-				}
+				return 
 			}
-			else ;no sandbox, no hiding and showing, only relative shifting
+			if (c_ymarg + HofText + v_OutVarTemp2H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox) and (IsSandboxMoved) ; left -> right, reduce
+			{
+				GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H - (c_ymarg + HofText + c_HofSandbox)
+				GuiControl, MoveDraw, % IdText10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - (HofText + c_HofSandbox)
+				GuiControl, MoveDraw, % IdEdit10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox "w" v_OutVarTemp2W
+				GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
+				IsSandboxMoved := false
+				OutputDebug, % "Left:" . A_Space . c_ymarg + HofText + v_OutVarTemp2H . A_Space . "Right:" . A_Space . LeftColumnH + c_ymarg + HofText + c_HofSandbox . A_Space . "IsSandboxMoved:" . A_Space . IsSandboxMoved . A_Space . "reset"
+				F_AutoXYWH("reset")
+				return
+			}
+			
+			if (c_ymarg + HofText + v_OutVarTemp2H > LeftColumnH) and (IsSandboxMoved) ;vertical 1
 			{
 				GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
 			}
+			
+			if (c_ymarg + HofText + v_OutVarTemp2H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox) and (!IsSandboxMoved) ;vertical 2
+			{
+				OutputDebug, % "Left:" . A_Space . c_ymarg + HofText + v_OutVarTemp2H . A_Space . "Right:" . A_Space . LeftColumnH + c_ymarg + HofText + c_HofSandbox . A_Space . "IsSandboxMoved:" . A_Space . IsSandboxMoved . A_Space . "top -> down"
+				GuiControl, MoveDraw, % IdText10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
+				GuiControl, MoveDraw, % IdEdit10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText 
+				GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg
+			;Pause, On
+			}
 		}
-		
-	;GuiControl,, % IdText2, % v_LoadedHotstrings . A_Space . v_HotstringCnt ; •(Blank): Puts new contents into the control.
-		OutputDebug, % "End:" . A_Space . CntGuiSize 
-		return
-	;*[Three]
+		else ;no sandbox, no hiding and showing, only relative shifting
+		{
+			GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
+		}
 	}
+	HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
+	HS3_GuiHeight := A_GuiHeight
+	OutputDebug, % "End:" . A_Space . CntGuiSize . "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space "A_GuiHeight" . A_Space . A_GuiHeight
+	return
+	;*[Three]
+}
 	
 	
 	/*
