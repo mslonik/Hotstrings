@@ -947,7 +947,7 @@ F_SaveGUIPos() ;Save to Config.ini
 	WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
 	IniWrite, % WinX, 			  Config.ini, GraphicalUserInterface, MainWindowPosX
 	IniWrite, % WinY, 			  Config.ini, GraphicalUserInterface, MainWindowPosY
-	;*[One]
+	
 	IniWrite, % HS3_GuiWidth, 	  Config.ini, GraphicalUserInterface, MainWindowPosW
 	IniWrite, % HS3_GuiHeight, 	  Config.ini, GraphicalUserInterface, MainWindowPosH
 	
@@ -987,6 +987,7 @@ F_LoadHotstringsFromLibraries()
 	
 	; Load (triggerstring, hotstring) definitions if enabled and triggerstring tips if enabled.
 	v_HotstringCnt := 0
+	;*[One]
 	for key, value in ini_LoadLib
 	{
 		if ((key != "PriorityLibrary.csv") and (value))
@@ -1061,7 +1062,13 @@ F_EnDisLib()
 	F_ValidateIniLibSections()
 	F_UpdateSelHotLibDDL()
 	F_LoadHotstringsFromLibraries()
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], If any library was unchecked, its hotstring definitions remain active. Please reload the application. 
+	MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % "If any library was unchecked, its hotstring definitions remain active. Please reload the application." 
+	. "`n`n" . "Do you want to reload application now?"
+	IfMsgBox, Yes
+	{
+		F_SaveGUIPos()
+		Reload
+	}
 	return
 }
 
