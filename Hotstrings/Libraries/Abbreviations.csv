@@ -1,347 +1,355 @@
 ﻿B0*?‖.ahk‖SI‖En‖‖only for extensions
-B0*?‖.csv‖SI‖En‖‖
+B0*?‖.csv‖SI‖En‖‖only for extensions
+B0*?‖.docx‖SI‖En‖‖only for extensions
 B0*?‖.easm‖SI‖En‖‖only for extensions
-B0*?‖.pdf‖SI‖En‖‖
-B0*?‖.svg‖SI‖En‖‖
+B0*?‖.pdf‖SI‖En‖‖only for extensions
+B0*?‖.svg‖SI‖En‖‖only for extensions
+B0*?‖.xlsx‖SI‖En‖‖only for extensions
+B0*?‖.xml‖SI‖En‖‖only for extensions
 O‖2d‖MSI‖En‖2D¦two-dimensional‖
-‖2fa‖SI‖En‖2FA‖
+C‖2fa‖SI‖En‖2FA‖
 *‖2fa/‖SI‖En‖Two-Factor Authentication‖
 *‖3d ‖MSI‖En‖3D ¦three-dimensional‖
 *‖a/‖SI‖En‖Availability‖
-*‖a3‖MSI‖En‖A3¦297 × 420 [mm]‖size of paper sheet in Europe 
-*‖a4‖MSI‖En‖A4¦210 × 297 [mm]‖
-‖ac‖SI‖En‖AC‖
+C*‖a3‖MSI‖En‖A3¦297 × 420 [mm]‖size of paper sheet in Europe 
+C*‖a4‖MSI‖En‖A4¦210 × 297 [mm]‖
+C‖ac‖SI‖En‖AC‖
 *‖ac/‖MSI‖En‖Alternating Current¦Axle Counter‖
-‖acl‖SI‖En‖ACL‖
+C‖acl‖SI‖En‖ACL‖
 *‖acl/‖SI‖En‖Access Control List‖
-‖adc‖SI‖En‖ADC‖
+C‖adc‖SI‖En‖ADC‖
 *‖adc/‖SI‖En‖Aanalog to Digital Converter‖
-‖ahk‖SI‖En‖AHK‖
+C‖ahk‖SI‖En‖AHK‖
 *‖ahk/‖CL‖En‖AutoHotkey‖https://www.autohotkey.com/
-‖ansi‖SI‖En‖ANSI‖
+C‖ansi‖SI‖En‖ANSI‖
 *‖ansi/‖SI‖En‖American National Standards Institute‖https://en.wikipedia.org/wiki/American_National_Standards_Instit
-‖api‖SI‖En‖API‖
+C‖api‖SI‖En‖API‖
 *‖api/‖CL‖En‖Application Programming Interface‖https://en.wikipedia.org/wiki/API
-‖ar‖SI‖En‖AR‖
+C‖ar‖SI‖En‖AR‖
 *‖ar/‖SI‖En‖Augmented Reality‖
-‖asci‖SI‖En‖ASCII‖
+C‖asci‖SI‖En‖ASCII‖
 *‖asci/‖CL‖En‖American Standard Code for Information Interchange‖
-‖ascii‖SI‖En‖ASCII‖
+C‖ascii‖SI‖En‖ASCII‖
 *‖ascii/‖SI‖En‖American Standard Code for Information Interchange‖https://en.wikipedia.org/wiki/ASCII
-‖ato‖SI‖En‖ATO‖
+C‖ato‖SI‖En‖ATO‖
 *‖ato/‖MCL‖En‖Assembly To Order¦Automatic Train Operation‖
-‖bios‖SI‖En‖BIOS‖
+C‖bios‖SI‖En‖BIOS‖
 *‖bios/‖SI‖En‖Basic Input/Output System‖https://en.wikipedia.org/wiki/BIOS
-‖bom‖SI‖En‖BOM‖
+C‖bom‖SI‖En‖BOM‖
 *‖bom/‖MSI‖En‖Bill of Materials¦Byte Order Mark‖
-‖cad‖SI‖En‖CAD‖
+C‖cad‖SI‖En‖CAD‖
 *‖cad/‖CL‖En‖Computer Aided Design‖https://en.wikipedia.org/wiki/Computer-aided_design
-‖cam‖SI‖En‖CAM‖
+C‖cam‖SI‖En‖CAM‖
 *‖cam/‖SI‖En‖Computer Aided Manufacturing‖https://en.wikipedia.org/wiki/Computer-aided_manufacturing
 *‖can/‖CL‖En‖Controller Area Network‖https://en.wikipedia.org/wiki/CAN_bus
 *‖can`t‖SI‖En‖CAN‖
-‖cat‖SI‖En‖CAT‖
+C‖cat‖SI‖En‖CAT‖
 *‖cat/‖CL‖En‖Computer Assisted Translation‖https://en.wikipedia.org/wiki/Computer-assisted_translation
-‖ccms‖SI‖En‖CCMS‖
+C‖ccms‖SI‖En‖CCMS‖
 *‖ccms/‖SI‖En‖Component Content Management System‖
-‖ceo‖SI‖En‖CEO‖
+C‖ceo‖SI‖En‖CEO‖
 *‖ceo/‖CL‖En‖Chief Executive Officer‖
-‖cfo‖SI‖En‖CFO‖
+C‖cfo‖SI‖En‖CFO‖
 *‖cfo/‖SI‖En‖Chief Financial Officer‖
-‖cms‖SI‖En‖CMS‖
+C‖cms‖SI‖En‖CMS‖
 *‖cms/‖SI‖En‖Content Management System‖
-‖com‖SI‖En‖COM‖
+C‖com‖SI‖En‖COM‖
 *‖com/‖MCL‖En‖a serial port interface on IBM PC-compatible computers¦Component Object Model, a Microsoft software interface technology‖https://en.wikipedia.org/wiki/Com
-‖cop‖SI‖En‖CoP‖
+C‖cop‖SI‖En‖CoP‖
 *‖cop/‖CL‖En‖Code of Practice‖
-‖cot‖SI‖En‖CoT‖
+C‖cot‖SI‖En‖CoT‖
 *‖cot/‖SI‖En‖Clearance of Track‖
-‖cots‖SI‖En‖COTS‖
+C‖cots‖SI‖En‖COTS‖
 *‖cots/‖CL‖En‖Commercial Off-The-Shelf‖
 ‖covid‖MSI‖En‖COVID-19¦👑🦠‖U+1F451 | U+83CC
 *‖covid/‖CL‖En‖severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2)‖
-‖crc‖SI‖En‖CRC‖
+C‖crc‖SI‖En‖CRC‖
 *‖crc/‖SI‖En‖Cyclic Redundancy Check‖
-‖crm‖SI‖En‖CRM‖
+C‖crm‖SI‖En‖CRM‖
 *‖crm/‖SI‖En‖Customer Relationship Management‖
-‖cso‖SI‖En‖CSO‖
+C‖cso‖SI‖En‖CSO‖
 *‖cso/‖SI‖En‖Chief Sales Officer‖
-‖csv‖SI‖En‖CSV‖
+C‖csv‖SI‖En‖CSV‖
 *‖csv/‖SI‖En‖Comma Separated Values‖https://en.wikipedia.org/wiki/Comma-separated_values
-‖cv‖SI‖En‖CV‖
+C‖cv‖SI‖En‖CV‖
 ‖cv/‖SI‖En‖Curriculum Vitae‖course of life
-‖dc‖SI‖En‖DC‖
+C‖dc‖SI‖En‖DC‖
 *‖dc/‖CL‖En‖Direct Current‖
-‖ddns‖SI‖En‖DDNS‖
+C‖ddns‖SI‖En‖DDNS‖
 *‖ddns/‖CL‖En‖Dynamic DNS‖https://en.wikipedia.org/wiki/Dynamic_DNS
-‖dhcp‖SI‖En‖DHCP‖
+C‖dhcp‖SI‖En‖DHCP‖
 *‖dhcp/‖SI‖En‖Dynamic Host Configuration Protocol‖https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protoco
-*‖din‖SI‖En‖DIN‖
-‖dita‖SI‖En‖DITA‖
+C*‖din‖SI‖En‖DIN‖
+C‖dita‖SI‖En‖DITA‖
 *‖dita/‖CL‖En‖Darwin Information Typing Architecture‖https://en.wikipedia.org/wiki/Darwin_Information_Typing_Architec
-‖dnd‖SI‖En‖D&D‖
+C‖dnd‖SI‖En‖D&D‖
 *‖dnd/‖SI‖En‖Drag&Drop‖
-‖dns‖SI‖En‖DNS‖
+C‖dns‖SI‖En‖DNS‖
 ‖dns/‖SI‖En‖Domain Name System‖https://en.wikipedia.org/wiki/Domain_Name_System
+C‖docx‖SI‖En‖DOCX‖https://en.wikipedia.org/wiki/Office_Open_XML
 *‖doors/‖SI‖En‖ Dynamic Object Oriented Requirements System‖https://www.ibm.com/pl-pl/products/requirements-management
-‖dsl‖SI‖En‖DSL‖
+C‖dsl‖SI‖En‖DSL‖
 *‖dsl/‖SI‖En‖Digital Subscriber Line‖https://en.wikipedia.org/wiki/Digital_subscriber_line
-‖dslr‖SI‖En‖DSLR‖
+C‖dslr‖SI‖En‖DSLR‖
 *‖dslr/‖SI‖En‖Digital Single-Lens Reflex camera‖https://en.wikipedia.org/wiki/Digital_single-lens_reflex_camera
-‖dvd‖SI‖En‖DVD‖
+C‖dvd‖SI‖En‖DVD‖
 *‖dvd/‖SI‖En‖Digital Versatile Disc‖https://en.wikipedia.org/wiki/DVD
-‖dwg‖SI‖En‖DWG‖
+C‖dwg‖SI‖En‖DWG‖
 *‖dwg/‖SI‖Dis‖Drawing Exchange Format‖
-‖dxf‖SI‖En‖DXF‖
+C‖dxf‖SI‖En‖DXF‖
 *‖dxf/‖SI‖En‖Drawing Exchange Format‖
-*‖easm ‖CL‖En‖EASM ‖
-‖ebit‖SI‖En‖EBIT‖
+C‖easm‖SI‖En‖EASM‖
+C‖ebit‖SI‖En‖EBIT‖
 *‖ebit/‖SI‖En‖Earnings Before Interest and Taxes‖
-‖ei‖SI‖En‖EI‖
+C‖ei‖SI‖En‖EI‖
 *‖ei/‖CL‖En‖Emotional Intelligence‖
-‖emc‖SI‖En‖EMC‖
+C‖emc‖SI‖En‖EMC‖
 *‖emc/‖CL‖En‖Electro-Magnetic Compatibility‖
-‖emf‖SI‖En‖EMF‖
+C‖emf‖SI‖En‖EMF‖
 *‖emf/‖CL‖En‖Enhanced Metafile‖https://en.wikipedia.org/wiki/Windows_Metafile#EMF
-‖emi‖SI‖En‖EMI‖
+C‖emi‖SI‖En‖EMI‖
 *‖emi/‖CL‖En‖Electromagnetic Interference‖
-‖ems‖SI‖En‖EMS‖
+C‖ems‖SI‖En‖EMS‖
 *‖ems/‖CL‖En‖Electronics Manufacturing Services‖
-‖eol‖SI‖En‖EOL‖
+C‖eol‖SI‖En‖EOL‖
 ‖eol/‖SI‖En‖End of Life‖
-‖eq‖SI‖En‖EQ ‖
+C‖eq‖SI‖En‖EQ ‖
 *‖eq/‖CL‖En‖Emotional Quotient‖
-‖era‖SI‖En‖ERA‖
+C‖era‖SI‖En‖ERA‖
 *‖era/‖CL‖En‖European Railway Agency‖
-‖ere‖SI‖En‖ERE‖
+C‖ere‖SI‖En‖ERE‖
 *‖ere/‖CL‖En‖Explicit Risk Estimation‖
-‖erp‖SI‖En‖ERP‖
+C‖erp‖SI‖En‖ERP‖
 *‖erp/‖CL‖En‖Enterprise Resource Planning‖
-‖ertms‖SI‖En‖ERTMS‖
+C‖ertms‖SI‖En‖ERTMS‖
 *‖ertms/‖CL‖En‖European Rail Traffic Management System‖
-‖etcs‖SI‖En‖ETCS‖
+C‖etcs‖SI‖En‖ETCS‖
 *‖etcs/‖SI‖En‖European Train Control System‖
-‖eto‖SI‖En‖ETO‖
+C‖eto‖SI‖En‖ETO‖
 *‖eto/‖CL‖En‖Engineer To Order‖
-‖eu‖SI‖En‖EU‖
+C‖eu‖SI‖En‖EU‖
 *‖eu/‖SI‖En‖European Union‖
-‖eut‖SI‖En‖EUT‖
+C‖eut‖SI‖En‖EUT‖
 *‖eut/‖SI‖En‖Equipment Under Test‖
-‖fai‖SI‖En‖FAI‖
+C‖fai‖SI‖En‖FAI‖
 *‖fai/‖CL‖En‖First Article Inspection‖
-‖faq‖SI‖En‖FAQ‖
+C‖faq‖SI‖En‖FAQ‖
 *‖faq/‖CL‖En‖Frequently Asked Questions‖
-‖fat‖SI‖En‖FAT‖
+C‖fat‖SI‖En‖FAT‖
 *‖fat/‖CL‖En‖Factory Acceptance Test‖
-‖fmea‖SI‖En‖FMEA‖
+C‖fmea‖SI‖En‖FMEA‖
 *‖fmea/‖CL‖En‖Failure Mode and Effects Analysis‖
-‖fmeca‖SI‖En‖FMECA‖
+C‖fmeca‖SI‖En‖FMECA‖
 *‖fmeca/‖SI‖En‖Failure mode effects and criticality analysis‖
-‖fo‖SI‖En‖FO‖
+C‖fo‖SI‖En‖FO‖
 *‖fo/‖SI‖En‖Fiber Optics‖
-‖ga‖SI‖En‖GA‖Generic Application
+C‖ga‖SI‖En‖GA‖Generic Application
 *‖ga/‖SI‖En‖Generic Application‖
-‖gdpr‖SI‖En‖GDPR‖
+C‖gdpr‖SI‖En‖GDPR‖
 *‖gdpr/‖SI‖En‖General Data Protection Regulation‖
-‖gmt‖SI‖En‖GMT‖
+C‖gmt‖SI‖En‖GMT‖
 *‖gmt/‖MSI‖En‖Greenwich Mean Time¦Poland: GMT + 01:00¦Polska: GMT + 01:00‖https://en.wikipedia.org/wiki/Greenwich_Mean_Time
-‖gnu‖SI‖En‖GNU‖
+C‖gnu‖SI‖En‖GNU‖
 *‖gnu/‖MCL‖En‖GNU's Not Unix!¦https://en.wikipedia.org/wiki/GNU‖https://en.wikipedia.org/wiki/GNU
-‖gpl‖SI‖En‖GPL‖
+C‖gpl‖SI‖En‖GPL‖
 *‖gpl/‖MCL‖En‖General Public License¦https://en.wikipedia.org/wiki/GNU_General_Public_License‖https://en.wikipedia.org/wiki/GNU_General_Public_License
-‖gps‖SI‖En‖GPS‖
+C‖gps‖SI‖En‖GPS‖
 *‖gps/‖CL‖En‖Global Positioning System‖
-‖gsm‖SI‖En‖GSM‖
+C‖gsm‖SI‖En‖GSM‖
 *‖gsm/‖CL‖En‖Global System for Mobile Communications‖
-‖gui‖SI‖En‖GUI‖
+C‖gui‖SI‖En‖GUI‖
 *‖gui/‖CL‖En‖Graphical User Interface‖
-‖hart‖SI‖En‖HART‖
+C‖hart‖SI‖En‖HART‖
 *‖hart/‖CL‖En‖Highway Addressable Remote Transducer Protocol‖
-‖hdmi‖SI‖En‖HDMI‖
+C‖hdmi‖SI‖En‖HDMI‖
 *‖hdmi/‖CL‖En‖High-Definition Multimedia Interface‖
-‖html‖SI‖En‖HTML‖
+C‖html‖SI‖En‖HTML‖
 *‖html/‖SI‖En‖HyperText Markup Language‖
-‖hw‖SI‖En‖HW‖
+C‖hw‖SI‖En‖HW‖
 *‖hw/‖SI‖En‖hardware‖
-‖ic‖SI‖En‖IC‖
+C‖ic‖SI‖En‖IC‖
 *‖ic/‖CL‖En‖Interoperability Constituent‖
-‖ide‖SI‖En‖IDE‖
+C‖ide‖SI‖En‖IDE‖
 *‖ide/‖SI‖En‖Integrated Development Environment‖
-‖ip‖SI‖En‖IP‖
+C‖ip‖SI‖En‖IP‖
 *‖ip/‖MCL‖En‖IP Code, Ingress Protection code¦https://en.wikipedia.org/wiki/IP_Code‖
-‖iq‖SI‖En‖IQ‖
+C‖iq‖SI‖En‖IQ‖
 *‖iq/‖CL‖En‖Inteligence Quotient‖
-‖iris‖SI‖En‖IRIS‖
+C‖iris‖SI‖En‖IRIS‖
 *‖iris/‖CL‖En‖International Railway Industry Standard for the evaluation of railway management systems‖
-‖iso‖SI‖En‖ISO‖
+C‖iso‖SI‖En‖ISO‖
 *‖iso/‖SI‖En‖International Standard Organisation‖
-*‖javascript‖SI‖En‖JavaScript‖
-‖kpi‖SI‖En‖KPI‖
+C*‖javascript‖SI‖En‖JavaScript‖
+C‖kpi‖SI‖En‖KPI‖
 *‖kpi/‖CL‖En‖Key Performance Indicator‖
-‖lad‖SI‖En‖LAD‖
+C‖lad‖SI‖En‖LAD‖
 *‖lad/‖CL‖En‖Logistic and Administrative Delay‖
-‖lan‖SI‖En‖LAN‖
+C‖lan‖SI‖En‖LAN‖
 *‖lan/‖SI‖En‖Local Area Network‖
-‖lc2‖CL‖En‖LLC‖
-*‖lc2/‖CL‖En‖Life Cycle Cost‖
-*‖led‖SI‖En‖LED‖
-*‖LED/‖CL‖En‖Light Emitting Diode‖
-‖lgbt‖SI‖En‖LGBT‖
+C‖led‖SI‖En‖LED‖
+*‖led/‖CL‖En‖Light Emitting Diode‖
+C‖lgbt‖SI‖En‖LGBT‖
 *‖lgbt/‖SI‖En‖Lesbian Gay Bisexual Transgender‖
-‖llc‖CL‖En‖LLC‖
+C‖llc‖CL‖En‖LLC‖
 *‖llc/‖CL‖En‖Life Cycle Cost‖
-‖lop‖SI‖En‖LOP‖
+C‖lms‖SI‖En‖LMS‖
+C‖lop‖SI‖En‖LOP‖
 *‖lop/‖CL‖En‖List of Open Points‖
-‖lte‖SI‖En‖LTE‖
+C‖lte‖SI‖En‖LTE‖
 *‖lte/‖SI‖En‖Long-Term Evolution‖
-‖mac‖SI‖En‖MAC‖
+C‖mac‖SI‖En‖MAC‖
 *‖mac/‖SI‖En‖Media Access control Address ‖https://en.wikipedia.org/wiki/MAC_address
-‖mba‖SI‖En‖MBA‖
+C‖mba‖SI‖En‖MBA‖
 *‖mba/‖SI‖En‖Master of Business Administration‖
-‖md5‖SI‖En‖MD5‖
+C‖md5‖SI‖En‖MD5‖
 *‖md5/‖MSI‖En‖Message-Digest Algorithm¦hash function producing a 128-bit hash value‖https://en.wikipedia.org/wiki/MD5
-‖mdt‖SI‖En‖MDT‖
+C‖mdt‖SI‖En‖MDT‖
 *‖mdt/‖CL‖En‖Mean Down Time‖
-‖mfa‖SI‖En‖MFA‖
-‖mfa/‖SI‖En‖Multi Factor Authentication‖
-‖mtbf‖SI‖En‖MTBF‖
+C‖mfa‖SI‖En‖MFA‖
+*‖mfa/‖SI‖En‖Multi Factor Authentication‖
+C‖mtbf‖SI‖En‖MTBF‖
 *‖mtbf/‖CL‖En‖Mean Time Between Failures‖
-‖mtbm‖SI‖En‖MTBM‖
+C‖mtbm‖SI‖En‖MTBM‖
 *‖mtbm/‖CL‖En‖Mean Time Between Maintainances‖
-‖mto‖SI‖En‖MTO‖
+C‖mto‖SI‖En‖MTO‖
 *‖mto/‖CL‖En‖Make To Order‖
-‖mttf‖SI‖En‖MTTF‖
+C‖mttf‖SI‖En‖MTTF‖
 *‖mttf/‖CL‖En‖Mean Time To Failure‖
-‖mttr‖SI‖En‖MTTR‖
+C‖mttr‖SI‖En‖MTTR‖
 *‖mttr/‖CL‖En‖Mean Time To Restore‖
-‖mtu‖SI‖En‖MTU‖
+C‖mtu‖SI‖En‖MTU‖
 *‖mtu/‖SI‖En‖Maximum Transmission Unit‖https://en.wikipedia.org/wiki/Maximum_transmission_unit
-‖mut‖SI‖En‖MUT‖
+C‖mut‖SI‖En‖MUT‖
 *‖mut/‖CL‖En‖Mean Up Time‖
 *‖nas/‖SI‖En‖Network Attached Storage‖
 *‖nas`t‖SI‖En‖NAS‖
-‖ncr‖SI‖En‖NCR‖
+C‖ncr‖SI‖En‖NCR‖
 *‖ncr/‖CL‖En‖Non Conformance Report‖
-‖nda‖SI‖En‖NDA‖
+C‖nda‖SI‖En‖NDA‖
 *‖nda/‖CL‖En‖Non-Disclosure Agreement‖
 *‖nic/‖SI‖En‖Network Interface Card‖
 *‖nic`t‖SI‖En‖NIC‖
-‖oem‖SI‖En‖OEM‖
+C‖oem‖SI‖En‖OEM‖
 *‖oem/‖SI‖En‖Original Equipment Manufacturer‖
-‖pcb‖SI‖En‖PCB‖
+C‖pcb‖SI‖En‖PCB‖
 *‖pcb/‖CL‖En‖Printed Circuit Board‖
-‖pcn‖SI‖En‖PCN‖
+C‖pcn‖SI‖En‖PCN‖
 *‖pcn/‖SI‖En‖Product Change Notification‖
-‖pdf‖SI‖En‖PDF‖
+C‖pdf‖SI‖En‖PDF‖
 *‖pdf/‖CL‖En‖Portable Document Format‖
-‖php‖SI‖En‖PHP‖
+C‖php‖SI‖En‖PHP‖
 *‖php/‖SI‖En‖Hypertext Preprocessor‖
-‖pit‖SI‖En‖PIT‖
+C‖pit‖SI‖En‖PIT‖
 *‖pit/‖SI‖En‖Personal Income Tax‖
-‖plc‖SI‖En‖PLC‖
+C‖plc‖SI‖En‖PLC‖
 *‖plc/‖SI‖En‖Programmable Logic Controller‖https://en.wikipedia.org/wiki/Programmable_logic_controller
-‖plm‖SI‖En‖PLM‖
+C‖plm‖SI‖En‖PLM‖
 *‖plm/‖CL‖En‖Product Lifecycle Management‖
-‖poc‖SI‖En‖PoC‖
+C‖poc‖SI‖En‖PoC‖
 *‖poc/‖CL‖En‖Proof of Concept‖
-‖poe‖SI‖En‖PoE‖
+C‖poe‖SI‖En‖PoE‖
 *‖poe/‖SI‖En‖Power over Ethernet‖
-‖ppi‖SI‖En‖PPI‖
+C‖ppi‖SI‖En‖PPI‖
 *‖ppi/‖SI‖En‖Point Per Inch‖
-‖pwm‖SI‖En‖PWM‖
+C‖pwm‖SI‖En‖PWM‖
 *‖PWM/‖SI‖En‖Pulse-Width Modulation‖
-‖qna‖SI‖En‖Q&A‖
+C‖qna‖SI‖En‖Q&A‖
 *‖qna/‖CL‖En‖Questions and Answers‖
-‖qr‖SI‖En‖QR code‖
+C‖qr‖SI‖En‖QR code‖
 *‖qr/‖SI‖En‖Quick Response code‖
-‖qrams‖SI‖En‖QRAMS‖
+C‖qrams‖SI‖En‖QRAMS‖
 *‖qrams/‖CL‖En‖Quality, Reliability, Availability, Maintainability, Safety‖
 *‖r/‖SI‖En‖Reliability‖
-‖rac‖SI‖En‖RAC‖
+C‖rac‖SI‖En‖RAC‖
 *‖rac/‖CL‖En‖Risk Acceptance Criteria‖
-‖ral‖SI‖En‖RAL‖
+C‖ral‖SI‖En‖RAL‖
 *‖ral/‖SI‖En‖Reichs-Ausschuß für Lieferbedingungen (National Committee for Delivery and Quality Assurance)‖
-‖ram‖SI‖En‖RAM‖
+C‖ram‖SI‖En‖RAM‖
 *‖ram/‖CL‖En‖Reliability, Availability, Maintainability‖
-‖rams‖SI‖En‖RAMS‖
+C‖rams‖SI‖En‖RAMS‖
 *‖rams/‖CL‖En‖Reliability, Availability, Maintainability and Safety‖
-‖rap‖SI‖En‖RAP‖
+C‖rap‖SI‖En‖RAP‖
 *‖rap/‖CL‖En‖Risk Acceptance Principle‖
-‖rgb‖SI‖En‖RGB‖
+C‖rgb‖SI‖En‖RGB‖
 *‖rgb/‖SI‖En‖Red Green Blue‖https://en.wikipedia.org/wiki/RGB_color_model
-‖rma‖SI‖En‖RMA‖
+C‖rma‖SI‖En‖RMA‖
 *‖rma/‖CL‖En‖Return Merchandise Authorization‖
-‖rms‖SI‖En‖RMS‖
+C‖rms‖SI‖En‖RMS‖
 *‖rms/‖CL‖En‖Root Mean Square‖
-‖rohs‖SI‖En‖RoHS‖
+C‖rohs‖SI‖En‖RoHS‖
 *‖rohs/‖SI‖En‖Restriction of Hazardous Substances Directive‖https://en.wikipedia.org/wiki/Restriction_of_Hazardous_Substance
-‖rpa‖SI‖En‖RPA‖
+C‖rpa‖SI‖En‖RPA‖
 *‖rpa/‖SI‖En‖Robotics Process Automation‖
-‖sa‖SI‖En‖SA‖
+C‖sa‖SI‖En‖SA‖
 *‖sa/‖CL‖En‖Specific Application‖
-‖seo‖SI‖En‖SEO‖
+C‖saas‖SI‖En‖SaaS‖
+*‖saas/‖SI‖En‖Software as a Service‖https://en.wikipedia.org/wiki/Software_as_a_service
+C‖seo‖SI‖En‖SEO‖
 *‖seo/‖SI‖En‖Search Engine Optimization‖
-‖sil‖SI‖En‖SIL‖
+C‖sil‖SI‖En‖SIL‖
 *‖sil/‖CL‖En‖Safety Integrity Level‖
-‖sla‖SI‖En‖SLA‖
+C‖sla‖SI‖En‖SLA‖
 *‖sla/‖CL‖En‖Service-Level Agreement‖
-‖sms‖SI‖En‖SMS‖
+C‖sms‖SI‖En‖SMS‖
 *‖sms/‖CL‖En‖Short Message Service‖
-‖snmp‖SI‖En‖SNMP‖
+C‖snmp‖SI‖En‖SNMP‖
 *‖snmp/‖SI‖En‖Simple Network Management Protocol‖https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol
-‖sql‖SI‖En‖SQL‖
+C‖sql‖SI‖En‖SQL‖
 *‖sql/‖CL‖En‖Structured Query Language‖
-‖srac‖SI‖En‖SRAC‖
+C‖srac‖SI‖En‖SRAC‖
 *‖srac/‖CL‖En‖Safety Related Application Condition‖
-‖suv‖SI‖En‖SUV‖
+C‖suv‖SI‖En‖SUV‖
 *‖suv/‖SI‖En‖Sport Utility Vehicle‖
-‖svg‖SI‖En‖SVG‖
+C‖svg‖SI‖En‖SVG‖
 *‖svg/‖SI‖En‖Scalable Vector Graphics‖
-‖sw‖SI‖En‖SW‖
+C‖sw‖SI‖En‖SW‖
 *‖sw/‖SI‖En‖software‖
-‖tco‖SI‖En‖TCO‖
-‖tco/‖SI‖En‖Total Cost of Ownership‖
-‖tffr‖SI‖En‖TFFR‖
+C‖tco‖SI‖En‖TCO‖
+*‖tco/‖SI‖En‖Total Cost of Ownership‖
+C‖tffr‖SI‖En‖TFFR‖
 *‖tffr/‖CL‖En‖Tolerable Functional Failure Rate‖
-‖thr‖SI‖En‖THR‖
+C‖thr‖SI‖En‖THR‖
 *‖thr/‖CL‖En‖Tolerable Hazard Rate‖
-‖tsi‖SI‖En‖TSI‖
+C‖tsi‖SI‖En‖TSI‖
 *‖tsi/‖CL‖En‖Technical Specifications for Interoperability‖
-‖uefi‖SI‖En‖UEFI‖
-‖uefi/‖SI‖En‖Unified Extensible Firmware Interface‖https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interf
-‖ui‖SI‖En‖UI‖
+C‖uefi‖SI‖En‖UEFI‖
+*‖uefi/‖SI‖En‖Unified Extensible Firmware Interface‖https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interf
+C‖ui‖SI‖En‖UI‖
 *‖ui/‖CL‖En‖User Interface‖
-‖uic‖SI‖En‖UIC‖
+C‖uic‖SI‖En‖UIC‖
 *‖uic/‖MCL‖En‖International Union of Railways¦French: Union internationale des chemins de fer‖https://uic.org/
-‖ups‖SI‖En‖UPS‖
+C‖ups‖SI‖En‖UPS‖
 *‖ups/‖CL‖En‖Uninterruptable Power Supply‖
-‖url‖SI‖En‖URL‖
+C‖url‖SI‖En‖URL‖
 *‖url/‖SI‖En‖Uniform Resource Locator‖https://en.wikipedia.org/wiki/URL
-‖usb‖SI‖En‖USB‖
+C‖usb‖SI‖En‖USB‖
 *‖usb/‖CL‖En‖Universal Serial Bus‖
-‖utf‖SI‖En‖UTF‖
+C‖utf‖SI‖En‖UTF‖
 *‖utf/‖CL‖En‖Unicode Transformation Format‖
-‖uv‖SI‖En‖UV‖
+C‖uv‖SI‖En‖UV‖
 *‖uv/‖SI‖En‖Ultra Violet‖
-‖ux‖SI‖En‖UX‖
+C‖ux‖SI‖En‖UX‖
 *‖ux/‖CL‖En‖User Experience‖
-‖vat‖SI‖En‖VAT‖
+C‖vat‖SI‖En‖VAT‖
 *‖vat/‖CL‖En‖Value Added Tax‖
-‖vba‖SI‖En‖VBA‖
+C‖vba‖SI‖En‖VBA‖
 *‖vba/‖CL‖En‖Visual Basic for Applications‖
-‖vlan‖SI‖En‖VLAN‖
+C‖vlan‖SI‖En‖VLAN‖
 *‖vlan/‖SI‖En‖Virtual LAN‖https://en.wikipedia.org/wiki/Virtual_LAN
-‖vpn‖SI‖En‖VPN‖
+C‖vpn‖SI‖En‖VPN‖
 *‖vpn/‖CL‖En‖Virtual Private Network‖
-‖vps‖SI‖En‖VPS‖
+C‖vps‖SI‖En‖VPS‖
 *‖vps/‖SI‖En‖Virtual Private Server‖
-‖vr‖CL‖En‖VR‖
+C‖vr‖CL‖En‖VR‖
 *‖vr/‖CL‖En‖Virtual Reality‖
-‖wmf‖SI‖En‖WMF‖
-‖wmf/‖CL‖En‖Windows Metafile‖https://en.wikipedia.org/wiki/Windows_Metafile#EMF
-‖wol‖SI‖En‖WoL‖
+C‖wmf‖SI‖En‖WMF‖
+*‖wmf/‖CL‖En‖Windows Metafile‖https://en.wikipedia.org/wiki/Windows_Metafile#EMF
+C‖wol‖SI‖En‖WoL‖
 *‖wol/‖SI‖En‖Wake-on-LAN‖
-‖www‖SI‖En‖WWW‖
+C‖www‖SI‖En‖WWW‖
 *‖www/‖SI‖En‖World Wide Web‖
-‖wysiwyg‖SI‖En‖WYSIWYG‖
+C‖wysiwyg‖SI‖En‖WYSIWYG‖
 *‖wysiwyg/‖SI‖En‖What You See Is What You Get‖
+C‖xlsx‖SI‖En‖XLSX‖
+C‖xml‖SI‖En‖XML‖
+*‖xml/‖SI‖En‖Extensible Markup Language‖https://en.wikipedia.org/wiki/XML
