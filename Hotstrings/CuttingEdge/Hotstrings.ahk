@@ -987,7 +987,7 @@ F_LoadHotstringsFromLibraries()
 	
 	; Load (triggerstring, hotstring) definitions if enabled and triggerstring tips if enabled.
 	v_HotstringCnt := 0
-	;*[One]
+	
 	for key, value in ini_LoadLib
 	{
 		if ((key != "PriorityLibrary.csv") and (value))
@@ -1308,7 +1308,11 @@ F_LoadFile(nameoffile)
 			a_Triggers.Push(tabSearch[2]) ; a_Triggers is used in main loop of application for generating tips
 		
 		F_ini_StartHotstring(line, nameoffile)
-		GuiControl, Text, % IdText2, % v_LoadedHotstrings . A_Space . ++v_HotstringCnt ; •(Blank): Puts new contents into the control.
+		;*[One]
+		;++v_HotstringCnt
+		GuiControl, Text, % IdText2, % v_LoadedHotstrings . A_Space . ++v_HotstringCnt ; Text: Puts new contents into the control.
+		;GuiControl, Text, % IdText2, % v_LoadedHotstrings . A_Space . 1050 ; Text: Puts new contents into the control.
+		;GuiControl, Text, % IdText2, fik
 		;OutputDebug, % "Content of IdText2 GuiControl:" . A_Space . v_LoadedHotstrings . A_Space . v_HotstringCnt
 	}
 	a_LibraryCnt.Push(v_HotstringCnt)
@@ -1316,47 +1320,6 @@ F_LoadFile(nameoffile)
 }
 
 ; ------------------------------------------------------------------------------------------------------------------------------------
-
-F_RemoveFile(nameoffile)
-{
-	global ;assume-global mode
-	local name := "", tabSearch := "", line := "", FlagLoadTriggerTips := false
-		,key := "", value := ""
-	
-	for key, value in ini_ShowTipsLib
-		if ((key == nameoffile) and (value))
-			FlagLoadTriggerTips := true
-	
-	Loop
-	{
-		FileReadLine, line, %A_ScriptDir%\Libraries\%nameoffile%, %A_Index%
-		if (ErrorLevel)
-			break
-		tabSearch := StrSplit(line, "‖")	
-		name := SubStr(A_LoopFileName, 1, -4) ;filename without extension
-		
-		a_Library.Push(name) ; function Search
-		a_TriggerOptions.Push(tabSearch[1])
-		a_Triggerstring.Push(tabSearch[2]) 
-		a_OutputFunction.Push(tabSearch[3])
-		a_EnableDisable.Push(tabSearch[4])
-		a_Hotstring.Push(tabSearch[5]) 
-		a_Comment.Push(tabSearch[6])
-		
-		if (FlagLoadTriggerTips)
-			a_Triggers.Push(tabSearch[2]) ; a_Triggers is used in main loop of application for generating tips
-		
-		F_ini_StartHotstring(line, nameoffile)
-		GuiControl, Text, % IdText2, % v_LoadedHotstrings . A_Space . ++v_HotstringCnt ; •(Blank): Puts new contents into the control.
-		;OutputDebug, % "Content of IdText2 GuiControl:" . A_Space . v_LoadedHotstrings . A_Space . v_HotstringCnt
-	}
-	a_LibraryCnt.Push(v_HotstringCnt)
-	return
-}
-
-; ------------------------------------------------------------------------------------------------------------------------------------
-
-
 
 F_GuiMain_CreateObject()
 {
@@ -1396,7 +1359,7 @@ F_GuiMain_CreateObject()
 ;GuiControl, 	Hide, 		% IdText1
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
-	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText2 vv_LoadedHotstrings, % "Total:     0" ;Future: to be translated
+	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText2 vv_LoadedHotstrings, Fikus: 0000 ;Future: to be translated
 	
 	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString 
 ;GuiControl,	Hide,		% IdEdit1
@@ -1497,7 +1460,7 @@ F_GuiMain_CreateObject()
 	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit10 vv_Sandbox r3 						; r3 = 3x rows of text
 ;GuiControl,	Hide,		% IdEdit10
 ;Gui, 		HS3:Add, 		Edit, 		HwndIdEdit11 vv_ViewString gViewString ReadOnly Hide
-	Gui,			HS3:Add,		Text,		x0 y0 HwndIdText11 vv_NoOfHotstringsInLibrary, % "Hotstrings:    0"
+	Gui,			HS3:Add,		Text,		x0 y0 HwndIdText11 vv_NoOfHotstringsInLibrary, % "Hotstrings: 9999"
 }
 
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -1697,7 +1660,11 @@ F_GuiMain_DetermineConstraints()
 	GuiControl, Move, % IdText11, % "x" v_xNext "y" v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdText11
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext
+	GuiControlGet, v_OutVarTemp1, Pos, % IdText2
+	;tu jestem
+	;GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext "w" 100
+	GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext "w" v_OutVarTemp1W + c_xmarg
+	;GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext "w" v_OutVarTemp1W 
 	
 ;5.3.2. Position the only one List View 
 	GuiControlGet, v_OutVarTemp1, Pos, % IdEdit10 ; height of Sandbox edit field
@@ -1758,15 +1725,16 @@ F_GuiMain_DetermineConstraints()
 ;6.1. Total counter:
 	GuiControlGet, v_LoadedHotstrings,, % IdText2
 	;OutputDebug, % "v_LoadedHotstrings from control:" . A_Space . v_LoadedHotstrings
+	
 	v_LoadedHotstrings := SubStr(v_LoadedHotstrings, 1, -4)
 	;OutputDebug, % "v_LoadedHotstrings to control:" . A_Space . v_LoadedHotstrings
 	GuiControl, Text, % IdText2, % v_LoadedHotstrings 
-	;GuiControlGet, v_LoadedHotstrings,, % IdText2
 	;OutputDebug, % "v_LoadedHotstrings from control:" . A_Space . v_LoadedHotstrings
 ;6.2. Counter of hotstrings in specificlibrary
-	v_NoOfHotstringsInLibrary := SubStr(v_NoOfHotstringsInLibrary, 1, -4)
 	GuiControlGet, v_NoOfHotstringsInLibrary,, % IdText11
+	v_NoOfHotstringsInLibrary := SubStr(v_NoOfHotstringsInLibrary, 1, -4)
 	GuiControl, Text, % IdText11, % v_NoOfHotstringsInLibrary
+	return
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4200,6 +4168,7 @@ HS3GuiSize() ;Gui event
 	HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
 	HS3_GuiHeight := A_GuiHeight
 	;OutputDebug, % "End:" . A_Space . CntGuiSize . "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space "A_GuiHeight" . A_Space . A_GuiHeight
+	;*[Two]
 	return
 	
 }
@@ -4721,8 +4690,8 @@ else ;increase size of List View and hide sandbox
 		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp1Y + v_OutVarTemp1H + HofText + c_HofSandbox + c_ymarg + c_ymarg ;Position of the long text F1 ... F2 ...
 	}
 }
-		;*[Two]
-		F_AutoXYWH("reset")
+
+F_AutoXYWH("reset")
 		;OutputDebug, return by if (ini_Sandbox)
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
