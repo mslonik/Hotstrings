@@ -54,7 +54,7 @@ global v_CaseSensitiveC1 		:= ""
 global v_BlockHotkeysFlag		:= 0
 global v_FlagSound 				:= 0
 ;I couldn't find how to get system settings for size of menu font. Quick & dirty solution: manual setting of all fonts with variable c_FontSize.
-global v_HotstringCnt 			:= 0
+global v_TotalHotstringCnt 			:= 0
 global v_HotstringFlag 			:= 0
 global v_HS3ListFlag 			:= 0
 global v_IndexLog 				:= 1
@@ -986,7 +986,7 @@ F_LoadHotstringsFromLibraries()
 		TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
 	
 	; Load (triggerstring, hotstring) definitions if enabled and triggerstring tips if enabled.
-	v_HotstringCnt := 0
+	v_TotalHotstringCnt := 0
 	
 	for key, value in ini_LoadLib
 	{
@@ -1151,6 +1151,7 @@ Hotstring menu (MSI, MCL) 								= Hotstring menu (MSI, MCL)
 Hotstring moved to the 									= Hotstring moved to the
 Hotstring paste from Clipboard delay 1 s 					= Hotstring paste from Clipboard delay 1 s
 Hotstring paste from Clipboard delay 						= Hotstring paste from Clipboard delay
+Hotstrings:											= Hotstrings:
 Hotstrings have been loaded 								= Hotstrings have been loaded
 Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
@@ -1214,6 +1215,7 @@ The file path is: 										= The file path is:
 There is no											= There is no
 There was no Languages subfolder, so one now is created.		= There was no Languages subfolder, so one now is created.
 Toggle EndChars	 									= &Toggle EndChars
+Total:												= Total:
 Triggerstring 											= Triggerstring
 Triggerstring tips 										= &Triggerstring tips
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
@@ -1309,13 +1311,10 @@ F_LoadFile(nameoffile)
 		
 		F_ini_StartHotstring(line, nameoffile)
 		;*[One]
-		;++v_HotstringCnt
-		GuiControl, Text, % IdText2, % v_LoadedHotstrings . A_Space . ++v_HotstringCnt ; Text: Puts new contents into the control.
-		;GuiControl, Text, % IdText2, % v_LoadedHotstrings . A_Space . 1050 ; Text: Puts new contents into the control.
-		;GuiControl, Text, % IdText2, fik
-		;OutputDebug, % "Content of IdText2 GuiControl:" . A_Space . v_LoadedHotstrings . A_Space . v_HotstringCnt
+		GuiControl, Text, % IdText12, % A_Space . ++v_TotalHotstringCnt ; Text: Puts new contents into the control.
+		;OutputDebug, % "Content of IdText2 GuiControl:" . A_Space . v_LoadedHotstrings . A_Space . v_TotalHotstringCnt
 	}
-	a_LibraryCnt.Push(v_HotstringCnt)
+	a_LibraryCnt.Push(v_TotalHotstringCnt)
 	return
 }
 
@@ -1327,7 +1326,7 @@ F_GuiMain_CreateObject()
 	local x0 := 0, y0 := 0
 	
 	/*
-		IdText1 IdText2 IdText3 IdText4 IdText5 IdText6 IdText7 IdText8 IdText9 IdText10 IdText11
+		IdText1 IdText2 IdText3 IdText4 IdText5 IdText6 IdText7 IdText8 IdText9 IdText10 IdText11 IdText12 IdText13
 		IdCheckBox1 IdCheckBox2 IdCheckBox3 IdCheckBox4 IdCheckBox5 IdCheckBox6
 		IdEdit1 IdEdit2 IdEdit3 IdEdit4 IdEdit5 IdEdit6 IdEdit7 IdEdit8 IdEdit9 IdEdit10
 		IdGroupBox1
@@ -1343,7 +1342,6 @@ F_GuiMain_CreateObject()
 		v_DeleteHotstring v_ToggleRightColumn
 		v_LibraryContent v_ShortcutsMainInterface v_SandString v_Sandbox v_NoOfHotstringsInLibrary
 	*/
-	v_NoOfHotstringsInLibrary := 0
 	
 ;1. Definition of HS3 GUI.
 ;-DPIScale doesn't work in Microsoft Windows 10
@@ -1358,8 +1356,10 @@ F_GuiMain_CreateObject()
 	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText1, 									% TransA["Enter triggerstring"]
 ;GuiControl, 	Hide, 		% IdText1
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	
-	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText2 vv_LoadedHotstrings, Fikus: 0000 ;Future: to be translated
+	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText2, % TransA["Total:"]
+	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
+	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText12, % A_Space . A_Space . A_Space . A_Space . "0"
+	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
 	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString 
 ;GuiControl,	Hide,		% IdEdit1
@@ -1460,7 +1460,11 @@ F_GuiMain_CreateObject()
 	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit10 vv_Sandbox r3 						; r3 = 3x rows of text
 ;GuiControl,	Hide,		% IdEdit10
 ;Gui, 		HS3:Add, 		Edit, 		HwndIdEdit11 vv_ViewString gViewString ReadOnly Hide
-	Gui,			HS3:Add,		Text,		x0 y0 HwndIdText11 vv_NoOfHotstringsInLibrary, % "Hotstrings: 9999"
+	Gui,			HS3:Add,		Text,		x0 y0 HwndIdText11, % TransA["Hotstrings:"]
+	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
+	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText13,  % A_Space . A_Space . A_Space . "0" ;value of Hotstrings counter
+	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
 }
 
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -1655,16 +1659,20 @@ F_GuiMain_DetermineConstraints()
 	GuiControl, Move, % IdText7, % "x" v_xNext "y" v_yNext
 	
 ;5.3.2. Position of hotstring statistics (in this library: IdText11 / total: IdText2)
-	GuiControlGet, v_OutVarTemp, Pos, % IdText7
+	GuiControlGet, v_OutVarTemp, Pos, % IdText7 ;text: Library content (F2)
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdText11, % "x" v_xNext "y" v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdText11
-	v_xNext += v_OutVarTempW + 2 * c_xmarg
-	GuiControlGet, v_OutVarTemp1, Pos, % IdText2
+	GuiControlGet, v_OutVarTemp, Pos, % IdText11 ;text: Hotstrings
+	v_xNext += v_OutVarTempW
+	GuiControl, Move, % IdText13, % "x" v_xNext "y" v_yNext ;Where to place value of Hotstrings counter
+	GuiControlGet, v_OutVarTemp, Pos, % IdText13
+	v_xNext += v_OutVarTempW + c_xmarg
 	;tu jestem
 	;GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext "w" 100
-	GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext "w" v_OutVarTemp1W + c_xmarg
-	;GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext "w" v_OutVarTemp1W 
+	GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext ;where to place text Total
+	GuiControlGet, v_OutVarTemp, Pos, % IdText2
+	v_xNext += v_OutVarTempW
+	GuiControl, Move, % IdText12, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
 	
 ;5.3.2. Position the only one List View 
 	GuiControlGet, v_OutVarTemp1, Pos, % IdEdit10 ; height of Sandbox edit field
@@ -1718,22 +1726,7 @@ F_GuiMain_DetermineConstraints()
 		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
 		GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext ;Position of the long text F1 ... F2 ...
 	}
-	
 	;Gui, 		%HS3GuiHwnd%:Show, AutoSize Center
-	
-;6. Counters
-;6.1. Total counter:
-	GuiControlGet, v_LoadedHotstrings,, % IdText2
-	;OutputDebug, % "v_LoadedHotstrings from control:" . A_Space . v_LoadedHotstrings
-	
-	v_LoadedHotstrings := SubStr(v_LoadedHotstrings, 1, -4)
-	;OutputDebug, % "v_LoadedHotstrings to control:" . A_Space . v_LoadedHotstrings
-	GuiControl, Text, % IdText2, % v_LoadedHotstrings 
-	;OutputDebug, % "v_LoadedHotstrings from control:" . A_Space . v_LoadedHotstrings
-;6.2. Counter of hotstrings in specificlibrary
-	GuiControlGet, v_NoOfHotstringsInLibrary,, % IdText11
-	v_NoOfHotstringsInLibrary := SubStr(v_NoOfHotstringsInLibrary, 1, -4)
-	GuiControl, Text, % IdText11, % v_NoOfHotstringsInLibrary
 	return
 }
 
@@ -2053,8 +2046,8 @@ F_LoadLibrariesToTables()
 			F_ini_StartHotstring(line, nameoffile)
 			if (v_Library)
 				a_Triggers.Push(v_TriggerString)
-			v_HotstringCnt++
-			GuiControl,, v_LoadedHotstrings, % TransA["Loaded hotstrings:"] . A_Space . v_HotstringCnt
+			v_TotalHotstringCnt++
+			GuiControl,, v_LoadedHotstrings, % TransA["Loaded hotstrings:"] . A_Space . v_TotalHotstringCnt
 		}
 		return
 	}
@@ -3332,7 +3325,8 @@ F_AddHotstring()
 		FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
 	}
 	;7. Increment library counter.
-	GuiControl, Text, % IdText11, % v_NoOfHotstringsInLibrary . A_Space . ++v_LibHotstringCnt	
+	GuiControl, Text, % IdText13, % A_Space . ++v_LibHotstringCnt
+	GuiControl, Text, % IdText12, % A_Space . ++v_TotalHotstringCnt
 	
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information", Hotstring added to the %v_SelectHotstringLibrary% file! ; Future: add to translation.
 	
@@ -3654,7 +3648,7 @@ F_SectionChoose()
 	LV_ModifyCol(1, "Sort")
 	
 	v_LibHotstringCnt := LV_GetCount()
-	GuiControl, Text, % IdText11, % v_NoOfHotstringsInLibrary . A_Space . v_LibHotstringCnt
+	GuiControl, Text, % IdText13, % A_Space . v_LibHotstringCnt
 	
 	return
 }
@@ -3979,7 +3973,8 @@ F_DeleteHotstring()
 	;Run, AutoHotkey.exe Hotstrings.ahk %v_Param% %v_SelectHotstringLibrary% %v_PreviousWidth% %v_PreviousHeight% %v_PreviousX% %v_PreviousY% %v_SelectedRow% %v_SelectedMonitor%	
 	
 	;6. Decrement library counter.
-	GuiControl, Text, % IdText11, % v_NoOfHotstringsInLibrary . A_Space . --v_LibHotstringCnt
+	GuiControl, Text, % IdText13, % A_Space . --v_LibHotstringCnt
+	GuiControl, Text, % IdText12, % A_Space . --v_TotalHotstringCnt
 	
 	return
 }
@@ -3997,7 +3992,9 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 		GuiControl, Hide, % IdEdit10  	;Sandbox Edit box
 		GuiControl, Hide, % IdText8		;Long text
 		GuiControl, Hide, % IdText2		;Total hotstring counter
-		GuiControl, Hide, % IdText11		;Library hotstring counter
+		GuiControl, Hide, % IdText11		;Text "Total"
+		GuiControl, Hide, % IdText12		;Total (triggerstring, hotstring) counter
+		GuiControl, Hide, % IdText13		;Library hotstring counter
 		GuiControl,, % IdButton5,  ⯈
 	}
 	else					;show
@@ -4009,6 +4006,8 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 		GuiControl, Show, % IdText8		;Long text
 		GuiControl, Show, % IdText2		;Total hotstring counter
 		GuiControl, Show, % IdText11		;Library hotstring counter
+		GuiControl, Show, % IdText12		;Total (triggerstring, hotstring) counter
+		GuiControl, Show, % IdText13		;Library hotstring counter
 		GuiControl,, % IdButton5, ⯇
 	}
 	v_ToggleRightColumn := !v_ToggleRightColumn
