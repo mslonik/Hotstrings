@@ -153,6 +153,9 @@ F_GuiMain_CreateObject()
 F_GuiMain_DefineConstants()
 F_GuiMain_DetermineConstraints()
 
+F_GuiHS4_CreateObject()
+F_GuiHS4_DetermineConstraints()
+
 F_UpdateSelHotLibDDL()
 v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
@@ -1320,6 +1323,156 @@ F_LoadFile(nameoffile)
 
 ; ------------------------------------------------------------------------------------------------------------------------------------
 
+F_GuiHS4_CreateObject()
+{
+	global ;assume-global mode
+	local x0 := 0, y0 := 0
+	
+	/*
+		IdText1 IdText2 IdText3 IdText4 IdText5 IdText6 IdText7 IdText8 IdText9 IdText10 IdText11 IdText12 IdText13
+		IdCheckBox1 IdCheckBox2 IdCheckBox3 IdCheckBox4 IdCheckBox5 IdCheckBox6
+		IdEdit1 IdEdit2 IdEdit3 IdEdit4 IdEdit5 IdEdit6 IdEdit7 IdEdit8 IdEdit9 IdEdit10
+		IdGroupBox1
+		IdDDL1 IdDDL2
+		IdButton1 IdButton2 IdButton3 IdButton4 IdButton5
+		IdListView1
+		
+		v_LoadedHotstrings v_TriggerString v_OptionImmediateExecute v_OptionCaseSensitive v_OptionNoBackspace v_OptionInsideWord v_OptionNoEndChar v_OptionDisable
+		v_TextSelectHotstringsOutFun v_SelectFunction v_TextEnterHotstring
+		v_EnterHotstring v_EnterHotstring1 v_EnterHotstring2 v_EnterHotstring3 v_EnterHotstring4 v_EnterHotstring5 v_EnterHotstring6
+		v_TextAddComment v_Comment
+		v_TextSelectHotstringLibrary v_SelectHotstringLibrary
+		v_DeleteHotstring v_ToggleRightColumn
+		v_LibraryContent v_ShortcutsMainInterface v_SandString v_Sandbox v_NoOfHotstringsInLibrary
+	*/
+	
+;1. Definition of HS3 GUI.
+;-DPIScale doesn't work in Microsoft Windows 10
+;+Border doesn't work in Microsoft Windows 10
+;OwnDialogs
+	Gui, 	HS4: New, 	+Resize +HwndHS4GuiHwnd +OwnDialogs -MaximizeBox, % SubStr(A_ScriptName, 1, -4) . "bis"
+	Gui, 	HS4: Margin,	% c_xmarg, % c_ymarg
+	Gui,		HS4: Color,	% c_WindowColor, % c_ControlColor
+	
+;2. Prepare all text objects according to mock-up.
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText1b, 									% TransA["Enter triggerstring"]
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText2b, % TransA["Total:"]
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText12b, % A_Space . A_Space . A_Space . A_Space . "0"
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit1b vv_TriggerString 
+;GuiControl,	Hide,		% IdEdit1
+	
+	Gui, 	HS4: Add, 	CheckBox, 	x0 y0 HwndIdCheckBox1b gCapsCheck vv_OptionImmediateExecute,	% TransA["Immediate Execute (*)"]
+;GuiControl,	Hide,		% IdCheckBox1
+	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox2b gCapsCheck vv_OptionCaseSensitive,		% TransA["Case Sensitive (C)"]
+;GuiControl,	Hide,		% IdCheckBox2
+	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox3b gCapsCheck vv_OptionNoBackspace,		% TransA["No Backspace (B0)"]
+;GuiControl,	Hide,		% IdCheckBox3
+	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox4b gCapsCheck vv_OptionInsideWord, 		% TransA["Inside Word (?)"]
+;GuiControl,	Hide,		% IdCheckBox4
+	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox5b gCapsCheck vv_OptionNoEndChar, 			% TransA["No End Char (O)"]
+;GuiControl,	Hide,		% IdCheckBox5
+	Gui, 	HS4: Add, 	CheckBox, 	x0 y0 HwndIdCheckBox6b gCapsCheck vv_OptionDisable, 			% TransA["Disable"]
+;GuiControl,	Hide,		% IdCheckBox6
+	
+	Gui,		HS4: Add,		GroupBox, 	x0 y0 HwndIdGroupBox1b, 									% TransA["Select trigger option(s)"]
+;GuiControl,	Hide,		% IdGroupBox1
+	
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText3b vv_TextSelectHotstringsOutFun, 			% TransA["Select hotstring output function"]
+	;GuiControl,	Hide,		% IdText3
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
+	Gui, 	HS4: Add, 		DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gL_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
+	;GuiControl,	Hide,		% IdDDL1
+	
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText4b vv_TextEnterHotstring, 				% TransA["Enter hotstring"]
+	;GuiControl,	Hide,		% IdText4
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit2b vv_EnterHotstring
+	;GuiControl,	Hide,		% IdEdit2
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit3b vv_EnterHotstring1  Disabled
+	;GuiControl,	Hide,		% IdEdit3
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit4b vv_EnterHotstring2  Disabled
+	;GuiControl,	Hide,		% IdEdit4
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit5b vv_EnterHotstring3  Disabled
+	;GuiControl,	Hide,		% IdEdit5
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit6b vv_EnterHotstring4  Disabled
+	;GuiControl,	Hide,		% IdEdit6
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit7b vv_EnterHotstring5  Disabled
+	;GuiControl,	Hide,		% IdEdit7
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit8b vv_EnterHotstring6  Disabled
+	;GuiControl,	Hide,		% IdEdit8
+	
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText5b vv_TextAddComment, 					% TransA["Add comment (optional)"]
+	;GuiControl,	Hide,		% IdText5
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit9b vv_Comment Limit64 
+	;GuiControl,	Hide,		% IdEdit9
+	
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText6b vv_TextSelectHotstringLibrary, 			% TransA["Select hotstring library"]
+	;GuiControl,	Hide,		% IdText6
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
+	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton1b gAddLib, 							% TransA["Add library"]
+	;GuiControl,	Hide,		% IdButton1
+	Gui,		HS4: Add,		DropDownList,	x0 y0 HwndIdDDL2b vv_SelectHotstringLibrary gF_SectionChoose
+	;GuiControl,	Hide,		% IdDDL2
+	
+	;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
+	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton2b gF_AddHotstring,						% TransA["Set hotstring (F9)"]
+	;GuiControl,	Hide,		% IdButton2
+	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton3b gClear,							% TransA["Clear (F5)"]
+	;GuiControl,	Hide,		% IdButton3
+	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton4b gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
+	;GuiControl,	Hide,		% IdButton4
+	
+	Gui,		HS4: Add,		Button,		x0 y0 HwndIdButton5b gF_ToggleRightColumn vv_ToggleRightColumn,			⯇
+	;GuiControl,	Hide,		% IdButton5
+	/*
+		
+	;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+		
+		Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+		Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText7,		 							% TransA["Library content (F2)"]
+	;GuiControl,	Hide,		% IdText7
+		Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+		
+		Gui,			HS3:Add, 		Text, 		x0 y0 HwndIdText9, 									% TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
+	;GuiControl,	Hide,		% IdText9
+		Gui, 		HS3:Add, 		ListView, 	x0 y0 HwndIdListView1 LV0x1 vv_LibraryContent AltSubmit gHSLV, % TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
+	;GuiControl,	Hide,		% IdListView1
+		
+		Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText8 vv_ShortcutsMainInterface, 				% TransA["F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring"]
+	;GuiControl,	Hide,		% IdText8
+		
+		Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+		Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText10 vv_SandString, 						% TransA["Sandbox"]
+	;GuiControl,	Hide,		% IdText10
+		Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+		
+		Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit10 vv_Sandbox r3 						; r3 = 3x rows of text
+	;GuiControl,	Hide,		% IdEdit10
+	;Gui, 		HS3:Add, 		Edit, 		HwndIdEdit11 vv_ViewString gViewString ReadOnly Hide
+		Gui,			HS3:Add,		Text,		x0 y0 HwndIdText11, % TransA["Hotstrings:"]
+		Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
+		Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText13,  % A_Space . A_Space . A_Space . "0" ;value of Hotstrings counter
+		Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	*/
+	
+}
+
+; ------------------------------------------------------------------------------------------------------------------------------------
+
 F_GuiMain_CreateObject()
 {
 	global ;assume-global mode
@@ -1496,7 +1649,7 @@ F_GuiMain_DefineConstants()
 
 ; ------------------------------------------------------------------------------------------------------------------------------------
 
-F_GuiMain_DetermineConstraints()
+F_GuiHS4_DetermineConstraints()
 {
 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.
 	global ;assume-global mode
@@ -1508,6 +1661,244 @@ F_GuiMain_DetermineConstraints()
 	
 	
 ;4. Determine constraints, according to mock-up
+	GuiControlGet, v_OutVarTemp1, Pos, % IdButton2b
+	GuiControlGet, v_OutVarTemp2, Pos, % IdButton3b
+	GuiControlGet, v_OutVarTemp3, Pos, % IdButton4b
+	
+	LeftColumnW := c_xmarg + v_OutVarTemp1W + c_xmarg + v_OutVarTemp2W + c_xmarg + v_OutVarTemp3W
+	;OutputDebug, % "IdButton2:" . A_Space . IdButton2 . A_Space . "IdButton3:" . A_Space . IdButton3 . A_Space . "IdButton4:" . A_Space . IdButton4
+	;OutputDebug, % "v_OutVarTemp1W:" . A_Space . v_OutVarTemp1W  . A_Space . "v_OutVarTemp2W:" . A_Space . v_OutVarTemp2W . A_Space . "v_OutVarTemp3W:" . A_Space .  v_OutVarTemp3W  . A_Space . "c_xmarg:" . A_Space c_xmarg
+	;OutputDebug, % "LeftColumnW:" . A_Space . LeftColumnW
+	
+	GuiControlGet, v_OutVarTemp1, Pos, % IdText8b
+	GuiControlGet, v_OutVarTemp2, Pos, % IdText9b
+	v_OutVarTemp3 := Max(v_OutVarTemp1W, v_OutVarTemp2W) ;longer of two texts
+	RightColumnW := v_OutVarTemp3
+	
+	
+;5. Move text objects to correct position
+;5.1. Left column
+;5.1.1. Enter triggerstring
+	v_yNext := c_ymarg
+	v_xNext := c_xmarg
+	GuiControl, Move, % IdText1b, % "x" v_xNext "y" v_yNext
+	;GuiControl, Show, % IdText1
+	GuiControlGet, v_OutVarTemp1, Pos, % IdText1b
+	GuiControlGet, v_OutVarTemp2, Pos, % IdEdit1b
+	v_xNext := c_xmarg + v_OutVarTemp1W + c_xmarg
+	v_wNext := LeftColumnW - v_xNext
+	
+	GuiControl, Move, % IdEdit1b, % "x" v_xNext "y" v_yNext "w" v_wNext
+	;GuiControl, Show, % IdEdit1
+	
+;5.1.2. Trigger options
+	v_yNext += Max(v_OutVarTemp1H, v_OutVarTemp2H)
+	v_xNext := c_xmarg
+	v_wNext := LeftColumnW - v_xNext
+	v_hNext := HofText + 3 * HofCheckBox + c_ymarg
+	GuiControl, Move, % IdGroupBox1b, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
+	;GuiControl, Show, % IdGroupBox1
+	
+	v_yNext += HofText
+	v_xNext := c_xmarg * 2
+	GuiControlGet, v_OutVarTemp1, Pos, % IdCheckBox1b
+	GuiControlGet, v_OutVarTemp2, Pos, % IdCheckBox3b
+	GuiControlGet, v_OutVarTemp3, Pos, % IdCheckBox5b
+	WleftMiniColumn  := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W)
+	GuiControlGet, v_OutVarTemp1, Pos, % IdCheckBox2b
+	GuiControlGet, v_OutVarTemp2, Pos, % IdCheckBox4b
+	GuiControlGet, v_OutVarTemp3, Pos, % IdCheckBox6b
+	WrightMiniColumn := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W)
+	SpaceBetweenColumns := LeftColumnW - (3 * c_xmarg + WleftMiniColumn + WrightMiniColumn)
+	GuiControl, Move, % IdCheckBox1b, % "x" v_xNext "y" v_yNext
+	;GuiControl, Show, % IdCheckBox1
+	v_xNext += SpaceBetweenColumns + WleftMiniColumn
+	GuiControl, Move, % IdCheckBox2b, % "x" v_xNext "y" v_yNext
+	;GuiControl, Show, % IdCheckBox2
+	v_yNext += HofCheckBox
+	v_xNext := c_xmarg * 2
+	GuiControl, Move, % IdCheckBox3b, % "x" v_xNext "y" v_yNext
+	;GuiControl, Show, % IdCheckBox3
+	v_xNext += SpaceBetweenColumns + wleftminicolumn
+	GuiControl, Move, % IdCheckBox4b, % "x" v_xNext "y" v_yNext
+	;GuiControl, Show, % IdCheckBox4
+	v_yNext += HofCheckBox
+	v_xNext := c_xmarg * 2
+	GuiControl, Move, % IdCheckBox5b, % "x" v_xNext "y" v_yNext
+	;GuiControl, Show, % IdCheckBox5
+	v_xNext += SpaceBetweenColumns + wleftminicolumn
+	GuiControl, Move, % IdCheckBox6b, % "x" v_xNext "y" v_yNext
+	;GuiControl, Show, % IdCheckBox6
+	
+;Gui, 		%HS3GuiHwnd%:Show, AutoSize Center
+	
+	;5.1.3. Select hotstring output function
+	v_yNext += HofCheckBox + c_ymarg * 2
+	v_xNext := c_xmarg
+	GuiControl, Move, % IdText3b, % "x" v_xNext "y" v_yNext
+	v_yNext += HofText
+	v_wNext := LeftColumnW - v_xNext
+	GuiControl, Move, % IdDDL1b, % "x" v_xNext "y" v_yNext "w" v_wNext
+	
+	v_yNext += HofDropDownList + c_ymarg
+	v_xNext := c_xmarg
+	GuiControl, Move, % IdText4b, % "x" v_xNext "y" v_yNext
+	v_yNext += HofText
+	v_xNext := c_xmarg
+	v_wNext := LeftColumnW - v_xNext
+	GuiControl, Move, % IdEdit2b, % "x" v_xNext "y" v_yNext "w" v_wNext
+	v_yNext += HofEdit
+	GuiControl, Move, % IdEdit3b, % "x" v_xNext "y" v_yNext "w" v_wNext
+	v_yNext += HofEdit
+	GuiControl, Move, % IdEdit4b, % "x" v_xNext "y" v_yNext "w" v_wNext
+	v_yNext += HofEdit
+	GuiControl, Move, % IdEdit5b, % "x" v_xNext "y" v_yNext "w" v_wNext
+	v_yNext += HofEdit
+	GuiControl, Move, % IdEdit6b, % "x" v_xNext "y" v_yNext "w" v_wNext
+	v_yNext += HofEdit
+	GuiControl, Move, % IdEdit7b, % "x" v_xNext "y" v_yNext "w" v_wNext
+	v_yNext += HofEdit
+	GuiControl, Move, % IdEdit8b, % "x" v_xNext "y" v_yNext "w" v_wNext
+	
+	v_yNext += HofEdit + c_ymarg
+	v_xNext := c_xmarg
+	GuiControl, Move, % IdText5b, % "x" v_xNext "y" v_yNext
+	v_yNext += HofText
+	v_xNext := c_xmarg
+	v_wNext := LeftColumnW - v_xNext
+	GuiControl, Move, % IdEdit9b, % "x" v_xNext "y" v_yNext "w" v_wNext
+	
+	v_yNext += HofEdit + c_ymarg
+	v_xNext := c_xmarg
+	GuiControl, Move, % IdText6b, % "x" v_xNext "y" v_yNext
+	GuiControlGet, v_OutVarTemp1, Pos, % IdText6b
+	GuiControlGet, v_OutVarTemp2, Pos, % IdButton1b
+	v_OutVarTemp := LeftColumnW - (v_OutVarTemp1W + v_OutVarTemp2W + 2 * c_xmarg)
+	v_xNext := v_OutVarTemp1W + v_OutVarTemp
+	v_wNext := v_OutVarTemp2W + 2 * c_xmarg
+	GuiControl, Move, % IdButton1b, % "x" v_xNext "y" v_yNext "w" v_wNext
+	v_yNext += HofButton
+	v_xNext := c_xmarg
+	v_wNext := LeftColumnW - v_xNext
+	GuiControl, Move, % IdDDL2b, % "x" v_xNext "y" v_yNext "w" . v_wNext
+	
+	
+	v_yNext += HofDropDownList + c_ymarg
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp1, Pos, % IdButton2b
+	GuiControlGet, v_OutVarTemp2, Pos, % IdButton3b
+	GuiControl, Move, % IdButton2b, % "x" v_xNext "y" v_yNext
+	v_xNext += v_OutVarTemp1W + c_xmarg
+	GuiControl, Move, % IdButton3b, % "x" v_xNext "y" v_yNext
+	v_xNext += v_OutVarTemp2W + c_xmarg
+	GuiControl, Move, % IdButton4b, % "x" v_xNext "y" v_yNext
+	v_yNext += HofButton
+	LeftColumnH := v_yNext
+	OutputDebug, % "LeftColumnH:" . A_Space . LeftColumnH
+	
+	;5.2. Button between left and right column
+	v_yNext := c_ymarg
+	v_xNext := LeftColumnW + c_xmarg
+	v_hNext := LeftColumnH - c_ymarg
+	if (ini_VertButtPos["X"] or ini_VertButtPos["Y"] or ini_VertButtPos["W"] or ini_VertButtPos["H"])
+		GuiControl, Move, % IdButton5b, % "x" v_xNext "y" v_yNext "h" ini_VertButtPos["H"]
+	else	
+		GuiControl, Move, % IdButton5b, % "x" v_xNext "y" v_yNext "h" v_hNext
+	
+	/*
+	;5.3. Right column
+	;5.3.1. Position the text "Library content"
+		v_yNext := c_ymarg
+		v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
+		GuiControl, Move, % IdText7, % "x" v_xNext "y" v_yNext
+		
+	;5.3.2. Position of hotstring statistics (in this library: IdText11 / total: IdText2)
+		GuiControlGet, v_OutVarTemp, Pos, % IdText7 ;text: Library content (F2)
+		v_xNext += v_OutVarTempW + 2 * c_xmarg
+		GuiControl, Move, % IdText11, % "x" v_xNext "y" v_yNext
+		GuiControlGet, v_OutVarTemp, Pos, % IdText11 ;text: Hotstrings
+		v_xNext += v_OutVarTempW
+		GuiControl, Move, % IdText13, % "x" v_xNext "y" v_yNext ;Where to place value of Hotstrings counter
+		GuiControlGet, v_OutVarTemp, Pos, % IdText13
+		v_xNext += v_OutVarTempW + c_xmarg
+		;tu jestem
+		;GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext "w" 100
+		GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext ;where to place text Total
+		GuiControlGet, v_OutVarTemp, Pos, % IdText2
+		v_xNext += v_OutVarTempW
+		GuiControl, Move, % IdText12, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
+		
+	;5.3.2. Position the only one List View 
+		GuiControlGet, v_OutVarTemp1, Pos, % IdEdit10 ; height of Sandbox edit field
+		GuiControlGet, v_OutVarTemp2, Pos, % IdListView1
+		v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
+		v_yNext += HofText
+	;v_xNext := LeftColumnW + c_xmarg
+		v_wNext := RightColumnW
+		if (ini_Sandbox)
+			v_hNext := LeftColumnH - (v_OutVarTemp1H + HofText * 3 + c_ymarg * 3)
+		else
+		{
+			v_hNext := LeftColumnH - (HofText * 2 + c_ymarg * 2)
+			GuiControl, Hide, % IdText10
+			GuiControl, Hide, % IdEdit10
+		}
+		if (ini_ListViewPos["X"] or ini_ListViewPos["Y"] or ini_ListViewPos["W"] or ini_ListViewPos["H"])
+			GuiControl, Move, % IdListView1, % "x" ini_ListViewPos["X"] "y" ini_ListViewPos["Y"] "w" ini_ListViewPos["W"] "h" ini_ListViewPos["H"]
+		else
+			GuiControl, Move, % IdListView1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
+		
+		GuiControl, Hide, % IdText9
+		
+	;5.3.3. Text Sandbox
+	;5.2.4. Sandbox edit text field
+	;5.3.5. Position of the long text F1 ... F2 ...
+		;tu jestem
+		GuiControlGet, v_OutVarTemp, Pos, % IdListView1
+		if ((ini_Sandbox) and (ini_IsSandboxMoved))
+		{
+			GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
+			GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
+			;GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTempY + v_OutVarTempH + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
+			GuiControl, MoveDraw, % IdText8,  % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTempY + v_OutVarTempH + c_ymarg ;Position of the long text F1 ... F2 ...
+		}
+		
+		if ((ini_Sandbox) and !(ini_IsSandboxMoved))
+		{
+			v_yNext += v_OutVarTempH + c_ymarg
+			GuiControl, Move, % IdText10, % "x" v_xNext "y" v_yNext
+			v_yNext += HofText
+			v_wNext := RightColumnW
+			GuiControl, Move, % IdEdit10, % "x" v_xNext "y" v_yNext "w" v_wNext
+			v_yNext += c_HofSandbox + c_ymarg
+			GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext
+		}
+		
+		if !(ini_Sandbox)
+		{
+			v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
+			v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
+			GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext ;Position of the long text F1 ... F2 ...
+		}
+	*/		
+		;Gui, 		%HS3GuiHwnd%:Show, AutoSize Center
+	return
+}
+
+	; ------------------------------------------------------------------------------------------------------------------------------------
+
+F_GuiMain_DetermineConstraints()
+{
+	;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.
+	global ;assume-global mode
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+			,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
+			,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
+			,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
+								,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+	
+	
+	;4. Determine constraints, according to mock-up
 	GuiControlGet, v_OutVarTemp1, Pos, % IdButton2
 	GuiControlGet, v_OutVarTemp2, Pos, % IdButton3
 	GuiControlGet, v_OutVarTemp3, Pos, % IdButton4
@@ -1523,28 +1914,28 @@ F_GuiMain_DetermineConstraints()
 	RightColumnW := v_OutVarTemp3
 	
 	
-;5. Move text objects to correct position
-;5.1. Left column
-;5.1.1. Enter triggerstring
+	;5. Move text objects to correct position
+	;5.1. Left column
+	;5.1.1. Enter triggerstring
 	v_yNext := c_ymarg
 	v_xNext := c_xmarg
 	GuiControl, Move, % IdText1, % "x" v_xNext "y" v_yNext
-	;GuiControl, Show, % IdText1
+		;GuiControl, Show, % IdText1
 	GuiControlGet, v_OutVarTemp1, Pos, % IdText1
 	GuiControlGet, v_OutVarTemp2, Pos, % IdEdit1
 	v_xNext := c_xmarg + v_OutVarTemp1W + c_xmarg
 	v_wNext := LeftColumnW - v_xNext
 	
 	GuiControl, Move, % IdEdit1, % "x" v_xNext "y" v_yNext "w" v_wNext
-	;GuiControl, Show, % IdEdit1
+		;GuiControl, Show, % IdEdit1
 	
-;5.1.2. Trigger options
+	;5.1.2. Trigger options
 	v_yNext += Max(v_OutVarTemp1H, v_OutVarTemp2H)
 	v_xNext := c_xmarg
 	v_wNext := LeftColumnW - v_xNext
 	v_hNext := HofText + 3 * HofCheckBox + c_ymarg
 	GuiControl, Move, % IdGroupBox1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
-	;GuiControl, Show, % IdGroupBox1
+		;GuiControl, Show, % IdGroupBox1
 	
 	v_yNext += HofText
 	v_xNext := c_xmarg * 2
@@ -1558,28 +1949,28 @@ F_GuiMain_DetermineConstraints()
 	WrightMiniColumn := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W)
 	SpaceBetweenColumns := LeftColumnW - (3 * c_xmarg + WleftMiniColumn + WrightMiniColumn)
 	GuiControl, Move, % IdCheckBox1, % "x" v_xNext "y" v_yNext
-	;GuiControl, Show, % IdCheckBox1
+		;GuiControl, Show, % IdCheckBox1
 	v_xNext += SpaceBetweenColumns + WleftMiniColumn
 	GuiControl, Move, % IdCheckBox2, % "x" v_xNext "y" v_yNext
-	;GuiControl, Show, % IdCheckBox2
+		;GuiControl, Show, % IdCheckBox2
 	v_yNext += HofCheckBox
 	v_xNext := c_xmarg * 2
 	GuiControl, Move, % IdCheckBox3, % "x" v_xNext "y" v_yNext
-	;GuiControl, Show, % IdCheckBox3
+		;GuiControl, Show, % IdCheckBox3
 	v_xNext += SpaceBetweenColumns + wleftminicolumn
 	GuiControl, Move, % IdCheckBox4, % "x" v_xNext "y" v_yNext
-	;GuiControl, Show, % IdCheckBox4
+		;GuiControl, Show, % IdCheckBox4
 	v_yNext += HofCheckBox
 	v_xNext := c_xmarg * 2
 	GuiControl, Move, % IdCheckBox5, % "x" v_xNext "y" v_yNext
-	;GuiControl, Show, % IdCheckBox5
+		;GuiControl, Show, % IdCheckBox5
 	v_xNext += SpaceBetweenColumns + wleftminicolumn
 	GuiControl, Move, % IdCheckBox6, % "x" v_xNext "y" v_yNext
-	;GuiControl, Show, % IdCheckBox6
+		;GuiControl, Show, % IdCheckBox6
 	
-;Gui, 		%HS3GuiHwnd%:Show, AutoSize Center
+	;Gui, 		%HS3GuiHwnd%:Show, AutoSize Center
 	
-;5.1.3. Select hotstring output function
+	;5.1.3. Select hotstring output function
 	v_yNext += HofCheckBox + c_ymarg * 2
 	v_xNext := c_xmarg
 	GuiControl, Move, % IdText3, % "x" v_xNext "y" v_yNext
@@ -1643,7 +2034,7 @@ F_GuiMain_DetermineConstraints()
 	LeftColumnH := v_yNext
 	OutputDebug, % "LeftColumnH:" . A_Space . LeftColumnH
 	
-;5.2. Button between left and right column
+	;5.2. Button between left and right column
 	v_yNext := c_ymarg
 	v_xNext := LeftColumnW + c_xmarg
 	v_hNext := LeftColumnH - c_ymarg
@@ -1652,13 +2043,13 @@ F_GuiMain_DetermineConstraints()
 	else	
 		GuiControl, Move, % IdButton5, % "x" v_xNext "y" v_yNext "h" v_hNext
 	
-;5.3. Right column
-;5.3.1. Position the text "Library content"
+	;5.3. Right column
+	;5.3.1. Position the text "Library content"
 	v_yNext := c_ymarg
 	v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
 	GuiControl, Move, % IdText7, % "x" v_xNext "y" v_yNext
 	
-;5.3.2. Position of hotstring statistics (in this library: IdText11 / total: IdText2)
+	;5.3.2. Position of hotstring statistics (in this library: IdText11 / total: IdText2)
 	GuiControlGet, v_OutVarTemp, Pos, % IdText7 ;text: Library content (F2)
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdText11, % "x" v_xNext "y" v_yNext
@@ -1667,19 +2058,19 @@ F_GuiMain_DetermineConstraints()
 	GuiControl, Move, % IdText13, % "x" v_xNext "y" v_yNext ;Where to place value of Hotstrings counter
 	GuiControlGet, v_OutVarTemp, Pos, % IdText13
 	v_xNext += v_OutVarTempW + c_xmarg
-	;tu jestem
-	;GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext "w" 100
+		;tu jestem
+		;GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext "w" 100
 	GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext ;where to place text Total
 	GuiControlGet, v_OutVarTemp, Pos, % IdText2
 	v_xNext += v_OutVarTempW
 	GuiControl, Move, % IdText12, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
 	
-;5.3.2. Position the only one List View 
+	;5.3.2. Position the only one List View 
 	GuiControlGet, v_OutVarTemp1, Pos, % IdEdit10 ; height of Sandbox edit field
 	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1
 	v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
 	v_yNext += HofText
-;v_xNext := LeftColumnW + c_xmarg
+	;v_xNext := LeftColumnW + c_xmarg
 	v_wNext := RightColumnW
 	if (ini_Sandbox)
 		v_hNext := LeftColumnH - (v_OutVarTemp1H + HofText * 3 + c_ymarg * 3)
@@ -1696,16 +2087,16 @@ F_GuiMain_DetermineConstraints()
 	
 	GuiControl, Hide, % IdText9
 	
-;5.3.3. Text Sandbox
-;5.2.4. Sandbox edit text field
-;5.3.5. Position of the long text F1 ... F2 ...
-	;tu jestem
+	;5.3.3. Text Sandbox
+	;5.2.4. Sandbox edit text field
+	;5.3.5. Position of the long text F1 ... F2 ...
+		;tu jestem
 	GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 	if ((ini_Sandbox) and (ini_IsSandboxMoved))
 	{
 		GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
 		GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
-		;GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTempY + v_OutVarTempH + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
+			;GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTempY + v_OutVarTempH + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
 		GuiControl, MoveDraw, % IdText8,  % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTempY + v_OutVarTempH + c_ymarg ;Position of the long text F1 ... F2 ...
 	}
 	
@@ -1726,6 +2117,7 @@ F_GuiMain_DetermineConstraints()
 		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
 		GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext ;Position of the long text F1 ... F2 ...
 	}
+	
 	;Gui, 		%HS3GuiHwnd%:Show, AutoSize Center
 	return
 }
@@ -2986,12 +3378,13 @@ if (v_ResizingFlag) ;if run for the very first time
 	if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]) or !(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
 	{
 		;why double Show is necessary if FontSize == 16???
-		Gui, 		HS3: Show, AutoSize Center
-		Gui, 		HS3: Show, AutoSize Center
+		Gui, HS3: Show, AutoSize Center
+		Gui, HS3: Show, AutoSize Center
 	}
 	else
 	{
-		Gui,			HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+		Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+		Gui,	HS4: Show, Hide
 	}
 	
 		;Gui, HS3: Default ; this line is necessary to enable handling of List Views.
@@ -3005,103 +3398,13 @@ if (v_ResizingFlag) ;if run for the very first time
 	v_ResizingFlag := 0
 }
 else
-		;dodać sprawdzenie, czy odczytane współrzędne nie są poza zakresem dostępnym na tym komputerze w momencie uruchomienia
+		;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakresem dostępnym na tym komputerze w momencie uruchomienia
 	Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
 return
 
 
-
-/*
-	v_FlagMax := 0 ;v_FlagMax is set if variables ini_StartW or ini_StartH are empty in ConfigIni 
-	if (ini_StartW == "") or (ini_StartH == "")
-		v_FlagMax := 1
-	if (ini_StartX == "")
-		;ini_StartX := Mon%v_SelectedMonitor%Left + (Abs(Mon%v_SelectedMonitor%Right - Mon%v_SelectedMonitor%Left)/2) - 430*DPI%v_SelectedMonitor%
-		ini_StartX := Mon%v_SelectedMonitor%Left
-	if (ini_StartY == "")
-		;ini_StartY := Mon%v_SelectedMonitor%Top + (Abs(Mon%v_SelectedMonitor%Bottom - Mon%v_SelectedMonitor%Top)/2) - (225*DPI%v_SelectedMonitor%+31)
-		ini_StartY := Mon%v_SelectedMonitor%Top
-	if (ini_StartW == "")
-		ini_StartW := 1350*DPI%v_SelectedMonitor%
-	if (ini_StartH == "")
-		if (ini_Sandbox)
-			ini_StartH := 640*DPI%v_SelectedMonitor%+20 + 154*DPI%v_SelectedMonitor%
-	else
-		ini_StartH := 640*DPI%v_SelectedMonitor%+20
-	
-	if (ini_Sandbox) and (ini_StartH < 640*DPI%v_SelectedMonitor%+20 + 154*DPI%v_SelectedMonitor%)
-		ini_StartH := 640*DPI%v_SelectedMonitor%+20 + 154*DPI%v_SelectedMonitor%
-	Gui, HS3:Hide
-*/
-/*
-	
-	if (v_ShowGui == 1) ; it meaans: Hotstrings app was not restarted
-	{
-		if (v_FlagMax)
-		{
-			;Gui, HS3:Show, x%ini_StartX% y%ini_StartY% w%ini_StartW% h%ini_StartH% Hide, Hotstrings
-			;Gui, HS3:Show, Maximize, Hotstrings
-			Gui,	HS3: Show, AutoSize Center
-			Gui,	HS3: Show, AutoSize Center
-		}
-		else 
-			;Gui, HS3:Show, x%ini_StartX% y%ini_StartY% w%ini_StartW% h%ini_StartH%, Hotstrings
-			Gui,	HS3: Show, AutoSize Center
-		Gui,	HS3: Show, AutoSize Center
-	}
-	else if (v_ShowGui == 2) ;it means: Hotstrings aap was restarted
-	{
-		;if (ini_Sandbox) and (v_PreviousHeight < 640*DPI%v_SelectedMonitor%+20 + 154*DPI%v_SelectedMonitor%)
-			;v_PreviousHeight := 640*DPI%v_SelectedMonitor%+20 + 154*DPI%v_SelectedMonitor%
-		;Gui, HS3:Show, W%v_PreviousWidth% H%v_PreviousHeight% X%v_PreviousX% Y%v_PreviousY%, Hotstrings
-		;Gui, HS3:Show, x%ini_StartX% y%ini_StartY% w%ini_StartW% h%ini_StartH%, Hotstrings
-		Gui,	HS3: Show, AutoSize Center
-		Gui,	HS3: Show, AutoSize Center
-	}
-*/
-
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-/*
-	ViewString:
-	Gui, HS3:Submit, NoHide
-	GuiControlGet, v_ViewString
-	Select := v_ViewString
-	a_String := StrSplit(Select, """")
-	HotString2 := StrSplit(a_String[2],":")
-	v_TriggerStringvar := SubStr(a_String[2], StrLen( ":" . HotString2[2] . ":" ) + 1, StrLen(a_String[2])-StrLen(  ":" . HotString2[2] . ":" ))
-	RText := StrSplit(Select, "bind(""")
-	if InStr(RText[2], """On""")
-	{
-		OText := SubStr(RText[2], 1, StrLen(RText[2])-9)
-	}
-	else
-	{    
-		OText := SubStr(RText[2], 1, StrLen(RText[2])-10)
-	}
-	GuiControl, , v_TriggerString, % v_TriggerStringvar
-	if (InStr(Select, """F_MenuText""") or InStr(Select, """F_MenuTextAHK"""))
-	{
-		OTextMenu := StrSplit(OText, "¦")
-		GuiControl, , v_EnterHotstring, % OTextMenu[1]
-		GuiControl, , v_EnterHotstring1, % OTextMenu[2]
-		GuiControl, , v_EnterHotstring2, % OTextMenu[3]
-		GuiControl, , v_EnterHotstring3, % OTextMenu[4]
-		GuiControl, , v_EnterHotstring4, % OTextMenu[5]
-		GuiControl, , v_EnterHotstring5, % OTextMenu[6]
-		GuiControl, , v_EnterHotstring6, % OTextMenu[7]
-		
-	}
-	else
-	{
-		GuiControl, , v_EnterHotstring, % OText
-	}
-	GoSub SetOptions 
-	gosub L_SelectFunction
-	return
-	
-*/
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ;#[AddHotstring]
@@ -3979,36 +4282,48 @@ F_DeleteHotstring()
 	return
 }
 
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 ;In AutoHotkey there is no Guicontrol, Delete sub-command. As a consequence even if specific control is hidden (Guicontrol, Hide), the Gui size isn't changed, size is not decreased, as space for hidden control is maintained. To solve this issue, the separate gui have to be prepared. This requires a lot of work and is a matter of far future.
 F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui 
 {
 	global ;assume-global mode
+	local WinX := 0, WinY := 0
 	
 	if !(v_ToggleRightColumn) ;hide
 	{
-		GuiControl, Hide, % IdText7		;Library content (F2)
-		GuiControl, Hide, % IdListView1 	;ListView
-		GuiControl, Hide, % IdText10  	;Sandbox text
-		GuiControl, Hide, % IdEdit10  	;Sandbox Edit box
-		GuiControl, Hide, % IdText8		;Long text
-		GuiControl, Hide, % IdText2		;Total hotstring counter
-		GuiControl, Hide, % IdText11		;Text "Total"
-		GuiControl, Hide, % IdText12		;Total (triggerstring, hotstring) counter
-		GuiControl, Hide, % IdText13		;Library hotstring counter
-		GuiControl,, % IdButton5,  ⯈
+		WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
+		Gui, HS3: Show, Hide
+		Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . "AutoSize"
+		/*
+			GuiControl, Hide, % IdText7		;Library content (F2)
+			GuiControl, Hide, % IdListView1 	;ListView
+			GuiControl, Hide, % IdText10  	;Sandbox text
+			GuiControl, Hide, % IdEdit10  	;Sandbox Edit box
+			GuiControl, Hide, % IdText8		;Long text
+			GuiControl, Hide, % IdText2		;Total hotstring counter
+			GuiControl, Hide, % IdText11		;Text "Total"
+			GuiControl, Hide, % IdText12		;Total (triggerstring, hotstring) counter
+			GuiControl, Hide, % IdText13		;Library hotstring counter
+			GuiControl,, % IdButton5,  ⯈
+		*/
 	}
 	else					;show
 	{
-		GuiControl, Show, % IdText7		;Library content (F2)
-		GuiControl, Show, % IdListView1 	;ListView
-		GuiControl, Show, % IdText10  	;Sandbox text
-		GuiControl, Show, % IdEdit10  	;Sandbox Edit box
-		GuiControl, Show, % IdText8		;Long text
-		GuiControl, Show, % IdText2		;Total hotstring counter
-		GuiControl, Show, % IdText11		;Library hotstring counter
-		GuiControl, Show, % IdText12		;Total (triggerstring, hotstring) counter
-		GuiControl, Show, % IdText13		;Library hotstring counter
-		GuiControl,, % IdButton5, ⯇
+		Gui, HS3: Show
+		Gui, HS4: Show, Hide
+		/*
+			GuiControl, Show, % IdText7		;Library content (F2)
+			GuiControl, Show, % IdListView1 	;ListView
+			GuiControl, Show, % IdText10  	;Sandbox text
+			GuiControl, Show, % IdEdit10  	;Sandbox Edit box
+			GuiControl, Show, % IdText8		;Long text
+			GuiControl, Show, % IdText2		;Total hotstring counter
+			GuiControl, Show, % IdText11		;Library hotstring counter
+			GuiControl, Show, % IdText12		;Total (triggerstring, hotstring) counter
+			GuiControl, Show, % IdText13		;Library hotstring counter
+			GuiControl,, % IdButton5, ⯇
+		*/
 	}
 	v_ToggleRightColumn := !v_ToggleRightColumn
 	return
