@@ -393,12 +393,6 @@ if (ini_Tips == 0)
 else
 	Menu, SubmenuTips, Check, % TransA["Enable/Disable"]
 
-Menu, Submenu1, Add, % TransA["Launch Sandbox"], 			L_Sandbox
-if (ini_Sandbox == 0)
-	Menu, Submenu1, UnCheck, % TransA["Launch Sandbox"]
-else
-	Menu, Submenu1, Check, % TransA["Launch Sandbox"]
-
 if (ini_Undo == 0)
 	Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring"]
 else
@@ -417,6 +411,11 @@ Menu, StyleGUIsubm, Add, Light (default),							L_StyleOfGUI
 Menu, StyleGUIsubm, Add, Dark,									L_StyleOfGUI
 
 Menu, ConfGUI,		Add, % TransA["Save position of application window"], 	F_SaveGUIPos
+Menu, ConfGUI, 	Add, % TransA["Show Sandbox"], 			L_Sandbox
+if (ini_Sandbox == 0)
+	Menu, ConfGUI, UnCheck, % TransA["Show Sandbox"]
+else
+	Menu, ConfGUI, Check, % TransA["Show Sandbox"]
 Menu, ConfGUI,		Add, Style of GUI,								:StyleGUIsubm
 Menu, ConfGUI,		Add, % TransA["Change Language"], 					:SubmenuLanguage
 /*
@@ -1183,7 +1182,7 @@ Import from .ahk to .csv 								= &Import from .ahk to .csv
 information											= information
 Inside Word (?) 										= Inside Word (?)
 is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv? = is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?
-Launch Sandbox 										= Launch Sandbox
+Show Sandbox 										= Show Sandbox
 \Languages\`nMind that Config.ini Language variable is equal to 	= \Languages\`nMind that Config.ini Language variable is equal to
 Let's make your PC personal again... 						= Let's make your PC personal again...
 Libraries configuration 									= &Libraries configuration
@@ -1838,24 +1837,45 @@ F_GuiHS4_DetermineConstraints()
 	
 	if (ini_Sandbox)
 	{
-		GuiControl, MoveDraw, % IdText10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg
-		GuiControl, MoveDraw, % IdEdit10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
+		GuiControl, Move, % IdText10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg
+		GuiControl, Move, % IdEdit10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
+		GuiControl, Show, % IdText10b
+		GuiControl, Show, % IdEdit10b
+		;5.2. Position of counters
+		GuiControlGet, v_OutVarTemp, Pos, % IdEdit10b
+		v_xNext := c_xmarg
+		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg 
+		GuiControl, Move, % IdText11b,  % "x" v_xNext "y" v_yNext ;text: Hotstrings
+		GuiControlGet, v_OutVarTemp, Pos, % IdText11b
+		v_xNext := v_OutVarTempX + v_OutVarTempW
+		GuiControl, Move, % IdText13b,  % "x" v_xNext "y" v_yNext ;text: value of Hotstrings
+		GuiControlGet, v_OutVarTemp, Pos, % IdText13b
+		v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
+		GuiControl, Move, % IdText2b, % "x" v_xNext "y" v_yNext ;where to place text Total
+		GuiControlGet, v_OutVarTemp, Pos, % IdText2
+		v_xNext += v_OutVarTempW
+		GuiControl, Move, % IdText12b, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
+	}
+	else
+	{
+		GuiControl, Hide, % IdText10b ;sandobx text
+		GuiControl, Hide, % IdEdit10b ;sandbox edit field
+		;5.3. Position of counters
+		v_xNext := c_xmarg
+		v_yNext := LeftColumnH + c_ymarg 
+		GuiControl, Move, % IdText11b,  % "x" v_xNext "y" v_yNext ;text: Hotstrings
+		GuiControlGet, v_OutVarTemp, Pos, % IdText11b
+		v_xNext := v_OutVarTempX + v_OutVarTempW
+		GuiControl, Move, % IdText13b,  % "x" v_xNext "y" v_yNext ;text: value of Hotstrings
+		GuiControlGet, v_OutVarTemp, Pos, % IdText13b
+		v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
+		GuiControl, Move, % IdText2b, % "x" v_xNext "y" v_yNext ;where to place text Total
+		GuiControlGet, v_OutVarTemp, Pos, % IdText2
+		v_xNext += v_OutVarTempW
+		GuiControl, Move, % IdText12b, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
 	}
 	
-	;5.3. Position of counters
-	GuiControlGet, v_OutVarTemp, Pos, % IdEdit10b
-	v_xNext := c_xmarg
-	v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg 
-	GuiControl, Move, % IdText11b,  % "x" v_xNext "y" v_yNext ;text: Hotstrings
-	GuiControlGet, v_OutVarTemp, Pos, % IdText11b
-	v_xNext := v_OutVarTempX + v_OutVarTempW
-	GuiControl, Move, % IdText13b,  % "x" v_xNext "y" v_yNext ;text: value of Hotstrings
-	GuiControlGet, v_OutVarTemp, Pos, % IdText13b
-	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
-	GuiControl, Move, % IdText2b, % "x" v_xNext "y" v_yNext ;where to place text Total
-	GuiControlGet, v_OutVarTemp, Pos, % IdText2
-	v_xNext += v_OutVarTempW
-	GuiControl, Move, % IdText12b, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
+
 	
 	return
 }
@@ -4277,12 +4297,14 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 		Gui, HS3: Show, Hide
 		Gui, HS4: Default
 		F_UpdateSelHotLibDDL()
+		F_GuiHS4_DetermineConstraints()
 		Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . "AutoSize"
 	}
 	else					;show
 	{
 		Gui, HS3: Default
 		F_UpdateSelHotLibDDL()
+		F_GuiMain_DetermineConstraints()
 		Gui, HS4: Show, Hide
 		Gui, HS3: Show
 	}
@@ -4332,7 +4354,7 @@ return
 ~F1::
 AboutOkButton:
 MyAboutGuiEscape:
-MyAboutGuiClose: ; Launched when the window is closed by pressing its X button in the title bar.
+MyAboutGuiClose: ; Showed when the window is closed by pressing its X button in the title bar.
 Gui, MyAbout: Hide
 return
 
@@ -4439,7 +4461,7 @@ HS3GuiSize() ;Gui event
 
 /*
 	
-	HS3GuiSize:		; Launched when the window is resized, minimized, maximized, or restored.
+	HS3GuiSize:		; Showed when the window is resized, minimized, maximized, or restored.
 	if (ErrorLevel == 1)
 		return
 	if (ErrorLevel == 0)
@@ -4912,7 +4934,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 L_Sandbox:
-Menu, Submenu1, ToggleCheck, % TransA["Launch Sandbox"]
+Menu, ConfGUI, ToggleCheck, % TransA["Show Sandbox"]
 ini_Sandbox := !(ini_Sandbox)
 Iniwrite, %ini_Sandbox%, Config.ini, GraphicalUserInterface, Sandbox
 if (A_DefaultGui = "HS3")
@@ -4963,8 +4985,10 @@ if (A_DefaultGui = "HS4")
 {
 	if (ini_Sandbox)
 	{
-		GuiControl, Show, % IdText10b ;sandobx text
-		GuiControl, Show, % IdEdit10b ;sandbox edit field
+		GuiControl, Move, % IdText10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg
+		GuiControl, Move, % IdEdit10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
+		GuiControl, Show, % IdText10b
+		GuiControl, Show, % IdEdit10b
 		;5.3. Position of counters
 		GuiControlGet, v_OutVarTemp, Pos, % IdEdit10b
 		v_xNext := c_xmarg
