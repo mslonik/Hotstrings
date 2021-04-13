@@ -3964,11 +3964,14 @@ return
 F_SectionChoose()
 {
 	global ;assume-global mode
-	
 	local str1 := []
 	
-	Gui, HS3:Submit, NoHide
-	Gui, HS3:+OwnDialogs
+	if (A_DefaultGui = "HS3")
+		Gui, HS3: Submit, NoHide
+	if (A_DefaultGui = "HS4")
+		Gui, HS4: Submit, NoHide
+	
+	;Gui, HS3:+OwnDialogs
 	
 	GuiControl, Enable, % IdButton4 ; button Delete hotstring (F8)
 	Gui, ListView, % IdListView1 ; identify which ListView
@@ -4004,8 +4007,11 @@ F_SectionChoose()
 	}
 	LV_ModifyCol(1, "Sort")
 	
-	v_LibHotstringCnt := LV_GetCount()
-	GuiControl, Text, % IdText13, % A_Space . v_LibHotstringCnt
+	v_LibHotstringCnt := SectionList.MaxIndex()
+	if (A_DefaultGui = "HS3")
+		GuiControl, Text, % IdText13,  % A_Space . v_LibHotstringCnt
+	if (A_DefaultGui = "HS4")
+		GuiControl, Text, % IdText13b, % A_Space . v_LibHotstringCnt
 	
 	return
 }
