@@ -32,6 +32,8 @@ global a_Comment 				:= []
 global a_EnableDisable 			:= []
 global a_Hotstring				:= []
 global a_Library 				:= []
+global v_TotalHotstringCnt 		:= 0
+global v_LibHotstringCnt			:= 0 ;no of (triggerstring, hotstring) definitions in single library
 global a_LibraryCnt				:= [] ;Hotstring counter for specific libraries
 global a_OutputFunction 			:= []
 global a_SelectedTriggers 		:= []
@@ -54,7 +56,7 @@ global v_CaseSensitiveC1 		:= ""
 global v_BlockHotkeysFlag		:= 0
 global v_FlagSound 				:= 0
 ;I couldn't find how to get system settings for size of menu font. Quick & dirty solution: manual setting of all fonts with variable c_FontSize.
-global v_TotalHotstringCnt 			:= 0
+
 global v_HotstringFlag 			:= 0
 global v_HS3ListFlag 			:= 0
 global v_IndexLog 				:= 1
@@ -91,9 +93,8 @@ global c_ControlColor 			:= "Default"
 ;Flags to control application
 global v_ResizingFlag 			:= 1 ; when Hotstrings Gui is displayed for the very first time
 ;global IsSandboxMoved			:= false
-global CntGuiSize				:= 0
 global v_ToggleRightColumn		:= false ;memory of last state of the IdButton5 (ToggleRightColumn)
-global v_LibHotstringCnt			:= 0 ;no of (triggerstring, hotstring) definitions in single library
+
 global PriorityFlag				:= false
 
 
@@ -137,6 +138,7 @@ IniRead, ini_TipsSortByLength,			Config.ini, Configuration, TipsSortByLength
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
 F_ValidateIniLibSections() 
 
+
 ; Future: to be removed
 ;if !(A_Args[8])
 if (v_SelectedRow == "")
@@ -152,11 +154,12 @@ else
 F_GuiMain_CreateObject()
 F_GuiMain_DefineConstants()
 F_GuiMain_DetermineConstraints()
+F_UpdateSelHotLibDDL()
 
 F_GuiHS4_CreateObject()
 F_GuiHS4_DetermineConstraints()
 
-F_UpdateSelHotLibDDL()
+
 v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
 F_LoadHotstringsFromLibraries()
@@ -1015,20 +1018,39 @@ F_UpdateSelHotLibDDL()
 {
 	global ;assume-global mode
 	local key := "", value := ""
-	
-	GuiControl, , v_SelectHotstringLibrary, |
-	if (ini_ShowTipsLib.Count()) ;if ini_ShowTipsLib isn't empty
+	;*[One]
+	if (A_DefaultGui = "HS3")
+		GuiControl, , % IdDDL2, |
+	if (A_DefaultGui = "HS4")
+		GuiControl, , % IdDDL2b, |
+	if (ini_LoadLib.Count()) ;if ini_LoadLib isn't empty
 	{
 		for key, value in ini_LoadLib
 		{
 			if !(value)
-				GuiControl, , v_SelectHotstringLibrary, % key . A_Space . TransA["DISABLED"]
+			{
+				if (A_DefaultGui = "HS3")
+					GuiControl, , % IdDDL2, % key . A_Space . TransA["DISABLED"]
+				if (A_DefaultGui = "HS4")
+					GuiControl, , % IdDDL2b, % key . A_Space . TransA["DISABLED"]				
+			}
 			else
-				GuiControl, , v_SelectHotstringLibrary, % key
+			{
+				if (A_DefaultGui = "HS3")
+					GuiControl, , % IdDDL2, % key
+				if (A_DefaultGui = "HS4")
+					GuiControl, , % IdDDL2b, % key
+			}
 		}
 	}
-	else ;if ini_ShowTipsLib is empty
-		GuiControl, , v_SelectHotstringLibrary, % TransA["No libraries have been found!"]
+	else ;if ini_LoadLib is empty
+	{
+		if (A_DefaultGui = "HS3")
+			GuiControl, , % IdDDL2, % TransA["No libraries have been found!"]
+		if (A_DefaultGui = "HS4")
+			GuiControl, , % IdDDL2b, % TransA["No libraries have been found!"]
+	}
+	
 	return
 }
 
@@ -1313,10 +1335,11 @@ F_LoadFile(nameoffile)
 			a_Triggers.Push(tabSearch[2]) ; a_Triggers is used in main loop of application for generating tips
 		
 		F_ini_StartHotstring(line, nameoffile)
-		;*[One]
+		
 		GuiControl, Text, % IdText12, % A_Space . ++v_TotalHotstringCnt ; Text: Puts new contents into the control.
 		;OutputDebug, % "Content of IdText2 GuiControl:" . A_Space . v_LoadedHotstrings . A_Space . v_TotalHotstringCnt
 	}
+	;*[One]
 	a_LibraryCnt.Push(v_TotalHotstringCnt)
 	return
 }
@@ -1670,10 +1693,10 @@ F_GuiHS4_DetermineConstraints()
 	;OutputDebug, % "v_OutVarTemp1W:" . A_Space . v_OutVarTemp1W  . A_Space . "v_OutVarTemp2W:" . A_Space . v_OutVarTemp2W . A_Space . "v_OutVarTemp3W:" . A_Space .  v_OutVarTemp3W  . A_Space . "c_xmarg:" . A_Space c_xmarg
 	;OutputDebug, % "LeftColumnW:" . A_Space . LeftColumnW
 	
-	GuiControlGet, v_OutVarTemp1, Pos, % IdText8b
-	GuiControlGet, v_OutVarTemp2, Pos, % IdText9b
-	v_OutVarTemp3 := Max(v_OutVarTemp1W, v_OutVarTemp2W) ;longer of two texts
-	RightColumnW := v_OutVarTemp3
+	;GuiControlGet, v_OutVarTemp1, Pos, % IdText8b
+	;GuiControlGet, v_OutVarTemp2, Pos, % IdText9b
+	;v_OutVarTemp3 := Max(v_OutVarTemp1W, v_OutVarTemp2W) ;longer of two texts
+	;RightColumnW := v_OutVarTemp3
 	
 	
 ;5. Move text objects to correct position
@@ -3385,6 +3408,7 @@ if (v_ResizingFlag) ;if run for the very first time
 	{
 		Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
 		Gui,	HS4: Show, Hide
+		Gui, HS3: Default
 	}
 	
 		;Gui, HS3: Default ; this line is necessary to enable handling of List Views.
@@ -3911,6 +3935,7 @@ return
 F_SectionChoose()
 {
 	global ;assume-global mode
+	
 	local str1 := []
 	
 	Gui, HS3:Submit, NoHide
@@ -4294,52 +4319,20 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 	{
 		WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
 		Gui, HS3: Show, Hide
+		Gui, HS4: Default
+		F_UpdateSelHotLibDDL()
 		Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . "AutoSize"
-		/*
-			GuiControl, Hide, % IdText7		;Library content (F2)
-			GuiControl, Hide, % IdListView1 	;ListView
-			GuiControl, Hide, % IdText10  	;Sandbox text
-			GuiControl, Hide, % IdEdit10  	;Sandbox Edit box
-			GuiControl, Hide, % IdText8		;Long text
-			GuiControl, Hide, % IdText2		;Total hotstring counter
-			GuiControl, Hide, % IdText11		;Text "Total"
-			GuiControl, Hide, % IdText12		;Total (triggerstring, hotstring) counter
-			GuiControl, Hide, % IdText13		;Library hotstring counter
-			GuiControl,, % IdButton5,  ⯈
-		*/
 	}
 	else					;show
 	{
-		Gui, HS3: Show
+		Gui, HS3: Default
+		F_UpdateSelHotLibDDL()
 		Gui, HS4: Show, Hide
-		/*
-			GuiControl, Show, % IdText7		;Library content (F2)
-			GuiControl, Show, % IdListView1 	;ListView
-			GuiControl, Show, % IdText10  	;Sandbox text
-			GuiControl, Show, % IdEdit10  	;Sandbox Edit box
-			GuiControl, Show, % IdText8		;Long text
-			GuiControl, Show, % IdText2		;Total hotstring counter
-			GuiControl, Show, % IdText11		;Library hotstring counter
-			GuiControl, Show, % IdText12		;Total (triggerstring, hotstring) counter
-			GuiControl, Show, % IdText13		;Library hotstring counter
-			GuiControl,, % IdButton5, ⯇
-		*/
+		Gui, HS3: Show
 	}
 	v_ToggleRightColumn := !v_ToggleRightColumn
 	return
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
-
-/*
-	DestroyGuis:
-	Loop, %N%
-	{
-		Gui, %A_Index%:Destroy
-	}
-	Gui, Font ; restore the font to the system's default GUI typeface, size and colour.
-	return
-*/
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -4400,7 +4393,6 @@ HS3GuiSize() ;Gui event
 	Critical
 	HS3_GuiWidth  := 0,	HS3_GuiHeight := 0
 	
-	;OutputDebug, % "Beginning:" . A_Space . ++CntGuiSize 
 	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "A_GuiHeight:" . A_Space .  A_GuiHeight
 	
 	if (A_EventInfo = 1) ; The window has been minimized.
@@ -4481,7 +4473,7 @@ HS3GuiSize() ;Gui event
 	}
 	HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
 	HS3_GuiHeight := A_GuiHeight
-	;OutputDebug, % "End:" . A_Space . CntGuiSize . "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space "A_GuiHeight" . A_Space . A_GuiHeight
+	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space "A_GuiHeight" . A_Space . A_GuiHeight
 	;*[Two]
 	return
 	
