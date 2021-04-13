@@ -1459,10 +1459,17 @@ F_GuiHS4_CreateObject()
 	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton4b gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
 	;GuiControl,	Hide,		% IdButton4
 	
-	Gui,		HS4: Add,		Button,		x0 y0 HwndIdButton5b gF_ToggleRightColumn vv_ToggleRightColumn,			⯇
+	Gui,		HS4: Add,			Button,		x0 y0 HwndIdButton5b gF_ToggleRightColumn vv_ToggleRightColumn,			⯈
 	;GuiControl,	Hide,		% IdButton5
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText10b vv_SandString, 						% TransA["Sandbox"]
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit10b vv_Sandbox r3 						; r3 = 3x rows of text
+	
+	Gui,		HS4: Add,			Text,		x0 y0 HwndIdText11b, % TransA["Hotstrings:"]
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText13b,  % A_Space . A_Space . A_Space . "0" ;value of Hotstrings counter
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+
 	/*
-		
 	;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 		
 		Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
@@ -1827,6 +1834,27 @@ F_GuiHS4_DetermineConstraints()
 		GuiControl, Move, % IdButton5b, % "x" v_xNext "y" v_yNext "h" ini_VertButtPos["H"]
 	else	
 		GuiControl, Move, % IdButton5b, % "x" v_xNext "y" v_yNext "h" v_hNext
+
+	if (ini_Sandbox)
+		{
+			GuiControl, MoveDraw, % IdText10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg
+			GuiControl, MoveDraw, % IdEdit10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
+		}
+
+	;5.3. Position of counters
+	GuiControlGet, v_OutVarTemp, Pos, % IdEdit10b
+	v_xNext := c_xmarg
+	v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg 
+	GuiControl, Move, % IdText11b,  % "x" v_xNext "y" v_yNext ;text: Hotstrings
+	GuiControlGet, v_OutVarTemp, Pos, % IdText11b
+	v_xNext := v_OutVarTempX + v_OutVarTempW
+	GuiControl, Move, % IdText13b,  % "x" v_xNext "y" v_yNext ;text: value of Hotstrings
+	GuiControlGet, v_OutVarTemp, Pos, % IdText13b
+	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
+	GuiControl, Move, % IdText2b, % "x" v_xNext "y" v_yNext ;where to place text Total
+	GuiControlGet, v_OutVarTemp, Pos, % IdText2
+	v_xNext += v_OutVarTempW
+	GuiControl, Move, % IdText12b, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
 	
 	/*
 	;5.3. Right column
