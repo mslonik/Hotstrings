@@ -469,8 +469,8 @@ Menu, 	LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	:
 Menu, 	HSMenu, 			Add, % TransA["Libraries configuration"], 			:LibrariesSubmenu
 Menu, 	HSMenu, 			Add, % TransA["Clipboard Delay"], 					HSdelay
 Menu, 	HSMenu, 			Add, % TransA["About/Help"], 						F_GuiAbout
-Gui, 	HS3:Menu, HSMenu
-
+Gui, 	HS3: Menu, HSMenu
+Gui, 	HS4: Menu, HSMenu
 
 F_GuiAbout_CreateObjects()
 F_GuiAbout_DetermineConstraints()
@@ -1469,7 +1469,7 @@ F_GuiHS4_CreateObject()
 	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
 	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText13b,  % A_Space . A_Space . A_Space . "0" ;value of Hotstrings counter
 	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-
+	
 	/*
 	;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 		
@@ -1835,13 +1835,13 @@ F_GuiHS4_DetermineConstraints()
 		GuiControl, Move, % IdButton5b, % "x" v_xNext "y" v_yNext "h" ini_VertButtPos["H"]
 	else	
 		GuiControl, Move, % IdButton5b, % "x" v_xNext "y" v_yNext "h" v_hNext
-
+	
 	if (ini_Sandbox)
-		{
-			GuiControl, MoveDraw, % IdText10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg
-			GuiControl, MoveDraw, % IdEdit10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
-		}
-
+	{
+		GuiControl, MoveDraw, % IdText10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg
+		GuiControl, MoveDraw, % IdEdit10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
+	}
+	
 	;5.3. Position of counters
 	GuiControlGet, v_OutVarTemp, Pos, % IdEdit10b
 	v_xNext := c_xmarg
@@ -1857,83 +1857,6 @@ F_GuiHS4_DetermineConstraints()
 	v_xNext += v_OutVarTempW
 	GuiControl, Move, % IdText12b, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
 	
-	/*
-	;5.3. Right column
-	;5.3.1. Position the text "Library content"
-		v_yNext := c_ymarg
-		v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
-		GuiControl, Move, % IdText7, % "x" v_xNext "y" v_yNext
-		
-	;5.3.2. Position of hotstring statistics (in this library: IdText11 / total: IdText2)
-		GuiControlGet, v_OutVarTemp, Pos, % IdText7 ;text: Library content (F2)
-		v_xNext += v_OutVarTempW + 2 * c_xmarg
-		GuiControl, Move, % IdText11, % "x" v_xNext "y" v_yNext
-		GuiControlGet, v_OutVarTemp, Pos, % IdText11 ;text: Hotstrings
-		v_xNext += v_OutVarTempW
-		GuiControl, Move, % IdText13, % "x" v_xNext "y" v_yNext ;Where to place value of Hotstrings counter
-		GuiControlGet, v_OutVarTemp, Pos, % IdText13
-		v_xNext += v_OutVarTempW + c_xmarg
-		;tu jestem
-		;GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext "w" 100
-		GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext ;where to place text Total
-		GuiControlGet, v_OutVarTemp, Pos, % IdText2
-		v_xNext += v_OutVarTempW
-		GuiControl, Move, % IdText12, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
-		
-	;5.3.2. Position the only one List View 
-		GuiControlGet, v_OutVarTemp1, Pos, % IdEdit10 ; height of Sandbox edit field
-		GuiControlGet, v_OutVarTemp2, Pos, % IdListView1
-		v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
-		v_yNext += HofText
-	;v_xNext := LeftColumnW + c_xmarg
-		v_wNext := RightColumnW
-		if (ini_Sandbox)
-			v_hNext := LeftColumnH - (v_OutVarTemp1H + HofText * 3 + c_ymarg * 3)
-		else
-		{
-			v_hNext := LeftColumnH - (HofText * 2 + c_ymarg * 2)
-			GuiControl, Hide, % IdText10
-			GuiControl, Hide, % IdEdit10
-		}
-		if (ini_ListViewPos["X"] or ini_ListViewPos["Y"] or ini_ListViewPos["W"] or ini_ListViewPos["H"])
-			GuiControl, Move, % IdListView1, % "x" ini_ListViewPos["X"] "y" ini_ListViewPos["Y"] "w" ini_ListViewPos["W"] "h" ini_ListViewPos["H"]
-		else
-			GuiControl, Move, % IdListView1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
-		
-		GuiControl, Hide, % IdText9
-		
-	;5.3.3. Text Sandbox
-	;5.2.4. Sandbox edit text field
-	;5.3.5. Position of the long text F1 ... F2 ...
-		;tu jestem
-		GuiControlGet, v_OutVarTemp, Pos, % IdListView1
-		if ((ini_Sandbox) and (ini_IsSandboxMoved))
-		{
-			GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
-			GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
-			;GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTempY + v_OutVarTempH + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
-			GuiControl, MoveDraw, % IdText8,  % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTempY + v_OutVarTempH + c_ymarg ;Position of the long text F1 ... F2 ...
-		}
-		
-		if ((ini_Sandbox) and !(ini_IsSandboxMoved))
-		{
-			v_yNext += v_OutVarTempH + c_ymarg
-			GuiControl, Move, % IdText10, % "x" v_xNext "y" v_yNext
-			v_yNext += HofText
-			v_wNext := RightColumnW
-			GuiControl, Move, % IdEdit10, % "x" v_xNext "y" v_yNext "w" v_wNext
-			v_yNext += c_HofSandbox + c_ymarg
-			GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext
-		}
-		
-		if !(ini_Sandbox)
-		{
-			v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
-			v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
-			GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext ;Position of the long text F1 ... F2 ...
-		}
-	*/		
-		;Gui, 		%HS3GuiHwnd%:Show, AutoSize Center
 	return
 }
 
@@ -3971,8 +3894,6 @@ F_SectionChoose()
 	if (A_DefaultGui = "HS4")
 		Gui, HS4: Submit, NoHide
 	
-	;Gui, HS3:+OwnDialogs
-	
 	GuiControl, Enable, % IdButton4 ; button Delete hotstring (F8)
 	Gui, ListView, % IdListView1 ; identify which ListView
 	LV_Delete()
@@ -4994,46 +4915,92 @@ L_Sandbox:
 Menu, Submenu1, ToggleCheck, % TransA["Launch Sandbox"]
 ini_Sandbox := !(ini_Sandbox)
 Iniwrite, %ini_Sandbox%, Config.ini, GraphicalUserInterface, Sandbox
-GuiControlGet, v_OutVarTemp1, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.
-if (ini_Sandbox) ;reduce size of List View and draw sandbox
+if (A_DefaultGui = "HS3")
 {
-	if (c_ymarg + HofText + v_OutVarTemp1H > LeftColumnH)
+	
+	GuiControlGet, v_OutVarTemp1, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.
+	if (ini_Sandbox) ;reduce size of List View and draw sandbox
 	{
-		GuiControl, Show, % IdText10 ;sandobx text
-		GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
-		GuiControl, Show, % IdEdit10 ;sandbox edit field
-		GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
-		ini_IsSandboxMoved := true
+		if (c_ymarg + HofText + v_OutVarTemp1H > LeftColumnH)
+		{
+			GuiControl, Show, % IdText10 ;sandobx text
+			GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
+			GuiControl, Show, % IdEdit10 ;sandbox edit field
+			GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
+			ini_IsSandboxMoved := true
+		}
+		if (c_ymarg + HofText + v_OutVarTemp1H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox)
+		{
+			GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp1H - (HofText + c_HofSandbox + c_ymarg)
+			GuiControl, Show, % IdText10 ;sandobx text
+			GuiControl, MoveDraw, % IdText10, % "x" v_OutVarTemp1X  "y" v_OutVarTemp1Y + v_OutVarTemp1H - (HofText + c_HofSandbox + c_ymarg) + c_ymarg
+			GuiControl, Show, % IdEdit10 ;sandbox edit field
+			GuiControl, MoveDraw, % IdEdit10, % "x" v_OutVarTemp1X "y" v_OutVarTemp1Y + v_OutVarTemp1H - (HofText + c_HofSandbox + c_ymarg) + c_ymarg + HofText "w" v_OutVarTemp1W
+			GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp1Y + v_OutVarTemp1H + c_ymarg ;Position of the long text F1 ... F2 ...
+			ini_IsSandboxMoved := false
+		}
 	}
-	if (c_ymarg + HofText + v_OutVarTemp1H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox)
+	else ;increase size of List View and hide sandbox
 	{
-		GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp1H - (HofText + c_HofSandbox + c_ymarg)
-		GuiControl, Show, % IdText10 ;sandobx text
-		GuiControl, MoveDraw, % IdText10, % "x" v_OutVarTemp1X  "y" v_OutVarTemp1Y + v_OutVarTemp1H - (HofText + c_HofSandbox + c_ymarg) + c_ymarg
-		GuiControl, Show, % IdEdit10 ;sandbox edit field
-		GuiControl, MoveDraw, % IdEdit10, % "x" v_OutVarTemp1X "y" v_OutVarTemp1Y + v_OutVarTemp1H - (HofText + c_HofSandbox + c_ymarg) + c_ymarg + HofText "w" v_OutVarTemp1W
-		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp1Y + v_OutVarTemp1H + c_ymarg ;Position of the long text F1 ... F2 ...
-		ini_IsSandboxMoved := false
+		if (c_ymarg + HofText + v_OutVarTemp1H > LeftColumnH)
+		{
+			GuiControl, Hide, % IdText10 ;sandobx text
+			GuiControl, Hide, % IdEdit10 ;sandbox edit field
+		}
+		if (c_ymarg + HofText + v_OutVarTemp1H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox)
+		{
+			GuiControl, Hide, % IdText10 ;sandobx text
+			GuiControl, Hide, % IdEdit10 ;sandbox edit field
+			GuiControl, MoveDraw, % IdListView1, % "h" . v_OutVarTemp1H + HofText + c_HofSandbox + c_ymarg
+			GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp1Y + v_OutVarTemp1H + HofText + c_HofSandbox + c_ymarg + c_ymarg ;Position of the long text F1 ... F2 ...
+		}
 	}
+	
+	F_AutoXYWH("reset")
+		;OutputDebug, return by if (ini_Sandbox)
 }
-else ;increase size of List View and hide sandbox
+if (A_DefaultGui = "HS4")
 {
-	if (c_ymarg + HofText + v_OutVarTemp1H > LeftColumnH)
+	if (ini_Sandbox)
 	{
-		GuiControl, Hide, % IdText10 ;sandobx text
-		GuiControl, Hide, % IdEdit10 ;sandbox edit field
+		GuiControl, Show, % IdText10b ;sandobx text
+		GuiControl, Show, % IdEdit10b ;sandbox edit field
+		;5.3. Position of counters
+		GuiControlGet, v_OutVarTemp, Pos, % IdEdit10b
+		v_xNext := c_xmarg
+		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg 
+		GuiControl, Move, % IdText11b,  % "x" v_xNext "y" v_yNext ;text: Hotstrings
+		GuiControlGet, v_OutVarTemp, Pos, % IdText11b
+		v_xNext := v_OutVarTempX + v_OutVarTempW
+		GuiControl, Move, % IdText13b,  % "x" v_xNext "y" v_yNext ;text: value of Hotstrings
+		GuiControlGet, v_OutVarTemp, Pos, % IdText13b
+		v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
+		GuiControl, Move, % IdText2b, % "x" v_xNext "y" v_yNext ;where to place text Total
+		GuiControlGet, v_OutVarTemp, Pos, % IdText2
+		v_xNext += v_OutVarTempW
+		GuiControl, Move, % IdText12b, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
 	}
-	if (c_ymarg + HofText + v_OutVarTemp1H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox)
+	else
 	{
-		GuiControl, Hide, % IdText10 ;sandobx text
-		GuiControl, Hide, % IdEdit10 ;sandbox edit field
-		GuiControl, MoveDraw, % IdListView1, % "h" . v_OutVarTemp1H + HofText + c_HofSandbox + c_ymarg
-		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp1Y + v_OutVarTemp1H + HofText + c_HofSandbox + c_ymarg + c_ymarg ;Position of the long text F1 ... F2 ...
+		GuiControl, Hide, % IdText10b ;sandobx text
+		GuiControl, Hide, % IdEdit10b ;sandbox edit field
+		;5.3. Position of counters
+		v_xNext := c_xmarg
+		v_yNext := LeftColumnH + c_ymarg 
+		GuiControl, Move, % IdText11b,  % "x" v_xNext "y" v_yNext ;text: Hotstrings
+		GuiControlGet, v_OutVarTemp, Pos, % IdText11b
+		v_xNext := v_OutVarTempX + v_OutVarTempW
+		GuiControl, Move, % IdText13b,  % "x" v_xNext "y" v_yNext ;text: value of Hotstrings
+		GuiControlGet, v_OutVarTemp, Pos, % IdText13b
+		v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
+		GuiControl, Move, % IdText2b, % "x" v_xNext "y" v_yNext ;where to place text Total
+		GuiControlGet, v_OutVarTemp, Pos, % IdText2
+		v_xNext += v_OutVarTempW
+		GuiControl, Move, % IdText12b, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
 	}
+	
 }
 
-F_AutoXYWH("reset")
-		;OutputDebug, return by if (ini_Sandbox)
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
