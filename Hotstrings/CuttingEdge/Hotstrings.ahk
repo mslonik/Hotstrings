@@ -1336,11 +1336,12 @@ F_LoadFile(nameoffile)
 		
 		F_ini_StartHotstring(line, nameoffile)
 		
-		GuiControl, Text, % IdText12, % A_Space . ++v_TotalHotstringCnt ; Text: Puts new contents into the control.
+		++v_TotalHotstringCnt
 		;OutputDebug, % "Content of IdText2 GuiControl:" . A_Space . v_LoadedHotstrings . A_Space . v_TotalHotstringCnt
 	}
 	;*[One]
-	a_LibraryCnt.Push(v_TotalHotstringCnt)
+	GuiControl, Text, % IdText12,  % A_Space . v_TotalHotstringCnt ; Text: Puts new contents into the control.
+	GuiControl, Text, % IdText12b, % A_Space . v_TotalHotstringCnt ; Text: Puts new contents into the control.
 	return
 }
 
