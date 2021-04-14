@@ -4032,32 +4032,6 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 /*
-	SetOptions:
-	OptionSet := Instr(Hotstring2[2],"*0") or InStr(Hotstring2[2],"*") = 0 ? F_CheckOption("No",2) :  F_CheckOption("Yes",2)
-	OptionSet := ((Instr(Hotstring2[2],"C0")) or (Instr(Hotstring2[2],"C1")) or (Instr(Hotstring2[2],"C") = 0)) ? F_CheckOption("No",3) : F_CheckOption("Yes",3)
-	OptionSet := Instr(Hotstring2[2],"B0") ? F_CheckOption("Yes",4) : F_CheckOption("No",4)
-	OptionSet := Instr(Hotstring2[2],"?") ? F_CheckOption("Yes",5) : F_CheckOption("No",5)
-	OptionSet := (Instr(Hotstring2[2],"O0") or (InStr(Hotstring2[2],"O") = 0)) ? F_CheckOption("No",6) : F_CheckOption("Yes",6)
-	GuiControlGet, v_ViewString
-	Select := v_ViewString
-	if Select = ; !!!
-		return
-	OptionSet := (InStr(Select,"""On""")) ? F_CheckOption("No", 7) : F_CheckOption("Yes",7)
-	if(InStr(Select,"F_NormalWay"))
-		GuiControl, Choose, v_SelectFunction, SendInput (SI)
-	else if(InStr(Select, "F_ViaClipboard"))
-		GuiControl, Choose, v_SelectFunction, Clipboard (CL)
-	else if(InStr(Select, """F_MenuText"""))
-		GuiControl, Choose, v_SelectFunction, Menu & Clipboard (MCL)
-	else if(InStr(Select, """F_MenuTextAHK"""))
-		GuiControl, Choose, v_SelectFunction, Menu & SendInput (MSI)
-	v_CaseSensitiveC1 := 0
-	return
-*/
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-/*
 	OptionString:
 	Options := ""
 	
@@ -4081,105 +4055,6 @@ return
 	
 	a_String[2] := Options
 	Return
-*/
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-/*
-	SaveHotstrings:
-	Gui, HS3:+OwnDialogs
-	
-	EnDis := ""
-	SendFun := ""
-	if (v_OptionDisable)
-		EnDis := "Dis"
-	else
-		EnDis := "En"
-	
-	
-	if (v_SelectFunction == "Clipboard (CL)")
-		SendFun := "CL"
-	else if (v_SelectFunction == "SendInput (SI)")
-		SendFun := "SI"
-	else if (v_SelectFunction == "Menu & Clipboard (MCL)")
-		SendFun := "MCL"
-	else if (v_SelectFunction == "Menu & SendInput (MSI)")
-		SendFun := "MSI"
-	
-	
-	;StrSp 		:= StrSplit(Items, "bind(""")
-	;StrSp 		:= StrSplit(v_String, "bind(""")
-	;StrSp1 		:= StrSplit(StrSp[2], """),")
-	;TextInsert 	:= StrSp1[1]
-	OutputFile 	:= % A_ScriptDir . "\Libraries\temp.csv"	; changed on 2021-02-13
-	;InputFile 	:= % A_ScriptDir . "\Libraries\" . SaveFile . ".csv"
-	InputFile 	:= % A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary 
-	LString 		:= % "‖" . v_TriggerString . "‖"
-	SaveFlag 		:= 0 ;true/false variable, if true, duplicate definition is found, if false, definition is new
-	
-	Loop, Read, %InputFile%, %OutputFile% ;read all definitions from this library file 
-	{
-		if (InStr(A_LoopReadLine, LString, 1) and InStr(Options, "C")) or (InStr(A_LoopReadLine, LString) and !(InStr(Options, "C")))
-		{
-			if !(v_SelectedRow)
-			{
-				;MsgBox, 4,, % t_TheHostring . " """ .  v_TriggerString . """ " .  TransA["exists in a file"] . " " . SaveFile . t_CsvDoYouWantToProceed
-				MsgBox, 4,, % t_TheHostring . " """ .  v_TriggerString . """ " .  TransA["exists in a file"] . " " . v_SelectHotstringLibrary . t_CsvDoYouWantToProceed
-				IfMsgBox, No
-					return
-			}
-			LV_Modify(A_Index, "", v_TriggerString, Options, SendFun, EnDis, TextInsert, v_Comment)
-			SaveFlag := 1
-		}
-	}
-	if (SaveFlag == 0) 
-	{
-		LV_Add("",  v_TriggerString, Options, SendFun, EnDis, TextInsert, v_Comment)
-		txt := % Options . "‖" . v_TriggerString . "‖" . SendFun . "‖" . EnDis . "‖" . TextInsert . "‖" . v_Comment ;tylko to się liczy
-		SectionList.Push(txt)
-	}
-	LV_ModifyCol(1, "Sort")
-	FileDelete, %InputFile%
-	if (SectionList.MaxIndex() == "") ;in order to speed up it's checked if library isn't empty.
-	{
-		LV_GetText(txt1, 1, 2)
-		LV_GetText(txt2, 1, 1)
-		LV_GetText(txt3, 1, 3)
-		LV_GetText(txt4, 1, 4)
-		LV_GetText(txt5, 1, 5)
-		LV_GetText(txt6, 1, 6)
-		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-		;FileAppend, %txt%, Libraries\%name%, UTF-8
-		FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
-	}
-	else
-	{ ;no idea why this is duplicated...
-		Loop, % SectionList.MaxIndex()-1
-		{
-			LV_GetText(txt1, A_Index, 2)
-			LV_GetText(txt2, A_Index, 1)
-			LV_GetText(txt3, A_Index, 3)
-			LV_GetText(txt4, A_Index, 4)
-			LV_GetText(txt5, A_Index, 5)
-			LV_GetText(txt6, A_Index, 6)
-			txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
-			if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == "")) ;only not empty definitions are added, not sure why
-				;FileAppend, %txt%, Libraries\%name%, UTF-8
-				FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
-		}
-		;the new added definition
-		LV_GetText(txt1, SectionList.MaxIndex(), 2)
-		LV_GetText(txt2, SectionList.MaxIndex(), 1)
-		LV_GetText(txt3, SectionList.MaxIndex(), 3)
-		LV_GetText(txt4, SectionList.MaxIndex(), 4)
-		LV_GetText(txt5, SectionList.MaxIndex(), 5)
-		LV_GetText(txt6, SectionList.MaxIndex(), 6)
-		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-		;FileAppend, %txt%, Libraries\%name%, UTF-8
-		FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
-	}
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information", Hotstring added to the %v_SelectHotstringLibrary% file! ; Future: add to translation.
-	return
 */
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4445,10 +4320,9 @@ HS3GuiSize() ;Gui event
 			GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
 			GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
 			ini_IsSandboxMoved := true
-			OutputDebug, % "Left:" . A_Space . c_ymarg + HofText + v_OutVarTemp2H . A_Space . "Right:" . A_Space .  LeftColumnH . A_Space . "ini_IsSandboxMoved:" . A_Space . ini_IsSandboxMoved . A_Space . "return"
-			F_AutoXYWH("reset")	
-			;Pause, On
-			return 
+			;OutputDebug, % "Left:" . A_Space . c_ymarg + HofText + v_OutVarTemp2H . A_Space . "Right:" . A_Space .  LeftColumnH . A_Space . "ini_IsSandboxMoved:" . A_Space . ini_IsSandboxMoved . A_Space . "return"
+			;F_AutoXYWH("reset")	
+			;return 
 		}
 		if (c_ymarg + HofText + v_OutVarTemp2H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox) and (ini_IsSandboxMoved) ; left -> right, reduce
 		{
@@ -4457,9 +4331,9 @@ HS3GuiSize() ;Gui event
 			GuiControl, MoveDraw, % IdEdit10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox "w" v_OutVarTemp2W
 			GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
 			ini_IsSandboxMoved := false
-			OutputDebug, % "Left:" . A_Space . c_ymarg + HofText + v_OutVarTemp2H . A_Space . "Right:" . A_Space . LeftColumnH + c_ymarg + HofText + c_HofSandbox . A_Space . "ini_IsSandboxMoved:" . A_Space . ini_IsSandboxMoved . A_Space . "reset"
-			F_AutoXYWH("reset")
-			return
+			;OutputDebug, % "Left:" . A_Space . c_ymarg + HofText + v_OutVarTemp2H . A_Space . "Right:" . A_Space . LeftColumnH + c_ymarg + HofText + c_HofSandbox . A_Space . "ini_IsSandboxMoved:" . A_Space . ini_IsSandboxMoved . A_Space . "reset"
+			;F_AutoXYWH("reset")
+			;return
 		}
 		
 		if (c_ymarg + HofText + v_OutVarTemp2H > LeftColumnH) and (ini_IsSandboxMoved) ;vertical 1
@@ -4469,11 +4343,10 @@ HS3GuiSize() ;Gui event
 		
 		if (c_ymarg + HofText + v_OutVarTemp2H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox) and (!ini_IsSandboxMoved) ;vertical 2
 		{
-			OutputDebug, % "Left:" . A_Space . c_ymarg + HofText + v_OutVarTemp2H . A_Space . "Right:" . A_Space . LeftColumnH + c_ymarg + HofText + c_HofSandbox . A_Space . "ini_IsSandboxMoved:" . A_Space . ini_IsSandboxMoved . A_Space . "top -> down"
+			;OutputDebug, % "Left:" . A_Space . c_ymarg + HofText + v_OutVarTemp2H . A_Space . "Right:" . A_Space . LeftColumnH + c_ymarg + HofText + c_HofSandbox . A_Space . "ini_IsSandboxMoved:" . A_Space . ini_IsSandboxMoved . A_Space . "top -> down"
 			GuiControl, MoveDraw, % IdText10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
 			GuiControl, MoveDraw, % IdEdit10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText 
 			GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg
-			;Pause, On
 		}
 	}
 	else ;no sandbox, no hiding and showing, only relative shifting
@@ -4485,72 +4358,7 @@ HS3GuiSize() ;Gui event
 	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space "A_GuiHeight" . A_Space . A_GuiHeight
 	;*[Two]
 	return
-	
 }
-
-
-
-/*
-	
-	HS3GuiSize:		; Showed when the window is resized, minimized, maximized, or restored.
-	if (ErrorLevel == 1)
-		return
-	if (ErrorLevel == 0)
-		v_ShowGui := 2
-	IniW := ini_StartW
-	IniH := ini_StartH
-	
-	AutoXYWH("wh", IdListView1)
-	GuiControlGet, temp2, Pos, %IdListView1%	
-	
-	LV_ModifyCol(1, Round(0.2 * temp2W))
-	LV_ModifyCol(2, Round(0.1 * temp2W))
-	LV_ModifyCol(3, Round(0.2 * temp2W))	
-	LV_ModifyCol(4, Round(0.1 * temp2W))
-	LV_ModifyCol(5, Round(0.1 * temp2W))
-	LV_ModifyCol(6, Round(0.3 * temp2W) - 3)
-	
-	WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
-	v_PreviousWidth := A_GuiWidth
-	v_PreviousHeight := A_GuiHeight
-	
-*/
-
-/*
-	LV_Width 	:= IniW - 460*DPI%v_SelectedMonitor%
-	LV_Height := IniH - 62*DPI%v_SelectedMonitor%
-	LV_ModifyCol(1,100*DPI%v_SelectedMonitor%)
-	LV_ModifyCol(2,80*DPI%v_SelectedMonitor%)
-	LV_ModifyCol(3,70*DPI%v_SelectedMonitor%)	
-	LV_ModifyCol(4,60*DPI%v_SelectedMonitor%)
-	LV_ModifyCol(6,300*DPI%v_SelectedMonitor%)
-	LV_ModifyCol(1,"Center")
-	LV_ModifyCol(2,"Center")
-	LV_ModifyCol(3,"Center")
-	LV_ModifyCol(4,"Center")
-	
-	WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
-	v_PreviousWidth := A_GuiWidth
-	v_PreviousHeight := A_GuiHeight
-	
-	NewHeight := LV_Height+(A_GuiHeight-IniH)
-	NewWidth 	:= LV_Width+(A_GuiWidth-IniW)
-	ColWid := (NewWidth-620*DPI%v_SelectedMonitor%)
-	LV_ModifyCol(5, "Auto")
-	SendMessage, 4125, 4, 0, SysListView321
-	wid := ErrorLevel
-	if (wid < ColWid)
-	{
-		LV_ModifyCol(5, ColWid)
-	}
-*/
-/*
-	GuiControl, Move, v_LibraryContent, W%NewWidth% H%NewHeight%
-	GuiControl, Move, v_ShortcutsMainInterface, % "y" . v_PreviousHeight - 22*DPI%v_SelectedMonitor%
-	GuiControl, Move, v_LoadedHotstrings, % "y" . v_PreviousHeight - 22*DPI%v_SelectedMonitor% . " x" . v_PreviousWidth - 200*DPI%v_SelectedMonitor%
-	GuiControl, Move, Line, % "w" . A_GuiWidth . " y" . v_PreviousHeight - 26*DPI%v_SelectedMonitor%
-*/
-;return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
