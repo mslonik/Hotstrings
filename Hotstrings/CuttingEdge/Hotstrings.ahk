@@ -1937,6 +1937,8 @@ F_GuiMain_Redraw()
 	{
 		v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
 		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
+		GuiControl, Hide, % IdText10
+		GuiControl, Hide, % IdEdit10
 		GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext ;Position of the long text F1 ... F2 ...
 	}
 	
