@@ -433,8 +433,6 @@ Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  		L_ExportLibraryStat
 Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  		L_ExportLibraryDynamic
 Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],	:ExportSubmenu
 
-;tu jestem
-
 if (ini_LoadLib.Count())
 {
 	for key, value in ini_LoadLib
@@ -1679,6 +1677,61 @@ F_GuiMain_DefineConstants()
 
 ; ------------------------------------------------------------------------------------------------------------------------------------
 
+F_GuiHS4_Redraw()
+{
+	global ;assume-global mode
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+	
+	if (ini_Sandbox)
+	{
+		GuiControl, Move, % IdText10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg
+		GuiControl, Move, % IdEdit10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
+		GuiControl, Show, % IdText10b
+		GuiControl, Show, % IdEdit10b
+		;5.2. Position of counters
+		GuiControlGet, v_OutVarTemp, Pos, % IdEdit10b
+		v_xNext := c_xmarg
+		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg 
+		GuiControl, Move, % IdText11b,  % "x" v_xNext "y" v_yNext ;text: Hotstrings
+		GuiControlGet, v_OutVarTemp, Pos, % IdText11b
+		v_xNext := v_OutVarTempX + v_OutVarTempW
+		GuiControl, Move, % IdText13b,  % "x" v_xNext "y" v_yNext ;text: value of Hotstrings
+		GuiControlGet, v_OutVarTemp, Pos, % IdText13b
+		v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
+		GuiControl, Move, % IdText2b, % "x" v_xNext "y" v_yNext ;where to place text Total
+		GuiControlGet, v_OutVarTemp, Pos, % IdText2
+		v_xNext += v_OutVarTempW
+		GuiControl, Move, % IdText12b, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
+	}
+	else
+	{
+		GuiControl, Hide, % IdText10b ;sandobx text
+		GuiControl, Hide, % IdEdit10b ;sandbox edit field
+		;5.3. Position of counters
+		v_xNext := c_xmarg
+		v_yNext := LeftColumnH + c_ymarg 
+		GuiControl, Move, % IdText11b,  % "x" v_xNext "y" v_yNext ;text: Hotstrings
+		GuiControlGet, v_OutVarTemp, Pos, % IdText11b
+		v_xNext := v_OutVarTempX + v_OutVarTempW
+		GuiControl, Move, % IdText13b,  % "x" v_xNext "y" v_yNext ;text: value of Hotstrings
+		GuiControlGet, v_OutVarTemp, Pos, % IdText13b
+		v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
+		GuiControl, Move, % IdText2b, % "x" v_xNext "y" v_yNext ;where to place text Total
+		GuiControlGet, v_OutVarTemp, Pos, % IdText2
+		v_xNext += v_OutVarTempW
+		GuiControl, Move, % IdText12b, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
+	}
+	
+	;5.2. Button between left and right column
+	v_yNext := c_ymarg
+	v_xNext := LeftColumnW + c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % IdText2b
+	v_hNext := v_OutVarTempY 
+	GuiControl, Move, % IdButton5b, % "x" v_xNext "y" v_yNext "h" v_hNext
+}
+
+; ------------------------------------------------------------------------------------------------------------------------------------
+
 F_GuiHS4_DetermineConstraints()
 {
 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.
@@ -1699,12 +1752,6 @@ F_GuiHS4_DetermineConstraints()
 	;OutputDebug, % "IdButton2:" . A_Space . IdButton2 . A_Space . "IdButton3:" . A_Space . IdButton3 . A_Space . "IdButton4:" . A_Space . IdButton4
 	;OutputDebug, % "v_OutVarTemp1W:" . A_Space . v_OutVarTemp1W  . A_Space . "v_OutVarTemp2W:" . A_Space . v_OutVarTemp2W . A_Space . "v_OutVarTemp3W:" . A_Space .  v_OutVarTemp3W  . A_Space . "c_xmarg:" . A_Space c_xmarg
 	;OutputDebug, % "LeftColumnW:" . A_Space . LeftColumnW
-	
-	;GuiControlGet, v_OutVarTemp1, Pos, % IdText8b
-	;GuiControlGet, v_OutVarTemp2, Pos, % IdText9b
-	;v_OutVarTemp3 := Max(v_OutVarTemp1W, v_OutVarTemp2W) ;longer of two texts
-	;RightColumnW := v_OutVarTemp3
-	
 	
 ;5. Move text objects to correct position
 ;5.1. Left column
@@ -1826,61 +1873,54 @@ F_GuiHS4_DetermineConstraints()
 	LeftColumnH := v_yNext
 	OutputDebug, % "LeftColumnH:" . A_Space . LeftColumnH
 	
-	;5.2. Button between left and right column
-	v_yNext := c_ymarg
-	v_xNext := LeftColumnW + c_xmarg
-	v_hNext := LeftColumnH - c_ymarg
-	if (ini_VertButtPos["X"] or ini_VertButtPos["Y"] or ini_VertButtPos["W"] or ini_VertButtPos["H"])
-		GuiControl, Move, % IdButton5b, % "x" v_xNext "y" v_yNext "h" ini_VertButtPos["H"]
-	else	
-		GuiControl, Move, % IdButton5b, % "x" v_xNext "y" v_yNext "h" v_hNext
+	F_GuiHS4_Redraw()
 	
-	if (ini_Sandbox)
-	{
-		GuiControl, Move, % IdText10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg
-		GuiControl, Move, % IdEdit10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
-		GuiControl, Show, % IdText10b
-		GuiControl, Show, % IdEdit10b
-		;5.2. Position of counters
-		GuiControlGet, v_OutVarTemp, Pos, % IdEdit10b
-		v_xNext := c_xmarg
-		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg 
-		GuiControl, Move, % IdText11b,  % "x" v_xNext "y" v_yNext ;text: Hotstrings
-		GuiControlGet, v_OutVarTemp, Pos, % IdText11b
-		v_xNext := v_OutVarTempX + v_OutVarTempW
-		GuiControl, Move, % IdText13b,  % "x" v_xNext "y" v_yNext ;text: value of Hotstrings
-		GuiControlGet, v_OutVarTemp, Pos, % IdText13b
-		v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
-		GuiControl, Move, % IdText2b, % "x" v_xNext "y" v_yNext ;where to place text Total
-		GuiControlGet, v_OutVarTemp, Pos, % IdText2
-		v_xNext += v_OutVarTempW
-		GuiControl, Move, % IdText12b, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
-	}
-	else
-	{
-		GuiControl, Hide, % IdText10b ;sandobx text
-		GuiControl, Hide, % IdEdit10b ;sandbox edit field
-		;5.3. Position of counters
-		v_xNext := c_xmarg
-		v_yNext := LeftColumnH + c_ymarg 
-		GuiControl, Move, % IdText11b,  % "x" v_xNext "y" v_yNext ;text: Hotstrings
-		GuiControlGet, v_OutVarTemp, Pos, % IdText11b
-		v_xNext := v_OutVarTempX + v_OutVarTempW
-		GuiControl, Move, % IdText13b,  % "x" v_xNext "y" v_yNext ;text: value of Hotstrings
-		GuiControlGet, v_OutVarTemp, Pos, % IdText13b
-		v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
-		GuiControl, Move, % IdText2b, % "x" v_xNext "y" v_yNext ;where to place text Total
-		GuiControlGet, v_OutVarTemp, Pos, % IdText2
-		v_xNext += v_OutVarTempW
-		GuiControl, Move, % IdText12b, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
-	}
-	
-
 	
 	return
 }
 
-	; ------------------------------------------------------------------------------------------------------------------------------------
+; ------------------------------------------------------------------------------------------------------------------------------------
+
+F_GuiMain_Redraw()
+{
+	global ;assume-global mode
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+	
+		;5.3.3. Text Sandbox
+	;5.2.4. Sandbox edit text field
+	;5.3.5. Position of the long text F1 ... F2 ...
+	GuiControlGet, v_OutVarTemp, Pos, % IdListView1
+	if ((ini_Sandbox) and (ini_IsSandboxMoved))
+	{
+		GuiControl, Move, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
+		GuiControl, Move, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
+		GuiControl, Show, % IdText10
+		GuiControl, Show, % IdEdit10
+		GuiControl, MoveDraw, % IdText8,  % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTempY + v_OutVarTempH + c_ymarg ;Position of the long text F1 ... F2 ...
+	}
+	
+	if ((ini_Sandbox) and !(ini_IsSandboxMoved))
+	{
+		v_yNext += v_OutVarTempH + c_ymarg
+		GuiControl, Move, % IdText10, % "x" v_xNext "y" v_yNext
+		v_yNext += HofText
+		v_wNext := RightColumnW
+		GuiControl, Move, % IdEdit10, % "x" v_xNext "y" v_yNext "w" v_wNext
+		v_yNext += c_HofSandbox + c_ymarg
+		GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext
+	}
+	
+	if !(ini_Sandbox)
+	{
+		v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
+		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
+		GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext ;Position of the long text F1 ... F2 ...
+	}
+	
+	;Gui, 		%HS3GuiHwnd%:Show, AutoSize Center
+}
+
+; ------------------------------------------------------------------------------------------------------------------------------------
 
 F_GuiMain_DetermineConstraints()
 {
@@ -2053,8 +2093,6 @@ F_GuiMain_DetermineConstraints()
 	GuiControl, Move, % IdText13, % "x" v_xNext "y" v_yNext ;Where to place value of Hotstrings counter
 	GuiControlGet, v_OutVarTemp, Pos, % IdText13
 	v_xNext += v_OutVarTempW + c_xmarg
-		;tu jestem
-		;GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext "w" 100
 	GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext ;where to place text Total
 	GuiControlGet, v_OutVarTemp, Pos, % IdText2
 	v_xNext += v_OutVarTempW
@@ -2082,38 +2120,8 @@ F_GuiMain_DetermineConstraints()
 	
 	GuiControl, Hide, % IdText9
 	
-	;5.3.3. Text Sandbox
-	;5.2.4. Sandbox edit text field
-	;5.3.5. Position of the long text F1 ... F2 ...
-		;tu jestem
-	GuiControlGet, v_OutVarTemp, Pos, % IdListView1
-	if ((ini_Sandbox) and (ini_IsSandboxMoved))
-	{
-		GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
-		GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
-			;GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTempY + v_OutVarTempH + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
-		GuiControl, MoveDraw, % IdText8,  % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTempY + v_OutVarTempH + c_ymarg ;Position of the long text F1 ... F2 ...
-	}
+	F_GuiMain_Redraw()
 	
-	if ((ini_Sandbox) and !(ini_IsSandboxMoved))
-	{
-		v_yNext += v_OutVarTempH + c_ymarg
-		GuiControl, Move, % IdText10, % "x" v_xNext "y" v_yNext
-		v_yNext += HofText
-		v_wNext := RightColumnW
-		GuiControl, Move, % IdEdit10, % "x" v_xNext "y" v_yNext "w" v_wNext
-		v_yNext += c_HofSandbox + c_ymarg
-		GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext
-	}
-	
-	if !(ini_Sandbox)
-	{
-		v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
-		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
-		GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext ;Position of the long text F1 ... F2 ...
-	}
-	
-	;Gui, 		%HS3GuiHwnd%:Show, AutoSize Center
 	return
 }
 
@@ -4939,93 +4947,17 @@ ini_Sandbox := !(ini_Sandbox)
 Iniwrite, %ini_Sandbox%, Config.ini, GraphicalUserInterface, Sandbox
 if (A_DefaultGui = "HS3")
 {
-	
-	GuiControlGet, v_OutVarTemp1, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.
-	if (ini_Sandbox) ;reduce size of List View and draw sandbox
-	{
-		if (c_ymarg + HofText + v_OutVarTemp1H > LeftColumnH)
-		{
-			GuiControl, Show, % IdText10 ;sandobx text
-			GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
-			GuiControl, Show, % IdEdit10 ;sandbox edit field
-			GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
-			ini_IsSandboxMoved := true
-		}
-		if (c_ymarg + HofText + v_OutVarTemp1H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox)
-		{
-			GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp1H - (HofText + c_HofSandbox + c_ymarg)
-			GuiControl, Show, % IdText10 ;sandobx text
-			GuiControl, MoveDraw, % IdText10, % "x" v_OutVarTemp1X  "y" v_OutVarTemp1Y + v_OutVarTemp1H - (HofText + c_HofSandbox + c_ymarg) + c_ymarg
-			GuiControl, Show, % IdEdit10 ;sandbox edit field
-			GuiControl, MoveDraw, % IdEdit10, % "x" v_OutVarTemp1X "y" v_OutVarTemp1Y + v_OutVarTemp1H - (HofText + c_HofSandbox + c_ymarg) + c_ymarg + HofText "w" v_OutVarTemp1W
-			GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp1Y + v_OutVarTemp1H + c_ymarg ;Position of the long text F1 ... F2 ...
-			ini_IsSandboxMoved := false
-		}
-	}
-	else ;increase size of List View and hide sandbox
-	{
-		if (c_ymarg + HofText + v_OutVarTemp1H > LeftColumnH)
-		{
-			GuiControl, Hide, % IdText10 ;sandobx text
-			GuiControl, Hide, % IdEdit10 ;sandbox edit field
-		}
-		if (c_ymarg + HofText + v_OutVarTemp1H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox)
-		{
-			GuiControl, Hide, % IdText10 ;sandobx text
-			GuiControl, Hide, % IdEdit10 ;sandbox edit field
-			GuiControl, MoveDraw, % IdListView1, % "h" . v_OutVarTemp1H + HofText + c_HofSandbox + c_ymarg
-			GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp1Y + v_OutVarTemp1H + HofText + c_HofSandbox + c_ymarg + c_ymarg ;Position of the long text F1 ... F2 ...
-		}
-	}
-	
-	F_AutoXYWH("reset")
-		;OutputDebug, return by if (ini_Sandbox)
+	F_GuiMain_Redraw()
+	Gui, HS3: Show, AutoSize
 }
+	;tu jestem. przywołać HS4 constraints i jeszcze raz narysować HS4 show autosize
 if (A_DefaultGui = "HS4")
 {
-	if (ini_Sandbox)
-	{
-		GuiControl, Move, % IdText10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg
-		GuiControl, Move, % IdEdit10b, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
-		GuiControl, Show, % IdText10b
-		GuiControl, Show, % IdEdit10b
-		;5.3. Position of counters
-		GuiControlGet, v_OutVarTemp, Pos, % IdEdit10b
-		v_xNext := c_xmarg
-		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg 
-		GuiControl, Move, % IdText11b,  % "x" v_xNext "y" v_yNext ;text: Hotstrings
-		GuiControlGet, v_OutVarTemp, Pos, % IdText11b
-		v_xNext := v_OutVarTempX + v_OutVarTempW
-		GuiControl, Move, % IdText13b,  % "x" v_xNext "y" v_yNext ;text: value of Hotstrings
-		GuiControlGet, v_OutVarTemp, Pos, % IdText13b
-		v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
-		GuiControl, Move, % IdText2b, % "x" v_xNext "y" v_yNext ;where to place text Total
-		GuiControlGet, v_OutVarTemp, Pos, % IdText2
-		v_xNext += v_OutVarTempW
-		GuiControl, Move, % IdText12b, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
-	}
-	else
-	{
-		GuiControl, Hide, % IdText10b ;sandobx text
-		GuiControl, Hide, % IdEdit10b ;sandbox edit field
-		;5.3. Position of counters
-		v_xNext := c_xmarg
-		v_yNext := LeftColumnH + c_ymarg 
-		GuiControl, Move, % IdText11b,  % "x" v_xNext "y" v_yNext ;text: Hotstrings
-		GuiControlGet, v_OutVarTemp, Pos, % IdText11b
-		v_xNext := v_OutVarTempX + v_OutVarTempW
-		GuiControl, Move, % IdText13b,  % "x" v_xNext "y" v_yNext ;text: value of Hotstrings
-		GuiControlGet, v_OutVarTemp, Pos, % IdText13b
-		v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
-		GuiControl, Move, % IdText2b, % "x" v_xNext "y" v_yNext ;where to place text Total
-		GuiControlGet, v_OutVarTemp, Pos, % IdText2
-		v_xNext += v_OutVarTempW
-		GuiControl, Move, % IdText12b, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
-	}
-	
+	F_GuiHS4_Redraw()
+	Gui, HS4: Show, AutoSize
 }
-
 return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 EndSpace:
