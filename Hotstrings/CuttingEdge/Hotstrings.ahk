@@ -411,7 +411,7 @@ Menu, StyleGUIsubm, Add, Light (default),							L_StyleOfGUI
 Menu, StyleGUIsubm, Add, Dark,									L_StyleOfGUI
 
 Menu, ConfGUI,		Add, % TransA["Save position of application window"], 	F_SaveGUIPos
-Menu, ConfGUI, 	Add, % TransA["Show Sandbox"], 			L_Sandbox
+Menu, ConfGUI, 	Add, % TransA["Show Sandbox"], 					F_Sandbox
 if (ini_Sandbox == 0)
 	Menu, ConfGUI, UnCheck, % TransA["Show Sandbox"]
 else
@@ -426,12 +426,12 @@ Menu, ConfGUI,		Add, % TransA["Change Language"], 					:SubmenuLanguage
 */
 Menu, Submenu1,	Add, % TransA["Graphical User Interface"], 			:ConfGUI
 
-Menu, HSMenu, 			Add, % TransA["Configuration"], 			:Submenu1
-Menu, HSMenu, 			Add, % TransA["Search Hotstrings"], 		L_Searching
-Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],	L_ImportLibrary
-Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  		L_ExportLibraryStatic
-Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  		L_ExportLibraryDynamic
-Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],	:ExportSubmenu
+Menu, HSMenu, 			Add, % TransA["Configuration"], 				:Submenu1
+Menu, HSMenu, 			Add, % TransA["Search Hotstrings"], 			L_Searching
+Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],		L_ImportLibrary
+Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  			L_ExportLibraryStatic
+Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  			L_ExportLibraryDynamic
+Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],		:ExportSubmenu
 
 if (ini_LoadLib.Count())
 {
@@ -823,6 +823,29 @@ return
 
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+
+F_Sandbox()
+{
+	global ;assume-global mode
+	
+	Menu, ConfGUI, ToggleCheck, % TransA["Show Sandbox"]
+	ini_Sandbox := !(ini_Sandbox)
+	Iniwrite, %ini_Sandbox%, Config.ini, GraphicalUserInterface, Sandbox
+	if (A_DefaultGui = "HS3")
+	{
+		F_GuiMain_Redraw()
+		Gui, HS3: Show, AutoSize
+	}
+	;tu jestem. przywołać HS4 constraints i jeszcze raz narysować HS4 show autosize
+	if (A_DefaultGui = "HS4")
+	{
+		F_GuiHS4_Redraw()
+		Gui, HS4: Show, AutoSize
+	}
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 F_LoadGUIPos()
 {
@@ -4937,25 +4960,6 @@ Menu, SubmenuTips, ToggleEnable, % TransA["Choose tips location"]
 Menu, SubmenuTips, ToggleEnable, % TransA["Number of characters for tips"]
 ini_Tips := !(ini_Tips)
 IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-L_Sandbox:
-Menu, ConfGUI, ToggleCheck, % TransA["Show Sandbox"]
-ini_Sandbox := !(ini_Sandbox)
-Iniwrite, %ini_Sandbox%, Config.ini, GraphicalUserInterface, Sandbox
-if (A_DefaultGui = "HS3")
-{
-	F_GuiMain_Redraw()
-	Gui, HS3: Show, AutoSize
-}
-	;tu jestem. przywołać HS4 constraints i jeszcze raz narysować HS4 show autosize
-if (A_DefaultGui = "HS4")
-{
-	F_GuiHS4_Redraw()
-	Gui, HS4: Show, AutoSize
-}
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
