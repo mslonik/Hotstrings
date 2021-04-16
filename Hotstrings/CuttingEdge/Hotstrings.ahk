@@ -91,9 +91,6 @@ global c_ControlColor 			:= "Default"
 
 ;Flags to control application
 global v_ResizingFlag 			:= 1 ; when Hotstrings Gui is displayed for the very first time
-;global IsSandboxMoved			:= false
-global v_ToggleRightColumn		:= false ;memory of last state of the IdButton5 (ToggleRightColumn)
-
 global PriorityFlag				:= false
 
 
@@ -849,9 +846,10 @@ F_LoadGUIPos()
 {
 	global ;assume-global mode
 	local ini_ReadTemp := 0
-	ini_HS3WindoPos := {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
-	ini_ListViewPos := {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
-	ini_VertButtPos := {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
+	ini_HS3WindoPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
+	ini_ListViewPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
+	ini_VertButtPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
+	ini_WhichGui := ""
 	
 	IniRead, ini_ReadTemp, 						Config.ini, GraphicalUserInterface, MainWindowPosX, 0
 	ini_HS3WindoPos["X"] := ini_ReadTemp
@@ -873,7 +871,11 @@ F_LoadGUIPos()
 	ini_ListViewPos["W"] := ini_ReadTemp
 	IniRead, ini_ReadTemp,						Config.ini, GraphicalUserInterface, ListViewPosH, 0
 	ini_ListViewPos["H"] := ini_ReadTemp
-
+	
+	IniRead, ini_WhichGui,						Config.ini, GraphicalUserInterface, WhichGui, %A_Space%
+	if !(ini_WhichGui)
+		ini_WhichGui := "HS3"
+	
 	return
 }
 
@@ -899,10 +901,7 @@ ListViewPosX=
 ListViewPosY=
 ListViewPosW=
 ListViewPosH=
-MiddleButtonPosX=
-MiddleButtonPosY=
-MiddleButtonPosW=
-MiddleButtonPosH=
+WhichGui=
 [Configuration]
 UndoHotstring=1
 Delay=300
@@ -957,12 +956,25 @@ F_SaveGUIPos() ;Save to Config.ini
 	local WinX := 0, WinY := 0
 		,TempPos := 0, TempPosX := 0, TempPosY := 0, TempPosW := 0, TempPosH := 0
 	
-	WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
+	if (A_DefaultGui = "HS3")
+	{
+		WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
+		IniWrite, HS3,				Config.ini, GraphicalUserInterface, WhichGui
+		IniWrite, % HS3_GuiWidth, 	  Config.ini, GraphicalUserInterface, MainWindowPosW
+		IniWrite, % HS3_GuiHeight, 	  Config.ini, GraphicalUserInterface, MainWindowPosH
+	}
+
+	if (A_DefaultGui = "HS4")
+	{
+		WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
+		IniWrite, HS4,				Config.ini, GraphicalUserInterface, WhichGui
+		IniWrite, % HS4_GuiWidth, 	  Config.ini, GraphicalUserInterface, MainWindowPosW
+		IniWrite, % HS4_GuiHeight, 	  Config.ini, GraphicalUserInterface, MainWindowPosH
+	}
+	
 	IniWrite, % WinX, 			  Config.ini, GraphicalUserInterface, MainWindowPosX
 	IniWrite, % WinY, 			  Config.ini, GraphicalUserInterface, MainWindowPosY
 	
-	IniWrite, % HS3_GuiWidth, 	  Config.ini, GraphicalUserInterface, MainWindowPosW
-	IniWrite, % HS3_GuiHeight, 	  Config.ini, GraphicalUserInterface, MainWindowPosH
 	
 	IniWrite, % ini_Sandbox, 	  Config.ini, GraphicalUserInterface, Sandbox
 	IniWrite, % ini_IsSandboxMoved, Config.ini, GraphicalUserInterface, IsSandboxMoved
@@ -972,12 +984,6 @@ F_SaveGUIPos() ;Save to Config.ini
 	IniWrite, % TempPosY,		  Config.ini, GraphicalUserInterface, ListViewPosY
 	IniWrite, % TempPosW,		  Config.ini, GraphicalUserInterface, ListViewPosW
 	IniWrite, % TempPosH,		  Config.ini, GraphicalUserInterface, ListViewPosH
-	
-	GuiControlGet, TempPos, Pos, % IdButton5
-	IniWrite, % TempPosX,		  Config.ini, GraphicalUserInterface, MiddleButtonPosX
-	IniWrite, % TempPosY,		  Config.ini, GraphicalUserInterface, MiddleButtonPosY
-	IniWrite, % TempPosW,		  Config.ini, GraphicalUserInterface, MiddleButtonPosW
-	IniWrite, % TempPosH,		  Config.ini, GraphicalUserInterface, MiddleButtonPosH
 	
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Position of main window is saved in Config.ini."]
 	return
@@ -1373,7 +1379,7 @@ F_GuiHS4_CreateObject()
 		v_EnterHotstring v_EnterHotstring1 v_EnterHotstring2 v_EnterHotstring3 v_EnterHotstring4 v_EnterHotstring5 v_EnterHotstring6
 		v_TextAddComment v_Comment
 		v_TextSelectHotstringLibrary v_SelectHotstringLibrary
-		v_DeleteHotstring v_ToggleRightColumn
+		v_DeleteHotstring 
 		v_LibraryContent v_ShortcutsMainInterface v_SandString v_Sandbox v_NoOfHotstringsInLibrary
 	*/
 	
@@ -1467,7 +1473,7 @@ F_GuiHS4_CreateObject()
 	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton4b gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
 	;GuiControl,	Hide,		% IdButton4
 	
-	Gui,		HS4: Add,			Button,		x0 y0 HwndIdButton5b gF_ToggleRightColumn vv_ToggleRightColumn,			⯈
+	Gui,		HS4: Add,			Button,		x0 y0 HwndIdButton5b gF_ToggleRightColumn,			⯈
 	;GuiControl,	Hide,		% IdButton5
 	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText10b vv_SandString, 						% TransA["Sandbox"]
 	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit10b vv_Sandbox r3 						; r3 = 3x rows of text
@@ -1530,7 +1536,7 @@ F_GuiMain_CreateObject()
 		v_EnterHotstring v_EnterHotstring1 v_EnterHotstring2 v_EnterHotstring3 v_EnterHotstring4 v_EnterHotstring5 v_EnterHotstring6
 		v_TextAddComment v_Comment
 		v_TextSelectHotstringLibrary v_SelectHotstringLibrary
-		v_DeleteHotstring v_ToggleRightColumn
+		v_DeleteHotstring
 		v_LibraryContent v_ShortcutsMainInterface v_SandString v_Sandbox v_NoOfHotstringsInLibrary
 	*/
 	
@@ -1625,7 +1631,7 @@ F_GuiMain_CreateObject()
 	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton4 gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
 ;GuiControl,	Hide,		% IdButton4
 	
-	Gui,			HS3:Add,		Button,		x0 y0 HwndIdButton5 gF_ToggleRightColumn vv_ToggleRightColumn,			⯇
+	Gui,			HS3:Add,		Button,		x0 y0 HwndIdButton5 gF_ToggleRightColumn,			⯇
 ;GuiControl,	Hide,		% IdButton5
 	
 ;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
@@ -3424,6 +3430,36 @@ L_GUIInit:
 
 if (v_ResizingFlag) ;if run for the very first time
 {
+	Switch ini_WhichGui
+	{
+		Case "HS3":
+			if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]) or !(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
+				Gui, HS3: Show, AutoSize Center
+			else
+				Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+			return
+		Case "HS4":
+			if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]) or !(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
+				Gui, HS4: Show, AutoSize Center
+			else
+				Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+			return
+	}
+}
+else ;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakresem dostępnym na tym komputerze w momencie uruchomienia
+	Switch A_DefaultGui
+	{
+		Case "HS3":
+			Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
+			return
+		Case "HS4":
+			Gui, HS4: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
+			return
+	}
+
+/*
+if (v_ResizingFlag) ;if run for the very first time
+{
 	if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]) or !(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
 	{
 		;why double Show is necessary if FontSize == 16???
@@ -3451,6 +3487,8 @@ if (v_ResizingFlag) ;if run for the very first time
 else
 		;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakresem dostępnym na tym komputerze w momencie uruchomienia
 	Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
+*/
+	
 return
 
 
@@ -4221,24 +4259,25 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 	global ;assume-global mode
 	local WinX := 0, WinY := 0
 	
-	if !(v_ToggleRightColumn) ;hide main Gui and show HS4 Gui
+	Switch A_DefaultGui
 	{
-		WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
-		Gui, HS3: Show, Hide
-		Gui, HS4: Default
-		F_UpdateSelHotLibDDL()
-		F_GuiHS4_DetermineConstraints()
-		Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . "AutoSize"
+		Case "HS3":
+			WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
+			GUI, HS4: Default
+			F_UpdateSelHotLibDDL()
+			F_GuiHS4_DetermineConstraints()
+			Gui, HS3: Show, Hide
+			Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
+			return
+		Case "HS4":
+			WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
+			Gui, HS3: Default
+			F_UpdateSelHotLibDDL()
+			F_GuiMain_DetermineConstraints()
+			Gui, HS4: Show, Hide
+			Gui, HS3: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
+			return
 	}
-	else					;show main Gui and hide HS4 Gui
-	{
-		Gui, HS3: Default
-		F_UpdateSelHotLibDDL()
-		F_GuiMain_DetermineConstraints()
-		Gui, HS4: Show, Hide
-		Gui, HS3: Show
-	}
-	v_ToggleRightColumn := !v_ToggleRightColumn
 	return
 }
 
@@ -4287,6 +4326,17 @@ MyAboutGuiEscape:
 MyAboutGuiClose: ; Showed when the window is closed by pressing its X button in the title bar.
 Gui, MyAbout: Hide
 return
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+HS4GuiSize() ;Gui event
+{
+	global ;assume-global mode
+	
+	HS4_GuiWidth  := A_GuiWidth
+	HS4_GuiHeight := A_GuiHeight
+	return
+}
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
