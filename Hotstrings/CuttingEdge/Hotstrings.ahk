@@ -1,5 +1,4 @@
-﻿/* 
-	/* 
+/* 
 	Author:      Jakub Masiak, Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings as in AutoHotkey (shortcuts), but editable with GUI and many more options.
@@ -1908,6 +1907,7 @@ F_GuiMain_Redraw()
 {
 	global ;assume-global mode
 	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_xNext := 0, v_yNext := 0,  v_wNext := 0
 	
 		;5.3.3. Text Sandbox
 	;5.2.4. Sandbox edit text field
@@ -1924,7 +1924,8 @@ F_GuiMain_Redraw()
 	
 	if ((ini_Sandbox) and !(ini_IsSandboxMoved))
 	{
-		v_yNext += v_OutVarTempH + c_ymarg
+		v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
+		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
 		GuiControl, Move, % IdText10, % "x" v_xNext "y" v_yNext
 		v_yNext += HofText
 		v_wNext := RightColumnW
@@ -3408,6 +3409,7 @@ if (v_ResizingFlag) ;if run for the very first time
 		;why double Show is necessary if FontSize == 16???
 		Gui, HS3: Show, AutoSize Center
 		Gui, HS3: Show, AutoSize Center
+		;Pause
 	}
 	else
 	{
@@ -4268,16 +4270,16 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-;Future: for some reasons size of Gui window can change rapidly by 20-30 px. It could be fixed by software routine, which checks if size  wasn't changed between last F_AutoXYWH("reset") and next function call.
 HS3GuiSize() ;Gui event
 {
 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 	global ;assume-global mode
 	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
-		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0
+		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0,
+		deltaW := 0, deltaH := 0
+	static HS3_GuiWidth  := 0,	HS3_GuiHeight := 0
 	
-	Critical
-	HS3_GuiWidth  := 0,	HS3_GuiHeight := 0
+	;~ Critical
 	
 	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "A_GuiHeight:" . A_Space .  A_GuiHeight
 	
@@ -4312,7 +4314,25 @@ HS3GuiSize() ;Gui event
 		LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W) - 3)
 	}	
 	;*[Two]
-	if (v_OutVarTemp2H + HofText < LeftColumnH + c_HofSandbox) and (ini_IsSandboxMoved)
+	
+	deltaW := A_GuiWidth -  HS3_GuiWidth
+	deltaH := A_GuiHeight - HS3_GuiHeight
+	
+	if (ini_Sandbox) and (deltaH > 0) and (v_OutVarTemp2H + HofText > LeftColumnH) and !(ini_IsSandboxMoved)
+	{
+		GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox ;increase
+		GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
+		GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
+		GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
+		ini_IsSandboxMoved := true
+		OutputDebug, % "Two:" . A_Space ini_IsSandboxMoved
+		F_AutoXYWH("reset")	
+		;~ HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
+		;~ HS3_GuiHeight := A_GuiHeight
+		;~ return
+	}
+		
+	if (ini_Sandbox) and (deltaH < 0) and (v_OutVarTemp2H + HofText <  LeftColumnH + c_HofSandbox)
 	{
 		GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H - (c_ymarg + HofText + c_HofSandbox) ;decrease
 		GuiControl, MoveDraw, % IdText10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - (HofText + c_HofSandbox)
@@ -4321,28 +4341,42 @@ HS3GuiSize() ;Gui event
 		ini_IsSandboxMoved := false
 		OutputDebug, % "One:" . A_Space ini_IsSandboxMoved
 		F_AutoXYWH("reset")	
-		HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
-		HS3_GuiHeight := A_GuiHeight
-		return
+		;~ HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
+		;~ HS3_GuiHeight := A_GuiHeight
+		;~ return
 	}
-	
-	;if (v_OutVarTemp2H > LeftColumnH + c_HofSandbox) and !(ini_IsSandboxMoved) ;to działa
-	if (v_OutVarTemp2H + HofText > LeftColumnH) and !(ini_IsSandboxMoved)
-	;if (v_OutVarTemp2H + c_HofSandbox > LeftColumnH) and !(ini_IsSandboxMoved) ;to nie działa
-	;if (v_OutVarTemp2H > LeftColumnH - c_HofSandbox) and !(ini_IsSandboxMoved) ;to nie działa
-	{
-		GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox ;increase
-		GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
-		GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
-		GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
-		;ini_IsSandboxMoved := !ini_IsSandboxMoved
-		ini_IsSandboxMoved := true
-		OutputDebug, % "Two:" . A_Space ini_IsSandboxMoved
-		F_AutoXYWH("reset")	
-		HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
-		HS3_GuiHeight := A_GuiHeight
-		return
-	}
+
+/* 	if (v_OutVarTemp2H + HofText < LeftColumnH + c_HofSandbox) and (ini_IsSandboxMoved)
+ * 	{
+ * 		GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H - (c_ymarg + HofText + c_HofSandbox) ;decrease
+ * 		GuiControl, MoveDraw, % IdText10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - (HofText + c_HofSandbox)
+ * 		GuiControl, MoveDraw, % IdEdit10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox "w" v_OutVarTemp2W
+ * 		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
+ * 		ini_IsSandboxMoved := false
+ * 		OutputDebug, % "One:" . A_Space ini_IsSandboxMoved
+ * 		F_AutoXYWH("reset")	
+ * 		HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
+ * 		HS3_GuiHeight := A_GuiHeight
+ * 		return
+ * 	}
+ * 	
+ * 	;if (v_OutVarTemp2H > LeftColumnH + c_HofSandbox) and !(ini_IsSandboxMoved) ;to działa
+ * 	if (v_OutVarTemp2H + HofText > LeftColumnH) and !(ini_IsSandboxMoved)
+ * 	;if (v_OutVarTemp2H + c_HofSandbox > LeftColumnH) and !(ini_IsSandboxMoved) ;to nie działa
+ * 	;if (v_OutVarTemp2H > LeftColumnH - c_HofSandbox) and !(ini_IsSandboxMoved) ;to nie działa
+ * 	{
+ * 		GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox ;increase
+ * 		GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
+ * 		GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
+ * 		GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
+ * 		ini_IsSandboxMoved := true
+ * 		OutputDebug, % "Two:" . A_Space ini_IsSandboxMoved
+ * 		F_AutoXYWH("reset")	
+ * 		HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
+ * 		HS3_GuiHeight := A_GuiHeight
+ * 		return
+ * 	}
+ */
 	
 	if ((ini_Sandbox) and (ini_IsSandboxMoved))
 	{
@@ -4362,49 +4396,7 @@ HS3GuiSize() ;Gui event
 		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
 		;return
 	}
-	/*
-		if (c_ymarg + HofText + v_OutVarTemp2H > LeftColumnH) and (!ini_IsSandboxMoved) ;left <- right, increase
-		{
-			
-			GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox
-			GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
-			GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
-			GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
-			ini_IsSandboxMoved := true
-				;OutputDebug, % "Left:" . A_Space . c_ymarg + HofText + v_OutVarTemp2H . A_Space . "Right:" . A_Space .  LeftColumnH . A_Space . "ini_IsSandboxMoved:" . A_Space . ini_IsSandboxMoved . A_Space . "return"
-				;F_AutoXYWH("reset")	
-				;return 
-		}
-		if (c_ymarg + HofText + v_OutVarTemp2H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox) and (ini_IsSandboxMoved) ; left -> right, reduce
-		{
-			GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H - (c_ymarg + HofText + c_HofSandbox)
-			GuiControl, MoveDraw, % IdText10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - (HofText + c_HofSandbox)
-			GuiControl, MoveDraw, % IdEdit10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox "w" v_OutVarTemp2W
-			GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
-			ini_IsSandboxMoved := false
-				;OutputDebug, % "Left:" . A_Space . c_ymarg + HofText + v_OutVarTemp2H . A_Space . "Right:" . A_Space . LeftColumnH + c_ymarg + HofText + c_HofSandbox . A_Space . "ini_IsSandboxMoved:" . A_Space . ini_IsSandboxMoved . A_Space . "reset"
-				;F_AutoXYWH("reset")
-				;return
-		}
-		
-		if (c_ymarg + HofText + v_OutVarTemp2H > LeftColumnH) and (ini_IsSandboxMoved) ;vertical 1
-		{
-			GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
-		}
-		
-		if (c_ymarg + HofText + v_OutVarTemp2H <= LeftColumnH + c_ymarg + HofText + c_HofSandbox) and (!ini_IsSandboxMoved) ;vertical 2
-		{
-			;OutputDebug, % "Left:" . A_Space . c_ymarg + HofText + v_OutVarTemp2H . A_Space . "Right:" . A_Space . LeftColumnH + c_ymarg + HofText + c_HofSandbox . A_Space . "ini_IsSandboxMoved:" . A_Space . ini_IsSandboxMoved . A_Space . "top -> down"
-			GuiControl, MoveDraw, % IdText10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
-			GuiControl, MoveDraw, % IdEdit10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText 
-			GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg
-		}
-		
-		else ;no sandbox, no hiding and showing, only relative shifting
-		{
-			GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
-		}
-	*/
+
 	HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
 	HS3_GuiHeight := A_GuiHeight
 	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space "A_GuiHeight" . A_Space . A_GuiHeight
