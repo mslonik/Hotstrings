@@ -835,7 +835,6 @@ F_Sandbox()
 		F_GuiMain_Redraw()
 		Gui, HS3: Show, AutoSize
 	}
-	;tu jestem. przywołać HS4 constraints i jeszcze raz narysować HS4 show autosize
 	if (A_DefaultGui = "HS4")
 	{
 		F_GuiHS4_Redraw()
@@ -874,18 +873,7 @@ F_LoadGUIPos()
 	ini_ListViewPos["W"] := ini_ReadTemp
 	IniRead, ini_ReadTemp,						Config.ini, GraphicalUserInterface, ListViewPosH, 0
 	ini_ListViewPos["H"] := ini_ReadTemp
-	
-	IniRead, ini_ReadTemp,						Config.ini, GraphicalUserInterface, MiddleButtonPosX, 0	
-	ini_VertButtPos["X"] := ini_ReadTemp
-	IniRead, ini_ReadTemp,						Config.ini, GraphicalUserInterface, MiddleButtonPosY, 0
-	ini_VertButtPos["Y"] := ini_ReadTemp
-	IniRead, ini_ReadTemp,						Config.ini, GraphicalUserInterface, MiddleButtonPosW, 0
-	ini_VertButtPos["W"] := ini_ReadTemp
-	IniRead, ini_ReadTemp,						Config.ini, GraphicalUserInterface, MiddleButtonPosH, 0
-	ini_VertButtPos["H"] := ini_ReadTemp
-	;if (ini_Sandbox)
-		;IsSandboxMoved := false
-	;b_SandboxResize := ini_Sandbox
+
 	return
 }
 
@@ -1389,7 +1377,7 @@ F_GuiHS4_CreateObject()
 		v_LibraryContent v_ShortcutsMainInterface v_SandString v_Sandbox v_NoOfHotstringsInLibrary
 	*/
 	
-;1. Definition of HS3 GUI.
+;1. Definition of HS4 GUI.
 ;-DPIScale doesn't work in Microsoft Windows 10
 ;+Border doesn't work in Microsoft Windows 10
 ;OwnDialogs
@@ -1908,11 +1896,69 @@ F_GuiMain_Redraw()
 	global ;assume-global mode
 	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
 		,v_xNext := 0, v_yNext := 0,  v_wNext := 0
+	static b_FirstRun := true
+
+	;position of the List View
+	if (b_FirstRun) 
+	{
+		if (ini_ListViewPos["X"] or ini_ListViewPos["Y"] or ini_ListViewPos["W"] or ini_ListViewPos["H"])
+			GuiControl, Move, % IdListView1, % "x" ini_ListViewPos["X"] "y" ini_ListViewPos["Y"] "w" ini_ListViewPos["W"] "h" ini_ListViewPos["H"]
+		else
+		{
+			if ((ini_Sandbox) and !(ini_IsSandboxMoved))
+			{
+				v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
+				v_yNext := c_ymarg + HofText
+				v_wNext := RightColumnW
+				v_hNext := LeftColumnH - (3 * c_ymarg + 3 * HofText + c_HofSandbox)
+			}
+			if ((ini_Sandbox) and (ini_IsSandboxMoved))
+			{
+				v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
+				v_yNext := c_ymarg + HofText
+				v_wNext := RightColumnW
+				v_hNext := LeftColumnH - (c_ymarg + c_HofSandobx + c_ymarg)
+			}
+			if !(ini_Sandbox)
+			{
+				v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
+				v_yNext := c_ymarg + HofText
+				v_wNext := RightColumnW
+				v_hNext := LeftColumnH - (c_ymarg + c_HofSandobx + c_ymarg)
+				GuiControl, Hide, % IdText10
+				GuiControl, Hide, % IdEdit10
+			}
+			GuiControl, Move, % IdListView1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
+		}	
+		b_FirstRun := false
+	}
+
+	GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 	
-		;5.3.3. Text Sandbox
+	;5.2. Button between left and right column
+	if ((ini_Sandbox) and !(ini_IsSandboxMoved))
+	{
+		v_yNext := c_ymarg
+		v_xNext := LeftColumnW + c_xmarg
+		v_hNext := c_ymarg + HofText + v_OutVarTempH + c_ymarg + HofText + c_HofSandbox  + HofText
+	}	
+	if ((ini_Sandbox) and (ini_IsSandboxMoved))
+	{
+		v_yNext := c_ymarg
+		v_xNext := LeftColumnW + c_xmarg
+		v_hNext := c_ymarg + HofText + v_OutVarTempH + HofText	
+	}
+	if !(ini_Sandbox)
+	{
+		v_yNext := c_ymarg
+		v_xNext := LeftColumnW + c_xmarg
+		v_hNext := c_ymarg + HofText + v_OutVarTempH + HofText	
+	}
+	GuiControl, Move, % IdButton5, % "x" v_xNext "y" v_yNext "h" v_hNext
+
+	;5.3.3. Text Sandbox
 	;5.2.4. Sandbox edit text field
 	;5.3.5. Position of the long text F1 ... F2 ...
-	GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 	if ((ini_Sandbox) and (ini_IsSandboxMoved))
 	{
 		GuiControl, Move, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
@@ -1943,7 +1989,6 @@ F_GuiMain_Redraw()
 		GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext ;Position of the long text F1 ... F2 ...
 	}
 	
-	;Gui, 		%HS3GuiHwnd%:Show, AutoSize Center
 }
 
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -1957,8 +2002,7 @@ F_GuiMain_DetermineConstraints()
 			,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
 			,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
 								,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
-	
-	
+		
 	;4. Determine constraints, according to mock-up
 	GuiControlGet, v_OutVarTemp1, Pos, % IdButton2
 	GuiControlGet, v_OutVarTemp2, Pos, % IdButton3
@@ -1973,7 +2017,7 @@ F_GuiMain_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp2, Pos, % IdText9
 	v_OutVarTemp3 := Max(v_OutVarTemp1W, v_OutVarTemp2W) ;longer of two texts
 	RightColumnW := v_OutVarTemp3
-	
+	GuiControl,	Hide,		% IdText9
 	
 	;5. Move text objects to correct position
 	;5.1. Left column
@@ -2095,15 +2139,6 @@ F_GuiMain_DetermineConstraints()
 	LeftColumnH := v_yNext
 	OutputDebug, % "LeftColumnH:" . A_Space . LeftColumnH
 	
-	;5.2. Button between left and right column
-	v_yNext := c_ymarg
-	v_xNext := LeftColumnW + c_xmarg
-	v_hNext := LeftColumnH - c_ymarg
-	if (ini_VertButtPos["X"] or ini_VertButtPos["Y"] or ini_VertButtPos["W"] or ini_VertButtPos["H"])
-		GuiControl, Move, % IdButton5, % "x" v_xNext "y" v_yNext "h" ini_VertButtPos["H"]
-	else	
-		GuiControl, Move, % IdButton5, % "x" v_xNext "y" v_yNext "h" v_hNext
-	
 	;5.3. Right column
 	;5.3.1. Position the text "Library content"
 	v_yNext := c_ymarg
@@ -2126,28 +2161,13 @@ F_GuiMain_DetermineConstraints()
 	
 	;5.3.2. Position the only one List View 
 	GuiControlGet, v_OutVarTemp1, Pos, % IdEdit10 ; height of Sandbox edit field
-	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1
+	;GuiControlGet, v_OutVarTemp2, Pos, % IdListView1
 	v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
 	v_yNext += HofText
-	;v_xNext := LeftColumnW + c_xmarg
 	v_wNext := RightColumnW
-	if (ini_Sandbox)
-		v_hNext := LeftColumnH - (v_OutVarTemp1H + HofText * 3 + c_ymarg * 3)
-	else
-	{
-		v_hNext := LeftColumnH - (HofText * 2 + c_ymarg * 2)
-		GuiControl, Hide, % IdText10
-		GuiControl, Hide, % IdEdit10
-	}
-	if (ini_ListViewPos["X"] or ini_ListViewPos["Y"] or ini_ListViewPos["W"] or ini_ListViewPos["H"])
-		GuiControl, Move, % IdListView1, % "x" ini_ListViewPos["X"] "y" ini_ListViewPos["Y"] "w" ini_ListViewPos["W"] "h" ini_ListViewPos["H"]
-	else
-		GuiControl, Move, % IdListView1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
-	
-	GuiControl, Hide, % IdText9
-	
+	v_hNext := LeftColumnH
+
 	F_GuiMain_Redraw()
-	
 	return
 }
 
@@ -4201,7 +4221,7 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 	global ;assume-global mode
 	local WinX := 0, WinY := 0
 	
-	if !(v_ToggleRightColumn) ;hide
+	if !(v_ToggleRightColumn) ;hide main Gui and show HS4 Gui
 	{
 		WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
 		Gui, HS3: Show, Hide
@@ -4210,7 +4230,7 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 		F_GuiHS4_DetermineConstraints()
 		Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . "AutoSize"
 	}
-	else					;show
+	else					;show main Gui and hide HS4 Gui
 	{
 		Gui, HS3: Default
 		F_UpdateSelHotLibDDL()
@@ -4277,7 +4297,7 @@ HS3GuiSize() ;Gui event
 	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
 		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0,
 		deltaW := 0, deltaH := 0
-	static HS3_GuiWidth  := 0,	HS3_GuiHeight := 0
+	;HS3_GuiWidth  := 0,	HS3_GuiHeight := 0
 	
 	;~ Critical
 	
