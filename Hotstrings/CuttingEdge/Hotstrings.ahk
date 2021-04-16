@@ -1387,7 +1387,7 @@ F_GuiHS4_CreateObject()
 ;-DPIScale doesn't work in Microsoft Windows 10
 ;+Border doesn't work in Microsoft Windows 10
 ;OwnDialogs
-	Gui, 	HS4: New, 	+Resize +HwndHS4GuiHwnd +OwnDialogs -MaximizeBox, % SubStr(A_ScriptName, 1, -4) . "bis"
+	Gui, 	HS4: New, 	+Resize +HwndHS4GuiHwnd +OwnDialogs -MaximizeBox, % SubStr(A_ScriptName, 1, -4) 
 	Gui, 	HS4: Margin,	% c_xmarg, % c_ymarg
 	Gui,		HS4: Color,	% c_WindowColor, % c_ControlColor
 	
@@ -4443,16 +4443,17 @@ HS3GuiSize() ;Gui event
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-HS3GuiEscape:
-Gui, 		HS3: Minimize
-Gui,			HS3: Show, Hide
-return
-
 ; Future: save window position
 HS3GuiClose:
-	;WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
-Gui, HS3: Destroy
+HS3GuiEscape:
+	Gui, 		HS3: Minimize
+	Gui,			HS3: Show, Hide
+return
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+HS4GuiClose:
+HS4GuiEscape:
+	Gui,		HS4: Minimize
+	Gui,		HS4: Show, Hide
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
