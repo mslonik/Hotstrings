@@ -1,4 +1,4 @@
-/* 
+﻿/* 
 	Author:      Jakub Masiak, Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings as in AutoHotkey (shortcuts), but editable with GUI and many more options.
@@ -84,10 +84,7 @@ global c_FontSize 				:= 10 ;points
 global c_xmarg					:= 10 ;pixels
 global c_ymarg					:= 10 ;pixels
 global c_FontType				:= "Calibri"
-global c_FontColor				:= "Black"
-global c_FontColorHighlighted		:= "Blue"
-global c_WindowColor			:= "Default"
-global c_ControlColor 			:= "Default"
+
 
 ;Flags to control application
 global v_ResizingFlag 			:= 1 ; when Hotstrings Gui is displayed for the very first time
@@ -118,9 +115,10 @@ else
 ;Read all variables from specified language .ini file. In order to distinguish GUI text from any other string or variable used in this script, the GUI strings are defined with prefix "t_".
 
 F_LoadGUIPos()
+F_LoadGUIstyle()
 
-IniRead, ini_Undo, 							Config.ini, Configuration, UndoHotstring
-IniRead, ini_Delay, 						Config.ini, Configuration, Delay
+IniRead, ini_Undo, 						Config.ini, Configuration, UndoHotstring
+IniRead, ini_Delay, 					Config.ini, Configuration, Delay
 IniRead, ini_MenuSound,					Config.ini, Configuration, MenuSound
 IniRead, ini_Tips, 						Config.ini, Configuration, Tips
 IniRead, ini_Cursor, 					Config.ini, Configuration, Cursor
@@ -403,8 +401,21 @@ Loop, %A_ScriptDir%\Languages\*.txt
 		Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
 }
 
-Menu, StyleGUIsubm, Add, Light (default),							L_StyleOfGUI
-Menu, StyleGUIsubm, Add, Dark,									L_StyleOfGUI
+Menu, StyleGUIsubm, Add, % TransA["Light (default)"],	F_StyleOfGUI
+Menu, StyleGUIsubm, Add, % TransA["Dark"],			F_StyleOfGUI
+	Switch c_FontColor
+	{
+		Case "Black": ;Light (default)
+		{
+			Menu, StyleGUIsubm, Check,   % TransA["Light (default)"]
+			Menu, StyleGUIsubm, UnCheck, % TransA["Dark"]
+		}
+		Case "White": ;Dark
+		{
+			Menu, StyleGUIsubm, UnCheck, % TransA["Light (default)"]
+			Menu, StyleGUIsubm, Check,   % TransA["Dark"]
+		}
+	}
 
 Menu, ConfGUI,		Add, % TransA["Save position of application window"], 	F_SaveGUIPos
 Menu, ConfGUI, 	Add, % TransA["Show Sandbox"], 					F_Sandbox
@@ -420,7 +431,7 @@ Menu, ConfGUI,		Add, % TransA["Change Language"], 					:SubmenuLanguage
 	Menu, ConfGUI,		Add, Size of font,								L_SizeOfFont
 	Menu, ConfGUI,		Add, Font type,								L_FontType
 */
-Menu, Submenu1,	Add, % TransA["Graphical User Interface"], 			:ConfGUI
+Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 			:ConfGUI
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 				:Submenu1
 Menu, HSMenu, 			Add, % TransA["Search Hotstrings"], 			L_Searching
@@ -461,6 +472,11 @@ Menu,	LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"],			:EnDisLib
 Menu, 	LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	:ToggleLibTrigTipsSubmenu
 Menu, 	HSMenu, 			Add, % TransA["Libraries configuration"], 			:LibrariesSubmenu
 Menu, 	HSMenu, 			Add, % TransA["Clipboard Delay"], 					HSdelay
+Menu,	ApplicationSubmenu,	Add, % TransA["Reload"],							F_Reload
+Menu,	ApplicationSubmenu,	Add, % TransA["Exit"],							F_Exit
+Menu,	ApplicationSubmenu,	Add,	% TransA["Compile"],						F_Compile
+Menu,	ApplicationSubmenu, Disable,										% TransA["Compile"]									
+Menu, 	HSMenu,			Add, % TransA["Application"],						:ApplicationSubmenu
 Menu, 	HSMenu, 			Add, % TransA["About/Help"], 						F_GuiAbout
 Gui, 	HS3: Menu, HSMenu
 Gui, 	HS4: Menu, HSMenu
@@ -820,6 +836,99 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_StyleOfGUI()
+{
+	global ;assume-global mode
+	Switch A_ThisMenuItemPos
+	{
+		Case 1: ;Light (default)
+		{
+			c_FontColor				:= "Black"
+			c_FontColorHighlighted		:= "Blue"
+			c_WindowColor				:= "Default"
+			c_ControlColor 			:= "Default"
+		}
+		Case 2: ;Dark
+		{
+			c_FontColor				:= "White"
+			c_FontColorHighlighted		:= "Blue"
+			c_WindowColor				:= "Black"
+			c_ControlColor 			:= "Grey"
+		}
+	}
+	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["In order to aplly new style it's necesssary to reload the application."]
+		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
+		. "`n`n" . TransA["Do you want to reload application now?"]
+	IfMsgBox, Yes
+	{
+		F_SaveGUIstyle()
+		Reload
+	}
+	IfMsgBox, No
+		return	
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SaveGUIstyle()
+{
+	global ;assume-global mode
+	
+	IniWrite, % c_FontColor,				Config.ini, GraphicalUserInterface, GuiFontColor
+	IniWrite, % c_FontColorHighlighted,	Config.ini, GraphicalUserInterface, GuiFontColorHighlighted
+	IniWrite, % c_WindowColor, 	  		Config.ini, GraphicalUserInterface, GuiWindowColor
+	Iniwrite, % c_ControlColor,			Config.ini, GraphicalUserInterface, GuiControlColor	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_LoadGUIstyle()
+{
+	global ;assume-global mode
+	c_FontColor				:= ""
+	c_FontColorHighlighted		:= ""
+	c_WindowColor				:= ""
+	c_ControlColor 			:= ""
+	
+	IniRead, c_FontColor, 			Config.ini, GraphicalUserInterface, GuiFontColor, 		 Black
+	IniRead, c_FontColorHighlighted, 	Config.ini, GraphicalUserInterface, GuiFontColorHighlighted, Blue
+	IniRead, c_WindowColor, 			Config.ini, GraphicalUserInterface, GuiWindowColor, 		 Default
+	IniRead, c_ControlColor, 		Config.ini, GraphicalUserInterface, GuiControlColor, 		 Default
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_Compile()
+{
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_Reload()
+{
+	global ;assume-global mode
+	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["Are you sure you want to reload this application now?"]
+		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
+	IfMsgBox, Yes
+	{
+		F_SaveGUIPos()
+		Reload
+	}
+	IfMsgBox, No
+		return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_Exit()
+{
+	global ;assume-global mode
+	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["Are you sure you want to exit this application now?"]
+	IfMsgBox, Yes
+		ExitApp, 0 ;Zero is traditionally used to indicate success.
+	IfMsgBox, No
+		return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 F_Sandbox()
 {
 	global ;assume-global mode
@@ -902,6 +1011,10 @@ ListViewPosY=
 ListViewPosW=
 ListViewPosH=
 WhichGui=
+GuiFontColor=
+GuiFontColorHighlighted= 
+GuiWindowColor=
+GuiControlColor=
 [Configuration]
 UndoHotstring=1
 Delay=300
@@ -1120,7 +1233,6 @@ F_LoadCreateTranslationTxt(decision*)
 	global ;assume-global mode
 	local TransConst := ""
 	
-	
 ;% TransA["file in Languages subfolder!"] . "`n" . TransA["The default"] 
 	TransConst := "			
 (Join`n `			
@@ -1129,8 +1241,11 @@ Add comment (optional) 									= Add comment (optional)
 Add library 											= Add library
 A library with that name already exists! 					= A library with that name already exists!
 Apostrophe ' 											= Apostrophe '
+Application											= Application
 Application help 										= Application help
 Application language changed to: 							= Application language changed to:
+Are you sure you want to exit this application now?			= Are you sure you want to exit this application now?
+Are you sure you want to reload this application now?			= Are you sure you want to reload this application now
 Backslash \ 											= Backslash \
 Cancel 												= Cancel
 Caret 												= Caret
@@ -1150,16 +1265,20 @@ Closing Round Bracket ) 									= Closing Round Bracket )
 Closing Square Bracket ] 								= Closing Square Bracket ]
 Colon : 												= Colon :
 Comma , 												= Comma ,
+Compile												= Compile
 Config.ini wasn't found. The default Config.ini is now created in location = Config.ini wasn't found. The default Config.ini is now created in location
 Configuration 											= &Configuration
+(Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
 Do you want to proceed? 									= Do you want to proceed?
 Cursor 												= Cursor
+Dark													= Dark
 Delete hotstring (F8) 									= Delete hotstring (F8)
 Deleting hotstring... 									= Deleting hotstring...
 Deleting hotstring. Please wait... 						= Deleting hotstring. Please wait...
 Disable 												= Disable
 DISABLED												= DISABLED
 Dot . 												= Dot .
+Do you want to reload application now?						= Do you want to reload application now?
 Dynamic hotstrings 										= &Dynamic hotstrings
 Edit Hotstring 										= Edit Hotstring
 Enable/Disable 										= Enable/Disable
@@ -1174,6 +1293,7 @@ Enter triggerstring 									= Enter triggerstring
 ErrorLevel was triggered by NewInput error. 					= ErrorLevel was triggered by NewInput error.
 Exclamation Mark ! 										= Exclamation Mark !
 exists in a file 										= exists in a file
+Exit													= Exit
 Export from .csv to .ahk 								= &Export from .csv to .ahk
 F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring = F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring
 F3 Close Search hotstrings | F8 Move hotstring 				= F3 Close Search hotstrings | F8 Move hotstring
@@ -1195,6 +1315,7 @@ Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
 information											= information
 Inside Word (?) 										= Inside Word (?)
+In order to aplly new style it's necesssary to reload the application. = In order to aplly new style it's necesssary to reload the application.
 is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv? = is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?
 Show Sandbox 										= Show Sandbox
 \Languages\`nMind that Config.ini Language variable is equal to 	= \Languages\`nMind that Config.ini Language variable is equal to
@@ -1208,6 +1329,7 @@ Library has been exported. 								= Library has been exported.
 Library has been imported. 								= Library has been imported.
 Library import. Please wait... 							= Library import. Please wait...
 Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment = Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment
+Light (default)										= Light (default)
 Loaded hotstrings: 										= Loaded hotstrings:
 Loading hotstrings from libraries... 						= Loading hotstrings from libraries...
 Loading libraries. Please wait... 							= Loading libraries. Please wait...
@@ -1222,9 +1344,11 @@ Opening Curly Bracket { 									= Opening Curly Bracket {
 Opening Round Bracket ( 									= Opening Round Bracket (
 Opening Square Bracket [ 								= Opening Square Bracket [
 Please wait, uploading .csv files... 						= Please wait, uploading .csv files...
+question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
 Position of main window is saved in Config.ini.				= Position of main window is saved in Config.ini.	
+Reload												= Reload
 Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
 Sandbox 												= Sandbox
 Save position of application window	 					= &Save position of application window
@@ -2889,7 +3013,7 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_CheckOption(State,Button)
+F_CheckOption(State, Button)
 {
 	If (State = "Yes")
 	{
@@ -2903,21 +3027,20 @@ F_CheckOption(State,Button)
 	}
 	Button := "Button" . Button
 	
-	F_CheckBoxColor(State,Button)  
+	F_CheckBoxColor(State, Button)  
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_CheckBoxColor(State,Button)
+F_CheckBoxColor(State, Button)
 {
-	;global v_SelectedMonitor
+	global ;assume-global mode
+	
 	if (State = 1)
-		;Gui, HS3:Font,% "s" . 12*DPI%v_SelectedMonitor% . " cRed Norm", Calibri
-		Gui, HS3:Font, % "s" . c_FontSize . A_Space . "cGreen Norm", Calibri
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", Calibri
 	else 
-		;Gui, HS3:Font,% "s" . 12*DPI%v_SelectedMonitor% . " cBlack Norm", Calibri
-		Gui, HS3:Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", Calibri
-	GuiControl, HS3:Font, %Button%
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", Calibri
+	GuiControl, HS3: Font, %Button%
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5168,9 +5291,6 @@ Loop, %A_ScriptDir%\Languages\*.ini
 }
 MsgBox, % TransA["Application language changed to:"] . A_Space . SubStr(v_Language, 1, StrLen(v_Language)-4) . "`n" . TransA["The application will be reloaded with the new language file."]
 Reload
-
-L_StyleOfGUI:
-return
 
 L_SizeOfMargin:
 return
