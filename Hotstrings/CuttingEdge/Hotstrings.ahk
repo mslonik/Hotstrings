@@ -80,7 +80,6 @@ global v_String				:= ""
 global v_ConfigFlag 			:= 0
 
 ;Future: configuration parameters
-global c_FontSize 				:= 10 ;points
 global c_xmarg					:= 10 ;pixels
 global c_ymarg					:= 10 ;pixels
 global c_FontType				:= "Calibri"
@@ -116,6 +115,7 @@ else
 
 F_LoadGUIPos()
 F_LoadGUIstyle()
+F_LoadFontSize()
 
 IniRead, ini_Undo, 						Config.ini, Configuration, UndoHotstring
 IniRead, ini_Delay, 					Config.ini, Configuration, Delay
@@ -148,10 +148,10 @@ else
 F_GuiMain_CreateObject()
 F_GuiMain_DefineConstants()
 F_GuiMain_DetermineConstraints()
-F_UpdateSelHotLibDDL()
 
 F_GuiHS4_CreateObject()
 F_GuiHS4_DetermineConstraints()
+F_UpdateSelHotLibDDL()
 
 
 v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
@@ -425,13 +425,30 @@ else
 	Menu, ConfGUI, Check, % TransA["Show Sandbox"]
 Menu, ConfGUI,		Add, Style of GUI,								:StyleGUIsubm
 Menu, ConfGUI,		Add, % TransA["Change Language"], 					:SubmenuLanguage
-/*
-	Menu, ConfGUI,		Add, Size of margin: x,							L_SizeOfMargin
-	Menu, ConfGUI,		Add, Size of margin: y,							L_SizeOfMargin
-	Menu, ConfGUI,		Add, Size of font,								L_SizeOfFont
-	Menu, ConfGUI,		Add, Font type,								L_FontType
-*/
-Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 			:ConfGUI
+
+Menu, ConfGUI,		Add, 	% TransA["Size of margin:"] . A_Space . "x",	L_SizeOfMargin
+Menu, ConfGUI, 	Disable,  % TransA["Size of margin:"] . A_Space . "x"
+Menu, ConfGUI,		Add, 	% TransA["Size of margin:"] . A_Space . "y",	L_SizeOfMargin
+Menu, ConfGUI, 	Disable,  % TransA["Size of margin:"] . A_Space . "y"
+
+Menu, SizeOfFont,	Add,		8,									F_SizeOfFont
+Menu, SizeOfFont,	Add,		9,									F_SizeOfFont
+Menu, SizeOfFont,	Add,		10,									F_SizeOfFont
+Menu, SizeOfFont,	Add,		11,									F_SizeOfFont
+Menu, SizeOfFont,	Add,		12,									F_SizeOfFont
+Menu, SizeOfFont, 	Check,	% c_FontSize
+
+Loop, 5
+{
+	if !(7 + A_Index = c_FontSize)
+		Menu, SizeOfFont, UnCheck, % 7 + A_Index 
+}
+
+Menu, ConfGUI,		Add, 	% TransA["Size of font"],				:SizeOfFont
+Menu, ConfGUI,		Add, 	% TransA["Font type"],					L_FontType
+Menu, ConfGUI, 	Disable,  % TransA["Font type"]
+
+Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 				:Submenu1
 Menu, HSMenu, 			Add, % TransA["Search Hotstrings"], 			L_Searching
@@ -475,7 +492,7 @@ Menu, 	HSMenu, 			Add, % TransA["Clipboard Delay"], 					HSdelay
 Menu,	ApplicationSubmenu,	Add, % TransA["Reload"],							F_Reload
 Menu,	ApplicationSubmenu,	Add, % TransA["Exit"],							F_Exit
 Menu,	ApplicationSubmenu,	Add,	% TransA["Compile"],						F_Compile
-Menu,	ApplicationSubmenu, Disable,										% TransA["Compile"]									
+Menu,	ApplicationSubmenu, Disable,										% TransA["Compile"]
 Menu, 	HSMenu,			Add, % TransA["Application"],						:ApplicationSubmenu
 Menu, 	HSMenu, 			Add, % TransA["About/Help"], 						F_GuiAbout
 Gui, 	HS3: Menu, HSMenu
@@ -836,6 +853,39 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_SizeOfFont()
+{
+	global ;assume-global mode
+	c_FontSize := 7 + A_ThisMenuItemPos
+	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["In order to aplly new font style it's necesssary to reload the application."]
+		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
+		. "`n`n" . TransA["Do you want to reload application now?"]
+	IfMsgBox, Yes
+	{
+		F_SaveFontSize()
+		F_SaveGUIPos("reset")
+		Reload
+	}
+	IfMsgBox, No
+		return	
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SaveFontSize()
+{
+	global ;assume-global mode
+	IniWrite, % c_FontSize,				Config.ini, GraphicalUserInterface, GuiFontSize
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_LoadFontSize()
+{
+	global ;assume-global mode
+	c_FontSize 				:= 0 ;points
+	
+	IniRead, c_FontSize, 			Config.ini, GraphicalUserInterface, GuiFontSize, 10
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_StyleOfGUI()
 {
 	global ;assume-global mode
@@ -956,7 +1006,6 @@ F_LoadGUIPos()
 	global ;assume-global mode
 	local ini_ReadTemp := 0
 	ini_HS3WindoPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
-	ini_ListViewPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
 	ini_VertButtPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
 	ini_WhichGui := ""
 	
@@ -971,16 +1020,6 @@ F_LoadGUIPos()
 	
 	IniRead, ini_Sandbox, 						Config.ini, GraphicalUserInterface, Sandbox
 	IniRead, ini_IsSandboxMoved,					Config.ini, GraphicalUserInterface, IsSandboxMoved 
-	
-	IniRead, ini_ReadTemp,						Config.ini, GraphicalUserInterface, ListViewPosX, 0
-	ini_ListViewPos["X"] := ini_ReadTemp
-	IniRead, ini_ReadTemp,						Config.ini, GraphicalUserInterface, ListViewPosY, 0
-	ini_ListViewPos["Y"] := ini_ReadTemp
-	IniRead, ini_ReadTemp,						Config.ini, GraphicalUserInterface, ListViewPosW, 0
-	ini_ListViewPos["W"] := ini_ReadTemp
-	IniRead, ini_ReadTemp,						Config.ini, GraphicalUserInterface, ListViewPosH, 0
-	ini_ListViewPos["H"] := ini_ReadTemp
-	
 	IniRead, ini_WhichGui,						Config.ini, GraphicalUserInterface, WhichGui, %A_Space%
 	if !(ini_WhichGui)
 		ini_WhichGui := "HS3"
@@ -1006,10 +1045,6 @@ MainWindowPosW=
 MainWindowPosH=
 Sandbox=1
 IsSandboxMoved=0
-ListViewPosX=
-ListViewPosY=
-ListViewPosW=
-ListViewPosH=
 WhichGui=
 GuiFontColor=
 GuiFontColorHighlighted= 
@@ -1063,43 +1098,55 @@ Language=English.txt
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_SaveGUIPos() ;Save to Config.ini
+F_SaveGUIPos(param*) ;Save to Config.ini
 {
 	global ;assume-global mode
 	local WinX := 0, WinY := 0
 		,TempPos := 0, TempPosX := 0, TempPosY := 0, TempPosW := 0, TempPosH := 0
 	
+	if (param[1] = "reset")
+	{
+		if (A_DefaultGui = "HS3")
+		{
+			WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
+		}
+		if (A_DefaultGui = "HS4")
+		{
+			WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
+		}
+		IniWrite, % WinX, 			  	Config.ini, GraphicalUserInterface, MainWindowPosX
+		IniWrite, % WinY, 			  	Config.ini, GraphicalUserInterface, MainWindowPosY
+		IniWrite, % "", 				Config.ini, GraphicalUserInterface, MainWindowPosW
+		IniWrite, % "", 				Config.ini, GraphicalUserInterface, MainWindowPosH
+		return
+	}	
+	
+	
 	if (A_DefaultGui = "HS3")
 	{
 		WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
-		IniWrite, HS3,				Config.ini, GraphicalUserInterface, WhichGui
-		IniWrite, % HS3_GuiWidth, 	  Config.ini, GraphicalUserInterface, MainWindowPosW
-		IniWrite, % HS3_GuiHeight, 	  Config.ini, GraphicalUserInterface, MainWindowPosH
+		IniWrite,  HS3,			Config.ini, GraphicalUserInterface, WhichGui
+		IniWrite, % HS3_GuiWidth, 	Config.ini, GraphicalUserInterface, MainWindowPosW
+		IniWrite, % HS3_GuiHeight, 	Config.ini, GraphicalUserInterface, MainWindowPosH
 	}
-
+	
 	if (A_DefaultGui = "HS4")
 	{
 		WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
-		IniWrite, HS4,				Config.ini, GraphicalUserInterface, WhichGui
-		IniWrite, % HS4_GuiWidth, 	  Config.ini, GraphicalUserInterface, MainWindowPosW
-		IniWrite, % HS4_GuiHeight, 	  Config.ini, GraphicalUserInterface, MainWindowPosH
+		IniWrite,  HS4,			Config.ini, GraphicalUserInterface, WhichGui
+		IniWrite, % HS4_GuiWidth, 	Config.ini, GraphicalUserInterface, MainWindowPosW
+		IniWrite, % HS4_GuiHeight, 	Config.ini, GraphicalUserInterface, MainWindowPosH
 	}
 	
 	IniWrite, % WinX, 			  Config.ini, GraphicalUserInterface, MainWindowPosX
 	IniWrite, % WinY, 			  Config.ini, GraphicalUserInterface, MainWindowPosY
 	
-	
 	IniWrite, % ini_Sandbox, 	  Config.ini, GraphicalUserInterface, Sandbox
 	IniWrite, % ini_IsSandboxMoved, Config.ini, GraphicalUserInterface, IsSandboxMoved
 	
-	GuiControlGet, TempPos, Pos, % IdListView1
-	IniWrite, % TempPosX,		  Config.ini, GraphicalUserInterface, ListViewPosX
-	IniWrite, % TempPosY,		  Config.ini, GraphicalUserInterface, ListViewPosY
-	IniWrite, % TempPosW,		  Config.ini, GraphicalUserInterface, ListViewPosW
-	IniWrite, % TempPosH,		  Config.ini, GraphicalUserInterface, ListViewPosH
-	
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Position of main window is saved in Config.ini."]
-	return
+	return		
+	
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1300,6 +1347,7 @@ F3 Close Search hotstrings | F8 Move hotstring 				= F3 Close Search hotstrings 
 file! 												= file!
 file in Languages subfolder!								= file in Languages subfolder!
 file is now created in the following subfolder:				= file is now created in the following subfolder:
+Font type												= Font type
 Genuine hotstrings AutoHotkey documentation 					= Genuine hotstrings AutoHotkey documentation
 Graphical User Interface									= Graphical User Interface
 has been created. 										= has been created.
@@ -1315,6 +1363,7 @@ Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
 information											= information
 Inside Word (?) 										= Inside Word (?)
+In order to aplly new font style it's necesssary to reload the application. = In order to aplly new font style it's necesssary to reload the application.
 In order to aplly new style it's necesssary to reload the application. = In order to aplly new style it's necesssary to reload the application.
 is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv? = is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?
 Show Sandbox 										= Show Sandbox
@@ -1363,6 +1412,8 @@ Select the target library: 								= Select the target library:
 Select trigger option(s) 								= Select trigger option(s)
 Semicolon ; 											= Semicolon ;
 Set hotstring (F9) 										= Set hotstring (F9)
+Size of font											= Size of font
+Size of margin:										= Size of margin:
 Slash / 												= Slash /
 Sort tips alphabetically 								= Sort tips &alphabetically
 Sort tips by length 									= Sort tips by &length
@@ -2014,8 +2065,6 @@ F_GuiHS4_DetermineConstraints()
 	OutputDebug, % "LeftColumnH:" . A_Space . LeftColumnH
 	
 	F_GuiHS4_Redraw()
-	
-	
 	return
 }
 
@@ -2027,42 +2076,37 @@ F_GuiMain_Redraw()
 	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
 		,v_xNext := 0, v_yNext := 0,  v_wNext := 0
 	static b_FirstRun := true
-
+	
 	;position of the List View
 	if (b_FirstRun) 
 	{
-		if (ini_ListViewPos["X"] or ini_ListViewPos["Y"] or ini_ListViewPos["W"] or ini_ListViewPos["H"])
-			GuiControl, Move, % IdListView1, % "x" ini_ListViewPos["X"] "y" ini_ListViewPos["Y"] "w" ini_ListViewPos["W"] "h" ini_ListViewPos["H"]
-		else
+		if ((ini_Sandbox) and !(ini_IsSandboxMoved))
 		{
-			if ((ini_Sandbox) and !(ini_IsSandboxMoved))
-			{
-				v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
-				v_yNext := c_ymarg + HofText
-				v_wNext := RightColumnW
-				v_hNext := LeftColumnH - (3 * c_ymarg + 3 * HofText + c_HofSandbox)
-			}
-			if ((ini_Sandbox) and (ini_IsSandboxMoved))
-			{
-				v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
-				v_yNext := c_ymarg + HofText
-				v_wNext := RightColumnW
-				v_hNext := LeftColumnH - (c_ymarg + c_HofSandobx + c_ymarg)
-			}
-			if !(ini_Sandbox)
-			{
-				v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
-				v_yNext := c_ymarg + HofText
-				v_wNext := RightColumnW
-				v_hNext := LeftColumnH - (c_ymarg + c_HofSandobx + c_ymarg)
-				GuiControl, Hide, % IdText10
-				GuiControl, Hide, % IdEdit10
-			}
-			GuiControl, Move, % IdListView1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
-		}	
+			v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
+			v_yNext := c_ymarg + HofText
+			v_wNext := RightColumnW
+			v_hNext := LeftColumnH - (3 * c_ymarg + 3 * HofText + c_HofSandbox)
+		}
+		if ((ini_Sandbox) and (ini_IsSandboxMoved))
+		{
+			v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
+			v_yNext := c_ymarg + HofText
+			v_wNext := RightColumnW
+			v_hNext := LeftColumnH - (c_ymarg + c_HofSandobx + c_ymarg)
+		}
+		if !(ini_Sandbox)
+		{
+			v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
+			v_yNext := c_ymarg + HofText
+			v_wNext := RightColumnW
+			v_hNext := LeftColumnH - (c_ymarg + c_HofSandobx + c_ymarg)
+			GuiControl, Hide, % IdText10
+			GuiControl, Hide, % IdEdit10
+		}
+		GuiControl, Move, % IdListView1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
 		b_FirstRun := false
 	}
-
+	
 	GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 	
 	;5.2. Button between left and right column
@@ -2085,7 +2129,7 @@ F_GuiMain_Redraw()
 		v_hNext := c_ymarg + HofText + v_OutVarTempH + HofText	
 	}
 	GuiControl, Move, % IdButton5, % "x" v_xNext "y" v_yNext "h" v_hNext
-
+	
 	;5.3.3. Text Sandbox
 	;5.2.4. Sandbox edit text field
 	;5.3.5. Position of the long text F1 ... F2 ...
@@ -2291,7 +2335,6 @@ F_GuiMain_DetermineConstraints()
 	
 	;5.3.2. Position the only one List View 
 	GuiControlGet, v_OutVarTemp1, Pos, % IdEdit10 ; height of Sandbox edit field
-	;GuiControlGet, v_OutVarTemp2, Pos, % IdListView1
 	v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
 	v_yNext += HofText
 	v_wNext := RightColumnW
@@ -3556,17 +3599,35 @@ if (v_ResizingFlag) ;if run for the very first time
 	Switch ini_WhichGui
 	{
 		Case "HS3":
-			if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]) or !(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
+		{
+			if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
+			{
+				;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
+				Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+				Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+				return
+			}
+			if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
+			{
 				Gui, HS3: Show, AutoSize Center
-			else
-				Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
-			return
+				return
+			}
+		}
 		Case "HS4":
-			if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]) or !(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
+		{
+			if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
+			{
+				;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
+				Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+				Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+				return
+			}
+			if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
+			{
 				Gui, HS4: Show, AutoSize Center
-			else
-				Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"] 
-			return
+				return
+			}
+		}
 	}
 }
 else ;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakresem dostępnym na tym komputerze w momencie uruchomienia
