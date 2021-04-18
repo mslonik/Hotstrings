@@ -426,10 +426,19 @@ else
 Menu, ConfGUI,		Add, Style of GUI,								:StyleGUIsubm
 Menu, ConfGUI,		Add, % TransA["Change Language"], 					:SubmenuLanguage
 
-Menu, ConfGUI,		Add, 	% TransA["Size of margin:"] . A_Space . "x",	L_SizeOfMargin
-Menu, ConfGUI, 	Disable,  % TransA["Size of margin:"] . A_Space . "x"
-Menu, ConfGUI,		Add, 	% TransA["Size of margin:"] . A_Space . "y",	L_SizeOfMargin
-Menu, ConfGUI, 	Disable,  % TransA["Size of margin:"] . A_Space . "y"
+/*
+	Menu, SizeOfMX, 	Add,		0,									F_SizeOfMargin
+	Menu, SizeOfMX, 	Add,		5,									F_SizeOfMargin
+	Menu, SizeOfMX, 	Add,		10,									F_SizeOfMargin
+	Menu, SizeOfMX, 	Add,		15,									F_SizeOfMargin
+	Menu, SizeOfMX, 	Add,		20,									F_SizeOfMargin
+	Menu, SizeOfMX,	Check,	% c_xmarg
+	
+	Menu, ConfGUI,		Add, 	% TransA["Size of margin:"] . A_Space . "x",	:SizeOfMX
+	Menu, ConfGUI, 	Disable,  % TransA["Size of margin:"] . A_Space . "x"
+	Menu, ConfGUI,		Add, 	% TransA["Size of margin:"] . A_Space . "y",	L_SizeOfMargin
+	Menu, ConfGUI, 	Disable,  % TransA["Size of margin:"] . A_Space . "y"
+*/
 
 Menu, SizeOfFont,	Add,		8,									F_SizeOfFont
 Menu, SizeOfFont,	Add,		9,									F_SizeOfFont
@@ -852,6 +861,13 @@ return
 
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+
+F_SizeOfMargin()
+{
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 F_SizeOfFont()
 {
@@ -3593,7 +3609,7 @@ return
 
 ^#h::		; Event
 L_GUIInit:
-
+;*[One]
 if (v_ResizingFlag) ;if run for the very first time
 {
 	Switch ini_WhichGui
@@ -3612,6 +3628,7 @@ if (v_ResizingFlag) ;if run for the very first time
 				Gui, HS3: Show, AutoSize Center
 				return
 			}
+			Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
 		}
 		Case "HS4":
 		{
@@ -3627,6 +3644,7 @@ if (v_ResizingFlag) ;if run for the very first time
 				Gui, HS4: Show, AutoSize Center
 				return
 			}
+			Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
 		}
 	}
 }
@@ -4567,7 +4585,7 @@ HS3GuiSize() ;Gui event
 		LV_ModifyCol(5, Round(0.4 * v_OutVarTemp2W))
 		LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W) - 3)
 	}	
-	;*[Two]
+	
 	
 	deltaW := A_GuiWidth -  HS3_GuiWidth
 	deltaH := A_GuiHeight - HS3_GuiHeight
@@ -5338,7 +5356,6 @@ ini_TipsSortByLength := !(ini_TipsSortByLength)
 IniWrite, %ini_TipsSortByLength%, Config.ini, Configuration, TipsSortByLength
 return
 
-
 L_ChangeLanguage:
 v_Language := A_ThisMenuitem
 IniWrite, %v_Language%, Config.ini, Configuration, Language
@@ -5354,9 +5371,6 @@ MsgBox, % TransA["Application language changed to:"] . A_Space . SubStr(v_Langua
 Reload
 
 L_SizeOfMargin:
-return
-
-L_SizeOfFont:
 return
 
 L_FontType:
