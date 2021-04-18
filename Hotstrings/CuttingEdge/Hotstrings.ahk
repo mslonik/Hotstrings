@@ -80,8 +80,7 @@ global v_String				:= ""
 global v_ConfigFlag 			:= 0
 
 ;Future: configuration parameters
-global c_xmarg					:= 10 ;pixels
-global c_ymarg					:= 10 ;pixels
+global SizeOfMargin				:= {1: 0, 2: 5, 3: 10, 4: 15, 5: 20} ;pixels
 global c_FontType				:= "Calibri"
 
 
@@ -116,6 +115,7 @@ else
 F_LoadGUIPos()
 F_LoadGUIstyle()
 F_LoadFontSize()
+F_LoadSizeOfMargin()
 
 IniRead, ini_Undo, 						Config.ini, Configuration, UndoHotstring
 IniRead, ini_Delay, 					Config.ini, Configuration, Delay
@@ -426,19 +426,24 @@ else
 Menu, ConfGUI,		Add, Style of GUI,								:StyleGUIsubm
 Menu, ConfGUI,		Add, % TransA["Change Language"], 					:SubmenuLanguage
 
-/*
-	Menu, SizeOfMX, 	Add,		0,									F_SizeOfMargin
-	Menu, SizeOfMX, 	Add,		5,									F_SizeOfMargin
-	Menu, SizeOfMX, 	Add,		10,									F_SizeOfMargin
-	Menu, SizeOfMX, 	Add,		15,									F_SizeOfMargin
-	Menu, SizeOfMX, 	Add,		20,									F_SizeOfMargin
-	Menu, SizeOfMX,	Check,	% c_xmarg
-	
-	Menu, ConfGUI,		Add, 	% TransA["Size of margin:"] . A_Space . "x",	:SizeOfMX
-	Menu, ConfGUI, 	Disable,  % TransA["Size of margin:"] . A_Space . "x"
-	Menu, ConfGUI,		Add, 	% TransA["Size of margin:"] . A_Space . "y",	L_SizeOfMargin
-	Menu, ConfGUI, 	Disable,  % TransA["Size of margin:"] . A_Space . "y"
-*/
+for key, value in SizeOfMargin
+	Menu, SizeOfMX, Add, % SizeOfMargin[key], F_SizeOfMargin
+for key, value in SizeOfMargin
+	Menu, SizeOfMY, Add, % SizeOfMargin[key], F_SizeOfMargin
+
+Menu, SizeOfMX,	Check,	% c_xmarg
+Menu, SizeOfMY,	Check,	% c_ymarg
+
+for key, value in SizeOfMargin
+	if (SizeOfMargin[key] != c_xmarg)
+		Menu, SizeOfMX, UnCheck, % SizeOfMargin[key]
+
+for key, value in SizeOfMargin
+	if (SizeOfMargin[key] != c_ymarg)
+		Menu, SizeOfMY, UnCheck, % SizeOfMargin[key]
+
+Menu, ConfGUI,		Add, 	% TransA["Size of margin:"] . A_Space . "x" . A_Space . TransA["pixels"],	:SizeOfMX
+Menu, ConfGUI,		Add, 	% TransA["Size of margin:"] . A_Space . "y" . A_Space . TransA["pixels"],	:SizeOfMY
 
 Menu, SizeOfFont,	Add,		8,									F_SizeOfFont
 Menu, SizeOfFont,	Add,		9,									F_SizeOfFont
@@ -864,6 +869,48 @@ return
 
 F_SizeOfMargin()
 {
+	global	;assume-global mode
+	;*[One]
+	Switch A_ThisMenu
+	{
+		Case "SizeOfMX": 
+			c_xmarg := SizeOfMargin[A_ThisMenuItemPos]
+		Case "SizeOfMY":
+			c_ymarg := SizeOfMargin[A_ThisMenuItemPos]
+	}
+	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["In order to aplly new size of margin it's necesssary to reload the application."]
+		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
+		. "`n`n" . TransA["Do you want to reload application now?"]
+	IfMsgBox, Yes
+	{
+		F_SaveSizeOfMargin()
+		F_SaveGUIPos("reset")
+		Reload
+	}
+	IfMsgBox, No
+		return	
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_SaveSizeOfMargin()
+{
+	global	;assume-global mode
+	IniWrite, % c_xmarg,				Config.ini, GraphicalUserInterface, GuiSizeOfMarginX
+	IniWrite, % c_ymarg,				Config.ini, GraphicalUserInterface, GuiSizeOfMarginY
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_LoadSizeOfMargin()
+{
+	global	;assume-global mode
+	c_xmarg := 0	;pixels
+	c_ymarg := 0	;pixels
+	
+	IniRead, c_xmarg, 			Config.ini, GraphicalUserInterface, GuiSizeOfMarginX, 10
+	IniRead, c_ymarg,			Config.ini, GraphicalUserInterface, GuiSizeOfMarginY, 10
 	return
 }
 
@@ -1066,6 +1113,8 @@ GuiFontColor=
 GuiFontColorHighlighted= 
 GuiWindowColor=
 GuiControlColor=
+GuiSizeOfMarginX=
+GuiSizeOfMarginY=
 [Configuration]
 UndoHotstring=1
 Delay=300
@@ -1380,6 +1429,7 @@ Import from .ahk to .csv 								= &Import from .ahk to .csv
 information											= information
 Inside Word (?) 										= Inside Word (?)
 In order to aplly new font style it's necesssary to reload the application. = In order to aplly new font style it's necesssary to reload the application.
+In order to aplly new size of margin it's necesssary to reload the application. = In order to aplly new size of margin it's necesssary to reload the application.
 In order to aplly new style it's necesssary to reload the application. = In order to aplly new style it's necesssary to reload the application.
 is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv? = is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?
 Show Sandbox 										= Show Sandbox
@@ -1412,6 +1462,7 @@ Please wait, uploading .csv files... 						= Please wait, uploading .csv files..
 question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
+pixels												= pixels
 Position of main window is saved in Config.ini.				= Position of main window is saved in Config.ini.	
 Reload												= Reload
 Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
@@ -3609,7 +3660,7 @@ return
 
 ^#h::		; Event
 L_GUIInit:
-;*[One]
+
 if (v_ResizingFlag) ;if run for the very first time
 {
 	Switch ini_WhichGui
