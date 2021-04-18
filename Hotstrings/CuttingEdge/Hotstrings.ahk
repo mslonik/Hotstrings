@@ -85,8 +85,8 @@ global c_FontType				:= "Calibri"
 
 
 ;Flags to control application
-global v_ResizingFlag 			:= 1 ; when Hotstrings Gui is displayed for the very first time
-global PriorityFlag				:= false
+global v_ResizingFlag 			:= true ; when Hotstrings Gui is displayed for the very first time
+global v_WhichGUIisMinimzed		:= ""
 
 
 F_LoadCreateTranslationTxt() ;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
@@ -406,15 +406,11 @@ Menu, StyleGUIsubm, Add, % TransA["Dark"],			F_StyleOfGUI
 	Switch c_FontColor
 	{
 		Case "Black": ;Light (default)
-		{
 			Menu, StyleGUIsubm, Check,   % TransA["Light (default)"]
 			Menu, StyleGUIsubm, UnCheck, % TransA["Dark"]
-		}
 		Case "White": ;Dark
-		{
 			Menu, StyleGUIsubm, UnCheck, % TransA["Light (default)"]
 			Menu, StyleGUIsubm, Check,   % TransA["Dark"]
-		}
 	}
 
 Menu, ConfGUI,		Add, % TransA["Save position of application window"], 	F_SaveGUIPos
@@ -870,7 +866,7 @@ return
 F_SizeOfMargin()
 {
 	global	;assume-global mode
-	;*[One]
+	
 	Switch A_ThisMenu
 	{
 		Case "SizeOfMX": 
@@ -955,19 +951,15 @@ F_StyleOfGUI()
 	Switch A_ThisMenuItemPos
 	{
 		Case 1: ;Light (default)
-		{
 			c_FontColor				:= "Black"
 			c_FontColorHighlighted		:= "Blue"
 			c_WindowColor				:= "Default"
 			c_ControlColor 			:= "Default"
-		}
 		Case 2: ;Dark
-		{
 			c_FontColor				:= "White"
 			c_FontColorHighlighted		:= "Blue"
 			c_WindowColor				:= "Black"
 			c_ControlColor 			:= "Grey"
-		}
 	}
 	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["In order to aplly new style it's necesssary to reload the application."]
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
@@ -1219,7 +1211,7 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 F_LoadHotstringsFromLibraries()
 {
 	global ; assume-global mode
-	local key := "", value := ""
+	local key := "", value := "", PriorityFlag := false
 	
 	; Prepare TrayTip message taking into account value of command line parameter.
 	if (v_Param == "d")
@@ -3660,92 +3652,63 @@ return
 
 ^#h::		; Event
 L_GUIInit:
-
+;*[One]
 if (v_ResizingFlag) ;if run for the very first time
 {
 	Switch ini_WhichGui
 	{
 		Case "HS3":
-		{
 			if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
 			{
 				;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
 				Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
 				Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+				v_ResizingFlag := false
 				return
 			}
 			if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
 			{
 				Gui, HS3: Show, AutoSize Center
+				v_ResizingFlag := false
 				return
 			}
 			Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
-		}
+			v_ResizingFlag := false
+			return
 		Case "HS4":
-		{
 			if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
 			{
 				;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
 				Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
 				Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+				v_ResizingFlag := false
 				return
 			}
 			if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
 			{
 				Gui, HS4: Show, AutoSize Center
+				v_ResizingFlag := false
 				return
 			}
 			Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
-		}
+			v_ResizingFlag := false
+			return
 	}
+	
 }
 else ;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakresem dostępnym na tym komputerze w momencie uruchomienia
-	Switch A_DefaultGui
+	
+	Switch v_WhichGUIisMinimzed
 	{
 		Case "HS3":
 			Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
 			return
 		Case "HS4":
+			
 			Gui, HS4: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
 			return
 	}
-
-/*
-if (v_ResizingFlag) ;if run for the very first time
-{
-	if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]) or !(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
-	{
-		;why double Show is necessary if FontSize == 16???
-		Gui, HS3: Show, AutoSize Center
-		Gui, HS3: Show, AutoSize Center
-		;Pause
-	}
-	else
-	{
-		Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
-		Gui,	HS4: Show, Hide
-		Gui, HS3: Default
-	}
-	
-		;Gui, HS3: Default ; this line is necessary to enable handling of List Views.
-	GuiControlGet, v_OutVarTemp, Pos, % IdListView1
-	LV_ModifyCol(1, Round(0.1 * v_OutVarTempW))
-	LV_ModifyCol(2, Round(0.1 * v_OutVarTempW))
-	LV_ModifyCol(3, Round(0.1 * v_OutVarTempW))	
-	LV_ModifyCol(4, Round(0.1 * v_OutVarTempW))
-	LV_ModifyCol(5, Round(0.4 * v_OutVarTempW))
-	LV_ModifyCol(6, Round(0.2 * v_OutVarTempW) - 3)
-	v_ResizingFlag := 0
-}
-else
-		;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakresem dostępnym na tym komputerze w momencie uruchomienia
-	Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
-*/
-	
 return
-
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -4516,11 +4479,12 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 	{
 		Case "HS3":
 			WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
-			GUI, HS4: Default
+			Gui, HS4: Default
 			F_UpdateSelHotLibDDL()
 			F_GuiHS4_DetermineConstraints()
 			Gui, HS3: Show, Hide
 			Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
+			v_WhichGUIisMinimzed := ""
 			return
 		Case "HS4":
 			WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
@@ -4529,9 +4493,9 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 			F_GuiMain_DetermineConstraints()
 			Gui, HS4: Show, Hide
 			Gui, HS3: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
+			v_WhichGUIisMinimzed := ""
 			return
 	}
-	return
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4605,7 +4569,7 @@ HS3GuiSize() ;Gui event
 	;~ Critical
 	
 	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "A_GuiHeight:" . A_Space .  A_GuiHeight
-	
+	;*[Two]
 	if (A_EventInfo = 1) ; The window has been minimized.
 		return
 	if (v_ResizingFlag) ;Special case: FontSize set to 16 and some procedures are run twice
@@ -4699,14 +4663,16 @@ HS3GuiSize() ;Gui event
 ; Future: save window position
 HS3GuiClose:
 HS3GuiEscape:
-	Gui, 		HS3: Minimize
-	Gui,			HS3: Show, Hide
+	;Gui, 	HS3: Minimize
+	Gui,		HS3: Show, Hide
+	v_WhichGUIisMinimzed := "HS3"
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS4GuiClose:
 HS4GuiEscape:
-	Gui,		HS4: Minimize
+	;Gui,		HS4: Minimize
 	Gui,		HS4: Show, Hide
+	v_WhichGUIisMinimzed := "HS4"
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
