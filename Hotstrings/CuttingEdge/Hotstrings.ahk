@@ -79,11 +79,6 @@ global v_UndoTriggerstring 		:= ""
 global v_String				:= ""
 global v_ConfigFlag 			:= 0
 
-;Future: configuration parameters
-global SizeOfMargin				:= {1: 0, 2: 5, 3: 10, 4: 15, 5: 20} ;pixels
-global c_FontType				:= "Calibri"
-
-
 ;Flags to control application
 global v_ResizingFlag 			:= true ; when Hotstrings Gui is displayed for the very first time
 global v_WhichGUIisMinimzed		:= ""
@@ -116,6 +111,7 @@ F_LoadGUIPos()
 F_LoadGUIstyle()
 F_LoadFontSize()
 F_LoadSizeOfMargin()
+F_LoadFontType()
 
 IniRead, ini_Undo, 						Config.ini, Configuration, UndoHotstring
 IniRead, ini_Delay, 					Config.ini, Configuration, Delay
@@ -400,10 +396,9 @@ Loop, %A_ScriptDir%\Languages\*.txt
 	else
 		Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
 }
-
 Menu, StyleGUIsubm, Add, % TransA["Light (default)"],	F_StyleOfGUI
 Menu, StyleGUIsubm, Add, % TransA["Dark"],			F_StyleOfGUI
-	Switch c_FontColor
+Switch c_FontColor
 	{
 		Case "Black": ;Light (default)
 			Menu, StyleGUIsubm, Check,   % TransA["Light (default)"]
@@ -419,24 +414,17 @@ if (ini_Sandbox == 0)
 	Menu, ConfGUI, UnCheck, % TransA["Show Sandbox"]
 else
 	Menu, ConfGUI, Check, % TransA["Show Sandbox"]
-Menu, ConfGUI,		Add, Style of GUI,								:StyleGUIsubm
+
 Menu, ConfGUI,		Add, % TransA["Change Language"], 					:SubmenuLanguage
+Menu, ConfGUI, Add	;To add a menu separator line, omit all three parameters.
+Menu, ConfGUI,		Add, Style of GUI,								:StyleGUIsubm
 
 for key, value in SizeOfMargin
 	Menu, SizeOfMX, Add, % SizeOfMargin[key], F_SizeOfMargin
 for key, value in SizeOfMargin
 	Menu, SizeOfMY, Add, % SizeOfMargin[key], F_SizeOfMargin
-
 Menu, SizeOfMX,	Check,	% c_xmarg
 Menu, SizeOfMY,	Check,	% c_ymarg
-
-for key, value in SizeOfMargin
-	if (SizeOfMargin[key] != c_xmarg)
-		Menu, SizeOfMX, UnCheck, % SizeOfMargin[key]
-
-for key, value in SizeOfMargin
-	if (SizeOfMargin[key] != c_ymarg)
-		Menu, SizeOfMY, UnCheck, % SizeOfMargin[key]
 
 Menu, ConfGUI,		Add, 	% TransA["Size of margin:"] . A_Space . "x" . A_Space . TransA["pixels"],	:SizeOfMX
 Menu, ConfGUI,		Add, 	% TransA["Size of margin:"] . A_Space . "y" . A_Space . TransA["pixels"],	:SizeOfMY
@@ -447,16 +435,15 @@ Menu, SizeOfFont,	Add,		10,									F_SizeOfFont
 Menu, SizeOfFont,	Add,		11,									F_SizeOfFont
 Menu, SizeOfFont,	Add,		12,									F_SizeOfFont
 Menu, SizeOfFont, 	Check,	% c_FontSize
-
-Loop, 5
-{
-	if !(7 + A_Index = c_FontSize)
-		Menu, SizeOfFont, UnCheck, % 7 + A_Index 
-}
-
 Menu, ConfGUI,		Add, 	% TransA["Size of font"],				:SizeOfFont
-Menu, ConfGUI,		Add, 	% TransA["Font type"],					L_FontType
-Menu, ConfGUI, 	Disable,  % TransA["Font type"]
+
+Menu, FontTypeMenu,	Add,		Arial,								F_FontType
+Menu, FontTypeMenu,	Add,		Calibri,								F_FontType
+Menu, FontTypeMenu,	Add,		Consolas,								F_FontType
+Menu, FontTypeMenu,	Add,		Courier,								F_FontType
+Menu, FontTypeMenu, Add,		Verdana,								F_FontType
+Menu, FontTypeMenu, Check,	% c_FontType
+Menu, ConfGUI,		Add, 	% TransA["Font type"],					:FontTypeMenu
 
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 
@@ -863,16 +850,70 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_FontType()
+{
+	global	;assume-global mode
+	local a_FontType := {1: "Arial", 2: "Calibri", 3: "Consolas", 4: "Courier", 5: "Verdana"}
+		, key := 0, value := 0
+
+	for key, value in a_FontType
+		if (a_FontType[key] = A_ThisMenuItem)
+			Menu, FontTypeMenu, Check, % a_FontType[key]
+		else
+			Menu, FontTypeMenu, UnCheck, % a_FontType[key]
+	
+	c_FontType := A_ThisMenuItem
+	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["In order to aplly new font type it's necesssary to reload the application."]
+		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
+		. "`n`n" . TransA["Do you want to reload application now?"]
+	IfMsgBox, Yes
+	{
+		F_SaveFontType()
+		F_SaveGUIPos("reset")
+		Reload
+	}
+	IfMsgBox, No
+		return	
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_LoadFontType()
+{
+	global	;assume-global mode
+	c_FontType := ""
+	
+	IniRead, c_FontType, 			Config.ini, GraphicalUserInterface, GuiFontType, Calibri
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SaveFontType()
+{
+	global	;assume-global mode
+	IniWrite, % c_FontType,			Config.ini, GraphicalUserInterface, GuiFontType
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SizeOfMargin()
 {
 	global	;assume-global mode
+	local key := 0, value := 0
 	
 	Switch A_ThisMenu
 	{
 		Case "SizeOfMX": 
-			c_xmarg := SizeOfMargin[A_ThisMenuItemPos]
+			for key, value in SizeOfMargin
+				if (SizeOfMargin[key] = A_ThisMenuItem)
+					Menu, SizeOfMX,	Check,	% SizeOfMargin[key]
+				else
+					Menu, SizeOfMX,	UnCheck,	% SizeOfMargin[key]
+			c_xmarg := A_ThisMenuItem
 		Case "SizeOfMY":
-			c_ymarg := SizeOfMargin[A_ThisMenuItemPos]
+			for key, value in SizeOfMargin
+				if (SizeOfMargin[key] = A_ThisMenuItem)
+					Menu, SizeOfMY,	Check,	% SizeOfMargin[key]
+				else
+					Menu, SizeOfMY,	UnCheck,	% SizeOfMargin[key]
+			c_ymarg := A_ThisMenuItem
 	}
 	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["In order to aplly new size of margin it's necesssary to reload the application."]
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
@@ -892,7 +933,7 @@ F_SizeOfMargin()
 F_SaveSizeOfMargin()
 {
 	global	;assume-global mode
-	IniWrite, % c_xmarg,				Config.ini, GraphicalUserInterface, GuiSizeOfMarginX
+		IniWrite, % c_xmarg,				Config.ini, GraphicalUserInterface, GuiSizeOfMarginX
 	IniWrite, % c_ymarg,				Config.ini, GraphicalUserInterface, GuiSizeOfMarginY
 	return
 }
@@ -902,6 +943,7 @@ F_SaveSizeOfMargin()
 F_LoadSizeOfMargin()
 {
 	global	;assume-global mode
+	SizeOfMargin				:= {1: 0, 2: 5, 3: 10, 4: 15, 5: 20} ;pixels
 	c_xmarg := 0	;pixels
 	c_ymarg := 0	;pixels
 	
@@ -915,7 +957,16 @@ F_LoadSizeOfMargin()
 F_SizeOfFont()
 {
 	global ;assume-global mode
-	c_FontSize := 7 + A_ThisMenuItemPos
+	local a_SizeOfFont := {1: 8, 2: 9, 3: 10, 4: 11, 5: 12}
+		, key := 0, value := 0
+
+	for key, value in a_SizeOfFont
+		if (a_SizeOfFont[key] = A_ThisMenuItem)
+			Menu, SizeOfFont, Check, % a_SizeOfFont[key]
+		else
+			Menu, SizeOfFont, UnCheck, % a_SizeOfFont[key]
+	
+	c_FontSize := A_ThisMenuItem
 	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["In order to aplly new font style it's necesssary to reload the application."]
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
 		. "`n`n" . TransA["Do you want to reload application now?"]
@@ -955,11 +1006,15 @@ F_StyleOfGUI()
 			c_FontColorHighlighted		:= "Blue"
 			c_WindowColor				:= "Default"
 			c_ControlColor 			:= "Default"
+			Menu, StyleGUIsubm, Check,   % TransA["Light (default)"]
+			Menu, StyleGUIsubm, UnCheck, % TransA["Dark"]
 		Case 2: ;Dark
 			c_FontColor				:= "White"
 			c_FontColorHighlighted		:= "Blue"
 			c_WindowColor				:= "Black"
 			c_ControlColor 			:= "Grey"
+			Menu, StyleGUIsubm, UnCheck, % TransA["Light (default)"]
+			Menu, StyleGUIsubm, Check,   % TransA["Dark"]
 	}
 	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["In order to aplly new style it's necesssary to reload the application."]
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
@@ -1107,6 +1162,7 @@ GuiWindowColor=
 GuiControlColor=
 GuiSizeOfMarginX=
 GuiSizeOfMarginY=
+GuiFontType=
 [Configuration]
 UndoHotstring=1
 Delay=300
@@ -1420,9 +1476,10 @@ Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
 information											= information
 Inside Word (?) 										= Inside Word (?)
-In order to aplly new font style it's necesssary to reload the application. = In order to aplly new font style it's necesssary to reload the application.
+In order to aplly new font style it's necesssary to reload the application. 	= In order to aplly new font style it's necesssary to reload the application.
+In order to aplly new font type it's necesssary to reload the application. 	= In order to aplly new font type it's necesssary to reload the application.
 In order to aplly new size of margin it's necesssary to reload the application. = In order to aplly new size of margin it's necesssary to reload the application.
-In order to aplly new style it's necesssary to reload the application. = In order to aplly new style it's necesssary to reload the application.
+In order to aplly new style it's necesssary to reload the application. 		= In order to aplly new style it's necesssary to reload the application.
 is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv? = is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?
 Show Sandbox 										= Show Sandbox
 \Languages\`nMind that Config.ini Language variable is equal to 	= \Languages\`nMind that Config.ini Language variable is equal to
@@ -2151,14 +2208,14 @@ F_GuiMain_Redraw()
 			v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
 			v_yNext := c_ymarg + HofText
 			v_wNext := RightColumnW
-			v_hNext := LeftColumnH - (c_ymarg + c_HofSandobx + c_ymarg)
+			v_hNext := LeftColumnH - (c_ymarg + c_HofSandbox + c_ymarg)
 		}
 		if !(ini_Sandbox)
 		{
 			v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
 			v_yNext := c_ymarg + HofText
 			v_wNext := RightColumnW
-			v_hNext := LeftColumnH - (c_ymarg + c_HofSandobx + c_ymarg)
+			v_hNext := LeftColumnH - (c_ymarg + c_HofSandbox + c_ymarg)
 			GuiControl, Hide, % IdText10
 			GuiControl, Hide, % IdEdit10
 		}
@@ -4663,14 +4720,12 @@ HS3GuiSize() ;Gui event
 ; Future: save window position
 HS3GuiClose:
 HS3GuiEscape:
-	;Gui, 	HS3: Minimize
 	Gui,		HS3: Show, Hide
 	v_WhichGUIisMinimzed := "HS3"
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS4GuiClose:
 HS4GuiEscape:
-	;Gui,		HS4: Minimize
 	Gui,		HS4: Show, Hide
 	v_WhichGUIisMinimzed := "HS4"
 return
@@ -5386,11 +5441,5 @@ Loop, %A_ScriptDir%\Languages\*.ini
 }
 MsgBox, % TransA["Application language changed to:"] . A_Space . SubStr(v_Language, 1, StrLen(v_Language)-4) . "`n" . TransA["The application will be reloaded with the new language file."]
 Reload
-
-L_SizeOfMargin:
-return
-
-L_FontType:
-return
 
 #If
