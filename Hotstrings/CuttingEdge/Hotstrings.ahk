@@ -82,7 +82,7 @@ global v_ConfigFlag 			:= 0
 ;Flags to control application
 global v_ResizingFlag 			:= true ; when Hotstrings Gui is displayed for the very first time
 global v_WhichGUIisMinimzed		:= ""
-
+global HS3_GuiWidth  := 0,	HS3_GuiHeight := 0
 
 F_LoadCreateTranslationTxt() ;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
 F_CheckCreateConfigIni() ;1. Try to load up configuration file. If those files do not exist, create them.
@@ -2169,7 +2169,7 @@ F_GuiMain_Redraw()
 {
 	global ;assume-global mode
 	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
-		,v_xNext := 0, v_yNext := 0,  v_wNext := 0
+		,v_xNext := 0, v_yNext := 0,  v_wNext := 0,	v_hNext := 0
 	static b_FirstRun := true
 	;*[Four]
 	;position of the List View, but only when HS3 Gui is initiated: before showing. So this code is run only once.
@@ -2206,18 +2206,27 @@ F_GuiMain_Redraw()
 		GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 		
 		;Increase / decrease List View 1
-		if ((ini_Sandbox) and !(ini_IsSandboxMoved)) ;checked
+		if ((ini_Sandbox) and !(ini_IsSandboxMoved))
 		{
-			;tu jestem
-			;jeżeli listview > left column + sandbox to przesuń na lewo i jeszcze ustaw ini_IsSandboxMoved := true
-			;else
-			v_hNext := v_OutVarTempH - (c_HofSandbox + HofText + c_ymarg)
+			if (v_OutVarTempH + HofText > LeftColumnH)
+				ini_IsSandboxMoved := true
+			else
+			{
+				v_hNext := v_OutVarTempH - (c_HofSandbox + HofText + c_ymarg)
+				GuiControl, Move, % IdListView1, % "h" v_hNext
+				F_AutoXYWH("reset")	
+			}
 		}
-		if !(ini_Sandbox) ;checked
+	
+		if (!(ini_Sandbox) and !(ini_IsSandboxMoved))
 		{
 			v_hNext := v_OutVarTempH + (c_HofSandbox + HofText + c_ymarg)
+			GuiControl, Move, % IdListView1, % "h" v_hNext
+			F_AutoXYWH("reset")	
 		}
-		GuiControl, Move, % IdListView1, % "h" v_hNext
+		
+		if (!(ini_Sandbox) and ini_IsSandboxMoved)
+			ini_IsSandboxMoved := false
 	}
 	
 	;5.3.3. Text Sandbox
@@ -2247,7 +2256,7 @@ F_GuiMain_Redraw()
 		GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext
 	}
 	
-	if !(ini_Sandbox) ;checked
+	if !(ini_Sandbox)
 	{
 		v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
 		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
@@ -4614,7 +4623,6 @@ HS3GuiSize() ;Gui event
 	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
 		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0
 		,deltaW := 0, deltaH := 0
-	HS3_GuiWidth  := 0,	HS3_GuiHeight := 0
 	
 	;~ Critical
 	
@@ -4669,7 +4677,7 @@ HS3GuiSize() ;Gui event
 		GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
 		GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
 		ini_IsSandboxMoved := true
-		OutputDebug, % "Two:" . A_Space ini_IsSandboxMoved
+		OutputDebug, % "Two:" . A_Space ini_IsSandboxMoved . A_Space . deltaH
 		F_AutoXYWH("reset")	
 		;~ HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
 		;~ HS3_GuiHeight := A_GuiHeight
@@ -4683,7 +4691,7 @@ HS3GuiSize() ;Gui event
 		GuiControl, MoveDraw, % IdEdit10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox "w" v_OutVarTemp2W
 		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
 		ini_IsSandboxMoved := false
-		OutputDebug, % "One:" . A_Space ini_IsSandboxMoved
+		OutputDebug, % "One:" . A_Space ini_IsSandboxMoved . A_Space . deltaH
 		F_AutoXYWH("reset")	
 		;~ HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
 		;~ HS3_GuiHeight := A_GuiHeight
@@ -4693,19 +4701,20 @@ HS3GuiSize() ;Gui event
 	if ((ini_Sandbox) and (ini_IsSandboxMoved))
 	{
 		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
-		OutputDebug, Three
+		OutputDebug, % "Three" . A_Space . deltaH
 	}
-	if ((ini_Sandbox) and !(ini_IsSandboxMoved))
+	if ((ini_Sandbox) and !(ini_IsSandboxMoved)) ;tu jest problem
 	{
 		
 		GuiControl, MoveDraw, % IdText10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
 		GuiControl, MoveDraw, % IdEdit10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText 
 		GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg
-		OutputDebug, Four
+		OutputDebug, % "Four" . A_Space . deltaH
 	}
 	if (!ini_Sandbox)
 	{
 		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
+		OutputDebug, % "Five" . A_Space . deltaH
 		;return
 	}
 
