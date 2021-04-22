@@ -1117,7 +1117,6 @@ F_Sandbox()
 	if (A_DefaultGui = "HS3")
 	{
 		F_GuiMain_Redraw()
-		;Gui, HS3: Show, AutoSize
 	}
 	if (A_DefaultGui = "HS4")
 	{
@@ -4064,26 +4063,15 @@ GuiControl,, % IdEdit10,  				;Sandbox
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+;tu jestem
 HSLV: ; copy content of List View 1 to editable fields of HS3 Gui
-Gui, HS3:+OwnDialogs
-/*
-	v_PreviousSelectedRow := v_SelectedRow ;this line rather as finishing this label section
-	If !(v_SelectedRow := LV_GetNext()) {
-		Return
-	}
-	if (v_PreviousSelectedRow == v_SelectedRow) and !(v_TriggerString == "")
-	{
-		return
-	}
-*/
+;Gui, HS3: +OwnDialogs ;Gui +OwnDialogs should be specified in each thread for which subsequently displayed MsgBox, InputBox, FileSelectFile, and FileSelectFolder dialogs should be owned by the window. Such dialogs become modal, meaning that the user cannot interact with the GUI window until dismissing the dialog. 
 if !(v_SelectedRow := LV_GetNext())
 	return
 
-
 LV_GetText(v_TriggerString, 	v_SelectedRow, 1)
-	;GuiControl, , v_TriggerString, % v_TriggerStringvar
-GuiControl, , % IdEdit1, % v_TriggerString
+GuiControl, HS3:, % IdEdit1, % v_TriggerString
+GuiControl, HS4:, % IdEdit1, % v_TriggerString
 
 LV_GetText(Options, 		v_SelectedRow, 2)
 Instr(Options,"*0") or (InStr(Options,"*") = 0) 							? F_CheckOption("No", 1) 	: F_CheckOption("Yes", 1)
@@ -4096,22 +4084,26 @@ LV_GetText(Fun, 			v_SelectedRow, 3)
 if (Fun = "SI")
 {
 	;SendFun := "F_NormalWay"
-	GuiControl, Choose, v_SelectFunction, SendInput (SI)
+	GuiControl, HS3: Choose, v_SelectFunction, SendInput (SI)
+	GuiControl, HS4: Choose, v_SelectFunction, SendInput (SI)
 }
 else if (Fun = "CL")
 {
 	;SendFun := "F_ViaClipboard"
-	GuiControl, Choose, v_SelectFunction, Clipboard (CL)
+	GuiControl, HS3: Choose, v_SelectFunction, Clipboard (CL)
+	GuiControl, HS4: Choose, v_SelectFunction, Clipboard (CL)
 }
 else if (Fun = "MCL")
 {
 	;SendFun := "F_MenuText"
-	GuiControl, Choose, v_SelectFunction, Menu & Clipboard (MCL)
+	GuiControl, HS3: Choose, v_SelectFunction, Menu & Clipboard (MCL)
+	GuiControl, HS4: Choose, v_SelectFunction, Menu & Clipboard (MCL)
 }
 else if (Fun = "MSI")
 {
 	;SendFun := "F_MenuTextAHK"
-	GuiControl, Choose, v_SelectFunction, Menu & SendInput (MSI)
+	GuiControl, HS3: Choose, v_SelectFunction, Menu & SendInput (MSI)
+	GuiControl, HS4: Choose, v_SelectFunction, Menu & SendInput (MSI)
 }
 
 LV_GetText(EnDis, 		v_SelectedRow, 4)
@@ -4121,71 +4113,31 @@ LV_GetText(TextInsert, 	v_SelectedRow, 5)
 if ((Fun = "MCL") or (Fun = "MSI"))
 {
 	OTextMenu := StrSplit(TextInsert, "¦")
-	GuiControl, , v_EnterHotstring,  % OTextMenu[1]
-	GuiControl, , v_EnterHotstring1, % OTextMenu[2]
-	GuiControl, , v_EnterHotstring2, % OTextMenu[3]
-	GuiControl, , v_EnterHotstring3, % OTextMenu[4]
-	GuiControl, , v_EnterHotstring4, % OTextMenu[5]
-	GuiControl, , v_EnterHotstring5, % OTextMenu[6]
-	GuiControl, , v_EnterHotstring6, % OTextMenu[7]
-	
+	GuiControl, HS3:, v_EnterHotstring,  % OTextMenu[1]
+	GuiControl, HS4:, v_EnterHotstring,  % OTextMenu[1]
+	GuiControl, HS3:, v_EnterHotstring1, % OTextMenu[2]
+	GuiControl, HS4:, v_EnterHotstring1, % OTextMenu[2]
+	GuiControl, HS3:, v_EnterHotstring2, % OTextMenu[3]
+	GuiControl, HS4:, v_EnterHotstring2, % OTextMenu[3]
+	GuiControl, HS3:, v_EnterHotstring3, % OTextMenu[4]
+	GuiControl, HS4:, v_EnterHotstring3, % OTextMenu[4]
+	GuiControl, HS3:, v_EnterHotstring4, % OTextMenu[5]
+	GuiControl, HS4:, v_EnterHotstring4, % OTextMenu[5]
+	GuiControl, HS3:, v_EnterHotstring5, % OTextMenu[6]
+	GuiControl, HS4:, v_EnterHotstring5, % OTextMenu[6]
+	GuiControl, HS3:, v_EnterHotstring6, % OTextMenu[7]
+	GuiControl, HS4:, v_EnterHotstring6, % OTextMenu[7]
 }
 else
 {
-	GuiControl, , v_EnterHotstring, % TextInsert
+	GuiControl, HS3:, v_EnterHotstring, % TextInsert
+	GuiControl, HS4:, v_EnterHotstring, % TextInsert
 }
 
-
 LV_GetText(Comment, 	v_SelectedRow, 6)
-GuiControl,, v_Comment, %Comment%
+GuiControl, HS3:, v_Comment, %Comment%
+GuiControl, HS4:, v_Comment, %Comment%
 
-/*
-	If (EnDis == "En")
-		OnOff := "On"
-	else if (EnDis == "Dis")
-		OnOff := "Off"
-	v_String := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
-	
-	a_String := StrSplit(v_String, """")
-	HotString2 := StrSplit(a_String[2],":")
-	v_TriggerStringvar := SubStr(a_String[2], StrLen( ":" . HotString2[2] . ":" ) + 1, StrLen(a_String[2])-StrLen(  ":" . HotString2[2] . ":" ))
-	RText := StrSplit(v_String, "bind(""")
-	if InStr(RText[2], """On""")
-	{
-		OText := SubStr(RText[2], 1, StrLen(RText[2])-9)
-	}
-	else
-	{    
-		OText := SubStr(RText[2], 1, StrLen(RText[2])-10)
-	}
-	;GuiControl, , v_TriggerString, % v_TriggerStringvar
-	if (InStr(v_String, """F_MenuText""") or InStr(v_String, """F_MenuTextAHK"""))
-	{
-		OTextMenu := StrSplit(OText, "¦")
-		GuiControl, , v_EnterHotstring,  % OTextMenu[1]
-		GuiControl, , v_EnterHotstring1, % OTextMenu[2]
-		GuiControl, , v_EnterHotstring2, % OTextMenu[3]
-		GuiControl, , v_EnterHotstring3, % OTextMenu[4]
-		GuiControl, , v_EnterHotstring4, % OTextMenu[5]
-		GuiControl, , v_EnterHotstring5, % OTextMenu[6]
-		GuiControl, , v_EnterHotstring6, % OTextMenu[7]
-		
-	}
-	else
-	{
-		GuiControl, , v_EnterHotstring, % OText
-	}
-	
-	
-	Instr(Hotstring2[2],"*0") or (InStr(Hotstring2[2],"*") = 0) ? F_CheckOption("No", 1) :  F_CheckOption("Yes", 1)
-	((Instr(Hotstring2[2],"C0")) or (Instr(Hotstring2[2],"C1")) or (Instr(Hotstring2[2],"C") = 0)) ? F_CheckOption("No", 2) : F_CheckOption("Yes", 2)
-	Instr(Hotstring2[2],"B0") ? F_CheckOption("Yes", 3) : F_CheckOption("No", 3)
-	Instr(Hotstring2[2],"?") ? F_CheckOption("Yes", 4) : F_CheckOption("No", 4)
-	(Instr(Hotstring2[2],"O0") or (InStr(Hotstring2[2],"O") = 0)) ? F_CheckOption("No", 5) : F_CheckOption("Yes", 5)
-	InStr(v_String, """On""") ? F_CheckOption("No", 6) : F_CheckOption("Yes", 6)
-*/
-
-;v_CaseSensitiveC1 := 0
 gosub L_SelectFunction
 return
 
@@ -4349,31 +4301,48 @@ F_SectionChoose()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 L_SelectFunction:
-Gui, HS3:+OwnDialogs
 GuiControlGet, v_SelectFunction
 if InStr(v_SelectFunction, "Menu")
 {
-	GuiControl, Enable, v_EnterHotstring1
-	GuiControl, Enable, v_EnterHotstring2
-	GuiControl, Enable, v_EnterHotstring3
-	GuiControl, Enable, v_EnterHotstring4
-	GuiControl, Enable, v_EnterHotstring5
-	GuiControl, Enable, v_EnterHotstring6
+	GuiControl, HS3: Enable, v_EnterHotstring1
+	GuiControl, HS4: Enable, v_EnterHotstring1
+	GuiControl, HS3: Enable, v_EnterHotstring2
+	GuiControl, HS4: Enable, v_EnterHotstring2
+	GuiControl, HS3: Enable, v_EnterHotstring3
+	GuiControl, HS4: Enable, v_EnterHotstring3
+	GuiControl, HS3: Enable, v_EnterHotstring4
+	GuiControl, HS4: Enable, v_EnterHotstring4
+	GuiControl, HS3: Enable, v_EnterHotstring5
+	GuiControl, HS4: Enable, v_EnterHotstring5
+	GuiControl, HS3: Enable, v_EnterHotstring6
+	GuiControl, HS4: Enable, v_EnterHotstring6
 }
 else
 {
-	GuiControl, , v_EnterHotstring1
-	GuiControl, , v_EnterHotstring2
-	GuiControl, , v_EnterHotstring3
-	GuiControl, , v_EnterHotstring4
-	GuiControl, , v_EnterHotstring5
-	GuiControl, , v_EnterHotstring6
-	GuiControl, Disable, v_EnterHotstring1
-	GuiControl, Disable, v_EnterHotstring2
-	GuiControl, Disable, v_EnterHotstring3
-	GuiControl, Disable, v_EnterHotstring4
-	GuiControl, Disable, v_EnterHotstring5
-	GuiControl, Disable, v_EnterHotstring6
+	GuiControl, HS3:, v_EnterHotstring1 ;Puts new contents into the control. Value := "". Makes empty this control.
+	GuiControl, HS4:, v_EnterHotstring1 ;Puts new contents into the control. Value := "". Makes empty this control.
+	GuiControl, HS3:, v_EnterHotstring2
+	GuiControl, HS4:, v_EnterHotstring2
+	GuiControl, HS3:, v_EnterHotstring3
+	GuiControl, HS4:, v_EnterHotstring3
+	GuiControl, HS3:, v_EnterHotstring4
+	GuiControl, HS4:, v_EnterHotstring4
+	GuiControl, HS3:, v_EnterHotstring5
+	GuiControl, HS4:, v_EnterHotstring5
+	GuiControl, HS3:, v_EnterHotstring6
+	GuiControl, HS4:, v_EnterHotstring6
+	GuiControl, HS3: Disable, v_EnterHotstring1
+	GuiControl, HS4: Disable, v_EnterHotstring1
+	GuiControl, HS3: Disable, v_EnterHotstring2
+	GuiControl, HS4: Disable, v_EnterHotstring2
+	GuiControl, HS3: Disable, v_EnterHotstring3
+	GuiControl, HS4: Disable, v_EnterHotstring3
+	GuiControl, HS3: Disable, v_EnterHotstring4
+	GuiControl, HS4: Disable, v_EnterHotstring4
+	GuiControl, HS3: Disable, v_EnterHotstring5
+	GuiControl, HS4: Disable, v_EnterHotstring5
+	GuiControl, HS3: Disable, v_EnterHotstring6
+	GuiControl, HS4: Disable, v_EnterHotstring6
 }
 return
 
@@ -4562,7 +4531,7 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 			WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
 			Gui, HS4: Default
 			F_UpdateSelHotLibDDL()
-			F_GuiHS4_DetermineConstraints()
+			F_GuiHS4_Redraw()
 			Gui, HS3: Show, Hide
 			Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
 			;v_WhichGUIisMinimzed := ""
@@ -4571,12 +4540,8 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 			WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
 			Gui, HS3: Default
 			F_UpdateSelHotLibDDL()
-			F_GuiMain_DetermineConstraints()
+			F_GuiMain_Redraw()
 			Gui, HS4: Show, Hide
-		
-			GuiControlGet, OutputvarTemp, Pos, % IdListView1
-			OutputDebug, % "OutputvarTemp" . A_Space . OutputvarTempW
-		
 			Gui, HS3: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
 			Gui, HS3: Show, AutoSize ;don't know why it has to be doubled to properly display...
 			;v_WhichGUIisMinimzed := ""
