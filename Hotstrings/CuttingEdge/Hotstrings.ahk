@@ -1354,7 +1354,7 @@ F_UpdateSelHotLibDDL()
 	{
 		FinalString .=  TransA["No libraries have been found!"] . "||" 
 	}
-	;*[One]
+	
 	if (A_DefaultGui = "HS3")
 		GuiControl, , % IdDDL2, % "|" . FinalString 	;To replace (overwrite) the list instead, include a pipe as the first character
 	if (A_DefaultGui = "HS4")
@@ -3180,16 +3180,22 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 F_CheckOption(State, Button)
+;This function uses trick to identify specific GuiControl:
+;ControlID can be either ClassNN (the classname and instance number of the control) or the control's text, both of which can be determined via Window Spy.
+;So in HS3 Gui the checkboxes ClassNN are 1...6
 {
-	If (State = "Yes")
+	;*[One]
+	if (State = "Yes")
 	{
 		State := 1
-		GuiControl, , Button%Button%, 1
+		GuiControl, HS3:, Button%Button%, 1
+		GuiControl, HS4:, Button%Button%, 1
 	}
-	Else 
+	else 
 	{
 		State := 0
-		GuiControl, , Button%Button%, 0
+		GuiControl, HS3:, Button%Button%, 0
+		GuiControl, HS4:, Button%Button%, 0
 	}
 	Button := "Button" . Button
 	
@@ -3203,10 +3209,17 @@ F_CheckBoxColor(State, Button)
 	global ;assume-global mode
 	
 	if (State = 1)
-		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", Calibri
+	{
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+	}
 	else 
-		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", Calibri
+	{
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+	}
 	GuiControl, HS3: Font, %Button%
+	GuiControl, HS4: Font, %Button%
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4665,7 +4678,6 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	
 	GuiControlGet, v_OutVarTemp1, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.
 	;OutputDebug, % "Before:" . A_Space . v_OutVarTemp1H
-	;*[Two]
 	F_AutoXYWH("*wh", IdListView1)
 	F_AutoXYWH("*h", IdButton5)
 
@@ -4739,7 +4751,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
 	HS3_GuiHeight := A_GuiHeight
 	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space "A_GuiHeight" . A_Space . A_GuiHeight
-	;*[Three]
+	;*[Two]
 	return
 }
 
