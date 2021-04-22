@@ -146,11 +146,12 @@ F_GuiMain_DefineConstants()
 F_GuiMain_DetermineConstraints()
 F_GuiMain_Redraw()
 
+F_UpdateSelHotLibDDL()
+
 F_GuiHS4_CreateObject()
 F_GuiHS4_DetermineConstraints()
 F_GuiHS4_Redraw()
 
-F_UpdateSelHotLibDDL()
 
 v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
@@ -1094,7 +1095,7 @@ F_Exit()
 F_Sandbox()
 {
 	global ;assume-global mode
-	;*[One]
+	
 	Menu, ConfGUI, ToggleCheck, % TransA["Show Sandbox"]
 	ini_Sandbox := !(ini_Sandbox)
 	Iniwrite, %ini_Sandbox%, Config.ini, GraphicalUserInterface, Sandbox
@@ -1315,40 +1316,38 @@ F_UpdateSelHotLibDDL()
 ;Load content of DDL2 and mark disabled libraries
 {
 	global ;assume-global mode
-	local key := "", value := ""
+	local key := "", value := "", FinalString := ""
 	
-	if (A_DefaultGui = "HS3")
-		GuiControl, , % IdDDL2, |
-	if (A_DefaultGui = "HS4")
-		GuiControl, , % IdDDL2b, |
+	;if (A_DefaultGui = "HS3")
+		;GuiControl, , % IdDDL2, | ;To make the control empty, specify only a pipe character (|). 
+	;if (A_DefaultGui = "HS4")
+		;GuiControl, , % IdDDL2b, | ;To make the control empty, specify only a pipe character (|). 
 	if (ini_LoadLib.Count()) ;if ini_LoadLib isn't empty
 	{
+		FinalString .= TransA["↓ Click here to select hotstring library ↓"] . "||"
 		for key, value in ini_LoadLib
 		{
 			if !(value)
 			{
-				if (A_DefaultGui = "HS3")
-					GuiControl, , % IdDDL2, % key . A_Space . TransA["DISABLED"]
-				if (A_DefaultGui = "HS4")
-					GuiControl, , % IdDDL2b, % key . A_Space . TransA["DISABLED"]				
+				FinalString .= key . A_Space . TransA["DISABLED"]
+				
 			}
 			else
 			{
-				if (A_DefaultGui = "HS3")
-					GuiControl, , % IdDDL2, % key
-				if (A_DefaultGui = "HS4")
-					GuiControl, , % IdDDL2b, % key
+				FinalString .= key 
 			}
+			FinalString .= "|"
 		}
 	}
 	else ;if ini_LoadLib is empty
 	{
-		if (A_DefaultGui = "HS3")
-			GuiControl, , % IdDDL2, % TransA["No libraries have been found!"]
-		if (A_DefaultGui = "HS4")
-			GuiControl, , % IdDDL2b, % TransA["No libraries have been found!"]
+		FinalString .=  TransA["No libraries have been found!"] . "||" 
 	}
-	
+	;*[One]
+	if (A_DefaultGui = "HS3")
+		GuiControl, , % IdDDL2, % "|" . FinalString 	;To replace (overwrite) the list instead, include a pipe as the first character
+	if (A_DefaultGui = "HS4")
+		GuiControl, , % IdDDL2b, % "|" . FinalString	;To replace (overwrite) the list instead, include a pipe as the first character
 	return
 }
 
@@ -1563,6 +1562,7 @@ Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg
 Underscore											= Underscore
 Undo the last hotstring 									= &Undo the last hotstring
 warning												= warning
+↓ Click here to select hotstring library ↓					= ↓ Click here to select hotstring library ↓
 )"
 	
 	TransA					:= {}	; ; this associative array is used to store translations of this application text strings
@@ -2171,7 +2171,7 @@ F_GuiMain_Redraw()
 	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
 		,v_xNext := 0, v_yNext := 0,  v_wNext := 0,	v_hNext := 0
 	static b_FirstRun := true
-	;*[Four]
+	
 	;position of the List View, but only when HS3 Gui is initiated: before showing. So this code is run only once.
 	if (b_FirstRun) 
 	{
