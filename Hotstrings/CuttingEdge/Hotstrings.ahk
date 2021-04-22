@@ -3706,6 +3706,9 @@ return
 ^#h::		; Event
 L_GUIInit:
 
+;Critical Off ;If the script has just resized the window, follow this example to ensure GuiSize is called immediately
+;Sleep -1
+
 if (v_ResizingFlag) ;if run for the very first time
 {
 	Switch ini_WhichGui
@@ -4616,7 +4619,7 @@ HS4GuiSize() ;Gui event
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-HS3GuiSize() ;Gui event
+HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 {
 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 	global ;assume-global mode
@@ -4624,10 +4627,8 @@ HS3GuiSize() ;Gui event
 		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0
 		,deltaW := 0, deltaH := 0
 	
-	;~ Critical
-	
 	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "A_GuiHeight:" . A_Space .  A_GuiHeight
-	;*[Two]
+	
 	if (A_EventInfo = 1) ; The window has been minimized.
 		return
 	if (v_ResizingFlag) ;Special case: FontSize set to 16 and some procedures are run twice
@@ -4652,10 +4653,17 @@ HS3GuiSize() ;Gui event
 	}
 	
 	GuiControlGet, v_OutVarTemp1, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.
-	
+	;OutputDebug, % "Before:" . A_Space . v_OutVarTemp1H
+	;*[Two]
 	F_AutoXYWH("*wh", IdListView1)
 	F_AutoXYWH("*h", IdButton5)
+
+	if (!ini_IsSandboxMoved)
+		F_AutoXYWH("*w", IdEdit10)
+
 	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;Check position of ListView1 again after resizing
+	;OutputDebug, % "After:" . A_Space . v_OutVarTemp2H
+	;OutputDebug, % "Height of ListView in rel to A_GuiHeight:" . A_Space . A_GuiHeight - v_OutVarTemp2H
 	if (v_OutVarTemp2W != v_OutVarTemp1W)
 	{
 		LV_ModifyCol(1, Round(0.1 * v_OutVarTemp2W))
@@ -4670,6 +4678,8 @@ HS3GuiSize() ;Gui event
 	deltaW := A_GuiWidth -  HS3_GuiWidth
 	deltaH := A_GuiHeight - HS3_GuiHeight
 	
+	;OutputDebug, % "Width:" . A_Space . Width . A_Space . "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "Height:" . A_Space . Height . A_Space . "A_GuiHeight:" . A_Space . A_GuiHeight
+	
 	if (ini_Sandbox) and (deltaH > 0) and !(ini_IsSandboxMoved) and (v_OutVarTemp2H + HofText > LeftColumnH) 
 	{
 		GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox ;increase
@@ -4678,10 +4688,9 @@ HS3GuiSize() ;Gui event
 		GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
 		ini_IsSandboxMoved := true
 		OutputDebug, % "Two:" . A_Space ini_IsSandboxMoved . A_Space . deltaH
-		F_AutoXYWH("reset")	
-		;~ HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
-		;~ HS3_GuiHeight := A_GuiHeight
-		;~ return
+		F_AutoXYWH("reset")
+		F_AutoXYWH("*wh", IdListView1)
+		F_AutoXYWH("*h", IdButton5)
 	}
 		
 	if (ini_Sandbox) and (deltaH < 0) and (ini_IsSandboxMoved) and (v_OutVarTemp2H + HofText <  LeftColumnH + c_HofSandbox)
@@ -4692,10 +4701,9 @@ HS3GuiSize() ;Gui event
 		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
 		ini_IsSandboxMoved := false
 		OutputDebug, % "One:" . A_Space ini_IsSandboxMoved . A_Space . deltaH
-		F_AutoXYWH("reset")	
-		;~ HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
-		;~ HS3_GuiHeight := A_GuiHeight
-		;~ return
+		F_AutoXYWH("reset")
+		F_AutoXYWH("*wh", IdListView1)
+		F_AutoXYWH("*h", IdButton5)
 	}
 
 	if ((ini_Sandbox) and (ini_IsSandboxMoved))
@@ -4715,7 +4723,6 @@ HS3GuiSize() ;Gui event
 	{
 		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
 		OutputDebug, % "Five" . A_Space . deltaH
-		;return
 	}
 
 	HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
