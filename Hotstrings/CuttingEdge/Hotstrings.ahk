@@ -853,6 +853,477 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_DeleteHotstring()
+{
+	;1. Remove selected library file.
+	;2. Create library file of the same name as selected. its content will contain List View but without selected row.
+	;3. Remove selected row from List View.
+	;4. Disable selected hotstring.
+	;5. Remove trigger hint.
+	;6. Decrement library counter.
+	global ;assume-global mode
+	local 	LibraryFullPathAndName := "" 
+			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
+	
+	Gui, HS3:+OwnDialogs
+	
+	if !(v_SelectedRow := LV_GetNext()) 
+	{
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information",  % TransA["Select a row in the list-view, please!"] ;Future: translate "information"
+		;MsgBox, 0, %A_ThisLabel%, %t_SelectARowInTheListViewPlease%
+		return
+	}
+	MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ": information", % TransA["Selected Hotstring will be deleted. Do you want to proceed?"] ;Future: translate "information"
+	IfMsgBox, No
+		return
+	TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
+	
+	/*
+		Gui, ProgressDelete:New, -Border -Resize
+		Gui, ProgressDelete:Add, Progress, w200 h20 cBlue vProgressDelete, 0
+		Gui, ProgressDelete:Add,Text,w200 vTextDelete, % TransA["Deleting hotstring. Please wait..."]
+		Gui, ProgressDelete:Show, hide, ProgressDelete
+		WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
+		DetectHiddenWindows, On
+		WinGetPos, , , DeleteWindowWidth, DeleteWindowHeight,ProgressDelete
+		DetectHiddenWindows, Off
+		Gui, ProgressDelete:Show,% "x" . v_WindowX + (v_WindowWidth - DeleteWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - DeleteWindowHeight)/2 ,ProgressDelete
+	*/
+	
+	;1. Remove selected library file.
+	LibraryFullPathAndName := A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary
+	FileDelete, % LibraryFullPathAndName
+	;cntDelete := 0
+	;Gui, HS3:Default
+	
+	;2. Create library file of the same name as selected. its content will contain LV but without selected row.
+	if (v_SelectedRow == SectionList.MaxIndex())
+	{
+		if (SectionList.MaxIndex() == 1)
+		{
+			FileAppend,, % LibraryFullPathAndName, UTF-8
+			;GuiControl,, ProgressDelete, 100
+		}
+		else
+		{
+			Loop, % SectionList.MaxIndex()-1
+			{
+				if !(A_Index == v_SelectedRow)
+				{
+					LV_GetText(txt1, A_Index, 2)
+					LV_GetText(txt2, A_Index, 1)
+					LV_GetText(txt3, A_Index, 3)
+					LV_GetText(txt4, A_Index, 4)
+					LV_GetText(txt5, A_Index, 5)
+					LV_GetText(txt6, A_Index, 6)
+					if (A_Index == SectionList.MaxIndex()-1)
+						txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
+					else
+						txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
+					if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
+						FileAppend, %txt%, % LibraryFullPathAndName, UTF-8
+					;v_DeleteProgress := (A_Index/(SectionList.MaxIndex()-1))*100
+					;Gui, ProgressDelete:Default
+					;GuiControl,, ProgressDelete, %v_DeleteProgress%
+					;Gui, HS3:Default
+				}
+			}
+		}
+	}
+	else
+	{
+		Loop, % SectionList.MaxIndex()
+		{
+			if !(A_Index == v_SelectedRow)
+			{
+				LV_GetText(txt1, A_Index, 2)
+				LV_GetText(txt2, A_Index, 1)
+				LV_GetText(txt3, A_Index, 3)
+				LV_GetText(txt4, A_Index, 4)
+				LV_GetText(txt5, A_Index, 5)
+				LV_GetText(txt6, A_Index, 6)
+				if (A_Index == SectionList.MaxIndex())
+					txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
+				else
+					txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
+				if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
+					FileAppend, %txt%, % LibraryFullPathAndName, UTF-8
+				;v_DeleteProgress := (A_Index/(SectionList.MaxIndex()-1))*100
+				;Gui, ProgressDelete:Default
+				;GuiControl,, ProgressDelete, %v_DeleteProgress%
+				;Gui, HS3:Default
+			}
+		}
+	}
+	;3. Remove selected row from List View.
+	LV_Delete(v_SelectedRow)
+	;4. Disable selected hotstring.
+	
+	Try
+		Hotstring(":" . Options . ":" . v_TriggerString, , "Off")
+	Catch
+		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_ThisFunc, % "Error, something went wrong with hotstring deletion:" . A_Space . v_TriggerString . A_Space . "Library name:" . A_Space . v_SelectHotstringLibrary ;Future: translate this.
+	
+	;5. Remove trigger hint.
+	Loop, % a_Triggers.MaxIndex()
+	{
+		if (InStr(a_Triggers[A_Index], v_TriggerString))
+			a_Triggers.RemoveAt(A_Index)
+	}
+	TrayTip, %A_ScriptName%, Specified definition of hotstring has been deleted, 1 ;Future: add to translate 
+	;Gui, ProgressDelete:Destroy
+	;MsgBox, % Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
+	;WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
+	;Run, AutoHotkey.exe Hotstrings.ahk %v_Param% %v_SelectHotstringLibrary% %v_PreviousWidth% %v_PreviousHeight% %v_PreviousX% %v_PreviousY% %v_SelectedRow% %v_SelectedMonitor%	
+	
+	;6. Decrement library counter.
+	GuiControl, Text, % IdText13, % A_Space . --v_LibHotstringCnt
+	GuiControl, Text, % IdText12, % A_Space . --v_TotalHotstringCnt
+	
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+;In AutoHotkey there is no Guicontrol, Delete sub-command. As a consequence even if specific control is hidden (Guicontrol, Hide), the Gui size isn't changed, size is not decreased, as space for hidden control is maintained. To solve this issue, the separate gui have to be prepared. This requires a lot of work and is a matter of far future.
+F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui 
+{
+	global ;assume-global mode
+	local WinX := 0, WinY := 0
+	local OutputvarTemp := 0, OutputvarTempW := 0
+	
+	Switch A_DefaultGui
+	{
+		Case "HS3":
+			WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
+			Gui, HS4: Default
+			F_UpdateSelHotLibDDL()
+			F_GuiHS4_Redraw()
+			Gui, HS3: Show, Hide
+			Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
+			;v_WhichGUIisMinimzed := ""
+			return
+		Case "HS4":
+			WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
+			Gui, HS3: Default
+			F_UpdateSelHotLibDDL()
+			F_GuiMain_Redraw()
+			Gui, HS4: Show, Hide
+			Gui, HS3: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
+			Gui, HS3: Show, AutoSize ;don't know why it has to be doubled to properly display...
+			;v_WhichGUIisMinimzed := ""
+			return
+	}
+}
+
+HS4GuiSize() ;Gui event
+{
+	global ;assume-global mode
+	
+	HS4_GuiWidth  := A_GuiWidth
+	HS4_GuiHeight := A_GuiHeight
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
+{
+;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
+	global ;assume-global mode
+	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
+		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0
+		,deltaW := 0, deltaH := 0
+	
+	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "A_GuiHeight:" . A_Space .  A_GuiHeight
+	
+	if (A_EventInfo = 1) ; The window has been minimized.
+		return
+	if (v_ResizingFlag) ;Special case: FontSize set to 16 and some procedures are run twice
+	{
+		HS3_GuiWidth  := A_GuiWidth
+		HS3_GuiHeight := A_GuiHeight
+		;OutputDebug, return because of "v_ResizingFlag"
+		GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;Check position of ListView1 again after resizing
+		LV_ModifyCol(1, Round(0.1 * v_OutVarTemp2W))
+		LV_ModifyCol(2, Round(0.1 * v_OutVarTemp2W))
+		LV_ModifyCol(3, Round(0.1 * v_OutVarTemp2W))	
+		LV_ModifyCol(4, Round(0.1 * v_OutVarTemp2W))
+		LV_ModifyCol(5, Round(0.4 * v_OutVarTemp2W))
+		LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W) - 3)
+		return
+	}
+	if (A_EventInfo = 2)
+	{
+		MsgBox, , maximized
+		;OutputDebug, return because of "A_EventInfo = 2"
+		return
+	}
+	
+	GuiControlGet, v_OutVarTemp1, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.
+	;OutputDebug, % "Before:" . A_Space . v_OutVarTemp1H
+	F_AutoXYWH("*wh", IdListView1)
+	F_AutoXYWH("*h", IdButton5)
+
+	if (!ini_IsSandboxMoved)
+		F_AutoXYWH("*w", IdEdit10)
+
+	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;Check position of ListView1 again after resizing
+	;OutputDebug, % "After:" . A_Space . v_OutVarTemp2H
+	;OutputDebug, % "Height of ListView in rel to A_GuiHeight:" . A_Space . A_GuiHeight - v_OutVarTemp2H
+	if (v_OutVarTemp2W != v_OutVarTemp1W)
+	{
+		LV_ModifyCol(1, Round(0.1 * v_OutVarTemp2W))
+		LV_ModifyCol(2, Round(0.1 * v_OutVarTemp2W))
+		LV_ModifyCol(3, Round(0.1 * v_OutVarTemp2W))	
+		LV_ModifyCol(4, Round(0.1 * v_OutVarTemp2W))
+		LV_ModifyCol(5, Round(0.4 * v_OutVarTemp2W))
+		LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W) - 3)
+	}	
+	
+	
+	deltaW := A_GuiWidth -  HS3_GuiWidth
+	deltaH := A_GuiHeight - HS3_GuiHeight
+	
+	;OutputDebug, % "Width:" . A_Space . Width . A_Space . "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "Height:" . A_Space . Height . A_Space . "A_GuiHeight:" . A_Space . A_GuiHeight
+	
+	if (ini_Sandbox) and (deltaH > 0) and !(ini_IsSandboxMoved) and (v_OutVarTemp2H + HofText > LeftColumnH) 
+	{
+		GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox ;increase
+		GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
+		GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
+		GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
+		ini_IsSandboxMoved := true
+		OutputDebug, % "Two:" . A_Space ini_IsSandboxMoved . A_Space . deltaH
+		F_AutoXYWH("reset")
+		F_AutoXYWH("*wh", IdListView1)
+		F_AutoXYWH("*h", IdButton5)
+	}
+		
+	if (ini_Sandbox) and (deltaH < 0) and (ini_IsSandboxMoved) and (v_OutVarTemp2H + HofText <  LeftColumnH + c_HofSandbox)
+	{
+		GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H - (c_ymarg + HofText + c_HofSandbox) ;decrease
+		GuiControl, MoveDraw, % IdText10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - (HofText + c_HofSandbox)
+		GuiControl, MoveDraw, % IdEdit10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox "w" v_OutVarTemp2W
+		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
+		ini_IsSandboxMoved := false
+		OutputDebug, % "One:" . A_Space ini_IsSandboxMoved . A_Space . deltaH
+		F_AutoXYWH("reset")
+		F_AutoXYWH("*wh", IdListView1)
+		F_AutoXYWH("*h", IdButton5)
+	}
+
+	if ((ini_Sandbox) and (ini_IsSandboxMoved))
+	{
+		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
+		OutputDebug, % "Three" . A_Space . deltaH
+	}
+	if ((ini_Sandbox) and !(ini_IsSandboxMoved)) ;tu jest problem
+	{
+		
+		GuiControl, MoveDraw, % IdText10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
+		GuiControl, MoveDraw, % IdEdit10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText 
+		GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg
+		OutputDebug, % "Four" . A_Space . deltaH
+	}
+	if (!ini_Sandbox)
+	{
+		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
+		OutputDebug, % "Five" . A_Space . deltaH
+	}
+
+	HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
+	HS3_GuiHeight := A_GuiHeight
+	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space "A_GuiHeight" . A_Space . A_GuiHeight
+	;*[Two]
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SectionChoose()
+{
+	global ;assume-global mode
+	local str1 := []
+	
+	if (A_DefaultGui = "HS3")
+		Gui, HS3: Submit, NoHide
+	if (A_DefaultGui = "HS4")
+		Gui, HS4: Submit, NoHide
+	
+	GuiControl, Enable, % IdButton4 ; button Delete hotstring (F8)
+	Gui, ListView, % IdListView1 ; identify which ListView
+	LV_Delete()
+	FileRead, Text, Libraries\%v_SelectHotstringLibrary%
+	
+	SectionList := StrSplit(Text, "`r`n")
+	
+	Loop, % SectionList.MaxIndex()
+	{
+		str1 := StrSplit(SectionList[A_Index], "‖")
+		if (InStr(str1[1], "*0"))
+		{
+			str1[1] := StrReplace(str1[1], "*0")
+		}
+		if (InStr(str1[1], "O0"))
+		{
+			str1[1] := StrReplace(str1[1], "O0")
+		}
+		if (InStr(str1[1], "C0"))
+		{
+			str1[1] := StrReplace(str1[1], "C0")
+		}
+		if (InStr(str1[1], "?0"))
+		{
+			str1[1] := StrReplace(str1[1], "?0")
+		}
+		if (InStr(str1[1], "B")) and !(InStr(str1[1], "B0"))
+		{
+			str1[1] := StrReplace(str1[1], "B")
+		}
+		LV_Add("", str1[2], str1[1], str1[3], str1[4],str1[5], str1[6])			
+	}
+	LV_ModifyCol(1, "Sort")
+	
+	v_LibHotstringCnt := SectionList.MaxIndex()
+	if (A_DefaultGui = "HS3")
+		GuiControl, Text, % IdText13,  % A_Space . v_LibHotstringCnt
+	if (A_DefaultGui = "HS4")
+		GuiControl, Text, % IdText13b, % A_Space . v_LibHotstringCnt
+	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+F_HSLV() 
+; copy content of List View 1 to editable fields of HS3 Gui
+{
+	global ;assume-global mode
+	local Options := "", Fun := "", EnDis := "", TextInsert := "", OTextMenu := "", Comment := ""
+	
+	if !(v_SelectedRow := LV_GetNext())
+		return
+	
+	LV_GetText(v_TriggerString, 	v_SelectedRow, 1)
+	GuiControl, HS3:, % IdEdit1, % v_TriggerString
+	GuiControl, HS4:, % IdEdit1, % v_TriggerString
+	
+	LV_GetText(Options, 		v_SelectedRow, 2)
+	Instr(Options,"*0") or (InStr(Options,"*") = 0) 							? F_CheckOption("No", 1) 	: F_CheckOption("Yes", 1)
+	((Instr(Options,"C0")) or (Instr(Options,"C1")) or (Instr(Options,"C") = 0)) 	? F_CheckOption("No", 2) 	: F_CheckOption("Yes", 2)
+	Instr(Options,"B0") 												? F_CheckOption("Yes", 3) 	: F_CheckOption("No", 3)
+	Instr(Options,"?") 													? F_CheckOption("Yes", 4) 	: F_CheckOption("No", 4)
+	(Instr(Options,"O0") or (InStr(Options,"O") = 0)) 						? F_CheckOption("No", 5) 	: F_CheckOption("Yes", 5)
+	
+	LV_GetText(Fun, 			v_SelectedRow, 3)
+	if (Fun = "SI")
+	{ ;SendFun := "F_NormalWay"
+		GuiControl, HS3: Choose, v_SelectFunction, SendInput (SI)
+		GuiControl, HS4: Choose, v_SelectFunction, SendInput (SI)
+	}
+	else if (Fun = "CL")
+	{ ;SendFun := "F_ViaClipboard"
+		GuiControl, HS3: Choose, v_SelectFunction, Clipboard (CL)
+		GuiControl, HS4: Choose, v_SelectFunction, Clipboard (CL)
+	}
+	else if (Fun = "MCL")
+	{ ;SendFun := "F_MenuText"
+		GuiControl, HS3: Choose, v_SelectFunction, Menu & Clipboard (MCL)
+		GuiControl, HS4: Choose, v_SelectFunction, Menu & Clipboard (MCL)
+	}
+	else if (Fun = "MSI")
+	{ ;SendFun := "F_MenuTextAHK"
+		GuiControl, HS3: Choose, v_SelectFunction, Menu & SendInput (MSI)
+		GuiControl, HS4: Choose, v_SelectFunction, Menu & SendInput (MSI)
+	}
+	
+	LV_GetText(EnDis, 		v_SelectedRow, 4)
+	InStr(EnDis, "En") ? F_CheckOption("No", 6) : F_CheckOption("Yes", 6)
+	
+	LV_GetText(TextInsert, 	v_SelectedRow, 5)
+	if ((Fun = "MCL") or (Fun = "MSI"))
+	{
+		OTextMenu := StrSplit(TextInsert, "¦")
+		GuiControl, HS3:, v_EnterHotstring,  % OTextMenu[1]
+		GuiControl, HS4:, v_EnterHotstring,  % OTextMenu[1]
+		GuiControl, HS3:, v_EnterHotstring1, % OTextMenu[2]
+		GuiControl, HS4:, v_EnterHotstring1, % OTextMenu[2]
+		GuiControl, HS3:, v_EnterHotstring2, % OTextMenu[3]
+		GuiControl, HS4:, v_EnterHotstring2, % OTextMenu[3]
+		GuiControl, HS3:, v_EnterHotstring3, % OTextMenu[4]
+		GuiControl, HS4:, v_EnterHotstring3, % OTextMenu[4]
+		GuiControl, HS3:, v_EnterHotstring4, % OTextMenu[5]
+		GuiControl, HS4:, v_EnterHotstring4, % OTextMenu[5]
+		GuiControl, HS3:, v_EnterHotstring5, % OTextMenu[6]
+		GuiControl, HS4:, v_EnterHotstring5, % OTextMenu[6]
+		GuiControl, HS3:, v_EnterHotstring6, % OTextMenu[7]
+		GuiControl, HS4:, v_EnterHotstring6, % OTextMenu[7]
+	}
+	else
+	{
+		GuiControl, HS3:, v_EnterHotstring, % TextInsert
+		GuiControl, HS4:, v_EnterHotstring, % TextInsert
+	}
+	
+	LV_GetText(Comment, 	v_SelectedRow, 6)
+	GuiControl, HS3:, v_Comment, %Comment%
+	GuiControl, HS4:, v_Comment, %Comment%
+	
+	F_SelectFunction()
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_SelectFunction()
+{
+	global ;assume-global mode
+	GuiControlGet, v_SelectFunction, HS3: ;Retrieves the contents of the control. 
+	GuiControlGet, v_SelectFunction, HS4: ;Retrieves the contents of the control. 
+	if InStr(v_SelectFunction, "Menu")
+	{
+		GuiControl, HS3: Enable, v_EnterHotstring1
+		GuiControl, HS4: Enable, v_EnterHotstring1
+		GuiControl, HS3: Enable, v_EnterHotstring2
+		GuiControl, HS4: Enable, v_EnterHotstring2
+		GuiControl, HS3: Enable, v_EnterHotstring3
+		GuiControl, HS4: Enable, v_EnterHotstring3
+		GuiControl, HS3: Enable, v_EnterHotstring4
+		GuiControl, HS4: Enable, v_EnterHotstring4
+		GuiControl, HS3: Enable, v_EnterHotstring5
+		GuiControl, HS4: Enable, v_EnterHotstring5
+		GuiControl, HS3: Enable, v_EnterHotstring6
+		GuiControl, HS4: Enable, v_EnterHotstring6
+	}
+	else
+	{
+		GuiControl, HS3:, v_EnterHotstring1 ;Puts new contents into the control. Value := "". Makes empty this control.
+		GuiControl, HS4:, v_EnterHotstring1 ;Puts new contents into the control. Value := "". Makes empty this control.
+		GuiControl, HS3:, v_EnterHotstring2
+		GuiControl, HS4:, v_EnterHotstring2
+		GuiControl, HS3:, v_EnterHotstring3
+		GuiControl, HS4:, v_EnterHotstring3
+		GuiControl, HS3:, v_EnterHotstring4
+		GuiControl, HS4:, v_EnterHotstring4
+		GuiControl, HS3:, v_EnterHotstring5
+		GuiControl, HS4:, v_EnterHotstring5
+		GuiControl, HS3:, v_EnterHotstring6
+		GuiControl, HS4:, v_EnterHotstring6
+		GuiControl, HS3: Disable, v_EnterHotstring1
+		GuiControl, HS4: Disable, v_EnterHotstring1
+		GuiControl, HS3: Disable, v_EnterHotstring2
+		GuiControl, HS4: Disable, v_EnterHotstring2
+		GuiControl, HS3: Disable, v_EnterHotstring3
+		GuiControl, HS4: Disable, v_EnterHotstring3
+		GuiControl, HS3: Disable, v_EnterHotstring4
+		GuiControl, HS4: Disable, v_EnterHotstring4
+		GuiControl, HS3: Disable, v_EnterHotstring5
+		GuiControl, HS4: Disable, v_EnterHotstring5
+		GuiControl, HS3: Disable, v_EnterHotstring6
+		GuiControl, HS4: Disable, v_EnterHotstring6
+	}
+return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_FontType()
 {
 	global	;assume-global mode
@@ -1737,7 +2208,7 @@ F_GuiHS4_CreateObject()
 	;GuiControl,	Hide,		% IdText3
 	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
-	Gui, 	HS4: Add, 		DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gL_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
+	Gui, 	HS4: Add, 		DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
 	;GuiControl,	Hide,		% IdDDL1
 	
 	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
@@ -1864,7 +2335,7 @@ F_GuiMain_CreateObject()
 ;GuiControl,	Hide,		% IdText3
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
-	Gui, 		HS3:Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gL_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
+	Gui, 		HS3:Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
 ;GuiControl,	Hide,		% IdDDL1
 	
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
@@ -1925,7 +2396,7 @@ F_GuiMain_CreateObject()
 	
 	Gui,			HS3:Add, 		Text, 		x0 y0 HwndIdText9, 									% TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
 ;GuiControl,	Hide,		% IdText9
-	Gui, 		HS3:Add, 		ListView, 	x0 y0 HwndIdListView1 LV0x1 vv_LibraryContent AltSubmit gHSLV, % TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
+	Gui, 		HS3:Add, 		ListView, 	x0 y0 HwndIdListView1 LV0x1 vv_LibraryContent AltSubmit gF_HSLV, % TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
 ;GuiControl,	Hide,		% IdListView1
 	
 	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText8, % TransA["F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring"]
@@ -2104,8 +2575,6 @@ F_GuiHS4_DetermineConstraints()
 	v_xNext += SpaceBetweenColumns + wleftminicolumn
 	GuiControl, Move, % IdCheckBox6b, % "x" v_xNext "y" v_yNext
 	;GuiControl, Show, % IdCheckBox6
-	
-;Gui, 		%HS3GuiHwnd%:Show, AutoSize Center
 	
 	;5.1.3. Select hotstring output function
 	v_yNext += HofCheckBox + c_ymarg * 2
@@ -3724,7 +4193,6 @@ return
 
 
 
-; - - - - - - - - - - The Beginning - - - - - - - - - - - - 
 
 ^#h::		; Event
 L_GUIInit:
@@ -4063,85 +4531,6 @@ GuiControl,, % IdEdit10,  				;Sandbox
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;tu jestem
-HSLV: ; copy content of List View 1 to editable fields of HS3 Gui
-;Gui, HS3: +OwnDialogs ;Gui +OwnDialogs should be specified in each thread for which subsequently displayed MsgBox, InputBox, FileSelectFile, and FileSelectFolder dialogs should be owned by the window. Such dialogs become modal, meaning that the user cannot interact with the GUI window until dismissing the dialog. 
-if !(v_SelectedRow := LV_GetNext())
-	return
-
-LV_GetText(v_TriggerString, 	v_SelectedRow, 1)
-GuiControl, HS3:, % IdEdit1, % v_TriggerString
-GuiControl, HS4:, % IdEdit1, % v_TriggerString
-
-LV_GetText(Options, 		v_SelectedRow, 2)
-Instr(Options,"*0") or (InStr(Options,"*") = 0) 							? F_CheckOption("No", 1) 	: F_CheckOption("Yes", 1)
-((Instr(Options,"C0")) or (Instr(Options,"C1")) or (Instr(Options,"C") = 0)) 	? F_CheckOption("No", 2) 	: F_CheckOption("Yes", 2)
-Instr(Options,"B0") 												? F_CheckOption("Yes", 3) 	: F_CheckOption("No", 3)
-Instr(Options,"?") 													? F_CheckOption("Yes", 4) 	: F_CheckOption("No", 4)
-(Instr(Options,"O0") or (InStr(Options,"O") = 0)) 						? F_CheckOption("No", 5) 	: F_CheckOption("Yes", 5)
-
-LV_GetText(Fun, 			v_SelectedRow, 3)
-if (Fun = "SI")
-{
-	;SendFun := "F_NormalWay"
-	GuiControl, HS3: Choose, v_SelectFunction, SendInput (SI)
-	GuiControl, HS4: Choose, v_SelectFunction, SendInput (SI)
-}
-else if (Fun = "CL")
-{
-	;SendFun := "F_ViaClipboard"
-	GuiControl, HS3: Choose, v_SelectFunction, Clipboard (CL)
-	GuiControl, HS4: Choose, v_SelectFunction, Clipboard (CL)
-}
-else if (Fun = "MCL")
-{
-	;SendFun := "F_MenuText"
-	GuiControl, HS3: Choose, v_SelectFunction, Menu & Clipboard (MCL)
-	GuiControl, HS4: Choose, v_SelectFunction, Menu & Clipboard (MCL)
-}
-else if (Fun = "MSI")
-{
-	;SendFun := "F_MenuTextAHK"
-	GuiControl, HS3: Choose, v_SelectFunction, Menu & SendInput (MSI)
-	GuiControl, HS4: Choose, v_SelectFunction, Menu & SendInput (MSI)
-}
-
-LV_GetText(EnDis, 		v_SelectedRow, 4)
-InStr(EnDis, "En") ? F_CheckOption("No", 6) : F_CheckOption("Yes", 6)
-
-LV_GetText(TextInsert, 	v_SelectedRow, 5)
-if ((Fun = "MCL") or (Fun = "MSI"))
-{
-	OTextMenu := StrSplit(TextInsert, "¦")
-	GuiControl, HS3:, v_EnterHotstring,  % OTextMenu[1]
-	GuiControl, HS4:, v_EnterHotstring,  % OTextMenu[1]
-	GuiControl, HS3:, v_EnterHotstring1, % OTextMenu[2]
-	GuiControl, HS4:, v_EnterHotstring1, % OTextMenu[2]
-	GuiControl, HS3:, v_EnterHotstring2, % OTextMenu[3]
-	GuiControl, HS4:, v_EnterHotstring2, % OTextMenu[3]
-	GuiControl, HS3:, v_EnterHotstring3, % OTextMenu[4]
-	GuiControl, HS4:, v_EnterHotstring3, % OTextMenu[4]
-	GuiControl, HS3:, v_EnterHotstring4, % OTextMenu[5]
-	GuiControl, HS4:, v_EnterHotstring4, % OTextMenu[5]
-	GuiControl, HS3:, v_EnterHotstring5, % OTextMenu[6]
-	GuiControl, HS4:, v_EnterHotstring5, % OTextMenu[6]
-	GuiControl, HS3:, v_EnterHotstring6, % OTextMenu[7]
-	GuiControl, HS4:, v_EnterHotstring6, % OTextMenu[7]
-}
-else
-{
-	GuiControl, HS3:, v_EnterHotstring, % TextInsert
-	GuiControl, HS4:, v_EnterHotstring, % TextInsert
-}
-
-LV_GetText(Comment, 	v_SelectedRow, 6)
-GuiControl, HS3:, v_Comment, %Comment%
-GuiControl, HS4:, v_Comment, %Comment%
-
-gosub L_SelectFunction
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 HSLV2:
 Gui, HS3List:+OwnDialogs
@@ -4245,109 +4634,6 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_SectionChoose()
-{
-	global ;assume-global mode
-	local str1 := []
-	
-	if (A_DefaultGui = "HS3")
-		Gui, HS3: Submit, NoHide
-	if (A_DefaultGui = "HS4")
-		Gui, HS4: Submit, NoHide
-	
-	GuiControl, Enable, % IdButton4 ; button Delete hotstring (F8)
-	Gui, ListView, % IdListView1 ; identify which ListView
-	LV_Delete()
-	FileRead, Text, Libraries\%v_SelectHotstringLibrary%
-	
-	SectionList := StrSplit(Text, "`r`n")
-	
-	Loop, % SectionList.MaxIndex()
-	{
-		str1 := StrSplit(SectionList[A_Index], "‖")
-		if (InStr(str1[1], "*0"))
-		{
-			str1[1] := StrReplace(str1[1], "*0")
-		}
-		if (InStr(str1[1], "O0"))
-		{
-			str1[1] := StrReplace(str1[1], "O0")
-		}
-		if (InStr(str1[1], "C0"))
-		{
-			str1[1] := StrReplace(str1[1], "C0")
-		}
-		if (InStr(str1[1], "?0"))
-		{
-			str1[1] := StrReplace(str1[1], "?0")
-		}
-		if (InStr(str1[1], "B")) and !(InStr(str1[1], "B0"))
-		{
-			str1[1] := StrReplace(str1[1], "B")
-		}
-		LV_Add("", str1[2], str1[1], str1[3], str1[4],str1[5], str1[6])			
-	}
-	LV_ModifyCol(1, "Sort")
-	
-	v_LibHotstringCnt := SectionList.MaxIndex()
-	if (A_DefaultGui = "HS3")
-		GuiControl, Text, % IdText13,  % A_Space . v_LibHotstringCnt
-	if (A_DefaultGui = "HS4")
-		GuiControl, Text, % IdText13b, % A_Space . v_LibHotstringCnt
-	
-	return
-}
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-L_SelectFunction:
-GuiControlGet, v_SelectFunction
-if InStr(v_SelectFunction, "Menu")
-{
-	GuiControl, HS3: Enable, v_EnterHotstring1
-	GuiControl, HS4: Enable, v_EnterHotstring1
-	GuiControl, HS3: Enable, v_EnterHotstring2
-	GuiControl, HS4: Enable, v_EnterHotstring2
-	GuiControl, HS3: Enable, v_EnterHotstring3
-	GuiControl, HS4: Enable, v_EnterHotstring3
-	GuiControl, HS3: Enable, v_EnterHotstring4
-	GuiControl, HS4: Enable, v_EnterHotstring4
-	GuiControl, HS3: Enable, v_EnterHotstring5
-	GuiControl, HS4: Enable, v_EnterHotstring5
-	GuiControl, HS3: Enable, v_EnterHotstring6
-	GuiControl, HS4: Enable, v_EnterHotstring6
-}
-else
-{
-	GuiControl, HS3:, v_EnterHotstring1 ;Puts new contents into the control. Value := "". Makes empty this control.
-	GuiControl, HS4:, v_EnterHotstring1 ;Puts new contents into the control. Value := "". Makes empty this control.
-	GuiControl, HS3:, v_EnterHotstring2
-	GuiControl, HS4:, v_EnterHotstring2
-	GuiControl, HS3:, v_EnterHotstring3
-	GuiControl, HS4:, v_EnterHotstring3
-	GuiControl, HS3:, v_EnterHotstring4
-	GuiControl, HS4:, v_EnterHotstring4
-	GuiControl, HS3:, v_EnterHotstring5
-	GuiControl, HS4:, v_EnterHotstring5
-	GuiControl, HS3:, v_EnterHotstring6
-	GuiControl, HS4:, v_EnterHotstring6
-	GuiControl, HS3: Disable, v_EnterHotstring1
-	GuiControl, HS4: Disable, v_EnterHotstring1
-	GuiControl, HS3: Disable, v_EnterHotstring2
-	GuiControl, HS4: Disable, v_EnterHotstring2
-	GuiControl, HS3: Disable, v_EnterHotstring3
-	GuiControl, HS4: Disable, v_EnterHotstring3
-	GuiControl, HS3: Disable, v_EnterHotstring4
-	GuiControl, HS4: Disable, v_EnterHotstring4
-	GuiControl, HS3: Disable, v_EnterHotstring5
-	GuiControl, HS4: Disable, v_EnterHotstring5
-	GuiControl, HS3: Disable, v_EnterHotstring6
-	GuiControl, HS4: Disable, v_EnterHotstring6
-}
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 CapsCheck:
 If (Instr(a_String[2], "C1"))
 	v_CaseSensitiveC1 := 1
@@ -4355,199 +4641,6 @@ GuiControlGet, OutputVar1, Focus
 GuiControlGet, OutputVar2, , %OutputVar1%
 F_CheckBoxColor(OutputVar2,OutputVar1)
 return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-/*
-	OptionString:
-	Options := ""
-	
-	Options := v_OptionCaseSensitive = 1 ? Options . "C"
-			: (Instr(OldOptions,"C1")) ?  Options . "C0"
-			: (Instr(OldOptions,"C0")) ?  Options
-			: (Instr(OldOptions,"C")) ? Options . "C1" : Options
-	
-	Options := v_OptionNoBackspace = 1 ?  Options . "B0" 
-			: (v_OptionNoBackspace = 0) and (Instr(OldOptions,"B0")) ? Options . "B" : Options
-	
-	Options := (v_OptionImmediateExecute = 1) ?  Options . "*" 
-			: (Instr(OldOptions,"*0")) ?  Options
-			: (Instr(OldOptions,"*")) ? Options . "*0" : Options
-	
-	Options := v_OptionInsideWord = 1 ?  Options . "?" : Options
-	
-	Options := (v_OptionNoEndChar = 1) ?  Options . "O"
-			: (Instr(OldOptions,"O0")) ?  Options
-			: (Instr(OldOptions,"O")) ? Options . "O0" : Options
-	
-	a_String[2] := Options
-	Return
-*/
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-F_DeleteHotstring()
-{
-	;1. Remove selected library file.
-	;2. Create library file of the same name as selected. its content will contain List View but without selected row.
-	;3. Remove selected row from List View.
-	;4. Disable selected hotstring.
-	;5. Remove trigger hint.
-	;6. Decrement library counter.
-	global ;assume-global mode
-	local 	LibraryFullPathAndName := "" 
-			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
-	
-	Gui, HS3:+OwnDialogs
-	
-	if !(v_SelectedRow := LV_GetNext()) 
-	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information",  % TransA["Select a row in the list-view, please!"] ;Future: translate "information"
-		;MsgBox, 0, %A_ThisLabel%, %t_SelectARowInTheListViewPlease%
-		return
-	}
-	MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ": information", % TransA["Selected Hotstring will be deleted. Do you want to proceed?"] ;Future: translate "information"
-	IfMsgBox, No
-		return
-	TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
-	
-	/*
-		Gui, ProgressDelete:New, -Border -Resize
-		Gui, ProgressDelete:Add, Progress, w200 h20 cBlue vProgressDelete, 0
-		Gui, ProgressDelete:Add,Text,w200 vTextDelete, % TransA["Deleting hotstring. Please wait..."]
-		Gui, ProgressDelete:Show, hide, ProgressDelete
-		WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
-		DetectHiddenWindows, On
-		WinGetPos, , , DeleteWindowWidth, DeleteWindowHeight,ProgressDelete
-		DetectHiddenWindows, Off
-		Gui, ProgressDelete:Show,% "x" . v_WindowX + (v_WindowWidth - DeleteWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - DeleteWindowHeight)/2 ,ProgressDelete
-	*/
-	
-	;1. Remove selected library file.
-	LibraryFullPathAndName := A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary
-	FileDelete, % LibraryFullPathAndName
-	;cntDelete := 0
-	;Gui, HS3:Default
-	
-	;2. Create library file of the same name as selected. its content will contain LV but without selected row.
-	if (v_SelectedRow == SectionList.MaxIndex())
-	{
-		if (SectionList.MaxIndex() == 1)
-		{
-			FileAppend,, % LibraryFullPathAndName, UTF-8
-			;GuiControl,, ProgressDelete, 100
-		}
-		else
-		{
-			Loop, % SectionList.MaxIndex()-1
-			{
-				if !(A_Index == v_SelectedRow)
-				{
-					LV_GetText(txt1, A_Index, 2)
-					LV_GetText(txt2, A_Index, 1)
-					LV_GetText(txt3, A_Index, 3)
-					LV_GetText(txt4, A_Index, 4)
-					LV_GetText(txt5, A_Index, 5)
-					LV_GetText(txt6, A_Index, 6)
-					if (A_Index == SectionList.MaxIndex()-1)
-						txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-					else
-						txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
-					if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
-						FileAppend, %txt%, % LibraryFullPathAndName, UTF-8
-					;v_DeleteProgress := (A_Index/(SectionList.MaxIndex()-1))*100
-					;Gui, ProgressDelete:Default
-					;GuiControl,, ProgressDelete, %v_DeleteProgress%
-					;Gui, HS3:Default
-				}
-			}
-		}
-	}
-	else
-	{
-		Loop, % SectionList.MaxIndex()
-		{
-			if !(A_Index == v_SelectedRow)
-			{
-				LV_GetText(txt1, A_Index, 2)
-				LV_GetText(txt2, A_Index, 1)
-				LV_GetText(txt3, A_Index, 3)
-				LV_GetText(txt4, A_Index, 4)
-				LV_GetText(txt5, A_Index, 5)
-				LV_GetText(txt6, A_Index, 6)
-				if (A_Index == SectionList.MaxIndex())
-					txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-				else
-					txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
-				if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
-					FileAppend, %txt%, % LibraryFullPathAndName, UTF-8
-				;v_DeleteProgress := (A_Index/(SectionList.MaxIndex()-1))*100
-				;Gui, ProgressDelete:Default
-				;GuiControl,, ProgressDelete, %v_DeleteProgress%
-				;Gui, HS3:Default
-			}
-		}
-	}
-	;3. Remove selected row from List View.
-	LV_Delete(v_SelectedRow)
-	;4. Disable selected hotstring.
-	
-	Try
-		Hotstring(":" . Options . ":" . v_TriggerString, , "Off")
-	Catch
-		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_ThisFunc, % "Error, something went wrong with hotstring deletion:" . A_Space . v_TriggerString . A_Space . "Library name:" . A_Space . v_SelectHotstringLibrary ;Future: translate this.
-	
-	;5. Remove trigger hint.
-	Loop, % a_Triggers.MaxIndex()
-	{
-		if (InStr(a_Triggers[A_Index], v_TriggerString))
-			a_Triggers.RemoveAt(A_Index)
-	}
-	TrayTip, %A_ScriptName%, Specified definition of hotstring has been deleted, 1 ;Future: add to translate 
-	;Gui, ProgressDelete:Destroy
-	;MsgBox, % Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
-	;WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
-	;Run, AutoHotkey.exe Hotstrings.ahk %v_Param% %v_SelectHotstringLibrary% %v_PreviousWidth% %v_PreviousHeight% %v_PreviousX% %v_PreviousY% %v_SelectedRow% %v_SelectedMonitor%	
-	
-	;6. Decrement library counter.
-	GuiControl, Text, % IdText13, % A_Space . --v_LibHotstringCnt
-	GuiControl, Text, % IdText12, % A_Space . --v_TotalHotstringCnt
-	
-	return
-}
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-;In AutoHotkey there is no Guicontrol, Delete sub-command. As a consequence even if specific control is hidden (Guicontrol, Hide), the Gui size isn't changed, size is not decreased, as space for hidden control is maintained. To solve this issue, the separate gui have to be prepared. This requires a lot of work and is a matter of far future.
-F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui 
-{
-	global ;assume-global mode
-	local WinX := 0, WinY := 0
-	local OutputvarTemp := 0, OutputvarTempW := 0
-	
-	Switch A_DefaultGui
-	{
-		Case "HS3":
-			WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
-			Gui, HS4: Default
-			F_UpdateSelHotLibDDL()
-			F_GuiHS4_Redraw()
-			Gui, HS3: Show, Hide
-			Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
-			;v_WhichGUIisMinimzed := ""
-			return
-		Case "HS4":
-			WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
-			Gui, HS3: Default
-			F_UpdateSelHotLibDDL()
-			F_GuiMain_Redraw()
-			Gui, HS4: Show, Hide
-			Gui, HS3: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
-			Gui, HS3: Show, AutoSize ;don't know why it has to be doubled to properly display...
-			;v_WhichGUIisMinimzed := ""
-			return
-	}
-}
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -4594,131 +4687,6 @@ MyAboutGuiEscape:
 MyAboutGuiClose: ; Showed when the window is closed by pressing its X button in the title bar.
 Gui, MyAbout: Hide
 return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-HS4GuiSize() ;Gui event
-{
-	global ;assume-global mode
-	
-	HS4_GuiWidth  := A_GuiWidth
-	HS4_GuiHeight := A_GuiHeight
-	return
-}
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
-{
-;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
-	global ;assume-global mode
-	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
-		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0
-		,deltaW := 0, deltaH := 0
-	
-	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "A_GuiHeight:" . A_Space .  A_GuiHeight
-	
-	if (A_EventInfo = 1) ; The window has been minimized.
-		return
-	if (v_ResizingFlag) ;Special case: FontSize set to 16 and some procedures are run twice
-	{
-		HS3_GuiWidth  := A_GuiWidth
-		HS3_GuiHeight := A_GuiHeight
-		;OutputDebug, return because of "v_ResizingFlag"
-		GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;Check position of ListView1 again after resizing
-		LV_ModifyCol(1, Round(0.1 * v_OutVarTemp2W))
-		LV_ModifyCol(2, Round(0.1 * v_OutVarTemp2W))
-		LV_ModifyCol(3, Round(0.1 * v_OutVarTemp2W))	
-		LV_ModifyCol(4, Round(0.1 * v_OutVarTemp2W))
-		LV_ModifyCol(5, Round(0.4 * v_OutVarTemp2W))
-		LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W) - 3)
-		return
-	}
-	if (A_EventInfo = 2)
-	{
-		MsgBox, , maximized
-		;OutputDebug, return because of "A_EventInfo = 2"
-		return
-	}
-	
-	GuiControlGet, v_OutVarTemp1, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.
-	;OutputDebug, % "Before:" . A_Space . v_OutVarTemp1H
-	F_AutoXYWH("*wh", IdListView1)
-	F_AutoXYWH("*h", IdButton5)
-
-	if (!ini_IsSandboxMoved)
-		F_AutoXYWH("*w", IdEdit10)
-
-	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;Check position of ListView1 again after resizing
-	;OutputDebug, % "After:" . A_Space . v_OutVarTemp2H
-	;OutputDebug, % "Height of ListView in rel to A_GuiHeight:" . A_Space . A_GuiHeight - v_OutVarTemp2H
-	if (v_OutVarTemp2W != v_OutVarTemp1W)
-	{
-		LV_ModifyCol(1, Round(0.1 * v_OutVarTemp2W))
-		LV_ModifyCol(2, Round(0.1 * v_OutVarTemp2W))
-		LV_ModifyCol(3, Round(0.1 * v_OutVarTemp2W))	
-		LV_ModifyCol(4, Round(0.1 * v_OutVarTemp2W))
-		LV_ModifyCol(5, Round(0.4 * v_OutVarTemp2W))
-		LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W) - 3)
-	}	
-	
-	
-	deltaW := A_GuiWidth -  HS3_GuiWidth
-	deltaH := A_GuiHeight - HS3_GuiHeight
-	
-	;OutputDebug, % "Width:" . A_Space . Width . A_Space . "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "Height:" . A_Space . Height . A_Space . "A_GuiHeight:" . A_Space . A_GuiHeight
-	
-	if (ini_Sandbox) and (deltaH > 0) and !(ini_IsSandboxMoved) and (v_OutVarTemp2H + HofText > LeftColumnH) 
-	{
-		GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox ;increase
-		GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
-		GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
-		GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
-		ini_IsSandboxMoved := true
-		OutputDebug, % "Two:" . A_Space ini_IsSandboxMoved . A_Space . deltaH
-		F_AutoXYWH("reset")
-		F_AutoXYWH("*wh", IdListView1)
-		F_AutoXYWH("*h", IdButton5)
-	}
-		
-	if (ini_Sandbox) and (deltaH < 0) and (ini_IsSandboxMoved) and (v_OutVarTemp2H + HofText <  LeftColumnH + c_HofSandbox)
-	{
-		GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H - (c_ymarg + HofText + c_HofSandbox) ;decrease
-		GuiControl, MoveDraw, % IdText10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - (HofText + c_HofSandbox)
-		GuiControl, MoveDraw, % IdEdit10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox "w" v_OutVarTemp2W
-		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
-		ini_IsSandboxMoved := false
-		OutputDebug, % "One:" . A_Space ini_IsSandboxMoved . A_Space . deltaH
-		F_AutoXYWH("reset")
-		F_AutoXYWH("*wh", IdListView1)
-		F_AutoXYWH("*h", IdButton5)
-	}
-
-	if ((ini_Sandbox) and (ini_IsSandboxMoved))
-	{
-		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
-		OutputDebug, % "Three" . A_Space . deltaH
-	}
-	if ((ini_Sandbox) and !(ini_IsSandboxMoved)) ;tu jest problem
-	{
-		
-		GuiControl, MoveDraw, % IdText10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
-		GuiControl, MoveDraw, % IdEdit10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText 
-		GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg
-		OutputDebug, % "Four" . A_Space . deltaH
-	}
-	if (!ini_Sandbox)
-	{
-		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
-		OutputDebug, % "Five" . A_Space . deltaH
-	}
-
-	HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
-	HS3_GuiHeight := A_GuiHeight
-	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space "A_GuiHeight" . A_Space . A_GuiHeight
-	;*[Two]
-	return
-}
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; Future: save window position
