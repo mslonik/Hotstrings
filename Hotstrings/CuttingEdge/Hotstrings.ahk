@@ -755,8 +755,8 @@ Goto, L_Searching
 
 F5::
 Gui, HS3:Default
-goto, Clear
-; return
+F_Clear()
+return
 
 F7::
 Gui, HS3:Default
@@ -1194,7 +1194,7 @@ F_SectionChoose()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-
+;tu jestem: zrobić tak, żeby wybrana funkcja z listy przenosiła się z HS3 → HS4
 F_HSLV() 
 ; copy content of List View 1 to editable fields of HS3 Gui
 {
@@ -2252,7 +2252,7 @@ F_GuiHS4_CreateObject()
 	;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
 	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton2b gF_AddHotstring,						% TransA["Set hotstring (F9)"]
 	;GuiControl,	Hide,		% IdButton2
-	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton3b gClear,							% TransA["Clear (F5)"]
+	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton3b gF_Clear,							% TransA["Clear (F5)"]
 	;GuiControl,	Hide,		% IdButton3
 	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton4b gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
 	;GuiControl,	Hide,		% IdButton4
@@ -2379,7 +2379,7 @@ F_GuiMain_CreateObject()
 ;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
 	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton2 gF_AddHotstring,						% TransA["Set hotstring (F9)"]
 ;GuiControl,	Hide,		% IdButton2
-	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton3 gClear,							% TransA["Clear (F5)"]
+	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton3 gF_Clear,							% TransA["Clear (F5)"]
 ;GuiControl,	Hide,		% IdButton3
 	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton4 gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
 ;GuiControl,	Hide,		% IdButton4
@@ -4489,46 +4489,78 @@ F_AddHotstring()
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-Clear: 
-Gui,		HS3: Font, % "c" . c_FontColor
-GuiControl, Font, % IdCheckBox1
-GuiControl,, % IdEdit1,  				;v_TriggerString
-GuiControl, Font, % IdCheckBox1
-GuiControl,, % IdCheckBox1, 0
-GuiControl, Font, % IdCheckBox2
-GuiControl,, % IdCheckBox2, 0
-GuiControl, Font, % IdCheckBox3
-GuiControl,, % IdCheckBox3, 0
-GuiControl, Font, % IdCheckBox4
-GuiControl,, % IdCheckBox4, 0
-GuiControl, Font, % IdCheckBox5
-GuiControl,, % IdCheckBox5, 0
-GuiControl, Font, % IdCheckBox6
-GuiControl,, % IdCheckBox6, 0
-GuiControl, Choose, % IdDDL1, SendInput (SI) ;v_SelectFunction 
-GuiControl,, % IdEdit2,  				;v_EnterHotstring
-GuiControl,, % IdEdit3, 					;v_EnterHotstring1
-GuiControl, Disable, % IdEdit3 			;v_EnterHotstring1
-GuiControl,, % IdEdit4, 					;v_EnterHotstring2
-GuiControl, Disable, % IdEdit4 			;v_EnterHotstring2
-GuiControl,, % IdEdit5, 					;v_EnterHotstring3
-GuiControl, Disable, % IdEdit5 			;v_EnterHotstring3
-GuiControl,, % IdEdit6, 					;v_EnterHotstring4
-GuiControl, Disable, % IdEdit6 			;v_EnterHotstring4
-GuiControl,, % IdEdit7, 					;v_EnterHotstring5
-GuiControl, Disable, % IdEdit7 			;v_EnterHotstring5
-GuiControl,, % IdEdit8, 					;v_EnterHotstring6
-GuiControl, Disable, % IdEdit8 			;v_EnterHotstring6
-GuiControl,, % IdEdit9,  				;Comment
-GuiControl,, % IdDDL2, | 				;v_SelectHotstringLibrary o make the control empty, specify only a pipe character (|)
-Loop,%A_ScriptDir%\Libraries\*.csv
-	GuiControl,, % IdDDL2, %A_LoopFileName%
-GuiControl, Disable, % IdButton4
-LV_Delete()
-GuiControl,, % IdEdit10,  				;Sandbox
-
-return
+F_Clear()
+{
+	global	;assume-global mode
+	Gui,		  HS3: Font, % "c" . c_FontColor
+	GuiControl, HS3:, % IdEdit1,  				;v_TriggerString
+	GuiControl, HS3: Font, % IdCheckBox1
+	GuiControl, HS3:, % IdCheckBox1, 0
+	GuiControl, HS3: Font, % IdCheckBox2
+	GuiControl, HS3:, % IdCheckBox2, 0
+	GuiControl, HS3: Font, % IdCheckBox3
+	GuiControl, HS3:, % IdCheckBox3, 0
+	GuiControl, HS3: Font, % IdCheckBox4
+	GuiControl, HS3:, % IdCheckBox4, 0
+	GuiControl, HS3: Font, % IdCheckBox5
+	GuiControl, HS3:, % IdCheckBox5, 0
+	GuiControl, HS3: Font, % IdCheckBox6
+	GuiControl, HS3:, % IdCheckBox6, 0
+	GuiControl, HS3: Choose, % IdDDL1, SendInput (SI) ;v_SelectFunction 
+	GuiControl, HS3:, % IdEdit2,  				;v_EnterHotstring
+	GuiControl, HS3:, % IdEdit3, 					;v_EnterHotstring1
+	GuiControl, HS3: Disable, % IdEdit3 			;v_EnterHotstring1
+	GuiControl, HS3:, % IdEdit4, 					;v_EnterHotstring2
+	GuiControl, HS3: Disable, % IdEdit4 			;v_EnterHotstring2
+	GuiControl, HS3:, % IdEdit5, 					;v_EnterHotstring3
+	GuiControl, HS3: Disable, % IdEdit5 			;v_EnterHotstring3
+	GuiControl, HS3:, % IdEdit6, 					;v_EnterHotstring4
+	GuiControl, HS3: Disable, % IdEdit6 			;v_EnterHotstring4
+	GuiControl, HS3:, % IdEdit7, 					;v_EnterHotstring5
+	GuiControl, HS3: Disable, % IdEdit7 			;v_EnterHotstring5
+	GuiControl, HS3:, % IdEdit8, 					;v_EnterHotstring6
+	GuiControl, HS3: Disable, % IdEdit8 			;v_EnterHotstring6
+	GuiControl, HS3:, % IdEdit9,  				;Comment
+	GuiControl, HS3: Disable, % IdButton4
+	GuiControl, HS3:, % IdEdit10,  				;Sandbox
+	GuiControl, HS3: ChooseString, % IdDDL2, % TransA["↓ Click here to select hotstring library ↓"]
+	LV_Delete()
+	
+	Gui,		  HS4: Font, % "c" . c_FontColor
+	GuiControl, HS4:, % IdEdit1b,  				;v_TriggerString
+	GuiControl, HS4: Font, % IdCheckBox1b
+	GuiControl, HS4:, % IdCheckBox1b, 0
+	GuiControl, HS4: Font, % IdCheckBox2b
+	GuiControl, HS4:, % IdCheckBox2b, 0
+	GuiControl, HS4: Font, % IdCheckBox3b
+	GuiControl, HS4:, % IdCheckBox3b, 0
+	GuiControl, HS4: Font, % IdCheckBox4b
+	GuiControl, HS4:, % IdCheckBox4b, 0
+	GuiControl, HS4: Font, % IdCheckBox5b
+	GuiControl, HS4:, % IdCheckBox5b, 0
+	GuiControl, HS4: Font, % IdCheckBox6b
+	GuiControl, HS4:, % IdCheckBox6b, 0
+	GuiControl, HS4: Choose, % IdDDL1b, SendInput (SI) ;v_SelectFunction 
+	GuiControl, HS4: , % IdEdit2b,  				;v_EnterHotstring
+	GuiControl, HS4: , % IdEdit3b, 					;v_EnterHotstring1
+	GuiControl, HS4: Disable, % IdEdit3b 			;v_EnterHotstring1
+	GuiControl, HS4: , % IdEdit4b, 					;v_EnterHotstring2
+	GuiControl, HS4: Disable, % IdEdit4b 			;v_EnterHotstring2
+	GuiControl, HS4: , % IdEdit5b, 					;v_EnterHotstring3
+	GuiControl, HS4: Disable, % IdEdit5b 			;v_EnterHotstring3
+	GuiControl, HS4: , % IdEdit6b, 					;v_EnterHotstring4
+	GuiControl, HS4: Disable, % IdEdit6b 			;v_EnterHotstring4
+	GuiControl, HS4: , % IdEdit7b, 					;v_EnterHotstring5
+	GuiControl, HS4: Disable, % IdEdit7b 			;v_EnterHotstring5
+	GuiControl, HS4: , % IdEdit8b, 					;v_EnterHotstring6
+	GuiControl, HS4: Disable, % IdEdit8b 			;v_EnterHotstring6
+	GuiControl, HS4: , % IdEdit9b,  				;Comment
+	GuiControl, HS4: Disable, % IdButton4b
+	GuiControl, HS4: , % IdEdit10b,  				;Sandbox
+	GuiControl, HS4: ChooseString, % IdDDL2b, % TransA["↓ Click here to select hotstring library ↓"]
+	
+	return
+}
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
