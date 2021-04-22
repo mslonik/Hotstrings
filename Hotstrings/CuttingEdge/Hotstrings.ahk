@@ -886,6 +886,9 @@ F_LoadFontType()
 	c_FontType := ""
 	
 	IniRead, c_FontType, 			Config.ini, GraphicalUserInterface, GuiFontType, Calibri
+	if (!c_FontType)
+		c_FontType := "Calibri"
+	
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -947,8 +950,8 @@ F_LoadSizeOfMargin()
 {
 	global	;assume-global mode
 	SizeOfMargin				:= {1: 0, 2: 5, 3: 10, 4: 15, 5: 20} ;pixels
-	c_xmarg := 0	;pixels
-	c_ymarg := 0	;pixels
+	c_xmarg := 10	;pixels
+	c_ymarg := 10	;pixels
 	
 	IniRead, c_xmarg, 			Config.ini, GraphicalUserInterface, GuiSizeOfMarginX, 10
 	IniRead, c_ymarg,			Config.ini, GraphicalUserInterface, GuiSizeOfMarginY, 10
@@ -996,6 +999,8 @@ F_LoadFontSize()
 	c_FontSize 				:= 0 ;points
 	
 	IniRead, c_FontSize, 			Config.ini, GraphicalUserInterface, GuiFontSize, 10
+	if (!c_FontSize)
+		c_FontSize := 10
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1055,6 +1060,16 @@ F_LoadGUIstyle()
 	IniRead, c_FontColorHighlighted, 	Config.ini, GraphicalUserInterface, GuiFontColorHighlighted, Blue
 	IniRead, c_WindowColor, 			Config.ini, GraphicalUserInterface, GuiWindowColor, 		 Default
 	IniRead, c_ControlColor, 		Config.ini, GraphicalUserInterface, GuiControlColor, 		 Default
+	
+	if (!c_FontColor)
+		c_FontColor := "Black"
+	if (!c_FontColorHighlighted)
+		c_FontColorHighlighted := "Blue"
+	if (!c_WindowColor)
+		c_WindowColor := "Default"
+	if (!c_ControlColor)
+		c_ControlColor := "Default"
+	
 	return
 }
 
@@ -1318,10 +1333,6 @@ F_UpdateSelHotLibDDL()
 	global ;assume-global mode
 	local key := "", value := "", FinalString := ""
 	
-	;if (A_DefaultGui = "HS3")
-		;GuiControl, , % IdDDL2, | ;To make the control empty, specify only a pipe character (|). 
-	;if (A_DefaultGui = "HS4")
-		;GuiControl, , % IdDDL2b, | ;To make the control empty, specify only a pipe character (|). 
 	if (ini_LoadLib.Count()) ;if ini_LoadLib isn't empty
 	{
 		FinalString .= TransA["↓ Click here to select hotstring library ↓"] . "||"
