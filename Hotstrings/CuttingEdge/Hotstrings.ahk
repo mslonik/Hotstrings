@@ -36,7 +36,7 @@ global v_LibHotstringCnt			:= 0 ;no of (triggerstring, hotstring) definitions in
 global a_LibraryCnt				:= [] ;Hotstring counter for specific libraries
 global a_OutputFunction 			:= []
 global a_SelectedTriggers 		:= []
-global a_String 				:= ""
+;global a_String 				:= ""
 global a_TriggerOptions 			:= []
 global a_Triggers 				:= []
 global a_Triggerstring 			:= []
@@ -51,7 +51,7 @@ global ini_Sandbox				:= 1	; as in new-created Config.ini
 global ini_Tips 				:= ""
 global ini_TipsSortAlphabetically 	:= ""
 global ini_TipsSortByLength 		:= ""
-global v_CaseSensitiveC1 		:= ""
+;global v_CaseSensitiveC1 		:= ""
 global v_BlockHotkeysFlag		:= 0
 global v_FlagSound 				:= 0
 ;I couldn't find how to get system settings for size of menu font. Quick & dirty solution: manual setting of all fonts with variable c_FontSize.
@@ -772,7 +772,7 @@ return
 F9::
 Gui, HS3:Default
 ;goto, AddHotstring
-F_AddHotstring()
+F_SetHotstring()
 return
 
 #if
@@ -869,11 +869,11 @@ F_DeleteHotstring()
 	
 	if !(v_SelectedRow := LV_GetNext()) 
 	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information",  % TransA["Select a row in the list-view, please!"] ;Future: translate "information"
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
 		;MsgBox, 0, %A_ThisLabel%, %t_SelectARowInTheListViewPlease%
 		return
 	}
-	MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ": information", % TransA["Selected Hotstring will be deleted. Do you want to proceed?"] ;Future: translate "information"
+	MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Selected Hotstring will be deleted. Do you want to proceed?"]
 	IfMsgBox, No
 		return
 	TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
@@ -996,18 +996,24 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 	{
 		Case "HS3":
 			WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
+			Gui, HS3: Submit, NoHide
 			Gui, HS4: Default
 			F_UpdateSelHotLibDDL()
 			F_GuiHS4_Redraw()
+			GuiControl,, % IdEdit1b, % v_TriggerString
+			GuiControl, ChooseString, % IdDDL2b, % v_SelectHotstringLibrary
 			Gui, HS3: Show, Hide
 			Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
 			;v_WhichGUIisMinimzed := ""
 			return
 		Case "HS4":
 			WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
+			Gui, HS4: Submit, NoHide
 			Gui, HS3: Default
 			F_UpdateSelHotLibDDL()
 			F_GuiMain_Redraw()
+			GuiControl,, % IdEdit1, % v_TriggerString
+			GuiControl, ChooseString, % IdDDL2, % v_SelectHotstringLibrary
 			Gui, HS4: Show, Hide
 			Gui, HS3: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
 			Gui, HS3: Show, AutoSize ;don't know why it has to be doubled to properly display...
@@ -1144,9 +1150,10 @@ F_SectionChoose()
 {
 	global ;assume-global mode
 	local str1 := []
-	
 	if (A_DefaultGui = "HS3")
+	{
 		Gui, HS3: Submit, NoHide
+	}
 	if (A_DefaultGui = "HS4")
 		Gui, HS4: Submit, NoHide
 	
@@ -1194,7 +1201,7 @@ F_SectionChoose()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-;tu jestem: zrobić tak, żeby wybrana funkcja z listy przenosiła się z HS3 → HS4
+
 F_HSLV() 
 ; copy content of List View 1 to editable fields of HS3 Gui
 {
@@ -1903,10 +1910,10 @@ Cancel 												= Cancel
 Caret 												= Caret
 Case Sensitive (C) 										= Case Sensitive (C)
 Change Language 										= Change Language
+Choose existing hotstring library file before saving! 			= Choose existing hotstring library file before saving!
 Choose library file (.ahk) for import 						= Choose library file (.ahk) for import
 Choose library file (.csv) for export 						= Choose library file (.csv) for export
 Choose menu position 									= Choose menu position
-Choose section before saving! 							= Choose section before saving!
 Choose sending function! 								= Choose sending function!
 Choose the method of sending the hotstring! 					= Choose the method of sending the hotstring!
 Choose tips location 									= Choose tips location
@@ -1941,7 +1948,7 @@ Enables Convenient Definition 							= Enables convenient definition and use of 
 Enter 												= Enter
 Enter a name for the new library 							= Enter a name for the new library
 Enter hotstring 										= Enter hotstring
-Enter triggerstring 									= Enter triggerstring
+Enter triggerstring before hotstring is set					= Enter triggerstring before hotstring is set
 ErrorLevel was triggered by NewInput error. 					= ErrorLevel was triggered by NewInput error.
 Exclamation Mark ! 										= Exclamation Mark !
 exists in a file 										= exists in a file
@@ -1957,6 +1964,7 @@ Genuine hotstrings AutoHotkey documentation 					= Genuine hotstrings AutoHotkey
 Graphical User Interface									= Graphical User Interface
 has been created. 										= has been created.
 Hotstring 											= Hotstring
+Hotstring added to the file								= Hotstring added to the file
 Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv) = Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
 Hotstring menu (MSI, MCL) 								= Hotstring menu (MSI, MCL)
 Hotstring moved to the 									= Hotstring moved to the
@@ -2250,8 +2258,8 @@ F_GuiHS4_CreateObject()
 	;GuiControl,	Hide,		% IdDDL2
 	
 	;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
-	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton2b gF_AddHotstring,						% TransA["Set hotstring (F9)"]
-	;GuiControl,	Hide,		% IdButton2
+	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton2b gF_SetHotstring,						% TransA["Set hotstring (F9)"]
+	;GuiControl,	HideSet% IdButton2
 	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton3b gF_Clear,							% TransA["Clear (F5)"]
 	;GuiControl,	Hide,		% IdButton3
 	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton4b gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
@@ -2377,8 +2385,8 @@ F_GuiMain_CreateObject()
 ;GuiControl,	Hide,		% IdDDL2
 	
 ;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
-	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton2 gF_AddHotstring,						% TransA["Set hotstring (F9)"]
-;GuiControl,	Hide,		% IdButton2
+	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton2 gF_SetHotstring,						% TransA["Set hotstring (F9)"]
+;GuiControl,	HideSet% IdButton2
 	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton3 gF_Clear,							% TransA["Clear (F5)"]
 ;GuiControl,	Hide,		% IdButton3
 	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton4 gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
@@ -4268,31 +4276,29 @@ return
 ;5. Delete library file. 
 ;6. Save List View into the library file.
 ;7. Increment library counter.
-F_AddHotstring()
+F_SetHotstring()
 {
 	global ;assume-global mode
 	local 	TextInsert := "", OldOptions := "", Options := "", SendFun := "", OnOff := "", EnDis := "", OutputFile := "", InputFile := "", LString := "", ModifiedFlag := false
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
 	
-	Gui, HS3:+OwnDialogs
+	Gui, +OwnDialogs
 	;1. Read all inputs. 
 	Gui, Submit, NoHide
-;GuiControlGet, v_SelectFunction
 	
 	if (Trim(v_TriggerString) = "")
 	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information",  % TransA["Enter hotstring"] ;Future: translate "information"
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"],  % TransA["Enter triggerstring before hotstring is set"]
 		return
 	}
 	if InStr(v_SelectFunction, "Menu")
 	{
 		if ((Trim(v_EnterHotstring) = "") and (Trim(v_EnterHotstring1) = "") and (Trim(v_EnterHotstring2) = "") and (Trim(v_EnterHotstring3) = "") and (Trim(v_EnterHotstring4) = "") and (Trim(v_EnterHotstring5) = "") and (Trim(v_EnterHotstring6) = ""))
 		{
-			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ": information", % TransA["Replacement text is blank. Do you want to proceed?"] ;Future: translate "information"
+			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Replacement text is blank. Do you want to proceed?"]
 			IfMsgBox, No
 				return
 		}
-		;TextInsert := ""
 		if (Trim(v_EnterHotstring) != "")
 			TextInsert := % TextInsert . "¦" . v_EnterHotstring
 		if (Trim(v_EnterHotstring1) != "")
@@ -4313,9 +4319,9 @@ F_AddHotstring()
 	{
 		if (Trim(v_EnterHotstring) = "")
 		{
-			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ": information", % TransA["Replacement text is blank. Do you want to proceed?"] ;Future: translate "information"
+			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Replacement text is blank. Do you want to proceed?"] 
 			IfMsgBox, No
-				Return
+				return
 		}
 		else
 		{
@@ -4323,15 +4329,13 @@ F_AddHotstring()
 		}
 	}
 	
-	if (v_SelectHotstringLibrary == "")
+	if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
 	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information", % TransA["Choose section before saving!"] ;Future: translate "information"
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Choose existing hotstring library file before saving!"]
 		return
 	}
 	
-	
 	/*
-		
 	; Added this conditional to prevent Hotstrings from a file losing the C1 option caused by
 	; cascading ternary operators when creating the options string. CapCheck set to 1 when 
 	; a Hotstring from a file contains the C1 option.
@@ -4340,9 +4344,6 @@ F_AddHotstring()
 			OldOptions := StrReplace(OldOptions,"C1") . "C"
 		v_CaseSensitiveC1 := 0
 	*/
-	
-;GoSub OptionString   ; Writes the Hotstring options string
-	
 	
 	Options := v_OptionCaseSensitive = 1 ? Options . "C"
 		: (Instr(OldOptions,"C1")) ?  Options . "C0"
@@ -4362,7 +4363,7 @@ F_AddHotstring()
 		: (Instr(OldOptions,"O0")) ?  Options
 		: (Instr(OldOptions,"O")) ? Options . "O0" : Options
 	
-	a_String[2] := Options ;???
+	;a_String[2] := Options ;???
 	
 ; Add new/changed target item in DropDownList
 	if (v_SelectFunction == "Clipboard (CL)")
@@ -4379,13 +4380,7 @@ F_AddHotstring()
 	else
 		OnOff := "On"
 	
-	/*
-	; If case sensitive (C) or inside a word (?) first deactivate Hotstring
-		If (v_OptionCaseSensitive or v_OptionInsideWord or InStr(OldOptions,"C") 
-			or InStr(OldOptions,"?")) 
-			Hotstring(":" . OldOptions . ":" . v_TriggerString , func(SendFun).bind(TextInsert), "Off")
-	*/
-	
+
 	;2. Create Hotstring definition according to inputs. 
 	if (InStr(Options,"O", 0))
 		Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, true), OnOff)
@@ -4483,7 +4478,7 @@ F_AddHotstring()
 	GuiControl, Text, % IdText13, % A_Space . ++v_LibHotstringCnt
 	GuiControl, Text, % IdText12, % A_Space . ++v_TotalHotstringCnt
 	
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ": information", Hotstring added to the %v_SelectHotstringLibrary% file! ; Future: add to translation.
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Hotstring added to the file"] . A_Space . v_SelectHotstringLibrary . A_Space . "!" 
 	
 	return
 }
@@ -4667,11 +4662,13 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 CapsCheck:
-If (Instr(a_String[2], "C1"))
-	v_CaseSensitiveC1 := 1
-GuiControlGet, OutputVar1, Focus
-GuiControlGet, OutputVar2, , %OutputVar1%
-F_CheckBoxColor(OutputVar2,OutputVar1)
+/*
+	If (Instr(a_String[2], "C1"))
+		v_CaseSensitiveC1 := 1
+	GuiControlGet, OutputVar1, Focus
+	GuiControlGet, OutputVar2, , %OutputVar1%
+	F_CheckBoxColor(OutputVar2,OutputVar1)
+*/
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
