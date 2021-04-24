@@ -83,6 +83,7 @@ global v_ConfigFlag 			:= 0
 global v_ResizingFlag 			:= true ; when Hotstrings Gui is displayed for the very first time
 global v_WhichGUIisMinimzed		:= ""
 global HS3_GuiWidth  := 0,	HS3_GuiHeight := 0
+global WinHWND := 0
 
 F_LoadCreateTranslationTxt() ;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
 F_CheckCreateConfigIni() ;1. Try to load up configuration file. If those files do not exist, create them.
@@ -731,8 +732,7 @@ Gui, HS3:Default
 Goto, L_Searching
 ; return
 
-F5::
-Gui, HS3:Default
+F5::	;new thread starts here
 F_Clear()
 return
 
@@ -741,15 +741,21 @@ Gui, HS3:Default
 goto, HSdelay
 ; return
 
-F8::
+F8::	;new thread starts here
 Gui, HS3:Default
 ;goto, Delete
 F_DeleteHotstring()
 return
 
-F9::
-Gui, HS3:Default
-;goto, AddHotstring
+F9::	;new thread starts here
+WinGet, WinHWND, ID, A
+Switch WinHWND
+{
+	Case HS3GuiHwnd:
+		Gui, HS3: Default
+	Case HS4GuiHwnd:
+		Gui, HS4: Default
+}
 F_SetHotstring()
 return
 
@@ -1095,6 +1101,7 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 			F_UpdateSelHotLibDDL()
 			F_GuiHS4_Redraw()
 			GuiControl,, % IdEdit1b, % v_TriggerString
+			GuiControl,, % IdEdit2b, % v_EnterHotstring
 			GuiControl, ChooseString, % IdDDL2b, % v_SelectHotstringLibrary
 			Gui, HS3: Show, Hide
 			Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
@@ -1106,6 +1113,7 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 			F_UpdateSelHotLibDDL()
 			;F_GuiMain_Redraw()
 			GuiControl,, % IdEdit1, % v_TriggerString
+			GuiControl,, % IdEdit2, % v_EnterHotstring
 			GuiControl, ChooseString, % IdDDL2, % v_SelectHotstringLibrary
 			Gui, HS4: Show, Hide
 			Gui, HS3: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
@@ -4386,9 +4394,9 @@ F_SetHotstring()
 	local 	TextInsert := "", OldOptions := "", Options := "", SendFun := "", OnOff := "", EnDis := "", OutputFile := "", InputFile := "", LString := "", ModifiedFlag := false
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
 	
-	Gui, +OwnDialogs
+	Gui, % A_DefaultGui . ":" . A_Space . "+OwnDialogs"
 	;1. Read all inputs. 
-	Gui, Submit, NoHide
+	Gui, % A_DefaultGui . ":" A_Space . "Submit", NoHide
 	
 	if (Trim(v_TriggerString) = "")
 	{
