@@ -451,18 +451,21 @@ Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 				:Submenu1
 Menu, HSMenu, 			Add, % TransA["Search Hotstrings"], 			L_Searching
-Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],		L_ImportLibrary
-Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  			L_ExportLibraryStatic
-Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  			L_ExportLibraryDynamic
-Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],		:ExportSubmenu
+Menu, HSMenu,		Disable,	% TransA["Search Hotstrings"]
 
 Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 		F_RefreshListOfLibraries
 F_RefreshListOfLibraries()
-
 Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	F_RefreshListOfLibraryTips
 F_RefreshListOfLibraryTips()
 
-Menu, 	HSMenu, 			Add, % TransA["Libraries configuration"], 			:LibrariesSubmenu
+Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],		L_ImportLibrary
+Menu, LibrariesSubmenu, Disable, % TransA["Import from .ahk to .csv"]
+Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  			L_ExportLibraryStatic
+Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  			L_ExportLibraryDynamic
+Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],		:ExportSubmenu
+Menu, LibrariesSubmenu, Disable, % TransA["Export from .csv to .ahk"]
+
+Menu, 	HSMenu, 			Add, % TransA["Libraries"], 			:LibrariesSubmenu
 Menu, 	HSMenu, 			Add, % TransA["Clipboard Delay"], 					HSdelay
 Menu,	ApplicationSubmenu,	Add, % TransA["Reload"],							F_Reload
 Menu,	ApplicationSubmenu,	Add, % TransA["Exit"],							F_Exit
@@ -828,6 +831,59 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_GuiAddLibrary()
+{
+	global	;assume-global
+	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
+		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0
+		,IdText1 := 0, IdText2 := 0, IdEdit1 := 0, IdButt1 := 0, IdButt2 := 0
+		,vTempWidth := 2 * c_xmarg, v_WidthButt1 := 0, v_WidthButt2 := 0, xButt2 := 0
+		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,NewWinPosX := 0, NewWinPosY := 0
+	
+	;+Owner to prevent display of a taskbar button
+	Gui, ALib: New, -Caption +Border +Owner +HwndAddLibrary
+	
+	Gui, ALib: Add, Text, HwndIdText1, % TransA["Enter a name for the new library"]
+	Gui, ALib: Add, Edit, HwndIdEdit1 vv_NewLib
+	
+	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdText1
+	GuiControl, ALib: Move, % IdEdit1, % "w" c_xmarg + v_OutVarTemp1W
+	
+	Gui, ALib: Add, Text, HwndIdText2, .csv
+	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdEdit1
+	vTempWidth += v_OutVarTemp1W
+	GuiControl, ALib: Move, % IdText2, % "x" v_OutVarTemp1X + v_OutVarTemp1W . A_Space . "y" v_OutVarTemp1Y
+	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdText2
+	vTempWidth += v_OutVarTemp1W
+	
+	Gui, ALib: Add, Button, HwndIdButt1 Default gALibOK, 	% TransA["OK"]
+	Gui, ALib: Add, Button, HwndIdButt2 gALibGuiClose, 	% TransA["Cancel"]
+	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdButt1
+	GuiControlGet, v_OutVarTemp2, ALib: Pos, % IdButt2
+	
+	v_WidthButt1 := v_OutVarTemp1W + 2 * c_xmarg
+	v_WidthButt2 := v_OutVarTemp2W + 2 * c_xmarg
+	xButt2	   := c_xmarg + v_WidthButt1 + vTempWidth - (2 * c_xmarg + v_WidthButt1 + v_WidthButt2)
+	
+	GuiControl, ALib: Move, % IdButt1, % "x" c_xmarg . A_Space . "w" v_WidthButt1
+	GuiControl, ALib: Move, % IdButt2, % "x" xButt2  . A_Space . "y" v_OutVarTemp1Y . A_Space . "w" v_WidthButt2
+	
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, ALib: Show, Hide AutoSize
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . AddLibrary
+	DetectHiddenWindows, Off
+	
+	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+
+	Gui, ALib: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_RefreshListOfLibraryTips()
 {
 	global	;assume-global
@@ -899,13 +955,13 @@ F_DeleteHotstring()
 	global ;assume-global mode
 	local 	LibraryFullPathAndName := "" 
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
+			,v_SelectedRow := 0
 	
 	Gui, HS3:+OwnDialogs
 	
 	if !(v_SelectedRow := LV_GetNext()) 
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
-		;MsgBox, 0, %A_ThisLabel%, %t_SelectARowInTheListViewPlease%
 		return
 	}
 	MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Selected Hotstring will be deleted. Do you want to proceed?"]
@@ -990,30 +1046,33 @@ F_DeleteHotstring()
 			}
 		}
 	}
+	;4. Disable selected hotstring.
+	LV_GetText(txt2, v_SelectedRow, 2)
+	Try
+		Hotstring(":" . txt2 . ":" . v_TriggerString, , "Off") ;tu jestem
+	Catch
+		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Error, something went wrong with hotstring deletion:"] . "`n`n" . v_TriggerString 
+		. A_Space . txt2 . "`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 
+
 	;3. Remove selected row from List View.
 	LV_Delete(v_SelectedRow)
-	;4. Disable selected hotstring.
-	
-	Try
-		Hotstring(":" . Options . ":" . v_TriggerString, , "Off")
-	Catch
-		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_ThisFunc, % "Error, something went wrong with hotstring deletion:" . A_Space . v_TriggerString . A_Space . "Library name:" . A_Space . v_SelectHotstringLibrary ;Future: translate this.
-	
-	;5. Remove trigger hint.
+
+	;5. Remove trigger hint. Remark: All trigger hints are deleted, so if triggerstring was duplicated, then all trigger hints are deleted!
 	Loop, % a_Triggers.MaxIndex()
 	{
 		if (InStr(a_Triggers[A_Index], v_TriggerString))
 			a_Triggers.RemoveAt(A_Index)
 	}
-	TrayTip, %A_ScriptName%, Specified definition of hotstring has been deleted, 1 ;Future: add to translate 
+	TrayTip, %A_ScriptName%, TransA["Specified definition of hotstring has been deleted"], 1
 	;Gui, ProgressDelete:Destroy
-	;MsgBox, % Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
-	;WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
-	;Run, AutoHotkey.exe Hotstrings.ahk %v_Param% %v_SelectHotstringLibrary% %v_PreviousWidth% %v_PreviousHeight% %v_PreviousX% %v_PreviousY% %v_SelectedRow% %v_SelectedMonitor%	
 	
 	;6. Decrement library counter.
-	GuiControl, Text, % IdText13, % A_Space . --v_LibHotstringCnt
-	GuiControl, Text, % IdText12, % A_Space . --v_TotalHotstringCnt
+	--v_LibHotstringCnt
+	--v_TotalHotstringCnt
+	GuiControl, Text, % IdText13,  % A_Space . v_LibHotstringCnt
+	GuiControl, Text, % IdText13b, % A_Space . v_LibHotstringCnt
+	GuiControl, Text, % IdText12,  % A_Space . v_TotalHotstringCnt
+	GuiControl, Text, % IdText12b, % A_Space . v_TotalHotstringCnt
 	
 	return
 }
@@ -1985,6 +2044,7 @@ Enter a name for the new library 							= Enter a name for the new library
 Enter hotstring 										= Enter hotstring
 Enter triggerstring before hotstring is set					= Enter triggerstring before hotstring is set
 Error												= Error
+Error, something went wrong with hotstring deletion:			= Error, something went wrong with hotstring deletion:
 ErrorLevel was triggered by NewInput error. 					= ErrorLevel was triggered by NewInput error.
 Error reading library file:								= Error reading library file:
 Exclamation Mark ! 										= Exclamation Mark !
@@ -2007,7 +2067,7 @@ Hotstring menu (MSI, MCL) 								= Hotstring menu (MSI, MCL)
 Hotstring moved to the 									= Hotstring moved to the
 Hotstring paste from Clipboard delay 1 s 					= Hotstring paste from Clipboard delay 1 s
 Hotstring paste from Clipboard delay 						= Hotstring paste from Clipboard delay
-Hotstrings:											= Hotstrings:
+This library											= This library
 Hotstrings have been loaded 								= Hotstrings have been loaded
 Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
@@ -2021,10 +2081,11 @@ is empty. No (triggerstring, hotstring) definition will be loaded. Do you want t
 Show Sandbox 										= Show Sandbox
 \Languages\`nMind that Config.ini Language variable is equal to 	= \Languages\`nMind that Config.ini Language variable is equal to
 Let's make your PC personal again... 						= Let's make your PC personal again...
-Libraries configuration 									= &Libraries configuration
+Libraries 											= &Libraries
 Libraries folder:										= Libraries folder:
 Library content (F2)									= Library content (F2)
 Library 												= Library
+Library name:											= Library name:
 Library export. Please wait... 							= Library export. Please wait...
 Library has been exported. 								= Library has been exported.
 Library has been imported. 								= Library has been imported.
@@ -2071,6 +2132,7 @@ Slash / 												= Slash /
 Sort tips alphabetically 								= Sort tips &alphabetically
 Sort tips by length 									= Sort tips by &length
 Space 												= Space
+Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
 Static hotstrings 										= &Static hotstrings
 Tab 													= Tab
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
@@ -2081,6 +2143,7 @@ The file path is: 										= The file path is:
 the following line is found:								= the following line is found:
 There is no											= There is no
 There was no Languages subfolder, so one now is created.		= There was no Languages subfolder, so one now is created.
+This library:											= This library:
 This line do not comply to format required by this application.  = This line do not comply to format required by this application.
 Toggle EndChars	 									= &Toggle EndChars
 Total:												= Total:
@@ -2234,17 +2297,17 @@ F_GuiHS4_CreateObject()
 	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit1b vv_TriggerString 
 ;GuiControl,	Hide,		% IdEdit1
 	
-	Gui, 	HS4: Add, 	CheckBox, 	x0 y0 HwndIdCheckBox1b gCapsCheck vv_OptionImmediateExecute,	% TransA["Immediate Execute (*)"]
+	Gui, 	HS4: Add, 	CheckBox, 	x0 y0 HwndIdCheckBox1b gF_Checkbox vv_OptionImmediateExecute,	% TransA["Immediate Execute (*)"]
 ;GuiControl,	Hide,		% IdCheckBox1
-	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox2b gCapsCheck vv_OptionCaseSensitive,		% TransA["Case Sensitive (C)"]
+	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox2b gF_Checkbox vv_OptionCaseSensitive,		% TransA["Case Sensitive (C)"]
 ;GuiControl,	Hide,		% IdCheckBox2
-	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox3b gCapsCheck vv_OptionNoBackspace,		% TransA["No Backspace (B0)"]
+	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox3b gF_Checkbox vv_OptionNoBackspace,		% TransA["No Backspace (B0)"]
 ;GuiControl,	Hide,		% IdCheckBox3
-	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox4b gCapsCheck vv_OptionInsideWord, 		% TransA["Inside Word (?)"]
+	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox4b gF_Checkbox vv_OptionInsideWord, 		% TransA["Inside Word (?)"]
 ;GuiControl,	Hide,		% IdCheckBox4
-	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox5b gCapsCheck vv_OptionNoEndChar, 			% TransA["No End Char (O)"]
+	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox5b gF_Checkbox vv_OptionNoEndChar, 			% TransA["No End Char (O)"]
 ;GuiControl,	Hide,		% IdCheckBox5
-	Gui, 	HS4: Add, 	CheckBox, 	x0 y0 HwndIdCheckBox6b gCapsCheck vv_OptionDisable, 			% TransA["Disable"]
+	Gui, 	HS4: Add, 	CheckBox, 	x0 y0 HwndIdCheckBox6b gF_Checkbox vv_OptionDisable, 			% TransA["Disable"]
 ;GuiControl,	Hide,		% IdCheckBox6
 	
 	Gui,		HS4: Add,		GroupBox, 	x0 y0 HwndIdGroupBox1b, 									% TransA["Select trigger option(s)"]
@@ -2309,7 +2372,7 @@ F_GuiHS4_CreateObject()
 	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText10b vv_SandString, 						% TransA["Sandbox"]
 	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit10b vv_Sandbox r3 						; r3 = 3x rows of text
 	
-	Gui,		HS4: Add,			Text,		x0 y0 HwndIdText11b, % TransA["Hotstrings:"]
+	Gui,		HS4: Add,			Text,		x0 y0 HwndIdText11b, % TransA["This library:"]
 	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
 	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText13b,  % A_Space . A_Space . A_Space . "0" ;value of Hotstrings counter
 	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
@@ -2362,20 +2425,20 @@ F_GuiMain_CreateObject()
 	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString 
 ;GuiControl,	Hide,		% IdEdit1
 	
-	Gui, 		HS3:Add, 		CheckBox, 	x0 y0 HwndIdCheckBox1 gCapsCheck vv_OptionImmediateExecute,	% TransA["Immediate Execute (*)"]
+	Gui, 		HS3:Add, 		CheckBox, 	x0 y0 HwndIdCheckBox1 gF_Checkbox vv_OptionImmediateExecute,	% TransA["Immediate Execute (*)"]
 ;GuiControl,	Hide,		% IdCheckBox1
-	Gui, 		HS3:Add,		CheckBox, 	x0 y0 HwndIdCheckBox2 gCapsCheck vv_OptionCaseSensitive,	% TransA["Case Sensitive (C)"]
+	Gui, 		HS3:Add,		CheckBox, 	x0 y0 HwndIdCheckBox2 gF_Checkbox vv_OptionCaseSensitive,		% TransA["Case Sensitive (C)"]
 ;GuiControl,	Hide,		% IdCheckBox2
-	Gui, 		HS3:Add,		CheckBox, 	x0 y0 HwndIdCheckBox3 gCapsCheck vv_OptionNoBackspace,		% TransA["No Backspace (B0)"]
+	Gui, 		HS3:Add,		CheckBox, 	x0 y0 HwndIdCheckBox3 gF_Checkbox vv_OptionNoBackspace,		% TransA["No Backspace (B0)"]
 ;GuiControl,	Hide,		% IdCheckBox3
-	Gui, 		HS3:Add,		CheckBox, 	x0 y0 HwndIdCheckBox4 gCapsCheck vv_OptionInsideWord, 		% TransA["Inside Word (?)"]
+	Gui, 		HS3:Add,		CheckBox, 	x0 y0 HwndIdCheckBox4 gF_Checkbox vv_OptionInsideWord, 		% TransA["Inside Word (?)"]
 ;GuiControl,	Hide,		% IdCheckBox4
-	Gui, 		HS3:Add,		CheckBox, 	x0 y0 HwndIdCheckBox5 gCapsCheck vv_OptionNoEndChar, 		% TransA["No End Char (O)"]
+	Gui, 		HS3:Add,		CheckBox, 	x0 y0 HwndIdCheckBox5 gF_Checkbox vv_OptionNoEndChar, 			% TransA["No End Char (O)"]
 ;GuiControl,	Hide,		% IdCheckBox5
-	Gui, 		HS3:Add, 		CheckBox, 	x0 y0 HwndIdCheckBox6 gCapsCheck vv_OptionDisable, 		% TransA["Disable"]
+	Gui, 		HS3:Add, 		CheckBox, 	x0 y0 HwndIdCheckBox6 gF_Checkbox vv_OptionDisable, 			% TransA["Disable"]
 ;GuiControl,	Hide,		% IdCheckBox6
 	
-	Gui,			HS3:Add,		GroupBox, 	x0 y0 HwndIdGroupBox1, 								% TransA["Select trigger option(s)"]
+	Gui,			HS3:Add,		GroupBox, 	x0 y0 HwndIdGroupBox1, 									% TransA["Select trigger option(s)"]
 ;GuiControl,	Hide,		% IdGroupBox1
 	
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
@@ -2458,7 +2521,7 @@ F_GuiMain_CreateObject()
 	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit10 vv_Sandbox r3 						; r3 = 3x rows of text
 ;GuiControl,	Hide,		% IdEdit10
 ;Gui, 		HS3:Add, 		Edit, 		HwndIdEdit11 vv_ViewString gViewString ReadOnly Hide
-	Gui,			HS3:Add,		Text,		x0 y0 HwndIdText11, % TransA["Hotstrings:"]
+	Gui,			HS3:Add,		Text,		x0 y0 HwndIdText11, % TransA["This library:"]
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
 	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText13,  % A_Space . A_Space . A_Space . "0" ;value of Hotstrings counter
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
@@ -4518,8 +4581,12 @@ F_SetHotstring()
 		FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
 	}
 	;7. Increment library counter.
-	GuiControl, Text, % IdText13, % A_Space . ++v_LibHotstringCnt
-	GuiControl, Text, % IdText12, % A_Space . ++v_TotalHotstringCnt
+	++v_LibHotstringCnt
+	++v_TotalHotstringCnt
+	GuiControl, Text, % IdText13,  % A_Space . v_LibHotstringCnt
+	GuiControl, Text, % IdText13b, % A_Space . v_LibHotstringCnt
+	GuiControl, Text, % IdText12,  % A_Space . v_TotalHotstringCnt
+	GuiControl, Text, % IdText12b, % A_Space . v_TotalHotstringCnt
 	
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring added to the file"] . A_Space . v_SelectHotstringLibrary . A_Space . "!" 
 	
@@ -4661,57 +4728,6 @@ Loop
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiAddLibrary()
-{
-	global	;assume-global
-	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
-		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0
-		,IdText1 := 0, IdText2 := 0, IdEdit1 := 0, IdButt1 := 0, IdButt2 := 0
-		,vTempWidth := 2 * c_xmarg, v_WidthButt1 := 0, v_WidthButt2 := 0, xButt2 := 0
-		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
-		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
-		,NewWinPosX := 0, NewWinPosY := 0
-	
-	;+Owner to prevent display of a taskbar button
-	Gui, ALib: New, -Caption +Border +Owner +HwndAddLibrary
-	
-	Gui, ALib: Add, Text, HwndIdText1, % TransA["Enter a name for the new library"]
-	Gui, ALib: Add, Edit, HwndIdEdit1 vv_NewLib
-	
-	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdText1
-	GuiControl, ALib: Move, % IdEdit1, % "w" c_xmarg + v_OutVarTemp1W
-	
-	Gui, ALib: Add, Text, HwndIdText2, .csv
-	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdEdit1
-	vTempWidth += v_OutVarTemp1W
-	GuiControl, ALib: Move, % IdText2, % "x" v_OutVarTemp1X + v_OutVarTemp1W . A_Space . "y" v_OutVarTemp1Y
-	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdText2
-	vTempWidth += v_OutVarTemp1W
-	
-	Gui, ALib: Add, Button, HwndIdButt1 Default gALibOK, 	% TransA["OK"]
-	Gui, ALib: Add, Button, HwndIdButt2 gALibGuiClose, 	% TransA["Cancel"]
-	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdButt1
-	GuiControlGet, v_OutVarTemp2, ALib: Pos, % IdButt2
-	
-	v_WidthButt1 := v_OutVarTemp1W + 2 * c_xmarg
-	v_WidthButt2 := v_OutVarTemp2W + 2 * c_xmarg
-	xButt2	   := c_xmarg + v_WidthButt1 + vTempWidth - (2 * c_xmarg + v_WidthButt1 + v_WidthButt2)
-	
-	GuiControl, ALib: Move, % IdButt1, % "x" c_xmarg . A_Space . "w" v_WidthButt1
-	GuiControl, ALib: Move, % IdButt2, % "x" xButt2  . A_Space . "y" v_OutVarTemp1Y . A_Space . "w" v_WidthButt2
-	
-	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-	Gui, ALib: Show, Hide AutoSize
-	DetectHiddenWindows, On
-	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . AddLibrary
-	DetectHiddenWindows, Off
-	
-	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
-	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
-
-	Gui, ALib: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"
-	return
-}
 
 ALibOK:
 Gui, ALib:Submit, NoHide
@@ -4743,10 +4759,13 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-CapsCheck: ;tu jestem
 ;*[One]
-GuiControlGet, v_OutputVar, % A_Gui . ":", % A_GuiControl
-
+F_Checkbox()
+{
+	global	;assume-global
+	local v_OutputVar := 0
+	GuiControlGet, v_OutputVar, % A_Gui . ":", % A_GuiControl
+	
 	if (v_OutputVar)
 	{
 		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
@@ -4762,15 +4781,16 @@ GuiControlGet, v_OutputVar, % A_Gui . ":", % A_GuiControl
 	Switch A_Gui
 	{
 		Case "HS3":
-			GuiControl, HS4:, % A_GuiControl, % v_OutputVar
+		GuiControl, HS4:, % A_GuiControl, % v_OutputVar
 		Case "HS4":
-			GuiControl, HS3:, % A_GuiControl, % v_OutputVar
+		GuiControl, HS3:, % A_GuiControl, % v_OutputVar
 	}
-return
+	return
+}
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-HSdelay:
+HSdelay: ;tu jestem
 ; Future: Add those strings to translations.
 Gui, HSDel:New, -MinimizeBox -MaximizeBox
 Gui, HSDel:Margin, 12.5*DPI%v_SelectedMonitor%, 7.5*DPI%v_SelectedMonitor%
