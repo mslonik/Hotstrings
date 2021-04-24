@@ -146,12 +146,11 @@ F_GuiMain_DefineConstants()
 F_GuiMain_DetermineConstraints()
 F_GuiMain_Redraw()
 
-F_UpdateSelHotLibDDL()
-
 F_GuiHS4_CreateObject()
 F_GuiHS4_DetermineConstraints()
 F_GuiHS4_Redraw()
 
+F_UpdateSelHotLibDDL()
 
 v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
@@ -409,7 +408,7 @@ Switch c_FontColor
 		Case "White": ;Dark
 			Menu, StyleGUIsubm, UnCheck, % TransA["Light (default)"]
 			Menu, StyleGUIsubm, Check,   % TransA["Dark"]
-	}
+}
 
 Menu, ConfGUI,		Add, % TransA["Save position of application window"], 	F_SaveGUIPos
 Menu, ConfGUI, 	Add, % TransA["Show Sandbox"], 					F_Sandbox
@@ -457,36 +456,12 @@ Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  			L_ExportLibrarySta
 Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  			L_ExportLibraryDynamic
 Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],		:ExportSubmenu
 
-if (ini_LoadLib.Count())
-{
-	for key, value in ini_LoadLib
-	{
-		Menu, EnDisLib, Add, %key%, F_EnDisLib
-		if (value)
-			Menu, EnDisLib, Check, %key%
-		else
-			Menu, EnDisLib, UnCheck, %key%	
-	}
-}
-else
-	Menu, EnDisLib, Add, % TransA["No libraries have been found!"], F_EnDisLib
+Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 		F_RefreshListOfLibraries
+F_RefreshListOfLibraries()
 
-if (ini_ShowTipsLib.Count())
-{
-	for key, value in ini_ShowTipsLib
-	{
-		Menu, ToggleLibTrigTipsSubmenu, Add, %key%, F_ToggleTipsLibrary
-		if (value)
-			Menu, ToggleLibTrigTipsSubmenu, Check, %key%
-		else
-			Menu, ToggleLibTrigTipsSubmenu, UnCheck, %key%
-	}
-}
-else
-	Menu, ToggleLibTrigTipsSubmenu, Add, % TransA["No libraries have been found!"], F_ToggleTipsLibrary
+Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	F_RefreshListOfLibraryTips
+F_RefreshListOfLibraryTips()
 
-Menu,	LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"],			:EnDisLib
-Menu, 	LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	:ToggleLibTrigTipsSubmenu
 Menu, 	HSMenu, 			Add, % TransA["Libraries configuration"], 			:LibrariesSubmenu
 Menu, 	HSMenu, 			Add, % TransA["Clipboard Delay"], 					HSdelay
 Menu,	ApplicationSubmenu,	Add, % TransA["Reload"],							F_Reload
@@ -853,6 +828,67 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_RefreshListOfLibraryTips()
+{
+	global	;assume-global
+	local	key := 0, value := 0
+
+	;if menu ToggleLibTrigTipsSubmenu doesn't exist, delete it
+	Menu, ToggleLibTrigTipsSubmenu, UseErrorLevel, On
+	if (!ErrorLevel)
+		Menu, ToggleLibTrigTipsSubmenu, Delete
+	Menu, ToggleLibTrigTipsSubmenu, UseErrorLevel, Off
+	
+	if (ini_ShowTipsLib.Count())
+	{
+		for key, value in ini_ShowTipsLib
+		{
+			Menu, ToggleLibTrigTipsSubmenu, Add, %key%, F_ToggleTipsLibrary
+			if (value)
+				Menu, ToggleLibTrigTipsSubmenu, Check, %key%
+			else
+				Menu, ToggleLibTrigTipsSubmenu, UnCheck, %key%
+		}
+	}
+	else
+		Menu, ToggleLibTrigTipsSubmenu, Add, % TransA["No libraries have been found!"], F_ToggleTipsLibrary
+	Menu, 	LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	:ToggleLibTrigTipsSubmenu
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;tu jestem
+F_RefreshListOfLibraries()
+{
+	global	;assume-global
+	local key := 0, value := 0
+
+	;*[One]
+	;if menu EnDisLib doesn't exist, delete it
+	Menu, EnDisLib, UseErrorLevel, On
+	if (!ErrorLevel)
+		Menu, EnDisLib, Delete
+	Menu, EnDisLib, UseErrorLevel, Off
+	
+	if (ini_LoadLib.Count())
+	{
+		for key, value in ini_LoadLib
+		{
+			Menu, EnDisLib, Add, %key%, F_EnDisLib
+			if (value)
+				Menu, EnDisLib, Check, %key%
+			else
+				Menu, EnDisLib, UnCheck, %key%	
+		}
+	}
+	else
+		Menu, EnDisLib, Add, % TransA["No libraries have been found!"], F_EnDisLib
+	
+	Menu,	LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"],			:EnDisLib
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 F_DeleteHotstring()
 {
 	;1. Remove selected library file.
@@ -1004,7 +1040,6 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 			GuiControl, ChooseString, % IdDDL2b, % v_SelectHotstringLibrary
 			Gui, HS3: Show, Hide
 			Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
-			;v_WhichGUIisMinimzed := ""
 			return
 		Case "HS4":
 			WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
@@ -1017,7 +1052,6 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 			Gui, HS4: Show, Hide
 			Gui, HS3: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
 			Gui, HS3: Show, AutoSize ;don't know why it has to be doubled to properly display...
-			;v_WhichGUIisMinimzed := ""
 			return
 	}
 }
@@ -1141,7 +1175,6 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
 	HS3_GuiHeight := A_GuiHeight
 	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space "A_GuiHeight" . A_Space . A_GuiHeight
-	;*[Two]
 	return
 }
 
@@ -1150,6 +1183,7 @@ F_SelectLibrary()
 {
 	global ;assume-global mode
 	local str1 := []
+	
 	if (A_DefaultGui = "HS3")
 	{
 		Gui, HS3: Submit, NoHide
@@ -1833,10 +1867,8 @@ F_UpdateSelHotLibDDL()
 		FinalString .=  TransA["No libraries have been found!"] . "||" 
 	}
 	
-	if (A_DefaultGui = "HS3")
-		GuiControl, , % IdDDL2, % "|" . FinalString 	;To replace (overwrite) the list instead, include a pipe as the first character
-	if (A_DefaultGui = "HS4")
-		GuiControl, , % IdDDL2b, % "|" . FinalString	;To replace (overwrite) the list instead, include a pipe as the first character
+	GuiControl, , % IdDDL2, % "|" . FinalString 	;To replace (overwrite) the list instead, include a pipe as the first character
+	GuiControl, , % IdDDL2b, % "|" . FinalString	;To replace (overwrite) the list instead, include a pipe as the first character
 	return
 }
 
@@ -2260,7 +2292,7 @@ F_GuiHS4_CreateObject()
 	
 	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton1b gF_GuiAddLibrary, 						% TransA["Add library"]
 	;GuiControl,	Hide,		% IdButton1
-	Gui,		HS4: Add,		DropDownList,	x0 y0 HwndIdDDL2b vv_SelectHotstringLibrary gF_SelectLibrary
+	Gui,		HS4: Add,		DropDownList,	x0 y0 HwndIdDDL2b vv_SelectHotstringLibrary gF_SelectLibrary Sort
 	;GuiControl,	Hide,		% IdDDL2
 	
 	;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
@@ -2387,7 +2419,7 @@ F_GuiMain_CreateObject()
 	
 	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton1 gF_GuiAddLibrary, 							% TransA["Add library"]
 ;GuiControl,	Hide,		% IdButton1
-	Gui,			HS3:Add,		DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SelectLibrary
+	Gui,			HS3:Add,		DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SelectLibrary Sort
 ;GuiControl,	Hide,		% IdDDL2
 	
 ;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
@@ -3184,7 +3216,6 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 		SectionTemp .= "PriorityLibrary.csv" . "=" . ValueTemp
 	
 	IniWrite, % SectionTemp, Config.ini, ShowTipsLibraries
-	
 	return
 }
 
@@ -3287,7 +3318,6 @@ F_ini_StartHotstring(txt, nameoffile)
 	v_TriggerString 	:= txtsp[2]
 	if (!v_TriggerString) ; Future: add those strings to translation.
 	{
-		;tu jestem
 		MsgBox, 262420, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Error reading library file:"] . "`n`n" . nameoffile . "`n`n" . TransA["the following line is found:"] 
 		. "`n" . txt . "`n`n" . TransA["This line do not comply to format required by this application."] . "`n`n" 
 		. TransA["Continue reading the library file?`nIf you answer ""No"" then application will exit!"]
@@ -3669,7 +3699,6 @@ F_CheckOption(State, Button)
 ;ControlID can be either ClassNN (the classname and instance number of the control) or the control's text, both of which can be determined via Window Spy.
 ;So in HS3 Gui the checkboxes ClassNN are 1...6
 {
-	;*[One]
 	if (State = "Yes")
 	{
 		State := 1
@@ -4629,7 +4658,6 @@ Loop
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;tu jestem
 F_GuiAddLibrary()
 {
 	global	;assume-global
@@ -4645,7 +4673,7 @@ F_GuiAddLibrary()
 	Gui, ALib: New, -Caption +Border +Owner +HwndAddLibrary
 	
 	Gui, ALib: Add, Text, HwndIdText1, % TransA["Enter a name for the new library"]
-	Gui, ALib: Add, Edit, HwndIdEdit1 vNewLib
+	Gui, ALib: Add, Edit, HwndIdEdit1 vv_NewLib
 	
 	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdText1
 	GuiControl, ALib: Move, % IdEdit1, % "w" c_xmarg + v_OutVarTemp1W
@@ -4683,31 +4711,31 @@ F_GuiAddLibrary()
 }
 
 ALibOK:
-Gui,ALib:Submit, NoHide
-if (NewLib == "")
+Gui, ALib:Submit, NoHide
+if (v_NewLib == "")
 {
 	MsgBox, % TransA["Enter a name for the new library"]
 	return
 }
-NewLib .= ".csv"
-IfNotExist, Libraries
-	FileCreateDir, Libraries
-IfNotExist, Libraries\%NewLib%
+v_NewLib .= ".csv"
+IfNotExist, Libraries\%v_NewLib%
 {
-	FileAppend,, Libraries\%NewLib%, UTF-8
-	MsgBox, % TransA["The library"] . A_Space . NewLib . A_Space . TransA["has been created."]
-	Gui, ALib:Destroy
-	GuiControl, HS3:, v_SelectHotstringLibrary, | ;To make the control empty, specify only a pipe character (|).
-	Loop,%A_ScriptDir%\Libraries\*.csv
-		GuiControl,HS3: , v_SelectHotstringLibrary, %A_LoopFileName%
+	FileAppend,, Libraries\%v_NewLib%, UTF-8
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The library"] . A_Space . v_NewLib . A_Space . TransA["has been created."]
+	Gui, ALib: Destroy
+	
+	F_ValidateIniLibSections()
+	F_RefreshListOfLibraries()
+	F_RefreshListOfLibraryTips()
+	F_UpdateSelHotLibDDL()
 }
 Else
-	MsgBox, % TransA["A library with that name already exists!"]
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["A library with that name already exists!"]
 return
 
 ALibGuiEscape:
 ALibGuiClose:
-Gui, ALib:Destroy
+Gui, ALib: Destroy
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
