@@ -869,11 +869,11 @@ F_DeleteHotstring()
 	
 	if !(v_SelectedRow := LV_GetNext()) 
 	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
 		;MsgBox, 0, %A_ThisLabel%, %t_SelectARowInTheListViewPlease%
 		return
 	}
-	MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Selected Hotstring will be deleted. Do you want to proceed?"]
+	MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Selected Hotstring will be deleted. Do you want to proceed?"]
 	IfMsgBox, No
 		return
 	TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
@@ -1146,7 +1146,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SectionChoose()
+F_SelectLibrary()
 {
 	global ;assume-global mode
 	local str1 := []
@@ -1158,6 +1158,7 @@ F_SectionChoose()
 		Gui, HS4: Submit, NoHide
 	
 	GuiControl, Enable, % IdButton4 ; button Delete hotstring (F8)
+	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
 	Gui, ListView, % IdListView1 ; identify which ListView
 	LV_Delete()
 	FileRead, Text, Libraries\%v_SelectHotstringLibrary%
@@ -1762,7 +1763,7 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 	IniWrite, % ini_Sandbox, 	  Config.ini, GraphicalUserInterface, Sandbox
 	IniWrite, % ini_IsSandboxMoved, Config.ini, GraphicalUserInterface, IsSandboxMoved
 	
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Position of main window is saved in Config.ini."]
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Position of main window is saved in Config.ini."]
 	return		
 	
 }
@@ -1872,7 +1873,7 @@ F_EnDisLib()
 	F_ValidateIniLibSections()
 	F_UpdateSelHotLibDDL()
 	F_LoadHotstringsFromLibraries()
-	MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % "If any library was unchecked, its hotstring definitions remain active. Please reload the application." 
+	MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "If any library was unchecked, its hotstring definitions remain active. Please reload the application." 
 	. "`n`n" . "Do you want to reload application now?"
 	IfMsgBox, Yes
 	{
@@ -1927,6 +1928,7 @@ Comma , 												= Comma ,
 Compile												= Compile
 Config.ini wasn't found. The default Config.ini is now created in location = Config.ini wasn't found. The default Config.ini is now created in location
 Configuration 											= &Configuration
+Continue reading the library file?`nIf you answer ""No"" then application will exit! = Continue reading the library file?`nIf you answer ""No"" then application will exit!
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
 Do you want to proceed? 									= Do you want to proceed?
 Cursor 												= Cursor
@@ -1949,7 +1951,9 @@ Enter 												= Enter
 Enter a name for the new library 							= Enter a name for the new library
 Enter hotstring 										= Enter hotstring
 Enter triggerstring before hotstring is set					= Enter triggerstring before hotstring is set
+Error												= Error
 ErrorLevel was triggered by NewInput error. 					= ErrorLevel was triggered by NewInput error.
+Error reading library file:								= Error reading library file:
 Exclamation Mark ! 										= Exclamation Mark !
 exists in a file 										= exists in a file
 Exit													= Exit
@@ -2041,8 +2045,10 @@ The default											= The default
 The hostring 											= The hostring
 The library  											= The library 
 The file path is: 										= The file path is:
+the following line is found:								= the following line is found:
 There is no											= There is no
 There was no Languages subfolder, so one now is created.		= There was no Languages subfolder, so one now is created.
+This line do not comply to format required by this application.  = This line do not comply to format required by this application.
 Toggle EndChars	 									= &Toggle EndChars
 Total:												= Total:
 Triggerstring 											= Triggerstring
@@ -2254,7 +2260,7 @@ F_GuiHS4_CreateObject()
 	
 	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton1b gAddLib, 							% TransA["Add library"]
 	;GuiControl,	Hide,		% IdButton1
-	Gui,		HS4: Add,		DropDownList,	x0 y0 HwndIdDDL2b vv_SelectHotstringLibrary gF_SectionChoose
+	Gui,		HS4: Add,		DropDownList,	x0 y0 HwndIdDDL2b vv_SelectHotstringLibrary gF_SelectLibrary
 	;GuiControl,	Hide,		% IdDDL2
 	
 	;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
@@ -2381,7 +2387,7 @@ F_GuiMain_CreateObject()
 	
 	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton1 gAddLib, 							% TransA["Add library"]
 ;GuiControl,	Hide,		% IdButton1
-	Gui,			HS3:Add,		DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SectionChoose
+	Gui,			HS3:Add,		DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SelectLibrary
 ;GuiControl,	Hide,		% IdDDL2
 	
 ;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
@@ -3270,7 +3276,7 @@ F_LoadLibrariesToTables()
 
 F_ini_StartHotstring(txt, nameoffile) 
 {
-	global v_TriggerString
+	global	;assume-global mode
 	static Options, OnOff, EnDis, SendFun, TextInsert
 	
 	v_UndoHotstring := ""
@@ -3281,7 +3287,10 @@ F_ini_StartHotstring(txt, nameoffile)
 	v_TriggerString 	:= txtsp[2]
 	if (!v_TriggerString) ; Future: add those strings to translation.
 	{
-		MsgBox, 262420, % A_ScriptName . "Error reading library file", % "On time of parsing the library file:`n`n" . nameoffile . "`n`nthe following line is found:`n" . txt . "`n`nThis line do not comply to format required by this application.`n`nContinue reading the library file?`nIf you answer ""No"" then application wiłl exit!"
+		;tu jestem
+		MsgBox, 262420, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Error reading library file:"] . "`n`n" . nameoffile . "`n`n" . TransA["the following line is found:"] 
+		. "`n" . txt . "`n`n" . TransA["This line do not comply to format required by this application."] . "`n`n" 
+		. TransA["Continue reading the library file?`nIf you answer ""No"" then application will exit!"]
 		IfMsgBox, No
 			ExitApp, 1
 		IfMsgBox, Yes
@@ -4288,14 +4297,14 @@ F_SetHotstring()
 	
 	if (Trim(v_TriggerString) = "")
 	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"],  % TransA["Enter triggerstring before hotstring is set"]
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Enter triggerstring before hotstring is set"]
 		return
 	}
 	if InStr(v_SelectFunction, "Menu")
 	{
 		if ((Trim(v_EnterHotstring) = "") and (Trim(v_EnterHotstring1) = "") and (Trim(v_EnterHotstring2) = "") and (Trim(v_EnterHotstring3) = "") and (Trim(v_EnterHotstring4) = "") and (Trim(v_EnterHotstring5) = "") and (Trim(v_EnterHotstring6) = ""))
 		{
-			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Replacement text is blank. Do you want to proceed?"]
+			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Replacement text is blank. Do you want to proceed?"]
 			IfMsgBox, No
 				return
 		}
@@ -4319,7 +4328,7 @@ F_SetHotstring()
 	{
 		if (Trim(v_EnterHotstring) = "")
 		{
-			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Replacement text is blank. Do you want to proceed?"] 
+			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Replacement text is blank. Do you want to proceed?"] 
 			IfMsgBox, No
 				return
 		}
@@ -4331,7 +4340,7 @@ F_SetHotstring()
 	
 	if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
 	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Choose existing hotstring library file before saving!"]
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Choose existing hotstring library file before saving!"]
 		return
 	}
 	
@@ -4411,6 +4420,9 @@ F_SetHotstring()
 	LString 		:= "‖" . v_TriggerString . "‖"
 	ModifiedFlag	:= false ;if true, duplicate triggerstring definition is found, if false, definition is new
 	
+	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
+	Gui, ListView, % IdListView1	;if HS4 is active still correct ListView have to be loaded with data
+	
 	Loop, Read, %InputFile%, %OutputFile% ;read all definitions from this library file 
 	{
 		
@@ -4471,14 +4483,13 @@ F_SetHotstring()
 		LV_GetText(txt5, SectionList.MaxIndex(), 5)
 		LV_GetText(txt6, SectionList.MaxIndex(), 6)
 		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-	;FileAppend, %txt%, Libraries\%name%, UTF-8
 		FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
 	}
 	;7. Increment library counter.
 	GuiControl, Text, % IdText13, % A_Space . ++v_LibHotstringCnt
 	GuiControl, Text, % IdText12, % A_Space . ++v_TotalHotstringCnt
 	
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Hotstring added to the file"] . A_Space . v_SelectHotstringLibrary . A_Space . "!" 
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring added to the file"] . A_Space . v_SelectHotstringLibrary . A_Space . "!" 
 	
 	return
 }
@@ -4601,7 +4612,7 @@ ChooseSec := % Library . ".csv"
 ;GuiControl,, v_ViewString ,  %v_String%
 ;gosub, ViewString
 GuiControl, Choose, v_SelectHotstringLibrary, %ChooseSec%
-F_SectionChoose()
+F_SelectLibrary()
 	;gosub, SectionChoose
 v_SearchedTriggerString := v_TriggerString
 Loop
@@ -4618,17 +4629,19 @@ Loop
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+;tu jestem
 AddLib:
-Gui, ALib:New, -Border
-Gui, ALib:Add, Text,, % TransA["Enter a name for the new library"]
-Gui, ALib:Add, Edit, % "vNewLib w" . 150*DPI%v_SelectedMonitor%,
-Gui, ALib:Add, Text, % "x+" . 10*DPI%v_SelectedMonitor%, .csv
-Gui, ALib:Add, Button, % "Default gALibOK xm w" . 70*DPI%v_SelectedMonitor%, OK
-Gui, ALib:Add, Button, % "gALibGuiClose x+" . 10*DPI%v_SelectedMonitor% . " w" . 70*DPI%v_SelectedMonitor%, % TransA["Cancel"]
-	;WinGetPos, v_PreviousX, v_PreviousY , , ,Hotstrings
-	;Gui, ALib:Show, % "x" . ((v_PreviousX+v_PreviousWidth)/2)/DPI%v_SelectedMonitor% . " y" . ((v_PreviousY+v_PreviousHeight)/2)/DPI%v_SelectedMonitor%
-Gui, ALib:Show
+Gui, ALib: New, -Border
+Gui, ALib: Add, Text,, % TransA["Enter a name for the new library"]
+Gui, ALib: Add, Edit, % vNewLib
+;Gui, ALib: Add, Edit, % "vNewLib w" . 150*DPI%v_SelectedMonitor%,
+;Gui, ALib: Add, Text, % "x+" . 10*DPI%v_SelectedMonitor%, .csv
+Gui, ALib: Add, Text, , .csv
+;Gui, ALib: Add, Button, % "Default gALibOK xm w" . 70*DPI%v_SelectedMonitor%, OK
+Gui, ALib: Add, Button, % Default gALibOK, OK
+;Gui, ALib: Add, Button, % "gALibGuiClose x+" . 10*DPI%v_SelectedMonitor% . " w" . 70*DPI%v_SelectedMonitor%, % TransA["Cancel"]
+Gui, ALib: Add, Button, gALibGuiClose, % TransA["Cancel"]
+Gui, ALib: Show
 return
 
 ALibOK:
@@ -4935,7 +4948,7 @@ LString := % "‖" . Triggerstring . "‖"
 SaveFlag := 0	; !!!
 Gui, HS3:Default
 GuiControl, Choose, v_SelectHotstringLibrary, %TargetLib%
-F_SectionChoose()
+F_SelectLibrary()
 	;Gosub, SectionChoose
 Loop, Read, %InputFile%
 {
