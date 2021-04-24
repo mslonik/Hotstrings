@@ -856,13 +856,12 @@ F_RefreshListOfLibraryTips()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;tu jestem
+
 F_RefreshListOfLibraries()
 {
 	global	;assume-global
 	local key := 0, value := 0
 
-	;*[One]
 	;if menu EnDisLib doesn't exist, delete it
 	Menu, EnDisLib, UseErrorLevel, On
 	if (!ErrorLevel)
@@ -1046,7 +1045,7 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 			Gui, HS4: Submit, NoHide
 			Gui, HS3: Default
 			F_UpdateSelHotLibDDL()
-			F_GuiMain_Redraw()
+			;F_GuiMain_Redraw()
 			GuiControl,, % IdEdit1, % v_TriggerString
 			GuiControl, ChooseString, % IdDDL2, % v_SelectHotstringLibrary
 			Gui, HS4: Show, Hide
@@ -1175,6 +1174,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
 	HS3_GuiHeight := A_GuiHeight
 	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space "A_GuiHeight" . A_Space . A_GuiHeight
+	;*[Two]
 	return
 }
 
@@ -1226,11 +1226,12 @@ F_SelectLibrary()
 	}
 	LV_ModifyCol(1, "Sort")
 	
-	v_LibHotstringCnt := SectionList.MaxIndex()
-	if (A_DefaultGui = "HS3")
-		GuiControl, Text, % IdText13,  % A_Space . v_LibHotstringCnt
-	if (A_DefaultGui = "HS4")
-		GuiControl, Text, % IdText13b, % A_Space . v_LibHotstringCnt
+	if (!SectionList.MaxIndex())
+		v_LibHotstringCnt := 0
+	else 
+		v_LibHotstringCnt := SectionList.MaxIndex()
+	GuiControl, Text, % IdText13,  % A_Space . v_LibHotstringCnt
+	GuiControl, Text, % IdText13b, % A_Space . v_LibHotstringCnt
 	
 	return
 }
@@ -2320,6 +2321,7 @@ F_GuiMain_CreateObject()
 {
 	global ;assume-global mode
 	local x0 := 0, y0 := 0
+	v_OptionImmediateExecute := 0, v_OptionCaseSensitive := 0, v_OptionNoBackspace := 0, v_OptionInsideWord := 0, v_OptionNoEndChar := 0, v_OptionDisable := 0
 	
 	/*
 		IdText1 IdText2 IdText3 IdText4 IdText5 IdText6 IdText7 IdText8 IdText9 IdText10 IdText11 IdText12 IdText13
@@ -2698,6 +2700,7 @@ F_GuiMain_Redraw()
 	static b_FirstRun := true
 	
 	;position of the List View, but only when HS3 Gui is initiated: before showing. So this code is run only once.
+	
 	if (b_FirstRun) 
 	{
 		v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
@@ -4740,14 +4743,29 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-CapsCheck:
-/*
-	If (Instr(a_String[2], "C1"))
-		v_CaseSensitiveC1 := 1
-	GuiControlGet, OutputVar1, Focus
-	GuiControlGet, OutputVar2, , %OutputVar1%
-	F_CheckBoxColor(OutputVar2,OutputVar1)
-*/
+CapsCheck: ;tu jestem
+;*[One]
+GuiControlGet, v_OutputVar, % A_Gui . ":", % A_GuiControl
+
+	if (v_OutputVar)
+	{
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+	}
+	else 
+	{
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+	}
+	GuiControl, HS3: Font, % A_GuiControl
+	GuiControl, HS4: Font, % A_GuiControl
+	Switch A_Gui
+	{
+		Case "HS3":
+			GuiControl, HS4:, % A_GuiControl, % v_OutputVar
+		Case "HS4":
+			GuiControl, HS3:, % A_GuiControl, % v_OutputVar
+	}
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
