@@ -2246,9 +2246,9 @@ F_GuiHS4_CreateObject()
 	;GuiControl,	Hide,		% IdEdit8
 	
 	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText5b vv_TextAddComment, 					% TransA["Add comment (optional)"]
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText5b vv_TextAddComment, 						% TransA["Add comment (optional)"]
 	;GuiControl,	Hide,		% IdText5
-	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
 	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit9b vv_Comment Limit64 
 	;GuiControl,	Hide,		% IdEdit9
@@ -2256,9 +2256,9 @@ F_GuiHS4_CreateObject()
 	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText6b vv_TextSelectHotstringLibrary, 			% TransA["Select hotstring library"]
 	;GuiControl,	Hide,		% IdText6
-	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton1b gAddLib, 							% TransA["Add library"]
+	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton1b gF_GuiAddLibrary, 						% TransA["Add library"]
 	;GuiControl,	Hide,		% IdButton1
 	Gui,		HS4: Add,		DropDownList,	x0 y0 HwndIdDDL2b vv_SelectHotstringLibrary gF_SelectLibrary
 	;GuiControl,	Hide,		% IdDDL2
@@ -2385,7 +2385,7 @@ F_GuiMain_CreateObject()
 ;GuiControl,	Hide,		% IdText6
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
-	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton1 gAddLib, 							% TransA["Add library"]
+	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton1 gF_GuiAddLibrary, 							% TransA["Add library"]
 ;GuiControl,	Hide,		% IdButton1
 	Gui,			HS3:Add,		DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SelectLibrary
 ;GuiControl,	Hide,		% IdDDL2
@@ -4630,19 +4630,57 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;tu jestem
-AddLib:
-Gui, ALib: New, -Border
-Gui, ALib: Add, Text,, % TransA["Enter a name for the new library"]
-Gui, ALib: Add, Edit, % vNewLib
-;Gui, ALib: Add, Edit, % "vNewLib w" . 150*DPI%v_SelectedMonitor%,
-;Gui, ALib: Add, Text, % "x+" . 10*DPI%v_SelectedMonitor%, .csv
-Gui, ALib: Add, Text, , .csv
-;Gui, ALib: Add, Button, % "Default gALibOK xm w" . 70*DPI%v_SelectedMonitor%, OK
-Gui, ALib: Add, Button, % Default gALibOK, OK
-;Gui, ALib: Add, Button, % "gALibGuiClose x+" . 10*DPI%v_SelectedMonitor% . " w" . 70*DPI%v_SelectedMonitor%, % TransA["Cancel"]
-Gui, ALib: Add, Button, gALibGuiClose, % TransA["Cancel"]
-Gui, ALib: Show
-return
+F_GuiAddLibrary()
+{
+	global	;assume-global
+	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
+		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0
+		,IdText1 := 0, IdText2 := 0, IdEdit1 := 0, IdButt1 := 0, IdButt2 := 0
+		,vTempWidth := 2 * c_xmarg, v_WidthButt1 := 0, v_WidthButt2 := 0, xButt2 := 0
+		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,NewWinPosX := 0, NewWinPosY := 0
+	
+	;+Owner to prevent display of a taskbar button
+	Gui, ALib: New, -Caption +Border +Owner +HwndAddLibrary
+	
+	Gui, ALib: Add, Text, HwndIdText1, % TransA["Enter a name for the new library"]
+	Gui, ALib: Add, Edit, HwndIdEdit1 vNewLib
+	
+	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdText1
+	GuiControl, ALib: Move, % IdEdit1, % "w" c_xmarg + v_OutVarTemp1W
+	
+	Gui, ALib: Add, Text, HwndIdText2, .csv
+	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdEdit1
+	vTempWidth += v_OutVarTemp1W
+	GuiControl, ALib: Move, % IdText2, % "x" v_OutVarTemp1X + v_OutVarTemp1W . A_Space . "y" v_OutVarTemp1Y
+	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdText2
+	vTempWidth += v_OutVarTemp1W
+	
+	Gui, ALib: Add, Button, HwndIdButt1 Default gALibOK, 	% TransA["OK"]
+	Gui, ALib: Add, Button, HwndIdButt2 gALibGuiClose, 	% TransA["Cancel"]
+	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdButt1
+	GuiControlGet, v_OutVarTemp2, ALib: Pos, % IdButt2
+	
+	v_WidthButt1 := v_OutVarTemp1W + 2 * c_xmarg
+	v_WidthButt2 := v_OutVarTemp2W + 2 * c_xmarg
+	xButt2	   := c_xmarg + v_WidthButt1 + vTempWidth - (2 * c_xmarg + v_WidthButt1 + v_WidthButt2)
+	
+	GuiControl, ALib: Move, % IdButt1, % "x" c_xmarg . A_Space . "w" v_WidthButt1
+	GuiControl, ALib: Move, % IdButt2, % "x" xButt2  . A_Space . "y" v_OutVarTemp1Y . A_Space . "w" v_WidthButt2
+	
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, ALib: Show, Hide AutoSize
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . AddLibrary
+	DetectHiddenWindows, Off
+	
+	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+
+	Gui, ALib: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"
+	return
+}
 
 ALibOK:
 Gui,ALib:Submit, NoHide
