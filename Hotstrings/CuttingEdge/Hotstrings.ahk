@@ -46,7 +46,7 @@ global ini_Tips 				:= ""
 global ini_TipsSortAlphabetically 	:= ""
 global ini_TipsSortByLength 		:= ""
 ;global v_CaseSensitiveC1 		:= ""
-global v_BlockHotkeysFlag		:= 0
+;global v_BlockHotkeysFlag		:= 0
 global v_FlagSound 				:= 0
 ;I couldn't find how to get system settings for size of menu font. Quick & dirty solution: manual setting of all fonts with variable c_FontSize.
 
@@ -78,6 +78,8 @@ global v_ResizingFlag 			:= true ; when Hotstrings Gui is displayed for the very
 global v_WhichGUIisMinimzed		:= ""
 global HS3_GuiWidth  := 0,	HS3_GuiHeight := 0
 
+; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+Critical, On
 F_LoadCreateTranslationTxt() ;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
 F_CheckCreateConfigIni() ;1. Try to load up configuration file. If those files do not exist, create them.
 
@@ -146,10 +148,11 @@ F_GuiHS4_Redraw()
 
 F_UpdateSelHotLibDDL()
 
-v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
+;v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
 F_LoadHotstringsFromLibraries()
-v_BlockHotkeysFlag := 0
+Critical, Off
+;v_BlockHotkeysFlag := 0
 
 ; After definitions of (triggerstring, hotstring) are uploaded to memory, prepare (System)Tray icon
 if !(v_Param == "l") 										; if Hotstrings.ahk wasn't run with "l" parameter (standing for "light / lightweight", prepare tray menu.
@@ -4335,12 +4338,7 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
-#If (v_Param != "l") and !(v_BlockHotkeysFlag)
-
-
-
-
-
+#If (v_Param != "l") 
 ^#h::		; Event
 L_GUIInit:
 
@@ -4403,7 +4401,7 @@ else ;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakr
 			return
 	}
 return
-
+#If	;#If (v_Param != "l") 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ;#[AddHotstring]
@@ -5592,5 +5590,3 @@ Loop, %A_ScriptDir%\Languages\*.ini
 }
 MsgBox, % TransA["Application language changed to:"] . A_Space . SubStr(v_Language, 1, StrLen(v_Language)-4) . "`n" . TransA["The application will be reloaded with the new language file."]
 Reload
-
-#If
