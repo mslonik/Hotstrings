@@ -1090,7 +1090,7 @@ F_DeleteHotstring()
 		if (InStr(a_Triggers[A_Index], v_TriggerString))
 			a_Triggers.RemoveAt(A_Index)
 	}
-	TrayTip, %A_ScriptName%, TransA["Specified definition of hotstring has been deleted"], 1
+	TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
 	;Gui, ProgressDelete:Destroy
 	
 	;6. Decrement library counter.
@@ -1282,7 +1282,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 F_SelectLibrary()
 {
 	global ;assume-global mode
-	local str1 := []
+	local SectionList := [], str1 := []
 	
 	if (A_DefaultGui = "HS3")
 	{
@@ -1325,7 +1325,7 @@ F_SelectLibrary()
 		LV_Add("", str1[2], str1[1], str1[3], str1[4],str1[5], str1[6])			
 	}
 	LV_ModifyCol(1, "Sort")
-	
+	;tu jestem, tutaj dodać rozstrzelanie kolumn; jest problem z sectionlist, ale w innych funkcjach wystarczy wartość licznika, ile jest wierszy w danej bibliotece, a to mamy w liczniku
 	if (!SectionList.MaxIndex())
 		v_LibHotstringCnt := 0
 	else 
@@ -2489,8 +2489,10 @@ F_GuiMain_CreateObject()
 ;GuiControl,	Hide,		% IdCheckBox5
 	Gui, 		HS3:Add, 		CheckBox, 	x0 y0 HwndIdCheckBox6 gF_Checkbox vv_OptionDisable, 			% TransA["Disable"]
 ;GuiControl,	Hide,		% IdCheckBox6
-	
+
+	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui,			HS3:Add,		GroupBox, 	x0 y0 HwndIdGroupBox1, 									% TransA["Select trigger option(s)"]
+	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 ;GuiControl,	Hide,		% IdGroupBox1
 	
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
