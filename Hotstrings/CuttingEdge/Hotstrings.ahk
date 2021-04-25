@@ -1226,7 +1226,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox ;increase
 		GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
 		GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
-		GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
+		;GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg ;Position of the long text F1 ... F2 ...
 		ini_IsSandboxMoved := true
 		OutputDebug, % "Two:" . A_Space ini_IsSandboxMoved . A_Space . deltaH
 		F_AutoXYWH("reset")
@@ -1234,12 +1234,13 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		F_AutoXYWH("*h", IdButton5)
 	}
 		
-	if (ini_Sandbox) and (deltaH < 0) and (ini_IsSandboxMoved) and (v_OutVarTemp2H + HofText <  LeftColumnH + c_HofSandbox)
+	;if (ini_Sandbox) and (deltaH < 0) and (ini_IsSandboxMoved) and (v_OutVarTemp2H + HofText <  LeftColumnH + c_HofSandbox)
+	if (ini_Sandbox) and (deltaH < 0) and (ini_IsSandboxMoved) and (v_OutVarTemp2H <  LeftColumnH + c_HofSandbox)
 	{
 		GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H - (c_ymarg + HofText + c_HofSandbox) ;decrease
 		GuiControl, MoveDraw, % IdText10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - (HofText + c_HofSandbox)
 		GuiControl, MoveDraw, % IdEdit10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox "w" v_OutVarTemp2W
-		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
+		;GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
 		ini_IsSandboxMoved := false
 		OutputDebug, % "One:" . A_Space ini_IsSandboxMoved . A_Space . deltaH
 		F_AutoXYWH("reset")
@@ -1247,24 +1248,28 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		F_AutoXYWH("*h", IdButton5)
 	}
 
-	if ((ini_Sandbox) and (ini_IsSandboxMoved))
-	{
-		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
-		OutputDebug, % "Three" . A_Space . deltaH
-	}
-	if ((ini_Sandbox) and !(ini_IsSandboxMoved)) ;tu jest problem
+	/*
+		if ((ini_Sandbox) and (ini_IsSandboxMoved))
+		{
+			GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
+			OutputDebug, % "Three" . A_Space . deltaH
+		}
+	*/
+	if ((ini_Sandbox) and !(ini_IsSandboxMoved))
 	{
 		
 		GuiControl, MoveDraw, % IdText10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
 		GuiControl, MoveDraw, % IdEdit10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText 
-		GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg
+		;GuiControl, MoveDraw, % IdText8,  % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox + c_ymarg
 		OutputDebug, % "Four" . A_Space . deltaH
 	}
-	if (!ini_Sandbox)
-	{
-		GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
-		OutputDebug, % "Five" . A_Space . deltaH
-	}
+	/*
+		if (!ini_Sandbox)
+		{
+			GuiControl, MoveDraw, % IdText8, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg ;Position of the long text F1 ... F2 ...
+			OutputDebug, % "Five" . A_Space . deltaH
+		}
+	*/
 
 	HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
 	HS3_GuiHeight := A_GuiHeight
@@ -1723,17 +1728,25 @@ F_Sandbox()
 	Menu, ConfGUI, ToggleCheck, % TransA["Show Sandbox (F6)"]
 	ini_Sandbox := !(ini_Sandbox)
 	Iniwrite, %ini_Sandbox%, Config.ini, GraphicalUserInterface, Sandbox
-	if (A_DefaultGui = "HS3")
-	{
-		F_GuiMain_Redraw()
-		F_GuiHS4_Redraw()
-	}
-	if (A_DefaultGui = "HS4")
-	{
-		F_GuiMain_Redraw()
-		F_GuiHS4_Redraw()
-		Gui, HS4: Show, AutoSize
-	}
+	
+	F_GuiMain_Redraw()
+	F_GuiHS4_Redraw()
+	Gui, % A_DefaultGui . ":" . A_Space . "Show", AutoSize
+	
+	/*
+		if (A_DefaultGui = "HS3")
+		{
+			F_GuiMain_Redraw()
+			F_GuiHS4_Redraw()
+			Gui, HS3: Show, AutoSize
+		}
+		if (A_DefaultGui = "HS4")
+		{
+			F_GuiMain_Redraw()
+			F_GuiHS4_Redraw()
+			Gui, HS4: Show, AutoSize
+		}
+	*/
 	return
 }
 
@@ -2549,7 +2562,7 @@ F_GuiMain_CreateObject()
 	Gui, 		HS3:Add, 		ListView, 	x0 y0 HwndIdListView1 LV0x1 vv_LibraryContent AltSubmit gF_HSLV, % TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
 ;GuiControl,	Hide,		% IdListView1
 	
-	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText8, % TransA["F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring"]
+	;Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText8, % TransA["F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring"]
 ;GuiControl,	Hide,		% IdText8
 	
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
@@ -2812,15 +2825,18 @@ F_GuiMain_Redraw()
 			v_wNext := RightColumnW
 			if ((ini_Sandbox) and !(ini_IsSandboxMoved))
 			{
-				v_hNext := LeftColumnH - (3 * c_ymarg + 3 * HofText + c_HofSandbox)
+				;v_hNext := LeftColumnH - (3 * c_ymarg + 3 * HofText + c_HofSandbox)
+				v_hNext := LeftColumnH - (2 * c_ymarg + 2 * HofText + c_HofSandbox)
 			}
 			if ((ini_Sandbox) and (ini_IsSandboxMoved))
 			{
-				v_hNext := LeftColumnH - (c_ymarg + c_HofSandbox + c_ymarg)
+				;v_hNext := LeftColumnH - (c_ymarg + c_HofSandbox + c_ymarg)
+				v_hNext := LeftColumnH - (c_ymarg + c_HofSandbox)
 			}
 			if !(ini_Sandbox)
 			{
-				v_hNext := LeftColumnH - (2 * c_ymarg + 2 * HofText)
+				;v_hNext := LeftColumnH - (2 * c_ymarg + 2 * HofText)
+				v_hNext := LeftColumnH - (c_ymarg + HofText)
 				GuiControl, Hide, % IdText10
 				GuiControl, Hide, % IdEdit10
 			}
@@ -2869,7 +2885,7 @@ F_GuiMain_Redraw()
 		GuiControl, Move, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
 		GuiControl, Show, % IdText10
 		GuiControl, Show, % IdEdit10
-		GuiControl, MoveDraw, % IdText8,  % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTempY + v_OutVarTempH + c_ymarg ;Position of the long text F1 ... F2 ...
+		;GuiControl, MoveDraw, % IdText8,  % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTempY + v_OutVarTempH + c_ymarg ;Position of the long text F1 ... F2 ...
 	}
 	
 	if ((ini_Sandbox) and !(ini_IsSandboxMoved)) ;checked
@@ -2882,36 +2898,41 @@ F_GuiMain_Redraw()
 		v_wNext := RightColumnW
 		GuiControl, Move, % IdEdit10, % "x" v_xNext "y" v_yNext "w" v_wNext
 		GuiControl, Show, % IdEdit10
-		v_yNext += c_HofSandbox + c_ymarg
-		GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext
+		;v_yNext += c_HofSandbox + c_ymarg
+		;GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext
 	}
 	
 	if !(ini_Sandbox)
 	{
-		v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
-		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
+		;v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
+		;v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
 		GuiControl, Hide, % IdText10
 		GuiControl, Hide, % IdEdit10
-		GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext ;Position of the long text F1 ... F2 ...
+		;GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext ;Position of the long text F1 ... F2 ...
 	}
 	;5.2. Button between left and right column
 	if ((ini_Sandbox) and !(ini_IsSandboxMoved)) ;checked
 	{
 		v_yNext := c_ymarg
 		v_xNext := LeftColumnW + c_xmarg
-		v_hNext := c_ymarg + HofText + v_OutVarTempH + c_ymarg + HofText + c_HofSandbox  + HofText
+		;v_hNext := c_ymarg + HofText + v_OutVarTempH + c_ymarg + HofText + c_HofSandbox  + HofText
+		v_hNext := c_ymarg + HofText + v_OutVarTempH + HofText + c_HofSandbox
 	}	
 	if ((ini_Sandbox) and (ini_IsSandboxMoved))
 	{
 		v_yNext := c_ymarg
 		v_xNext := LeftColumnW + c_xmarg
-		v_hNext := c_ymarg + HofText + v_OutVarTempH + HofText	
+		;v_hNext := c_ymarg + HofText + v_OutVarTempH + HofText	
+		;v_hNext := c_ymarg + HofText + v_OutVarTempH
+		v_hNext := HofText + v_OutVarTempH
 	}
 	if !(ini_Sandbox) ;checked
 	{
 		v_yNext := c_ymarg
 		v_xNext := LeftColumnW + c_xmarg
-		v_hNext := c_ymarg + HofText + v_OutVarTempH + HofText	
+		;v_hNext := c_ymarg + HofText + v_OutVarTempH + HofText	
+		;v_hNext := c_ymarg + HofText + v_OutVarTempH
+		v_hNext := HofText + v_OutVarTempH
 	}
 	GuiControl, Move, % IdButton5, % "x" v_xNext "y" v_yNext "h" v_hNext
 }
@@ -2938,9 +2959,10 @@ F_GuiMain_DetermineConstraints()
 	;OutputDebug, % "v_OutVarTemp1W:" . A_Space . v_OutVarTemp1W  . A_Space . "v_OutVarTemp2W:" . A_Space . v_OutVarTemp2W . A_Space . "v_OutVarTemp3W:" . A_Space .  v_OutVarTemp3W  . A_Space . "c_xmarg:" . A_Space c_xmarg
 	;OutputDebug, % "LeftColumnW:" . A_Space . LeftColumnW
 	
-	GuiControlGet, v_OutVarTemp1, Pos, % IdText8 ;F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring
+	;GuiControlGet, v_OutVarTemp1, Pos, % IdText8 ;F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring
 	GuiControlGet, v_OutVarTemp2, Pos, % IdText9 ;Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
-	RightColumnW := Max(v_OutVarTemp1W, v_OutVarTemp2W) ;longer of two texts
+	;RightColumnW := Max(v_OutVarTemp1W, v_OutVarTemp2W) ;longer of two texts
+	RightColumnW := v_OutVarTemp2W
 	GuiControl,	Hide,		% IdText9
 	
 	;5. Move text objects to correct position
