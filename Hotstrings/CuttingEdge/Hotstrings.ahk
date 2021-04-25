@@ -20,11 +20,6 @@ FileEncoding, UTF-16			; Sets the default encoding for FileRead, FileReadLine, L
 
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user
-;global v_PreviousSection 		:= A_Args[2]
-;global v_PreviousWidth 			:= A_Args[3]
-;global v_PreviousHeight 			:= A_Args[4]
-;global v_PreviousX 				:= A_Args[5]
-;global v_PreviousY 				:= A_Args[6]
 global v_SelectedRow 			:= A_Args[7]
 global v_PreviousMonitor 		:= A_Args[8]
 global a_Comment 				:= []
@@ -36,7 +31,6 @@ global v_LibHotstringCnt			:= 0 ;no of (triggerstring, hotstring) definitions in
 global a_LibraryCnt				:= [] ;Hotstring counter for specific libraries
 global a_OutputFunction 			:= []
 global a_SelectedTriggers 		:= []
-;global a_String 				:= ""
 global a_TriggerOptions 			:= []
 global a_Triggers 				:= []
 global a_Triggerstring 			:= []
@@ -83,7 +77,6 @@ global v_ConfigFlag 			:= 0
 global v_ResizingFlag 			:= true ; when Hotstrings Gui is displayed for the very first time
 global v_WhichGUIisMinimzed		:= ""
 global HS3_GuiWidth  := 0,	HS3_GuiHeight := 0
-global WinHWND := 0
 
 F_LoadCreateTranslationTxt() ;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
 F_CheckCreateConfigIni() ;1. Try to load up configuration file. If those files do not exist, create them.
@@ -412,13 +405,20 @@ Switch c_FontColor
 }
 
 Menu, ConfGUI,		Add, % TransA["Save position of application window"], 	F_SaveGUIPos
-Menu, ConfGUI, 	Add, % TransA["Show Sandbox"], 					F_Sandbox
-if (ini_Sandbox == 0)
-	Menu, ConfGUI, UnCheck, % TransA["Show Sandbox"]
-else
-	Menu, ConfGUI, Check, % TransA["Show Sandbox"]
-
 Menu, ConfGUI,		Add, % TransA["Change Language"], 					:SubmenuLanguage
+Menu, ConfGUI, Add	;To add a menu separator line, omit all three parameters.
+Menu, ConfGUI, 	Add, % TransA["Show Sandbox (F6)"], 				F_Sandbox
+if (ini_Sandbox)
+	Menu, ConfGUI, Check, % TransA["Show Sandbox (F6)"]
+else
+	Menu, ConfGUI, UnCheck, % TransA["Show Sandbox (F6)"]
+
+Menu, ConfGUI,		Add, % TransA["Show full GUI (F4)"],				F_ToggleRightColumn
+if (ini_WhichGui = "HS3")
+	Menu, ConfGUI, Check, % TransA["Show full GUI (F4)"]
+else
+	Menu, ConfGUI, UnCheck, % TransA["Show full GUI (F4)"]
+
 Menu, ConfGUI, Add	;To add a menu separator line, omit all three parameters.
 Menu, ConfGUI,		Add, Style of GUI,								:StyleGUIsubm
 
@@ -705,10 +705,9 @@ return
 
 #if WinActive("Hotstrings") and WinActive("ahk_class AutoHotkeyGUI") ; the following hotkeys will be active only if Hotstrings windows are active at the moment. 
 
-F1::
-Gui, HS3:Default
+F1::	;new thread starts here
+F_WhichGui()
 F_GuiAbout()
-	;Goto, L_About
 return
 
 F2::
@@ -732,8 +731,18 @@ Gui, HS3:Default
 Goto, L_Searching
 ; return
 
+F4::	;new thread starts here
+F_WhichGui()
+F_ToggleRightColumn()
+return
+
 F5::	;new thread starts here
 F_Clear()
+return
+
+F6::	;new thread starts here
+F_WhichGui()
+F_Sandbox()
 return
 
 F7::
@@ -748,14 +757,7 @@ F_DeleteHotstring()
 return
 
 F9::	;new thread starts here
-WinGet, WinHWND, ID, A
-Switch WinHWND
-{
-	Case HS3GuiHwnd:
-		Gui, HS3: Default
-	Case HS4GuiHwnd:
-		Gui, HS4: Default
-}
+F_WhichGui()
 F_SetHotstring()
 return
 
@@ -837,9 +839,25 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_WhichGui()
+{
+	global	;assume-global mode
+	local	WinHWND := 0
+	
+	WinGet, WinHWND, ID, A
+	Switch WinHWND
+	{
+		Case HS3GuiHwnd:
+		Gui, HS3: Default
+		Case HS4GuiHwnd:
+		Gui, HS4: Default
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiAddLibrary()
 {
-	global	;assume-global
+	global	;assume-global mode
 	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
 		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0
 		,IdText1 := 0, IdText2 := 0, IdEdit1 := 0, IdButt1 := 0, IdButt2 := 0
@@ -1099,13 +1117,14 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 			Gui, HS3: Submit, NoHide
 			Gui, HS4: Default
 			F_UpdateSelHotLibDDL()
-			F_GuiHS4_Redraw()
+			;F_GuiHS4_Redraw()
 			GuiControl,, % IdEdit1b, % v_TriggerString
 			GuiControl,, % IdEdit2b, % v_EnterHotstring
 			GuiControl, ChooseString, % IdDDL2b, % v_SelectHotstringLibrary
 			Gui, HS3: Show, Hide
 			Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
-			return
+			ini_WhichGui := "HS4"
+			;return
 		Case "HS4":
 			WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
 			Gui, HS4: Submit, NoHide
@@ -1118,8 +1137,14 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 			Gui, HS4: Show, Hide
 			Gui, HS3: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
 			Gui, HS3: Show, AutoSize ;don't know why it has to be doubled to properly display...
-			return
+			ini_WhichGui := "HS3"
+			;return
 	}
+	if (ini_WhichGui = "HS3")
+		Menu, ConfGUI, Check, 	% TransA["Show full GUI (F4)"]
+	else
+		Menu, ConfGUI, UnCheck, % TransA["Show full GUI (F4)"]
+
 }
 
 HS4GuiSize() ;Gui event
@@ -1692,15 +1717,17 @@ F_Sandbox()
 {
 	global ;assume-global mode
 	
-	Menu, ConfGUI, ToggleCheck, % TransA["Show Sandbox"]
+	Menu, ConfGUI, ToggleCheck, % TransA["Show Sandbox (F6)"]
 	ini_Sandbox := !(ini_Sandbox)
 	Iniwrite, %ini_Sandbox%, Config.ini, GraphicalUserInterface, Sandbox
 	if (A_DefaultGui = "HS3")
 	{
 		F_GuiMain_Redraw()
+		F_GuiHS4_Redraw()
 	}
 	if (A_DefaultGui = "HS4")
 	{
+		F_GuiMain_Redraw()
 		F_GuiHS4_Redraw()
 		Gui, HS4: Show, AutoSize
 	}
@@ -2028,7 +2055,7 @@ Comma , 												= Comma ,
 Compile												= Compile
 Config.ini wasn't found. The default Config.ini is now created in location = Config.ini wasn't found. The default Config.ini is now created in location
 Configuration 											= &Configuration
-Continue reading the library file?`nIf you answer ""No"" then application will exit! = Continue reading the library file?`nIf you answer ""No"" then application will exit!
+Continue reading the library file? If you answer ""No"" then application will exit! = Continue reading the library file?`nIf you answer ""No"" then application will exit!
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
 Do you want to proceed? 									= Do you want to proceed?
 Cursor 												= Cursor
@@ -2086,7 +2113,6 @@ In order to aplly new font type it's necesssary to reload the application. 	= In
 In order to aplly new size of margin it's necesssary to reload the application. = In order to aplly new size of margin it's necesssary to reload the application.
 In order to aplly new style it's necesssary to reload the application. 		= In order to aplly new style it's necesssary to reload the application.
 is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv? = is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?
-Show Sandbox 										= Show Sandbox
 \Languages\`nMind that Config.ini Language variable is equal to 	= \Languages\`nMind that Config.ini Language variable is equal to
 Let's make your PC personal again... 						= Let's make your PC personal again...
 Libraries 											= &Libraries
@@ -2121,7 +2147,7 @@ pixels												= pixels
 Position of main window is saved in Config.ini.				= Position of main window is saved in Config.ini.	
 Reload												= Reload
 Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
-Sandbox 												= Sandbox
+Sandbox (F6)											= Sandbox (F6)
 Save position of application window	 					= &Save position of application window
 Search by: 											= Search by:
 Search Hotstrings 										= &Search Hotstrings
@@ -2134,6 +2160,8 @@ Select the target library: 								= Select the target library:
 Select trigger option(s) 								= Select trigger option(s)
 Semicolon ; 											= Semicolon ;
 Set hotstring (F9) 										= Set hotstring (F9)
+Show full GUI (F4)										= Show full GUI (F4)
+Show Sandbox (F6)										= Show Sandbox (F6)
 Size of font											= Size of font
 Size of margin:										= Size of margin:
 Slash / 												= Slash /
@@ -2313,7 +2341,7 @@ F_GuiHS4_CreateObject()
 ;GuiControl,	Hide,		% IdCheckBox3
 	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox4b gF_Checkbox vv_OptionInsideWord, 		% TransA["Inside Word (?)"]
 ;GuiControl,	Hide,		% IdCheckBox4
-	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox5b gF_Checkbox vv_OptionNoEndChar, 			% TransA["No End Char (O)"]
+	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox5b gF_Checkbox vv_OptionNoEndChar, 		% TransA["No End Char (O)"]
 ;GuiControl,	Hide,		% IdCheckBox5
 	Gui, 	HS4: Add, 	CheckBox, 	x0 y0 HwndIdCheckBox6b gF_Checkbox vv_OptionDisable, 			% TransA["Disable"]
 ;GuiControl,	Hide,		% IdCheckBox6
@@ -2375,9 +2403,9 @@ F_GuiHS4_CreateObject()
 	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton4b gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
 	;GuiControl,	Hide,		% IdButton4
 	
-	Gui,		HS4: Add,			Button,		x0 y0 HwndIdButton5b gF_ToggleRightColumn,			⯈
+	Gui,		HS4: Add,			Button,		x0 y0 HwndIdButton5b gF_ToggleRightColumn,			⯈`nF4
 	;GuiControl,	Hide,		% IdButton5
-	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText10b vv_SandString, 						% TransA["Sandbox"]
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText10b vv_SandString, 						% TransA["Sandbox (F6)"]
 	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit10b vv_Sandbox r3 						; r3 = 3x rows of text
 	
 	Gui,		HS4: Add,			Text,		x0 y0 HwndIdText11b, % TransA["This library:"]
@@ -2503,7 +2531,7 @@ F_GuiMain_CreateObject()
 	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton4 gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
 ;GuiControl,	Hide,		% IdButton4
 	
-	Gui,			HS3:Add,		Button,		x0 y0 HwndIdButton5 gF_ToggleRightColumn,			⯇
+	Gui,			HS3:Add,		Button,		x0 y0 HwndIdButton5 gF_ToggleRightColumn,			⯇`nF4
 ;GuiControl,	Hide,		% IdButton5
 	
 ;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
@@ -2522,7 +2550,7 @@ F_GuiMain_CreateObject()
 ;GuiControl,	Hide,		% IdText8
 	
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText10 vv_SandString, 						% TransA["Sandbox"]
+	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText10 vv_SandString, 						% TransA["Sandbox (F6)"]
 ;GuiControl,	Hide,		% IdText10
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
@@ -2771,7 +2799,7 @@ F_GuiMain_Redraw()
 	static b_FirstRun := true
 	
 	;position of the List View, but only when HS3 Gui is initiated: before showing. So this code is run only once.
-	
+	;*[One]
 	if (b_FirstRun) 
 	{
 		v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
@@ -3154,20 +3182,19 @@ F_GuiAbout()
 			NewStr := SubStr(TransA["About/Help"], FoundPos + 1)
 	}
 	
-	
-	WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
-	if !(WinExist("ahk_id" . MyAboutGuiHwnd))
-		Gui, MyAbout: Show, Hide Center AutoSize
+	;WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
+	;if !(WinExist("ahk_id" . MyAboutGuiHwnd))
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, MyAbout: Show, Hide Center AutoSize
 	
 	DetectHiddenWindows, On
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . MyAboutGuiHwnd
 	DetectHiddenWindows, Off
 	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
 	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
-	OutputDebug, % "Window2W:" . A_Space . Window2W . A_Space . "Window2H:" . A_Space . Window2H
-	OutputDebug, % "NewWinPosX:" . A_Space . NewWinPosX . A_Space . "NewWinPosY:" . A_Space . NewWinPosY
+	;OutputDebug, % "Window2W:" . A_Space . Window2W . A_Space . "Window2H:" . A_Space . Window2H
+	;OutputDebug, % "NewWinPosX:" . A_Space . NewWinPosX . A_Space . "NewWinPosY:" . A_Space . NewWinPosY
 	Gui, MyAbout: Show, % "Center" . A_Space . "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % SubStr(A_ScriptName, 1, -4) . A_Space . NewStr
-	
 	return  
 }
 
@@ -4394,9 +4421,8 @@ F_SetHotstring()
 	local 	TextInsert := "", OldOptions := "", Options := "", SendFun := "", OnOff := "", EnDis := "", OutputFile := "", InputFile := "", LString := "", ModifiedFlag := false
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
 	
-	Gui, % A_DefaultGui . ":" . A_Space . "+OwnDialogs"
 	;1. Read all inputs. 
-	Gui, % A_DefaultGui . ":" A_Space . "Submit", NoHide
+	Gui, % A_DefaultGui . ":" A_Space . "Submit" . A_Space . "+OwnDialogs", NoHide
 	
 	if (Trim(v_TriggerString) = "")
 	{
@@ -4767,7 +4793,6 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-;*[One]
 F_Checkbox()
 {
 	global	;assume-global
