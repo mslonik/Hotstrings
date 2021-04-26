@@ -150,6 +150,7 @@ F_UpdateSelHotLibDDL()
 
 ;v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
+;*[One]
 F_LoadHotstringsFromLibraries()
 Critical, Off
 ;v_BlockHotkeysFlag := 0
@@ -1011,20 +1012,21 @@ F_DeleteHotstring()
 	;1. Remove selected library file.
 	LibraryFullPathAndName := A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary
 	FileDelete, % LibraryFullPathAndName
-	;cntDelete := 0
-	;Gui, HS3:Default
 	
 	;2. Create library file of the same name as selected. its content will contain LV but without selected row.
-	if (v_SelectedRow == SectionList.MaxIndex())
+	;if (v_SelectedRow == SectionList.MaxIndex())
+	if (v_SelectedRow = v_LibHotstringCnt)
 	{
-		if (SectionList.MaxIndex() == 1)
+		;if (SectionList.MaxIndex() == 1)
+		if (v_LibHotstringCnt = 1)
 		{
 			FileAppend,, % LibraryFullPathAndName, UTF-8
 			;GuiControl,, ProgressDelete, 100
 		}
 		else
 		{
-			Loop, % SectionList.MaxIndex()-1
+			;Loop, % SectionList.MaxIndex()-1
+			Loop, % v_LibHotstringCnt - 1
 			{
 				if !(A_Index == v_SelectedRow)
 				{
@@ -1034,7 +1036,8 @@ F_DeleteHotstring()
 					LV_GetText(txt4, A_Index, 4)
 					LV_GetText(txt5, A_Index, 5)
 					LV_GetText(txt6, A_Index, 6)
-					if (A_Index == SectionList.MaxIndex()-1)
+					;if (A_Index == SectionList.MaxIndex()-1)
+					if (A_Index = v_LibHotstringCnt - 1)
 						txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
 					else
 						txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
@@ -1050,9 +1053,10 @@ F_DeleteHotstring()
 	}
 	else
 	{
-		Loop, % SectionList.MaxIndex()
+		;Loop, % SectionList.MaxIndex()
+		Loop, % v_LibHotstringCnt
 		{
-			if !(A_Index == v_SelectedRow)
+			if !(A_Index = v_SelectedRow)
 			{
 				LV_GetText(txt1, A_Index, 2)
 				LV_GetText(txt2, A_Index, 1)
@@ -1060,7 +1064,8 @@ F_DeleteHotstring()
 				LV_GetText(txt4, A_Index, 4)
 				LV_GetText(txt5, A_Index, 5)
 				LV_GetText(txt6, A_Index, 6)
-				if (A_Index == SectionList.MaxIndex())
+				;if (A_Index == SectionList.MaxIndex())
+				if (A_Index = v_LibHotstringCnt)
 					txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
 				else
 					txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
@@ -1076,7 +1081,7 @@ F_DeleteHotstring()
 	;4. Disable selected hotstring.
 	LV_GetText(txt2, v_SelectedRow, 2)
 	Try
-		Hotstring(":" . txt2 . ":" . v_TriggerString, , "Off") ;tu jestem
+		Hotstring(":" . txt2 . ":" . v_TriggerString, , "Off") 
 	Catch
 		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Error, something went wrong with hotstring deletion:"] . "`n`n" . v_TriggerString 
 		. A_Space . txt2 . "`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 
@@ -1282,7 +1287,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 F_SelectLibrary()
 {
 	global ;assume-global mode
-	local SectionList := [], str1 := []
+	local Text := "", SectionList := [], str1 := []
 	
 	if (A_DefaultGui = "HS3")
 	{
@@ -1325,7 +1330,14 @@ F_SelectLibrary()
 		LV_Add("", str1[2], str1[1], str1[3], str1[4],str1[5], str1[6])			
 	}
 	LV_ModifyCol(1, "Sort")
-	;tu jestem, tutaj dodać rozstrzelanie kolumn; jest problem z sectionlist, ale w innych funkcjach wystarczy wartość licznika, ile jest wierszy w danej bibliotece, a to mamy w liczniku
+	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;Check position of ListView1 again after resizing
+	LV_ModifyCol(1, Round(0.1 * v_OutVarTemp2W))
+	LV_ModifyCol(2, Round(0.1 * v_OutVarTemp2W))
+	LV_ModifyCol(3, Round(0.1 * v_OutVarTemp2W))	
+	LV_ModifyCol(4, Round(0.1 * v_OutVarTemp2W))
+	LV_ModifyCol(5, Round(0.4 * v_OutVarTemp2W))
+	LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W) - 3)
+
 	if (!SectionList.MaxIndex())
 		v_LibHotstringCnt := 0
 	else 
@@ -2095,6 +2107,7 @@ Enter a name for the new library 							= Enter a name for the new library
 Enter hotstring 										= Enter hotstring
 Enter triggerstring before hotstring is set					= Enter triggerstring before hotstring is set
 Error												= Error
+Error reading line from file:								= Error reading line from file:
 Error, something went wrong with hotstring deletion:			= Error, something went wrong with hotstring deletion:
 ErrorLevel was triggered by NewInput error. 					= ErrorLevel was triggered by NewInput error.
 Error reading library file:								= Error reading library file:
@@ -2277,8 +2290,9 @@ F_LoadFile(nameoffile)
 	Loop
 	{
 		FileReadLine, line, %A_ScriptDir%\Libraries\%nameoffile%, %A_Index%
-		if (ErrorLevel)
+		if (ErrorLevel) ;this is a trick to exit this loop when end of file is riched
 			break
+
 		tabSearch := StrSplit(line, "‖")	
 		name := SubStr(A_LoopFileName, 1, -4) ;filename without extension
 		
@@ -2817,7 +2831,7 @@ F_GuiMain_Redraw()
 	static b_FirstRun := true
 	
 	;position of the List View, but only when HS3 Gui is initiated: before showing. So this code is run only once.
-	;*[One]
+	
 	if (b_FirstRun) 
 	{
 		v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
@@ -3406,37 +3420,10 @@ F_LoadLibrariesToTables()
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-/*
-	F_LoadFiles(nameoffile)
-	{
-		global 
-		local line := ""
-		
-		IniRead, v_Library, Config.ini, TipsLibraries, %nameoffile%
-		Loop
-		{
-			FileReadLine, line, Libraries\%nameoffile%, %A_Index%
-			if (ErrorLevel)
-				break
-			line := StrReplace(line, "``n", "`n")
-			line := StrReplace(line, "``r", "`r")		
-			line := StrReplace(line, "``t", "`t")
-			F_ini_StartHotstring(line, nameoffile)
-			if (v_Library)
-				a_Triggers.Push(v_TriggerString)
-			v_TotalHotstringCnt++
-			GuiControl,, v_LoadedHotstrings, % TransA["Loaded hotstrings:"] . A_Space . v_TotalHotstringCnt
-		}
-		return
-	}
-*/
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 F_ini_StartHotstring(txt, nameoffile) 
-{
+{ ;tu jestem
 	global	;assume-global mode
-	static Options, OnOff, EnDis, SendFun, TextInsert
+	local txtsp := "", Options := "", SendFun := "", EnDis := "", OnOff := "", TextInsert := "", Oflag := 0
 	
 	v_UndoHotstring := ""
 	v_TriggerString := ""
@@ -3444,7 +3431,7 @@ F_ini_StartHotstring(txt, nameoffile)
 	txtsp 			:= StrSplit(txt, "‖")
 	Options 			:= txtsp[1]
 	v_TriggerString 	:= txtsp[2]
-	if (!v_TriggerString) ; Future: add those strings to translation.
+	if (!v_TriggerString) 
 	{
 		MsgBox, 262420, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Error reading library file:"] . "`n`n" . nameoffile . "`n`n" . TransA["the following line is found:"] 
 		. "`n" . txt . "`n`n" . TransA["This line do not comply to format required by this application."] . "`n`n" 
@@ -3468,6 +3455,12 @@ F_ini_StartHotstring(txt, nameoffile)
 	else if (EnDis == "Dis")
 		OnOff := "Off"
 	TextInsert := txtsp[5]
+	
+	TextInsert := StrReplace(TextInsert, "``n", "`n") ;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
+	TextInsert := StrReplace(TextInsert, "``r", "`r")		
+	TextInsert := StrReplace(TextInsert, "``t", "`t")
+	TextInsert := StrReplace(TextInsert, "``", "`")
+	
 	Oflag := ""
 	If (InStr(Options,"O",0))
 		Oflag := 1
@@ -3479,8 +3472,6 @@ F_ini_StartHotstring(txt, nameoffile)
 	}
 	return
 }
-
-
 
 ; =================================================================================
 ; Function: AutoXYWH
@@ -4444,7 +4435,8 @@ F_SetHotstring()
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
 	
 	;1. Read all inputs. 
-	Gui, % A_DefaultGui . ":" A_Space . "Submit" . A_Space . "+OwnDialogs", NoHide
+	Gui, % A_DefaultGui . ":" A_Space . "Submit", NoHide
+	Gui, % A_DefaultGui . ":" A_Space . "+OwnDialogs"
 	
 	if (Trim(v_TriggerString) = "")
 	{
@@ -4579,7 +4571,7 @@ F_SetHotstring()
 		
 		if (InStr(A_LoopReadLine, LString, 1) and InStr(Options, "C")) or (InStr(A_LoopReadLine, LString) and !(InStr(Options, "C")))
 		{
-			MsgBox, 4,, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in a file"] . A_Space . v_SelectHotstringLibrary . "." . A_Space . TransA["Do you want to proceed?"]
+			MsgBox, 68,, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in a file"] . A_Space . v_SelectHotstringLibrary . "." . A_Space . TransA["Do you want to proceed?"]
 			IfMsgBox, No
 				return
 			LV_Modify(A_Index, "", v_TriggerString, Options, SendFun, EnDis, TextInsert, v_Comment)
@@ -4590,7 +4582,7 @@ F_SetHotstring()
 	{
 		LV_Add("",  v_TriggerString, Options, SendFun, EnDis, TextInsert, v_Comment)
 		txt := % Options . "‖" . v_TriggerString . "‖" . SendFun . "‖" . EnDis . "‖" . TextInsert . "‖" . v_Comment ;tylko to się liczy
-		SectionList.Push(txt)
+		;SectionList.Push(txt)
 		a_Triggers.Push(v_TriggerString) ;added to table of hotstring recognizer (a_Triggers)
 	}
 	;4. Sort List View. 
@@ -4599,43 +4591,57 @@ F_SetHotstring()
 	FileDelete, %InputFile%
 	
 	;6. Save List View into the library file.
-	if (SectionList.MaxIndex() == "") ;in order to speed up it's checked if library isn't empty.
+	Loop, % LV_GetCount()
 	{
-		LV_GetText(txt1, 1, 2)
-		LV_GetText(txt2, 1, 1)
-		LV_GetText(txt3, 1, 3)
-		LV_GetText(txt4, 1, 4)
-		LV_GetText(txt5, 1, 5)
-		LV_GetText(txt6, 1, 6)
-		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-	;FileAppend, %txt%, Libraries\%name%, UTF-8
-		FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
+		LV_GetText(txt1, A_Index, 2)
+		LV_GetText(txt2, A_Index, 1)
+		LV_GetText(txt3, A_Index, 3)
+		LV_GetText(txt4, A_Index, 4)
+		LV_GetText(txt5, A_Index, 5)
+		LV_GetText(txt6, A_Index, 6)
+		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
+		if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == "")) ;only not empty definitions are added, not sure why
+			FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
 	}
-	else
-	{ ;no idea why this is duplicated...
-		Loop, % SectionList.MaxIndex()-1
+	
+	/*
+		if (SectionList.MaxIndex() == "") ;in order to speed up it's checked if library isn't empty.
 		{
-			LV_GetText(txt1, A_Index, 2)
-			LV_GetText(txt2, A_Index, 1)
-			LV_GetText(txt3, A_Index, 3)
-			LV_GetText(txt4, A_Index, 4)
-			LV_GetText(txt5, A_Index, 5)
-			LV_GetText(txt6, A_Index, 6)
-			txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
-			if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == "")) ;only not empty definitions are added, not sure why
-			;FileAppend, %txt%, Libraries\%name%, UTF-8
-				FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
+			LV_GetText(txt1, 1, 2)
+			LV_GetText(txt2, 1, 1)
+			LV_GetText(txt3, 1, 3)
+			LV_GetText(txt4, 1, 4)
+			LV_GetText(txt5, 1, 5)
+			LV_GetText(txt6, 1, 6)
+			txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
+		;FileAppend, %txt%, Libraries\%name%, UTF-8
+			FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
 		}
-	;the new added definition
-		LV_GetText(txt1, SectionList.MaxIndex(), 2)
-		LV_GetText(txt2, SectionList.MaxIndex(), 1)
-		LV_GetText(txt3, SectionList.MaxIndex(), 3)
-		LV_GetText(txt4, SectionList.MaxIndex(), 4)
-		LV_GetText(txt5, SectionList.MaxIndex(), 5)
-		LV_GetText(txt6, SectionList.MaxIndex(), 6)
-		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-		FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
-	}
+		else
+		{ ;no idea why this is duplicated...
+			Loop, % SectionList.MaxIndex()-1
+			{
+				LV_GetText(txt1, A_Index, 2)
+				LV_GetText(txt2, A_Index, 1)
+				LV_GetText(txt3, A_Index, 3)
+				LV_GetText(txt4, A_Index, 4)
+				LV_GetText(txt5, A_Index, 5)
+				LV_GetText(txt6, A_Index, 6)
+				txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
+				if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == "")) ;only not empty definitions are added, not sure why
+					FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
+			}
+		;the new added definition
+			LV_GetText(txt1, SectionList.MaxIndex(), 2)
+			LV_GetText(txt2, SectionList.MaxIndex(), 1)
+			LV_GetText(txt3, SectionList.MaxIndex(), 3)
+			LV_GetText(txt4, SectionList.MaxIndex(), 4)
+			LV_GetText(txt5, SectionList.MaxIndex(), 5)
+			LV_GetText(txt6, SectionList.MaxIndex(), 6)
+			txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
+			FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
+		}
+	*/
 	;7. Increment library counter.
 	++v_LibHotstringCnt
 	++v_TotalHotstringCnt
