@@ -843,6 +843,66 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_Checkbox()
+{
+	global	;assume-global
+	local v_OutputVar := 0
+	GuiControlGet, v_OutputVar, % A_Gui . ":", % A_GuiControl
+	
+	if (v_OutputVar)
+	{
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+	}
+	else 
+	{
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+	}
+	GuiControl, HS3: Font, % A_GuiControl
+	GuiControl, HS4: Font, % A_GuiControl
+	Switch A_Gui
+	{
+		Case "HS3":
+		GuiControl, HS4:, % A_GuiControl, % v_OutputVar
+		Case "HS4":
+		GuiControl, HS3:, % A_GuiControl, % v_OutputVar
+	}
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiHSdelay()
+{
+	global	;assume-global mode
+	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,NewWinPosX := 0, NewWinPosY := 0
+	;+Owner to prevent display of a taskbar button
+	Gui, HSDel: New, -MinimizeBox -MaximizeBox +Owner +HwndHotstringDelay, % TransA["Set Clipboard Delay"]
+	Gui, HSDel: Margin,	% c_xmarg, % c_ymarg
+	Gui,	HSDel: Color,	% c_WindowColor, % c_ControlColor
+	Gui,	HSDel: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
+	Gui, HSDel: Add, Slider, w300 vMySlider gmySlider Range100-1000 ToolTipBottom Buddy1999, % ini_Delay
+	
+	TransA["This option is valid"] := StrReplace(TransA["This option is valid"], "``n", "`n")
+	
+	Gui, HSDel: Add, Text, vDelayText, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_Delay . "`n`n" . TransA["This option is valid"]
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, HSDel: Show, Hide AutoSize 
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . HotstringDelay
+	DetectHiddenWindows, Off
+	
+	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+
+	Gui, HSDel: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"	
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_WhichGui()
 {
 	global	;assume-global mode
@@ -988,7 +1048,7 @@ F_DeleteHotstring()
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
 			,v_SelectedRow := 0
 	
-	Gui, HS3:+OwnDialogs
+	Gui, HS3: +OwnDialogs
 	
 	if !(v_SelectedRow := LV_GetNext()) 
 	{
@@ -1016,22 +1076,47 @@ F_DeleteHotstring()
 	LibraryFullPathAndName := A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary
 	FileDelete, % LibraryFullPathAndName
 	
-	;2. Create library file of the same name as selected. its content will contain LV but without selected row.
-	;if (v_SelectedRow == SectionList.MaxIndex())
-	if (v_SelectedRow = v_LibHotstringCnt)
-	{
-		;if (SectionList.MaxIndex() == 1)
-		if (v_LibHotstringCnt = 1)
+	/*
+		;2. Create library file of the same name as selected. its content will contain LV but without selected row.
+		if (v_SelectedRow = v_LibHotstringCnt)
 		{
-			FileAppend,, % LibraryFullPathAndName, UTF-8
-			;GuiControl,, ProgressDelete, 100
+			if (v_LibHotstringCnt = 1)
+			{
+				FileAppend,, % LibraryFullPathAndName, UTF-8
+				;GuiControl,, ProgressDelete, 100
+			}
+			else
+			{
+				Loop, % v_LibHotstringCnt - 1
+				{
+					if !(A_Index == v_SelectedRow)
+					{
+						LV_GetText(txt1, A_Index, 2)
+						LV_GetText(txt2, A_Index, 1)
+						LV_GetText(txt3, A_Index, 3)
+						LV_GetText(txt4, A_Index, 4)
+						LV_GetText(txt5, A_Index, 5)
+						LV_GetText(txt6, A_Index, 6)
+						;if (A_Index == SectionList.MaxIndex()-1)
+						if (A_Index = v_LibHotstringCnt - 1)
+							txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
+						else
+							txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
+						if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
+							FileAppend, %txt%, % LibraryFullPathAndName, UTF-8
+						;v_DeleteProgress := (A_Index/(SectionList.MaxIndex()-1))*100
+						;Gui, ProgressDelete:Default
+						;GuiControl,, ProgressDelete, %v_DeleteProgress%
+						;Gui, HS3:Default
+					}
+				}
+			}
 		}
 		else
 		{
-			;Loop, % SectionList.MaxIndex()-1
-			Loop, % v_LibHotstringCnt - 1
+			Loop, % v_LibHotstringCnt
 			{
-				if !(A_Index == v_SelectedRow)
+				if !(A_Index = v_SelectedRow)
 				{
 					LV_GetText(txt1, A_Index, 2)
 					LV_GetText(txt2, A_Index, 1)
@@ -1039,8 +1124,7 @@ F_DeleteHotstring()
 					LV_GetText(txt4, A_Index, 4)
 					LV_GetText(txt5, A_Index, 5)
 					LV_GetText(txt6, A_Index, 6)
-					;if (A_Index == SectionList.MaxIndex()-1)
-					if (A_Index = v_LibHotstringCnt - 1)
+					if (A_Index = v_LibHotstringCnt)
 						txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
 					else
 						txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
@@ -1053,34 +1137,8 @@ F_DeleteHotstring()
 				}
 			}
 		}
-	}
-	else
-	{
-		;Loop, % SectionList.MaxIndex()
-		Loop, % v_LibHotstringCnt
-		{
-			if !(A_Index = v_SelectedRow)
-			{
-				LV_GetText(txt1, A_Index, 2)
-				LV_GetText(txt2, A_Index, 1)
-				LV_GetText(txt3, A_Index, 3)
-				LV_GetText(txt4, A_Index, 4)
-				LV_GetText(txt5, A_Index, 5)
-				LV_GetText(txt6, A_Index, 6)
-				;if (A_Index == SectionList.MaxIndex())
-				if (A_Index = v_LibHotstringCnt)
-					txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-				else
-					txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
-				if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
-					FileAppend, %txt%, % LibraryFullPathAndName, UTF-8
-				;v_DeleteProgress := (A_Index/(SectionList.MaxIndex()-1))*100
-				;Gui, ProgressDelete:Default
-				;GuiControl,, ProgressDelete, %v_DeleteProgress%
-				;Gui, HS3:Default
-			}
-		}
-	}
+	*/
+	
 	;4. Disable selected hotstring.
 	LV_GetText(txt2, v_SelectedRow, 2)
 	Try
@@ -1091,6 +1149,21 @@ F_DeleteHotstring()
 
 	;3. Remove selected row from List View.
 	LV_Delete(v_SelectedRow)
+	;tu jestem zapisać wszystko, co pozostało, do jednego pliku
+	
+	;4. Save List View into the library file.
+	Loop, % LV_GetCount()
+	{
+		LV_GetText(txt1, A_Index, 2)
+		LV_GetText(txt2, A_Index, 1)
+		LV_GetText(txt3, A_Index, 3)
+		LV_GetText(txt4, A_Index, 4)
+		LV_GetText(txt5, A_Index, 5)
+		LV_GetText(txt6, A_Index, 6)
+		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
+		if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == "")) ;only not empty definitions are added, not sure why
+			FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
+	}
 
 	;5. Remove trigger hint. Remark: All trigger hints are deleted, so if triggerstring was duplicated, then all trigger hints are deleted!
 	Loop, % a_Triggers.MaxIndex()
@@ -4607,44 +4680,6 @@ F_SetHotstring()
 			FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
 	}
 	
-	/*
-		if (SectionList.MaxIndex() == "") ;in order to speed up it's checked if library isn't empty.
-		{
-			LV_GetText(txt1, 1, 2)
-			LV_GetText(txt2, 1, 1)
-			LV_GetText(txt3, 1, 3)
-			LV_GetText(txt4, 1, 4)
-			LV_GetText(txt5, 1, 5)
-			LV_GetText(txt6, 1, 6)
-			txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-		;FileAppend, %txt%, Libraries\%name%, UTF-8
-			FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
-		}
-		else
-		{ ;no idea why this is duplicated...
-			Loop, % SectionList.MaxIndex()-1
-			{
-				LV_GetText(txt1, A_Index, 2)
-				LV_GetText(txt2, A_Index, 1)
-				LV_GetText(txt3, A_Index, 3)
-				LV_GetText(txt4, A_Index, 4)
-				LV_GetText(txt5, A_Index, 5)
-				LV_GetText(txt6, A_Index, 6)
-				txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
-				if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == "")) ;only not empty definitions are added, not sure why
-					FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
-			}
-		;the new added definition
-			LV_GetText(txt1, SectionList.MaxIndex(), 2)
-			LV_GetText(txt2, SectionList.MaxIndex(), 1)
-			LV_GetText(txt3, SectionList.MaxIndex(), 3)
-			LV_GetText(txt4, SectionList.MaxIndex(), 4)
-			LV_GetText(txt5, SectionList.MaxIndex(), 5)
-			LV_GetText(txt6, SectionList.MaxIndex(), 6)
-			txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-			FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
-		}
-	*/
 	;7. Increment library counter.
 	++v_LibHotstringCnt
 	++v_TotalHotstringCnt
@@ -4824,74 +4859,9 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_Checkbox()
-{
-	global	;assume-global
-	local v_OutputVar := 0
-	GuiControlGet, v_OutputVar, % A_Gui . ":", % A_GuiControl
-	
-	if (v_OutputVar)
-	{
-		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
-		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
-	}
-	else 
-	{
-		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-	}
-	GuiControl, HS3: Font, % A_GuiControl
-	GuiControl, HS4: Font, % A_GuiControl
-	Switch A_Gui
-	{
-		Case "HS3":
-		GuiControl, HS4:, % A_GuiControl, % v_OutputVar
-		Case "HS4":
-		GuiControl, HS3:, % A_GuiControl, % v_OutputVar
-	}
-	return
-}
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;tu jestem
-F_GuiHSdelay()
-{
-	global	;assume-global mode
-	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
-		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
-		,NewWinPosX := 0, NewWinPosY := 0
-	;+Owner to prevent display of a taskbar button
-	Gui, HSDel: New, -MinimizeBox -MaximizeBox +Owner +HwndHotstringDelay, % TransA["Set Clipboard Delay"]
-	Gui, HSDel: Margin,	% c_xmarg, % c_ymarg
-	Gui,	HSDel: Color,	% c_WindowColor, % c_ControlColor
-	Gui,	HSDel: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	
-	Gui, HSDel: Add, Slider, w300 vMySlider gmySlider Range100-1000 ToolTipBottom Buddy1999, % ini_Delay
-	
-	TransA["This option is valid"] := StrReplace(TransA["This option is valid"], "``n", "`n")
-	
-	Gui, HSDel: Add, Text, vDelayText, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_Delay . "`n`n" . TransA["This option is valid"]
-	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-	Gui, HSDel: Show, Hide AutoSize 
-	DetectHiddenWindows, On
-	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . HotstringDelay
-	DetectHiddenWindows, Off
-	
-	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
-	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
-
-	Gui, HSDel: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"	
-	return
-}
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 MySlider:
 ini_Delay := MySlider
-if (ini_Delay = 1000)
-	GuiControl,, DelayText, % TransA["Hotstring paste from Clipboard delay 1 s"]
-else
-	GuiControl,, DelayText, % TransA["Hotstring paste from Clipboard delay"] . A_Space . ini_Delay . " ms"
+GuiControl,, DelayText, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_Delay . "`n`n" . TransA["This option is valid"]
 IniWrite, %ini_Delay%, Config.ini, Configuration, Delay
 return
 
