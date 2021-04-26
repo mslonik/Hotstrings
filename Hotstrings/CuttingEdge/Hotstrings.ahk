@@ -470,14 +470,14 @@ Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  			L_ExportLibraryDy
 Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],		:ExportSubmenu
 Menu, LibrariesSubmenu, Disable, % TransA["Export from .csv to .ahk"]
 
-Menu, 	HSMenu, 			Add, % TransA["Libraries"], 			:LibrariesSubmenu
-Menu, 	HSMenu, 			Add, % TransA["Clipboard Delay"], 					HSdelay
-Menu,	ApplicationSubmenu,	Add, % TransA["Reload"],							F_Reload
-Menu,	ApplicationSubmenu,	Add, % TransA["Exit"],							F_Exit
-Menu,	ApplicationSubmenu,	Add,	% TransA["Compile"],						F_Compile
-Menu,	ApplicationSubmenu, Disable,										% TransA["Compile"]
-Menu, 	HSMenu,			Add, % TransA["Application"],						:ApplicationSubmenu
-Menu, 	HSMenu, 			Add, % TransA["About/Help"], 						F_GuiAbout
+Menu, 	HSMenu, 			Add, % TransA["Libraries"], 				:LibrariesSubmenu
+Menu, 	HSMenu, 			Add, % TransA["Clipboard Delay (F7)"], 		F_GuiHSdelay
+Menu,	ApplicationSubmenu,	Add, % TransA["Reload"],					F_Reload
+Menu,	ApplicationSubmenu,	Add, % TransA["Exit"],					F_Exit
+Menu,	ApplicationSubmenu,	Add,	% TransA["Compile"],				F_Compile
+Menu,	ApplicationSubmenu, Disable,								% TransA["Compile"]
+Menu, 	HSMenu,			Add, % TransA["Application"],				:ApplicationSubmenu
+Menu, 	HSMenu, 			Add, % TransA["About/Help"], 				F_GuiAbout
 Gui, 	HS3: Menu, HSMenu
 Gui, 	HS4: Menu, HSMenu
 
@@ -749,10 +749,10 @@ F_WhichGui()
 F_Sandbox()
 return
 
-F7::
+F7:: ;new thread starts here
 Gui, HS3:Default
-goto, HSdelay
-; return
+F_GuiHSdelay()
+return
 
 F8::	;new thread starts here
 Gui, HS3:Default
@@ -872,6 +872,9 @@ F_GuiAddLibrary()
 	
 	;+Owner to prevent display of a taskbar button
 	Gui, ALib: New, -Caption +Border +Owner +HwndAddLibrary
+	Gui, ALib: Margin,	% c_xmarg, % c_ymarg
+	Gui,	ALib: Color,	% c_WindowColor, % c_ControlColor
+	Gui,	ALib: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
 	Gui, ALib: Add, Text, HwndIdText1, % TransA["Enter a name for the new library"]
 	Gui, ALib: Add, Edit, HwndIdEdit1 vv_NewLib
@@ -2048,7 +2051,7 @@ F_LoadCreateTranslationTxt(decision*)
 	global ;assume-global mode
 	local TransConst := ""
 	
-;% TransA["file in Languages subfolder!"] . "`n" . TransA["The default"] 
+;Warning. If right side contains `n chars it's necessary to replace them with StrReplace.
 	TransConst := "			
 (Join`n `			
 About/Help	 										= &About/Help
@@ -2074,7 +2077,8 @@ Choose sending function! 								= Choose sending function!
 Choose the method of sending the hotstring! 					= Choose the method of sending the hotstring!
 Choose tips location 									= Choose tips location
 Clear (F5) 											= Clear (F5)
-Clipboard Delay 										= Clipboard &Delay
+Clipboard Delay (F7)									= Clipboard &Delay (F7)
+Clipboard paste delay in [ms]:  							= Clipboard paste delay in [ms]:
 Closing Curly Bracket } 									= Closing Curly Bracket }
 Closing Round Bracket ) 									= Closing Round Bracket )
 Closing Square Bracket ] 								= Closing Square Bracket ]
@@ -2188,6 +2192,7 @@ Select hotstring output function 							= Select hotstring output function
 Select the target library: 								= Select the target library:
 Select trigger option(s) 								= Select trigger option(s)
 Semicolon ; 											= Semicolon ;
+Set Clipboard Delay										= Set Clipboard Delay
 Set hotstring (F9) 										= Set hotstring (F9)
 Show full GUI (F4)										= Show full GUI (F4)
 Show Sandbox (F6)										= Show Sandbox (F6)
@@ -2210,6 +2215,7 @@ There is no											= There is no
 There was no Languages subfolder, so one now is created.		= There was no Languages subfolder, so one now is created.
 This library:											= This library:
 This line do not comply to format required by this application.  = This line do not comply to format required by this application.
+This option is valid 									= In case you observe some hotstrings aren't pasted from clipboard increase this value. `nThis option is valid for CL and MCL hotstring output functions. 
 Toggle EndChars	 									= &Toggle EndChars
 Total:												= Total:
 Triggerstring 											= Triggerstring
@@ -2474,85 +2480,85 @@ F_GuiMain_CreateObject()
 ;-DPIScale doesn't work in Microsoft Windows 10
 ;+Border doesn't work in Microsoft Windows 10
 ;OwnDialogs
-	Gui, 		HS3:New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs -MaximizeBox, % SubStr(A_ScriptName, 1, -4)
-	Gui, 		HS3:Margin,	% c_xmarg, % c_ymarg
-	Gui,			HS3:Color,	% c_WindowColor, % c_ControlColor
+	Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs -MaximizeBox, % SubStr(A_ScriptName, 1, -4)
+	Gui, 		HS3: Margin,	% c_xmarg, % c_ymarg
+	Gui,			HS3: Color,	% c_WindowColor, % c_ControlColor
 	
 ;2. Prepare all text objects according to mock-up.
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText1, 									% TransA["Enter triggerstring"]
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText1, 									% TransA["Enter triggerstring"]
 ;GuiControl, 	Hide, 		% IdText1
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText2, % TransA["Total:"]
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
-	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText12, % A_Space . A_Space . A_Space . A_Space . "0"
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText2, % TransA["Total:"]
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText12, % A_Space . A_Space . A_Space . A_Space . "0"
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
-	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString 
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString 
 ;GuiControl,	Hide,		% IdEdit1
 	
-	Gui, 		HS3:Add, 		CheckBox, 	x0 y0 HwndIdCheckBox1 gF_Checkbox vv_OptionImmediateExecute,	% TransA["Immediate Execute (*)"]
+	Gui, 		HS3: Add, 		CheckBox, 	x0 y0 HwndIdCheckBox1 gF_Checkbox vv_OptionImmediateExecute,	% TransA["Immediate Execute (*)"]
 ;GuiControl,	Hide,		% IdCheckBox1
-	Gui, 		HS3:Add,		CheckBox, 	x0 y0 HwndIdCheckBox2 gF_Checkbox vv_OptionCaseSensitive,		% TransA["Case Sensitive (C)"]
+	Gui, 		HS3: Add,		CheckBox, 	x0 y0 HwndIdCheckBox2 gF_Checkbox vv_OptionCaseSensitive,		% TransA["Case Sensitive (C)"]
 ;GuiControl,	Hide,		% IdCheckBox2
-	Gui, 		HS3:Add,		CheckBox, 	x0 y0 HwndIdCheckBox3 gF_Checkbox vv_OptionNoBackspace,		% TransA["No Backspace (B0)"]
+	Gui, 		HS3: Add,		CheckBox, 	x0 y0 HwndIdCheckBox3 gF_Checkbox vv_OptionNoBackspace,		% TransA["No Backspace (B0)"]
 ;GuiControl,	Hide,		% IdCheckBox3
-	Gui, 		HS3:Add,		CheckBox, 	x0 y0 HwndIdCheckBox4 gF_Checkbox vv_OptionInsideWord, 		% TransA["Inside Word (?)"]
+	Gui, 		HS3: Add,		CheckBox, 	x0 y0 HwndIdCheckBox4 gF_Checkbox vv_OptionInsideWord, 		% TransA["Inside Word (?)"]
 ;GuiControl,	Hide,		% IdCheckBox4
-	Gui, 		HS3:Add,		CheckBox, 	x0 y0 HwndIdCheckBox5 gF_Checkbox vv_OptionNoEndChar, 			% TransA["No End Char (O)"]
+	Gui, 		HS3: Add,		CheckBox, 	x0 y0 HwndIdCheckBox5 gF_Checkbox vv_OptionNoEndChar, 			% TransA["No End Char (O)"]
 ;GuiControl,	Hide,		% IdCheckBox5
-	Gui, 		HS3:Add, 		CheckBox, 	x0 y0 HwndIdCheckBox6 gF_Checkbox vv_OptionDisable, 			% TransA["Disable"]
+	Gui, 		HS3: Add, 		CheckBox, 	x0 y0 HwndIdCheckBox6 gF_Checkbox vv_OptionDisable, 			% TransA["Disable"]
 ;GuiControl,	Hide,		% IdCheckBox6
 
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui,			HS3:Add,		GroupBox, 	x0 y0 HwndIdGroupBox1, 									% TransA["Select trigger option(s)"]
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui,			HS3: Add,		GroupBox, 	x0 y0 HwndIdGroupBox1, 									% TransA["Select trigger option(s)"]
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 ;GuiControl,	Hide,		% IdGroupBox1
 	
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText3 vv_TextSelectHotstringsOutFun, 			% TransA["Select hotstring output function"]
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText3 vv_TextSelectHotstringsOutFun, 			% TransA["Select hotstring output function"]
 ;GuiControl,	Hide,		% IdText3
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
-	Gui, 		HS3:Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
+	Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
 ;GuiControl,	Hide,		% IdDDL1
 	
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText4 vv_TextEnterHotstring, 				% TransA["Enter hotstring"]
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText4 vv_TextEnterHotstring, 				% TransA["Enter hotstring"]
 ;GuiControl,	Hide,		% IdText4
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
-	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit2 vv_EnterHotstring
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit2 vv_EnterHotstring
 ;GuiControl,	Hide,		% IdEdit2
-	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit3 vv_EnterHotstring1  Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit3 vv_EnterHotstring1  Disabled
 ;GuiControl,	Hide,		% IdEdit3
-	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit4 vv_EnterHotstring2  Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit4 vv_EnterHotstring2  Disabled
 ;GuiControl,	Hide,		% IdEdit4
-	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit5 vv_EnterHotstring3  Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit5 vv_EnterHotstring3  Disabled
 ;GuiControl,	Hide,		% IdEdit5
-	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit6 vv_EnterHotstring4  Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit6 vv_EnterHotstring4  Disabled
 ;GuiControl,	Hide,		% IdEdit6
-	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit7 vv_EnterHotstring5  Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit7 vv_EnterHotstring5  Disabled
 ;GuiControl,	Hide,		% IdEdit7
-	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit8 vv_EnterHotstring6  Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit8 vv_EnterHotstring6  Disabled
 ;GuiControl,	Hide,		% IdEdit8
 	
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText5 vv_TextAddComment, 					% TransA["Add comment (optional)"]
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText5 vv_TextAddComment, 					% TransA["Add comment (optional)"]
 ;GuiControl,	Hide,		% IdText5
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
-	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit9 vv_Comment Limit64 
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit9 vv_Comment Limit64 
 ;GuiControl,	Hide,		% IdEdit9
 	
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText6 vv_TextSelectHotstringLibrary, 			% TransA["Select hotstring library"]
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText6 vv_TextSelectHotstringLibrary, 			% TransA["Select hotstring library"]
 ;GuiControl,	Hide,		% IdText6
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
-	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton1 gF_GuiAddLibrary, 							% TransA["Add library"]
+	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton1 gF_GuiAddLibrary, 							% TransA["Add library"]
 ;GuiControl,	Hide,		% IdButton1
-	Gui,			HS3:Add,		DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SelectLibrary Sort
+	Gui,			HS3: Add,		DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SelectLibrary Sort
 ;GuiControl,	Hide,		% IdDDL2
 	
 ;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
@@ -3213,7 +3219,6 @@ F_GuiAbout()
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
 	
-	;Find the longest text string:
 	FoundPos := Instr(TransA["About/Help"], "&")
 	if (FoundPos)
 	{
@@ -3223,8 +3228,6 @@ F_GuiAbout()
 			NewStr := SubStr(TransA["About/Help"], FoundPos + 1)
 	}
 	
-	;WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
-	;if !(WinExist("ahk_id" . MyAboutGuiHwnd))
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	Gui, MyAbout: Show, Hide Center AutoSize
 	
@@ -3421,7 +3424,7 @@ F_LoadLibrariesToTables()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 F_ini_StartHotstring(txt, nameoffile) 
-{ ;tu jestem
+{ 
 	global	;assume-global mode
 	local txtsp := "", Options := "", SendFun := "", EnDis := "", OnOff := "", TextInsert := "", Oflag := 0
 	
@@ -4850,22 +4853,36 @@ F_Checkbox()
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;tu jestem
+F_GuiHSdelay()
+{
+	global	;assume-global mode
+	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,NewWinPosX := 0, NewWinPosY := 0
+	;+Owner to prevent display of a taskbar button
+	Gui, HSDel: New, -MinimizeBox -MaximizeBox +Owner +HwndHotstringDelay, % TransA["Set Clipboard Delay"]
+	Gui, HSDel: Margin,	% c_xmarg, % c_ymarg
+	Gui,	HSDel: Color,	% c_WindowColor, % c_ControlColor
+	Gui,	HSDel: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
+	Gui, HSDel: Add, Slider, w300 vMySlider gmySlider Range100-1000 ToolTipBottom Buddy1999, % ini_Delay
+	
+	TransA["This option is valid"] := StrReplace(TransA["This option is valid"], "``n", "`n")
+	
+	Gui, HSDel: Add, Text, vDelayText, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_Delay . "`n`n" . TransA["This option is valid"]
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, HSDel: Show, Hide AutoSize 
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . HotstringDelay
+	DetectHiddenWindows, Off
+	
+	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
 
-HSdelay: ;tu jestem
-; Future: Add those strings to translations.
-Gui, HSDel:New, -MinimizeBox -MaximizeBox
-Gui, HSDel:Margin, 12.5*DPI%v_SelectedMonitor%, 7.5*DPI%v_SelectedMonitor%
-Gui, HSDel:Font, % "s" . 12*DPI%v_SelectedMonitor% . " norm cBlack"
-Gui, HSDel:Add, Slider, % "w" . 340*DPI%v_SelectedMonitor% . " vMySlider gmySlider Range100-1000 ToolTipBottom Buddy1999", %ini_Delay%
-Gui, HSDel:Add, Text,% "yp+" . 62.5*DPI%v_SelectedMonitor% . " xm+" . 10*DPI%v_SelectedMonitor% . " vDelayText" , Hotstring paste from Clipboard delay %ini_Delay% ms
-Gui, HSDel:Show, % "w" . 380*DPI%v_SelectedMonitor% . " h" . 112.5*DPI%v_SelectedMonitor% . " hide", Set Clipboard Delay
-WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
-DetectHiddenWindows, On
-WinGetPos, , , DelayWindowWidth, DelayWindowHeight,Set Clipboard Delay
-DetectHiddenWindows, Off
-Gui, HSDel:Show,% "x" . v_WindowX + (v_WindowWidth - DelayWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - DelayWindowHeight)/2 ,Set Clipboard Delay
-
-return
+	Gui, HSDel: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"	
+	return
+}
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -4899,14 +4916,14 @@ return
 ; Future: save window position
 HS3GuiClose:
 HS3GuiEscape:
-	Gui,		HS3: Show, Hide
-	v_WhichGUIisMinimzed := "HS3"
+Gui,		HS3: Show, Hide
+v_WhichGUIisMinimzed := "HS3"
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS4GuiClose:
 HS4GuiEscape:
-	Gui,		HS4: Show, Hide
-	v_WhichGUIisMinimzed := "HS4"
+Gui,		HS4: Show, Hide
+v_WhichGUIisMinimzed := "HS4"
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
