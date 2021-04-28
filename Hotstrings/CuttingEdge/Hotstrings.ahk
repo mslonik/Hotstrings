@@ -164,6 +164,8 @@ if !(v_Param == "l") 										; if Hotstrings.ahk wasn't run with "l" parameter
 	Menu, Tray, Add										; separator line
 	Menu, Tray, NoStandard									; remove all the rest of standard tray menu
 	Menu, Tray, Standard									; add it again at the bottom
+	
+	Menu, Tray, Icon,		HotString02.ico 
 }
 
 ;If the script is run with command line parameter "d" like debug, prepare new folder and create file named as specified in the following pattern.
@@ -1820,21 +1822,6 @@ F_Sandbox()
 	F_GuiMain_Redraw()
 	F_GuiHS4_Redraw()
 	Gui, % A_DefaultGui . ":" . A_Space . "Show", AutoSize
-	
-	/*
-		if (A_DefaultGui = "HS3")
-		{
-			F_GuiMain_Redraw()
-			F_GuiHS4_Redraw()
-			Gui, HS3: Show, AutoSize
-		}
-		if (A_DefaultGui = "HS4")
-		{
-			F_GuiMain_Redraw()
-			F_GuiHS4_Redraw()
-			Gui, HS4: Show, AutoSize
-		}
-	*/
 	return
 }
 
@@ -2980,7 +2967,6 @@ F_GuiMain_Redraw()
 		GuiControl, Move, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - c_xmarg
 		GuiControl, Show, % IdText10
 		GuiControl, Show, % IdEdit10
-		;GuiControl, MoveDraw, % IdText8,  % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTempY + v_OutVarTempH + c_ymarg ;Position of the long text F1 ... F2 ...
 	}
 	
 	if ((ini_Sandbox) and !(ini_IsSandboxMoved)) ;checked
@@ -2990,43 +2976,34 @@ F_GuiMain_Redraw()
 		GuiControl, Move, % IdText10, % "x" v_xNext "y" v_yNext
 		GuiControl, Show, % IdText10
 		v_yNext += HofText
-		v_wNext := RightColumnW
+		;v_wNext := RightColumnW
+		v_wNext := v_OutVarTempW
 		GuiControl, Move, % IdEdit10, % "x" v_xNext "y" v_yNext "w" v_wNext
 		GuiControl, Show, % IdEdit10
-		;v_yNext += c_HofSandbox + c_ymarg
-		;GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext
 	}
 	
 	if !(ini_Sandbox)
 	{
-		;v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
-		;v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
 		GuiControl, Hide, % IdText10
 		GuiControl, Hide, % IdEdit10
-		;GuiControl, Move, % IdText8, % "x" v_xNext "y" v_yNext ;Position of the long text F1 ... F2 ...
 	}
 	;5.2. Button between left and right column
 	if ((ini_Sandbox) and !(ini_IsSandboxMoved)) ;checked
 	{
 		v_yNext := c_ymarg
 		v_xNext := LeftColumnW + c_xmarg
-		;v_hNext := c_ymarg + HofText + v_OutVarTempH + c_ymarg + HofText + c_HofSandbox  + HofText
 		v_hNext := c_ymarg + HofText + v_OutVarTempH + HofText + c_HofSandbox
 	}	
 	if ((ini_Sandbox) and (ini_IsSandboxMoved))
 	{
 		v_yNext := c_ymarg
 		v_xNext := LeftColumnW + c_xmarg
-		;v_hNext := c_ymarg + HofText + v_OutVarTempH + HofText	
-		;v_hNext := c_ymarg + HofText + v_OutVarTempH
 		v_hNext := HofText + v_OutVarTempH
 	}
-	if !(ini_Sandbox) ;checked
+	if !(ini_Sandbox)
 	{
 		v_yNext := c_ymarg
 		v_xNext := LeftColumnW + c_xmarg
-		;v_hNext := c_ymarg + HofText + v_OutVarTempH + HofText	
-		;v_hNext := c_ymarg + HofText + v_OutVarTempH
 		v_hNext := HofText + v_OutVarTempH
 	}
 	GuiControl, Move, % IdButton5, % "x" v_xNext "y" v_yNext "h" v_hNext
