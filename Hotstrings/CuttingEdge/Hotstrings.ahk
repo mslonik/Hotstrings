@@ -61,7 +61,7 @@ global v_FlagSound 				:= 0
 ;I couldn't find how to get system settings for size of menu font. Quick & dirty solution: manual setting of all fonts with variable c_FontSize.
 
 global v_HotstringFlag 			:= 0
-global v_HS3ListFlag 			:= 0
+global v_HS3SearchFlag 			:= 0
 global v_IndexLog 				:= 1
 global v_InputString 			:= ""
 global v_Language 				:= ""	; OutputVar for IniRead funtion
@@ -469,8 +469,8 @@ Menu, ConfGUI,		Add, 	% TransA["Font type"],					:FontTypeMenu
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 				:Submenu1
-Menu, HSMenu, 			Add, % TransA["Search Hotstrings"], 			L_Searching
-Menu, HSMenu,		Disable,	% TransA["Search Hotstrings"]
+Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 			L_Searching
+;Menu, HSMenu,		Disable,	% TransA["Search Hotstrings"]
 
 Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 		F_RefreshListOfLibraries
 F_RefreshListOfLibraries()
@@ -488,6 +488,7 @@ Menu, 	HSMenu, 			Add, % TransA["Libraries"], 				:LibrariesSubmenu
 Menu, 	HSMenu, 			Add, % TransA["Clipboard Delay (F7)"], 		F_GuiHSdelay
 Menu,	ApplicationSubmenu,	Add, % TransA["Reload"],					F_Reload
 Menu,	ApplicationSubmenu,	Add, % TransA["Exit"],					F_Exit
+Menu,	ApplicationSubmenu, Add, % TransA["Remove Config.ini"],		F_RemoveConfigIni
 
 F_CompileSubmenu()
 Menu,	ApplicationSubmenu,	Add,	% TransA["Compile"],				:CompileSubmenu
@@ -810,7 +811,7 @@ return
 #if WinActive("Search Hotstrings") and WinActive("ahk_class AutoHotkeyGUI")
 
 F8::
-Gui, HS3List:Default
+Gui, HS3Search:Default
 goto, MoveList
 #if
 
@@ -860,6 +861,70 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+HS3SearchGuiSize()
+{
+	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
+		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0
+	
+	if (A_EventInfo = 1) ;The window has been minimized.
+		return
+	if (A_EventInfo = 2)
+		return
+	;*[One]
+	GuiControlGet, v_OutVarTemp1, Pos, % IdLV_Search 
+	F_AutoXYWH("*wh", IdLV_Search)
+	GuiControlGet, v_OutVarTemp2, Pos, % IdLV_Search ;Check position of ListView1 again after resizing
+	if (v_OutVarTemp2W != v_OutVarTemp1W)
+	{
+		LV_ModifyCol(1, Round(0.1 * v_OutVarTemp2W))
+		LV_ModifyCol(2, Round(0.1 * v_OutVarTemp2W))
+		LV_ModifyCol(3, Round(0.1 * v_OutVarTemp2W))	
+		LV_ModifyCol(4, Round(0.1 * v_OutVarTemp2W))
+		LV_ModifyCol(5, Round(0.3 * v_OutVarTemp2W))
+		LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W))
+		LV_ModifyCol(7, Round(0.1 * v_OutVarTemp2W) - 3)
+	}	
+	;LV_ModifyCol(1, "100 Center")
+	;LV_ModifyCol(2, "100 Center")
+	;LV_ModifyCol(3, "110 Center")
+	;LV_ModifyCol(4, "110 Center")
+	;LV_ModifyCol(5, "110 Center")
+	;LV_ModifyCol(7, "185 Center")
+	/*
+		WinGetPos,,, ListW, ListH, Search Hotstrings
+		NewHeight := LV_Height+(A_GuiHeight-IniH)
+		NewWidth := LV_Width+(A_GuiWidth-IniW)
+		ColWid := (NewWidth-740*DPI%v_SelectedMonitor%)
+		SendMessage, 4125, 4, 0, SysListView321
+		wid := ErrorLevel
+		if (wid < ColWid)
+		{
+			LV_ModifyCol(6, ColWid)
+		}
+		GuiControl, Move, List, W%NewWidth% H%NewHeight%
+		GuiControl, Move, Shortcuts2, % "y" . A_GuiHeight - 20*DPI%v_SelectedMonitor%
+		GuiControl, Move, Line2, % "w" . A_GuiWidth . " y" . A_GuiHeight - 25*DPI%v_SelectedMonitor%
+	*/
+	return
+}
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_RemoveConfigIni()
+{
+	global	;assume-global mode
+	if (FileExist("Config.ini"))
+	{
+		MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["Config.ini will be deleted. Next application will be reloaded. This action cannot be undone. Are you sure?"] 
+		IfMsgBox, Yes
+		{
+			FileDelete, Config.ini
+			Reload
+		}
+		IfMsgBox, No
+			return
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Checkbox()
 {
 	global	;assume-global
@@ -1093,68 +1158,6 @@ F_DeleteHotstring()
 	LibraryFullPathAndName := A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary
 	FileDelete, % LibraryFullPathAndName
 	
-	/*
-		;2. Create library file of the same name as selected. its content will contain LV but without selected row.
-		if (v_SelectedRow = v_LibHotstringCnt)
-		{
-			if (v_LibHotstringCnt = 1)
-			{
-				FileAppend,, % LibraryFullPathAndName, UTF-8
-				;GuiControl,, ProgressDelete, 100
-			}
-			else
-			{
-				Loop, % v_LibHotstringCnt - 1
-				{
-					if !(A_Index == v_SelectedRow)
-					{
-						LV_GetText(txt1, A_Index, 2)
-						LV_GetText(txt2, A_Index, 1)
-						LV_GetText(txt3, A_Index, 3)
-						LV_GetText(txt4, A_Index, 4)
-						LV_GetText(txt5, A_Index, 5)
-						LV_GetText(txt6, A_Index, 6)
-						;if (A_Index == SectionList.MaxIndex()-1)
-						if (A_Index = v_LibHotstringCnt - 1)
-							txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-						else
-							txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
-						if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
-							FileAppend, %txt%, % LibraryFullPathAndName, UTF-8
-						;v_DeleteProgress := (A_Index/(SectionList.MaxIndex()-1))*100
-						;Gui, ProgressDelete:Default
-						;GuiControl,, ProgressDelete, %v_DeleteProgress%
-						;Gui, HS3:Default
-					}
-				}
-			}
-		}
-		else
-		{
-			Loop, % v_LibHotstringCnt
-			{
-				if !(A_Index = v_SelectedRow)
-				{
-					LV_GetText(txt1, A_Index, 2)
-					LV_GetText(txt2, A_Index, 1)
-					LV_GetText(txt3, A_Index, 3)
-					LV_GetText(txt4, A_Index, 4)
-					LV_GetText(txt5, A_Index, 5)
-					LV_GetText(txt6, A_Index, 6)
-					if (A_Index = v_LibHotstringCnt)
-						txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-					else
-						txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
-					if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
-						FileAppend, %txt%, % LibraryFullPathAndName, UTF-8
-					;v_DeleteProgress := (A_Index/(SectionList.MaxIndex()-1))*100
-					;Gui, ProgressDelete:Default
-					;GuiControl,, ProgressDelete, %v_DeleteProgress%
-					;Gui, HS3:Default
-				}
-			}
-		}
-	*/
 	
 	;4. Disable selected hotstring.
 	LV_GetText(txt2, v_SelectedRow, 2)
@@ -1284,17 +1287,11 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W) - 3)
 		return
 	}
-	if (A_EventInfo = 2)
-	{
-		MsgBox, , maximized
-		;OutputDebug, return because of "A_EventInfo = 2"
-		return
-	}
 	
 	GuiControlGet, v_OutVarTemp1, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.
 	;OutputDebug, % "Before:" . A_Space . v_OutVarTemp1H
 	F_AutoXYWH("*wh", IdListView1)
-	F_AutoXYWH("*h", IdButton5)
+	F_AutoXYWH("*h",  IdButton5)
 
 	if (!ini_IsSandboxMoved)
 		F_AutoXYWH("*w", IdEdit10)
@@ -1744,9 +1741,9 @@ F_StyleOfGUI()
 			Menu, StyleGUIsubm, UnCheck, % TransA["Dark"]
 		Case 2: ;Dark
 			c_FontColor				:= "White"
-			c_FontColorHighlighted		:= "Blue"
-			c_WindowColor				:= "Black"
-			c_ControlColor 			:= "Grey"
+			c_FontColorHighlighted		:= "Navy"
+			c_WindowColor				:= "Gray"
+			c_ControlColor 			:= "Gray"
 			Menu, StyleGUIsubm, UnCheck, % TransA["Light (default)"]
 			Menu, StyleGUIsubm, Check,   % TransA["Dark"]
 	}
@@ -1831,7 +1828,6 @@ F_Compile()
 	}
 	v_TempOutStr2 := v_TempOutStr . "Compiler" . "\" 
 	
-	;*[One]
 	Switch A_ThisMenuItem
 	{
 		Case TransA["Standard executable (Ahk2Exe.exe)"]:
@@ -2009,7 +2005,7 @@ Language=English.txt
 	
 	if (!FileExist("Config.ini"))
 	{
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini is now created in location"] . A_Space . A_ScriptDir
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini is now created in location:"] . "`n`n" . A_ScriptDir
 		FileAppend, %ConfigIni%, Config.ini
 	}
 	return	
@@ -2230,7 +2226,8 @@ Comma , 												= Comma ,
 Compile												= Compile
 Compressed executable (upx.exe)							= Compressed executable (upx.exe)
 Compressed executable (mpress.exe)							= Compressed executable (mpress.exe)
-Config.ini wasn't found. The default Config.ini is now created in location = Config.ini wasn't found. The default Config.ini is now created in location
+Config.ini wasn't found. The default Config.ini is now created in location: = Config.ini wasn't found. The default Config.ini is now created in location:
+Config.ini will be deleted. Next application will be reloaded. This action cannot be undone. Are you sure? = Config.ini will be deleted. Next application will be reloaded. This action cannot be undone. Are you sure?
 Configuration 											= &Configuration
 Continue reading the library file? If you answer ""No"" then application will exit! = Continue reading the library file?`nIf you answer ""No"" then application will exit!
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
@@ -2265,7 +2262,6 @@ Exclamation Mark ! 										= Exclamation Mark !
 exists in a file 										= exists in a file
 Exit													= Exit
 Export from .csv to .ahk 								= &Export from .csv to .ahk
-F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring = F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring
 F3 Close Search hotstrings | F8 Move hotstring 				= F3 Close Search hotstrings | F8 Move hotstring
 file! 												= file!
 file in Languages subfolder!								= file in Languages subfolder!
@@ -2325,11 +2321,13 @@ Quote "" 												= Quote ""
 pixels												= pixels
 Position of main window is saved in Config.ini.				= Position of main window is saved in Config.ini.	
 Reload												= Reload
+Remove Config.ini										= Remove Config.ini
 Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
 Sandbox (F6)											= Sandbox (F6)
 Save position of application window	 					= &Save position of application window
 Search by: 											= Search by:
-Search Hotstrings 										= &Search Hotstrings
+Search Hotstrings 										= Search Hotstrings
+Search Hotstrings (F3)									= Search Hotstrings (F3)
 Select a row in the list-view, please! 						= Select a row in the list-view, please!
 Selected file is empty. 									= Selected file is empty.
 Selected Hotstring will be deleted. Do you want to proceed? 	= Selected Hotstring will be deleted. Do you want to proceed?
@@ -2443,14 +2441,14 @@ F_LoadFile(nameoffile)
 		if ((key == nameoffile) and (value))
 			FlagLoadTriggerTips := true
 	
+	name := SubStr(nameoffile, 1, -4) ;filename without extension
 	Loop
 	{
 		FileReadLine, line, %A_ScriptDir%\Libraries\%nameoffile%, %A_Index%
 		if (ErrorLevel) ;this is a trick to exit this loop when end of file is riched
 			break
-
+		
 		tabSearch := StrSplit(line, "‖")	
-		name := SubStr(A_LoopFileName, 1, -4) ;filename without extension
 		
 		a_Library.Push(name) ; function Search
 		a_TriggerOptions.Push(tabSearch[1])
@@ -2639,6 +2637,7 @@ F_GuiMain_CreateObject()
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText1, 										% TransA["Enter triggerstring"]
 	;GuiControl, 	Hide, 		% IdText1
 	
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString 
 	;GuiControl,	Hide,		% IdEdit1
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
@@ -2733,9 +2732,6 @@ F_GuiMain_CreateObject()
 ;GuiControl,	Hide,		% IdText9
 	Gui, 		HS3:Add, 		ListView, 	x0 y0 HwndIdListView1 LV0x1 vv_LibraryContent AltSubmit gF_HSLV, % TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
 ;GuiControl,	Hide,		% IdListView1
-	
-	;Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText8, % TransA["F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring"]
-;GuiControl,	Hide,		% IdText8
 	
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText10 vv_SandString, 						% TransA["Sandbox (F6)"]
@@ -3119,7 +3115,6 @@ F_GuiMain_DetermineConstraints()
 ;OutputDebug, % "v_OutVarTemp1W:" . A_Space . v_OutVarTemp1W  . A_Space . "v_OutVarTemp2W:" . A_Space . v_OutVarTemp2W . A_Space . "v_OutVarTemp3W:" . A_Space .  v_OutVarTemp3W  . A_Space . "c_xmarg:" . A_Space c_xmarg
 ;OutputDebug, % "LeftColumnW:" . A_Space . LeftColumnW
 	
-;GuiControlGet, v_OutVarTemp1, Pos, % IdText8 ;F1 About/Help | F2 Library content | F3 Search hotstrings | F5 Clear | F7 Clipboard Delay | F8 Delete hotstring | F9 Set hotstring
 	GuiControlGet, v_OutVarTemp2, Pos, % IdText9 ;Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
 	RightColumnW := v_OutVarTemp2W
 	GuiControl,	Hide,		% IdText9
@@ -3507,7 +3502,8 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 
 F_LoadLibrariesToTables()
 { 
-	local name
+	global	;assume-global mode
+	local name := "", varSearch := "", tabSearch := ""
 	
 	; Prepare TrayTip message taking into account value of command line parameter.
 	if (v_Param == "d")
@@ -4838,7 +4834,7 @@ F_Clear()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 HSLV2:
-Gui, HS3List:+OwnDialogs
+Gui, HS3Search:+OwnDialogs
 v_PreviousSelectedRow2 := v_SelectedRow2
 If !(v_SelectedRow2 := LV_GetNext()) {
 	Return
@@ -4966,70 +4962,79 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Here I use 2x GUIs: SearchLoad which shows progress on time of library loading process and HS3List which is in fact Search GUI name.
-; Not clear why v_HS3ListFlag is used.
+; Here I use 2x GUIs: SearchLoad which shows progress on time of library loading process and HS3Search which is in fact Search GUI name.
+; Not clear why v_HS3SearchFlag is used.
 L_Searching:
-if (v_HS3ListFlag) 
-	Gui, HS3List:Show
+if (v_HS3SearchFlag) 
+	Gui, HS3Search: Show
 else
 {
-	WinGetPos, ini_StartXlist, ini_StartYlist,,,Hotstrings
-	Gui, SearchLoad:New, -Resize -Border
-	Gui, SearchLoad:Add, Text,, % TransA["Please wait, uploading .csv files..."]
-	Gui, SearchLoad:Add, Progress, w300 h20 HwndhPB2 -0x1, 50
-	WinSet, Style, +0x8, % "ahk_id " hPB2
-	SendMessage, 0x40A, 1, 20,, % "ahk_id " hPB2		; CBEM_HASEDITCHANGED := 0x40A
-	Gui, SearchLoad:Show, hide, UploadingSearch
-	WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
-	DetectHiddenWindows, On
-	WinGetPos, , , UploadingWindowWidth, UploadingWindowHeight,UploadingSearch
-	DetectHiddenWindows, Off
-	Gui, SearchLoad:Show, % "x" . v_WindowX + (v_WindowWidth - UploadingWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - UploadingWindowHeight)/2, UploadingSearch
-	
-	SysGet, N, MonitorCount
-	Loop, % N
-	{
-		SysGet, Mon%A_Index%, Monitor, %A_Index%
-		W%A_Index% := Mon%A_Index%Right - Mon%A_Index%Left
-		H%A_Index% := Mon%A_Index%Bottom - Mon%A_Index%Top
-		DPI%A_Index% := round(W%A_Index%/1920*(96/A_ScreenDPI),2)	; Future: DPI := 1
-	}
-	SysGet, PrimMon, MonitorPrimary
-	if (v_SelectedMonitor == 0)
-		v_SelectedMonitor := PrimMon
 	/*
+		WinGetPos, ini_StartXlist, ini_StartYlist,,,Hotstrings
+		Gui, SearchLoad:New, -Resize -Border
+		Gui, SearchLoad:Add, Text,, % TransA["Please wait, uploading .csv files..."]
+		Gui, SearchLoad:Add, Progress, w300 h20 HwndhPB2 -0x1, 50
+		WinSet, Style, +0x8, % "ahk_id " hPB2
+		SendMessage, 0x40A, 1, 20,, % "ahk_id " hPB2		; CBEM_HASEDITCHANGED := 0x40A
+		Gui, SearchLoad:Show, hide, UploadingSearch
+		WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
+		DetectHiddenWindows, On
+		WinGetPos, , , UploadingWindowWidth, UploadingWindowHeight,UploadingSearch
+		DetectHiddenWindows, Off
+		Gui, SearchLoad:Show, % "x" . v_WindowX + (v_WindowWidth - UploadingWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - UploadingWindowHeight)/2, UploadingSearch
+		
+		SysGet, N, MonitorCount
+		Loop, % N
+		{
+			SysGet, Mon%A_Index%, Monitor, %A_Index%
+			W%A_Index% := Mon%A_Index%Right - Mon%A_Index%Left
+			H%A_Index% := Mon%A_Index%Bottom - Mon%A_Index%Top
+			DPI%A_Index% := round(W%A_Index%/1920*(96/A_ScreenDPI),2)	; Future: DPI := 1
+		}
+		SysGet, PrimMon, MonitorPrimary
+		if (v_SelectedMonitor == 0)
+			v_SelectedMonitor := PrimMon
 		if (WinExist("Search Hotstring"))	; I have serious doubts if those lines are useful
 		{
-			Gui, HS3List:Hide
+			Gui, HS3Search:Hide
 		}
 	*/
-	Gui, HS3List:New, % "+Resize MinSize" . 940*DPI%v_SelectedMonitor% . "x" . 500*DPI%v_SelectedMonitor%
-	v_HS3ListFlag := 1
-	Gui, HS3List:Add, Text, ,Search:
-	Gui, HS3List:Add, Text, 		% "yp xm+" . 420*DPI%v_SelectedMonitor%, % TransA["Search by:"]
-	Gui, HS3List:Add, Edit, 		% "xm w" . 400*DPI%v_SelectedMonitor% . " vv_SearchTerm gSearch"
-	Gui, HS3List:Add, Radio, 	% "yp xm+" . 420*DPI%v_SelectedMonitor% . " vv_RadioGroup gSearchChange Checked", % TransA["Triggerstring"]
-	Gui, HS3List:Add, Radio, 	% "yp xm+" . 540*DPI%v_SelectedMonitor% . " gSearchChange", % TransA["Hotstring"]
-	Gui, HS3List:Add, Radio, 	% "yp xm+" . 640*DPI%v_SelectedMonitor% . " gSearchChange", % TransA["Library"]
-	Gui, HS3List:Add, Button, 	% "yp-2 xm+" . 720*DPI%v_SelectedMonitor% . " w" . 100*DPI%v_SelectedMonitor% . " gMoveList Default", % TransA["Move"]
-	Gui, HS3List:Add, ListView, 	% "xm grid vList +AltSubmit gHSLV2 h" . 400*DPI%v_SelectedMonitor%, % TransA["Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment"]
+	Gui, HS3Search: New, 	% "+Resize +HwndHS3SearchHwnd +Owner +MinSize" HS3MinWidth + 3 * c_xmarg "x" HS3MinHeight, % TransA["Search Hotstrings"]
+	Gui, HS3Search: Margin,	% c_xmarg, % c_ymarg
+	Gui,	HS3Search: Color,	% c_WindowColor, % c_ControlColor
+	Gui,	HS3Search: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+
+	v_HS3SearchFlag := 1
+	Gui, HS3Search:Add, Text, ,	Search: ;future: translate
+	Gui, HS3Search:Add, Text, 		% "yp xm+" . 420, % TransA["Search by:"]
+	Gui, HS3Search:Add, Edit, 		% "xm w" . 400 . " vv_SearchTerm gSearch"
+	Gui, HS3Search:Add, Radio, 		% "yp xm+" . 420 . " vv_RadioGroup gSearchChange Checked", % TransA["Triggerstring"]
+	Gui, HS3Search:Add, Radio, 		% "yp xm+" . 540 . " gSearchChange", % TransA["Hotstring"]
+	Gui, HS3Search:Add, Radio, 		% "yp xm+" . 640 . " gSearchChange", % TransA["Library"]
+	Gui, HS3Search:Add, Button, 		% "yp-2 xm+" . 720 . " w" . 100 . " gMoveList Default", % TransA["Move"]
+	Gui, HS3Search:Add, ListView, 	% "HwndIdLV_Search xm grid vList +AltSubmit gHSLV2 h400" . A_Space . "w" HS3MinWidth, % TransA["Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment"]
+	
 	Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
 	{
-		LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Hotstring[A_Index], a_Comment[A_Index])
+		LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
 	}
 	LV_ModifyCol(1, "Sort")
-	ini_StartWlist := 940*DPI%v_SelectedMonitor%
-	ini_StartHlist := 500*DPI%v_SelectedMonitor%
-	SetTitleMatchMode, 3
-	WinGetPos, ini_StartXlist, ini_StartYlist,,,Hotstrings
-	if ((ini_StartXlist == "") or (ini_StartYlist == ""))
-	{
-		ini_StartXlist := (Mon%v_SelectedMonitor%Left + (Abs(Mon%v_SelectedMonitor%Right - Mon%v_SelectedMonitor%Left)/2))*DPI%v_SelectedMonitor% - ini_StartWlist/2
-		ini_StartYlist := (Mon%v_SelectedMonitor%Top + (Abs(Mon%v_SelectedMonitor%Bottom - Mon%v_SelectedMonitor%Top)/2))*DPI%v_SelectedMonitor% - ini_StartHlist/2
-	}
-		;Gui, HS3List:Add, Text, x0 h1 0x7 w10 vLine2
-	Gui, HS3List:Font, % "s" . c_FontSize*DPI%v_SelectedMonitor% . " cBlack Norm"
-	Gui, HS3List:Add, Text, xm vShortcuts2, % TransA["F3 Close Search hotstrings | F8 Move hotstring"]
+	/*
+		ini_StartWlist := 940
+		ini_StartHlist := 500
+		SetTitleMatchMode, 3
+		WinGetPos, ini_StartXlist, ini_StartYlist,,,Hotstrings
+		if ((ini_StartXlist == "") or (ini_StartYlist == ""))
+		{
+			;ini_StartXlist := (Mon%v_SelectedMonitor%Left + (Abs(Mon%v_SelectedMonitor%Right - Mon%v_SelectedMonitor%Left)/2))*DPI%v_SelectedMonitor% - ini_StartWlist/2
+			ini_StartXlist := 0
+			;ini_StartYlist := (Mon%v_SelectedMonitor%Top + (Abs(Mon%v_SelectedMonitor%Bottom - Mon%v_SelectedMonitor%Top)/2))*DPI%v_SelectedMonitor% - ini_StartHlist/2
+			ini_StartYlist := 0
+		}
+	*/
+	Gui, HS3Search:Add, Text, x0 h1 0x7 w10 vLine2
+	;Gui, HS3Search:Font, % "s" . c_FontSize . " cBlack Norm"
+	Gui, HS3Search:Add, Text, xm vShortcuts2, % TransA["F3 Close Search hotstrings | F8 Move hotstring"]
 	if !(v_SearchTerm == "")
 		GuiControl,, v_SearchTerm, %v_SearchTerm%
 	if (v_RadioGroup == 1)
@@ -5038,13 +5043,14 @@ else
 		GuiControl,, Hotstring, 1
 	else if (v_RadioGroup == 3)
 		GuiControl,, Library, 1
-	Gui, HS3List:Show, % "w" . ini_StartWlist . " h" . ini_StartHlist . " x" . ini_StartXlist . " y" . ini_StartYlist, Search Hotstrings ;Future: translate
-	Gui, SearchLoad:Destroy
+	;Gui, HS3Search: Show, % "w" . ini_StartWlist . " h" . ini_StartHlist . " x" . ini_StartXlist . " y" . ini_StartYlist
+	Gui, HS3Search: Show, % "W" HS3MinWidth "H" HS3MinHeight
+	;Gui, SearchLoad: Destroy
 }
 
 Search:
-Gui, HS3List:Default
-Gui, HS3List:Submit, NoHide
+Gui, HS3Search:Default
+Gui, HS3Search:Submit, NoHide
 if getkeystate("CapsLock","T")
 	return
 GuiControlGet, v_SearchTerm
@@ -5101,7 +5107,7 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 MoveList:
-Gui, HS3List:Submit, NoHide 
+Gui, HS3Search:Submit, NoHide 
 If !(v_SelectedRow := LV_GetNext()) {
 	MsgBox, 0, %A_ThisLabel%, % TransA["Select a row in the list-view, please!"]
 	Return
@@ -5250,7 +5256,7 @@ if (cntLines == 1)
 FileDelete, %OutputFile%
 MsgBox, % TransA["Hotstring moved to the"] . A_Space . TargetLib . A_Space . TransA["file!"]
 Gui, MoveLibs:Destroy
-Gui, HS3List:Hide	
+Gui, HS3Search:Hide	
 
 ;Clearing of arrays before fill up by function F_LoadLibrariesToTables().
 a_Triggers := [] 
@@ -5274,404 +5280,364 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-HS3ListGuiSize:
-if (ErrorLevel == 1)
-	return
-IniW := ini_StartWlist
-IniH := ini_StartHlist
-LV_Width := IniW - 30*DPI%v_SelectedMonitor%
-LV_Height := IniH - 100*DPI%v_SelectedMonitor%
-LV_ModifyCol(1,100*DPI%v_SelectedMonitor%)
-LV_ModifyCol(2,100*DPI%v_SelectedMonitor%)
-LV_ModifyCol(3,110*DPI%v_SelectedMonitor%)
-LV_ModifyCol(4,110*DPI%v_SelectedMonitor%)
-LV_ModifyCol(5,110*DPI%v_SelectedMonitor%)
-LV_ModifyCol(7,185*DPI%v_SelectedMonitor%)
-LV_ModifyCol(1,"Center")
-LV_ModifyCol(2,"Center")
-LV_ModifyCol(3,"Center")
-LV_ModifyCol(4,"Center")
-LV_ModifyCol(5,"Center")
-WinGetPos,,, ListW, ListH, Search Hotstrings
-NewHeight := LV_Height+(A_GuiHeight-IniH)
-NewWidth := LV_Width+(A_GuiWidth-IniW)
-ColWid := (NewWidth-740*DPI%v_SelectedMonitor%)
-SendMessage, 4125, 4, 0, SysListView321
-wid := ErrorLevel
-if (wid < ColWid)
-{
-	LV_ModifyCol(6, ColWid)
-}
-GuiControl, Move, List, W%NewWidth% H%NewHeight%
-GuiControl, Move, Shortcuts2, % "y" . A_GuiHeight - 20*DPI%v_SelectedMonitor%
-GuiControl, Move, Line2, % "w" . A_GuiWidth . " y" . A_GuiHeight - 25*DPI%v_SelectedMonitor%
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ~^f::
 ~^s::
 ~F3::
-HS3ListGuiEscape:
-HS3ListGuiClose:
-Gui, HS3List:Hide
-	; v_SearchTerm := ""
-	; a_Hotstring := []
-	; a_Library := []
-	; a_Triggerstring := []
-	; a_EnableDisable := []
-	; v_RadioGroup := ""
+HS3SearchGuiEscape:
+HS3SearchGuiClose:
+Gui, HS3Search: Hide
 return
-
+	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-~F7::
-HSDelGuiEscape:
-HSDelGuiClose:
-Gui, HSDel:Destroy
-return
-
+	
+	~F7::
+	HSDelGuiEscape:
+	HSDelGuiClose:
+	Gui, HSDel:Destroy
+	return
+	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-MonGuiEscape:
-MonGuiClose:
-Gui, Mon:Destroy
-return
-
+	
+	MonGuiEscape:
+	MonGuiClose:
+	Gui, Mon:Destroy
+	return
+	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-L_Undo:
-Menu, Submenu1, ToggleCheck, % TransA["Undo the last hotstring"]
-ini_Undo := !(ini_Undo)
-IniWrite, %ini_Undo%, Config.ini, Configuration, UndoHotstring
-return
-
+	
+	L_Undo:
+	Menu, Submenu1, ToggleCheck, % TransA["Undo the last hotstring"]
+	ini_Undo := !(ini_Undo)
+	IniWrite, %ini_Undo%, Config.ini, Configuration, UndoHotstring
+	return
+	
 ; F11::
 ;	IniRead, Undo, Config.ini, Configuration, UndoHotstring
 ;	Undo := !(Undo)
 ;	IniWrite, %Undo%, Config.ini, Configuration, UndoHotstring
 ; return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-Tips:
-Menu, SubmenuTips, ToggleCheck, % TransA["Enable/Disable"]
-Menu, SubmenuTips, ToggleEnable, % TransA["Choose tips location"]
-Menu, SubmenuTips, ToggleEnable, % TransA["Number of characters for tips"]
-ini_Tips := !(ini_Tips)
-IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndSpace:
-Menu, Submenu2, ToggleCheck, % TransA["Space"]
-EndingChar_Space := !(EndingChar_Space)
-IniWrite, %EndingChar_Space%, Config.ini, Configuration, EndingChar_Space
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndMinus:
-Menu, Submenu2, ToggleCheck, % TransA["Minus -"]
-EndingChar_Minus := !(EndingChar_Minus)
-IniWrite, %EndingChar_Minus%, Config.ini, Configuration, EndingChar_Minus
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndORoundBracket:
-Menu, Submenu2, ToggleCheck, % TransA["Opening Round Bracket ("]
-EndingChar_ORoundBracket := !(EndingChar_ORoundBracket)
-IniWrite, %EndingChar_ORoundBracket%, Config.ini, Configuration, EndingChar_ORoundBracket
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndCRoundBracket:
-Menu, Submenu2, ToggleCheck, % TransA["Closing Round Bracket )"]
-EndingChar_CRoundBracket := !(EndingChar_CRoundBracket)
-IniWrite, %EndingChar_CRoundBracket%, Config.ini, Configuration, EndingChar_CRoundBracket
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndOSquareBracket:
-Menu, Submenu2, ToggleCheck, % TransA["Opening Square Bracket ["]
-EndingChar_OSquareBracket := !(EndingChar_OSquareBracket)
-IniWrite, %EndingChar_OSquareBracket%, Config.ini, Configuration, EndingChar_OSquareBracket
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndCSquareBracket:
-Menu, Submenu2, ToggleCheck, % TransA["Closing Square Bracket ]"]
-EndingChar_CSquareBracket := !(EndingChar_CSquareBracket)
-IniWrite, %EndingChar_CSquareBracket%, Config.ini, Configuration, EndingChar_CSquareBracket
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndOCurlyBracket:
-Menu, Submenu2, ToggleCheck, % TransA["Opening Curly Bracket {"]
-EndingChar_OCurlyBracket := !(EndingChar_OCurlyBracket)
-IniWrite, %EndingChar_OCurlyBracket%, Config.ini, Configuration, EndingChar_OCurlyBracket
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndCCurlyBracket:
-Menu, Submenu2, ToggleCheck, % TransA["Closing Curly Bracket }"]
-EndingChar_CCurlyBracket := !(EndingChar_CCurlyBracket)
-IniWrite, %EndingChar_CCurlyBracket%, Config.ini, Configuration, EndingChar_CCurlyBracket
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndColon:
-Menu, Submenu2, ToggleCheck,% TransA["Colon :"]
-EndingChar_Colon := !(EndingChar_Colon)
-IniWrite, %EndingChar_Colon%, Config.ini, Configuration, EndingChar_Colon
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndSemicolon:
-Menu, Submenu2, ToggleCheck, % TransA["Semicolon `;"]
-EndingChar_Semicolon := !(EndingChar_Semicolon)
-IniWrite, %EndingChar_Semicolon%, Config.ini, Configuration, EndingChar_Semicolon
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndApostrophe:
-Menu, Submenu2, ToggleCheck, % TransA["Apostrophe '"]
-EndingChar_Apostrophe := !(EndingChar_Apostrophe)
-IniWrite, %EndingChar_Apostrophe%, Config.ini, Configuration, EndingChar_Apostrophe
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndQuote:
-Menu, Submenu2, ToggleCheck, % TransA["Quote """]
-EndingChar_Quote := !(EndingChar_Quote)
-IniWrite, %EndingChar_Quote%, Config.ini, Configuration, EndingChar_Quote
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndSlash:
-Menu, Submenu2, ToggleCheck, % TransA["Slash /"]
-EndingChar_Slash := !(EndingChar_Slash)
-IniWrite, %EndingChar_Slash%, Config.ini, Configuration, EndingChar_Slash
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndBackslash:
-Menu, Submenu2, ToggleCheck, % TransA["Backslash \"]
-EndingChar_Backslash := !(EndingChar_Backslash)
-IniWrite, %EndingChar_Backslash%, Config.ini, Configuration, EndingChar_Backslash
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndComma:
-Menu, Submenu2, ToggleCheck, % TransA["Comma ,"]
-EndingChar_Comma := !(EndingChar_Comma)
-IniWrite, %EndingChar_Comma%, Config.ini, Configuration, EndingChar_Comma
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndDot:
-Menu, Submenu2, ToggleCheck, % TransA["Dot ."]
-EndingChar_Dot := !(EndingChar_Dot)
-IniWrite, %EndingChar_Dot%, Config.ini, Configuration, EndingChar_Dot
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndQuestionMark:
-Menu, Submenu2, ToggleCheck, % TransA["Question Mark ?"]
-EndingChar_QuestionMark := !(EndingChar_QuestionMark)
-IniWrite, %EndingChar_QuestionMark%, Config.ini, Configuration, EndingChar_QuestionMark
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndExclamationMark:
-Menu, Submenu2, ToggleCheck, % TransA["Exclamation Mark !"]
-EndingChar_ExclamationMark := !(EndingChar_ExclamationMark)
-IniWrite, %EndingChar_ExclamationMark%, Config.ini, Configuration, EndingChar_ExclamationMark
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndEnter:
-Menu, Submenu2, ToggleCheck, % TransA["Enter"]
-EndingChar_Enter := !(EndingChar_Enter)
-IniWrite, %EndingChar_Enter%, Config.ini, Configuration, EndingChar_Enter
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndTab:
-Menu, Submenu2, ToggleCheck, % TransA["Tab"]
-EndingChar_Tab := !(EndingChar_Tab)
-IniWrite, %EndingChar_Tab%, Config.ini, Configuration, EndingChar_Tab
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndUnderscore:
-Menu, Submenu2, ToggleCheck, % TransA["Underscore _"]
-EndingChar_Underscore := !(EndingChar_Underscore)
-Iniwrite, %EndingChar_Underscore%, Config.ini, Configuration, EndingChar_Underscore
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-L_DPIScaling:
-	; SetTimer, L_DPIScaling, Off
-if WinExist("Hotstrings") and WinExist("ahk_class AutoHotkeyGUI")
-{
 	
-	WinGetPos, awinX, awinY,awinW,awinH,Hotstrings
-	SysGet, N, MonitorCount
-	Loop, % N
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	Tips:
+	Menu, SubmenuTips, ToggleCheck, % TransA["Enable/Disable"]
+	Menu, SubmenuTips, ToggleEnable, % TransA["Choose tips location"]
+	Menu, SubmenuTips, ToggleEnable, % TransA["Number of characters for tips"]
+	ini_Tips := !(ini_Tips)
+	IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndSpace:
+	Menu, Submenu2, ToggleCheck, % TransA["Space"]
+	EndingChar_Space := !(EndingChar_Space)
+	IniWrite, %EndingChar_Space%, Config.ini, Configuration, EndingChar_Space
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndMinus:
+	Menu, Submenu2, ToggleCheck, % TransA["Minus -"]
+	EndingChar_Minus := !(EndingChar_Minus)
+	IniWrite, %EndingChar_Minus%, Config.ini, Configuration, EndingChar_Minus
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndORoundBracket:
+	Menu, Submenu2, ToggleCheck, % TransA["Opening Round Bracket ("]
+	EndingChar_ORoundBracket := !(EndingChar_ORoundBracket)
+	IniWrite, %EndingChar_ORoundBracket%, Config.ini, Configuration, EndingChar_ORoundBracket
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndCRoundBracket:
+	Menu, Submenu2, ToggleCheck, % TransA["Closing Round Bracket )"]
+	EndingChar_CRoundBracket := !(EndingChar_CRoundBracket)
+	IniWrite, %EndingChar_CRoundBracket%, Config.ini, Configuration, EndingChar_CRoundBracket
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndOSquareBracket:
+	Menu, Submenu2, ToggleCheck, % TransA["Opening Square Bracket ["]
+	EndingChar_OSquareBracket := !(EndingChar_OSquareBracket)
+	IniWrite, %EndingChar_OSquareBracket%, Config.ini, Configuration, EndingChar_OSquareBracket
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndCSquareBracket:
+	Menu, Submenu2, ToggleCheck, % TransA["Closing Square Bracket ]"]
+	EndingChar_CSquareBracket := !(EndingChar_CSquareBracket)
+	IniWrite, %EndingChar_CSquareBracket%, Config.ini, Configuration, EndingChar_CSquareBracket
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndOCurlyBracket:
+	Menu, Submenu2, ToggleCheck, % TransA["Opening Curly Bracket {"]
+	EndingChar_OCurlyBracket := !(EndingChar_OCurlyBracket)
+	IniWrite, %EndingChar_OCurlyBracket%, Config.ini, Configuration, EndingChar_OCurlyBracket
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndCCurlyBracket:
+	Menu, Submenu2, ToggleCheck, % TransA["Closing Curly Bracket }"]
+	EndingChar_CCurlyBracket := !(EndingChar_CCurlyBracket)
+	IniWrite, %EndingChar_CCurlyBracket%, Config.ini, Configuration, EndingChar_CCurlyBracket
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndColon:
+	Menu, Submenu2, ToggleCheck,% TransA["Colon :"]
+	EndingChar_Colon := !(EndingChar_Colon)
+	IniWrite, %EndingChar_Colon%, Config.ini, Configuration, EndingChar_Colon
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndSemicolon:
+	Menu, Submenu2, ToggleCheck, % TransA["Semicolon `;"]
+	EndingChar_Semicolon := !(EndingChar_Semicolon)
+	IniWrite, %EndingChar_Semicolon%, Config.ini, Configuration, EndingChar_Semicolon
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndApostrophe:
+	Menu, Submenu2, ToggleCheck, % TransA["Apostrophe '"]
+	EndingChar_Apostrophe := !(EndingChar_Apostrophe)
+	IniWrite, %EndingChar_Apostrophe%, Config.ini, Configuration, EndingChar_Apostrophe
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndQuote:
+	Menu, Submenu2, ToggleCheck, % TransA["Quote """]
+	EndingChar_Quote := !(EndingChar_Quote)
+	IniWrite, %EndingChar_Quote%, Config.ini, Configuration, EndingChar_Quote
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndSlash:
+	Menu, Submenu2, ToggleCheck, % TransA["Slash /"]
+	EndingChar_Slash := !(EndingChar_Slash)
+	IniWrite, %EndingChar_Slash%, Config.ini, Configuration, EndingChar_Slash
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndBackslash:
+	Menu, Submenu2, ToggleCheck, % TransA["Backslash \"]
+	EndingChar_Backslash := !(EndingChar_Backslash)
+	IniWrite, %EndingChar_Backslash%, Config.ini, Configuration, EndingChar_Backslash
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndComma:
+	Menu, Submenu2, ToggleCheck, % TransA["Comma ,"]
+	EndingChar_Comma := !(EndingChar_Comma)
+	IniWrite, %EndingChar_Comma%, Config.ini, Configuration, EndingChar_Comma
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndDot:
+	Menu, Submenu2, ToggleCheck, % TransA["Dot ."]
+	EndingChar_Dot := !(EndingChar_Dot)
+	IniWrite, %EndingChar_Dot%, Config.ini, Configuration, EndingChar_Dot
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndQuestionMark:
+	Menu, Submenu2, ToggleCheck, % TransA["Question Mark ?"]
+	EndingChar_QuestionMark := !(EndingChar_QuestionMark)
+	IniWrite, %EndingChar_QuestionMark%, Config.ini, Configuration, EndingChar_QuestionMark
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndExclamationMark:
+	Menu, Submenu2, ToggleCheck, % TransA["Exclamation Mark !"]
+	EndingChar_ExclamationMark := !(EndingChar_ExclamationMark)
+	IniWrite, %EndingChar_ExclamationMark%, Config.ini, Configuration, EndingChar_ExclamationMark
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndEnter:
+	Menu, Submenu2, ToggleCheck, % TransA["Enter"]
+	EndingChar_Enter := !(EndingChar_Enter)
+	IniWrite, %EndingChar_Enter%, Config.ini, Configuration, EndingChar_Enter
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndTab:
+	Menu, Submenu2, ToggleCheck, % TransA["Tab"]
+	EndingChar_Tab := !(EndingChar_Tab)
+	IniWrite, %EndingChar_Tab%, Config.ini, Configuration, EndingChar_Tab
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	EndUnderscore:
+	Menu, Submenu2, ToggleCheck, % TransA["Underscore _"]
+	EndingChar_Underscore := !(EndingChar_Underscore)
+	Iniwrite, %EndingChar_Underscore%, Config.ini, Configuration, EndingChar_Underscore
+	F_LoadEndChars()
+	return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	L_DPIScaling:
+	; SetTimer, L_DPIScaling, Off
+	if WinExist("Hotstrings") and WinExist("ahk_class AutoHotkeyGUI")
 	{
-		SysGet, Mon%A_Index%, Monitor, %A_Index%
-		W%A_Index% := Mon%A_Index%Right - Mon%A_Index%Left
-		H%A_Index% := Mon%A_Index%Bottom - Mon%A_Index%Top
-		DPI%A_Index% := round(W%A_Index%/1920*(96/A_ScreenDPI),2)
-		if (awinX >= Mon%A_Index%Left) and (awinX <= Mon%A_Index%Right)
+		
+		WinGetPos, awinX, awinY,awinW,awinH,Hotstrings
+		SysGet, N, MonitorCount
+		Loop, % N
 		{
-			v_SelectedMonitor := A_Index
-		} 
+			SysGet, Mon%A_Index%, Monitor, %A_Index%
+			W%A_Index% := Mon%A_Index%Right - Mon%A_Index%Left
+			H%A_Index% := Mon%A_Index%Bottom - Mon%A_Index%Top
+			DPI%A_Index% := round(W%A_Index%/1920*(96/A_ScreenDPI),2)
+			if (awinX >= Mon%A_Index%Left) and (awinX <= Mon%A_Index%Right)
+			{
+				v_SelectedMonitor := A_Index
+			} 
+		}
 	}
-}
-return
-
-L_CaretCursor:
-Menu, Submenu3, ToggleCheck, % TransA["Caret"]
-Menu, Submenu3, ToggleCheck, % TransA["Cursor"]
-ini_Caret := !(ini_Caret)
-ini_Cursor := !(ini_Cursor)
-IniWrite, %ini_Caret%, Config.ini, Configuration, Caret
-IniWrite, %ini_Cursor%, Config.ini, Configuration, Cursor
-return
-
-L_AmountOfCharacterTips1:
-ini_AmountOfCharacterTips := 1
-gosub, L_AmountOfCharacterTips
-return
-
-L_AmountOfCharacterTips2:
-ini_AmountOfCharacterTips := 2
-gosub, L_AmountOfCharacterTips
-return
-
-L_AmountOfCharacterTips3:
-ini_AmountOfCharacterTips := 3
-gosub, L_AmountOfCharacterTips
-return
-
-L_AmountOfCharacterTips4:
-ini_AmountOfCharacterTips := 4
-gosub, L_AmountOfCharacterTips
-return
-
-L_AmountOfCharacterTips5:
-ini_AmountOfCharacterTips := 5
-gosub, L_AmountOfCharacterTips
-return
-
-L_AmountOfCharacterTips:
-IniWrite, %ini_AmountOfCharacterTips%, Config.ini, Configuration, TipsChars
-Menu, Submenu4, Check, %ini_AmountOfCharacterTips%
-Loop, 5
-{
-	if !(A_Index == ini_AmountOfCharacterTips)
-		Menu, Submenu4, UnCheck, %A_Index%
-}
-return
-
-L_MenuCaretCursor:
-Menu, PositionMenu, ToggleCheck, % TransA["Caret"]
-Menu, PositionMenu, ToggleCheck, % TransA["Cursor"]
-ini_MenuCaret := !(ini_MenuCaret)
-ini_MenuCursor := !(ini_MenuCursor)
-IniWrite, %ini_MenuCaret%, Config.ini, Configuration, MenuCaret
-IniWrite, %ini_MenuCursor%, Config.ini, Configuration, MenuCursor
-return
-
-L_MenuSound:
-Menu, SubmenuMenu, ToggleCheck, % TransA["Enable sound if overrun"]
-ini_MenuSound := !(ini_MenuSound)
-IniWrite, %ini_MenuSound%, Config.ini, Configuration, MenuSound
-return
-
-L_ImportLibrary:
-FileSelectFile, v_LibraryName, 3, %A_ScriptDir%, % TransA["Choose library file (.ahk) for import"], AHK Files (*.ahk)]
-if !(v_LibraryName == "")
-	F_ImportLibrary(v_LibraryName)
-return
-
-L_ExportLibraryStatic:
-FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries",% TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
-if !(v_LibraryName == "")
-	F_ExportLibraryStatic(v_LibraryName)
-return
-
-L_ExportLibraryDynamic:
-FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries", % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
-if !(v_LibraryName == "")
-	F_ExportLibraryDynamic(v_LibraryName)
-return
-
-L_SortTipsAlphabetically:
-Menu, SubmenuTips, ToggleCheck, % TransA["Sort tips alphabetically"]
-ini_TipsSortAlphabetically := !(ini_TipsSortAlphabetically)
-IniWrite, %ini_TipsSortAlphabetically%, Config.ini, Configuration, TipsSortAlphatebically
-return
-
-L_SortTipsByLength:
-Menu, SubmenuTips, ToggleCheck, % TransA["Sort tips by length"]
-ini_TipsSortByLength := !(ini_TipsSortByLength)
-IniWrite, %ini_TipsSortByLength%, Config.ini, Configuration, TipsSortByLength
-return
-
-L_ChangeLanguage:
-v_Language := A_ThisMenuitem
-IniWrite, %v_Language%, Config.ini, Configuration, Language
-Loop, %A_ScriptDir%\Languages\*.ini
-{
-	Menu, SubmenuLanguage, Add, %A_LoopFileName%, L_ChangeLangage
-	if (v_Language == A_LoopFileName)
-		Menu, SubmenuLanguage, Check, %A_LoopFileName%
-	else
-		Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
-}
-MsgBox, % TransA["Application language changed to:"] . A_Space . SubStr(v_Language, 1, StrLen(v_Language)-4) . "`n" . TransA["The application will be reloaded with the new language file."]
-Reload
+	return
+	
+	L_CaretCursor:
+	Menu, Submenu3, ToggleCheck, % TransA["Caret"]
+	Menu, Submenu3, ToggleCheck, % TransA["Cursor"]
+	ini_Caret := !(ini_Caret)
+	ini_Cursor := !(ini_Cursor)
+	IniWrite, %ini_Caret%, Config.ini, Configuration, Caret
+	IniWrite, %ini_Cursor%, Config.ini, Configuration, Cursor
+	return
+	
+	L_AmountOfCharacterTips1:
+	ini_AmountOfCharacterTips := 1
+	gosub, L_AmountOfCharacterTips
+	return
+	
+	L_AmountOfCharacterTips2:
+	ini_AmountOfCharacterTips := 2
+	gosub, L_AmountOfCharacterTips
+	return
+	
+	L_AmountOfCharacterTips3:
+	ini_AmountOfCharacterTips := 3
+	gosub, L_AmountOfCharacterTips
+	return
+	
+	L_AmountOfCharacterTips4:
+	ini_AmountOfCharacterTips := 4
+	gosub, L_AmountOfCharacterTips
+	return
+	
+	L_AmountOfCharacterTips5:
+	ini_AmountOfCharacterTips := 5
+	gosub, L_AmountOfCharacterTips
+	return
+	
+	L_AmountOfCharacterTips:
+	IniWrite, %ini_AmountOfCharacterTips%, Config.ini, Configuration, TipsChars
+	Menu, Submenu4, Check, %ini_AmountOfCharacterTips%
+	Loop, 5
+	{
+		if !(A_Index == ini_AmountOfCharacterTips)
+			Menu, Submenu4, UnCheck, %A_Index%
+	}
+	return
+	
+	L_MenuCaretCursor:
+	Menu, PositionMenu, ToggleCheck, % TransA["Caret"]
+	Menu, PositionMenu, ToggleCheck, % TransA["Cursor"]
+	ini_MenuCaret := !(ini_MenuCaret)
+	ini_MenuCursor := !(ini_MenuCursor)
+	IniWrite, %ini_MenuCaret%, Config.ini, Configuration, MenuCaret
+	IniWrite, %ini_MenuCursor%, Config.ini, Configuration, MenuCursor
+	return
+	
+	L_MenuSound:
+	Menu, SubmenuMenu, ToggleCheck, % TransA["Enable sound if overrun"]
+	ini_MenuSound := !(ini_MenuSound)
+	IniWrite, %ini_MenuSound%, Config.ini, Configuration, MenuSound
+	return
+	
+	L_ImportLibrary:
+	FileSelectFile, v_LibraryName, 3, %A_ScriptDir%, % TransA["Choose library file (.ahk) for import"], AHK Files (*.ahk)]
+	if !(v_LibraryName == "")
+		F_ImportLibrary(v_LibraryName)
+	return
+	
+	L_ExportLibraryStatic:
+	FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries",% TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
+	if !(v_LibraryName == "")
+		F_ExportLibraryStatic(v_LibraryName)
+	return
+	
+	L_ExportLibraryDynamic:
+	FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries", % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
+	if !(v_LibraryName == "")
+		F_ExportLibraryDynamic(v_LibraryName)
+	return
+	
+	L_SortTipsAlphabetically:
+	Menu, SubmenuTips, ToggleCheck, % TransA["Sort tips alphabetically"]
+	ini_TipsSortAlphabetically := !(ini_TipsSortAlphabetically)
+	IniWrite, %ini_TipsSortAlphabetically%, Config.ini, Configuration, TipsSortAlphatebically
+	return
+	
+	L_SortTipsByLength:
+	Menu, SubmenuTips, ToggleCheck, % TransA["Sort tips by length"]
+	ini_TipsSortByLength := !(ini_TipsSortByLength)
+	IniWrite, %ini_TipsSortByLength%, Config.ini, Configuration, TipsSortByLength
+	return
+	
+	L_ChangeLanguage:
+	v_Language := A_ThisMenuitem
+	IniWrite, %v_Language%, Config.ini, Configuration, Language
+	Loop, %A_ScriptDir%\Languages\*.ini
+	{
+		Menu, SubmenuLanguage, Add, %A_LoopFileName%, L_ChangeLangage
+		if (v_Language == A_LoopFileName)
+			Menu, SubmenuLanguage, Check, %A_LoopFileName%
+		else
+			Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
+	}
+	MsgBox, % TransA["Application language changed to:"] . A_Space . SubStr(v_Language, 1, StrLen(v_Language)-4) . "`n" . TransA["The application will be reloaded with the new language file."]
+	Reload
