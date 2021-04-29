@@ -19,6 +19,16 @@ FileEncoding, UTF-16			; Sets the default encoding for FileRead, FileReadLine, L
 ; BMP = Basic Multilingual Plane.
 
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert image.png -alpha off -resize 256x256 \ -define icon:auto-resize="256,128,96,64,48,32,16" \ hotstrings.ico
+;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
+;Overrides the custom EXE icon used for compilation
+;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
+;@Ahk2Exe-SetCopyright GNU GPL 3.x
+;@Ahk2Exe-SetDescription Advanced tool for hotstring management.
+;@Ahk2Exe-SetProductName Original script name: %A_ScriptName%
+;@Ahk2Exe-Set OriginalScriptlocation, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings
+;@Ahk2Exe-SetCompanyName  http://mslonik.pl
+;@Ahk2Exe-SetFileVersion 4.0
 global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user
 global v_SelectedRow 			:= A_Args[7]
 global v_PreviousMonitor 		:= A_Args[8]
@@ -147,7 +157,7 @@ if !(v_Param == "l") 		;GUI window uses the tray icon that was in effect at the 
 	Menu, Tray, NoStandard									; remove all the rest of standard tray menu
 	Menu, Tray, Standard									; add it again at the bottom
 	
-	Menu, Tray, Icon,		HotString02.ico 					;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
+	Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
 }
 
 F_GuiMain_CreateObject()
@@ -478,8 +488,11 @@ Menu, 	HSMenu, 			Add, % TransA["Libraries"], 				:LibrariesSubmenu
 Menu, 	HSMenu, 			Add, % TransA["Clipboard Delay (F7)"], 		F_GuiHSdelay
 Menu,	ApplicationSubmenu,	Add, % TransA["Reload"],					F_Reload
 Menu,	ApplicationSubmenu,	Add, % TransA["Exit"],					F_Exit
-Menu,	ApplicationSubmenu,	Add,	% TransA["Compile"],				F_Compile
-;Menu,	ApplicationSubmenu, Disable,								% TransA["Compile"]
+
+F_CompileSubmenu()
+Menu,	ApplicationSubmenu,	Add,	% TransA["Compile"],				:CompileSubmenu
+if (!A_AhkPath) ;if AutoHotkey isn't installed
+	Menu,	ApplicationSubmenu, Disable,							% TransA["Compile"]
 Menu, 	HSMenu,			Add, % TransA["Application"],				:ApplicationSubmenu
 Menu, 	HSMenu, 			Add, % TransA["About/Help"], 				F_GuiAbout
 Gui, 	HS3: Menu, HSMenu
@@ -1788,30 +1801,68 @@ F_LoadGUIstyle()
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_Compile()
+F_CompileSubmenu()
 {
-	local v_Compress := false, v_TempInStr := "", v_TempOutStr := ""
+	local v_TempOutStr := ""
 	Loop, Parse, %  A_AhkPath, "\"
 	{
 		if (Instr(A_LoopField, ".exe"))
 			break
 		v_TempOutStr .= A_LoopField . "\"
 	}
-	;*[One]
-	v_TempOutStr .= "Compiler" . "\" . "Ahk2Exe.exe"
-	v_Compress := false
-	if (FileExist(v_TempOutStr))
+	v_TempOutStr .= "Compiler" . "\" 
+	if (FileExist(v_TempOutStr . "Ahk2Exe.exe"))
+		Menu, CompileSubmenu, Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
+	if (FileExist(v_TempOutStr . "upx.exe"))
+		Menu, CompileSubmenu, Add, % TransA["Compressed executable (upx.exe)"], F_Compile
+	if (FileExist(v_TempOutStr . "mpress.exe"))
+		Menu, CompileSubmenu, Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_Compile()
+{
+	local v_TempOutStr := "", v_TempOutStr2 := "", v_TempOutStr3 := ""
+	Loop, Parse, %  A_AhkPath, "\"
 	{
-		Run, % v_TempOutStr . A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName . A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
-		MsgBox, , Compiled, The file is compiled, but not compressed
-		return
+		if (Instr(A_LoopField, ".exe"))
+			break
+		v_TempOutStr .= A_LoopField . "\"
 	}
-	else if (FileExist(v_TempOutStr . "Compiler" . "\" . "upx.exe"))
+	v_TempOutStr2 := v_TempOutStr . "Compiler" . "\" 
+	
+	;*[One]
+	Switch A_ThisMenuItem
 	{
-		v_Compress := 2
+		Case TransA["Standard executable (Ahk2Exe.exe)"]:
+			Run, % v_TempOutStr2 . "Ahk2Exe.exe" 
+				. A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName 
+				. A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+				. A_Space . "/icon" . A_Space . A_ScriptDir . "\" . AppIcon 
+				. A_Space . "/ahk" . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """"
+				. A_Space . "/compress" . A_Space . "0"
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe, but not compressed:"]
+				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe"
 		
-		
-		MsgBox, , Compiled, The file is compiled and compressed
+		Case TransA["Compressed executable (upx.exe)"]:
+			Run, % v_TempOutStr2 . "Ahk2Exe.exe" 
+				. A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName 
+				. A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+				. A_Space . "/icon" . A_Space . A_ScriptDir . "\" . AppIcon 
+				. A_Space . "/ahk" . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" 
+				. A_Space . "/compress" . A_Space . "2" 
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["The executable file is prepared by Ahk2Exe and compressed by upx.exe:"]
+				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe"
+				
+		Case TransA["Compressed executable (mpress.exe)"]:
+			Run, % v_TempOutStr2 . "Ahk2Exe.exe" 
+				. A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName 
+				. A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+				. A_Space . "/icon" . A_Space . A_ScriptDir . "\" . AppIcon 
+				. A_Space . "/ahk" . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """"
+				. A_Space . "/compress" . A_Space . "1"
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe and compressed by mpress.exe:"]
+				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe"
 	}
 	return
 }
@@ -2177,6 +2228,8 @@ Closing Square Bracket ] 								= Closing Square Bracket ]
 Colon : 												= Colon :
 Comma , 												= Comma ,
 Compile												= Compile
+Compressed executable (upx.exe)							= Compressed executable (upx.exe)
+Compressed executable (mpress.exe)							= Compressed executable (mpress.exe)
 Config.ini wasn't found. The default Config.ini is now created in location = Config.ini wasn't found. The default Config.ini is now created in location
 Configuration 											= &Configuration
 Continue reading the library file? If you answer ""No"" then application will exit! = Continue reading the library file?`nIf you answer ""No"" then application will exit!
@@ -2296,10 +2349,14 @@ Sort tips alphabetically 								= Sort tips &alphabetically
 Sort tips by length 									= Sort tips by &length
 Space 												= Space
 Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
+Standard executable (Ahk2Exe.exe)							= Standard executable (Ahk2Exe.exe)
 Static hotstrings 										= &Static hotstrings
 Tab 													= Tab
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
 The default											= The default
+The executable file is prepared by Ahk2Exe and compressed by mpress.exe: = The executable file is prepared by Ahk2Exe and compressed by mpress.exe:
+The executable file is prepared by Ahk2Exe and compressed by upx.exe: = The executable file is prepared by Ahk2Exe and compressed by upx.exe:
+The executable file is prepared by Ahk2Exe, but not compressed:	= The executable file is prepared by Ahk2Exe, but not compressed:
 The hostring 											= The hostring
 The library  											= The library 
 The file path is: 										= The file path is:
