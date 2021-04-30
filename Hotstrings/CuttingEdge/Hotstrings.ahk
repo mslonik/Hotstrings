@@ -2383,6 +2383,7 @@ warning												= warning
 		FileAppend, %TransConst%, %A_ScriptDir%\Languages\English.txt, UTF-8 
 	
 	if (decision[1] = "load")
+	{
 		Loop, Read, %A_ScriptDir%\Languages\%v_Language%
 		{
 			tick := false
@@ -2401,6 +2402,8 @@ warning												= warning
 			}
 			TransA[key] := val
 		}
+		return
+	}
 	
 	tick := false
 	Loop, Parse, TransConst, =`n, %A_Space%%A_Tab%
@@ -3104,6 +3107,7 @@ F_GuiMain_DetermineConstraints()
 		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
 		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
 							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+		,WleftMiniColumn := 0,	WrightMiniColumn := 0,	SpaceBetweenColumns := 0
 	
 ;4. Determine constraints, according to mock-up
 	GuiControlGet, v_OutVarTemp1, Pos, % IdButton2
@@ -3146,6 +3150,7 @@ F_GuiMain_DetermineConstraints()
 	
 	v_yNext += HofText
 	v_xNext := c_xmarg * 2
+	;*[Three]
 	GuiControlGet, v_OutVarTemp1, Pos, % IdCheckBox1
 	GuiControlGet, v_OutVarTemp2, Pos, % IdCheckBox3
 	GuiControlGet, v_OutVarTemp3, Pos, % IdCheckBox5
@@ -3155,6 +3160,10 @@ F_GuiMain_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp3, Pos, % IdCheckBox6
 	WrightMiniColumn := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W)
 	SpaceBetweenColumns := LeftColumnW - (3 * c_xmarg + WleftMiniColumn + WrightMiniColumn)
+	if (SpaceBetweenColumns < 0)
+		SpaceBetweenColumns := 0
+	if (WleftMiniColumn + WrightMiniColumn > LeftColumnW - 3 * c_xmarg)
+		WleftMiniColumn := Round((LeftColumnW - 3 * c_xmarg)/ 2) 
 	GuiControl, Move, % IdCheckBox1, % "x" v_xNext "y" v_yNext
 	;GuiControl, Show, % IdCheckBox1
 	v_xNext += SpaceBetweenColumns + WleftMiniColumn
