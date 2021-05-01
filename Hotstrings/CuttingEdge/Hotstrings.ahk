@@ -860,6 +860,40 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_HSLV2() ;load content of chosen row from Search Gui into HS3 Gui
+{
+	global	;assume-global mode
+	local v_SelectedRow2 := 0, v_Library := "", v_TriggerString := "", v_SearchedTriggerString := ""
+	static v_PreviousSelectedRow2 := 0
+;The following lines protect from refreshing of ListView if user chooses the same row couple of times.
+	v_PreviousSelectedRow2 := v_SelectedRow2
+	v_SelectedRow2 := LV_GetNext()
+	If (!v_SelectedRow2) ;if empty
+		return
+	if (v_PreviousSelectedRow2 == v_SelectedRow2) ;if the same
+		return
+	
+	LV_GetText(v_Library, 		v_SelectedRow2, 1)
+	LV_GetText(v_TriggerString, 	v_SelectedRow2, 2)
+	
+	v_SelectHotstringLibrary := % v_Library . ".csv"
+	
+	GuiControl, Choose, % IdDDL2, % v_SelectHotstringLibrary
+	F_SelectLibrary()
+	
+	v_SearchedTriggerString := v_TriggerString
+	Loop
+	{
+		LV_GetText(v_TriggerString, A_Index, 1)
+		if (v_TriggerString == v_SearchedTriggerString)
+		{
+			LV_Modify(A_Index, "Vis +Select +Focus")
+			break
+		}
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SearchPhrase()
 {
 	global	;assume-global mode
@@ -950,11 +984,14 @@ F_GuiSearch_CreateObject()
 	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT2,								% TransA["Search by:"]
 	Gui,	HS3Search: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, HS3Search: Add, Edit, 		x0 y0 HwndIdSearchE1 vv_SearchTerm gF_SearchPhrase
-	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR1 vv_RadioGroup gSearchChange Checked, 	% TransA["Triggerstring"]
-	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR2 gSearchChange, 					% TransA["Hotstring"]
-	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR3 gSearchChange, 					% TransA["Library"]
+	;Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR1 vv_RadioGroup gSearchChange Checked, 	% TransA["Triggerstring"]
+	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR1 vv_RadioGroup gF_SearchPhrase Checked, % TransA["Triggerstring"]
+	;Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR2 gSearchChange, 					% TransA["Hotstring"]
+	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR2 gF_SearchPhrase, 					% TransA["Hotstring"]
+	;Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR3 gSearchChange, 					% TransA["Library"]
+	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR3 gF_SearchPhrase, 					% TransA["Library"]
 	Gui, HS3Search: Add, Button, 		x0 y0 HwndIdSearchB1 gMoveList Default Disabled,			% TransA["Move (F8)"]
-	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 gHSLV2 +AltSubmit Grid,	 		% TransA["Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment"]
+	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 gF_HSLV2 +AltSubmit Grid,	 		% TransA["Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment"]
 	;Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT3 0x7 vLine2						;0x7 = SS_BLACKFRAME Specifies a box with a frame drawn in the same color as the window frames. This color is black in the default color scheme.
 	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT4, 								% TransA["F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries"]
 
@@ -4990,66 +5027,6 @@ F_Clear()
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-HSLV2: ;tu jestem
-;Gui, HS3Search:+OwnDialogs
-v_PreviousSelectedRow2 := v_SelectedRow2
-v_SelectedRow2 := LV_GetNext()
-If (!v_SelectedRow2) ;if empty
-	return
-if (v_PreviousSelectedRow2 == v_SelectedRow2) ;if the same
-	return
-
-LV_GetText(v_Library, 		v_SelectedRow2, 1)
-LV_GetText(v_TriggerString, 	v_SelectedRow2, 2)
-/*
-	LV_GetText(Options, 		v_SelectedRow2, 3)
-	LV_GetText(Fun, 			v_SelectedRow2, 4)
-	
-	Switch Fun
-	{
-		Case "SI":
-			SendFun := "F_NormalWay"
-		Case "CL":
-			SendFun := "F_ViaClipboard"
-		Case "MCL":
-			SendFun := "F_MenuText"
-		Case "MSI":
-			SendFun := "F_MenuTextAHK"
-	}
-	
-	LV_GetText(EnDis, v_SelectedRow2, 5)
-	LV_GetText(TextInsert, v_SelectedRow2, 6)
-	If (EnDis == "En")
-		OnOff := "On"
-	else if (EnDis == "Dis")
-		OnOff := "Off"
-*/
-Gui, HS3: Default ;defines which ListView will be addressed
-ChooseSec := % v_Library . ".csv"
-;v_String := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
-;GuiControl,, v_ViewString ,  %v_String%
-;gosub, ViewString
-GuiControl, Choose, % IdDDL2, % ChooseSec
-F_SelectLibrary()
-	;gosub, SectionChoose
-v_SearchedTriggerString := v_TriggerString
-Gui, ListView, % IdListView1
-Loop
-{
-	LV_GetText(v_TriggerString, A_Index, 1)
-	if (v_TriggerString == v_SearchedTriggerString)
-	{
-		;v_SelectedRow := A_Index
-		;LV_Modify(v_SelectedRow, "Vis")
-		if (LV_Modify(A_Index, "Vis +Select +Focus"))
-			MsgBox,, Tu jestem
-		break
-	}
-}
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 ALibOK:
 Gui, ALib:Submit, NoHide
 if (v_NewLib == "")
@@ -5319,10 +5296,12 @@ F_Searching()
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-SearchChange:
-F_SearchPhrase()
-GuiControl,, v_SearchTerm, %v_SearchTerm% ;Puts new contents into the control.
-return
+/*
+	SearchChange:
+	F_SearchPhrase()
+	GuiControl,, v_SearchTerm, %v_SearchTerm% ;Puts new contents into the control.
+	return
+*/
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
