@@ -151,7 +151,7 @@ else
 if !(v_Param == "l") 		;GUI window uses the tray icon that was in effect at the time the window was created, therefore this section have to be run before the first Gui, New command. 
 {
 	Menu, Tray, Add, 		% TransA["Edit Hotstring"], 		L_GUIInit
-	Menu, Tray, Add, 		% TransA["Search Hotstrings"], 	L_Searching
+	Menu, Tray, Add, 		% TransA["Search Hotstrings"], 	F_Searching
 	Menu, Tray, Default, 	% TransA["Edit Hotstring"]
 	Menu, Tray, Add										; separator line
 	Menu, Tray, NoStandard									; remove all the rest of standard tray menu
@@ -175,6 +175,9 @@ F_UpdateSelHotLibDDL()
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
 
 F_LoadHotstringsFromLibraries()
+
+F_GuiSearch_CreateObject()	;When all tables are full, initialize GuiSearch
+F_GuiSearch_DetermineConstraints()
 ;MsgBox,, A_IsCritical, % A_IsCritical
 Critical, Off
 ;v_BlockHotkeysFlag := 0
@@ -469,7 +472,7 @@ Menu, ConfGUI,		Add, 	% TransA["Font type"],					:FontTypeMenu
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 				:Submenu1
-Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 			L_Searching
+Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 		F_Searching
 ;Menu, HSMenu,		Disable,	% TransA["Search Hotstrings"]
 
 Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 		F_RefreshListOfLibraries
@@ -748,10 +751,9 @@ return
 
 ^f::
 ^s::
-F3::
-Gui, HS3:Default
-Goto, L_Searching
-; return
+F3:: ;new thread starts here
+F_Searching()
+return
 
 F4::	;new thread starts here
 F_WhichGui()
@@ -861,50 +863,156 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_Searching()
+{
+	global	;assume-global mode
+	Gui, HS3Search: Default
+	if (v_HS3SearchFlag) ;This flag is used to spare redrawing of the Gui content if it already exists.
+		Gui, HS3Search: Show, % "W" HS3MinWidth "H" HS3MinHeight . A_Space . "Center"
+	else ;HS3Search Gui was never yet filled with data
+	{
+		Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
+		{
+			LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+		}
+		LV_ModifyCol(2, "Sort") ;by default: triggerstring
+		
+		/*
+			if (!v_SearchTerm) 
+				GuiControl,, v_SearchTerm, %v_SearchTerm%
+			if (v_RadioGroup == 1)
+				GuiControl,, Triggerstring, 1
+			else if (v_RadioGroup == 2)
+				GuiControl,, Hotstring, 1
+			else if (v_RadioGroup == 3)
+				GuiControl,, Library, 1
+		*/
+		
+		v_HS3SearchFlag := 1
+		Gui, HS3Search: Show, % "W" HS3MinWidth "H" HS3MinHeight . A_Space . "Center"
+	;Gui, SearchLoad: Destroy
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiSearch_CreateObject()
+{
+	global	;assume-global mode
+
+	;1. Prepare Gui general parameters
+	Gui, HS3Search: New, 	% "+Resize +HwndHS3SearchHwnd +Owner +MinSize" HS3MinWidth + 3 * c_xmarg "x" HS3MinHeight, % TransA["Search Hotstrings"]
+	Gui, HS3Search: Margin,	% c_xmarg, % c_ymarg
+	Gui,	HS3Search: Color,	% c_WindowColor, % c_ControlColor
+		
+	;2. Prepare alll Gui objects
+	Gui,	HS3Search: Font,			% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT1,								% TransA["Phrase to search:"]
+	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT2,								% TransA["Search by:"]
+	Gui,	HS3Search: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, HS3Search: Add, Edit, 		x0 y0 HwndIdSearchE1 vv_SearchTerm gSearch
+	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR1 vv_RadioGroup gSearchChange Checked, 	% TransA["Triggerstring"]
+	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR2 gSearchChange, 					% TransA["Hotstring"]
+	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR3 gSearchChange, 					% TransA["Library"]
+	Gui, HS3Search: Add, Button, 		x0 y0 HwndIdSearchB1 gMoveList Default, 				% TransA["Move (F8)"]
+	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 grid vList +AltSubmit gHSLV2, 		% TransA["Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment"]
+	;Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT3 0x7 vLine2						;0x7 = SS_BLACKFRAME Specifies a box with a frame drawn in the same color as the window frames. This color is black in the default color scheme.
+	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT4, 								% TransA["F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries"]
+
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiSearch_DetermineConstraints()
+{
+	global	;assume-global mode
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+		,v_ButtonW := 0
+	
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdSearchT1, % "x" v_xNext "y" v_yNext ;Phrase to search
+	v_yNext += HofText
+	GuiControlGet, v_OutVarTemp, Pos, % IdSearchE1
+	v_wNext := v_OutVarTempW * 2
+	GuiControl, Move, % IdSearchE1, % "x" v_xNext "y" v_yNext "w" v_wNext
+	
+	GuiControlGet, v_OutVarTemp, Pos, % IdSearchE1
+	v_xNext := c_xmarg + v_OutVarTempW + 2 * c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdSearchT2, % "x" v_xNext "y" v_yNext	;Search by
+	v_yNext += HofText
+	GuiControl, Move, % IdSearchR1, % "x" v_xNext "y" v_yNext
+	
+	GuiControlGet, v_OutVarTemp, Pos, % IdSearchR1
+	v_xNext += v_OutVarTempW + c_xmarg
+	GuiControl, Move, % IdSearchR2, % "x" v_xNext "y" v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdSearchR2
+	v_xNext += v_OutVarTempW + c_xmarg
+	GuiControl, Move, % IdSearchR3, % "x" v_xNext "y" v_yNext
+	
+	HofRadio := v_OutVarTempH
+	v_OutVarTemp := Max(HofRadio, HofEdit)
+	v_xNext := c_xmarg
+	v_yNext += v_OutVarTemp + c_ymarg
+	v_wNext := HS3MinWidth
+	v_hNext := HS3MinHeight - (c_ymarg + HofText + v_OutVarTemp + c_ymarg + HofText * 2)
+	GuiControl, Move, % IdSearchLV1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
+	
+	GuiControlGet, v_OutVarTemp, Pos, % IdSearchLV1
+	LV_ModifyCol(1, Round(0.2 * v_OutVarTempW))
+	LV_ModifyCol(2, Round(0.1 * v_OutVarTempW))
+	LV_ModifyCol(3, Round(0.1 * v_OutVarTempW))	
+	LV_ModifyCol(4, Round(0.1 * v_OutVarTempW))
+	LV_ModifyCol(5, Round(0.1 * v_OutVarTempW))
+	LV_ModifyCol(6, Round(0.27 * v_OutVarTempW))
+	LV_ModifyCol(7, Round(0.1 * v_OutVarTempW) - 3)
+	v_xNext := c_xmarg
+	v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
+	GuiControl, Move, % IdSearchT4, % "x" v_xNext "y" v_yNext ;information about shortcuts
+	
+	GuiControlGet, v_OutVarTemp, Pos, % IdSearchB1
+	v_ButtonW := v_OutVarTempW + 2 * c_ymarg
+	v_xNext := HS3MinWidth + c_xmarg - v_ButtonW
+	v_yNext -= c_ymarg
+	GuiControl, Move, % IdSearchB1, % "x" v_xNext "y" v_yNext "w" v_ButtonW
+	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS3SearchGuiSize()
 {
+	global	;assume-global mode
 	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
 		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0
+		,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
 	
 	if (A_EventInfo = 1) ;The window has been minimized.
 		return
-	if (A_EventInfo = 2)
+	if (A_EventInfo = 2) ;The window has been maximized.
 		return
 	;*[One]
-	GuiControlGet, v_OutVarTemp1, Pos, % IdLV_Search 
-	F_AutoXYWH("*wh", IdLV_Search)
-	GuiControlGet, v_OutVarTemp2, Pos, % IdLV_Search ;Check position of ListView1 again after resizing
+	GuiControlGet, v_OutVarTemp1, Pos, % IdSearchLV1 
+	F_AutoXYWH("*wh", IdSearchLV1)
+	GuiControlGet, v_OutVarTemp2, Pos, % IdSearchLV1 ;Check position of ListView1 again after resizing
 	if (v_OutVarTemp2W != v_OutVarTemp1W)
 	{
-		LV_ModifyCol(1, Round(0.1 * v_OutVarTemp2W))
+		LV_ModifyCol(1, Round(0.2 * v_OutVarTemp2W))
 		LV_ModifyCol(2, Round(0.1 * v_OutVarTemp2W))
 		LV_ModifyCol(3, Round(0.1 * v_OutVarTemp2W))	
 		LV_ModifyCol(4, Round(0.1 * v_OutVarTemp2W))
-		LV_ModifyCol(5, Round(0.3 * v_OutVarTemp2W))
-		LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W))
+		LV_ModifyCol(5, Round(0.1 * v_OutVarTemp2W))
+		LV_ModifyCol(6, Round(0.27 * v_OutVarTemp2W))
 		LV_ModifyCol(7, Round(0.1 * v_OutVarTemp2W) - 3)
-	}	
-	;LV_ModifyCol(1, "100 Center")
-	;LV_ModifyCol(2, "100 Center")
-	;LV_ModifyCol(3, "110 Center")
-	;LV_ModifyCol(4, "110 Center")
-	;LV_ModifyCol(5, "110 Center")
-	;LV_ModifyCol(7, "185 Center")
-	/*
-		WinGetPos,,, ListW, ListH, Search Hotstrings
-		NewHeight := LV_Height+(A_GuiHeight-IniH)
-		NewWidth := LV_Width+(A_GuiWidth-IniW)
-		ColWid := (NewWidth-740*DPI%v_SelectedMonitor%)
-		SendMessage, 4125, 4, 0, SysListView321
-		wid := ErrorLevel
-		if (wid < ColWid)
-		{
-			LV_ModifyCol(6, ColWid)
-		}
-		GuiControl, Move, List, W%NewWidth% H%NewHeight%
-		GuiControl, Move, Shortcuts2, % "y" . A_GuiHeight - 20*DPI%v_SelectedMonitor%
-		GuiControl, Move, Line2, % "w" . A_GuiWidth . " y" . A_GuiHeight - 25*DPI%v_SelectedMonitor%
-	*/
+	}
+	v_xNext := c_xmarg
+	v_yNext := v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
+	GuiControl, MoveDraw, % IdSearchT4, % "x" v_xNext "y" v_yNext ;information about shortcuts
+	
+	GuiControlGet, v_OutVarTemp1, Pos, % IdSearchB1
+	v_xNext := HS3MinWidth + c_xmarg - v_OutVarTemp1W
+	v_yNext -= c_ymarg
+	GuiControl, MoveDraw, % IdSearchB1, % "x" v_xNext "y" v_yNext 
+	
 	return
 }
 	
@@ -2262,7 +2370,7 @@ Exclamation Mark ! 										= Exclamation Mark !
 exists in a file 										= exists in a file
 Exit													= Exit
 Export from .csv to .ahk 								= &Export from .csv to .ahk
-F3 Close Search hotstrings | F8 Move hotstring 				= F3 Close Search hotstrings | F8 Move hotstring
+F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries = F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries
 file! 												= file!
 file in Languages subfolder!								= file in Languages subfolder!
 file is now created in the following subfolder:				= file is now created in the following subfolder:
@@ -2305,7 +2413,7 @@ Loaded hotstrings: 										= Loaded hotstrings:
 Loading hotstrings from libraries... 						= Loading hotstrings from libraries...
 Loading libraries. Please wait... 							= Loading libraries. Please wait...
 Minus - 												= Minus -
-Move 												= Move
+Move (F8)												= Move (F8)
 No Backspace (B0) 										= No Backspace (B0)
 No End Char (O) 										= No End Char (O)
 No libraries have been found!								= No libraries have been found!
@@ -2318,6 +2426,7 @@ Please wait, uploading .csv files... 						= Please wait, uploading .csv files..
 question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
+Phrase to search:										= Phrase to search:
 pixels												= pixels
 Position of main window is saved in Config.ini.				= Position of main window is saved in Config.ini.	
 Reload												= Reload
@@ -4970,14 +5079,6 @@ v_WhichGUIisMinimzed := "HS4"
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-; Here I use 2x GUIs: SearchLoad which shows progress on time of library loading process and HS3Search which is in fact Search GUI name.
-; Not clear why v_HS3SearchFlag is used.
-L_Searching:
-if (v_HS3SearchFlag) 
-	Gui, HS3Search: Show
-else
-{
 	/*
 		WinGetPos, ini_StartXlist, ini_StartYlist,,,Hotstrings
 		Gui, SearchLoad:New, -Resize -Border
@@ -5008,54 +5109,6 @@ else
 			Gui, HS3Search:Hide
 		}
 	*/
-	Gui, HS3Search: New, 	% "+Resize +HwndHS3SearchHwnd +Owner +MinSize" HS3MinWidth + 3 * c_xmarg "x" HS3MinHeight, % TransA["Search Hotstrings"]
-	Gui, HS3Search: Margin,	% c_xmarg, % c_ymarg
-	Gui,	HS3Search: Color,	% c_WindowColor, % c_ControlColor
-	Gui,	HS3Search: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-
-	v_HS3SearchFlag := 1
-	Gui, HS3Search:Add, Text, ,	Search: ;future: translate
-	Gui, HS3Search:Add, Text, 		% "yp xm+" . 420, % TransA["Search by:"]
-	Gui, HS3Search:Add, Edit, 		% "xm w" . 400 . " vv_SearchTerm gSearch"
-	Gui, HS3Search:Add, Radio, 		% "yp xm+" . 420 . " vv_RadioGroup gSearchChange Checked", % TransA["Triggerstring"]
-	Gui, HS3Search:Add, Radio, 		% "yp xm+" . 540 . " gSearchChange", % TransA["Hotstring"]
-	Gui, HS3Search:Add, Radio, 		% "yp xm+" . 640 . " gSearchChange", % TransA["Library"]
-	Gui, HS3Search:Add, Button, 		% "yp-2 xm+" . 720 . " w" . 100 . " gMoveList Default", % TransA["Move"]
-	Gui, HS3Search:Add, ListView, 	% "HwndIdLV_Search xm grid vList +AltSubmit gHSLV2 h400" . A_Space . "w" HS3MinWidth, % TransA["Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment"]
-	
-	Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
-	{
-		LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
-	}
-	LV_ModifyCol(1, "Sort")
-	/*
-		ini_StartWlist := 940
-		ini_StartHlist := 500
-		SetTitleMatchMode, 3
-		WinGetPos, ini_StartXlist, ini_StartYlist,,,Hotstrings
-		if ((ini_StartXlist == "") or (ini_StartYlist == ""))
-		{
-			;ini_StartXlist := (Mon%v_SelectedMonitor%Left + (Abs(Mon%v_SelectedMonitor%Right - Mon%v_SelectedMonitor%Left)/2))*DPI%v_SelectedMonitor% - ini_StartWlist/2
-			ini_StartXlist := 0
-			;ini_StartYlist := (Mon%v_SelectedMonitor%Top + (Abs(Mon%v_SelectedMonitor%Bottom - Mon%v_SelectedMonitor%Top)/2))*DPI%v_SelectedMonitor% - ini_StartHlist/2
-			ini_StartYlist := 0
-		}
-	*/
-	Gui, HS3Search:Add, Text, x0 h1 0x7 w10 vLine2
-	;Gui, HS3Search:Font, % "s" . c_FontSize . " cBlack Norm"
-	Gui, HS3Search:Add, Text, xm vShortcuts2, % TransA["F3 Close Search hotstrings | F8 Move hotstring"]
-	if !(v_SearchTerm == "")
-		GuiControl,, v_SearchTerm, %v_SearchTerm%
-	if (v_RadioGroup == 1)
-		GuiControl,, Triggerstring, 1
-	else if (v_RadioGroup == 2)
-		GuiControl,, Hotstring, 1
-	else if (v_RadioGroup == 3)
-		GuiControl,, Library, 1
-	;Gui, HS3Search: Show, % "w" . ini_StartWlist . " h" . ini_StartHlist . " x" . ini_StartXlist . " y" . ini_StartYlist
-	Gui, HS3Search: Show, % "W" HS3MinWidth "H" HS3MinHeight
-	;Gui, SearchLoad: Destroy
-}
 
 Search:
 Gui, HS3Search:Default
@@ -5277,7 +5330,7 @@ a_EnableDisable	:= []
 a_Triggerstring	:= []
 a_Comment			:= []
 F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
-Gosub, L_Searching 
+F_Searching()
 ;return ; This line will be never reached
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
