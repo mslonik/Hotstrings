@@ -70,8 +70,6 @@ global v_MenuMax2 				:= 0
 global v_MonitorFlag 			:= 0
 global v_MouseX 				:= ""
 global v_MouseY 				:= ""
-global v_RadioGroup 			:= ""
-global v_SearchTerm 			:= ""
 global v_SelectedRow2 			:= 0
 global v_SelectedMonitor			:= 0
 global v_Tips 					:= ""
@@ -473,7 +471,6 @@ Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 				:Submenu1
 Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 		F_Searching
-;Menu, HSMenu,		Disable,	% TransA["Search Hotstrings"]
 
 Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 		F_RefreshListOfLibraries
 F_RefreshListOfLibraries()
@@ -863,6 +860,61 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_SearchPhrase()
+{
+	global	;assume-global mode
+	local	Each := 0, FileName := ""
+	
+;Gui, HS3Search:Default
+	Gui, HS3Search: Submit, NoHide
+	if getkeystate("CapsLock","T") ;I don't understand it
+		return
+	GuiControlGet, v_SearchTerm
+	GuiControl, -Redraw, % IdSearchLV1	;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
+	LV_Delete()
+	Switch v_RadioGroup
+	{
+		Case 1:
+		For Each, FileName in a_Triggerstring
+		{
+			if (v_SearchTerm)
+			{
+				if (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start ;for overall matching without = 1
+					LV_Add("", a_Library[A_Index], FileName, a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+			}
+			else
+				LV_Add("", a_Library[A_Index], FileName, a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+		}
+		LV_ModifyCol(2,"Sort") 	
+		Case 2:
+		For Each, FileName in a_Hotstring
+		{
+			if (v_SearchTerm)
+			{
+				if (InStr(FileName, v_SearchTerm) = 1) ; for overall matching
+					LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], FileName, a_Comment[A_Index])
+			}
+			else
+				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], FileName, a_Comment[A_Index])
+		}
+		LV_ModifyCol(6, "Sort")	
+		Case 3:
+		For Each, FileName in a_Library
+		{
+			if (v_SearchTerm)
+			{
+				if (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
+					LV_Add("", FileName, a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+			}
+			else
+				LV_Add("", FileName, a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+		}
+		LV_ModifyCol(1,"Sort")
+	}
+	GuiControl, +Redraw, % IdSearchLV1 ;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Searching()
 {
 	global	;assume-global mode
@@ -876,18 +928,6 @@ F_Searching()
 			LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
 		}
 		LV_ModifyCol(2, "Sort") ;by default: triggerstring
-		
-		/*
-			if (!v_SearchTerm) 
-				GuiControl,, v_SearchTerm, %v_SearchTerm%
-			if (v_RadioGroup == 1)
-				GuiControl,, Triggerstring, 1
-			else if (v_RadioGroup == 2)
-				GuiControl,, Hotstring, 1
-			else if (v_RadioGroup == 3)
-				GuiControl,, Library, 1
-		*/
-		
 		v_HS3SearchFlag := 1
 		Gui, HS3Search: Show, % "W" HS3MinWidth "H" HS3MinHeight . A_Space . "Center"
 	;Gui, SearchLoad: Destroy
@@ -906,15 +946,15 @@ F_GuiSearch_CreateObject()
 		
 	;2. Prepare alll Gui objects
 	Gui,	HS3Search: Font,			% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT1,								% TransA["Phrase to search:"]
+	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT1,								% TransA["Phrase to search for:"]
 	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT2,								% TransA["Search by:"]
 	Gui,	HS3Search: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	Gui, HS3Search: Add, Edit, 		x0 y0 HwndIdSearchE1 vv_SearchTerm gSearch
+	Gui, HS3Search: Add, Edit, 		x0 y0 HwndIdSearchE1 vv_SearchTerm gF_SearchPhrase
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR1 vv_RadioGroup gSearchChange Checked, 	% TransA["Triggerstring"]
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR2 gSearchChange, 					% TransA["Hotstring"]
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR3 gSearchChange, 					% TransA["Library"]
-	Gui, HS3Search: Add, Button, 		x0 y0 HwndIdSearchB1 gMoveList Default, 				% TransA["Move (F8)"]
-	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 grid vList +AltSubmit gHSLV2, 		% TransA["Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment"]
+	Gui, HS3Search: Add, Button, 		x0 y0 HwndIdSearchB1 gMoveList Default Disabled,			% TransA["Move (F8)"]
+	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 gHSLV2 +AltSubmit Grid,	 		% TransA["Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment"]
 	;Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT3 0x7 vLine2						;0x7 = SS_BLACKFRAME Specifies a box with a frame drawn in the same color as the window frames. This color is black in the default color scheme.
 	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT4, 								% TransA["F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries"]
 
@@ -2426,7 +2466,7 @@ Please wait, uploading .csv files... 						= Please wait, uploading .csv files..
 question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
-Phrase to search:										= Phrase to search:
+Phrase to search for:									= Phrase to search for:
 pixels												= pixels
 Position of main window is saved in Config.ini.				= Position of main window is saved in Config.ini.	
 Reload												= Reload
@@ -3376,7 +3416,6 @@ F_GuiMain_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdText2
 	v_xNext += v_OutVarTempW
 	GuiControl, Move, % IdText12, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
-	;tu jestem
 	HS3MinWidth		:= LeftColumnW + c_WofMiddleButton + RightColumnW
 	HS3MinHeight		:= LeftColumnH + c_ymarg
 	return
@@ -4951,59 +4990,59 @@ F_Clear()
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-HSLV2:
-Gui, HS3Search:+OwnDialogs
+HSLV2: ;tu jestem
+;Gui, HS3Search:+OwnDialogs
 v_PreviousSelectedRow2 := v_SelectedRow2
-If !(v_SelectedRow2 := LV_GetNext()) {
-	Return
-}
-if (v_PreviousSelectedRow2 == v_SelectedRow2)
-{
+v_SelectedRow2 := LV_GetNext()
+If (!v_SelectedRow2) ;if empty
 	return
-}
-LV_GetText(Options, v_SelectedRow2, 3)
-LV_GetText(v_TriggerString, v_SelectedRow2, 2)
-LV_GetText(Fun, v_SelectedRow2, 4)
-if (Fun = "SI")
-{
-	SendFun := "F_NormalWay"
-}
-else if (Fun = "CL")
-{
-	SendFun := "F_ViaClipboard"
-}
-else if (Fun = "MCL")
-{
-	SendFun := "F_MenuText"
-}
-else if (Fun = "MSI")
-{
-	SendFun := "F_MenuTextAHK"
-}
-LV_GetText(TextInsert, v_SelectedRow2, 6)
-LV_GetText(EnDis, v_SelectedRow2, 5)
-If (EnDis == "En")
-	OnOff := "On"
-else if (EnDis == "Dis")
-	OnOff := "Off"
-LV_GetText(Library, v_SelectedRow2, 1)
-Gui, HS3: Default
-ChooseSec := % Library . ".csv"
+if (v_PreviousSelectedRow2 == v_SelectedRow2) ;if the same
+	return
+
+LV_GetText(v_Library, 		v_SelectedRow2, 1)
+LV_GetText(v_TriggerString, 	v_SelectedRow2, 2)
+/*
+	LV_GetText(Options, 		v_SelectedRow2, 3)
+	LV_GetText(Fun, 			v_SelectedRow2, 4)
+	
+	Switch Fun
+	{
+		Case "SI":
+			SendFun := "F_NormalWay"
+		Case "CL":
+			SendFun := "F_ViaClipboard"
+		Case "MCL":
+			SendFun := "F_MenuText"
+		Case "MSI":
+			SendFun := "F_MenuTextAHK"
+	}
+	
+	LV_GetText(EnDis, v_SelectedRow2, 5)
+	LV_GetText(TextInsert, v_SelectedRow2, 6)
+	If (EnDis == "En")
+		OnOff := "On"
+	else if (EnDis == "Dis")
+		OnOff := "Off"
+*/
+Gui, HS3: Default ;defines which ListView will be addressed
+ChooseSec := % v_Library . ".csv"
 ;v_String := % "Hotstring("":" . Options . ":" . v_TriggerString . """, func(""" . SendFun . """).bind(""" . TextInsert . """), """ . OnOff . """)"
 ;GuiControl,, v_ViewString ,  %v_String%
 ;gosub, ViewString
-GuiControl, Choose, v_SelectHotstringLibrary, %ChooseSec%
+GuiControl, Choose, % IdDDL2, % ChooseSec
 F_SelectLibrary()
 	;gosub, SectionChoose
 v_SearchedTriggerString := v_TriggerString
+Gui, ListView, % IdListView1
 Loop
 {
-	LV_GetText(v_TriggerString,A_Index,1)
+	LV_GetText(v_TriggerString, A_Index, 1)
 	if (v_TriggerString == v_SearchedTriggerString)
 	{
-		v_SelectedRow := A_Index
-		LV_Modify(v_SelectedRow, "Vis")
-		LV_Modify(v_SelectedRow, "+Select +Focus")
+		;v_SelectedRow := A_Index
+		;LV_Modify(v_SelectedRow, "Vis")
+		if (LV_Modify(A_Index, "Vis +Select +Focus"))
+			MsgBox,, Tu jestem
 		break
 	}
 }
@@ -5108,63 +5147,8 @@ return
 		{
 			Gui, HS3Search:Hide
 		}
-	*/
+*/
 
-Search:
-Gui, HS3Search:Default
-Gui, HS3Search:Submit, NoHide
-if getkeystate("CapsLock","T")
-	return
-GuiControlGet, v_SearchTerm
-GuiControl, -Redraw, List
-LV_Delete()
-if (v_RadioGroup == 2)
-{
-	For Each, FileName In a_Hotstring
-	{
-		If (v_SearchTerm != "")
-		{
-		; If (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
-			If InStr(FileName, v_SearchTerm) ; for overall matching
-				LV_Add("",a_Library[A_Index], a_Triggerstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],FileName,a_Comment[A_Index])
-		}
-		Else
-			LV_Add("",a_Library[A_Index], a_Triggerstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],FileName,a_Comment[A_Index])
-	}
-	LV_ModifyCol(6,"Sort")
-}
-else if (v_RadioGroup == 1)
-{
-	For Each, FileName In a_Triggerstring
-	{
-		If (v_SearchTerm != "")
-		{
-			If (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
-		; If InStr(FileName, v_SearchTerm) ; for overall matching
-				LV_Add("",a_Library[A_Index], FileName,a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Hotstring[A_Index],a_Comment[A_Index])
-		}
-		Else
-			LV_Add("",a_Library[A_Index], FileName,a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Hotstring[A_Index],a_Comment[A_Index])
-	}
-	LV_ModifyCol(2,"Sort") 
-}
-else if (v_RadioGroup == 3)
-{
-	For Each, FileName In a_Library
-	{
-		If (v_SearchTerm != "")
-		{
-			If (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
-		; If InStr(FileName, v_SearchTerm) ; for overall matching
-				LV_Add("",FileName, a_Triggerstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Hotstring[A_Index],a_Comment[A_Index])
-		}
-		Else
-			LV_Add("",FileName, a_Triggerstring[A_Index],a_TriggerOptions[A_Index],a_OutputFunction[A_Index],a_EnableDisable[A_Index],a_Hotstring[A_Index],a_Comment[A_Index])
-	}
-	LV_ModifyCol(1,"Sort")
-}
-GuiControl, +Redraw, List 
-return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -5336,8 +5320,8 @@ F_Searching()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 SearchChange:
-gosub, Search
-GuiControl,, v_SearchTerm, %v_SearchTerm%
+F_SearchPhrase()
+GuiControl,, v_SearchTerm, %v_SearchTerm% ;Puts new contents into the control.
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
