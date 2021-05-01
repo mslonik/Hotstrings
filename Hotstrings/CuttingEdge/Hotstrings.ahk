@@ -3144,11 +3144,11 @@ F_GuiMain_DetermineConstraints()
 	v_yNext += Max(v_OutVarTemp1H, v_OutVarTemp2H)
 	v_xNext := c_xmarg
 	v_wNext := LeftColumnW - v_xNext
-	v_hNext := HofText + 3 * HofCheckBox + c_ymarg
+	v_hNext := HofText + 3 * HofCheckBox + 2 * c_ymarg
 	GuiControl, Move, % IdGroupBox1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
 	;GuiControl, Show, % IdGroupBox1
 	
-	v_yNext += HofText
+	v_yNext += HofText + c_ymarg
 	v_xNext := c_xmarg * 2
 	;*[Three]
 	GuiControlGet, v_OutVarTemp1, Pos, % IdCheckBox1
