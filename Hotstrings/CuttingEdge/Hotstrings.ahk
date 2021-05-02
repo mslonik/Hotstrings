@@ -929,14 +929,21 @@ F_MoveList()
 	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
 	
 	Gui, HS3Search: Default
-	v_SelectedRow := LV_GetNext()
+	v_SelectedRow := LV_GetNext()	;this variable now contains row number of source table
 	if !(v_SelectedRow) 
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
 		return
 	}
-	;LV_GetText(FileName,		v_SelectedRow, 1)
+	;The following lines will be used by "next function": Move, moving of (triggerstrin, hotstring) definition between libraries.
+	LV_GetText(v_SourceLibrary,	v_SelectedRow, 1)
+	v_SourceLibrary .= ".csv"
 	LV_GetText(v_Triggerstring, 	v_SelectedRow, 2)
+	LV_GetText(v_TriggOpt,		v_SelectedRow, 3)
+	LV_GetText(v_OutFun,		v_SelectedRow, 4)
+	LV_GetText(v_EnDis,			v_SelectedRow, 5)
+	LV_GetText(v_Hotstring,		v_SelectedRow, 6)
+	LV_GetText(v_Comment,		v_SelectedRow, 7)
 	
 	Gui, MoveLibs: Show, % "AutoSize" . A_Space . "X" . NewWinPosX . A_Space . "Y" . NewWinPosY . A_Space . "yCenter"
 	return
@@ -5203,147 +5210,80 @@ CancelMove:
 return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
 ;tu jestem
 Move:
 
 	Gui, MoveLibs: Submit, NoHide
-	If !(v_SelectedRow := LV_GetNext()) 
+	If !(v_DestinationLibrary := LV_GetNext()) 
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
 		return
-}
-	;LV_GetText(TargetLib, v_SelectedRow)
-
-	;FileRead, Text, Libraries\%TargetLib%
-	;SectionList := StrSplit(Text, "`r`n")
-	;InputFile = % A_ScriptDir . "\Libraries\" . TargetLib
-	;LString := % "‖" . Triggerstring . "‖"
-	;SaveFlag := 0	; !!!
-	LV_GetText(v_SelectHotstringLibrary, v_SelectedRow)
-	;v_SelectHotstringLibrary := v_Temp1
+	}
+	LV_GetText(v_SelectHotstringLibrary, v_DestinationLibrary) ;destination
 	Gui, MoveLibs: Destroy
 	Gui, HS3Search: Hide	
-	;Gui, HS3: Default
-	;GuiControl, Choose, v_SelectHotstringLibrary, %TargetLib%
 	F_SelectLibrary()
-	;Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
-	;Gui, ListView, % IdListView1 ; identify which ListView
 	;*[One]
-Loop, % LV_GetCount()
-{
+	Loop, % LV_GetCount()
+	{
 		v_Temp2 := LV_GetText(v_Temp1, A_Index, 1)
 		if (v_Temp1 == v_TriggerString)
 		{
 			MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["The hostring"] . "`n`n" . Triggerstring . "`n`n" . TransA["exists in a file"] . A_Space . TargetLib . A_Space 
 				. TransA["Do you want to proceed?"]
 			IfMsgBox, Yes
-				LV_Add("",  Triggerstring, TriggOpt, OutFun, EnDis,  HSText, v_Comment)
+				LV_Add("",  v_Triggerstring, v_TriggOpt, v_OutFun, v_EnDis, v_Hotstring, v_Comment)
 			IfMsgBox, No
 				return
 		}
-	}
+}
+
+	LV_Add("",  v_Triggerstring, v_TriggOpt, v_OutFun, v_EnDis, v_Hotstring, v_Comment) ;add to ListView
+	LV_ModifyCol(1, "Sort")
 	
-	/*
-		Loop, Read, %InputFile%
-		{
-			if InStr(A_LoopReadLine, LString)
-			{
-				MsgBox, 4,, % TransA["The hostring"] . "`n`n" . Triggerstring . "`n`n" . TransA["exists in a file"] . A_Space . TargetLib . A_Space . TransA["Do you want to proceed?"]
-				IfMsgBox, No
-				{
-					Gui, MoveLibs:Destroy
-					return
-				}
-				LV_Modify(A_Index, "", Triggerstring, TriggOpt, OutFun, EnDis, HSText, v_Comment)
-				SaveFlag := 1
-			}
-		}
-		if (SaveFlag == 0)
-		{
-			LV_Add("",  Triggerstring, TriggOpt, OutFun, EnDis,  HSText, v_Comment)
-			SectionList.Push(MovedHS)
-		}
-	*/
+	FileDelete, Libraries\%v_SelectHotstringLibrary%	;delete the old destination file.
+	Loop, % LV_GetCount() ;Saving the same filename but now containing moved (triggerstring, hotstring) definition.
+	{
+		LV_GetText(txt1, A_Index, 2)
+		LV_GetText(txt2, A_Index, 1)
+		LV_GetText(txt3, A_Index, 3)
+		LV_GetText(txt4, A_Index, 4)
+		LV_GetText(txt5, A_Index, 5)
+		LV_GetText(txt6, A_Index, 6)
+		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
+		if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == "")) ;only not empty definitions are added, not sure why
+			FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
+	}
 	;*[Two]	
-	;LV_ModifyCol(1, "Sort")
-	;dotąd
-	LV_Add("",  Triggerstring, TriggOpt, OutFun, EnDis,  HSText, v_Comment)
-	
-	FileDelete, Libraries\%v_SelectHotstringLibrary%
-	;i teraz zapis do pliku
-	
-	if (SectionList.MaxIndex() == "")
+	F_SelectLibrary() ;Remove the definition from source table / file.
+	Loop, % LV_GetCount()
 	{
-		LV_GetText(txt1, 1, 2)
-		LV_GetText(txt2, 1, 1)
-		LV_GetText(txt3, 1, 3)
-		LV_GetText(txt4, 1, 4)
-		LV_GetText(txt5, 1, 5)
-		LV_GetText(txt6, 1, 6)
-		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-		FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
-	}
-	else
-	{
-		Loop, % SectionList.MaxIndex()-1
+		LV_GetText(v_Temp1, A_Index, 1)
+		if (v_Temp1 == v_TriggerString)
 		{
-			LV_GetText(txt1, A_Index, 2)
-			LV_GetText(txt2, A_Index, 1)
-			LV_GetText(txt3, A_Index, 3)
-			LV_GetText(txt4, A_Index, 4)
-			LV_GetText(txt5, A_Index, 5)
-			LV_GetText(txt6, A_Index, 6)
-			txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
-			if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
-				FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
+			LV_Delete(A_Index)
+			break
 		}
-		LV_GetText(txt1, SectionList.MaxIndex(),2) 
-		LV_GetText(txt2, SectionList.MaxIndex(),1) 
-		LV_GetText(txt3, SectionList.MaxIndex(),3) 
-		LV_GetText(txt4, SectionList.MaxIndex(),4) 
-		LV_GetText(txt5, SectionList.MaxIndex(),5)
-		LV_GetText(txt6, SectionList.MaxIndex(),6) 
-		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-		FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
 	}
-	InputFile 	:= % A_ScriptDir . "\Libraries\" . FileName . ".csv"
-	OutputFile 	:= % A_ScriptDir . "\Libraries\temp.csv"
-	cntLines 		:= 0
-	Loop, Read, %InputFile%
-	{	
-		if !(InStr(A_LoopReadLine, LString))
-			FileAppend, % A_LoopReadLine . "`r`n", %OutputFile%, UTF-8
-		cntLines++
-	}
-	FileDelete, %InputFile%
-	Loop, Read, %OutputFile%
+	;*[Three]	
+	FileDelete, Libraries\%v_SourceLibrary%	;delete the old source filename.
+	Loop, % LV_GetCount() ;Saving the same filename but now containing moved (triggerstring, hotstring) definition.
 	{
-		if (A_Index == 1)
-			FileAppend, % A_LoopReadLine, %InputFile%, UTF-8
-		else
-			FileAppend, % "`r`n" . A_LoopReadLine, %InputFile%, UTF-8
-		
+		LV_GetText(txt1, A_Index, 2)
+		LV_GetText(txt2, A_Index, 1)
+		LV_GetText(txt3, A_Index, 3)
+		LV_GetText(txt4, A_Index, 4)
+		LV_GetText(txt5, A_Index, 5)
+		LV_GetText(txt6, A_Index, 6)
+		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
+		if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == "")) ;only not empty definitions are added, not sure why
+			FileAppend, %txt%, Libraries\%v_SourceLibrary%, UTF-8
 	}
-	if (cntLines == 1)
-	{
-		FileAppend,, %InputFile%, UTF-8
-	}
-	FileDelete, %OutputFile%
-	MsgBox, % TransA["Hotstring moved to the"] . A_Space . TargetLib . A_Space . TransA["file!"]
-	
-;Clearing of arrays before fill up by function F_LoadLibrariesToTables().
-	a_Triggers := [] 
-	a_Library			:= []
-	a_TriggerOptions	:= []
-	a_Hotstring		:= []
-	a_OutputFunction	:= []
-	a_EnableDisable	:= []
-	a_Triggerstring	:= []
-	a_Comment			:= []
+	;*[Four]
+	F_Clear()
 	F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
 	F_Searching()
-;return ; This line will be never reached
+	return 
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
