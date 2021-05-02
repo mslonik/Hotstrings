@@ -809,9 +809,9 @@ return
 
 #if WinActive("Search Hotstrings") and WinActive("ahk_class AutoHotkeyGUI")
 
-F8::
-Gui, HS3Search:Default
-goto, MoveList
+F8:: ;new thread starts here
+Gui, HS3Search: Default
+F_MoveList()
 #if
 
 
@@ -859,7 +859,95 @@ return
 
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_GuiMoveLibs_CreateDetermine()
+{
+	global	;assume-global mode
+	local v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
+		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
+		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
+							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+		,v_WB1 := 0,			v_WB2 := 0,			v_DB := 0
+		,key := "",			value := 0,			v_SelectedRow := 0
 
+	Gui, MoveLibs: New, -Caption +Border -Resize +HwndMoveLibsHwnd +Owner
+	Gui, MoveLibs: Margin,	% c_xmarg, % c_ymarg
+	Gui,	MoveLibs: Color,	% c_WindowColor, % c_ControlColor
+	Gui,	MoveLibs: Font, % "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 	% c_FontType
+	Gui, MoveLibs: Default
+	
+	Gui, MoveLibs: Add, Text,     x0 y0 HwndIdMoveLibs_T1, 						% TransA["Select the target library:"]
+	Gui, MoveLibs: Add, ListView, x0 y0 HwndIdMoveLibs_LV LV0x1 +AltSubmit -Hdr -Multi, 	| 	;-Hdr (minus Hdr) to omit the header (the special top row that contains column titles). "|" is required!
+	Gui, MoveLibs: Add, Button, 	x0 y0 HwndIdMoveLibs_B1 Default gMove, 				% TransA["Move (F8)"]
+	Gui, MoveLibs: Add, Button, 	x0 y0 HwndIdMoveLibs_B2 gCancelMove, 				% TransA["Cancel"]
+	
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdMoveLibs_T1, % "x" v_xNext "y" v_yNext
+	
+	GuiControlGet, v_OutVarTemp2, Pos, % IdMoveLibs_LV
+	v_yNext := HofText + c_ymarg
+	v_hNext := v_OutVarTemp2H * 4
+	GuiControl, Move, % IdMoveLibs_LV, % "x" v_xNext "y" v_yNext "h" v_hNext ; by default ListView shows just 5 rows
+	
+	GuiControlGet, v_OutVarTemp1, Pos, % IdMoveLibs_LV
+	GuiControlGet, v_OutVarTemp2, Pos, % IdMoveLibs_B1
+	GuiControlGet, v_OutVarTemp3, Pos, % IdMoveLibs_B2
+	
+	v_WB1 := v_OutVarTemp2W + 2 * c_xmarg
+	v_WB2 := v_OutVarTemp3W + 2 * c_xmarg
+	v_DB  := v_OutVarTemp1W - (v_WB1 + v_WB2)
+	
+	v_xNext := c_xmarg
+	v_yNext := v_OutVarTemp1Y + v_OutVarTemp1H + c_ymarg
+	v_wNext := v_WB1
+	GuiControl, Move, % IdMoveLibs_B1, % "x" v_xNext "y" v_yNext "w" v_wNext
+	
+	v_xNext := c_xmarg + v_WB1 + v_DB
+	v_wNext := v_WB2
+	GuiControl, Move, % IdMoveLibs_B2, % "x" v_xNext "y" v_yNext "w" v_wNext
+	
+	for key, value in ini_LoadLib
+		if (value)
+			LV_Add("", key)
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_MoveList() ;tu jestem
+{
+	global	;assume-global mode
+	local 	v_SelectedRow := 0
+			,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+			,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+			,NewWinPosX := 0, NewWinPosY := 0
+	
+	Gui, HS3Search: Submit, NoHide 
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	F_GuiMoveLibs_CreateDetermine()
+	Gui, MoveLibs: Show, Hide
+	
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . MoveLibsHwnd
+	DetectHiddenWindows, Off
+	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+	
+	Gui, HS3Search: Default
+	v_SelectedRow := LV_GetNext()
+	if !(v_SelectedRow) 
+	{
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
+		Return
+	}
+	LV_GetText(FileName,		v_SelectedRow, 1)
+	LV_GetText(Triggerstring, 	v_SelectedRow, 2)
+	
+	Gui, MoveLibs: Show, % "AutoSize" . A_Space . "X" . NewWinPosX . A_Space . "Y" . NewWinPosY
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HSLV2() ;load content of chosen row from Search Gui into HS3 Gui
 {
 	global	;assume-global mode
@@ -952,10 +1040,14 @@ F_SearchPhrase()
 F_Searching()
 {
 	global	;assume-global mode
+	local	Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+			,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+			,NewWinPosX := 0, NewWinPosY := 0
+	;*[One]
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
 	Gui, HS3Search: Default
-	if (v_HS3SearchFlag) ;This flag is used to spare redrawing of the Gui content if it already exists.
-		Gui, HS3Search: Show, % "W" HS3MinWidth "H" HS3MinHeight . A_Space . "Center"
-	else ;HS3Search Gui was never yet filled with data
+	
+	if (!v_HS3SearchFlag) ;This flag is used to spare redrawing of the Gui content if it already exists.
 	{
 		Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
 		{
@@ -963,9 +1055,10 @@ F_Searching()
 		}
 		LV_ModifyCol(2, "Sort") ;by default: triggerstring
 		v_HS3SearchFlag := 1
-		Gui, HS3Search: Show, % "W" HS3MinWidth "H" HS3MinHeight . A_Space . "Center"
-	;Gui, SearchLoad: Destroy
 	}
+	;*[Two]
+	Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
+	Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -979,18 +1072,15 @@ F_GuiSearch_CreateObject()
 	Gui,	HS3Search: Color,	% c_WindowColor, % c_ControlColor
 		
 	;2. Prepare alll Gui objects
-	Gui,	HS3Search: Font,			% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui,	HS3Search: Font,% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT1,								% TransA["Phrase to search for:"]
 	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT2,								% TransA["Search by:"]
-	Gui,	HS3Search: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,	HS3Search: Font, % "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 	% c_FontType
 	Gui, HS3Search: Add, Edit, 		x0 y0 HwndIdSearchE1 vv_SearchTerm gF_SearchPhrase
-	;Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR1 vv_RadioGroup gSearchChange Checked, 	% TransA["Triggerstring"]
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR1 vv_RadioGroup gF_SearchPhrase Checked, % TransA["Triggerstring"]
-	;Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR2 gSearchChange, 					% TransA["Hotstring"]
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR2 gF_SearchPhrase, 					% TransA["Hotstring"]
-	;Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR3 gSearchChange, 					% TransA["Library"]
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR3 gF_SearchPhrase, 					% TransA["Library"]
-	Gui, HS3Search: Add, Button, 		x0 y0 HwndIdSearchB1 gMoveList Default Disabled,			% TransA["Move (F8)"]
+	Gui, HS3Search: Add, Button, 		x0 y0 HwndIdSearchB1 gF_MoveList Default,				% TransA["Move (F8)"]
 	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 gF_HSLV2 +AltSubmit Grid,	 		% TransA["Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment"]
 	;Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT3 0x7 vLine2						;0x7 = SS_BLACKFRAME Specifies a box with a frame drawn in the same color as the window frames. This color is black in the default color scheme.
 	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT4, 								% TransA["F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries"]
@@ -1067,7 +1157,7 @@ HS3SearchGuiSize()
 		return
 	if (A_EventInfo = 2) ;The window has been maximized.
 		return
-	;*[One]
+	
 	GuiControlGet, v_OutVarTemp1, Pos, % IdSearchLV1 
 	F_AutoXYWH("*wh", IdSearchLV1)
 	GuiControlGet, v_OutVarTemp2, Pos, % IdSearchLV1 ;Check position of ListView1 again after resizing
@@ -3336,7 +3426,6 @@ F_GuiMain_DetermineConstraints()
 	
 	v_yNext += HofText + c_ymarg
 	v_xNext := c_xmarg * 2
-	;*[Three]
 	GuiControlGet, v_OutVarTemp1, Pos, % IdCheckBox1
 	GuiControlGet, v_OutVarTemp2, Pos, % IdCheckBox3
 	GuiControlGet, v_OutVarTemp3, Pos, % IdCheckBox5
@@ -5108,210 +5197,141 @@ return
 		WinGetPos, , , UploadingWindowWidth, UploadingWindowHeight,UploadingSearch
 		DetectHiddenWindows, Off
 		Gui, SearchLoad:Show, % "x" . v_WindowX + (v_WindowWidth - UploadingWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - UploadingWindowHeight)/2, UploadingSearch
-		
-		SysGet, N, MonitorCount
-		Loop, % N
-		{
-			SysGet, Mon%A_Index%, Monitor, %A_Index%
-			W%A_Index% := Mon%A_Index%Right - Mon%A_Index%Left
-			H%A_Index% := Mon%A_Index%Bottom - Mon%A_Index%Top
-			DPI%A_Index% := round(W%A_Index%/1920*(96/A_ScreenDPI),2)	; Future: DPI := 1
-		}
-		SysGet, PrimMon, MonitorPrimary
-		if (v_SelectedMonitor == 0)
-			v_SelectedMonitor := PrimMon
-		if (WinExist("Search Hotstring"))	; I have serious doubts if those lines are useful
-		{
-			Gui, HS3Search:Hide
-		}
 */
 
 
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-MoveList:
-Gui, HS3Search:Submit, NoHide 
-If !(v_SelectedRow := LV_GetNext()) {
-	MsgBox, 0, %A_ThisLabel%, % TransA["Select a row in the list-view, please!"]
-	Return
-}
-LV_GetText(FileName,		v_SelectedRow, 1)
-LV_GetText(Triggerstring, 	v_SelectedRow, 2)
-LV_GetText(TriggOpt, 		v_SelectedRow, 3)
-LV_GetText(OutFun, 			v_SelectedRow, 4)
-LV_GetText(EnDis, 			v_SelectedRow, 5)
-If (EnDis == "En")
-	OnOff := "On"
-else if (EnDis == "Dis")
-	OnOff := "Off"
-LV_GetText(HSText, 			v_SelectedRow, 6)
-LV_GetText(v_Comment, 		v_SelectedRow, 7)
-MovedHS 		:= TriggOpt . "‖" . Triggerstring . "‖" . OutFun . "‖" . EnDis . "‖" . HSText . "‖" . v_Comment
-MovedNoOptHS 	:= "‖" . Triggerstring . "‖" . OutFun . "‖" . EnDis . "‖" . HSText . "‖" . v_Comment
-Gui, MoveLibs:New
-cntMove := -1
-Loop, %A_ScriptDir%\Libraries\*.csv
-{
-	cntMove += 1
-}
-Gui, MoveLibs:Add, Text,, % TransA["Select the target library:"]
-Gui, MoveLibs:Add, ListView, LV0x1 -Hdr r%cntMove%, Library
-Loop, %A_ScriptDir%\Libraries\*.csv
-{
-	if (SubStr(A_LoopFileName,1,StrLen(A_LoopFileName)-4) != FileName )
-	{
-		LV_Add("", A_LoopFileName)
-	}
-}
-Gui, MoveLibs:Add, Button, % "Default gMove w" . 100*DPI%v_SelectedMonitor%, % TransA["Move"]
-Gui, MoveLibs:Add, Button, % "yp x+m gCancelMove w" . 100*DPI%v_SelectedMonitor%, % TransA["Cancel"]
-Gui, MoveLibs:Show, hide, Select library
-WinGetPos, v_WindowX, v_WindowY, v_WindowWidth, v_WindowHeight, Hotstrings
-DetectHiddenWindows, On
-WinGetPos, , , SelectLibraryWindowWidth, SelectLibraryWindowHeight, Select library
-DetectHiddenWindows, Off
-Gui, MoveLibs:Show, % "x" . v_WindowX + (v_WindowWidth - SelectLibraryWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - SelectLibraryWindowHeight)/2, Select library
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-CancelMove:
-Gui, MoveLibs:Destroy
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-; This function have to be further investigated.
-Move:
-Gui, MoveLibs:Submit, NoHide
-If !(v_SelectedRow := LV_GetNext()) 
-{
-	MsgBox, 0, %A_ThisLabel%, % TransA["Select a row in the list-view, please!"] ; Future: center on current screen.
-	return
-}
-LV_GetText(TargetLib, v_SelectedRow)
-FileRead, Text, Libraries\%TargetLib%
-SectionList := StrSplit(Text, "`r`n")
-InputFile = % A_ScriptDir . "\Libraries\" . TargetLib
-LString := % "‖" . Triggerstring . "‖"
-SaveFlag := 0	; !!!
-Gui, HS3:Default
-GuiControl, Choose, v_SelectHotstringLibrary, %TargetLib%
-F_SelectLibrary()
-	;Gosub, SectionChoose
-Loop, Read, %InputFile%
-{
-	if InStr(A_LoopReadLine, LString)
-	{
-		MsgBox, 4,, % TransA["The hostring"] . A_Space . """" . Triggerstring . A_Space .  """" . TransA["exists in a file"] . A_Space . TargetLib . A_Space . TransA["Do you want to proceed?"]
-		IfMsgBox, No
-		{
-			Gui, MoveLibs:Destroy
-			return
-		}
-		LV_Modify(A_Index, "", Triggerstring, TriggOpt, OutFun, EnDis, HSText, v_Comment)
-		SaveFlag := 1
-	}
-}
-if (SaveFlag == 0)
-{
-	LV_Add("",  Triggerstring, TriggOpt, OutFun, EnDis,  HSText, v_Comment)
-	SectionList.Push(MovedHS)
-}
-LV_ModifyCol(1, "Sort")
-FileDelete, Libraries\%TargetLib%
-if (SectionList.MaxIndex() == "")
-{
-	LV_GetText(txt1, 1, 2)
-	LV_GetText(txt2, 1, 1)
-	LV_GetText(txt3, 1, 3)
-	LV_GetText(txt4, 1, 4)
-	LV_GetText(txt5, 1, 5)
-	LV_GetText(txt6, 1, 6)
-	txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-	FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
-}
-else
-{
-	Loop, % SectionList.MaxIndex()-1
-	{
-		LV_GetText(txt1, A_Index, 2)
-		LV_GetText(txt2, A_Index, 1)
-		LV_GetText(txt3, A_Index, 3)
-		LV_GetText(txt4, A_Index, 4)
-		LV_GetText(txt5, A_Index, 5)
-		LV_GetText(txt6, A_Index, 6)
-		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
-		if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
-			FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
-	}
-	LV_GetText(txt1, SectionList.MaxIndex(),2) 
-	LV_GetText(txt2, SectionList.MaxIndex(),1) 
-	LV_GetText(txt3, SectionList.MaxIndex(),3) 
-	LV_GetText(txt4, SectionList.MaxIndex(),4) 
-	LV_GetText(txt5, SectionList.MaxIndex(),5)
-	LV_GetText(txt6, SectionList.MaxIndex(),6) 
-	txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
-	FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
-}
-InputFile 	:= % A_ScriptDir . "\Libraries\" . FileName . ".csv"
-OutputFile 	:= % A_ScriptDir . "\Libraries\temp.csv"
-cntLines 		:= 0
-Loop, Read, %InputFile%
-{	
-	if !(InStr(A_LoopReadLine, LString))
-		FileAppend, % A_LoopReadLine . "`r`n", %OutputFile%, UTF-8
-	cntLines++
-}
-FileDelete, %InputFile%
-Loop, Read, %OutputFile%
-{
-	if (A_Index == 1)
-		FileAppend, % A_LoopReadLine, %InputFile%, UTF-8
-	else
-		FileAppend, % "`r`n" . A_LoopReadLine, %InputFile%, UTF-8
 	
-}
-if (cntLines == 1)
-{
-	FileAppend,, %InputFile%, UTF-8
-}
-FileDelete, %OutputFile%
-MsgBox, % TransA["Hotstring moved to the"] . A_Space . TargetLib . A_Space . TransA["file!"]
-Gui, MoveLibs:Destroy
-Gui, HS3Search:Hide	
-
-;Clearing of arrays before fill up by function F_LoadLibrariesToTables().
-a_Triggers := [] 
-a_Library			:= []
-a_TriggerOptions	:= []
-a_Hotstring		:= []
-a_OutputFunction	:= []
-a_EnableDisable	:= []
-a_Triggerstring	:= []
-a_Comment			:= []
-F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
-F_Searching()
-;return ; This line will be never reached
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-/*
-	SearchChange:
-	F_SearchPhrase()
-	GuiControl,, v_SearchTerm, %v_SearchTerm% ;Puts new contents into the control.
-	return
-*/
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-~^f::
-~^s::
-~F3::
-HS3SearchGuiEscape:
-HS3SearchGuiClose:
-Gui, HS3Search: Hide
+MoveLibsGuiEscape:
+CancelMove:
+	Gui, MoveLibs: Destroy
 return
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+; This function have to be further investigated.
+	Move:
+	Gui, MoveLibs:Submit, NoHide
+	If !(v_SelectedRow := LV_GetNext()) 
+	{
+		MsgBox, 0, %A_ThisLabel%, % TransA["Select a row in the list-view, please!"] ; Future: center on current screen.
+		return
+	}
+	LV_GetText(TargetLib, v_SelectedRow)
+	FileRead, Text, Libraries\%TargetLib%
+	SectionList := StrSplit(Text, "`r`n")
+	InputFile = % A_ScriptDir . "\Libraries\" . TargetLib
+	LString := % "‖" . Triggerstring . "‖"
+	SaveFlag := 0	; !!!
+	Gui, HS3:Default
+	GuiControl, Choose, v_SelectHotstringLibrary, %TargetLib%
+	F_SelectLibrary()
+	;Gosub, SectionChoose
+	Loop, Read, %InputFile%
+	{
+		if InStr(A_LoopReadLine, LString)
+		{
+			MsgBox, 4,, % TransA["The hostring"] . A_Space . """" . Triggerstring . A_Space .  """" . TransA["exists in a file"] . A_Space . TargetLib . A_Space . TransA["Do you want to proceed?"]
+			IfMsgBox, No
+			{
+				Gui, MoveLibs:Destroy
+				return
+			}
+			LV_Modify(A_Index, "", Triggerstring, TriggOpt, OutFun, EnDis, HSText, v_Comment)
+			SaveFlag := 1
+		}
+	}
+	if (SaveFlag == 0)
+	{
+		LV_Add("",  Triggerstring, TriggOpt, OutFun, EnDis,  HSText, v_Comment)
+		SectionList.Push(MovedHS)
+	}
+	LV_ModifyCol(1, "Sort")
+	FileDelete, Libraries\%TargetLib%
+	if (SectionList.MaxIndex() == "")
+	{
+		LV_GetText(txt1, 1, 2)
+		LV_GetText(txt2, 1, 1)
+		LV_GetText(txt3, 1, 3)
+		LV_GetText(txt4, 1, 4)
+		LV_GetText(txt5, 1, 5)
+		LV_GetText(txt6, 1, 6)
+		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
+		FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
+	}
+	else
+	{
+		Loop, % SectionList.MaxIndex()-1
+		{
+			LV_GetText(txt1, A_Index, 2)
+			LV_GetText(txt2, A_Index, 1)
+			LV_GetText(txt3, A_Index, 3)
+			LV_GetText(txt4, A_Index, 4)
+			LV_GetText(txt5, A_Index, 5)
+			LV_GetText(txt6, A_Index, 6)
+			txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
+			if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == ""))
+				FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
+		}
+		LV_GetText(txt1, SectionList.MaxIndex(),2) 
+		LV_GetText(txt2, SectionList.MaxIndex(),1) 
+		LV_GetText(txt3, SectionList.MaxIndex(),3) 
+		LV_GetText(txt4, SectionList.MaxIndex(),4) 
+		LV_GetText(txt5, SectionList.MaxIndex(),5)
+		LV_GetText(txt6, SectionList.MaxIndex(),6) 
+		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6
+		FileAppend, %txt%, Libraries\%TargetLib%, UTF-8
+	}
+	InputFile 	:= % A_ScriptDir . "\Libraries\" . FileName . ".csv"
+	OutputFile 	:= % A_ScriptDir . "\Libraries\temp.csv"
+	cntLines 		:= 0
+	Loop, Read, %InputFile%
+	{	
+		if !(InStr(A_LoopReadLine, LString))
+			FileAppend, % A_LoopReadLine . "`r`n", %OutputFile%, UTF-8
+		cntLines++
+	}
+	FileDelete, %InputFile%
+	Loop, Read, %OutputFile%
+	{
+		if (A_Index == 1)
+			FileAppend, % A_LoopReadLine, %InputFile%, UTF-8
+		else
+			FileAppend, % "`r`n" . A_LoopReadLine, %InputFile%, UTF-8
+		
+	}
+	if (cntLines == 1)
+	{
+		FileAppend,, %InputFile%, UTF-8
+	}
+	FileDelete, %OutputFile%
+	MsgBox, % TransA["Hotstring moved to the"] . A_Space . TargetLib . A_Space . TransA["file!"]
+	Gui, MoveLibs:Destroy
+	Gui, HS3Search:Hide	
+	
+;Clearing of arrays before fill up by function F_LoadLibrariesToTables().
+	a_Triggers := [] 
+	a_Library			:= []
+	a_TriggerOptions	:= []
+	a_Hotstring		:= []
+	a_OutputFunction	:= []
+	a_EnableDisable	:= []
+	a_Triggerstring	:= []
+	a_Comment			:= []
+	F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
+	F_Searching()
+;return ; This line will be never reached
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	~^f::
+	~^s::
+	~F3::
+	HS3SearchGuiEscape:
+	HS3SearchGuiClose:
+	Gui, HS3Search: Hide
+	return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
@@ -5335,12 +5355,6 @@ return
 	ini_Undo := !(ini_Undo)
 	IniWrite, %ini_Undo%, Config.ini, Configuration, UndoHotstring
 	return
-	
-; F11::
-;	IniRead, Undo, Config.ini, Configuration, UndoHotstring
-;	Undo := !(Undo)
-;	IniWrite, %Undo%, Config.ini, Configuration, UndoHotstring
-; return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
