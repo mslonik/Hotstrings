@@ -717,7 +717,7 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if WinExist("Hotstrings") and WinExist("ahk_class AutoHotkeyGUI") ; the following hotkeys will be active only if Hotstrings windows exist at the moment.
+#if WinExist(SubStr(A_ScriptName, 1, -4)) and WinExist("ahk_class AutoHotkeyGUI") ; the following hotkeys will be active only if Hotstrings windows exist at the moment.
 
 ~^c::			; copy to edit field "Enter hotstring" content of Clipboard.
 Sleep, %ini_Delay%
@@ -725,7 +725,7 @@ ControlSetText, Edit2, %Clipboard%
 return
 #if
 
-#if WinActive("Hotstrings") and WinActive("ahk_class AutoHotkeyGUI") ; the following hotkeys will be active only if Hotstrings windows are active at the moment. 
+#if WinActive(SubStr(A_ScriptName, 1, -4)) and WinActive("ahk_class AutoHotkeyGUI") ; the following hotkeys will be active only if Hotstrings windows are active at the moment. 
 
 F1::	;new thread starts here
 F_WhichGui()
@@ -773,7 +773,6 @@ return
 
 F8::	;new thread starts here
 Gui, HS3:Default
-;goto, Delete
 F_DeleteHotstring()
 return
 
@@ -806,15 +805,11 @@ ToolTip,
 v_InputString := ""
 return
 
-
-#if WinActive("Search Hotstrings") and WinActive("ahk_class AutoHotkeyGUI")
-
+#if WinActive(TransA["Search Hotstrings"]) and WinActive("ahk_class AutoHotkeyGUI")
 F8:: ;new thread starts here
 Gui, HS3Search: Default
 F_MoveList()
 #if
-
-
 
 #IfWinActive Hotstring listbox
 ~1::
@@ -914,7 +909,7 @@ F_GuiMoveLibs_CreateDetermine()
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_MoveList() ;tu jestem
+F_MoveList() 
 {
 	global	;assume-global mode
 	local 	v_SelectedRow := 0
@@ -938,12 +933,12 @@ F_MoveList() ;tu jestem
 	if !(v_SelectedRow) 
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
-		Return
+		return
 	}
-	LV_GetText(FileName,		v_SelectedRow, 1)
-	LV_GetText(Triggerstring, 	v_SelectedRow, 2)
+	;LV_GetText(FileName,		v_SelectedRow, 1)
+	LV_GetText(v_Triggerstring, 	v_SelectedRow, 2)
 	
-	Gui, MoveLibs: Show, % "AutoSize" . A_Space . "X" . NewWinPosX . A_Space . "Y" . NewWinPosY
+	Gui, MoveLibs: Show, % "AutoSize" . A_Space . "X" . NewWinPosX . A_Space . "Y" . NewWinPosY . A_Space . "yCenter"
 	return
 }
 
@@ -997,41 +992,41 @@ F_SearchPhrase()
 	Switch v_RadioGroup
 	{
 		Case 1:
-		For Each, FileName in a_Triggerstring
-		{
-			if (v_SearchTerm)
+			For Each, FileName in a_Triggerstring
 			{
-				if (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start ;for overall matching without = 1
+				if (v_SearchTerm)
+				{
+					if (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start ;for overall matching without = 1
+						LV_Add("", a_Library[A_Index], FileName, a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+				}
+				else
 					LV_Add("", a_Library[A_Index], FileName, a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
 			}
-			else
-				LV_Add("", a_Library[A_Index], FileName, a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
-		}
-		LV_ModifyCol(2,"Sort") 	
+			LV_ModifyCol(2,"Sort") 	
 		Case 2:
-		For Each, FileName in a_Hotstring
-		{
-			if (v_SearchTerm)
+			For Each, FileName in a_Hotstring
 			{
-				if (InStr(FileName, v_SearchTerm) = 1) ; for overall matching
+				if (v_SearchTerm)
+				{
+					if (InStr(FileName, v_SearchTerm) = 1) ; for overall matching
+						LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], FileName, a_Comment[A_Index])
+				}
+				else
 					LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], FileName, a_Comment[A_Index])
 			}
-			else
-				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], FileName, a_Comment[A_Index])
-		}
-		LV_ModifyCol(6, "Sort")	
+			LV_ModifyCol(6, "Sort")	
 		Case 3:
-		For Each, FileName in a_Library
-		{
-			if (v_SearchTerm)
+			For Each, FileName in a_Library
 			{
-				if (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
+				if (v_SearchTerm)
+				{
+					if (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
+						LV_Add("", FileName, a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+				}
+				else
 					LV_Add("", FileName, a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
 			}
-			else
-				LV_Add("", FileName, a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
-		}
-		LV_ModifyCol(1,"Sort")
+			LV_ModifyCol(1,"Sort")
 	}
 	GuiControl, +Redraw, % IdSearchLV1 ;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
 	return
@@ -1043,7 +1038,7 @@ F_Searching()
 	local	Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
 			,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 			,NewWinPosX := 0, NewWinPosY := 0
-	;*[One]
+
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
 	Gui, HS3Search: Default
 	
@@ -1056,7 +1051,6 @@ F_Searching()
 		LV_ModifyCol(2, "Sort") ;by default: triggerstring
 		v_HS3SearchFlag := 1
 	}
-	;*[Two]
 	Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
 	Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
 	return
@@ -5210,45 +5204,75 @@ return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-; This function have to be further investigated.
-	Move:
-	Gui, MoveLibs:Submit, NoHide
+;tu jestem
+Move:
+
+	Gui, MoveLibs: Submit, NoHide
 	If !(v_SelectedRow := LV_GetNext()) 
 	{
-		MsgBox, 0, %A_ThisLabel%, % TransA["Select a row in the list-view, please!"] ; Future: center on current screen.
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
 		return
-	}
-	LV_GetText(TargetLib, v_SelectedRow)
-	FileRead, Text, Libraries\%TargetLib%
-	SectionList := StrSplit(Text, "`r`n")
-	InputFile = % A_ScriptDir . "\Libraries\" . TargetLib
-	LString := % "‖" . Triggerstring . "‖"
-	SaveFlag := 0	; !!!
-	Gui, HS3:Default
-	GuiControl, Choose, v_SelectHotstringLibrary, %TargetLib%
+}
+	;LV_GetText(TargetLib, v_SelectedRow)
+
+	;FileRead, Text, Libraries\%TargetLib%
+	;SectionList := StrSplit(Text, "`r`n")
+	;InputFile = % A_ScriptDir . "\Libraries\" . TargetLib
+	;LString := % "‖" . Triggerstring . "‖"
+	;SaveFlag := 0	; !!!
+	LV_GetText(v_SelectHotstringLibrary, v_SelectedRow)
+	;v_SelectHotstringLibrary := v_Temp1
+	Gui, MoveLibs: Destroy
+	Gui, HS3Search: Hide	
+	;Gui, HS3: Default
+	;GuiControl, Choose, v_SelectHotstringLibrary, %TargetLib%
 	F_SelectLibrary()
-	;Gosub, SectionChoose
-	Loop, Read, %InputFile%
-	{
-		if InStr(A_LoopReadLine, LString)
+	;Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
+	;Gui, ListView, % IdListView1 ; identify which ListView
+	;*[One]
+Loop, % LV_GetCount()
+{
+		v_Temp2 := LV_GetText(v_Temp1, A_Index, 1)
+		if (v_Temp1 == v_TriggerString)
 		{
-			MsgBox, 4,, % TransA["The hostring"] . A_Space . """" . Triggerstring . A_Space .  """" . TransA["exists in a file"] . A_Space . TargetLib . A_Space . TransA["Do you want to proceed?"]
+			MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["The hostring"] . "`n`n" . Triggerstring . "`n`n" . TransA["exists in a file"] . A_Space . TargetLib . A_Space 
+				. TransA["Do you want to proceed?"]
+			IfMsgBox, Yes
+				LV_Add("",  Triggerstring, TriggOpt, OutFun, EnDis,  HSText, v_Comment)
 			IfMsgBox, No
-			{
-				Gui, MoveLibs:Destroy
 				return
-			}
-			LV_Modify(A_Index, "", Triggerstring, TriggOpt, OutFun, EnDis, HSText, v_Comment)
-			SaveFlag := 1
 		}
 	}
-	if (SaveFlag == 0)
-	{
-		LV_Add("",  Triggerstring, TriggOpt, OutFun, EnDis,  HSText, v_Comment)
-		SectionList.Push(MovedHS)
-	}
-	LV_ModifyCol(1, "Sort")
-	FileDelete, Libraries\%TargetLib%
+	
+	/*
+		Loop, Read, %InputFile%
+		{
+			if InStr(A_LoopReadLine, LString)
+			{
+				MsgBox, 4,, % TransA["The hostring"] . "`n`n" . Triggerstring . "`n`n" . TransA["exists in a file"] . A_Space . TargetLib . A_Space . TransA["Do you want to proceed?"]
+				IfMsgBox, No
+				{
+					Gui, MoveLibs:Destroy
+					return
+				}
+				LV_Modify(A_Index, "", Triggerstring, TriggOpt, OutFun, EnDis, HSText, v_Comment)
+				SaveFlag := 1
+			}
+		}
+		if (SaveFlag == 0)
+		{
+			LV_Add("",  Triggerstring, TriggOpt, OutFun, EnDis,  HSText, v_Comment)
+			SectionList.Push(MovedHS)
+		}
+	*/
+	;*[Two]	
+	;LV_ModifyCol(1, "Sort")
+	;dotąd
+	LV_Add("",  Triggerstring, TriggOpt, OutFun, EnDis,  HSText, v_Comment)
+	
+	FileDelete, Libraries\%v_SelectHotstringLibrary%
+	;i teraz zapis do pliku
+	
 	if (SectionList.MaxIndex() == "")
 	{
 		LV_GetText(txt1, 1, 2)
@@ -5307,8 +5331,6 @@ return
 	}
 	FileDelete, %OutputFile%
 	MsgBox, % TransA["Hotstring moved to the"] . A_Space . TargetLib . A_Space . TransA["file!"]
-	Gui, MoveLibs:Destroy
-	Gui, HS3Search:Hide	
 	
 ;Clearing of arrays before fill up by function F_LoadLibrariesToTables().
 	a_Triggers := [] 
@@ -5678,5 +5700,6 @@ return
 		else
 			Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
 	}
-	MsgBox, % TransA["Application language changed to:"] . A_Space . SubStr(v_Language, 1, StrLen(v_Language)-4) . "`n" . TransA["The application will be reloaded with the new language file."]
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Application language changed to:"] . A_Space 
+		. SubStr(v_Language, 1, -4) . "`n`n" . TransA["The application will be reloaded with the new language file."]
 	Reload
