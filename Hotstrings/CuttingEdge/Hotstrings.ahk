@@ -35,7 +35,6 @@ global v_PreviousMonitor 		:= A_Args[8]
 
 global v_TotalHotstringCnt 		:= 0
 global v_LibHotstringCnt			:= 0 ;no of (triggerstring, hotstring) definitions in single library
-global a_LibraryCnt				:= [] ;Hotstring counter for specific libraries
 
 global a_SelectedTriggers 		:= []
 global a_Triggers 				:= []
@@ -471,7 +470,7 @@ Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	F_
 F_RefreshListOfLibraryTips()
 
 Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],		L_ImportLibrary
-Menu, LibrariesSubmenu, Disable, % TransA["Import from .ahk to .csv"]
+;Menu, LibrariesSubmenu, Disable, % TransA["Import from .ahk to .csv"]
 Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  			L_ExportLibraryStatic
 Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  			L_ExportLibraryDynamic
 Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],		:ExportSubmenu
@@ -760,12 +759,12 @@ F_ToggleSandbox()
 return
 
 F7:: ;new thread starts here
-Gui, HS3:Default
+Gui, HS3: Default
 F_GuiHSdelay()
 return
 
 F8::	;new thread starts here
-Gui, HS3:Default
+Gui, HS3: Default
 F_DeleteHotstring()
 return
 
@@ -863,7 +862,6 @@ F_Move()
 	Gui, MoveLibs: Destroy
 	Gui, HS3Search: Hide	
 	F_SelectLibrary()
-	;*[One]
 	Loop, % LV_GetCount()
 	{
 		v_Temp2 := LV_GetText(v_Temp1, A_Index, 1)
@@ -897,7 +895,6 @@ F_Move()
 		if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == "")) ;only not empty definitions are added, not sure why
 			FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
 	}
-	;*[Two]	
 	F_SelectLibrary() ;Remove the definition from source table / file.
 	Loop, % LV_GetCount()
 	{
@@ -908,7 +905,6 @@ F_Move()
 			break
 		}
 	}
-	;*[Three]	
 	FileDelete, Libraries\%v_SourceLibrary%	;delete the old source filename.
 	Loop, % LV_GetCount() ;Saving the same filename but now without deleted (triggerstring, hotstring) definition.
 	{
@@ -922,7 +918,6 @@ F_Move()
 		if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == "")) ;only not empty definitions are added, not sure why
 			FileAppend, %txt%, Libraries\%v_SourceLibrary%, UTF-8
 	}
-	;*[Four]
 	F_Clear()
 	F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
 	F_Searching("ReloadAndView")
@@ -1121,7 +1116,7 @@ F_Searching(ReloadListView*)
 	local	Window1X := 0, 	Window1Y := 0, 	Window1W := 0, 	Window1H := 0
 			,Window2X := 0, 	Window2Y := 0, 	Window2W := 0, 	Window2H := 0
 			,NewWinPosX := 0, 	NewWinPosY := 0
-	;*[One]
+	
 	Switch ReloadListView[1]
 	{
 		Case "ReloadAndView":
@@ -1751,6 +1746,7 @@ F_SelectLibrary()
 		Gui, HS3: Submit, NoHide
 	}
 	if (A_DefaultGui = "HS4")
+	
 		Gui, HS4: Submit, NoHide
 	
 	GuiControl, Enable, % IdButton4 ; button Delete hotstring (F8)
@@ -2584,7 +2580,7 @@ Caret 												= Caret
 Case Sensitive (C) 										= Case Sensitive (C)
 Change Language 										= Change Language
 Choose existing hotstring library file before saving! 			= Choose existing hotstring library file before saving!
-Choose library file (.ahk) for import 						= Choose library file (.ahk) for import
+Choose (.ahk) file containing (triggerstring, hotstring) definitions for import	= Choose (.ahk) file containing (triggerstring, hotstring) definitions for import
 Choose library file (.csv) for export 						= Choose library file (.csv) for export
 Choose menu position 									= Choose menu position
 Choose sending function! 								= Choose sending function!
@@ -2604,7 +2600,10 @@ Compressed executable (mpress.exe)							= Compressed executable (mpress.exe)
 Config.ini wasn't found. The default Config.ini is now created in location: = Config.ini wasn't found. The default Config.ini is now created in location:
 Config.ini will be deleted. Next application will be reloaded. This action cannot be undone. Are you sure? = Config.ini will be deleted. Next application will be reloaded. This action cannot be undone. Are you sure?
 Configuration 											= &Configuration
-Continue reading the library file? If you answer ""No"" then application will exit! = Continue reading the library file?`nIf you answer ""No"" then application will exit!
+Continue reading the library file? If you answer ""No"" then application will exit! = Continue reading the library file? If you answer ""No"" then application will exit!
+Conversion of .ahk file into new .csv file (library) and import of that new library = Conversion of .ahk file into new .csv file (library) and import of that new library
+Conversion of .ahk file into new .csv file (library). Please wait... = Conversion of .ahk file into new .csv file (library). Please wait...
+Converted												= Converted
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
 Do you want to proceed? 									= Do you want to proceed?
 Cursor 												= Cursor
@@ -2673,18 +2672,18 @@ Library name:											= Library name:
 Library export. Please wait... 							= Library export. Please wait...
 Library has been exported. 								= Library has been exported.
 Library has been imported. 								= Library has been imported.
-Library import. Please wait... 							= Library import. Please wait...
 Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment = Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment
 Light (default)										= Light (default)
 Loaded hotstrings: 										= Loaded hotstrings:
 Loading hotstrings from libraries... 						= Loading hotstrings from libraries...
-Loading libraries. Please wait... 							= Loading libraries. Please wait...
+Loading imported library. Please wait...					= Loading imported library. Please wait...
 Minus - 												= Minus -
 Move (F8)												= Move (F8)
 No Backspace (B0) 										= No Backspace (B0)
 No End Char (O) 										= No End Char (O)
 No libraries have been found!								= No libraries have been found!
 Number of characters for tips 							= &Number of characters for tips
+of													= of
 OK													= &OK
 Opening Curly Bracket { 									= Opening Curly Bracket {
 Opening Round Bracket ( 									= Opening Round Bracket (
@@ -2742,6 +2741,7 @@ This line do not comply to format required by this application.  = This line do 
 This option is valid 									= In case you observe some hotstrings aren't pasted from clipboard increase this value. `nThis option is valid for CL and MCL hotstring output functions. 
 Toggle EndChars	 									= &Toggle EndChars
 Total:												= Total:
+(triggerstring, hotstring) definitions						= (triggerstring, hotstring) definitions
 Triggerstring 											= Triggerstring
 Triggerstring tips 										= &Triggerstring tips
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
@@ -3007,23 +3007,23 @@ F_GuiMain_CreateObject()
 ;-DPIScale doesn't work in Microsoft Windows 10
 ;+Border doesn't work in Microsoft Windows 10
 ;OwnDialogs
-	Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs -MaximizeBox, % SubStr(A_ScriptName, 1, -4)
-	Gui, 		HS3: Margin,	% c_xmarg, % c_ymarg
-	Gui,			HS3: Color,	% c_WindowColor, % c_ControlColor
+	Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs -MaximizeBox, 						% SubStr(A_ScriptName, 1, -4)
+	Gui, 		HS3: Margin,		% c_xmarg, % c_ymarg
+	Gui,			HS3: Color,		% c_WindowColor, % c_ControlColor
 	
 ;2. Prepare all text objects according to mock-up.
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText1, 										% TransA["Enter triggerstring"]
 	;GuiControl, 	Hide, 		% IdText1
 	
-	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString 
 	;GuiControl,	Hide,		% IdEdit1
-	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText2, % TransA["Total:"]
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText12, % A_Space . A_Space . A_Space . A_Space . "0"
-	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
 	Gui, 		HS3: Add, 		CheckBox, 	x0 y0 HwndIdCheckBox1 gF_Checkbox vv_OptionImmediateExecute,	% TransA["Immediate Execute (*)"]
 ;GuiControl,	Hide,		% IdCheckBox1
@@ -3039,22 +3039,22 @@ F_GuiMain_CreateObject()
 ;GuiControl,	Hide,		% IdCheckBox6
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui,			HS3: Add,		GroupBox, 	x0 y0 HwndIdGroupBox1, 									% TransA["Select trigger option(s)"]
-	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Add,		GroupBox, 	x0 y0 HwndIdGroupBox1, 										% TransA["Select trigger option(s)"]
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 ;GuiControl,	Hide,		% IdGroupBox1
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText3 vv_TextSelectHotstringsOutFun, 			% TransA["Select hotstring output function"]
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText3 vv_TextSelectHotstringsOutFun, 				% TransA["Select hotstring output function"]
 ;GuiControl,	Hide,		% IdText3
-	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
+	Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 			SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
 ;GuiControl,	Hide,		% IdDDL1
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText4 vv_TextEnterHotstring, 				% TransA["Enter hotstring"]
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText4 vv_TextEnterHotstring, 					% TransA["Enter hotstring"]
 ;GuiControl,	Hide,		% IdText4
-	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
 	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit2 vv_EnterHotstring
 ;GuiControl,	Hide,		% IdEdit2
@@ -3072,27 +3072,27 @@ F_GuiMain_CreateObject()
 ;GuiControl,	Hide,		% IdEdit8
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText5 vv_TextAddComment, 					% TransA["Add comment (optional)"]
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText5 vv_TextAddComment, 						% TransA["Add comment (optional)"]
 ;GuiControl,	Hide,		% IdText5
-	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
 	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit9 vv_Comment Limit64 
 ;GuiControl,	Hide,		% IdEdit9
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText6 vv_TextSelectHotstringLibrary, 			% TransA["Select hotstring library"]
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText6 vv_TextSelectHotstringLibrary, 				% TransA["Select hotstring library"]
 ;GuiControl,	Hide,		% IdText6
-	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton1 gF_GuiAddLibrary, 							% TransA["Add library"]
+	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton1 gF_GuiAddLibrary, 						% TransA["Add library"]
 ;GuiControl,	Hide,		% IdButton1
 	Gui,			HS3: Add,		DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SelectLibrary Sort
 ;GuiControl,	Hide,		% IdDDL2
 	
 ;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
-	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton2 gF_SetHotstring,						% TransA["Set hotstring (F9)"]
+	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton2 gF_SetHotstring,							% TransA["Set hotstring (F9)"]
 ;GuiControl,	HideSet% IdButton2
-	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton3 gF_Clear,							% TransA["Clear (F5)"]
+	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton3 gF_Clear,									% TransA["Clear (F5)"]
 ;GuiControl,	Hide,		% IdButton3
 	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton4 gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
 ;GuiControl,	Hide,		% IdButton4
@@ -4532,10 +4532,8 @@ F_SortArrayAlphabetically(a_array)
 F_SortHotstringsAlphabetically(filename)
 {
 	local v_Text, v_Text2, a_TempArray, a_TriggerArray, line, v_Trigger, a_TriggerArray, a_SortedTriggers, a_SortedHotstrings, cnt, no, v_AscTrigger, v_AscArray, flag, v_ActualArray, v_TempArray
-	a_TempArray := []
-	a_TriggerArray := []
-	a_SortedTriggers := []
-	a_SortedHotstrings := []
+	,a_TempArray := [], a_TriggerArray := [], a_SortedTriggers := [], a_SortedHotstrings := []
+
 	Loop
 	{
 		FileReadLine, line, %filename%, %A_Index%
@@ -4654,65 +4652,79 @@ F_SortArrayByLength(a_array)
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_ImportLibrary(filename)
+F_ImportLibrary(filename) ;tu jestem
 {
-	static MyProgress, MyText
-	;global v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight
-	global
-	local line := ""
+	global	;assume-global mode
+	local IdImport_P1 := 0, IdImport_T1 := 0
+		,HS3GuiWinX := 0, HS3GuiWinY := 0, HS3GuiWinW := 0, HS3GuiWinH := 0
+		,ImportGuiWinW := 0, ImportGuiWinH := 0
+		,v_OutputFile := "", OutFileName := "", OutNameNoExt := ""
+		,v_TotalLines := 0, line := "", v_Progress := 0
+		,a_Hotstring := [], v_Options := "", v_Trigger := "", v_Hotstring := ""
+	;static MyProgress, MyText
 	
-	Gui, Import:New, -Border
-	Gui, Import:Add, Progress, w200 h20 cBlue vMyProgress, 0
-	Gui, Import:Add,Text,w200 vMyText, % TransA["Library import. Please wait..."]
-	Gui, Import:Show, hide, Import
-	WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
+	Gui, Import: New, 	-Border +HwndImportGuiHwnd +Owner +OwnDialogs, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space 
+		. TransA["Conversion of .ahk file into new .csv file (library) and loading of that new library"]
+	Gui, Import: Margin,	% c_xmarg, % c_ymarg
+	Gui,	Import: Color,	% c_WindowColor, % c_ControlColor
+	
+	;Gui, Import: Add, Progress, 	HwndIdImport_P1 w200 h20 vMyProgress cBlue, 0
+	Gui, Import: Add, Progress, 	HwndIdImport_P1 w400 h20 cBlue, 0
+	Gui, Import: Add, Text, 		HwndIdImport_T1 w400 h80, % TransA["Conversion of .ahk file into new .csv file (library). Please wait..."]
+	Gui, Import: Show, Hide
+	
+	WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd ;future: if HS4
 	DetectHiddenWindows, On
-	WinGetPos, , , ImportWindowWidth, ImportWindowHeight,Import
+	WinGetPos, , , ImportGuiWinW, ImportGuiWinH, % "ahk_id" . ImportGuiHwnd
 	DetectHiddenWindows, Off
-	Gui, Import:Show,% "x" . v_WindowX + (v_WindowWidth - ImportWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - ImportWindowHeight)/2 ,Import
-	SplitPath, filename, ShortFileName
-	v_OutputFile := % A_ScriptDir . "\Libraries\" . SubStr(ShortFileName, 1, StrLen(ShortFileName)-3) . "csv"
-	Loop,
+	Gui, Import: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ImportGuiWinW)/2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ImportGuiWinH)/2 . A_Space . "AutoSize"
+	
+	SplitPath, filename, OutFileName,,, OutNameNoExt
+	v_OutputFile := % A_ScriptDir . "\Libraries\" . OutNameNoExt . ".csv"
+	
+	Loop
 	{
-		If FileExist(v_OutputFile) and (A_Index == 1)
-			v_OutputFile := % SubStr(v_OutputFile, 1, StrLen(v_OutputFile)-4) . "_(" . A_Index . ").csv"
+		if (FileExist(v_OutputFile) and (A_Index = 1))
+			v_OutputFile := % SubStr(v_OutputFile, 1, -4) . "(" . A_Index . ").csv"
 		else if FileExist(v_OutputFile) and (A_Index != 1)
 			v_OutputFile := % SubStr(v_OutputFile, 1, InStr(v_OutputFile, "(" ,,0,1)) . A_Index . ").csv" 
 		else
 			break
 	}
+	
 	Loop, Read, %filename%
-	{
 		v_TotalLines := A_Index
-	}
 	FileAppend,, %v_OutputFile%, UTF-8
+	
 	Loop
 	{
 		FileReadLine, line, %filename%, %A_Index%
 		if ErrorLevel
 			break  
-		a_Hotstring := StrSplit(line, ":")
-		v_Options := a_Hotstring[2]
-		v_Trigger := a_Hotstring[3]
-		v_Hotstring := a_Hotstring[5]
-		if (A_Index == 1)
+		a_Hotstring 	:= StrSplit(line, ":")
+		v_Options 	:= a_Hotstring[2]
+		v_Trigger 	:= a_Hotstring[3]
+		v_Hotstring 	:= a_Hotstring[5]
+		if (A_Index = 1)
 			FileAppend, % v_Options . "‖" . v_Trigger . "‖SI‖En‖" . v_Hotstring  . "‖", %v_OutputFile%, UTF-8
 		else
 			FileAppend, % "`n" . v_Options . "‖" . v_Trigger . "‖SI‖En‖" . v_Hotstring  . "‖", %v_OutputFile%, UTF-8
-		v_Progress := (A_Index/v_TotalLines)*100
-		GuiControl,, MyProgress, %v_Progress%
-		GuiControl,, MyText, % "Imported " . A_Index . " of " . v_TotalLines . " hotstrings"
+		v_Progress := Round((A_Index / v_TotalLines) * 100)
+		GuiControl,, % IdImport_P1, % v_Progress
+		GuiControl,, % IdImport_T1, % TransA["Converted"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
+			. A_Space . "(" . v_Progress . A_Space . "%" . ")"
 	}
-	F_SortHotstringsAlphabetically(v_OutputFile)
-	GuiControl,, MyText, % TransA["Loading libraries. Please wait..."]
-	a_Triggers := []
-	;F_LoadHotstringsFromLibraries()
-	Gui, HS3:Default
-	GuiControl, , v_SelectHotstringLibrary, |
-	Loop,%A_ScriptDir%\Libraries\*.csv
-		GuiControl, , v_SelectHotstringLibrary, %A_LoopFileName%
-	Gui, Import:Destroy
-	MsgBox, % TransA["Library has been imported."]
+	F_SortHotstringsAlphabetically(v_OutputFile) ;future: add progress bar also for sorting; trick with sorting within ListView?
+	GuiControl,, % IdImport_T1, % TransA["Loading of new library. Please wait..."]
+	
+	F_ValidateIniLibSections()
+	F_RefreshListOfLibraries()
+	F_RefreshListOfLibraryTips()
+	F_UpdateSelHotLibDDL()
+	;*[One]
+	F_LoadFile(OutNameNoExt . ".csv")
+	Gui, Import: Destroy
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been imported."]
 	return
 }
 
@@ -5224,7 +5236,7 @@ F_Clear()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ALibOK:
-Gui, ALib:Submit, NoHide
+Gui, ALib: Submit, NoHide
 if (v_NewLib == "")
 {
 	MsgBox, % TransA["Enter a name for the new library"]
@@ -5627,8 +5639,9 @@ if WinExist("Hotstrings") and WinExist("ahk_class AutoHotkeyGUI")
 	IniWrite, %ini_MenuSound%, Config.ini, Configuration, MenuSound
 	return
 	
-	L_ImportLibrary:
-	FileSelectFile, v_LibraryName, 3, %A_ScriptDir%, % TransA["Choose library file (.ahk) for import"], AHK Files (*.ahk)]
+	L_ImportLibrary: ;The label subroutine is run as a new thread when the user selects the menu item 
+	F_WhichGui()
+	FileSelectFile, v_LibraryName, 3, %A_ScriptDir%, % TransA["Choose (.ahk) file containing (triggerstring, hotstring) definitions for import"], AutoHotkey (*.ahk)
 	if !(v_LibraryName == "")
 		F_ImportLibrary(v_LibraryName)
 	return
