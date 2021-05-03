@@ -32,18 +32,14 @@ global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert image.png -alpha o
 global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user
 global v_SelectedRow 			:= A_Args[7]
 global v_PreviousMonitor 		:= A_Args[8]
-global a_Comment 				:= []
-global a_EnableDisable 			:= []
-global a_Hotstring				:= []
-global a_Library 				:= []
+
 global v_TotalHotstringCnt 		:= 0
 global v_LibHotstringCnt			:= 0 ;no of (triggerstring, hotstring) definitions in single library
 global a_LibraryCnt				:= [] ;Hotstring counter for specific libraries
-global a_OutputFunction 			:= []
+
 global a_SelectedTriggers 		:= []
-global a_TriggerOptions 			:= []
 global a_Triggers 				:= []
-global a_Triggerstring 			:= []
+
 global ini_AmountOfCharacterTips 	:= ""
 global ini_Caret 				:= ""
 global ini_Cursor 				:= ""
@@ -55,13 +51,10 @@ global ini_Sandbox				:= 1	; as in new-created Config.ini
 global ini_Tips 				:= ""
 global ini_TipsSortAlphabetically 	:= ""
 global ini_TipsSortByLength 		:= ""
-;global v_CaseSensitiveC1 		:= ""
-;global v_BlockHotkeysFlag		:= 0
 global v_FlagSound 				:= 0
 ;I couldn't find how to get system settings for size of menu font. Quick & dirty solution: manual setting of all fonts with variable c_FontSize.
 
 global v_HotstringFlag 			:= 0
-global v_HS3SearchFlag 			:= 0
 global v_IndexLog 				:= 1
 global v_InputString 			:= ""
 global v_Language 				:= ""	; OutputVar for IniRead funtion
@@ -145,7 +138,7 @@ if (v_PreviousMonitor == "")
 else
 	v_SelectedMonitor := v_PreviousMonitor
 
-; After definitions of (triggerstring, hotstring) are uploaded to memory, prepare (System)Tray icon. If Hotstrings.ahk wasn't run with "l" parameter (standing for "light / lightweight", prepare tray menu.
+;If application wasn't run with "l" parameter (standing for "light / lightweight"), prepare tray menu.
 if !(v_Param == "l") 		;GUI window uses the tray icon that was in effect at the time the window was created, therefore this section have to be run before the first Gui, New command. 
 {
 	Menu, Tray, Add, 		% TransA["Edit Hotstring"], 		L_GUIInit
@@ -154,7 +147,6 @@ if !(v_Param == "l") 		;GUI window uses the tray icon that was in effect at the 
 	Menu, Tray, Add										; separator line
 	Menu, Tray, NoStandard									; remove all the rest of standard tray menu
 	Menu, Tray, Standard									; add it again at the bottom
-	
 	Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
 }
 
@@ -176,6 +168,7 @@ F_LoadHotstringsFromLibraries()
 
 F_GuiSearch_CreateObject()	;When all tables are full, initialize GuiSearch
 F_GuiSearch_DetermineConstraints()
+F_Searching("Reload")			;prepare content of Search tables
 ;MsgBox,, A_IsCritical, % A_IsCritical
 Critical, Off
 ;v_BlockHotkeysFlag := 0
@@ -852,8 +845,91 @@ SendRaw, % SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive
 return
 #If
 
-
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_Move()
+{
+	global	;assume-global mode
+	local v_DestinationLibrary := 0, v_Temp1 := "", v_Temp2 := ""
+		,txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
+	
+	Gui, MoveLibs: Submit, NoHide
+	v_DestinationLibrary := LV_GetNext()
+	if (!v_DestinationLibrary) 
+	{
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
+		return
+	}
+	LV_GetText(v_SelectHotstringLibrary, v_DestinationLibrary) ;destination
+	Gui, MoveLibs: Destroy
+	Gui, HS3Search: Hide	
+	F_SelectLibrary()
+	;*[One]
+	Loop, % LV_GetCount()
+	{
+		v_Temp2 := LV_GetText(v_Temp1, A_Index, 1)
+		if (v_Temp1 == v_TriggerString)
+		{
+			MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["The hostring"] . ":" . "`n`n" . v_Triggerstring . "`n`n" . TransA["exists in a file and will be now replaced."] 
+				. "`n" . v_SelectHotstringLibrary . "`n`n" . TransA["Do you want to proceed?"]
+			IfMsgBox, Yes
+			{
+				LV_Delete(A_Index)
+				LV_Add("",  v_Triggerstring, v_TriggOpt, v_OutFun, v_EnDis, v_Hotstring, v_Comment)
+			}
+			IfMsgBox, No
+				return
+		}
+	}
+	
+	LV_Add("", v_Triggerstring, v_TriggOpt, v_OutFun, v_EnDis, v_Hotstring, v_Comment) ;add to ListView
+	LV_ModifyCol(1, "Sort")
+	
+	FileDelete, Libraries\%v_SelectHotstringLibrary%	;delete the old destination file.
+	Loop, % LV_GetCount() ;Saving the same filename but now containing moved (triggerstring, hotstring) definition.
+	{
+		LV_GetText(txt1, A_Index, 2)
+		LV_GetText(txt2, A_Index, 1)
+		LV_GetText(txt3, A_Index, 3)
+		LV_GetText(txt4, A_Index, 4)
+		LV_GetText(txt5, A_Index, 5)
+		LV_GetText(txt6, A_Index, 6)
+		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
+		if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == "")) ;only not empty definitions are added, not sure why
+			FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
+	}
+	;*[Two]	
+	F_SelectLibrary() ;Remove the definition from source table / file.
+	Loop, % LV_GetCount()
+	{
+		LV_GetText(v_Temp1, A_Index, 1)
+		if (v_Temp1 == v_TriggerString)
+		{
+			LV_Delete(A_Index)
+			break
+		}
+	}
+	;*[Three]	
+	FileDelete, Libraries\%v_SourceLibrary%	;delete the old source filename.
+	Loop, % LV_GetCount() ;Saving the same filename but now without deleted (triggerstring, hotstring) definition.
+	{
+		LV_GetText(txt1, A_Index, 2)
+		LV_GetText(txt2, A_Index, 1)
+		LV_GetText(txt3, A_Index, 3)
+		LV_GetText(txt4, A_Index, 4)
+		LV_GetText(txt5, A_Index, 5)
+		LV_GetText(txt6, A_Index, 6)
+		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
+		if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == "")) ;only not empty definitions are added, not sure why
+			FileAppend, %txt%, Libraries\%v_SourceLibrary%, UTF-8
+	}
+	;*[Four]
+	F_Clear()
+	F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
+	F_Searching("ReloadAndView")
+	return 
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiMoveLibs_CreateDetermine()
 {
 	global	;assume-global mode
@@ -864,15 +940,15 @@ F_GuiMoveLibs_CreateDetermine()
 		,v_WB1 := 0,			v_WB2 := 0,			v_DB := 0
 		,key := "",			value := 0,			v_SelectedRow := 0
 
-	Gui, MoveLibs: New, -Caption +Border -Resize +HwndMoveLibsHwnd +Owner
+	Gui, MoveLibs: New, 	-Caption +Border -Resize +HwndMoveLibsHwnd +Owner
 	Gui, MoveLibs: Margin,	% c_xmarg, % c_ymarg
 	Gui,	MoveLibs: Color,	% c_WindowColor, % c_ControlColor
-	Gui,	MoveLibs: Font, % "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 	% c_FontType
+	Gui,	MoveLibs: Font, 	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 	% c_FontType
 	Gui, MoveLibs: Default
 	
 	Gui, MoveLibs: Add, Text,     x0 y0 HwndIdMoveLibs_T1, 						% TransA["Select the target library:"]
 	Gui, MoveLibs: Add, ListView, x0 y0 HwndIdMoveLibs_LV LV0x1 +AltSubmit -Hdr -Multi, 	| 	;-Hdr (minus Hdr) to omit the header (the special top row that contains column titles). "|" is required!
-	Gui, MoveLibs: Add, Button, 	x0 y0 HwndIdMoveLibs_B1 Default gMove, 				% TransA["Move (F8)"]
+	Gui, MoveLibs: Add, Button, 	x0 y0 HwndIdMoveLibs_B1 Default gF_Move,			% TransA["Move (F8)"]
 	Gui, MoveLibs: Add, Button, 	x0 y0 HwndIdMoveLibs_B2 gCancelMove, 				% TransA["Cancel"]
 	
 	v_xNext := c_xmarg
@@ -1039,27 +1115,42 @@ F_SearchPhrase()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Searching()
+F_Searching(ReloadListView*)
 {
 	global	;assume-global mode
-	local	Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
-			,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
-			,NewWinPosX := 0, NewWinPosY := 0
-
-	WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
-	Gui, HS3Search: Default
-	
-	if (!v_HS3SearchFlag) ;This flag is used to spare redrawing of the Gui content if it already exists.
+	local	Window1X := 0, 	Window1Y := 0, 	Window1W := 0, 	Window1H := 0
+			,Window2X := 0, 	Window2Y := 0, 	Window2W := 0, 	Window2H := 0
+			,NewWinPosX := 0, 	NewWinPosY := 0
+	;*[One]
+	Switch ReloadListView[1]
 	{
-		Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
-		{
-			LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
-		}
-		LV_ModifyCol(2, "Sort") ;by default: triggerstring
-		v_HS3SearchFlag := 1
+		Case "ReloadAndView":
+			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
+			Gui, HS3Search: Default
+			LV_Delete()
+			Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
+				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+			Switch v_RadioGroup
+			{
+				Case 1: LV_ModifyCol(2, "Sort") ;by default: triggerstring
+				Case 2: LV_ModifyCol(6, "Sort")
+				Case 3: LV_ModifyCol(1, "Sort")
+				;Default: LV_ModifyCol(2, "Sort")
+			}
+			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
+			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
+			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
+		Case "Reload":
+			Gui, HS3Search: Default
+			LV_Delete()
+			Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
+				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+		Case "": ;view only
+			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
+			Gui, HS3Search: Default
+			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
+			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
 	}
-	Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
-	Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1082,7 +1173,7 @@ F_GuiSearch_CreateObject()
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR2 gF_SearchPhrase, 					% TransA["Hotstring"]
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR3 gF_SearchPhrase, 					% TransA["Library"]
 	Gui, HS3Search: Add, Button, 		x0 y0 HwndIdSearchB1 gF_MoveList Default,				% TransA["Move (F8)"]
-	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 gF_HSLV2 +AltSubmit Grid,	 		% TransA["Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment"]
+	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 gF_HSLV2 +AltSubmit Grid -Multi,		% TransA["Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment"]
 	;Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT3 0x7 vLine2						;0x7 = SS_BLACKFRAME Specifies a box with a frame drawn in the same color as the window frames. This color is black in the default color scheme.
 	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT4, 								% TransA["F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries"]
 
@@ -1434,7 +1525,6 @@ F_DeleteHotstring()
 	LibraryFullPathAndName := A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary
 	FileDelete, % LibraryFullPathAndName
 	
-	
 	;4. Disable selected hotstring.
 	LV_GetText(txt2, v_SelectedRow, 2)
 	Try
@@ -1477,6 +1567,8 @@ F_DeleteHotstring()
 	GuiControl, Text, % IdText12,  % A_Space . v_TotalHotstringCnt
 	GuiControl, Text, % IdText12b, % A_Space . v_TotalHotstringCnt
 	
+	;7. Update table for searching
+	F_Searching("Reload")
 	return
 }
 
@@ -2349,6 +2441,13 @@ F_LoadHotstringsFromLibraries()
 {
 	global ; assume-global mode
 	local key := "", value := "", PriorityFlag := false
+	a_Library 				:= []
+	a_TriggerOptions 			:= []
+	a_Triggerstring 			:= []
+	a_OutputFunction 			:= []
+	a_EnableDisable 			:= []
+	a_Hotstring				:= []
+	a_Comment 				:= []
 	
 	; Prepare TrayTip message taking into account value of command line parameter.
 	if (v_Param == "d")
@@ -2535,7 +2634,7 @@ Error, something went wrong with hotstring deletion:			= Error, something went w
 ErrorLevel was triggered by NewInput error. 					= ErrorLevel was triggered by NewInput error.
 Error reading library file:								= Error reading library file:
 Exclamation Mark ! 										= Exclamation Mark !
-exists in a file 										= exists in a file
+exists in a file and will be now replaced.					= exists in a file and will be now replaced.
 Exit													= Exit
 Export from .csv to .ahk 								= &Export from .csv to .ahk
 F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries = F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries
@@ -3010,7 +3109,7 @@ F_GuiMain_CreateObject()
 	
 	Gui,			HS3:Add, 		Text, 		x0 y0 HwndIdText9, 									% TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
 ;GuiControl,	Hide,		% IdText9
-	Gui, 		HS3:Add, 		ListView, 	x0 y0 HwndIdListView1 LV0x1 vv_LibraryContent AltSubmit gF_HSLV, % TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
+	Gui, 		HS3:Add, 		ListView, 	x0 y0 HwndIdListView1 LV0x1 vv_LibraryContent AltSubmit gF_HSLV -Multi, % TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
 ;GuiControl,	Hide,		% IdListView1
 	
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
@@ -3788,6 +3887,13 @@ F_LoadLibrariesToTables()
 { 
 	global	;assume-global mode
 	local name := "", varSearch := "", tabSearch := ""
+	a_Library 				:= []
+	a_TriggerOptions 			:= []
+	a_Triggerstring 			:= []
+	a_OutputFunction 			:= []
+	a_EnableDisable 			:= []
+	a_Hotstring				:= []
+	a_Comment 				:= []
 	
 	; Prepare TrayTip message taking into account value of command line parameter.
 	if (v_Param == "d")
@@ -5200,8 +5306,6 @@ return
 		Gui, SearchLoad:Show, % "x" . v_WindowX + (v_WindowWidth - UploadingWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - UploadingWindowHeight)/2, UploadingSearch
 */
 
-
-	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 MoveLibsGuiEscape:
@@ -5210,319 +5314,243 @@ CancelMove:
 return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;tu jestem
-Move:
 
-	Gui, MoveLibs: Submit, NoHide
-	If !(v_DestinationLibrary := LV_GetNext()) 
-	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
-		return
-	}
-	LV_GetText(v_SelectHotstringLibrary, v_DestinationLibrary) ;destination
-	Gui, MoveLibs: Destroy
-	Gui, HS3Search: Hide	
-	F_SelectLibrary()
-	;*[One]
-	Loop, % LV_GetCount()
-	{
-		v_Temp2 := LV_GetText(v_Temp1, A_Index, 1)
-		if (v_Temp1 == v_TriggerString)
-		{
-			MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["The hostring"] . "`n`n" . Triggerstring . "`n`n" . TransA["exists in a file"] . A_Space . TargetLib . A_Space 
-				. TransA["Do you want to proceed?"]
-			IfMsgBox, Yes
-				LV_Add("",  v_Triggerstring, v_TriggOpt, v_OutFun, v_EnDis, v_Hotstring, v_Comment)
-			IfMsgBox, No
-				return
-		}
-}
+~^f::
+~^s::
+~F3::
+HS3SearchGuiEscape:
+HS3SearchGuiClose:
+Gui, HS3Search: Hide
+return
 
-	LV_Add("",  v_Triggerstring, v_TriggOpt, v_OutFun, v_EnDis, v_Hotstring, v_Comment) ;add to ListView
-	LV_ModifyCol(1, "Sort")
-	
-	FileDelete, Libraries\%v_SelectHotstringLibrary%	;delete the old destination file.
-	Loop, % LV_GetCount() ;Saving the same filename but now containing moved (triggerstring, hotstring) definition.
-	{
-		LV_GetText(txt1, A_Index, 2)
-		LV_GetText(txt2, A_Index, 1)
-		LV_GetText(txt3, A_Index, 3)
-		LV_GetText(txt4, A_Index, 4)
-		LV_GetText(txt5, A_Index, 5)
-		LV_GetText(txt6, A_Index, 6)
-		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
-		if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == "")) ;only not empty definitions are added, not sure why
-			FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
-	}
-	;*[Two]	
-	F_SelectLibrary() ;Remove the definition from source table / file.
-	Loop, % LV_GetCount()
-	{
-		LV_GetText(v_Temp1, A_Index, 1)
-		if (v_Temp1 == v_TriggerString)
-		{
-			LV_Delete(A_Index)
-			break
-		}
-	}
-	;*[Three]	
-	FileDelete, Libraries\%v_SourceLibrary%	;delete the old source filename.
-	Loop, % LV_GetCount() ;Saving the same filename but now containing moved (triggerstring, hotstring) definition.
-	{
-		LV_GetText(txt1, A_Index, 2)
-		LV_GetText(txt2, A_Index, 1)
-		LV_GetText(txt3, A_Index, 3)
-		LV_GetText(txt4, A_Index, 4)
-		LV_GetText(txt5, A_Index, 5)
-		LV_GetText(txt6, A_Index, 6)
-		txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
-		if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == "")) ;only not empty definitions are added, not sure why
-			FileAppend, %txt%, Libraries\%v_SourceLibrary%, UTF-8
-	}
-	;*[Four]
-	F_Clear()
-	F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
-	F_Searching()
-	return 
-	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	~^f::
-	~^s::
-	~F3::
-	HS3SearchGuiEscape:
-	HS3SearchGuiClose:
-	Gui, HS3Search: Hide
-	return
-	
+
+~F7::
+HSDelGuiEscape:
+HSDelGuiClose:
+Gui, HSDel:Destroy
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	~F7::
-	HSDelGuiEscape:
-	HSDelGuiClose:
-	Gui, HSDel:Destroy
-	return
-	
+
+MonGuiEscape:
+MonGuiClose:
+Gui, Mon:Destroy
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	MonGuiEscape:
-	MonGuiClose:
-	Gui, Mon:Destroy
-	return
-	
+
+L_Undo:
+Menu, Submenu1, ToggleCheck, % TransA["Undo the last hotstring"]
+ini_Undo := !(ini_Undo)
+IniWrite, %ini_Undo%, Config.ini, Configuration, UndoHotstring
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	L_Undo:
-	Menu, Submenu1, ToggleCheck, % TransA["Undo the last hotstring"]
-	ini_Undo := !(ini_Undo)
-	IniWrite, %ini_Undo%, Config.ini, Configuration, UndoHotstring
-	return
-	
+
+Tips:
+Menu, SubmenuTips, ToggleCheck, % TransA["Enable/Disable"]
+Menu, SubmenuTips, ToggleEnable, % TransA["Choose tips location"]
+Menu, SubmenuTips, ToggleEnable, % TransA["Number of characters for tips"]
+ini_Tips := !(ini_Tips)
+IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	Tips:
-	Menu, SubmenuTips, ToggleCheck, % TransA["Enable/Disable"]
-	Menu, SubmenuTips, ToggleEnable, % TransA["Choose tips location"]
-	Menu, SubmenuTips, ToggleEnable, % TransA["Number of characters for tips"]
-	ini_Tips := !(ini_Tips)
-	IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
-	return
-	
+
+EndSpace:
+Menu, Submenu2, ToggleCheck, % TransA["Space"]
+EndingChar_Space := !(EndingChar_Space)
+IniWrite, %EndingChar_Space%, Config.ini, Configuration, EndingChar_Space
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndSpace:
-	Menu, Submenu2, ToggleCheck, % TransA["Space"]
-	EndingChar_Space := !(EndingChar_Space)
-	IniWrite, %EndingChar_Space%, Config.ini, Configuration, EndingChar_Space
-	F_LoadEndChars()
-	return
-	
+
+EndMinus:
+Menu, Submenu2, ToggleCheck, % TransA["Minus -"]
+EndingChar_Minus := !(EndingChar_Minus)
+IniWrite, %EndingChar_Minus%, Config.ini, Configuration, EndingChar_Minus
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndMinus:
-	Menu, Submenu2, ToggleCheck, % TransA["Minus -"]
-	EndingChar_Minus := !(EndingChar_Minus)
-	IniWrite, %EndingChar_Minus%, Config.ini, Configuration, EndingChar_Minus
-	F_LoadEndChars()
-	return
-	
+
+EndORoundBracket:
+Menu, Submenu2, ToggleCheck, % TransA["Opening Round Bracket ("]
+EndingChar_ORoundBracket := !(EndingChar_ORoundBracket)
+IniWrite, %EndingChar_ORoundBracket%, Config.ini, Configuration, EndingChar_ORoundBracket
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndORoundBracket:
-	Menu, Submenu2, ToggleCheck, % TransA["Opening Round Bracket ("]
-	EndingChar_ORoundBracket := !(EndingChar_ORoundBracket)
-	IniWrite, %EndingChar_ORoundBracket%, Config.ini, Configuration, EndingChar_ORoundBracket
-	F_LoadEndChars()
-	return
-	
+
+EndCRoundBracket:
+Menu, Submenu2, ToggleCheck, % TransA["Closing Round Bracket )"]
+EndingChar_CRoundBracket := !(EndingChar_CRoundBracket)
+IniWrite, %EndingChar_CRoundBracket%, Config.ini, Configuration, EndingChar_CRoundBracket
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndCRoundBracket:
-	Menu, Submenu2, ToggleCheck, % TransA["Closing Round Bracket )"]
-	EndingChar_CRoundBracket := !(EndingChar_CRoundBracket)
-	IniWrite, %EndingChar_CRoundBracket%, Config.ini, Configuration, EndingChar_CRoundBracket
-	F_LoadEndChars()
-	return
-	
+
+EndOSquareBracket:
+Menu, Submenu2, ToggleCheck, % TransA["Opening Square Bracket ["]
+EndingChar_OSquareBracket := !(EndingChar_OSquareBracket)
+IniWrite, %EndingChar_OSquareBracket%, Config.ini, Configuration, EndingChar_OSquareBracket
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndOSquareBracket:
-	Menu, Submenu2, ToggleCheck, % TransA["Opening Square Bracket ["]
-	EndingChar_OSquareBracket := !(EndingChar_OSquareBracket)
-	IniWrite, %EndingChar_OSquareBracket%, Config.ini, Configuration, EndingChar_OSquareBracket
-	F_LoadEndChars()
-	return
-	
+
+EndCSquareBracket:
+Menu, Submenu2, ToggleCheck, % TransA["Closing Square Bracket ]"]
+EndingChar_CSquareBracket := !(EndingChar_CSquareBracket)
+IniWrite, %EndingChar_CSquareBracket%, Config.ini, Configuration, EndingChar_CSquareBracket
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndCSquareBracket:
-	Menu, Submenu2, ToggleCheck, % TransA["Closing Square Bracket ]"]
-	EndingChar_CSquareBracket := !(EndingChar_CSquareBracket)
-	IniWrite, %EndingChar_CSquareBracket%, Config.ini, Configuration, EndingChar_CSquareBracket
-	F_LoadEndChars()
-	return
-	
+
+EndOCurlyBracket:
+Menu, Submenu2, ToggleCheck, % TransA["Opening Curly Bracket {"]
+EndingChar_OCurlyBracket := !(EndingChar_OCurlyBracket)
+IniWrite, %EndingChar_OCurlyBracket%, Config.ini, Configuration, EndingChar_OCurlyBracket
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndOCurlyBracket:
-	Menu, Submenu2, ToggleCheck, % TransA["Opening Curly Bracket {"]
-	EndingChar_OCurlyBracket := !(EndingChar_OCurlyBracket)
-	IniWrite, %EndingChar_OCurlyBracket%, Config.ini, Configuration, EndingChar_OCurlyBracket
-	F_LoadEndChars()
-	return
-	
+
+EndCCurlyBracket:
+Menu, Submenu2, ToggleCheck, % TransA["Closing Curly Bracket }"]
+EndingChar_CCurlyBracket := !(EndingChar_CCurlyBracket)
+IniWrite, %EndingChar_CCurlyBracket%, Config.ini, Configuration, EndingChar_CCurlyBracket
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndCCurlyBracket:
-	Menu, Submenu2, ToggleCheck, % TransA["Closing Curly Bracket }"]
-	EndingChar_CCurlyBracket := !(EndingChar_CCurlyBracket)
-	IniWrite, %EndingChar_CCurlyBracket%, Config.ini, Configuration, EndingChar_CCurlyBracket
-	F_LoadEndChars()
-	return
-	
+
+EndColon:
+Menu, Submenu2, ToggleCheck,% TransA["Colon :"]
+EndingChar_Colon := !(EndingChar_Colon)
+IniWrite, %EndingChar_Colon%, Config.ini, Configuration, EndingChar_Colon
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndColon:
-	Menu, Submenu2, ToggleCheck,% TransA["Colon :"]
-	EndingChar_Colon := !(EndingChar_Colon)
-	IniWrite, %EndingChar_Colon%, Config.ini, Configuration, EndingChar_Colon
-	F_LoadEndChars()
-	return
-	
+
+EndSemicolon:
+Menu, Submenu2, ToggleCheck, % TransA["Semicolon `;"]
+EndingChar_Semicolon := !(EndingChar_Semicolon)
+IniWrite, %EndingChar_Semicolon%, Config.ini, Configuration, EndingChar_Semicolon
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndSemicolon:
-	Menu, Submenu2, ToggleCheck, % TransA["Semicolon `;"]
-	EndingChar_Semicolon := !(EndingChar_Semicolon)
-	IniWrite, %EndingChar_Semicolon%, Config.ini, Configuration, EndingChar_Semicolon
-	F_LoadEndChars()
-	return
-	
+
+EndApostrophe:
+Menu, Submenu2, ToggleCheck, % TransA["Apostrophe '"]
+EndingChar_Apostrophe := !(EndingChar_Apostrophe)
+IniWrite, %EndingChar_Apostrophe%, Config.ini, Configuration, EndingChar_Apostrophe
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndApostrophe:
-	Menu, Submenu2, ToggleCheck, % TransA["Apostrophe '"]
-	EndingChar_Apostrophe := !(EndingChar_Apostrophe)
-	IniWrite, %EndingChar_Apostrophe%, Config.ini, Configuration, EndingChar_Apostrophe
-	F_LoadEndChars()
-	return
-	
+
+EndQuote:
+Menu, Submenu2, ToggleCheck, % TransA["Quote """]
+EndingChar_Quote := !(EndingChar_Quote)
+IniWrite, %EndingChar_Quote%, Config.ini, Configuration, EndingChar_Quote
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndQuote:
-	Menu, Submenu2, ToggleCheck, % TransA["Quote """]
-	EndingChar_Quote := !(EndingChar_Quote)
-	IniWrite, %EndingChar_Quote%, Config.ini, Configuration, EndingChar_Quote
-	F_LoadEndChars()
-	return
-	
+
+EndSlash:
+Menu, Submenu2, ToggleCheck, % TransA["Slash /"]
+EndingChar_Slash := !(EndingChar_Slash)
+IniWrite, %EndingChar_Slash%, Config.ini, Configuration, EndingChar_Slash
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndSlash:
-	Menu, Submenu2, ToggleCheck, % TransA["Slash /"]
-	EndingChar_Slash := !(EndingChar_Slash)
-	IniWrite, %EndingChar_Slash%, Config.ini, Configuration, EndingChar_Slash
-	F_LoadEndChars()
-	return
-	
+
+EndBackslash:
+Menu, Submenu2, ToggleCheck, % TransA["Backslash \"]
+EndingChar_Backslash := !(EndingChar_Backslash)
+IniWrite, %EndingChar_Backslash%, Config.ini, Configuration, EndingChar_Backslash
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndBackslash:
-	Menu, Submenu2, ToggleCheck, % TransA["Backslash \"]
-	EndingChar_Backslash := !(EndingChar_Backslash)
-	IniWrite, %EndingChar_Backslash%, Config.ini, Configuration, EndingChar_Backslash
-	F_LoadEndChars()
-	return
-	
+
+EndComma:
+Menu, Submenu2, ToggleCheck, % TransA["Comma ,"]
+EndingChar_Comma := !(EndingChar_Comma)
+IniWrite, %EndingChar_Comma%, Config.ini, Configuration, EndingChar_Comma
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndComma:
-	Menu, Submenu2, ToggleCheck, % TransA["Comma ,"]
-	EndingChar_Comma := !(EndingChar_Comma)
-	IniWrite, %EndingChar_Comma%, Config.ini, Configuration, EndingChar_Comma
-	F_LoadEndChars()
-	return
-	
+
+EndDot:
+Menu, Submenu2, ToggleCheck, % TransA["Dot ."]
+EndingChar_Dot := !(EndingChar_Dot)
+IniWrite, %EndingChar_Dot%, Config.ini, Configuration, EndingChar_Dot
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndDot:
-	Menu, Submenu2, ToggleCheck, % TransA["Dot ."]
-	EndingChar_Dot := !(EndingChar_Dot)
-	IniWrite, %EndingChar_Dot%, Config.ini, Configuration, EndingChar_Dot
-	F_LoadEndChars()
-	return
-	
+
+EndQuestionMark:
+Menu, Submenu2, ToggleCheck, % TransA["Question Mark ?"]
+EndingChar_QuestionMark := !(EndingChar_QuestionMark)
+IniWrite, %EndingChar_QuestionMark%, Config.ini, Configuration, EndingChar_QuestionMark
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndQuestionMark:
-	Menu, Submenu2, ToggleCheck, % TransA["Question Mark ?"]
-	EndingChar_QuestionMark := !(EndingChar_QuestionMark)
-	IniWrite, %EndingChar_QuestionMark%, Config.ini, Configuration, EndingChar_QuestionMark
-	F_LoadEndChars()
-	return
-	
+
+EndExclamationMark:
+Menu, Submenu2, ToggleCheck, % TransA["Exclamation Mark !"]
+EndingChar_ExclamationMark := !(EndingChar_ExclamationMark)
+IniWrite, %EndingChar_ExclamationMark%, Config.ini, Configuration, EndingChar_ExclamationMark
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndExclamationMark:
-	Menu, Submenu2, ToggleCheck, % TransA["Exclamation Mark !"]
-	EndingChar_ExclamationMark := !(EndingChar_ExclamationMark)
-	IniWrite, %EndingChar_ExclamationMark%, Config.ini, Configuration, EndingChar_ExclamationMark
-	F_LoadEndChars()
-	return
-	
+
+EndEnter:
+Menu, Submenu2, ToggleCheck, % TransA["Enter"]
+EndingChar_Enter := !(EndingChar_Enter)
+IniWrite, %EndingChar_Enter%, Config.ini, Configuration, EndingChar_Enter
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndEnter:
-	Menu, Submenu2, ToggleCheck, % TransA["Enter"]
-	EndingChar_Enter := !(EndingChar_Enter)
-	IniWrite, %EndingChar_Enter%, Config.ini, Configuration, EndingChar_Enter
-	F_LoadEndChars()
-	return
-	
+
+EndTab:
+Menu, Submenu2, ToggleCheck, % TransA["Tab"]
+EndingChar_Tab := !(EndingChar_Tab)
+IniWrite, %EndingChar_Tab%, Config.ini, Configuration, EndingChar_Tab
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndTab:
-	Menu, Submenu2, ToggleCheck, % TransA["Tab"]
-	EndingChar_Tab := !(EndingChar_Tab)
-	IniWrite, %EndingChar_Tab%, Config.ini, Configuration, EndingChar_Tab
-	F_LoadEndChars()
-	return
-	
+
+EndUnderscore:
+Menu, Submenu2, ToggleCheck, % TransA["Underscore _"]
+EndingChar_Underscore := !(EndingChar_Underscore)
+Iniwrite, %EndingChar_Underscore%, Config.ini, Configuration, EndingChar_Underscore
+F_LoadEndChars()
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	EndUnderscore:
-	Menu, Submenu2, ToggleCheck, % TransA["Underscore _"]
-	EndingChar_Underscore := !(EndingChar_Underscore)
-	Iniwrite, %EndingChar_Underscore%, Config.ini, Configuration, EndingChar_Underscore
-	F_LoadEndChars()
-	return
-	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	L_DPIScaling:
+
+L_DPIScaling:
 	; SetTimer, L_DPIScaling, Off
-	if WinExist("Hotstrings") and WinExist("ahk_class AutoHotkeyGUI")
-	{
+if WinExist("Hotstrings") and WinExist("ahk_class AutoHotkeyGUI")
+{
 		
 		WinGetPos, awinX, awinY,awinW,awinH,Hotstrings
 		SysGet, N, MonitorCount
