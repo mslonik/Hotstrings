@@ -94,7 +94,7 @@ IniRead v_Language, Config.ini, Configuration, Language				; Load from Config.in
 if (!FileExist(A_ScriptDir . "\Languages\" . v_Language))			; else if there is no v_language .ini file, e.g. v_langugae == Polish.ini and there is no such file in Languages folder
 {
 	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["There is no"] . A_Space . v_Language . A_Space . TransA["file in Languages subfolder!"]
-	. "`n" . TransA["The default"] . A_Space . v_Language . A_Space . TransA["file is now created in the following subfolder:"] . "`n"  A_ScriptDir . "\Languages\"
+	. "`n`n" . TransA["The default"] . A_Space . v_Language . A_Space . TransA["file is now created in the following subfolder:"] . "`n"  A_ScriptDir . "\Languages\"
 	F_LoadCreateTranslationTxt("create")
 }
 else
@@ -140,13 +140,14 @@ else
 ;If application wasn't run with "l" parameter (standing for "light / lightweight"), prepare tray menu.
 if !(v_Param == "l") 		;GUI window uses the tray icon that was in effect at the time the window was created, therefore this section have to be run before the first Gui, New command. 
 {
-	Menu, Tray, Add, 		% TransA["Edit Hotstring"], 		L_GUIInit
-	Menu, Tray, Add, 		% TransA["Search Hotstrings"], 	F_Searching
-	Menu, Tray, Default, 	% TransA["Edit Hotstring"]
+	Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
+	Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 			L_GUIInit
+	Menu, Tray, Default, 	% TransA["Edit Hotstrings"]
 	Menu, Tray, Add										; separator line
 	Menu, Tray, NoStandard									; remove all the rest of standard tray menu
-	Menu, Tray, Standard									; add it again at the bottom
-	Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
+	Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			L_TraySuspendHotkeys
+	Menu, Tray, Add,		% TransA["Pause Script"],			L_TrayPauseScript
+	Menu, Tray, Add,		% TransA["Exit"],					L_TrayExit
 }
 
 F_GuiMain_CreateObject()
@@ -609,8 +610,6 @@ Loop,
 
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
-
-Pause::Pause, Toggle
 
 ~BackSpace:: 
 if (WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
@@ -1116,7 +1115,7 @@ F_Searching(ReloadListView*)
 	local	Window1X := 0, 	Window1Y := 0, 	Window1W := 0, 	Window1H := 0
 			,Window2X := 0, 	Window2Y := 0, 	Window2W := 0, 	Window2H := 0
 			,NewWinPosX := 0, 	NewWinPosY := 0
-	
+	;*[One]
 	Switch ReloadListView[1]
 	{
 		Case "ReloadAndView":
@@ -1140,7 +1139,10 @@ F_Searching(ReloadListView*)
 			LV_Delete()
 			Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
 				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+		Case TransA["Search Hotstrings (F3)"]:
+			Goto, ViewOnly
 		Case "": ;view only
+		ViewOnly:
 			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
 			Gui, HS3Search: Default
 			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
@@ -2616,7 +2618,7 @@ DISABLED												= DISABLED
 Dot . 												= Dot .
 Do you want to reload application now?						= Do you want to reload application now?
 Dynamic hotstrings 										= &Dynamic hotstrings
-Edit Hotstring 										= Edit Hotstring
+Edit Hotstrings 										= Edit Hotstrings
 Enable/Disable 										= Enable/Disable
 Enable/disable libraries									= Enable/disable &libraries
 Enable/disable triggerstring tips 							= Enable/disable triggerstring tips	
@@ -2692,6 +2694,7 @@ Please wait, uploading .csv files... 						= Please wait, uploading .csv files..
 question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
+Pause Script											= Pause Script
 Phrase to search for:									= Phrase to search for:
 pixels												= pixels
 Position of main window is saved in Config.ini.				= Position of main window is saved in Config.ini.	
@@ -2724,6 +2727,7 @@ Space 												= Space
 Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
 Standard executable (Ahk2Exe.exe)							= Standard executable (Ahk2Exe.exe)
 Static hotstrings 										= &Static hotstrings
+Suspend Hotkeys										= Suspend Hotkeys
 Tab 													= Tab
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
 The default											= The default
@@ -4658,7 +4662,7 @@ F_ImportLibrary(filename) ;tu jestem
 	local IdImport_P1 := 0, IdImport_T1 := 0
 		,HS3GuiWinX := 0, HS3GuiWinY := 0, HS3GuiWinW := 0, HS3GuiWinH := 0
 		,ImportGuiWinW := 0, ImportGuiWinH := 0
-		,v_OutputFile := "", OutFileName := "", OutNameNoExt := ""
+		,v_OutputFile := "", OutNameNoExt := ""
 		,v_TotalLines := 0, line := "", v_Progress := 0
 		,a_Hotstring := [], v_Options := "", v_Trigger := "", v_Hotstring := ""
 	;static MyProgress, MyText
@@ -4679,7 +4683,7 @@ F_ImportLibrary(filename) ;tu jestem
 	DetectHiddenWindows, Off
 	Gui, Import: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ImportGuiWinW)/2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ImportGuiWinH)/2 . A_Space . "AutoSize"
 	
-	SplitPath, filename, OutFileName,,, OutNameNoExt
+	SplitPath, filename, ,,, OutNameNoExt
 	v_OutputFile := % A_ScriptDir . "\Libraries\" . OutNameNoExt . ".csv"
 	
 	Loop
@@ -5680,7 +5684,26 @@ if WinExist("Hotstrings") and WinExist("ahk_class AutoHotkeyGUI")
 			Menu, SubmenuLanguage, Check, %A_LoopFileName%
 		else
 			Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
-	}
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Application language changed to:"] . A_Space 
+}
+MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Application language changed to:"] . A_Space 
 		. SubStr(v_Language, 1, -4) . "`n`n" . TransA["The application will be reloaded with the new language file."]
-	Reload
+Reload
+
+L_TraySuspendHotkeys:
+	Suspend, Toggle
+	if (A_IsSuspended)
+		Menu, Tray, Check,   % TransA["Suspend Hotkeys"]
+	else
+		Menu, Tray, UnCheck, % TransA["Suspend Hotkeys"]
+return
+
+L_TrayPauseScript:
+	Pause, Toggle, 1
+	if (A_IsPaused)
+		Menu, Tray, Check,	 % TransA["Pause Script"]
+	else
+		Menu, Tray, UnCheck, % TransA["Pause Script"]
+return
+
+L_TrayExit:
+	ExitApp, 2	;2 = by Tray
