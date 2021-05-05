@@ -75,7 +75,7 @@ global v_ConfigFlag 			:= 0
 
 ;Flags to control application
 global v_ResizingFlag 			:= true ; when Hotstrings Gui is displayed for the very first time
-global v_WhichGUIisMinimzed		:= ""
+;global v_WhichGUIisMinimzed		:= ""
 global HS3_GuiWidth  := 0,	HS3_GuiHeight := 0
 
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -143,6 +143,8 @@ if !(v_Param == "l") 		;GUI window uses the tray icon that was in effect at the 
 	Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
 	Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 			L_GUIInit
 	Menu, Tray, Default, 	% TransA["Edit Hotstrings"]
+	Menu, Tray, Add,		% TransA["Application help"],			Link1
+	Menu, Tray, Add,		% TransA["Genuine hotstrings AutoHotkey documentation"], Link2
 	Menu, Tray, Add										; separator line
 	Menu, Tray, NoStandard									; remove all the rest of standard tray menu
 	Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			L_TraySuspendHotkeys
@@ -488,7 +490,7 @@ Menu,	ApplicationSubmenu,	Add,	% TransA["Compile"],				:CompileSubmenu
 if (!A_AhkPath) ;if AutoHotkey isn't installed
 	Menu,	ApplicationSubmenu, Disable,							% TransA["Compile"]
 Menu, 	HSMenu,			Add, % TransA["Application"],				:ApplicationSubmenu
-Menu, 	HSMenu, 			Add, % TransA["About/Help"], 				F_GuiAbout
+Menu, 	HSMenu, 			Add, % TransA["About/Help (F1)"], 			F_GuiAbout
 Gui, 	HS3: Menu, HSMenu
 Gui, 	HS4: Menu, HSMenu
 
@@ -1115,7 +1117,7 @@ F_Searching(ReloadListView*)
 	local	Window1X := 0, 	Window1Y := 0, 	Window1W := 0, 	Window1H := 0
 			,Window2X := 0, 	Window2Y := 0, 	Window2W := 0, 	Window2H := 0
 			,NewWinPosX := 0, 	NewWinPosY := 0
-	;*[One]
+	
 	Switch ReloadListView[1]
 	{
 		Case "ReloadAndView":
@@ -1358,9 +1360,9 @@ F_WhichGui()
 	Switch WinHWND
 	{
 		Case HS3GuiHwnd:
-		Gui, HS3: Default
+			Gui, HS3: Default
 		Case HS4GuiHwnd:
-		Gui, HS4: Default
+			Gui, HS4: Default
 	}
 	return
 }
@@ -1619,6 +1621,13 @@ HS4GuiSize() ;Gui event
 {
 	global ;assume-global mode
 	
+	if (A_EventInfo = 1) ; The window has been minimized.
+	{
+		;v_WhichGUIisMinimzed := "HS4"
+		ini_WhichGui := "HS4"
+		return
+	}
+	
 	HS4_GuiWidth  := A_GuiWidth
 	HS4_GuiHeight := A_GuiHeight
 	return
@@ -1637,7 +1646,11 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "A_GuiHeight:" . A_Space .  A_GuiHeight
 	
 	if (A_EventInfo = 1) ; The window has been minimized.
+	{
+		;v_WhichGUIisMinimzed := "HS3"
+		ini_WhichGui := "HS3"
 		return
+	}
 	if (v_ResizingFlag) ;Special case: FontSize set to 16 and some procedures are run twice
 	{
 		HS3_GuiWidth  := A_GuiWidth
@@ -1657,10 +1670,10 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	;OutputDebug, % "Before:" . A_Space . v_OutVarTemp1H
 	F_AutoXYWH("*wh", IdListView1)
 	F_AutoXYWH("*h",  IdButton5)
-
+	
 	if (!ini_IsSandboxMoved)
 		F_AutoXYWH("*w", IdEdit10)
-
+	
 	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;Check position of ListView1 again after resizing
 	;OutputDebug, % "After:" . A_Space . v_OutVarTemp2H
 	;OutputDebug, % "Height of ListView in rel to A_GuiHeight:" . A_Space . A_GuiHeight - v_OutVarTemp2H
@@ -1692,7 +1705,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		F_AutoXYWH("*wh", IdListView1)
 		F_AutoXYWH("*h", IdButton5)
 	}
-		
+	
 	;if (ini_Sandbox) and (deltaH < 0) and (ini_IsSandboxMoved) and (v_OutVarTemp2H + HofText <  LeftColumnH + c_HofSandbox)
 	if (ini_Sandbox) and (deltaH < 0) and (ini_IsSandboxMoved) and (v_OutVarTemp2H <  LeftColumnH + c_HofSandbox)
 	{
@@ -1706,7 +1719,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		F_AutoXYWH("*wh", IdListView1)
 		F_AutoXYWH("*h", IdButton5)
 	}
-
+	
 	/*
 		if ((ini_Sandbox) and (ini_IsSandboxMoved))
 		{
@@ -1729,7 +1742,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			OutputDebug, % "Five" . A_Space . deltaH
 		}
 	*/
-
+	
 	HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
 	HS3_GuiHeight := A_GuiHeight
 	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space "A_GuiHeight" . A_Space . A_GuiHeight
@@ -2566,12 +2579,12 @@ F_LoadCreateTranslationTxt(decision*)
 ;Warning. If right side contains `n chars it's necessary to replace them with StrReplace.
 	TransConst := "			
 (Join`n `			
-About/Help	 										= &About/Help
+About/Help (F1) 										= &About/Help (F1)
 Add comment (optional) 									= Add comment (optional)
 Add library 											= Add library
 A library with that name already exists! 					= A library with that name already exists!
 Apostrophe ' 											= Apostrophe '
-Application											= Application
+Application											= A&pplication
 Application help 										= Application help
 Application language changed to: 							= Application language changed to:
 Are you sure you want to exit this application now?			= Are you sure you want to exit this application now?
@@ -2705,7 +2718,7 @@ Sandbox (F6)											= Sandbox (F6)
 Save position of application window	 					= &Save position of application window
 Search by: 											= Search by:
 Search Hotstrings 										= Search Hotstrings
-Search Hotstrings (F3)									= Search Hotstrings (F3)
+Search Hotstrings (F3)									= &Search Hotstrings (F3)
 Select a row in the list-view, please! 						= Select a row in the list-view, please!
 Selected file is empty. 									= Selected file is empty.
 Selected Hotstring will be deleted. Do you want to proceed? 	= Selected Hotstring will be deleted. Do you want to proceed?
@@ -3740,14 +3753,7 @@ F_GuiAbout()
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
 	
-	FoundPos := Instr(TransA["About/Help"], "&")
-	if (FoundPos)
-	{
-		if (FoundPos > 1)
-			NewStr := SubStr(TransA["About/Help"], FoundPos - 1) . SubStr(TransA["About/Help"], FoundPos + 1)
-		else
-			NewStr := SubStr(TransA["About/Help"], FoundPos + 1)
-	}
+	NewStr := RegExReplace(TransA["About/Help (F1)"], "&", "")
 	
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	Gui, MyAbout: Show, Hide Center AutoSize
@@ -4901,9 +4907,6 @@ return
 ^#h::		; Event
 L_GUIInit:
 
-;Critical Off ;If the script has just resized the window, follow this example to ensure GuiSize is called immediately
-;Sleep -1
-
 if (v_ResizingFlag) ;if run for the very first time
 {
 	Gui, HS3: +MinSize%HS3MinWidth%x%HS3MinHeight%
@@ -4950,17 +4953,20 @@ if (v_ResizingFlag) ;if run for the very first time
 	
 }
 else ;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakresem dostępnym na tym komputerze w momencie uruchomienia
-	
-	Switch v_WhichGUIisMinimzed
+{
+	;*[One]
+	;WinGet, fikumiku1, MinMax, % "ahk_id" HS3GuiHwnd
+	;WinGet, fikumiku2, MinMax, % "ahk_id" HS4GuiHwnd
+	;MsgBox, , fikumiku, % "HS3:" . A_Space . fikumiku1 . "`n`n" . "HS4:" . A_Space . fikumiku2
+	;Switch v_WhichGUIisMinimzed
+	Switch ini_WhichGui
 	{
 		Case "HS3":
 			Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
-			return
 		Case "HS4":
-			
 			Gui, HS4: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
-			return
 	}
+}
 return
 #If	;#If (v_Param != "l") 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5297,13 +5303,15 @@ return
 HS3GuiClose:
 HS3GuiEscape:
 Gui,		HS3: Show, Hide
-v_WhichGUIisMinimzed := "HS3"
+;v_WhichGUIisMinimzed := "HS3"
+ini_WhichGui := "HS3"
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS4GuiClose:
 HS4GuiEscape:
 Gui,		HS4: Show, Hide
-v_WhichGUIisMinimzed := "HS4"
+;v_WhichGUIisMinimzed := "HS4"
+ini_WhichGui := "HS4"
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
