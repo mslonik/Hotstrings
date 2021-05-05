@@ -75,7 +75,6 @@ global v_ConfigFlag 			:= 0
 
 ;Flags to control application
 global v_ResizingFlag 			:= true ; when Hotstrings Gui is displayed for the very first time
-;global v_WhichGUIisMinimzed		:= ""
 global HS3_GuiWidth  := 0,	HS3_GuiHeight := 0
 
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -486,7 +485,7 @@ Menu,	ApplicationSubmenu,	Add, % TransA["Exit"],					F_Exit
 Menu,	ApplicationSubmenu, Add, % TransA["Remove Config.ini"],		F_RemoveConfigIni
 
 F_CompileSubmenu()
-Menu,	ApplicationSubmenu,	Add,	% TransA["Compile"],				:CompileSubmenu
+
 if (!A_AhkPath) ;if AutoHotkey isn't installed
 	Menu,	ApplicationSubmenu, Disable,							% TransA["Compile"]
 Menu, 	HSMenu,			Add, % TransA["Application"],				:ApplicationSubmenu
@@ -776,13 +775,11 @@ return
 
 #if
 
-; ms on 2020-11-02
 ~Alt::
-/*
-	~MButton::
-	~RButton::
-	~LButton::
-*/
+;It's important to comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
+~MButton::
+~RButton::
+~LButton::
 ~LWin::
 ~RWin::
 ~Down::
@@ -2187,12 +2184,25 @@ F_CompileSubmenu()
 		v_TempOutStr .= A_LoopField . "\"
 	}
 	v_TempOutStr .= "Compiler" . "\" 
+	
+	;tu jestem
 	if (FileExist(v_TempOutStr . "Ahk2Exe.exe"))
+	{
 		Menu, CompileSubmenu, Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
+		Menu, TraySubmenu,	  Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
+	}
 	if (FileExist(v_TempOutStr . "upx.exe"))
+	{
 		Menu, CompileSubmenu, Add, % TransA["Compressed executable (upx.exe)"], F_Compile
+		Menu, TraySubmenu,	  Add, % TransA["Compressed executable (upx.exe)"], F_Compile
+	}
 	if (FileExist(v_TempOutStr . "mpress.exe"))
+	{
 		Menu, CompileSubmenu, Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
+		Menu, TraySubmenu,		  Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
+	}
+	Menu,	ApplicationSubmenu,	Add,	% TransA["Compile"],				:CompileSubmenu
+	Menu,	Tray,			Add, % TransA["Compile"],				:TraySubmenu
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2211,23 +2221,27 @@ F_Compile()
 	{
 		Case TransA["Standard executable (Ahk2Exe.exe)"]:
 			Run, % v_TempOutStr2 . "Ahk2Exe.exe" 
-				. A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName 
-				. A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
-				. A_Space . "/icon" . A_Space . A_ScriptDir . "\" . AppIcon 
-				. A_Space . "/ahk" . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """"
+				. A_Space . "/in"       . A_Space . A_ScriptDir . "\" . A_ScriptName 
+				. A_Space . "/out"      . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+				. A_Space . "/icon"     . A_Space . A_ScriptDir . "\" . AppIcon
+				. A_Space . "/bin"      . A_Space . """" . v_TempOutStr . "AutoHotkeyU64.exe" . """"
+				. A_Space . "/cp"       . A_Space . "65001"	;Unicode (UTF-8)
+				. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """"
 				. A_Space . "/compress" . A_Space . "0"
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe, but not compressed:"]
-				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe"
+				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "AutoHotkeyU64.exe" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
 		
 		Case TransA["Compressed executable (upx.exe)"]:
 			Run, % v_TempOutStr2 . "Ahk2Exe.exe" 
-				. A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName 
-				. A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
-				. A_Space . "/icon" . A_Space . A_ScriptDir . "\" . AppIcon 
-				. A_Space . "/ahk" . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" 
-				. A_Space . "/compress" . A_Space . "2" 
+				. A_Space . "/in"   	. A_Space . A_ScriptDir . "\" . A_ScriptName 
+				. A_Space . "/out"  	. A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+				. A_Space . "/icon" 	. A_Space . A_ScriptDir . "\" . AppIcon 
+				. A_Space . "/bin"  	. A_Space . """" . v_TempOutStr . "AutoHotkeyU64.exe" . """"
+				. A_Space . "/cp"   	. A_Space . "65001"	;Unicode (UTF-8)
+				. A_Space . "/ahk"  	. A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" 
+				. A_Space . "/compress" 	. A_Space . "2" 
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["The executable file is prepared by Ahk2Exe and compressed by upx.exe:"]
-				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe"
+				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "AutoHotkeyU64.exe" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
 				
 		Case TransA["Compressed executable (mpress.exe)"]:
 			Run, % v_TempOutStr2 . "Ahk2Exe.exe" 
@@ -2237,7 +2251,7 @@ F_Compile()
 				. A_Space . "/ahk" . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """"
 				. A_Space . "/compress" . A_Space . "1"
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe and compressed by mpress.exe:"]
-				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe"
+				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "AutoHotkeyU64.exe" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
 	}
 	return
 }
