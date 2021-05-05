@@ -2185,7 +2185,6 @@ F_CompileSubmenu()
 	}
 	v_TempOutStr .= "Compiler" . "\" 
 	
-	;tu jestem
 	if (FileExist(v_TempOutStr . "Ahk2Exe.exe"))
 	{
 		Menu, CompileSubmenu, Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
@@ -2650,7 +2649,7 @@ Enable/Disable 										= Enable/Disable
 Enable/disable libraries									= Enable/disable &libraries
 Enable/disable triggerstring tips 							= Enable/disable triggerstring tips	
 Enable sound if overrun 									= Enable sound if overrun
-Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 3rd edition of this application, 2020 by Jakub Masiak and Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
+Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 4th edition of this application, 2021 by Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
 Enter 												= Enter
 Enter a name for the new library 							= Enter a name for the new library
 Enter hotstring 										= Enter hotstring
@@ -3692,14 +3691,16 @@ F_GuiAbout_CreateObjects()
 	TransA["Enables Convenient Definition"] := StrReplace(TransA["Enables Convenient Definition"], "``n", "`n")
 	;2. Prepare all text objects according to mock-up.
 	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, 					% c_FontType
-	Gui, MyAbout: Add, 		Text, x0 y0 HwndIdLine1, 													% TransA["Let's make your PC personal again..."]
+	Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLine1, 													% TransA["Let's make your PC personal again..."]
 	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType
-	Gui, MyAbout: Add, 		Text, x0 y0 HwndIdLine2, 													% TransA["Enables Convenient Definition"]
+	Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLine2, 													% TransA["Enables Convenient Definition"]
 	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "bold underline" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, MyAbout: Add, 		Text, x0 y0 HwndIdLink1 gLink1,												% TransA["Application help"]
-	Gui, MyAbout: Add, 		Text, x0 y0 HwndIdLink2 gLink2,												% TransA["Genuine hotstrings AutoHotkey documentation"]
+	Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLink1 gLink1,												% TransA["Application help"]
+	Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLink2 gLink2,												% TransA["Genuine hotstrings AutoHotkey documentation"]
 	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType
-	Gui, MyAbout: Add, 		Button, x0 y0 HwndIdAboutOkButton gAboutOkButton,									% TransA["OK"]
+	Gui, MyAbout: Add, 		Button,  x0 y0 HwndIdAboutOkButton gAboutOkButton,									% TransA["OK"]
+	;tu jestem
+	Gui, MyAbout: Add,		Picture, x0 y0 HwndIdAboutPicture w96 h96, % AppIcon
 	
 	return
 }
@@ -3754,6 +3755,11 @@ F_GuiAbout_DetermineConstraints()
 	v_xNext := (v_OutVarTemp1W / 2) - (v_wNext / 2)
 	v_yNext += v_OutVarTemp2H + c_ymarg
 	GuiControl, Move, % IdAboutOkButton, % "x" v_xNext "y" v_yNext "w" v_wNext
+	
+	GuiControlGet, v_OutVarTemp1, Pos, % IdLine2
+	v_xNext := v_OutVarTemp1X + v_OutVarTemp1W - 96 ;96 = chosen size of icon
+	v_yNext := v_OutVarTemp1Y + v_OutVarTemp1H
+	GuiControl, Move, % IdAboutPicture, % "x" v_xNext "y" v_yNext 
 	
 	return
 }
