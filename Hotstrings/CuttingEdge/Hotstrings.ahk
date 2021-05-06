@@ -146,6 +146,7 @@ if !(v_Param == "l") 		;GUI window uses the tray icon that was in effect at the 
 	Menu, Tray, Add,		% TransA["Genuine hotstrings AutoHotkey documentation"], Link2
 	Menu, Tray, Add										; separator line
 	Menu, Tray, NoStandard									; remove all the rest of standard tray menu
+	Menu, Tray, Add,		% TransA["Reload"],					L_TrayReload
 	Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			L_TraySuspendHotkeys
 	Menu, Tray, Add,		% TransA["Pause Script"],			L_TrayPauseScript
 	Menu, Tray, Add,		% TransA["Exit"],					L_TrayExit
@@ -1278,7 +1279,11 @@ F_RemoveConfigIni()
 	if (FileExist("Config.ini"))
 	{
 		MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["Config.ini will be deleted. Next application will be reloaded. This action cannot be undone. Are you sure?"] 
-		IfMsgBox, Yes
+		/*
+			IfMsgBox, Yes
+		/*
+			*/
+		*/
 		{
 			FileDelete, Config.ini
 			Reload
@@ -1349,17 +1354,22 @@ F_GuiHSdelay()
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_WhichGui()
+;This version is more robust: it doesn't take into account just "last active window" (A parameter), but just checks if there are active windows.
 {
 	global	;assume-global mode
 	local	WinHWND := 0
 	
-	WinGet, WinHWND, ID, A
-	Switch WinHWND
+	WinGet, WinHWND, ID, % "ahk_id" HS3GuiHwnd
+	if (WinHWND)
 	{
-		Case HS3GuiHwnd:
-			Gui, HS3: Default
-		Case HS4GuiHwnd:
-			Gui, HS4: Default
+		Gui, HS3: Default
+		return
+	}
+	WinGet, WinHWND, ID, % "ahk_id" HS4GuiHwnd
+	if (WinHWND)
+	{
+		Gui, HS4: Default
+		return
 	}
 	return
 }
@@ -2262,8 +2272,13 @@ F_Reload()
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
 	IfMsgBox, Yes
 	{
-		F_SaveGUIPos()
-		Reload
+		if (WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd))
+		{
+			F_SaveGUIPos()
+			Reload
+		}
+		else
+			Reload
 	}
 	IfMsgBox, No
 		return
@@ -2428,7 +2443,7 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 		return
 	}	
 	
-	
+	;*[One]
 	if (A_DefaultGui = "HS3")
 	{
 		WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
@@ -3698,10 +3713,8 @@ F_GuiAbout_CreateObjects()
 	Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLink1 gLink1,												% TransA["Application help"]
 	Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLink2 gLink2,												% TransA["Genuine hotstrings AutoHotkey documentation"]
 	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType
-	Gui, MyAbout: Add, 		Button,  x0 y0 HwndIdAboutOkButton gAboutOkButton,									% TransA["OK"]
-	;tu jestem
-	Gui, MyAbout: Add,		Picture, x0 y0 HwndIdAboutPicture w96 h96, % AppIcon
-	
+	Gui, MyAbout: Add, 		Button,  x0 y0 HwndIdAboutOkButton gAboutOkButton,								% TransA["OK"]
+	Gui, MyAbout: Add,		Picture, x0 y0 HwndIdAboutPicture w96 h96, 										% AppIcon
 	return
 }
 
@@ -4974,7 +4987,6 @@ if (v_ResizingFlag) ;if run for the very first time
 }
 else ;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakresem dostępnym na tym komputerze w momencie uruchomienia
 {
-	;*[One]
 	;WinGet, fikumiku1, MinMax, % "ahk_id" HS3GuiHwnd
 	;WinGet, fikumiku2, MinMax, % "ahk_id" HS4GuiHwnd
 	;MsgBox, , fikumiku, % "HS3:" . A_Space . fikumiku1 . "`n`n" . "HS4:" . A_Space . fikumiku2
@@ -5735,3 +5747,8 @@ return
 
 L_TrayExit:
 	ExitApp, 2	;2 = by Tray
+
+L_TrayReload:	;new thread starts here
+	F_WhichGui()
+	F_Reload()
+return
