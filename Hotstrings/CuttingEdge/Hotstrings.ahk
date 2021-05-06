@@ -1328,17 +1328,24 @@ F_GuiHSdelay()
 	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
+		,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
 	;+Owner to prevent display of a taskbar button
 	Gui, HSDel: New, -MinimizeBox -MaximizeBox +Owner +HwndHotstringDelay, % TransA["Set Clipboard Delay"]
 	Gui, HSDel: Margin,	% c_xmarg, % c_ymarg
 	Gui,	HSDel: Color,	% c_WindowColor, % c_ControlColor
 	Gui,	HSDel: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
-	Gui, HSDel: Add, Slider, w300 vMySlider gmySlider Range100-1000 ToolTipBottom Buddy1999, % ini_Delay
-	
+	Gui, HSDel: Add, Slider, x0 y0 HwndIdHD_S1 vMySlider gmySlider Range100-1000 ToolTipBottom Buddy1999, % ini_Delay
 	TransA["This option is valid"] := StrReplace(TransA["This option is valid"], "``n", "`n")
+	Gui, HSDel: Add, Text, HwndIdHD_T1 vDelayText, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_Delay . "`n`n" . TransA["This option is valid"]
+	GuiControlGet, v_OutVarTemp, Pos, % IdHD_T1
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	v_wNext := v_OutVarTempW
+	GuiControl, Move, % IdHD_S1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space "w" v_wNext
+	GuiControl, Move, % IdHD_T1, % "x" v_xNext
 	
-	Gui, HSDel: Add, Text, vDelayText, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_Delay . "`n`n" . TransA["This option is valid"]
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	Gui, HSDel: Show, Hide AutoSize 
 	DetectHiddenWindows, On
