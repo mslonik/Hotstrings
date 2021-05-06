@@ -2216,48 +2216,47 @@ F_CompileSubmenu()
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Compile()
+;https://www.autohotkey.com/boards/viewtopic.php?f=86&t=90196&p=398198#p398198
 {
-	local v_TempOutStr := "", v_TempOutStr2 := "", v_TempOutStr3 := ""
-	Loop, Parse, %  A_AhkPath, "\"
-	{
-		if (Instr(A_LoopField, ".exe"))
-			break
-		v_TempOutStr .= A_LoopField . "\"
-	}
-	v_TempOutStr2 := v_TempOutStr . "Compiler" . "\" 
+	local v_TempOutStr := "" ;, v_TempOutStr2 := "", v_TempOutStr3 := ""
+	
+	SplitPath, A_AhkPath, ,v_TempOutStr
+	v_TempOutStr .= "\" . "Compiler" . "\" 
 	
 	Switch A_ThisMenuItem
 	{
 		Case TransA["Standard executable (Ahk2Exe.exe)"]:
-			Run, % v_TempOutStr2 . "Ahk2Exe.exe" 
+			Run, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in"       . A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out"      . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 				. A_Space . "/icon"     . A_Space . A_ScriptDir . "\" . AppIcon
-				. A_Space . "/bin"      . A_Space . """" . v_TempOutStr . "AutoHotkeyU64.exe" . """"
+				. A_Space . "/bin"      . A_Space . """" . v_TempOutStr . "Unicode 64-bit.bin" . """"
 				. A_Space . "/cp"       . A_Space . "65001"	;Unicode (UTF-8)
-				. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """"
+				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" . A_Space . "0"
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe, but not compressed:"]
 				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "AutoHotkeyU64.exe" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
 		
 		Case TransA["Compressed executable (upx.exe)"]:
-			Run, % v_TempOutStr2 . "Ahk2Exe.exe" 
+			Run, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in"   	. A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out"  	. A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 				. A_Space . "/icon" 	. A_Space . A_ScriptDir . "\" . AppIcon 
-				. A_Space . "/bin"  	. A_Space . """" . v_TempOutStr . "AutoHotkeyU64.exe" . """"
+				. A_Space . "/bin"      . A_Space . """" . v_TempOutStr . "Unicode 64-bit.bin" . """"
 				. A_Space . "/cp"   	. A_Space . "65001"	;Unicode (UTF-8)
-				. A_Space . "/ahk"  	. A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" 
+				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" 	. A_Space . "2" 
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["The executable file is prepared by Ahk2Exe and compressed by upx.exe:"]
 				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "AutoHotkeyU64.exe" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
 				
 		Case TransA["Compressed executable (mpress.exe)"]:
-			Run, % v_TempOutStr2 . "Ahk2Exe.exe" 
+			Run, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 				. A_Space . "/icon" . A_Space . A_ScriptDir . "\" . AppIcon 
-				. A_Space . "/ahk" . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """"
+				. A_Space . "/bin"      . A_Space . """" . v_TempOutStr . "Unicode 64-bit.bin" . """"
+				. A_Space . "/cp"   	. A_Space . "65001"	;Unicode (UTF-8)
+				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" . A_Space . "1"
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe and compressed by mpress.exe:"]
 				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "AutoHotkeyU64.exe" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
