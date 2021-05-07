@@ -2449,7 +2449,6 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 		return
 	}	
 	
-	;*[One]
 	if (A_DefaultGui = "HS3")
 	{
 		WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
@@ -2700,7 +2699,6 @@ Hotstring menu (MSI, MCL) 								= Hotstring menu (MSI, MCL)
 Hotstring moved to the 									= Hotstring moved to the
 Hotstring paste from Clipboard delay 1 s 					= Hotstring paste from Clipboard delay 1 s
 Hotstring paste from Clipboard delay 						= Hotstring paste from Clipboard delay
-This library											= This library
 Hotstrings have been loaded 								= Hotstrings have been loaded
 Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
@@ -3024,7 +3022,7 @@ F_GuiHS4_CreateObject()
 	
 	Gui,		HS4: Add,			Text,		x0 y0 HwndIdText11b, % TransA["This library:"]
 	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
-	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText13b,  % A_Space . A_Space . A_Space . "0" ;value of Hotstrings counter
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText13b,  % A_Space . A_Space . A_Space . A_Space . "0" ;value of Hotstrings counter
 	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 }
 
@@ -3173,7 +3171,7 @@ F_GuiMain_CreateObject()
 ;Gui, 		HS3:Add, 		Edit, 		HwndIdEdit11 vv_ViewString gViewString ReadOnly Hide
 	Gui,			HS3:Add,		Text,		x0 y0 HwndIdText11, % TransA["This library:"]
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
-	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText13,  % A_Space . A_Space . A_Space . "0" ;value of Hotstrings counter
+	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText13,  % A_Space . A_Space . A_Space . A_Space . "0" ;value of Hotstrings counter
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
 }
@@ -4012,7 +4010,7 @@ F_ini_StartHotstring(txt, nameoffile)
 	{
 		MsgBox, 262420, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Error reading library file:"] . "`n`n" . nameoffile . "`n`n" . TransA["the following line is found:"] 
 		. "`n" . txt . "`n`n" . TransA["This line do not comply to format required by this application."] . "`n`n" 
-		. TransA["Continue reading the library file?`nIf you answer ""No"" then application will exit!"]
+		. TransA["Continue reading the library file? If you answer ""No"" then application will exit!"]
 		IfMsgBox, No
 			ExitApp, 1
 		IfMsgBox, Yes
@@ -4577,7 +4575,7 @@ F_SortArrayAlphabetically(a_array)
 	}
 	return a_TempArray
 }
-
+/*
 F_SortHotstringsAlphabetically(filename)
 {
 	local v_Text, v_Text2, a_TempArray, a_TriggerArray, line, v_Trigger, a_TriggerArray, a_SortedTriggers, a_SortedHotstrings, cnt, no, v_AscTrigger, v_AscArray, flag, v_ActualArray, v_TempArray
@@ -4673,7 +4671,7 @@ F_SortHotstringsAlphabetically(filename)
 	FileAppend, %v_Text%, %filename%, UTF-8
 	return 
 }
-
+*/
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 F_SortArrayByLength(a_array)
@@ -4701,7 +4699,7 @@ F_SortArrayByLength(a_array)
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_ImportLibrary(filename) ;tu jestem
+F_ImportLibrary(filename) 
 {
 	global	;assume-global mode
 	local IdImport_P1 := 0, IdImport_T1 := 0
@@ -4710,6 +4708,7 @@ F_ImportLibrary(filename) ;tu jestem
 		,v_OutputFile := "", OutNameNoExt := ""
 		,v_TotalLines := 0, line := "", v_Progress := 0
 		,a_Hotstring := [], v_Options := "", v_Trigger := "", v_Hotstring := ""
+		,v_TheWholeFile := ""
 	;static MyProgress, MyText
 	
 	Gui, Import: New, 	-Border +HwndImportGuiHwnd +Owner +OwnDialogs, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space 
@@ -4741,30 +4740,60 @@ F_ImportLibrary(filename) ;tu jestem
 			break
 	}
 	
-	Loop, Read, %filename%
-		v_TotalLines := A_Index
-	FileAppend,, %v_OutputFile%, UTF-8
+	FileRead, v_TheWholeFile, % filename
+	Loop, Parse, v_TheWholeFile, `n
+		v_TotalLines++
 	
-	Loop
+	Gui, HS3: Default
+	LV_Delete()
+	Loop, Parse, v_TheWholeFile, `n
 	{
-		FileReadLine, line, %filename%, %A_Index%
-		if ErrorLevel
-			break  
-		a_Hotstring 	:= StrSplit(line, ":")
-		v_Options 	:= a_Hotstring[2]
-		v_Trigger 	:= a_Hotstring[3]
-		v_Hotstring 	:= a_Hotstring[5]
-		if (A_Index = 1)
-			FileAppend, % v_Options . "‖" . v_Trigger . "‖SI‖En‖" . v_Hotstring  . "‖", %v_OutputFile%, UTF-8
-		else
-			FileAppend, % "`n" . v_Options . "‖" . v_Trigger . "‖SI‖En‖" . v_Hotstring  . "‖", %v_OutputFile%, UTF-8
+		Loop, Parse, A_LoopField, :, `r
+		{
+			Switch A_Index
+			{
+				Case 2:
+				v_Options := A_LoopField
+				Case 3:
+				v_Trigger := A_LoopField
+				Case 5:
+				v_Hotstring := A_LoopField
+			}
+		}
+		LV_Add("", v_Options, v_Trigger, v_Hotstring)
 		v_Progress := Round((A_Index / v_TotalLines) * 100)
 		GuiControl,, % IdImport_P1, % v_Progress
 		GuiControl,, % IdImport_T1, % TransA["Converted"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
 			. A_Space . "(" . v_Progress . A_Space . "%" . ")"
 	}
-	F_SortHotstringsAlphabetically(v_OutputFile) ;future: add progress bar also for sorting; trick with sorting within ListView?
-	GuiControl,, % IdImport_T1, % TransA["Loading of new library. Please wait..."]
+	
+	;tu jestem
+	LV_ModifyCol(2, "Sort")
+	if (FileExist(v_OutputFile))
+	{
+		FileDelete, % v_OutputFile
+		MsgBox,,File was found, and deleted
+	}
+	else
+	{
+		;*[One]
+		v_TheWholeFile := ""
+		Loop, % LV_GetCount()
+		{
+			LV_GetText(v_Options, 	A_Index, 1)
+			LV_GetText(v_Trigger, 	A_Index, 2)
+			LV_GetText(v_Hotstring, 	A_Index, 3)
+			line := v_Options . "‖" . v_Trigger . "‖SI‖En‖" . v_Hotstring . "‖"
+			v_TheWholeFile .= line . "`n"
+			v_Progress := Round((A_Index / v_TotalLines) * 100)
+			GuiControl,, % IdImport_P1, % v_Progress
+			GuiControl,, % IdImport_T1, % "Saved" . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
+			. A_Space . "(" . v_Progress . A_Space . "%" . ")"
+		}	
+		FileAppend, % v_TheWholeFile, % v_OutputFile, UTF-8
+	}
+	LV_Delete()	
+	Gui, Import: Destroy
 	
 	F_ValidateIniLibSections()
 	F_RefreshListOfLibraries()
