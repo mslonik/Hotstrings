@@ -2649,8 +2649,7 @@ Config.ini wasn't found. The default Config.ini is now created in location: = Co
 Config.ini will be deleted. Next application will be reloaded. This action cannot be undone. Are you sure? = Config.ini will be deleted. Next application will be reloaded. This action cannot be undone. Are you sure?
 Configuration 											= &Configuration
 Continue reading the library file? If you answer ""No"" then application will exit! = Continue reading the library file? If you answer ""No"" then application will exit!
-Conversion of .ahk file into new .csv file (library) and import of that new library = Conversion of .ahk file into new .csv file (library) and import of that new library
-Conversion of .ahk file into new .csv file (library). Please wait... = Conversion of .ahk file into new .csv file (library). Please wait...
+Conversion of .ahk file into new .csv file (library) and loading of that new library = Conversion of .ahk file into new .csv file (library) and loading of that new library
 Converted												= Converted
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
 Do you want to proceed? 									= Do you want to proceed?
@@ -4709,24 +4708,42 @@ F_ImportLibrary(filename)
 		,v_TotalLines := 0, line := "", v_Progress := 0
 		,a_Hotstring := [], v_Options := "", v_Trigger := "", v_Hotstring := ""
 		,v_TheWholeFile := ""
-	;static MyProgress, MyText
+		,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+		,NewStr := ""
 	
-	Gui, Import: New, 	-Border +HwndImportGuiHwnd +Owner +OwnDialogs, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space 
-		. TransA["Conversion of .ahk file into new .csv file (library) and loading of that new library"]
+	NewStr := RegExReplace(TransA["Import from .ahk to .csv"], "&", "")
+	
+	Gui, Import: New, 	+Border -Resize -MaximizeBox -MinimizeBox +HwndImportGuiHwnd +Owner +OwnDialogs, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . NewStr
 	Gui, Import: Margin,	% c_xmarg, % c_ymarg
 	Gui,	Import: Color,	% c_WindowColor, % c_ControlColor
 	
-	;Gui, Import: Add, Progress, 	HwndIdImport_P1 w200 h20 vMyProgress cBlue, 0
-	Gui, Import: Add, Progress, 	HwndIdImport_P1 w400 h20 cBlue, 0
-	Gui, Import: Add, Text, 		HwndIdImport_T1 w400 h80, % TransA["Conversion of .ahk file into new .csv file (library). Please wait..."]
+	Gui, Import: Add, Text,		x0 y0 HwndIdImport_T1, % TransA["Conversion of .ahk file into new .csv file (library) and loading of that new library"]
+	Gui, Import: Add, Progress, 	x0 y0 HwndIdImport_P1 cBlue, 0
+	Gui, Import: Add, Text, 		x0 y0 HwndIdImport_T2, % TransA["Converted"] . A_Space . v_TotalLines . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
+			. A_Space . "(" . v_Progress . A_Space . "%" . ")"
+	;*[One]
+	GuiControlGet, v_OutVarTemp, Pos, % IdImport_T1
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdImport_T1, % "x" v_xNext . A_Space . "y" v_yNext
+	;Gui, Import: Show, Center AutoSize
+	v_yNext += HofText + c_ymarg
+	GuiControl, Move, % IdImport_T2, % "x" v_xNext . A_Space . "y" v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdImport_T2
+	v_wNext := v_OutVarTempW
+	v_hNext := HofText
+	GuiControl, Move, % IdImport_P1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space . "w" v_wNext . A_Space . "h" . v_hNext
+	v_yNext += HofText + c_ymarg
+	GuiControl, Move, % IdImport_T2, % "x" v_xNext . A_Space . "y" v_yNext
+	;Gui, Import: Show, Center AutoSize
 	Gui, Import: Show, Hide
 	
 	WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd ;future: if HS4
 	DetectHiddenWindows, On
 	WinGetPos, , , ImportGuiWinW, ImportGuiWinH, % "ahk_id" . ImportGuiHwnd
 	DetectHiddenWindows, Off
-	Gui, Import: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ImportGuiWinW)/2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ImportGuiWinH)/2 . A_Space . "AutoSize"
-	
+	Gui, Import: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ImportGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ImportGuiWinH) / 2 . A_Space . "AutoSize"
 	SplitPath, filename, ,,, OutNameNoExt
 	v_OutputFile := % A_ScriptDir . "\Libraries\" . OutNameNoExt . ".csv"
 	
@@ -4744,7 +4761,8 @@ F_ImportLibrary(filename)
 	Loop, Parse, v_TheWholeFile, `n
 		v_TotalLines++
 	
-	Gui, HS3: Default
+	Gui, HS3: Default 
+	Gui, HS3: +Disabled
 	LV_Delete()
 	Loop, Parse, v_TheWholeFile, `n
 	{
@@ -4762,12 +4780,11 @@ F_ImportLibrary(filename)
 		}
 		LV_Add("", v_Options, v_Trigger, v_Hotstring)
 		v_Progress := Round((A_Index / v_TotalLines) * 100)
-		GuiControl,, % IdImport_P1, % v_Progress
-		GuiControl,, % IdImport_T1, % TransA["Converted"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
+		GuiControl,, % IdImport_T2, % TransA["Converted"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
 			. A_Space . "(" . v_Progress . A_Space . "%" . ")"
+		GuiControl,, % IdImport_P1, % v_Progress
 	}
 	
-	;tu jestem
 	LV_ModifyCol(2, "Sort")
 	if (FileExist(v_OutputFile))
 	{
@@ -4776,7 +4793,6 @@ F_ImportLibrary(filename)
 	}
 	else
 	{
-		;*[One]
 		v_TheWholeFile := ""
 		Loop, % LV_GetCount()
 		{
@@ -4787,14 +4803,12 @@ F_ImportLibrary(filename)
 			v_TheWholeFile .= line . "`n"
 			v_Progress := Round((A_Index / v_TotalLines) * 100)
 			GuiControl,, % IdImport_P1, % v_Progress
-			GuiControl,, % IdImport_T1, % "Saved" . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
-			. A_Space . "(" . v_Progress . A_Space . "%" . ")"
+			GuiControl,, % IdImport_T2, % "Saved" . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
+				. A_Space . "(" . v_Progress . A_Space . "%" . ")"
 		}	
 		FileAppend, % v_TheWholeFile, % v_OutputFile, UTF-8
 	}
 	LV_Delete()	
-	Gui, Import: Destroy
-	
 	F_ValidateIniLibSections()
 	F_RefreshListOfLibraries()
 	F_RefreshListOfLibraryTips()
@@ -4802,6 +4816,7 @@ F_ImportLibrary(filename)
 	;*[One]
 	F_LoadFile(OutNameNoExt . ".csv")
 	Gui, Import: Destroy
+	Gui, HS3: -Disabled
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been imported."]
 	return
 }
