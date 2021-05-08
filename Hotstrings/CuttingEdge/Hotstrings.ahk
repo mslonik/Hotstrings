@@ -476,7 +476,6 @@ Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	F_
 F_RefreshListOfLibraryTips()
 
 Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],		L_ImportLibrary
-;Menu, LibrariesSubmenu, Disable, % TransA["Import from .ahk to .csv"]
 Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  			L_ExportLibraryStatic
 Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  			L_ExportLibraryDynamic
 Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],		:ExportSubmenu
@@ -1445,12 +1444,6 @@ F_RefreshListOfLibraryTips()
 	global	;assume-global
 	local	key := 0, value := 0
 
-	;if menu ToggleLibTrigTipsSubmenu doesn't exist, delete it
-	Menu, ToggleLibTrigTipsSubmenu, UseErrorLevel, On
-	if (!ErrorLevel)
-		Menu, ToggleLibTrigTipsSubmenu, Delete
-	Menu, ToggleLibTrigTipsSubmenu, UseErrorLevel, Off
-	
 	if (ini_ShowTipsLib.Count())
 	{
 		for key, value in ini_ShowTipsLib
@@ -1461,6 +1454,10 @@ F_RefreshListOfLibraryTips()
 			else
 				Menu, ToggleLibTrigTipsSubmenu, UnCheck, %key%
 		}
+		Menu, % TransA["No libraries have been found!"], UseErrorLevel, On ;check if this menu exists
+		if (!ErrorLevel)
+			Menu, ToggleLibTrigTipsSubmenu, Delete, % TransA["No libraries have been found!"] ;if exists, delete it
+		Menu, % TransA["No libraries have been found!"], UseErrorLevel, Off
 	}
 	else
 		Menu, ToggleLibTrigTipsSubmenu, Add, % TransA["No libraries have been found!"], F_ToggleTipsLibrary
@@ -1474,12 +1471,6 @@ F_RefreshListOfLibraries()
 	global	;assume-global
 	local key := 0, value := 0
 
-	;if menu EnDisLib doesn't exist, delete it
-	Menu, EnDisLib, UseErrorLevel, On
-	if (!ErrorLevel)
-		Menu, EnDisLib, Delete
-	Menu, EnDisLib, UseErrorLevel, Off
-	
 	if (ini_LoadLib.Count())
 	{
 		for key, value in ini_LoadLib
@@ -1490,6 +1481,10 @@ F_RefreshListOfLibraries()
 			else
 				Menu, EnDisLib, UnCheck, %key%	
 		}
+		Menu, % TransA["No libraries have been found!"], UseErrorLevel, On ;check if this menu exists
+		if (!ErrorLevel)
+			Menu, EnDisLib, Delete, % TransA["No libraries have been found!"] ;if exists, delete it
+		Menu, % TransA["No libraries have been found!"], UseErrorLevel, Off
 	}
 	else
 		Menu, EnDisLib, Add, % TransA["No libraries have been found!"], F_EnDisLib
@@ -1829,16 +1824,6 @@ F_SelectLibrary()
 	LV_ModifyCol(4, Round(0.1 * v_OutVarTemp2W))
 	LV_ModifyCol(5, Round(0.4 * v_OutVarTemp2W))
 	LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W) - 3)
-	;*[One]
-	/*
-		if (!SectionList.MaxIndex())
-			v_LibHotstringCnt := 0
-		else 
-			v_LibHotstringCnt := SectionList.MaxIndex()
-		GuiControl, , % IdText13,  % v_LibHotstringCnt
-		GuiControl, , % IdText13b, % v_LibHotstringCnt
-	*/
-	
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3877,8 +3862,8 @@ F_GuiMain_CreateObject()
 	
 ; ------------------------------------------------------------------------------------------------------------------------------------
 	
-	F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
-	{
+F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
+{
 		global ;assume-global mode
 		local v_IsLibraryEmpty := true, v_ConfigLibrary := "", v_ConfigFlag := false
 		,o_Libraries := {}, v_LibFileName := "", key := 0, value := "", TempLoadLib := "", TempShowTipsLib := "", v_LibFlagTemp := ""
@@ -3995,12 +3980,12 @@ F_GuiMain_CreateObject()
 		
 		IniWrite, % SectionTemp, Config.ini, ShowTipsLibraries
 		return
-	}
+}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_LoadLibrariesToTables()
-	{ 
+F_LoadLibrariesToTables()
+{ 
 		global	;assume-global mode
 		local name := "", varSearch := "", tabSearch := ""
 		a_Library 				:= []
@@ -4111,8 +4096,8 @@ F_ini_StartHotstring(txt, nameoffile)
 			}
 		}
 		
-		
-		if ((!v_TriggerString) and Options and SendFun and OnOff and TextInsert)
+		;*[One]
+		if ((!v_TriggerString) and (Options or SendFun or OnOff or TextInsert))
 		{
 			MsgBox, 262420, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Error reading library file:"] . "`n`n" . nameoffile . "`n`n" . TransA["the following line is found:"] 
 					. "`n" . txt . "`n`n" . TransA["This line do not comply to format required by this application."] . "`n`n" 
@@ -4122,7 +4107,8 @@ F_ini_StartHotstring(txt, nameoffile)
 			IfMsgBox, Yes
 				return
 		}
-		if !((Options == "") and (v_TriggerString == "") and (TextInsert == "") and (OnOff == ""))
+		;if !((Options == "") and (v_TriggerString == "") and (TextInsert == "") and (OnOff == ""))
+		if (Options and v_TriggerString and TextInsert and OnOff)
 			Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, Oflag), OnOff)
 		return
 	}
@@ -4780,15 +4766,16 @@ F_ImportLibrary(filename)
 		. A_Space . "(" . v_Progress . A_Space . "%" . ")"
 	}	
 	FileAppend, % v_TheWholeFile, % v_OutputFile, UTF-8
-
+	
 	LV_Delete()	
+	;*[One]
+	Gui, HS3: -Disabled
+	Gui, Import: Destroy
 	F_ValidateIniLibSections()
 	F_RefreshListOfLibraries()
 	F_RefreshListOfLibraryTips()
 	F_UpdateSelHotLibDDL()
 	
-	Gui, HS3: -Disabled
-	Gui, Import: Destroy
 	F_LoadFile(OutNameNoExt . ".csv")
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been imported."]
 	return
