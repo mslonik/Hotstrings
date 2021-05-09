@@ -848,6 +848,272 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+
+;#[AddHotstring]
+;AddHotstring: 
+;1. Read all inputs. 
+;2. Create Hotstring definition according to inputs. 
+;3. Read the library file into List View. 
+;4. Sort List View. 
+;5. Delete library file. 
+;6. Save List View into the library file.
+;7. Increment library counter.
+F_SetHotstring()
+{
+	global ;assume-global mode
+	local 	TextInsert := "", OldOptions := "", Options := "", SendFun := "", OnOff := "", EnDis := "", OutputFile := "", InputFile := "", LString := "", ModifiedFlag := false
+			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
+	
+	;1. Read all inputs. 
+	Gui, % A_DefaultGui . ":" A_Space . "Submit", NoHide
+	Gui, % A_DefaultGui . ":" A_Space . "+OwnDialogs"
+	
+	if (Trim(v_TriggerString) = "")
+	{
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Enter triggerstring before hotstring is set"]
+		return
+	}
+	if InStr(v_SelectFunction, "Menu")
+	{
+		if ((Trim(v_EnterHotstring) = "") and (Trim(v_EnterHotstring1) = "") and (Trim(v_EnterHotstring2) = "") and (Trim(v_EnterHotstring3) = "") and (Trim(v_EnterHotstring4) = "") and (Trim(v_EnterHotstring5) = "") and (Trim(v_EnterHotstring6) = ""))
+		{
+			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Replacement text is blank. Do you want to proceed?"]
+			IfMsgBox, No
+				return
+		}
+		if (Trim(v_EnterHotstring) != "")
+			TextInsert := % TextInsert . "¦" . v_EnterHotstring
+		if (Trim(v_EnterHotstring1) != "")
+			TextInsert := % TextInsert . "¦" . v_EnterHotstring1
+		if (Trim(v_EnterHotstring2) != "")
+			TextInsert := % TextInsert . "¦" . v_EnterHotstring2
+		if (Trim(v_EnterHotstring3) != "")
+			TextInsert := % TextInsert . "¦" . v_EnterHotstring3
+		if (Trim(v_EnterHotstring4) != "")
+			TextInsert := % TextInsert . "¦" . v_EnterHotstring4
+		if (Trim(v_EnterHotstring5) != "")
+			TextInsert := % TextInsert . "¦" . v_EnterHotstring5
+		if (Trim(v_EnterHotstring6) != "")
+			TextInsert := % TextInsert . "¦" . v_EnterHotstring6
+		TextInsert := SubStr(TextInsert, 2, StrLen(TextInsert)-1)
+	}
+	else
+	{
+		if (Trim(v_EnterHotstring) = "")
+		{
+			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Replacement text is blank. Do you want to proceed?"] 
+			IfMsgBox, No
+				return
+		}
+		else
+		{
+			TextInsert := v_EnterHotstring
+		}
+	}
+	
+	if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
+	{
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Choose existing hotstring library file before saving!"]
+		return
+	}
+	
+	/*
+	; Added this conditional to prevent Hotstrings from a file losing the C1 option caused by
+	; cascading ternary operators when creating the options string. CapCheck set to 1 when 
+	; a Hotstring from a file contains the C1 option.
+		
+		If (v_CaseSensitiveC1 = 1) and ((OldOptions = "") or (InStr(OldOptions,"C1"))) and (Instr(a_String[2],"C1"))
+			OldOptions := StrReplace(OldOptions,"C1") . "C"
+		v_CaseSensitiveC1 := 0
+	*/
+	
+	Options := v_OptionCaseSensitive = 1 ? Options . "C"
+		: (Instr(OldOptions,"C1")) ?  Options . "C0"
+		: (Instr(OldOptions,"C0")) ?  Options
+		: (Instr(OldOptions,"C")) ? Options . "C1" : Options
+	
+	Options := v_OptionNoBackspace = 1 ?  Options . "B0" 
+		: (v_OptionNoBackspace = 0) and (Instr(OldOptions,"B0")) ? Options . "B" : Options
+	
+	Options := (v_OptionImmediateExecute = 1) ?  Options . "*" 
+		: (Instr(OldOptions,"*0")) ?  Options
+		: (Instr(OldOptions,"*")) ? Options . "*0" : Options
+	
+	Options := v_OptionInsideWord = 1 ?  Options . "?" : Options
+	
+	Options := (v_OptionNoEndChar = 1) ?  Options . "O"
+		: (Instr(OldOptions,"O0")) ?  Options
+		: (Instr(OldOptions,"O")) ? Options . "O0" : Options
+	
+; Add new/changed target item in DropDownList
+	if (v_SelectFunction == "Clipboard (CL)")
+		SendFun := "F_ViaClipboard"
+	else if (v_SelectFunction == "SendInput (SI)")
+		SendFun := "F_NormalWay"
+	else if (v_SelectFunction == "Menu & Clipboard (MCL)")
+		SendFun := "F_MenuText"
+	else if (v_SelectFunction == "Menu & SendInput (MSI)")
+		SendFun := "F_MenuTextAHK"
+	
+	if (v_OptionDisable == 1)
+		OnOff := "Off"
+	else
+		OnOff := "On"
+	
+	;2. Create Hotstring definition according to inputs. 
+	if (InStr(Options,"O", 0))
+		Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, true), OnOff)
+	else
+		Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, false), OnOff)
+	
+	Hotstring("Reset") ;reset hotstring recognizer
+	
+	;3. Read the library file into List View. 
+	SendFun := ""
+	if (v_OptionDisable)
+		EnDis := "Dis"
+	else
+		EnDis := "En"
+	
+	if (v_SelectFunction == "Clipboard (CL)")
+		SendFun := "CL"
+	else if (v_SelectFunction == "SendInput (SI)")
+		SendFun := "SI"
+	else if (v_SelectFunction == "Menu & Clipboard (MCL)")
+		SendFun := "MCL"
+	else if (v_SelectFunction == "Menu & SendInput (MSI)")
+		SendFun := "MSI"
+	
+	OutputFile 	:= A_ScriptDir . "\Libraries\temp.csv"	; changed on 2021-02-13
+	InputFile 	:= A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary 
+	LString 		:= "‖" . v_TriggerString . "‖"
+	ModifiedFlag	:= false ;if true, duplicate triggerstring definition is found, if false, definition is new
+	
+	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
+	Gui, ListView, % IdListView1	;if HS4 is active still correct ListView have to be loaded with data
+	
+	Loop, Read, %InputFile%, %OutputFile% ;read all definitions from this library file 
+	{
+		if (InStr(A_LoopReadLine, LString, 1) and InStr(Options, "C")) or (InStr(A_LoopReadLine, LString) and !(InStr(Options, "C")))
+		{
+			MsgBox, 68,, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in a file"] . A_Space . v_SelectHotstringLibrary . "." . A_Space . TransA["Do you want to proceed?"]
+			IfMsgBox, No
+				return
+			LV_Modify(A_Index, "", v_TriggerString, Options, SendFun, EnDis, TextInsert, v_Comment)
+			ModifiedFlag := true
+		}
+	}
+	if !(ModifiedFlag) 
+	{
+		LV_Add("",  v_TriggerString, Options, SendFun, EnDis, TextInsert, v_Comment)
+		txt := % Options . "‖" . v_TriggerString . "‖" . SendFun . "‖" . EnDis . "‖" . TextInsert . "‖" . v_Comment ;tylko to się liczy
+		;SectionList.Push(txt)
+		a_Triggers.Push(v_TriggerString) ;added to table of hotstring recognizer (a_Triggers)
+	}
+	;4. Sort List View. 
+	LV_ModifyCol(1, "Sort")
+	;5. Delete library file. 
+	FileDelete, %InputFile%
+	
+	;6. Save List View into the library file.
+	Loop, % LV_GetCount()
+	{
+		LV_GetText(txt1, A_Index, 2)
+		LV_GetText(txt2, A_Index, 1)
+		LV_GetText(txt3, A_Index, 3)
+		LV_GetText(txt4, A_Index, 4)
+		LV_GetText(txt5, A_Index, 5)
+		LV_GetText(txt6, A_Index, 6)
+		;tu jestem
+		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
+	}
+	FileAppend, % txt, Libraries\%v_SelectHotstringLibrary%, UTF-8
+	
+	;7. Increment library counter.
+	++v_LibHotstringCnt
+	++v_TotalHotstringCnt
+	GuiControl, , % IdText13,  % v_LibHotstringCnt
+	GuiControl, , % IdText13b, % v_LibHotstringCnt
+	GuiControl, , % IdText12,  % v_TotalHotstringCnt
+	GuiControl, , % IdText12b, % v_TotalHotstringCnt
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring added to the file"] . A_Space . v_SelectHotstringLibrary . A_Space . "!" 
+	
+	return
+}
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_Clear()
+{
+	global	;assume-global mode
+	Gui,		  HS3: Font, % "c" . c_FontColor
+	GuiControl, HS3:, % IdEdit1,  				;v_TriggerString
+	GuiControl, HS3: Font, % IdCheckBox1
+	GuiControl, HS3:, % IdCheckBox1, 0
+	GuiControl, HS3: Font, % IdCheckBox2
+	GuiControl, HS3:, % IdCheckBox2, 0
+	GuiControl, HS3: Font, % IdCheckBox3
+	GuiControl, HS3:, % IdCheckBox3, 0
+	GuiControl, HS3: Font, % IdCheckBox4
+	GuiControl, HS3:, % IdCheckBox4, 0
+	GuiControl, HS3: Font, % IdCheckBox5
+	GuiControl, HS3:, % IdCheckBox5, 0
+	GuiControl, HS3: Font, % IdCheckBox6
+	GuiControl, HS3:, % IdCheckBox6, 0
+	GuiControl, HS3: Choose, % IdDDL1, SendInput (SI) ;v_SelectFunction 
+	GuiControl, HS3:, % IdEdit2,  				;v_EnterHotstring
+	GuiControl, HS3:, % IdEdit3, 					;v_EnterHotstring1
+	GuiControl, HS3: Disable, % IdEdit3 			;v_EnterHotstring1
+	GuiControl, HS3:, % IdEdit4, 					;v_EnterHotstring2
+	GuiControl, HS3: Disable, % IdEdit4 			;v_EnterHotstring2
+	GuiControl, HS3:, % IdEdit5, 					;v_EnterHotstring3
+	GuiControl, HS3: Disable, % IdEdit5 			;v_EnterHotstring3
+	GuiControl, HS3:, % IdEdit6, 					;v_EnterHotstring4
+	GuiControl, HS3: Disable, % IdEdit6 			;v_EnterHotstring4
+	GuiControl, HS3:, % IdEdit7, 					;v_EnterHotstring5
+	GuiControl, HS3: Disable, % IdEdit7 			;v_EnterHotstring5
+	GuiControl, HS3:, % IdEdit8, 					;v_EnterHotstring6
+	GuiControl, HS3: Disable, % IdEdit8 			;v_EnterHotstring6
+	GuiControl, HS3:, % IdEdit9,  				;Comment
+	GuiControl, HS3: Disable, % IdButton4
+	GuiControl, HS3:, % IdEdit10,  				;Sandbox
+	GuiControl, HS3: ChooseString, % IdDDL2, % TransA["↓ Click here to select hotstring library ↓"]
+	LV_Delete()
+	
+	Gui,		  HS4: Font, % "c" . c_FontColor
+	GuiControl, HS4:, % IdEdit1b,  				;v_TriggerString
+	GuiControl, HS4: Font, % IdCheckBox1b
+	GuiControl, HS4:, % IdCheckBox1b, 0
+	GuiControl, HS4: Font, % IdCheckBox2b
+	GuiControl, HS4:, % IdCheckBox2b, 0
+	GuiControl, HS4: Font, % IdCheckBox3b
+	GuiControl, HS4:, % IdCheckBox3b, 0
+	GuiControl, HS4: Font, % IdCheckBox4b
+	GuiControl, HS4:, % IdCheckBox4b, 0
+	GuiControl, HS4: Font, % IdCheckBox5b
+	GuiControl, HS4:, % IdCheckBox5b, 0
+	GuiControl, HS4: Font, % IdCheckBox6b
+	GuiControl, HS4:, % IdCheckBox6b, 0
+	GuiControl, HS4: Choose, % IdDDL1b, SendInput (SI) ;v_SelectFunction 
+	GuiControl, HS4: , % IdEdit2b,  				;v_EnterHotstring
+	GuiControl, HS4: , % IdEdit3b, 					;v_EnterHotstring1
+	GuiControl, HS4: Disable, % IdEdit3b 			;v_EnterHotstring1
+	GuiControl, HS4: , % IdEdit4b, 					;v_EnterHotstring2
+	GuiControl, HS4: Disable, % IdEdit4b 			;v_EnterHotstring2
+	GuiControl, HS4: , % IdEdit5b, 					;v_EnterHotstring3
+	GuiControl, HS4: Disable, % IdEdit5b 			;v_EnterHotstring3
+	GuiControl, HS4: , % IdEdit6b, 					;v_EnterHotstring4
+	GuiControl, HS4: Disable, % IdEdit6b 			;v_EnterHotstring4
+	GuiControl, HS4: , % IdEdit7b, 					;v_EnterHotstring5
+	GuiControl, HS4: Disable, % IdEdit7b 			;v_EnterHotstring5
+	GuiControl, HS4: , % IdEdit8b, 					;v_EnterHotstring6
+	GuiControl, HS4: Disable, % IdEdit8b 			;v_EnterHotstring6
+	GuiControl, HS4: , % IdEdit9b,  				;Comment
+	GuiControl, HS4: Disable, % IdButton4b
+	GuiControl, HS4: , % IdEdit10b,  				;Sandbox
+	GuiControl, HS4: ChooseString, % IdDDL2b, % TransA["↓ Click here to select hotstring library ↓"]
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Move()
 {
 	global	;assume-global mode
@@ -917,7 +1183,7 @@ F_Move()
 		LV_GetText(txt4, A_Index, 4)
 		LV_GetText(txt5, A_Index, 5)
 		LV_GetText(txt6, A_Index, 6)
-		txt := txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
+		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
 	}
 	FileAppend, % txt, Libraries\%v_SourceLibrary%, UTF-8
 	F_Clear()
@@ -5021,280 +5287,7 @@ warning												= warning
 	#If	;#If (v_Param != "l") 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-;#[AddHotstring]
-;AddHotstring: 
-;1. Read all inputs. 
-;2. Create Hotstring definition according to inputs. 
-;3. Read the library file into List View. 
-;4. Sort List View. 
-;5. Delete library file. 
-;6. Save List View into the library file.
-;7. Increment library counter.
-	F_SetHotstring()
-	{
-		global ;assume-global mode
-		local 	TextInsert := "", OldOptions := "", Options := "", SendFun := "", OnOff := "", EnDis := "", OutputFile := "", InputFile := "", LString := "", ModifiedFlag := false
-			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
-		
-	;1. Read all inputs. 
-		Gui, % A_DefaultGui . ":" A_Space . "Submit", NoHide
-		Gui, % A_DefaultGui . ":" A_Space . "+OwnDialogs"
-		
-		if (Trim(v_TriggerString) = "")
-		{
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Enter triggerstring before hotstring is set"]
-			return
-		}
-		if InStr(v_SelectFunction, "Menu")
-		{
-			if ((Trim(v_EnterHotstring) = "") and (Trim(v_EnterHotstring1) = "") and (Trim(v_EnterHotstring2) = "") and (Trim(v_EnterHotstring3) = "") and (Trim(v_EnterHotstring4) = "") and (Trim(v_EnterHotstring5) = "") and (Trim(v_EnterHotstring6) = ""))
-			{
-				MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Replacement text is blank. Do you want to proceed?"]
-				IfMsgBox, No
-					return
-			}
-			if (Trim(v_EnterHotstring) != "")
-				TextInsert := % TextInsert . "¦" . v_EnterHotstring
-			if (Trim(v_EnterHotstring1) != "")
-				TextInsert := % TextInsert . "¦" . v_EnterHotstring1
-			if (Trim(v_EnterHotstring2) != "")
-				TextInsert := % TextInsert . "¦" . v_EnterHotstring2
-			if (Trim(v_EnterHotstring3) != "")
-				TextInsert := % TextInsert . "¦" . v_EnterHotstring3
-			if (Trim(v_EnterHotstring4) != "")
-				TextInsert := % TextInsert . "¦" . v_EnterHotstring4
-			if (Trim(v_EnterHotstring5) != "")
-				TextInsert := % TextInsert . "¦" . v_EnterHotstring5
-			if (Trim(v_EnterHotstring6) != "")
-				TextInsert := % TextInsert . "¦" . v_EnterHotstring6
-			TextInsert := SubStr(TextInsert, 2, StrLen(TextInsert)-1)
-		}
-		else
-		{
-			if (Trim(v_EnterHotstring) = "")
-			{
-				MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Replacement text is blank. Do you want to proceed?"] 
-				IfMsgBox, No
-					return
-			}
-			else
-			{
-				TextInsert := v_EnterHotstring
-			}
-		}
-		
-		if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
-		{
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Choose existing hotstring library file before saving!"]
-			return
-		}
-		
-		/*
-	; Added this conditional to prevent Hotstrings from a file losing the C1 option caused by
-	; cascading ternary operators when creating the options string. CapCheck set to 1 when 
-	; a Hotstring from a file contains the C1 option.
-			
-			If (v_CaseSensitiveC1 = 1) and ((OldOptions = "") or (InStr(OldOptions,"C1"))) and (Instr(a_String[2],"C1"))
-				OldOptions := StrReplace(OldOptions,"C1") . "C"
-			v_CaseSensitiveC1 := 0
-		*/
-		
-		Options := v_OptionCaseSensitive = 1 ? Options . "C"
-		: (Instr(OldOptions,"C1")) ?  Options . "C0"
-		: (Instr(OldOptions,"C0")) ?  Options
-		: (Instr(OldOptions,"C")) ? Options . "C1" : Options
-		
-		Options := v_OptionNoBackspace = 1 ?  Options . "B0" 
-		: (v_OptionNoBackspace = 0) and (Instr(OldOptions,"B0")) ? Options . "B" : Options
-		
-		Options := (v_OptionImmediateExecute = 1) ?  Options . "*" 
-		: (Instr(OldOptions,"*0")) ?  Options
-		: (Instr(OldOptions,"*")) ? Options . "*0" : Options
-		
-		Options := v_OptionInsideWord = 1 ?  Options . "?" : Options
-		
-		Options := (v_OptionNoEndChar = 1) ?  Options . "O"
-		: (Instr(OldOptions,"O0")) ?  Options
-		: (Instr(OldOptions,"O")) ? Options . "O0" : Options
-		
-	;a_String[2] := Options ;???
-		
-; Add new/changed target item in DropDownList
-		if (v_SelectFunction == "Clipboard (CL)")
-			SendFun := "F_ViaClipboard"
-		else if (v_SelectFunction == "SendInput (SI)")
-			SendFun := "F_NormalWay"
-		else if (v_SelectFunction == "Menu & Clipboard (MCL)")
-			SendFun := "F_MenuText"
-		else if (v_SelectFunction == "Menu & SendInput (MSI)")
-			SendFun := "F_MenuTextAHK"
-		
-		if (v_OptionDisable == 1)
-			OnOff := "Off"
-		else
-			OnOff := "On"
-		
-		
-	;2. Create Hotstring definition according to inputs. 
-		if (InStr(Options,"O", 0))
-			Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, true), OnOff)
-		else
-			Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, false), OnOff)
-		
-		Hotstring("Reset") ;reset hotstring recognizer
-		
-	;3. Read the library file into List View. 
-		SendFun := ""
-		if (v_OptionDisable)
-			EnDis := "Dis"
-		else
-			EnDis := "En"
-		
-		
-		if (v_SelectFunction == "Clipboard (CL)")
-			SendFun := "CL"
-		else if (v_SelectFunction == "SendInput (SI)")
-			SendFun := "SI"
-		else if (v_SelectFunction == "Menu & Clipboard (MCL)")
-			SendFun := "MCL"
-		else if (v_SelectFunction == "Menu & SendInput (MSI)")
-			SendFun := "MSI"
-		
-		OutputFile 	:= A_ScriptDir . "\Libraries\temp.csv"	; changed on 2021-02-13
-		InputFile 	:= A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary 
-		LString 		:= "‖" . v_TriggerString . "‖"
-		ModifiedFlag	:= false ;if true, duplicate triggerstring definition is found, if false, definition is new
-		
-		Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
-		Gui, ListView, % IdListView1	;if HS4 is active still correct ListView have to be loaded with data
-		
-		Loop, Read, %InputFile%, %OutputFile% ;read all definitions from this library file 
-		{
-			
-			if (InStr(A_LoopReadLine, LString, 1) and InStr(Options, "C")) or (InStr(A_LoopReadLine, LString) and !(InStr(Options, "C")))
-			{
-				MsgBox, 68,, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in a file"] . A_Space . v_SelectHotstringLibrary . "." . A_Space . TransA["Do you want to proceed?"]
-				IfMsgBox, No
-					return
-				LV_Modify(A_Index, "", v_TriggerString, Options, SendFun, EnDis, TextInsert, v_Comment)
-				ModifiedFlag := true
-			}
-		}
-		if !(ModifiedFlag) 
-		{
-			LV_Add("",  v_TriggerString, Options, SendFun, EnDis, TextInsert, v_Comment)
-			txt := % Options . "‖" . v_TriggerString . "‖" . SendFun . "‖" . EnDis . "‖" . TextInsert . "‖" . v_Comment ;tylko to się liczy
-		;SectionList.Push(txt)
-			a_Triggers.Push(v_TriggerString) ;added to table of hotstring recognizer (a_Triggers)
-		}
-	;4. Sort List View. 
-		LV_ModifyCol(1, "Sort")
-	;5. Delete library file. 
-		FileDelete, %InputFile%
-		
-	;6. Save List View into the library file.
-		Loop, % LV_GetCount()
-		{
-			LV_GetText(txt1, A_Index, 2)
-			LV_GetText(txt2, A_Index, 1)
-			LV_GetText(txt3, A_Index, 3)
-			LV_GetText(txt4, A_Index, 4)
-			LV_GetText(txt5, A_Index, 5)
-			LV_GetText(txt6, A_Index, 6)
-			txt := % txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`r`n"
-			if !((txt1 == "") and (txt2 == "") and (txt3 == "") and (txt4 == "") and (txt5 == "") and (txt6 == "")) ;only not empty definitions are added, not sure why
-				FileAppend, %txt%, Libraries\%v_SelectHotstringLibrary%, UTF-8
-		}
-		
-	;7. Increment library counter.
-		++v_LibHotstringCnt
-		++v_TotalHotstringCnt
-		GuiControl, , % IdText13,  % v_LibHotstringCnt
-		GuiControl, , % IdText13b, % v_LibHotstringCnt
-		GuiControl, , % IdText12,  % v_TotalHotstringCnt
-		GuiControl, , % IdText12b, % v_TotalHotstringCnt
-		
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring added to the file"] . A_Space . v_SelectHotstringLibrary . A_Space . "!" 
-		return
-	}
-	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_Clear()
-	{
-		global	;assume-global mode
-		Gui,		  HS3: Font, % "c" . c_FontColor
-		GuiControl, HS3:, % IdEdit1,  				;v_TriggerString
-		GuiControl, HS3: Font, % IdCheckBox1
-		GuiControl, HS3:, % IdCheckBox1, 0
-		GuiControl, HS3: Font, % IdCheckBox2
-		GuiControl, HS3:, % IdCheckBox2, 0
-		GuiControl, HS3: Font, % IdCheckBox3
-		GuiControl, HS3:, % IdCheckBox3, 0
-		GuiControl, HS3: Font, % IdCheckBox4
-		GuiControl, HS3:, % IdCheckBox4, 0
-		GuiControl, HS3: Font, % IdCheckBox5
-		GuiControl, HS3:, % IdCheckBox5, 0
-		GuiControl, HS3: Font, % IdCheckBox6
-		GuiControl, HS3:, % IdCheckBox6, 0
-		GuiControl, HS3: Choose, % IdDDL1, SendInput (SI) ;v_SelectFunction 
-		GuiControl, HS3:, % IdEdit2,  				;v_EnterHotstring
-		GuiControl, HS3:, % IdEdit3, 					;v_EnterHotstring1
-		GuiControl, HS3: Disable, % IdEdit3 			;v_EnterHotstring1
-		GuiControl, HS3:, % IdEdit4, 					;v_EnterHotstring2
-		GuiControl, HS3: Disable, % IdEdit4 			;v_EnterHotstring2
-		GuiControl, HS3:, % IdEdit5, 					;v_EnterHotstring3
-		GuiControl, HS3: Disable, % IdEdit5 			;v_EnterHotstring3
-		GuiControl, HS3:, % IdEdit6, 					;v_EnterHotstring4
-		GuiControl, HS3: Disable, % IdEdit6 			;v_EnterHotstring4
-		GuiControl, HS3:, % IdEdit7, 					;v_EnterHotstring5
-		GuiControl, HS3: Disable, % IdEdit7 			;v_EnterHotstring5
-		GuiControl, HS3:, % IdEdit8, 					;v_EnterHotstring6
-		GuiControl, HS3: Disable, % IdEdit8 			;v_EnterHotstring6
-		GuiControl, HS3:, % IdEdit9,  				;Comment
-		GuiControl, HS3: Disable, % IdButton4
-		GuiControl, HS3:, % IdEdit10,  				;Sandbox
-		GuiControl, HS3: ChooseString, % IdDDL2, % TransA["↓ Click here to select hotstring library ↓"]
-		LV_Delete()
-		
-		Gui,		  HS4: Font, % "c" . c_FontColor
-		GuiControl, HS4:, % IdEdit1b,  				;v_TriggerString
-		GuiControl, HS4: Font, % IdCheckBox1b
-		GuiControl, HS4:, % IdCheckBox1b, 0
-		GuiControl, HS4: Font, % IdCheckBox2b
-		GuiControl, HS4:, % IdCheckBox2b, 0
-		GuiControl, HS4: Font, % IdCheckBox3b
-		GuiControl, HS4:, % IdCheckBox3b, 0
-		GuiControl, HS4: Font, % IdCheckBox4b
-		GuiControl, HS4:, % IdCheckBox4b, 0
-		GuiControl, HS4: Font, % IdCheckBox5b
-		GuiControl, HS4:, % IdCheckBox5b, 0
-		GuiControl, HS4: Font, % IdCheckBox6b
-		GuiControl, HS4:, % IdCheckBox6b, 0
-		GuiControl, HS4: Choose, % IdDDL1b, SendInput (SI) ;v_SelectFunction 
-		GuiControl, HS4: , % IdEdit2b,  				;v_EnterHotstring
-		GuiControl, HS4: , % IdEdit3b, 					;v_EnterHotstring1
-		GuiControl, HS4: Disable, % IdEdit3b 			;v_EnterHotstring1
-		GuiControl, HS4: , % IdEdit4b, 					;v_EnterHotstring2
-		GuiControl, HS4: Disable, % IdEdit4b 			;v_EnterHotstring2
-		GuiControl, HS4: , % IdEdit5b, 					;v_EnterHotstring3
-		GuiControl, HS4: Disable, % IdEdit5b 			;v_EnterHotstring3
-		GuiControl, HS4: , % IdEdit6b, 					;v_EnterHotstring4
-		GuiControl, HS4: Disable, % IdEdit6b 			;v_EnterHotstring4
-		GuiControl, HS4: , % IdEdit7b, 					;v_EnterHotstring5
-		GuiControl, HS4: Disable, % IdEdit7b 			;v_EnterHotstring5
-		GuiControl, HS4: , % IdEdit8b, 					;v_EnterHotstring6
-		GuiControl, HS4: Disable, % IdEdit8b 			;v_EnterHotstring6
-		GuiControl, HS4: , % IdEdit9b,  				;Comment
-		GuiControl, HS4: Disable, % IdButton4b
-		GuiControl, HS4: , % IdEdit10b,  				;Sandbox
-		GuiControl, HS4: ChooseString, % IdDDL2b, % TransA["↓ Click here to select hotstring library ↓"]
-		
-		return
-	}
-	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	ALibOK:
+ALibOK:
 	Gui, ALib: Submit, NoHide
 	if (v_NewLib == "")
 	{
@@ -5320,15 +5313,15 @@ warning												= warning
 	ALibGuiEscape:
 	ALibGuiClose:
 	Gui, ALib: Destroy
-	return
+return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	MySlider:
+MySlider:
 	ini_Delay := MySlider
 	GuiControl,, DelayText, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_Delay . "`n`n" . TransA["This option is valid"]
 	IniWrite, %ini_Delay%, Config.ini, Configuration, Delay
-	return
+return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	Link1:
