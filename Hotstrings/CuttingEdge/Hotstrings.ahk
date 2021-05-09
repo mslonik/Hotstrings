@@ -783,11 +783,9 @@ return
 
 ~Alt::
 ;It's important to comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
-/*
-	~MButton::
-	~RButton::
-	~LButton::
-*/
+~MButton::
+~RButton::
+~LButton::
 ~LWin::
 ~RWin::
 ~Down::
