@@ -476,7 +476,7 @@ F_RefreshListOfLibraries()
 Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	F_RefreshListOfLibraryTips
 F_RefreshListOfLibraryTips()
 
-Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],		L_ImportLibrary
+Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],		F_ImportLibrary
 Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  			F_ExportLibraryStatic
 Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  			L_ExportLibraryDynamic
 Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],		:ExportSubmenu
@@ -4948,7 +4948,7 @@ F_GuiAbout()
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-F_ImportLibrary(filename) 
+F_ImportLibrary() 
 {
 	global	;assume-global mode
 	local IdImport_P1 := 0, IdImport_T1 := 0
@@ -4960,7 +4960,10 @@ F_ImportLibrary(filename)
 	,v_TheWholeFile := ""
 	,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
 	,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
-	,NewStr := ""
+	,NewStr := "", v_LibraryName := ""
+	
+	F_WhichGui()
+	FileSelectFile, v_LibraryName, 3, %A_ScriptDir%, % TransA["Choose (.ahk) file containing (triggerstring, hotstring) definitions for import"], AutoHotkey (*.ahk)
 	
 	NewStr := RegExReplace(TransA["Import from .ahk to .csv"], "&", "")
 	
@@ -4995,7 +4998,7 @@ F_ImportLibrary(filename)
 	WinGetPos, , , ImportGuiWinW, ImportGuiWinH, % "ahk_id" . ImportGuiHwnd
 	DetectHiddenWindows, Off
 	Gui, Import: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ImportGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ImportGuiWinH) / 2 . A_Space . "AutoSize"
-	SplitPath, filename, ,,, OutNameNoExt
+	SplitPath, v_LibraryName, ,,, OutNameNoExt
 	v_OutputFile := % A_ScriptDir . "\Libraries\" . OutNameNoExt . ".csv"
 	
 	if (FileExist(v_OutputFile))
@@ -5006,7 +5009,7 @@ F_ImportLibrary(filename)
 			FileDelete, % v_OutputFile
 	}
 	
-	FileRead, v_TheWholeFile, % filename
+	FileRead, v_TheWholeFile, % v_LibraryName
 	Loop, Parse, v_TheWholeFile, `r`n
 		if (A_LoopField)
 			v_TotalLines++
@@ -5779,18 +5782,11 @@ return
 	IniWrite, %ini_MenuSound%, Config.ini, Configuration, MenuSound
 	return
 	
-	L_ImportLibrary: ;The label subroutine is run as a new thread when the user selects the menu item 
-	F_WhichGui()
-	FileSelectFile, v_LibraryName, 3, %A_ScriptDir%, % TransA["Choose (.ahk) file containing (triggerstring, hotstring) definitions for import"], AutoHotkey (*.ahk)
-	if !(v_LibraryName == "")
-		F_ImportLibrary(v_LibraryName)
-	return
-	
-	L_ExportLibraryDynamic:
+L_ExportLibraryDynamic:
 	FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries", % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
 	if !(v_LibraryName == "")
 		F_ExportLibraryDynamic(v_LibraryName)
-	return
+return
 	
 	L_SortTipsAlphabetically:
 	Menu, SubmenuTips, ToggleCheck, % TransA["Sort tips alphabetically"]
