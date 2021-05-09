@@ -499,6 +499,9 @@ Gui, 	HS4: Menu, HSMenu
 F_GuiAbout_CreateObjects()
 F_GuiAbout_DetermineConstraints()
 
+IniRead, ini_GuiReload, 						Config.ini, GraphicalUserInterface, GuiReload
+if (ini_GuiReload)
+	Goto, L_GUIInit
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; Beginning of the main loop of application.
@@ -1024,7 +1027,6 @@ F_SetHotstring()
 		LV_GetText(txt4, A_Index, 4)
 		LV_GetText(txt5, A_Index, 5)
 		LV_GetText(txt6, A_Index, 6)
-		;tu jestem
 		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
 	}
 	FileAppend, % txt, Libraries\%v_SelectHotstringLibrary%, UTF-8
@@ -2556,6 +2558,8 @@ F_HSLV()
 			if (WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd))
 			{
 				F_SaveGUIPos()
+				ini_GuiReload := true
+				IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
 				Reload
 			}
 			else
@@ -2653,6 +2657,7 @@ GuiControlColor=
 GuiSizeOfMarginX=10
 GuiSizeOfMarginY=10
 GuiFontType=Calibri
+GuiReload=
 [Configuration]
 UndoHotstring=1
 Delay=300
@@ -5214,15 +5219,15 @@ warning												= warning
 ; --------------------------- SECTION OF LABELS ---------------------------
 	
 	
-	TurnOffTooltip:
+TurnOffTooltip:
 	ToolTip ,
-	return
+return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
-	#If (v_Param != "l") 
-	^#h::		; Event
-	L_GUIInit:
+#If (v_Param != "l") 
+^#h::		; Event
+L_GUIInit:
 	
 	if (v_ResizingFlag) ;if run for the very first time
 	{
@@ -5271,10 +5276,6 @@ warning												= warning
 	}
 	else ;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakresem dostępnym na tym komputerze w momencie uruchomienia
 	{
-	;WinGet, fikumiku1, MinMax, % "ahk_id" HS3GuiHwnd
-	;WinGet, fikumiku2, MinMax, % "ahk_id" HS4GuiHwnd
-	;MsgBox, , fikumiku, % "HS3:" . A_Space . fikumiku1 . "`n`n" . "HS4:" . A_Space . fikumiku2
-	;Switch v_WhichGUIisMinimzed
 		Switch ini_WhichGui
 		{
 			Case "HS3":
@@ -5283,8 +5284,8 @@ warning												= warning
 			Gui, HS4: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
 		}
 	}
-	return
-	#If	;#If (v_Param != "l") 
+return
+#If	;#If (v_Param != "l") 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
 ALibOK:
@@ -5747,18 +5748,18 @@ return
 		Menu, Tray, UnCheck, % TransA["Suspend Hotkeys"]
 	return
 	
-	L_TrayPauseScript:
+L_TrayPauseScript:
 	Pause, Toggle, 1
 	if (A_IsPaused)
 		Menu, Tray, Check,	 % TransA["Pause Script"]
 	else
 		Menu, Tray, UnCheck, % TransA["Pause Script"]
-	return
+return
 	
-	L_TrayExit:
+L_TrayExit:
 	ExitApp, 2	;2 = by Tray
 	
-	L_TrayReload:	;new thread starts here
+L_TrayReload:	;new thread starts here
 	F_WhichGui()
 	F_Reload()
-	return
+return
