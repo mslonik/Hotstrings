@@ -51,7 +51,7 @@ global ini_Tips 				:= ""
 global ini_TipsSortAlphabetically 	:= ""
 global ini_TipsSortByLength 		:= ""
 global v_FlagSound 				:= 0
-global ini_GuiReload			:= 0
+global ini_GuiReload			:= false
 ;I couldn't find how to get system settings for size of menu font. Quick & dirty solution: manual setting of all fonts with variable c_FontSize.
 
 global v_HotstringFlag 			:= 0
@@ -500,15 +500,17 @@ Gui, 	HS4: Menu, HSMenu
 F_GuiAbout_CreateObjects()
 F_GuiAbout_DetermineConstraints()
 
-IniRead, ini_GuiReload, 						Config.ini, GraphicalUserInterface, GuiReload
-if (ini_GuiReload)
-	Goto, L_GUIInit
+/*
+	IniRead, ini_GuiReload, 						Config.ini, GraphicalUserInterface, GuiReload
+	if (ini_GuiReload)
+		Gosub, L_GUIInit
+*/
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; Beginning of the main loop of application.
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Loop,
-	
+;*[One]	
 {
 	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
 	if (ErrorLevel = "NewInput")
@@ -577,6 +579,7 @@ Loop,
 			a_SelectedTriggers := StrSplit(v_Tips, "`n")
 			if (ini_TipsSortAlphabetically)
 				a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
+			;*[Two]
 			if (ini_TipsSortByLength)
 				a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
 			v_Tips := ""
@@ -784,9 +787,11 @@ return
 
 ~Alt::
 ;It's important to comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
-~MButton::
-~RButton::
-~LButton::
+/*
+	~MButton::
+	~RButton::
+	~LButton::
+*/
 ~LWin::
 ~RWin::
 ~Down::
@@ -2056,9 +2061,8 @@ F_SelectLibrary()
 	GuiControl, , % IdText13b, % v_LibHotstringCnt
 	
 	FileRead, v_TheWholeFile, Libraries\%v_SelectHotstringLibrary%
-	;SectionList := StrSplit(Text, ["`n", "`r`n", "`r"])
 	
-	Loop, Parse, v_TheWholeFile, `n
+	Loop, Parse, v_TheWholeFile, `n, `r
 	{
 		if (A_LoopField)
 		{
@@ -2453,35 +2457,35 @@ F_HSLV()
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_CompileSubmenu()
+F_CompileSubmenu()
+{
+	local v_TempOutStr := ""
+	Loop, Parse, %  A_AhkPath, "\"
 	{
-		local v_TempOutStr := ""
-		Loop, Parse, %  A_AhkPath, "\"
-		{
-			if (Instr(A_LoopField, ".exe"))
-				break
-			v_TempOutStr .= A_LoopField . "\"
-		}
-		v_TempOutStr .= "Compiler" . "\" 
-		
-		if (FileExist(v_TempOutStr . "Ahk2Exe.exe"))
-		{
-			Menu, CompileSubmenu, Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
-			Menu, TraySubmenu,	  Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
-		}
-		if (FileExist(v_TempOutStr . "upx.exe"))
-		{
-			Menu, CompileSubmenu, Add, % TransA["Compressed executable (upx.exe)"], F_Compile
-			Menu, TraySubmenu,	  Add, % TransA["Compressed executable (upx.exe)"], F_Compile
-		}
-		if (FileExist(v_TempOutStr . "mpress.exe"))
-		{
-			Menu, CompileSubmenu, Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
-			Menu, TraySubmenu,		  Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
-		}
-		Menu,	ApplicationSubmenu,	Add,	% TransA["Compile"],				:CompileSubmenu
-		Menu,	Tray,			Add, % TransA["Compile"],				:TraySubmenu
+		if (Instr(A_LoopField, ".exe"))
+			break
+		v_TempOutStr .= A_LoopField . "\"
 	}
+	v_TempOutStr .= "Compiler" . "\" 
+	
+	if (FileExist(v_TempOutStr . "Ahk2Exe.exe"))
+	{
+		Menu, CompileSubmenu, Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
+		Menu, TraySubmenu,	  Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
+	}
+	if (FileExist(v_TempOutStr . "upx.exe"))
+	{
+		Menu, CompileSubmenu, Add, % TransA["Compressed executable (upx.exe)"], F_Compile
+		Menu, TraySubmenu,	  Add, % TransA["Compressed executable (upx.exe)"], F_Compile
+	}
+	if (FileExist(v_TempOutStr . "mpress.exe"))
+	{
+		Menu, CompileSubmenu, Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
+		Menu, TraySubmenu,		  Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
+	}
+	Menu,	Tray,			Add, % TransA["Compile"],				:TraySubmenu
+	Menu,	ApplicationSubmenu,	Add,	% TransA["Compile"],				:CompileSubmenu
+}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	F_Compile()
@@ -2533,38 +2537,38 @@ F_HSLV()
 		return
 	}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_Reload()
-	{
-		global ;assume-global mode
-		MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["Are you sure you want to reload this application now?"]
+F_Reload()
+{
+	global ;assume-global mode
+	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["Are you sure you want to reload this application now?"]
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
-		IfMsgBox, Yes
+	IfMsgBox, Yes
+	{
+		if (WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd))
 		{
-			if (WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd))
-			{
-				F_SaveGUIPos()
-				ini_GuiReload := true
-				IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
-				Reload
-			}
-			else
-				Reload
+			F_SaveGUIPos()
+			ini_GuiReload := true
+			IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
+			Reload
 		}
-		IfMsgBox, No
-			return
+		else
+			Reload
 	}
+	IfMsgBox, No
+		return
+}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_Exit()
-	{
-		global ;assume-global mode
-		MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["Are you sure you want to exit this application now?"]
-		IfMsgBox, Yes
-			ExitApp, 0 ;Zero is traditionally used to indicate success.
-		IfMsgBox, No
-			return
-	}
+F_Exit()
+{
+	global ;assume-global mode
+	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["Are you sure you want to exit this application now?"]
+	IfMsgBox, Yes
+		ExitApp, 0 ;Zero is traditionally used to indicate success.
+	IfMsgBox, No
+		return
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
 	F_ToggleSandbox()
@@ -3186,7 +3190,6 @@ F_LoadFile(nameoffile)
 		DetectHiddenWindows, Off
 		Gui, LoadFile: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - LoadFileGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - LoadFileGuiWinH) / 2 . A_Space . "AutoSize"
 	}
-	;*[One]
 	name := SubStr(nameoffile, 1, -4) ;filename without extension
 	Loop, Parse, v_TheWholeFile, `n, `r
 	{
@@ -4049,62 +4052,62 @@ F_LoadFile(nameoffile)
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_GuiAbout_DetermineConstraints()
-	{
-		global ;assume-global mode
+F_GuiAbout_DetermineConstraints()
+{
+	global ;assume-global mode
 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.
-		local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
 		,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
 		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
 		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
 							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
 		,HwndIdLongest := 0, 	IdLongest := 0
-		
+	
 ;4. Determine constraints, according to mock-up
-		v_xNext := c_xmarg
-		v_yNext := c_ymarg
-		GuiControl, Move, % IdLine1, % "x" v_xNext "y" v_yNext
-		GuiControlGet, v_OutVarTemp, Pos, % IdLine1
-		v_yNext += v_OutVarTempH + c_ymarg
-		GuiControl, Move, % IdLine2, % "x" v_xNext "y" v_yNext
-		GuiControlGet, v_OutVarTemp, Pos, % IdLine2
-		v_yNext += v_OutVarTempH + c_ymarg
-		GuiControl, Move, % IdLink1, % "x" v_xNext "y" v_yNext
-		GuiControlGet, v_OutVarTemp, Pos, % IdLink1
-		v_yNext += v_OutVarTempH + c_ymarg
-		GuiControl, Move, % IdLink2, % "x" v_xNext "y" v_yNext
-		
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdLine1, % "x" v_xNext "y" v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdLine1
+	v_yNext += v_OutVarTempH + c_ymarg
+	GuiControl, Move, % IdLine2, % "x" v_xNext "y" v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdLine2
+	v_yNext += v_OutVarTempH + c_ymarg
+	GuiControl, Move, % IdLink1, % "x" v_xNext "y" v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdLink1
+	v_yNext += v_OutVarTempH + c_ymarg
+	GuiControl, Move, % IdLink2, % "x" v_xNext "y" v_yNext
+	
 	;Find the longest substring:
-		Loop, Parse, % TransA["Enables Convenient Definition"], % "`n"
-		{
-			v_OutVarTemp1 := StrLen(Trim(A_LoopField))
-			if (v_OutVarTemp1 > v_OutVarTemp)
-				v_OutVarTemp := v_OutVarTemp1
-		}
-		Loop, Parse, % TransA["Enables Convenient Definition"], % "`n"
-		{
-			if (StrLen(Trim(A_LoopField)) = v_OutVarTemp)
-			{
-				Gui, MyAbout: Add, Text, x0 y0 HwndIdLongest, % Trim(A_LoopField)
-				GuiControl, Hide, % IdLongest
-				Break
-			}
-		}
-		
-		GuiControlGet, v_OutVarTemp1, Pos, % IdLongest ; weight of the longest text
-		GuiControlGet, v_OutVarTemp2, Pos, % IdAboutOkButton 
-		v_wNext := v_OutVarTemp2W + 2 * c_xmarg
-		v_xNext := (v_OutVarTemp1W / 2) - (v_wNext / 2)
-		v_yNext += v_OutVarTemp2H + c_ymarg
-		GuiControl, Move, % IdAboutOkButton, % "x" v_xNext "y" v_yNext "w" v_wNext
-		
-		GuiControlGet, v_OutVarTemp1, Pos, % IdLine2
-		v_xNext := v_OutVarTemp1X + v_OutVarTemp1W - 96 ;96 = chosen size of icon
-		v_yNext := v_OutVarTemp1Y + v_OutVarTemp1H
-		GuiControl, Move, % IdAboutPicture, % "x" v_xNext "y" v_yNext 
-		
-		return
+	Loop, Parse, % TransA["Enables Convenient Definition"], % "`n"
+	{
+		v_OutVarTemp1 := StrLen(Trim(A_LoopField))
+		if (v_OutVarTemp1 > v_OutVarTemp)
+			v_OutVarTemp := v_OutVarTemp1
 	}
+	Loop, Parse, % TransA["Enables Convenient Definition"], % "`n"
+	{
+		if (StrLen(Trim(A_LoopField)) = v_OutVarTemp)
+		{
+			Gui, MyAbout: Add, Text, x0 y0 HwndIdLongest, % Trim(A_LoopField)
+			GuiControl, Hide, % IdLongest
+			Break
+		}
+	}
+	
+	GuiControlGet, v_OutVarTemp1, Pos, % IdLongest ; weight of the longest text
+	GuiControlGet, v_OutVarTemp2, Pos, % IdAboutOkButton 
+	v_wNext := v_OutVarTemp2W + 2 * c_xmarg
+	v_xNext := (v_OutVarTemp1W / 2) - (v_wNext / 2)
+	v_yNext += v_OutVarTemp2H + c_ymarg
+	GuiControl, Move, % IdAboutOkButton, % "x" v_xNext "y" v_yNext "w" v_wNext
+	
+	GuiControlGet, v_OutVarTemp1, Pos, % IdLine2
+	v_xNext := v_OutVarTemp1X + v_OutVarTemp1W - 96 ;96 = chosen size of icon
+	v_yNext := v_OutVarTemp1Y + v_OutVarTemp1H
+	GuiControl, Move, % IdAboutPicture, % "x" v_xNext "y" v_yNext 
+	
+	return
+}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiAbout()
@@ -4133,190 +4136,190 @@ F_GuiAbout()
 	
 ; ------------------------------------------------------------------------------------------------------------------------------------
 	
-	F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
-	{
-		global ;assume-global mode
-		local v_IsLibraryEmpty := true, v_ConfigLibrary := "", v_ConfigFlag := false
+F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
+{
+	global ;assume-global mode
+	local v_IsLibraryEmpty := true, v_ConfigLibrary := "", v_ConfigFlag := false
 		,o_Libraries := {}, v_LibFileName := "", key := 0, value := "", TempLoadLib := "", TempShowTipsLib := "", v_LibFlagTemp := ""
 		,FlagFound := false, PriorityFlag := false, ValueTemp := 0, SectionTemp := ""
-		
-		ini_LoadLib := {}, ini_ShowTipsLib := {}	; this associative array is used to store information about Libraries\*.csv files to be loaded
-		
-		IniRead, TempLoadLib,	Config.ini, LoadLibraries
-		
+	
+	ini_LoadLib := {}, ini_ShowTipsLib := {}	; this associative array is used to store information about Libraries\*.csv files to be loaded
+	
+	IniRead, TempLoadLib,	Config.ini, LoadLibraries
+	
 	;Check if Libraries subfolder exists. If not, create it and display warning.
-		v_IsLibraryEmpty := true
-		if (!Instr(FileExist(A_ScriptDir . "\Libraries"), "D"))				; if  there is no "Libraries" subfolder 
-		{
-			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], There is no Libraries subfolder and no lbrary (*.csv) file exist!`nThe  %A_ScriptDir%\Libraries\ folder is now created.
-			FileCreateDir, %A_ScriptDir%\Libraries							; Future: check against errors
-		}
-		else
-		{
+	v_IsLibraryEmpty := true
+	if (!Instr(FileExist(A_ScriptDir . "\Libraries"), "D"))				; if  there is no "Libraries" subfolder 
+	{
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], There is no Libraries subfolder and no lbrary (*.csv) file exist!`nThe  %A_ScriptDir%\Libraries\ folder is now created.
+		FileCreateDir, %A_ScriptDir%\Libraries							; Future: check against errors
+	}
+	else
+	{
 		;Check if Libraries subfolder is empty. If it does, display warning.
-			Loop, Files, Libraries\*.csv
-			{
-				v_IsLibraryEmpty := false
-				break
-			}
-		}
-		if (v_IsLibraryEmpty)
+		Loop, Files, Libraries\*.csv
 		{
-			MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["Libraries folder:"] . "`n`n" . A_ScriptDir . "\Libraries" . A_Space . "`n`n"
-		. TransA["is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?"]
-			IfMsgBox, Yes
-			{
-				FileAppend, , % A_ScriptDir . "\Libraries\PriorityLibrary.csv", UTF-8
-				F_ValidateIniLibSections()
-			}
+			v_IsLibraryEmpty := false
+			break
 		}
-		
+	}
+	if (v_IsLibraryEmpty)
+	{
+		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["Libraries folder:"] . "`n`n" . A_ScriptDir . "\Libraries" . A_Space . "`n`n"
+		. TransA["is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?"]
+		IfMsgBox, Yes
+		{
+			FileAppend, , % A_ScriptDir . "\Libraries\PriorityLibrary.csv", UTF-8
+			F_ValidateIniLibSections()
+		}
+	}
+	
 	;Read names library files (*.csv) from Library subfolder into object.
-		if !(v_IsLibraryEmpty)
-			Loop, Files, Libraries\*.csv
-				o_Libraries.Push(A_LoopFileName)
-		
+	if !(v_IsLibraryEmpty)
+		Loop, Files, Libraries\*.csv
+			o_Libraries.Push(A_LoopFileName)
+	
 	;Check if Config.ini contains in section [Libraries] file names which are actually in library subfolder. Synchronize [Libraries] section with content of subfolder.
 	;Parse the TempLoadLib.
-		IniRead, TempLoadLib, Config.ini, LoadLibraries
-		for key, value in o_Libraries
+	IniRead, TempLoadLib, Config.ini, LoadLibraries
+	for key, value in o_Libraries
+	{
+		FlagFound := false
+		Loop, Parse, TempLoadLib, `n, `r
 		{
-			FlagFound := false
-			Loop, Parse, TempLoadLib, `n
+			v_LibFileName 	:= SubStr(A_LoopField, 1, InStr(A_LoopField, "=") - 1)
+			v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=",, v_LibFileName) + 1)
+			if (value == v_LibFileName)
 			{
-				v_LibFileName 	:= SubStr(A_LoopField, 1, InStr(A_LoopField, "=") - 1)
-				v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=",, v_LibFileName) + 1)
-				if (value == v_LibFileName)
-				{
-					ini_LoadLib[value] := v_LibFlagTemp
-					FlagFound := true
-				}
-			}	
-			if !(FlagFound)
-				ini_LoadLib[value] := 1
-		}
-		
-	;Delete and recreate [Libraries] section of Config.ini mirroring ini_LoadLib associative table. "PriorityLibrary.csv" as the last one.
-		IniDelete, Config.ini, LoadLibraries
-		for key, value in ini_LoadLib
-		{
-			if (key != "PriorityLibrary.csv")
-				SectionTemp .= key . "=" . value . "`n"
-			else
-			{
-				PriorityFlag := true
-				ValueTemp := value
+				ini_LoadLib[value] := v_LibFlagTemp
+				FlagFound := true
 			}
+		}	
+		if !(FlagFound)
+			ini_LoadLib[value] := 1
+	}
+	
+	;Delete and recreate [Libraries] section of Config.ini mirroring ini_LoadLib associative table. "PriorityLibrary.csv" as the last one.
+	IniDelete, Config.ini, LoadLibraries
+	for key, value in ini_LoadLib
+	{
+		if (key != "PriorityLibrary.csv")
+			SectionTemp .= key . "=" . value . "`n"
+		else
+		{
+			PriorityFlag := true
+			ValueTemp := value
 		}
-		if (PriorityFlag)
-			SectionTemp .= "PriorityLibrary.csv" . "=" . ValueTemp
-		
-		IniWrite, % SectionTemp, Config.ini, LoadLibraries
-		
-		SectionTemp := ""
+	}
+	if (PriorityFlag)
+		SectionTemp .= "PriorityLibrary.csv" . "=" . ValueTemp
+	
+	IniWrite, % SectionTemp, Config.ini, LoadLibraries
+	
+	SectionTemp := ""
 	;Check if Config.ini contains in section [ShowTipsLibraries] file names which are actually in library subfolder. Synchronize [Libraries] section with content of subfolder.
 	;Parse the TempLoadLib.
-		IniRead, TempShowTipsLib, Config.ini, ShowTipsLibraries
-		for key, value in o_Libraries
+	IniRead, TempShowTipsLib, Config.ini, ShowTipsLibraries
+	for key, value in o_Libraries
+	{
+		FlagFound := false
+		Loop, Parse, TempShowTipsLib, `n, `r
 		{
-			FlagFound := false
-			Loop, Parse, TempShowTipsLib, `n
+			v_LibFileName 	:= SubStr(A_LoopField, 1, InStr(A_LoopField, "=") - 1)
+			v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=",, v_LibFileName) + 1)
+			if (value == v_LibFileName)
 			{
-				v_LibFileName 	:= SubStr(A_LoopField, 1, InStr(A_LoopField, "=") - 1)
-				v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=",, v_LibFileName) + 1)
-				if (value == v_LibFileName)
-				{
-					ini_ShowTipsLib[value] := v_LibFlagTemp
-					FlagFound := true
-				}
-			}	
-			if !(FlagFound)
-				ini_ShowTipsLib[value] := 1
-		}
-		
-	;Delete and recreate [ShowTipsLibraries] section of Config.ini mirroring ini_ShowTipsLib associative table. "PriorityLibrary.csv" as the last one.
-		IniDelete, Config.ini, ShowTipsLibraries
-		for key, value in ini_ShowTipsLib
-		{
-			if (key != "PriorityLibrary.csv")
-				SectionTemp .= key . "=" . value . "`n"
-			else
-			{
-				PriorityFlag := true
-				ValueTemp := value
+				ini_ShowTipsLib[value] := v_LibFlagTemp
+				FlagFound := true
 			}
-		}
-		if (PriorityFlag)
-			SectionTemp .= "PriorityLibrary.csv" . "=" . ValueTemp
-		
-		IniWrite, % SectionTemp, Config.ini, ShowTipsLibraries
-		return
+		}	
+		if !(FlagFound)
+			ini_ShowTipsLib[value] := 1
 	}
+	
+	;Delete and recreate [ShowTipsLibraries] section of Config.ini mirroring ini_ShowTipsLib associative table. "PriorityLibrary.csv" as the last one.
+	IniDelete, Config.ini, ShowTipsLibraries
+	for key, value in ini_ShowTipsLib
+	{
+		if (key != "PriorityLibrary.csv")
+			SectionTemp .= key . "=" . value . "`n"
+		else
+		{
+			PriorityFlag := true
+			ValueTemp := value
+		}
+	}
+	if (PriorityFlag)
+		SectionTemp .= "PriorityLibrary.csv" . "=" . ValueTemp
+	
+	IniWrite, % SectionTemp, Config.ini, ShowTipsLibraries
+	return
+}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_LoadLibrariesToTables()
-	{ 
-		global	;assume-global mode
-		local name := "", varSearch := "", tabSearch := ""
-		a_Library 				:= []
-		a_TriggerOptions 			:= []
-		a_Triggerstring 			:= []
-		a_OutputFunction 			:= []
-		a_EnableDisable 			:= []
-		a_Hotstring				:= []
-		a_Comment 				:= []
-		
+F_LoadLibrariesToTables()
+{ 
+	global	;assume-global mode
+	local name := "", varSearch := "", tabSearch := ""
+	a_Library 				:= []
+	a_TriggerOptions 			:= []
+	a_Triggerstring 			:= []
+	a_OutputFunction 			:= []
+	a_EnableDisable 			:= []
+	a_Hotstring				:= []
+	a_Comment 				:= []
+	
 	; Prepare TrayTip message taking into account value of command line parameter.
-		if (v_Param == "d")
-			TrayTip, %A_ScriptName% - Debug mode, 	% TransA["Loading hotstrings from libraries..."], 1
-		else if (v_Param == "l")
-			TrayTip, %A_ScriptName% - Lite mode, 	% TransA["Loading hotstrings from libraries..."], 1
-		else	
-			TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
-		
+	if (v_Param == "d")
+		TrayTip, %A_ScriptName% - Debug mode, 	% TransA["Loading hotstrings from libraries..."], 1
+	else if (v_Param == "l")
+		TrayTip, %A_ScriptName% - Lite mode, 	% TransA["Loading hotstrings from libraries..."], 1
+	else	
+		TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
+	
 	;Here content of libraries is loaded into set of tables
-		Loop, Files, %A_ScriptDir%\Libraries\*.csv ;#[Ladowanie tablic]
+	Loop, Files, %A_ScriptDir%\Libraries\*.csv ;#[Ladowanie tablic]
+	{
+		Loop
 		{
-			Loop
+			FileReadLine, varSearch, %A_LoopFileFullPath%, %A_Index%
+			if (ErrorLevel)
+				break
+			tabSearch := StrSplit(varSearch, "‖")
+			if (InStr(tabSearch[1], "*0"))
 			{
-				FileReadLine, varSearch, %A_LoopFileFullPath%, %A_Index%
-				if (ErrorLevel)
-					break
-				tabSearch := StrSplit(varSearch, "‖")
-				if (InStr(tabSearch[1], "*0"))
-				{
-					tabSearch[1] := StrReplace(tabSearch[1], "*0")
-				}
-				if (InStr(tabSearch[1], "O0"))
-				{
-					tabSearch[1] := StrReplace(tabSearch[1], "O0")
-				}
-				if (InStr(tabSearch[1], "C0"))
-				{
-					tabSearch[1] := StrReplace(tabSearch[1], "C0")
-				}
-				if (InStr(tabSearch[1], "?0"))
-				{
-					tabSearch[1] := StrReplace(tabSearch[1], "?0")
-				}
-				if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
-				{
-					tabSearch[1] := StrReplace(tabSearch[1], "B")
-				}
-				name := SubStr(A_LoopFileName, 1, StrLen(A_LoopFileName)-4)
-			; LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4],tabSearch[5], tabSearch[6])
-				a_Library.Push(name)
-				a_TriggerOptions.Push(tabSearch[1])
-				a_Triggerstring.Push(tabSearch[2])
-				a_OutputFunction.Push(tabSearch[3])
-				a_EnableDisable.Push(tabSearch[4])
-				a_Hotstring.Push(tabSearch[5])
-				a_Comment.Push(tabSearch[6])
+				tabSearch[1] := StrReplace(tabSearch[1], "*0")
 			}
+			if (InStr(tabSearch[1], "O0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "O0")
+			}
+			if (InStr(tabSearch[1], "C0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "C0")
+			}
+			if (InStr(tabSearch[1], "?0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "?0")
+			}
+			if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
+			{
+				tabSearch[1] := StrReplace(tabSearch[1], "B")
+			}
+			name := SubStr(A_LoopFileName, 1, StrLen(A_LoopFileName)-4)
+			; LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4],tabSearch[5], tabSearch[6])
+			a_Library.Push(name)
+			a_TriggerOptions.Push(tabSearch[1])
+			a_Triggerstring.Push(tabSearch[2])
+			a_OutputFunction.Push(tabSearch[3])
+			a_EnableDisable.Push(tabSearch[4])
+			a_Hotstring.Push(tabSearch[5])
+			a_Comment.Push(tabSearch[6])
 		}
-		TrayTip, %A_ScriptName%, % TransA["Hotstrings have been loaded"], 1
 	}
+	TrayTip, %A_ScriptName%, % TransA["Hotstrings have been loaded"], 1
+}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
@@ -4324,7 +4327,7 @@ F_ini_StartHotstring(txt, nameoffile)
 { 
 	global	;assume-global mode
 	local Options := "", SendFun := "", EnDis := "", OnOff := "", TextInsert := "", Oflag := false
-		;*[One]
+
 	Loop, Parse, txt, ‖
 	{
 		Switch A_Index
@@ -4854,57 +4857,57 @@ F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_SortArrayAlphabetically(a_array)
+F_SortArrayAlphabetically(a_array)
+{
+	local a_TempArray, v_ActualArray, v_TempArray, flag, cnt, no
+	a_TempArray := []
+	Loop, % a_array.MaxIndex()
 	{
-		local a_TempArray, v_ActualArray, v_TempArray, flag, cnt, no
-		a_TempArray := []
-		Loop, % a_array.MaxIndex()
+		cnt := A_Index
+		a_TempArray[cnt] := a_array[cnt]
+		Loop, % cnt - 1
 		{
-			cnt := A_Index
-			a_TempArray[cnt] := a_array[cnt]
-			Loop, % cnt - 1
+			If (Asc(a_array[cnt]) < Asc(a_TempArray[A_Index]))
 			{
-				If (Asc(a_array[cnt]) < Asc(a_TempArray[A_Index]))
+				Loop, % cnt - A_Index
 				{
-					Loop, % cnt - A_Index
-					{
-						a_TempArray[cnt - (A_Index - 1)] := a_TempArray[cnt - A_Index]
-					}
-					a_TempArray[A_Index] := a_array[cnt]
-					break
+					a_TempArray[cnt - (A_Index - 1)] := a_TempArray[cnt - A_Index]
 				}
-				else if (Asc(a_array[cnt]) == Asc(a_TempArray[A_Index]))
+				a_TempArray[A_Index] := a_array[cnt]
+				break
+			}
+			else if (Asc(a_array[cnt]) == Asc(a_TempArray[A_Index]))
+			{
+				flag := 0
+				no := A_Index
+				v_ActualArray := a_array[cnt]
+				v_TempArray := a_TempArray[no]
+				Loop, % Max(StrLen(v_ActualArray), StrLen(v_TempArray))
 				{
-					flag := 0
-					no := A_Index
-					v_ActualArray := a_array[cnt]
-					v_TempArray := a_TempArray[no]
-					Loop, % Max(StrLen(v_ActualArray), StrLen(v_TempArray))
+					v_ActualArray := SubStr(v_ActualArray, 2)
+					v_TempArray := SubStr(v_TempArray, 2)
+					If (Asc(v_ActualArray) < Asc(v_TempArray))
 					{
-						v_ActualArray := SubStr(v_ActualArray, 2)
-						v_TempArray := SubStr(v_TempArray, 2)
-						If (Asc(v_ActualArray) < Asc(v_TempArray))
+						Loop, % cnt - no
 						{
-							Loop, % cnt - no
-							{
-								a_TempArray[cnt - A_Index + 1] := a_TempArray[cnt - A_Index]
-							}
-							a_TempArray[no] := a_array[cnt]
-							flag := 1
-							Break
+							a_TempArray[cnt - A_Index + 1] := a_TempArray[cnt - A_Index]
 						}
-						else if (Asc(v_ActualArray) > Asc(v_TempArray))
-						{
-							Break
-						}
-					}
-					if (flag)
+						a_TempArray[no] := a_array[cnt]
+						flag := 1
 						Break
+					}
+					else if (Asc(v_ActualArray) > Asc(v_TempArray))
+					{
+						Break
+					}
 				}
+				if (flag)
+					Break
 			}
 		}
-		return a_TempArray
 	}
+	return a_TempArray
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
 F_SortArrayByLength(a_array)
@@ -4926,8 +4929,8 @@ F_SortArrayByLength(a_array)
 				a_TempArray.Push(a_array[A_Index])
 			}
 		}
-		return a_TempArray
 	}
+	return a_TempArray
 }
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4994,7 +4997,7 @@ F_ImportLibrary()
 	}
 	
 	FileRead, v_TheWholeFile, % v_LibraryName
-	Loop, Parse, v_TheWholeFile, `r`n
+	Loop, Parse, v_TheWholeFile, `n, `r
 		if (A_LoopField)
 			v_TotalLines++
 	
@@ -5007,7 +5010,7 @@ F_ImportLibrary()
 	Gui, HS3: Default 
 	Gui, HS3: +Disabled
 	LV_Delete()
-	Loop, Parse, v_TheWholeFile, `n
+	Loop, Parse, v_TheWholeFile, `n, `r
 	{
 		Loop, Parse, A_LoopField, :, `r
 		{
@@ -5130,7 +5133,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	}	
 	
 	FileRead, v_TheWholeFile, % v_LibraryName
-	Loop, Parse, v_TheWholeFile, `r`n
+	Loop, Parse, v_TheWholeFile, `n, `r
 		if (A_LoopField)
 			v_TotalLines++
 	
@@ -5139,9 +5142,8 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["The selected file is empty. Process of export will be interrupted."]
 		return
 	}
-	;*[One]
 	line .= v_Header . "`n`n"
-	Loop, Parse, v_TheWholeFile, `r`n
+	Loop, Parse, v_TheWholeFile, `n, `r
 	{
 		if (A_LoopField)
 		{
@@ -5305,6 +5307,9 @@ L_GUIInit:
 	{
 		Gui, HS3: +MinSize%HS3MinWidth%x%HS3MinHeight%
 		Gui, HS4: +MinSize%HS4MinWidth%x%HS4MinHeight%
+		ini_GuiReload := false
+		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
+
 		Switch ini_WhichGui
 		{
 			Case "HS3":
