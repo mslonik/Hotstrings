@@ -1788,19 +1788,7 @@ F_DeleteHotstring()
 	IfMsgBox, No
 		return
 	TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
-	
-	/*
-		Gui, ProgressDelete:New, -Border -Resize
-		Gui, ProgressDelete:Add, Progress, w200 h20 cBlue vProgressDelete, 0
-		Gui, ProgressDelete:Add,Text,w200 vTextDelete, % TransA["Deleting hotstring. Please wait..."]
-		Gui, ProgressDelete:Show, hide, ProgressDelete
-		WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
-		DetectHiddenWindows, On
-		WinGetPos, , , DeleteWindowWidth, DeleteWindowHeight,ProgressDelete
-		DetectHiddenWindows, Off
-		Gui, ProgressDelete:Show,% "x" . v_WindowX + (v_WindowWidth - DeleteWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - DeleteWindowHeight)/2 ,ProgressDelete
-	*/
-	
+
 	;1. Remove selected library file.
 	LibraryFullPathAndName := A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary
 	FileDelete, % LibraryFullPathAndName
@@ -3139,102 +3127,103 @@ Warning, code generated automatically for definitions based on menu, see documen
 ; ------------------------------------------------------------------------------------------------------------------------------------
 ;Future. Rationale: when specific library is unchecked in menu, its hotstrings should be unloaded (and triggers). What is done currently is only "loading of all libraries again", but in such
 ;a case all existing hotstring definitions remain not changed in memory. So currently script should be reloaded.
-	F_UnloadFile(nameoffile)
-	{
-		
-		return
-	}
+F_UnloadFile(nameoffile)
+{
+	
+	return
+}
 	
 ; ------------------------------------------------------------------------------------------------------------------------------------
 	
-	F_LoadFile(nameoffile)
-	{
-		global ;assume-global mode
-		local name := "", FlagLoadTriggerTips := false, key := "", value := "", v_TheWholeFile := "", v_TotalLines := 0
+F_LoadFile(nameoffile)
+{
+	global ;assume-global mode
+	local name := "", FlagLoadTriggerTips := false, key := "", value := "", v_TheWholeFile := "", v_TotalLines := 0
 	,HS3GuiWinX := 0, HS3GuiWinY := 0, HS3GuiWinW := 0, HS3GuiWinH := 0, LoadFileGuiWinW := 0, LoadFileGuiWinH := 0
 	,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
 	,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
 	,v_Progress := 0
 	,IdLoadFile_T1 := 0, IdLoadFile_P1 := 0, IdLoadFile_T2 := 0
-		
-		for key, value in ini_ShowTipsLib
-			if ((key == nameoffile) and (value))
-				FlagLoadTriggerTips := true
-		
-		FileRead, v_TheWholeFile, % A_ScriptDir . "\Libraries\" . nameoffile
-		Loop, Parse, v_TheWholeFile, `n	;counter of total lines in the file
+	
+	for key, value in ini_ShowTipsLib
+		if ((key == nameoffile) and (value))
+			FlagLoadTriggerTips := true
+	
+	FileRead, v_TheWholeFile, % A_ScriptDir . "\Libraries\" . nameoffile
+	Loop, Parse, v_TheWholeFile, `n, `r	;counter of total lines in the file
+		if (A_LoopField)
 			v_TotalLines++
+	
+	if ((A_DefaultGui = "HS3") or (A_DefaultGui = "HS4"))
+	{
+		Gui, LoadFile: New, 	+Border -Resize -MaximizeBox -MinimizeBox +HwndLoadFileGuiHwnd +Owner +OwnDialogs, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Loading file"] . ":" . A_Space . nameoffile
+		Gui, LoadFile: Margin,	% c_xmarg, % c_ymarg
+		Gui,	LoadFile: Color,	% c_WindowColor, % c_ControlColor
 		
-		if ((A_DefaultGui = "HS3") or (A_DefaultGui = "HS4"))
-		{
-			Gui, LoadFile: New, 	+Border -Resize -MaximizeBox -MinimizeBox +HwndLoadFileGuiHwnd +Owner +OwnDialogs, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Loading file"] . ":" . A_Space . nameoffile
-			Gui, LoadFile: Margin,	% c_xmarg, % c_ymarg
-			Gui,	LoadFile: Color,	% c_WindowColor, % c_ControlColor
-			
-			Gui, LoadFile: Add, Text,		x0 y0 HwndIdLoadFile_T1, % TransA["Loading of (triggerstring, hotstring) definitions from the library file"]
-			Gui, LoadFile: Add, Progress, 	x0 y0 HwndIdLoadFile_P1 cBlue, 0
-			Gui, LoadFile: Add, Text, 		x0 y0 HwndIdLoadFile_T2, % TransA["Loaded"] . A_Space . v_Progress . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
+		Gui, LoadFile: Add, Text,		x0 y0 HwndIdLoadFile_T1, % TransA["Loading of (triggerstring, hotstring) definitions from the library file"]
+		Gui, LoadFile: Add, Progress, 	x0 y0 HwndIdLoadFile_P1 cBlue, 0
+		Gui, LoadFile: Add, Text, 		x0 y0 HwndIdLoadFile_T2, % TransA["Loaded"] . A_Space . v_Progress . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
 		. A_Space . "(" . v_Progress . A_Space . "%" . ")"
-			GuiControlGet, v_OutVarTemp, Pos, % IdLoadFile_T1
-			v_xNext := c_xmarg
-			v_yNext := c_ymarg
-			GuiControl, Move, % IdLoadFile_T1, % "x" v_xNext . A_Space . "y" v_yNext
+		GuiControlGet, v_OutVarTemp, Pos, % IdLoadFile_T1
+		v_xNext := c_xmarg
+		v_yNext := c_ymarg
+		GuiControl, Move, % IdLoadFile_T1, % "x" v_xNext . A_Space . "y" v_yNext
 ;Gui, Import: Show, Center AutoSize
-			v_yNext += HofText + c_ymarg
-			GuiControl, Move, % IdLoadFile_T2, % "x" v_xNext . A_Space . "y" v_yNext
-			GuiControlGet, v_OutVarTemp, Pos, % IdLoadFile_T2
-			v_wNext := v_OutVarTempW
-			v_hNext := HofText
-			GuiControl, Move, % IdLoadFile_P1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space . "w" v_wNext . A_Space . "h" . v_hNext
-			v_yNext += HofText + c_ymarg
-			GuiControl, Move, % IdLoadFile_T2, % "x" v_xNext . A_Space . "y" v_yNext
+		v_yNext += HofText + c_ymarg
+		GuiControl, Move, % IdLoadFile_T2, % "x" v_xNext . A_Space . "y" v_yNext
+		GuiControlGet, v_OutVarTemp, Pos, % IdLoadFile_T2
+		v_wNext := v_OutVarTempW
+		v_hNext := HofText
+		GuiControl, Move, % IdLoadFile_P1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space . "w" v_wNext . A_Space . "h" . v_hNext
+		v_yNext += HofText + c_ymarg
+		GuiControl, Move, % IdLoadFile_T2, % "x" v_xNext . A_Space . "y" v_yNext
 ;Gui, Import: Show, Center AutoSize
-			Gui, LoadFile: Show, Hide
-			
-			WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd ;future: if HS4
-			DetectHiddenWindows, On
-			WinGetPos, , , LoadFileGuiWinW, LoadFileGuiWinH, % "ahk_id" . LoadFileGuiHwnd
-			DetectHiddenWindows, Off
-			Gui, LoadFile: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - LoadFileGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - LoadFileGuiWinH) / 2 . A_Space . "AutoSize"
-		}
+		Gui, LoadFile: Show, Hide
 		
-		name := SubStr(nameoffile, 1, -4) ;filename without extension
-		Loop, Parse, v_TheWholeFile, `n
-		{
-			if (A_LoopField)
-				F_ini_StartHotstring(A_LoopField, nameoffile)
-			else
-				Break
-			Loop, Parse, A_LoopField, ‖
-			{
-				Switch A_Index
-				{
-					Case 1:	a_TriggerOptions.Push(A_LoopField)
-					Case 2:	
-					a_Triggerstring.Push(A_LoopField)
-					if (FlagLoadTriggerTips)
-						a_Triggers.Push(A_LoopField) ; a_Triggers is used in main loop of application for generating tips
-					Case 3:	a_OutputFunction.Push(A_LoopField)
-					Case 4:	a_EnableDisable.Push(A_LoopField)
-					Case 5:	a_Hotstring.Push(A_LoopField)
-					Case 6:	a_Comment.Push(A_LoopField)
-				}
-			}
-			a_Library.Push(name) ; function Search
-			++v_TotalHotstringCnt
-			if (A_DefaultGui = "LoadFile")
-			{
-				v_Progress := Round((A_Index / v_TotalLines) * 100)
-				GuiControl,, % IdLoadFile_T2, % TransA["Loaded"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
-			. A_Space . "(" . v_Progress . A_Space . "%" . ")"
-				GuiControl,, % IdLoadFile_P1, % v_Progress
-			}
-		}	
-		GuiControl, , % IdText12,  % v_TotalHotstringCnt ; Text: Puts new contents into the control.
-		GuiControl, , % IdText12b, % v_TotalHotstringCnt ; Text: Puts new contents into the control.
-		Gui, LoadFile: Destroy
-		return
+		WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd ;future: if HS4
+		DetectHiddenWindows, On
+		WinGetPos, , , LoadFileGuiWinW, LoadFileGuiWinH, % "ahk_id" . LoadFileGuiHwnd
+		DetectHiddenWindows, Off
+		Gui, LoadFile: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - LoadFileGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - LoadFileGuiWinH) / 2 . A_Space . "AutoSize"
 	}
+	;*[One]
+	name := SubStr(nameoffile, 1, -4) ;filename without extension
+	Loop, Parse, v_TheWholeFile, `n, `r
+	{
+		if (A_LoopField)
+			F_ini_StartHotstring(A_LoopField, nameoffile)
+		else
+			Break
+		Loop, Parse, A_LoopField, ‖
+		{
+			Switch A_Index
+			{
+				Case 1:	a_TriggerOptions.Push(A_LoopField)
+				Case 2:	
+				a_Triggerstring.Push(A_LoopField)
+				if (FlagLoadTriggerTips)
+					a_Triggers.Push(A_LoopField) ; a_Triggers is used in main loop of application for generating tips
+				Case 3:	a_OutputFunction.Push(A_LoopField)
+				Case 4:	a_EnableDisable.Push(A_LoopField)
+				Case 5:	a_Hotstring.Push(A_LoopField)
+				Case 6:	a_Comment.Push(A_LoopField)
+			}
+		}
+		a_Library.Push(name) ; function Search
+		++v_TotalHotstringCnt
+		if (A_DefaultGui = "LoadFile")
+		{
+			v_Progress := Round((A_Index / v_TotalLines) * 100)
+			GuiControl,, % IdLoadFile_T2, % TransA["Loaded"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
+			. A_Space . "(" . v_Progress . A_Space . "%" . ")"
+			GuiControl,, % IdLoadFile_P1, % v_Progress
+		}
+	}	
+	GuiControl, , % IdText12,  % v_TotalHotstringCnt ; Text: Puts new contents into the control.
+	GuiControl, , % IdText12b, % v_TotalHotstringCnt ; Text: Puts new contents into the control.
+	Gui, LoadFile: Destroy
+	return
+}
 	
 ; ------------------------------------------------------------------------------------------------------------------------------------
 	
@@ -4331,69 +4320,64 @@ F_GuiAbout()
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_ini_StartHotstring(txt, nameoffile) 
-	{ 
-		global	;assume-global mode
-		local Options := "", SendFun := "", EnDis := "", OnOff := "", TextInsert := "", Oflag := false
-		
-		Loop, Parse, txt, ‖
+F_ini_StartHotstring(txt, nameoffile) 
+{ 
+	global	;assume-global mode
+	local Options := "", SendFun := "", EnDis := "", OnOff := "", TextInsert := "", Oflag := false
+		;*[One]
+	Loop, Parse, txt, ‖
+	{
+		Switch A_Index
 		{
-			Switch A_Index
-			{
-				Case 1:
-				Options := A_LoopField
+			Case 1:
+			Options := A_LoopField
 				Oflag := false
 				if (InStr(Options, "O", 0))
 					Oflag := true
 				else
 					Oflag := false
-				Case 2:
+			Case 2:
 				v_Triggerstring := A_LoopField
-				Case 3:
+			Case 3:
 				Switch A_LoopField
 				{
-					Case "SI": 
-					SendFun := "F_NormalWay"
-					Case "CL": 
-					SendFun := "F_ViaClipboard"
-					Case "MCL": 
-					SendFun := "F_MenuText"
-					Case "MSI": 
-					SendFun := "F_MenuTextAHK"
+					Case "SI": 	SendFun := "F_NormalWay"
+					Case "CL": 	SendFun := "F_ViaClipboard"
+					Case "MCL": 	SendFun := "F_MenuText"
+					Case "MSI":	SendFun := "F_MenuTextAHK"
 				}
-				Case 4: 
+			Case 4: 
 				Switch A_LoopField
 				{
-					Case "En":
-					OnOff := "On"
-					Case "Dis":
-					OnOff := "Off"	
+					Case "En":	OnOff := "On"
+					Case "Dis":	OnOff := "Off"	
 				}
-				Case 5:
+			Case 5:
 				TextInsert := A_LoopField
 				TextInsert := StrReplace(TextInsert, "``n", "`n") ;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
 				TextInsert := StrReplace(TextInsert, "``r", "`r")		
 				TextInsert := StrReplace(TextInsert, "``t", "`t")
 				TextInsert := StrReplace(TextInsert, "``", "`")
-			}
 		}
-		
-		if ((!v_TriggerString) and (Options or SendFun or OnOff or TextInsert))
-		{
-			MsgBox, 262420, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Error reading library file:"] . "`n`n" . nameoffile . "`n`n" . TransA["the following line is found:"] 
-					. "`n" . txt . "`n`n" . TransA["This line do not comply to format required by this application."] . "`n`n" 
-					. TransA["Continue reading the library file? If you answer ""No"" then application will exit!"]
-			IfMsgBox, No
-				ExitApp, 1
-			IfMsgBox, Yes
-				return
-		}
-		;if !((Options == "") and (v_TriggerString == "") and (TextInsert == "") and (OnOff == ""))
-		if (Options and v_TriggerString and TextInsert and OnOff)
-			Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, Oflag), OnOff)
-		return
 	}
 	
+	if ((!v_TriggerString) and (Options or SendFun or OnOff or TextInsert))
+	{
+		MsgBox, 262420, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Error reading library file:"] . "`n`n" . nameoffile . "`n`n" . TransA["the following line is found:"] 
+					. "`n" . txt . "`n`n" . TransA["This line do not comply to format required by this application."] . "`n`n" 
+					. TransA["Continue reading the library file? If you answer ""No"" then application will exit!"]
+		IfMsgBox, No
+			ExitApp, 1
+		IfMsgBox, Yes
+			return
+	}
+		;if !((Options == "") and (v_TriggerString == "") and (TextInsert == "") and (OnOff == ""))
+	;if (Options and v_TriggerString and TextInsert and OnOff)
+	if (v_TriggerString and OnOff)
+		Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, Oflag), OnOff)
+	return
+}
+
 ; =================================================================================
 ; Function: AutoXYWH
 ;   Move and resize control automatically when GUI resizes.
@@ -4413,7 +4397,7 @@ F_GuiAbout()
 ;          2014-1-2  / tmplinshi
 ; requires AHK version : 1.1.13.01+
 ; =================================================================================
-	F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t=1079
+F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t=1079
 		static cInfo := {}
 		AutoXYWHOptions := 0
 		
@@ -4923,28 +4907,28 @@ F_GuiAbout()
 	}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_SortArrayByLength(a_array)
+F_SortArrayByLength(a_array)
+{
+	local a_TempArray, v_Length, v_ActLen
+	a_TempArray := []
+	v_Length := 0
+	Loop, % a_array.MaxIndex()
 	{
-		local a_TempArray, v_Length, v_ActLen
-		a_TempArray := []
-		v_Length := 0
+		v_Length := Max(StrLen(a_array[A_Index]),v_Length)
+	}
+	Loop, % v_Length
+	{
+		v_ActLen := A_Index
 		Loop, % a_array.MaxIndex()
 		{
-			v_Length := Max(StrLen(a_array[A_Index]),v_Length)
-		}
-		Loop, % v_Length
-		{
-			v_ActLen := A_Index
-			Loop, % a_array.MaxIndex()
+			if StrLen(a_array[A_Index]) == v_ActLen
 			{
-				if StrLen(a_array[A_Index]) == v_ActLen
-				{
-					a_TempArray.Push(a_array[A_Index])
-				}
+				a_TempArray.Push(a_array[A_Index])
 			}
 		}
 		return a_TempArray
 	}
+}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
@@ -5395,12 +5379,12 @@ ALibOK:
 		F_RefreshListOfLibraryTips()
 		F_UpdateSelHotLibDDL()
 	}
-	Else
+	else
 		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["A library with that name already exists!"]
-	return
-	
-	ALibGuiEscape:
-	ALibGuiClose:
+return
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
+ALibGuiEscape:
+ALibGuiClose:
 	Gui, ALib: Destroy
 return
 	
@@ -5431,42 +5415,23 @@ return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; Future: save window position
-	HS3GuiClose:
-	HS3GuiEscape:
+HS3GuiClose:
+HS3GuiEscape:
 	Gui,		HS3: Show, Hide
-;v_WhichGUIisMinimzed := "HS3"
 	ini_WhichGui := "HS3"
-	return
+return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	HS4GuiClose:
-	HS4GuiEscape:
+HS4GuiClose:
+HS4GuiEscape:
 	Gui,		HS4: Show, Hide
-;v_WhichGUIisMinimzed := "HS4"
 	ini_WhichGui := "HS4"
-	return
+return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	/*
-		WinGetPos, ini_StartXlist, ini_StartYlist,,,Hotstrings
-		Gui, SearchLoad:New, -Resize -Border
-		Gui, SearchLoad:Add, Text,, % TransA["Please wait, uploading .csv files..."]
-		Gui, SearchLoad:Add, Progress, w300 h20 HwndhPB2 -0x1, 50
-		WinSet, Style, +0x8, % "ahk_id " hPB2
-		SendMessage, 0x40A, 1, 20,, % "ahk_id " hPB2		; CBEM_HASEDITCHANGED := 0x40A
-		Gui, SearchLoad:Show, hide, UploadingSearch
-		WinGetPos, v_WindowX, v_WindowY ,v_WindowWidth,v_WindowHeight,Hotstrings
-		DetectHiddenWindows, On
-		WinGetPos, , , UploadingWindowWidth, UploadingWindowHeight,UploadingSearch
-		DetectHiddenWindows, Off
-		Gui, SearchLoad:Show, % "x" . v_WindowX + (v_WindowWidth - UploadingWindowWidth)/2 . " y" . v_WindowY + (v_WindowHeight - UploadingWindowHeight)/2, UploadingSearch
-	*/
-	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	MoveLibsGuiEscape:
-	CancelMove:
+MoveLibsGuiEscape:
+CancelMove:
 	Gui, MoveLibs: Destroy
-	return
+return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
@@ -5701,37 +5666,6 @@ return
 	return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	L_DPIScaling:
-	; SetTimer, L_DPIScaling, Off
-	if WinExist("Hotstrings") and WinExist("ahk_class AutoHotkeyGUI")
-	{
-		
-		WinGetPos, awinX, awinY,awinW,awinH,Hotstrings
-		SysGet, N, MonitorCount
-		Loop, % N
-		{
-			SysGet, Mon%A_Index%, Monitor, %A_Index%
-			W%A_Index% := Mon%A_Index%Right - Mon%A_Index%Left
-			H%A_Index% := Mon%A_Index%Bottom - Mon%A_Index%Top
-			DPI%A_Index% := round(W%A_Index%/1920*(96/A_ScreenDPI),2)
-			if (awinX >= Mon%A_Index%Left) and (awinX <= Mon%A_Index%Right)
-			{
-				v_SelectedMonitor := A_Index
-			} 
-		}
-	}
-	return
-	
-	L_CaretCursor:
-	Menu, Submenu3, ToggleCheck, % TransA["Caret"]
-	Menu, Submenu3, ToggleCheck, % TransA["Cursor"]
-	ini_Caret := !(ini_Caret)
-	ini_Cursor := !(ini_Cursor)
-	IniWrite, %ini_Caret%, Config.ini, Configuration, Caret
-	IniWrite, %ini_Cursor%, Config.ini, Configuration, Cursor
-	return
-	
 	L_AmountOfCharacterTips1:
 	ini_AmountOfCharacterTips := 1
 	gosub, L_AmountOfCharacterTips
@@ -5766,21 +5700,30 @@ return
 			Menu, Submenu4, UnCheck, %A_Index%
 	}
 	return
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+L_CaretCursor:
+	Menu, Submenu3, ToggleCheck, % TransA["Caret"]
+	Menu, Submenu3, ToggleCheck, % TransA["Cursor"]
+	ini_Caret := !(ini_Caret)
+	ini_Cursor := !(ini_Cursor)
+	IniWrite, %ini_Caret%, Config.ini, Configuration, Caret
+	IniWrite, %ini_Cursor%, Config.ini, Configuration, Cursor
+return
 	
-	L_MenuCaretCursor:
+L_MenuCaretCursor:
 	Menu, PositionMenu, ToggleCheck, % TransA["Caret"]
 	Menu, PositionMenu, ToggleCheck, % TransA["Cursor"]
 	ini_MenuCaret := !(ini_MenuCaret)
 	ini_MenuCursor := !(ini_MenuCursor)
 	IniWrite, %ini_MenuCaret%, Config.ini, Configuration, MenuCaret
 	IniWrite, %ini_MenuCursor%, Config.ini, Configuration, MenuCursor
-	return
+return
 	
-	L_MenuSound:
+L_MenuSound:
 	Menu, SubmenuMenu, ToggleCheck, % TransA["Enable sound if overrun"]
 	ini_MenuSound := !(ini_MenuSound)
 	IniWrite, %ini_MenuSound%, Config.ini, Configuration, MenuSound
-	return
+return
 	
 L_ExportLibraryDynamic:
 	FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries", % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
@@ -5815,13 +5758,13 @@ return
 		. SubStr(v_Language, 1, -4) . "`n`n" . TransA["The application will be reloaded with the new language file."]
 	Reload
 	
-	L_TraySuspendHotkeys:
+L_TraySuspendHotkeys:
 	Suspend, Toggle
 	if (A_IsSuspended)
 		Menu, Tray, Check,   % TransA["Suspend Hotkeys"]
 	else
 		Menu, Tray, UnCheck, % TransA["Suspend Hotkeys"]
-	return
+return
 	
 L_TrayPauseScript:
 	Pause, Toggle, 1
