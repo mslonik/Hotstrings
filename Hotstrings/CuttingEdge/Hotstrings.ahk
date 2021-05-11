@@ -164,20 +164,17 @@ F_GuiHS4_Redraw()
 
 F_UpdateSelHotLibDDL()
 
-;v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
 Gui, 1: Default	;this line is necessary to not show too many Guis on time of loading hotstrings from library
 v_LibHotstringCnt := 0	;dirty trick to show initially 0 instead of 0000
 GuiControl, , % IdText13,  % v_LibHotstringCnt
 GuiControl, , % IdText13b, % v_LibHotstringCnt
+;*[One]
 F_LoadHotstringsFromLibraries()
-
 F_GuiSearch_CreateObject()	;When all tables are full, initialize GuiSearch
 F_GuiSearch_DetermineConstraints()
 F_Searching("Reload")			;prepare content of Search tables
-;MsgBox,, A_IsCritical, % A_IsCritical
 Critical, Off
-;v_BlockHotkeysFlag := 0
 
 
 ;If the script is run with command line parameter "d" like debug, prepare new folder and create file named as specified in the following pattern.
@@ -507,7 +504,6 @@ if (ini_GuiReload)
 ; Beginning of the main loop of application.
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Loop,
-;*[One]	
 {
 	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
 	if (ErrorLevel = "NewInput")
@@ -577,7 +573,6 @@ Loop,
 			if (ini_TipsSortAlphabetically)
 				;a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
 				Sort, a_SelectedTriggers
-			;*[Two]
 			if (ini_TipsSortByLength)
 				a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
 			v_Tips := ""
@@ -2921,7 +2916,6 @@ Compile												= Compile
 Compressed executable (upx.exe)							= Compressed executable (upx.exe)
 Compressed executable (mpress.exe)							= Compressed executable (mpress.exe)
 Config.ini wasn't found. The default Config.ini is now created in location: = Config.ini wasn't found. The default Config.ini is now created in location:
-The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure? = The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure?
 Configuration 											= &Configuration
 Continue reading the library file? If you answer ""No"" then application will exit! = Continue reading the library file? If you answer ""No"" then application will exit!
 Conversion of .ahk file into new .csv file (library) and loading of that new library = Conversion of .ahk file into new .csv file (library) and loading of that new library
@@ -2981,8 +2975,8 @@ Hotstring paste from Clipboard delay 1 s 					= Hotstring paste from Clipboard d
 Hotstring paste from Clipboard delay 						= Hotstring paste from Clipboard delay
 Hotstrings have been loaded 								= Hotstrings have been loaded
 If you answer ""Yes"" it will overwritten.					= If you answer ""Yes"" it will overwritten.
-If you answer ""Yes"", the existing file will be deleted. If you answer ""No"", the current task will be continued and new content will be added to existing file. = If you answer ""Yes"", the existing file will be deleted. If you answer ""No"", the current task will be continued and new content will be added to existing file.
-	If you've just unchecked any library, its hotstring definitions remain active. Please reload the application in order to deactivate it. = If you've just unchecked any library, its hotstring definitions remain active. Please reload the application in order to deactivate it.
+If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file. = If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file.
+If you've just unchecked any library, its hotstring definitions remain active. Please reload the application in order to deactivate it. = If you've just unchecked any library, its hotstring definitions remain active. Please reload the application in order to deactivate it.
 Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
 information											= information
@@ -3064,11 +3058,13 @@ Such file already exists									= Such file already exists
 Suspend Hotkeys										= Suspend Hotkeys
 Tab 													= Tab
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
+The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure? = The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure?
 The default											= The default
 The executable file is prepared by Ahk2Exe and compressed by mpress.exe: = The executable file is prepared by Ahk2Exe and compressed by mpress.exe:
 The executable file is prepared by Ahk2Exe and compressed by upx.exe: = The executable file is prepared by Ahk2Exe and compressed by upx.exe:
 The executable file is prepared by Ahk2Exe, but not compressed:	= The executable file is prepared by Ahk2Exe, but not compressed:
 The hostring 											= The hostring
+The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes. = The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes.
 The library  											= The library 
 The file path is: 										= The file path is:
 the following line is found:								= the following line is found:
@@ -3164,10 +3160,15 @@ F_LoadFile(nameoffile)
 		if ((key == nameoffile) and (value))
 			FlagLoadTriggerTips := true
 	
+	FileRead, v_TheWholeFile, % A_ScriptDir . "\Libraries\" . nameoffile
 	F_WhichGui()
 	if (A_DefaultGui = "HS3" or A_DefaultGui = "HS4")
 	{
-		FileRead, v_TheWholeFile, % A_ScriptDir . "\Libraries\" . nameoffile
+		Switch A_DefaultGui
+		{
+			Case "HS3": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd
+			Case "HS4": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS4GuiHwnd 
+		}
 		Loop, Parse, v_TheWholeFile, `n, `r	;counter of total lines in the file
 			if (A_LoopField)
 				v_TotalLines++
@@ -3196,11 +3197,6 @@ F_LoadFile(nameoffile)
 		;Gui, Import: Show, Center AutoSize
 		Gui, LoadFile: Show, Hide
 		
-		Switch A_DefaultGui
-		{
-			Case "HS3": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd
-			Case "HS4": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS4GuiHwnd 
-		}
 		DetectHiddenWindows, On
 		WinGetPos, , , LoadFileGuiWinW, LoadFileGuiWinH, % "ahk_id" . LoadFileGuiHwnd
 		DetectHiddenWindows, Off
@@ -3221,9 +3217,9 @@ F_LoadFile(nameoffile)
 			{
 				Case 1:	a_TriggerOptions.Push(A_LoopField)
 				Case 2:	
-						a_Triggerstring.Push(A_LoopField)
-						if (FlagLoadTriggerTips)
-							a_Triggers.Push(A_LoopField) ; a_Triggers is used in main loop of application for generating tips
+				a_Triggerstring.Push(A_LoopField)
+				if (FlagLoadTriggerTips)
+					a_Triggers.Push(A_LoopField) ; a_Triggers is used in main loop of application for generating tips
 				Case 3:	a_OutputFunction.Push(A_LoopField)
 				Case 4:	a_EnableDisable.Push(A_LoopField)
 				Case 5:	a_Hotstring.Push(A_LoopField)
@@ -4975,16 +4971,25 @@ F_ImportLibrary()
 	,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
 	,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
 	,NewStr := "", v_LibraryName := ""
+	,key := "", value := 0, f_ExistedLib := false
 	
 	FileSelectFile, v_LibraryName, 3, %A_ScriptDir%, % TransA["Choose (.ahk) file containing (triggerstring, hotstring) definitions for import"], AutoHotkey (*.ahk)
 	if (!v_LibraryName)
 		return
+	SplitPath, v_LibraryName, ,,, OutNameNoExt
+	v_OutputFile := % A_ScriptDir . "\Libraries\" . OutNameNoExt . ".csv"
+	
 	if (FileExist(v_OutputFile))
 	{
 		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["Such file already exists"] . ":" . "`n`n" . v_OutputFile . "`n`n" . TransA["Do you want to delete it?"] . "`n`n" 
-			. TransA["If you answer ""Yes"", the process of import will not be interrupted. If you answer ""No"", import will be continued and new content will be added to existing file."]
-		IfMsgBox, Yes
+			. TransA["If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file."]
+		IfMsgBox, Yes	;check if it was loaded. if yes, recommend restart of application, because "Total" counter and Hotstrings definitions will be incredible. Future: at first disable existing Hotstrings definitions and then reduce total counter.
+		{
+			for key, value in ini_LoadLib
+				if (key = OutNameNoExt)
+					f_ExistedLib := true
 			FileDelete, % v_OutputFile
+		}
 	}
 	
 	NewStr := RegExReplace(TransA["Import from .ahk to .csv"], "&", "")
@@ -5024,10 +5029,8 @@ F_ImportLibrary()
 	DetectHiddenWindows, On
 	WinGetPos, , , ImportGuiWinW, ImportGuiWinH, % "ahk_id" . ImportGuiHwnd
 	DetectHiddenWindows, Off
-	Gui, Import: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ImportGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ImportGuiWinH) / 2 . A_Space . "AutoSize"
 	Gui, % A_DefaultGui . ":" . A_Space . "+Disabled"
-	SplitPath, v_LibraryName, ,,, OutNameNoExt
-	v_OutputFile := % A_ScriptDir . "\Libraries\" . OutNameNoExt . ".csv"
+	Gui, Import: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ImportGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ImportGuiWinH) / 2 . A_Space . "AutoSize"
 	
 	FileRead, v_TheWholeFile, % v_LibraryName
 	Loop, Parse, v_TheWholeFile, `n, `r
@@ -5039,7 +5042,8 @@ F_ImportLibrary()
 		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["The selected file is empty. Process of import will be interrupted."]
 		return
 	}
-	
+	if (A_DefaultGui = "HS4") ;in order to have access to ListView even when HS4 is active, temporarily default gui is switched to HS3.
+		Gui, HS3: Default
 	LV_Delete()
 	Loop, Parse, v_TheWholeFile, `n, `r
 	{
@@ -5075,16 +5079,30 @@ F_ImportLibrary()
 	}	
 	FileAppend, % v_TheWholeFile, % v_OutputFile, UTF-8
 	
-	LV_Delete()	
+	LV_Delete()
+	if (A_DefaultGui = "HS3")
+		Gui, HS4: Default
 	Gui, % A_DefaultGui . ":" . A_Space . "-Disabled"
 	Gui, Import: Destroy
-	F_ValidateIniLibSections()
-	F_RefreshListOfLibraries()
-	F_RefreshListOfLibraryTips()
-	F_UpdateSelHotLibDDL()
-	F_LoadFile(OutNameNoExt . ".csv")
-	F_Searching("Reload")
+	
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been imported."]
+	if (f_ExistedLib)
+	{
+		MsgBox, , 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], TransA["The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes."]
+		F_SaveGUIPos()
+		ini_GuiReload := true
+		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
+		Reload
+	}
+	else	;tu jestem, do przetestowania
+	{
+		F_ValidateIniLibSections()
+		F_RefreshListOfLibraries()
+		F_RefreshListOfLibraryTips()
+		F_UpdateSelHotLibDDL()
+		F_LoadFile(OutNameNoExt . ".csv")
+		F_Searching("Reload")
+	}
 	return
 }
 	
