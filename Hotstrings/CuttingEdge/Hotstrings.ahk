@@ -1406,6 +1406,7 @@ F_Searching(ReloadListView*)
 	local	Window1X := 0, 	Window1Y := 0, 	Window1W := 0, 	Window1H := 0
 			,Window2X := 0, 	Window2Y := 0, 	Window2W := 0, 	Window2H := 0
 			,NewWinPosX := 0, 	NewWinPosY := 0
+			,WhichGui := ""
 	
 	Switch ReloadListView[1]
 	{
@@ -1422,7 +1423,6 @@ F_Searching(ReloadListView*)
 				Case 1: LV_ModifyCol(2, "Sort") ;by default: triggerstring
 				Case 2: LV_ModifyCol(6, "Sort")
 				Case 3: LV_ModifyCol(1, "Sort")
-				;Default: LV_ModifyCol(2, "Sort")
 			}
 			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
 			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
@@ -1434,14 +1434,30 @@ F_Searching(ReloadListView*)
 			Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
 				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
 			GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
-		Case TransA["Search Hotstrings (F3)"]:
+			Case TransA["Search Hotstrings (F3)"]:
 			Goto, ViewOnly
 		Case "": ;view only
-		ViewOnly:
-			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
+			ViewOnly:
+			F_WhichGui()
+			Switch A_DefaultGui
+			{
+				Case "HS3": 
+					WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
+					WhichGui := "HS3"
+				Case "HS4": 
+					WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS4GuiHwnd 
+					WhichGui := "HS4"
+			}
 			Gui, HS3Search: Default
-			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
-			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
+			Switch WhichGui
+			{
+				Case "HS3":
+					Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
+					Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
+				Case "HS4":
+					Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS4MinWidth . A_Space . "H" HS4MinHeight	;no idea why twice, but then it shows correct size
+					Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS4MinWidth . A_Space . "H" HS4MinHeight 
+			}
 	}
 	return
 }
@@ -5599,13 +5615,14 @@ return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	~^f::
-	~^s::
-	~F3::
-	HS3SearchGuiEscape:
-	HS3SearchGuiClose:
+~^f::
+~^s::
+~F3::
+HS3SearchGuiEscape:
+HS3SearchGuiClose:
+	F_WhichGui()
 	Gui, HS3Search: Hide
-	return
+return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
