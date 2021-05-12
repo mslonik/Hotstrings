@@ -862,6 +862,7 @@ F_SetHotstring()
 	global ;assume-global mode
 	local 	TextInsert := "", OldOptions := "", Options := "", SendFun := "", OnOff := "", EnDis := "", OutputFile := "", InputFile := "", LString := "", ModifiedFlag := false
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
+			,v_TheWholeFile := "", v_TotalLines := 0
 	
 	;1. Read all inputs. 
 	Gui, % A_DefaultGui . ":" A_Space . "Submit", NoHide
@@ -1001,22 +1002,31 @@ F_SetHotstring()
 	ModifiedFlag	:= false ;if true, duplicate triggerstring definition is found, if false, definition is new
 	
 	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
-	Gui, ListView, % IdListView1	;if HS4 is active still correct ListView have to be loaded with data
+	GuiControl, % "Count" . v_TotalLines . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	
-	Loop, Read, %InputFile%, %OutputFile% ;read all definitions from this library file 
+	FileRead, v_TheWholeFile, Libraries\%v_SelectHotstringLibrary%
+	Loop, Parse, v_TheWholeFile, `n, `r
+		if (A_LoopField)
+			v_TotalLines++
+	
+	Loop, Parse, v_TheWholeFile, `n, `r
 	{
-		if (InStr(A_LoopReadLine, LString, 1) and InStr(Options, "C")) or (InStr(A_LoopReadLine, LString) and !(InStr(Options, "C")))
+		if (A_LoopField)
 		{
-			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-				, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in the file"] . A_Space . v_SelectHotstringLibrary . "." . "`n`n" 
-				. TransA["Do you want to proceed?"]
-				. "`n`n" . TransA["If you answer ""Yes"" it will overwritten."]
-			IfMsgBox, No
-				return
-			LV_Modify(A_Index, "", v_TriggerString, Options, SendFun, EnDis, TextInsert, v_Comment)
-			ModifiedFlag := true
+			if (InStr(A_LoopReadLine, LString))
+			{
+				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+					, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in the file"] . A_Space . v_SelectHotstringLibrary . "." . "`n`n" 
+					. TransA["Do you want to proceed?"]
+					. "`n`n" . TransA["If you answer ""Yes"" it will overwritten."]
+				IfMsgBox, No
+					return
+				LV_Modify(A_Index, "", v_TriggerString, Options, SendFun, EnDis, TextInsert, v_Comment)
+				ModifiedFlag := true
+			}
 		}
 	}
+	
 	if !(ModifiedFlag) 
 	{
 		LV_Add("",  v_TriggerString, Options, SendFun, EnDis, TextInsert, v_Comment)
@@ -1040,7 +1050,7 @@ F_SetHotstring()
 		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
 	}
 	FileAppend, % txt, Libraries\%v_SelectHotstringLibrary%, UTF-8
-	
+	GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 	;7. Increment library counter.
 	++v_LibHotstringCnt
 	++v_TotalHotstringCnt
@@ -1402,9 +1412,11 @@ F_Searching(ReloadListView*)
 		Case "ReloadAndView":
 			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
 			Gui, HS3Search: Default
+			GuiControl, % "Count" . a_Library.MaxIndex() . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 			LV_Delete()
 			Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
 				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+			GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 			Switch v_RadioGroup
 			{
 				Case 1: LV_ModifyCol(2, "Sort") ;by default: triggerstring
@@ -1417,9 +1429,11 @@ F_Searching(ReloadListView*)
 			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
 		Case "Reload":
 			Gui, HS3Search: Default
+			GuiControl, % "Count" . a_Library.MaxIndex() . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 			LV_Delete()
 			Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
 				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+			GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 		Case TransA["Search Hotstrings (F3)"]:
 			Goto, ViewOnly
 		Case "": ;view only
@@ -2044,7 +2058,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 F_SelectLibrary()
 {
 	global ;assume-global mode
-	local v_TheWholeFile := "", str1 := []
+	local v_TheWholeFile := "", str1 := [], v_TotalLines := 0
 		,v_OutVarTemp := 0, v_OutVarTempX := 0, v_OutVarTempY := 0, v_OutVarTempW := 0, v_OutVarTempH := 0
 	
 	if (A_DefaultGui = "HS3")
@@ -2053,14 +2067,17 @@ F_SelectLibrary()
 		Gui, HS4: Submit, NoHide
 	
 	GuiControl, Enable, % IdButton4 ; button Delete hotstring (F8)
+	FileRead, v_TheWholeFile, Libraries\%v_SelectHotstringLibrary%
+	Loop, Parse, v_TheWholeFile, `n, `r
+		if (A_LoopField)
+			v_TotalLines++
+	
 	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
-	Gui, ListView, % IdListView1 ; identify which ListView
+	GuiControl, % "Count" . v_TotalLines . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	LV_Delete()
 	v_LibHotstringCnt := 0
 	GuiControl, , % IdText13,  % v_LibHotstringCnt
 	GuiControl, , % IdText13b, % v_LibHotstringCnt
-	
-	FileRead, v_TheWholeFile, Libraries\%v_SelectHotstringLibrary%
 	
 	Loop, Parse, v_TheWholeFile, `n, `r
 	{
@@ -2094,6 +2111,7 @@ F_SelectLibrary()
 	LV_ModifyCol(4, Round(0.1 * v_OutVarTempW))
 	LV_ModifyCol(5, Round(0.4 * v_OutVarTempW))
 	LV_ModifyCol(6, Round(0.2 * v_OutVarTempW) - 3)
+	GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5044,6 +5062,7 @@ F_ImportLibrary()
 	}
 	if (A_DefaultGui = "HS4") ;in order to have access to ListView even when HS4 is active, temporarily default gui is switched to HS3.
 		Gui, HS3: Default
+	GuiControl, % "Count" . v_TotalLines . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	LV_Delete()
 	Loop, Parse, v_TheWholeFile, `n, `r
 	{
@@ -5080,6 +5099,7 @@ F_ImportLibrary()
 	FileAppend, % v_TheWholeFile, % v_OutputFile, UTF-8
 	
 	LV_Delete()
+	GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 	if (A_DefaultGui = "HS3")
 		Gui, HS4: Default
 	Gui, % A_DefaultGui . ":" . A_Space . "-Disabled"
@@ -5094,7 +5114,7 @@ F_ImportLibrary()
 		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
 		Reload
 	}
-	else	;tu jestem, do przetestowania
+	else	
 	{
 		F_ValidateIniLibSections()
 		F_RefreshListOfLibraries()
