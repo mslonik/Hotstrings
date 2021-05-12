@@ -29,54 +29,44 @@ global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert image.png -alpha o
 ;@Ahk2Exe-Set OriginalScriptlocation, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings
 ;@Ahk2Exe-SetCompanyName  http://mslonik.pl
 ;@Ahk2Exe-SetFileVersion 4.0
-global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user
-global v_SelectedRow 			:= A_Args[7]
-global v_PreviousMonitor 		:= A_Args[8]
+global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l or d
 
-global v_TotalHotstringCnt 		:= 0000
-global v_LibHotstringCnt			:= 0000 ;no of (triggerstring, hotstring) definitions in single library
+global a_SelectedTriggers 		:= []		;Main loop of application
+global a_Triggers 				:= []		;Main loop of application
+global v_HotstringFlag 			:= false		;Main loop of application
+global v_InputString 			:= ""		;Main loop of application
+global v_MouseX 				:= 0			;Main loop of application
+global v_MouseY 				:= 0			;Main loop of application
+global v_Tips 					:= ""		;Main loop of application
+global v_TipsFlag 				:= false		;Main loop of application
 
-global a_SelectedTriggers 		:= []
-global a_Triggers 				:= []
-
-global ini_AmountOfCharacterTips 	:= ""
-global ini_Caret 				:= ""
-global ini_Cursor 				:= ""
-global ini_Delay 				:= ""
-global ini_MenuCaret 			:= ""
-global ini_MenuCursor 			:= ""
-global ini_MenuSound 			:= 1
-global ini_Sandbox				:= 1	; as in new-created Config.ini
-global ini_Tips 				:= ""
-global ini_TipsSortAlphabetically 	:= ""
-global ini_TipsSortByLength 		:= ""
-global v_FlagSound 				:= 0
+global ini_AmountOfCharacterTips 	:= 1			;1-5, default: 1
+global ini_Caret 				:= false
+global ini_Cursor 				:= true
+global ini_Delay 				:= 300		;1-1000 [ms], default: 300
+global ini_MenuCaret 			:= false
+global ini_MenuCursor 			:= true
+global ini_MenuSound 			:= true
+global ini_Sandbox				:= true		
+global ini_Tips 				:= true
+global ini_TipsSortAlphabetically 	:= true
+global ini_TipsSortByLength 		:= true
 global ini_GuiReload			:= false
-;I couldn't find how to get system settings for size of menu font. Quick & dirty solution: manual setting of all fonts with variable c_FontSize.
+global ini_Language 			:= "English.txt"	
 
-global v_HotstringFlag 			:= 0
-global v_IndexLog 				:= 1
-global v_InputString 			:= ""
-global v_Language 				:= ""	; OutputVar for IniRead funtion
-global v_MenuMax 				:= 0
-global v_MenuMax2 				:= 0
-global v_MonitorFlag 			:= 0
-global v_MouseX 				:= ""
-global v_MouseY 				:= ""
-global v_SelectedRow2 			:= 0
-global v_SelectedMonitor			:= 0
-global v_Tips 					:= ""
-global v_TipsFlag 				:= 0
-global v_TriggerString 			:= ""
-global v_TypedTriggerstring 		:= ""
-global v_UndoHotstring 			:= ""
-global v_UndoTriggerstring 		:= ""
-global v_String				:= ""
-global v_ConfigFlag 			:= 0
+global v_IndexLog 				:= 1			;for logging, if Hotstrings application is run with d parameter.
+
+global v_MenuMax 				:= 0			;important for hotstring menu; future: to be investigated
+global v_MenuMax2 				:= 0			;important for hotstring menu; future: to be investigated
+
+;global v_TriggerString 			:= ""
+global v_TypedTriggerstring 		:= ""		;used by output functions
+global v_UndoHotstring 			:= ""		;used by output functions
+global v_UndoTriggerstring 		:= ""		;used by output functions
 
 ;Flags to control application
-global v_ResizingFlag 			:= true ; when Hotstrings Gui is displayed for the very first time
-global HS3_GuiWidth  := 0,	HS3_GuiHeight := 0
+global v_ResizingFlag 			:= true 		;when Hotstrings Gui is displayed for the very first time
+;global HS3_GuiWidth  := 0,	HS3_GuiHeight := 0
 
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
@@ -90,11 +80,11 @@ if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "L
 	. A_ScriptDir . "\Languages"
 }
 
-IniRead v_Language, Config.ini, Configuration, Language				; Load from Config.ini file specific parameter: language into variable v_Language, e.g. v_Language = English.ini
-if (!FileExist(A_ScriptDir . "\Languages\" . v_Language))			; else if there is no v_language .ini file, e.g. v_langugae == Polish.ini and there is no such file in Languages folder
+IniRead ini_Language, Config.ini, Configuration, Language				; Load from Config.ini file specific parameter: language into variable ini_Language, e.g. ini_Language = English.ini
+if (!FileExist(A_ScriptDir . "\Languages\" . ini_Language))			; else if there is no ini_language .ini file, e.g. v_langugae == Polish.ini and there is no such file in Languages folder
 {
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["There is no"] . A_Space . v_Language . A_Space . TransA["file in Languages subfolder!"]
-	. "`n`n" . TransA["The default"] . A_Space . v_Language . A_Space . TransA["file is now created in the following subfolder:"] . "`n"  A_ScriptDir . "\Languages\"
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["There is no"] . A_Space . ini_Language . A_Space . TransA["file in Languages subfolder!"]
+	. "`n`n" . TransA["The default"] . A_Space . ini_Language . A_Space . TransA["file is now created in the following subfolder:"] . "`n"  A_ScriptDir . "\Languages\"
 	F_LoadCreateTranslationTxt("create")
 }
 else
@@ -124,27 +114,14 @@ IniRead, ini_TipsSortByLength,			Config.ini, Configuration, TipsSortByLength
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
 F_ValidateIniLibSections() 
 
-
-; Future: to be removed
-;if !(A_Args[8])
-if (v_SelectedRow == "")
-	v_SelectedRow := 0
-;else
-	;v_SelectedRow := A_Args[8]
-;if !(v_PreviousMonitor)
-if (v_PreviousMonitor == "")
-	v_SelectedMonitor := 0
-else
-	v_SelectedMonitor := v_PreviousMonitor
-
 ;If application wasn't run with "l" parameter (standing for "light / lightweight"), prepare tray menu.
 if !(v_Param == "l") 		;GUI window uses the tray icon that was in effect at the time the window was created, therefore this section have to be run before the first Gui, New command. 
 {
 	Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
 	Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 			L_GUIInit
 	Menu, Tray, Default, 	% TransA["Edit Hotstrings"]
-	Menu, Tray, Add,		% TransA["Application help"],			Link1
-	Menu, Tray, Add,		% TransA["Genuine hotstrings AutoHotkey documentation"], Link2
+	Menu, Tray, Add,		% TransA["Application help"],			GuiAboutLink1
+	Menu, Tray, Add,		% TransA["Genuine hotstrings AutoHotkey documentation"], GuiAboutLink2
 	Menu, Tray, Add										; separator line
 	Menu, Tray, NoStandard									; remove all the rest of standard tray menu
 	Menu, Tray, Add,		% TransA["Reload"],					L_TrayReload
@@ -169,16 +146,14 @@ Gui, 1: Default	;this line is necessary to not show too many Guis on time of loa
 v_LibHotstringCnt := 0	;dirty trick to show initially 0 instead of 0000
 GuiControl, , % IdText13,  % v_LibHotstringCnt
 GuiControl, , % IdText13b, % v_LibHotstringCnt
-;*[One]
 F_LoadHotstringsFromLibraries()
 F_GuiSearch_CreateObject()	;When all tables are full, initialize GuiSearch
 F_GuiSearch_DetermineConstraints()
 F_Searching("Reload")			;prepare content of Search tables
+TrayTip, %A_ScriptName%, % TransA["Hotstrings have been loaded"], 1
 Critical, Off
 
-
-;If the script is run with command line parameter "d" like debug, prepare new folder and create file named as specified in the following pattern.
-if (v_Param == "d")
+if (v_Param == "d") ;If the script is run with command line parameter "d" like debug, prepare new folder and create file named as specified in the following pattern.
 {	
 	FileCreateDir, Logs
 	v_LogFileName := % "Logs\Logs" . A_DD . A_MM . "_" . A_Hour . A_Min . ".txt"
@@ -186,20 +161,22 @@ if (v_Param == "d")
 }
 
 ; Multi monitor environment, initialization of monitor width and height parameters
-SysGet, N, MonitorCount
-Loop, % N
-{
-	SysGet, Mon%A_Index%, Monitor, %A_Index%
-	W%A_Index% := Mon%A_Index%Right - Mon%A_Index%Left
-	H%A_Index% := Mon%A_Index%Bottom - Mon%A_Index%Top
-		;DPI%A_Index% := round(W%A_Index%/1920*(96/A_ScreenDPI), 2) ; original
-	DPI%A_Index% := 1			; added on 2021-01-31 in order to clean up GUI sizing
-}
-SysGet, PrimMon, MonitorPrimary
-if (v_SelectedMonitor == 0)
-	v_SelectedMonitor := PrimMon
+/*
+	SysGet, N, MonitorCount
+	Loop, % N
+	{
+		SysGet, Mon%A_Index%, Monitor, %A_Index%
+		W%A_Index% := Mon%A_Index%Right - Mon%A_Index%Left
+		H%A_Index% := Mon%A_Index%Bottom - Mon%A_Index%Top
+			;DPI%A_Index% := round(W%A_Index%/1920*(96/A_ScreenDPI), 2) ; original
+		DPI%A_Index% := 1			; added on 2021-01-31 in order to clean up GUI sizing
+	}
+	SysGet, PrimMon, MonitorPrimary
+	if (v_SelectedMonitor == 0)
+		v_SelectedMonitor := PrimMon
+*/
 
-Menu, Submenu1, 	Add, % TransA["Undo the last hotstring"],	L_Undo
+Menu, ConfTHB, 	Add, % TransA["Undo the last hotstring"],	L_Undo
 Menu, SubmenuTips, 	Add, % TransA["Enable/Disable"], 			Tips
 Menu, PositionMenu, Add, % TransA["Caret"], 					L_MenuCaretCursor
 Menu, PositionMenu, Add, % TransA["Cursor"], 				L_MenuCaretCursor
@@ -209,7 +186,7 @@ if (ini_MenuSound)
 	Menu, SubmenuMenu, Check, % TransA["Enable sound if overrun"]
 else
 	Menu, SubmenuMenu, UnCheck, % TransA["Enable sound if overrun"]
-Menu, Submenu1, 	Add, % TransA["Hotstring menu (MSI, MCL)"], :SubmenuMenu
+Menu, ConfTHB, 	Add, % TransA["Hotstring menu (MSI, MCL)"], :SubmenuMenu
 if (ini_MenuCursor)
 	Menu, PositionMenu, Check, % TransA["Cursor"]
 else
@@ -218,7 +195,7 @@ if (ini_MenuCaret)
 	Menu, PositionMenu, Check, % TransA["Caret"]
 else
 	Menu, PositionMenu, UnCheck, % TransA["Caret"]
-Menu, Submenu1, 	Add, % TransA["Triggerstring tips"], 	:SubmenuTips
+Menu, ConfTHB, 	Add, % TransA["Triggerstring tips"], 	:SubmenuTips
 Menu, Submenu3, 	Add, % TransA["Caret"],		L_CaretCursor
 Menu, Submenu3, 	Add, % TransA["Cursor"],			L_CaretCursor
 if (ini_Cursor)
@@ -387,7 +364,7 @@ if (EndingChar_Tab)
 else
 	Menu, Submenu2, UnCheck, % TransA["Tab"]
 
-Menu, Submenu1, Add, % TransA["Toggle EndChars"], :Submenu2
+Menu, ConfTHB, Add, % TransA["Toggle EndChars"], :Submenu2
 
 if (ini_Tips == 0)
 	Menu, SubmenuTips, UnCheck, % TransA["Enable/Disable"]
@@ -395,14 +372,14 @@ else
 	Menu, SubmenuTips, Check, % TransA["Enable/Disable"]
 
 if (ini_Undo == 0)
-	Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring"]
+	Menu, ConfTHB, UnCheck, % TransA["Undo the last hotstring"]
 else
-	Menu, Submenu1, Check, % TransA["Undo the last hotstring"]
+	Menu, ConfTHB, Check, % TransA["Undo the last hotstring"]
 
 Loop, %A_ScriptDir%\Languages\*.txt 
 {
 	Menu, SubmenuLanguage, Add, %A_LoopFileName%, L_ChangeLanguage
-	if (v_Language == A_LoopFileName)
+	if (ini_Language == A_LoopFileName)
 		Menu, SubmenuLanguage, Check, %A_LoopFileName%
 	else
 		Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
@@ -421,7 +398,7 @@ Switch c_FontColor
 
 Menu, ConfGUI,		Add, % TransA["Save position of application window"], 	F_SaveGUIPos
 Menu, ConfGUI,		Add, % TransA["Change Language"], 					:SubmenuLanguage
-Menu, ConfGUI, Add	;To add a menu separator line, omit all three parameters.
+Menu, ConfGUI, 	Add	;To add a menu separator line, omit all three parameters.
 Menu, ConfGUI, 	Add, % TransA["Show Sandbox (F6)"], 				F_ToggleSandbox
 if (ini_Sandbox)
 	Menu, ConfGUI, Check, % TransA["Show Sandbox (F6)"]
@@ -434,15 +411,10 @@ if (ini_WhichGui = "HS3")
 else
 	Menu, ConfGUI, UnCheck, % TransA["Show full GUI (F4)"]
 
-Menu, ConfGUI, Add	;To add a menu separator line, omit all three parameters.
+Menu, ConfGUI, 	Add	;To add a menu separator line, omit all three parameters.
 Menu, ConfGUI,		Add, Style of GUI,								:StyleGUIsubm
 
-for key, value in SizeOfMargin
-	Menu, SizeOfMX, Add, % SizeOfMargin[key], F_SizeOfMargin
-for key, value in SizeOfMargin
-	Menu, SizeOfMY, Add, % SizeOfMargin[key], F_SizeOfMargin
-Menu, SizeOfMX,	Check,	% c_xmarg
-Menu, SizeOfMY,	Check,	% c_ymarg
+F_CreateMenu_SizeOfMargin()
 
 Menu, ConfGUI,		Add, 	% TransA["Size of margin:"] . A_Space . "x" . A_Space . TransA["pixels"],	:SizeOfMX
 Menu, ConfGUI,		Add, 	% TransA["Size of margin:"] . A_Space . "y" . A_Space . TransA["pixels"],	:SizeOfMY
@@ -463,6 +435,7 @@ Menu, FontTypeMenu, Add,		Verdana,								F_FontType
 Menu, FontTypeMenu, Check,	% c_FontType
 Menu, ConfGUI,		Add, 	% TransA["Font type"],					:FontTypeMenu
 
+Menu, Submenu1,		Add, % TransA["Triggerstring / hotstring behaviour"], :ConfTHB
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 				:Submenu1
@@ -472,7 +445,9 @@ Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 		F_RefreshLi
 F_RefreshListOfLibraries()
 Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	F_RefreshListOfLibraryTips
 F_RefreshListOfLibraryTips()
-
+Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.
+Menu, LibrariesSubmenu,	Add, % TransA["Public libraries"],				L_PublicLibraries
+Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.
 Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],		F_ImportLibrary
 Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  			F_ExportLibraryStatic
 Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  			F_ExportLibraryDynamic
@@ -505,6 +480,7 @@ if (ini_GuiReload)
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Loop,
 {
+	;*[One]
 	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
 	if (ErrorLevel = "NewInput")
 		MsgBox, % TransA["ErrorLevel was triggered by NewInput error."]
@@ -514,10 +490,7 @@ Loop,
 	{
 		if (ini_MenuSound)
 		{
-			if (v_FlagSound == 0)
-				; Future: configurable parameters of the sound
-				SoundBeep, 400, 200
-			v_FlagSound := 0
+			SoundBeep, 400, 200	;Future: configurable parameters of the sound
 		}
 	}
 	else
@@ -620,9 +593,7 @@ if (WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
 {
 	if (ini_MenuSound)
 	{
-		if (v_FlagSound == 0)
-			SoundBeep, 400, 200
-		v_FlagSound := 0
+		SoundBeep, 400, 200
 	}
 }
 else
@@ -691,9 +662,9 @@ if (ini_Undo == 1) and (v_TypedTriggerstring && (A_ThisHotkey != A_PriorHotkey))
 		Send, {BackSpace}
 	}
 	if (v_UndoHotstring == "")
-		Send, % "{BackSpace " . StrLen(v_TypedTriggerstring) . "}" . SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
+		Send, % "{BackSpace " . StrLen(v_TypedTriggerstring) . "}" . SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, 2) + 1)
 	else
-		Send, % "{BackSpace " . StrLen(v_UndoHotstring) . "}" . SubStr(v_UndoTriggerstring, InStr(v_UndoTriggerstring, ":", v_OptionCaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
+		Send, % "{BackSpace " . StrLen(v_UndoHotstring) . "}" . SubStr(v_UndoTriggerstring, InStr(v_UndoTriggerstring, ":", v_OptionCaseSensitive := false, StartingPos := 1, 2) + 1)
 	if (InStr(TriggerOpt, "*0") or !(InStr(TriggerOpt, "*")))  and (InStr(TriggerOpt, "O0") or !(InStr(TriggerOpt, "O")))
 	{
 		Send, %A_EndChar%
@@ -842,14 +813,28 @@ Return
 #IfWinExist Hotstring listbox
 Esc::
 Gui, Menu:Destroy
-SendRaw, % SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
+SendRaw, % SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, 2) + 1)
 return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
-;#[AddHotstring]
-;AddHotstring: 
+F_CreateMenu_SizeOfMargin()
+{
+	global	;assume-global mode
+	local	key := 0, value := 0
+	
+	for key, value in SizeOfMargin
+		Menu, SizeOfMX, Add, % SizeOfMargin[key], F_SizeOfMargin
+	for key, value in SizeOfMargin
+		Menu, SizeOfMY, Add, % SizeOfMargin[key], F_SizeOfMargin
+	
+	Menu, SizeOfMX,	Check,	% c_xmarg
+	Menu, SizeOfMY,	Check,	% c_ymarg
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_SetHotstring()
 ;1. Read all inputs. 
 ;2. Create Hotstring definition according to inputs. 
 ;3. Read the library file into List View. 
@@ -857,7 +842,6 @@ return
 ;5. Delete library file. 
 ;6. Save List View into the library file.
 ;7. Increment library counter.
-F_SetHotstring()
 {
 	global ;assume-global mode
 	local 	TextInsert := "", OldOptions := "", Options := "", SendFun := "", OnOff := "", EnDis := "", OutputFile := "", InputFile := "", LString := "", ModifiedFlag := false
@@ -1030,7 +1014,6 @@ F_SetHotstring()
 	if !(ModifiedFlag) 
 	{
 		LV_Add("",  v_TriggerString, Options, SendFun, EnDis, TextInsert, v_Comment)
-		;txt := Options . "‖" . v_TriggerString . "‖" . SendFun . "‖" . EnDis . "‖" . TextInsert . "‖" . v_Comment ;tylko to się liczy
 		a_Triggers.Push(v_TriggerString) ;added to table of hotstring recognizer (a_Triggers)
 	}
 	;4. Sort List View. 
@@ -1862,7 +1845,6 @@ F_DeleteHotstring()
 			a_Triggers.RemoveAt(A_Index)
 	}
 	TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
-	;Gui, ProgressDelete:Destroy
 	
 	;6. Decrement library counter.
 	--v_LibHotstringCnt
@@ -1901,7 +1883,7 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 {
 	global ;assume-global mode
 	local WinX := 0, WinY := 0
-	local OutputvarTemp := 0, OutputvarTempW := 0
+		,OutputvarTemp := 0, OutputvarTempW := 0
 	
 	Switch A_DefaultGui
 	{
@@ -2137,6 +2119,7 @@ F_HSLV()
 {
 	global ;assume-global mode
 	local Options := "", Fun := "", EnDis := "", TextInsert := "", OTextMenu := "", Comment := ""
+		,v_SelectedRow := 0
 		
 	if !(v_SelectedRow := LV_GetNext())
 		return
@@ -2315,40 +2298,40 @@ F_HSLV()
 		return
 	}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_SizeOfMargin()
+F_SizeOfMargin()
+{
+	global	;assume-global mode
+	local key := 0, value := 0
+	
+	Switch A_ThisMenu
 	{
-		global	;assume-global mode
-		local key := 0, value := 0
-		
-		Switch A_ThisMenu
-		{
-			Case "SizeOfMX": 
-			for key, value in SizeOfMargin
-				if (SizeOfMargin[key] = A_ThisMenuItem)
-					Menu, SizeOfMX,	Check,	% SizeOfMargin[key]
-			else
-				Menu, SizeOfMX,	UnCheck,	% SizeOfMargin[key]
-			c_xmarg := A_ThisMenuItem
-			Case "SizeOfMY":
-			for key, value in SizeOfMargin
-				if (SizeOfMargin[key] = A_ThisMenuItem)
-					Menu, SizeOfMY,	Check,	% SizeOfMargin[key]
-			else
-				Menu, SizeOfMY,	UnCheck,	% SizeOfMargin[key]
-			c_ymarg := A_ThisMenuItem
-		}
-		MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["In order to aplly new size of margin it's necesssary to reload the application."]
+		Case "SizeOfMX": 
+		for key, value in SizeOfMargin
+			if (SizeOfMargin[key] = A_ThisMenuItem)
+				Menu, SizeOfMX,	Check,	% SizeOfMargin[key]
+		else
+			Menu, SizeOfMX,	UnCheck,	% SizeOfMargin[key]
+		c_xmarg := A_ThisMenuItem
+		Case "SizeOfMY":
+		for key, value in SizeOfMargin
+			if (SizeOfMargin[key] = A_ThisMenuItem)
+				Menu, SizeOfMY,	Check,	% SizeOfMargin[key]
+		else
+			Menu, SizeOfMY,	UnCheck,	% SizeOfMargin[key]
+		c_ymarg := A_ThisMenuItem
+	}
+	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["In order to aplly new size of margin it's necesssary to reload the application."]
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
 		. "`n`n" . TransA["Do you want to reload application now?"]
-		IfMsgBox, Yes
-		{
-			F_SaveSizeOfMargin()
-			F_SaveGUIPos("reset")
-			Reload
-		}
-		IfMsgBox, No
-			return	
+	IfMsgBox, Yes
+	{
+		F_SaveSizeOfMargin()
+		F_SaveGUIPos("reset")
+		Reload
 	}
+	IfMsgBox, No
+		return	
+}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
@@ -2785,45 +2768,43 @@ Language=English.txt
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_LoadHotstringsFromLibraries()
-	{
-		global ; assume-global mode
-		local key := "", value := "", PriorityFlag := false
-		a_Library 				:= []
-		a_TriggerOptions 			:= []
-		a_Triggerstring 			:= []
-		a_OutputFunction 			:= []
-		a_EnableDisable 			:= []
-		a_Hotstring				:= []
-		a_Comment 				:= []
-		
+F_LoadHotstringsFromLibraries()
+{
+	global ; assume-global mode
+	local key := "", value := "", PriorityFlag := false
+	a_Library 				:= []
+	a_TriggerOptions 			:= []
+	a_Triggerstring 			:= []
+	a_OutputFunction 			:= []
+	a_EnableDisable 			:= []
+	a_Hotstring				:= []
+	a_Comment 				:= []
+	
 	; Prepare TrayTip message taking into account value of command line parameter.
-		if (v_Param == "d")
-			TrayTip, %A_ScriptName% - Debug mode, 	% TransA["Loading hotstrings from libraries..."], 1
-		else if (v_Param == "l")
-			TrayTip, %A_ScriptName% - Lite mode, 	% TransA["Loading hotstrings from libraries..."], 1
-		else	
-			TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
-		
+	if (v_Param == "d")
+		TrayTip, %A_ScriptName% - Debug mode, 	% TransA["Loading hotstrings from libraries..."], 1
+	else if (v_Param == "l")
+		TrayTip, %A_ScriptName% - Lite mode, 	% TransA["Loading hotstrings from libraries..."], 1
+	else	
+		TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
+	
 	; Load (triggerstring, hotstring) definitions if enabled and triggerstring tips if enabled.
-		v_TotalHotstringCnt := 0
-		
-		for key, value in ini_LoadLib
-		{
-			if ((key != "PriorityLibrary.csv") and (value))
-				F_LoadFile(key)
-			if ((key == "PriorityLibrary.csv") and (value))
-				PriorityFlag := true
-		}
-		if (PriorityFlag)
-		{
-			F_LoadFile("PriorityLibrary.csv")
-			PriorityFlag := false
-		}
-		
-		TrayTip, %A_ScriptName%, % TransA["Hotstrings have been loaded"], 1
-		return
+	v_TotalHotstringCnt := 0
+	
+	for key, value in ini_LoadLib
+	{
+		if ((key != "PriorityLibrary.csv") and (value))
+			F_LoadFile(key)
+		if ((key == "PriorityLibrary.csv") and (value))
+			PriorityFlag := true
 	}
+	if (PriorityFlag)
+	{
+		F_LoadFile("PriorityLibrary.csv")
+		PriorityFlag := false
+	}
+	return
+}
 	
 ; ------------------------------------------------------------------------------------------------------------------------------------
 	
@@ -3057,6 +3038,7 @@ Pause Script											= Pause Script
 Phrase to search for:									= Phrase to search for:
 pixels												= pixels
 Position of main window is saved in Config.ini.				= Position of main window is saved in Config.ini.	
+Public libraries										= Public libraries
 Reload												= Reload
 Remove Config.ini										= Remove Config.ini
 Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
@@ -3113,6 +3095,7 @@ Toggle EndChars	 									= &Toggle EndChars
 Total:												= Total:
 (triggerstring, hotstring) definitions						= (triggerstring, hotstring) definitions
 Triggerstring 											= Triggerstring
+Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
 Triggerstring tips 										= &Triggerstring tips
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
 Underscore _											= Underscore _
@@ -3131,7 +3114,7 @@ Warning, code generated automatically for definitions based on menu, see documen
 	
 	if (decision[1] = "load")
 	{
-		Loop, Read, %A_ScriptDir%\Languages\%v_Language%
+		Loop, Read, %A_ScriptDir%\Languages\%ini_Language%
 		{
 			tick := false
 			Loop, Parse, A_LoopReadLine, =, %A_Space%%A_Tab%
@@ -3278,279 +3261,287 @@ F_LoadFile(nameoffile)
 	
 ; ------------------------------------------------------------------------------------------------------------------------------------
 	
-	F_GuiHS4_CreateObject()
-	{
-		global ;assume-global mode
-		local x0 := 0, y0 := 0
+F_GuiHS4_CreateObject()
+{
+	global ;assume-global mode
+	local x0 := 0, y0 := 0
+	
+	v_TotalHotstringCnt 		:= 0000
+	v_LibHotstringCnt			:= 0000 ;no of (triggerstring, hotstring) definitions in single library
+
+	/*
+		IdText1 IdText2 IdText3 IdText4 IdText5 IdText6 IdText7 IdText8 IdText9 IdText10 IdText11 IdText12 IdText13
+		IdCheckBox1 IdCheckBox2 IdCheckBox3 IdCheckBox4 IdCheckBox5 IdCheckBox6
+		IdEdit1 IdEdit2 IdEdit3 IdEdit4 IdEdit5 IdEdit6 IdEdit7 IdEdit8 IdEdit9 IdEdit10
+		IdGroupBox1
+		IdDDL1 IdDDL2
+		IdButton1 IdButton2 IdButton3 IdButton4 IdButton5
+		IdListView1
 		
-		/*
-			IdText1 IdText2 IdText3 IdText4 IdText5 IdText6 IdText7 IdText8 IdText9 IdText10 IdText11 IdText12 IdText13
-			IdCheckBox1 IdCheckBox2 IdCheckBox3 IdCheckBox4 IdCheckBox5 IdCheckBox6
-			IdEdit1 IdEdit2 IdEdit3 IdEdit4 IdEdit5 IdEdit6 IdEdit7 IdEdit8 IdEdit9 IdEdit10
-			IdGroupBox1
-			IdDDL1 IdDDL2
-			IdButton1 IdButton2 IdButton3 IdButton4 IdButton5
-			IdListView1
-			
-			v_LoadedHotstrings v_TriggerString v_OptionImmediateExecute v_OptionCaseSensitive v_OptionNoBackspace v_OptionInsideWord v_OptionNoEndChar v_OptionDisable
-			v_TextSelectHotstringsOutFun v_SelectFunction v_TextEnterHotstring
-			v_EnterHotstring v_EnterHotstring1 v_EnterHotstring2 v_EnterHotstring3 v_EnterHotstring4 v_EnterHotstring5 v_EnterHotstring6
-			v_TextAddComment v_Comment
-			v_TextSelectHotstringLibrary v_SelectHotstringLibrary
-			v_DeleteHotstring 
-			v_LibraryContent v_ShortcutsMainInterface v_SandString v_Sandbox v_NoOfHotstringsInLibrary
-		*/
-		
+		v_LoadedHotstrings v_TriggerString v_OptionImmediateExecute v_OptionCaseSensitive v_OptionNoBackspace v_OptionInsideWord v_OptionNoEndChar v_OptionDisable
+		v_TextSelectHotstringsOutFun v_SelectFunction v_TextEnterHotstring
+		v_EnterHotstring v_EnterHotstring1 v_EnterHotstring2 v_EnterHotstring3 v_EnterHotstring4 v_EnterHotstring5 v_EnterHotstring6
+		v_Comment
+		v_TextSelectHotstringLibrary v_SelectHotstringLibrary
+		v_DeleteHotstring 
+		v_LibraryContent v_ShortcutsMainInterface v_Sandbox v_NoOfHotstringsInLibrary
+	*/
+	
 ;1. Definition of HS4 GUI.
 ;-DPIScale doesn't work in Microsoft Windows 10
 ;+Border doesn't work in Microsoft Windows 10
 ;OwnDialogs
-		Gui, 	HS4: New, 	-Resize +HwndHS4GuiHwnd +OwnDialogs -MaximizeBox, % SubStr(A_ScriptName, 1, -4) 
-		Gui, 	HS4: Margin,	% c_xmarg, % c_ymarg
-		Gui,		HS4: Color,	% c_WindowColor, % c_ControlColor
-		
+	Gui, 	HS4: New, 	-Resize +HwndHS4GuiHwnd +OwnDialogs -MaximizeBox, % SubStr(A_ScriptName, 1, -4) 
+	Gui, 	HS4: Margin,	% c_xmarg, % c_ymarg
+	Gui,		HS4: Color,	% c_WindowColor, % c_ControlColor
+	
 ;2. Prepare all text objects according to mock-up.
-		Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-		Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText1b, 									% TransA["Enter triggerstring"]
-		Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-		Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText2b, % TransA["Total:"] . A_Space
-		Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
-		Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText12b, % v_TotalHotstringCnt
-		Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-		
-		Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit1b vv_TriggerString 
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText1b, 									% TransA["Enter triggerstring"]
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText2b, % TransA["Total:"] . A_Space
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText12b, % v_TotalHotstringCnt
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit1b vv_TriggerString 
 ;GuiControl,	Hide,		% IdEdit1
-		
-		Gui, 	HS4: Add, 	CheckBox, 	x0 y0 HwndIdCheckBox1b gF_Checkbox vv_OptionImmediateExecute,	% TransA["Immediate Execute (*)"]
+	
+	Gui, 	HS4: Add, 	CheckBox, 	x0 y0 HwndIdCheckBox1b gF_Checkbox vv_OptionImmediateExecute,	% TransA["Immediate Execute (*)"]
 ;GuiControl,	Hide,		% IdCheckBox1
-		Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox2b gF_Checkbox vv_OptionCaseSensitive,		% TransA["Case Sensitive (C)"]
+	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox2b gF_Checkbox vv_OptionCaseSensitive,		% TransA["Case Sensitive (C)"]
 ;GuiControl,	Hide,		% IdCheckBox2
-		Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox3b gF_Checkbox vv_OptionNoBackspace,		% TransA["No Backspace (B0)"]
+	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox3b gF_Checkbox vv_OptionNoBackspace,		% TransA["No Backspace (B0)"]
 ;GuiControl,	Hide,		% IdCheckBox3
-		Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox4b gF_Checkbox vv_OptionInsideWord, 		% TransA["Inside Word (?)"]
+	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox4b gF_Checkbox vv_OptionInsideWord, 		% TransA["Inside Word (?)"]
 ;GuiControl,	Hide,		% IdCheckBox4
-		Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox5b gF_Checkbox vv_OptionNoEndChar, 		% TransA["No End Char (O)"]
+	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox5b gF_Checkbox vv_OptionNoEndChar, 		% TransA["No End Char (O)"]
 ;GuiControl,	Hide,		% IdCheckBox5
-		Gui, 	HS4: Add, 	CheckBox, 	x0 y0 HwndIdCheckBox6b gF_Checkbox vv_OptionDisable, 			% TransA["Disable"]
+	Gui, 	HS4: Add, 	CheckBox, 	x0 y0 HwndIdCheckBox6b gF_Checkbox vv_OptionDisable, 			% TransA["Disable"]
 ;GuiControl,	Hide,		% IdCheckBox6
-		
-		Gui,		HS4: Add,		GroupBox, 	x0 y0 HwndIdGroupBox1b, 									% TransA["Select trigger option(s)"]
+	
+	Gui,		HS4: Add,		GroupBox, 	x0 y0 HwndIdGroupBox1b, 									% TransA["Select trigger option(s)"]
 ;GuiControl,	Hide,		% IdGroupBox1
-		
-		Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-		Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText3b vv_TextSelectHotstringsOutFun, 			% TransA["Select hotstring output function"]
+	
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText3b vv_TextSelectHotstringsOutFun, 			% TransA["Select hotstring output function"]
 	;GuiControl,	Hide,		% IdText3
-		Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-		
-		Gui, 	HS4: Add, 		DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
+	Gui, 	HS4: Add, 		DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
 	;GuiControl,	Hide,		% IdDDL1
-		
-		Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-		Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText4b vv_TextEnterHotstring, 				% TransA["Enter hotstring"]
+	
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText4b vv_TextEnterHotstring, 				% TransA["Enter hotstring"]
 	;GuiControl,	Hide,		% IdText4
-		Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-		
-		Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit2b vv_EnterHotstring
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit2b vv_EnterHotstring
 	;GuiControl,	Hide,		% IdEdit2
-		Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit3b vv_EnterHotstring1  Disabled
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit3b vv_EnterHotstring1  Disabled
 	;GuiControl,	Hide,		% IdEdit3
-		Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit4b vv_EnterHotstring2  Disabled
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit4b vv_EnterHotstring2  Disabled
 	;GuiControl,	Hide,		% IdEdit4
-		Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit5b vv_EnterHotstring3  Disabled
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit5b vv_EnterHotstring3  Disabled
 	;GuiControl,	Hide,		% IdEdit5
-		Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit6b vv_EnterHotstring4  Disabled
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit6b vv_EnterHotstring4  Disabled
 	;GuiControl,	Hide,		% IdEdit6
-		Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit7b vv_EnterHotstring5  Disabled
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit7b vv_EnterHotstring5  Disabled
 	;GuiControl,	Hide,		% IdEdit7
-		Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit8b vv_EnterHotstring6  Disabled
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit8b vv_EnterHotstring6  Disabled
 	;GuiControl,	Hide,		% IdEdit8
-		
-		Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-		Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText5b vv_TextAddComment, 						% TransA["Add comment (optional)"]
+	
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText5b,				 						% TransA["Add comment (optional)"]
 	;GuiControl,	Hide,		% IdText5
-		Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-		
-		Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit9b vv_Comment Limit64 
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit9b vv_Comment Limit64 
 	;GuiControl,	Hide,		% IdEdit9
-		
-		Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-		Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText6b vv_TextSelectHotstringLibrary, 			% TransA["Select hotstring library"]
+	
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText6b vv_TextSelectHotstringLibrary, 			% TransA["Select hotstring library"]
 	;GuiControl,	Hide,		% IdText6
-		Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-		
-		Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton1b gF_GuiAddLibrary, 						% TransA["Add library"]
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	
+	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton1b gF_GuiAddLibrary, 						% TransA["Add library"]
 	;GuiControl,	Hide,		% IdButton1
-		Gui,		HS4: Add,		DropDownList,	x0 y0 HwndIdDDL2b vv_SelectHotstringLibrary gF_SelectLibrary Sort
+	Gui,		HS4: Add,		DropDownList,	x0 y0 HwndIdDDL2b vv_SelectHotstringLibrary gF_SelectLibrary Sort
 	;GuiControl,	Hide,		% IdDDL2
-		
+	
 	;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
-		Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton2b gF_SetHotstring,						% TransA["Set hotstring (F9)"]
+	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton2b gF_SetHotstring,						% TransA["Set hotstring (F9)"]
 	;GuiControl,	HideSet% IdButton2
-		Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton3b gF_Clear,							% TransA["Clear (F5)"]
+	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton3b gF_Clear,							% TransA["Clear (F5)"]
 	;GuiControl,	Hide,		% IdButton3
-		Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton4b gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
+	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton4b gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
 	;GuiControl,	Hide,		% IdButton4
-		
-		Gui,		HS4: Add,			Button,		x0 y0 HwndIdButton5b gF_ToggleRightColumn,			⯈`nF4
+	
+	Gui,		HS4: Add,			Button,		x0 y0 HwndIdButton5b gF_ToggleRightColumn,			⯈`nF4
 	;GuiControl,	Hide,		% IdButton5
-		Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText10b vv_SandString, 						% TransA["Sandbox (F6)"]
-		Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit10b vv_Sandbox r3 						; r3 = 3x rows of text
-		
-		Gui,		HS4: Add,			Text,		x0 y0 HwndIdText11b, % TransA["This library:"] . A_Space
-		Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
-		Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText13b,  % v_LibHotstringCnt ;value of Hotstrings counter
-		Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	}
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText10b,			 						% TransA["Sandbox (F6)"]
+	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit10b vv_Sandbox r3 						; r3 = 3x rows of text
+	
+	Gui,		HS4: Add,			Text,		x0 y0 HwndIdText11b, % TransA["This library:"] . A_Space
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText13b,  % v_LibHotstringCnt ;value of Hotstrings counter
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+}
 	
 ; ------------------------------------------------------------------------------------------------------------------------------------
 	
-	F_GuiMain_CreateObject()
-	{
-		global ;assume-global mode
-		local x0 := 0, y0 := 0
-		v_OptionImmediateExecute := 0, v_OptionCaseSensitive := 0, v_OptionNoBackspace := 0, v_OptionInsideWord := 0, v_OptionNoEndChar := 0, v_OptionDisable := 0
+F_GuiMain_CreateObject()
+{
+	global ;assume-global mode
+	local x0 := 0, y0 := 0
+	v_OptionImmediateExecute := 0, v_OptionCaseSensitive := 0, v_OptionNoBackspace := 0, v_OptionInsideWord := 0, v_OptionNoEndChar := 0, v_OptionDisable := 0
+	
+	v_TotalHotstringCnt 		:= 0000
+	v_LibHotstringCnt			:= 0000 ;no of (triggerstring, hotstring) definitions in single library
+	HS3_GuiWidth  				:= 0
+	HS3_GuiHeight 				:= 0
+	
+	/*
+		IdText1 IdText2 IdText3 IdText4 IdText5 IdText6 IdText7 IdText8 IdText9 IdText10 IdText11 IdText12 IdText13
+		IdCheckBox1 IdCheckBox2 IdCheckBox3 IdCheckBox4 IdCheckBox5 IdCheckBox6
+		IdEdit1 IdEdit2 IdEdit3 IdEdit4 IdEdit5 IdEdit6 IdEdit7 IdEdit8 IdEdit9 IdEdit10
+		IdGroupBox1
+		IdDDL1 IdDDL2
+		IdButton1 IdButton2 IdButton3 IdButton4 IdButton5
+		IdListView1
 		
-		/*
-			IdText1 IdText2 IdText3 IdText4 IdText5 IdText6 IdText7 IdText8 IdText9 IdText10 IdText11 IdText12 IdText13
-			IdCheckBox1 IdCheckBox2 IdCheckBox3 IdCheckBox4 IdCheckBox5 IdCheckBox6
-			IdEdit1 IdEdit2 IdEdit3 IdEdit4 IdEdit5 IdEdit6 IdEdit7 IdEdit8 IdEdit9 IdEdit10
-			IdGroupBox1
-			IdDDL1 IdDDL2
-			IdButton1 IdButton2 IdButton3 IdButton4 IdButton5
-			IdListView1
-			
-			v_LoadedHotstrings v_TriggerString v_OptionImmediateExecute v_OptionCaseSensitive v_OptionNoBackspace v_OptionInsideWord v_OptionNoEndChar v_OptionDisable
-			v_TextSelectHotstringsOutFun v_SelectFunction v_TextEnterHotstring
-			v_EnterHotstring v_EnterHotstring1 v_EnterHotstring2 v_EnterHotstring3 v_EnterHotstring4 v_EnterHotstring5 v_EnterHotstring6
-			v_TextAddComment v_Comment
-			v_TextSelectHotstringLibrary v_SelectHotstringLibrary
-			v_DeleteHotstring
-			v_LibraryContent v_ShortcutsMainInterface v_SandString v_Sandbox v_NoOfHotstringsInLibrary
-		*/
-		
+		v_LoadedHotstrings v_TriggerString v_OptionImmediateExecute v_OptionCaseSensitive v_OptionNoBackspace v_OptionInsideWord v_OptionNoEndChar v_OptionDisable
+		v_TextSelectHotstringsOutFun v_SelectFunction v_TextEnterHotstring
+		v_EnterHotstring v_EnterHotstring1 v_EnterHotstring2 v_EnterHotstring3 v_EnterHotstring4 v_EnterHotstring5 v_EnterHotstring6
+		v_Comment
+		v_TextSelectHotstringLibrary v_SelectHotstringLibrary
+		v_DeleteHotstring
+		v_LibraryContent v_ShortcutsMainInterface v_Sandbox v_NoOfHotstringsInLibrary
+	*/
+	
 ;1. Definition of HS3 GUI.
 ;-DPIScale doesn't work in Microsoft Windows 10
 ;+Border doesn't work in Microsoft Windows 10
 ;OwnDialogs
-		Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs -MaximizeBox, 						% SubStr(A_ScriptName, 1, -4)
-		Gui, 		HS3: Margin,		% c_xmarg, % c_ymarg
-		Gui,			HS3: Color,		% c_WindowColor, % c_ControlColor
-		
+	Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs -MaximizeBox, 						% SubStr(A_ScriptName, 1, -4)
+	Gui, 		HS3: Margin,		% c_xmarg, % c_ymarg
+	Gui,			HS3: Color,		% c_WindowColor, % c_ControlColor
+	
 ;2. Prepare all text objects according to mock-up.
-		Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-		Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText1, 										% TransA["Enter triggerstring"]
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText1, 										% TransA["Enter triggerstring"]
 	;GuiControl, 	Hide, 		% IdText1
-		
-		Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-		Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString 
+	
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString 
 	;GuiControl,	Hide,		% IdEdit1
-		Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-		Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText2, % TransA["Total:"] . A_Space 
-		Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			Consolas ;Consolas type is monospace
-		Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText12, % v_TotalHotstringCnt
-		Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-		
-		Gui, 		HS3: Add, 		CheckBox, 	x0 y0 HwndIdCheckBox1 gF_Checkbox vv_OptionImmediateExecute,	% TransA["Immediate Execute (*)"]
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText2, % TransA["Total:"] . A_Space 
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			Consolas ;Consolas type is monospace
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText12, % v_TotalHotstringCnt
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	
+	Gui, 		HS3: Add, 		CheckBox, 	x0 y0 HwndIdCheckBox1 gF_Checkbox vv_OptionImmediateExecute,	% TransA["Immediate Execute (*)"]
 ;GuiControl,	Hide,		% IdCheckBox1
-		Gui, 		HS3: Add,			CheckBox, 	x0 y0 HwndIdCheckBox2 gF_Checkbox vv_OptionCaseSensitive,		% TransA["Case Sensitive (C)"]
+	Gui, 		HS3: Add,			CheckBox, 	x0 y0 HwndIdCheckBox2 gF_Checkbox vv_OptionCaseSensitive,		% TransA["Case Sensitive (C)"]
 ;GuiControl,	Hide,		% IdCheckBox2
-		Gui, 		HS3: Add,			CheckBox, 	x0 y0 HwndIdCheckBox3 gF_Checkbox vv_OptionNoBackspace,		% TransA["No Backspace (B0)"]
+	Gui, 		HS3: Add,			CheckBox, 	x0 y0 HwndIdCheckBox3 gF_Checkbox vv_OptionNoBackspace,		% TransA["No Backspace (B0)"]
 ;GuiControl,	Hide,		% IdCheckBox3
-		Gui, 		HS3: Add,			CheckBox, 	x0 y0 HwndIdCheckBox4 gF_Checkbox vv_OptionInsideWord, 		% TransA["Inside Word (?)"]
+	Gui, 		HS3: Add,			CheckBox, 	x0 y0 HwndIdCheckBox4 gF_Checkbox vv_OptionInsideWord, 		% TransA["Inside Word (?)"]
 ;GuiControl,	Hide,		% IdCheckBox4
-		Gui, 		HS3: Add,			CheckBox, 	x0 y0 HwndIdCheckBox5 gF_Checkbox vv_OptionNoEndChar, 			% TransA["No End Char (O)"]
+	Gui, 		HS3: Add,			CheckBox, 	x0 y0 HwndIdCheckBox5 gF_Checkbox vv_OptionNoEndChar, 			% TransA["No End Char (O)"]
 ;GuiControl,	Hide,		% IdCheckBox5
-		Gui, 		HS3: Add, 		CheckBox, 	x0 y0 HwndIdCheckBox6 gF_Checkbox vv_OptionDisable, 			% TransA["Disable"]
+	Gui, 		HS3: Add, 		CheckBox, 	x0 y0 HwndIdCheckBox6 gF_Checkbox vv_OptionDisable, 			% TransA["Disable"]
 ;GuiControl,	Hide,		% IdCheckBox6
-		
-		Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-		Gui,			HS3: Add,		GroupBox, 	x0 y0 HwndIdGroupBox1, 										% TransA["Select trigger option(s)"]
-		Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui,			HS3: Add,		GroupBox, 	x0 y0 HwndIdGroupBox1, 										% TransA["Select trigger option(s)"]
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 ;GuiControl,	Hide,		% IdGroupBox1
-		
-		Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-		Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText3 vv_TextSelectHotstringsOutFun, 				% TransA["Select hotstring output function"]
+	
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText3 vv_TextSelectHotstringsOutFun, 				% TransA["Select hotstring output function"]
 ;GuiControl,	Hide,		% IdText3
-		Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-		
-		Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 			SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	
+	Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 			SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
 ;GuiControl,	Hide,		% IdDDL1
-		
-		Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-		Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText4 vv_TextEnterHotstring, 					% TransA["Enter hotstring"]
+	
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText4 vv_TextEnterHotstring, 					% TransA["Enter hotstring"]
 ;GuiControl,	Hide,		% IdText4
-		Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-		
-		Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit2 vv_EnterHotstring
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit2 vv_EnterHotstring
 ;GuiControl,	Hide,		% IdEdit2
-		Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit3 vv_EnterHotstring1  Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit3 vv_EnterHotstring1  Disabled
 ;GuiControl,	Hide,		% IdEdit3
-		Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit4 vv_EnterHotstring2  Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit4 vv_EnterHotstring2  Disabled
 ;GuiControl,	Hide,		% IdEdit4
-		Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit5 vv_EnterHotstring3  Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit5 vv_EnterHotstring3  Disabled
 ;GuiControl,	Hide,		% IdEdit5
-		Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit6 vv_EnterHotstring4  Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit6 vv_EnterHotstring4  Disabled
 ;GuiControl,	Hide,		% IdEdit6
-		Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit7 vv_EnterHotstring5  Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit7 vv_EnterHotstring5  Disabled
 ;GuiControl,	Hide,		% IdEdit7
-		Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit8 vv_EnterHotstring6  Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit8 vv_EnterHotstring6  Disabled
 ;GuiControl,	Hide,		% IdEdit8
-		
-		Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-		Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText5 vv_TextAddComment, 						% TransA["Add comment (optional)"]
+	
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText5,				 						% TransA["Add comment (optional)"]
 ;GuiControl,	Hide,		% IdText5
-		Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-		
-		Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit9 vv_Comment Limit64 
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit9 vv_Comment Limit64 
 ;GuiControl,	Hide,		% IdEdit9
-		
-		Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-		Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText6 vv_TextSelectHotstringLibrary, 				% TransA["Select hotstring library"]
+	
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText6 vv_TextSelectHotstringLibrary, 				% TransA["Select hotstring library"]
 ;GuiControl,	Hide,		% IdText6
-		Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-		
-		Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton1 gF_GuiAddLibrary, 						% TransA["Add library"]
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	
+	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton1 gF_GuiAddLibrary, 						% TransA["Add library"]
 ;GuiControl,	Hide,		% IdButton1
-		Gui,			HS3: Add,		DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SelectLibrary Sort
+	Gui,			HS3: Add,		DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SelectLibrary Sort
 ;GuiControl,	Hide,		% IdDDL2
-		
+	
 ;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
-		Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton2 gF_SetHotstring,							% TransA["Set hotstring (F9)"]
+	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton2 gF_SetHotstring,							% TransA["Set hotstring (F9)"]
 ;GuiControl,	HideSet% IdButton2
-		Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton3 gF_Clear,									% TransA["Clear (F5)"]
+	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton3 gF_Clear,									% TransA["Clear (F5)"]
 ;GuiControl,	Hide,		% IdButton3
-		Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton4 gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
+	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton4 gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
 ;GuiControl,	Hide,		% IdButton4
-		
-		Gui,			HS3:Add,		Button,		x0 y0 HwndIdButton5 gF_ToggleRightColumn,			⯇`nF4
+	
+	Gui,			HS3:Add,		Button,		x0 y0 HwndIdButton5 gF_ToggleRightColumn,			⯇`nF4
 ;GuiControl,	Hide,		% IdButton5
-		
+	
 ;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-		
-		Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-		Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText7,		 							% TransA["Library content (F2)"]
+	
+	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText7,		 							% TransA["Library content (F2)"]
 ;GuiControl,	Hide,		% IdText7
-		Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-		
-		Gui,			HS3:Add, 		Text, 		x0 y0 HwndIdText9, 									% TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
+	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
+	Gui,			HS3:Add, 		Text, 		x0 y0 HwndIdText9, 									% TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
 ;GuiControl,	Hide,		% IdText9
-		Gui, 		HS3:Add, 		ListView, 	x0 y0 HwndIdListView1 LV0x1 vv_LibraryContent AltSubmit gF_HSLV -Multi, % TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
+	Gui, 		HS3:Add, 		ListView, 	x0 y0 HwndIdListView1 LV0x1 vv_LibraryContent AltSubmit gF_HSLV -Multi, % TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
 ;GuiControl,	Hide,		% IdListView1
-		
-		Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-		Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText10 vv_SandString, 						% TransA["Sandbox (F6)"]
+	
+	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText10,			 						% TransA["Sandbox (F6)"]
 ;GuiControl,	Hide,		% IdText10
-		Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-		
-		Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit10 vv_Sandbox r3 						; r3 = 3x rows of text
+	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
+	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit10 vv_Sandbox r3 						; r3 = 3x rows of text
 ;GuiControl,	Hide,		% IdEdit10
 ;Gui, 		HS3:Add, 		Edit, 		HwndIdEdit11 vv_ViewString gViewString ReadOnly Hide
-		Gui,			HS3:Add,		Text,		x0 y0 HwndIdText11, % TransA["This library:"] . A_Space
-		Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
-		Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText13,  %  v_LibHotstringCnt ;value of Hotstrings counter in the current library
-		
-		Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	}
+	Gui,			HS3:Add,		Text,		x0 y0 HwndIdText11, % TransA["This library:"] . A_Space
+	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
+	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText13,  %  v_LibHotstringCnt ;value of Hotstrings counter in the current library
+	
+	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+}
 	
 ; ------------------------------------------------------------------------------------------------------------------------------------
 	
@@ -4090,8 +4081,8 @@ F_GuiHS4_DetermineConstraints()
 		Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType
 		Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLine2, 													% TransA["Enables Convenient Definition"]
 		Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "bold underline" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-		Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLink1 gLink1,												% TransA["Application help"]
-		Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLink2 gLink2,												% TransA["Genuine hotstrings AutoHotkey documentation"]
+		Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLink1 gGuiAboutLink1,										% TransA["Application help"]
+		Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLink2 gGuiAboutLink2,										% TransA["Genuine hotstrings AutoHotkey documentation"]
 		Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType
 		Gui, MyAbout: Add, 		Button,  x0 y0 HwndIdAboutOkButton gAboutOkButton,								% TransA["OK"]
 		Gui, MyAbout: Add,		Picture, x0 y0 HwndIdAboutPicture w96 h96, 										% AppIcon
@@ -4187,7 +4178,7 @@ F_GuiAbout()
 F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 {
 	global ;assume-global mode
-	local v_IsLibraryEmpty := true, v_ConfigLibrary := "", v_ConfigFlag := false
+	local v_IsLibraryEmpty := true, v_ConfigLibrary := ""
 		,o_Libraries := {}, v_LibFileName := "", key := 0, value := "", TempLoadLib := "", TempShowTipsLib := "", v_LibFlagTemp := ""
 		,FlagFound := false, PriorityFlag := false, ValueTemp := 0, SectionTemp := ""
 	
@@ -4539,190 +4530,190 @@ F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_NormalWay(ReplacementString, Oflag)
+F_NormalWay(ReplacementString, Oflag)
+{
+	static InputLocaleID := false
+	
+	v_InputString := ""
+	ToolTip,
+	v_HotstringFlag := 1
+	v_UndoTriggerstring := A_ThisHotkey
+	ReplacementString := F_AHKVariables(ReplacementString)
+	if (Oflag == 0)
+		Send, % ReplacementString . A_EndChar
+	else
+		Send, %ReplacementString%
+	v_UndoHotstring := % ReplacementString
+	v_UndoHotstring := F_ChangingBrackets(v_UndoHotstring)
+	SetFormat, Integer, H
+	if (!InputLocaleID)	;special case; future: to be investigated if it wasn't related to bug in one of the previous versions of AutoHotkey
 	{
-		v_InputString := ""
-		ToolTip,
-		v_HotstringFlag := 1
-		v_UndoTriggerstring := A_ThisHotkey
-		ReplacementString := F_AHKVariables(ReplacementString)
-		if (Oflag == 0)
-			Send, % ReplacementString . A_EndChar
-		else
-			Send, %ReplacementString%
-		v_UndoHotstring := % ReplacementString
-		v_UndoHotstring := F_ChangingBrackets(v_UndoHotstring)
-		SetFormat, Integer, H
-		InputLocaleID:=DllCall("GetKeyboardLayout", "UInt", 0, "UInt")
+		InputLocaleID := DllCall("GetKeyboardLayout", "UInt", 0, "UInt")
 		Polish := Format("{:#x}", 0x415)
 		InputLocaleID := InputLocaleID / 0xFFFF
 		InputLocaleID := Format("{:#04x}", InputLocaleID)
-		if(InputLocaleID = Polish)
-		{
-			Send, {LCtrl up}
-		}
-		if (InStr(A_ThisHotkey, "*"))
-		{
-			if (InStr(A_ThisHotkey,"*0"))
-				v_TypedTriggerstring := % ReplacementString . A_Space
-			else
-				v_TypedTriggerstring := ReplacementString
-		}
-		else
+	}
+	if (InputLocaleID = "Polish")
+		Send, {LCtrl up}
+	
+	if (InStr(A_ThisHotkey, "*"))
+	{
+		if (InStr(A_ThisHotkey,"*0"))
 			v_TypedTriggerstring := % ReplacementString . A_Space
-		if (InStr(v_TypedTriggerstring, "{"))
-			v_TypedTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, "}")+1 , StrLen(v_TypedTriggerstring)-InStr(v_TypedTriggerstring, "}"))
-		Hotstring("Reset")
-	}
-	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	F_ViaClipboard(ReplacementString, Oflag)
-	{
-		global oWord, ini_Delay
-		v_InputString := ""
-		ToolTip,
-		v_UndoTriggerstring := A_ThisHotkey
-		ReplacementString := F_AHKVariables(ReplacementString)
-		v_UndoHotstring := ReplacementString
-		ClipboardBackup := ClipboardAll
-		Clipboard := ReplacementString
-		ClipWait
-		ifWinActive,, "Microsoft Word"
-		{
-			oWord := ComObjActive("Word.Application")
-			oWord.Selection.Paste
-			oWord := ""
-		}
 		else
-		{
-			Send, ^v
-		}
-		if (Oflag == 0)
-			Send, % A_EndChar
-		Sleep, %ini_Delay% ; this sleep is required surprisingly
-		Clipboard := ClipboardBackup
-		ClipboardBackup := ""
-		v_TypedTriggerstring := ReplacementString
-		Hotstring("Reset")
-		v_HotstringFlag := 1
+			v_TypedTriggerstring := ReplacementString
 	}
+	else
+		v_TypedTriggerstring := % ReplacementString . A_Space
+	if (InStr(v_TypedTriggerstring, "{"))
+		v_TypedTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, "}")+1 , StrLen(v_TypedTriggerstring)-InStr(v_TypedTriggerstring, "}"))
+	Hotstring("Reset")
+}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_MenuText(TextOptions, Oflag)
+F_ViaClipboard(ReplacementString, Oflag)
+{
+	global	;assume-global mode
+	local oWord := ""
+	
+	v_InputString := ""
+	ToolTip,
+	v_UndoTriggerstring := A_ThisHotkey
+	ReplacementString := F_AHKVariables(ReplacementString)
+	v_UndoHotstring := ReplacementString
+	ClipboardBackup := ClipboardAll
+	Clipboard := ReplacementString
+	ClipWait
+	ifWinActive,, "Microsoft Word"
 	{
-		global MenuListbox, Ovar
-		v_InputString := ""
-		ToolTip,
-		v_UndoTriggerstring := A_ThisHotkey
-		TextOptions := F_AHKVariables(TextOptions)
-		WinGetPos, WinX, WinY,WinW,WinH,A
-		mouseX := Round(WinX+WinW/2)
-		mouseY := Round(WinY+WinH/2)
-		DllCall("SetCursorPos", "int", mouseX, "int", mouseY)
-		v_TypedTriggerstring := ""
-		Gui, Menu:New, +LastFound +AlwaysOnTop -Caption +ToolWindow
-		Gui, Menu:Margin, 0, 0
-		Gui, Menu:Font, c766D69 s8
-		Gui, Menu:Color,,FFFFFF
-		Gui, Menu:Add, Listbox, x0 y0 h100 w250 vMenuListbox,
-		v_MenuMax := 0
-		for k, MenuItems in StrSplit(TextOptions,"¦") ;parse the data on the weird pipe character
-		{
-			GuiControl,, MenuListbox, % A_Index . ". " . MenuItems
-			v_MenuMax++
-		}
-		if (ini_MenuCaret)
-		{
-		;CoordMode, Caret, Screen
-			CoordMode, Caret, Client
-			MenuX := A_CaretX + 20
-			MenuY := A_CaretY - 20
-			
-			
-		}
-		if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
-		{
-		;CoordMode, Mouse, Screen
-			CoordMode, Mouse, Client
-			MouseGetPos, v_MouseX, v_MouseY
-			MenuX := v_MouseX + 20
-			MenuY := v_MouseY + 20
-		}
-		Gui, Menu:Show, x%MenuX% y%MenuY%, Hotstring listbox
-		if (ini_MenuSound)
-			SoundBeep, 400, 200
-		v_FlagSound := 1
-		if (v_TypedTriggerstring == "")
-		{
-			HK := StrSplit(A_ThisHotkey, ":")
-			
-			
-			ThisHotkey := SubStr(A_ThisHotkey, StrLen(HK[2])+3, StrLen(A_ThisHotkey)-StrLen(HK[2])-2)
-			Send, % ThisHotkey
-		}
-		GuiControl, Choose, MenuListbox, 1
-		Ovar := Oflag
-		v_HotstringFlag := 1
-		return
+		oWord := ComObjActive("Word.Application")
+		oWord.Selection.Paste
+		oWord := ""
 	}
+	else
+	{
+		Send, ^v
+	}
+	if (Oflag == 0)
+		Send, % A_EndChar
+	Sleep, %ini_Delay% ; this sleep is required surprisingly
+	Clipboard := ClipboardBackup
+	ClipboardBackup := ""
+	v_TypedTriggerstring := ReplacementString
+	Hotstring("Reset")
+	v_HotstringFlag := 1
+}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_MenuTextAHK(TextOptions, Oflag)
+F_MenuText(TextOptions, Oflag)
+{
+	global MenuListbox, Ovar
+	v_InputString := ""
+	ToolTip,
+	v_UndoTriggerstring := A_ThisHotkey
+	TextOptions := F_AHKVariables(TextOptions)
+	WinGetPos, WinX, WinY,WinW,WinH,A
+	mouseX := Round(WinX+WinW/2)
+	mouseY := Round(WinY+WinH/2)
+	DllCall("SetCursorPos", "int", mouseX, "int", mouseY)
+	v_TypedTriggerstring := ""
+	Gui, Menu:New, +LastFound +AlwaysOnTop -Caption +ToolWindow
+	Gui, Menu:Margin, 0, 0
+	Gui, Menu:Font, c766D69 s8
+	Gui, Menu:Color,,FFFFFF
+	Gui, Menu:Add, Listbox, x0 y0 h100 w250 vMenuListbox,
+	v_MenuMax := 0
+	for k, MenuItems in StrSplit(TextOptions,"¦") ;parse the data on the weird pipe character
 	{
-		global MenuListbox, Ovar
-		v_InputString := ""
-		ToolTip,
-		v_UndoTriggerstring := A_ThisHotkey
-		TextOptions := F_AHKVariables(TextOptions)
-		WinGetPos, WinX, WinY,WinW,WinH,A
-		mouseX := Round(WinX+WinW/2)
-		mouseY := Round(WinY+WinH/2)
-		DllCall("SetCursorPos", "int", mouseX, "int", mouseY)
-		v_TypedTriggerstring := ""
-		Gui, MenuAHK:New, +LastFound +AlwaysOnTop -Caption +ToolWindow
-		Gui, MenuAHK:Margin, 0, 0
-		Gui, MenuAHK:Font, c766D69 s8
-		Gui, MenuAHK:Color,,FFFFFF
-		Gui, MenuAHK:Add, Listbox, x0 y0 h100 w250 vMenuListbox2,
-		v_MenuMax2 := 0
-		for k, MenuItems in StrSplit(TextOptions,"¦") ;parse the data on the weird pipe character
-		{
-			GuiControl,, MenuListbox2, % A_Index . ". " . MenuItems
-			v_MenuMax2++
-		}
-		if (ini_MenuCaret)
-		{
-		;CoordMode, Caret, Screen
-			CoordMode, Caret, Client
-			MenuX := A_CaretX + 20
-			MenuY := A_CaretY - 20
-		}
-		if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
-		{
-		;CoordMode, Mouse, Screen
-			CoordMode, Mouse, Client
-			MouseGetPos, v_MouseX, v_MouseY
-			MenuX := v_MouseX + 20
-			MenuY := v_MouseY + 20
-		}
-		Gui, MenuAHK:Show, x%MenuX% y%MenuY%, HotstringAHK listbox
-		if (ini_MenuSound)
-			SoundBeep, 400, 200
-		v_FlagSound := 1
-		if (v_TypedTriggerstring == "")
-		{
-			HK := StrSplit(A_ThisHotkey, ":")
-			ThisHotkey := SubStr(A_ThisHotkey, StrLen(HK[2])+3, StrLen(A_ThisHotkey)-StrLen(HK[2])-2)
-			Send, % ThisHotkey
-		}
-		GuiControl, Choose, MenuListbox2, 1
-		Ovar := Oflag
-		v_HotstringFlag := 1
-		return
+		GuiControl,, MenuListbox, % A_Index . ". " . MenuItems
+		v_MenuMax++
 	}
+	if (ini_MenuCaret)
+	{
+		;CoordMode, Caret, Screen
+		CoordMode, Caret, Client
+		MenuX := A_CaretX + 20
+		MenuY := A_CaretY - 20
+	}
+	if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
+	{
+		;CoordMode, Mouse, Screen
+		CoordMode, Mouse, Client
+		MouseGetPos, v_MouseX, v_MouseY
+		MenuX := v_MouseX + 20
+		MenuY := v_MouseY + 20
+	}
+	Gui, Menu:Show, x%MenuX% y%MenuY%, Hotstring listbox
+	if (ini_MenuSound)
+		SoundBeep, 400, 200
+	if (v_TypedTriggerstring == "")
+	{
+		HK := StrSplit(A_ThisHotkey, ":")
+		ThisHotkey := SubStr(A_ThisHotkey, StrLen(HK[2])+3, StrLen(A_ThisHotkey)-StrLen(HK[2])-2)
+		Send, % ThisHotkey
+	}
+	GuiControl, Choose, MenuListbox, 1
+	Ovar := Oflag
+	v_HotstringFlag := 1
+	return
+}
+	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+F_MenuTextAHK(TextOptions, Oflag)
+{
+	global MenuListbox, Ovar
+	v_InputString := ""
+	ToolTip,
+	v_UndoTriggerstring := A_ThisHotkey
+	TextOptions := F_AHKVariables(TextOptions)
+	WinGetPos, WinX, WinY,WinW,WinH,A
+	mouseX := Round(WinX+WinW/2)
+	mouseY := Round(WinY+WinH/2)
+	DllCall("SetCursorPos", "int", mouseX, "int", mouseY)
+	v_TypedTriggerstring := ""
+	Gui, MenuAHK:New, +LastFound +AlwaysOnTop -Caption +ToolWindow
+	Gui, MenuAHK:Margin, 0, 0
+	Gui, MenuAHK:Font, c766D69 s8
+	Gui, MenuAHK:Color,,FFFFFF
+	Gui, MenuAHK:Add, Listbox, x0 y0 h100 w250 vMenuListbox2,
+	v_MenuMax2 := 0
+	for k, MenuItems in StrSplit(TextOptions,"¦") ;parse the data on the weird pipe character
+	{
+		GuiControl,, MenuListbox2, % A_Index . ". " . MenuItems
+		v_MenuMax2++
+	}
+	if (ini_MenuCaret)
+	{
+		;CoordMode, Caret, Screen
+		CoordMode, Caret, Client
+		MenuX := A_CaretX + 20
+		MenuY := A_CaretY - 20
+	}
+	if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
+	{
+		;CoordMode, Mouse, Screen
+		CoordMode, Mouse, Client
+		MouseGetPos, v_MouseX, v_MouseY
+		MenuX := v_MouseX + 20
+		MenuY := v_MouseY + 20
+	}
+	Gui, MenuAHK:Show, x%MenuX% y%MenuY%, HotstringAHK listbox
+	if (ini_MenuSound)
+		SoundBeep, 400, 200
+	if (v_TypedTriggerstring == "")
+	{
+		HK := StrSplit(A_ThisHotkey, ":")
+		ThisHotkey := SubStr(A_ThisHotkey, StrLen(HK[2])+3, StrLen(A_ThisHotkey)-StrLen(HK[2])-2)
+		Send, % ThisHotkey
+	}
+	GuiControl, Choose, MenuListbox2, 1
+	Ovar := Oflag
+	v_HotstringFlag := 1
+	return
+}
 	
 ;Future: move this section of code to Hotkeys
 	#IfWinActive HotstringAHK listbox
@@ -4751,11 +4742,11 @@ F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t
 	v_UndoHotstring := MenuListbox2
 	v_UndoHotstring := F_ChangingBrackets(v_UndoHotstring)
 	SetFormat, Integer, H
-	InputLocaleIDv:=DllCall("GetKeyboardLayout", "UInt", 0, "UInt")
+	InputLocaleIDv := DllCall("GetKeyboardLayout", "UInt", 0, "UInt")
 	Polishv := Format("{:#x}", 0x415)
 	InputLocaleIDv := InputLocaleIDv / 0xFFFF
 	InputLocaleIDv := Format("{:#04x}", InputLocaleIDv)
-	if(InputLocaleIDv = Polishv)
+	if (InputLocaleIDv = "Polishv")
 	{
 		Send, {LCtrl up}
 	}
@@ -4769,7 +4760,7 @@ F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t
 	#IfWinExist HotstringAHK listbox
 	Esc::
 	Gui, MenuAHK:Destroy
-	Send, % SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, Occurrence := 2) + 1)
+	Send, % SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, 2) + 1)
 	return
 	#If
 	
@@ -4818,7 +4809,7 @@ F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t
 	}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
+	/*
 	F_ShowMonitorNumbers()
 	{
 		global
@@ -4831,10 +4822,11 @@ F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t
 			Gui, %A_Index%:Font, cWhite s26 bold, Calibri
 			Gui, %A_Index%:Add, Text, x150 y150 w150 h150, % A_Index
 			Gui, % A_Index . ":Show", % "x" .  MonitorBoundingCoordinates_Left + (Abs(MonitorBoundingCoordinates_Left - MonitorBoundingCoordinates_Right) / 2) - (300 / 2) . "y"
-        . MonitorBoundingCoordinates_Top + (Abs(MonitorBoundingCoordinates_Top - MonitorBoundingCoordinates_Bottom) / 2) - (300 / 2) . "w300" . "h300"
+		   . MonitorBoundingCoordinates_Top + (Abs(MonitorBoundingCoordinates_Top - MonitorBoundingCoordinates_Bottom) / 2) - (300 / 2) . "w300" . "h300"
 		}
 		return
 	}
+	*/
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
@@ -5577,14 +5569,17 @@ MySlider:
 return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	Link1:
+GuiAboutLink1:
 	Run, https://github.com/mslonik/Hotstrings
-	return
+return
 	
-	Link2:
+GuiAboutLink2:
 	Run, https://www.autohotkey.com/docs/Hotstrings.htm
-	return
-	
+return
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+L_PublicLibraries:	
+	Run, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings/Libraries
+return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	~F1::
 	AboutOkButton:
@@ -5920,18 +5915,18 @@ L_SortTipsByLength:
 return
 	
 L_ChangeLanguage:
-	v_Language := A_ThisMenuitem
-	IniWrite, %v_Language%, Config.ini, Configuration, Language
+	ini_Language := A_ThisMenuitem
+	IniWrite, %ini_Language%, Config.ini, Configuration, Language
 	Loop, %A_ScriptDir%\Languages\*.ini
 	{
 		Menu, SubmenuLanguage, Add, %A_LoopFileName%, L_ChangeLangage
-		if (v_Language == A_LoopFileName)
+		if (ini_Language == A_LoopFileName)
 			Menu, SubmenuLanguage, Check, %A_LoopFileName%
 		else
 			Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
 	}
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Application language changed to:"] . A_Space 
-		. SubStr(v_Language, 1, -4) . "`n`n" . TransA["The application will be reloaded with the new language file."]
+		. SubStr(ini_Language, 1, -4) . "`n`n" . TransA["The application will be reloaded with the new language file."]
 	Reload
 	
 L_TraySuspendHotkeys:
