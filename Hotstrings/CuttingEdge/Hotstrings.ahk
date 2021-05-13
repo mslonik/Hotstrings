@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 	Author:      Jakub Masiak, Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings as in AutoHotkey (shortcuts), but editable with GUI and many more options.
@@ -76,14 +76,14 @@ F_CheckCreateConfigIni() ;1. Try to load up configuration file. If those files d
 if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "Languages" subfolder 
 {
 	FileCreateDir, %A_ScriptDir%\Languages							; Future: check against errors
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["There was no Languages subfolder, so one now is created."] . A_Space . "`n" 
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["There was no Languages subfolder, so one now is created."] . A_Space . "`n" 
 	. A_ScriptDir . "\Languages"
 }
 
 IniRead ini_Language, Config.ini, Configuration, Language				; Load from Config.ini file specific parameter: language into variable ini_Language, e.g. ini_Language = English.ini
 if (!FileExist(A_ScriptDir . "\Languages\" . ini_Language))			; else if there is no ini_language .ini file, e.g. v_langugae == Polish.ini and there is no such file in Languages folder
 {
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["There is no"] . A_Space . ini_Language . A_Space . TransA["file in Languages subfolder!"]
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no"] . A_Space . ini_Language . A_Space . TransA["file in Languages subfolder!"]
 	. "`n`n" . TransA["The default"] . A_Space . ini_Language . A_Space . TransA["file is now created in the following subfolder:"] . "`n"  A_ScriptDir . "\Languages\"
 	F_LoadCreateTranslationTxt("create")
 }
@@ -483,7 +483,7 @@ Loop,
 	;*[One]
 	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
 	if (ErrorLevel = "NewInput")
-		MsgBox, % TransA["ErrorLevel was triggered by NewInput error."]
+		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["ErrorLevel was triggered by NewInput error."]
 	
 	; if exist window with hotstring tips, output sound
 	if (WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
@@ -704,8 +704,7 @@ Gui, HS3:Default
 Gui, HS3:Submit, NoHide
 if (v_SelectHotstringLibrary == "")
 {
-		;Future: center this MsgBox on current screen.
-	MsgBox, % TransA["Select hotstring library"]
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Select hotstring library"]
 	return
 }
 GuiControl, Focus, v_LibraryContent
@@ -897,7 +896,7 @@ F_SetHotstring()
 	
 	if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
 	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Choose existing hotstring library file before saving!"]
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Choose existing hotstring library file before saving new (triggerstring, hotstring) definition!"]
 		return
 	}
 	
@@ -1141,7 +1140,7 @@ F_Move()
 		v_Temp2 := LV_GetText(v_Temp1, A_Index, 1)
 		if (v_Temp1 == v_TriggerString)
 		{
-			MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["The hostring"] . ":" . "`n`n" . v_Triggerstring . "`n`n" . TransA["exists in a file and will be now replaced."] 
+			MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The hostring"] . ":" . "`n`n" . v_Triggerstring . "`n`n" . TransA["exists in a file and will be now replaced."] 
 				. "`n" . v_SelectHotstringLibrary . "`n`n" . TransA["Do you want to proceed?"]
 			IfMsgBox, Yes
 			{
@@ -1572,7 +1571,7 @@ F_RemoveConfigIni()
 	global	;assume-global mode
 	if (FileExist("Config.ini"))
 	{
-		MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure?"] 
+		MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure?"] 
 		IfMsgBox, Yes
 		{
 			FileDelete, Config.ini
@@ -1819,7 +1818,7 @@ F_DeleteHotstring()
 	Try
 		Hotstring(":" . txt2 . ":" . v_TriggerString, , "Off") 
 	Catch
-		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion:"] . "`n`n" . v_TriggerString 
+		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion:"] . "`n`n" . v_TriggerString 
 		. A_Space . txt2 . "`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 
 	
 	;3. Remove selected row from List View.
@@ -2265,7 +2264,7 @@ F_HSLV()
 			Menu, FontTypeMenu, UnCheck, % a_FontType[key]
 		
 		c_FontType := A_ThisMenuItem
-		MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["In order to aplly new font type it's necesssary to reload the application."]
+		MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["In order to aplly new font type it's necesssary to reload the application."]
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
 		. "`n`n" . TransA["Do you want to reload application now?"]
 		IfMsgBox, Yes
@@ -2320,7 +2319,7 @@ F_SizeOfMargin()
 			Menu, SizeOfMY,	UnCheck,	% SizeOfMargin[key]
 		c_ymarg := A_ThisMenuItem
 	}
-	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["In order to aplly new size of margin it's necesssary to reload the application."]
+	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["In order to aplly new size of margin it's necesssary to reload the application."]
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
 		. "`n`n" . TransA["Do you want to reload application now?"]
 	IfMsgBox, Yes
@@ -2372,7 +2371,7 @@ F_SizeOfMargin()
 			Menu, SizeOfFont, UnCheck, % a_SizeOfFont[key]
 		
 		c_FontSize := A_ThisMenuItem
-		MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["In order to aplly new font style it's necesssary to reload the application."]
+		MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["In order to aplly new font style it's necesssary to reload the application."]
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
 		. "`n`n" . TransA["Do you want to reload application now?"]
 		IfMsgBox, Yes
@@ -2423,7 +2422,7 @@ F_SizeOfMargin()
 			Menu, StyleGUIsubm, UnCheck, % TransA["Light (default)"]
 			Menu, StyleGUIsubm, Check,   % TransA["Dark"]
 		}
-		MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["In order to aplly new style it's necesssary to reload the application."]
+		MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["In order to aplly new style it's necesssary to reload the application."]
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
 		. "`n`n" . TransA["Do you want to reload application now?"]
 		IfMsgBox, Yes
@@ -2560,7 +2559,7 @@ F_CompileSubmenu()
 F_Reload()
 {
 	global ;assume-global mode
-	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["Are you sure you want to reload this application now?"]
+	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["Are you sure you want to reload this application now?"]
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
 	IfMsgBox, Yes
 	{
@@ -2583,7 +2582,7 @@ F_Reload()
 F_Exit()
 {
 	global ;assume-global mode
-	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["question"], % TransA["Are you sure you want to exit this application now?"]
+	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["Are you sure you want to exit this application now?"]
 	IfMsgBox, Yes
 		ExitApp, 0 ;Zero is traditionally used to indicate success.
 	IfMsgBox, No
@@ -2705,7 +2704,7 @@ Language=English.txt
 		
 	if (!FileExist("Config.ini"))
 	{
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini is now created in location:"] . "`n`n" . A_ScriptDir
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini is now created in location:"] . "`n`n" . A_ScriptDir
 		FileAppend, %ConfigIni%, Config.ini
 	}
 	return	
@@ -2912,7 +2911,7 @@ Cancel 												= Cancel
 Caret 												= Caret
 Case Sensitive (C) 										= Case Sensitive (C)
 Change Language 										= Change Language
-Choose existing hotstring library file before saving! 			= Choose existing hotstring library file before saving!
+Choose existing hotstring library file before saving new (triggerstring, hotstring) definition!	= Choose existing hotstring library file before saving new (triggerstring, hotstring) definition!
 Choose (.ahk) file containing (triggerstring, hotstring) definitions for import	= Choose (.ahk) file containing (triggerstring, hotstring) definitions for import
 Choose library file (.csv) for export 						= Choose library file (.csv) for export
 Choose menu position 									= Choose menu position
@@ -2977,6 +2976,7 @@ F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries = F3 o
 file! 												= file!
 file in Languages subfolder!								= file in Languages subfolder!
 file is now created in the following subfolder:				= file is now created in the following subfolder:
+folder is now created							= folder is now created
 Font type												= Font type
 Genuine hotstrings AutoHotkey documentation 					= Genuine hotstrings AutoHotkey documentation
 Graphical User Interface									= Graphical User Interface
@@ -3084,7 +3084,7 @@ The already imported file already existed. As a consequence some (triggerstring,
 The library  											= The library 
 The file path is: 										= The file path is:
 the following line is found:								= the following line is found:
-The selected file is empty. Process of export will be interrupted. = The selected file is empty. Process of export will be interrupted.
+There is no Libraries subfolder and no lbrary (*.csv) file exist! = There is no Libraries subfolder and no lbrary (*.csv) file exist!
 The selected file is empty. Process of import will be interrupted. = The selected file is empty. Process of import will be interrupted.
 There is no											= There is no
 There was no Languages subfolder, so one now is created.		= There was no Languages subfolder, so one now is created.
@@ -4190,7 +4190,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	v_IsLibraryEmpty := true
 	if (!Instr(FileExist(A_ScriptDir . "\Libraries"), "D"))				; if  there is no "Libraries" subfolder 
 	{
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], There is no Libraries subfolder and no lbrary (*.csv) file exist!`nThe  %A_ScriptDir%\Libraries\ folder is now created.
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exist!"] . "`n`n" . %A_ScriptDir%\Libraries\ . "`n`n" . TransA["folder is now created"] . "."
 		FileCreateDir, %A_ScriptDir%\Libraries							; Future: check against errors
 	}
 	else
@@ -4204,7 +4204,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	}
 	if (v_IsLibraryEmpty)
 	{
-		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["Libraries folder:"] . "`n`n" . A_ScriptDir . "\Libraries" . A_Space . "`n`n"
+		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Libraries folder:"] . "`n`n" . A_ScriptDir . "\Libraries" . A_Space . "`n`n"
 		. TransA["is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?"]
 		IfMsgBox, Yes
 		{
@@ -4420,7 +4420,7 @@ F_ini_StartHotstring(txt, nameoffile)
 		Try
 			Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, Oflag), OnOff)
 		Catch
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion:"] . "`n`n"
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion:"] . "`n`n"
 				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
 	}
 	return
@@ -5007,7 +5007,7 @@ F_ImportLibrary()
 	
 	if (FileExist(v_OutputFile))
 	{
-		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["Such file already exists"] . ":" . "`n`n" . v_OutputFile . "`n`n" . TransA["Do you want to delete it?"] . "`n`n" 
+		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Such file already exists"] . ":" . "`n`n" . v_OutputFile . "`n`n" . TransA["Do you want to delete it?"] . "`n`n" 
 			. TransA["If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file."]
 		IfMsgBox, Yes	;check if it was loaded. if yes, recommend restart of application, because "Total" counter and Hotstrings definitions will be incredible. Future: at first disable existing Hotstrings definitions and then reduce total counter.
 		{
@@ -5065,7 +5065,7 @@ F_ImportLibrary()
 	
 	if (v_TotalLines = 0)
 	{
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["The selected file is empty. Process of import will be interrupted."]
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The selected file is empty. Process of import will be interrupted."]
 		return
 	}
 	if (A_DefaultGui = "HS4") ;in order to have access to ListView even when HS4 is active, temporarily default gui is switched to HS3.
@@ -5116,7 +5116,7 @@ F_ImportLibrary()
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been imported."]
 	if (f_ExistedLib)
 	{
-		MsgBox, , 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], TransA["The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes."]
+		MsgBox, , 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], TransA["The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes."]
 		F_SaveGUIPos()
 		ini_GuiReload := true
 		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
@@ -5166,7 +5166,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	
 	if (FileExist(v_OutputFile))
 	{
-		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["Such file already exists"] . ":" . "`n`n" . v_OutputFile . "`n`n" . TransA["Do you want to delete it?"] . "`n`n" 
+		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Such file already exists"] . ":" . "`n`n" . v_OutputFile . "`n`n" . TransA["Do you want to delete it?"] . "`n`n" 
 			. TransA["If you answer ""Yes"", the existing file will be deleted. If you answer ""No"", the current task will be continued and new content will be added to existing file."]
 		IfMsgBox, Yes
 			FileDelete, % v_OutputFile
@@ -5222,7 +5222,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	
 	if (v_TotalLines = 0)
 	{
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["The selected file is empty. Process of export will be interrupted."]
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The selected file is empty. Process of export will be interrupted."]
 		return
 	}
 	line .= v_Header . "`n`n"
@@ -5324,7 +5324,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 
 	if (FileExist(v_OutputFile))
 	{
-		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["Such file already exists"] . ":" . "`n`n" . v_OutputFile . "`n`n" . TransA["Do you want to delete it?"] . "`n`n" 
+		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Such file already exists"] . ":" . "`n`n" . v_OutputFile . "`n`n" . TransA["Do you want to delete it?"] . "`n`n" 
 			. TransA["If you answer ""Yes"", the existing file will be deleted. If you answer ""No"", the current task will be continued and new content will be added to existing file."]
 		IfMsgBox, Yes
 			FileDelete, % v_OutputFile
@@ -5380,7 +5380,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	
 	if (v_TotalLines = 0)
 	{
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["The selected file is empty. Process of export will be interrupted."]
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The selected file is empty. Process of export will be interrupted."]
 		return
 	}
 	line .= v_Header . "`n`n"
@@ -5536,7 +5536,7 @@ ALibOK:
 	Gui, ALib: Submit, NoHide
 	if (v_NewLib == "")
 	{
-		MsgBox, % TransA["Enter a name for the new library"]
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Enter a name for the new library"]
 		return
 	}
 	v_NewLib .= ".csv"
@@ -5552,7 +5552,7 @@ ALibOK:
 		F_UpdateSelHotLibDDL()
 	}
 	else
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["warning"], % TransA["A library with that name already exists!"]
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["A library with that name already exists!"]
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
 ALibGuiEscape:
