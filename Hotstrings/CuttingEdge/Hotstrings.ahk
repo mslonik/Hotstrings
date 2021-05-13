@@ -1,4 +1,4 @@
-/* 
+﻿/* 
 	Author:      Jakub Masiak, Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings as in AutoHotkey (shortcuts), but editable with GUI and many more options.
@@ -66,6 +66,8 @@ global v_UndoTriggerstring 		:= ""		;used by output functions
 
 ;Flags to control application
 global v_ResizingFlag 			:= true 		;when Hotstrings Gui is displayed for the very first time
+global HMenuHwnd				:= 0
+global fikumiku1				:= ""
 ;global HS3_GuiWidth  := 0,	HS3_GuiHeight := 0
 
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -480,13 +482,12 @@ if (ini_GuiReload)
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Loop,
 {
-	;*[One]
 	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
 	if (ErrorLevel = "NewInput")
 		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["ErrorLevel was triggered by NewInput error."]
 	
 	; if exist window with hotstring tips, output sound
-	if (WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
+	if (WinExist("ahk_id" HMenuHwnd) or WinExist("HotstringAHK listbox"))
 	{
 		if (ini_MenuSound)
 		{
@@ -500,7 +501,7 @@ Loop,
 		{
 			v_InputString := ""
 			ToolTip,
-			if !(WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
+			if !(WinExist("ahk_id" HMenuHwnd) or WinExist("HotstringAHK listbox"))
 				v_HotstringFlag := 0
 		}
 		if (InStr(HotstringEndChars, out))
@@ -589,7 +590,7 @@ Loop,
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
 
 ~BackSpace:: 
-if (WinExist("Hotstring listbox") or WinExist("HotstringAHK listbox"))
+if (WinExist("ahk_id" HMenuHwnd) or WinExist("HotstringAHK listbox"))
 {
 	if (ini_MenuSound)
 	{
@@ -695,65 +696,75 @@ return
 #if WinActive(SubStr(A_ScriptName, 1, -4)) and WinActive("ahk_class AutoHotkeyGUI") ; the following hotkeys will be active only if Hotstrings windows are active at the moment. 
 
 F1::	;new thread starts here
-F_WhichGui()
-F_GuiAbout()
+	F_WhichGui()
+	F_GuiAbout()
 return
 
-F2::
-Gui, HS3:Default
-Gui, HS3:Submit, NoHide
-if (v_SelectHotstringLibrary == "")
+F2:: ;new thread starts here
+F_WhichGui()
+if (A_DefaultGui = "HS4")
+	return
+if (A_DefaultGui = "HS3")
 {
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Select hotstring library"]
+	Gui, HS3: Submit, NoHide
+	if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
+	{
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to display library content please at first select hotstring library"] . "."
+		return
+	}
+	GuiControl, Focus, v_LibraryContent
+	if (LV_GetNext(0,"Focused") == 0)
+		LV_Modify(1, "+Select +Focus")
 	return
 }
-GuiControl, Focus, v_LibraryContent
-if (LV_GetNext(0,"Focused") == 0)
-	LV_Modify(1, "+Select +Focus")
-return
 
 ^f::
 ^s::
 F3:: ;new thread starts here
-F_Searching()
+	F_Searching()
 return
 
 F4::	;new thread starts here
-F_WhichGui()
-F_ToggleRightColumn()
+	F_WhichGui()
+	F_ToggleRightColumn()
 return
 
 F5::	;new thread starts here
-F_Clear()
+	F_Clear()
 return
 
 F6::	;new thread starts here
-F_WhichGui()
-F_ToggleSandbox()
+	F_WhichGui()
+	F_ToggleSandbox()
 return
 
 F7:: ;new thread starts here
-Gui, HS3: Default
-F_GuiHSdelay()
+	F_WhichGui()
+	F_GuiHSdelay()
 return
 
 F8::	;new thread starts here
-Gui, HS3: Default
-F_DeleteHotstring()
+	F_WhichGui()
+	if (A_DefaultGui = "HS4")
+		return
+	if (A_DefaultGui = "HS3")
+		F_DeleteHotstring()
 return
 
 F9::	;new thread starts here
-F_WhichGui()
-F_SetHotstring()
+	F_WhichGui()
+	F_SetHotstring()
 return
 
 #if
 
 ~Alt::
 ;It's important to comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
-~MButton::
-~RButton::
-~LButton::
+/*
+	~MButton::
+	~RButton::
+	~LButton::
+*/
 ~LWin::
 ~RWin::
 ~Down::
@@ -775,28 +786,42 @@ Gui, HS3Search: Default
 F_MoveList()
 #if
 
-#IfWinActive Hotstring listbox
-~1::
-~2::
-~3::
-~4::
-~5::
-~6::
-~7::
-v_PressedKey := SubStr(A_ThisHotkey,2)
+;#IfWinActive Hotstring listbox
+;#if WinActive("ahk_id" HMenuHwnd)
+#if WinExist("ahk_id" HMenuHwnd)
+1::
+2::
+3::
+4::
+5::
+6::
+7::
+v_PressedKey := A_ThisHotkey
+;Gui, HMenu: Default
+;v_PressedKey := SubStr(A_ThisHotkey,2)
+;fikumiku1 := A_ThisHotkey
+;fikumiku1 := SubStr(fikumiku1, 2)
+;MsgBox,, A_ThisHotkey, % A_ThisHotkey
+;MsgBox,, Title, %fikumiku1%
+;*[One]
 if (v_PressedKey > v_MenuMax)
+;if (fikumiku1 > v_MenuMax)
 	return
 else
 {
-	GuiControl, Choose, MenuListbox, v_PressedKey
+	ControlGet, MenuListbox, List, , , % "ahk_id" IdListViewHMenu
 	Sleep, 100
 }
 Enter:: 
 v_HotstringFlag := 1
-Gui, Menu:Submit, Hide
-ClipboardBack:=ClipboardAll ;backup clipboard
-MenuListbox := SubStr(MenuListbox, InStr(MenuListbox, ".")+2)
-Clipboard:=MenuListbox ;Shove what was selected into the clipboard
+ClipboardBack := ClipboardAll ;backup clipboard
+Loop, Parse, MenuListbox, `n
+{
+	if (InStr(A_LoopField, v_PressedKey . "."))
+		MenuListbox := SubStr(A_LoopField, 4)
+}
+
+Clipboard := MenuListbox 
 Send, ^v ;paste the text
 if (Ovar == 0)
 	Send, % A_EndChar
@@ -805,13 +830,18 @@ v_TypedTriggerstring := MenuListbox
 v_UndoHotstring 	 := MenuListbox
 Clipboard 		 := ClipboardBack
 Hotstring("Reset")
-Gui, Menu:Destroy
-Return
+Gui, HMenu: Destroy
+return
+
+Esc::
+Gui, HMenu: Destroy
+return
 #If
 
-#IfWinExist Hotstring listbox
+;#IfWinExist Hotstring listbox
+#if WinActive("ahk_id" HMenuHwnd)
 Esc::
-Gui, Menu:Destroy
+Gui, HMenu: Destroy
 SendRaw, % SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, 2) + 1)
 return
 #If
@@ -2994,6 +3024,7 @@ If you answer ""Yes"", the existing file will be deleted. This is recommended ch
 If you've just unchecked any library, its hotstring definitions remain active. Please reload the application in order to deactivate it. = If you've just unchecked any library, its hotstring definitions remain active. Please reload the application in order to deactivate it.
 Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
+In order to display library content please at first select hotstring library = In order to display library content please at first select hotstring library
 information											= information
 Inside Word (?) 										= Inside Word (?)
 In order to aplly new font style it's necesssary to reload the application. 	= In order to aplly new font style it's necesssary to reload the application.
@@ -3051,7 +3082,6 @@ Search Hotstrings 										= Search Hotstrings
 Search Hotstrings (F3)									= &Search Hotstrings (F3)
 Select a row in the list-view, please! 						= Select a row in the list-view, please!
 Selected Hotstring will be deleted. Do you want to proceed? 	= Selected Hotstring will be deleted. Do you want to proceed?
-Select hotstring library 								= Select hotstring library
 Select hotstring output function 							= Select hotstring output function
 Select the target library: 								= Select the target library:
 Select trigger option(s) 								= Select trigger option(s)
@@ -3288,9 +3318,6 @@ F_GuiHS4_CreateObject()
 	*/
 	
 ;1. Definition of HS4 GUI.
-;-DPIScale doesn't work in Microsoft Windows 10
-;+Border doesn't work in Microsoft Windows 10
-;OwnDialogs
 	Gui, 	HS4: New, 	-Resize +HwndHS4GuiHwnd +OwnDialogs -MaximizeBox, % SubStr(A_ScriptName, 1, -4) 
 	Gui, 	HS4: Margin,	% c_xmarg, % c_ymarg
 	Gui,		HS4: Color,	% c_WindowColor, % c_ControlColor
@@ -4606,57 +4633,98 @@ F_ViaClipboard(ReplacementString, Oflag)
 }
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-F_MenuText(TextOptions, Oflag)
-{
-	global MenuListbox, Ovar
-	v_InputString := ""
-	ToolTip,
-	v_UndoTriggerstring := A_ThisHotkey
-	TextOptions := F_AHKVariables(TextOptions)
-	WinGetPos, WinX, WinY,WinW,WinH,A
-	mouseX := Round(WinX+WinW/2)
-	mouseY := Round(WinY+WinH/2)
-	DllCall("SetCursorPos", "int", mouseX, "int", mouseY)
-	v_TypedTriggerstring := ""
-	Gui, Menu:New, +LastFound +AlwaysOnTop -Caption +ToolWindow
-	Gui, Menu:Margin, 0, 0
-	Gui, Menu:Font, c766D69 s8
-	Gui, Menu:Color,,FFFFFF
-	Gui, Menu:Add, Listbox, x0 y0 h100 w250 vMenuListbox,
-	v_MenuMax := 0
-	for k, MenuItems in StrSplit(TextOptions,"¦") ;parse the data on the weird pipe character
+
+/*
+	F_MenuText(TextOptions, Oflag)
 	{
-		GuiControl,, MenuListbox, % A_Index . ". " . MenuItems
+		global MenuListbox, Ovar
+		v_InputString := ""
+		ToolTip,
+		v_UndoTriggerstring := A_ThisHotkey
+		TextOptions := F_AHKVariables(TextOptions)
+		v_TypedTriggerstring := ""
+		Gui, Menu:New, +AlwaysOnTop -Caption +ToolWindow
+		;Gui, Menu:New, -Caption +ToolWindow
+		Gui, Menu:Margin, 0, 0
+		Gui, Menu:Font, c766D69 s8
+		Gui, Menu:Color,,FFFFFF
+		Gui, Menu:Add, Listbox, x0 y0 h100 w250 vMenuListbox,
+		v_MenuMax := 0
+		for k, MenuItems in StrSplit(TextOptions,"¦") ;parse the data on the weird pipe character
+		{
+			GuiControl,, MenuListbox, % A_Index . ". " . MenuItems
+			v_MenuMax++
+		}
+		if (ini_MenuCaret)
+		{
+	;CoordMode, Caret, Screen
+			CoordMode, Caret, Client
+			MenuX := A_CaretX + 20
+			MenuY := A_CaretY - 20
+		}
+		if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
+		{
+	;CoordMode, Mouse, Screen
+			CoordMode, Mouse, Client
+			MouseGetPos, v_MouseX, v_MouseY
+			MenuX := v_MouseX + 20
+			MenuY := v_MouseY + 20polski
+		}
+		;Gui, Menu:Show, x%MenuX% y%MenuY%, Hotstring listbox
+		Gui, Menu:Show, x%MenuX% y%MenuY% NoActivate, Hotstring listbox
+		
+		GuiControl, Choose, MenuListbox, 1
+		Ovar := Oflag
+		v_HotstringFlag := 1
+		return
+	}
+*/
+
+F_MenuText(TextOptions, Oflag)	;tu jestem
+{
+	global	;assume-global mode
+	local	WinX		 := 0, 	WinY	  	:= 0, 	WinW	:= 0, 	WinH	:= 0
+			,mouseX 	 := 0,	mouseY 	:= 0
+			,MenuX	 := 0,	MenuY  	:= 0
+			,v_MouseX  := 0,	v_MouseY	:= 0
+			,HK		 := [],	ThisHotkey := ""
+	
+	v_InputString 		 := ""
+	v_TypedTriggerstring := ""
+	v_UndoTriggerstring  := A_ThisHotkey
+	TextOptions 		 := F_AHKVariables(TextOptions)
+	ToolTip,
+	Gui, HMenu: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuHwnd
+	Gui, HMenu: Margin, 0, 0
+	Gui, HMenu: Font, c766D69 s8	;Tooltip font color
+	Gui, HMenu: Color,, White
+	Gui, HMenu: Add, Listbox, x0 y0 h100 w250 HwndIdListViewHMenu vMenuListbox
+	
+	Loop, Parse, TextOptions, ¦
+	{
+		GuiControl,, % IdListViewHMenu, % A_Index . ". " . A_LoopField
 		v_MenuMax++
 	}
+	
 	if (ini_MenuCaret)
 	{
-		;CoordMode, Caret, Screen
-		CoordMode, Caret, Client
+		CoordMode, Caret, Client ;CoordMode, Caret, Screen
 		MenuX := A_CaretX + 20
 		MenuY := A_CaretY - 20
 	}
 	if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
 	{
-		;CoordMode, Mouse, Screen
-		CoordMode, Mouse, Client
+		CoordMode, Mouse, Client	;CoordMode, Mouse, Screen
 		MouseGetPos, v_MouseX, v_MouseY
 		MenuX := v_MouseX + 20
 		MenuY := v_MouseY + 20
 	}
-	Gui, Menu:Show, x%MenuX% y%MenuY%, Hotstring listbox
-	if (ini_MenuSound)
-		SoundBeep, 400, 200
-	if (v_TypedTriggerstring == "")
-	{
-		HK := StrSplit(A_ThisHotkey, ":")
-		ThisHotkey := SubStr(A_ThisHotkey, StrLen(HK[2])+3, StrLen(A_ThisHotkey)-StrLen(HK[2])-2)
-		Send, % ThisHotkey
-	}
-	GuiControl, Choose, MenuListbox, 1
+	
+	Gui, HMenu: Show, x%MenuX% y%MenuY% NoActivate
+	
+	GuiControl, Choose, % IdListViewHMenu, 1
 	Ovar := Oflag
-	v_HotstringFlag := 1
+	v_HotstringFlag := true
 	return
 }
 	
@@ -4943,7 +5011,7 @@ F_LoadEndChars() ;Load from Config.ini
 							flag := 1
 							Break
 						}
-						else if (Asc(v_ActualArray) > Asc(v_TempArray))
+						else if (Asc(v_ActualArray) > Asc(v_TempArray)22)
 						{
 							Break
 						}
@@ -5952,3 +6020,9 @@ L_TrayReload:	;new thread starts here
 	F_WhichGui()
 	F_Reload()
 return
+
+/*
+	HMenuEscape:
+		Gui, HMenu: Destroy
+	return
+*/
