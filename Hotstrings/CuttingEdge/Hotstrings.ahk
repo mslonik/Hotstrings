@@ -4190,7 +4190,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	v_IsLibraryEmpty := true
 	if (!Instr(FileExist(A_ScriptDir . "\Libraries"), "D"))				; if  there is no "Libraries" subfolder 
 	{
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exist!"] . "`n`n" . %A_ScriptDir%\Libraries\ . "`n`n" . TransA["folder is now created"] . "."
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exist!"] . "`n`n" . A_ScriptDir . "\Libraries\" . "`n`n" . TransA["folder is now created"] . "."
 		FileCreateDir, %A_ScriptDir%\Libraries							; Future: check against errors
 	}
 	else
