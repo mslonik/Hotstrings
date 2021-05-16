@@ -877,11 +877,6 @@ F_HMenuCli()
 
 Esc::
 	Gui, HMenuCli: Destroy
-	;*[One]
-	;SendRaw, % SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, 2) + 1) ;there was a problem
-	;Send, % v_UndoTriggerstring ;nie
-	;Send, % v_UndoHotstring	;nie
-	;Send, % v_TypedTriggerstring ;nie
 	Send, % v_TriggerString
 return
 #If
@@ -923,7 +918,7 @@ F_SetHotstring()
 	
 	if (Trim(v_TriggerString) = "")
 	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Enter triggerstring before hotstring is set"]
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Enter triggerstring before hotstring is set"] . "."
 		return
 	}
 	if InStr(v_SelectFunction, "Menu")
@@ -948,7 +943,7 @@ F_SetHotstring()
 			TextInsert := % TextInsert . "¦" . v_EnterHotstring5
 		if (Trim(v_EnterHotstring6) != "")
 			TextInsert := % TextInsert . "¦" . v_EnterHotstring6
-		TextInsert := SubStr(TextInsert, 2, StrLen(TextInsert)-1)
+		TextInsert := SubStr(TextInsert, 2, StrLen(TextInsert) - 1)
 	}
 	else
 	{
@@ -999,14 +994,13 @@ F_SetHotstring()
 		: (Instr(OldOptions,"O")) ? Options . "O0" : Options
 	
 ; Add new/changed target item in DropDownList
-	if (v_SelectFunction == "Clipboard (CL)")
-		SendFun := "F_ViaClipboard"
-	else if (v_SelectFunction == "SendInput (SI)")
-		SendFun := "F_NormalWay"
-	else if (v_SelectFunction == "Menu & Clipboard (MCL)")
-		SendFun := "F_MenuCli"
-	else if (v_SelectFunction == "Menu & SendInput (MSI)")
-		SendFun := "F_MenuAHK"
+	Switch v_SelectFunction
+	{
+		Case "Clipboard (CL)": 			SendFun := "F_ViaClipboard"
+		Case "SendInput (SI)": 			SendFun := "F_NormalWay"
+		Case "Menu & Clipboard (MCL)": 	SendFun := "F_MenuCli"
+		Case "Menu & SendInput (MSI)": 	SendFun := "F_MenuAHK"
+	}
 	
 	if (v_OptionDisable == 1)
 		OnOff := "Off"
@@ -1034,20 +1028,19 @@ F_SetHotstring()
 	Hotstring("Reset") ;reset hotstring recognizer
 	
 	;3. Read the library file into List View. 
-	SendFun := ""
 	if (v_OptionDisable)
 		EnDis := "Dis"
 	else
 		EnDis := "En"
 	
-	if (v_SelectFunction == "Clipboard (CL)")
-		SendFun := "CL"
-	else if (v_SelectFunction == "SendInput (SI)")
-		SendFun := "SI"
-	else if (v_SelectFunction == "Menu & Clipboard (MCL)")
-		SendFun := "MCL"
-	else if (v_SelectFunction == "Menu & SendInput (MSI)")
-		SendFun := "MSI"
+	;SendFun := ""
+	Switch v_SelectFunction
+	{
+		Case "Clipboard (CL)": 			SendFun := "CL"
+		Case "SendInput (SI)": 			SendFun := "SI"
+		Case "Menu & Clipboard (MCL)": 	SendFun := "MCL"
+		Case "Menu & SendInput (MSI)": 	SendFun := "MSI"
+	}
 	
 	OutputFile 	:= A_ScriptDir . "\Libraries\temp.csv"	; changed on 2021-02-13
 	InputFile 	:= A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary 
@@ -1062,11 +1055,12 @@ F_SetHotstring()
 		if (A_LoopField)
 			v_TotalLines++
 	
+	;*[One]
 	Loop, Parse, v_TheWholeFile, `n, `r
 	{
 		if (A_LoopField)
 		{
-			if (InStr(A_LoopReadLine, LString))
+			if (InStr(A_LoopField, LString))
 			{
 				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
 					, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in the file"] . A_Space . v_SelectHotstringLibrary . "." . "`n`n" 
@@ -4385,7 +4379,7 @@ F_LoadLibrariesToTables()
 		TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
 	
 	;Here content of libraries is loaded into set of tables
-	Loop, Files, %A_ScriptDir%\Libraries\*.csv ;#[Ladowanie tablic]
+	Loop, Files, %A_ScriptDir%\Libraries\*.csv 
 	{
 		Loop
 		{
@@ -4740,7 +4734,6 @@ F_MouseMenuCli() ;The subroutine may consult the following built-in variables: A
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;tu jestem
 F_MenuAHK(TextOptions, Oflag)	
 {
 	global	;assume-global mode
@@ -4789,7 +4782,6 @@ F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A
 	MouseGetPos, , , , MouseCtl, 2
 	if ((A_GuiEvent = "Normal") and (MouseCtl = Id_LB_HMenuAHK)) ;only ordinary mouse left click
 	{
-		;*[One]
 		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuAHK 
 		v_HotstringFlag := true
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
@@ -4806,7 +4798,6 @@ F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A
 
 ;Future: move this section of code to Hotkeys
 #if WinExist("ahk_id" HMenuAHKHwnd)
-;#IfWinActive HotstringAHK listbox
 1::
 2::
 3::
@@ -4846,7 +4837,7 @@ F_HMenuAHK()
 		IntCnt := 1
 		return
 	}
-	;*[One]
+	
 	if (IsCursorPressed)
 	{
 		if (IntCnt > v_MenuMax)
