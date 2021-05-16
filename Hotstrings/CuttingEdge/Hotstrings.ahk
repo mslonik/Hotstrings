@@ -52,7 +52,10 @@ global ini_Tips 				:= true
 global ini_TipsSortAlphabetically 	:= true
 global ini_TipsSortByLength 		:= true
 global ini_GuiReload			:= false
-global ini_Language 			:= "English.txt"	
+global ini_Language 			:= "English.txt"
+
+global ini_SFrequency			:= 400		;Future. The frequency of the sound. It should be a number between 37 and 32767. If omitted, the frequency will be 523.
+global ini_SDuration			:= 200		;Future. The duration of the sound, in milliseconds. If omitted, the duration will be 150.
 
 global v_IndexLog 				:= 1			;for logging, if Hotstrings application is run with d parameter.
 
@@ -490,7 +493,7 @@ Loop,
 	if (WinExist("ahk_id" HMenuHwnd) or WinExist("HotstringAHK listbox"))
 	{
 		if (ini_MenuSound)
-			SoundBeep, 400, 200	;Future: configurable parameters of the sound
+			SoundBeep, % ini_SFrequency, % ini_SDuration	;Future: configurable parameters of the sound
 	}
 	else
 	{
@@ -591,9 +594,7 @@ Loop,
 if (WinExist("ahk_id" HMenuHwnd) or WinExist("HotstringAHK listbox"))
 {
 	if (ini_MenuSound)
-	{
-		SoundBeep, 400, 200
-	}
+		SoundBeep, % ini_SFrequency, % ini_SDuration
 }
 else
 {
@@ -806,20 +807,21 @@ F_HMenuC()
 	local	v_PressedKey := "",		v_Temp1 := "",		ClipboardBack := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	
-	;*[One]
 	v_PressedKey := A_ThisHotkey
-	OutputDebug, % "Beginning" . ":" . A_Space . A_ThisHotkey
+	;OutputDebug, % "Beginning" . ":" . A_Space . A_ThisHotkey
 	if (InStr(v_PressedKey, "Up"))
 	{
 		IsCursorPressed := true
 		IntCnt--
-		OutputDebug, % "Up" . ":" . A_Space IntCnt
+		;OutputDebug, % "Up" . ":" . A_Space IntCnt
+		ControlSend, , {Up}, % "ahk_id" HMenuHwnd
 	}
 	if (InStr(v_PressedKey, "Down"))
 	{
 		IsCursorPressed := true
 		IntCnt++
-		OutputDebug, % "Down" . ":" . A_Space IntCnt
+		;OutputDebug, % "Down" . ":" . A_Space IntCnt
+		ControlSend, , {Down}, % "ahk_id" HMenuHwnd
 	}
 	
 	if ((v_MenuMax = 1) and IsCursorPressed)
@@ -833,12 +835,12 @@ F_HMenuC()
 		if (IntCnt > v_MenuMax)
 		{
 			IntCnt := v_MenuMax
-			SoundBeep, 400, 200	;Future: configurable parameters of the sound
+			SoundBeep, % ini_SFrequency, % ini_SDuration	;Future: configurable parameters of the sound
 		}
 		if (IntCnt < 1)
 		{
 			IntCnt := 1
-			SoundBeep, 400, 200	;Future: configurable parameters of the sound
+			SoundBeep, % ini_SFrequency, % ini_SDuration	;Future: configurable parameters of the sound
 		}
 		IsCursorPressed := false
 		return
@@ -882,8 +884,14 @@ F_HMenuC()
 }
 
 Esc::
-Gui, HMenu: Destroy
-SendRaw, % SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, 2) + 1) ;tu jest problem
+	Gui, HMenu: Destroy
+	;*[One]
+	;SendRaw, % SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, 2) + 1) ;there was a problem
+	;Send, % v_UndoTriggerstring ;nie
+	;Send, % v_UndoHotstring	;nie
+	;Send, % v_TypedTriggerstring ;nie
+	Send, % v_TriggerString
+	;MsgBox,,Proba, % v_TypedTriggerstring
 return
 #If
 
@@ -4744,7 +4752,7 @@ F_MenuText(TextOptions, Oflag)	;tu jestem
 	v_MenuMax			 := 0
 	v_InputString 		 := ""
 	;v_TypedTriggerstring := ""
-	;v_UndoTriggerstring  := A_ThisHotkey
+	;v_UndoTriggerstring  := A_ThisHotkey	;tu jestem
 	TextOptions 		 := F_AHKVariables(TextOptions)
 	Loop, Parse, TextOptions, ¦
 		v_MenuMax := A_Index
@@ -4820,7 +4828,7 @@ F_MenuTextAHK(TextOptions, Oflag)
 	}
 	Gui, MenuAHK:Show, x%MenuX% y%MenuY%, HotstringAHK listbox
 	if (ini_MenuSound)
-		SoundBeep, 400, 200
+		SoundBeep, % ini_SFrequency, % ini_SDuration
 	if (v_TypedTriggerstring == "")
 	{
 		HK := StrSplit(A_ThisHotkey, ":")
