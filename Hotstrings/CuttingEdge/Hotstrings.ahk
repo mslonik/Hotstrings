@@ -461,7 +461,9 @@ Menu, 	HSMenu, 			Add, % TransA["Libraries"], 				:LibrariesSubmenu
 Menu, 	HSMenu, 			Add, % TransA["Clipboard Delay (F7)"], 		F_GuiHSdelay
 Menu,	ApplicationSubmenu,	Add, % TransA["Reload"],					F_Reload
 Menu,	ApplicationSubmenu,	Add, % TransA["Exit"],					F_Exit
+Menu,	ApplicationSubmenu,	Add	;To add a menu separator line, omit all three parameters.
 Menu,	ApplicationSubmenu, Add, % TransA["Remove Config.ini"],		F_RemoveConfigIni
+Menu,	ApplicationSubmenu, Add, % TransA["Add to Autostart"],			F_AddToAutostart
 
 F_CompileSubmenu()
 
@@ -489,7 +491,7 @@ Loop,
 		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["ErrorLevel was triggered by NewInput error."]
 	
 	; if exist window with hotstring tips, output sound
-	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("HotstringAHK listbox"))
+	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 	{
 		if (ini_MenuSound)
 			SoundBeep, % ini_SFrequency, % ini_SDuration	;Future: configurable parameters of the sound
@@ -501,7 +503,7 @@ Loop,
 		{
 			v_InputString := ""
 			ToolTip,
-			if !(WinExist("ahk_id" HMenuCliHwnd) or WinExist("HotstringAHK listbox"))
+			if !(WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 				v_HotstringFlag := 0
 		}
 		if (InStr(HotstringEndChars, out))
@@ -590,7 +592,7 @@ Loop,
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
 
 ~BackSpace:: 
-if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("HotstringAHK listbox"))
+if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 {
 	if (ini_MenuSound)
 		SoundBeep, % ini_SFrequency, % ini_SDuration
@@ -683,7 +685,7 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if WinExist("ahk_id" HS3GuiHwnd) and WinExist("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows exist at the moment.
+#if WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows exist at the moment.
 
 ~^c::			; copy to edit field "Enter hotstring" content of Clipboard.
 Sleep, %ini_Delay%
@@ -883,6 +885,32 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_AddToAutostart()
+{
+	global	;assume-global mode
+	local v_Temp1 := true, Target := "", LinkFile := "", Args := "", Description := "", IconFile := ""
+	
+	Target 		:= A_ScriptFullPath
+	LinkFile 		:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "." . "lnk"
+	WorkingDir 	:= A_ScriptDir
+	Args 		:= ""
+	Description 	:= TransA["Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries"] . "."
+	IconFile 		:= A_ScriptDir . "\" . AppIcon
+	
+	Try
+		FileCreateShortcut, % Target, % LinkFile, % WorkingDir, % Args, % Description, % IconFile, h, , 7
+	Catch
+	{
+		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something weng wrong with link file (.lnk) creation"] . ":" 
+			. A_Space . ErrorLevel
+	}
+	F_WhichGui()
+	if (!ErrorLevel)
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Link file (.lnk) was created in AutoStart folder"] . ":" . "`n`n"
+			. A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "." . "lnk"
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_CreateMenu_SizeOfMargin()
 {
 	global	;assume-global mode
@@ -2962,6 +2990,7 @@ F_LoadCreateTranslationTxt(decision*)
 About/Help (F1) 										= &About/Help (F1)
 Add comment (optional) 									= Add comment (optional)
 Add library 											= Add library
+Add to Autostart										= Add to Autostart
 A library with that name already exists! 					= A library with that name already exists!
 Apostrophe ' 											= Apostrophe '
 Application											= A&pplication
@@ -3036,6 +3065,7 @@ Export from .csv to .ahk 								= &Export from .csv to .ahk
 Export to .ahk with static definitions of hotstrings			= Export to .ahk with static definitions of hotstrings
 Export to .ahk with dynamic definitions of hotstrings			= Export to .ahk with dynamic definitions of hotstrings
 Exported												= Exported
+Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries = Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries
 F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries = F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries
 file! 												= file!
 file in Languages subfolder!								= file in Languages subfolder!
@@ -3078,6 +3108,7 @@ Library has been exported 								= Library has been exported
 Library has been imported. 								= Library has been imported.
 Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment = Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment
 Light (default)										= Light (default)
+Link file (.lnk) was created in AutoStart folder				= Link file (.lnk) was created in AutoStart folder
 Loading of (triggerstring, hotstring) definitions from the library file = Loading of (triggerstring, hotstring) definitions from the library file
 Loading file											= Loading file
 Loaded hotstrings: 										= Loaded hotstrings:
@@ -3128,6 +3159,7 @@ Size of font											= Size of font
 Size of margin:										= Size of margin:
 Slash / 												= Slash /
 Something went wrong with hotstring deletion:				= Something went wrong with hotstring deletion:
+Something weng wrong with link file (.lnk) creation			= Something weng wrong with link file (.lnk) creation
 Sort tips alphabetically 								= Sort tips &alphabetically
 Sort tips by length 									= Sort tips by &length
 Space 												= Space
@@ -3162,6 +3194,9 @@ Triggerstring 											= Triggerstring
 Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
 Triggerstring tips 										= &Triggerstring tips
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
+)"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
+TransConst .= "`n
+(
 Underscore _											= Underscore _
 Undo the last hotstring 									= &Undo the last hotstring
 warning												= warning
