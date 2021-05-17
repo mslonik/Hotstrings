@@ -59,10 +59,6 @@ global ini_SDuration			:= 200		;Future. The duration of the sound, in millisecon
 
 global v_IndexLog 				:= 1			;for logging, if Hotstrings application is run with d parameter.
 
-;global v_MenuMax 				:= 0			;important for hotstring menu; future: to be investigated
-;global v_MenuMax2 				:= 0			;important for hotstring menu; future: to be investigated
-
-;global v_TriggerString 			:= ""
 global v_TypedTriggerstring 		:= ""		;used by output functions
 global v_UndoHotstring 			:= ""		;used by output functions
 global v_UndoTriggerstring 		:= ""		;used by output functions
@@ -85,7 +81,6 @@ if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "L
 }
 
 IniRead ini_Language, Config.ini, Configuration, Language				; Load from Config.ini file specific parameter: language into variable ini_Language, e.g. ini_Language = English.ini
-;*[One]
 if (!FileExist(A_ScriptDir . "\Languages\" . ini_Language))			; else if there is no ini_language .ini file, e.g. v_langugae == Polish.ini and there is no such file in Languages folder
 {
 	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no"] . A_Space . ini_Language . A_Space . TransA["file in Languages subfolder!"]
@@ -120,24 +115,43 @@ F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of 
 F_ValidateIniLibSections() 
 
 ;If application wasn't run with "l" parameter (standing for "light / lightweight"), prepare tray menu.
-if !(v_Param == "l") 		;GUI window uses the tray icon that was in effect at the time the window was created, therefore this section have to be run before the first Gui, New command. 
+;*[One]
+;v_Param := 1
+Switch v_Param
 {
-	Menu, Tray, NoStandard									; remove all the rest of standard tray menu
-	if (!FileExist(AppIcon))
-	{
-		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." . A_Space . TransA["Because of that the default AutoHotkey icon will be used instead"] . "."
-		AppIcon := "*"
-	}
-	Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
-	Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 			L_GUIInit
-	Menu, Tray, Default, 	% TransA["Edit Hotstrings"]
-	Menu, Tray, Add,		% TransA["Application help"],			GuiAboutLink1
-	Menu, Tray, Add,		% TransA["Genuine hotstrings AutoHotkey documentation"], GuiAboutLink2
-	Menu, Tray, Add										; separator line
-	Menu, Tray, Add,		% TransA["Reload"],					L_TrayReload
-	Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			L_TraySuspendHotkeys
-	Menu, Tray, Add,		% TransA["Pause Script"],			L_TrayPauseScript
-	Menu, Tray, Add,		% TransA["Exit"],					L_TrayExit
+	Case "l":
+		Menu, Tray, NoStandard									; remove all the rest of standard tray menu
+		if (!FileExist(AppIcon))
+		{
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." . A_Space . TransA["Because of that the default AutoHotkey icon will be used instead"] . "."
+			AppIcon := "*"
+		}
+		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
+		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4),		F_GuiAbout
+		Menu, Tray, Default,	% SubStr(A_ScriptName, 1, -4)
+		Menu, Tray, Add										;separator line
+		Menu, Tray, Add,		% TransA["Reload"],					L_TrayReload
+		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			L_TraySuspendHotkeys
+		Menu, Tray, Add,		% TransA["Pause Application"],		L_TrayPauseScript
+		Menu, Tray, Add,		% TransA["Exit Application"],			L_TrayExit		
+	Case "", "d":
+		Menu, Tray, NoStandard									; remove all the rest of standard tray menu
+		if (!FileExist(AppIcon))
+		{
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." . A_Space . TransA["Because of that the default AutoHotkey icon will be used instead"] . "."
+			AppIcon := "*"
+		}
+		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
+		Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 			L_GUIInit
+		Menu, Tray, Default, 	% TransA["Edit Hotstrings"]
+		Menu, Tray, Add										;separator line
+		Menu, Tray, Add,		% TransA["Application help"],			GuiAboutLink1
+		Menu, Tray, Add,		% TransA["Genuine hotstrings AutoHotkey documentation"], GuiAboutLink2
+		Menu, Tray, Add										;separator line
+		Menu, Tray, Add,		% TransA["Reload"],					L_TrayReload
+		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			L_TraySuspendHotkeys
+		Menu, Tray, Add,		% TransA["Pause Application"],		L_TrayPauseScript
+		Menu, Tray, Add,		% TransA["Exit Application"],			L_TrayExit
 }
 
 F_GuiMain_CreateObject()
@@ -466,6 +480,8 @@ Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],		:ExportSubm
 Menu, 	HSMenu, 		Add, % TransA["Libraries"], 					:LibrariesSubmenu
 Menu, 	HSMenu, 		Add, % TransA["Clipboard Delay (F7)"], 			F_GuiHSdelay
 Menu,	AppSubmenu,	Add, % TransA["Reload"],						F_Reload
+Menu,	AppSubmenu,	Add, % TransA["Suspend Hotkeys"],				L_TraySuspendHotkeys
+Menu,	AppSubmenu,	Add, % TransA["Pause"],						L_TrayPauseScript
 Menu,	AppSubmenu,	Add, % TransA["Exit"],						F_Exit
 Menu,	AppSubmenu,	Add	;To add a menu separator line, omit all three parameters.
 Menu,	AppSubmenu, 	Add, % TransA["Remove Config.ini"],			F_RemoveConfigIni
@@ -3090,6 +3106,7 @@ Exclamation Mark ! 										= Exclamation Mark !
 exists in the file										= exists in the file
 exists in a file and will be now replaced.					= exists in a file and will be now replaced.
 Exit													= Exit
+Exit	Application										= Exit Application
 Export from .csv to .ahk 								= &Export from .csv to .ahk
 Export to .ahk with static definitions of hotstrings			= Export to .ahk with static definitions of hotstrings
 Export to .ahk with dynamic definitions of hotstrings			= Export to .ahk with dynamic definitions of hotstrings
@@ -3159,7 +3176,8 @@ Please wait, uploading .csv files... 						= Please wait, uploading .csv files..
 question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
-Pause Script											= Pause Script
+Pause												= Pause
+Pause Application										= Pause Application
 Phrase to search for:									= Phrase to search for:
 pixels												= pixels
 Position of main window is saved in Config.ini.				= Position of main window is saved in Config.ini.	
@@ -4286,6 +4304,7 @@ F_GuiAbout()
 		,NewWinPosX := 0, NewWinPosY := 0
 	
 	NewStr := RegExReplace(TransA["About/Help (F1)"], "&", "")
+	NewStr := SubStr(NewStr, 1, -4)
 	
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	Gui, MyAbout: Show, Hide Center AutoSize
@@ -4297,7 +4316,10 @@ F_GuiAbout()
 	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
 	;OutputDebug, % "Window2W:" . A_Space . Window2W . A_Space . "Window2H:" . A_Space . Window2H
 	;OutputDebug, % "NewWinPosX:" . A_Space . NewWinPosX . A_Space . "NewWinPosY:" . A_Space . NewWinPosY
-	Gui, MyAbout: Show, % "Center" . A_Space . "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % SubStr(A_ScriptName, 1, -4) . A_Space . NewStr
+	if ((NewWinPosX != 0) and (NewWinPosY != 0))
+		Gui, MyAbout: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . NewStr
+	else 
+		Gui, MyAbout: Show, Center AutoSize, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . NewStr
 	return  
 }
 
@@ -6128,19 +6150,31 @@ MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"
 Reload
 
 L_TraySuspendHotkeys:
-Suspend, Toggle
-if (A_IsSuspended)
-	Menu, Tray, Check,   % TransA["Suspend Hotkeys"]
-else
-	Menu, Tray, UnCheck, % TransA["Suspend Hotkeys"]
+	Suspend, Toggle
+	if (A_IsSuspended)
+	{
+		Menu, Tray, 		Check, 	% TransA["Suspend Hotkeys"]
+		Menu, AppSubmenu, 	Check, 	% TransA["Suspend Hotkeys"]
+	}
+	else
+	{
+		Menu, Tray, 		UnCheck, 	% TransA["Suspend Hotkeys"]
+		Menu, AppSubmenu,	UnCheck, 	% TransA["Suspend Hotkeys"]
+	}
 return
 
 L_TrayPauseScript:
-Pause, Toggle, 1
-if (A_IsPaused)
-	Menu, Tray, Check,	 % TransA["Pause Script"]
-else
-	Menu, Tray, UnCheck, % TransA["Pause Script"]
+	Pause, Toggle, 1
+	if (A_IsPaused)
+	{
+		Menu, Tray, 		Check, 	% TransA["Pause Application"]
+		Menu, AppSubmenu,	Check, 	% TransA["Pause Application"]
+	}
+	else
+	{
+		Menu, Tray, 		UnCheck, 	% TransA["Pause Application"]
+		Menu, AppSubmenu,	UnCheck, 	% TransA["Pause Application"]
+	}
 return
 
 L_TrayExit:
