@@ -115,8 +115,6 @@ F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of 
 F_ValidateIniLibSections() 
 
 ;If application wasn't run with "l" parameter (standing for "light / lightweight"), prepare tray menu.
-;*[One]
-;v_Param := 1
 Switch v_Param
 {
 	Case "l":
@@ -903,7 +901,8 @@ F_HMenuCli()
 
 Esc::
 	Gui, HMenuCli: Destroy
-	Send, % v_TriggerString
+	Send, % v_InputString
+	v_InputString := ""	;I'm not sure if this line is necessary anymore.
 return
 #If
 
@@ -1125,7 +1124,6 @@ F_SetHotstring()
 		if (A_LoopField)
 			v_TotalLines++
 	
-	;*[One]
 	Loop, Parse, v_TheWholeFile, `n, `r
 	{
 		if (A_LoopField)
@@ -4687,6 +4685,7 @@ F_NormalWay(ReplacementString, Oflag)
 	v_InputString := ""
 	ToolTip,
 	v_HotstringFlag := 1
+	;*[One]
 	v_UndoTriggerstring := A_ThisHotkey
 	ReplacementString := F_AHKVariables(ReplacementString)
 	if (Oflag == 0)
@@ -4761,8 +4760,11 @@ F_MenuCli(TextOptions, Oflag)
 	global	;assume-global mode
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
 	
+	v_UndoTriggerstring := A_ThisHotkey
+	if (ini_MenuSound)
+		SoundBeep, % ini_SFrequency, % ini_SDuration
 	v_MenuMax			 := 0
-	v_InputString 		 := ""
+	;v_InputString 		 := ""
 	TextOptions 		 := F_AHKVariables(TextOptions)
 	Loop, Parse, TextOptions, ¦
 		v_MenuMax := A_Index
@@ -4828,8 +4830,8 @@ F_MenuAHK(TextOptions, Oflag)
 	global	;assume-global mode
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
 	
+	v_UndoTriggerstring := A_ThisHotkey
 	v_MenuMax			 := 0
-	v_InputString 		 := ""
 	TextOptions 		 := F_AHKVariables(TextOptions)
 	Loop, Parse, TextOptions, ¦
 		v_MenuMax := A_Index
@@ -4956,23 +4958,17 @@ F_HMenuAHK()
 		return
 	}
 	v_HotstringFlag := true
-	;ClipboardBack := ClipboardAll ;backup clipboard
 	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuAHK
 	Loop, Parse, v_Temp1, `n
 	{
 		if (InStr(A_LoopField, v_PressedKey . "."))
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
-	
-	;Clipboard := v_Temp1 
-	;Send, ^v ;paste the text
 	Send, % v_Temp1 
 	if (Ovar = false)
 		Send, % A_EndChar
-	;Sleep, %ini_Delay% ;Remember to sleep before restoring clipboard or it will fail
 	v_TypedTriggerstring := v_Temp1
 	v_UndoHotstring 	 := v_Temp1
-	;Clipboard 		 := ClipboardBack
 	Hotstring("Reset")
 	Gui, HMenuAHK: Destroy
 	return
@@ -4980,7 +4976,8 @@ F_HMenuAHK()
 
 Esc::
 	Gui, HMenuAHK: Destroy
-	Send, % v_TriggerString
+	Send, % v_InputString
+	v_InputString := ""	;I'm not sure if this line is necessary anymore
 return
 #If
 
@@ -5671,17 +5668,10 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	return
 }
 
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-
-
-
-
-; --------------------------- SECTION OF LABELS ---------------------------
-
-
+; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
 TurnOffTooltip:
-ToolTip ,
+	ToolTip ,
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
