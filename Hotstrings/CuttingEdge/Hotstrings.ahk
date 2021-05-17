@@ -19,7 +19,7 @@ FileEncoding, UTF-16			; Sets the default encoding for FileRead, FileReadLine, L
 ; BMP = Basic Multilingual Plane.
 
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert image.png -alpha off -resize 256x256 \ -define icon:auto-resize="256,128,96,64,48,32,16" \ hotstrings.ico
+global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -85,10 +85,11 @@ if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "L
 }
 
 IniRead ini_Language, Config.ini, Configuration, Language				; Load from Config.ini file specific parameter: language into variable ini_Language, e.g. ini_Language = English.ini
+;*[One]
 if (!FileExist(A_ScriptDir . "\Languages\" . ini_Language))			; else if there is no ini_language .ini file, e.g. v_langugae == Polish.ini and there is no such file in Languages folder
 {
 	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no"] . A_Space . ini_Language . A_Space . TransA["file in Languages subfolder!"]
-	. "`n`n" . TransA["The default"] . A_Space . ini_Language . A_Space . TransA["file is now created in the following subfolder:"] . "`n"  A_ScriptDir . "\Languages\"
+	. "`n`n" . TransA["The default"] . A_Space . ini_Language . A_Space . TransA["file is now created in the following subfolder:"] . "`n`n"  A_ScriptDir . "\Languages\"
 	F_LoadCreateTranslationTxt("create")
 }
 else
@@ -121,13 +122,18 @@ F_ValidateIniLibSections()
 ;If application wasn't run with "l" parameter (standing for "light / lightweight"), prepare tray menu.
 if !(v_Param == "l") 		;GUI window uses the tray icon that was in effect at the time the window was created, therefore this section have to be run before the first Gui, New command. 
 {
+	Menu, Tray, NoStandard									; remove all the rest of standard tray menu
+	if (!FileExist(AppIcon))
+	{
+		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." . A_Space . TransA["Because of that the default AutoHotkey icon will be used instead"] . "."
+		AppIcon := "*"
+	}
 	Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
 	Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 			L_GUIInit
 	Menu, Tray, Default, 	% TransA["Edit Hotstrings"]
 	Menu, Tray, Add,		% TransA["Application help"],			GuiAboutLink1
 	Menu, Tray, Add,		% TransA["Genuine hotstrings AutoHotkey documentation"], GuiAboutLink2
 	Menu, Tray, Add										; separator line
-	Menu, Tray, NoStandard									; remove all the rest of standard tray menu
 	Menu, Tray, Add,		% TransA["Reload"],					L_TrayReload
 	Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			L_TraySuspendHotkeys
 	Menu, Tray, Add,		% TransA["Pause Script"],			L_TrayPauseScript
@@ -3019,6 +3025,7 @@ Application language changed to: 							= Application language changed to:
 Are you sure you want to exit this application now?			= Are you sure you want to exit this application now?
 Are you sure you want to reload this application now?			= Are you sure you want to reload this application now
 Backslash \ 											= Backslash \
+Because of that the default AutoHotkey icon will be used instead = Because of that the default AutoHotkey icon will be used instead
 Build with Autohotkey.exe version							= Build with Autohotkey.exe version
 Cancel 												= Cancel
 Caret 												= Caret
@@ -3063,6 +3070,7 @@ Disable 												= Disable
 DISABLED												= DISABLED
 Dot . 												= Dot .
 Do you want to reload application now?						= Do you want to reload application now?
+doesn't exist in application folder						= doesn't exist in application folder
 Dynamic hotstrings 										= &Dynamic hotstrings
 Edit Hotstrings 										= Edit Hotstrings
 Enable/Disable 										= Enable/Disable
@@ -3190,6 +3198,9 @@ Standard executable (Ahk2Exe.exe)							= Standard executable (Ahk2Exe.exe)
 Static hotstrings 										= &Static hotstrings
 Such file already exists									= Such file already exists
 Suspend Hotkeys										= Suspend Hotkeys
+)"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
+TransConst .= "`n
+(Join`n `
 Tab 													= Tab
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
 The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure? = The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure?
@@ -3197,6 +3208,7 @@ The default											= The default
 The executable file is prepared by Ahk2Exe and compressed by mpress.exe: = The executable file is prepared by Ahk2Exe and compressed by mpress.exe:
 The executable file is prepared by Ahk2Exe and compressed by upx.exe: = The executable file is prepared by Ahk2Exe and compressed by upx.exe:
 The executable file is prepared by Ahk2Exe, but not compressed:	= The executable file is prepared by Ahk2Exe, but not compressed:
+The icon file											= The icon file
 The hostring 											= The hostring
 The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes. = The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes.
 The library  											= The library 
@@ -3216,9 +3228,6 @@ Triggerstring 											= Triggerstring
 Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
 Triggerstring tips 										= &Triggerstring tips
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
-)"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
-TransConst .= "`n
-(
 Underscore _											= Underscore _
 Undo the last hotstring 									= &Undo the last hotstring
 warning												= warning
@@ -3257,6 +3266,7 @@ Warning, code generated automatically for definitions based on menu, see documen
 	}
 	
 	tick := false
+
 	Loop, Parse, TransConst, =`n, %A_Space%%A_Tab%
 	{
 		if !(tick)
