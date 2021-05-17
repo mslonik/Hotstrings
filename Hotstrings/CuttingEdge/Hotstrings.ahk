@@ -457,19 +457,21 @@ Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  			F_ExportLibrarySta
 Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  			F_ExportLibraryDynamic
 Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],		:ExportSubmenu
 
-Menu, 	HSMenu, 			Add, % TransA["Libraries"], 				:LibrariesSubmenu
-Menu, 	HSMenu, 			Add, % TransA["Clipboard Delay (F7)"], 		F_GuiHSdelay
-Menu,	ApplicationSubmenu,	Add, % TransA["Reload"],					F_Reload
-Menu,	ApplicationSubmenu,	Add, % TransA["Exit"],					F_Exit
-Menu,	ApplicationSubmenu,	Add	;To add a menu separator line, omit all three parameters.
-Menu,	ApplicationSubmenu, Add, % TransA["Remove Config.ini"],		F_RemoveConfigIni
-Menu,	ApplicationSubmenu, Add, % TransA["Add to Autostart"],			F_AddToAutostart
+Menu, 	HSMenu, 		Add, % TransA["Libraries"], 					:LibrariesSubmenu
+Menu, 	HSMenu, 		Add, % TransA["Clipboard Delay (F7)"], 			F_GuiHSdelay
+Menu,	AppSubmenu,	Add, % TransA["Reload"],						F_Reload
+Menu,	AppSubmenu,	Add, % TransA["Exit"],						F_Exit
+Menu,	AppSubmenu,	Add	;To add a menu separator line, omit all three parameters.
+Menu,	AppSubmenu, 	Add, % TransA["Remove Config.ini"],			F_RemoveConfigIni
+Menu,	AutoStartSub,	Add, % TransA["Default mode"],				F_AddToAutostart
+Menu,	AutoStartSub,	Add,	% TransA["Silent mode"],					F_AddToAutostart
+Menu,	AppSubmenu, 	Add, % TransA["Add to Autostart"],				:AutoStartSub
 
 F_CompileSubmenu()
 
 if (!A_AhkPath) ;if AutoHotkey isn't installed
 	Menu,	ApplicationSubmenu, Disable,							% TransA["Compile"]
-Menu, 	HSMenu,			Add, % TransA["Application"],				:ApplicationSubmenu
+Menu, 	HSMenu,			Add, % TransA["Application"],				:AppSubmenu
 Menu, 	HSMenu, 			Add, % TransA["About/Help (F1)"], 			F_GuiAbout
 Gui, 	HS3: Menu, HSMenu
 Gui, 	HS4: Menu, HSMenu
@@ -891,23 +893,41 @@ F_AddToAutostart()
 	local v_Temp1 := true, Target := "", LinkFile := "", Args := "", Description := "", IconFile := ""
 	
 	Target 		:= A_ScriptFullPath
-	LinkFile 		:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "." . "lnk"
+	LinkFile_DM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_DM" . "." . "lnk"
+	LinkFile_SM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_SM" . "." . "lnk"
 	WorkingDir 	:= A_ScriptDir
-	Args 		:= ""
+	Args_DM 		:= ""
+	Args_SM		:= "l"
 	Description 	:= TransA["Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries"] . "."
 	IconFile 		:= A_ScriptDir . "\" . AppIcon
 	
-	Try
-		FileCreateShortcut, % Target, % LinkFile, % WorkingDir, % Args, % Description, % IconFile, h, , 7
-	Catch
+	Switch A_ThisMenuItem
 	{
-		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something weng wrong with link file (.lnk) creation"] . ":" 
-			. A_Space . ErrorLevel
+		Case TransA["Default mode"]:
+			Try
+				FileCreateShortcut, % Target, % LinkFile_DM, % WorkingDir, % Args_DM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+			Catch
+			{
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something weng wrong with link file (.lnk) creation"] . ":" 
+				. A_Space . ErrorLevel
+			}
+			F_WhichGui()
+			if (!ErrorLevel)
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Link file (.lnk) was created in AutoStart folder"] . ":" . "`n`n"
+				. A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_DM" . "." . "lnk" . "," . A_Space . TransA["Default mode"]
+		Case TransA["Silent mode"]:
+			Try
+				FileCreateShortcut, % Target, % LinkFile_SM, % WorkingDir, % Args_SM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+			Catch
+			{
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something weng wrong with link file (.lnk) creation"] . ":" 
+				. A_Space . ErrorLevel
+			}
+			F_WhichGui()
+			if (!ErrorLevel)
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Link file (.lnk) was created in AutoStart folder"] . ":" . "`n`n"
+				. A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_SM" . "." . "lnk" . "," . A_Space . TransA["Silent mode"]
 	}
-	F_WhichGui()
-	if (!ErrorLevel)
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Link file (.lnk) was created in AutoStart folder"] . ":" . "`n`n"
-			. A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "." . "lnk"
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2589,10 +2609,10 @@ F_CompileSubmenu()
 	if (FileExist(v_TempOutStr . "mpress.exe"))
 	{
 		Menu, CompileSubmenu, Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
-		Menu, TraySubmenu,		  Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
+		Menu, TraySubmenu,	  Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
 	}
 	Menu,	Tray,			Add, % TransA["Compile"],				:TraySubmenu
-	Menu,	ApplicationSubmenu,	Add,	% TransA["Compile"],				:CompileSubmenu
+	Menu,	AppSubmenu,		Add,	% TransA["Compile"],				:CompileSubmenu
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3035,6 +3055,7 @@ Do you want to proceed? 									= Do you want to proceed?
 Do you want to reload application now?						= Do you want to reload application now?
 Cursor 												= Cursor
 Dark													= Dark
+Default mode											= Default mode
 Delete hotstring (F8) 									= Delete hotstring (F8)
 Deleting hotstring... 									= Deleting hotstring...
 Deleting hotstring. Please wait... 						= Deleting hotstring. Please wait...
@@ -3155,6 +3176,7 @@ Set Clipboard Delay										= Set Clipboard Delay
 Set hotstring (F9) 										= Set hotstring (F9)
 Show full GUI (F4)										= Show full GUI (F4)
 Show Sandbox (F6)										= Show Sandbox (F6)
+Silent mode											= Silent mode
 Size of font											= Size of font
 Size of margin:										= Size of margin:
 Slash / 												= Slash /
