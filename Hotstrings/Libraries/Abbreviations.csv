@@ -101,6 +101,8 @@ C‖dxf‖SI‖En‖DXF‖
 C‖easm‖SI‖En‖EASM‖
 C‖ebit‖SI‖En‖EBIT‖
 *‖ebit/‖SI‖En‖Earnings Before Interest and Taxes‖
+C‖ebitda‖SI‖En‖EBITDA‖
+*‖ebitda/‖SI‖En‖Earnings before interest, taxes, depreciation and amortization‖https://en.wikipedia.org/wiki/Earnings_before_interest,_taxes,_d
 C‖ei‖SI‖En‖EI‖
 *‖ei/‖CL‖En‖Emotional Intelligence‖
 C‖emc‖SI‖En‖EMC‖
@@ -144,7 +146,7 @@ C‖fmeca‖SI‖En‖FMECA‖
 C‖fo‖SI‖En‖FO‖
 *‖fo/‖SI‖En‖Fiber Optics‖
 C‖ga‖SI‖En‖GA‖Generic Application
-*‖ga/‖SI‖En‖Generic Application‖
+*‖ga/‖MSI‖En‖Generic Application¦generische Anwendung‖
 C‖gdpr‖SI‖En‖GDPR‖
 *‖gdpr/‖SI‖En‖General Data Protection Regulation‖
 C‖gmt‖SI‖En‖GMT‖
@@ -270,12 +272,16 @@ C‖rams‖SI‖En‖RAMS‖
 *‖rams/‖CL‖En‖Reliability, Availability, Maintainability and Safety‖
 C‖rap‖SI‖En‖RAP‖
 *‖rap/‖CL‖En‖Risk Acceptance Principle‖
+C‖rfid‖SI‖En‖RFID‖
+*‖rfid/‖SI‖En‖Radio Frequency Identification‖
 C‖rgb‖SI‖En‖RGB‖
 *‖rgb/‖SI‖En‖Red Green Blue‖https://en.wikipedia.org/wiki/RGB_color_model
 C‖rma‖SI‖En‖RMA‖
 *‖rma/‖CL‖En‖Return Merchandise Authorization‖
 C‖rms‖SI‖En‖RMS‖
 *‖rms/‖CL‖En‖Root Mean Square‖
+C‖roce‖SI‖En‖ROCE‖
+C1*‖roce/‖SI‖En‖Return on Capital Employed‖https://en.wikipedia.org/wiki/Return_on_capital_employed
 C‖rohs‖SI‖En‖RoHS‖
 *‖rohs/‖SI‖En‖Restriction of Hazardous Substances Directive‖https://en.wikipedia.org/wiki/Restriction_of_Hazardous_Substance
 C‖rpa‖SI‖En‖RPA‖
@@ -287,7 +293,7 @@ C‖saas‖SI‖En‖SaaS‖
 C‖seo‖SI‖En‖SEO‖
 *‖seo/‖SI‖En‖Search Engine Optimization‖
 C‖sil‖SI‖En‖SIL‖
-*‖sil/‖CL‖En‖Safety Integrity Level‖
+*‖sil/‖MSI‖En‖Safety Integrity Level¦poziom nienaruszalności bezpieczeństwa funkcjonalnego‖
 C‖sla‖SI‖En‖SLA‖
 *‖sla/‖CL‖En‖Service-Level Agreement‖
 C‖sms‖SI‖En‖SMS‖
@@ -309,7 +315,7 @@ C‖tco‖SI‖En‖TCO‖
 C‖tffr‖SI‖En‖TFFR‖
 *‖tffr/‖CL‖En‖Tolerable Functional Failure Rate‖
 C‖thr‖SI‖En‖THR‖
-*‖thr/‖CL‖En‖Tolerable Hazard Rate‖
+*‖thr/‖MSI‖En‖Tolerable Hazard Rate¦współczynnik tolerowanego zagrożenia‖
 C‖tsi‖SI‖En‖TSI‖
 *‖tsi/‖CL‖En‖Technical Specifications for Interoperability‖
 C‖uefi‖SI‖En‖UEFI‖
