@@ -61,7 +61,6 @@ global v_IndexLog 				:= 1			;for logging, if Hotstrings application is run with
 
 global v_TypedTriggerstring 		:= ""		;used by output functions
 global v_UndoHotstring 			:= ""		;used by output functions
-global v_UndoTriggerstring 		:= ""		;used by output functions
 
 ;Flags to control application
 global v_ResizingFlag 			:= true 		;when Hotstrings Gui is displayed for the very first time
@@ -526,7 +525,7 @@ Loop,
 			v_InputString := ""
 			ToolTip,
 			if !(WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
-				v_HotstringFlag := 0
+				v_HotstringFlag := false
 		}
 		if (InStr(HotstringEndChars, out))
 		{
@@ -676,34 +675,86 @@ return
 
 $^z::			;~ Ctrl + z as in MS Word: Undo; $ prevents autotriggering as the same hotkey is send with SendInput function
 $!BackSpace:: 		;~ Alt + Backspace as in MS Word: rolls back last Autocorrect action ; $ prevents autotriggering as the same hotkey is send with SendInput function
-if (ini_Undo == 1) and (v_TypedTriggerstring && (A_ThisHotkey != A_PriorHotkey))
+F_Undo()
 {
-	ToolTip, % TransA["Undo the last hotstring"], % A_CaretX, % A_CaretY - 20
-	TriggerOpt := SubStr(v_UndoTriggerstring, InStr(v_UndoTriggerstring, ":" ,, 1,1)+1 ,InStr(v_UndoTriggerstring, ":" ,, 1,2)-InStr(v_UndoTriggerstring, ":" ,, 1,1)-1)
-	if (InStr(TriggerOpt, "*0") or !(InStr(TriggerOpt, "*"))) and (InStr(TriggerOpt, "O0") or !(InStr(TriggerOpt, "O")))
-	{
-		Send, {BackSpace}
+	global	;assume-global mode
+	local	TriggerOpt := "", PosColon1 := 0, PosColon2 := 0, HowManyBackSpaces := 0, ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey
+			,OrigTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, ":", false, 1, 2) + 1)
+	;*[One]
+	if ((ini_Undo = true) and v_TypedTriggerstring and (ThisHotkey != PriorHotkey))
+	{	
+		PosColon1 := InStr(v_TypedTriggerstring, ":", false, 1, 1) ;position of the first colon
+		PosColon2 := InStr(v_TypedTriggerstring, ":", false, 3, 1) ;position of the second colon
+		TriggerOpt := SubStr(v_TypedTriggerstring, PosColon1 + 1, PosColon2 - PosColon1 - 1)
+		if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O")))
+			Send, {BackSpace}
+		if (v_UndoHotstring)
+		{
+			HowManyBackSpaces := StrLenUnicode(v_UndoHotstring)
+			Send, % "{BackSpace " . HowManyBackSpaces . "}"
+			Loop, Parse, OrigTriggerstring
+					Switch A_LoopField
+					{
+						Case "^", "+", "!", "#", "{", "}":
+							SendRaw, % A_LoopField
+						Default:
+							Send, % A_LoopField
+					}
+		}
+		if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O"))) 
+			Send, % A_EndChar
+		ToolTip, % TransA["Undid the last hotstring"], % A_CaretX, % A_CaretY - 20
+		SetTimer, TurnOffTooltip, -5000, -1 ; Priority -1 to avoid conflict with other timers
+		v_TypedTriggerstring := ""
+		v_HotstringFlag := true
 	}
-	if (v_UndoHotstring == "")
-		Send, % "{BackSpace " . StrLen(v_TypedTriggerstring) . "}" . SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, 2) + 1)
 	else
-		Send, % "{BackSpace " . StrLen(v_UndoHotstring) . "}" . SubStr(v_UndoTriggerstring, InStr(v_UndoTriggerstring, ":", v_OptionCaseSensitive := false, StartingPos := 1, 2) + 1)
-	if (InStr(TriggerOpt, "*0") or !(InStr(TriggerOpt, "*")))  and (InStr(TriggerOpt, "O0") or !(InStr(TriggerOpt, "O")))
 	{
-		Send, %A_EndChar%
+		ToolTip,
+		If InStr(ThisHotkey, "^z")
+			SendInput, ^z
+		else if InStr(ThisHotkey, "!BackSpace")
+			SendInput, !{BackSpace}
 	}
-	SetTimer, TurnOffTooltip, -5000, -1 ; Priorytet -1 sprawia, że nie będzie on psuł działanie innego timera
-	v_TypedTriggerstring := ""
+	return
 }
-else
+
+StrLenUnicode(data) 
 {
-	ToolTip,
-	If InStr(A_ThisHotkey, "^z")
-		SendInput, ^z
-	else if InStr(A_ThisHotkey, "!BackSpace")
-		SendInput, !{BackSpace}
+	RegExReplace(data, "s).", "", i)
+	return i
 }
-return
+
+/*
+	if (ini_Undo == 1) and (v_TypedTriggerstring && (A_ThisHotkey != A_PriorHotkey))
+	{
+		ToolTip, % TransA["Undo the last hotstring"], % A_CaretX, % A_CaretY - 20
+		TriggerOpt := SubStr(v_UndoTriggerstring, InStr(v_UndoTriggerstring, ":" ,, 1,1)+1 ,InStr(v_UndoTriggerstring, ":" ,, 1,2)-InStr(v_UndoTriggerstring, ":" ,, 1,1)-1)
+		if (InStr(TriggerOpt, "*0") or !(InStr(TriggerOpt, "*"))) and (InStr(TriggerOpt, "O0") or !(InStr(TriggerOpt, "O")))
+		{
+			Send, {BackSpace}
+		}
+		if (v_UndoHotstring == "")
+			Send, % "{BackSpace " . StrLen(v_TypedTriggerstring) . "}" . SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, 2) + 1)
+		else
+			Send, % "{BackSpace " . StrLen(v_UndoHotstring) . "}" . SubStr(v_UndoTriggerstring, InStr(v_UndoTriggerstring, ":", v_OptionCaseSensitive := false, StartingPos := 1, 2) + 1)
+		if (InStr(TriggerOpt, "*0") or !(InStr(TriggerOpt, "*")))  and (InStr(TriggerOpt, "O0") or !(InStr(TriggerOpt, "O")))
+		{
+			Send, %A_EndChar%
+		}
+		SetTimer, TurnOffTooltip, -5000, -1 ; Priorytet -1 sprawia, że nie będzie on psuł działanie innego timera
+		v_TypedTriggerstring := ""
+	}
+	else
+	{
+		ToolTip,
+		If InStr(A_ThisHotkey, "^z")
+			SendInput, ^z
+		else if InStr(A_ThisHotkey, "!BackSpace")
+			SendInput, !{BackSpace}
+	}
+	return
+*/
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -782,11 +833,9 @@ return
 
 ~Alt::
 ;It's important to comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
-/*
-	~MButton::
-	~RButton::
-	~LButton::
-*/
+~MButton::
+~RButton::
+~LButton::
 ~LWin::
 ~RWin::
 ~Down::
@@ -891,9 +940,8 @@ F_HMenuCli()
 	if (Ovar = false)
 		Send, % A_EndChar
 	Sleep, %ini_Delay% ;Remember to sleep before restoring clipboard or it will fail
-	v_TypedTriggerstring := v_Temp1
-	v_UndoHotstring 	 := v_Temp1
 	Clipboard 		 := ClipboardBack
+	v_UndoHotstring 	 := v_Temp1
 	Hotstring("Reset")
 	Gui, HMenuCli: Destroy
 	return
@@ -911,7 +959,7 @@ return
 F_AddToAutostart()
 {
 	global	;assume-global mode
-	local v_Temp1 := true, Target := "", LinkFile := "", Args := "", Description := "", IconFile := ""
+	local v_Temp1 := true, Target := "", LinkFile_DM := "", LinkFile_SM := "", Args_DM := "", Args_SM := "", Description := "", IconFile := "", WorkingDir := ""
 	
 	Target 		:= A_ScriptFullPath
 	LinkFile_DM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_DM" . "." . "lnk"
@@ -3245,7 +3293,8 @@ Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
 Triggerstring tips 										= &Triggerstring tips
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
 Underscore _											= Underscore _
-Undo the last hotstring 									= &Undo the last hotstring
+Undo the last hotstring									= &Undo the last hotstring
+Undid the last hotstring 								= Undid the last hotstring
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
 ↓ Click here to select hotstring library ↓					= ↓ Click here to select hotstring library ↓
@@ -3468,17 +3517,17 @@ F_GuiHS4_CreateObject()
 ;GuiControl,	Hide,		% IdGroupBox1
 	
 	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText3b vv_TextSelectHotstringsOutFun, 			% TransA["Select hotstring output function"]
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText3b,						 			% TransA["Select hotstring output function"]
 	;GuiControl,	Hide,		% IdText3
-	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 		% c_FontType
 	
 	Gui, 	HS4: Add, 		DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
 	;GuiControl,	Hide,		% IdDDL1
 	
 	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText4b vv_TextEnterHotstring, 				% TransA["Enter hotstring"]
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText4b,					 				% TransA["Enter hotstring"]
 	;GuiControl,	Hide,		% IdText4
-	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 		% c_FontType
 	
 	Gui, 	HS4: Add, 		Edit, 		x0 y0 HwndIdEdit2b vv_EnterHotstring
 	;GuiControl,	Hide,		% IdEdit2
@@ -3504,7 +3553,7 @@ F_GuiHS4_CreateObject()
 	;GuiControl,	Hide,		% IdEdit9
 	
 	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText6b vv_TextSelectHotstringLibrary, 			% TransA["Select hotstring library"]
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText6b,							 			% TransA["Select hotstring library"]
 	;GuiControl,	Hide,		% IdText6
 	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
@@ -3604,7 +3653,7 @@ F_GuiMain_CreateObject()
 ;GuiControl,	Hide,		% IdGroupBox1
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText3 vv_TextSelectHotstringsOutFun, 				% TransA["Select hotstring output function"]
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText3,						 				% TransA["Select hotstring output function"]
 ;GuiControl,	Hide,		% IdText3
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
@@ -3612,7 +3661,7 @@ F_GuiMain_CreateObject()
 ;GuiControl,	Hide,		% IdDDL1
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText4 vv_TextEnterHotstring, 					% TransA["Enter hotstring"]
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText4,					 					% TransA["Enter hotstring"]
 ;GuiControl,	Hide,		% IdText4
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
@@ -3640,7 +3689,7 @@ F_GuiMain_CreateObject()
 ;GuiControl,	Hide,		% IdEdit9
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText6 vv_TextSelectHotstringLibrary, 				% TransA["Select hotstring library"]
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText6,						 				% TransA["Select hotstring library"]
 ;GuiControl,	Hide,		% IdText6
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
@@ -4626,23 +4675,23 @@ F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t
 
 F_AHKVariables(String)
 {
-	String := StrReplace(String, "A_YYYY", A_YYYY)
-	String := StrReplace(String, "A_MMMM", A_MMMM)
-	String := StrReplace(String, "A_MMM", A_MMM)
-	String := StrReplace(String, "A_MM", A_MM)
-	String := StrReplace(String, "A_DDDD", A_DDDD)
-	String := StrReplace(String, "A_DDD", A_DDD)
-	String := StrReplace(String, "A_DD", A_DD)
-	String := StrReplace(String, "A_WDay", A_WDay)
-	String := StrReplace(String, "A_YDay", A_YDay)
-	String := StrReplace(String, "A_YWeek", A_YWeek)
-	String := StrReplace(String, "A_Hour", A_Hour)
-	String := StrReplace(String, "A_Min", A_Min)
-	String := StrReplace(String, "A_Sec", A_Sec)
-	String := StrReplace(String, "A_MSec", A_MSec)
-	String := StrReplace(String, "A_Now", A_Now)
-	String := StrReplace(String, "A_NowUTC", A_NowUTC)
-	String := StrReplace(String, "A_TickCount", A_TickCount)
+	String := StrReplace(String, "A_YYYY", 		A_YYYY)
+	String := StrReplace(String, "A_MMMM", 		A_MMMM)
+	String := StrReplace(String, "A_MMM", 		A_MMM)
+	String := StrReplace(String, "A_MM", 		A_MM)
+	String := StrReplace(String, "A_DDDD", 		A_DDDD)
+	String := StrReplace(String, "A_DDD", 		A_DDD)
+	String := StrReplace(String, "A_DD", 		A_DD)
+	String := StrReplace(String, "A_WDay", 		A_WDay)
+	String := StrReplace(String, "A_YDay", 		A_YDay)
+	String := StrReplace(String, "A_YWeek", 	A_YWeek)
+	String := StrReplace(String, "A_Hour",		A_Hour)
+	String := StrReplace(String, "A_Min", 		A_Min)
+	String := StrReplace(String, "A_Sec", 		A_Sec)
+	String := StrReplace(String, "A_MSec", 		A_MSec)
+	String := StrReplace(String, "A_Now", 		A_Now)
+	String := StrReplace(String, "A_NowUTC", 	A_NowUTC)
+	String := StrReplace(String, "A_TickCount", 	A_TickCount)
 	return String
 }
 
@@ -4653,7 +4702,7 @@ F_ChangingBrackets(string)
 	occ := 1
 	Loop
 	{
-		PosStart := InStr(string,"{",0,1,occ)
+		PosStart := InStr(string, "{", 0, 1, occ)
 		if (PosStart)
 		{
 			PosEnd := InStr(string, "}", 0, 1, occ)
@@ -4678,44 +4727,55 @@ F_ChangingBrackets(string)
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_NormalWay(ReplacementString, Oflag)
+F_NormalWay(ReplacementString, Oflag)	;tu jestem
 {
-	static InputLocaleID := false
+	global	;assume-global mode
+	;static InputLocaleID := false
+	local	ThisHotkey := A_ThisHotkey
 	
+	;v_UndoTriggerstring := A_ThisHotkey 
 	v_InputString := ""
 	ToolTip,
-	v_HotstringFlag := 1
-	;*[One]
-	v_UndoTriggerstring := A_ThisHotkey
+	v_HotstringFlag := true
 	ReplacementString := F_AHKVariables(ReplacementString)
-	if (Oflag == 0)
+	if (Oflag = false)
 		Send, % ReplacementString . A_EndChar
 	else
-		Send, %ReplacementString%
-	v_UndoHotstring := % ReplacementString
+		Send, % ReplacementString
+	v_UndoHotstring := ReplacementString
 	v_UndoHotstring := F_ChangingBrackets(v_UndoHotstring)
-	SetFormat, Integer, H
-	if (!InputLocaleID)	;special case; future: to be investigated if it wasn't related to bug in one of the previous versions of AutoHotkey
-	{
-		InputLocaleID := DllCall("GetKeyboardLayout", "UInt", 0, "UInt")
-		Polish := Format("{:#x}", 0x415)
-		InputLocaleID := InputLocaleID / 0xFFFF
-		InputLocaleID := Format("{:#04x}", InputLocaleID)
-	}
-	if (InputLocaleID = "Polish")
-		Send, {LCtrl up}
 	
-	if (InStr(A_ThisHotkey, "*"))
-	{
-		if (InStr(A_ThisHotkey,"*0"))
-			v_TypedTriggerstring := % ReplacementString . A_Space
+	/*
+		SetFormat, Integer, H
+		if (!InputLocaleID)	;special case; future: to be investigated if it wasn't related to bug in one of the previous versions of AutoHotkey
+		{
+			InputLocaleID := DllCall("GetKeyboardLayout", "UInt", 0, "UInt")
+			Polish := Format("{:#x}", 0x415)
+			InputLocaleID := InputLocaleID / 0xFFFF
+			InputLocaleID := Format("{:#04x}", InputLocaleID)
+		}
+		if (InputLocaleID = "Polish")
+			Send, {LCtrl up}
+	*/
+	
+	;if (Instr(ThisHotkey, "*"))
+		v_TypedTriggerstring := ThisHotkey 
+	;else
+		;v_TypedTriggerstring := ThisHotkey . A_Space
+	
+	/*
+		if (InStr(vTemp1, "*"))
+		{
+			if (InStr(vTemp1,"*0"))
+				v_TypedTriggerstring := ReplacementString . A_Space
+			else
+				v_TypedTriggerstring := ReplacementString
+		}
 		else
-			v_TypedTriggerstring := ReplacementString
-	}
-	else
-		v_TypedTriggerstring := % ReplacementString . A_Space
+			v_TypedTriggerstring := ReplacementString . A_Space
+	*/
 	if (InStr(v_TypedTriggerstring, "{"))
-		v_TypedTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, "}")+1 , StrLen(v_TypedTriggerstring)-InStr(v_TypedTriggerstring, "}"))
+		v_TypedTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, "}") + 1 , StrLen(v_TypedTriggerstring) - InStr(v_TypedTriggerstring, "}"))
 	Hotstring("Reset")
 }
 
@@ -4724,13 +4784,12 @@ F_NormalWay(ReplacementString, Oflag)
 F_ViaClipboard(ReplacementString, Oflag)
 {
 	global	;assume-global mode
-	local oWord := ""
+	local oWord := "", ThisHotkey := A_ThisHotkey
 	
 	v_InputString := ""
 	ToolTip,
-	v_UndoTriggerstring := A_ThisHotkey
-	ReplacementString := F_AHKVariables(ReplacementString)
 	v_UndoHotstring := ReplacementString
+	ReplacementString := F_AHKVariables(ReplacementString)
 	ClipboardBackup := ClipboardAll
 	Clipboard := ReplacementString
 	ClipWait
@@ -4749,7 +4808,7 @@ F_ViaClipboard(ReplacementString, Oflag)
 	Sleep, %ini_Delay% ; this sleep is required surprisingly
 	Clipboard := ClipboardBackup
 	ClipboardBackup := ""
-	v_TypedTriggerstring := ReplacementString
+	v_TypedTriggerstring := ThisHotkey
 	Hotstring("Reset")
 	v_HotstringFlag := 1
 }
@@ -4760,10 +4819,10 @@ F_MenuCli(TextOptions, Oflag)
 	global	;assume-global mode
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
 	
-	v_UndoTriggerstring := A_ThisHotkey
-	if (ini_MenuSound)
+	v_TypedTriggerstring	:= A_ThisHotkey
+	if (ini_MenuSound)		;Second beep on purpose
 		SoundBeep, % ini_SFrequency, % ini_SDuration
-	v_MenuMax			 := 0
+	v_MenuMax			 	:= 0
 	;v_InputString 		 := ""
 	TextOptions 		 := F_AHKVariables(TextOptions)
 	Loop, Parse, TextOptions, ¦
@@ -4829,10 +4888,13 @@ F_MenuAHK(TextOptions, Oflag)
 {
 	global	;assume-global mode
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
-	
-	v_UndoTriggerstring := A_ThisHotkey
-	v_MenuMax			 := 0
-	TextOptions 		 := F_AHKVariables(TextOptions)
+
+	v_TypedTriggerstring	:= A_ThisHotkey
+	if (ini_MenuSound)		;Second beep on purpose
+		SoundBeep, % ini_SFrequency, % ini_SDuration
+
+	v_MenuMax				:= 0
+	TextOptions 			:= F_AHKVariables(TextOptions)
 	Loop, Parse, TextOptions, ¦
 		v_MenuMax := A_Index
 	ToolTip,
@@ -4967,7 +5029,6 @@ F_HMenuAHK()
 	Send, % v_Temp1 
 	if (Ovar = false)
 		Send, % A_EndChar
-	v_TypedTriggerstring := v_Temp1
 	v_UndoHotstring 	 := v_Temp1
 	Hotstring("Reset")
 	Gui, HMenuAHK: Destroy
