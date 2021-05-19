@@ -949,7 +949,7 @@ F_HMenuCli()
 
 Esc::
 	Gui, HMenuCli: Destroy
-	Send, % v_InputString
+	Send, % SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, ":", false, 1, 2) + 1) 
 	v_InputString := ""	;I'm not sure if this line is necessary anymore.
 return
 #If
@@ -5039,7 +5039,7 @@ F_HMenuAHK()
 
 Esc::
 	Gui, HMenuAHK: Destroy
-	Send, % v_InputString
+	Send, % SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, ":", false, 1, 2) + 1)
 	v_InputString := ""	;I'm not sure if this line is necessary anymore
 return
 #If
