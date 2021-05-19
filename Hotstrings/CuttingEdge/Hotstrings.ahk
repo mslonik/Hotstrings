@@ -1,4 +1,4 @@
-/* 
+﻿/* 
 	Author:      Jakub Masiak, Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings as in AutoHotkey (shortcuts), but editable with GUI and many more options.
@@ -719,7 +719,7 @@ F_Undo()
 	return
 }
 
-StrLenUnicode(data) 
+StrLenUnicode(data) ;https://www.autohotkey.com/boards/viewtopic.php?t=22036
 {
 	RegExReplace(data, "s).", "", i)
 	return i
@@ -4836,21 +4836,22 @@ F_MenuCli(TextOptions, Oflag)
 	Gui, HMenuCli: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuCli" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenuCli"
 	Loop, Parse, TextOptions, ¦
 		GuiControl,, % Id_LB_HMenuCli, % A_Index . ". " . A_LoopField . "|"
+	;*[One]
 	if (ini_MenuCaret)
 	{
-		CoordMode, Caret, Client ;CoordMode, Caret, Screen
+		CoordMode, Caret, Screen ;CoordMode, Caret, Screen
 		MenuX := A_CaretX + 20
 		MenuY := A_CaretY - 20
 	}
 	if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
 	{
-		CoordMode, Mouse, Client	;CoordMode, Mouse, Screen
+		CoordMode, Mouse, Screen	;CoordMode, Mouse, Screen
 		MouseGetPos, v_MouseX, v_MouseY
 		MenuX := v_MouseX + 20
 		MenuY := v_MouseY + 20
 	}
-	
 	Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate
+	
 	
 	GuiControl, Choose, % Id_LB_HMenuCli, 1
 	Ovar := Oflag
@@ -4908,13 +4909,13 @@ F_MenuAHK(TextOptions, Oflag)
 		GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . "|"
 	if (ini_MenuCaret)
 	{
-		CoordMode, Caret, Client ;CoordMode, Caret, Screen
+		CoordMode, Caret, Screen
 		MenuX := A_CaretX + 20
 		MenuY := A_CaretY - 20
 	}
 	if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
 	{
-		CoordMode, Mouse, Client	;CoordMode, Mouse, Screen
+		CoordMode, Mouse, Screen
 		MouseGetPos, v_MouseX, v_MouseY
 		MenuX := v_MouseX + 20
 		MenuY := v_MouseY + 20
