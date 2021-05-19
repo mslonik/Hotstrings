@@ -703,8 +703,8 @@ F_Undo()
 		}
 		if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O"))) 
 			Send, % A_EndChar
-		ToolTip, % TransA["Undid the last hotstring"], % A_CaretX, % A_CaretY - 20
-		SetTimer, TurnOffTooltip, -5000, -1 ; Priority -1 to avoid conflict with other timers
+		ToolTip, % TransA["Undid the last hotstring"], % A_CaretX, % A_CaretY - 20, 5
+		SetTimer, TurnOffTooltip, -3000, 200 ;Priority = 200 to avoid conflicts with other threads 
 		v_TypedTriggerstring := ""
 		v_HotstringFlag := true
 	}
@@ -4843,7 +4843,8 @@ F_MenuCli(TextOptions, Oflag)
 		MenuX := A_CaretX + 20
 		MenuY := A_CaretY - 20
 	}
-	if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
+	;if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
+	if (ini_MenuCursor)
 	{
 		CoordMode, Mouse, Screen	;CoordMode, Mouse, Screen
 		MouseGetPos, v_MouseX, v_MouseY
@@ -4913,7 +4914,8 @@ F_MenuAHK(TextOptions, Oflag)
 		MenuX := A_CaretX + 20
 		MenuY := A_CaretY - 20
 	}
-	if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
+	;if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
+	if (ini_MenuCursor) 
 	{
 		CoordMode, Mouse, Screen
 		MouseGetPos, v_MouseX, v_MouseY
@@ -5733,9 +5735,6 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 
 
 ; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
-TurnOffTooltip:
-	ToolTip ,
-return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
@@ -6236,4 +6235,8 @@ ExitApp, 2	;2 = by Tray
 L_TrayReload:	;new thread starts here
 F_WhichGui()
 F_Reload()
+return
+
+TurnOffTooltip:
+	ToolTip, ,, , 5
 return
