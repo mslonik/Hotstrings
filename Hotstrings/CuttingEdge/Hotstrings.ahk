@@ -53,6 +53,7 @@ global ini_TipsSortAlphabetically 	:= true
 global ini_TipsSortByLength 		:= true
 global ini_GuiReload			:= false
 global ini_Language 			:= "English.txt"
+global ini_TipsDelay			:= 3000		;[ms], default: 3000
 
 global ini_SFrequency			:= 400		;Future. The frequency of the sound. It should be a number between 37 and 32767. If omitted, the frequency will be 523.
 global ini_SDuration			:= 200		;Future. The duration of the sound, in milliseconds. If omitted, the duration will be 150.
@@ -101,7 +102,9 @@ F_LoadFontType()
 IniRead, ini_Undo, 						Config.ini, Configuration, UndoHotstring
 IniRead, ini_Delay, 					Config.ini, Configuration, Delay
 IniRead, ini_MenuSound,					Config.ini, Configuration, MenuSound
+F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
 IniRead, ini_Tips, 						Config.ini, Configuration, Tips
+IniRead, ini_TipsDelay,					Config.ini, Configuration, TipsDelay
 IniRead, ini_Cursor, 					Config.ini, Configuration, Cursor
 IniRead, ini_Caret, 					Config.ini, Configuration, Caret
 IniRead, ini_AmountOfCharacterTips, 		Config.ini, Configuration, TipsChars
@@ -110,7 +113,6 @@ IniRead, ini_MenuCaret, 					Config.ini, Configuration, MenuCaret
 IniRead, ini_TipsSortAlphabetically,		Config.ini, Configuration, TipsSortAlphatebically
 IniRead, ini_TipsSortByLength,			Config.ini, Configuration, TipsSortByLength
 
-F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
 F_ValidateIniLibSections() 
 
 ;If application wasn't run with "l" parameter (standing for "light / lightweight"), prepare tray menu.
@@ -124,13 +126,12 @@ Switch v_Param
 			AppIcon := "*"
 		}
 		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
-		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4),		F_GuiAbout
-		Menu, Tray, Default,	% SubStr(A_ScriptName, 1, -4)
+		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"], F_GuiAbout
+		Menu, Tray, Default,	% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"]
 		Menu, Tray, Add										;separator line
-		Menu, Tray, Add,		% TransA["Reload"],					L_TrayReload
 		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			L_TraySuspendHotkeys
-		Menu, Tray, Add,		% TransA["Pause Application"],		L_TrayPauseScript
-		Menu, Tray, Add,		% TransA["Exit Application"],			L_TrayExit		
+		Menu, Tray, Add,		% TransA["Pause application"],		L_TrayPauseScript
+		Menu  Tray, Add,		% TransA["Exit application"],			L_TrayExit		
 	Case "", "d":
 		Menu, Tray, NoStandard									; remove all the rest of standard tray menu
 		if (!FileExist(AppIcon))
@@ -139,16 +140,20 @@ Switch v_Param
 			AppIcon := "*"
 		}
 		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
+		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Default mode"], F_GuiAbout
+		Menu, Tray, Add										;separator line
 		Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 			L_GUIInit
 		Menu, Tray, Default, 	% TransA["Edit Hotstrings"]
 		Menu, Tray, Add										;separator line
 		Menu, Tray, Add,		% TransA["Application help"],			GuiAboutLink1
 		Menu, Tray, Add,		% TransA["Genuine hotstrings AutoHotkey documentation"], GuiAboutLink2
 		Menu, Tray, Add										;separator line
-		Menu, Tray, Add,		% TransA["Reload"],					L_TrayReload
+		Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],	L_TrayReload
+		Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],		L_TrayReload
+		Menu, Tray, Add,		% TransA["Reload"],					:SubmenuReload
 		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			L_TraySuspendHotkeys
-		Menu, Tray, Add,		% TransA["Pause Application"],		L_TrayPauseScript
-		Menu, Tray, Add,		% TransA["Exit Application"],			L_TrayExit
+		Menu, Tray, Add,		% TransA["Pause application"],		L_TrayPauseScript
+		Menu  Tray, Add,		% TransA["Exit application"],			L_TrayExit
 }
 
 F_GuiMain_CreateObject()
@@ -199,6 +204,10 @@ if (v_Param == "d") ;If the script is run with command line parameter "d" like d
 
 Menu, ConfTHB, 	Add, % TransA["Undo the last hotstring"],	L_Undo
 Menu, SubmenuTips, 	Add, % TransA["Enable/Disable"], 			Tips
+Menu, SubmenuTips, 	Add
+Menu, SubmenuTips,	Add, % TransA["Set delay"],				F_GuiSetTipsDelay
+Menu, SubmenuTips,	Add, % TransA["Set amount"],				F_GuiSetAmountTrigTip
+Menu, SubmenuTips, 	Add
 Menu, PositionMenu, Add, % TransA["Caret"], 					L_MenuCaretCursor
 Menu, PositionMenu, Add, % TransA["Cursor"], 				L_MenuCaretCursor
 Menu, SubmenuMenu, 	Add, % TransA["Choose menu position"],		:PositionMenu
@@ -476,7 +485,9 @@ Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],		:ExportSubm
 
 Menu, 	HSMenu, 		Add, % TransA["Libraries"], 					:LibrariesSubmenu
 Menu, 	HSMenu, 		Add, % TransA["Clipboard Delay (F7)"], 			F_GuiHSdelay
-Menu,	AppSubmenu,	Add, % TransA["Reload"],						F_Reload
+
+if (v_Param != "l")
+	Menu, 	AppSubmenu, 	Add,	% TransA["Reload"],						:SubmenuReload
 Menu,	AppSubmenu,	Add, % TransA["Suspend Hotkeys"],				L_TraySuspendHotkeys
 Menu,	AppSubmenu,	Add, % TransA["Pause"],						L_TrayPauseScript
 Menu,	AppSubmenu,	Add, % TransA["Exit"],						F_Exit
@@ -581,17 +592,29 @@ Loop,
 			}
 			if (ini_Caret)
 			{
-				;CoordMode, Caret, Screen
-				CoordMode, Caret, Client
-				ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
+				if (A_CaretX and A_CaretY)
+				{
+					CoordMode, Caret, Client
+					ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
+					if (ini_TipsDelay)
+						SetTimer, TurnOffTttt, % "-" . ini_TipsDelay ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+				}
+				else
+				{
+					CoordMode, Mouse, Client
+					MouseGetPos, v_MouseX, v_MouseY
+					ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
+					if (ini_TipsDelay)
+						SetTimer, TurnOffTttt, % "-" . ini_TipsDelay ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+				}
 			}
 			if (ini_Cursor)
 			{
-				;CoordMode, Mouse, Screen
-				;CoordMode, Mouse
 				CoordMode, Mouse, Client
 				MouseGetPos, v_MouseX, v_MouseY
 				ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
+				if (ini_TipsDelay)
+					SetTimer, TurnOffTttt, % "-" . ini_TipsDelay ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 			}
 		}
 		else
@@ -649,13 +672,20 @@ else
 		}
 		if (ini_Caret)
 		{
-				;CoordMode, Caret, Screen
-			CoordMode, Caret, Client
-			ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
+			if (A_CaretX and A_CaretY)
+			{
+				CoordMode, Caret, Client
+				ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
+			}
+			else
+			{
+				CoordMode, Mouse, Screen
+				MouseGetPos, v_MouseX, v_MouseY
+				ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20		
+			}
 		}
 		if (ini_Cursor)
 		{
-				;CoordMode, Mouse, Screen
 			CoordMode, Mouse, Client
 			MouseGetPos, v_MouseX, v_MouseY
 			ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
@@ -725,37 +755,6 @@ StrLenUnicode(data) ;https://www.autohotkey.com/boards/viewtopic.php?t=22036
 	return i
 }
 
-/*
-	if (ini_Undo == 1) and (v_TypedTriggerstring && (A_ThisHotkey != A_PriorHotkey))
-	{
-		ToolTip, % TransA["Undo the last hotstring"], % A_CaretX, % A_CaretY - 20
-		TriggerOpt := SubStr(v_UndoTriggerstring, InStr(v_UndoTriggerstring, ":" ,, 1,1)+1 ,InStr(v_UndoTriggerstring, ":" ,, 1,2)-InStr(v_UndoTriggerstring, ":" ,, 1,1)-1)
-		if (InStr(TriggerOpt, "*0") or !(InStr(TriggerOpt, "*"))) and (InStr(TriggerOpt, "O0") or !(InStr(TriggerOpt, "O")))
-		{
-			Send, {BackSpace}
-		}
-		if (v_UndoHotstring == "")
-			Send, % "{BackSpace " . StrLen(v_TypedTriggerstring) . "}" . SubStr(A_PriorHotkey, InStr(A_PriorHotkey, ":", v_OptionCaseSensitive := false, StartingPos := 1, 2) + 1)
-		else
-			Send, % "{BackSpace " . StrLen(v_UndoHotstring) . "}" . SubStr(v_UndoTriggerstring, InStr(v_UndoTriggerstring, ":", v_OptionCaseSensitive := false, StartingPos := 1, 2) + 1)
-		if (InStr(TriggerOpt, "*0") or !(InStr(TriggerOpt, "*")))  and (InStr(TriggerOpt, "O0") or !(InStr(TriggerOpt, "O")))
-		{
-			Send, %A_EndChar%
-		}
-		SetTimer, TurnOffTooltip, -5000, -1 ; Priorytet -1 sprawia, że nie będzie on psuł działanie innego timera
-		v_TypedTriggerstring := ""
-	}
-	else
-	{
-		ToolTip,
-		If InStr(A_ThisHotkey, "^z")
-			SendInput, ^z
-		else if InStr(A_ThisHotkey, "!BackSpace")
-			SendInput, !{BackSpace}
-	}
-	return
-*/
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #if WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows exist at the moment.
@@ -803,6 +802,7 @@ F4::	;new thread starts here
 return
 
 F5::	;new thread starts here
+	F_WhichGui()
 	F_Clear()
 return
 
@@ -876,19 +876,19 @@ F_HMenuCli()
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	
 	v_PressedKey := A_ThisHotkey
-	;OutputDebug, % "Beginning" . ":" . A_Space . A_ThisHotkey
+	;OutputDebug, % "Beginning" . ":" . A_Space . A_ThisHotkey . A_Space . "v_MenuMax" . ":" . A_Space . v_MenuMax
 	if (InStr(v_PressedKey, "Up"))
 	{
 		IsCursorPressed := true
 		IntCnt--
-		;OutputDebug, % "Up" . ":" . A_Space IntCnt
+		;OutputDebug, % "Up" . ":" . A_Space IntCnt . A_Space . IsCursorPressed
 		ControlSend, , {Up}, % "ahk_id" HMenuCliHwnd
 	}
 	if (InStr(v_PressedKey, "Down"))
 	{
 		IsCursorPressed := true
 		IntCnt++
-		;OutputDebug, % "Down" . ":" . A_Space IntCnt
+		;OutputDebug, % "Down" . ":" . A_Space IntCnt . A_Space . IsCursorPressed
 		ControlSend, , {Down}, % "ahk_id" HMenuCliHwnd
 	}
 	
@@ -935,7 +935,8 @@ F_HMenuCli()
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
 	
-	Clipboard := v_Temp1 
+	Clipboard := v_Temp1
+	;*[One]
 	Send, ^v ;paste the text
 	if (Ovar = false)
 		Send, % A_EndChar
@@ -956,6 +957,57 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_GuiSetAmountTrigTip() ;tu jestem
+{
+	return
+}
+
+F_GuiSetTipsDelay()
+{
+	global	;assume-global mode
+	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,NewWinPosX := 0, NewWinPosY := 0
+		,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+	;+Owner to prevent display of a taskbar button
+	Gui, TDel: New, -MinimizeBox -MaximizeBox +Owner +HwndTooltipDelay, % TransA["Set triggerstring tip delay"]
+	Gui, TDel: Margin,	% c_xmarg, % c_ymarg
+	Gui,	TDel: Color,	% c_WindowColor, % c_ControlColor
+	Gui,	TDel: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
+	Gui, TDel: Add, Slider, x0 y0 HwndIdTDel_S1 vini_TipsDelay gF_SetTipsDelay Range0-10000 ToolTipBottom Buddy1999, % ini_TipsDelay
+	;TransA["This option is valid"] := StrReplace(TransA["This option is valid"], "``n", "`n")
+	v_OutVarTemp := 10000
+	Gui, TDel: Add, Text, HwndIdTDel_T1, % TransA["Triggerstring tooltip delay in [ms]"] . ":" . A_Space . v_OutVarTemp ;. "`n`n" . TransA["This option is valid"]
+	GuiControlGet, v_OutVarTemp, Pos, % IdTDel_T1
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	v_wNext := v_OutVarTempW
+	GuiControl, Move, % IdTDel_S1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space "w" v_wNext
+	GuiControl, Move, % IdTDel_T1, % "x" v_xNext
+	
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, TDel: Show, Hide AutoSize 
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TooltipDelay
+	DetectHiddenWindows, Off
+	
+	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+	
+	GuiControl,, % IdTDel_T1, % TransA["Triggerstring tooltip delay in [ms]"] . ":" . A_Space . ini_TipsDelay
+	Gui, TDel: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SetTipsDelay()
+{
+	global	;assume-global mode
+	GuiControl,, % IdTDel_T1, % TransA["Triggerstring tooltip delay in [ms]"] . ":" . A_Space . ini_TipsDelay ;. "`n`n" . TransA["This option is valid"]
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_AddToAutostart()
 {
 	global	;assume-global mode
@@ -999,7 +1051,7 @@ F_AddToAutostart()
 	}
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_CreateMenu_SizeOfMargin()
 {
 	global	;assume-global mode
@@ -1013,7 +1065,7 @@ F_CreateMenu_SizeOfMargin()
 	Menu, SizeOfMX,	Check,	% c_xmarg
 	Menu, SizeOfMY,	Check,	% c_ymarg
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 F_SetHotstring()
 ;1. Read all inputs. 
@@ -1176,8 +1228,9 @@ F_SetHotstring()
 	{
 		if (A_LoopField)
 		{
-			if (InStr(A_LoopField, LString))
+			if (InStr(A_LoopField, LString, true))
 			{
+				;*[One]
 				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
 					, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in the file"] . A_Space . v_SelectHotstringLibrary . "." . "`n`n" 
 					. TransA["Do you want to proceed?"]
@@ -1261,7 +1314,8 @@ F_Clear()
 	GuiControl, HS3: Disable, % IdButton4
 	GuiControl, HS3:, % IdEdit10,  				;Sandbox
 	GuiControl, HS3: ChooseString, % IdDDL2, % TransA["↓ Click here to select hotstring library ↓"]
-	LV_Delete()
+	if (A_DefaultGui = "HS3")
+		LV_Delete()
 	
 	Gui,		  HS4: Font, % "c" . c_FontColor
 	GuiControl, HS4:, % IdEdit1b,  				;v_TriggerString
@@ -1790,7 +1844,7 @@ F_Checkbox()
 	return
 }
 
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiHSdelay()
 {
 	global	;assume-global mode
@@ -1805,9 +1859,10 @@ F_GuiHSdelay()
 	Gui,	HSDel: Color,	% c_WindowColor, % c_ControlColor
 	Gui,	HSDel: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
-	Gui, HSDel: Add, Slider, x0 y0 HwndIdHD_S1 vMySlider gmySlider Range100-1000 ToolTipBottom Buddy1999, % ini_Delay
+	Gui, HSDel: Add, Slider, x0 y0 HwndIdHD_S1 vini_Delay gF_HSdelay Range100-1000 ToolTipBottom Buddy1999, % ini_Delay
 	TransA["This option is valid"] := StrReplace(TransA["This option is valid"], "``n", "`n")
-	Gui, HSDel: Add, Text, HwndIdHD_T1 vDelayText, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_Delay . "`n`n" . TransA["This option is valid"]
+	;Gui, HSDel: Add, Text, HwndIdHD_T1 vDelayText, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_Delay . "`n`n" . TransA["This option is valid"]
+	Gui, HSDel: Add, Text, HwndIdHD_T1, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_Delay . "`n`n" . TransA["This option is valid"]
 	GuiControlGet, v_OutVarTemp, Pos, % IdHD_T1
 	v_xNext := c_xmarg
 	v_yNext := c_ymarg
@@ -1827,8 +1882,14 @@ F_GuiHSdelay()
 	Gui, HSDel: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"	
 	return
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HSdelay()
+{
+	global	;assume-global mode
+	GuiControl,, % IdHD_T1, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_Delay . "`n`n" . TransA["This option is valid"]
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_WhichGui()
 ;This version is more robust: it doesn't take into account just "last active window" (A parameter), but just checks if there are active windows.
 {
@@ -2451,6 +2512,8 @@ F_FontType()
 	{
 		F_SaveFontType()
 		F_SaveGUIPos("reset")
+		ini_GuiReload := true
+		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
 		Reload
 	}
 	IfMsgBox, No
@@ -2506,6 +2569,8 @@ F_SizeOfMargin()
 	{
 		F_SaveSizeOfMargin()
 		F_SaveGUIPos("reset")
+		ini_GuiReload := true
+		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
 		Reload
 	}
 	IfMsgBox, No
@@ -2558,6 +2623,8 @@ F_SizeOfFont()
 	{
 		F_SaveFontSize()
 		F_SaveGUIPos("reset")
+		ini_GuiReload := true
+		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
 		Reload
 	}
 	IfMsgBox, No
@@ -2588,19 +2655,19 @@ F_StyleOfGUI()
 	Switch A_ThisMenuItemPos
 	{
 		Case 1: ;Light (default)
-		c_FontColor				:= "Black"
-		c_FontColorHighlighted		:= "Blue"
-		c_WindowColor				:= "Default"
-		c_ControlColor 			:= "Default"
-		Menu, StyleGUIsubm, Check,   % TransA["Light (default)"]
-		Menu, StyleGUIsubm, UnCheck, % TransA["Dark"]
+			c_FontColor				:= "Black"
+			c_FontColorHighlighted		:= "Blue"
+			c_WindowColor				:= "Default"
+			c_ControlColor 			:= "Default"
+			Menu, StyleGUIsubm, Check,   % TransA["Light (default)"]
+			Menu, StyleGUIsubm, UnCheck, % TransA["Dark"]
 		Case 2: ;Dark
-		c_FontColor				:= "White"
-		c_FontColorHighlighted		:= "Navy"
-		c_WindowColor				:= "Gray"
-		c_ControlColor 			:= "Gray"
-		Menu, StyleGUIsubm, UnCheck, % TransA["Light (default)"]
-		Menu, StyleGUIsubm, Check,   % TransA["Dark"]
+			c_FontColor				:= "White"
+			c_FontColorHighlighted		:= "Teal"
+			c_WindowColor				:= "Black"
+			c_ControlColor 			:= "Gray"
+			Menu, StyleGUIsubm, UnCheck, % TransA["Light (default)"]
+			Menu, StyleGUIsubm, Check,   % TransA["Dark"]
 	}
 	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["In order to aplly new style it's necesssary to reload the application."]
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
@@ -2608,6 +2675,8 @@ F_StyleOfGUI()
 	IfMsgBox, Yes
 	{
 		F_SaveGUIstyle()
+		ini_GuiReload := true
+		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
 		Reload
 	}
 	IfMsgBox, No
@@ -2667,20 +2736,20 @@ F_CompileSubmenu()
 	if (FileExist(v_TempOutStr . "Ahk2Exe.exe"))
 	{
 		Menu, CompileSubmenu, Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
-		Menu, TraySubmenu,	  Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
+		;Menu, TraySubmenu,	  Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
 	}
 	if (FileExist(v_TempOutStr . "upx.exe"))
 	{
 		Menu, CompileSubmenu, Add, % TransA["Compressed executable (upx.exe)"], F_Compile
-		Menu, TraySubmenu,	  Add, % TransA["Compressed executable (upx.exe)"], F_Compile
+		;Menu, TraySubmenu,	  Add, % TransA["Compressed executable (upx.exe)"], F_Compile
 	}
 	if (FileExist(v_TempOutStr . "mpress.exe"))
 	{
 		Menu, CompileSubmenu, Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
-		Menu, TraySubmenu,	  Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
+		;Menu, TraySubmenu,	  Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
 	}
-	Menu,	Tray,			Add, % TransA["Compile"],				:TraySubmenu
 	Menu,	AppSubmenu,		Add,	% TransA["Compile"],				:CompileSubmenu
+	;Menu,	Tray,			Add, % TransA["Compile"],				:TraySubmenu
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2741,6 +2810,7 @@ F_Reload()
 	global ;assume-global mode
 	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["Are you sure you want to reload this application now?"]
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
+	;*[One]
 	IfMsgBox, Yes
 	{
 		if (WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd))
@@ -2748,10 +2818,38 @@ F_Reload()
 			F_SaveGUIPos()
 			ini_GuiReload := true
 			IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
-			Reload
+			Switch A_ThisMenuItem
+			{
+				Case % TransA["Reload in default mode"]:
+					Switch A_IsCompiled
+					{
+						Case % true:	Run, % A_ScriptFullPath 
+						Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
+					}
+				Case % TransA["Reload in silent mode"]:
+					Switch A_IsCompiled
+					{
+						Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
+						Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
+					}
+			}
 		}
 		else
-			Reload
+			Switch A_ThisMenuItem
+			{
+				Case % TransA["Reload in default mode"]:
+					Switch A_IsCompiled
+					{
+						Case % true:	Run, % A_ScriptFullPath 
+						Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
+					}
+				Case % TransA["Reload in silent mode"]:
+					Switch A_IsCompiled
+					{
+						Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
+						Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
+					}
+			}
 	}
 	IfMsgBox, No
 		return
@@ -2870,6 +2968,7 @@ EndingChar_Enter=1
 EndingChar_Tab=1
 EndingChar_Underscore=0
 Tips=1
+TipsDelay=0
 Cursor=0
 Caret=1
 TipsChars=1
@@ -3152,7 +3251,7 @@ Exclamation Mark ! 										= Exclamation Mark !
 exists in the file										= exists in the file
 exists in a file and will be now replaced.					= exists in a file and will be now replaced.
 Exit													= Exit
-Exit	Application										= Exit Application
+Exit application										= Exit application
 Export from .csv to .ahk 								= &Export from .csv to .ahk
 Export to .ahk with static definitions of hotstrings			= Export to .ahk with static definitions of hotstrings
 Export to .ahk with dynamic definitions of hotstrings			= Export to .ahk with dynamic definitions of hotstrings
@@ -3223,12 +3322,14 @@ question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
 Pause												= Pause
-Pause Application										= Pause Application
+Pause application										= Pause application
 Phrase to search for:									= Phrase to search for:
 pixels												= pixels
 Position of main window is saved in Config.ini.				= Position of main window is saved in Config.ini.	
 Public libraries										= Public libraries
 Reload												= Reload
+Reload in default mode									= Reload in default mode
+Reload in silent mode									= Reload in silent mode
 Remove Config.ini										= Remove Config.ini
 Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
 Sandbox (F6)											= Sandbox (F6)
@@ -3245,8 +3346,11 @@ Select hotstring output function 							= Select hotstring output function
 Select the target library: 								= Select the target library:
 Select trigger option(s) 								= Select trigger option(s)
 Semicolon ; 											= Semicolon ;
+Set amount											= Set amount
 Set Clipboard Delay										= Set Clipboard Delay
-Set hotstring (F9) 										= Set hotstring (F9)
+Set delay												= Set delay
+Set triggerstring tip delay								= Set triggerstring tip delay
+Add hotstring (F9) 										= Add hotstring (F9)
 Show full GUI (F4)										= Show full GUI (F4)
 Show Sandbox (F6)										= Show Sandbox (F6)
 Silent mode											= Silent mode
@@ -3292,6 +3396,7 @@ Total:												= Total:
 Triggerstring 											= Triggerstring
 Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
 Triggerstring tips 										= &Triggerstring tips
+Triggerstring tooltip delay in [ms]						= Triggerstring tooltip delay in [ms]
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
 Underscore _											= Underscore _
 Undo the last hotstring									= &Undo the last hotstring
@@ -3564,7 +3669,7 @@ F_GuiHS4_CreateObject()
 	;GuiControl,	Hide,		% IdDDL2
 	
 	;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
-	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton2b gF_SetHotstring,						% TransA["Set hotstring (F9)"]
+	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton2b gF_SetHotstring,						% TransA["Add hotstring (F9)"]
 	;GuiControl,	HideSet% IdButton2
 	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton3b gF_Clear,							% TransA["Clear (F5)"]
 	;GuiControl,	Hide,		% IdButton3
@@ -3700,7 +3805,7 @@ F_GuiMain_CreateObject()
 ;GuiControl,	Hide,		% IdDDL2
 	
 ;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
-	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton2 gF_SetHotstring,							% TransA["Set hotstring (F9)"]
+	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton2 gF_SetHotstring,							% TransA["Add hotstring (F9)"]
 ;GuiControl,	HideSet% IdButton2
 	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton3 gF_Clear,									% TransA["Clear (F5)"]
 ;GuiControl,	Hide,		% IdButton3
@@ -4210,10 +4315,12 @@ F_GuiMain_DetermineConstraints()
 	GuiControl, Move, % IdText6, % "x" v_xNext "y" v_yNext
 	GuiControlGet, v_OutVarTemp1, Pos, % IdText6
 	GuiControlGet, v_OutVarTemp2, Pos, % IdButton1
-	v_OutVarTemp := LeftColumnW - (v_OutVarTemp1W + v_OutVarTemp2W + 2 * c_xmarg)
+	;v_OutVarTemp := LeftColumnW - (v_OutVarTemp1W + v_OutVarTemp2W + 2 * c_xmarg)
+	v_OutVarTemp := LeftColumnW - (v_OutVarTemp1W + v_OutVarTemp2W)
 	v_xNext := v_OutVarTemp1W + v_OutVarTemp
-	v_wNext := v_OutVarTemp2W + 2 * c_xmarg
-	GuiControl, Move, % IdButton1, % "x" v_xNext "y" v_yNext "w" v_wNext
+	;v_wNext := v_OutVarTemp2W + 2 * c_xmarg
+	v_wNext := v_OutVarTemp2W
+	GuiControl, Move, % IdButton1, % "x" v_xNext "y" v_yNext "w" v_wNext ;Add library button
 	v_yNext += HofButton
 	v_xNext := c_xmarg
 	v_wNext := LeftColumnW - v_xNext
@@ -4728,13 +4835,11 @@ F_ChangingBrackets(string)
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_NormalWay(ReplacementString, Oflag)	;tu jestem
+F_NormalWay(ReplacementString, Oflag)	
 {
 	global	;assume-global mode
-	;static InputLocaleID := false
 	local	ThisHotkey := A_ThisHotkey
 	
-	;v_UndoTriggerstring := A_ThisHotkey 
 	v_InputString := ""
 	ToolTip,
 	v_HotstringFlag := true
@@ -4745,36 +4850,9 @@ F_NormalWay(ReplacementString, Oflag)	;tu jestem
 		Send, % ReplacementString
 	v_UndoHotstring := ReplacementString
 	v_UndoHotstring := F_ChangingBrackets(v_UndoHotstring)
-	
-	/*
-		SetFormat, Integer, H
-		if (!InputLocaleID)	;special case; future: to be investigated if it wasn't related to bug in one of the previous versions of AutoHotkey
-		{
-			InputLocaleID := DllCall("GetKeyboardLayout", "UInt", 0, "UInt")
-			Polish := Format("{:#x}", 0x415)
-			InputLocaleID := InputLocaleID / 0xFFFF
-			InputLocaleID := Format("{:#04x}", InputLocaleID)
-		}
-		if (InputLocaleID = "Polish")
-			Send, {LCtrl up}
-	*/
-	
-	;if (Instr(ThisHotkey, "*"))
-		v_TypedTriggerstring := ThisHotkey 
-	;else
-		;v_TypedTriggerstring := ThisHotkey . A_Space
-	
-	/*
-		if (InStr(vTemp1, "*"))
-		{
-			if (InStr(vTemp1,"*0"))
-				v_TypedTriggerstring := ReplacementString . A_Space
-			else
-				v_TypedTriggerstring := ReplacementString
-		}
-		else
-			v_TypedTriggerstring := ReplacementString . A_Space
-	*/
+
+	v_TypedTriggerstring := ThisHotkey 
+
 	if (InStr(v_TypedTriggerstring, "{"))
 		v_TypedTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, "}") + 1 , StrLen(v_TypedTriggerstring) - InStr(v_TypedTriggerstring, "}"))
 	Hotstring("Reset")
@@ -4802,6 +4880,7 @@ F_ViaClipboard(ReplacementString, Oflag)
 	}
 	else
 	{
+		;*[One]
 		Send, ^v
 	}
 	if (Oflag == 0)
@@ -4836,14 +4915,23 @@ F_MenuCli(TextOptions, Oflag)
 	Gui, HMenuCli: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuCli" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenuCli"
 	Loop, Parse, TextOptions, ¦
 		GuiControl,, % Id_LB_HMenuCli, % A_Index . ". " . A_LoopField . "|"
-	;*[One]
+	
 	if (ini_MenuCaret)
 	{
 		CoordMode, Caret, Screen ;CoordMode, Caret, Screen
-		MenuX := A_CaretX + 20
-		MenuY := A_CaretY - 20
+		if (A_CaretX and A_CaretY)
+		{
+			MenuX := A_CaretX + 20
+			MenuY := A_CaretY - 20
+		}
+		else
+		{
+			CoordMode, Mouse, Screen	;CoordMode, Mouse, Screen
+			MouseGetPos, v_MouseX, v_MouseY
+			MenuX := v_MouseX + 20
+			MenuY := v_MouseY + 20
+		}
 	}
-	;if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
 	if (ini_MenuCursor)
 	{
 		CoordMode, Mouse, Screen	;CoordMode, Mouse, Screen
@@ -4852,7 +4940,6 @@ F_MenuCli(TextOptions, Oflag)
 		MenuY := v_MouseY + 20
 	}
 	Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate
-	
 	
 	GuiControl, Choose, % Id_LB_HMenuCli, 1
 	Ovar := Oflag
@@ -4863,10 +4950,10 @@ F_MenuCli(TextOptions, Oflag)
 F_MouseMenuCli() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
-	local	OutputVarTemp := "",	MouseCtl := 0
+	local	OutputVarTemp := "",	MouseCtl := 0,		ThisHotkey := A_ThisHotkey
 	
 	MouseGetPos, , , , MouseCtl, 2
-	if ((A_GuiEvent = "Normal") and (MouseCtl = Id_LB_HMenuCli)) ;only ordinary mouse left click
+	if ((A_GuiEvent = "Normal") and (MouseCtl = Id_LB_HMenuCli) and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down"))) ;only ordinary mouse left click
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuCli 
 		v_HotstringFlag := true
@@ -4934,10 +5021,10 @@ F_MenuAHK(TextOptions, Oflag)
 F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
-	local	OutputVarTemp := "",	MouseCtl := 0
+	local	OutputVarTemp := "",	MouseCtl := 0,		ThisHotkey := A_ThisHotkey
 	
 	MouseGetPos, , , , MouseCtl, 2
-	if ((A_GuiEvent = "Normal") and (MouseCtl = Id_LB_HMenuAHK)) ;only ordinary mouse left click
+	if ((A_GuiEvent = "Normal") and (MouseCtl = Id_LB_HMenuAHK) and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down"))) ;only ordinary mouse left click
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuAHK 
 		v_HotstringFlag := true
@@ -5834,23 +5921,16 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-MySlider:
-ini_Delay := MySlider
-GuiControl,, DelayText, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_Delay . "`n`n" . TransA["This option is valid"]
-IniWrite, %ini_Delay%, Config.ini, Configuration, Delay
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 GuiAboutLink1:
-Run, https://github.com/mslonik/Hotstrings
+	Run, https://github.com/mslonik/Hotstrings
 return
 
 GuiAboutLink2:
-Run, https://www.autohotkey.com/docs/Hotstrings.htm
+	Run, https://www.autohotkey.com/docs/Hotstrings.htm
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 L_PublicLibraries:	
-Run, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings/Libraries
+	Run, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings/Libraries
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ~F1::
@@ -5896,7 +5976,8 @@ return
 ~F7::
 HSDelGuiEscape:
 HSDelGuiClose:
-Gui, HSDel:Destroy
+	IniWrite, %ini_Delay%, Config.ini, Configuration, Delay
+	Gui, HSDel: Destroy
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6226,17 +6307,28 @@ L_TrayPauseScript:
 	{
 		Menu, Tray, 		UnCheck, 	% TransA["Pause Application"]
 		Menu, AppSubmenu,	UnCheck, 	% TransA["Pause Application"]
-	}
+}
 return
 
-L_TrayExit:
-ExitApp, 2	;2 = by Tray
 
 L_TrayReload:	;new thread starts here
-F_WhichGui()
-F_Reload()
+	F_WhichGui()
+	F_Reload()
 return
 
 TurnOffTooltip:
 	ToolTip, ,, , 5
+return
+
+TurnOffTttt:
+	ToolTip
+return
+
+L_TrayExit:
+	ExitApp, 2	;2 = by Tray
+	
+TDelGuiClose:
+TDelGuiEscape:
+	IniWrite, % ini_TipsDelay, Config.ini, Configuration, TipsDelay
+	Gui, TDel: Destroy
 return
