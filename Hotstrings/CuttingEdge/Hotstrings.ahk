@@ -3263,7 +3263,7 @@ F_LoadCreateTranslationTxt(decision*)
 (Join`n `
 ; This file contains definitions of text strings used by Hotstrings application. The left column (preceding equal sign) contains definitions of text strings as defined in source code. 
 ; The right column contains text strings which are replaced instead of left column definitions. Exchange text strings in right columnt with localized translations of text strings. 
-; You don't have to remove lines starting with semicolon: ";". Those lines won't be read by Hotstrings application.
+; You don't have to remove lines starting with semicolon. Those lines won't be read by Hotstrings application.
 )"
 	
 	TransConst .= "
@@ -3517,7 +3517,7 @@ F_TooltipTimeoutSlider									= You may slide the control by the following mean
 		;*[One]
 		Loop, Read, %A_ScriptDir%\Languages\%ini_Language%
 		{
-			if !(InStr((LTrim(A_LoopReadLine)), ";") = 1)
+			if !(InStr((LTrim(A_LoopReadLine)), ";") = 1) 
 			{
 				tick := false
 				Loop, Parse, A_LoopReadLine, =, %A_Space%%A_Tab%
