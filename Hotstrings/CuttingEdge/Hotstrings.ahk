@@ -1,4 +1,4 @@
-/* 
+﻿/* 
 	Author:      Jakub Masiak, Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings as in AutoHotkey (shortcuts), but editable with GUI and many more options.
@@ -12,6 +12,7 @@
 #SingleInstance force 			; Only one instance of this script may run at a time!
 #NoEnv  						; Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn  						; Enable warnings to assist with detecting common errors.
+#LTrim						; Omits spaces and tabs at the beginning of each line. This is primarily used to allow the continuation section to be indented. Also, this option may be turned on for multiple continuation sections by specifying #LTrim on a line by itself. #LTrim is positional: it affects all continuation sections physically beneath it.
 SendMode Input  				; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
 FileEncoding, UTF-16			; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN
@@ -203,10 +204,7 @@ if (v_Param == "d") ;If the script is run with command line parameter "d" like d
 */
 
 Menu, ConfTHB, 	Add, % TransA["Undo the last hotstring"],	L_Undo
-Menu, SubmenuTips, 	Add, % TransA["Enable/Disable"], 			Tips
-Menu, SubmenuTips, 	Add
-Menu, SubmenuTips,	Add, % TransA["Set delay"],				F_GuiSetTipsDelay
-Menu, SubmenuTips,	Add, % TransA["Set amount"],				F_GuiSetAmountTrigTip
+Menu, SubmenuTips, 	Add, % TransA["Enable/Disable"], 			L_Tips
 Menu, SubmenuTips, 	Add
 Menu, PositionMenu, Add, % TransA["Caret"], 					L_MenuCaretCursor
 Menu, PositionMenu, Add, % TransA["Cursor"], 				L_MenuCaretCursor
@@ -227,7 +225,7 @@ else
 	Menu, PositionMenu, UnCheck, % TransA["Caret"]
 Menu, ConfTHB, 	Add, % TransA["Triggerstring tips"], 	:SubmenuTips
 Menu, Submenu3, 	Add, % TransA["Caret"],		L_CaretCursor
-Menu, Submenu3, 	Add, % TransA["Cursor"],			L_CaretCursor
+Menu, Submenu3, 	Add, % TransA["Cursor"],		L_CaretCursor
 if (ini_Cursor)
 	Menu, Submenu3, Check, % TransA["Cursor"]
 else
@@ -236,33 +234,34 @@ if (ini_Caret)
 	Menu, Submenu3, Check, % TransA["Caret"]
 else
 	Menu, Submenu3, UnCheck, % TransA["Caret"]
-Menu, SubmenuTips, 	Add, % TransA["Choose tips location"], 	:Submenu3
-If !(ini_Tips)
-{
-	Menu, SubmenuTips, Disable, % TransA["Choose tips location"]
-}
+
 Menu, Submenu4, 	Add, 1, 					L_AmountOfCharacterTips1
 Menu, Submenu4, 	Add, 2, 					L_AmountOfCharacterTips2
 Menu, Submenu4, 	Add, 3, 					L_AmountOfCharacterTips3
 Menu, Submenu4, 	Add, 4, 					L_AmountOfCharacterTips4
 Menu, Submenu4, 	Add, 5, 					L_AmountOfCharacterTips5
+
+Menu, SubmenuTips, Add, % TransA["Set triggerstring tooltip timeout"],F_GuiSetTooltipTimeout
+Menu, SubmenuTips, Add, % TransA["Set amount"],					F_GuiSetAmountTrigTip
+Menu, SubmenuTips, Add
+Menu, SubmenuTips, Add, % TransA["Choose tips location"], 			:Submenu3
+Menu, SubmenuTips, Add, % TransA["Number of characters for tips"],	:Submenu4
+Menu, SubmenuTips, Add
+Menu, SubmenuTips, Add, % TransA["Sort tips alphabetically"], 		L_SortTipsAlphabetically
+Menu, SubmenuTips, Add, % TransA["Sort tips by length"], 			L_SortTipsByLength
+
+F_ToggleMenu_iniTips(ini_Tips)
+
 Menu, Submenu4, 	Check, 					% ini_AmountOfCharacterTips
 Loop, 5
 {
 	if !(A_Index == ini_AmountOfCharacterTips)
 		Menu, Submenu4, UnCheck, %A_Index%
 }
-Menu, SubmenuTips, 	Add, % TransA["Number of characters for tips"], :Submenu4
-If !(ini_Tips)
-{
-	Menu, SubmenuTips, Disable, % TransA["Number of characters for tips"]
-}
-Menu, SubmenuTips, Add, % TransA["Sort tips alphabetically"], L_SortTipsAlphabetically
 if (ini_TipsSortAlphabetically)
 	Menu, SubmenuTips, Check, % TransA["Sort tips alphabetically"]
 else
 	Menu, SubmenuTips, UnCheck, % TransA["Sort tips alphabetically"]
-Menu, SubmenuTips, Add, % TransA["Sort tips by length"], L_SortTipsByLength
 if (ini_TipsSortByLength)
 	Menu, SubmenuTips, Check, % TransA["Sort tips by length"]
 else
@@ -957,12 +956,37 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_ToggleMenu_iniTips(ini_Tips)
+{
+	global	;assume-global mode
+	
+	Switch ini_Tips
+	{
+		Case % true:
+			Menu, SubmenuTips, Enable, 	% TransA["Set triggerstring tooltip timeout"]
+			Menu, SubmenuTips, Enable, 	% TransA["Set amount"]
+			Menu, SubmenuTips, Enable, 	% TransA["Choose tips location"]
+			Menu, SubmenuTips, Enable, 	% TransA["Number of characters for tips"]
+			Menu, SubmenuTips, Enable, 	% TransA["Sort tips alphabetically"]
+			Menu, SubmenuTips, Enable, 	% TransA["Sort tips by length"]
+		Case % false:
+			Menu, SubmenuTips, Disable, 	% TransA["Set triggerstring tooltip timeout"]
+			Menu, SubmenuTips, Disable, 	% TransA["Set amount"]
+			Menu, SubmenuTips, Disable, 	% TransA["Choose tips location"]
+			Menu, SubmenuTips, Disable, 	% TransA["Number of characters for tips"]
+			Menu, SubmenuTips, Disable, 	% TransA["Sort tips alphabetically"]
+			Menu, SubmenuTips, Disable, 	% TransA["Sort tips by length"]
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 F_GuiSetAmountTrigTip() ;tu jestem
 {
 	return
 }
-
-F_GuiSetTipsDelay()
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiSetTooltipTimeout() ;tu jestem
 {
 	global	;assume-global mode
 	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
@@ -970,41 +994,104 @@ F_GuiSetTipsDelay()
 		,NewWinPosX := 0, NewWinPosY := 0
 		,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
 		,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
-	;+Owner to prevent display of a taskbar button
-	Gui, TDel: New, -MinimizeBox -MaximizeBox +Owner +HwndTooltipDelay, % TransA["Set triggerstring tip delay"]
-	Gui, TDel: Margin,	% c_xmarg, % c_ymarg
-	Gui,	TDel: Color,	% c_WindowColor, % c_ControlColor
-	Gui,	TDel: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+		,vRadioCheck := true
 	
-	Gui, TDel: Add, Slider, x0 y0 HwndIdTDel_S1 vini_TipsDelay gF_SetTipsDelay Range0-10000 ToolTipBottom Buddy1999, % ini_TipsDelay
-	;TransA["This option is valid"] := StrReplace(TransA["This option is valid"], "``n", "`n")
+	;+Owner to prevent display of a taskbar button
+	Gui, STD: New, -MinimizeBox -MaximizeBox +Owner +HwndTooltipTimeout, % TransA["Set triggerstring tooltip timeout"]
+	Gui, STD: Margin,	% c_xmarg, % c_ymarg
+	Gui,	STD: Color,	% c_WindowColor, % c_ControlColor
+	Gui,	STD: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
+	Gui, STD: Add, Text, HwndIdSTD_T1, % TransA["When timeout is set, triggerstring tooltips will dissapear after time reaches it."]
+	Gui, STD: Add, Text, HwndIdSTD_T2, % TransA["Finite timeout?"]
+	
+	if (ini_TipsDelay = 0)
+		vRadioCheck 		:= false
+	if (ini_TipsDelay > 0)
+		vRadioCheck 		:= true
+	
+	Gui, STD: Add, Radio, HwndIdSTD_R1 vFiniteTttimeout gF_STDRadio Checked%vRadioCheck% Group, % TransA["Yes"]
+	vRadioCheck := !vRadioCheck
+	Gui, STD: Add, Radio, HwndIdSTD_R2 gF_STDRadio Checked%vRadioCheck%, % TransA["No"]
+	Gui, STD: Add, Slider, x0 y0 HwndIdSTD_S1 vini_TipsDelay gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_TipsDelay, % ini_TipsDelay
+	Gui, STD: Font, % "cBlue underline" . A_Space . "s" . c_FontSize + 2
+	Gui, STD: Add, Text, HwndIdSTD_T4 gF_TooltipTimeoutSlider, ⓘ
+	Gui,	STD: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	v_OutVarTemp := 10000
-	Gui, TDel: Add, Text, HwndIdTDel_T1, % TransA["Triggerstring tooltip delay in [ms]"] . ":" . A_Space . v_OutVarTemp ;. "`n`n" . TransA["This option is valid"]
-	GuiControlGet, v_OutVarTemp, Pos, % IdTDel_T1
+	Gui, STD: Add, Text, HwndIdSTD_T3, % TransA["Triggerstring tooltip timeout in [ms]"] . ":" . A_Space . v_OutVarTemp 
+	
 	v_xNext := c_xmarg
 	v_yNext := c_ymarg
+	GuiControl, Move, % IdSTD_T1, % "x" . v_xNext . A_Space . "y" . v_yNext
+	v_yNext += HofText
+	GuiControl, Move, % IdSTD_T2, % "x" . v_xNext . A_Space . "y" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdSTD_T2
+	v_xNext += v_OutVarTempW + c_xmarg
+	GuiControl, Move, % IdSTD_R1, % "x" . v_xNext . A_Space . "y" . v_yNext 
+	GuiControlGet, v_OutVarTemp, Pos, % IdSTD_R1
+	v_xNext += v_OutVarTempW + c_xmarg
+	GuiControl, Move, % IdSTD_R2, % "x" . v_xNext . A_Space . "y" . v_yNext 
+	GuiControlGet, v_OutVarTemp, Pos, % IdSTD_T1
+	v_xNext := c_xmarg
+	v_yNext += HofText
 	v_wNext := v_OutVarTempW
-	GuiControl, Move, % IdTDel_S1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space "w" v_wNext
-	GuiControl, Move, % IdTDel_T1, % "x" v_xNext
+	GuiControl, Move, % IdSTD_S1, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
+	
+	GuiControlGet, v_OutVarTemp, Pos, % IdSTD_S1
+	v_xNext := v_OutVarTempX + v_OutVarTempW
+	GuiControl, Move, % IdSTD_T4, % "x" . v_xNext . A_Space . "y" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext := v_OutVarTempY + v_OutVarTempH
+	GuiControl, Move, % IdSTD_T3, % "x" v_xNext . A_Space . "y" v_yNext
+	GuiControl,, % IdSTD_T3, % TransA["Triggerstring tooltip timeout in [ms]"] . ":" . A_Space . ini_TipsDelay
 	
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-	Gui, TDel: Show, Hide AutoSize 
+	Gui, STD: Show, Hide AutoSize 
 	DetectHiddenWindows, On
-	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TooltipDelay
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TooltipTimeout
 	DetectHiddenWindows, Off
 	
 	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
 	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
 	
-	GuiControl,, % IdTDel_T1, % TransA["Triggerstring tooltip delay in [ms]"] . ":" . A_Space . ini_TipsDelay
-	Gui, TDel: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"	
+	Gui, STD: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"	
+	F_STDRadio()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SetTipsDelay()
+F_TooltipTimeoutSlider()
 {
 	global	;assume-global mode
-	GuiControl,, % IdTDel_T1, % TransA["Triggerstring tooltip delay in [ms]"] . ":" . A_Space . ini_TipsDelay ;. "`n`n" . TransA["This option is valid"]
+	TransA["F_TooltipTimeoutSlider"] := StrReplace(TransA["F_TooltipTimeoutSlider"], "``n", "`n")
+	ToolTip, % TransA["F_TooltipTimeoutSlider"]
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_STDRadio()
+{
+	global	;assume-global mode
+	;*[One]
+	Gui, STD: Submit, NoHide
+	Switch FiniteTttimeout
+	{
+		Case 1: 
+			GuiControl, Enable, % IdSTD_S1
+			ini_TipsDelay := 1000 
+			GuiControl,, % IdSTD_T3, % TransA["Triggerstring tooltip timeout in [ms]"] . ":" . A_Space . ini_TipsDelay
+ 			GuiControl,, % IdSTD_S1, % ini_TipsDelay
+		Case 2: 
+			GuiControl, Disable, % IdSTD_S1
+			ini_TipsDelay := 0 
+			GuiControl,, % IdSTD_T3, % TransA["Triggerstring tooltip timeout in [ms]"] . ":" . A_Space . ini_TipsDelay 
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SetTooltipTimeout()
+{
+	global	;assume-global mode
+	Gui, STD: Submit, NoHide
+	GuiControl,, % IdSTD_T3, % TransA["Triggerstring tooltip timeout in [ms]"] . ":" . A_Space . ini_TipsDelay 
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3171,8 +3258,15 @@ F_LoadCreateTranslationTxt(decision*)
 	global ;assume-global mode
 	local TransConst := "" ; variable which is used as default content of Languages/English.ini. Join lines with `n separator and escape all ` occurrences. Thanks to that string lines where 'n is present 'aren't separated.
 	
-;Warning. If right side contains `n chars it's necessary to replace them with StrReplace.
-	TransConst := "			
+;Warning. If right side contains `n chars it's necessary to replace them with StrReplace, e.g. TransA["Enables Convenient Definition"] := StrReplace(TransA["Enables Convenient Definition"], "``n", "`n")
+	TransConst := "
+(Join`n `
+; This file contains definitions of text strings used by Hotstrings application. The left column (preceding equal sign) contains definitions of text strings as defined in source code. 
+; The right column contains text strings which are replaced instead of left column definitions. Exchange text strings in right columnt with localized translations of text strings. 
+; You don't have to remove lines starting with semicolon: ";". Those lines won't be read by Hotstrings application.
+)"
+	
+	TransConst .= "
 (Join`n `			
 About/Help (F1) 										= &About/Help (F1)
 Add comment (optional) 									= Add comment (optional)
@@ -3261,7 +3355,8 @@ F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries = F3 o
 file! 												= file!
 file in Languages subfolder!								= file in Languages subfolder!
 file is now created in the following subfolder:				= file is now created in the following subfolder:
-folder is now created							= folder is now created
+Finite timeout?										= Finite timeout?
+folder is now created									= folder is now created
 Font type												= Font type
 Genuine hotstrings AutoHotkey documentation 					= Genuine hotstrings AutoHotkey documentation
 Graphical User Interface									= Graphical User Interface
@@ -3308,6 +3403,7 @@ Loading imported library. Please wait...					= Loading imported library. Please 
 Loaded												= Loaded
 Minus - 												= Minus -
 Move (F8)												= Move (F8)
+No													= No
 No Backspace (B0) 										= No Backspace (B0)
 No End Char (O) 										= No End Char (O)
 No libraries have been found!								= No libraries have been found!
@@ -3349,7 +3445,7 @@ Semicolon ; 											= Semicolon ;
 Set amount											= Set amount
 Set Clipboard Delay										= Set Clipboard Delay
 Set delay												= Set delay
-Set triggerstring tip delay								= Set triggerstring tip delay
+Set triggerstring tooltip timeout							= Set triggerstring tooltip timeout
 Add hotstring (F9) 										= Add hotstring (F9)
 Show full GUI (F4)										= Show full GUI (F4)
 Show Sandbox (F6)										= Show Sandbox (F6)
@@ -3368,7 +3464,7 @@ Static hotstrings 										= &Static hotstrings
 Such file already exists									= Such file already exists
 Suspend Hotkeys										= Suspend Hotkeys
 )"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
-TransConst .= "`n
+	TransConst .= "`n
 (Join`n `
 Tab 													= Tab
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
@@ -3396,13 +3492,16 @@ Total:												= Total:
 Triggerstring 											= Triggerstring
 Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
 Triggerstring tips 										= &Triggerstring tips
-Triggerstring tooltip delay in [ms]						= Triggerstring tooltip delay in [ms]
+Triggerstring tooltip timeout in [ms]						= Triggerstring tooltip timeout in [ms]
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
 Underscore _											= Underscore _
 Undo the last hotstring									= &Undo the last hotstring
 Undid the last hotstring 								= Undid the last hotstring
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
+When timeout is set, triggerstring tooltips will dissapear after time reaches it. = When timeout is set, triggerstring tooltips will dissapear after time reaches it.
+Yes													= Yes
+F_TooltipTimeoutSlider									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 500 [ms]; `nInterval:         500 [ms]; `nRange:            1000 ÷ 10 000 [ms]. `n`nWhen required value is chosen just press Esc key to close this window.
 ↓ Click here to select hotstring library ↓					= ↓ Click here to select hotstring library ↓
 )"
 	
@@ -3415,29 +3514,33 @@ Warning, code generated automatically for definitions based on menu, see documen
 	
 	if (decision[1] = "load")
 	{
+		;*[One]
 		Loop, Read, %A_ScriptDir%\Languages\%ini_Language%
 		{
-			tick := false
-			Loop, Parse, A_LoopReadLine, =, %A_Space%%A_Tab%
+			if !(InStr((LTrim(A_LoopReadLine)), ";") = 1)
 			{
-				if !(tick)
+				tick := false
+				Loop, Parse, A_LoopReadLine, =, %A_Space%%A_Tab%
 				{
-					key := A_LoopField
-					tick := true
+					if !(tick)
+					{
+						key := A_LoopField
+						tick := true
+					}
+					else
+					{
+						val := A_LoopField
+						tick := false
+					}
 				}
-				else
-				{
-					val := A_LoopField
-					tick := false
-				}
+				TransA[key] := val
 			}
-			TransA[key] := val
 		}
 		return
 	}
 	
 	tick := false
-
+	
 	Loop, Parse, TransConst, =`n, %A_Space%%A_Tab%
 	{
 		if !(tick)
@@ -6004,12 +6107,10 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-Tips:
-Menu, SubmenuTips, ToggleCheck, % TransA["Enable/Disable"]
-Menu, SubmenuTips, ToggleEnable, % TransA["Choose tips location"]
-Menu, SubmenuTips, ToggleEnable, % TransA["Number of characters for tips"]
-ini_Tips := !(ini_Tips)
-IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
+L_Tips:
+	ini_Tips := !(ini_Tips)
+	F_ToggleMenu_iniTips(ini_Tips)
+	IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6317,7 +6418,6 @@ L_TrayPauseScript:
 }
 return
 
-
 L_TrayReload:	;new thread starts here
 	F_WhichGui()
 	F_Reload()
@@ -6334,8 +6434,8 @@ return
 L_TrayExit:
 	ExitApp, 2	;2 = by Tray
 	
-TDelGuiClose:
-TDelGuiEscape:
+STDGuiClose:
+STDGuiEscape:
 	IniWrite, % ini_TipsDelay, Config.ini, Configuration, TipsDelay
-	Gui, TDel: Destroy
+	Gui, STD: Destroy
 return
