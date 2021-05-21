@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 	Author:      Jakub Masiak, Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings as in AutoHotkey (shortcuts), but editable with GUI and many more options.
@@ -4995,13 +4995,20 @@ F_MenuAHK(TextOptions, Oflag)
 	Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenuAHK"
 	Loop, Parse, TextOptions, ¦
 		GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . "|"
-	if (ini_MenuCaret)
-	{
-		CoordMode, Caret, Screen
-		MenuX := A_CaretX + 20
-		MenuY := A_CaretY - 20
-	}
-	;if (ini_MenuCursor) or ((MenuX == "") and (MenuY == ""))
+	
+	CoordMode, Caret, Screen ;CoordMode, Caret, Screen
+	if (A_CaretX and A_CaretY)
+		{
+			MenuX := A_CaretX + 20
+			MenuY := A_CaretY - 20
+		}
+		else
+		{
+			CoordMode, Mouse, Screen	;CoordMode, Mouse, Screen
+			MouseGetPos, v_MouseX, v_MouseY
+			MenuX := v_MouseX + 20
+			MenuY := v_MouseY + 20
+		}
 	if (ini_MenuCursor) 
 	{
 		CoordMode, Mouse, Screen
