@@ -57,8 +57,8 @@ global ini_Language 			:= "English.txt"
 global ini_TipsDelay			:= 3000		;[ms], default: 3000
 global ini_TipsSound			:= true
 
-global ini_TipsSFrequency		:= 400		;Future. The frequency of the sound. It should be a number between 37 and 32767. If omitted, the frequency will be 523.
-global ini_TipsSDuration			:= 200		;Future. The duration of the sound, in milliseconds. If omitted, the duration will be 150.
+;global ini_TipsSFrequency		:= 400		;Future. The frequency of the sound. It should be a number between 37 and 32767. If omitted, the frequency will be 523.
+;global ini_TipsSDuration			:= 200		;Future. The duration of the sound, in milliseconds. If omitted, the duration will be 150.
 
 global v_IndexLog 				:= 1			;for logging, if Hotstrings application is run with d parameter.
 
@@ -107,16 +107,18 @@ IniRead, ini_MenuSound,					Config.ini, Configuration, MenuSound
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
 IniRead, ini_Tips, 						Config.ini, Configuration, Tips
 IniRead, ini_TipsDelay,					Config.ini, Configuration, TipsDelay
-IniRead, ini_Cursor, 					Config.ini, Configuration, Cursor
-IniRead, ini_Caret, 					Config.ini, Configuration, Caret
-IniRead, ini_AmountOfCharacterTips, 		Config.ini, Configuration, TipsChars
-IniRead, ini_MenuCursor, 				Config.ini, Configuration, MenuCursor
-IniRead, ini_MenuCaret, 					Config.ini, Configuration, MenuCaret
 IniRead, ini_TipsSortAlphabetically,		Config.ini, Configuration, TipsSortAlphatebically
 IniRead, ini_TipsSortByLength,			Config.ini, Configuration, TipsSortByLength
 IniRead, ini_TipsSound,					Config.ini, Configuration, TipsSound
 IniRead, ini_TipsSFrequency,				Config.ini, Configuration, TipsSFrequency
 IniRead, ini_TipsSDuration,				Config.ini, Configuration, TipsSDuration
+IniRead, ini_Cursor, 					Config.ini, Configuration, Cursor
+IniRead, ini_Caret, 					Config.ini, Configuration, Caret
+IniRead, ini_AmountOfCharacterTips, 		Config.ini, Configuration, TipsChars
+IniRead, ini_MenuCursor, 				Config.ini, Configuration, MenuCursor
+IniRead, ini_MenuCaret, 					Config.ini, Configuration, MenuCaret
+IniRead, ini_MenuSFrequency,				Config.ini, Configuration, MenuSFrequency
+IniRead, ini_MenuSDuration,				Config.ini, Configuration, MenuSDuration
 
 F_ValidateIniLibSections() 
 
@@ -208,16 +210,14 @@ if (v_Param == "d") ;If the script is run with command line parameter "d" like d
 */
 
 Menu, ConfTHB, 	Add, % TransA["Undo the last hotstring"],	L_Undo
-Menu, SubmenuTips, 	Add, % TransA["Enable/Disable"], 			L_Tips
-Menu, SubmenuTips, 	Add
 Menu, PositionMenu, Add, % TransA["Caret"], 					L_MenuCaretCursor
 Menu, PositionMenu, Add, % TransA["Cursor"], 				L_MenuCaretCursor
 Menu, SubmenuMenu, 	Add, % TransA["Choose menu position"],		:PositionMenu
-Menu, SubmenuMenu, 	Add, % TransA["Enable sound if overrun"],	L_MenuSound
-if (ini_MenuSound)
-	Menu, SubmenuMenu, Check, % TransA["Enable sound if overrun"]
-else
-	Menu, SubmenuMenu, UnCheck, % TransA["Enable sound if overrun"]
+Menu, SubmenuMenu, 	Add, % TransA["Enable sound if overrun"],	F_ToggleMenuSound
+Menu, SubmenuMenu,	Add, % TransA["Menu sound parameters"],		F_GuiMenuSoundParameters
+
+F_ToggleMenuSound()
+
 Menu, ConfTHB, 	Add, % TransA["Hotstring menu (MSI, MCL)"], :SubmenuMenu
 if (ini_MenuCursor)
 	Menu, PositionMenu, Check, % TransA["Cursor"]
@@ -227,7 +227,6 @@ if (ini_MenuCaret)
 	Menu, PositionMenu, Check, % TransA["Caret"]
 else
 	Menu, PositionMenu, UnCheck, % TransA["Caret"]
-Menu, ConfTHB, 	Add, % TransA["Triggerstring tips"], 	:SubmenuTips
 Menu, Submenu3, 	Add, % TransA["Caret"],		L_CaretCursor
 Menu, Submenu3, 	Add, % TransA["Cursor"],		L_CaretCursor
 if (ini_Cursor)
@@ -245,6 +244,8 @@ Menu, Submenu4, 	Add, 3, 					L_AmountOfCharacterTips3
 Menu, Submenu4, 	Add, 4, 					L_AmountOfCharacterTips4
 Menu, Submenu4, 	Add, 5, 					L_AmountOfCharacterTips5
 
+Menu, SubmenuTips, Add, % TransA["Enable/Disable"], 				F_ToggleMenu_iniTips
+Menu, SubmenuTips, Add
 Menu, SubmenuTips, Add, % TransA["Set triggerstring tooltip timeout"],F_GuiSetTooltipTimeout
 Menu, SubmenuTips, Add, % TransA["Set amount"],					F_GuiSetAmountTrigTip
 Menu, SubmenuTips, Add
@@ -257,8 +258,10 @@ Menu, SubmenuTips, Add
 Menu, SubmenuTips, Add, % TransA["Enable sound if triggerstring"],	F_EnableSoundIfTrig
 Menu, SubmenuTips, Add, % TransA["Triggerstring sound parameters"],	F_GuiTrigSoundParameters
 
+Menu, ConfTHB, 	Add, % TransA["Triggerstring tips"], 	:SubmenuTips
+
+F_ToggleMenu_iniTips()
 F_EnableSoundIfTrig()
-F_ToggleMenu_iniTips(ini_Tips)
 
 Menu, Submenu4, 	Check, 					% ini_AmountOfCharacterTips
 Loop, 5
@@ -533,7 +536,7 @@ Loop,
 	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 	{
 		if (ini_MenuSound)
-			SoundBeep, % ini_SFrequency, % ini_SDuration	;Future: configurable parameters of the sound
+			SoundBeep, % ini_MenuSFrequency, % ini_MenuSDuration	;Future: configurable parameters of the sound
 	}
 	else
 	{
@@ -648,7 +651,7 @@ Loop,
 if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 {
 	if (ini_MenuSound)
-		SoundBeep, % ini_SFrequency, % ini_SDuration
+		SoundBeep, % ini_MenuSFrequency, % ini_MenuSDuration
 }
 else
 {
@@ -912,12 +915,12 @@ F_HMenuCli()
 		if (IntCnt > v_MenuMax)
 		{
 			IntCnt := v_MenuMax
-			SoundBeep, % ini_SFrequency, % ini_SDuration	;Future: configurable parameters of the sound
+			SoundBeep, % ini_MenuSFrequency, % ini_MenuSDuration	;Future: configurable parameters of the sound
 		}
 		if (IntCnt < 1)
 		{
 			IntCnt := 1
-			SoundBeep, % ini_SFrequency, % ini_SDuration	;Future: configurable parameters of the sound
+			SoundBeep, % ini_MenuSFrequency, % ini_MenuSDuration	;Future: configurable parameters of the sound
 		}
 		IsCursorPressed := false
 		return
@@ -965,6 +968,127 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_ToggleMenuSound()
+{
+	global	;assume-global mode
+	static OneTimeMemory := true
+	
+	if (OneTimeMemory)
+	{
+		Switch ini_MenuSound
+		{
+			Case % true:
+				Menu, SubmenuMenu, Check, 	% TransA["Enable sound if overrun"]
+				Menu, SubmenuMenu, Enable, 	% TransA["Menu sound parameters"]
+			Case % false:
+				Menu, SubmenuMenu, UnCheck, 	% TransA["Enable sound if overrun"]
+				Menu, SubmenuMenu, Disable, 	% TransA["Menu sound parameters"]
+		}
+		OneTimeMemory := False
+		return
+	}
+	else
+	{
+		ini_MenuSound := !(ini_MenuSound)
+		Switch ini_MenuSound
+		{
+			Case % true:
+				Menu, SubmenuMenu, Check, 	% TransA["Enable sound if overrun"]
+				Menu, SubmenuMenu, Enable, 	% TransA["Menu sound parameters"]
+			Case % false:
+				Menu, SubmenuMenu, UnCheck, 	% TransA["Enable sound if overrun"]
+				Menu, SubmenuMenu, Disable, 	% TransA["Menu sound parameters"]
+		}
+		IniWrite, %ini_MenuSound%, Config.ini, Configuration, MenuSound
+		return
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiMenuSoundParameters()	;tu jestem
+{
+	global	;assume-global mode
+	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,NewWinPosX := 0, NewWinPosY := 0
+		,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+		,TickInterval := (32767 - 37) / 9, SliderWidth := 0, SliderHeight := 0, MaxWidth := 0, iWidth := 0, ButtonMar := 0, ButtonWidth := 0
+	
+	;+Owner to prevent display of a taskbar button
+	Gui, MSP: New, -MinimizeBox -MaximizeBox +Owner +HwndMenuSoundPar, % TransA["Set parameters of menu sound"]
+	Gui, MSP: Margin,	% c_xmarg, % c_ymarg
+	Gui,	MSP: Color,	% c_WindowColor, % c_ControlColor
+	Gui,	MSP: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
+	Gui, MSP: Add, Text, HwndIdMSP_T1, % TransA["When hotstring menu event takes place, sound is emitted according to the following settings."]
+	
+	Gui, MSP: Add, Slider, HwndIdMSP_S1 vini_MenuSFrequency gF_SetMenuSoundFrequency Line1 Page%TickInterval% Range37-32767 TickInterval%TickInterval% ToolTipBottom Buddy1ini_MenuSFrequency, % ini_MenuSFrequency
+	Gui, MSP: Font, % "cBlue underline" . A_Space . "s" . c_FontSize + 2
+	Gui, MSP: Add, Text, HwndIdMSP_T2 gF_MenuSoundFreqSliderInfo, ⓘ
+	Gui,	MSP: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	v_OutVarTemp := 10000
+	Gui, MSP: Add, Text, HwndIdMSP_T3, % TransA["Menu sound frequency range"] . ":" . A_Space . v_OutVarTemp 
+	
+	Gui, MSP: Add, Slider, HwndIdMSP_S2 vini_MenuSDuration gF_SetMenuSoundDuration Line1 Page50 Range50-2000 TickInterval50 ToolTipBottom Buddy1ini_MenuSDuration, % ini_MenuSDuration
+	Gui, MSP: Font, % "cBlue underline" . A_Space . "s" . c_FontSize + 2
+	Gui, MSP: Add, Text, HwndIdMSP_T4 gF_MenuSoundDurSliderInfo, ⓘ
+	Gui,	MSP: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	v_OutVarTemp := 10000
+	Gui, MSP: Add, Text, HwndIdMSP_T5, % TransA["Menu sound duration [ms]"] . ":" . A_Space . v_OutVarTemp
+	Gui, MSP: Add, Button, HwndIdMSP_B1 gF_MenuSoundTestBut, % TransA["Sound test"]
+	
+	GuiControlGet, v_OutVarTemp, Pos, % IdMSP_T1
+	MaxWidth := v_OutVarTempW
+	GuiControlGet, v_OutVarTemp, Pos, % IdMSP_T2
+	iWidth := v_OutVarTempW
+	SliderWidth := MaxWidth - (iWidth + 2 * c_xmarg)
+	GuiControlGet, v_OutVarTemp, Pos, % IdMSP_S1
+	SliderHeight := v_OutVarTempH
+	GuiControlGet, v_OutVarTemp, Pos, % IdMSP_B1
+	ButtonWidth := v_OutVarTempW + 2 * c_xmarg
+	ButtonMar := Round((MaxWidth - ButtonWidth) / 2)
+	
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdMSP_T1, % "x" . v_xNext . A_Space . "y" . v_yNext
+	v_yNext += HofText
+	v_wNext := SliderWidth
+	GuiControl, Move, % IdMSP_S1, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
+	v_xNext := c_xmarg + SliderWidth + c_xmarg
+	GuiControl, Move, % IdMSP_T2, % "x" . v_xNext . A_Space . "y" . v_yNext 
+	GuiControlGet, v_OutVarTemp, Pos, % IdMSP_S1
+	v_xNext := c_xmarg
+	v_yNext += SliderHeight
+	GuiControl, Move, % IdMSP_T3, % "x" . v_xNext . A_Space . "y" . v_yNext 
+	v_yNext += HofText + 4 * c_ymarg
+	v_wNext := SliderWidth
+	GuiControl, Move, % IdMSP_S2, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
+	v_xNext := c_xmarg + SliderWidth + c_xmarg
+	GuiControl, Move, % IdMSP_T4, % "x" . v_xNext . A_Space . "y" . v_yNext 
+	v_xNext := c_xmarg
+	v_yNext += SliderHeight
+	GuiControl, Move, % IdMSP_T5, % "x" . v_xNext . A_Space . "y" . v_yNext 
+	v_xNext := ButtonMar
+	v_yNext += HofText + c_ymarg
+	v_wNext := ButtonWidth
+	GuiControl, Move, % IdMSP_B1, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
+	
+	GuiControl,, % IdMSP_T3, % TransA["Menu sound frequency range"] . ":" . A_Space . ini_TipsSFrequency
+	GuiControl,, % IdMSP_T5, % TransA["Menu sound duration [ms]"] . ":" 	. A_Space . ini_TipsSDuration
+	
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, MSP: Show, Hide AutoSize 
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . MenuSoundPar
+	DetectHiddenWindows, Off
+	
+	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+	
+	Gui, MSP: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EnableSoundIfTrig()
 {
 	global	;assume-global mode
@@ -982,7 +1106,7 @@ F_EnableSoundIfTrig()
 			Menu, SubmenuTips, UnCheck, % TransA["Enable sound if triggerstring"]
 			Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]
 		}
-		Onetimememory := False
+		OneTimeMemory := False
 		return
 	}
 	else
@@ -1119,7 +1243,7 @@ F_TrigSoundFreqSliderInfo()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SetTipsSoundFrequency() ;tu jestem
+F_SetTipsSoundFrequency()
 {
 	global	;assume-global mode
 	Gui, TSP: Submit, NoHide
@@ -1128,28 +1252,66 @@ F_SetTipsSoundFrequency() ;tu jestem
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ToggleMenu_iniTips(ini_Tips)
+F_ToggleMenu_iniTips()
 {
 	global	;assume-global mode
+	static OneTimeMemory := true
 	
-	Switch ini_Tips
+	if (OneTimeMemory)
 	{
-		Case % true:
+		Switch ini_Tips
+		{
+			Case % true:
+				Menu, SubmenuTips, Check, 	% TransA["Enable/Disable"]
+				Menu, SubmenuTips, Enable, 	% TransA["Set triggerstring tooltip timeout"]
+				Menu, SubmenuTips, Enable, 	% TransA["Set amount"]
+				Menu, SubmenuTips, Enable, 	% TransA["Choose tips location"]
+				Menu, SubmenuTips, Enable, 	% TransA["Number of characters for tips"]
+				Menu, SubmenuTips, Enable, 	% TransA["Sort tips alphabetically"]
+				Menu, SubmenuTips, Enable, 	% TransA["Sort tips by length"]
+				Menu, SubmenuTips, Enable,	% TransA["Enable sound if triggerstring"]
+				Menu, SubmenuTips, Enable,	% TransA["Triggerstring sound parameters"]
+			Case % false:
+				Menu, SubmenuTips, UnCheck, 	% TransA["Enable/Disable"]
+				Menu, SubmenuTips, Disable, 	% TransA["Set triggerstring tooltip timeout"]
+				Menu, SubmenuTips, Disable, 	% TransA["Set amount"]
+				Menu, SubmenuTips, Disable, 	% TransA["Choose tips location"]
+				Menu, SubmenuTips, Disable, 	% TransA["Number of characters for tips"]
+				Menu, SubmenuTips, Disable, 	% TransA["Sort tips alphabetically"]
+				Menu, SubmenuTips, Disable, 	% TransA["Sort tips by length"]
+				Menu, SubmenuTips, Disable,	% TransA["Enable sound if triggerstring"]
+				Menu, SubmenuTips, Disable,	% TransA["Triggerstring sound parameters"]
+		}
+		OneTimeMemory := False
+		return
+	}
+	else
+	{
+		ini_Tips := !(ini_Tips)
+		Switch ini_Tips
+		{
+			Case % true:
 			Menu, SubmenuTips, Enable, 	% TransA["Set triggerstring tooltip timeout"]
 			Menu, SubmenuTips, Enable, 	% TransA["Set amount"]
 			Menu, SubmenuTips, Enable, 	% TransA["Choose tips location"]
 			Menu, SubmenuTips, Enable, 	% TransA["Number of characters for tips"]
 			Menu, SubmenuTips, Enable, 	% TransA["Sort tips alphabetically"]
 			Menu, SubmenuTips, Enable, 	% TransA["Sort tips by length"]
-		Case % false:
+			Menu, SubmenuTips, Enable,	% TransA["Enable sound if triggerstring"]
+			Menu, SubmenuTips, Enable,	% TransA["Triggerstring sound parameters"]
+			Case % false:
 			Menu, SubmenuTips, Disable, 	% TransA["Set triggerstring tooltip timeout"]
 			Menu, SubmenuTips, Disable, 	% TransA["Set amount"]
 			Menu, SubmenuTips, Disable, 	% TransA["Choose tips location"]
 			Menu, SubmenuTips, Disable, 	% TransA["Number of characters for tips"]
 			Menu, SubmenuTips, Disable, 	% TransA["Sort tips alphabetically"]
 			Menu, SubmenuTips, Disable, 	% TransA["Sort tips by length"]
+			Menu, SubmenuTips, Disable,	% TransA["Enable sound if triggerstring"]
+			Menu, SubmenuTips, Disable,	% TransA["Triggerstring sound parameters"]
+		}
+		IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
+		return
 	}
-	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -3205,6 +3367,8 @@ GuiReload=
 UndoHotstring=1
 Delay=300
 MenuSound=1
+MenuSFrequency=300
+MenuSDuration=400
 MenuCursor=0
 MenuCaret=1
 EndingChar_Space=1
@@ -3579,6 +3743,9 @@ Loaded hotstrings: 										= Loaded hotstrings:
 Loading hotstrings from libraries... 						= Loading hotstrings from libraries...
 Loading imported library. Please wait...					= Loading imported library. Please wait...
 Loaded												= Loaded
+Menu sound duration [ms]									= Menu sound duration [ms]
+Menu sound frequency range								= Menu sound frequency range
+Menu sound parameters									= Menu sound parameters
 Minus - 												= Minus -
 Move (F8)												= Move (F8)
 No													= No
@@ -3623,6 +3790,7 @@ Semicolon ; 											= Semicolon ;
 Set amount											= Set amount
 Set Clipboard Delay										= Set Clipboard Delay
 Set delay												= Set delay
+Set parameters of menu sound								= Set parameters of menu sound
 Set parameters of triggerstring sound						= Set parameters of triggerstring sound
 Set triggerstring tooltip timeout							= Set triggerstring tooltip timeout
 Show full GUI (F4)										= Show full GUI (F4)
@@ -3681,6 +3849,7 @@ Undo the last hotstring									= &Undo the last hotstring
 Undid the last hotstring 								= Undid the last hotstring
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
+When hotstring menu event takes place, sound is emitted according to the following settings. = When hotstring menu event takes place, sound is emitted according to the following settings.
 When timeout is set, triggerstring tooltips will dissapear after time reaches it. = When timeout is set, triggerstring tooltips will dissapear after time reaches it.
 When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
 Yes													= Yes
@@ -5180,7 +5349,7 @@ F_MenuCli(TextOptions, Oflag)
 	
 	v_TypedTriggerstring	:= A_ThisHotkey
 	if (ini_MenuSound)		;Second beep on purpose
-		SoundBeep, % ini_SFrequency, % ini_SDuration
+		SoundBeep, % ini_MenuSFrequency, % ini_MenuSDuration
 	v_MenuMax			 	:= 0
 	;v_InputString 		 := ""
 	TextOptions 		 := F_AHKVariables(TextOptions)
@@ -5260,7 +5429,7 @@ F_MenuAHK(TextOptions, Oflag)
 
 	v_TypedTriggerstring	:= A_ThisHotkey
 	if (ini_MenuSound)		;Second beep on purpose
-		SoundBeep, % ini_SFrequency, % ini_SDuration
+		SoundBeep, % ini_MenuSFrequency, % ini_MenuSDuration
 
 	v_MenuMax				:= 0
 	TextOptions 			:= F_AHKVariables(TextOptions)
@@ -5373,12 +5542,12 @@ F_HMenuAHK()
 		if (IntCnt > v_MenuMax)
 		{
 			IntCnt := v_MenuMax
-			SoundBeep, % ini_SFrequency, % ini_SDuration	;Future: configurable parameters of the sound
+			SoundBeep, % ini_MenuSFrequency, % ini_MenuSDuration	;Future: configurable parameters of the sound
 		}
 		if (IntCnt < 1)
 		{
 			IntCnt := 1
-			SoundBeep, % ini_SFrequency, % ini_SDuration	;Future: configurable parameters of the sound
+			SoundBeep, % ini_MenuSFrequency, % ini_MenuSDuration	;Future: configurable parameters of the sound
 		}
 		IsCursorPressed := false
 		return
@@ -6291,14 +6460,6 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-L_Tips:
-ini_Tips := !(ini_Tips)
-F_ToggleMenu_iniTips(ini_Tips)
-IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 EndSpace:
 Menu, Submenu2, ToggleCheck, % TransA["Space"]
 EndingChar_Space := !(EndingChar_Space)
@@ -6539,13 +6700,6 @@ ini_MenuCursor := !(ini_MenuCursor)
 IniWrite, %ini_MenuCaret%, Config.ini, Configuration, MenuCaret
 IniWrite, %ini_MenuCursor%, Config.ini, Configuration, MenuCursor
 return
-
-L_MenuSound:
-Menu, SubmenuMenu, ToggleCheck, % TransA["Enable sound if overrun"]
-ini_MenuSound := !(ini_MenuSound)
-IniWrite, %ini_MenuSound%, Config.ini, Configuration, MenuSound
-return
-
 
 L_SortTipsAlphabetically:
 Menu, SubmenuTips, ToggleCheck, % TransA["Sort tips alphabetically"]
