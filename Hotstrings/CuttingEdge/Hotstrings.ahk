@@ -57,8 +57,8 @@ global ini_Language 			:= "English.txt"
 global ini_TipsDelay			:= 3000		;[ms], default: 3000
 global ini_TipsSound			:= true
 
-global ini_SFrequency			:= 400		;Future. The frequency of the sound. It should be a number between 37 and 32767. If omitted, the frequency will be 523.
-global ini_SDuration			:= 200		;Future. The duration of the sound, in milliseconds. If omitted, the duration will be 150.
+global ini_TipsSFrequency		:= 400		;Future. The frequency of the sound. It should be a number between 37 and 32767. If omitted, the frequency will be 523.
+global ini_TipsSDuration			:= 200		;Future. The duration of the sound, in milliseconds. If omitted, the duration will be 150.
 
 global v_IndexLog 				:= 1			;for logging, if Hotstrings application is run with d parameter.
 
@@ -542,8 +542,8 @@ Loop,
 		{
 			v_InputString := ""
 			ToolTip,
-			if (ini_TipsSound)
-				SoundBeep, % ini_SFrequency, % ini_SDuration
+			if (ini_Tips and ini_TipsSound)
+				SoundBeep, % ini_TipsSFrequency, % ini_TipsSDuration
 			if !(WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 				v_HotstringFlag := false
 		}
@@ -719,7 +719,7 @@ F_Undo()
 	global	;assume-global mode
 	local	TriggerOpt := "", PosColon1 := 0, PosColon2 := 0, HowManyBackSpaces := 0, ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey
 			,OrigTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, ":", false, 1, 2) + 1)
-	;*[One]
+	
 	if ((ini_Undo = true) and v_TypedTriggerstring and (ThisHotkey != PriorHotkey))
 	{	
 		PosColon1 := InStr(v_TypedTriggerstring, ":", false, 1, 1) ;position of the first colon
@@ -945,7 +945,7 @@ F_HMenuCli()
 	}
 	
 	Clipboard := v_Temp1
-	;*[One]
+	
 	Send, ^v ;paste the text
 	if (Ovar = false)
 		Send, % A_EndChar
@@ -965,7 +965,45 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
-F_GuiTrigSoundParameters() ;tu jestem
+F_EnableSoundIfTrig()
+{
+	global	;assume-global mode
+	static OneTimeMemory := true
+
+	if (OneTimeMemory)
+	{
+		if (ini_TipsSound)
+		{
+			Menu, SubmenuTips, Check, % TransA["Enable sound if triggerstring"]
+			Menu, SubmenuTips, Enable, % TransA["Triggerstring sound parameters"]
+		}
+		else
+		{
+			Menu, SubmenuTips, UnCheck, % TransA["Enable sound if triggerstring"]
+			Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]
+		}
+		Onetimememory := False
+		return
+	}
+	else
+	{
+		ini_TipsSound := !(ini_TipsSound)
+		if (ini_TipsSound)
+		{
+			Menu, SubmenuTips, Check, % TransA["Enable sound if triggerstring"]
+			Menu, SubmenuTips, Enable, % TransA["Triggerstring sound parameters"]
+		}
+		else
+		{
+			Menu, SubmenuTips, UnCheck, % TransA["Enable sound if triggerstring"]
+			Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]
+		}
+		IniWrite, % ini_TipsSound, Config.ini, Configuration, TipsSound
+		return
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiTrigSoundParameters() 
 {
 	global	;assume-global mode
 	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
@@ -973,7 +1011,7 @@ F_GuiTrigSoundParameters() ;tu jestem
 		,NewWinPosX := 0, NewWinPosY := 0
 		,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
 		,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
-		,TickInterval := (32767 - 37) / 9
+		,TickInterval := (32767 - 37) / 9, SliderWidth := 0, SliderHeight := 0, MaxWidth := 0, iWidth := 0, ButtonMar := 0, ButtonWidth := 0
 	
 	;+Owner to prevent display of a taskbar button
 	Gui, TSP: New, -MinimizeBox -MaximizeBox +Owner +HwndTrigSoundPar, % TransA["Set parameters of triggerstring sound"]
@@ -983,46 +1021,59 @@ F_GuiTrigSoundParameters() ;tu jestem
 	
 	Gui, TSP: Add, Text, HwndIdTSP_T1, % TransA["When triggerstring event takes place, sound is emitted according to the following settings."]
 	
-	Gui, TSP: Add, Slider, HwndIdTSP_S1 vini_SFrequency gF_SetTipsSoundFrequency Line1 Page%TickInterval% Range37-32767 TickInterval%TickInterval% ToolTipBottom Buddy1ini_SFrequency, % ini_SFrequency
+	Gui, TSP: Add, Slider, HwndIdTSP_S1 vini_TipsSFrequency gF_SetTipsSoundFrequency Line1 Page%TickInterval% Range37-32767 TickInterval%TickInterval% ToolTipBottom Buddy1ini_TipsSFrequency, % ini_TipsSFrequency
 	Gui, TSP: Font, % "cBlue underline" . A_Space . "s" . c_FontSize + 2
 	Gui, TSP: Add, Text, HwndIdTSP_T2 gF_TrigSoundFreqSliderInfo, ⓘ
 	Gui,	TSP: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	v_OutVarTemp := 10000
 	Gui, TSP: Add, Text, HwndIdTSP_T3, % TransA["Triggerstring sound frequency range"] . ":" . A_Space . v_OutVarTemp 
 	
-	Gui, TSP: Add, Slider, HwndIdTSP_S2 vini_SDuration gF_SetTipsSoundDuration Line1 Page100 Range200-2000 TickInterval400 ToolTipBottom Buddy1ini_SDuration, % ini_SDuration
+	Gui, TSP: Add, Slider, HwndIdTSP_S2 vini_TipsSDuration gF_SetTipsSoundDuration Line1 Page50 Range50-2000 TickInterval50 ToolTipBottom Buddy1ini_TipsSDuration, % ini_TipsSDuration
 	Gui, TSP: Font, % "cBlue underline" . A_Space . "s" . c_FontSize + 2
 	Gui, TSP: Add, Text, HwndIdTSP_T4 gF_TrigSoundDurSliderInfo, ⓘ
 	Gui,	TSP: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	v_OutVarTemp := 10000
-	Gui, TSP: Add, Text, HwndIdTSP_T5, % TransA["Triggerstring sound duration [ms]"] . ":" . A_Space . v_OutVarTemp 
+	Gui, TSP: Add, Text, HwndIdTSP_T5, % TransA["Triggerstring sound duration [ms]"] . ":" . A_Space . v_OutVarTemp
+	Gui, TSP: Add, Button, HwndIdTSP_B1 gF_SoundTestBut, % TransA["Sound test"]
+	
+	GuiControlGet, v_OutVarTemp, Pos, % IdTSP_T1
+	MaxWidth := v_OutVarTempW
+	GuiControlGet, v_OutVarTemp, Pos, % IdTSP_T2
+	iWidth := v_OutVarTempW
+	SliderWidth := MaxWidth - (iWidth + 2 * c_xmarg)
+	GuiControlGet, v_OutVarTemp, Pos, % IdTSP_S1
+	SliderHeight := v_OutVarTempH
+	GuiControlGet, v_OutVarTemp, Pos, % IdTSP_B1
+	ButtonWidth := v_OutVarTempW + 2 * c_xmarg
+	ButtonMar := Round((MaxWidth - ButtonWidth) / 2)
 	
 	v_xNext := c_xmarg
 	v_yNext := c_ymarg
 	GuiControl, Move, % IdTSP_T1, % "x" . v_xNext . A_Space . "y" . v_yNext
 	v_yNext += HofText
-	GuiControlGet, v_OutVarTemp, Pos, % IdTSP_T1
-	v_wNext := v_OutVarTempW
+	v_wNext := SliderWidth
 	GuiControl, Move, % IdTSP_S1, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdTSP_S1
-	v_xNext := v_OutVarTempX + v_OutVarTempW + c_ymarg
+	v_xNext := c_xmarg + SliderWidth + c_xmarg
 	GuiControl, Move, % IdTSP_T2, % "x" . v_xNext . A_Space . "y" . v_yNext 
+	GuiControlGet, v_OutVarTemp, Pos, % IdTSP_S1
 	v_xNext := c_xmarg
-	v_yNext := v_OutVarTempY + v_OutVarTempH
+	v_yNext += SliderHeight
 	GuiControl, Move, % IdTSP_T3, % "x" . v_xNext . A_Space . "y" . v_yNext 
-	v_yNext += HofText + c_ymarg
-	GuiControlGet, v_OutVarTemp, Pos, % IdTSP_T1
-	v_wNext := v_OutVarTempW
+	v_yNext += HofText + 4 * c_ymarg
+	v_wNext := SliderWidth
 	GuiControl, Move, % IdTSP_S2, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdTSP_S2
-	v_xNext := v_OutVarTempX + v_OutVarTempW + c_ymarg
+	v_xNext := c_xmarg + SliderWidth + c_xmarg
 	GuiControl, Move, % IdTSP_T4, % "x" . v_xNext . A_Space . "y" . v_yNext 
 	v_xNext := c_xmarg
-	v_yNext := v_OutVarTempY + v_OutVarTempH
+	v_yNext += SliderHeight
 	GuiControl, Move, % IdTSP_T5, % "x" . v_xNext . A_Space . "y" . v_yNext 
-
-	GuiControl,, % IdTSP_T3, % TransA["Triggerstring tooltip timeout in [ms]"] . ":" . A_Space . ini_SFrequency
-	GuiControl,, % IdTSP_T5, % TransA["Triggerstring sound duration [ms]"] . ":" . A_Space . ini_SDuration
+	v_xNext := ButtonMar
+	v_yNext += HofText + c_ymarg
+	v_wNext := ButtonWidth
+	GuiControl, Move, % IdTSP_B1, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
+	
+	GuiControl,, % IdTSP_T3, % TransA["Triggerstring sound frequency range"] . ":" 	. A_Space . ini_TipsSFrequency
+	GuiControl,, % IdTSP_T5, % TransA["Triggerstring sound duration [ms]"] . ":" 	. A_Space . ini_TipsSDuration
 	
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	Gui, TSP: Show, Hide AutoSize 
@@ -1037,27 +1088,43 @@ F_GuiTrigSoundParameters() ;tu jestem
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SetTipsSoundDuration()
+F_SoundTestBut()
 {
 	global	;assume-global mode
+	SoundBeep, % ini_TipsSFrequency, % ini_TipsSDuration
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TrigSoundDurSliderInfo()
+F_SetTipsSoundDuration()
 {
 	global	;assume-global mode
+	Gui, TSP: Submit, NoHide
+	GuiControl,, % IdTSP_T5, % TransA["Triggerstring sound duration [ms]"] . ":" . A_Space . ini_TipsSDuration 	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_TrigSoundDurSliderInfo() 
+{
+	global	;assume-global mode
+	TransA["F_TrigSoundDurSliderInfo"] := StrReplace(TransA["F_TrigSoundDurSliderInfo"], "``n", "`n")
+	ToolTip, % TransA["F_TrigSoundDurSliderInfo"]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TrigSoundFreqSliderInfo()
 {
 	global	;assume-global mode
+	TransA["F_TrigSoundFreqSliderInfo"] := StrReplace(TransA["F_TrigSoundFreqSliderInfo"], "``n", "`n")
+	ToolTip, % TransA["F_TrigSoundFreqSliderInfo"]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SetTipsSoundFrequency()
+F_SetTipsSoundFrequency() ;tu jestem
 {
 	global	;assume-global mode
+	Gui, TSP: Submit, NoHide
+	;*[One]
+	GuiControl,, % IdTSP_T3, % TransA["Triggerstring sound frequency range"] . ":" . A_Space . ini_TipsSFrequency
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1175,7 +1242,7 @@ F_TooltipTimeoutSlider()
 F_STDRadio()
 {
 	global	;assume-global mode
-	;*[One]
+	
 	Gui, STD: Submit, NoHide
 	Switch FiniteTttimeout
 	{
@@ -1422,7 +1489,6 @@ F_SetHotstring()
 		{
 			if (InStr(A_LoopField, LString, true))
 			{
-				;*[One]
 				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
 					, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in the file"] . A_Space . v_SelectHotstringLibrary . "." . "`n`n" 
 					. TransA["Do you want to proceed?"]
@@ -3002,7 +3068,7 @@ F_Reload()
 	global ;assume-global mode
 	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["Are you sure you want to reload this application now?"]
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
-	;*[One]
+	
 	IfMsgBox, Yes
 	{
 		if (WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd))
@@ -3170,8 +3236,8 @@ TipsChars=1
 TipsSortAlphatebically=1
 TipsSortByLength=1
 TipsSound=1
-TipsSFrequency=
-TipsSDuration=
+TipsSFrequency=400
+TipsSDuration=200
 Language=English.txt
 [LoadLibraries]
 [ShowTipsLibraries]
@@ -3380,6 +3446,7 @@ F_LoadCreateTranslationTxt(decision*)
 (Join`n `			
 About/Help (F1) 										= &About/Help (F1)
 Add comment (optional) 									= Add comment (optional)
+Add hotstring (F9) 										= Add hotstring (F9)
 Add library 											= Add library
 Add to Autostart										= Add to Autostart
 A library with that name already exists! 					= A library with that name already exists!
@@ -3556,8 +3623,8 @@ Semicolon ; 											= Semicolon ;
 Set amount											= Set amount
 Set Clipboard Delay										= Set Clipboard Delay
 Set delay												= Set delay
+Set parameters of triggerstring sound						= Set parameters of triggerstring sound
 Set triggerstring tooltip timeout							= Set triggerstring tooltip timeout
-Add hotstring (F9) 										= Add hotstring (F9)
 Show full GUI (F4)										= Show full GUI (F4)
 Show Sandbox (F6)										= Show Sandbox (F6)
 Silent mode											= Silent mode
@@ -3568,6 +3635,7 @@ Something went wrong with hotstring deletion:				= Something went wrong with hot
 Something weng wrong with link file (.lnk) creation			= Something weng wrong with link file (.lnk) creation
 Sort tips alphabetically 								= Sort tips &alphabetically
 Sort tips by length 									= Sort tips by &length
+Sound test											= Sound test
 Space 												= Space
 Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
 Standard executable (Ahk2Exe.exe)							= Standard executable (Ahk2Exe.exe)
@@ -3602,6 +3670,8 @@ Total:												= Total:
 (triggerstring, hotstring) definitions						= (triggerstring, hotstring) definitions
 Triggerstring 											= Triggerstring
 Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
+Triggerstring sound duration [ms]							= Triggerstring sound duration [ms]
+Triggerstring sound frequency range						= Triggerstring sound frequency range
 Triggerstring sound parameters							= Triggerstring sound parameters
 Triggerstring tips 										= &Triggerstring tips
 Triggerstring tooltip timeout in [ms]						= Triggerstring tooltip timeout in [ms]
@@ -3612,8 +3682,11 @@ Undid the last hotstring 								= Undid the last hotstring
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
 When timeout is set, triggerstring tooltips will dissapear after time reaches it. = When timeout is set, triggerstring tooltips will dissapear after time reaches it.
+When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
 Yes													= Yes
-F_TooltipTimeoutSlider									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 500 [ms]; `nInterval:         500 [ms]; `nRange:            1000 ÷ 10 000 [ms]. `n`nWhen required value is chosen just press Esc key to close this window.
+F_TooltipTimeoutSlider									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 500 [ms]; `nInterval:         500 [ms]; `nRange:            1000 ÷ 10 000 [ms]. `n`nWhen required value is chosen just press Esc key to close this window or close this window with mouse.
+F_TrigSoundDurSliderInfo									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 100 [ms]; `nInterval:         400 [ms]; `nRange:            200 ÷ 2 000 [ms]. `n`nWhen required value is chosen just press Esc key to close this window or close this window with mouse.`n`nTip: Recommended time is somewhere between 200 to 400 ms.
+F_TrigSoundFreqSliderInfo								= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 100 [ms]; `nInterval:         3636 [ms]; `nRange:            37 ÷ 32 767 [ms]. `n`nWhen required value is chosen just press Esc key to close this window or close this window with mouse.`n`nTip: Recommended value is somewhere between 200 to 2000. Mind that for your spcific PC some values outside of recommended range may not produce any sound.
 ↓ Click here to select hotstring library ↓					= ↓ Click here to select hotstring library ↓
 )"
 	
@@ -3625,7 +3698,6 @@ F_TooltipTimeoutSlider									= You may slide the control by the following mean
 	if (decision[1] = "load")
 	{
 		FileRead, v_TheWholeFile, % A_ScriptDir . "\Languages\English.txt" 
-		;*[One]
 		F_ParseLanguageFile(v_TheWholeFile)
 		return
 	}
@@ -6136,15 +6208,15 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 GuiAboutLink1:
-	Run, https://github.com/mslonik/Hotstrings
+Run, https://github.com/mslonik/Hotstrings
 return
 
 GuiAboutLink2:
-	Run, https://www.autohotkey.com/docs/Hotstrings.htm
+Run, https://www.autohotkey.com/docs/Hotstrings.htm
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 L_PublicLibraries:	
-	Run, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings/Libraries
+Run, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings/Libraries
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ~F1::
@@ -6167,7 +6239,15 @@ HS4GuiEscape:
 Gui,		HS4: Show, Hide
 ini_WhichGui := "HS4"
 return
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+TSPGuiClose:
+TSPGuiEscape:
+	;Gui, TSP: Submit, NoHide
+	;*[One]
+	IniWrite, % ini_TipsSFrequency, Config.ini, Configuration, TipsSFrequency
+	Iniwrite, % ini_TipsSDuration, Config.ini, Configuration, TipsSDuration
+	Gui, TSP: Destroy
+return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 MoveLibsGuiEscape:
 CancelMove:
@@ -6190,8 +6270,8 @@ return
 ~F7::
 HSDelGuiEscape:
 HSDelGuiClose:
-	IniWrite, %ini_Delay%, Config.ini, Configuration, Delay
-	Gui, HSDel: Destroy
+IniWrite, %ini_Delay%, Config.ini, Configuration, Delay
+Gui, HSDel: Destroy
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6212,9 +6292,9 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 L_Tips:
-	ini_Tips := !(ini_Tips)
-	F_ToggleMenu_iniTips(ini_Tips)
-	IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
+ini_Tips := !(ini_Tips)
+F_ToggleMenu_iniTips(ini_Tips)
+IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6495,30 +6575,30 @@ MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"
 Reload
 
 L_TraySuspendHotkeys:
-	Suspend, Toggle
-	if (A_IsSuspended)
-	{
-		Menu, Tray, 		Check, 	% TransA["Suspend Hotkeys"]
-		Menu, AppSubmenu, 	Check, 	% TransA["Suspend Hotkeys"]
-	}
-	else
-	{
-		Menu, Tray, 		UnCheck, 	% TransA["Suspend Hotkeys"]
-		Menu, AppSubmenu,	UnCheck, 	% TransA["Suspend Hotkeys"]
-	}
+Suspend, Toggle
+if (A_IsSuspended)
+{
+	Menu, Tray, 		Check, 	% TransA["Suspend Hotkeys"]
+	Menu, AppSubmenu, 	Check, 	% TransA["Suspend Hotkeys"]
+}
+else
+{
+	Menu, Tray, 		UnCheck, 	% TransA["Suspend Hotkeys"]
+	Menu, AppSubmenu,	UnCheck, 	% TransA["Suspend Hotkeys"]
+}
 return
 
 L_TrayPauseScript:
-	Pause, Toggle, 1
-	if (A_IsPaused)
-	{
-		Menu, Tray, 		Check, 	% TransA["Pause Application"]
-		Menu, AppSubmenu,	Check, 	% TransA["Pause Application"]
-	}
-	else
-	{
-		Menu, Tray, 		UnCheck, 	% TransA["Pause Application"]
-		Menu, AppSubmenu,	UnCheck, 	% TransA["Pause Application"]
+Pause, Toggle, 1
+if (A_IsPaused)
+{
+	Menu, Tray, 		Check, 	% TransA["Pause Application"]
+	Menu, AppSubmenu,	Check, 	% TransA["Pause Application"]
+}
+else
+{
+	Menu, Tray, 		UnCheck, 	% TransA["Pause Application"]
+	Menu, AppSubmenu,	UnCheck, 	% TransA["Pause Application"]
 }
 return
 
@@ -6543,22 +6623,3 @@ STDGuiEscape:
 IniWrite, % ini_TipsDelay, Config.ini, Configuration, TipsDelay
 Gui, STD: Destroy
 return
-
-F_EnableSoundIfTrig()
-{
-	global	;assume-global mode
-	if (ini_TipsSound)
-	{
-		Menu, SubmenuTips, Check, % TransA["Enable sound if triggerstring"]
-		Menu, SubmenuTips, Enable, % TransA["Triggerstring sound parameters"]
-	}
-	else
-	{
-		Menu, SubmenuTips, UnCheck, % TransA["Enable sound if triggerstring"]
-		Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]
-	}
-	ini_TipsSound := !(ini_TipsSound)
-	IniWrite, % ini_TipsSound, Config.ini, Configuration, TipsSound
-	
-	return
-}
