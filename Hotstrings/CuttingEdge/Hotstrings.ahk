@@ -212,6 +212,7 @@ if (v_Param == "d") ;If the script is run with command line parameter "d" like d
 Menu, ConfTHB, 	Add, % TransA["Undo the last hotstring"],	L_Undo
 Menu, PositionMenu, Add, % TransA["Caret"], 					L_MenuCaretCursor
 Menu, PositionMenu, Add, % TransA["Cursor"], 				L_MenuCaretCursor
+
 Menu, SubmenuMenu, 	Add, % TransA["Choose menu position"],		:PositionMenu
 Menu, SubmenuMenu, 	Add, % TransA["Enable sound if overrun"],	F_ToggleMenuSound
 Menu, SubmenuMenu,	Add, % TransA["Menu sound parameters"],		F_GuiMenuSoundParameters
@@ -1022,7 +1023,7 @@ F_GuiMenuSoundParameters()	;tu jestem
 	
 	Gui, MSP: Add, Text, HwndIdMSP_T1, % TransA["When hotstring menu event takes place, sound is emitted according to the following settings."]
 	
-	Gui, MSP: Add, Slider, HwndIdMSP_S1 vini_MenuSFrequency gF_SetMenuSoundFrequency Line1 Page%TickInterval% Range37-32767 TickInterval%TickInterval% ToolTipBottom Buddy1ini_MenuSFrequency, % ini_MenuSFrequency
+	Gui, MSP: Add, Slider, HwndIdMSP_S1 vini_MenuSFrequency gF_SetMenuSoundFrequency Line1 Page50 Range37-32767 TickInterval%TickInterval% ToolTipBottom Buddy1ini_MenuSFrequency, % ini_MenuSFrequency
 	Gui, MSP: Font, % "cBlue underline" . A_Space . "s" . c_FontSize + 2
 	Gui, MSP: Add, Text, HwndIdMSP_T2 gF_MenuSoundFreqSliderInfo, ⓘ
 	Gui,	MSP: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
@@ -1051,7 +1052,7 @@ F_GuiMenuSoundParameters()	;tu jestem
 	v_xNext := c_xmarg
 	v_yNext := c_ymarg
 	GuiControl, Move, % IdMSP_T1, % "x" . v_xNext . A_Space . "y" . v_yNext
-	v_yNext += HofText
+	v_yNext += 2 * HofText
 	v_wNext := SliderWidth
 	GuiControl, Move, % IdMSP_S1, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
 	v_xNext := c_xmarg + SliderWidth + c_xmarg
@@ -1089,6 +1090,45 @@ F_GuiMenuSoundParameters()	;tu jestem
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_MenuSoundTestBut()
+{
+	global	;assume-global mode
+	SoundBeep, % ini_MenuSFrequency, % ini_MenuSDuration
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_MenuSoundDurSliderInfo()
+{
+	global	;assume-global mode
+	TransA["F_MenuSoundDurSliderInfo"] := StrReplace(TransA["F_MenuSoundDurSliderInfo"], "``n", "`n")
+	ToolTip, % TransA["F_MenuSoundDurSliderInfo"]
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_MenuSoundFreqSliderInfo()
+{
+	global	;assume-global mode
+	TransA["F_MenuSoundFreqSliderInfo"] := StrReplace(TransA["F_MenuSoundFreqSliderInfo"], "``n", "`n")
+	ToolTip, % TransA["F_MenuSoundFreqSliderInfo"]	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SetMenuSoundDuration()
+{
+	global	;assume-global mode
+	Gui, MSP: Submit, NoHide
+	GuiControl,, % IdMSP_T5, % TransA["Menu sound duration [ms]"] . ":" . A_Space . ini_MenuSDuration 	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SetMenuSoundFrequency()
+{
+	global	;assume-global mode
+	Gui, MSP: Submit, NoHide
+	GuiControl,, % IdMSP_T3, % TransA["Menu sound frequency range"] . ":" . A_Space . ini_MenuSFrequency
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EnableSoundIfTrig()
 {
 	global	;assume-global mode
@@ -1096,32 +1136,79 @@ F_EnableSoundIfTrig()
 
 	if (OneTimeMemory)
 	{
-		if (ini_TipsSound)
+		if (ini_Tips and ini_TipsSound)
 		{
 			Menu, SubmenuTips, Check, % TransA["Enable sound if triggerstring"]
 			Menu, SubmenuTips, Enable, % TransA["Triggerstring sound parameters"]
 		}
-		else
+		if (ini_Tips and !ini_TipsSound)
 		{
 			Menu, SubmenuTips, UnCheck, % TransA["Enable sound if triggerstring"]
 			Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]
+			
+		}
+		if (!ini_Tips and ini_TipsSound)
+		{
+			Menu, SubmenuTips, Check, % TransA["Enable sound if triggerstring"]
+			Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]
+		}
+		if (!ini_Tips and !ini_TipsSound)
+		{
+			Menu, SubmenuTips, UnCheck, % TransA["Enable sound if triggerstring"]
+			Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]		
 		}
 		OneTimeMemory := False
 		return
+		
+		/*
+			if (ini_TipsSound)
+			{
+				Menu, SubmenuTips, Check, % TransA["Enable sound if triggerstring"]
+				Menu, SubmenuTips, Enable, % TransA["Triggerstring sound parameters"]
+			}
+			else
+			{
+				Menu, SubmenuTips, UnCheck, % TransA["Enable sound if triggerstring"]
+				Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]
+			}
+		*/
 	}
 	else
 	{
 		ini_TipsSound := !(ini_TipsSound)
-		if (ini_TipsSound)
+		if (ini_Tips and ini_TipsSound)
 		{
 			Menu, SubmenuTips, Check, % TransA["Enable sound if triggerstring"]
 			Menu, SubmenuTips, Enable, % TransA["Triggerstring sound parameters"]
 		}
-		else
+		if (ini_Tips and !ini_TipsSound)
 		{
 			Menu, SubmenuTips, UnCheck, % TransA["Enable sound if triggerstring"]
 			Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]
+			
 		}
+		if (!ini_Tips and ini_TipsSound)
+		{
+			Menu, SubmenuTips, Check, % TransA["Enable sound if triggerstring"]
+			Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]
+		}
+		if (!ini_Tips and !ini_TipsSound)
+		{
+			Menu, SubmenuTips, UnCheck, % TransA["Enable sound if triggerstring"]
+			Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]		
+		}		
+		/*
+			if (ini_TipsSound)
+			{
+				Menu, SubmenuTips, Check, % TransA["Enable sound if triggerstring"]
+				Menu, SubmenuTips, Enable, % TransA["Triggerstring sound parameters"]
+			}
+			else
+			{
+				Menu, SubmenuTips, UnCheck, % TransA["Enable sound if triggerstring"]
+				Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]
+			}
+		*/
 		IniWrite, % ini_TipsSound, Config.ini, Configuration, TipsSound
 		return
 	}
@@ -1158,7 +1245,7 @@ F_GuiTrigSoundParameters()
 	Gui,	TSP: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	v_OutVarTemp := 10000
 	Gui, TSP: Add, Text, HwndIdTSP_T5, % TransA["Triggerstring sound duration [ms]"] . ":" . A_Space . v_OutVarTemp
-	Gui, TSP: Add, Button, HwndIdTSP_B1 gF_SoundTestBut, % TransA["Sound test"]
+	Gui, TSP: Add, Button, HwndIdTSP_B1 gF_TrigSTestBut, % TransA["Sound test"]
 	
 	GuiControlGet, v_OutVarTemp, Pos, % IdTSP_T1
 	MaxWidth := v_OutVarTempW
@@ -1212,7 +1299,7 @@ F_GuiTrigSoundParameters()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SoundTestBut()
+F_TrigSTestBut()
 {
 	global	;assume-global mode
 	SoundBeep, % ini_TipsSFrequency, % ini_TipsSDuration
@@ -1247,7 +1334,6 @@ F_SetTipsSoundFrequency()
 {
 	global	;assume-global mode
 	Gui, TSP: Submit, NoHide
-	;*[One]
 	GuiControl,, % IdTSP_T3, % TransA["Triggerstring sound frequency range"] . ":" . A_Space . ini_TipsSFrequency
 	return
 }
@@ -1291,23 +1377,25 @@ F_ToggleMenu_iniTips()
 		Switch ini_Tips
 		{
 			Case % true:
-			Menu, SubmenuTips, Enable, 	% TransA["Set triggerstring tooltip timeout"]
-			Menu, SubmenuTips, Enable, 	% TransA["Set amount"]
-			Menu, SubmenuTips, Enable, 	% TransA["Choose tips location"]
-			Menu, SubmenuTips, Enable, 	% TransA["Number of characters for tips"]
-			Menu, SubmenuTips, Enable, 	% TransA["Sort tips alphabetically"]
-			Menu, SubmenuTips, Enable, 	% TransA["Sort tips by length"]
-			Menu, SubmenuTips, Enable,	% TransA["Enable sound if triggerstring"]
-			Menu, SubmenuTips, Enable,	% TransA["Triggerstring sound parameters"]
+				Menu, SubmenuTips, Check, 	% TransA["Enable/Disable"]
+				Menu, SubmenuTips, Enable, 	% TransA["Set triggerstring tooltip timeout"]
+				Menu, SubmenuTips, Enable, 	% TransA["Set amount"]
+				Menu, SubmenuTips, Enable, 	% TransA["Choose tips location"]
+				Menu, SubmenuTips, Enable, 	% TransA["Number of characters for tips"]
+				Menu, SubmenuTips, Enable, 	% TransA["Sort tips alphabetically"]
+				Menu, SubmenuTips, Enable, 	% TransA["Sort tips by length"]
+				Menu, SubmenuTips, Enable,	% TransA["Enable sound if triggerstring"]
+				Menu, SubmenuTips, Enable,	% TransA["Triggerstring sound parameters"]
 			Case % false:
-			Menu, SubmenuTips, Disable, 	% TransA["Set triggerstring tooltip timeout"]
-			Menu, SubmenuTips, Disable, 	% TransA["Set amount"]
-			Menu, SubmenuTips, Disable, 	% TransA["Choose tips location"]
-			Menu, SubmenuTips, Disable, 	% TransA["Number of characters for tips"]
-			Menu, SubmenuTips, Disable, 	% TransA["Sort tips alphabetically"]
-			Menu, SubmenuTips, Disable, 	% TransA["Sort tips by length"]
-			Menu, SubmenuTips, Disable,	% TransA["Enable sound if triggerstring"]
-			Menu, SubmenuTips, Disable,	% TransA["Triggerstring sound parameters"]
+				Menu, SubmenuTips, UnCheck, 	% TransA["Enable/Disable"]
+				Menu, SubmenuTips, Disable, 	% TransA["Set triggerstring tooltip timeout"]
+				Menu, SubmenuTips, Disable, 	% TransA["Set amount"]
+				Menu, SubmenuTips, Disable, 	% TransA["Choose tips location"]
+				Menu, SubmenuTips, Disable, 	% TransA["Number of characters for tips"]
+				Menu, SubmenuTips, Disable, 	% TransA["Sort tips alphabetically"]
+				Menu, SubmenuTips, Disable, 	% TransA["Sort tips by length"]
+				Menu, SubmenuTips, Disable,	% TransA["Enable sound if triggerstring"]
+				Menu, SubmenuTips, Disable,	% TransA["Triggerstring sound parameters"]
 		}
 		IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
 		return
@@ -3854,8 +3942,10 @@ When timeout is set, triggerstring tooltips will dissapear after time reaches it
 When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
 Yes													= Yes
 F_TooltipTimeoutSlider									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 500 [ms]; `nInterval:         500 [ms]; `nRange:            1000 ÷ 10 000 [ms]. `n`nWhen required value is chosen just press Esc key to close this window or close this window with mouse.
-F_TrigSoundDurSliderInfo									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 100 [ms]; `nInterval:         400 [ms]; `nRange:            200 ÷ 2 000 [ms]. `n`nWhen required value is chosen just press Esc key to close this window or close this window with mouse.`n`nTip: Recommended time is somewhere between 200 to 400 ms.
-F_TrigSoundFreqSliderInfo								= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 100 [ms]; `nInterval:         3636 [ms]; `nRange:            37 ÷ 32 767 [ms]. `n`nWhen required value is chosen just press Esc key to close this window or close this window with mouse.`n`nTip: Recommended value is somewhere between 200 to 2000. Mind that for your spcific PC some values outside of recommended range may not produce any sound.
+F_TrigSoundDurSliderInfo									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 100 [ms]; `nInterval:         400 [ms]; `nRange:            200 ÷ 2 000 [ms]. `n`nWhen required value is chosen just press Esc key to close this window or close this window with mouse.`n`nTip: Recommended time is between 200 to 400 ms.
+F_TrigSoundFreqSliderInfo								= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 50; `nInterval:         3636; `nRange:            37 ÷ 32 767. `n`nWhen required value is chosen just press Esc key to close this window or close this window with mouse.`n`nTip: Recommended value is between 200 to 2000. Mind that for your spcific PC some values outside of recommended range may not produce any sound.
+F_MenuSoundDurSliderInfo									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 50 [ms]; `nInterval:         150 [ms]; `nRange:            50 ÷ 2 000 [ms]. `n`nWhen required value is chosen just press Esc key to close this window or close this window with mouse.`n`nTip: Recommended time is between 200 to 400 ms.
+F_MenuSoundFreqSliderInfo								= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 50; `nInterval:         3636; `nRange:            37 ÷ 32 767. `n`nWhen required value is chosen just press Esc key to close this window or close this window with mouse.`n`nTip: Recommended value is between 200 to 2000. Mind that for your spcific PC some values outside of recommended range may not produce any sound.
 ↓ Click here to select hotstring library ↓					= ↓ Click here to select hotstring library ↓
 )"
 	
@@ -6411,10 +6501,15 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 TSPGuiClose:
 TSPGuiEscape:
-	;Gui, TSP: Submit, NoHide
-	;*[One]
 	IniWrite, % ini_TipsSFrequency, Config.ini, Configuration, TipsSFrequency
 	Iniwrite, % ini_TipsSDuration, Config.ini, Configuration, TipsSDuration
+	Gui, TSP: Destroy
+return
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+MSPGuiClose:
+MSPGuiEscape:
+	IniWrite, % ini_MenuSFrequency, Config.ini, Configuration, MenuSFrequency
+	Iniwrite, % ini_MenuSDuration, Config.ini, Configuration, MenuSDuration
 	Gui, TSP: Destroy
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
