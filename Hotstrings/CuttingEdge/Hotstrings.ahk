@@ -209,7 +209,26 @@ if (v_Param == "d") ;If the script is run with command line parameter "d" like d
 		v_SelectedMonitor := PrimMon
 */
 
+/*
+	Menu, SmUH,		Add, % TransA["Enable / disable ""undid the last hotstring"" tooltip"]
+	Menu, SmUH,		Add, % TransA["Timeout ""undid the last hotstring"" tooltip "]
+	Menu, SmUH,		Add, % TransA["Enable / disable sound if ""undid the last hotstring"""]
+	Menu, SmUH,		Add, % TransA["Parameters of ""undid the last hotstring"" sound"]
+	Menu, SmUH,		Add, % TransA["Shortcut (hotkey) to undo the last hotstring"]
+*/
+
 Menu, ConfTHB, 	Add, % TransA["Undo the last hotstring"],	L_Undo
+
+Menu, SmHiT,		Add, % TransA["Enable / disable hotstring is triggered tooltip"],L_EnDisHiTtooltip	;SmHiT = Submenu Hotstring is Triggered
+Menu, SmHiT,		Disable, % TransA["Enable / disable hotstring is triggered tooltip"]
+Menu, SmHiT,		Add, % TransA["Timeout of hotstring is triggered tooltip"], 	F_TofHiTtooltip
+Menu, SmHiT,		Disable, % TransA["Timeout of hotstring is triggered tooltip"]
+Menu, SmHiT,		Add, % TransA["Enable / disable hotstring is triggered sound"],	F_EnDisHiTsound
+Menu, SmHiT,		Disable, % TransA["Enable / disable hotstring is triggered sound"]
+Menu, SmHiT,		Add, % TransA["Parameters of hostring is triggered sound"],		F_GuiSoundTofH
+Menu, SmHiT,		Disable, % TransA["Parameters of hostring is triggered sound"]
+
+Menu, ConfTHB,		Add, % TransA["If hotstring is triggered"], 	:SmHiT			;;SmHiT = Submenu Hotstring is Triggered
 Menu, PositionMenu, Add, % TransA["Caret"], 					L_MenuCaretCursor
 Menu, PositionMenu, Add, % TransA["Cursor"], 				L_MenuCaretCursor
 
@@ -248,7 +267,8 @@ Menu, Submenu4, 	Add, 5, 					L_AmountOfCharacterTips5
 Menu, SubmenuTips, Add, % TransA["Enable/Disable"], 				F_ToggleMenu_iniTips
 Menu, SubmenuTips, Add
 Menu, SubmenuTips, Add, % TransA["Set triggerstring tooltip timeout"],F_GuiSetTooltipTimeout
-Menu, SubmenuTips, Add, % TransA["Set amount"],					F_GuiSetAmountTrigTip
+Menu, SubmenuTips, Add, % TransA["Set max. no. of shown tips"],		F_GuiSetAmountTrigTip
+Menu, SubmenuTips, Disable, % TransA["Set max. no. of shown tips"]
 Menu, SubmenuTips, Add
 Menu, SubmenuTips, Add, % TransA["Choose tips location"], 			:Submenu3
 Menu, SubmenuTips, Add, % TransA["Number of characters for tips"],	:Submenu4
@@ -259,10 +279,12 @@ Menu, SubmenuTips, Add
 Menu, SubmenuTips, Add, % TransA["Enable sound if triggerstring"],	F_EnableSoundIfTrig
 Menu, SubmenuTips, Add, % TransA["Triggerstring sound parameters"],	F_GuiTrigSoundParameters
 
-Menu, ConfTHB, 	Add, % TransA["Triggerstring tips"], 	:SubmenuTips
-
 F_ToggleMenu_iniTips()
 F_EnableSoundIfTrig()
+
+Menu, ConfTHB, 	Add, % TransA["Triggerstring tips"], 			:SubmenuTips
+Menu, ConfTHB,		Add
+
 
 Menu, Submenu4, 	Check, 					% ini_AmountOfCharacterTips
 Loop, 5
@@ -969,6 +991,24 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_GuiSoundTofH()
+{
+	global	;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EnDisHiTsound()
+{
+	global	;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_TofHiTtooltip()
+{
+	global	;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ToggleMenuSound()
 {
 	global	;assume-global mode
@@ -1350,7 +1390,7 @@ F_ToggleMenu_iniTips()
 			Case % true:
 				Menu, SubmenuTips, Check, 	% TransA["Enable/Disable"]
 				Menu, SubmenuTips, Enable, 	% TransA["Set triggerstring tooltip timeout"]
-				Menu, SubmenuTips, Enable, 	% TransA["Set amount"]
+				Menu, SubmenuTips, Enable, 	% TransA["Set max. no. of shown tips"]
 				Menu, SubmenuTips, Enable, 	% TransA["Choose tips location"]
 				Menu, SubmenuTips, Enable, 	% TransA["Number of characters for tips"]
 				Menu, SubmenuTips, Enable, 	% TransA["Sort tips alphabetically"]
@@ -1360,7 +1400,7 @@ F_ToggleMenu_iniTips()
 			Case % false:
 				Menu, SubmenuTips, UnCheck, 	% TransA["Enable/Disable"]
 				Menu, SubmenuTips, Disable, 	% TransA["Set triggerstring tooltip timeout"]
-				Menu, SubmenuTips, Disable, 	% TransA["Set amount"]
+				Menu, SubmenuTips, Disable, 	% TransA["Set max. no. of shown tips"]
 				Menu, SubmenuTips, Disable, 	% TransA["Choose tips location"]
 				Menu, SubmenuTips, Disable, 	% TransA["Number of characters for tips"]
 				Menu, SubmenuTips, Disable, 	% TransA["Sort tips alphabetically"]
@@ -1379,7 +1419,7 @@ F_ToggleMenu_iniTips()
 			Case % true:
 				Menu, SubmenuTips, Check, 	% TransA["Enable/Disable"]
 				Menu, SubmenuTips, Enable, 	% TransA["Set triggerstring tooltip timeout"]
-				Menu, SubmenuTips, Enable, 	% TransA["Set amount"]
+				Menu, SubmenuTips, Enable, 	% TransA["Set max. no. of shown tips"]
 				Menu, SubmenuTips, Enable, 	% TransA["Choose tips location"]
 				Menu, SubmenuTips, Enable, 	% TransA["Number of characters for tips"]
 				Menu, SubmenuTips, Enable, 	% TransA["Sort tips alphabetically"]
@@ -1389,7 +1429,7 @@ F_ToggleMenu_iniTips()
 			Case % false:
 				Menu, SubmenuTips, UnCheck, 	% TransA["Enable/Disable"]
 				Menu, SubmenuTips, Disable, 	% TransA["Set triggerstring tooltip timeout"]
-				Menu, SubmenuTips, Disable, 	% TransA["Set amount"]
+				Menu, SubmenuTips, Disable, 	% TransA["Set max. no. of shown tips"]
 				Menu, SubmenuTips, Disable, 	% TransA["Choose tips location"]
 				Menu, SubmenuTips, Disable, 	% TransA["Number of characters for tips"]
 				Menu, SubmenuTips, Disable, 	% TransA["Sort tips alphabetically"]
@@ -3758,6 +3798,8 @@ doesn't exist in application folder						= doesn't exist in application folder
 Dynamic hotstrings 										= &Dynamic hotstrings
 Edit Hotstrings 										= Edit Hotstrings
 Enable/Disable 										= Enable/Disable
+Enable / disable hotstring is triggered sound				= Enable / disable hotstring is triggered sound
+Enable / disable hotstring is triggered tooltip				= Enable / disable hotstring is triggered tooltip
 Enable/disable libraries									= Enable/disable &libraries
 Enable/disable triggerstring tips 							= Enable/disable triggerstring tips	
 Enable sound if overrun 									= Enable sound if overrun
@@ -3799,6 +3841,7 @@ Hotstring moved to the 									= Hotstring moved to the
 Hotstring paste from Clipboard delay 1 s 					= Hotstring paste from Clipboard delay 1 s
 Hotstring paste from Clipboard delay 						= Hotstring paste from Clipboard delay
 Hotstrings have been loaded 								= Hotstrings have been loaded
+If hotstring is triggered								= If hotstring is triggered
 If you answer ""Yes"" it will overwritten.					= If you answer ""Yes"" it will overwritten.
 If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file. = If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file.
 If you've just unchecked any library, its hotstring definitions remain active. Please reload the application in order to deactivate it. = If you've just unchecked any library, its hotstring definitions remain active. Please reload the application in order to deactivate it.
@@ -3850,6 +3893,7 @@ Please wait, uploading .csv files... 						= Please wait, uploading .csv files..
 question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
+Parameters of hostring is triggered sound					= Parameters of hostring is triggered sound
 Pause												= Pause
 Pause application										= Pause application
 Phrase to search for:									= Phrase to search for:
@@ -3875,7 +3919,7 @@ Select hotstring output function 							= Select hotstring output function
 Select the target library: 								= Select the target library:
 Select trigger option(s) 								= Select trigger option(s)
 Semicolon ; 											= Semicolon ;
-Set amount											= Set amount
+Set max. no. of shown tips 								= Set max. no. of shown tips
 Set Clipboard Delay										= Set Clipboard Delay
 Set delay												= Set delay
 Set parameters of menu sound								= Set parameters of menu sound
@@ -3921,6 +3965,7 @@ There was no Languages subfolder, so one now is created.		= There was no Languag
 This library:											= This library:
 This line do not comply to format required by this application.  = This line do not comply to format required by this application.
 This option is valid 									= In case you observe some hotstrings aren't pasted from clipboard increase this value. `nThis option is valid for CL and MCL hotstring output functions. 
+Timeout of hotstring is triggered tooltip					= Timeout of hotstring is triggered tooltip
 Toggle EndChars	 									= &Toggle EndChars
 Total:												= Total:
 (triggerstring, hotstring) definitions						= (triggerstring, hotstring) definitions
@@ -6871,4 +6916,7 @@ STDGuiClose:
 STDGuiEscape:
 IniWrite, % ini_TipsDelay, Config.ini, Configuration, TipsDelay
 Gui, STD: Destroy
+return
+
+L_EnDisHiTtooltip:
 return
