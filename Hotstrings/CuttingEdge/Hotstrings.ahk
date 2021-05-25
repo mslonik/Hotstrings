@@ -301,133 +301,67 @@ if (ini_TipsSortByLength)
 else
 	Menu, SubmenuTips, UnCheck, % TransA["Sort tips by length"]
 
-Menu, Submenu2, Add, % TransA["Space"], 				EndSpace
-if (EndingChar_Space)
-	Menu, Submenu2, Check, % TransA["Space"]
-else
-	Menu, Submenu2, UnCheck, % TransA["Space"]
+;tu jestem
+Menu, SubmenuEndChars, Add, % TransA["Minus -"], 				F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Space"],				F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Round Bracket ("],	F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Round Bracket )"],	F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Square Bracket ["],F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Square Bracket ]"],F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Curly Bracket {"], F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Curly Bracket }"], F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Colon :"], 				F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Semicolon `;"], 			F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Apostrophe '"], 			F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Quote """], 			F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Slash /"], 				F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Backslash \"], 			F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Comma ,"], 				F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Dot ."], 				F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Question Mark ?"], 		F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 			F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Exclamation Mark !"], 	F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Enter"],				F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Tab"], 				F_MenuEndChars
+Menu, ConfTHB,  	   Add, % TransA["Toggle EndChars"], 		:SubmenuEndChars
+F_MenuEndChars()
 
-Menu, Submenu2, Add, % TransA["Minus -"], EndMinus
-if (EndingChar_Minus)
-	Menu, Submenu2, Check, % TransA["Minus -"]
-else
-	Menu, Submenu2, UnCheck, % TransA["Minus -"]
+F_MenuEndChars()
+{	
+	global	;assume-global mode
+	local	key := "", val := ""
+	static OneTimeMemory := true
+	
+	if (OneTimeMemory)
+	{
+		for key, val in a_HotstringEndChars
+		{
+			if (a_HotstringEndChars[key])
+				Menu, SubmenuEndChars, Check, % TransA[key]
+			else
+				Menu, SubmenuEndChars, UnCheck, % TransA[key]
+		}
+		OneTimeMemory := false
+	}
+	else
+	{
+	;*[One]
+		if (a_HotstringEndChars[A_ThisMenuItem])
+		{
+			Menu, SubmenuEndChars, UnCheck, % A_ThisMenuitem
+			a_HotstringEndChars[A_ThisMenuItem] := false
+			IniWrite, % false, Config.ini, EndChars, % A_ThisMenuItem
+		}
+		else
+		{
+			Menu, SubmenuEndChars, Check, % A_ThisMenuitem
+			a_HotstringEndChars[A_ThisMenuItem] := true
+			IniWrite, % true, Config.ini, EndChars, % A_ThisMenuItem
+		}
+	}
+	return
+}
 
-Menu, Submenu2, Add, % TransA["Opening Round Bracket ("], EndORoundBracket
-if (EndingChar_ORoundBracket)
-	Menu, Submenu2, Check, % TransA["Opening Round Bracket ("]
-else
-	Menu, Submenu2, UnCheck, % TransA["Opening Round Bracket ("]
-
-Menu, Submenu2, Add, % TransA["Closing Round Bracket )"], EndCRoundBracket
-if (EndingChar_CRoundBracket)
-	Menu, Submenu2, Check, % TransA["Closing Round Bracket )"]
-else
-	Menu, Submenu2, UnCheck, % TransA["Closing Round Bracket )"]
-
-Menu, Submenu2, Add, % TransA["Opening Square Bracket ["], EndOSquareBracket
-if (EndingChar_OSquareBracket)
-	Menu, Submenu2, Check, % TransA["Opening Square Bracket ["]
-else
-	Menu, Submenu2, UnCheck, % TransA["Opening Square Bracket ["]
-
-Menu, Submenu2, Add, % TransA["Closing Square Bracket ]"], EndCSquareBracket
-if (EndingChar_CSquareBracket)
-	Menu, Submenu2, Check, % TransA["Closing Square Bracket ]"]
-else
-	Menu, Submenu2, UnCheck, % TransA["Closing Square Bracket ]"]
-
-Menu, Submenu2, Add, % TransA["Opening Curly Bracket {"], EndOCurlyBracket
-if (EndingChar_OCurlyBracket)
-	Menu, Submenu2, Check, % TransA["Opening Curly Bracket {"]
-else
-	Menu, Submenu2, UnCheck, % TransA["Opening Curly Bracket {"]
-
-Menu, Submenu2, Add, % TransA["Closing Curly Bracket }"], EndCCurlyBracket
-if (EndingChar_CCurlyBracket)
-	Menu, Submenu2, Check, % TransA["Closing Curly Bracket }"]
-else
-	Menu, Submenu2, UnCheck, % TransA["Closing Curly Bracket }"]
-
-Menu, Submenu2, Add, % TransA["Colon :"], EndColon
-if (EndingChar_Colon)
-	Menu, Submenu2, Check, % TransA["Colon :"]
-else
-	Menu, Submenu2, UnCheck, % TransA["Colon :"]
-
-Menu, Submenu2, Add, % TransA["Semicolon `;"], EndSemicolon
-if (EndingChar_Semicolon)
-	Menu, Submenu2, Check, % TransA["Semicolon `;"]
-else
-	Menu, Submenu2, UnCheck, % TransA["Semicolon `;"]
-
-Menu, Submenu2, Add, % TransA["Apostrophe '"], EndApostrophe
-if (EndingChar_Apostrophe)
-	Menu, Submenu2, Check, % TransA["Apostrophe '"]
-else
-	Menu, Submenu2, UnCheck, % TransA["Apostrophe '"]
-
-Menu, Submenu2, Add, % TransA["Quote """], EndQuote
-if (EndingChar_Quote)
-	Menu, Submenu2, Check, % TransA["Quote """]
-else
-	Menu, Submenu2, UnCheck, % TransA["Quote """]
-
-Menu, Submenu2, Add, % TransA["Slash /"], EndSlash
-if (EndingChar_Slash)
-	Menu, Submenu2, Check, % TransA["Slash /"]
-else
-	Menu, Submenu2, UnCheck, % TransA["Slash /"]
-
-Menu, Submenu2, Add, % TransA["Backslash \"], EndBackslash
-if (EndingChar_Backslash)
-	Menu, Submenu2, Check, % TransA["Backslash \"]
-else
-	Menu, Submenu2, UnCheck, % TransA["Backslash \"]
-
-Menu, Submenu2, Add, % TransA["Comma ,"], EndComma
-if (EndingChar_Comma)
-	Menu, Submenu2, Check, % TransA["Comma ,"]
-else
-	Menu, Submenu2, UnCheck, % TransA["Comma ,"]
-
-Menu, Submenu2, Add, % TransA["Dot ."], EndDot
-if (EndingChar_Dot)
-	Menu, Submenu2, Check, % TransA["Dot ."]
-else
-	Menu, Submenu2, UnCheck, % TransA["Dot ."]
-
-Menu, Submenu2, Add, % TransA["Question Mark ?"], EndQuestionMark
-if (EndingChar_QuestionMark)
-	Menu, Submenu2, Check, % TransA["Question Mark ?"]
-else
-	Menu, Submenu2, UnCheck, % TransA["Question Mark ?"]
-
-Menu, Submenu2, Add, % TransA["Exclamation Mark !"], EndExclamationMark
-if (EndingChar_ExclamationMark)
-	Menu, Submenu2, Check, % TransA["Exclamation Mark !"]
-else
-	Menu, Submenu2, UnCheck, % TransA["Exclamation Mark !"]
-
-Menu, Submenu2, Add, % TransA["Underscore _"], EndUnderscore
-if (EndingChar_Underscore)
-	Menu, Submenu2, Check, % TransA["Underscore _"]
-else
-	Menu, Submenu2, UnCheck, % TransA["Underscore _"]
-
-Menu, Submenu2, Add, % TransA["Enter"], EndEnter
-if (EndingChar_Enter)
-	Menu, Submenu2, Check, % TransA["Enter"]
-else
-	Menu, Submenu2, UnCheck, % TransA["Enter"]
-
-Menu, Submenu2, Add, % TransA["Tab"], EndTab
-if (EndingChar_Tab)
-	Menu, Submenu2, Check, % TransA["Tab"]
-else
-	Menu, Submenu2, UnCheck, % TransA["Tab"]
-
-Menu, ConfTHB, Add, % TransA["Toggle EndChars"], :Submenu2
 
 if (ini_Tips == 0)
 	Menu, SubmenuTips, UnCheck, % TransA["Enable/Disable"]
@@ -3472,6 +3406,25 @@ F_CheckCreateConfigIni()
 	
 	ConfigIni := "			
 	(
+[Configuration]
+UndoHotstring=1
+Delay=300
+MenuSound=1
+MenuSFrequency=300
+MenuSDuration=400
+MenuCursor=0
+MenuCaret=1
+Tips=1
+TipsDelay=0
+Cursor=0
+Caret=1
+TipsChars=1
+TipsSortAlphatebically=1
+TipsSortByLength=1
+TipsSound=1
+TipsSFrequency=400
+TipsSDuration=200
+Language=English.txt
 [GraphicalUserInterface]
 MainWindowPosX=
 MainWindowPosY=
@@ -3491,46 +3444,27 @@ GuiSizeOfMarginY=10
 GuiFontType=Calibri
 GuiFontSize=10
 GuiReload=
-[Configuration]
-UndoHotstring=1
-Delay=300
-MenuSound=1
-MenuSFrequency=300
-MenuSDuration=400
-MenuCursor=0
-MenuCaret=1
-EndingChar_Space=1
-EndingChar_Minus=1
-EndingChar_ORoundBracket=1
-EndingChar_CRoundBracket=1
-EndingChar_OSquareBracket=1
-EndingChar_CSquareBracket=1
-EndingChar_OCurlyBracket=1
-EndingChar_CCurlyBracket=1
-EndingChar_Colon=1
-EndingChar_Semicolon=1
-EndingChar_Apostrophe=1
-EndingChar_Quote=1
-EndingChar_Slash=0
-EndingChar_Backslash=1
-EndingChar_Comma=1
-EndingChar_Dot=1
-EndingChar_QuestionMark=1
-EndingChar_ExclamationMark=1
-EndingChar_Enter=1
-EndingChar_Tab=1
-EndingChar_Underscore=0
-Tips=1
-TipsDelay=0
-Cursor=0
-Caret=1
-TipsChars=1
-TipsSortAlphatebically=1
-TipsSortByLength=1
-TipsSound=1
-TipsSFrequency=400
-TipsSDuration=200
-Language=English.txt
+[EndChars]
+beg-end=1
+beg end=1
+beg(end=1
+beg)end=1
+beg[end=1
+beg]end=1
+beg{end=1
+beg}end=1
+beg:end=1
+beg;end=1
+beg""end=1
+beg/end=0
+beg\end=1
+beg:end=1
+beg.end=1
+beg?end=1
+beg!end=1
+beg`nend=1
+beg`tend=1
+beg_end=0
 [LoadLibraries]
 [ShowTipsLibraries]
 	)"
@@ -3805,7 +3739,7 @@ Enable/disable triggerstring tips 							= Enable/disable triggerstring tips
 Enable sound if overrun 									= Enable sound if overrun
 Enable sound if triggerstring								= Enable sound if triggerstring
 Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 4th edition of this application, 2021 by Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
-Enter 												= Enter
+Enter 												= Enter 
 Enter a name for the new library 							= Enter a name for the new library
 Enter hotstring 										= Enter hotstring
 Enter triggerstring										= Enter triggerstring
@@ -3932,11 +3866,12 @@ Size of font											= Size of font
 Size of margin:										= Size of margin:
 Slash / 												= Slash /
 Something went wrong with hotstring deletion:				= Something went wrong with hotstring deletion:
+Something went wrong with hotstring EndChars					= Something went wrong with hotstring EndChars
 Something weng wrong with link file (.lnk) creation			= Something weng wrong with link file (.lnk) creation
 Sort tips alphabetically 								= Sort tips &alphabetically
 Sort tips by length 									= Sort tips by &length
 Sound test											= Sound test
-Space 												= Space
+Space												= Space
 Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
 Standard executable (Ahk2Exe.exe)							= Standard executable (Ahk2Exe.exe)
 Static hotstrings 										= &Static hotstrings
@@ -3945,7 +3880,7 @@ Suspend Hotkeys										= Suspend Hotkeys
 )"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
 	TransConst .= "`n
 (Join`n `
-Tab 													= Tab
+Tab 													= Tab 
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
 The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure? = The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure?
 The default											= The default
@@ -5791,73 +5726,48 @@ F_CheckBoxColor(State, Button)
 
 F_LoadEndChars() ;Load from Config.ini
 {
-	global
+	global	;assume-global mode
+	local	vOutputVarSection := "", key := "", val := "", tick := false, LastKey := ""
 	
-	HotstringEndChars := ""
-	IniRead, EndingChar_Space, 				Config.ini, Configuration, EndingChar_Space
-	IniRead, EndingChar_Minus, 				Config.ini, Configuration, EndingChar_Minus
-	IniRead, EndingChar_ORoundBracket, 		Config.ini, Configuration, EndingChar_ORoundBracket
-	IniRead, EndingChar_CRoundBracket, 		Config.ini, Configuration, EndingChar_CRoundBracket
-	IniRead, EndingChar_OSquareBracket, 		Config.ini, Configuration, EndingChar_OSquareBracket
-	IniRead, EndingChar_CSquareBracket, 		Config.ini, Configuration, EndingChar_CSquareBracket
-	IniRead, EndingChar_OCurlyBracket, 		Config.ini, Configuration, EndingChar_OCurlyBracket
-	IniRead, EndingChar_CCurlyBracket, 		Config.ini, Configuration, EndingChar_CCurlyBracket
-	IniRead, EndingChar_Colon, 				Config.ini, Configuration, EndingChar_Colon
-	IniRead, EndingChar_Semicolon, 			Config.ini, Configuration, EndingChar_Semicolon
-	IniRead, EndingChar_Apostrophe, 			Config.ini, Configuration, EndingChar_Apostrophe
-	IniRead, EndingChar_Quote, 				Config.ini, Configuration, EndingChar_Quote
-	IniRead, EndingChar_Slash, 				Config.ini, Configuration, EndingChar_Slash
-	IniRead, EndingChar_Backslash, 			Config.ini, Configuration, EndingChar_Backslash
-	IniRead, EndingChar_Comma, 				Config.ini, Configuration, EndingChar_Comma
-	IniRead, EndingChar_Dot, 				Config.ini, Configuration, EndingChar_Dot
-	IniRead, EndingChar_QuestionMark, 			Config.ini, Configuration, EndingChar_QuestionMark
-	IniRead, EndingChar_ExclamationMark, 		Config.ini, Configuration, EndingChar_ExclamationMark
-	IniRead, EndingChar_Enter, 				Config.ini, Configuration, EndingChar_Enter
-	IniRead, EndingChar_Tab, 				Config.ini, Configuration, EndingChar_Tab
-	IniRead, EndingChar_Underscore,			Config.ini, Configuration, EndingChar_Underscore
-	if (EndingChar_Space)
-		HotstringEndChars .= " "
-	if (EndingChar_Minus)
-		HotstringEndChars .= "-"
-	if (EndingChar_ORoundBracket)
-		HotstringEndChars .= "("
-	if (EndingChar_CRoundBracket)
-		HotstringEndChars .= ")"
-	if (EndingChar_OSquareBracket)
-		HotstringEndChars .= "["
-	if (EndingChar_CSquareBracket)
-		HotstringEndChars .= "]"
-	if (EndingChar_OCurlyBracket)
-		HotstringEndChars .= "{"
-	if (EndingChar_CCurlyBracket)
-		HotstringEndChars .= "}"
-	if (EndingChar_Colon)
-		HotstringEndChars .= ":"
-	if (EndingChar_Semicolon)
-		HotstringEndChars .= ";"
-	if (EndingChar_Apostrophe)
-		HotstringEndChars .= "'"
-	if (EndingChar_Quote)
-		HotstringEndChars .= """"
-	if (EndingChar_Slash)
-		HotstringEndChars .= "/"
-	if (EndingChar_Backslash)
-		HotstringEndChars .= "\"
-	if (EndingChar_Comma)
-		HotstringEndChars .= ","
-	if (EndingChar_Dot)
-		HotstringEndChars .= "."
-	if (EndingChar_QuestionMark)
-		HotstringEndChars .= "?"
-	if (EndingChar_ExclamationMark)
-		HotstringEndChars .= "!"
-	if (EndingChar_Enter)
-		HotstringEndChars .= "`n"
-	if (EndingChar_Tab)
-		HotstringEndChars .= "`t"
-	if (EndingChar_Underscore)
-		HotstringEndChars .= "_"
-	Hotstring("EndChars", HotstringEndChars)
+	HotstringEndChars 	:= ""
+	a_HotstringEndChars := {}
+	
+	IniRead, vOutputVarSection, Config.ini, EndChars
+	Loop, Parse, vOutputVarSection, =`n, `r%A_Tab%
+	{
+		if !(tick)
+		{
+			;key := SubStr(A_LoopField, 2, -1)
+			key := A_LoopField
+			tick := true
+		}
+		else
+		{
+			;val := SubStr(A_LoopField, 2, -1)
+			val := A_LoopField
+			tick := false
+			if (val)
+			{
+				Switch key
+				{
+					Case "Space": 	HotstringEndChars .= A_Space
+					Case "Enter": 	HotstringEndChars .= "``n"
+					Case "Tab":	HotstringEndChars .= "``t"
+					Default:
+						LastKey := SubStr(key, 0)
+						HotstringEndChars .= LastKey
+				}
+			}
+		}			
+		a_HotstringEndChars[key] := val
+	}
+	
+	Try
+		Hotstring("EndChars", HotstringEndChars)
+	Catch
+		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring EndChars"] . ":" . "`n`n"
+			. "EndChars" . ":" . A_Space . HotstringEndChars
+	return	
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6596,195 +6506,6 @@ L_Undo:
 Menu, Submenu1, ToggleCheck, % TransA["Undo the last hotstring"]
 ini_Undo := !(ini_Undo)
 IniWrite, %ini_Undo%, Config.ini, Configuration, UndoHotstring
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndSpace:
-Menu, Submenu2, ToggleCheck, % TransA["Space"]
-EndingChar_Space := !(EndingChar_Space)
-IniWrite, %EndingChar_Space%, Config.ini, Configuration, EndingChar_Space
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndMinus:
-Menu, Submenu2, ToggleCheck, % TransA["Minus -"]
-EndingChar_Minus := !(EndingChar_Minus)
-IniWrite, %EndingChar_Minus%, Config.ini, Configuration, EndingChar_Minus
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndORoundBracket:
-Menu, Submenu2, ToggleCheck, % TransA["Opening Round Bracket ("]
-EndingChar_ORoundBracket := !(EndingChar_ORoundBracket)
-IniWrite, %EndingChar_ORoundBracket%, Config.ini, Configuration, EndingChar_ORoundBracket
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndCRoundBracket:
-Menu, Submenu2, ToggleCheck, % TransA["Closing Round Bracket )"]
-EndingChar_CRoundBracket := !(EndingChar_CRoundBracket)
-IniWrite, %EndingChar_CRoundBracket%, Config.ini, Configuration, EndingChar_CRoundBracket
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndOSquareBracket:
-Menu, Submenu2, ToggleCheck, % TransA["Opening Square Bracket ["]
-EndingChar_OSquareBracket := !(EndingChar_OSquareBracket)
-IniWrite, %EndingChar_OSquareBracket%, Config.ini, Configuration, EndingChar_OSquareBracket
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndCSquareBracket:
-Menu, Submenu2, ToggleCheck, % TransA["Closing Square Bracket ]"]
-EndingChar_CSquareBracket := !(EndingChar_CSquareBracket)
-IniWrite, %EndingChar_CSquareBracket%, Config.ini, Configuration, EndingChar_CSquareBracket
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndOCurlyBracket:
-Menu, Submenu2, ToggleCheck, % TransA["Opening Curly Bracket {"]
-EndingChar_OCurlyBracket := !(EndingChar_OCurlyBracket)
-IniWrite, %EndingChar_OCurlyBracket%, Config.ini, Configuration, EndingChar_OCurlyBracket
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndCCurlyBracket:
-Menu, Submenu2, ToggleCheck, % TransA["Closing Curly Bracket }"]
-EndingChar_CCurlyBracket := !(EndingChar_CCurlyBracket)
-IniWrite, %EndingChar_CCurlyBracket%, Config.ini, Configuration, EndingChar_CCurlyBracket
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndColon:
-Menu, Submenu2, ToggleCheck,% TransA["Colon :"]
-EndingChar_Colon := !(EndingChar_Colon)
-IniWrite, %EndingChar_Colon%, Config.ini, Configuration, EndingChar_Colon
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndSemicolon:
-Menu, Submenu2, ToggleCheck, % TransA["Semicolon `;"]
-EndingChar_Semicolon := !(EndingChar_Semicolon)
-IniWrite, %EndingChar_Semicolon%, Config.ini, Configuration, EndingChar_Semicolon
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndApostrophe:
-Menu, Submenu2, ToggleCheck, % TransA["Apostrophe '"]
-EndingChar_Apostrophe := !(EndingChar_Apostrophe)
-IniWrite, %EndingChar_Apostrophe%, Config.ini, Configuration, EndingChar_Apostrophe
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndQuote:
-Menu, Submenu2, ToggleCheck, % TransA["Quote """]
-EndingChar_Quote := !(EndingChar_Quote)
-IniWrite, %EndingChar_Quote%, Config.ini, Configuration, EndingChar_Quote
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndSlash:
-Menu, Submenu2, ToggleCheck, % TransA["Slash /"]
-EndingChar_Slash := !(EndingChar_Slash)
-IniWrite, %EndingChar_Slash%, Config.ini, Configuration, EndingChar_Slash
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndBackslash:
-Menu, Submenu2, ToggleCheck, % TransA["Backslash \"]
-EndingChar_Backslash := !(EndingChar_Backslash)
-IniWrite, %EndingChar_Backslash%, Config.ini, Configuration, EndingChar_Backslash
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndComma:
-Menu, Submenu2, ToggleCheck, % TransA["Comma ,"]
-EndingChar_Comma := !(EndingChar_Comma)
-IniWrite, %EndingChar_Comma%, Config.ini, Configuration, EndingChar_Comma
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndDot:
-Menu, Submenu2, ToggleCheck, % TransA["Dot ."]
-EndingChar_Dot := !(EndingChar_Dot)
-IniWrite, %EndingChar_Dot%, Config.ini, Configuration, EndingChar_Dot
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndQuestionMark:
-Menu, Submenu2, ToggleCheck, % TransA["Question Mark ?"]
-EndingChar_QuestionMark := !(EndingChar_QuestionMark)
-IniWrite, %EndingChar_QuestionMark%, Config.ini, Configuration, EndingChar_QuestionMark
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndExclamationMark:
-Menu, Submenu2, ToggleCheck, % TransA["Exclamation Mark !"]
-EndingChar_ExclamationMark := !(EndingChar_ExclamationMark)
-IniWrite, %EndingChar_ExclamationMark%, Config.ini, Configuration, EndingChar_ExclamationMark
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndEnter:
-Menu, Submenu2, ToggleCheck, % TransA["Enter"]
-EndingChar_Enter := !(EndingChar_Enter)
-IniWrite, %EndingChar_Enter%, Config.ini, Configuration, EndingChar_Enter
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndTab:
-Menu, Submenu2, ToggleCheck, % TransA["Tab"]
-EndingChar_Tab := !(EndingChar_Tab)
-IniWrite, %EndingChar_Tab%, Config.ini, Configuration, EndingChar_Tab
-F_LoadEndChars()
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-EndUnderscore:
-Menu, Submenu2, ToggleCheck, % TransA["Underscore _"]
-EndingChar_Underscore := !(EndingChar_Underscore)
-Iniwrite, %EndingChar_Underscore%, Config.ini, Configuration, EndingChar_Underscore
-F_LoadEndChars()
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
