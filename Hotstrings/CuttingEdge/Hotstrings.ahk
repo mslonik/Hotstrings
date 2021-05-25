@@ -120,6 +120,8 @@ IniRead, ini_MenuCaret, 					Config.ini, Configuration, MenuCaret
 IniRead, ini_MenuSFrequency,				Config.ini, Configuration, MenuSFrequency
 IniRead, ini_MenuSDuration,				Config.ini, Configuration, MenuSDuration
 
+F_LoadSignalingParams()
+
 F_ValidateIniLibSections() 
 
 ;If application wasn't run with "l" parameter (standing for "light / lightweight"), prepare tray menu.
@@ -301,7 +303,6 @@ if (ini_TipsSortByLength)
 else
 	Menu, SubmenuTips, UnCheck, % TransA["Sort tips by length"]
 
-;tu jestem
 Menu, SubmenuEndChars, Add, % TransA["Minus -"], 				F_MenuEndChars
 Menu, SubmenuEndChars, Add, % TransA["Space"],				F_MenuEndChars
 Menu, SubmenuEndChars, Add, % TransA["Opening Round Bracket ("],	F_MenuEndChars
@@ -325,43 +326,6 @@ Menu, SubmenuEndChars, Add, % TransA["Enter"],				F_MenuEndChars
 Menu, SubmenuEndChars, Add, % TransA["Tab"], 				F_MenuEndChars
 Menu, ConfTHB,  	   Add, % TransA["Toggle EndChars"], 		:SubmenuEndChars
 F_MenuEndChars()
-
-F_MenuEndChars()
-{	
-	global	;assume-global mode
-	local	key := "", val := ""
-	static OneTimeMemory := true
-	
-	if (OneTimeMemory)
-	{
-		for key, val in a_HotstringEndChars
-		{
-			if (a_HotstringEndChars[key])
-				Menu, SubmenuEndChars, Check, % TransA[key]
-			else
-				Menu, SubmenuEndChars, UnCheck, % TransA[key]
-		}
-		OneTimeMemory := false
-	}
-	else
-	{
-	;*[One]
-		if (a_HotstringEndChars[A_ThisMenuItem])
-		{
-			Menu, SubmenuEndChars, UnCheck, % A_ThisMenuitem
-			a_HotstringEndChars[A_ThisMenuItem] := false
-			IniWrite, % false, Config.ini, EndChars, % A_ThisMenuItem
-		}
-		else
-		{
-			Menu, SubmenuEndChars, Check, % A_ThisMenuitem
-			a_HotstringEndChars[A_ThisMenuItem] := true
-			IniWrite, % true, Config.ini, EndChars, % A_ThisMenuItem
-		}
-	}
-	return
-}
-
 
 if (ini_Tips == 0)
 	Menu, SubmenuTips, UnCheck, % TransA["Enable/Disable"]
@@ -433,6 +397,154 @@ Menu, FontTypeMenu, Check,	% c_FontType
 Menu, ConfGUI,		Add, 	% TransA["Font type"],					:FontTypeMenu
 
 Menu, Submenu1,		Add, % TransA["Triggerstring / hotstring behaviour"], :ConfTHB
+
+Menu, UndoOfH,			Add, Enable / Disable,						F_EventEnDis
+Menu, UndoOfH,			Add, Tooltip,								F_EventTooltip
+Menu, UndoOfH,			Add, Sound,								F_EventSound
+
+Menu, OrdHisTrig,		Add, Enable / Disable,						F_EventEnDis
+Menu, OrdHisTrig,		Add, Tooltip,								F_EventTooltip
+Menu, OrdHisTrig,		Add, Sound,								F_EventSound
+
+Menu, MenuHisTrig,		Add, Enable / Disable,						F_EventEnDis
+Menu, MenuHisTrig,		Add, Tooltip,								F_EventTooltip
+Menu, MenuHisTrig,		Add, Sound,								F_EventSound
+
+Menu, SigOfEvents,		Add, Ordinary hotstring is triggered,			:OrdHisTrig
+Menu, SigOfEvents,		Add, Menu hotstring is triggered,				:MenuHisTrig
+Menu, SigOfEvents,		Add, Undo of hotstring,						:UndoOfH
+Menu, SigOfEvents,		Add
+Menu, SigOfEvents,		Add, Mute all signals,						F_AllMute
+Menu, SigOfEvents,		Add, Off all signals tooltips,				F_AllTooltipsOff
+
+F_EventEnDis()
+
+
+F_AllTooltipsOff()
+{
+	global	;assume-global mode
+	return
+}
+
+F_AllMute()
+{
+	global	;assume-global mode
+	return
+}
+
+F_EventSound()
+{
+	global	;assume-global mode
+	return
+}
+
+F_EventTooltip()
+{
+	global	;assume-global mode
+	return
+}
+
+
+F_EventEnDis()	;tu jestem
+{
+	global	;assume-global mode
+	static OneTimeMemory := true
+	
+	if (OneTimeMemory)
+	{
+		if (ini_OHSignaling)
+		{
+			Menu, MenuHisTrig, Check, Enable / Disable
+			Menu, MenuHisTrig, Enable, Tooltip
+			Menu, MenuHisTrig, Enable, Sound
+		}
+		else
+		{
+			Menu, MenuHisTrig, UnCheck, Enable / Disable
+			Menu, MenuHisTrig, Disable, Tooltip
+			Menu, MenuHisTrig, Disable, Sound
+		}
+		if (ini_MHSignaling)
+		{
+			Menu, OrdHisTrig, Check, Enable / Disable
+			Menu, OrdHisTrig, Enable, Tooltip
+			Menu, OrdHisTrig, Enable, Sound
+		}
+		else
+		{
+			Menu, OrdHisTrig, UnCheck, Enable / Disable
+			Menu, OrdHisTrig, Disable, Tooltip
+			Menu, OrdHisTrig, Disable, Sound
+		}
+			
+		if (ini_UHSignaling)
+		{
+			Menu, UndoOfH, Check, Enable / Disable
+			Menu, UndoOfH, Enable, Tooltip
+			Menu, UndoOfH, Enable, Sound
+		}
+		else
+		{
+			Menu, UndoOfH, UnCheck, Enable / Disable
+			Menu, UndoOfH, Disable, Tooltip
+			Menu, UndoOfH, Disable, Sound
+		}
+		OneTimeMemory := false
+	}
+	else
+		Switch A_ThisMenu
+	{
+		Case "MenuHisTrig":
+			ini_OHSignaling := !ini_OHSignaling
+			if (ini_OHSignaling)
+			{
+				Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+				Menu, % A_ThisMenu, Enable, Tooltip
+				Menu, % A_ThisMenu, Enable, Sound
+			}
+			else
+			{
+				Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+				Menu, % A_ThisMenu, Disable, Tooltip
+				Menu, % A_ThisMenu, Disable, Sound
+			}
+			IniWrite, % ini_OHSignaling, Config.ini, Event_OrdinaryHotstring, OHSignaling
+		Case "OrdHisTrig":
+			ini_MHSignaling := !ini_MHSignaling
+			if (ini_MHSignaling)
+			{
+				Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+				Menu, % A_ThisMenu, Enable, Tooltip
+				Menu, % A_ThisMenu, Enable, Sound
+			}
+			else
+			{
+				Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+				Menu, % A_ThisMenu, Disable, Tooltip
+				Menu, % A_ThisMenu, Disable, Sound
+			}
+			IniWrite, % ini_MHSignaling, Config.ini, Event_MenuHotstring, MHSignaling
+		Case "UndoOfH":
+			ini_UHSignaling := !ini_UHSignaling
+			if (ini_UHSignaling)
+			{
+				Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+				Menu, % A_ThisMenu, Enable, Tooltip
+				Menu, % A_ThisMenu, Enable, Sound
+			}
+			else
+			{
+				Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+				Menu, % A_ThisMenu, Disable, Tooltip
+				Menu, % A_ThisMenu, Disable, Sound
+			}
+			IniWrite, % ini_UHSignaling, Config.ini, Event_UndoHotstring, UHSignaling
+	}
+	return
+}
+
+
+Menu, Submenu1,		Add, Signaling of events,					:SigOfEvents
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 				:Submenu1
@@ -925,6 +1037,53 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+
+F_LoadSignalingParams()
+{
+	global	;assume-global mode
+	
+	IniRead, ini_OHSignaling, Config.ini, Event_OrdinaryHotstring, 	OHSignaling, 1
+	IniRead, ini_MHSignaling, Config.ini, Event_MenuHotstring, 		MHSignaling, 1
+	IniRead, ini_UHSignaling, Config.ini, Event_UndoHotstring, 		UHSignaling, 1
+	return
+}
+
+
+F_MenuEndChars()
+{	
+	global	;assume-global mode
+	local	key := "", val := ""
+	static OneTimeMemory := true
+	
+	if (OneTimeMemory)
+	{
+		for key, val in a_HotstringEndChars
+		{
+			if (a_HotstringEndChars[key])
+				Menu, SubmenuEndChars, Check, % TransA[key]
+			else
+				Menu, SubmenuEndChars, UnCheck, % TransA[key]
+		}
+		OneTimeMemory := false
+	}
+	else
+	{
+		if (a_HotstringEndChars[A_ThisMenuItem])
+		{
+			Menu, SubmenuEndChars, UnCheck, % A_ThisMenuitem
+			a_HotstringEndChars[A_ThisMenuItem] := false
+			IniWrite, % false, Config.ini, EndChars, % A_ThisMenuItem
+		}
+		else
+		{
+			Menu, SubmenuEndChars, Check, % A_ThisMenuitem
+			a_HotstringEndChars[A_ThisMenuItem] := true
+			IniWrite, % true, Config.ini, EndChars, % A_ThisMenuItem
+		}
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiSoundTofH()
 {
 	global	;assume-global mode
@@ -3445,26 +3604,27 @@ GuiFontType=Calibri
 GuiFontSize=10
 GuiReload=
 [EndChars]
-beg-end=1
-beg end=1
-beg(end=1
-beg)end=1
-beg[end=1
-beg]end=1
-beg{end=1
-beg}end=1
-beg:end=1
-beg;end=1
-beg""end=1
-beg/end=0
-beg\end=1
-beg:end=1
-beg.end=1
-beg?end=1
-beg!end=1
-beg`nend=1
-beg`tend=1
-beg_end=0
+Minus -=1
+Space=1
+Opening Round Bracket (=1
+Closing Round Bracket )=1
+Opening Square Bracket [=1
+Closing Square Bracket ]=1
+Opening Curly Bracket {=1
+Closing Curly Bracket }=1
+Colon :=1
+Semicolon ;=1
+Apostrophe '=1
+Quote ""=1
+Slash /=0
+Backslash \=1
+Comma ,=1
+Dot .=1
+Question Mark ?=1
+Underscore _=0
+Exclamation Mark !=1
+Enter=1
+Tab=1
 [LoadLibraries]
 [ShowTipsLibraries]
 	)"
