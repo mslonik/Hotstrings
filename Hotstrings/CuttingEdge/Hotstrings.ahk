@@ -275,9 +275,6 @@ Menu, SubmenuTips, Add
 Menu, SubmenuTips, Add, % TransA["Choose tips location"], 			:Submenu3
 Menu, SubmenuTips, Add, % TransA["Number of characters for tips"],	:Submenu4
 Menu, SubmenuTips, Add
-Menu, SubmenuTips, Add, % TransA["Sort tips alphabetically"], 		L_SortTipsAlphabetically
-Menu, SubmenuTips, Add, % TransA["Sort tips by length"], 			L_SortTipsByLength
-Menu, SubmenuTips, Add
 Menu, SubmenuTips, Add, % TransA["Enable sound if triggerstring"],	F_EnableSoundIfTrig
 Menu, SubmenuTips, Add, % TransA["Triggerstring sound parameters"],	F_GuiTrigSoundParameters
 
@@ -294,38 +291,16 @@ Loop, 5
 	if !(A_Index == ini_AmountOfCharacterTips)
 		Menu, Submenu4, UnCheck, %A_Index%
 }
-if (ini_TipsSortAlphabetically)
-	Menu, SubmenuTips, Check, % TransA["Sort tips alphabetically"]
-else
-	Menu, SubmenuTips, UnCheck, % TransA["Sort tips alphabetically"]
-if (ini_TipsSortByLength)
-	Menu, SubmenuTips, Check, % TransA["Sort tips by length"]
-else
-	Menu, SubmenuTips, UnCheck, % TransA["Sort tips by length"]
-
-Menu, SubmenuEndChars, Add, % TransA["Minus -"], 				F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Space"],				F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Opening Round Bracket ("],	F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Closing Round Bracket )"],	F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Opening Square Bracket ["],F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Closing Square Bracket ]"],F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Opening Curly Bracket {"], F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Closing Curly Bracket }"], F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Colon :"], 				F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Semicolon `;"], 			F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Apostrophe '"], 			F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Quote """], 			F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Slash /"], 				F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Backslash \"], 			F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Comma ,"], 				F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Dot ."], 				F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Question Mark ?"], 		F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 			F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Exclamation Mark !"], 	F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Enter"],				F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Tab"], 				F_MenuEndChars
-Menu, ConfTHB,  	   Add, % TransA["Toggle EndChars"], 		:SubmenuEndChars
-F_MenuEndChars()
+/*
+	if (ini_TipsSortAlphabetically)
+		Menu, SubmenuTips, Check, % TransA["Sort tips alphabetically"]
+	else
+		Menu, SubmenuTips, UnCheck, % TransA["Sort tips alphabetically"]
+	if (ini_TipsSortByLength)
+		Menu, SubmenuTips, Check, % TransA["Sort tips by length"]
+	else
+		Menu, SubmenuTips, UnCheck, % TransA["Sort tips by length"]
+*/
 
 if (ini_Tips == 0)
 	Menu, SubmenuTips, UnCheck, % TransA["Enable/Disable"]
@@ -398,27 +373,66 @@ Menu, ConfGUI,		Add, 	% TransA["Font type"],					:FontTypeMenu
 
 Menu, Submenu1,		Add, % TransA["Triggerstring / hotstring behaviour"], :ConfTHB
 
-Menu, UndoOfH,			Add, Enable / Disable,						F_EventEnDis
-Menu, UndoOfH,			Add, Tooltip,								F_EventTooltip
-Menu, UndoOfH,			Add, Sound,								F_EventSound
+Menu, TrigSortOrder, Add, % TransA["Sort tips alphabetically"], 		L_SortTipsAlphabetically
+Menu, TrigSortOrder, Add, % TransA["Sort tips by length"], 			L_SortTipsByLength
 
-Menu, OrdHisTrig,		Add, Enable / Disable,						F_EventEnDis
-Menu, OrdHisTrig,		Add, Tooltip,								F_EventTooltip
-Menu, OrdHisTrig,		Add, Sound,								F_EventSound
+Menu, OrdHisTrig,		Add, Tooltip enable / disable,				F_EventTtEn
+Menu, OrdHisTrig,		Add, Tooltip timeout,						F_EventTtTimeout
+Menu, OrdHisTrig,		Add, Tooltip position,						F_EventTtPos
+Menu, OrdHisTrig,		Add, Sound enable / disable,					F_EventSoEn
+Menu, OrdHisTrig,		Add, Sound parameters,						F_EventSoPar
 
-Menu, MenuHisTrig,		Add, Enable / Disable,						F_EventEnDis
-Menu, MenuHisTrig,		Add, Tooltip,								F_EventTooltip
-Menu, MenuHisTrig,		Add, Sound,								F_EventSound
+;Menu, MenuHisTrig,		Add, Enable / Disable,						F_EventEnDis
+;Menu, MenuHisTrig,		Add, Tooltip,								F_EventTooltip
+;Menu, MenuHisTrig,		Add, Tooltip position,						F_EventTtPos
+Menu, MenuHisTrig,		Add, Sound enable / disable,					F_EventSoEn
+Menu, MenuHisTrig,		Add, Sound parameters,						F_EventSoPar
+
+Menu, UndoOfH,			Add, Tooltip enable / disable,				F_EventTtEn
+Menu, UndoOfH,			Add, Tooltip timeout,						F_EventTtTimeout
+Menu, UndoOfH,			Add, Tooltip position,						F_EventTtPos
+Menu, UndoOfH,			Add, Sound enable / disable,					F_EventSoEn
+Menu, UndoOfH,			Add, Sound parameters,						F_EventSoPar
+
+Menu, TrigTips,		Add, Tooltip enable / disable,				F_EventTtEn
+Menu, TrigTips,		Add, Tooltip timeout,						F_EventTtTimeout
+Menu, TrigTips,		Add, Tooltip position,						F_EventTtPos
+;Menu, TrigTips,		Add, Sound enable / disable,					F_EventSoEn
+;Menu, TrigTips,		Add, Sound parameters,						F_EventSoPar
+Menu, TrigTips,		Add, Sorting order,							:TrigSortOrder								
+Menu, TrigTips,		Add,	Max. no. of shown tips,					F_TrigShowNoOfTips
 
 Menu, SigOfEvents,		Add, Ordinary hotstring is triggered,			:OrdHisTrig
 Menu, SigOfEvents,		Add, Menu hotstring is triggered,				:MenuHisTrig
 Menu, SigOfEvents,		Add, Undo of hotstring,						:UndoOfH
-Menu, SigOfEvents,		Add
-Menu, SigOfEvents,		Add, Mute all signals,						F_AllMute
-Menu, SigOfEvents,		Add, Off all signals tooltips,				F_AllTooltipsOff
+Menu, SigOfEvents,		Add, Triggerstring tips,						:TrigTips
 
-F_EventEnDis()
+F_EventTtEn()
 
+
+F_EventSoPar()
+{
+	global	;assume-global mode
+	return
+}
+
+F_EventTtPos()
+{
+	global	;assume-global mode
+	return
+}
+
+F_EventTtTimeout()
+{
+	global	;assume-global mode
+	return
+}
+
+F_TrigShowNoOfTips()
+{
+	global	;assume-global mode
+	return
+}
 
 F_AllTooltipsOff()
 {
@@ -432,120 +446,150 @@ F_AllMute()
 	return
 }
 
-F_EventSound()
+F_EventSoEn()
 {
 	global	;assume-global mode
 	return
 }
 
-F_EventTooltip()
-{
-	global	;assume-global mode
-	return
-}
-
-
-F_EventEnDis()	;tu jestem
+F_EventTtEn()	;Event tooltip enable
 {
 	global	;assume-global mode
 	static OneTimeMemory := true
 	
 	if (OneTimeMemory)
 	{
-		if (ini_OHSignaling)
+		if (ini_OHTtEn)
 		{
-			Menu, MenuHisTrig, Check, Enable / Disable
-			Menu, MenuHisTrig, Enable, Tooltip
-			Menu, MenuHisTrig, Enable, Sound
+			Menu, OrdHisTrig, Check, Tooltip enable / disable
+			Menu, OrdHisTrig, Enable, Tooltip timeout
+			Menu, OrdHisTrig, Enable, Tooltip position
 		}
 		else
 		{
-			Menu, MenuHisTrig, UnCheck, Enable / Disable
-			Menu, MenuHisTrig, Disable, Tooltip
-			Menu, MenuHisTrig, Disable, Sound
-		}
-		if (ini_MHSignaling)
-		{
-			Menu, OrdHisTrig, Check, Enable / Disable
-			Menu, OrdHisTrig, Enable, Tooltip
-			Menu, OrdHisTrig, Enable, Sound
-		}
-		else
-		{
-			Menu, OrdHisTrig, UnCheck, Enable / Disable
-			Menu, OrdHisTrig, Disable, Tooltip
-			Menu, OrdHisTrig, Disable, Sound
+			Menu, OrdHisTrig, UnCheck, Tooltip enable / disable
+			Menu, OrdHisTrig, Disable, Tooltip timeout
+			Menu, OrdHisTrig, Disable, Tooltip position
 		}
 			
-		if (ini_UHSignaling)
+		if (ini_UHTtEn)
 		{
-			Menu, UndoOfH, Check, Enable / Disable
-			Menu, UndoOfH, Enable, Tooltip
-			Menu, UndoOfH, Enable, Sound
+			Menu, UndoOfH, Check, Tooltip enable / disable
+			Menu, UndoOfH, Enable, Tooltip timeout
+			Menu, UndoOfH, Enable, Tooltip position
 		}
 		else
 		{
-			Menu, UndoOfH, UnCheck, Enable / Disable
-			Menu, UndoOfH, Disable, Tooltip
-			Menu, UndoOfH, Disable, Sound
+			Menu, UndoOfH, UnCheck, Tooltip enable / disable
+			Menu, UndoOfH, Disable, Tooltip timeout
+			Menu, UndoOfH, Disable, Tooltip position
 		}
+		
+		if (ini_TTTtEn)
+		{
+			Menu, TrigTips, Check, Tooltip enable / disable
+			Menu, TrigTips, Enable, Tooltip timeout
+			Menu, TrigTips, Enable, Tooltip position
+			Menu, TrigTips, Enable, Sorting order
+			Menu, TrigTips, Enable, Max. no. of shown tips
+		}
+		else
+		{
+			Menu, TrigTips, UnCheck, Tooltip enable / disable
+			Menu, TrigTips, Disable, Tooltip timeout
+			Menu, TrigTips, Disable, Tooltip position
+			Menu, TrigTips, Disable, Sorting order
+			Menu, TrigTips, Disable, Max. no. of shown tips
+		}		
 		OneTimeMemory := false
 	}
 	else
 		Switch A_ThisMenu
-	{
-		Case "MenuHisTrig":
-			ini_OHSignaling := !ini_OHSignaling
-			if (ini_OHSignaling)
-			{
-				Menu, % A_ThisMenu, Check, % A_ThisMenuItem
-				Menu, % A_ThisMenu, Enable, Tooltip
-				Menu, % A_ThisMenu, Enable, Sound
-			}
-			else
-			{
-				Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
-				Menu, % A_ThisMenu, Disable, Tooltip
-				Menu, % A_ThisMenu, Disable, Sound
-			}
-			IniWrite, % ini_OHSignaling, Config.ini, Event_OrdinaryHotstring, OHSignaling
+		{
 		Case "OrdHisTrig":
-			ini_MHSignaling := !ini_MHSignaling
-			if (ini_MHSignaling)
+			ini_OHTtEn := !ini_OHTtEn
+			if (ini_OHTtEn)
 			{
 				Menu, % A_ThisMenu, Check, % A_ThisMenuItem
-				Menu, % A_ThisMenu, Enable, Tooltip
-				Menu, % A_ThisMenu, Enable, Sound
+				Menu, % A_ThisMenu, Enable, Tooltip timeout
+				Menu, % A_ThisMenu, Enable, Tooltip position
 			}
 			else
 			{
 				Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
-				Menu, % A_ThisMenu, Disable, Tooltip
-				Menu, % A_ThisMenu, Disable, Sound
+				Menu, % A_ThisMenu, Disable, Tooltip timeout
+				Menu, % A_ThisMenu, Disable, Tooltip position
 			}
-			IniWrite, % ini_MHSignaling, Config.ini, Event_MenuHotstring, MHSignaling
+			IniWrite, % ini_OHTtEn, Config.ini, Event_OrdinaryHotstring, OHTtEn
 		Case "UndoOfH":
-			ini_UHSignaling := !ini_UHSignaling
-			if (ini_UHSignaling)
+			ini_UHTtEn := !ini_UHTtEn
+			if (ini_UHTtEn)
 			{
 				Menu, % A_ThisMenu, Check, % A_ThisMenuItem
-				Menu, % A_ThisMenu, Enable, Tooltip
-				Menu, % A_ThisMenu, Enable, Sound
+				Menu, % A_ThisMenu, Enable, Tooltip timeout
+				Menu, % A_ThisMenu, Enable, Tooltip position
 			}
 			else
 			{
 				Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
-				Menu, % A_ThisMenu, Disable, Tooltip
-				Menu, % A_ThisMenu, Disable, Sound
+				Menu, % A_ThisMenu, Disable, Tooltip timeout
+				Menu, % A_ThisMenu, Disable, Tooltip position
 			}
-			IniWrite, % ini_UHSignaling, Config.ini, Event_UndoHotstring, UHSignaling
+			IniWrite, % ini_UHTtEn, Config.ini, Event_UndoHotstring, UHTtEn
+		Case "TrigTips":
+			ini_TTTtEn := !ini_TTTtEn
+			if (ini_TTTtEn)
+			{
+				Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+				Menu, % A_ThisMenu, Enable, Tooltip timeout
+				Menu, % A_ThisMenu, Enable, Tooltip position
+				Menu, % A_ThisMenu, Enable, Sorting order
+				Menu, % A_ThisMenu, Enable, Max. no. of shown tips
+			}
+			else
+			{
+				Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+				Menu, % A_ThisMenu, Disable, Tooltip timeout
+				Menu, % A_ThisMenu, Disable, Tooltip position
+				Menu, % A_ThisMenu, Disable, Sorting order
+				Menu, % A_ThisMenu, Disable, Max. no. of shown tips
+			}
+			IniWrite, % ini_TTTtEn, Config.ini, Event_TriggerstringTips, TTTtEn
 	}
 	return
 }
+Menu, SubmenuEndChars, Add, % TransA["Minus -"], 				F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Space"],				F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Round Bracket ("],	F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Round Bracket )"],	F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Square Bracket ["],F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Square Bracket ]"],F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Curly Bracket {"], F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Curly Bracket }"], F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Colon :"], 				F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Semicolon `;"], 			F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Apostrophe '"], 			F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Quote """], 			F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Slash /"], 				F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Backslash \"], 			F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Comma ,"], 				F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Dot ."], 				F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Question Mark ?"], 		F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 			F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Exclamation Mark !"], 	F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Enter"],				F_MenuEndChars
+Menu, SubmenuEndChars, Add, % TransA["Tab"], 				F_MenuEndChars
+F_MenuEndChars()
 
 
 Menu, Submenu1,		Add, Signaling of events,					:SigOfEvents
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
+Menu, Submenu1,		Add
+Menu, Submenu1,		Add, Mute all signals,						F_AllMute
+Menu, Submenu1,		Add, Off all signals tooltips,				F_AllTooltipsOff
+Menu, Submenu1,		Add
+Menu, Submenu1,  	   	Add, % TransA["Toggle EndChars"], 				:SubmenuEndChars
+
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 				:Submenu1
 Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 		F_Searching
@@ -1042,9 +1086,10 @@ F_LoadSignalingParams()
 {
 	global	;assume-global mode
 	
-	IniRead, ini_OHSignaling, Config.ini, Event_OrdinaryHotstring, 	OHSignaling, 1
-	IniRead, ini_MHSignaling, Config.ini, Event_MenuHotstring, 		MHSignaling, 1
-	IniRead, ini_UHSignaling, Config.ini, Event_UndoHotstring, 		UHSignaling, 1
+	IniRead, ini_OHTtEn, Config.ini, Event_OrdinaryHotstring, 	OHTtEn, 1
+	;IniRead, ini_MH, Config.ini, Event_MenuHotstring, 		MHSignaling, 1
+	IniRead, ini_UHTtEn, Config.ini, Event_UndoHotstring, 		UHTtEn, 1
+	IniRead, ini_TTTtEn, Config.ini, Event_TriggerstringTips,	TTTtEn, 1
 	return
 }
 
@@ -1486,8 +1531,8 @@ F_ToggleMenu_iniTips()
 				Menu, SubmenuTips, Enable, 	% TransA["Set max. no. of shown tips"]
 				Menu, SubmenuTips, Enable, 	% TransA["Choose tips location"]
 				Menu, SubmenuTips, Enable, 	% TransA["Number of characters for tips"]
-				Menu, SubmenuTips, Enable, 	% TransA["Sort tips alphabetically"]
-				Menu, SubmenuTips, Enable, 	% TransA["Sort tips by length"]
+				;Menu, SubmenuTips, Enable, 	% TransA["Sort tips alphabetically"]
+				;Menu, SubmenuTips, Enable, 	% TransA["Sort tips by length"]
 				Menu, SubmenuTips, Enable,	% TransA["Enable sound if triggerstring"]
 				Menu, SubmenuTips, Enable,	% TransA["Triggerstring sound parameters"]
 			Case % false:
@@ -1496,8 +1541,8 @@ F_ToggleMenu_iniTips()
 				Menu, SubmenuTips, Disable, 	% TransA["Set max. no. of shown tips"]
 				Menu, SubmenuTips, Disable, 	% TransA["Choose tips location"]
 				Menu, SubmenuTips, Disable, 	% TransA["Number of characters for tips"]
-				Menu, SubmenuTips, Disable, 	% TransA["Sort tips alphabetically"]
-				Menu, SubmenuTips, Disable, 	% TransA["Sort tips by length"]
+				;Menu, SubmenuTips, Disable, 	% TransA["Sort tips alphabetically"]
+				;Menu, SubmenuTips, Disable, 	% TransA["Sort tips by length"]
 				Menu, SubmenuTips, Disable,	% TransA["Enable sound if triggerstring"]
 				Menu, SubmenuTips, Disable,	% TransA["Triggerstring sound parameters"]
 		}
