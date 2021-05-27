@@ -1,4 +1,4 @@
-/* 
+﻿/* 
 	Author:      Jakub Masiak, Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings as in AutoHotkey (shortcuts), but editable with GUI and many more options.
@@ -408,7 +408,7 @@ Menu, SigOfEvents,		Add, Undo of hotstring,						:UndoOfH
 Menu, SigOfEvents,		Add, Triggerstring tips,						:TrigTips
 
 F_EventTtEn()
-
+F_EventSoEn()
 
 F_EventSoPar()
 {
@@ -449,6 +449,88 @@ F_AllMute()
 F_EventSoEn() ;tu jestem
 {
 	global	;assume-global mode
+	static OneTimeMemory := true
+	
+	if (OneTimeMemory)
+	{
+		if (ini_OHSEn)
+		{
+			Menu, OrdHisTrig, Check, Sound enable / disable
+			Menu, OrdHisTrig, Enable, Sound parameters
+		}
+		else
+		{
+			Menu, OrdHisTrig, UnCheck, Sound enable / disable
+			Menu, OrdHisTrig, Disable, Sound parameters
+		}
+		if (ini_MHSEn)
+		{
+			Menu, MenuHisTrig, Check, Sound enable / disable
+			Menu, MenuHisTrig, Enable, Sound parameters
+		}
+		else
+		{
+			Menu, MenuHisTrig, UnCheck, Sound enable / disable
+			Menu, MenuHisTrig, Disable, Sound parameters
+		}
+		if (ini_UHSEn)
+		{
+			Menu, UndoOfH, Check, Sound enable / disable
+			Menu, UndoOfH, Enable, Sound parameters
+		}
+		else
+		{
+			Menu, UndoOfH, UnCheck, Sound enable / disable
+			Menu, UndoOfH, Disable, Sound parameters
+		}
+		OneTimeMemory := false
+	}
+	else
+	{
+		;*One[]
+		Switch A_ThisMenu
+		{
+			Case "OrdHisTrig":
+				ini_OHSEn := !ini_OHSEn
+				if (ini_OHSEn)
+				{
+					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Enable, Sound parameters
+				}
+				else
+				{
+					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Disable, Sound parameters
+				}
+				IniWrite, % ini_OHSEn, Config.ini, Event_OrdinaryHotstring, OHSEn
+			Case "MenuHisTrig":
+				ini_MHSEn := !ini_MHSEn
+				if (ini_MHSEn)
+				{
+					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Enable, Sound parameters
+				}
+				else
+				{
+					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Disable, Sound parameters
+				}
+				IniWrite, % ini_MHSEn, Config.ini, Event_MenuHotstring, MHSEn
+			Case "UndoOfH":
+				ini_UHSEn := !ini_UHSEn
+				if (ini_UHSEn)
+				{
+					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Enable, Sound parameters
+				}
+				else
+				{
+					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Disable, Sound parameters
+				}
+				IniWrite, % ini_UHSEn, Config.ini, Event_UndoHotstring, UHSEn
+		}
+	}
 	return
 }
 
@@ -506,56 +588,56 @@ F_EventTtEn()	;Event tooltip enable
 	else
 		Switch A_ThisMenu
 		{
-		Case "OrdHisTrig":
-			ini_OHTtEn := !ini_OHTtEn
-			if (ini_OHTtEn)
-			{
-				Menu, % A_ThisMenu, Check, % A_ThisMenuItem
-				Menu, % A_ThisMenu, Enable, Tooltip timeout
-				Menu, % A_ThisMenu, Enable, Tooltip position
-			}
-			else
-			{
-				Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
-				Menu, % A_ThisMenu, Disable, Tooltip timeout
-				Menu, % A_ThisMenu, Disable, Tooltip position
-			}
-			IniWrite, % ini_OHTtEn, Config.ini, Event_OrdinaryHotstring, OHTtEn
-		Case "UndoOfH":
-			ini_UHTtEn := !ini_UHTtEn
-			if (ini_UHTtEn)
-			{
-				Menu, % A_ThisMenu, Check, % A_ThisMenuItem
-				Menu, % A_ThisMenu, Enable, Tooltip timeout
-				Menu, % A_ThisMenu, Enable, Tooltip position
-			}
-			else
-			{
-				Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
-				Menu, % A_ThisMenu, Disable, Tooltip timeout
-				Menu, % A_ThisMenu, Disable, Tooltip position
-			}
-			IniWrite, % ini_UHTtEn, Config.ini, Event_UndoHotstring, UHTtEn
-		Case "TrigTips":
-			ini_TTTtEn := !ini_TTTtEn
-			if (ini_TTTtEn)
-			{
-				Menu, % A_ThisMenu, Check, % A_ThisMenuItem
-				Menu, % A_ThisMenu, Enable, Tooltip timeout
-				Menu, % A_ThisMenu, Enable, Tooltip position
-				Menu, % A_ThisMenu, Enable, Sorting order
-				Menu, % A_ThisMenu, Enable, Max. no. of shown tips
-			}
-			else
-			{
-				Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
-				Menu, % A_ThisMenu, Disable, Tooltip timeout
-				Menu, % A_ThisMenu, Disable, Tooltip position
-				Menu, % A_ThisMenu, Disable, Sorting order
-				Menu, % A_ThisMenu, Disable, Max. no. of shown tips
-			}
-			IniWrite, % ini_TTTtEn, Config.ini, Event_TriggerstringTips, TTTtEn
-	}
+			Case "OrdHisTrig":
+				ini_OHTtEn := !ini_OHTtEn
+				if (ini_OHTtEn)
+				{
+					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Enable, Tooltip timeout
+					Menu, % A_ThisMenu, Enable, Tooltip position
+				}
+				else
+				{
+					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Disable, Tooltip timeout
+					Menu, % A_ThisMenu, Disable, Tooltip position
+				}
+				IniWrite, % ini_OHTtEn, Config.ini, Event_OrdinaryHotstring, OHTtEn
+			Case "UndoOfH":
+				ini_UHTtEn := !ini_UHTtEn
+				if (ini_UHTtEn)
+				{
+					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Enable, Tooltip timeout
+					Menu, % A_ThisMenu, Enable, Tooltip position
+				}
+				else
+				{
+					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Disable, Tooltip timeout
+					Menu, % A_ThisMenu, Disable, Tooltip position
+				}
+				IniWrite, % ini_UHTtEn, Config.ini, Event_UndoHotstring, UHTtEn
+			Case "TrigTips":
+				ini_TTTtEn := !ini_TTTtEn
+				if (ini_TTTtEn)
+				{
+					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Enable, Tooltip timeout
+					Menu, % A_ThisMenu, Enable, Tooltip position
+					Menu, % A_ThisMenu, Enable, Sorting order
+					Menu, % A_ThisMenu, Enable, Max. no. of shown tips
+				}
+				else
+				{
+					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Disable, Tooltip timeout
+					Menu, % A_ThisMenu, Disable, Tooltip position
+					Menu, % A_ThisMenu, Disable, Sorting order
+					Menu, % A_ThisMenu, Disable, Max. no. of shown tips
+				}
+				IniWrite, % ini_TTTtEn, Config.ini, Event_TriggerstringTips, TTTtEn
+		}
 	return
 }
 Menu, SubmenuEndChars, Add, % TransA["Minus -"], 				F_MenuEndChars
@@ -1086,10 +1168,12 @@ F_LoadSignalingParams()
 {
 	global	;assume-global mode
 	
-	IniRead, ini_OHTtEn, Config.ini, Event_OrdinaryHotstring, 	OHTtEn, 1
-	;IniRead, ini_MH, Config.ini, Event_MenuHotstring, 		MHSignaling, 1
-	IniRead, ini_UHTtEn, Config.ini, Event_UndoHotstring, 		UHTtEn, 1
-	IniRead, ini_TTTtEn, Config.ini, Event_TriggerstringTips,	TTTtEn, 1
+	IniRead, ini_OHTtEn, 	Config.ini, Event_OrdinaryHotstring, 	OHTtEn, 	1
+	IniRead, ini_OHSEn, 	Config.ini, Event_OrdinaryHotstring,	OHSEn, 	1
+	IniRead, ini_MHSEn,		Config.ini, Event_MenuHotstring,		MHSEn,	1
+	IniRead, ini_UHTtEn, 	Config.ini, Event_UndoHotstring, 		UHTtEn, 	1
+	IniRead, ini_UHSEn,		Config.ini, Event_UndoHotstring,		UHSEn,	1
+	IniRead, ini_TTTtEn, 	Config.ini, Event_TriggerstringTips,	TTTtEn, 	1
 	return
 }
 
@@ -3631,9 +3715,12 @@ TipsSDuration=200
 Language=English.txt
 [Event_OrdinaryHotstring]
 OHTtEn=1
+OHSEn=0
 [Event_MenuHotstring]
+MHSEn=1
 [Event_UndoHotstring]
 UHTtEn=1
+UHSEn=0
 [Event_TriggerstringTips]
 TTTtEn=1
 [GraphicalUserInterface]
