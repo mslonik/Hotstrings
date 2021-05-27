@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 	Author:      Jakub Masiak, Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings as in AutoHotkey (shortcuts), but editable with GUI and many more options.
@@ -5963,8 +5963,8 @@ F_LoadEndChars() ;Load from Config.ini
 				Switch key
 				{
 					Case "Space": 	HotstringEndChars .= A_Space
-					Case "Enter": 	HotstringEndChars .= "``n"
-					Case "Tab":	HotstringEndChars .= "``t"
+					Case "Enter": 	HotstringEndChars .= "`n"
+					Case "Tab":	HotstringEndChars .= "`t"
 					Default:
 						LastKey := SubStr(key, 0)
 						HotstringEndChars .= LastKey
