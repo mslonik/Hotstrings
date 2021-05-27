@@ -446,7 +446,7 @@ F_AllMute()
 	return
 }
 
-F_EventSoEn()
+F_EventSoEn() ;tu jestem
 {
 	global	;assume-global mode
 	return
@@ -3629,6 +3629,13 @@ TipsSound=1
 TipsSFrequency=400
 TipsSDuration=200
 Language=English.txt
+[Event_OrdinaryHotstring]
+OHTtEn=1
+[Event_MenuHotstring]
+[Event_UndoHotstring]
+UHTtEn=1
+[Event_TriggerstringTips]
+TTTtEn=1
 [GraphicalUserInterface]
 MainWindowPosX=
 MainWindowPosY=
