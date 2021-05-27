@@ -378,25 +378,29 @@ Menu, TrigSortOrder, Add, % TransA["Sort tips by length"], 			L_SortTipsByLength
 
 Menu, OrdHisTrig,		Add, Tooltip enable / disable,				F_EventTtEn
 Menu, OrdHisTrig,		Add, Tooltip timeout,						F_GuiSetTooltipTimeout
-Menu, OrdHisTrig,		Add, Tooltip position,						F_EventTtPos
+Menu, OrdHisTrig,		Add, Tooltip position: caret,					F_EventTtPos
+Menu, OrdHisTrig,		Add, Tooltip position: cursor,				F_EventTtPos
 Menu, OrdHisTrig,		Add, Sound enable / disable,					F_EventSoEn
 Menu, OrdHisTrig,		Add, Sound parameters,						F_EventSoPar
 
 ;Menu, MenuHisTrig,		Add, Enable / Disable,						F_EventEnDis
 ;Menu, MenuHisTrig,		Add, Tooltip,								F_GuiSetTooltipTimeout
-;Menu, MenuHisTrig,		Add, Tooltip position,						F_EventTtPos
+Menu, MenuHisTrig,		Add, Menu position: caret,					F_EventTtPos
+Menu, MenuHisTrig,		Add, Menu position: cursor,					F_EventTtPos
 Menu, MenuHisTrig,		Add, Sound enable / disable,					F_EventSoEn
 Menu, MenuHisTrig,		Add, Sound parameters,						F_EventSoPar
 
 Menu, UndoOfH,			Add, Tooltip enable / disable,				F_EventTtEn
 Menu, UndoOfH,			Add, Tooltip timeout,						F_GuiSetTooltipTimeout
-Menu, UndoOfH,			Add, Tooltip position,						F_EventTtPos
+Menu, UndoOfH,			Add, Tooltip position: caret,					F_EventTtPos
+Menu, UndoOfH,			Add, Tooltip position: cursor,				F_EventTtPos
 Menu, UndoOfH,			Add, Sound enable / disable,					F_EventSoEn
 Menu, UndoOfH,			Add, Sound parameters,						F_EventSoPar
 
 Menu, TrigTips,		Add, Tooltip enable / disable,				F_EventTtEn
 Menu, TrigTips,		Add, Tooltip timeout,						F_GuiSetTooltipTimeout
-Menu, TrigTips,		Add, Tooltip position,						F_EventTtPos
+Menu, TrigTips,		Add, Tooltip position: caret,					F_EventTtPos
+Menu, TrigTips,		Add, Tooltip position: cursor,				F_EventTtPos
 ;Menu, TrigTips,		Add, Sound enable / disable,					F_EventSoEn
 ;Menu, TrigTips,		Add, Sound parameters,						F_EventSoPar
 Menu, TrigTips,		Add, Sorting order,							:TrigSortOrder								
@@ -409,6 +413,7 @@ Menu, SigOfEvents,		Add, Triggerstring tips,						:TrigTips
 
 F_EventTtEn()
 F_EventSoEn()
+F_EventTtPos()
 
 F_EventSoPar()
 {
@@ -416,15 +421,110 @@ F_EventSoPar()
 	return
 }
 
-F_EventTtPos()
+F_EventTtPos()	;tu jestem
 {
 	global	;assume-global mode
-	return
-}
-
-F_EventTtTimeout()
-{
-	global	;assume-global mode
+	static OneTimeMemory := true
+	
+	if (OneTimeMemory)
+	{
+		Switch (ini_OHTP)
+		{
+			Case 1:
+			Menu, OrdHisTrig, Check, Tooltip position: caret
+			Menu, OrdHisTrig, UnCheck, Tooltip position: cursor
+			Case 2: 
+			Menu, OrdHisTrig, Check, Tooltip position: cursor
+			Menu, OrdHisTrig, UnCheck, Tooltip position: caret
+		}
+		Switch (ini_MHMP)
+		{
+			Case 1:
+			Menu, MenuHisTrig, Check, Menu position: caret
+			Menu, MenuHisTrig, UnCheck, Menu position: cursor
+			Case 2:
+			Menu, MenuHisTrig, Check, Menu position: cursor
+			Menu, MenuHisTrig, UnCheck, Menu position: caret
+		}
+		Switch (ini_UHTP)
+		{
+			Case 1:
+			Menu, UndoOfH, Check, Tooltip position: caret
+			Menu, UndoOfH, UnCheck, Tooltip position: cursor
+			Case 2:
+			Menu, UndoOfH, Check, Tooltip position: cursor
+			Menu, UndoOfH, UnCheck, Tooltip position: caret
+		}
+		Switch (ini_TTTP)
+		{
+			Case 1:
+			Menu, TrigTips, Check, Tooltip position: caret
+			Menu, TrigTips, UnCheck, Tooltip position: cursor
+			Case 2:
+			Menu, TrigTips, Check, Tooltip position: cursor
+			Menu, TrigTips, UnCheck, Tooltip position: caret
+		}
+		OneTimeMemory := false
+	}
+	else
+	{
+		;*[One]
+		Switch (A_ThisMenu)
+		{
+			Case "OrdHisTrig":
+			Switch (ini_OHTP)
+			{
+				Case 1:
+				Menu, OrdHisTrig, Check, Tooltip position: cursor
+				Menu, OrdHisTrig, UnCheck, Tooltip position: caret
+				ini_OHTP := 2
+				Case 2: 
+				Menu, OrdHisTrig, Check, Tooltip position: caret
+				Menu, OrdHisTrig, UnCheck, Tooltip position: cursor
+				ini_OHTP := 1
+			}
+			IniWrite, % ini_OHTP, Config.ini, Event_OrdinaryHotstring, OHTP
+			Case "MenuHisTrig":
+			Switch (ini_MHMP)
+			{
+				Case 1:
+				Menu, MenuHisTrig, Check, Menu position: cursor
+				Menu, MenuHisTrig, UnCheck, Menu position: caret
+				ini_MHMP := 2
+				Case 2:
+				Menu, MenuHisTrig, Check, Menu position: caret
+				Menu, MenuHisTrig, UnCheck, Menu position: cursor
+				ini_MHMP := 1
+			}
+			IniWrite, % ini_MHMP, Config.ini, Event_MenuHotstring, MHMP
+			Case "UndoOfH":
+			Switch (ini_UHTP)
+			{
+				Case 1:
+				Menu, UndoOfH, Check, Tooltip position: cursor
+				Menu, UndoOfH, UnCheck, Tooltip position: caret
+				ini_UHTP := 2
+				Case 2:
+				Menu, UndoOfH, Check, Tooltip position: caret
+				Menu, UndoOfH, UnCheck, Tooltip position: cursor
+				ini_UHTP := 1
+			}
+			IniWrite, % ini_UHTP, Config.ini, Event_UndoHotstring, UHTP
+			Case "TrigTips":
+			Switch (ini_TTTP)
+			{
+				Case 1:
+				Menu, TrigTips, Check, Tooltip position: cursor
+				Menu, TrigTips, UnCheck, Tooltip position: caret
+				ini_TTTP := 2
+				Case 2:
+				Menu, TrigTips, Check, Tooltip position: caret
+				Menu, TrigTips, UnCheck, Tooltip position: cursor
+				ini_TTTP := 1
+			}
+			IniWrite, % ini_TTTP, Config.ini, Event_TriggerstringTips, TTTP
+		}
+	}
 	return
 }
 
@@ -443,93 +543,6 @@ F_AllTooltipsOff()
 F_AllMute()
 {
 	global	;assume-global mode
-	return
-}
-
-F_EventSoEn() ;tu jestem
-{
-	global	;assume-global mode
-	static OneTimeMemory := true
-	
-	if (OneTimeMemory)
-	{
-		if (ini_OHSEn)
-		{
-			Menu, OrdHisTrig, Check, Sound enable / disable
-			Menu, OrdHisTrig, Enable, Sound parameters
-		}
-		else
-		{
-			Menu, OrdHisTrig, UnCheck, Sound enable / disable
-			Menu, OrdHisTrig, Disable, Sound parameters
-		}
-		if (ini_MHSEn)
-		{
-			Menu, MenuHisTrig, Check, Sound enable / disable
-			Menu, MenuHisTrig, Enable, Sound parameters
-		}
-		else
-		{
-			Menu, MenuHisTrig, UnCheck, Sound enable / disable
-			Menu, MenuHisTrig, Disable, Sound parameters
-		}
-		if (ini_UHSEn)
-		{
-			Menu, UndoOfH, Check, Sound enable / disable
-			Menu, UndoOfH, Enable, Sound parameters
-		}
-		else
-		{
-			Menu, UndoOfH, UnCheck, Sound enable / disable
-			Menu, UndoOfH, Disable, Sound parameters
-		}
-		OneTimeMemory := false
-	}
-	else
-	{
-		Switch A_ThisMenu
-		{
-			Case "OrdHisTrig":
-				ini_OHSEn := !ini_OHSEn
-				if (ini_OHSEn)
-				{
-					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
-					Menu, % A_ThisMenu, Enable, Sound parameters
-				}
-				else
-				{
-					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
-					Menu, % A_ThisMenu, Disable, Sound parameters
-				}
-				IniWrite, % ini_OHSEn, Config.ini, Event_OrdinaryHotstring, OHSEn
-			Case "MenuHisTrig":
-				ini_MHSEn := !ini_MHSEn
-				if (ini_MHSEn)
-				{
-					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
-					Menu, % A_ThisMenu, Enable, Sound parameters
-				}
-				else
-				{
-					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
-					Menu, % A_ThisMenu, Disable, Sound parameters
-				}
-				IniWrite, % ini_MHSEn, Config.ini, Event_MenuHotstring, MHSEn
-			Case "UndoOfH":
-				ini_UHSEn := !ini_UHSEn
-				if (ini_UHSEn)
-				{
-					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
-					Menu, % A_ThisMenu, Enable, Sound parameters
-				}
-				else
-				{
-					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
-					Menu, % A_ThisMenu, Disable, Sound parameters
-				}
-				IniWrite, % ini_UHSEn, Config.ini, Event_UndoHotstring, UHSEn
-		}
-	}
 	return
 }
 
@@ -1056,6 +1069,94 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+
+F_EventSoEn() 
+{
+	global	;assume-global mode
+	static OneTimeMemory := true
+	
+	if (OneTimeMemory)
+	{
+		if (ini_OHSEn)
+		{
+			Menu, OrdHisTrig, Check, Sound enable / disable
+			Menu, OrdHisTrig, Enable, Sound parameters
+		}
+		else
+		{
+			Menu, OrdHisTrig, UnCheck, Sound enable / disable
+			Menu, OrdHisTrig, Disable, Sound parameters
+		}
+		if (ini_MHSEn)
+		{
+			Menu, MenuHisTrig, Check, Sound enable / disable
+			Menu, MenuHisTrig, Enable, Sound parameters
+		}
+		else
+		{
+			Menu, MenuHisTrig, UnCheck, Sound enable / disable
+			Menu, MenuHisTrig, Disable, Sound parameters
+		}
+		if (ini_UHSEn)
+		{
+			Menu, UndoOfH, Check, Sound enable / disable
+			Menu, UndoOfH, Enable, Sound parameters
+		}
+		else
+		{
+			Menu, UndoOfH, UnCheck, Sound enable / disable
+			Menu, UndoOfH, Disable, Sound parameters
+		}
+		OneTimeMemory := false
+	}
+	else
+	{
+		Switch A_ThisMenu
+		{
+			Case "OrdHisTrig":
+				ini_OHSEn := !ini_OHSEn
+				if (ini_OHSEn)
+				{
+					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Enable, Sound parameters
+				}
+				else
+				{
+					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Disable, Sound parameters
+				}
+				IniWrite, % ini_OHSEn, Config.ini, Event_OrdinaryHotstring, OHSEn
+			Case "MenuHisTrig":
+				ini_MHSEn := !ini_MHSEn
+				if (ini_MHSEn)
+				{
+					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Enable, Sound parameters
+				}
+				else
+				{
+					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Disable, Sound parameters
+				}
+				IniWrite, % ini_MHSEn, Config.ini, Event_MenuHotstring, MHSEn
+			Case "UndoOfH":
+				ini_UHSEn := !ini_UHSEn
+				if (ini_UHSEn)
+				{
+					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Enable, Sound parameters
+				}
+				else
+				{
+					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Disable, Sound parameters
+				}
+				IniWrite, % ini_UHSEn, Config.ini, Event_UndoHotstring, UHSEn
+		}
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EventTtEn()	;Event tooltip enable
 {
 	global	;assume-global mode
@@ -1067,33 +1168,38 @@ F_EventTtEn()	;Event tooltip enable
 		{
 			Menu, OrdHisTrig, Check, Tooltip enable / disable
 			Menu, OrdHisTrig, Enable, Tooltip timeout
-			Menu, OrdHisTrig, Enable, Tooltip position
+			Menu, OrdHisTrig, Enable, Tooltip position: caret
+			Menu, OrdHisTrig, Enable, Tooltip position: cursor
 		}
 		else
 		{
 			Menu, OrdHisTrig, UnCheck, Tooltip enable / disable
 			Menu, OrdHisTrig, Disable, Tooltip timeout
-			Menu, OrdHisTrig, Disable, Tooltip position
+			Menu, OrdHisTrig, Disable, Tooltip position: caret
+			Menu, OrdHisTrig, Disable, Tooltip position: cursor
 		}
 			
 		if (ini_UHTtEn)
 		{
 			Menu, UndoOfH, Check, Tooltip enable / disable
 			Menu, UndoOfH, Enable, Tooltip timeout
-			Menu, UndoOfH, Enable, Tooltip position
+			Menu, UndoOfH, Enable, Tooltip position: caret
+			Menu, UndoOfH, Enable, Tooltip position: cursor
 		}
 		else
 		{
 			Menu, UndoOfH, UnCheck, Tooltip enable / disable
 			Menu, UndoOfH, Disable, Tooltip timeout
-			Menu, UndoOfH, Disable, Tooltip position
+			Menu, UndoOfH, Disable, Tooltip position: caret
+			Menu, UndoOfH, Disable, Tooltip position: cursor
 		}
 		
 		if (ini_TTTtEn)
 		{
 			Menu, TrigTips, Check, Tooltip enable / disable
 			Menu, TrigTips, Enable, Tooltip timeout
-			Menu, TrigTips, Enable, Tooltip position
+			Menu, TrigTips, Enable, Tooltip position: caret
+			Menu, TrigTips, Enable, Tooltip position: cursor
 			Menu, TrigTips, Enable, Sorting order
 			Menu, TrigTips, Enable, Max. no. of shown tips
 		}
@@ -1101,7 +1207,8 @@ F_EventTtEn()	;Event tooltip enable
 		{
 			Menu, TrigTips, UnCheck, Tooltip enable / disable
 			Menu, TrigTips, Disable, Tooltip timeout
-			Menu, TrigTips, Disable, Tooltip position
+			Menu, TrigTips, Disable, Tooltip position: caret
+			Menu, TrigTips, Disable, Tooltip position: cursor
 			Menu, TrigTips, Disable, Sorting order
 			Menu, TrigTips, Disable, Max. no. of shown tips
 		}		
@@ -1169,11 +1276,15 @@ F_LoadSignalingParams()
 	
 	IniRead, ini_OHTtEn, 	Config.ini, Event_OrdinaryHotstring, 	OHTtEn, 	1
 	IniRead, ini_OHTD,		Config.ini, Event_OrdinaryHotstring,	OHTD,	0
+	IniRead, ini_OHTP,		Config.ini, Event_OrdinaryHotstring,	OHTP,	1
 	IniRead, ini_OHSEn, 	Config.ini, Event_OrdinaryHotstring,	OHSEn, 	1
+	IniRead, ini_MHMP,		Config.ini, Event_MenuHotstring,		MHMP,	1
 	IniRead, ini_MHSEn,		Config.ini, Event_MenuHotstring,		MHSEn,	1
 	IniRead, ini_UHTtEn, 	Config.ini, Event_UndoHotstring, 		UHTtEn, 	1
 	IniRead, ini_UHTD,		Config.ini, Event_UndoHotstring,		UHTD,	0
+	IniRead, ini_UHTP,		Config.ini, Event_UndoHotstring,		UHTP,	1
 	IniRead, ini_UHSEn,		Config.ini, Event_UndoHotstring,		UHSEn,	1
+	IniRead, ini_TTTP,		Config.ini, Event_TriggerstringTips,	TTTP,	1
 	IniRead, ini_TTTtEn, 	Config.ini, Event_TriggerstringTips,	TTTtEn, 	1
 	IniRead, ini_TTTD,		Config.ini, Event_TriggerstringTips,	TTTD,	0
 	return
@@ -3783,16 +3894,20 @@ Language=English.txt
 [Event_OrdinaryHotstring]
 OHTtEn=1
 OHTD=0
+OHTP=1
 OHSEn=0
 [Event_MenuHotstring]
+MHMP=1
 MHSEn=1
 [Event_UndoHotstring]
 UHTtEn=1
 UHTD=0
+UHTP=1
 UHSEn=0
 [Event_TriggerstringTips]
 TTTtEn=1
 TTTD=0
+TTTP=1
 [GraphicalUserInterface]
 MainWindowPosX=
 MainWindowPosY=
