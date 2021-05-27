@@ -377,25 +377,25 @@ Menu, TrigSortOrder, Add, % TransA["Sort tips alphabetically"], 		L_SortTipsAlph
 Menu, TrigSortOrder, Add, % TransA["Sort tips by length"], 			L_SortTipsByLength
 
 Menu, OrdHisTrig,		Add, Tooltip enable / disable,				F_EventTtEn
-Menu, OrdHisTrig,		Add, Tooltip timeout,						F_EventTtTimeout
+Menu, OrdHisTrig,		Add, Tooltip timeout,						F_GuiSetTooltipTimeout
 Menu, OrdHisTrig,		Add, Tooltip position,						F_EventTtPos
 Menu, OrdHisTrig,		Add, Sound enable / disable,					F_EventSoEn
 Menu, OrdHisTrig,		Add, Sound parameters,						F_EventSoPar
 
 ;Menu, MenuHisTrig,		Add, Enable / Disable,						F_EventEnDis
-;Menu, MenuHisTrig,		Add, Tooltip,								F_EventTooltip
+;Menu, MenuHisTrig,		Add, Tooltip,								F_GuiSetTooltipTimeout
 ;Menu, MenuHisTrig,		Add, Tooltip position,						F_EventTtPos
 Menu, MenuHisTrig,		Add, Sound enable / disable,					F_EventSoEn
 Menu, MenuHisTrig,		Add, Sound parameters,						F_EventSoPar
 
 Menu, UndoOfH,			Add, Tooltip enable / disable,				F_EventTtEn
-Menu, UndoOfH,			Add, Tooltip timeout,						F_EventTtTimeout
+Menu, UndoOfH,			Add, Tooltip timeout,						F_GuiSetTooltipTimeout
 Menu, UndoOfH,			Add, Tooltip position,						F_EventTtPos
 Menu, UndoOfH,			Add, Sound enable / disable,					F_EventSoEn
 Menu, UndoOfH,			Add, Sound parameters,						F_EventSoPar
 
 Menu, TrigTips,		Add, Tooltip enable / disable,				F_EventTtEn
-Menu, TrigTips,		Add, Tooltip timeout,						F_EventTtTimeout
+Menu, TrigTips,		Add, Tooltip timeout,						F_GuiSetTooltipTimeout
 Menu, TrigTips,		Add, Tooltip position,						F_EventTtPos
 ;Menu, TrigTips,		Add, Sound enable / disable,					F_EventSoEn
 ;Menu, TrigTips,		Add, Sound parameters,						F_EventSoPar
@@ -487,7 +487,6 @@ F_EventSoEn() ;tu jestem
 	}
 	else
 	{
-		;*One[]
 		Switch A_ThisMenu
 		{
 			Case "OrdHisTrig":
@@ -534,112 +533,6 @@ F_EventSoEn() ;tu jestem
 	return
 }
 
-F_EventTtEn()	;Event tooltip enable
-{
-	global	;assume-global mode
-	static OneTimeMemory := true
-	
-	if (OneTimeMemory)
-	{
-		if (ini_OHTtEn)
-		{
-			Menu, OrdHisTrig, Check, Tooltip enable / disable
-			Menu, OrdHisTrig, Enable, Tooltip timeout
-			Menu, OrdHisTrig, Enable, Tooltip position
-		}
-		else
-		{
-			Menu, OrdHisTrig, UnCheck, Tooltip enable / disable
-			Menu, OrdHisTrig, Disable, Tooltip timeout
-			Menu, OrdHisTrig, Disable, Tooltip position
-		}
-			
-		if (ini_UHTtEn)
-		{
-			Menu, UndoOfH, Check, Tooltip enable / disable
-			Menu, UndoOfH, Enable, Tooltip timeout
-			Menu, UndoOfH, Enable, Tooltip position
-		}
-		else
-		{
-			Menu, UndoOfH, UnCheck, Tooltip enable / disable
-			Menu, UndoOfH, Disable, Tooltip timeout
-			Menu, UndoOfH, Disable, Tooltip position
-		}
-		
-		if (ini_TTTtEn)
-		{
-			Menu, TrigTips, Check, Tooltip enable / disable
-			Menu, TrigTips, Enable, Tooltip timeout
-			Menu, TrigTips, Enable, Tooltip position
-			Menu, TrigTips, Enable, Sorting order
-			Menu, TrigTips, Enable, Max. no. of shown tips
-		}
-		else
-		{
-			Menu, TrigTips, UnCheck, Tooltip enable / disable
-			Menu, TrigTips, Disable, Tooltip timeout
-			Menu, TrigTips, Disable, Tooltip position
-			Menu, TrigTips, Disable, Sorting order
-			Menu, TrigTips, Disable, Max. no. of shown tips
-		}		
-		OneTimeMemory := false
-	}
-	else
-		Switch A_ThisMenu
-		{
-			Case "OrdHisTrig":
-				ini_OHTtEn := !ini_OHTtEn
-				if (ini_OHTtEn)
-				{
-					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
-					Menu, % A_ThisMenu, Enable, Tooltip timeout
-					Menu, % A_ThisMenu, Enable, Tooltip position
-				}
-				else
-				{
-					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
-					Menu, % A_ThisMenu, Disable, Tooltip timeout
-					Menu, % A_ThisMenu, Disable, Tooltip position
-				}
-				IniWrite, % ini_OHTtEn, Config.ini, Event_OrdinaryHotstring, OHTtEn
-			Case "UndoOfH":
-				ini_UHTtEn := !ini_UHTtEn
-				if (ini_UHTtEn)
-				{
-					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
-					Menu, % A_ThisMenu, Enable, Tooltip timeout
-					Menu, % A_ThisMenu, Enable, Tooltip position
-				}
-				else
-				{
-					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
-					Menu, % A_ThisMenu, Disable, Tooltip timeout
-					Menu, % A_ThisMenu, Disable, Tooltip position
-				}
-				IniWrite, % ini_UHTtEn, Config.ini, Event_UndoHotstring, UHTtEn
-			Case "TrigTips":
-				ini_TTTtEn := !ini_TTTtEn
-				if (ini_TTTtEn)
-				{
-					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
-					Menu, % A_ThisMenu, Enable, Tooltip timeout
-					Menu, % A_ThisMenu, Enable, Tooltip position
-					Menu, % A_ThisMenu, Enable, Sorting order
-					Menu, % A_ThisMenu, Enable, Max. no. of shown tips
-				}
-				else
-				{
-					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
-					Menu, % A_ThisMenu, Disable, Tooltip timeout
-					Menu, % A_ThisMenu, Disable, Tooltip position
-					Menu, % A_ThisMenu, Disable, Sorting order
-					Menu, % A_ThisMenu, Disable, Max. no. of shown tips
-				}
-				IniWrite, % ini_TTTtEn, Config.ini, Event_TriggerstringTips, TTTtEn
-		}
-	return
-}
 Menu, SubmenuEndChars, Add, % TransA["Minus -"], 				F_MenuEndChars
 Menu, SubmenuEndChars, Add, % TransA["Space"],				F_MenuEndChars
 Menu, SubmenuEndChars, Add, % TransA["Opening Round Bracket ("],	F_MenuEndChars
@@ -1163,21 +1056,129 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
-
+F_EventTtEn()	;Event tooltip enable
+{
+	global	;assume-global mode
+	static OneTimeMemory := true
+	
+	if (OneTimeMemory)
+	{
+		if (ini_OHTtEn)
+		{
+			Menu, OrdHisTrig, Check, Tooltip enable / disable
+			Menu, OrdHisTrig, Enable, Tooltip timeout
+			Menu, OrdHisTrig, Enable, Tooltip position
+		}
+		else
+		{
+			Menu, OrdHisTrig, UnCheck, Tooltip enable / disable
+			Menu, OrdHisTrig, Disable, Tooltip timeout
+			Menu, OrdHisTrig, Disable, Tooltip position
+		}
+			
+		if (ini_UHTtEn)
+		{
+			Menu, UndoOfH, Check, Tooltip enable / disable
+			Menu, UndoOfH, Enable, Tooltip timeout
+			Menu, UndoOfH, Enable, Tooltip position
+		}
+		else
+		{
+			Menu, UndoOfH, UnCheck, Tooltip enable / disable
+			Menu, UndoOfH, Disable, Tooltip timeout
+			Menu, UndoOfH, Disable, Tooltip position
+		}
+		
+		if (ini_TTTtEn)
+		{
+			Menu, TrigTips, Check, Tooltip enable / disable
+			Menu, TrigTips, Enable, Tooltip timeout
+			Menu, TrigTips, Enable, Tooltip position
+			Menu, TrigTips, Enable, Sorting order
+			Menu, TrigTips, Enable, Max. no. of shown tips
+		}
+		else
+		{
+			Menu, TrigTips, UnCheck, Tooltip enable / disable
+			Menu, TrigTips, Disable, Tooltip timeout
+			Menu, TrigTips, Disable, Tooltip position
+			Menu, TrigTips, Disable, Sorting order
+			Menu, TrigTips, Disable, Max. no. of shown tips
+		}		
+		OneTimeMemory := false
+	}
+	else
+		Switch A_ThisMenu
+		{
+			Case "OrdHisTrig":
+				ini_OHTtEn := !ini_OHTtEn
+				if (ini_OHTtEn)
+				{
+					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Enable, Tooltip timeout
+					Menu, % A_ThisMenu, Enable, Tooltip position
+				}
+				else
+				{
+					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Disable, Tooltip timeout
+					Menu, % A_ThisMenu, Disable, Tooltip position
+				}
+				IniWrite, % ini_OHTtEn, Config.ini, Event_OrdinaryHotstring, OHTtEn
+			Case "UndoOfH":
+				ini_UHTtEn := !ini_UHTtEn
+				if (ini_UHTtEn)
+				{
+					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Enable, Tooltip timeout
+					Menu, % A_ThisMenu, Enable, Tooltip position
+				}
+				else
+				{
+					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Disable, Tooltip timeout
+					Menu, % A_ThisMenu, Disable, Tooltip position
+				}
+				IniWrite, % ini_UHTtEn, Config.ini, Event_UndoHotstring, UHTtEn
+			Case "TrigTips":
+				ini_TTTtEn := !ini_TTTtEn
+				if (ini_TTTtEn)
+				{
+					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Enable, Tooltip timeout
+					Menu, % A_ThisMenu, Enable, Tooltip position
+					Menu, % A_ThisMenu, Enable, Sorting order
+					Menu, % A_ThisMenu, Enable, Max. no. of shown tips
+				}
+				else
+				{
+					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Disable, Tooltip timeout
+					Menu, % A_ThisMenu, Disable, Tooltip position
+					Menu, % A_ThisMenu, Disable, Sorting order
+					Menu, % A_ThisMenu, Disable, Max. no. of shown tips
+				}
+				IniWrite, % ini_TTTtEn, Config.ini, Event_TriggerstringTips, TTTtEn
+		}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadSignalingParams()
 {
 	global	;assume-global mode
 	
 	IniRead, ini_OHTtEn, 	Config.ini, Event_OrdinaryHotstring, 	OHTtEn, 	1
+	IniRead, ini_OHTD,		Config.ini, Event_OrdinaryHotstring,	OHTD,	0
 	IniRead, ini_OHSEn, 	Config.ini, Event_OrdinaryHotstring,	OHSEn, 	1
 	IniRead, ini_MHSEn,		Config.ini, Event_MenuHotstring,		MHSEn,	1
 	IniRead, ini_UHTtEn, 	Config.ini, Event_UndoHotstring, 		UHTtEn, 	1
+	IniRead, ini_UHTD,		Config.ini, Event_UndoHotstring,		UHTD,	0
 	IniRead, ini_UHSEn,		Config.ini, Event_UndoHotstring,		UHSEn,	1
 	IniRead, ini_TTTtEn, 	Config.ini, Event_TriggerstringTips,	TTTtEn, 	1
+	IniRead, ini_TTTD,		Config.ini, Event_TriggerstringTips,	TTTD,	0
 	return
 }
-
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MenuEndChars()
 {	
 	global	;assume-global mode
@@ -1681,28 +1682,62 @@ F_GuiSetTooltipTimeout()
 		,vRadioCheck := true
 	
 	;+Owner to prevent display of a taskbar button
-	Gui, STD: New, -MinimizeBox -MaximizeBox +Owner +HwndTooltipTimeout, % TransA["Set triggerstring tooltip timeout"]
+	Switch (A_ThisMenu)
+	{
+		Case "OrdHisTrig":	Gui, STD: New, -MinimizeBox -MaximizeBox +Owner +HwndTooltipTimeout, Set ""Hotstring was triggered"" tooltip timeout
+		Case "UndoOfH":	Gui, STD: New, -MinimizeBox -MaximizeBox +Owner +HwndTooltipTimeout, Set ""Undid the last hotstring!"" tooltip timeout
+		Case "TrigTips":	Gui, STD: New, -MinimizeBox -MaximizeBox +Owner +HwndTooltipTimeout, Set  triggerstring tip(s) tooltip timeout
+	}
 	Gui, STD: Margin,	% c_xmarg, % c_ymarg
 	Gui,	STD: Color,	% c_WindowColor, % c_ControlColor
 	Gui,	STD: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	
-	Gui, STD: Add, Text, HwndIdSTD_T1, % TransA["When timeout is set, triggerstring tooltips will dissapear after time reaches it."]
+	;*[One]
+	Switch (A_ThisMenu)
+	{
+		Case "OrdHisTrig": 	Gui, STD: Add, Text, HwndIdSTD_T1, When timeout is set, the tooltip ""Hotstring was triggered"" will dissapear after time reaches it.
+		Case "UndoOfH":	Gui, STD: Add, Text, HwndIdSTD_T1, When timeout is set, the tooltip ""Undid the last hotstring!"" will dissapear after time reaches it.
+		Case "TrigTips":	Gui, STD: Add, Text, HwndIdSTD_T1, When timeout is set, the triggerstring tip(s) will dissapear after time reaches it. 
+	}
 	Gui, STD: Add, Text, HwndIdSTD_T2, % TransA["Finite timeout?"]
 	
-	if (ini_TipsDelay = 0)
-		vRadioCheck 		:= false
-	if (ini_TipsDelay > 0)
-		vRadioCheck 		:= true
+	Switch (A_ThisMenu)
+	{
+		Case "OrdHisTrig":
+			if (ini_OHTD = 0)
+				vRadioCheck	:= false
+			if (ini_OHTD > 0)
+				vRadioCheck	:= true
+		Case "UndoOfH":	
+			if (ini_UHTD = 0)
+				vRadioCheck	:= false
+			if (ini_UHTD > 0)
+				vRadioCheck	:= true
+		Case "TrigTips":	
+			if (ini_TTTD = 0)
+				vRadioCheck	:= false
+			if (ini_TTTD > 0)
+				vRadioCheck	:= true
+	}
 	
 	Gui, STD: Add, Radio, HwndIdSTD_R1 vFiniteTttimeout gF_STDRadio Checked%vRadioCheck% Group, % TransA["Yes"]
 	vRadioCheck := !vRadioCheck
 	Gui, STD: Add, Radio, HwndIdSTD_R2 gF_STDRadio Checked%vRadioCheck%, % TransA["No"]
-	Gui, STD: Add, Slider, x0 y0 HwndIdSTD_S1 vini_TipsDelay gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_TipsDelay, % ini_TipsDelay
+	Switch (A_ThisMenu)
+	{
+		Case "OrdHisTrig": 	Gui, STD: Add, Slider, x0 y0 HwndIdSTD_S1 vini_OHTD gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_TipsDelay, % ini_OHTD
+		Case "UndoOfH":	Gui, STD: Add, Slider, x0 y0 HwndIdSTD_S1 vini_UHTD gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_TipsDelay, % ini_UHTD
+		Case "TrigTips":	Gui, STD: Add, Slider, x0 y0 HwndIdSTD_S1 vini_TTTD gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_TipsDelay, % ini_TTTD
+	}
 	Gui, STD: Font, % "cBlue underline" . A_Space . "s" . c_FontSize + 2
 	Gui, STD: Add, Text, HwndIdSTD_T4 gF_TooltipTimeoutSlider, ⓘ
 	Gui,	STD: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	v_OutVarTemp := 10000
-	Gui, STD: Add, Text, HwndIdSTD_T3, % TransA["Triggerstring tooltip timeout in [ms]"] . ":" . A_Space . v_OutVarTemp 
+	Switch (A_ThisMenu)
+	{
+		Case "OrdHisTrig": 	Gui, STD: Add, Text, HwndIdSTD_T3, ""Hotstring was triggered"" tooltip timeout in [ms]: %v_OutVarTemp%
+		Case "UndoOfH":	Gui, STD: Add, Text, HwndIdSTD_T3, ""Undid the last hotstring!"" tooltip timeout in [ms]: %v_OutVarTemp%
+		Case "TrigTips":	Gui, STD: Add, Text, HwndIdSTD_T3, Triggerstring tip(s) tooltip timeout in [ms]: %v_OutVarTemp%
+	}
 	
 	v_xNext := c_xmarg
 	v_yNext := c_ymarg
@@ -1727,7 +1762,12 @@ F_GuiSetTooltipTimeout()
 	v_xNext := c_xmarg
 	v_yNext := v_OutVarTempY + v_OutVarTempH
 	GuiControl, Move, % IdSTD_T3, % "x" v_xNext . A_Space . "y" v_yNext
-	GuiControl,, % IdSTD_T3, % TransA["Triggerstring tooltip timeout in [ms]"] . ":" . A_Space . ini_TipsDelay
+	Switch (A_ThisMenu)
+	{
+		Case "OrdHisTrig": 	GuiControl,, % IdSTD_T3, ""Hotstring was triggered"" tooltip timeout in [ms]: %ini_OHTD%
+		Case "UndoOfH":	GuiControl,, % IdSTD_T3, ""Undid the last hotstring!"" tooltip timeout in [ms]: %ini_UHTD%
+		Case "TrigTips":	GuiControl,, % IdSTD_T3, Triggerstring tip(s) tooltip timeout in [ms]: %ini_TTTD%
+	}
 	
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	Gui, STD: Show, Hide AutoSize 
@@ -1760,13 +1800,35 @@ F_STDRadio()
 	{
 		Case 1: 
 			GuiControl, Enable, % IdSTD_S1
-			ini_TipsDelay := 1000 
-			GuiControl,, % IdSTD_T3, % TransA["Triggerstring tooltip timeout in [ms]"] . ":" . A_Space . ini_TipsDelay
- 			GuiControl,, % IdSTD_S1, % ini_TipsDelay
+			Switch (A_ThisMenu)
+			{
+				Case "OrdHisTrig":
+					ini_OHTD := 1000
+					GuiControl,, % IdSTD_T3, ""Hotstring was triggered"" tooltip timeout in [ms]: %ini_OHTD%
+					GuiControl,, % IdSTD_S1, % ini_OHTD
+				Case "UndoOfH":
+					ini_UHTD := 1000
+					GuiControl,, % IdSTD_T3, ""Undid the last hotstring!"" tooltip timeout in [ms]: %ini_UHTD%
+					GuiControl,, % IdSTD_S1, % ini_UHTD
+				Case "TrigTips":
+					ini_TTTD := 1000
+					GuiControl,, % IdSTD_T3, Triggerstring tip(s) tooltip timeout in [ms]: %ini_TTTD%
+					GuiControl,, % IdSTD_S1, % ini_TTTD
+			}
 		Case 2: 
 			GuiControl, Disable, % IdSTD_S1
-			ini_TipsDelay := 0 
-			GuiControl,, % IdSTD_T3, % TransA["Triggerstring tooltip timeout in [ms]"] . ":" . A_Space . ini_TipsDelay 
+			Switch (A_ThisMenu)
+			{
+				Case "OrdHisTrig":
+					ini_OHTD := 0
+					GuiControl,, % IdSTD_T3, ""Hotstring was triggered"" tooltip timeout in [ms]: %ini_OHTD%
+				Case "UndoOfH":
+					ini_UHTD := 0
+					GuiControl,, % IdSTD_T3, ""Undid the last hotstring!"" tooltip timeout in [ms]: %ini_UHTD%
+				Case "TrigTips":
+					ini_TTTD := 0
+					GuiControl,, % IdSTD_T3, Triggerstring tip(s) tooltip timeout in [ms]: %ini_TTTD%
+			}
 	}
 	return
 }
@@ -1775,7 +1837,12 @@ F_SetTooltipTimeout()
 {
 	global	;assume-global mode
 	Gui, STD: Submit, NoHide
-	GuiControl,, % IdSTD_T3, % TransA["Triggerstring tooltip timeout in [ms]"] . ":" . A_Space . ini_TipsDelay 
+	Switch (A_ThisMenu)
+	{
+		Case "OrdHisTrig":	GuiControl,, % IdSTD_T3, ""Hotstring was triggered"" tooltip timeout in [ms]: %ini_OHTD%
+		Case "UndoOfH":	GuiControl,, % IdSTD_T3, ""Undid the last hotstring!"" tooltip timeout in [ms]: %ini_UHTD%
+		Case "TrigTips":	GuiControl,, % IdSTD_T3, Triggerstring tip(s) tooltip timeout in [ms]: %ini_TTTD%
+	}
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3715,14 +3782,17 @@ TipsSDuration=200
 Language=English.txt
 [Event_OrdinaryHotstring]
 OHTtEn=1
+OHTD=0
 OHSEn=0
 [Event_MenuHotstring]
 MHSEn=1
 [Event_UndoHotstring]
 UHTtEn=1
+UHTD=0
 UHSEn=0
 [Event_TriggerstringTips]
 TTTtEn=1
+TTTD=0
 [GraphicalUserInterface]
 MainWindowPosX=
 MainWindowPosY=
@@ -6934,8 +7004,13 @@ ExitApp, 2	;2 = by Tray
 
 STDGuiClose:
 STDGuiEscape:
-IniWrite, % ini_TipsDelay, Config.ini, Configuration, TipsDelay
-Gui, STD: Destroy
+	Switch (A_ThisMenu)
+	{
+		Case "OrdHisTrig": 	IniWrite, % ini_OHTD, Config.ini, Event_OrdinaryHotstring, 	OHTD
+		Case "UndoOfH":	IniWrite, % ini_UHTD, Config.ini, Event_UndoHotstring, 	UHTD
+		Case "TrigTips":	IniWrite, % ini_TTTD, Config.ini, Event_TriggerstringTips, 	TTTD
+	}
+	Gui, STD: Destroy
 return
 
 L_EnDisHiTtooltip:
