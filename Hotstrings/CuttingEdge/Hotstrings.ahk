@@ -1427,7 +1427,7 @@ F_EventSoPar()	;tu jestem
 			Gui, MSP: Add, Slider, HwndIdMSP_S2 vini_UHSD gF_SetSoundDuration Line1 Page50 Range50-2000 TickInterval50 ToolTipBottom Buddy1ini_UHSD, % ini_UHSD
 	}
 	Gui, MSP: Font, % "cBlue underline" . A_Space . "s" . c_FontSize + 2
-	Gui, MSP: Add, Text, HwndIdMSP_T4 gF_MenuSoundDurSliderInfo, ⓘ
+	Gui, MSP: Add, Text, HwndIdMSP_T4 gF_SoundDurSliderInfo, ⓘ
 	Gui,	MSP: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	v_OutVarTemp := 10000
 	
@@ -1506,9 +1506,9 @@ F_SoundTestBut()
 	global	;assume-global mode
 	Switch A_ThisMenu
 	{
-		Case "OrdHisTrig":	SoundBeep, % ini_OHSF, % OHSD
-		Case "MenuHisTrig":	SoundBeep, % ini_MHSF, % MHSD
-		Case "UndoOfH":	SoundBeep, % ini_UHSF, % UHSD
+		Case "OrdHisTrig":	SoundBeep, % ini_OHSF, % ini_OHSD
+		Case "MenuHisTrig":	SoundBeep, % ini_MHSF, % ini_MHSD
+		Case "UndoOfH":	SoundBeep, % ini_UHSF, % ini_UHSD
 	}
 	return
 }
@@ -1525,6 +1525,7 @@ F_SoundFreqSliderInfo()
 {
 	global	;assume-global mode
 	TransA["F_SoundFreqSliderInfo"] := StrReplace(TransA["F_SoundFreqSliderInfo"], "``n", "`n")
+	;*[One]
 	ToolTip, % TransA["F_SoundFreqSliderInfo"]	
 	return
 }
@@ -6983,18 +6984,22 @@ Gui,		HS4: Show, Hide
 ini_WhichGui := "HS4"
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-TSPGuiClose:
-TSPGuiEscape:
-	IniWrite, % ini_TipsSFrequency, Config.ini, Configuration, TipsSFrequency
-	Iniwrite, % ini_TipsSDuration, Config.ini, Configuration, TipsSDuration
-	Gui, TSP: Destroy
-return
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-MSPGuiClose:
+MSPGuiClose:	
 MSPGuiEscape:
-	IniWrite, % ini_MenuSFrequency, Config.ini, Configuration, MenuSFrequency
-	Iniwrite, % ini_MenuSDuration, Config.ini, Configuration, MenuSDuration
-	Gui, TSP: Destroy
+
+Switch A_ThisMenu
+	{
+		Case "OrdHisTrig":
+			IniWrite, % ini_OHSF, Config.ini, Event_OrdinaryHotstring, OHSF
+			Iniwrite, % ini_OHSD, Config.ini, Event_OrdinaryHotstring, OHSD
+		Case "MenuHisTrig":
+			IniWrite, % ini_MHSF, Config.ini, Event_OrdinaryHotstring, MHSF
+			Iniwrite, % ini_MHSD, Config.ini, Event_OrdinaryHotstring, MHSD
+		Case "UndoOfH":
+			IniWrite, % ini_UHSF, Config.ini, Event_OrdinaryHotstring, UHSF
+			Iniwrite, % ini_UHSD, Config.ini, Event_OrdinaryHotstring, UHSD
+	}
+	Gui, MSP: Destroy
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 MoveLibsGuiEscape:
