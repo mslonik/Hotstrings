@@ -1,4 +1,4 @@
-/* 
+﻿/* 
 	Author:      Jakub Masiak, Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings as in AutoHotkey (shortcuts), but editable with GUI and many more options.
@@ -211,18 +211,12 @@ if (v_Param == "d") ;If the script is run with command line parameter "d" like d
 		v_SelectedMonitor := PrimMon
 */
 
-Menu, Submenu1, Add, Undo the last hotstring: enable, F_MUndo
-Menu, Submenu1, Add, Undo the last hotstring: disable, F_MUndo
-Menu, Submenu1, Add
-F_MUndo()
-
 Menu, PositionMenu, Add, % TransA["Caret"], 					L_MenuCaretCursor
 Menu, PositionMenu, Add, % TransA["Cursor"], 				L_MenuCaretCursor
 
 Menu, SubmenuMenu, 	Add, % TransA["Choose menu position"],		:PositionMenu
 Menu, SubmenuMenu, 	Add, % TransA["Enable sound if overrun"],	F_ToggleMenuSound
 Menu, SubmenuMenu,	Add, % TransA["Menu sound parameters"],		F_GuiMenuSoundParameters
-
 F_ToggleMenuSound()
 
 Menu, ConfTHB, 	Add, % TransA["Hotstring menu (MSI, MCL)"], :SubmenuMenu
@@ -363,7 +357,7 @@ Menu, OrdHisTrig,		Add, Tooltip timeout,						F_GuiSetTooltipTimeout
 Menu, OrdHisTrig,		Add, Tooltip position: caret,					F_EventTtPos
 Menu, OrdHisTrig,		Add, Tooltip position: cursor,				F_EventTtPos
 Menu, OrdHisTrig,		Add
-Menu, OrdHisTrig,		Add, Sound enable,								F_EventSoEn
+Menu, OrdHisTrig,		Add, Sound enable,							F_EventSoEn
 Menu, OrdHisTrig,		Add, Sound disable,							F_EventSoEn
 Menu, OrdHisTrig,		Add
 Menu, OrdHisTrig,		Add, Sound parameters,						F_EventSoPar
@@ -375,13 +369,13 @@ Menu, OrdHisTrig,		Add, Sound parameters,						F_EventSoPar
 Menu, MenuHisTrig,		Add, Menu position: caret,					F_EventTtPos
 Menu, MenuHisTrig,		Add, Menu position: cursor,					F_EventTtPos
 Menu, MenuHisTrig,		Add
-Menu, MenuHisTrig,		Add, Sound enable,								F_EventSoEn
+Menu, MenuHisTrig,		Add, Sound enable,							F_EventSoEn
 Menu, MenuHisTrig,		Add, Sound disable,							F_EventSoEn
 Menu, MenuHisTrig,		Add
 Menu, MenuHisTrig,		Add, Sound parameters,						F_EventSoPar
 
-Menu, UndoOfH,			Add, Tooltip enable,								F_EventTtEn
-Menu, UndoOfH,			Add, Tooltip disable,								F_EventTtEn
+Menu, UndoOfH,			Add, Tooltip enable,						F_EventTtEn
+Menu, UndoOfH,			Add, Tooltip disable,						F_EventTtEn
 Menu, UndoOfH,			Add
 Menu, UndoOfH,			Add, Tooltip timeout,						F_GuiSetTooltipTimeout
 Menu, UndoOfH,			Add, Tooltip position: caret,					F_EventTtPos
@@ -392,14 +386,14 @@ Menu, UndoOfH,			Add, Sound disable,							F_EventSoEn
 Menu, UndoOfH,			Add
 Menu, UndoOfH,			Add, Sound parameters,						F_EventSoPar
 
-Menu, TrigTips,		Add, Tooltip enable,							F_EventTtEn
-Menu, TrigTips,		Add, Tooltip disable,							F_EventTtEn
+Menu, TrigTips,		Add, Tooltip enable,						F_EventTtEn
+Menu, TrigTips,		Add, Tooltip disable,						F_EventTtEn
 Menu, TrigTips,		Add
 Menu, TrigTips,		Add, Tooltip timeout,						F_GuiSetTooltipTimeout
 Menu, TrigTips,		Add, Tooltip position: caret,					F_EventTtPos
 Menu, TrigTips,		Add, Tooltip position: cursor,				F_EventTtPos
 Menu, TrigTips,		Add
-;Menu, TrigTips,		Add, Sound enable,								F_EventSoEn
+;Menu, TrigTips,		Add, Sound enable,							F_EventSoEn
 ;Menu, TrigTips,		Add, Sound disable,							F_EventSoEn
 ;Menu, TrigTips,		Add
 ;Menu, TrigTips,		Add, Sound parameters,						F_EventSoPar
@@ -409,12 +403,17 @@ Menu, TrigTips,		Add,	Max. no. of shown tips,					F_TrigShowNoOfTips
 
 Menu, SigOfEvents,		Add, Ordinary hotstring is triggered,			:OrdHisTrig
 Menu, SigOfEvents,		Add, Menu hotstring is triggered,				:MenuHisTrig
-Menu, SigOfEvents,		Add, Undo of hotstring,						:UndoOfH
+Menu, SigOfEvents,		Add, Undid the last hotsring,					:UndoOfH
 Menu, SigOfEvents,		Add, Triggerstring tips,						:TrigTips
 
 F_EventTtEn()
 F_EventSoEn()
 F_EventTtPos()
+
+Menu, Submenu1, Add, Undo the last hotstring: enable, F_MUndo
+Menu, Submenu1, Add, Undo the last hotstring: disable, F_MUndo
+Menu, Submenu1, Add
+F_MUndo()
 
 F_EventSoPar()
 {
@@ -468,7 +467,7 @@ Menu, Submenu1,		Add, Signaling of events,					:SigOfEvents
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 Menu, Submenu1,		Add
 Menu, Submenu1,		Add, Mute all signals,						F_AllMute
-Menu, Submenu1,		Add, Off all signals tooltips,				F_AllTooltipsOff
+Menu, Submenu1,		Add, Turn off all signals tooltips,			F_AllTooltipsOff
 Menu, Submenu1,		Add
 Menu, Submenu1,  	   	Add, % TransA["Toggle EndChars"], 				:SubmenuEndChars
 
@@ -1080,11 +1079,13 @@ F_MUndo()
 			{
 				Menu, Submenu1, UnCheck, Undo the last hotstring: disable
 				Menu, Submenu1, Check,  Undo the last hotstring: enable
+				Menu, SigOfEvents, Enable, Undid the last hotsring
 			}
 		else
 			{
 				Menu, Submenu1, Check, Undo the last hotstring: disable
 				Menu, Submenu1, UnCheck, Undo the last hotstring: enable
+				Menu, SigOfEvents, Disable, Undid the last hotsring
 			}
 		OneTimeMemory := false	
 	}
@@ -1094,11 +1095,13 @@ F_MUndo()
 			{
 				Menu, Submenu1, Check, Undo the last hotstring: disable
 				Menu, Submenu1, UnCheck, Undo the last hotstring: enable
+				Menu, SigOfEvents, Disable, Undid the last hotsring				
 			}
 		else
 			{
 				Menu, Submenu1, UnCheck, Undo the last hotstring: disable
 				Menu, Submenu1, Check,  Undo the last hotstring: enable
+				Menu, SigOfEvents, Enable, Undid the last hotsring				
 			}
 		ini_Undo := !(ini_Undo)
 		IniWrite, %ini_Undo%, Config.ini, Configuration, UndoHotstring
@@ -1106,7 +1109,7 @@ F_MUndo()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EventSoEn()  ;tu jestem
+F_EventSoEn()
 {
 	global	;assume-global mode
 	static OneTimeMemory := true
@@ -1115,32 +1118,38 @@ F_EventSoEn()  ;tu jestem
 	{
 		if (ini_OHSEn)
 		{
-			Menu, OrdHisTrig, Check, Sound enable / disable
+			Menu, OrdHisTrig, Check, Sound enable
+			Menu, OrdHisTrig, UnCheck, Sound disable
 			Menu, OrdHisTrig, Enable, Sound parameters
 		}
 		else
 		{
-			Menu, OrdHisTrig, UnCheck, Sound enable / disable
+			Menu, OrdHisTrig, UnCheck, Sound enable
+			Menu, OrdHisTrig, Check, Sound disable
 			Menu, OrdHisTrig, Disable, Sound parameters
 		}
 		if (ini_MHSEn)
 		{
-			Menu, MenuHisTrig, Check, Sound enable / disable
+			Menu, MenuHisTrig, Check, Sound enable
+			Menu, MenuHisTrig, UnCheck, Sound disable
 			Menu, MenuHisTrig, Enable, Sound parameters
 		}
 		else
 		{
-			Menu, MenuHisTrig, UnCheck, Sound enable / disable
+			Menu, MenuHisTrig, UnCheck, Sound enable
+			Menu, MenuHisTrig, Check, Sound disable
 			Menu, MenuHisTrig, Disable, Sound parameters
 		}
 		if (ini_UHSEn)
 		{
-			Menu, UndoOfH, Check, Sound enable / disable
+			Menu, UndoOfH, Check, Sound enable 
+			Menu, UndoOfH, UnCheck, Sound disable
 			Menu, UndoOfH, Enable, Sound parameters
 		}
 		else
 		{
-			Menu, UndoOfH, UnCheck, Sound enable / disable
+			Menu, UndoOfH, UnCheck, Sound enable 
+			Menu, UndoOfH, Check, Sound disable
 			Menu, UndoOfH, Disable, Sound parameters
 		}
 		OneTimeMemory := false
@@ -1153,12 +1162,14 @@ F_EventSoEn()  ;tu jestem
 				ini_OHSEn := !ini_OHSEn
 				if (ini_OHSEn)
 				{
-					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Check, Sound enable
+					Menu, % A_ThisMenu, UnCheck, Sound disable
 					Menu, % A_ThisMenu, Enable, Sound parameters
 				}
 				else
 				{
-					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+					Menu, % A_ThisMenu, UnCheck, Sound enable
+					Menu, % A_ThisMenu, Check, Sound disable
 					Menu, % A_ThisMenu, Disable, Sound parameters
 				}
 				IniWrite, % ini_OHSEn, Config.ini, Event_OrdinaryHotstring, OHSEn
@@ -1166,12 +1177,14 @@ F_EventSoEn()  ;tu jestem
 				ini_MHSEn := !ini_MHSEn
 				if (ini_MHSEn)
 				{
-					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Check, Sound enable
+					Menu, % A_ThisMenu, UnCheck, Sound disable
 					Menu, % A_ThisMenu, Enable, Sound parameters
 				}
 				else
 				{
-					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+					Menu, % A_ThisMenu, UnCheck, Sound enable
+					Menu, % A_ThisMenu, Check, Sound disable
 					Menu, % A_ThisMenu, Disable, Sound parameters
 				}
 				IniWrite, % ini_MHSEn, Config.ini, Event_MenuHotstring, MHSEn
@@ -1179,12 +1192,14 @@ F_EventSoEn()  ;tu jestem
 				ini_UHSEn := !ini_UHSEn
 				if (ini_UHSEn)
 				{
-					Menu, % A_ThisMenu, Check, % A_ThisMenuItem
+					Menu, % A_ThisMenu, Check, Sound enable
+					Menu, % A_ThisMenu, UnCheck, Sound disable
 					Menu, % A_ThisMenu, Enable, Sound parameters
 				}
 				else
 				{
-					Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
+					Menu, % A_ThisMenu, UnCheck, Sound enable
+					Menu, % A_ThisMenu, Check, Sound disable
 					Menu, % A_ThisMenu, Disable, Sound parameters
 				}
 				IniWrite, % ini_UHSEn, Config.ini, Event_UndoHotstring, UHSEn
