@@ -82,7 +82,7 @@ if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "L
 	. A_ScriptDir . "\Languages"
 }
 
-IniRead ini_Language, Config.ini, Configuration, Language				; Load from Config.ini file specific parameter: language into variable ini_Language, e.g. ini_Language = English.ini
+IniRead ini_Language, Config.ini, GraphicalUserInterface, Language				; Load from Config.ini file specific parameter: language into variable ini_Language, e.g. ini_Language = English.ini
 if (!FileExist(A_ScriptDir . "\Languages\" . ini_Language))			; else if there is no ini_language .ini file, e.g. v_langugae == Polish.ini and there is no such file in Languages folder
 {
 	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no"] . A_Space . ini_Language . A_Space . TransA["file in Languages subfolder!"]
@@ -209,48 +209,6 @@ if (v_Param == "d") ;If the script is run with command line parameter "d" like d
 		v_SelectedMonitor := PrimMon
 */
 
-Menu, Submenu3, 	Add, % TransA["Caret"],		L_CaretCursor	;tu jestem
-Menu, Submenu3, 	Add, % TransA["Cursor"],		L_CaretCursor
-
-if (ini_Cursor)
-	Menu, Submenu3, Check, % TransA["Cursor"]
-else
-	Menu, Submenu3, UnCheck, % TransA["Cursor"]
-if (ini_Caret)	
-	Menu, Submenu3, Check, % TransA["Caret"]
-else
-	Menu, Submenu3, UnCheck, % TransA["Caret"]
-
-Menu, SubmenuTips, Add, % TransA["Enable/Disable"], 				F_ToggleMenu_iniTips
-Menu, SubmenuTips, Add
-Menu, SubmenuTips, Add, % TransA["Set triggerstring tooltip timeout"],F_GuiSetTooltipTimeout
-Menu, SubmenuTips, Add, % TransA["Set max. no. of shown tips"],		F_GuiSetAmountTrigTip
-Menu, SubmenuTips, Disable, % TransA["Set max. no. of shown tips"]
-Menu, SubmenuTips, Add
-Menu, SubmenuTips, Add, % TransA["Choose tips location"], 			:Submenu3
-
-F_ToggleMenu_iniTips()
-
-
-Menu, ConfTHB, 	Add, % TransA["Triggerstring tips"], 			:SubmenuTips
-Menu, ConfTHB,		Add
-
-/*
-	if (ini_TipsSortAlphabetically)
-		Menu, SubmenuTips, Check, % TransA["Sort tips alphabetically"]
-	else
-		Menu, SubmenuTips, UnCheck, % TransA["Sort tips alphabetically"]
-	if (ini_TipsSortByLength)
-		Menu, SubmenuTips, Check, % TransA["Sort tips by length"]
-	else
-		Menu, SubmenuTips, UnCheck, % TransA["Sort tips by length"]
-*/
-
-if (ini_Tips == 0)
-	Menu, SubmenuTips, UnCheck, % TransA["Enable/Disable"]
-else
-	Menu, SubmenuTips, Check, % TransA["Enable/Disable"]
-
 Loop, %A_ScriptDir%\Languages\*.txt 
 {
 	Menu, SubmenuLanguage, Add, %A_LoopFileName%, L_ChangeLanguage
@@ -272,7 +230,7 @@ Switch c_FontColor
 }
 
 Menu, ConfGUI,		Add, % TransA["Save position of application window"], 	F_SaveGUIPos
-Menu, ConfGUI,		Add, % TransA["Change Language"], 					:SubmenuLanguage
+Menu, ConfGUI,		Add, % TransA["Change language"], 					:SubmenuLanguage
 Menu, ConfGUI, 	Add	;To add a menu separator line, omit all three parameters.
 Menu, ConfGUI, 	Add, % TransA["Show Sandbox (F6)"], 				F_ToggleSandbox
 if (ini_Sandbox)
@@ -310,10 +268,8 @@ Menu, FontTypeMenu, Add,		Verdana,								F_FontType
 Menu, FontTypeMenu, Check,	% c_FontType
 Menu, ConfGUI,		Add, 	% TransA["Font type"],					:FontTypeMenu
 
-Menu, Submenu1,		Add, % TransA["Triggerstring / hotstring behaviour"], :ConfTHB
-
-Menu, TrigSortOrder, Add, % TransA["Sort tips alphabetically"], 		L_SortTipsAlphabetically
-Menu, TrigSortOrder, Add, % TransA["Sort tips by length"], 			L_SortTipsByLength
+Menu, TrigSortOrder, 	Add, % TransA["Alphabetically"], 				F_SortTipsAlphabetically
+Menu, TrigSortOrder, 	Add, % TransA["By length"], 			F_SortTipsByLength
 
 Menu, OrdHisTrig,		Add, Tooltip enable,						F_EventTtEn
 Menu, OrdHisTrig,		Add, Tooltip disable,						F_EventTtEn
@@ -381,6 +337,7 @@ F_EventTtEn()
 F_EventSoEn()
 F_EventTtPos()
 F_AmountOfCharacterTips()
+F_SortTipsAlphabetically()
 
 Menu, Submenu1, Add, Undo the last hotstring: enable, F_MUndo
 Menu, Submenu1, Add, Undo the last hotstring: disable, F_MUndo
@@ -928,6 +885,56 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_SortTipsByLength()
+{
+	global	;assume-global mode
+	static OneTimeMemory := true
+	
+	if (OneTimeMemory)
+	{
+		if (ini_TipsSortByLength)
+			Menu, TrigSortOrder, Check, % TransA["By length"]
+		else
+			Menu, TrigSortOrder, UnCheck, % TransA["By length"]
+		OneTimeMemory := false
+	}
+	else
+	{
+		ini_TipsSortByLength := !(ini_TipsSortByLength)
+		if (ini_TipsSortByLength)
+			Menu, TrigSortOrder, Check, % TransA["By length"]
+		else
+			Menu, TrigSortOrder, UnCheck, % TransA["By length"]
+		IniWrite, % ini_TipsSortByLength, Config.ini, Event_TriggerstringTips, TipsSortByLength
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SortTipsAlphabetically()
+{
+	global	;assume-global mode
+	static OneTimeMemory := true
+	
+	if (OneTimeMemory)
+	{
+		if (ini_TipsSortAlphabetically)
+			Menu, TrigSortOrder, Check, % TransA["Alphabetically"]
+		else
+			Menu, TrigSortOrder, UnCheck, % TransA["Alphabetically"]
+		OneTimeMemory := false
+	}
+	else
+	{
+		ini_TipsSortAlphabetically := !(ini_TipsSortAlphabetically)
+		if (ini_TipsSortAlphabetically)
+			Menu, TrigSortOrder, Check, % TransA["Alphabetically"]
+		else
+			Menu, TrigSortOrder, UnCheck, % TransA["Alphabetically"]
+		IniWrite, % ini_TipsSortAlphabetically, Config.ini, Event_TriggerstringTips, TipsSortAlphatebically
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_AmountOfCharacterTips()
 {
 	global	;assume-global mode
@@ -1364,6 +1371,8 @@ F_LoadSignalingParams()
 	IniRead, ini_TTTP,		Config.ini, Event_TriggerstringTips,	TTTP,	1
 	IniRead, ini_TTTtEn, 	Config.ini, Event_TriggerstringTips,	TTTtEn, 	1
 	IniRead, ini_TTTD,		Config.ini, Event_TriggerstringTips,	TTTD,	0
+	IniRead, ini_TipsSortAlphatebically, Config.ini, Event_TriggerstringTips, TipsSortAlphatebically, 1
+	IniRead, ini_TipsSortByLength, Config.ini, Event_TriggerstringTips, TipsSortByLength, 1
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1622,76 +1631,6 @@ F_SetTipsSoundFrequency()
 	global	;assume-global mode
 	Gui, TSP: Submit, NoHide
 	GuiControl,, % IdTSP_T3, % TransA["Triggerstring sound frequency range"] . ":" . A_Space . ini_TipsSFrequency
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ToggleMenu_iniTips()
-{
-	global	;assume-global mode
-	static OneTimeMemory := true
-	
-	if (OneTimeMemory)
-	{
-		Switch ini_Tips
-		{
-			Case % true:
-				Menu, SubmenuTips, Check, 	% TransA["Enable/Disable"]
-				Menu, SubmenuTips, Enable, 	% TransA["Set triggerstring tooltip timeout"]
-				Menu, SubmenuTips, Enable, 	% TransA["Set max. no. of shown tips"]
-				Menu, SubmenuTips, Enable, 	% TransA["Choose tips location"]
-				;Menu, SubmenuTips, Enable, 	Tips are shown after no. of characters
-				;Menu, SubmenuTips, Enable, 	% TransA["Sort tips alphabetically"]
-				;Menu, SubmenuTips, Enable, 	% TransA["Sort tips by length"]
-				;Menu, SubmenuTips, Enable,	% TransA["Enable sound if triggerstring"]
-				;Menu, SubmenuTips, Enable,	% TransA["Triggerstring sound parameters"]
-			Case % false:
-				Menu, SubmenuTips, UnCheck, 	% TransA["Enable/Disable"]
-				Menu, SubmenuTips, Disable, 	% TransA["Set triggerstring tooltip timeout"]
-				Menu, SubmenuTips, Disable, 	% TransA["Set max. no. of shown tips"]
-				Menu, SubmenuTips, Disable, 	% TransA["Choose tips location"]
-				;Menu, SubmenuTips, Disable, 	Tips are shown after no. of characters
-				;Menu, SubmenuTips, Disable, 	% TransA["Sort tips alphabetically"]
-				;Menu, SubmenuTips, Disable, 	% TransA["Sort tips by length"]
-				;Menu, SubmenuTips, Disable,	% TransA["Enable sound if triggerstring"]
-				;Menu, SubmenuTips, Disable,	% TransA["Triggerstring sound parameters"]
-		}
-		OneTimeMemory := False
-		return
-	}
-	else
-	{
-		ini_Tips := !(ini_Tips)
-		Switch ini_Tips
-		{
-			Case % true:
-				Menu, SubmenuTips, Check, 	% TransA["Enable/Disable"]
-				Menu, SubmenuTips, Enable, 	% TransA["Set triggerstring tooltip timeout"]
-				Menu, SubmenuTips, Enable, 	% TransA["Set max. no. of shown tips"]
-				Menu, SubmenuTips, Enable, 	% TransA["Choose tips location"]
-				Menu, SubmenuTips, Enable, 	% TransA["Number of characters for tips"]
-				;Menu, SubmenuTips, Enable, 	% TransA["Sort tips alphabetically"]
-				;Menu, SubmenuTips, Enable, 	% TransA["Sort tips by length"]
-				;Menu, SubmenuTips, Enable,	% TransA["Enable sound if triggerstring"]
-				;Menu, SubmenuTips, Enable,	% TransA["Triggerstring sound parameters"]
-			Case % false:
-				Menu, SubmenuTips, UnCheck, 	% TransA["Enable/Disable"]
-				Menu, SubmenuTips, Disable, 	% TransA["Set triggerstring tooltip timeout"]
-				Menu, SubmenuTips, Disable, 	% TransA["Set max. no. of shown tips"]
-				Menu, SubmenuTips, Disable, 	% TransA["Choose tips location"]
-				Menu, SubmenuTips, Disable, 	% TransA["Number of characters for tips"]
-				;Menu, SubmenuTips, Disable, 	% TransA["Sort tips alphabetically"]
-				;Menu, SubmenuTips, Disable, 	% TransA["Sort tips by length"]
-				;Menu, SubmenuTips, Disable,	% TransA["Enable sound if triggerstring"]
-				;Menu, SubmenuTips, Disable,	% TransA["Triggerstring sound parameters"]
-		}
-		IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
-		return
-	}
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-F_GuiSetAmountTrigTip()
-{
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3796,12 +3735,9 @@ TipsDelay=0
 Cursor=0
 Caret=1
 TipsChars=1
-TipsSortAlphatebically=1
-TipsSortByLength=1
 TipsSound=1
 TipsSFrequency=400
 TipsSDuration=200
-Language=English.txt
 [Event_OrdinaryHotstring]
 OHTtEn=1
 OHTD=0
@@ -3825,7 +3761,10 @@ UHSD=250
 TTTtEn=1
 TTTD=0
 TTTP=1
+TipsSortAlphatebically=1
+TipsSortByLength=1
 [GraphicalUserInterface]
+Language=English.txt
 MainWindowPosX=
 MainWindowPosY=
 MainWindowPosW=
@@ -4077,6 +4016,7 @@ Add hotstring (F9) 										= Add hotstring (F9)
 Add library 											= Add library
 Add to Autostart										= Add to Autostart
 A library with that name already exists! 					= A library with that name already exists!
+Alphabetically 										= Alphabetically
 Apostrophe ' 											= Apostrophe '
 Application											= A&pplication
 Application help 										= Application help
@@ -4087,9 +4027,8 @@ Backslash \ 											= Backslash \
 Because of that the default AutoHotkey icon will be used instead = Because of that the default AutoHotkey icon will be used instead
 Build with Autohotkey.exe version							= Build with Autohotkey.exe version
 Cancel 												= Cancel
-Caret 												= Caret
 Case Sensitive (C) 										= Case Sensitive (C)
-Change Language 										= Change Language
+Change language 										= Change language
 Choose existing hotstring library file before saving new (triggerstring, hotstring) definition!	= Choose existing hotstring library file before saving new (triggerstring, hotstring) definition!
 Choose (.ahk) file containing (triggerstring, hotstring) definitions for import	= Choose (.ahk) file containing (triggerstring, hotstring) definitions for import
 Choose library file (.csv) for export 						= Choose library file (.csv) for export
@@ -4119,7 +4058,6 @@ Converted												= Converted
 Do you want to delete it?								= Do you want to delete it?
 Do you want to proceed? 									= Do you want to proceed?
 Do you want to reload application now?						= Do you want to reload application now?
-Cursor 												= Cursor
 Dark													= Dark
 Default mode											= Default mode
 Delete hotstring (F8) 									= Delete hotstring (F8)
@@ -4132,7 +4070,6 @@ Do you want to reload application now?						= Do you want to reload application 
 doesn't exist in application folder						= doesn't exist in application folder
 Dynamic hotstrings 										= &Dynamic hotstrings
 Edit Hotstrings 										= Edit Hotstrings
-Enable/Disable 										= Enable/Disable
 Enable/disable libraries									= Enable/disable &libraries
 Enable/disable triggerstring tips 							= Enable/disable triggerstring tips	
 Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 4th edition of this application, 2021 by Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
@@ -4244,12 +4181,10 @@ Select hotstring output function 							= Select hotstring output function
 Select the target library: 								= Select the target library:
 Select trigger option(s) 								= Select trigger option(s)
 Semicolon ; 											= Semicolon ;
-Set max. no. of shown tips 								= Set max. no. of shown tips
 Set Clipboard Delay										= Set Clipboard Delay
 Set delay												= Set delay
 Set parameters of menu sound								= Set parameters of menu sound
 Set parameters of triggerstring sound						= Set parameters of triggerstring sound
-Set triggerstring tooltip timeout							= Set triggerstring tooltip timeout
 Show full GUI (F4)										= Show full GUI (F4)
 Show Sandbox (F6)										= Show Sandbox (F6)
 Silent mode											= Silent mode
@@ -4259,8 +4194,7 @@ Slash / 												= Slash /
 Something went wrong with hotstring deletion:				= Something went wrong with hotstring deletion:
 Something went wrong with hotstring EndChars					= Something went wrong with hotstring EndChars
 Something weng wrong with link file (.lnk) creation			= Something weng wrong with link file (.lnk) creation
-Sort tips alphabetically 								= Sort tips &alphabetically
-Sort tips by length 									= Sort tips by &length
+By length 									= By length
 Sound test											= Sound test
 Space												= Space
 Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
@@ -6891,30 +6825,9 @@ Gui, Mon:Destroy
 return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-L_CaretCursor:
-Menu, Submenu3, ToggleCheck, % TransA["Caret"]
-Menu, Submenu3, ToggleCheck, % TransA["Cursor"]
-ini_Caret := !(ini_Caret)
-ini_Cursor := !(ini_Cursor)
-IniWrite, %ini_Caret%, Config.ini, Configuration, Caret
-IniWrite, %ini_Cursor%, Config.ini, Configuration, Cursor
-return
-
-L_SortTipsAlphabetically:
-Menu, SubmenuTips, ToggleCheck, % TransA["Sort tips alphabetically"]
-ini_TipsSortAlphabetically := !(ini_TipsSortAlphabetically)
-IniWrite, %ini_TipsSortAlphabetically%, Config.ini, Configuration, TipsSortAlphatebically
-return
-
-L_SortTipsByLength:
-Menu, SubmenuTips, ToggleCheck, % TransA["Sort tips by length"]
-ini_TipsSortByLength := !(ini_TipsSortByLength)
-IniWrite, %ini_TipsSortByLength%, Config.ini, Configuration, TipsSortByLength
-return
-
 L_ChangeLanguage:
 ini_Language := A_ThisMenuitem
-IniWrite, %ini_Language%, Config.ini, Configuration, Language
+IniWrite, %ini_Language%, Config.ini, GraphicalUserInterface, Language
 Loop, %A_ScriptDir%\Languages\*.ini
 {
 	Menu, SubmenuLanguage, Add, %A_LoopFileName%, L_ChangeLangage
