@@ -209,7 +209,7 @@ if (v_Param == "d") ;If the script is run with command line parameter "d" like d
 		v_SelectedMonitor := PrimMon
 */
 
-Menu, Submenu3, 	Add, % TransA["Caret"],		L_CaretCursor
+Menu, Submenu3, 	Add, % TransA["Caret"],		L_CaretCursor	;tu jestem
 Menu, Submenu3, 	Add, % TransA["Cursor"],		L_CaretCursor
 
 if (ini_Cursor)
@@ -221,12 +221,6 @@ if (ini_Caret)
 else
 	Menu, Submenu3, UnCheck, % TransA["Caret"]
 
-Menu, Submenu4, 	Add, 1, 					L_AmountOfCharacterTips1
-Menu, Submenu4, 	Add, 2, 					L_AmountOfCharacterTips2
-Menu, Submenu4, 	Add, 3, 					L_AmountOfCharacterTips3
-Menu, Submenu4, 	Add, 4, 					L_AmountOfCharacterTips4
-Menu, Submenu4, 	Add, 5, 					L_AmountOfCharacterTips5
-
 Menu, SubmenuTips, Add, % TransA["Enable/Disable"], 				F_ToggleMenu_iniTips
 Menu, SubmenuTips, Add
 Menu, SubmenuTips, Add, % TransA["Set triggerstring tooltip timeout"],F_GuiSetTooltipTimeout
@@ -234,24 +228,13 @@ Menu, SubmenuTips, Add, % TransA["Set max. no. of shown tips"],		F_GuiSetAmountT
 Menu, SubmenuTips, Disable, % TransA["Set max. no. of shown tips"]
 Menu, SubmenuTips, Add
 Menu, SubmenuTips, Add, % TransA["Choose tips location"], 			:Submenu3
-Menu, SubmenuTips, Add, % TransA["Number of characters for tips"],	:Submenu4
-Menu, SubmenuTips, Add
-Menu, SubmenuTips, Add, % TransA["Enable sound if triggerstring"],	F_EnableSoundIfTrig
-Menu, SubmenuTips, Add, % TransA["Triggerstring sound parameters"],	F_GuiTrigSoundParameters
 
 F_ToggleMenu_iniTips()
-F_EnableSoundIfTrig()
+
 
 Menu, ConfTHB, 	Add, % TransA["Triggerstring tips"], 			:SubmenuTips
 Menu, ConfTHB,		Add
 
-
-Menu, Submenu4, 	Check, 					% ini_AmountOfCharacterTips
-Loop, 5
-{
-	if !(A_Index == ini_AmountOfCharacterTips)
-		Menu, Submenu4, UnCheck, %A_Index%
-}
 /*
 	if (ini_TipsSortAlphabetically)
 		Menu, SubmenuTips, Check, % TransA["Sort tips alphabetically"]
@@ -379,9 +362,15 @@ Menu, TrigTips,		Add
 ;Menu, TrigTips,		Add, Sound disable,							F_EventSoEn
 ;Menu, TrigTips,		Add
 ;Menu, TrigTips,		Add, Sound parameters,						F_EventSoPar
-Menu, TrigTips,		Add
 Menu, TrigTips,		Add, Sorting order,							:TrigSortOrder								
 Menu, TrigTips,		Add,	Max. no. of shown tips,					F_TrigShowNoOfTips
+
+Menu, Submenu4, 		Add, 1, 									F_AmountOfCharacterTips
+Menu, Submenu4, 		Add, 2, 									F_AmountOfCharacterTips
+Menu, Submenu4, 		Add, 3, 									F_AmountOfCharacterTips
+Menu, Submenu4, 		Add, 4, 									F_AmountOfCharacterTips
+Menu, Submenu4, 		Add, 5, 									F_AmountOfCharacterTips
+Menu, TrigTips, 		Add, Tips are shown after no. of characters,		:Submenu4		
 
 Menu, SigOfEvents,		Add, Ordinary hotstring is triggered,			:OrdHisTrig
 Menu, SigOfEvents,		Add, Menu hotstring is triggered,				:MenuHisTrig
@@ -391,6 +380,7 @@ Menu, SigOfEvents,		Add, Triggerstring tips,						:TrigTips
 F_EventTtEn()
 F_EventSoEn()
 F_EventTtPos()
+F_AmountOfCharacterTips()
 
 Menu, Submenu1, Add, Undo the last hotstring: enable, F_MUndo
 Menu, Submenu1, Add, Undo the last hotstring: disable, F_MUndo
@@ -442,8 +432,8 @@ F_MenuEndChars()
 Menu, Submenu1,		Add, Signaling of events,					:SigOfEvents
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 Menu, Submenu1,		Add
-Menu, Submenu1,		Add, Mute all signals,						F_AllMute
-Menu, Submenu1,		Add, Turn off all signals tooltips,			F_AllTooltipsOff
+Menu, Submenu1,		Add, Mute all events sound,					F_AllMute
+Menu, Submenu1,		Add, Turn off all events tooltips,				F_AllTooltipsOff
 Menu, Submenu1,		Add
 Menu, Submenu1,  	   	Add, % TransA["Toggle EndChars"], 				:SubmenuEndChars
 
@@ -938,6 +928,44 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_AmountOfCharacterTips()
+{
+	global	;assume-global mode
+	static OneTimeMemory := true
+	
+	if (OneTimeMemory)
+	{
+		Switch ini_AmountOfCharacterTips
+		{
+			Case 1:	Menu, Submenu4, Check, 1
+			Case 2:	Menu, Submenu4, Check, 2
+			Case 3:	Menu, Submenu4, Check, 3
+			Case 4:	Menu, Submenu4, Check, 4
+			Case 5:	Menu, Submenu4, Check, 5
+		}
+		OneTimeMemory := false
+	}
+	else
+	{
+		ini_AmountOfCharacterTips := A_ThisMenuItem
+		Switch ini_AmountOfCharacterTips
+		{
+			Case 1:	Menu, Submenu4, Check, 1
+			Case 2:	Menu, Submenu4, Check, 2
+			Case 3:	Menu, Submenu4, Check, 3
+			Case 4:	Menu, Submenu4, Check, 4
+			Case 5:	Menu, Submenu4, Check, 5
+		}
+		IniWrite, % ini_AmountOfCharacterTips, Config.ini, Configuration, TipsChars
+		Loop, 5
+		{
+			if (A_Index != ini_AmountOfCharacterTips)
+				Menu, Submenu4, UnCheck, %A_Index%
+		}
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EventTtPos()
 {
 	global	;assume-global mode
@@ -1374,7 +1402,7 @@ F_MenuEndChars()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EventSoPar()	;tu jestem
+F_EventSoPar()
 {
 	global	;assume-global mode
 	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
@@ -1558,176 +1586,6 @@ F_SetSoundFrequency()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EnableSoundIfTrig()
-{
-	global	;assume-global mode
-	static OneTimeMemory := true
-
-	if (OneTimeMemory)
-	{
-		if (ini_Tips and ini_TipsSound)
-		{
-			Menu, SubmenuTips, Check, % TransA["Enable sound if triggerstring"]
-			Menu, SubmenuTips, Enable, % TransA["Triggerstring sound parameters"]
-		}
-		if (ini_Tips and !ini_TipsSound)
-		{
-			Menu, SubmenuTips, UnCheck, % TransA["Enable sound if triggerstring"]
-			Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]
-			
-		}
-		if (!ini_Tips and ini_TipsSound)
-		{
-			Menu, SubmenuTips, Check, % TransA["Enable sound if triggerstring"]
-			Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]
-		}
-		if (!ini_Tips and !ini_TipsSound)
-		{
-			Menu, SubmenuTips, UnCheck, % TransA["Enable sound if triggerstring"]
-			Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]		
-		}
-		OneTimeMemory := False
-		return
-		
-		/*
-			if (ini_TipsSound)
-			{
-				Menu, SubmenuTips, Check, % TransA["Enable sound if triggerstring"]
-				Menu, SubmenuTips, Enable, % TransA["Triggerstring sound parameters"]
-			}
-			else
-			{
-				Menu, SubmenuTips, UnCheck, % TransA["Enable sound if triggerstring"]
-				Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]
-			}
-		*/
-	}
-	else
-	{
-		ini_TipsSound := !(ini_TipsSound)
-		if (ini_Tips and ini_TipsSound)
-		{
-			Menu, SubmenuTips, Check, % TransA["Enable sound if triggerstring"]
-			Menu, SubmenuTips, Enable, % TransA["Triggerstring sound parameters"]
-		}
-		if (ini_Tips and !ini_TipsSound)
-		{
-			Menu, SubmenuTips, UnCheck, % TransA["Enable sound if triggerstring"]
-			Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]
-			
-		}
-		if (!ini_Tips and ini_TipsSound)
-		{
-			Menu, SubmenuTips, Check, % TransA["Enable sound if triggerstring"]
-			Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]
-		}
-		if (!ini_Tips and !ini_TipsSound)
-		{
-			Menu, SubmenuTips, UnCheck, % TransA["Enable sound if triggerstring"]
-			Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]		
-		}		
-		/*
-			if (ini_TipsSound)
-			{
-				Menu, SubmenuTips, Check, % TransA["Enable sound if triggerstring"]
-				Menu, SubmenuTips, Enable, % TransA["Triggerstring sound parameters"]
-			}
-			else
-			{
-				Menu, SubmenuTips, UnCheck, % TransA["Enable sound if triggerstring"]
-				Menu, SubmenuTips, Disable, % TransA["Triggerstring sound parameters"]
-			}
-		*/
-		IniWrite, % ini_TipsSound, Config.ini, Configuration, TipsSound
-		return
-	}
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiTrigSoundParameters() 
-{
-	global	;assume-global mode
-	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
-		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
-		,NewWinPosX := 0, NewWinPosY := 0
-		,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
-		,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
-		,TickInterval := (32767 - 37) / 9, SliderWidth := 0, SliderHeight := 0, MaxWidth := 0, iWidth := 0, ButtonMar := 0, ButtonWidth := 0
-	
-	;+Owner to prevent display of a taskbar button
-	Gui, TSP: New, -MinimizeBox -MaximizeBox +Owner +HwndTrigSoundPar, % TransA["Set parameters of triggerstring sound"]
-	Gui, TSP: Margin,	% c_xmarg, % c_ymarg
-	Gui,	TSP: Color,	% c_WindowColor, % c_ControlColor
-	Gui,	TSP: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	
-	Gui, TSP: Add, Text, HwndIdTSP_T1, % TransA["When triggerstring event takes place, sound is emitted according to the following settings."]
-	
-	Gui, TSP: Add, Slider, HwndIdTSP_S1 vini_TipsSFrequency gF_SetTipsSoundFrequency Line1 Page%TickInterval% Range37-32767 TickInterval%TickInterval% ToolTipBottom Buddy1ini_TipsSFrequency, % ini_TipsSFrequency
-	Gui, TSP: Font, % "cBlue underline" . A_Space . "s" . c_FontSize + 2
-	Gui, TSP: Add, Text, HwndIdTSP_T2 gF_TrigSoundFreqSliderInfo, ⓘ
-	Gui,	TSP: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	v_OutVarTemp := 10000
-	Gui, TSP: Add, Text, HwndIdTSP_T3, % TransA["Triggerstring sound frequency range"] . ":" . A_Space . v_OutVarTemp 
-	
-	Gui, TSP: Add, Slider, HwndIdTSP_S2 vini_TipsSDuration gF_SetTipsSoundDuration Line1 Page50 Range50-2000 TickInterval50 ToolTipBottom Buddy1ini_TipsSDuration, % ini_TipsSDuration
-	Gui, TSP: Font, % "cBlue underline" . A_Space . "s" . c_FontSize + 2
-	Gui, TSP: Add, Text, HwndIdTSP_T4 gF_TrigSoundDurSliderInfo, ⓘ
-	Gui,	TSP: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	v_OutVarTemp := 10000
-	Gui, TSP: Add, Text, HwndIdTSP_T5, % TransA["Triggerstring sound duration [ms]"] . ":" . A_Space . v_OutVarTemp
-	Gui, TSP: Add, Button, HwndIdTSP_B1 gF_TrigSTestBut, % TransA["Sound test"]
-	
-	GuiControlGet, v_OutVarTemp, Pos, % IdTSP_T1
-	MaxWidth := v_OutVarTempW
-	GuiControlGet, v_OutVarTemp, Pos, % IdTSP_T2
-	iWidth := v_OutVarTempW
-	SliderWidth := MaxWidth - (iWidth + 2 * c_xmarg)
-	GuiControlGet, v_OutVarTemp, Pos, % IdTSP_S1
-	SliderHeight := v_OutVarTempH
-	GuiControlGet, v_OutVarTemp, Pos, % IdTSP_B1
-	ButtonWidth := v_OutVarTempW + 2 * c_xmarg
-	ButtonMar := Round((MaxWidth - ButtonWidth) / 2)
-	
-	v_xNext := c_xmarg
-	v_yNext := c_ymarg
-	GuiControl, Move, % IdTSP_T1, % "x" . v_xNext . A_Space . "y" . v_yNext
-	v_yNext += HofText
-	v_wNext := SliderWidth
-	GuiControl, Move, % IdTSP_S1, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
-	v_xNext := c_xmarg + SliderWidth + c_xmarg
-	GuiControl, Move, % IdTSP_T2, % "x" . v_xNext . A_Space . "y" . v_yNext 
-	GuiControlGet, v_OutVarTemp, Pos, % IdTSP_S1
-	v_xNext := c_xmarg
-	v_yNext += SliderHeight
-	GuiControl, Move, % IdTSP_T3, % "x" . v_xNext . A_Space . "y" . v_yNext 
-	v_yNext += HofText + 4 * c_ymarg
-	v_wNext := SliderWidth
-	GuiControl, Move, % IdTSP_S2, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
-	v_xNext := c_xmarg + SliderWidth + c_xmarg
-	GuiControl, Move, % IdTSP_T4, % "x" . v_xNext . A_Space . "y" . v_yNext 
-	v_xNext := c_xmarg
-	v_yNext += SliderHeight
-	GuiControl, Move, % IdTSP_T5, % "x" . v_xNext . A_Space . "y" . v_yNext 
-	v_xNext := ButtonMar
-	v_yNext += HofText + c_ymarg
-	v_wNext := ButtonWidth
-	GuiControl, Move, % IdTSP_B1, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
-	
-	GuiControl,, % IdTSP_T3, % TransA["Triggerstring sound frequency range"] . ":" 	. A_Space . ini_TipsSFrequency
-	GuiControl,, % IdTSP_T5, % TransA["Triggerstring sound duration [ms]"] . ":" 	. A_Space . ini_TipsSDuration
-	
-	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-	Gui, TSP: Show, Hide AutoSize 
-	DetectHiddenWindows, On
-	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TrigSoundPar
-	DetectHiddenWindows, Off
-	
-	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
-	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
-	
-	Gui, TSP: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"	
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TrigSTestBut()
 {
 	global	;assume-global mode
@@ -1781,21 +1639,21 @@ F_ToggleMenu_iniTips()
 				Menu, SubmenuTips, Enable, 	% TransA["Set triggerstring tooltip timeout"]
 				Menu, SubmenuTips, Enable, 	% TransA["Set max. no. of shown tips"]
 				Menu, SubmenuTips, Enable, 	% TransA["Choose tips location"]
-				Menu, SubmenuTips, Enable, 	% TransA["Number of characters for tips"]
+				;Menu, SubmenuTips, Enable, 	Tips are shown after no. of characters
 				;Menu, SubmenuTips, Enable, 	% TransA["Sort tips alphabetically"]
 				;Menu, SubmenuTips, Enable, 	% TransA["Sort tips by length"]
-				Menu, SubmenuTips, Enable,	% TransA["Enable sound if triggerstring"]
-				Menu, SubmenuTips, Enable,	% TransA["Triggerstring sound parameters"]
+				;Menu, SubmenuTips, Enable,	% TransA["Enable sound if triggerstring"]
+				;Menu, SubmenuTips, Enable,	% TransA["Triggerstring sound parameters"]
 			Case % false:
 				Menu, SubmenuTips, UnCheck, 	% TransA["Enable/Disable"]
 				Menu, SubmenuTips, Disable, 	% TransA["Set triggerstring tooltip timeout"]
 				Menu, SubmenuTips, Disable, 	% TransA["Set max. no. of shown tips"]
 				Menu, SubmenuTips, Disable, 	% TransA["Choose tips location"]
-				Menu, SubmenuTips, Disable, 	% TransA["Number of characters for tips"]
+				;Menu, SubmenuTips, Disable, 	Tips are shown after no. of characters
 				;Menu, SubmenuTips, Disable, 	% TransA["Sort tips alphabetically"]
 				;Menu, SubmenuTips, Disable, 	% TransA["Sort tips by length"]
-				Menu, SubmenuTips, Disable,	% TransA["Enable sound if triggerstring"]
-				Menu, SubmenuTips, Disable,	% TransA["Triggerstring sound parameters"]
+				;Menu, SubmenuTips, Disable,	% TransA["Enable sound if triggerstring"]
+				;Menu, SubmenuTips, Disable,	% TransA["Triggerstring sound parameters"]
 		}
 		OneTimeMemory := False
 		return
@@ -1811,20 +1669,20 @@ F_ToggleMenu_iniTips()
 				Menu, SubmenuTips, Enable, 	% TransA["Set max. no. of shown tips"]
 				Menu, SubmenuTips, Enable, 	% TransA["Choose tips location"]
 				Menu, SubmenuTips, Enable, 	% TransA["Number of characters for tips"]
-				Menu, SubmenuTips, Enable, 	% TransA["Sort tips alphabetically"]
-				Menu, SubmenuTips, Enable, 	% TransA["Sort tips by length"]
-				Menu, SubmenuTips, Enable,	% TransA["Enable sound if triggerstring"]
-				Menu, SubmenuTips, Enable,	% TransA["Triggerstring sound parameters"]
+				;Menu, SubmenuTips, Enable, 	% TransA["Sort tips alphabetically"]
+				;Menu, SubmenuTips, Enable, 	% TransA["Sort tips by length"]
+				;Menu, SubmenuTips, Enable,	% TransA["Enable sound if triggerstring"]
+				;Menu, SubmenuTips, Enable,	% TransA["Triggerstring sound parameters"]
 			Case % false:
 				Menu, SubmenuTips, UnCheck, 	% TransA["Enable/Disable"]
 				Menu, SubmenuTips, Disable, 	% TransA["Set triggerstring tooltip timeout"]
 				Menu, SubmenuTips, Disable, 	% TransA["Set max. no. of shown tips"]
 				Menu, SubmenuTips, Disable, 	% TransA["Choose tips location"]
 				Menu, SubmenuTips, Disable, 	% TransA["Number of characters for tips"]
-				Menu, SubmenuTips, Disable, 	% TransA["Sort tips alphabetically"]
-				Menu, SubmenuTips, Disable, 	% TransA["Sort tips by length"]
-				Menu, SubmenuTips, Disable,	% TransA["Enable sound if triggerstring"]
-				Menu, SubmenuTips, Disable,	% TransA["Triggerstring sound parameters"]
+				;Menu, SubmenuTips, Disable, 	% TransA["Sort tips alphabetically"]
+				;Menu, SubmenuTips, Disable, 	% TransA["Sort tips by length"]
+				;Menu, SubmenuTips, Disable,	% TransA["Enable sound if triggerstring"]
+				;Menu, SubmenuTips, Disable,	% TransA["Triggerstring sound parameters"]
 		}
 		IniWrite, %ini_Tips%, Config.ini, Configuration, Tips
 		return
@@ -4277,7 +4135,6 @@ Edit Hotstrings 										= Edit Hotstrings
 Enable/Disable 										= Enable/Disable
 Enable/disable libraries									= Enable/disable &libraries
 Enable/disable triggerstring tips 							= Enable/disable triggerstring tips	
-Enable sound if triggerstring								= Enable sound if triggerstring
 Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 4th edition of this application, 2021 by Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
 Enter 												= Enter 
 Enter a name for the new library 							= Enter a name for the new library
@@ -4441,7 +4298,6 @@ Triggerstring 											= Triggerstring
 Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
 Triggerstring sound duration [ms]							= Triggerstring sound duration [ms]
 Triggerstring sound frequency range						= Triggerstring sound frequency range
-Triggerstring sound parameters							= Triggerstring sound parameters
 Triggerstring tips 										= &Triggerstring tips
 Triggerstring tooltip timeout in [ms]						= Triggerstring tooltip timeout in [ms]
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
@@ -7034,41 +6890,6 @@ MonGuiClose:
 Gui, Mon:Destroy
 return
 
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-L_AmountOfCharacterTips1:
-ini_AmountOfCharacterTips := 1
-gosub, L_AmountOfCharacterTips
-return
-
-L_AmountOfCharacterTips2:
-ini_AmountOfCharacterTips := 2
-gosub, L_AmountOfCharacterTips
-return
-
-L_AmountOfCharacterTips3:
-ini_AmountOfCharacterTips := 3
-gosub, L_AmountOfCharacterTips
-return
-
-L_AmountOfCharacterTips4:
-ini_AmountOfCharacterTips := 4
-gosub, L_AmountOfCharacterTips
-return
-
-L_AmountOfCharacterTips5:
-ini_AmountOfCharacterTips := 5
-gosub, L_AmountOfCharacterTips
-return
-
-L_AmountOfCharacterTips:
-IniWrite, %ini_AmountOfCharacterTips%, Config.ini, Configuration, TipsChars
-Menu, Submenu4, Check, %ini_AmountOfCharacterTips%
-Loop, 5
-{
-	if !(A_Index == ini_AmountOfCharacterTips)
-		Menu, Submenu4, UnCheck, %A_Index%
-}
-return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 L_CaretCursor:
 Menu, Submenu3, ToggleCheck, % TransA["Caret"]
