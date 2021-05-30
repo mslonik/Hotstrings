@@ -18,7 +18,9 @@ SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
 FileEncoding, UTF-16			; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN
 ; Warning! UTF-16 is not recognized by Notepad++ editor (2021), which recognizes correctly UCS-2 (defined by the International Standard ISO/IEC 10646). 
 ; BMP = Basic Multilingual Plane.
-
+CoordMode, Caret,	Client
+CoordMode, ToolTip,	Client
+CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
@@ -41,24 +43,8 @@ global v_MouseY 				:= 0			;Main loop of application
 global v_Tips 					:= ""		;Main loop of application
 global v_TipsFlag 				:= false		;Main loop of application
 
-global ini_AmountOfCharacterTips 	:= 1			;1-5, default: 1
-global ini_Caret 				:= false
-global ini_Cursor 				:= true
-global ini_Delay 				:= 300		;1-1000 [ms], default: 300
-global ini_MenuCaret 			:= false		;to be deleted
-global ini_MenuCursor 			:= true		;to be deleted
-global ini_MenuSound 			:= true
-global ini_Sandbox				:= true		
-global ini_Tips 				:= true
-global ini_TipsSortAlphabetically 	:= true
-global ini_TipsSortByLength 		:= true
 global ini_GuiReload			:= false
 global ini_Language 			:= "English.txt"
-global ini_TipsDelay			:= 3000		;[ms], default: 3000
-global ini_TipsSound			:= true
-
-;global ini_TipsSFrequency		:= 400		;Future. The frequency of the sound. It should be a number between 37 and 32767. If omitted, the frequency will be 523.
-;global ini_TipsSDuration			:= 200		;Future. The duration of the sound, in milliseconds. If omitted, the duration will be 150.
 
 global v_IndexLog 				:= 1			;for logging, if Hotstrings application is run with d parameter.
 
@@ -101,23 +87,9 @@ F_LoadFontSize()
 F_LoadSizeOfMargin()
 F_LoadFontType()
 
-IniRead, ini_Undo, 						Config.ini, Configuration, UndoHotstring
-IniRead, ini_Delay, 					Config.ini, Configuration, Delay
-IniRead, ini_MenuSound,					Config.ini, Configuration, MenuSound
+global ini_CPDelay 				:= 300		;1-1000 [ms], default: 300
+IniRead, ini_CPDelay, 					Config.ini, Configuration, ClipBoardPasteDelay,		300
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
-IniRead, ini_Tips, 						Config.ini, Configuration, Tips
-IniRead, ini_TipsDelay,					Config.ini, Configuration, TipsDelay
-IniRead, ini_TipsSortAlphabetically,		Config.ini, Configuration, TipsSortAlphatebically
-IniRead, ini_TipsSortByLength,			Config.ini, Configuration, TipsSortByLength
-IniRead, ini_TipsSound,					Config.ini, Configuration, TipsSound
-IniRead, ini_TipsSFrequency,				Config.ini, Configuration, TipsSFrequency
-IniRead, ini_TipsSDuration,				Config.ini, Configuration, TipsSDuration
-IniRead, ini_Cursor, 					Config.ini, Configuration, Cursor
-IniRead, ini_Caret, 					Config.ini, Configuration, Caret
-IniRead, ini_AmountOfCharacterTips, 		Config.ini, Configuration, TipsChars
-IniRead, ini_MenuSFrequency,				Config.ini, Configuration, MenuSFrequency
-IniRead, ini_MenuSDuration,				Config.ini, Configuration, MenuSDuration
-
 F_LoadSignalingParams()
 
 F_ValidateIniLibSections() 
@@ -452,106 +424,121 @@ Loop,
 	; if exist window with hotstring tips, output sound
 	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 	{
-		if (ini_MenuSound)
-			SoundBeep, % ini_MenuSFrequency, % ini_MenuSDuration	;Future: configurable parameters of the sound
+		if (ini_MHSEn)	;Menu Hotstring Sound Enable
+			SoundBeep, % ini_MHSF, % ini_MHSD	;Menu Hotstring Sound Frequency, Menu Hotstring Sound Duration
 	}
 	else
 	{
 		v_InputString .= out
-		if (v_HotstringFlag)
+		if (v_HotstringFlag)	;v_HotstringFlag = 1, triggerstring was fired = hotstring was shown
 		{
+			;*[One]
 			v_InputString := ""
 			ToolTip,
-			if (ini_Tips and ini_TipsSound)
-				SoundBeep, % ini_TipsSFrequency, % ini_TipsSDuration
+			if (ini_OHTtEn)
+			{
+				if (ini_OHTP = 1)
+				{
+					if (A_CaretX and A_CaretY)
+					{
+						ToolTip, Hotstring was triggered!, % A_CaretX + 20, % A_CaretY - 20, 4
+						if (ini_OHTD > 0)
+							SetTimer, TurnOff_OHE, % "-" . ini_OHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+					}
+					else
+					{
+						MouseGetPos, v_MouseX, v_MouseY
+						ToolTip, Hotstring was triggered!, % v_MouseX + 20, % v_MouseY - 20, 4
+						if (ini_OHTD > 0)
+							SetTimer, TurnOff_OHE, % "-" . ini_OHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+					}
+				}
+				if (ini_OHTP = 2)
+				{
+					MouseGetPos, v_MouseX, v_MouseY
+					ToolTip, Ordinary Hotstring was triggered!, % v_MouseX + 20, % v_MouseY - 20, 4
+					if (ini_OHTD > 0)
+						SetTimer, TurnOff_OHE, % "-" . ini_OHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+				}
+			}
+			
+			if (ini_OHSEn)	;Ordinary Hotstring Sound Enabled
+				SoundBeep, % ini_OHSF, % ini_OHSD
 			if !(WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 				v_HotstringFlag := false
 		}
+		
+		
 		if (InStr(HotstringEndChars, out))
 		{
-			v_TipsFlag := 0
+			;OutputDebug, % "out" . ":" . A_Space . Ord(out) . "`n" . "v_InputString" . ":" . A_Space . Ord(v_InputString)	;tu jestem
+			v_TipsFlag := false
 			Loop, % a_Triggers.MaxIndex()
 			{
+				;temp := InStr(a_Triggers[A_Index], v_InputString)
 				if (InStr(a_Triggers[A_Index], v_InputString) = 1) ;if in string a_Triggers is found v_InputString from the first position 
 				{
-					v_TipsFlag := 1
+					v_TipsFlag := true
+					Break
 				}
 			}
 			if !(v_TipsFlag)
 				v_InputString := ""
 		}		  
-		if (StrLen(v_InputString) > ini_AmountOfCharacterTips - 1 ) and (ini_Tips)
+		if (StrLen(v_InputString) > ini_TASAC - 1 ) and (ini_TTTtEn)
 		{
-			v_Tips := ""
+			;v_Tips := ""
+			a_SelectedTriggers := []
+			vIntCnt := 0
 			Loop, % a_Triggers.MaxIndex()
 			{
 				if (InStr(a_Triggers[A_Index], v_InputString) = 1) ;if in string a_Triggers is found v_InputString from the first position 
 				{
-					if !(v_Tips == "")
-						v_Tips .= "`n"
-					v_Tips .= a_Triggers[A_Index]
+					;if !(v_Tips == "")
+						;v_Tips .= "`n"
+					;v_Tips .= a_Triggers[A_Index]
+					vIntCnt++
+					a_SelectedTriggers[vIntCnt] := a_Triggers[A_Index]
 				}
 			}
-			If (v_Tips == "") and InStr(HotstringEndChars, SubStr(v_InputString, -1, 1))
-			{
-				v_InputString := out
-				Loop, % a_Triggers.MaxIndex()
+			;wg mnie poniższa część kodu jest niepotrzebna
+			/*
+				if (v_Tips == "") and InStr(HotstringEndChars, SubStr(v_InputString, -1, 1)) ;future
 				{
-					If (InStr(a_Triggers[A_Index], v_InputString) == 1)
+					v_InputString := out
+					Loop, % a_Triggers.MaxIndex()
 					{
-						If !(v_Tips == "")
-							v_Tips .= "`n"
-						v_Tips .= a_Triggers[A_Index]
+						if (InStr(a_Triggers[A_Index], v_InputString) = 1)
+						{
+							if !(v_Tips == "")
+								v_Tips .= "`n"
+							v_Tips .= a_Triggers[A_Index]
+						}
 					}
 				}
-			}
-			a_SelectedTriggers := []
-			a_SelectedTriggers := StrSplit(v_Tips, "`n")
-			if (ini_TipsSortAlphabetically)
+			*/
+			;a_SelectedTriggers := []
+			;a_SelectedTriggers := StrSplit(v_Tips, "`n")
+			if ((ini_TTTtEn) and (ini_TipsSortAlphabetically))
 				;a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
 				Sort, a_SelectedTriggers
-			if (ini_TipsSortByLength)
+			if ((ini_TTTtEn) and (ini_TipsSortByLength))
 				a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
 			v_Tips := ""
-			Loop, % a_SelectedTriggers.MaxIndex()
+			Loop, % a_SelectedTriggers.MaxIndex() ;conversion: table -> string
 			{
-				If !(v_Tips == "")
+				if !(v_Tips == "")
 					v_Tips .= "`n"
 				v_Tips .= a_SelectedTriggers[A_Index]
 			}
-			if (ini_Caret)
-			{
-				if (A_CaretX and A_CaretY)
-				{
-					CoordMode, Caret, Client
-					ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
-					if (ini_TipsDelay)
-						SetTimer, TurnOffTttt, % "-" . ini_TipsDelay ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-				}
-				else
-				{
-					CoordMode, Mouse, Client
-					MouseGetPos, v_MouseX, v_MouseY
-					ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
-					if (ini_TipsDelay)
-						SetTimer, TurnOffTttt, % "-" . ini_TipsDelay ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-				}
-			}
-			if (ini_Cursor)
-			{
-				CoordMode, Mouse, Client
-				MouseGetPos, v_MouseX, v_MouseY
-				ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
-				if (ini_TipsDelay)
-					SetTimer, TurnOffTttt, % "-" . ini_TipsDelay ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-			}
+			F_ShowTriggerstringTips()
 		}
 		else
 			ToolTip, 
 		
 		if (v_Param == "d")
 		{
-			FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_AmountOfCharacterTips . "|" . ini_Tips . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
+			FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_TASAC . "|" . ini_TTTtEn . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
 			v_IndexLog++
 		}
 	}
@@ -567,26 +554,25 @@ Loop,
 ~BackSpace:: 
 if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 {
-	if (ini_MenuSound)
-		SoundBeep, % ini_MenuSFrequency, % ini_MenuSDuration
+	if (ini_MHSEn)
+		SoundBeep, % ini_MHSF, % ini_MHSD
 }
 else
 {
 	StringTrimRight, v_InputString, v_InputString, 1
-	if (StrLen(v_InputString) > ini_AmountOfCharacterTips - 1) and (ini_Tips)
+	if (StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn)
 	{
-		v_Tips := ""
+		;v_Tips := ""
+		a_SelectedTriggers := []
+		vIntCnt := 0
 		Loop, % a_Triggers.MaxIndex()
 		{
 			If InStr(a_Triggers[A_Index], v_InputString) == 1
 			{
-				If !(v_Tips == "")
-					v_Tips .= "`n"
-				v_Tips .= a_Triggers[A_Index]
+				vIntCnt++
+				a_SelectedTriggers[vIntCnt] := a_Triggers[A_Index]
 			}
 		}
-		a_SelectedTriggers := []
-		a_SelectedTriggers := StrSplit(v_Tips, "`n")
 		if (ini_TipsSortAlphabetically)
 			;a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
 			Sort, a_SelectedTriggers
@@ -599,34 +585,14 @@ else
 				v_Tips .= "`n"
 			v_Tips .= a_SelectedTriggers[A_Index]
 		}
-		if (ini_Caret)
-		{
-			if (A_CaretX and A_CaretY)
-			{
-				CoordMode, Caret, Client
-				ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
-			}
-			else
-			{
-				CoordMode, Mouse, Screen
-				MouseGetPos, v_MouseX, v_MouseY
-				ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20		
-			}
-		}
-		if (ini_Cursor)
-		{
-			CoordMode, Mouse, Client
-			MouseGetPos, v_MouseX, v_MouseY
-			ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
-		}
+		F_ShowTriggerstringTips()
 	}
 	else
-	{
 		ToolTip,
-	}
+
 	if (v_Param == "d")
 	{
-		FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_AmountOfCharacterTips . "|" . ini_Tips . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
+		FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_TASAC . "|" . ini_TTTtEn . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
 		v_IndexLog++
 	}
 }
@@ -640,7 +606,7 @@ F_Undo()
 	local	TriggerOpt := "", PosColon1 := 0, PosColon2 := 0, HowManyBackSpaces := 0, ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey
 			,OrigTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, ":", false, 1, 2) + 1)
 	
-	if ((ini_Undo = true) and v_TypedTriggerstring and (ThisHotkey != PriorHotkey))
+	if ((ini_UHTtEn) and v_TypedTriggerstring and (ThisHotkey != PriorHotkey))
 	{	
 		PosColon1 := InStr(v_TypedTriggerstring, ":", false, 1, 1) ;position of the first colon
 		PosColon2 := InStr(v_TypedTriggerstring, ":", false, 3, 1) ;position of the second colon
@@ -689,7 +655,7 @@ StrLenUnicode(data) ;https://www.autohotkey.com/boards/viewtopic.php?t=22036
 #if WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows exist at the moment.
 
 ~^c::			; copy to edit field "Enter hotstring" content of Clipboard.
-Sleep, %ini_Delay%
+Sleep, %ini_CPDelay%
 ControlSetText, Edit2, %Clipboard%
 return
 #if
@@ -762,9 +728,11 @@ return
 
 ~Alt::
 ;It's important to comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
-~MButton::
-~RButton::
-~LButton::
+/*
+	~MButton::
+	~RButton::
+	~LButton::
+*/
 ~LWin::
 ~RWin::
 ~Down::
@@ -777,6 +745,8 @@ return
 ~End::
 ~Esc::
 ToolTip,
+ToolTip, ,, , 4
+ToolTip, ,, , 5
 v_InputString := ""
 return
 
@@ -832,12 +802,14 @@ F_HMenuCli()
 		if (IntCnt > v_MenuMax)
 		{
 			IntCnt := v_MenuMax
-			SoundBeep, % ini_MenuSFrequency, % ini_MenuSDuration	;Future: configurable parameters of the sound
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	;Future: configurable parameters of the sound
 		}
 		if (IntCnt < 1)
 		{
 			IntCnt := 1
-			SoundBeep, % ini_MenuSFrequency, % ini_MenuSDuration	;Future: configurable parameters of the sound
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	;Future: configurable parameters of the sound
 		}
 		IsCursorPressed := false
 		return
@@ -869,7 +841,7 @@ F_HMenuCli()
 	Send, ^v ;paste the text
 	if (Ovar = false)
 		Send, % A_EndChar
-	Sleep, %ini_Delay% ;Remember to sleep before restoring clipboard or it will fail
+	Sleep, %ini_CPDelay% ;Remember to sleep before restoring clipboard or it will fail
 	Clipboard 		 := ClipboardBack
 	v_UndoHotstring 	 := v_Temp1
 	Hotstring("Reset")
@@ -885,6 +857,37 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+
+F_ShowTriggerstringTips()
+{
+	global	;assume-global mode
+	
+	if ((ini_TTTtEn) and (ini_TTTP = 1))
+	{
+		if (A_CaretX and A_CaretY)
+		{
+			ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
+			if ((ini_TTTtEn) and (ini_TTTD > 0))
+				SetTimer, TurnOffTttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+		}
+		else
+		{
+			MouseGetPos, v_MouseX, v_MouseY
+			ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
+			if ((ini_TTTtEn) and (ini_TTTD > 0))
+				SetTimer, TurnOffTttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+		}
+	}
+	if ((ini_TTTtEn) and (ini_TTTP = 2))
+	{
+		MouseGetPos, v_MouseX, v_MouseY
+		ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
+		if ((ini_TTTtEn) and (ini_TTTD > 0))
+			SetTimer, TurnOffTttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+	}
+	return
+		}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SortTipsByLength()
 {
 	global	;assume-global mode
@@ -930,7 +933,7 @@ F_SortTipsAlphabetically()
 			Menu, TrigSortOrder, Check, % TransA["Alphabetically"]
 		else
 			Menu, TrigSortOrder, UnCheck, % TransA["Alphabetically"]
-		IniWrite, % ini_TipsSortAlphabetically, Config.ini, Event_TriggerstringTips, TipsSortAlphatebically
+		IniWrite, % ini_TipsSortAlphabetically, Config.ini, Event_TriggerstringTips, TipsSortAlphabetically
 	}
 	return
 }
@@ -942,7 +945,7 @@ F_AmountOfCharacterTips()
 	
 	if (OneTimeMemory)
 	{
-		Switch ini_AmountOfCharacterTips
+		Switch ini_TASAC
 		{
 			Case 1:	Menu, Submenu4, Check, 1
 			Case 2:	Menu, Submenu4, Check, 2
@@ -954,8 +957,8 @@ F_AmountOfCharacterTips()
 	}
 	else
 	{
-		ini_AmountOfCharacterTips := A_ThisMenuItem
-		Switch ini_AmountOfCharacterTips
+		ini_TASAC := A_ThisMenuItem
+		Switch ini_TASAC
 		{
 			Case 1:	Menu, Submenu4, Check, 1
 			Case 2:	Menu, Submenu4, Check, 2
@@ -963,10 +966,10 @@ F_AmountOfCharacterTips()
 			Case 4:	Menu, Submenu4, Check, 4
 			Case 5:	Menu, Submenu4, Check, 5
 		}
-		IniWrite, % ini_AmountOfCharacterTips, Config.ini, Configuration, TipsChars
+		IniWrite, % ini_TASAC, Config.ini, Event_TriggerstringTips, TipsAreShownAfterNoOfCharacters
 		Loop, 5
 		{
-			if (A_Index != ini_AmountOfCharacterTips)
+			if (A_Index != ini_TASAC)
 				Menu, Submenu4, UnCheck, %A_Index%
 		}
 	}
@@ -1086,7 +1089,7 @@ F_MUndo()
 	
 	if (OneTimeMemory)
 	{
-		if (ini_Undo)
+		if (ini_UHTtEn)
 			{
 				Menu, Submenu1, UnCheck, Undo the last hotstring: disable
 				Menu, Submenu1, Check,  Undo the last hotstring: enable
@@ -1102,7 +1105,7 @@ F_MUndo()
 	}
 	else
 	{
-		if (ini_Undo)
+		if (ini_UHTtEn)
 			{
 				Menu, Submenu1, Check, Undo the last hotstring: disable
 				Menu, Submenu1, UnCheck, Undo the last hotstring: enable
@@ -1114,8 +1117,8 @@ F_MUndo()
 				Menu, Submenu1, Check,  Undo the last hotstring: enable
 				Menu, SigOfEvents, Enable, Undid the last hotsring				
 			}
-		ini_Undo := !(ini_Undo)
-		IniWrite, %ini_Undo%, Config.ini, Configuration, UndoHotstring
+		ini_UHTtEn := !(ini_UHTtEn)
+		IniWrite, % ini_UHTtEn, Config.ini, Event_UndoHotstring, UHTtEn
 	}
 	return
 }
@@ -1351,6 +1354,9 @@ F_EventTtEn()	;Event tooltip enable
 F_LoadSignalingParams()
 {
 	global	;assume-global mode
+	ini_OHTtEn := 1, 	ini_OHTD := 0, 	ini_OHTP := 1, 	ini_OHSEn := 1, 	ini_OHSF := 500, 	ini_OHSD := 250, 	ini_MHMP := 1, 	ini_MHSEn := 1
+	,ini_MHSF := 500, 	ini_MHSD := 250, 	ini_UHTtEn := 1, 	ini_UHTD := 0, 	ini_UHTP := 1, 	ini_UHSEn := 1, 	ini_UHSF := 500, 	ini_UHSD := 250
+	,ini_TTTP := 1, 	ini_TTTtEn := 1, 	ini_TTTD := 0, 	ini_TipsSortAlphabetically := 1, 	ini_TipsSortByLength := 1, 	ini_TASAC := 1
 	
 	IniRead, ini_OHTtEn, 	Config.ini, Event_OrdinaryHotstring, 	OHTtEn, 	1
 	IniRead, ini_OHTD,		Config.ini, Event_OrdinaryHotstring,	OHTD,	0
@@ -1371,8 +1377,9 @@ F_LoadSignalingParams()
 	IniRead, ini_TTTP,		Config.ini, Event_TriggerstringTips,	TTTP,	1
 	IniRead, ini_TTTtEn, 	Config.ini, Event_TriggerstringTips,	TTTtEn, 	1
 	IniRead, ini_TTTD,		Config.ini, Event_TriggerstringTips,	TTTD,	0
-	IniRead, ini_TipsSortAlphatebically, Config.ini, Event_TriggerstringTips, TipsSortAlphatebically, 1
+	IniRead, ini_TipsSortAlphabetically, Config.ini, Event_TriggerstringTips, TipsSortAlphabetically, 1
 	IniRead, ini_TipsSortByLength, Config.ini, Event_TriggerstringTips, TipsSortByLength, 1
+	IniRead, ini_TASAC, 	Config.ini, Event_TriggerstringTips, 	TipsAreShownAfterNoOfCharacters, 1
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1577,8 +1584,6 @@ F_SetSoundDuration()
 		Case "MenuHisTrig":	GuiControl,, % IdMSP_T5, "Hotstring menu" sound duration [ms]: %ini_MHSD%
 		Case "UndoOfH":	GuiControl,, % IdMSP_T5, "Undo hotstring" sound duration [ms]: %ini_UHSD%
 	}
-	
-	GuiControl,, % IdMSP_T5, % TransA["Menu sound duration [ms]"] . ":" . A_Space . ini_MenuSDuration 	
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1595,21 +1600,6 @@ F_SetSoundFrequency()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TrigSTestBut()
-{
-	global	;assume-global mode
-	SoundBeep, % ini_TipsSFrequency, % ini_TipsSDuration
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SetTipsSoundDuration()
-{
-	global	;assume-global mode
-	Gui, TSP: Submit, NoHide
-	GuiControl,, % IdTSP_T5, % TransA["Triggerstring sound duration [ms]"] . ":" . A_Space . ini_TipsSDuration 	
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TrigSoundDurSliderInfo() 
 {
 	global	;assume-global mode
@@ -1623,14 +1613,6 @@ F_TrigSoundFreqSliderInfo()
 	global	;assume-global mode
 	TransA["F_TrigSoundFreqSliderInfo"] := StrReplace(TransA["F_TrigSoundFreqSliderInfo"], "``n", "`n")
 	ToolTip, % TransA["F_TrigSoundFreqSliderInfo"]
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SetTipsSoundFrequency()
-{
-	global	;assume-global mode
-	Gui, TSP: Submit, NoHide
-	GuiControl,, % IdTSP_T3, % TransA["Triggerstring sound frequency range"] . ":" . A_Space . ini_TipsSFrequency
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2659,10 +2641,10 @@ F_GuiHSdelay()
 	Gui,	HSDel: Color,	% c_WindowColor, % c_ControlColor
 	Gui,	HSDel: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
-	Gui, HSDel: Add, Slider, x0 y0 HwndIdHD_S1 vini_Delay gF_HSdelay Range100-1000 ToolTipBottom Buddy1999, % ini_Delay
+	Gui, HSDel: Add, Slider, x0 y0 HwndIdHD_S1 vini_CPDelay gF_HSdelay Range100-1000 ToolTipBottom Buddy1999, % ini_CPDelay
 	TransA["This option is valid"] := StrReplace(TransA["This option is valid"], "``n", "`n")
-	;Gui, HSDel: Add, Text, HwndIdHD_T1 vDelayText, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_Delay . "`n`n" . TransA["This option is valid"]
-	Gui, HSDel: Add, Text, HwndIdHD_T1, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_Delay . "`n`n" . TransA["This option is valid"]
+	;Gui, HSDel: Add, Text, HwndIdHD_T1 vDelayText, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_CPDelay . "`n`n" . TransA["This option is valid"]
+	Gui, HSDel: Add, Text, HwndIdHD_T1, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_CPDelay . "`n`n" . TransA["This option is valid"]
 	GuiControlGet, v_OutVarTemp, Pos, % IdHD_T1
 	v_xNext := c_xmarg
 	v_yNext := c_ymarg
@@ -2686,7 +2668,7 @@ F_GuiHSdelay()
 F_HSdelay()
 {
 	global	;assume-global mode
-	GuiControl,, % IdHD_T1, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_Delay . "`n`n" . TransA["This option is valid"]
+	GuiControl,, % IdHD_T1, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_CPDelay . "`n`n" . TransA["This option is valid"]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3688,9 +3670,11 @@ F_LoadGUIPos()
 {
 	global ;assume-global mode
 	local ini_ReadTemp := 0
+	
 	ini_HS3WindoPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
 	ini_ListViewPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
 	ini_WhichGui := ""
+	ini_Sandbox := true
 	
 	IniRead, ini_ReadTemp, 						Config.ini, GraphicalUserInterface, MainWindowPosX, 0
 	ini_HS3WindoPos["X"] := ini_ReadTemp
@@ -3706,7 +3690,7 @@ F_LoadGUIPos()
 	IniRead, ini_ReadTemp,						Config.ini, GraphicalUserInterface, ListViewPosH, % A_Space
 	ini_ListViewPos["H"] := ini_ReadTemp
 	
-	IniRead, ini_Sandbox, 						Config.ini, GraphicalUserInterface, Sandbox
+	IniRead, ini_Sandbox, 						Config.ini, GraphicalUserInterface, Sandbox,				1
 	IniRead, ini_IsSandboxMoved,					Config.ini, GraphicalUserInterface, IsSandboxMoved 
 	IniRead, ini_WhichGui,						Config.ini, GraphicalUserInterface, WhichGui, %A_Space%
 	if !(ini_WhichGui)
@@ -3725,19 +3709,7 @@ F_CheckCreateConfigIni()
 	ConfigIni := "			
 	(
 [Configuration]
-UndoHotstring=1
-Delay=300
-MenuSound=1
-MenuSFrequency=300
-MenuSDuration=400
-Tips=1
-TipsDelay=0
-Cursor=0
-Caret=1
-TipsChars=1
-TipsSound=1
-TipsSFrequency=400
-TipsSDuration=200
+ClipBoardPasteDelay=300
 [Event_OrdinaryHotstring]
 OHTtEn=1
 OHTD=0
@@ -3761,8 +3733,9 @@ UHSD=250
 TTTtEn=1
 TTTD=0
 TTTP=1
-TipsSortAlphatebically=1
+TipsSortAlphabetically=1
 TipsSortByLength=1
+TipsAreShownAfterNoOfCharacters=1
 [GraphicalUserInterface]
 Language=English.txt
 MainWindowPosX=
@@ -5723,7 +5696,7 @@ F_ViaClipboard(ReplacementString, Oflag)
 	}
 	if (Oflag == 0)
 		Send, % A_EndChar
-	Sleep, %ini_Delay% ; this sleep is required surprisingly
+	Sleep, %ini_CPDelay% ; this sleep is required surprisingly
 	Clipboard := ClipboardBackup
 	ClipboardBackup := ""
 	v_TypedTriggerstring := ThisHotkey
@@ -5738,8 +5711,8 @@ F_MenuCli(TextOptions, Oflag)
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
 	
 	v_TypedTriggerstring	:= A_ThisHotkey
-	if (ini_MenuSound)		;Second beep on purpose
-		SoundBeep, % ini_MenuSFrequency, % ini_MenuSDuration
+	if (ini_MHSEn)		;Second beep on purpose
+		SoundBeep, % ini_MHSF, % ini_MHSD
 	v_MenuMax			 	:= 0
 	;v_InputString 		 := ""
 	TextOptions 		 := F_AHKVariables(TextOptions)
@@ -5754,9 +5727,8 @@ F_MenuCli(TextOptions, Oflag)
 	Loop, Parse, TextOptions, ¦
 		GuiControl,, % Id_LB_HMenuCli, % A_Index . ". " . A_LoopField . "|"
 	
-	if (ini_MenuCaret)
+	if (ini_MHMP = 1)
 	{
-		CoordMode, Caret, Screen ;CoordMode, Caret, Screen
 		if (A_CaretX and A_CaretY)
 		{
 			MenuX := A_CaretX + 20
@@ -5764,15 +5736,13 @@ F_MenuCli(TextOptions, Oflag)
 		}
 		else
 		{
-			CoordMode, Mouse, Screen	;CoordMode, Mouse, Screen
 			MouseGetPos, v_MouseX, v_MouseY
 			MenuX := v_MouseX + 20
 			MenuY := v_MouseY + 20
 		}
 	}
-	if (ini_MenuCursor)
+	if (ini_MHMP = 2)
 	{
-		CoordMode, Mouse, Screen	;CoordMode, Mouse, Screen
 		MouseGetPos, v_MouseX, v_MouseY
 		MenuX := v_MouseX + 20
 		MenuY := v_MouseY + 20
@@ -5802,7 +5772,7 @@ F_MouseMenuCli() ;The subroutine may consult the following built-in variables: A
 		Send, ^v ;paste the text
 		if (Ovar = false)
 			Send, % A_EndChar
-		Sleep, %ini_Delay% ;Remember to sleep before restoring clipboard or it will fail
+		Sleep, %ini_CPDelay% ;Remember to sleep before restoring clipboard or it will fail
 		v_TypedTriggerstring := OutputVarTemp
 		v_UndoHotstring 	 := OutputVarTemp
 		Clipboard 		 := ClipboardBack
@@ -5816,11 +5786,11 @@ F_MenuAHK(TextOptions, Oflag)
 {
 	global	;assume-global mode
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
-
+	
 	v_TypedTriggerstring	:= A_ThisHotkey
-	if (ini_MenuSound)		;Second beep on purpose
-		SoundBeep, % ini_MenuSFrequency, % ini_MenuSDuration
-
+	if (ini_MHSEn)		;Second beep on purpose
+		SoundBeep, % ini_MHSF, % ini_MHSD
+	
 	v_MenuMax				:= 0
 	TextOptions 			:= F_AHKVariables(TextOptions)
 	Loop, Parse, TextOptions, ¦
@@ -5834,22 +5804,22 @@ F_MenuAHK(TextOptions, Oflag)
 	Loop, Parse, TextOptions, ¦
 		GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . "|"
 	
-	CoordMode, Caret, Screen ;CoordMode, Caret, Screen
-	if (A_CaretX and A_CaretY)
+	if (ini_MHMP = 1)
+	{
+		if (A_CaretX and A_CaretY)
 		{
 			MenuX := A_CaretX + 20
 			MenuY := A_CaretY - 20
 		}
 		else
 		{
-			CoordMode, Mouse, Screen	;CoordMode, Mouse, Screen
 			MouseGetPos, v_MouseX, v_MouseY
 			MenuX := v_MouseX + 20
 			MenuY := v_MouseY + 20
 		}
-	if (ini_MenuCursor) 
+	}
+	if (ini_MHMP = 2) 
 	{
-		CoordMode, Mouse, Screen
 		MouseGetPos, v_MouseX, v_MouseY
 		MenuX := v_MouseX + 20
 		MenuY := v_MouseY + 20
@@ -5932,12 +5902,14 @@ F_HMenuAHK()
 		if (IntCnt > v_MenuMax)
 		{
 			IntCnt := v_MenuMax
-			SoundBeep, % ini_MenuSFrequency, % ini_MenuSDuration	;Future: configurable parameters of the sound
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	;Future: configurable parameters of the sound
 		}
 		if (IntCnt < 1)
 		{
 			IntCnt := 1
-			SoundBeep, % ini_MenuSFrequency, % ini_MenuSDuration	;Future: configurable parameters of the sound
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	;Future: configurable parameters of the sound
 		}
 		IsCursorPressed := false
 		return
@@ -6813,7 +6785,7 @@ return
 ~F7::
 HSDelGuiEscape:
 HSDelGuiClose:
-IniWrite, %ini_Delay%, Config.ini, Configuration, Delay
+IniWrite, %ini_CPDelay%, Config.ini, Configuration, ClipBoardPasteDelay
 Gui, HSDel: Destroy
 return
 
@@ -6875,6 +6847,10 @@ return
 
 TurnOffTooltip:
 ToolTip, ,, , 5
+return
+
+TurnOff_OHE:
+ToolTip, ,, , 4
 return
 
 TurnOffTttt:
