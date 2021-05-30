@@ -470,6 +470,7 @@ Loop,
 		}		  
 		
 		F_PrepareTriggerstringTipsTables()		
+		F_ShowTriggerstringTips()
 		if (v_Param == "d")
 		{
 			FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_TASAC . "|" . ini_TTTtEn . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
@@ -817,11 +818,10 @@ return
 F_PrepareTriggerstringTipsTables()
 {
 	global	;assume-global mode
-	local	vIntCnt := 0
+	local	vIntCnt := 0, a_SelectedTriggers := []
 	
 	if (StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn)
 	{
-		a_SelectedTriggers := []
 		Loop, % a_Triggers.MaxIndex()
 		{
 			If InStr(a_Triggers[A_Index], v_InputString) == 1
