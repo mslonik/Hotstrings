@@ -89,6 +89,8 @@ F_LoadFontType()
 
 global ini_CPDelay 				:= 300		;1-1000 [ms], default: 300
 IniRead, ini_CPDelay, 					Config.ini, Configuration, ClipBoardPasteDelay,		300
+global ini_HotstringUndo			:= true
+IniRead, ini_HotstringUndo,				Config.ini, Configuration, HotstringUndo,			1
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
 F_LoadSignalingParams()
 
@@ -274,7 +276,7 @@ Menu, UndoOfH,			Add, Tooltip timeout,						F_GuiSetTooltipTimeout
 Menu, UndoOfH,			Add, Tooltip position: caret,					F_EventTtPos
 Menu, UndoOfH,			Add, Tooltip position: cursor,				F_EventTtPos
 Menu, UndoOfH,			Add
-Menu, UndoOfH,			Add, Sound enable,								F_EventSoEn
+Menu, UndoOfH,			Add, Sound enable,							F_EventSoEn
 Menu, UndoOfH,			Add, Sound disable,							F_EventSoEn
 Menu, UndoOfH,			Add
 Menu, UndoOfH,			Add, Sound parameters,						F_EventSoPar
@@ -291,7 +293,7 @@ Menu, TrigTips,		Add
 ;Menu, TrigTips,		Add
 ;Menu, TrigTips,		Add, Sound parameters,						F_EventSoPar
 Menu, TrigTips,		Add, Sorting order,							:TrigSortOrder								
-Menu, TrigTips,		Add,	Max. no. of shown tips,					F_TrigShowNoOfTips
+Menu, TrigTips,		Add,	Max. no. of shown tips,					F_GuiTrigShowNoOfTips
 
 Menu, Submenu4, 		Add, 1, 									F_AmountOfCharacterTips
 Menu, Submenu4, 		Add, 2, 									F_AmountOfCharacterTips
@@ -316,53 +318,35 @@ Menu, Submenu1, Add, Undo the last hotstring: disable, F_MUndo
 Menu, Submenu1, Add
 F_MUndo()
 
-F_TrigShowNoOfTips()
-{
-	global	;assume-global mode
-	return
-}
-
-F_AllTooltipsOff()
-{
-	global	;assume-global mode
-	return
-}
-
-F_AllMute()
-{
-	global	;assume-global mode
-	return
-}
-
-Menu, SubmenuEndChars, Add, % TransA["Minus -"], 				F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Space"],				F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Opening Round Bracket ("],	F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Closing Round Bracket )"],	F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Opening Square Bracket ["],F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Closing Square Bracket ]"],F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Opening Curly Bracket {"], F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Closing Curly Bracket }"], F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Colon :"], 				F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Semicolon `;"], 			F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Apostrophe '"], 			F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Quote """], 			F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Slash /"], 				F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Backslash \"], 			F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Comma ,"], 				F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Dot ."], 				F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Question Mark ?"], 		F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 			F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Exclamation Mark !"], 	F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Enter"],				F_MenuEndChars
-Menu, SubmenuEndChars, Add, % TransA["Tab"], 				F_MenuEndChars
-F_MenuEndChars()
+Menu, SubmenuEndChars, Add, % TransA["Minus -"], 				F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Space"],				F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Round Bracket ("],	F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Round Bracket )"],	F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Square Bracket ["],F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Square Bracket ]"],F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Curly Bracket {"], F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Curly Bracket }"], F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Colon :"], 				F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Semicolon `;"], 			F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Apostrophe '"], 			F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Quote """], 			F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Slash /"], 				F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Backslash \"], 			F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Comma ,"], 				F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Dot ."], 				F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Question Mark ?"], 		F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 			F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Exclamation Mark !"], 	F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Enter"],				F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Tab"], 				F_ToggleEndChars
+F_ToggleEndChars()
 
 
 Menu, Submenu1,		Add, Signaling of events,					:SigOfEvents
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
-Menu, Submenu1,		Add
-Menu, Submenu1,		Add, Mute all events sound,					F_AllMute
-Menu, Submenu1,		Add, Turn off all events tooltips,				F_AllTooltipsOff
+;Menu, Submenu1,		Add
+;Menu, Submenu1,		Add, Mute all events sound,					F_AllMute
+;Menu, Submenu1,		Add, Turn off all events tooltips,				F_AllTooltipsOff
 Menu, Submenu1,		Add
 Menu, Submenu1,  	   	Add, % TransA["Toggle EndChars"], 				:SubmenuEndChars
 
@@ -468,8 +452,7 @@ Loop,
 				v_HotstringFlag := false
 		}
 		
-		
-		if (InStr(HotstringEndChars, out))
+		if (InStr(HotstringEndChars, out))	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. What's a need to do so?
 		{
 			;OutputDebug, % "out" . ":" . A_Space . Ord(out) . "`n" . "v_InputString" . ":" . A_Space . Ord(v_InputString)	;tu jestem
 			v_TipsFlag := false
@@ -485,7 +468,8 @@ Loop,
 			if !(v_TipsFlag)
 				v_InputString := ""
 		}		  
-		if (StrLen(v_InputString) > ini_TASAC - 1 ) and (ini_TTTtEn)
+		
+		if ((StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn))
 		{
 			;v_Tips := ""
 			a_SelectedTriggers := []
@@ -499,6 +483,8 @@ Loop,
 					;v_Tips .= a_Triggers[A_Index]
 					vIntCnt++
 					a_SelectedTriggers[vIntCnt] := a_Triggers[A_Index]
+					if (vIntCnt = ini_MNTT)	;tu jestem
+						break
 				}
 			}
 			;wg mnie poniższa część kodu jest niepotrzebna
@@ -606,7 +592,7 @@ F_Undo()
 	local	TriggerOpt := "", PosColon1 := 0, PosColon2 := 0, HowManyBackSpaces := 0, ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey
 			,OrigTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, ":", false, 1, 2) + 1)
 	
-	if ((ini_UHTtEn) and v_TypedTriggerstring and (ThisHotkey != PriorHotkey))
+	if (ini_UHTtEn and v_TypedTriggerstring and (ThisHotkey != PriorHotkey))
 	{	
 		PosColon1 := InStr(v_TypedTriggerstring, ":", false, 1, 1) ;position of the first colon
 		PosColon2 := InStr(v_TypedTriggerstring, ":", false, 3, 1) ;position of the second colon
@@ -628,8 +614,39 @@ F_Undo()
 		}
 		if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O"))) 
 			Send, % A_EndChar
-		ToolTip, % TransA["Undid the last hotstring"], % A_CaretX, % A_CaretY - 20, 5
-		SetTimer, TurnOffTooltip, -3000, 200 ;Priority = 200 to avoid conflicts with other threads 
+		;ToolTip, % TransA["Undid the last hotstring"], % A_CaretX, % A_CaretY - 20, 5
+		;SetTimer, TurnOffTooltip, -3000, 200 ;Priority = 200 to avoid conflicts with other threads 
+		
+		if (ini_UHTtEn)
+		{
+			if (ini_UHTP = 1)
+			{
+				if (A_CaretX and A_CaretY)
+				{
+					ToolTip, % TransA["Undid the last hotstring"], % A_CaretX + 20, % A_CaretY - 20, 6
+					if (ini_UHTD > 0)
+						SetTimer, TurnOff_UHE, % "-" . ini_UHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+				}
+				else
+				{
+					MouseGetPos, v_MouseX, v_MouseY
+					ToolTip, % TransA["Undid the last hotstring"], % v_MouseX + 20, % v_MouseY - 20, 6
+					if (ini_UHTD > 0)
+						SetTimer, TurnOff_UHE, % "-" . ini_UHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+				}
+			}
+			if (ini_UHTP = 2)
+			{
+				MouseGetPos, v_MouseX, v_MouseY
+				ToolTip, % TransA["Undid the last hotstring"], % v_MouseX + 20, % v_MouseY - 20, 6
+				if (ini_UHTD > 0)
+					SetTimer, TurnOff_UHE, % "-" . ini_UHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+			}
+		}
+			
+		if (ini_UHSEn)	;Ordinary Hotstring Sound Enabled
+			SoundBeep, % ini_UHSF, % ini_UHSD
+		
 		v_TypedTriggerstring := ""
 		v_HotstringFlag := true
 	}
@@ -857,7 +874,97 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
-
+F_GuiTrigShowNoOfTips()
+{
+	global	;assume-global mode
+	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,NewWinPosX := 0, NewWinPosY := 0
+		,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+		,vWidthOfSliderAndInfo := 0, vWidthOfInfo := 0
+	
+	;+Owner to prevent display of a taskbar button
+	Gui, TMNT: New, -MinimizeBox -MaximizeBox +Owner +HwndMaxNoTrigTips, Set maximum number of shown triggerstring tips
+	Gui, TMNT: Margin,	% c_xmarg, % c_ymarg
+	Gui,	TMNT: Color,	% c_WindowColor, % c_ControlColor
+	Gui,	TMNT: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	;*[One]
+	Gui, TMNT: Add, Text, HwndIdTMNT_T1, This is the maximum length of list displayed on the screen in form of tooltip containing triggerstring tips.
+	
+	Gui, TMNT: Add, Slider, x0 y0 HwndIdTMNT_S1 vini_MNTT gF_SetNoOfTips Line1 Page1 Range1-25 TickInterval5 ToolTipBottom Buddy1ini_MNTT, % ini_MNTT
+	Gui, TMNT: Font, % "cBlue underline" . A_Space . "s" . c_FontSize + 2
+	Gui, TMNT: Add, Text, HwndIdTMNT_T4 gF_TooltipMNTTSliderInfo, ⓘ
+	Gui,	TMNT: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	v_OutVarTemp := 25
+	Gui, TMNT: Add, Text, HwndIdTMNT_T3, Maximum number of shown triggerstring tips: %v_OutVarTemp%
+	
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdTMNT_T1, % "x" . v_xNext . A_Space . "y" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTMNT_T1
+	vWidthOfSliderAndInfo := v_OutVarTempW
+	GuiControlGet, v_OutVarTemp, Pos, % IdTMNT_T4
+	vWidthOfInfo := v_OutVarTempW
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	v_wNext := vWidthOfSliderAndInfo - (vWidthOfInfo + c_xmarg)
+	GuiControl, Move, % IdTMNT_S1, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
+	
+	GuiControlGet, v_OutVarTemp, Pos, % IdTMNT_S1
+	v_xNext := v_OutVarTempX + v_OutVarTempW
+	GuiControl, Move, % IdTMNT_T4, % "x" . v_xNext . A_Space . "y" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext := v_OutVarTempY + v_OutVarTempH
+	GuiControl, Move, % IdTMNT_T3, % "x" v_xNext . A_Space . "y" v_yNext
+	
+	GuiControl,, % IdTMNT_T3, Maximum number of shown triggerstring tips: %ini_MNTT%
+	
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, TMNT: Show, Hide AutoSize 
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . MaxNoTrigTips
+	DetectHiddenWindows, Off
+	
+	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+	
+	Gui, TMNT: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SetNoOfTips()
+{
+	global	;assume-global mode
+	Gui, TMNT: Submit, NoHide
+	GuiControl,, % IdTMNT_T3, Maximum number of shown triggerstring tips: %ini_MNTT%
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_TooltipMNTTSliderInfo()
+{
+	global	;assume-global mode
+	TransA["F_TooltipMNTTSliderInfo"] := StrReplace(TransA["F_TooltipMNTTSliderInfo"], "``n", "`n")
+	ToolTip, % TransA["F_TooltipMNTTSliderInfo"]
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+/*
+	F_AllTooltipsOff() ;future
+	{
+		global	;assume-global mode
+		return
+	}
+*/
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+/*
+	F_AllMute() ;future
+	{
+		global	;assume-global mode
+		return
+	}
+*/
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ShowTriggerstringTips()
 {
 	global	;assume-global mode
@@ -886,7 +993,7 @@ F_ShowTriggerstringTips()
 			SetTimer, TurnOffTttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 	}
 	return
-		}
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SortTipsByLength()
 {
@@ -1089,7 +1196,7 @@ F_MUndo()
 	
 	if (OneTimeMemory)
 	{
-		if (ini_UHTtEn)
+		if (ini_HotstringUndo)
 			{
 				Menu, Submenu1, UnCheck, Undo the last hotstring: disable
 				Menu, Submenu1, Check,  Undo the last hotstring: enable
@@ -1105,7 +1212,7 @@ F_MUndo()
 	}
 	else
 	{
-		if (ini_UHTtEn)
+		if (ini_HotstringUndo)
 			{
 				Menu, Submenu1, Check, Undo the last hotstring: disable
 				Menu, Submenu1, UnCheck, Undo the last hotstring: enable
@@ -1117,8 +1224,8 @@ F_MUndo()
 				Menu, Submenu1, Check,  Undo the last hotstring: enable
 				Menu, SigOfEvents, Enable, Undid the last hotsring				
 			}
-		ini_UHTtEn := !(ini_UHTtEn)
-		IniWrite, % ini_UHTtEn, Config.ini, Event_UndoHotstring, UHTtEn
+		ini_HotstringUndo := !(ini_HotstringUndo)
+		IniWrite, % ini_HotstringUndo, Config.ini, Configuration, HotstringUndo
 	}
 	return
 }
@@ -1356,7 +1463,7 @@ F_LoadSignalingParams()
 	global	;assume-global mode
 	ini_OHTtEn := 1, 	ini_OHTD := 0, 	ini_OHTP := 1, 	ini_OHSEn := 1, 	ini_OHSF := 500, 	ini_OHSD := 250, 	ini_MHMP := 1, 	ini_MHSEn := 1
 	,ini_MHSF := 500, 	ini_MHSD := 250, 	ini_UHTtEn := 1, 	ini_UHTD := 0, 	ini_UHTP := 1, 	ini_UHSEn := 1, 	ini_UHSF := 500, 	ini_UHSD := 250
-	,ini_TTTP := 1, 	ini_TTTtEn := 1, 	ini_TTTD := 0, 	ini_TipsSortAlphabetically := 1, 	ini_TipsSortByLength := 1, 	ini_TASAC := 1
+	,ini_TTTP := 1, 	ini_TTTtEn := 1, 	ini_TTTD := 0, 	ini_TipsSortAlphabetically := 1, 	ini_TipsSortByLength := 1, 	ini_TASAC := 1,	ini_MNTT := 5
 	
 	IniRead, ini_OHTtEn, 	Config.ini, Event_OrdinaryHotstring, 	OHTtEn, 	1
 	IniRead, ini_OHTD,		Config.ini, Event_OrdinaryHotstring,	OHTD,	0
@@ -1380,10 +1487,11 @@ F_LoadSignalingParams()
 	IniRead, ini_TipsSortAlphabetically, Config.ini, Event_TriggerstringTips, TipsSortAlphabetically, 1
 	IniRead, ini_TipsSortByLength, Config.ini, Event_TriggerstringTips, TipsSortByLength, 1
 	IniRead, ini_TASAC, 	Config.ini, Event_TriggerstringTips, 	TipsAreShownAfterNoOfCharacters, 1
+	IniRead, ini_MNTT,		Config.ini, Event_TriggerstringTips,	MNTT,	5
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_MenuEndChars()
+F_ToggleEndChars()
 {	
 	global	;assume-global mode
 	local	key := "", val := ""
@@ -1414,6 +1522,7 @@ F_MenuEndChars()
 			a_HotstringEndChars[A_ThisMenuItem] := true
 			IniWrite, % true, Config.ini, EndChars, % A_ThisMenuItem
 		}
+		F_LoadEndChars()
 	}
 	return
 }
@@ -1569,7 +1678,6 @@ F_SoundFreqSliderInfo()
 {
 	global	;assume-global mode
 	TransA["F_SoundFreqSliderInfo"] := StrReplace(TransA["F_SoundFreqSliderInfo"], "``n", "`n")
-	;*[One]
 	ToolTip, % TransA["F_SoundFreqSliderInfo"]	
 	return
 }
@@ -3710,6 +3818,7 @@ F_CheckCreateConfigIni()
 	(
 [Configuration]
 ClipBoardPasteDelay=300
+HotstringUndo=1
 [Event_OrdinaryHotstring]
 OHTtEn=1
 OHTD=0
@@ -3736,6 +3845,7 @@ TTTP=1
 TipsSortAlphabetically=1
 TipsSortByLength=1
 TipsAreShownAfterNoOfCharacters=1
+MNTT=20
 [GraphicalUserInterface]
 Language=English.txt
 MainWindowPosX=
@@ -4216,9 +4326,10 @@ When hotstring menu event takes place, sound is emitted according to the followi
 When timeout is set, triggerstring tooltips will dissapear after time reaches it. = When timeout is set, triggerstring tooltips will dissapear after time reaches it.
 When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
 Yes													= Yes
-F_TooltipTimeoutSlider									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 500 [ms]; `nInterval:         500 [ms]; `nRange:            1000 ÷ 10 000 [ms]. `n`nWhen required value is chosen just press Esc key to close this window or close this window with mouse.
-F_SoundDurSliderInfo									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 50 [ms]; `nInterval:         150 [ms]; `nRange:            50 ÷ 2 000 [ms]. `n`nWhen required value is chosen just press Esc key to close this window or close this window with mouse.`n`nTip: Recommended time is between 200 to 400 ms.
-F_SoundFreqSliderInfo									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 50; `nInterval:         3636; `nRange:            37 ÷ 32 767. `n`nWhen required value is chosen just press Esc key to close this window or close this window with mouse.`n`nTip: Recommended value is between 200 to 2000. Mind that for your spcific PC some values outside of recommended range may not produce any sound.
+F_TooltipTimeoutSlider									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 500 [ms]; `nInterval:         500 [ms]; `nRange:            1000 ÷ 10 000 [ms]. `n`nWhen required value is chosen just press Esc key to close this window or close it with mouse.
+F_SoundDurSliderInfo									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 50 [ms]; `nInterval:         150 [ms]; `nRange:            50 ÷ 2 000 [ms]. `n`nWhen required value is chosen just press Esc key to close this window or close it with mouse.`n`nTip: Recommended time is between 200 to 400 ms.
+F_SoundFreqSliderInfo									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 50; `nInterval:         3636; `nRange:            37 ÷ 32 767. `n`nWhen required value is chosen just press Esc key to close this window or close it with mouse.`n`nTip: Recommended value is between 200 to 2000. Mind that for your spcific PC some values outside of recommended range may not produce any sound.
+F_TooltipMNTTSliderInfo									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 1; `nInterval:         5; `nRange:            1 ÷ 25 `n`nWhen required value is chosen just press Esc key to close this window or close it with mouse.
 ↓ Click here to select hotstring library ↓					= ↓ Click here to select hotstring library ↓
 )"
 	
@@ -6029,13 +6140,11 @@ F_LoadEndChars() ;Load from Config.ini
 	{
 		if !(tick)
 		{
-			;key := SubStr(A_LoopField, 2, -1)
 			key := A_LoopField
 			tick := true
 		}
 		else
 		{
-			;val := SubStr(A_LoopField, 2, -1)
 			val := A_LoopField
 			tick := false
 			if (val)
@@ -6845,12 +6954,16 @@ F_WhichGui()
 F_Reload()
 return
 
+TurnOff_OHE:
+ToolTip, ,, , 4
+return
+
 TurnOffTooltip:
 ToolTip, ,, , 5
 return
 
-TurnOff_OHE:
-ToolTip, ,, , 4
+TurnOff_UHE:
+ToolTip, ,, , 6
 return
 
 TurnOffTttt:
@@ -6862,11 +6975,17 @@ ExitApp, 2	;2 = by Tray
 
 STDGuiClose:
 STDGuiEscape:
-	Switch (A_ThisMenu)
-	{
+Switch (A_ThisMenu)
+{
 		Case "OrdHisTrig": 	IniWrite, % ini_OHTD, Config.ini, Event_OrdinaryHotstring, 	OHTD
 		Case "UndoOfH":	IniWrite, % ini_UHTD, Config.ini, Event_UndoHotstring, 	UHTD
 		Case "TrigTips":	IniWrite, % ini_TTTD, Config.ini, Event_TriggerstringTips, 	TTTD
 	}
 	Gui, STD: Destroy
+return
+
+TMNTGuiClose:
+TMNTGuiEscape:
+	IniWrite, % ini_MNTT, Config.ini, Event_TriggerstringTips, MNTT
+	Gui, TMNT: Destroy
 return
