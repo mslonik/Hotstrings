@@ -34,7 +34,7 @@ global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -al
 ;@Ahk2Exe-SetFileVersion 4.0
 global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l or d
 
-global a_SelectedTriggers 		:= []		;Main loop of application
+;global a_SelectedTriggers 		:= []		;Main loop of application
 global a_Triggers 				:= []		;Main loop of application
 global v_HotstringFlag 			:= false		;Main loop of application
 global v_InputString 			:= ""		;Main loop of application
@@ -405,6 +405,7 @@ Loop,
 	if (ErrorLevel = "NewInput")
 		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["ErrorLevel was triggered by NewInput error."]
 	
+	OutputDebug, % "out" . ":" . A_Space . Ord(out)
 	; if exist window with hotstring tips, output sound
 	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 	{
@@ -452,9 +453,9 @@ Loop,
 				v_HotstringFlag := false
 		}
 		
-		if (InStr(HotstringEndChars, out))	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. What's a need to do so?
+		if (out and InStr(HotstringEndChars, out))	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. What's a need to do so?
 		{
-			;OutputDebug, % "out" . ":" . A_Space . Ord(out) . "`n" . "v_InputString" . ":" . A_Space . Ord(v_InputString)
+			OutputDebug, % "out" . ":" . A_Space . Ord(out) . "`t" . "v_InputString" . ":" . A_Space . Ord(v_InputString)
 			v_TipsFlag := false
 			Loop, % a_Triggers.MaxIndex()
 			{
@@ -687,9 +688,11 @@ return
 
 ~Alt::
 ;It's important to comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
-~MButton::
-~RButton::
-~LButton::
+/*
+	~MButton::
+	~RButton::
+	~LButton::
+*/
 ~LWin::
 ~RWin::
 ~Down::
@@ -701,10 +704,13 @@ return
 ~Home::
 ~End::
 ~Esc::
+;*[One]
 ToolTip,
 ToolTip, ,, , 4
-ToolTip, ,, , 5
+ToolTip, ,, , 6
+OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString
 v_InputString := ""
+OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString
 return
 
 #if WinActive("ahk_id" HS3SearchHwnd)
@@ -840,13 +846,16 @@ F_PrepareTriggerstringTipsTables()
 		v_Tips := ""
 		Loop, % a_SelectedTriggers.MaxIndex()
 		{
-			If !(v_Tips == "")
+			if (v_Tips)
 				v_Tips .= "`n"
 			v_Tips .= a_SelectedTriggers[A_Index]
 		}
 	}
 	else
+	{
 		ToolTip,
+		v_Tips := ""
+	}
 	return
 }	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -939,37 +948,37 @@ F_PrepareTriggerstringTipsTables()
 			global	;assume-global mode
 			return
 		}
-	*/
+*/
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_ShowTriggerstringTips()
+F_ShowTriggerstringTips()
+{
+	global	;assume-global mode
+	
+	if ((ini_TTTtEn) and (ini_TTTP = 1))
 	{
-		global	;assume-global mode
-		
-		if ((ini_TTTtEn) and (ini_TTTP = 1))
+		if (A_CaretX and A_CaretY)
 		{
-			if (A_CaretX and A_CaretY)
-			{
-				ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
-				if ((ini_TTTtEn) and (ini_TTTD > 0))
-					SetTimer, TurnOffTttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-			}
-			else
-			{
-				MouseGetPos, v_MouseX, v_MouseY
-				ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
-				if ((ini_TTTtEn) and (ini_TTTD > 0))
-					SetTimer, TurnOffTttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-			}
+			ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
+			if ((ini_TTTtEn) and (ini_TTTD > 0))
+				SetTimer, TurnOffTttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 		}
-		if ((ini_TTTtEn) and (ini_TTTP = 2))
+		else
 		{
 			MouseGetPos, v_MouseX, v_MouseY
 			ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
 			if ((ini_TTTtEn) and (ini_TTTD > 0))
 				SetTimer, TurnOffTttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 		}
-		return
 	}
+	if ((ini_TTTtEn) and (ini_TTTP = 2))
+	{
+		MouseGetPos, v_MouseX, v_MouseY
+		ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
+		if ((ini_TTTtEn) and (ini_TTTD > 0))
+			SetTimer, TurnOffTttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+	}
+	return
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	F_SortTipsByLength()
 	{
@@ -6932,23 +6941,25 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	F_Reload()
 	return
 	
-	TurnOff_OHE:
+TurnOff_OHE:
 	ToolTip, ,, , 4
 	return
 	
+/*
 	TurnOffTooltip:
-	ToolTip, ,, , 5
-	return
+		ToolTip, ,, , 5
+		return
+*/
 	
-	TurnOff_UHE:
+TurnOff_UHE:
 	ToolTip, ,, , 6
 	return
 	
-	TurnOffTttt:
+TurnOffTttt:
 	ToolTip
 	return
 	
-	L_TrayExit:
+L_TrayExit:
 	ExitApp, 2	;2 = by Tray
 	
 STDGuiClose:
