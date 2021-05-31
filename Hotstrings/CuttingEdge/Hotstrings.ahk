@@ -20,7 +20,7 @@ FileEncoding, UTF-16			; Sets the default encoding for FileRead, FileReadLine, L
 ; BMP = Basic Multilingual Plane.
 CoordMode, Caret,	Client
 CoordMode, ToolTip,	Client
-CoordMode, Mouse,	Screen
+CoordMode, Mouse,	Window
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
@@ -34,7 +34,6 @@ global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -al
 ;@Ahk2Exe-SetFileVersion 4.0
 global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l or d
 
-;global a_SelectedTriggers 		:= []		;Main loop of application
 global a_Triggers 				:= []		;Main loop of application
 global v_HotstringFlag 			:= false		;Main loop of application
 global v_InputString 			:= ""		;Main loop of application
@@ -243,69 +242,69 @@ Menu, FontTypeMenu, Check,	% c_FontType
 Menu, ConfGUI,		Add, 	% TransA["Font type"],					:FontTypeMenu
 
 Menu, TrigSortOrder, 	Add, % TransA["Alphabetically"], 				F_SortTipsAlphabetically
-Menu, TrigSortOrder, 	Add, % TransA["By length"], 			F_SortTipsByLength
+Menu, TrigSortOrder, 	Add, % TransA["By length"], 					F_SortTipsByLength
 
-Menu, OrdHisTrig,		Add, Tooltip enable,						F_EventTtEn
-Menu, OrdHisTrig,		Add, Tooltip disable,						F_EventTtEn
+Menu, OrdHisTrig,		Add, % TransA["Tooltip enable"],				F_EventTtEn
+Menu, OrdHisTrig,		Add, % TransA["Tooltip disable"],				F_EventTtEn
 Menu, OrdHisTrig,		Add
-Menu, OrdHisTrig,		Add, Tooltip timeout,						F_GuiSetTooltipTimeout
-Menu, OrdHisTrig,		Add, Tooltip position: caret,					F_EventTtPos
-Menu, OrdHisTrig,		Add, Tooltip position: cursor,				F_EventTtPos
+Menu, OrdHisTrig,		Add, % TransA["Tooltip timeout"],				F_GuiSetTooltipTimeout
+Menu, OrdHisTrig,		Add, % TransA["Tooltip position: caret"],		F_EventTtPos
+Menu, OrdHisTrig,		Add, % TransA["Tooltip position: cursor"],		F_EventTtPos
 Menu, OrdHisTrig,		Add
-Menu, OrdHisTrig,		Add, Sound enable,							F_EventSoEn
-Menu, OrdHisTrig,		Add, Sound disable,							F_EventSoEn
+Menu, OrdHisTrig,		Add, % TransA["Sound enable"],				F_EventSoEn
+Menu, OrdHisTrig,		Add, % TransA["Sound disable"],				F_EventSoEn
 Menu, OrdHisTrig,		Add
-Menu, OrdHisTrig,		Add, Sound parameters,						F_EventSoPar
+Menu, OrdHisTrig,		Add, % TransA["Sound parameters"],				F_EventSoPar
 
-;Menu, MenuHisTrig,		Add, Tooltip enable,						F_EventEnDis
-;Menu, MenuHisTrig,		Add, Tooltip disable,						F_EventEnDis
+;Menu, MenuHisTrig,		Add, % TransA["Tooltip enable"],				F_EventEnDis
+;Menu, MenuHisTrig,		Add, % TransA["Tooltip disable"],				F_EventEnDis
 ;Menu, MenuHisTrig,		Add
 ;Menu, MenuHisTrig,		Add, Tooltip,								F_GuiSetTooltipTimeout
-Menu, MenuHisTrig,		Add, Menu position: caret,					F_EventTtPos
-Menu, MenuHisTrig,		Add, Menu position: cursor,					F_EventTtPos
+Menu, MenuHisTrig,		Add, % TransA["Menu position: caret"],					F_EventTtPos
+Menu, MenuHisTrig,		Add, % TransA["Menu position: cursor"],					F_EventTtPos
 Menu, MenuHisTrig,		Add
-Menu, MenuHisTrig,		Add, Sound enable,							F_EventSoEn
-Menu, MenuHisTrig,		Add, Sound disable,							F_EventSoEn
+Menu, MenuHisTrig,		Add, % TransA["Sound enable"],				F_EventSoEn
+Menu, MenuHisTrig,		Add, % TransA["Sound disable"],				F_EventSoEn
 Menu, MenuHisTrig,		Add
-Menu, MenuHisTrig,		Add, Sound parameters,						F_EventSoPar
+Menu, MenuHisTrig,		Add, % TransA["Sound parameters"],				F_EventSoPar
 
-Menu, UndoOfH,			Add, Tooltip enable,						F_EventTtEn
-Menu, UndoOfH,			Add, Tooltip disable,						F_EventTtEn
+Menu, UndoOfH,			Add, % TransA["Tooltip enable"],				F_EventTtEn
+Menu, UndoOfH,			Add, % TransA["Tooltip disable"],				F_EventTtEn
 Menu, UndoOfH,			Add
-Menu, UndoOfH,			Add, Tooltip timeout,						F_GuiSetTooltipTimeout
-Menu, UndoOfH,			Add, Tooltip position: caret,					F_EventTtPos
-Menu, UndoOfH,			Add, Tooltip position: cursor,				F_EventTtPos
+Menu, UndoOfH,			Add, % TransA["Tooltip timeout"],				F_GuiSetTooltipTimeout
+Menu, UndoOfH,			Add, % TransA["Tooltip position: caret"],		F_EventTtPos
+Menu, UndoOfH,			Add, % TransA["Tooltip position: cursor"],		F_EventTtPos
 Menu, UndoOfH,			Add
-Menu, UndoOfH,			Add, Sound enable,							F_EventSoEn
-Menu, UndoOfH,			Add, Sound disable,							F_EventSoEn
+Menu, UndoOfH,			Add, % TransA["Sound enable"],				F_EventSoEn
+Menu, UndoOfH,			Add, % TransA["Sound disable"],				F_EventSoEn
 Menu, UndoOfH,			Add
-Menu, UndoOfH,			Add, Sound parameters,						F_EventSoPar
+Menu, UndoOfH,			Add, % TransA["Sound parameters"],				F_EventSoPar
 
-Menu, TrigTips,		Add, Tooltip enable,						F_EventTtEn
-Menu, TrigTips,		Add, Tooltip disable,						F_EventTtEn
+Menu, TrigTips,		Add, % TransA["Tooltip enable"],				F_EventTtEn
+Menu, TrigTips,		Add, % TransA["Tooltip disable"],				F_EventTtEn
 Menu, TrigTips,		Add
-Menu, TrigTips,		Add, Tooltip timeout,						F_GuiSetTooltipTimeout
-Menu, TrigTips,		Add, Tooltip position: caret,					F_EventTtPos
-Menu, TrigTips,		Add, Tooltip position: cursor,				F_EventTtPos
+Menu, TrigTips,		Add, % TransA["Tooltip timeout"],				F_GuiSetTooltipTimeout
+Menu, TrigTips,		Add, % TransA["Tooltip position: caret"],		F_EventTtPos
+Menu, TrigTips,		Add, % TransA["Tooltip position: cursor"],		F_EventTtPos
 Menu, TrigTips,		Add
-;Menu, TrigTips,		Add, Sound enable,							F_EventSoEn
-;Menu, TrigTips,		Add, Sound disable,							F_EventSoEn
+;Menu, TrigTips,		Add, % TransA["Sound enable"],				F_EventSoEn
+;Menu, TrigTips,		Add, % TransA["Sound disable"],				F_EventSoEn
 ;Menu, TrigTips,		Add
-;Menu, TrigTips,		Add, Sound parameters,						F_EventSoPar
-Menu, TrigTips,		Add, Sorting order,							:TrigSortOrder								
-Menu, TrigTips,		Add,	Max. no. of shown tips,					F_GuiTrigShowNoOfTips
+;Menu, TrigTips,		Add, % TransA["Sound parameters"],				F_EventSoPar
+Menu, TrigTips,		Add, % TransA["Sorting order"],				:TrigSortOrder								
+Menu, TrigTips,		Add,	% TransA["Max. no. of shown tips"],		F_GuiTrigShowNoOfTips
 
 Menu, Submenu4, 		Add, 1, 									F_AmountOfCharacterTips
 Menu, Submenu4, 		Add, 2, 									F_AmountOfCharacterTips
 Menu, Submenu4, 		Add, 3, 									F_AmountOfCharacterTips
 Menu, Submenu4, 		Add, 4, 									F_AmountOfCharacterTips
 Menu, Submenu4, 		Add, 5, 									F_AmountOfCharacterTips
-Menu, TrigTips, 		Add, Tips are shown after no. of characters,		:Submenu4		
+Menu, TrigTips, 		Add, % TransA["Tips are shown after no. of characters"],		:Submenu4		
 
-Menu, SigOfEvents,		Add, Ordinary hotstring is triggered,			:OrdHisTrig
-Menu, SigOfEvents,		Add, Menu hotstring is triggered,				:MenuHisTrig
-Menu, SigOfEvents,		Add, Undid the last hotsring,					:UndoOfH
-Menu, SigOfEvents,		Add, Triggerstring tips,						:TrigTips
+Menu, SigOfEvents,		Add, % TransA["Basic hotstring is triggered"],	:OrdHisTrig
+Menu, SigOfEvents,		Add, % TransA["Menu hotstring is triggered"],	:MenuHisTrig
+Menu, SigOfEvents,		Add, % TransA["Undid the last hotstring"],		:UndoOfH
+Menu, SigOfEvents,		Add, % TransA["Triggerstring tips"],			:TrigTips
 
 F_EventTtEn()
 F_EventSoEn()
@@ -313,8 +312,8 @@ F_EventTtPos()
 F_AmountOfCharacterTips()
 F_SortTipsAlphabetically()
 
-Menu, Submenu1, Add, Undo the last hotstring: enable, F_MUndo
-Menu, Submenu1, Add, Undo the last hotstring: disable, F_MUndo
+Menu, Submenu1, Add, % TransA["Undo the last hotstring: enable"], 	F_MUndo
+Menu, Submenu1, Add, % TransA["Undo the last hotstring: disable"],	F_MUndo
 Menu, Submenu1, Add
 F_MUndo()
 
@@ -342,7 +341,7 @@ Menu, SubmenuEndChars, Add, % TransA["Tab"], 				F_ToggleEndChars
 F_ToggleEndChars()
 
 
-Menu, Submenu1,		Add, Signaling of events,					:SigOfEvents
+Menu, Submenu1,		Add, % TransA["Signaling of events"],			:SigOfEvents
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 ;Menu, Submenu1,		Add
 ;Menu, Submenu1,		Add, Mute all events sound,					F_AllMute
@@ -399,17 +398,18 @@ if (ini_GuiReload)
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; Beginning of the main loop of application.
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 Loop,
 {
 	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
 	if (ErrorLevel = "NewInput")
 		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["ErrorLevel was triggered by NewInput error."]
 	
-	OutputDebug, % "out" . ":" . A_Space . Ord(out)
+	;OutputDebug, % "out" . ":" . A_Space . Ord(out)
 	; if exist window with hotstring tips, output sound
 	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 	{
-		if (ini_MHSEn)	;Menu Hotstring Sound Enable
+		if (ini_MHSEn)	;Menu Hotstring % TransA["Sound Enable"]
 			SoundBeep, % ini_MHSF, % ini_MHSD	;Menu Hotstring Sound Frequency, Menu Hotstring Sound Duration
 	}
 	else
@@ -420,42 +420,14 @@ Loop,
 			;*[One]
 			v_InputString := ""
 			ToolTip,
-			if (ini_OHTtEn)
-			{
-				if (ini_OHTP = 1)
-				{
-					if (A_CaretX and A_CaretY)
-					{
-						ToolTip, Hotstring was triggered!, % A_CaretX + 20, % A_CaretY - 20, 4
-						if (ini_OHTD > 0)
-							SetTimer, TurnOff_OHE, % "-" . ini_OHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-					}
-					else
-					{
-						MouseGetPos, v_MouseX, v_MouseY
-						ToolTip, Hotstring was triggered!, % v_MouseX + 20, % v_MouseY - 20, 4
-						if (ini_OHTD > 0)
-							SetTimer, TurnOff_OHE, % "-" . ini_OHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-					}
-				}
-				if (ini_OHTP = 2)
-				{
-					MouseGetPos, v_MouseX, v_MouseY
-					ToolTip, Hotstring was triggered!, % v_MouseX + 20, % v_MouseY - 20, 4
-					if (ini_OHTD > 0)
-						SetTimer, TurnOff_OHE, % "-" . ini_OHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-				}
-			}
-			
-			if (ini_OHSEn)	;Ordinary Hotstring Sound Enabled
-				SoundBeep, % ini_OHSF, % ini_OHSD
+			F_EventSigOrdHotstring()
 			if !(WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 				v_HotstringFlag := false
 		}
 		
-		if (out and InStr(HotstringEndChars, out))	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. What's a need to do so?
+		if (out and InStr(HotstringEndChars, out))	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. If "out" is empty, InStr returns true.
 		{
-			OutputDebug, % "out" . ":" . A_Space . Ord(out) . "`t" . "v_InputString" . ":" . A_Space . Ord(v_InputString)
+			;OutputDebug, % "out" . ":" . A_Space . Ord(out) . "`t" . "v_InputString" . ":" . A_Space . Ord(v_InputString)
 			v_TipsFlag := false
 			Loop, % a_Triggers.MaxIndex()
 			{
@@ -567,7 +539,7 @@ F_Undo()
 			}
 		}
 			
-		if (ini_UHSEn)	;Ordinary Hotstring Sound Enabled
+		if (ini_UHSEn)	;Basic Hotstring % TransA["Sound Enable"]d
 			SoundBeep, % ini_UHSF, % ini_UHSD
 		
 		v_TypedTriggerstring := ""
@@ -688,11 +660,9 @@ return
 
 ~Alt::
 ;It's important to comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
-/*
-	~MButton::
-	~RButton::
-	~LButton::
-*/
+~MButton::
+~RButton::
+~LButton::
 ~LWin::
 ~RWin::
 ~Down::
@@ -704,7 +674,6 @@ return
 ~Home::
 ~End::
 ~Esc::
-;*[One]
 ToolTip,
 ToolTip, ,, , 4
 ToolTip, ,, , 6
@@ -821,6 +790,44 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_EventSigOrdHotstring()
+{
+	global	;assume-global mode
+	local 	v_MouseX := 0, v_MouseY := 0
+	if (ini_OHTtEn)
+		
+	{
+		if (ini_OHTP = 1)
+		{
+			if (A_CaretX and A_CaretY)
+			{
+				ToolTip, TransA["Hotstring was triggered!"], % A_CaretX + 20, % A_CaretY - 20, 4
+				if (ini_OHTD > 0)
+					SetTimer, TurnOff_OHE, % "-" . ini_OHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+			}
+			else
+			{
+				MouseGetPos, v_MouseX, v_MouseY
+				ToolTip, TransA["Hotstring was triggered!"], % v_MouseX + 20, % v_MouseY - 20, 4
+				if (ini_OHTD > 0)
+					SetTimer, TurnOff_OHE, % "-" . ini_OHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+			}
+		}
+		if (ini_OHTP = 2)
+		{
+			MouseGetPos, v_MouseX, v_MouseY
+			ToolTip, TransA["Hotstring was triggered!"], % v_MouseX + 20, % v_MouseY - 20, 4
+			if (ini_OHTD > 0)
+				SetTimer, TurnOff_OHE, % "-" . ini_OHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+		}
+	}
+	
+	if (ini_OHSEn)	;Basic Hotstring % TransA["Sound Enable"]d
+		SoundBeep, % ini_OHSF, % ini_OHSD
+	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PrepareTriggerstringTipsTables()
 {
 	global	;assume-global mode
@@ -1078,38 +1085,38 @@ F_ShowTriggerstringTips()
 			Switch (ini_OHTP)
 			{
 				Case 1:
-				Menu, OrdHisTrig, Check, Tooltip position: caret
-				Menu, OrdHisTrig, UnCheck, Tooltip position: cursor
+				Menu, OrdHisTrig, Check, 	% TransA["Tooltip position: caret"]
+				Menu, OrdHisTrig, UnCheck, 	% TransA["Tooltip position: cursor"]
 				Case 2: 
-				Menu, OrdHisTrig, Check, Tooltip position: cursor
-				Menu, OrdHisTrig, UnCheck, Tooltip position: caret
+				Menu, OrdHisTrig, Check, 	% TransA["Tooltip position: cursor"]
+				Menu, OrdHisTrig, UnCheck, 	% TransA["Tooltip position: caret"]
 			}
 			Switch (ini_MHMP)
 			{
 				Case 1:
-				Menu, MenuHisTrig, Check, Menu position: caret
-				Menu, MenuHisTrig, UnCheck, Menu position: cursor
+				Menu, MenuHisTrig, Check, % TransA["Menu position: caret"]
+				Menu, MenuHisTrig, UnCheck, % TransA["Menu position: cursor"]
 				Case 2:
-				Menu, MenuHisTrig, Check, Menu position: cursor
-				Menu, MenuHisTrig, UnCheck, Menu position: caret
+				Menu, MenuHisTrig, Check, % TransA["Menu position: cursor"]
+				Menu, MenuHisTrig, UnCheck, % TransA["Menu position: caret"]
 			}
 			Switch (ini_UHTP)
 			{
 				Case 1:
-				Menu, UndoOfH, Check, Tooltip position: caret
-				Menu, UndoOfH, UnCheck, Tooltip position: cursor
+				Menu, UndoOfH, Check, 	% TransA["Tooltip position: caret"]
+				Menu, UndoOfH, UnCheck, 	% TransA["Tooltip position: cursor"]
 				Case 2:
-				Menu, UndoOfH, Check, Tooltip position: cursor
-				Menu, UndoOfH, UnCheck, Tooltip position: caret
+				Menu, UndoOfH, Check, 	% TransA["Tooltip position: cursor"]
+				Menu, UndoOfH, UnCheck, 	% TransA["Tooltip position: caret"]
 			}
 			Switch (ini_TTTP)
 			{
 				Case 1:
-				Menu, TrigTips, Check, Tooltip position: caret
-				Menu, TrigTips, UnCheck, Tooltip position: cursor
+				Menu, TrigTips, Check, 	% TransA["Tooltip position: caret"]
+				Menu, TrigTips, UnCheck, % TransA["Tooltip position: cursor"]
 				Case 2:
-				Menu, TrigTips, Check, Tooltip position: cursor
-				Menu, TrigTips, UnCheck, Tooltip position: caret
+				Menu, TrigTips, Check, 	% TransA["Tooltip position: cursor"]
+				Menu, TrigTips, UnCheck, % TransA["Tooltip position: caret"]
 			}
 			OneTimeMemory := false
 		}
@@ -1121,25 +1128,25 @@ F_ShowTriggerstringTips()
 				Switch (ini_OHTP)
 				{
 					Case 1:
-					Menu, OrdHisTrig, Check, Tooltip position: cursor
-					Menu, OrdHisTrig, UnCheck, Tooltip position: caret
+					Menu, OrdHisTrig, Check, 	% TransA["Tooltip position: cursor"]
+					Menu, OrdHisTrig, UnCheck, 	% TransA["Tooltip position: caret"]
 					ini_OHTP := 2
 					Case 2: 
-					Menu, OrdHisTrig, Check, Tooltip position: caret
-					Menu, OrdHisTrig, UnCheck, Tooltip position: cursor
+					Menu, OrdHisTrig, Check, 	% TransA["Tooltip position: caret"]
+					Menu, OrdHisTrig, UnCheck, 	% TransA["Tooltip position: cursor"]
 					ini_OHTP := 1
 				}
-				IniWrite, % ini_OHTP, Config.ini, Event_OrdinaryHotstring, OHTP
+				IniWrite, % ini_OHTP, Config.ini, Event_BasicHotstring, OHTP
 				Case "MenuHisTrig":
 				Switch (ini_MHMP)
 				{
 					Case 1:
-					Menu, MenuHisTrig, Check, Menu position: cursor
-					Menu, MenuHisTrig, UnCheck, Menu position: caret
+					Menu, MenuHisTrig, Check, % TransA["Menu position: cursor"]
+					Menu, MenuHisTrig, UnCheck, % TransA["Menu position: caret"]
 					ini_MHMP := 2
 					Case 2:
-					Menu, MenuHisTrig, Check, Menu position: caret
-					Menu, MenuHisTrig, UnCheck, Menu position: cursor
+					Menu, MenuHisTrig, Check, % TransA["Menu position: caret"]
+					Menu, MenuHisTrig, UnCheck, % TransA["Menu position: cursor"]
 					ini_MHMP := 1
 				}
 				IniWrite, % ini_MHMP, Config.ini, Event_MenuHotstring, MHMP
@@ -1147,12 +1154,12 @@ F_ShowTriggerstringTips()
 				Switch (ini_UHTP)
 				{
 					Case 1:
-					Menu, UndoOfH, Check, Tooltip position: cursor
-					Menu, UndoOfH, UnCheck, Tooltip position: caret
+					Menu, UndoOfH, Check, 	% TransA["Tooltip position: cursor"]
+					Menu, UndoOfH, UnCheck, 	% TransA["Tooltip position: caret"]
 					ini_UHTP := 2
 					Case 2:
-					Menu, UndoOfH, Check, Tooltip position: caret
-					Menu, UndoOfH, UnCheck, Tooltip position: cursor
+					Menu, UndoOfH, Check, 	% TransA["Tooltip position: caret"]
+					Menu, UndoOfH, UnCheck, 	% TransA["Tooltip position: cursor"]
 					ini_UHTP := 1
 				}
 				IniWrite, % ini_UHTP, Config.ini, Event_UndoHotstring, UHTP
@@ -1160,12 +1167,12 @@ F_ShowTriggerstringTips()
 				Switch (ini_TTTP)
 				{
 					Case 1:
-					Menu, TrigTips, Check, Tooltip position: cursor
-					Menu, TrigTips, UnCheck, Tooltip position: caret
+					Menu, TrigTips, Check, 	% TransA["Tooltip position: cursor"]
+					Menu, TrigTips, UnCheck, % TransA["Tooltip position: caret"]
 					ini_TTTP := 2
 					Case 2:
-					Menu, TrigTips, Check, Tooltip position: caret
-					Menu, TrigTips, UnCheck, Tooltip position: cursor
+					Menu, TrigTips, Check, 	% TransA["Tooltip position: caret"]
+					Menu, TrigTips, UnCheck, % TransA["Tooltip position: cursor"]
 					ini_TTTP := 1
 				}
 				IniWrite, % ini_TTTP, Config.ini, Event_TriggerstringTips, TTTP
@@ -1183,15 +1190,15 @@ F_ShowTriggerstringTips()
 		{
 			if (ini_HotstringUndo)
 			{
-				Menu, Submenu1, UnCheck, Undo the last hotstring: disable
-				Menu, Submenu1, Check,  Undo the last hotstring: enable
-				Menu, SigOfEvents, Enable, Undid the last hotsring
+				Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: disable"]
+				Menu, Submenu1, Check,  % TransA["Undo the last hotstring: enable"]
+				Menu, SigOfEvents, Enable, % TransA["Undid the last hotstring"]
 			}
 			else
 			{
-				Menu, Submenu1, Check, Undo the last hotstring: disable
-				Menu, Submenu1, UnCheck, Undo the last hotstring: enable
-				Menu, SigOfEvents, Disable, Undid the last hotsring
+				Menu, Submenu1, Check, % TransA["Undo the last hotstring: disable"]
+				Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: enable"]
+				Menu, SigOfEvents, Disable, % TransA["Undid the last hotstring"]
 			}
 			OneTimeMemory := false	
 		}
@@ -1199,15 +1206,15 @@ F_ShowTriggerstringTips()
 		{
 			if (ini_HotstringUndo)
 			{
-				Menu, Submenu1, Check, Undo the last hotstring: disable
-				Menu, Submenu1, UnCheck, Undo the last hotstring: enable
-				Menu, SigOfEvents, Disable, Undid the last hotsring				
+				Menu, Submenu1, Check, % TransA["Undo the last hotstring: disable"]
+				Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: enable"]
+				Menu, SigOfEvents, Disable, % TransA["Undid the last hotstring"]				
 			}
 			else
 			{
-				Menu, Submenu1, UnCheck, Undo the last hotstring: disable
-				Menu, Submenu1, Check,  Undo the last hotstring: enable
-				Menu, SigOfEvents, Enable, Undid the last hotsring				
+				Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: disable"]
+				Menu, Submenu1, Check,  % TransA["Undo the last hotstring: enable"]
+				Menu, SigOfEvents, Enable, % TransA["Undid the last hotstring"]				
 			}
 			ini_HotstringUndo := !(ini_HotstringUndo)
 			IniWrite, % ini_HotstringUndo, Config.ini, Configuration, HotstringUndo
@@ -1224,39 +1231,39 @@ F_ShowTriggerstringTips()
 		{
 			if (ini_OHSEn)
 			{
-				Menu, OrdHisTrig, Check, Sound enable
-				Menu, OrdHisTrig, UnCheck, Sound disable
-				Menu, OrdHisTrig, Enable, Sound parameters
+				Menu, OrdHisTrig, Check, % TransA["Sound enable"]
+				Menu, OrdHisTrig, UnCheck, % TransA["Sound disable"]
+				Menu, OrdHisTrig, Enable, % TransA["Sound parameters"]
 			}
 			else
 			{
-				Menu, OrdHisTrig, UnCheck, Sound enable
-				Menu, OrdHisTrig, Check, Sound disable
-				Menu, OrdHisTrig, Disable, Sound parameters
+				Menu, OrdHisTrig, UnCheck, % TransA["Sound enable"]
+				Menu, OrdHisTrig, Check, % TransA["Sound disable"]
+				Menu, OrdHisTrig, Disable, % TransA["Sound parameters"]
 			}
 			if (ini_MHSEn)
 			{
-				Menu, MenuHisTrig, Check, Sound enable
-				Menu, MenuHisTrig, UnCheck, Sound disable
-				Menu, MenuHisTrig, Enable, Sound parameters
+				Menu, MenuHisTrig, Check, % TransA["Sound enable"]
+				Menu, MenuHisTrig, UnCheck, % TransA["Sound disable"]
+				Menu, MenuHisTrig, Enable, % TransA["Sound parameters"]
 			}
 			else
 			{
-				Menu, MenuHisTrig, UnCheck, Sound enable
-				Menu, MenuHisTrig, Check, Sound disable
-				Menu, MenuHisTrig, Disable, Sound parameters
+				Menu, MenuHisTrig, UnCheck, % TransA["Sound enable"]
+				Menu, MenuHisTrig, Check, % TransA["Sound disable"]
+				Menu, MenuHisTrig, Disable, % TransA["Sound parameters"]
 			}
 			if (ini_UHSEn)
 			{
-				Menu, UndoOfH, Check, Sound enable 
-				Menu, UndoOfH, UnCheck, Sound disable
-				Menu, UndoOfH, Enable, Sound parameters
+				Menu, UndoOfH, Check, % TransA["Sound enable"] 
+				Menu, UndoOfH, UnCheck, % TransA["Sound disable"]
+				Menu, UndoOfH, Enable, % TransA["Sound parameters"]
 			}
 			else
 			{
-				Menu, UndoOfH, UnCheck, Sound enable 
-				Menu, UndoOfH, Check, Sound disable
-				Menu, UndoOfH, Disable, Sound parameters
+				Menu, UndoOfH, UnCheck, % TransA["Sound enable"] 
+				Menu, UndoOfH, Check, % TransA["Sound disable"]
+				Menu, UndoOfH, Disable, % TransA["Sound parameters"]
 			}
 			OneTimeMemory := false
 		}
@@ -1268,45 +1275,45 @@ F_ShowTriggerstringTips()
 				ini_OHSEn := !ini_OHSEn
 				if (ini_OHSEn)
 				{
-					Menu, % A_ThisMenu, Check, Sound enable
-					Menu, % A_ThisMenu, UnCheck, Sound disable
-					Menu, % A_ThisMenu, Enable, Sound parameters
+					Menu, % A_ThisMenu, Check, % TransA["Sound enable"]
+					Menu, % A_ThisMenu, UnCheck, % TransA["Sound disable"]
+					Menu, % A_ThisMenu, Enable, % TransA["Sound parameters"]
 				}
 				else
 				{
-					Menu, % A_ThisMenu, UnCheck, Sound enable
-					Menu, % A_ThisMenu, Check, Sound disable
-					Menu, % A_ThisMenu, Disable, Sound parameters
+					Menu, % A_ThisMenu, UnCheck, % TransA["Sound enable"]
+					Menu, % A_ThisMenu, Check, % TransA["Sound disable"]
+					Menu, % A_ThisMenu, Disable, % TransA["Sound parameters"]
 				}
-				IniWrite, % ini_OHSEn, Config.ini, Event_OrdinaryHotstring, OHSEn
+				IniWrite, % ini_OHSEn, Config.ini, Event_BasicHotstring, OHSEn
 				Case "MenuHisTrig":
 				ini_MHSEn := !ini_MHSEn
 				if (ini_MHSEn)
 				{
-					Menu, % A_ThisMenu, Check, Sound enable
-					Menu, % A_ThisMenu, UnCheck, Sound disable
-					Menu, % A_ThisMenu, Enable, Sound parameters
+					Menu, % A_ThisMenu, Check, % TransA["Sound enable"]
+					Menu, % A_ThisMenu, UnCheck, % TransA["Sound disable"]
+					Menu, % A_ThisMenu, Enable, % TransA["Sound parameters"]
 				}
 				else
 				{
-					Menu, % A_ThisMenu, UnCheck, Sound enable
-					Menu, % A_ThisMenu, Check, Sound disable
-					Menu, % A_ThisMenu, Disable, Sound parameters
+					Menu, % A_ThisMenu, UnCheck, % TransA["Sound enable"]
+					Menu, % A_ThisMenu, Check, % TransA["Sound disable"]
+					Menu, % A_ThisMenu, Disable, % TransA["Sound parameters"]
 				}
 				IniWrite, % ini_MHSEn, Config.ini, Event_MenuHotstring, MHSEn
 				Case "UndoOfH":
 				ini_UHSEn := !ini_UHSEn
 				if (ini_UHSEn)
 				{
-					Menu, % A_ThisMenu, Check, Sound enable
-					Menu, % A_ThisMenu, UnCheck, Sound disable
-					Menu, % A_ThisMenu, Enable, Sound parameters
+					Menu, % A_ThisMenu, Check, % TransA["Sound enable"]
+					Menu, % A_ThisMenu, UnCheck, % TransA["Sound disable"]
+					Menu, % A_ThisMenu, Enable, % TransA["Sound parameters"]
 				}
 				else
 				{
-					Menu, % A_ThisMenu, UnCheck, Sound enable
-					Menu, % A_ThisMenu, Check, Sound disable
-					Menu, % A_ThisMenu, Disable, Sound parameters
+					Menu, % A_ThisMenu, UnCheck, % TransA["Sound enable"]
+					Menu, % A_ThisMenu, Check, % TransA["Sound disable"]
+					Menu, % A_ThisMenu, Disable, % TransA["Sound parameters"]
 				}
 				IniWrite, % ini_UHSEn, Config.ini, Event_UndoHotstring, UHSEn
 			}
@@ -1314,7 +1321,7 @@ F_ShowTriggerstringTips()
 		return
 	}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_EventTtEn()	;Event tooltip enable
+	F_EventTtEn()	;Event TransA["tooltip enable"]
 	{
 		global	;assume-global mode
 		static OneTimeMemory := true
@@ -1323,57 +1330,57 @@ F_ShowTriggerstringTips()
 		{
 			if (ini_OHTtEn)
 			{
-				Menu, OrdHisTrig, Check, Tooltip enable
-				Menu, OrdHisTrig, UnCheck, Tooltip disable
-				Menu, OrdHisTrig, Enable, Tooltip timeout
-				Menu, OrdHisTrig, Enable, Tooltip position: caret
-				Menu, OrdHisTrig, Enable, Tooltip position: cursor
+				Menu, OrdHisTrig, Check, 	% TransA["Tooltip enable"]
+				Menu, OrdHisTrig, UnCheck, 	% TransA["Tooltip disable"]
+				Menu, OrdHisTrig, Enable, 	% TransA["Tooltip timeout"]
+				Menu, OrdHisTrig, Enable, 	% TransA["Tooltip position: caret"]
+				Menu, OrdHisTrig, Enable, 	% TransA["Tooltip position: cursor"]
 			}
 			else
 			{
-				Menu, OrdHisTrig, UnCheck, Tooltip enable
-				Menu, OrdHisTrig, Check, Tooltip disable
-				Menu, OrdHisTrig, Disable, Tooltip timeout
-				Menu, OrdHisTrig, Disable, Tooltip position: caret
-				Menu, OrdHisTrig, Disable, Tooltip position: cursor
+				Menu, OrdHisTrig, UnCheck, 	% TransA["Tooltip enable"]
+				Menu, OrdHisTrig, Check, 	% TransA["Tooltip disable"]
+				Menu, OrdHisTrig, Disable, 	% TransA["Tooltip timeout"]
+				Menu, OrdHisTrig, Disable, 	% TransA["Tooltip position: caret"]
+				Menu, OrdHisTrig, Disable, 	% TransA["Tooltip position: cursor"]
 			}
 			
 			if (ini_UHTtEn)
 			{
-				Menu, UndoOfH, Check, Tooltip enable
-				Menu, UndoOfH, UnCheck, Tooltip disable
-				Menu, UndoOfH, Enable, Tooltip timeout
-				Menu, UndoOfH, Enable, Tooltip position: caret
-				Menu, UndoOfH, Enable, Tooltip position: cursor
+				Menu, UndoOfH, Check, 	% TransA["Tooltip enable"]
+				Menu, UndoOfH, UnCheck, 	% TransA["Tooltip disable"]
+				Menu, UndoOfH, Enable, 	% TransA["Tooltip timeout"]
+				Menu, UndoOfH, Enable, 	% TransA["Tooltip position: caret"]
+				Menu, UndoOfH, Enable, 	% TransA["Tooltip position: cursor"]
 			}
 			else
 			{
-				Menu, UndoOfH, UnCheck, Tooltip enable
-				Menu, UndoOfH, Check, Tooltip disable
-				Menu, UndoOfH, Disable, Tooltip timeout
-				Menu, UndoOfH, Disable, Tooltip position: caret
-				Menu, UndoOfH, Disable, Tooltip position: cursor
+				Menu, UndoOfH, UnCheck, 	% TransA["Tooltip enable"]
+				Menu, UndoOfH, Check, 	% TransA["Tooltip disable"]
+				Menu, UndoOfH, Disable, 	% TransA["Tooltip timeout"]
+				Menu, UndoOfH, Disable, 	% TransA["Tooltip position: caret"]
+				Menu, UndoOfH, Disable, 	% TransA["Tooltip position: cursor"]
 			}
 			
 			if (ini_TTTtEn)
 			{
-				Menu, TrigTips, Check, Tooltip enable
-				Menu, TrigTips, UnCheck, Tooltip disable
-				Menu, TrigTips, Enable, Tooltip timeout
-				Menu, TrigTips, Enable, Tooltip position: caret
-				Menu, TrigTips, Enable, Tooltip position: cursor
-				Menu, TrigTips, Enable, Sorting order
-				Menu, TrigTips, Enable, Max. no. of shown tips
+				Menu, TrigTips, Check, 	% TransA["Tooltip enable"]
+				Menu, TrigTips, UnCheck, % TransA["Tooltip disable"]
+				Menu, TrigTips, Enable, 	% TransA["Tooltip timeout"]
+				Menu, TrigTips, Enable, 	% TransA["Tooltip position: caret"]
+				Menu, TrigTips, Enable, 	% TransA["Tooltip position: cursor"]
+				Menu, TrigTips, Enable, 	% TransA["Sorting order"]
+				Menu, TrigTips, Enable, 	% TransA["Max. no. of shown tips"]
 			}
 			else
 			{
-				Menu, TrigTips, UnCheck, Tooltip enable
-				Menu, TrigTips, Check, Tooltip disable
-				Menu, TrigTips, Disable, Tooltip timeout
-				Menu, TrigTips, Disable, Tooltip position: caret
-				Menu, TrigTips, Disable, Tooltip position: cursor
-				Menu, TrigTips, Disable, Sorting order
-				Menu, TrigTips, Disable, Max. no. of shown tips
+				Menu, TrigTips, UnCheck, % TransA["Tooltip enable"]
+				Menu, TrigTips, Check, 	% TransA["Tooltip disable"]
+				Menu, TrigTips, Disable, % TransA["Tooltip timeout"]
+				Menu, TrigTips, Disable, % TransA["Tooltip position: caret"]
+				Menu, TrigTips, Disable, % TransA["Tooltip position: cursor"]
+				Menu, TrigTips, Disable, % TransA["Sorting order"]
+				Menu, TrigTips, Disable, % TransA["Max. no. of shown tips"]
 			}		
 			OneTimeMemory := false
 		}
@@ -1384,59 +1391,59 @@ F_ShowTriggerstringTips()
 			ini_OHTtEn := !ini_OHTtEn
 			if (ini_OHTtEn)
 			{
-				Menu, % A_ThisMenu, Check, Tooltip enable
-				Menu, % A_ThisMenu, UnCheck, Tooltip disable
-				Menu, % A_ThisMenu, Enable, Tooltip timeout
-				Menu, % A_ThisMenu, Enable, Tooltip position: caret
-				Menu, % A_ThisMenu, Enable, Tooltip position: cursor
+				Menu, % A_ThisMenu, Check, 	% TransA["Tooltip enable"]
+				Menu, % A_ThisMenu, UnCheck, 	% TransA["Tooltip disable"]
+				Menu, % A_ThisMenu, Enable, 	% TransA["Tooltip timeout"]
+				Menu, % A_ThisMenu, Enable, 	% TransA["Tooltip position: caret"]
+				Menu, % A_ThisMenu, Enable, 	% TransA["Tooltip position: cursor"]
 			}
 			else
 			{
-				Menu, % A_ThisMenu, UnCheck, Tooltip enable
-				Menu, % A_ThisMenu, Check, Tooltip disable
-				Menu, % A_ThisMenu, Disable, Tooltip timeout
-				Menu, % A_ThisMenu, Disable, Tooltip position: caret
-				Menu, % A_ThisMenu, Disable, Tooltip position: cursor
+				Menu, % A_ThisMenu, UnCheck, 	% TransA["Tooltip enable"]
+				Menu, % A_ThisMenu, Check, 	% TransA["Tooltip disable"]
+				Menu, % A_ThisMenu, Disable, 	% TransA["Tooltip timeout"]
+				Menu, % A_ThisMenu, Disable, 	% TransA["Tooltip position: caret"]
+				Menu, % A_ThisMenu, Disable, 	% TransA["Tooltip position: cursor"]
 			}
-			IniWrite, % ini_OHTtEn, Config.ini, Event_OrdinaryHotstring, OHTtEn
+			IniWrite, % ini_OHTtEn, Config.ini, Event_BasicHotstring, OHTtEn
 			Case "UndoOfH":
 			ini_UHTtEn := !ini_UHTtEn
 			if (ini_UHTtEn)
 			{
-				Menu, % A_ThisMenu, Check, Tooltip enable
-				Menu, % A_ThisMenu, UnCheck, Tooltip disable
-				Menu, % A_ThisMenu, Enable, Tooltip timeout
-				Menu, % A_ThisMenu, Enable, Tooltip position: caret
-				Menu, % A_ThisMenu, Enable, Tooltip position: cursor
+				Menu, % A_ThisMenu, Check, 	% TransA["Tooltip enable"]
+				Menu, % A_ThisMenu, UnCheck, 	% TransA["Tooltip disable"]
+				Menu, % A_ThisMenu, Enable, 	% TransA["Tooltip timeout"]
+				Menu, % A_ThisMenu, Enable, 	% TransA["Tooltip position: caret"]
+				Menu, % A_ThisMenu, Enable, 	% TransA["Tooltip position: cursor"]
 			}
 			else
 			{
 				Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
-				Menu, % A_ThisMenu, Disable, Tooltip timeout
-				Menu, % A_ThisMenu, Disable, Tooltip position: caret
-				Menu, % A_ThisMenu, Disable, Tooltip position: cursor
+				Menu, % A_ThisMenu, Disable, % TransA["Tooltip timeout"]
+				Menu, % A_ThisMenu, Disable, % TransA["Tooltip position: caret"]
+				Menu, % A_ThisMenu, Disable, % TransA["Tooltip position: cursor"]
 			}
 			IniWrite, % ini_UHTtEn, Config.ini, Event_UndoHotstring, UHTtEn
 			Case "TrigTips":
 			ini_TTTtEn := !ini_TTTtEn
 			if (ini_TTTtEn)
 			{
-				Menu, % A_ThisMenu, UnCheck, Tooltip enable
-				Menu, % A_ThisMenu, Check, Tooltip disable
-				Menu, % A_ThisMenu, Enable, Tooltip timeout
-				Menu, % A_ThisMenu, Enable, Tooltip position: caret
-				Menu, % A_ThisMenu, Enable, Tooltip position: cursor
-				Menu, % A_ThisMenu, Enable, Sorting order
-				Menu, % A_ThisMenu, Enable, Max. no. of shown tips
+				Menu, % A_ThisMenu, UnCheck, 	% TransA["Tooltip enable"]
+				Menu, % A_ThisMenu, Check, 	% TransA["Tooltip disable"]
+				Menu, % A_ThisMenu, Enable, 	% TransA["Tooltip timeout"]
+				Menu, % A_ThisMenu, Enable, 	% TransA["Tooltip position: caret"]
+				Menu, % A_ThisMenu, Enable, 	% TransA["Tooltip position: cursor"]
+				Menu, % A_ThisMenu, Enable, % TransA["Sorting order"]
+				Menu, % A_ThisMenu, Enable, % TransA["Max. no. of shown tips"]
 			}
 			else
 			{
 				Menu, % A_ThisMenu, UnCheck, % A_ThisMenuItem
-				Menu, % A_ThisMenu, Disable, Tooltip timeout
-				Menu, % A_ThisMenu, Disable, Tooltip position: caret
-				Menu, % A_ThisMenu, Disable, Tooltip position: cursor
-				Menu, % A_ThisMenu, Disable, Sorting order
-				Menu, % A_ThisMenu, Disable, Max. no. of shown tips
+				Menu, % A_ThisMenu, Disable, % TransA["Tooltip timeout"]
+				Menu, % A_ThisMenu, Disable, % TransA["Tooltip position: caret"]
+				Menu, % A_ThisMenu, Disable, % TransA["Tooltip position: cursor"]
+				Menu, % A_ThisMenu, Disable, % TransA["Sorting order"]
+				Menu, % A_ThisMenu, Disable, % TransA["Max. no. of shown tips"]
 			}
 			IniWrite, % ini_TTTtEn, Config.ini, Event_TriggerstringTips, TTTtEn
 		}
@@ -1450,12 +1457,12 @@ F_LoadSignalingParams()
 	,ini_MHSF := 500, 	ini_MHSD := 250, 	ini_UHTtEn := 1, 	ini_UHTD := 0, 	ini_UHTP := 1, 	ini_UHSEn := 1, 	ini_UHSF := 500, 	ini_UHSD := 250
 	,ini_TTTP := 1, 	ini_TTTtEn := 1, 	ini_TTTD := 0, 	ini_TipsSortAlphabetically := 1, 	ini_TipsSortByLength := 1, 	ini_TASAC := 1,	ini_MNTT := 5
 	
-	IniRead, ini_OHTtEn, 	Config.ini, Event_OrdinaryHotstring, 	OHTtEn, 	1
-	IniRead, ini_OHTD,		Config.ini, Event_OrdinaryHotstring,	OHTD,	0
-	IniRead, ini_OHTP,		Config.ini, Event_OrdinaryHotstring,	OHTP,	1
-	IniRead, ini_OHSEn, 	Config.ini, Event_OrdinaryHotstring,	OHSEn, 	1
-	IniRead, ini_OHSF,		Config.ini, Event_OrdinaryHotstring,	OHSF,	500
-	IniRead, ini_OHSD,		Config.ini, Event_OrdinaryHotstring,	OHSD,	250
+	IniRead, ini_OHTtEn, 	Config.ini, Event_BasicHotstring, 	OHTtEn, 	1
+	IniRead, ini_OHTD,		Config.ini, Event_BasicHotstring,	OHTD,	0
+	IniRead, ini_OHTP,		Config.ini, Event_BasicHotstring,	OHTP,	1
+	IniRead, ini_OHSEn, 	Config.ini, Event_BasicHotstring,	OHSEn, 	1
+	IniRead, ini_OHSF,		Config.ini, Event_BasicHotstring,	OHSF,	500
+	IniRead, ini_OHSD,		Config.ini, Event_BasicHotstring,	OHSD,	250
 	IniRead, ini_MHMP,		Config.ini, Event_MenuHotstring,		MHMP,	1
 	IniRead, ini_MHSEn,		Config.ini, Event_MenuHotstring,		MHSEn,	1
 	IniRead, ini_MHSF,		Config.ini, Event_MenuHotstring,		MHSF,	500
@@ -1525,9 +1532,9 @@ F_EventSoPar()
 	;+Owner to prevent display of a taskbar button
 	Switch A_ThisMenu
 	{
-		Case "OrdHisTrig":	Gui, MSP: New, -MinimizeBox -MaximizeBox +Owner +HwndSoundPar, Set sound parameters for event "ordinary hotstring"
-		Case "MenuHisTrig":	Gui, MSP: New, -MinimizeBox -MaximizeBox +Owner +HwndSoundPar, Set sound parameters for event "hotstring menu"
-		Case "UndoOfH":	Gui, MSP: New, -MinimizeBox -MaximizeBox +Owner +HwndSoundPar, Set sound parameters for event "undo hotstring"
+		Case "OrdHisTrig":	Gui, MSP: New, -MinimizeBox -MaximizeBox +Owner +HwndSoundPar, % TransA["Set sound parameters for event ""basic hotstring"""]
+		Case "MenuHisTrig":	Gui, MSP: New, -MinimizeBox -MaximizeBox +Owner +HwndSoundPar, % TransA["Set sound parameters for event ""hotstring menu"""]
+		Case "UndoOfH":	Gui, MSP: New, -MinimizeBox -MaximizeBox +Owner +HwndSoundPar, % TransA["Set sound parameters for event ""undo hotstring"""]
 	}
 	
 	Gui, MSP: Margin,	% c_xmarg, % c_ymarg
@@ -1537,7 +1544,7 @@ F_EventSoPar()
 	Switch A_ThisMenu
 	{
 		Case "OrdHisTrig":	
-		Gui, MSP: Add, Text, HwndIdMSP_T1, When "ordinary hotsring" event takes place, sound is emitted according to the following settings.
+		Gui, MSP: Add, Text, HwndIdMSP_T1, When "Basic hotsring" event takes place, sound is emitted according to the following settings.
 		Gui, MSP: Add, Slider, HwndIdMSP_S1 vini_OHSF gF_SetSoundFrequency Line1 Page50 Range37-32767 TickInterval%TickInterval% ToolTipBottom Buddy1ini_OHSF, % ini_OHSF
 		Case "MenuHisTrig": 
 		Gui, MSP: Add, Text, HwndIdMSP_T1, When "hotstring menu" event takes place, sound is emitted according to the following settings.
@@ -1555,7 +1562,7 @@ F_EventSoPar()
 	Switch A_ThisMenu
 	{
 		Case "OrdHisTrig":
-		Gui, MSP: Add, Text, HwndIdMSP_T3, "Ordinary hotstring" sound frequency: %v_OutVarTemp%
+		Gui, MSP: Add, Text, HwndIdMSP_T3, "Basic hotstring" sound frequency: %v_OutVarTemp%
 		Gui, MSP: Add, Slider, HwndIdMSP_S2 vini_OHSD gF_SetSoundDuration Line1 Page50 Range50-2000 TickInterval50 ToolTipBottom Buddy1ini_OHSD, % ini_OHSD
 		Case "MenuHisTrig":
 		Gui, MSP: Add, Text, HwndIdMSP_T3, "Hotstring menu" sound frequency: %v_OutVarTemp% 
@@ -1571,7 +1578,7 @@ F_EventSoPar()
 	
 	Switch A_ThisMenu
 	{
-		Case "OrdHisTrig":	Gui, MSP: Add, Text, HwndIdMSP_T5, "Ordinary hotstring" sound duration [ms]: %v_OutVarTemp%
+		Case "OrdHisTrig":	Gui, MSP: Add, Text, HwndIdMSP_T5, "Basic hotstring" sound duration [ms]: %v_OutVarTemp%
 		Case "MenuHisTrig":	Gui, MSP: Add, Text, HwndIdMSP_T5, "Hotstring menu" sound duration [ms]: %v_OutVarTemp%
 		Case "UndoOfH":	Gui, MSP: Add, Text, HwndIdMSP_T5, "Undo hotstring" sound duration [ms]: %v_OutVarTemp%
 	}
@@ -1616,8 +1623,8 @@ F_EventSoPar()
 	Switch A_ThisMenu
 	{
 		Case "OrdHisTrig":
-		GuiControl,, % IdMSP_T3, "Ordinary hotstring" sound frequency: %ini_OHSF%
-		GuiControl,, % IdMSP_T5, "Ordinary hotstring" sound duration [ms]: %ini_OHSD%
+		GuiControl,, % IdMSP_T3, "Basic hotstring" sound frequency: %ini_OHSF%
+		GuiControl,, % IdMSP_T5, "Basic hotstring" sound duration [ms]: %ini_OHSD%
 		Case "MenuHisTrig":
 		GuiControl,, % IdMSP_T3, "Hotstring menu" sound frequency: %ini_MHSF%
 		GuiControl,, % IdMSP_T5, "Hotstring menu" sound duration [ms]: %ini_MHSD%
@@ -1673,7 +1680,7 @@ F_SoundTestBut()
 		Gui, MSP: Submit, NoHide
 		Switch A_ThisMenu
 		{
-			Case "OrdHisTrig":	GuiControl,, % IdMSP_T5, "Ordinary hotstring" sound duration [ms]: %ini_OHSD%
+			Case "OrdHisTrig":	GuiControl,, % IdMSP_T5, "Basic hotstring" sound duration [ms]: %ini_OHSD%
 			Case "MenuHisTrig":	GuiControl,, % IdMSP_T5, "Hotstring menu" sound duration [ms]: %ini_MHSD%
 			Case "UndoOfH":	GuiControl,, % IdMSP_T5, "Undo hotstring" sound duration [ms]: %ini_UHSD%
 		}
@@ -1686,7 +1693,7 @@ F_SoundTestBut()
 		Gui, MSP: Submit, NoHide
 		Switch A_ThisMenu
 		{
-			Case "OrdHisTrig":	GuiControl,, % IdMSP_T3, "Ordinary hotstring" sound frequency: %ini_OHSF%
+			Case "OrdHisTrig":	GuiControl,, % IdMSP_T3, "Basic hotstring" sound frequency: %ini_OHSF%
 			Case "MenuHisTrig":	GuiControl,, % IdMSP_T3, "Hotstring menu" sound frequency: %ini_MHSF%
 			Case "UndoOfH":	GuiControl,, % IdMSP_T3, "Undo hotstring" sound frequency: %ini_UHSF%
 		}
@@ -1772,9 +1779,9 @@ F_SoundTestBut()
 		v_OutVarTemp := 10000
 		Switch (A_ThisMenu)
 		{
-			Case "OrdHisTrig": 	Gui, STD: Add, Text, HwndIdSTD_T3, ""Hotstring was triggered"" tooltip timeout in [ms]: %v_OutVarTemp%
-			Case "UndoOfH":	Gui, STD: Add, Text, HwndIdSTD_T3, ""Undid the last hotstring!"" tooltip timeout in [ms]: %v_OutVarTemp%
-			Case "TrigTips":	Gui, STD: Add, Text, HwndIdSTD_T3, Triggerstring tip(s) tooltip timeout in [ms]: %v_OutVarTemp%
+			Case "OrdHisTrig": 	Gui, STD: Add, Text, HwndIdSTD_T3, ""Hotstring was triggered"" TransA["tooltip timeout "]in [ms]: %v_OutVarTemp%
+			Case "UndoOfH":	Gui, STD: Add, Text, HwndIdSTD_T3, ""Undid the last hotstring!"" TransA["tooltip timeout "]in [ms]: %v_OutVarTemp%
+			Case "TrigTips":	Gui, STD: Add, Text, HwndIdSTD_T3, Triggerstring tip(s) TransA["tooltip timeout "]in [ms]: %v_OutVarTemp%
 		}
 		
 		v_xNext := c_xmarg
@@ -1802,9 +1809,9 @@ F_SoundTestBut()
 		GuiControl, Move, % IdSTD_T3, % "x" v_xNext . A_Space . "y" v_yNext
 		Switch (A_ThisMenu)
 		{
-			Case "OrdHisTrig": 	GuiControl,, % IdSTD_T3, ""Hotstring was triggered"" tooltip timeout in [ms]: %ini_OHTD%
-			Case "UndoOfH":	GuiControl,, % IdSTD_T3, ""Undid the last hotstring!"" tooltip timeout in [ms]: %ini_UHTD%
-			Case "TrigTips":	GuiControl,, % IdSTD_T3, Triggerstring tip(s) tooltip timeout in [ms]: %ini_TTTD%
+			Case "OrdHisTrig": 	GuiControl,, % IdSTD_T3, ""Hotstring was triggered"" TransA["tooltip timeout "]in [ms]: %ini_OHTD%
+			Case "UndoOfH":	GuiControl,, % IdSTD_T3, ""Undid the last hotstring!"" TransA["tooltip timeout "]in [ms]: %ini_UHTD%
+			Case "TrigTips":	GuiControl,, % IdSTD_T3, Triggerstring tip(s) TransA["tooltip timeout "]in [ms]: %ini_TTTD%
 		}
 		
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
@@ -3795,7 +3802,7 @@ F_Checkbox()
 [Configuration]
 ClipBoardPasteDelay=300
 HotstringUndo=1
-[Event_OrdinaryHotstring]
+[Event_BasicHotstring]
 OHTtEn=1
 OHTD=0
 OHTP=1
@@ -4083,8 +4090,10 @@ Application language changed to: 							= Application language changed to:
 Are you sure you want to exit this application now?			= Are you sure you want to exit this application now?
 Are you sure you want to reload this application now?			= Are you sure you want to reload this application now
 Backslash \ 											= Backslash \
+Basic hotstring is triggered								= Basic hotstring is triggered
 Because of that the default AutoHotkey icon will be used instead = Because of that the default AutoHotkey icon will be used instead
 Build with Autohotkey.exe version							= Build with Autohotkey.exe version
+By length 											= By length
 Cancel 												= Cancel
 Case Sensitive (C) 										= Case Sensitive (C)
 Change language 										= Change language
@@ -4164,6 +4173,7 @@ has been created. 										= has been created.
 Hotstring 											= Hotstring
 Hotstring added to the file								= Hotstring added to the file
 Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv) = Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
+Hotstring was triggered!									= Hotstring was triggered!
 Hotstring moved to the 									= Hotstring moved to the
 Hotstring paste from Clipboard delay 1 s 					= Hotstring paste from Clipboard delay 1 s
 Hotstring paste from Clipboard delay 						= Hotstring paste from Clipboard delay
@@ -4200,6 +4210,10 @@ Loaded hotstrings: 										= Loaded hotstrings:
 Loading hotstrings from libraries... 						= Loading hotstrings from libraries...
 Loading imported library. Please wait...					= Loading imported library. Please wait...
 Loaded												= Loaded
+Max. no. of shown tips									= Max. no. of shown tips
+Menu hotstring is triggered								= Menu hotstring is triggered
+Menu position: caret									= Menu position: caret
+Menu position: cursor									= Menu position: cursor
 Minus - 												= Minus -
 Move (F8)												= Move (F8)
 No													= No
@@ -4245,8 +4259,12 @@ Set Clipboard Delay										= Set Clipboard Delay
 Set delay												= Set delay
 Set parameters of menu sound								= Set parameters of menu sound
 Set parameters of triggerstring sound						= Set parameters of triggerstring sound
+Set sound parameters for event ""basic hotstring""			= Set sound parameters for event ""basic hotstring""
+Set sound parameters for event ""hotstring menu""				= Set sound parameters for event ""hotstring menu""
+Set sound parameters for event ""undo hotstring""				= Set sound parameters for event ""undo hotstring""
 Show full GUI (F4)										= Show full GUI (F4)
 Show Sandbox (F6)										= Show Sandbox (F6)
+Signaling of events										= Signaling of events
 Silent mode											= Silent mode
 Size of font											= Size of font
 Size of margin:										= Size of margin:
@@ -4254,8 +4272,11 @@ Slash / 												= Slash /
 Something went wrong with hotstring deletion:				= Something went wrong with hotstring deletion:
 Something went wrong with hotstring EndChars					= Something went wrong with hotstring EndChars
 Something weng wrong with link file (.lnk) creation			= Something weng wrong with link file (.lnk) creation
-By length 									= By length
+Sound disable											= Sound disable
+Sound enable											= Sound enable
+Sound parameters										= Sound parameters
 Sound test											= Sound test
+Sorting order											= Sorting order
 Space												= Space
 Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
 Standard executable (Ahk2Exe.exe)							= Standard executable (Ahk2Exe.exe)
@@ -4286,7 +4307,14 @@ This library:											= This library:
 This line do not comply to format required by this application.  = This line do not comply to format required by this application.
 This option is valid 									= In case you observe some hotstrings aren't pasted from clipboard increase this value. `nThis option is valid for CL and MCL hotstring output functions. 
 Tip: If you copy text from PDF file it's adviced to remove them. = Tip: If you copy text from PDF file it's adviced to remove them.
+Tips are shown after no. of characters						= Tips are shown after no. of characters
 Toggle EndChars	 									= &Toggle EndChars
+Tooltip disable										= Tooltip disable
+Tooltip enable											= Tooltip enable
+Tooltip position: caret									= Tooltip position: caret
+Tooltip position: cursor									= Tooltip position: cursor
+Tooltip timeout										= Tooltip timeout
+Tooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeouttooltip timeouttooltip timeouttooltip timeouttooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout 
 Total:												= Total:
 (triggerstring, hotstring) definitions						= (triggerstring, hotstring) definitions
 Triggerstring 											= Triggerstring
@@ -4297,6 +4325,8 @@ Triggerstring tips 										= &Triggerstring tips
 Triggerstring tooltip timeout in [ms]						= Triggerstring tooltip timeout in [ms]
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
 Underscore _											= Underscore _
+Undo the last hotstring: disable							= Undo the last hotstring: disable
+Undo the last hotstring: enable							= Undo the last hotstring: enable
 Undid the last hotstring 								= Undid the last hotstring
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
@@ -5851,7 +5881,7 @@ F_NormalWay(ReplacementString, Oflag)
 		local	OutputVarTemp := "",	MouseCtl := 0,		ThisHotkey := A_ThisHotkey
 		
 		MouseGetPos, , , , MouseCtl, 2
-		if ((A_GuiEvent = "Normal") and (MouseCtl = Id_LB_HMenuCli) and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down"))) ;only ordinary mouse left click
+		if ((A_GuiEvent = "Normal") and (MouseCtl = Id_LB_HMenuCli) and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down"))) ;only Basic mouse left click
 		{
 			GuiControlGet, OutputVarTemp, , % Id_LB_HMenuCli 
 			v_HotstringFlag := true
@@ -5929,7 +5959,7 @@ F_NormalWay(ReplacementString, Oflag)
 		local	OutputVarTemp := "",	MouseCtl := 0,		ThisHotkey := A_ThisHotkey
 		
 		MouseGetPos, , , , MouseCtl, 2
-		if ((A_GuiEvent = "Normal") and (MouseCtl = Id_LB_HMenuAHK) and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down"))) ;only ordinary mouse left click
+		if ((A_GuiEvent = "Normal") and (MouseCtl = Id_LB_HMenuAHK) and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down"))) ;only Basic mouse left click
 		{
 			GuiControlGet, OutputVarTemp, , % Id_LB_HMenuAHK 
 			v_HotstringFlag := true
@@ -6848,14 +6878,14 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	Switch A_ThisMenu
 	{
 		Case "OrdHisTrig":
-		IniWrite, % ini_OHSF, Config.ini, Event_OrdinaryHotstring, OHSF
-		Iniwrite, % ini_OHSD, Config.ini, Event_OrdinaryHotstring, OHSD
+		IniWrite, % ini_OHSF, Config.ini, Event_BasicHotstring, OHSF
+		Iniwrite, % ini_OHSD, Config.ini, Event_BasicHotstring, OHSD
 		Case "MenuHisTrig":
-		IniWrite, % ini_MHSF, Config.ini, Event_OrdinaryHotstring, MHSF
-		Iniwrite, % ini_MHSD, Config.ini, Event_OrdinaryHotstring, MHSD
+		IniWrite, % ini_MHSF, Config.ini, Event_BasicHotstring, MHSF
+		Iniwrite, % ini_MHSD, Config.ini, Event_BasicHotstring, MHSD
 		Case "UndoOfH":
-		IniWrite, % ini_UHSF, Config.ini, Event_OrdinaryHotstring, UHSF
-		Iniwrite, % ini_UHSD, Config.ini, Event_OrdinaryHotstring, UHSD
+		IniWrite, % ini_UHSF, Config.ini, Event_BasicHotstring, UHSF
+		Iniwrite, % ini_UHSD, Config.ini, Event_BasicHotstring, UHSD
 	}
 	Gui, MSP: Destroy
 	return
@@ -6966,7 +6996,7 @@ STDGuiClose:
 STDGuiEscape:
 	Switch (A_ThisMenu)
 	{
-		Case "OrdHisTrig": 	IniWrite, % ini_OHTD, Config.ini, Event_OrdinaryHotstring, 	OHTD
+		Case "OrdHisTrig": 	IniWrite, % ini_OHTD, Config.ini, Event_BasicHotstring, 	OHTD
 		Case "UndoOfH":	IniWrite, % ini_UHTD, Config.ini, Event_UndoHotstring, 	UHTD
 		Case "TrigTips":	IniWrite, % ini_TTTD, Config.ini, Event_TriggerstringTips, 	TTTD
 	}
