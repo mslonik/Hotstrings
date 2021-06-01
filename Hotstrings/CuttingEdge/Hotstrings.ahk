@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 	Author:      Jakub Masiak, Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings as in AutoHotkey (shortcuts), but editable with GUI and many more options.
@@ -801,14 +801,14 @@ F_EventSigOrdHotstring()
 		{
 			if (A_CaretX and A_CaretY)
 			{
-				ToolTip, TransA["Hotstring was triggered!"], % A_CaretX + 20, % A_CaretY - 20, 4
+				ToolTip, % TransA["Hotstring was triggered!"], % A_CaretX + 20, % A_CaretY - 20, 4
 				if (ini_OHTD > 0)
 					SetTimer, TurnOff_OHE, % "-" . ini_OHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 			}
 			else
 			{
 				MouseGetPos, v_MouseX, v_MouseY
-				ToolTip, TransA["Hotstring was triggered!"], % v_MouseX + 20, % v_MouseY - 20, 4
+				ToolTip, % TransA["Hotstring was triggered!"], % v_MouseX + 20, % v_MouseY - 20, 4
 				if (ini_OHTD > 0)
 					SetTimer, TurnOff_OHE, % "-" . ini_OHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 			}
@@ -816,7 +816,7 @@ F_EventSigOrdHotstring()
 		if (ini_OHTP = 2)
 		{
 			MouseGetPos, v_MouseX, v_MouseY
-			ToolTip, TransA["Hotstring was triggered!"], % v_MouseX + 20, % v_MouseY - 20, 4
+			ToolTip, % TransA["Hotstring was triggered!"], % v_MouseX + 20, % v_MouseY - 20, 4
 			if (ini_OHTD > 0)
 				SetTimer, TurnOff_OHE, % "-" . ini_OHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 		}
@@ -1321,7 +1321,7 @@ F_ShowTriggerstringTips()
 		return
 	}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_EventTtEn()	;Event TransA["tooltip enable"]
+	F_EventTtEn()	;Event "tooltip enable"
 	{
 		global	;assume-global mode
 		static OneTimeMemory := true
@@ -1767,11 +1767,11 @@ F_SoundTestBut()
 		Gui, STD: Add, Radio, HwndIdSTD_R1 vFiniteTttimeout gF_STDRadio Checked%vRadioCheck% Group, % TransA["Yes"]
 		vRadioCheck := !vRadioCheck
 		Gui, STD: Add, Radio, HwndIdSTD_R2 gF_STDRadio Checked%vRadioCheck%, % TransA["No"]
-		Switch (A_ThisMenu)
+		Switch (A_ThisMenu)	;tu jestem
 		{
-			Case "OrdHisTrig": 	Gui, STD: Add, Slider, x0 y0 HwndIdSTD_S1 vini_OHTD gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_TipsDelay, % ini_OHTD
-			Case "UndoOfH":	Gui, STD: Add, Slider, x0 y0 HwndIdSTD_S1 vini_UHTD gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_TipsDelay, % ini_UHTD
-			Case "TrigTips":	Gui, STD: Add, Slider, x0 y0 HwndIdSTD_S1 vini_TTTD gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_TipsDelay, % ini_TTTD
+			Case "OrdHisTrig": 	Gui, STD: Add, Slider, x0 y0 HwndIdSTD_S1 vini_OHTD gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_OHTD, % ini_OHTD
+			Case "UndoOfH":	Gui, STD: Add, Slider, x0 y0 HwndIdSTD_S1 vini_UHTD gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_UHTD, % ini_UHTD
+			Case "TrigTips":	Gui, STD: Add, Slider, x0 y0 HwndIdSTD_S1 vini_TTTD gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_TTTD, % ini_TTTD
 		}
 		Gui, STD: Font, % "cBlue underline" . A_Space . "s" . c_FontSize + 2
 		Gui, STD: Add, Text, HwndIdSTD_T4 gF_TooltipTimeoutSlider, ⓘ
@@ -1779,9 +1779,9 @@ F_SoundTestBut()
 		v_OutVarTemp := 10000
 		Switch (A_ThisMenu)
 		{
-			Case "OrdHisTrig": 	Gui, STD: Add, Text, HwndIdSTD_T3, ""Hotstring was triggered"" TransA["tooltip timeout "]in [ms]: %v_OutVarTemp%
-			Case "UndoOfH":	Gui, STD: Add, Text, HwndIdSTD_T3, ""Undid the last hotstring!"" TransA["tooltip timeout "]in [ms]: %v_OutVarTemp%
-			Case "TrigTips":	Gui, STD: Add, Text, HwndIdSTD_T3, Triggerstring tip(s) TransA["tooltip timeout "]in [ms]: %v_OutVarTemp%
+			Case "OrdHisTrig": 	Gui, STD: Add, Text, HwndIdSTD_T3, ""Hotstring was triggered"" in [ms]: %v_OutVarTemp%
+			Case "UndoOfH":	Gui, STD: Add, Text, HwndIdSTD_T3, ""Undid the last hotstring!"" in [ms]: %v_OutVarTemp%
+			Case "TrigTips":	Gui, STD: Add, Text, HwndIdSTD_T3, Triggerstring tip(s) in [ms]: %v_OutVarTemp%
 		}
 		
 		v_xNext := c_xmarg
@@ -1809,9 +1809,9 @@ F_SoundTestBut()
 		GuiControl, Move, % IdSTD_T3, % "x" v_xNext . A_Space . "y" v_yNext
 		Switch (A_ThisMenu)
 		{
-			Case "OrdHisTrig": 	GuiControl,, % IdSTD_T3, ""Hotstring was triggered"" TransA["tooltip timeout "]in [ms]: %ini_OHTD%
-			Case "UndoOfH":	GuiControl,, % IdSTD_T3, ""Undid the last hotstring!"" TransA["tooltip timeout "]in [ms]: %ini_UHTD%
-			Case "TrigTips":	GuiControl,, % IdSTD_T3, Triggerstring tip(s) TransA["tooltip timeout "]in [ms]: %ini_TTTD%
+			Case "OrdHisTrig": 	GuiControl,, % IdSTD_T3, ""Hotstring was triggered"" in [ms]: %ini_OHTD%
+			Case "UndoOfH":	GuiControl,, % IdSTD_T3, ""Undid the last hotstring!"" in [ms]: %ini_UHTD%
+			Case "TrigTips":	GuiControl,, % IdSTD_T3, Triggerstring tip(s) in [ms]: %ini_TTTD%
 		}
 		
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
@@ -1878,7 +1878,7 @@ F_SoundTestBut()
 		return
 	}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_SetTooltipTimeout()
+	F_SetTooltipTimeout()	;tu jestem
 	{
 		global	;assume-global mode
 		Gui, STD: Submit, NoHide
@@ -4314,14 +4314,13 @@ Tooltip enable											= Tooltip enable
 Tooltip position: caret									= Tooltip position: caret
 Tooltip position: cursor									= Tooltip position: cursor
 Tooltip timeout										= Tooltip timeout
-Tooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeoutTooltip timeouttooltip timeouttooltip timeouttooltip timeouttooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout tooltip timeout 
 Total:												= Total:
 (triggerstring, hotstring) definitions						= (triggerstring, hotstring) definitions
 Triggerstring 											= Triggerstring
 Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
 Triggerstring sound duration [ms]							= Triggerstring sound duration [ms]
 Triggerstring sound frequency range						= Triggerstring sound frequency range
-Triggerstring tips 										= &Triggerstring tips
+Triggerstring tips 										= Triggerstring tips
 Triggerstring tooltip timeout in [ms]						= Triggerstring tooltip timeout in [ms]
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
 Underscore _											= Underscore _
