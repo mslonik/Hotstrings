@@ -479,89 +479,6 @@ else
 }
 return
 
-$^z::			;~ Ctrl + z as in MS Word: Undo; $ prevents autotriggering as the same hotkey is send with SendInput function
-$!BackSpace:: 		;~ Alt + Backspace as in MS Word: rolls back last Autocorrect action ; $ prevents autotriggering as the same hotkey is send with SendInput function
-F_Undo()
-{
-	global	;assume-global mode
-	local	TriggerOpt := "", PosColon1 := 0, PosColon2 := 0, HowManyBackSpaces := 0, ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey
-			,OrigTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, ":", false, 1, 2) + 1)
-	
-	if (ini_UHTtEn and v_TypedTriggerstring and (ThisHotkey != PriorHotkey))
-	{	
-		PosColon1 := InStr(v_TypedTriggerstring, ":", false, 1, 1) ;position of the first colon
-		PosColon2 := InStr(v_TypedTriggerstring, ":", false, 3, 1) ;position of the second colon
-		TriggerOpt := SubStr(v_TypedTriggerstring, PosColon1 + 1, PosColon2 - PosColon1 - 1)
-		if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O")))
-			Send, {BackSpace}
-		if (v_UndoHotstring)
-		{
-			HowManyBackSpaces := StrLenUnicode(v_UndoHotstring)
-			Send, % "{BackSpace " . HowManyBackSpaces . "}"
-			Loop, Parse, OrigTriggerstring
-					Switch A_LoopField
-					{
-						Case "^", "+", "!", "#", "{", "}":
-							SendRaw, % A_LoopField
-						Default:
-							Send, % A_LoopField
-					}
-		}
-		if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O"))) 
-			Send, % A_EndChar
-		;ToolTip, % TransA["Undid the last hotstring"], % A_CaretX, % A_CaretY - 20, 5
-		;SetTimer, TurnOffTooltip, -3000, 200 ;Priority = 200 to avoid conflicts with other threads 
-		
-		if (ini_UHTtEn)
-		{
-			if (ini_UHTP = 1)
-			{
-				if (A_CaretX and A_CaretY)
-				{
-					ToolTip, % TransA["Undid the last hotstring"], % A_CaretX + 20, % A_CaretY - 20, 6
-					if (ini_UHTD > 0)
-						SetTimer, TurnOff_UHE, % "-" . ini_UHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-				}
-				else
-				{
-					MouseGetPos, v_MouseX, v_MouseY
-					ToolTip, % TransA["Undid the last hotstring"], % v_MouseX + 20, % v_MouseY - 20, 6
-					if (ini_UHTD > 0)
-						SetTimer, TurnOff_UHE, % "-" . ini_UHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-				}
-			}
-			if (ini_UHTP = 2)
-			{
-				MouseGetPos, v_MouseX, v_MouseY
-				ToolTip, % TransA["Undid the last hotstring"], % v_MouseX + 20, % v_MouseY - 20, 6
-				if (ini_UHTD > 0)
-					SetTimer, TurnOff_UHE, % "-" . ini_UHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-			}
-		}
-			
-		if (ini_UHSEn)	;Basic Hotstring % TransA["Sound Enable"]
-			SoundBeep, % ini_UHSF, % ini_UHSD
-		
-		v_TypedTriggerstring := ""
-		v_HotstringFlag := true
-	}
-	else
-	{
-		ToolTip,
-		If InStr(ThisHotkey, "^z")
-			SendInput, ^z
-		else if InStr(ThisHotkey, "!BackSpace")
-			SendInput, !{BackSpace}
-	}
-	return
-}
-
-StrLenUnicode(data) ;https://www.autohotkey.com/boards/viewtopic.php?t=22036
-{
-	RegExReplace(data, "s).", "", i)
-	return i
-}
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #if WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows exist at the moment.
@@ -790,6 +707,87 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_Undo()
+{
+	global	;assume-global mode
+	local	TriggerOpt := "", PosColon1 := 0, PosColon2 := 0, HowManyBackSpaces := 0, ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey
+			,OrigTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, ":", false, 1, 2) + 1)
+	
+	if (ini_UHTtEn and v_TypedTriggerstring and (ThisHotkey != PriorHotkey))
+	{	
+		PosColon1 := InStr(v_TypedTriggerstring, ":", false, 1, 1) ;position of the first colon
+		PosColon2 := InStr(v_TypedTriggerstring, ":", false, 3, 1) ;position of the second colon
+		TriggerOpt := SubStr(v_TypedTriggerstring, PosColon1 + 1, PosColon2 - PosColon1 - 1)
+		if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O")))
+			Send, {BackSpace}
+		if (v_UndoHotstring)
+		{
+			HowManyBackSpaces := StrLenUnicode(v_UndoHotstring)
+			Send, % "{BackSpace " . HowManyBackSpaces . "}"
+			Loop, Parse, OrigTriggerstring
+					Switch A_LoopField
+					{
+						Case "^", "+", "!", "#", "{", "}":
+							SendRaw, % A_LoopField
+						Default:
+							Send, % A_LoopField
+					}
+		}
+		if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O"))) 
+			Send, % A_EndChar
+		;ToolTip, % TransA["Undid the last hotstring"], % A_CaretX, % A_CaretY - 20, 5
+		;SetTimer, TurnOffTooltip, -3000, 200 ;Priority = 200 to avoid conflicts with other threads 
+		
+		if (ini_UHTtEn)
+		{
+			if (ini_UHTP = 1)
+			{
+				if (A_CaretX and A_CaretY)
+				{
+					ToolTip, % TransA["Undid the last hotstring"], % A_CaretX + 20, % A_CaretY - 20, 6
+					if (ini_UHTD > 0)
+						SetTimer, TurnOff_UHE, % "-" . ini_UHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+				}
+				else
+				{
+					MouseGetPos, v_MouseX, v_MouseY
+					ToolTip, % TransA["Undid the last hotstring"], % v_MouseX + 20, % v_MouseY - 20, 6
+					if (ini_UHTD > 0)
+						SetTimer, TurnOff_UHE, % "-" . ini_UHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+				}
+			}
+			if (ini_UHTP = 2)
+			{
+				MouseGetPos, v_MouseX, v_MouseY
+				ToolTip, % TransA["Undid the last hotstring"], % v_MouseX + 20, % v_MouseY - 20, 6
+				if (ini_UHTD > 0)
+					SetTimer, TurnOff_UHE, % "-" . ini_UHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+			}
+		}
+			
+		if (ini_UHSEn)	;Basic Hotstring % TransA["Sound Enable"]
+			SoundBeep, % ini_UHSF, % ini_UHSD
+		
+		v_TypedTriggerstring := ""
+		v_HotstringFlag := true
+	}
+	else
+	{
+		ToolTip,
+		If InStr(ThisHotkey, "^z")
+			SendInput, ^z
+		else if InStr(ThisHotkey, "!BackSpace")
+			SendInput, !{BackSpace}
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+StrLenUnicode(data) ;https://www.autohotkey.com/boards/viewtopic.php?t=22036
+{
+	RegExReplace(data, "s).", "", i)
+	return i
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EventSigOrdHotstring()
 {
 	global	;assume-global mode
@@ -1181,145 +1179,149 @@ F_ShowTriggerstringTips()
 		return
 	}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_MUndo()
+F_MUndo()
+{
+	global	;assume-global mode
+	static OneTimeMemory := true
+	
+	if (OneTimeMemory)
 	{
-		global	;assume-global mode
-		static OneTimeMemory := true
-		
-		if (OneTimeMemory)
+		if (ini_HotstringUndo)
 		{
-			if (ini_HotstringUndo)
-			{
-				Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: disable"]
-				Menu, Submenu1, Check,  % TransA["Undo the last hotstring: enable"]
-				Menu, SigOfEvents, Enable, % TransA["Undid the last hotstring"]
-			}
-			else
-			{
-				Menu, Submenu1, Check, % TransA["Undo the last hotstring: disable"]
-				Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: enable"]
-				Menu, SigOfEvents, Disable, % TransA["Undid the last hotstring"]
-			}
-			OneTimeMemory := false	
+			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: disable"]
+			Menu, Submenu1, Check,  % TransA["Undo the last hotstring: enable"]
+			Menu, SigOfEvents, Enable, % TransA["Undid the last hotstring"]
+			Hotkey, $^F12, F_Undo, On	;tu jestem
 		}
 		else
 		{
-			if (ini_HotstringUndo)
-			{
-				Menu, Submenu1, Check, % TransA["Undo the last hotstring: disable"]
-				Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: enable"]
-				Menu, SigOfEvents, Disable, % TransA["Undid the last hotstring"]				
-			}
-			else
-			{
-				Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: disable"]
-				Menu, Submenu1, Check,  % TransA["Undo the last hotstring: enable"]
-				Menu, SigOfEvents, Enable, % TransA["Undid the last hotstring"]				
-			}
-			ini_HotstringUndo := !(ini_HotstringUndo)
-			IniWrite, % ini_HotstringUndo, Config.ini, Configuration, HotstringUndo
+			Menu, Submenu1, Check, % TransA["Undo the last hotstring: disable"]
+			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: enable"]
+			Menu, SigOfEvents, Disable, % TransA["Undid the last hotstring"]
+			Hotkey, $^F12, F_Undo, Off
 		}
-		return
+		OneTimeMemory := false	
 	}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_EventSoEn()
+	else
 	{
-		global	;assume-global mode
-		static OneTimeMemory := true
-		
-		if (OneTimeMemory)
+		if (ini_HotstringUndo)
 		{
+			Menu, Submenu1, Check, % TransA["Undo the last hotstring: disable"]
+			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: enable"]
+			Menu, SigOfEvents, Disable, % TransA["Undid the last hotstring"]				
+			Hotkey, $^F12, F_Undo, Off
+		}
+		else
+		{
+			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: disable"]
+			Menu, Submenu1, Check,  % TransA["Undo the last hotstring: enable"]
+			Menu, SigOfEvents, Enable, % TransA["Undid the last hotstring"]				
+			Hotkey, $^F12, F_Undo, On
+		}
+		ini_HotstringUndo := !(ini_HotstringUndo)
+		IniWrite, % ini_HotstringUndo, Config.ini, Configuration, HotstringUndo
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EventSoEn()
+{
+	global	;assume-global mode
+	static OneTimeMemory := true
+	
+	if (OneTimeMemory)
+	{
+		if (ini_OHSEn)
+		{
+			Menu, OrdHisTrig, Check, % TransA["Sound enable"]
+			Menu, OrdHisTrig, UnCheck, % TransA["Sound disable"]
+			Menu, OrdHisTrig, Enable, % TransA["Sound parameters"]
+		}
+		else
+		{
+			Menu, OrdHisTrig, UnCheck, % TransA["Sound enable"]
+			Menu, OrdHisTrig, Check, % TransA["Sound disable"]
+			Menu, OrdHisTrig, Disable, % TransA["Sound parameters"]
+		}
+		if (ini_MHSEn)
+		{
+			Menu, MenuHisTrig, Check, % TransA["Sound enable"]
+			Menu, MenuHisTrig, UnCheck, % TransA["Sound disable"]
+			Menu, MenuHisTrig, Enable, % TransA["Sound parameters"]
+		}
+		else
+		{
+			Menu, MenuHisTrig, UnCheck, % TransA["Sound enable"]
+			Menu, MenuHisTrig, Check, % TransA["Sound disable"]
+			Menu, MenuHisTrig, Disable, % TransA["Sound parameters"]
+		}
+		if (ini_UHSEn)
+		{
+			Menu, UndoOfH, Check, % TransA["Sound enable"] 
+			Menu, UndoOfH, UnCheck, % TransA["Sound disable"]
+			Menu, UndoOfH, Enable, % TransA["Sound parameters"]
+		}
+		else
+		{
+			Menu, UndoOfH, UnCheck, % TransA["Sound enable"] 
+			Menu, UndoOfH, Check, % TransA["Sound disable"]
+			Menu, UndoOfH, Disable, % TransA["Sound parameters"]
+		}
+		OneTimeMemory := false
+	}
+	else
+	{
+		Switch A_ThisMenu
+		{
+			Case "OrdHisTrig":
+			ini_OHSEn := !ini_OHSEn
 			if (ini_OHSEn)
 			{
-				Menu, OrdHisTrig, Check, % TransA["Sound enable"]
-				Menu, OrdHisTrig, UnCheck, % TransA["Sound disable"]
-				Menu, OrdHisTrig, Enable, % TransA["Sound parameters"]
+				Menu, % A_ThisMenu, Check, % TransA["Sound enable"]
+				Menu, % A_ThisMenu, UnCheck, % TransA["Sound disable"]
+				Menu, % A_ThisMenu, Enable, % TransA["Sound parameters"]
 			}
 			else
 			{
-				Menu, OrdHisTrig, UnCheck, % TransA["Sound enable"]
-				Menu, OrdHisTrig, Check, % TransA["Sound disable"]
-				Menu, OrdHisTrig, Disable, % TransA["Sound parameters"]
+				Menu, % A_ThisMenu, UnCheck, % TransA["Sound enable"]
+				Menu, % A_ThisMenu, Check, % TransA["Sound disable"]
+				Menu, % A_ThisMenu, Disable, % TransA["Sound parameters"]
 			}
+			IniWrite, % ini_OHSEn, Config.ini, Event_BasicHotstring, OHSEn
+			Case "MenuHisTrig":
+			ini_MHSEn := !ini_MHSEn
 			if (ini_MHSEn)
 			{
-				Menu, MenuHisTrig, Check, % TransA["Sound enable"]
-				Menu, MenuHisTrig, UnCheck, % TransA["Sound disable"]
-				Menu, MenuHisTrig, Enable, % TransA["Sound parameters"]
+				Menu, % A_ThisMenu, Check, % TransA["Sound enable"]
+				Menu, % A_ThisMenu, UnCheck, % TransA["Sound disable"]
+				Menu, % A_ThisMenu, Enable, % TransA["Sound parameters"]
 			}
 			else
 			{
-				Menu, MenuHisTrig, UnCheck, % TransA["Sound enable"]
-				Menu, MenuHisTrig, Check, % TransA["Sound disable"]
-				Menu, MenuHisTrig, Disable, % TransA["Sound parameters"]
+				Menu, % A_ThisMenu, UnCheck, % TransA["Sound enable"]
+				Menu, % A_ThisMenu, Check, % TransA["Sound disable"]
+				Menu, % A_ThisMenu, Disable, % TransA["Sound parameters"]
 			}
+			IniWrite, % ini_MHSEn, Config.ini, Event_MenuHotstring, MHSEn
+			Case "UndoOfH":
+			ini_UHSEn := !ini_UHSEn
 			if (ini_UHSEn)
 			{
-				Menu, UndoOfH, Check, % TransA["Sound enable"] 
-				Menu, UndoOfH, UnCheck, % TransA["Sound disable"]
-				Menu, UndoOfH, Enable, % TransA["Sound parameters"]
+				Menu, % A_ThisMenu, Check, % TransA["Sound enable"]
+				Menu, % A_ThisMenu, UnCheck, % TransA["Sound disable"]
+				Menu, % A_ThisMenu, Enable, % TransA["Sound parameters"]
 			}
 			else
 			{
-				Menu, UndoOfH, UnCheck, % TransA["Sound enable"] 
-				Menu, UndoOfH, Check, % TransA["Sound disable"]
-				Menu, UndoOfH, Disable, % TransA["Sound parameters"]
+				Menu, % A_ThisMenu, UnCheck, % TransA["Sound enable"]
+				Menu, % A_ThisMenu, Check, % TransA["Sound disable"]
+				Menu, % A_ThisMenu, Disable, % TransA["Sound parameters"]
 			}
-			OneTimeMemory := false
+			IniWrite, % ini_UHSEn, Config.ini, Event_UndoHotstring, UHSEn
 		}
-		else
-		{
-			Switch A_ThisMenu
-			{
-				Case "OrdHisTrig":
-				ini_OHSEn := !ini_OHSEn
-				if (ini_OHSEn)
-				{
-					Menu, % A_ThisMenu, Check, % TransA["Sound enable"]
-					Menu, % A_ThisMenu, UnCheck, % TransA["Sound disable"]
-					Menu, % A_ThisMenu, Enable, % TransA["Sound parameters"]
-				}
-				else
-				{
-					Menu, % A_ThisMenu, UnCheck, % TransA["Sound enable"]
-					Menu, % A_ThisMenu, Check, % TransA["Sound disable"]
-					Menu, % A_ThisMenu, Disable, % TransA["Sound parameters"]
-				}
-				IniWrite, % ini_OHSEn, Config.ini, Event_BasicHotstring, OHSEn
-				Case "MenuHisTrig":
-				ini_MHSEn := !ini_MHSEn
-				if (ini_MHSEn)
-				{
-					Menu, % A_ThisMenu, Check, % TransA["Sound enable"]
-					Menu, % A_ThisMenu, UnCheck, % TransA["Sound disable"]
-					Menu, % A_ThisMenu, Enable, % TransA["Sound parameters"]
-				}
-				else
-				{
-					Menu, % A_ThisMenu, UnCheck, % TransA["Sound enable"]
-					Menu, % A_ThisMenu, Check, % TransA["Sound disable"]
-					Menu, % A_ThisMenu, Disable, % TransA["Sound parameters"]
-				}
-				IniWrite, % ini_MHSEn, Config.ini, Event_MenuHotstring, MHSEn
-				Case "UndoOfH":
-				ini_UHSEn := !ini_UHSEn
-				if (ini_UHSEn)
-				{
-					Menu, % A_ThisMenu, Check, % TransA["Sound enable"]
-					Menu, % A_ThisMenu, UnCheck, % TransA["Sound disable"]
-					Menu, % A_ThisMenu, Enable, % TransA["Sound parameters"]
-				}
-				else
-				{
-					Menu, % A_ThisMenu, UnCheck, % TransA["Sound enable"]
-					Menu, % A_ThisMenu, Check, % TransA["Sound disable"]
-					Menu, % A_ThisMenu, Disable, % TransA["Sound parameters"]
-				}
-				IniWrite, % ini_UHSEn, Config.ini, Event_UndoHotstring, UHSEn
-			}
-		}
-		return
 	}
+	return
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	F_EventTtEn()	;Event "tooltip enable"
 	{
@@ -1874,18 +1876,18 @@ F_SoundTestBut()
 		return
 	}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_SetTooltipTimeout()	;tu jestem
+F_SetTooltipTimeout()
+{
+	global	;assume-global mode
+	Gui, STD: Submit, NoHide
+	Switch (A_ThisMenu)
 	{
-		global	;assume-global mode
-		Gui, STD: Submit, NoHide
-		Switch (A_ThisMenu)
-		{
-			Case "OrdHisTrig":	GuiControl,, % IdSTD_T3, % TransA["""Hotstring was triggered"" tooltip timeout in [ms]"] . ":" . A_Space . ini_OHTD
-			Case "UndoOfH":	GuiControl,, % IdSTD_T3, % TransA["""Undid the last hotstring!"" tooltip timeout in [ms]"] . ":" . A_Space . ini_UHTD
-			Case "TrigTips":	GuiControl,, % IdSTD_T3, % TransA["Triggerstring tip(s) tooltip timeout in [ms]"] . ":" . A_Space . ini_TTTD
-		}
-		return
+		Case "OrdHisTrig":	GuiControl,, % IdSTD_T3, % TransA["""Hotstring was triggered"" tooltip timeout in [ms]"] . ":" . A_Space . ini_OHTD
+		Case "UndoOfH":	GuiControl,, % IdSTD_T3, % TransA["""Undid the last hotstring!"" tooltip timeout in [ms]"] . ":" . A_Space . ini_UHTD
+		Case "TrigTips":	GuiControl,, % IdSTD_T3, % TransA["Triggerstring tip(s) tooltip timeout in [ms]"] . ":" . A_Space . ini_TTTD
 	}
+	return
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	F_AddToAutostart()
 	{
@@ -6118,7 +6120,7 @@ F_CheckBoxColor(State, Button)
 	;*[One]
 	if (State)
 	{
-		if (Button = "Button6")	;tu jestem
+		if (Button = "Button6")
 		{
 			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cRed Norm", % c_FontType
 			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cRed Norm", % c_FontType
