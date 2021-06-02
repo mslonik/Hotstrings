@@ -1,4 +1,4 @@
-/* 
+﻿/* 
 	Author:      Jakub Masiak, Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings as in AutoHotkey (shortcuts), but editable with GUI and many more options.
@@ -18,9 +18,9 @@ SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
 FileEncoding, UTF-16			; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN
 ; Warning! UTF-16 is not recognized by Notepad++ editor (2021), which recognizes correctly UCS-2 (defined by the International Standard ISO/IEC 10646). 
 ; BMP = Basic Multilingual Plane.
-CoordMode, Caret,	Client
+CoordMode, Caret,	Screen 
 CoordMode, ToolTip,	Client
-CoordMode, Mouse,	Window
+CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
@@ -405,51 +405,58 @@ Loop,
 	if (ErrorLevel = "NewInput")
 		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["ErrorLevel was triggered by NewInput error."]
 	
-	;OutputDebug, % "out" . ":" . A_Space . Ord(out)
+	OutputDebug, % "out" . ":" . A_Space . Ord(out) . A_Space . out
 	; if exist window with hotstring tips, output sound
-	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
+	;if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
+	;{
+		;if (ini_MHSEn)	;Menu Hotstring Sound Enable
+			;SoundBeep, % ini_MHSF, % ini_MHSD	;Menu Hotstring Sound Frequency, Menu Hotstring Sound Duration
+	;}
+	;else
+	;{
+		;v_InputString .= out
+	OutputDebug, % "After:" . A_Space . v_InputString
+	if (v_HotstringFlag)	;v_HotstringFlag = 1, triggerstring was fired = hotstring was shown
 	{
-		if (ini_MHSEn)	;Menu Hotstring % TransA["Sound Enable"]
-			SoundBeep, % ini_MHSF, % ini_MHSD	;Menu Hotstring Sound Frequency, Menu Hotstring Sound Duration
+		v_InputString := ""
+		out := ""
+		ToolTip,	;Triggerstring Tips tooltip
+		
+			;if !(WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
+		v_HotstringFlag := false
 	}
 	else
 	{
 		v_InputString .= out
-		if (v_HotstringFlag)	;v_HotstringFlag = 1, triggerstring was fired = hotstring was shown
-		{
-			;*[One]
-			v_InputString := ""
-			ToolTip,
-			F_EventSigOrdHotstring()
-			if !(WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
-				v_HotstringFlag := false
-		}
-		
-		if (out and InStr(HotstringEndChars, out))	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. If "out" is empty, InStr returns true.
-		{
-			;OutputDebug, % "out" . ":" . A_Space . Ord(out) . "`t" . "v_InputString" . ":" . A_Space . Ord(v_InputString)
-			v_TipsFlag := false
-			Loop, % a_Triggers.MaxIndex()
-			{
-				;temp := InStr(a_Triggers[A_Index], v_InputString)
-				if (InStr(a_Triggers[A_Index], v_InputString) = 1) ;if in string a_Triggers is found v_InputString from the first position 
-				{
-					v_TipsFlag := true
-					Break
-				}
-			}
-			if !(v_TipsFlag)
-				v_InputString := ""
-		}		  
-		
+		ToolTip, ,, , 4	;Basic triggerstring was triggered
+		ToolTip, ,, , 6	;Undid the last hotstring
+		OutputDebug, % "Before F_PrepareTriggerstringTipsTables:" . A_Space . v_InputString
 		F_PrepareTriggerstringTipsTables()		
 		F_ShowTriggerstringTips()
-		if (v_Param == "d")
-		{
-			FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_TASAC . "|" . ini_TTTtEn . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
-			v_IndexLog++
-		}
 	}
+	
+	if (out and InStr(HotstringEndChars, out))	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. If "out" is empty, InStr returns true.
+	{
+			;OutputDebug, % "out" . ":" . A_Space . Ord(out) . "`t" . "v_InputString" . ":" . A_Space . Ord(v_InputString)
+		v_TipsFlag := false
+		Loop, % a_Triggers.MaxIndex()
+		{
+				;temp := InStr(a_Triggers[A_Index], v_InputString)
+			if (InStr(a_Triggers[A_Index], v_InputString) = 1) ;if in string a_Triggers is found v_InputString from the first position 
+			{
+				v_TipsFlag := true
+				Break
+			}
+		}
+		if !(v_TipsFlag)
+			v_InputString := ""
+	}		  
+	if (v_Param == "d")
+	{
+		FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_TASAC . "|" . ini_TTTtEn . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
+		v_IndexLog++
+	}
+	;}
 }
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; The end of the main loop of application.
@@ -573,14 +580,22 @@ F9::	;new thread starts here
 	F_SetHotstring()
 return
 
+F11::
+	SetTimer, TurnOff_UHE, Off
+	SetTimer, TurnOff_OHE, Off
+	SetTimer, TurnOffTttt, Off
+return
+
 #if
 
 ~Alt::
 ;It's important to comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
-~MButton::
-~RButton::
-~LButton::
-~LWin::
+/*
+	~MButton::
+	~RButton::
+	~LButton::
+	~LWin::
+*/
 ~RWin::
 ~Down::
 ~Up::
@@ -676,7 +691,6 @@ F_HMenuCli()
 		;OutputDebug, % "v_PressedKey" . ":" . A_Space . v_PressedKey
 		return
 	}
-	v_HotstringFlag := true
 	ClipboardBack := ClipboardAll ;backup clipboard
 	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuCli
 	Loop, Parse, v_Temp1, `n
@@ -690,11 +704,16 @@ F_HMenuCli()
 	Send, ^v ;paste the text
 	if (Ovar = false)
 		Send, % A_EndChar
+	if (ini_MHSEn)
+		SoundBeep, % ini_MHSF, % ini_MHSD	;Future: configurable parameters of the sound
+	
 	Sleep, %ini_CPDelay% ;Remember to sleep before restoring clipboard or it will fail
 	Clipboard 		 := ClipboardBack
 	v_UndoHotstring 	 := v_Temp1
 	Hotstring("Reset")
+	v_HotstringFlag := true
 	Gui, HMenuCli: Destroy
+	F_EventSigOrdHotstring()
 	return
 }
 
@@ -702,6 +721,7 @@ Esc::
 	Gui, HMenuCli: Destroy
 	Send, % SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, ":", false, 1, 2) + 1) 
 	v_InputString := ""	;I'm not sure if this line is necessary anymore.
+	v_HotstringFlag := true
 return
 #If
 
@@ -738,8 +758,10 @@ F_Undo()
 		;ToolTip, % TransA["Undid the last hotstring"], % A_CaretX, % A_CaretY - 20, 5
 		;SetTimer, TurnOffTooltip, -3000, 200 ;Priority = 200 to avoid conflicts with other threads 
 		
+				;*[One]
 		if (ini_UHTtEn)
 		{
+			ToolTip, ,, , 4	;Basic triggerstring was triggered
 			if (ini_UHTP = 1)
 			{
 				if (A_CaretX and A_CaretY)
@@ -831,11 +853,12 @@ F_PrepareTriggerstringTipsTables()
 	global	;assume-global mode
 	local	vIntCnt := 0, a_SelectedTriggers := []
 	
+	OutputDebug, % "Length of v_InputString:" . A_Space . StrLen(v_InputString) . A_Tab . "v_InputString:" . A_Space . v_InputString
 	if (StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn)
 	{
 		Loop, % a_Triggers.MaxIndex()
 		{
-			If InStr(a_Triggers[A_Index], v_InputString) == 1
+			if (InStr(a_Triggers[A_Index], v_InputString) = 1)
 			{
 				vIntCnt++
 				a_SelectedTriggers[vIntCnt] := a_Triggers[A_Index]
@@ -5725,39 +5748,39 @@ F_TooltipMNTTSliderInfo									= You may slide the control by the following mea
 				GuiControl, % A_Gui ":" cInfo[ctrlID].m , % ctrl, % AutoXYWHOptions
 			} 
 		} 
-	}
-	
+}
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	F_AHKVariables(String)
-	{
-		String := StrReplace(String, "A_YYYY", 		A_YYYY)
-		String := StrReplace(String, "A_MMMM", 		A_MMMM)
-		String := StrReplace(String, "A_MMM", 		A_MMM)
-		String := StrReplace(String, "A_MM", 		A_MM)
-		String := StrReplace(String, "A_DDDD", 		A_DDDD)
-		String := StrReplace(String, "A_DDD", 		A_DDD)
-		String := StrReplace(String, "A_DD", 		A_DD)
-		String := StrReplace(String, "A_WDay", 		A_WDay)
-		String := StrReplace(String, "A_YDay", 		A_YDay)
-		String := StrReplace(String, "A_YWeek", 	A_YWeek)
-		String := StrReplace(String, "A_Hour",		A_Hour)
-		String := StrReplace(String, "A_Min", 		A_Min)
-		String := StrReplace(String, "A_Sec", 		A_Sec)
-		String := StrReplace(String, "A_MSec", 		A_MSec)
-		String := StrReplace(String, "A_Now", 		A_Now)
-		String := StrReplace(String, "A_NowUTC", 	A_NowUTC)
-		String := StrReplace(String, "A_TickCount", 	A_TickCount)
-		String := StrReplace(String, "``n",		"`n")	;dirty trick for new created hotstrings coming from clipboard
-		return String
-	}
-	
+
+F_AHKVariables(String)
+{
+	String := StrReplace(String, "A_YYYY", 		A_YYYY)
+	String := StrReplace(String, "A_MMMM", 		A_MMMM)
+	String := StrReplace(String, "A_MMM", 		A_MMM)
+	String := StrReplace(String, "A_MM", 		A_MM)
+	String := StrReplace(String, "A_DDDD", 		A_DDDD)
+	String := StrReplace(String, "A_DDD", 		A_DDD)
+	String := StrReplace(String, "A_DD", 		A_DD)
+	String := StrReplace(String, "A_WDay", 		A_WDay)
+	String := StrReplace(String, "A_YDay", 		A_YDay)
+	String := StrReplace(String, "A_YWeek", 	A_YWeek)
+	String := StrReplace(String, "A_Hour",		A_Hour)
+	String := StrReplace(String, "A_Min", 		A_Min)
+	String := StrReplace(String, "A_Sec", 		A_Sec)
+	String := StrReplace(String, "A_MSec", 		A_MSec)
+	String := StrReplace(String, "A_Now", 		A_Now)
+	String := StrReplace(String, "A_NowUTC", 	A_NowUTC)
+	String := StrReplace(String, "A_TickCount", 	A_TickCount)
+	String := StrReplace(String, "``n",		"`n")	;dirty trick for new created hotstrings coming from clipboard
+	return String
+}
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	F_ChangingBrackets(string)
-	{
-		occ := 1
-		Loop
+
+F_ChangingBrackets(string)
+{
+	occ := 1
+	Loop
 		{
 			PosStart := InStr(string, "{", 0, 1, occ)
 			if (PosStart)
@@ -5790,8 +5813,6 @@ F_NormalWay(ReplacementString, Oflag)
 	local	ThisHotkey := A_ThisHotkey
 	
 	v_InputString := ""
-	ToolTip,
-	v_HotstringFlag := true
 	ReplacementString := F_AHKVariables(ReplacementString)
 	if (Oflag = false)
 		Send, % ReplacementString . A_EndChar
@@ -5805,119 +5826,127 @@ F_NormalWay(ReplacementString, Oflag)
 	if (InStr(v_TypedTriggerstring, "{"))
 		v_TypedTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, "}") + 1 , StrLen(v_TypedTriggerstring) - InStr(v_TypedTriggerstring, "}"))
 	Hotstring("Reset")
+	v_HotstringFlag := true
+	F_EventSigOrdHotstring()
 }
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_ViaClipboard(ReplacementString, Oflag)
+F_ViaClipboard(ReplacementString, Oflag)
+{
+	global	;assume-global mode
+	local oWord := "", ThisHotkey := A_ThisHotkey
+	
+	v_InputString := ""
+	ToolTip,
+	v_UndoHotstring := ReplacementString
+	ReplacementString := F_AHKVariables(ReplacementString)
+	ClipboardBackup := ClipboardAll
+	Clipboard := ReplacementString
+	ClipWait
+	ifWinActive,, "Microsoft Word"
 	{
-		global	;assume-global mode
-		local oWord := "", ThisHotkey := A_ThisHotkey
-		
-		v_InputString := ""
-		ToolTip,
-		v_UndoHotstring := ReplacementString
-		ReplacementString := F_AHKVariables(ReplacementString)
-		ClipboardBackup := ClipboardAll
-		Clipboard := ReplacementString
-		ClipWait
-		ifWinActive,, "Microsoft Word"
-		{
-			oWord := ComObjActive("Word.Application")
-			oWord.Selection.Paste
-			oWord := ""
-		}
-		else
-		{
-		;*[One]
-			Send, ^v
-		}
-		if (Oflag == 0)
-			Send, % A_EndChar
-		Sleep, %ini_CPDelay% ; this sleep is required surprisingly
-		Clipboard := ClipboardBackup
-		ClipboardBackup := ""
-		v_TypedTriggerstring := ThisHotkey
-		Hotstring("Reset")
-		v_HotstringFlag := 1
+		oWord := ComObjActive("Word.Application")
+		oWord.Selection.Paste
+		oWord := ""
 	}
+	else
+	{
+	;*[One]
+		Send, ^v
+	}
+	if (Oflag == 0)
+		Send, % A_EndChar
+	Sleep, %ini_CPDelay% ; this sleep is required surprisingly
+	Clipboard := ClipboardBackup
+	ClipboardBackup := ""
+	v_TypedTriggerstring := ThisHotkey
+	Hotstring("Reset")
+	v_HotstringFlag := true
+	F_EventSigOrdHotstring()
+}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_MenuCli(TextOptions, Oflag)	
+F_MenuCli(TextOptions, Oflag)
+{
+	global	;assume-global mode
+	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
+	
+	v_TypedTriggerstring	:= A_ThisHotkey
+	if (ini_MHSEn)		;Second beep on purpose
 	{
-		global	;assume-global mode
-		local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
-		
-		v_TypedTriggerstring	:= A_ThisHotkey
-		if (ini_MHSEn)		;Second beep on purpose
-			SoundBeep, % ini_MHSF, % ini_MHSD
-		v_MenuMax			 	:= 0
-	;v_InputString 		 := ""
-		TextOptions 		 := F_AHKVariables(TextOptions)
-		Loop, Parse, TextOptions, ¦
-			v_MenuMax := A_Index
-		ToolTip,
-		Gui, HMenuCli: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuCliHwnd
-		Gui, HMenuCli: Margin, 0, 0
-		Gui, HMenuCli: Font, c766D69 s8	;Tooltip font color
-		Gui, HMenuCli: Color,, White
-		Gui, HMenuCli: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuCli" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenuCli"
-		Loop, Parse, TextOptions, ¦
-			GuiControl,, % Id_LB_HMenuCli, % A_Index . ". " . A_LoopField . "|"
-		
-		if (ini_MHMP = 1)
+		SoundBeep, % ini_MHSF, % ini_MHSD
+		SoundBeep, % ini_MHSF, % ini_MHSD
+	}
+	
+	v_MenuMax			 	:= 0
+;v_InputString 		 := ""
+	TextOptions 		 := F_AHKVariables(TextOptions)
+	Loop, Parse, TextOptions, ¦
+		v_MenuMax := A_Index
+	ToolTip,
+	Gui, HMenuCli: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuCliHwnd
+	Gui, HMenuCli: Margin, 0, 0
+	Gui, HMenuCli: Font, c766D69 s8	;Tooltip font color
+	Gui, HMenuCli: Color,, White
+	Gui, HMenuCli: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuCli" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenuCli"
+	Loop, Parse, TextOptions, ¦
+		GuiControl,, % Id_LB_HMenuCli, % A_Index . ". " . A_LoopField . "|"
+	
+	if (ini_MHMP = 1)
+	{
+		if (A_CaretX and A_CaretY)
 		{
-			if (A_CaretX and A_CaretY)
-			{
-				MenuX := A_CaretX + 20
-				MenuY := A_CaretY - 20
-			}
-			else
-			{
-				MouseGetPos, v_MouseX, v_MouseY
-				MenuX := v_MouseX + 20
-				MenuY := v_MouseY + 20
-			}
+			MenuX := A_CaretX + 20
+			MenuY := A_CaretY - 20
 		}
-		if (ini_MHMP = 2)
+		else
 		{
 			MouseGetPos, v_MouseX, v_MouseY
 			MenuX := v_MouseX + 20
 			MenuY := v_MouseY + 20
 		}
-		Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate
-		
-		GuiControl, Choose, % Id_LB_HMenuCli, 1
-		Ovar := Oflag
-		v_HotstringFlag := true
-		return
 	}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_MouseMenuCli() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
+	if (ini_MHMP = 2)
 	{
-		global	;assume-global mode
-		local	OutputVarTemp := "",	MouseCtl := 0,		ThisHotkey := A_ThisHotkey
-		
-		MouseGetPos, , , , MouseCtl, 2
-		if ((A_GuiEvent = "Normal") and (MouseCtl = Id_LB_HMenuCli) and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down"))) ;only Basic mouse left click
-		{
-			GuiControlGet, OutputVarTemp, , % Id_LB_HMenuCli 
-			v_HotstringFlag := true
-			ClipboardBack := ClipboardAll ;backup clipboard
-			OutputVarTemp := SubStr(OutputVarTemp, 4)
-			Gui, HMenuCli: Destroy
-			Clipboard := OutputvarTemp 
-			Send, ^v ;paste the text
-			if (Ovar = false)
-				Send, % A_EndChar
-			Sleep, %ini_CPDelay% ;Remember to sleep before restoring clipboard or it will fail
-			v_TypedTriggerstring := OutputVarTemp
-			v_UndoHotstring 	 := OutputVarTemp
-			Clipboard 		 := ClipboardBack
-			Hotstring("Reset")
-		}
-		return
+		MouseGetPos, v_MouseX, v_MouseY
+		MenuX := v_MouseX + 20
+		MenuY := v_MouseY + 20
 	}
+	Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate
+	
+	GuiControl, Choose, % Id_LB_HMenuCli, 1
+	Ovar := Oflag
+	v_HotstringFlag := true
+	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_MouseMenuCli() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
+{
+	global	;assume-global mode
+	local	OutputVarTemp := "",	MouseCtl := 0,		ThisHotkey := A_ThisHotkey
+	
+	MouseGetPos, , , , MouseCtl, 2
+	if ((A_GuiEvent = "Normal") and (MouseCtl = Id_LB_HMenuCli) and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down"))) ;only Basic mouse left click
+	{
+		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuCli 
+		v_HotstringFlag := true
+		ClipboardBack := ClipboardAll ;backup clipboard
+		OutputVarTemp := SubStr(OutputVarTemp, 4)
+		Gui, HMenuCli: Destroy
+		Clipboard := OutputvarTemp 
+		Send, ^v ;paste the text
+		if (Ovar = false)
+			Send, % A_EndChar
+		Sleep, %ini_CPDelay% ;Remember to sleep before restoring clipboard or it will fail
+		v_TypedTriggerstring := OutputVarTemp
+		v_UndoHotstring 	 := OutputVarTemp
+		Clipboard 		 := ClipboardBack
+		Hotstring("Reset")
+	}
+	return
+}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	F_MenuAHK(TextOptions, Oflag)	
@@ -5971,114 +6000,115 @@ F_NormalWay(ReplacementString, Oflag)
 		return
 	}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
+F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
+{
+	global	;assume-global mode
+	local	OutputVarTemp := "",	MouseCtl := 0,		ThisHotkey := A_ThisHotkey
+	
+	MouseGetPos, , , , MouseCtl, 2
+	if ((A_GuiEvent = "Normal") and (MouseCtl = Id_LB_HMenuAHK) and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down"))) ;only Basic mouse left click
 	{
-		global	;assume-global mode
-		local	OutputVarTemp := "",	MouseCtl := 0,		ThisHotkey := A_ThisHotkey
-		
-		MouseGetPos, , , , MouseCtl, 2
-		if ((A_GuiEvent = "Normal") and (MouseCtl = Id_LB_HMenuAHK) and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down"))) ;only Basic mouse left click
-		{
-			GuiControlGet, OutputVarTemp, , % Id_LB_HMenuAHK 
-			v_HotstringFlag := true
-			OutputVarTemp := SubStr(OutputVarTemp, 4)
-			Gui, HMenuAHK: Destroy
-			Send, % OutputVarTemp
-			if (Ovar = false)
-				Send, % A_EndChar
-			v_TypedTriggerstring := OutputVarTemp
-			v_UndoHotstring 	 := OutputVarTemp
-			Hotstring("Reset")
-		}
+		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuAHK 
+		v_HotstringFlag := true
+		OutputVarTemp := SubStr(OutputVarTemp, 4)
+		Gui, HMenuAHK: Destroy
+		Send, % OutputVarTemp
+		if (Ovar = false)
+			Send, % A_EndChar
+		v_TypedTriggerstring := OutputVarTemp
+		v_UndoHotstring 	 := OutputVarTemp
+		Hotstring("Reset")
+	}
+	return
+}
+	
+;Future: move this section of code to Hotkeys
+#if WinExist("ahk_id" HMenuAHKHwnd)
+1::
+2::
+3::
+4::
+5::
+6::
+7::
+Enter:: 
+Up::
+Down::
+
+F_HMenuAHK()
+{
+	global	;assume-global moee
+	local	v_PressedKey := "",		v_Temp1 := ""
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
+	
+	v_PressedKey := A_ThisHotkey
+;OutputDebug, % "Beginning" . ":" . A_Space . A_ThisHotkey
+	if (InStr(v_PressedKey, "Up"))
+	{
+		IsCursorPressed := true
+		IntCnt--
+	;OutputDebug, % "Up" . ":" . A_Space IntCnt
+		ControlSend, , {Up}, % "ahk_id" HMenuAHKHwnd
+	}
+	if (InStr(v_PressedKey, "Down"))
+	{
+		IsCursorPressed := true
+		IntCnt++
+	;OutputDebug, % "Down" . ":" . A_Space IntCnt
+		ControlSend, , {Down}, % "ahk_id" HMenuAHKHwnd
+	}
+	
+	if ((v_MenuMax = 1) and IsCursorPressed)
+	{
+		IntCnt := 1
 		return
 	}
 	
-;Future: move this section of code to Hotkeys
-	#if WinExist("ahk_id" HMenuAHKHwnd)
-	1::
-	2::
-	3::
-	4::
-	5::
-	6::
-	7::
-	Enter:: 
-	Up::
-	Down::
-	
-	F_HMenuAHK()
+	if (IsCursorPressed)
 	{
-		global	;assume-global moee
-		local	v_PressedKey := "",		v_Temp1 := ""
-		static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
-		
-		v_PressedKey := A_ThisHotkey
-	;OutputDebug, % "Beginning" . ":" . A_Space . A_ThisHotkey
-		if (InStr(v_PressedKey, "Up"))
+		if (IntCnt > v_MenuMax)
 		{
-			IsCursorPressed := true
-			IntCnt--
-		;OutputDebug, % "Up" . ":" . A_Space IntCnt
-			ControlSend, , {Up}, % "ahk_id" HMenuAHKHwnd
+			IntCnt := v_MenuMax
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	;Future: configurable parameters of the sound
 		}
-		if (InStr(v_PressedKey, "Down"))
-		{
-			IsCursorPressed := true
-			IntCnt++
-		;OutputDebug, % "Down" . ":" . A_Space IntCnt
-			ControlSend, , {Down}, % "ahk_id" HMenuAHKHwnd
-		}
-		
-		if ((v_MenuMax = 1) and IsCursorPressed)
+		if (IntCnt < 1)
 		{
 			IntCnt := 1
-			return
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	;Future: configurable parameters of the sound
 		}
-		
-		if (IsCursorPressed)
-		{
-			if (IntCnt > v_MenuMax)
-			{
-				IntCnt := v_MenuMax
-				if (ini_MHSEn)
-					SoundBeep, % ini_MHSF, % ini_MHSD	;Future: configurable parameters of the sound
-			}
-			if (IntCnt < 1)
-			{
-				IntCnt := 1
-				if (ini_MHSEn)
-					SoundBeep, % ini_MHSF, % ini_MHSD	;Future: configurable parameters of the sound
-			}
-			IsCursorPressed := false
-			return
-		}		
-		
-		if (InStr(v_PressedKey, "Enter"))
-		{
-			v_PressedKey := IntCnt
-			IsCursorPressed := false
-			IntCnt := 1
-		;OutputDebug, % "Enter" . ":" . A_Space . v_PressedKey
-		}
-		if (v_PressedKey > v_MenuMax)
-		{
-		;OutputDebug, % "v_PressedKey" . ":" . A_Space . v_PressedKey
-			return
-		}
-		v_HotstringFlag := true
-		ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuAHK
-		Loop, Parse, v_Temp1, `n
-		{
-			if (InStr(A_LoopField, v_PressedKey . "."))
-				v_Temp1 := SubStr(A_LoopField, 4)
-		}
-		Send, % v_Temp1 
-		if (Ovar = false)
-			Send, % A_EndChar
-		v_UndoHotstring 	 := v_Temp1
-		Hotstring("Reset")
-		Gui, HMenuAHK: Destroy
+		IsCursorPressed := false
 		return
+	}		
+	
+	if (InStr(v_PressedKey, "Enter"))
+	{
+		v_PressedKey := IntCnt
+		IsCursorPressed := false
+		IntCnt := 1
+		;OutputDebug, % "Enter" . ":" . A_Space . v_PressedKey
+	}
+	if (v_PressedKey > v_MenuMax)
+	{
+		;OutputDebug, % "v_PressedKey" . ":" . A_Space . v_PressedKey
+		return
+	}
+	v_HotstringFlag := true
+	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuAHK
+	Loop, Parse, v_Temp1, `n
+	{
+		if (InStr(A_LoopField, v_PressedKey . "."))
+			v_Temp1 := SubStr(A_LoopField, 4)
+	}
+	Send, % v_Temp1 
+	if (Ovar = false)
+		Send, % A_EndChar
+	v_UndoHotstring 	 := v_Temp1
+	Hotstring("Reset")
+	Gui, HMenuAHK: Destroy
+	F_EventSigOrdHotstring()
+	return
 }
 
 Esc::
@@ -6139,160 +6169,160 @@ F_CheckBoxColor(State, Button)
 	GuiControl, HS3: Font, %Button%
 	GuiControl, HS4: Font, %Button%
 }
-	
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	/*
-		F_ShowMonitorNumbers()
-		{
-			global
-			
-			Loop, %N%
-			{
-				SysGet, MonitorBoundingCoordinates_, Monitor, %A_Index%
-				Gui, %A_Index%:-SysMenu -Caption +Border +AlwaysOnTop
-				Gui, %A_Index%:Color, Black ; WindowColor, ControlColor
-				Gui, %A_Index%:Font, cWhite s26 bold, Calibri
-				Gui, %A_Index%:Add, Text, x150 y150 w150 h150, % A_Index
-				Gui, % A_Index . ":Show", % "x" .  MonitorBoundingCoordinates_Left + (Abs(MonitorBoundingCoordinates_Left - MonitorBoundingCoordinates_Right) / 2) - (300 / 2) . "y"
-		   . MonitorBoundingCoordinates_Top + (Abs(MonitorBoundingCoordinates_Top - MonitorBoundingCoordinates_Bottom) / 2) - (300 / 2) . "w300" . "h300"
-			}
-			return
-		}
-	*/
-	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	F_LoadEndChars() ;Load from Config.ini
+/*
+	F_ShowMonitorNumbers()
 	{
-		global	;assume-global mode
-		local	vOutputVarSection := "", key := "", val := "", tick := false, LastKey := ""
+		global
 		
-		HotstringEndChars 	:= ""
-		a_HotstringEndChars := {}
-		
-		IniRead, vOutputVarSection, Config.ini, EndChars
-		Loop, Parse, vOutputVarSection, =`n, `r%A_Tab%
+		Loop, %N%
 		{
-			if !(tick)
-			{
-				key := A_LoopField
-				tick := true
-			}
-			else
-			{
-				val := A_LoopField
-				tick := false
-				if (val)
-				{
-					Switch key
-					{
-						Case "Space": 	HotstringEndChars .= A_Space
-						Case "Enter": 	HotstringEndChars .= "`n"
-						Case "Tab":	HotstringEndChars .= "`t"
-						Default:
-						LastKey := SubStr(key, 0)
-						HotstringEndChars .= LastKey
-					}
-				}
-			}			
-			a_HotstringEndChars[key] := val
+			SysGet, MonitorBoundingCoordinates_, Monitor, %A_Index%
+			Gui, %A_Index%:-SysMenu -Caption +Border +AlwaysOnTop
+			Gui, %A_Index%:Color, Black ; WindowColor, ControlColor
+			Gui, %A_Index%:Font, cWhite s26 bold, Calibri
+			Gui, %A_Index%:Add, Text, x150 y150 w150 h150, % A_Index
+			Gui, % A_Index . ":Show", % "x" .  MonitorBoundingCoordinates_Left + (Abs(MonitorBoundingCoordinates_Left - MonitorBoundingCoordinates_Right) / 2) - (300 / 2) . "y"
+		   . MonitorBoundingCoordinates_Top + (Abs(MonitorBoundingCoordinates_Top - MonitorBoundingCoordinates_Bottom) / 2) - (300 / 2) . "w300" . "h300"
 		}
-		
-		Try
-			Hotstring("EndChars", HotstringEndChars)
-		Catch
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring EndChars"] . ":" . "`n`n"
-			. "EndChars" . ":" . A_Space . HotstringEndChars
-		return	
+		return
+	}
+*/
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_LoadEndChars() ;Load from Config.ini
+{
+	global	;assume-global mode
+	local	vOutputVarSection := "", key := "", val := "", tick := false, LastKey := ""
+	
+	HotstringEndChars 	:= ""
+	a_HotstringEndChars := {}
+	
+	IniRead, vOutputVarSection, Config.ini, EndChars
+	Loop, Parse, vOutputVarSection, =`n, `r%A_Tab%
+	{
+		if !(tick)
+		{
+			key := A_LoopField
+			tick := true
+		}
+		else
+		{
+			val := A_LoopField
+			tick := false
+			if (val)
+			{
+				Switch key
+				{
+					Case "Space": 	HotstringEndChars .= A_Space
+					Case "Enter": 	HotstringEndChars .= "`n"
+					Case "Tab":	HotstringEndChars .= "`t"
+					Default:
+					LastKey := SubStr(key, 0)
+					HotstringEndChars .= LastKey
+				}
+			}
+		}			
+		a_HotstringEndChars[key] := val
 	}
 	
+	Try
+		Hotstring("EndChars", HotstringEndChars)
+	Catch
+		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring EndChars"] . ":" . "`n`n"
+			. "EndChars" . ":" . A_Space . HotstringEndChars
+	return	
+}
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	/*
-		F_SortArrayAlphabetically(a_array)
-		{
-			local a_TempArray, v_ActualArray, v_TempArray, flag, cnt, no
-			a_TempArray := []
-			Loop, % a_array.MaxIndex()
-			{
-				cnt := A_Index
-				a_TempArray[cnt] := a_array[cnt]
-				Loop, % cnt - 1
-				{
-					If (Asc(a_array[cnt]) < Asc(a_TempArray[A_Index]))
-					{
-						Loop, % cnt - A_Index
-						{
-							a_TempArray[cnt - (A_Index - 1)] := a_TempArray[cnt - A_Index]
-						}
-						a_TempArray[A_Index] := a_array[cnt]
-						break
-					}
-					else if (Asc(a_array[cnt]) == Asc(a_TempArray[A_Index]))
-					{
-						flag := 0
-						no := A_Index
-						v_ActualArray := a_array[cnt]
-						v_TempArray := a_TempArray[no]
-						Loop, % Max(StrLen(v_ActualArray), StrLen(v_TempArray))
-						{
-							v_ActualArray := SubStr(v_ActualArray, 2)
-							v_TempArray := SubStr(v_TempArray, 2)
-							If (Asc(v_ActualArray) < Asc(v_TempArray))
-							{
-								Loop, % cnt - no
-								{
-									a_TempArray[cnt - A_Index + 1] := a_TempArray[cnt - A_Index]
-								}
-								a_TempArray[no] := a_array[cnt]
-								flag := 1
-								Break
-							}
-							else if (Asc(v_ActualArray) > Asc(v_TempArray)22)
-							{
-								Break
-							}
-						}
-						if (flag)
-							Break
-					}
-				}
-			}
-			return a_TempArray
-		}
-	*/
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	F_SortArrayByLength(a_array)
+
+/*
+	F_SortArrayAlphabetically(a_array)
 	{
-		local a_TempArray, v_Length, v_ActLen
+		local a_TempArray, v_ActualArray, v_TempArray, flag, cnt, no
 		a_TempArray := []
-		v_Length := 0
 		Loop, % a_array.MaxIndex()
 		{
-			v_Length := Max(StrLen(a_array[A_Index]),v_Length)
-		}
-		Loop, % v_Length
-		{
-			v_ActLen := A_Index
-			Loop, % a_array.MaxIndex()
+			cnt := A_Index
+			a_TempArray[cnt] := a_array[cnt]
+			Loop, % cnt - 1
 			{
-				if StrLen(a_array[A_Index]) == v_ActLen
+				If (Asc(a_array[cnt]) < Asc(a_TempArray[A_Index]))
 				{
-					a_TempArray.Push(a_array[A_Index])
+					Loop, % cnt - A_Index
+					{
+						a_TempArray[cnt - (A_Index - 1)] := a_TempArray[cnt - A_Index]
+					}
+					a_TempArray[A_Index] := a_array[cnt]
+					break
+				}
+				else if (Asc(a_array[cnt]) == Asc(a_TempArray[A_Index]))
+				{
+					flag := 0
+					no := A_Index
+					v_ActualArray := a_array[cnt]
+					v_TempArray := a_TempArray[no]
+					Loop, % Max(StrLen(v_ActualArray), StrLen(v_TempArray))
+					{
+						v_ActualArray := SubStr(v_ActualArray, 2)
+						v_TempArray := SubStr(v_TempArray, 2)
+						If (Asc(v_ActualArray) < Asc(v_TempArray))
+						{
+							Loop, % cnt - no
+							{
+								a_TempArray[cnt - A_Index + 1] := a_TempArray[cnt - A_Index]
+							}
+							a_TempArray[no] := a_array[cnt]
+							flag := 1
+							Break
+						}
+						else if (Asc(v_ActualArray) > Asc(v_TempArray)22)
+						{
+							Break
+						}
+					}
+					if (flag)
+						Break
 				}
 			}
 		}
 		return a_TempArray
 	}
-	
+*/
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	F_ImportLibrary() 
-;Future: omit commented lines of a imported script
+
+F_SortArrayByLength(a_array)
+{
+	local a_TempArray, v_Length, v_ActLen
+	a_TempArray := []
+	v_Length := 0
+	Loop, % a_array.MaxIndex()
 	{
-		global	;assume-global mode
-		local IdImport_P1 := 0, IdImport_T1 := 0
+		v_Length := Max(StrLen(a_array[A_Index]),v_Length)
+	}
+	Loop, % v_Length
+	{
+		v_ActLen := A_Index
+		Loop, % a_array.MaxIndex()
+		{
+			if StrLen(a_array[A_Index]) == v_ActLen
+			{
+				a_TempArray.Push(a_array[A_Index])
+			}
+		}
+	}
+	return a_TempArray
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_ImportLibrary() 
+;Future: omit commented lines of a imported script
+{
+	global	;assume-global mode
+	local IdImport_P1 := 0, IdImport_T1 := 0
 	,HS3GuiWinX := 0, HS3GuiWinY := 0, HS3GuiWinW := 0, HS3GuiWinH := 0
 	,ImportGuiWinW := 0, ImportGuiWinH := 0
 	,v_OutputFile := "", OutNameNoExt := ""
@@ -6303,726 +6333,726 @@ F_CheckBoxColor(State, Button)
 	,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
 	,NewStr := "", v_LibraryName := ""
 	,key := "", value := 0, f_ExistedLib := false
-		
-		FileSelectFile, v_LibraryName, 3, %A_ScriptDir%, % TransA["Choose (.ahk) file containing (triggerstring, hotstring) definitions for import"], AutoHotkey (*.ahk)
-		if (!v_LibraryName)
-			return
-		SplitPath, v_LibraryName, ,,, OutNameNoExt
-		v_OutputFile := % A_ScriptDir . "\Libraries\" . OutNameNoExt . ".csv"
-		
-		if (FileExist(v_OutputFile))
-		{
-			MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Such file already exists"] . ":" . "`n`n" . v_OutputFile . "`n`n" . TransA["Do you want to delete it?"] . "`n`n" 
+	
+	FileSelectFile, v_LibraryName, 3, %A_ScriptDir%, % TransA["Choose (.ahk) file containing (triggerstring, hotstring) definitions for import"], AutoHotkey (*.ahk)
+	if (!v_LibraryName)
+		return
+	SplitPath, v_LibraryName, ,,, OutNameNoExt
+	v_OutputFile := % A_ScriptDir . "\Libraries\" . OutNameNoExt . ".csv"
+	
+	if (FileExist(v_OutputFile))
+	{
+		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Such file already exists"] . ":" . "`n`n" . v_OutputFile . "`n`n" . TransA["Do you want to delete it?"] . "`n`n" 
 			. TransA["If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file."]
-			IfMsgBox, Yes	;check if it was loaded. if yes, recommend restart of application, because "Total" counter and Hotstrings definitions will be incredible. Future: at first disable existing Hotstrings definitions and then reduce total counter.
-			{
-				for key, value in ini_LoadLib
-					if (key = OutNameNoExt)
-						f_ExistedLib := true
-				FileDelete, % v_OutputFile
-			}
+		IfMsgBox, Yes	;check if it was loaded. if yes, recommend restart of application, because "Total" counter and Hotstrings definitions will be incredible. Future: at first disable existing Hotstrings definitions and then reduce total counter.
+		{
+			for key, value in ini_LoadLib
+				if (key = OutNameNoExt)
+					f_ExistedLib := true
+			FileDelete, % v_OutputFile
 		}
-		
-		NewStr := RegExReplace(TransA["Import from .ahk to .csv"], "&", "")
-		
-		Gui, Import: New, 	+Border -Resize -MaximizeBox -MinimizeBox +HwndImportGuiHwnd +Owner +OwnDialogs, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . NewStr
-		Gui, Import: Margin,	% c_xmarg, % c_ymarg
-		Gui,	Import: Color,	% c_WindowColor, % c_ControlColor
-		Gui,	Import: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType
-		
-		Gui, Import: Add, Text,		x0 y0 HwndIdImport_T1, % TransA["Conversion of .ahk file into new .csv file (library) and loading of that new library"]
-		Gui, Import: Add, Progress, 	x0 y0 HwndIdImport_P1 cBlue, 0
-		Gui, Import: Add, Text, 		x0 y0 HwndIdImport_T2, % TransA["Converted"] . A_Space . v_Progress . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
+	}
+	
+	NewStr := RegExReplace(TransA["Import from .ahk to .csv"], "&", "")
+	
+	Gui, Import: New, 	+Border -Resize -MaximizeBox -MinimizeBox +HwndImportGuiHwnd +Owner +OwnDialogs, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . NewStr
+	Gui, Import: Margin,	% c_xmarg, % c_ymarg
+	Gui,	Import: Color,	% c_WindowColor, % c_ControlColor
+	Gui,	Import: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType
+	
+	Gui, Import: Add, Text,		x0 y0 HwndIdImport_T1, % TransA["Conversion of .ahk file into new .csv file (library) and loading of that new library"]
+	Gui, Import: Add, Progress, 	x0 y0 HwndIdImport_P1 cBlue, 0
+	Gui, Import: Add, Text, 		x0 y0 HwndIdImport_T2, % TransA["Converted"] . A_Space . v_Progress . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
 		. A_Space . "(" . v_Progress . A_Space . "%" . ")"
-		
-		GuiControlGet, v_OutVarTemp, Pos, % IdImport_T1
-		v_xNext := c_xmarg
-		v_yNext := c_ymarg
-		GuiControl, Move, % IdImport_T1, % "x" v_xNext . A_Space . "y" v_yNext
+	
+	GuiControlGet, v_OutVarTemp, Pos, % IdImport_T1
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdImport_T1, % "x" v_xNext . A_Space . "y" v_yNext
 ;Gui, Import: Show, Center AutoSize
-		v_yNext += HofText + c_ymarg
-		GuiControl, Move, % IdImport_T2, % "x" v_xNext . A_Space . "y" v_yNext
-		GuiControlGet, v_OutVarTemp, Pos, % IdImport_T2
-		v_wNext := v_OutVarTempW
-		v_hNext := HofText
-		GuiControl, Move, % IdImport_P1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space . "w" v_wNext . A_Space . "h" . v_hNext
-		v_yNext += HofText + c_ymarg
-		GuiControl, Move, % IdImport_T2, % "x" v_xNext . A_Space . "y" v_yNext
+	v_yNext += HofText + c_ymarg
+	GuiControl, Move, % IdImport_T2, % "x" v_xNext . A_Space . "y" v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdImport_T2
+	v_wNext := v_OutVarTempW
+	v_hNext := HofText
+	GuiControl, Move, % IdImport_P1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space . "w" v_wNext . A_Space . "h" . v_hNext
+	v_yNext += HofText + c_ymarg
+	GuiControl, Move, % IdImport_T2, % "x" v_xNext . A_Space . "y" v_yNext
 ;Gui, Import: Show, Center AutoSize
-		Gui, Import: Show, Hide
-		
-		F_WhichGui()
-		Switch A_DefaultGui
-		{
-			Case "HS3": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd
-			Case "HS4": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS4GuiHwnd 
-		}
-		DetectHiddenWindows, On
-		WinGetPos, , , ImportGuiWinW, ImportGuiWinH, % "ahk_id" . ImportGuiHwnd
-		DetectHiddenWindows, Off
-		Gui, % A_DefaultGui . ":" . A_Space . "+Disabled"
-		Gui, Import: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ImportGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ImportGuiWinH) / 2 . A_Space . "AutoSize"
-		
-		FileRead, v_TheWholeFile, % v_LibraryName
-		Loop, Parse, v_TheWholeFile, `n, `r
-			if (A_LoopField)
-				v_TotalLines++
-		
-		if (v_TotalLines = 0)
-		{
-			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The selected file is empty. Process of import will be interrupted."]
-			return
-		}
-		if (A_DefaultGui = "HS4") ;in order to have access to ListView even when HS4 is active, temporarily default gui is switched to HS3.
-			Gui, HS3: Default
-		GuiControl, % "Count" . v_TotalLines . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
-		LV_Delete()
-		Loop, Parse, v_TheWholeFile, `n, `r
-		{
-			Loop, Parse, A_LoopField, :, `r
-			{
-				Switch A_Index
-				{
-					Case 2: v_Options := A_LoopField
-					Case 3: v_Trigger := A_LoopField
-					Case 5: v_Hotstring := A_LoopField
-				}
-			}
-			LV_Add("", v_Options, v_Trigger, v_Hotstring)
-			v_Progress := Round((A_Index / v_TotalLines) * 100)
-			GuiControl,, % IdImport_T2, % TransA["Converted"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
-			. A_Space . "(" . v_Progress . A_Space . "%" . ")"
-			GuiControl,, % IdImport_P1, % v_Progress
-		}
-		LV_ModifyCol(2, "Sort")
-		v_TheWholeFile := ""
-		GuiControl,, % IdImport_T1, % TransA["Saving of sorted content into .csv file (library)"]
-		Loop, % LV_GetCount()
-		{
-			LV_GetText(v_Options, 	A_Index, 1)
-			LV_GetText(v_Trigger, 	A_Index, 2)
-			LV_GetText(v_Hotstring, 	A_Index, 3)
-			line := v_Options . "‖" . v_Trigger . "‖SI‖En‖" . v_Hotstring . "‖"
-			v_TheWholeFile .= line . "`n"
-			v_Progress := Round((A_Index / v_TotalLines) * 100)
-			GuiControl,, % IdImport_P1, % v_Progress
-			GuiControl,, % IdImport_T2, % TransA["Saved"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
-		. A_Space . "(" . v_Progress . A_Space . "%" . ")"
-		}	
-		FileAppend, % v_TheWholeFile, % v_OutputFile, UTF-8
-		
-		LV_Delete()
-		GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
-		if (A_DefaultGui = "HS3")
-			Gui, HS4: Default
-		Gui, % A_DefaultGui . ":" . A_Space . "-Disabled"
-		Gui, Import: Destroy
-		
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been imported."]
-		if (f_ExistedLib)
-		{
-			MsgBox, , 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], TransA["The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes."]
-			F_SaveGUIPos()
-			ini_GuiReload := true
-			IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
-			Reload
-		}
-		else	
-		{
-			F_ValidateIniLibSections()
-			F_RefreshListOfLibraries()
-			F_RefreshListOfLibraryTips()
-			F_UpdateSelHotLibDDL()
-			F_LoadFile(OutNameNoExt . ".csv")
-			F_Searching("Reload")
-		}
+	Gui, Import: Show, Hide
+	
+	F_WhichGui()
+	Switch A_DefaultGui
+	{
+		Case "HS3": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd
+		Case "HS4": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS4GuiHwnd 
+	}
+	DetectHiddenWindows, On
+	WinGetPos, , , ImportGuiWinW, ImportGuiWinH, % "ahk_id" . ImportGuiHwnd
+	DetectHiddenWindows, Off
+	Gui, % A_DefaultGui . ":" . A_Space . "+Disabled"
+	Gui, Import: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ImportGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ImportGuiWinH) / 2 . A_Space . "AutoSize"
+	
+	FileRead, v_TheWholeFile, % v_LibraryName
+	Loop, Parse, v_TheWholeFile, `n, `r
+		if (A_LoopField)
+			v_TotalLines++
+	
+	if (v_TotalLines = 0)
+	{
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The selected file is empty. Process of import will be interrupted."]
 		return
 	}
-	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	F_ExportLibraryStatic()
+	if (A_DefaultGui = "HS4") ;in order to have access to ListView even when HS4 is active, temporarily default gui is switched to HS3.
+		Gui, HS3: Default
+	GuiControl, % "Count" . v_TotalLines . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
+	LV_Delete()
+	Loop, Parse, v_TheWholeFile, `n, `r
 	{
-		global	;assume-global mode
-		local	v_LibraryName := "", v_Progress := "100", v_TotalLines := "0000"
-			,v_OutVarTemp := 0, v_OutVarTempX := 0, v_OutVarTempY := 0, v_OutVarTempW := 0, v_OutVarTempH := 0
-			,HS3GuiWinX := 0, HS3GuiWinY := 0, HS3GuiWinW := 0, HS3GuiWinH := 0, ExportGuiWinW := 0, ExportGuiWinH := 0
-			,OutFileName := "", OutNameNoExt := "", v_LibrariesDir := "", v_OutputFile := "", v_TheWholeFile := "", line := ""
-			,v_Options := "", v_Trigger := "", v_Function := "", v_EnDis := "", v_Hotstring := "", v_Comment := "", a_MenuHotstring := []
-			,v_Header := "
-(
-; This file is result of export from Hotstrings.ahk application (https://github.com/mslonik/Hotstrings).
-#SingleInstance force 			; Only one instance of this script may run at a time!
-#NoEnv  						; Recommended for performance and compatibility with future AutoHotkey releases.
-#Warn  						; Enable warnings to assist with detection of common errors.
-SendMode Input  				; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
-FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN
-)"
-		FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries", % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
-		if (!v_LibraryName)
-			return
-		
-		SplitPath, v_LibraryName, OutFileName, , , OutNameNoExt
-		v_LibrariesDir := % A_ScriptDir . "\ExportedLibraries"
-		if !InStr(FileExist(v_LibrariesDir),"D")
-			FileCreateDir, %v_LibrariesDir%
-		v_OutputFile := % A_ScriptDir . "\ExportedLibraries\" . OutNameNoExt . "." . "ahk"
-		
-		if (FileExist(v_OutputFile))
+		Loop, Parse, A_LoopField, :, `r
 		{
-			MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Such file already exists"] . ":" . "`n`n" . v_OutputFile . "`n`n" . TransA["Do you want to delete it?"] . "`n`n" 
-			. TransA["If you answer ""Yes"", the existing file will be deleted. If you answer ""No"", the current task will be continued and new content will be added to existing file."]
-			IfMsgBox, Yes
-				FileDelete, % v_OutputFile
-		}	
-		
-		Gui, Export: New, 		+Border -Resize -MaximizeBox -MinimizeBox +HwndExportGuiHwnd +Owner +OwnDialogs, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Export to .ahk with static definitions of hotstrings"] 
-		Gui, Export: Margin,	% c_xmarg, % c_ymarg
-		Gui,	Export: Color,		% c_WindowColor, % c_ControlColor
-		Gui,	Export: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType	
-		
-		Gui, Export: Add, Text,		x0 y0 HwndIdExport_T1, TransA["Conversion of .csv library file into new .ahk file containing static (triggerstring, hotstring) definitions"]
-		Gui, Export: Add, Progress, 	x0 y0 HwndIdExport_P1 cBlue, 0
-		Gui, Export: Add, Text, 		x0 y0 HwndIdExport_T2, % TransA["Exported"] . A_Space . v_TotalLines . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
-		. A_Space . "(" . v_Progress . A_Space . "%" . ")"
-		
-		GuiControlGet, v_OutVarTemp, Pos, % IdExport_T1
-		v_xNext := c_xmarg
-		v_yNext := c_ymarg
-		GuiControl, Move, % IdExport_T1, % "x" v_xNext . A_Space . "y" v_yNext
-	;Gui, Export: Show, Center AutoSize
-		v_yNext += HofText + c_ymarg
-		GuiControl, Move, % IdExport_T2, % "x" v_xNext . A_Space . "y" v_yNext
-	;Gui, Export: Show, Center AutoSize
-		GuiControlGet, v_OutVarTemp, Pos, % IdExport_T2
-		v_wNext := v_OutVarTempW
-		v_hNext := HofText
-		GuiControl, Move, % IdExport_P1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space . "w" v_wNext . A_Space . "h" . v_hNext
-		v_yNext += HofText + c_ymarg
-		GuiControl, Move, % IdExport_T2, % "x" v_xNext . A_Space . "y" v_yNext
-	;Gui, Export: Show, Center AutoSize
-		v_Progress   := 0
-		v_TotalLines := 0
-		GuiControl,, % IdExport_T2, % TransA["Exported"] . A_Space . v_TotalLines . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"] . A_Space . "(" . v_Progress . A_Space . "%" . ")"
-	;Gui, Export: Show, Center AutoSize	
-		Gui, Export: Show, Hide
-		
-		F_WhichGui()
-		Switch A_DefaultGui
-		{
-			Case "HS3": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd
-			Case "HS4": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS4GuiHwnd 
-		}
-		DetectHiddenWindows, On
-		WinGetPos, , , ExportGuiWinW, ExportGuiWinH, % "ahk_id" . ExportGuiHwnd
-		DetectHiddenWindows, Off
-		Gui, Export: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ExportGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ExportGuiWinH) / 2 . A_Space . "AutoSize"
-		Gui, % A_DefaultGui . ":" . A_Space . "+Disabled"
-		
-		FileRead, v_TheWholeFile, % v_LibraryName
-		Loop, Parse, v_TheWholeFile, `n, `r
-			if (A_LoopField)
-				v_TotalLines++
-		
-		if (v_TotalLines = 0)
-		{
-			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The selected file is empty. Process of export will be interrupted."]
-			return
-		}
-		line .= v_Header . "`n`n"
-		Loop, Parse, v_TheWholeFile, `n, `r
-		{
-			if (A_LoopField)
+			Switch A_Index
 			{
-				Loop, Parse, A_LoopField, ‖, %A_Space%%A_Tab%
-				{
-					Switch A_Index
-					{
-						Case 1: v_Options 	:= A_LoopField
-						Case 2: v_Trigger 	:= A_LoopField
-						Case 3: v_Function 	:= A_LoopField
-						Case 4: v_EnDis 	:= A_LoopField
-						Case 5: v_Hotstring := A_LoopField
-						Case 6: v_Comment 	:= A_LoopField
-					}
-				}
-				if (v_EnDis = "Dis")
-				{
-					line .= ";" . A_Space
-				}
-				if (InStr(v_Function, "M"))
-				{
-					a_MenuHotstring := StrSplit(v_Hotstring,"¦")
-					Loop, % a_MenuHotstring.MaxIndex()
-					{
-						if (A_Index = 1)
-						{
-							line .= ":" v_Options . ":" . v_Trigger . "::" . a_MenuHotstring[A_Index] . A_Space
-							if (v_Comment)
-								line .= ";" . v_Comment . A_Space . ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
-							else
-								line .= ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
-							line .= "`n"
-						}
-						else
-						{
-							line .=  ";" . A_Space . ":" v_Options . ":" . v_Trigger . "::" . a_MenuHotstring[A_Index] . A_Space 
-							if (v_Comment)
-								line .= ";" . v_Comment . A_Space . ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
-							else
-								line .= ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
-							line .= "`n"
-						}
-					}
-				}
-				else
-				{
-					line .= ":" . v_Options . ":" . v_Trigger . "::" . v_Hotstring . A_Space
-					if (v_Comment)
-						line .= ";" . v_Comment
-					line .= "`n"
-				}
+				Case 2: v_Options := A_LoopField
+				Case 3: v_Trigger := A_LoopField
+				Case 5: v_Hotstring := A_LoopField
 			}
-			
-			v_Progress := Round((A_Index / v_TotalLines) * 100)
-			GuiControl,, % IdExport_T2, % TransA["Exported"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
-			. A_Space . "(" . v_Progress . A_Space . "%" . ")"
-			GuiControl,, % IdExport_P1, % v_Progress
 		}
-		FileAppend, % line, % v_OutputFile, UTF-8
-		Gui, % A_DefaultGui . ":" . A_Space . "-Disabled"
-		Gui, Export: Destroy
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been exported"] . ":" . "`n`n" . v_OutputFile
-		return
+		LV_Add("", v_Options, v_Trigger, v_Hotstring)
+		v_Progress := Round((A_Index / v_TotalLines) * 100)
+		GuiControl,, % IdImport_T2, % TransA["Converted"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
+			. A_Space . "(" . v_Progress . A_Space . "%" . ")"
+		GuiControl,, % IdImport_P1, % v_Progress
 	}
-	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	F_ExportLibraryDynamic()
+	LV_ModifyCol(2, "Sort")
+	v_TheWholeFile := ""
+	GuiControl,, % IdImport_T1, % TransA["Saving of sorted content into .csv file (library)"]
+	Loop, % LV_GetCount()
 	{
-		global	;assume-global mode
-		local	v_LibraryName := "", v_Progress := "100", v_TotalLines := "0000"
-			,v_OutVarTemp := 0, v_OutVarTempX := 0, v_OutVarTempY := 0, v_OutVarTempW := 0, v_OutVarTempH := 0
-			,HS3GuiWinX := 0, HS3GuiWinY := 0, HS3GuiWinW := 0, HS3GuiWinH := 0, ExportGuiWinW := 0, ExportGuiWinH := 0
-			,OutFileName := "", OutNameNoExt := "", v_LibrariesDir := "", v_OutputFile := "", v_TheWholeFile := "", line := ""
-			,v_Options := "", v_Trigger := "", v_Function := "", v_EnDis := "", v_Hotstring := "", v_Comment := "", a_MenuHotstring := []
-			,v_Header := "
-(
-; This file is result of export from Hotstrings.ahk application (https://github.com/mslonik/Hotstrings).
-#SingleInstance force 			; Only one instance of this script may run at a time!
-#NoEnv  						; Recommended for performance and compatibility with future AutoHotkey releases.
-#Warn  						; Enable warnings to assist with detection of common errors.
-SendMode Input  				; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
-FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN
-)"
-		FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries", % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
-		if (!v_LibraryName)
-			return
-		
-		SplitPath, v_LibraryName, OutFileName, , , OutNameNoExt
-		v_LibrariesDir := % A_ScriptDir . "\ExportedLibraries"
-		if !InStr(FileExist(v_LibrariesDir),"D")
-			FileCreateDir, %v_LibrariesDir%
-		v_OutputFile := % A_ScriptDir . "\ExportedLibraries\" . OutNameNoExt . "." . "ahk"
-		
-		if (FileExist(v_OutputFile))
-		{
-			MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Such file already exists"] . ":" . "`n`n" . v_OutputFile . "`n`n" . TransA["Do you want to delete it?"] . "`n`n" 
-			. TransA["If you answer ""Yes"", the existing file will be deleted. If you answer ""No"", the current task will be continued and new content will be added to existing file."]
-			IfMsgBox, Yes
-				FileDelete, % v_OutputFile
-		}	
-		
-		Gui, Export: New, 		+Border -Resize -MaximizeBox -MinimizeBox +HwndExportGuiHwnd +Owner +OwnDialogs, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Export to .ahk with dynamic definitions of hotstrings"] 
-		Gui, Export: Margin,	% c_xmarg, % c_ymarg
-		Gui,	Export: Color,		% c_WindowColor, % c_ControlColor
-		Gui,	Export: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType	
-		
-		Gui, Export: Add, Text,		x0 y0 HwndIdExport_T1, TransA["Conversion of .csv library file into new .ahk file containing dynamic (triggerstring, hotstring) definitions"]
-		Gui, Export: Add, Progress, 	x0 y0 HwndIdExport_P1 cBlue, 0
-		Gui, Export: Add, Text, 		x0 y0 HwndIdExport_T2, % TransA["Exported"] . A_Space . v_TotalLines . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
+		LV_GetText(v_Options, 	A_Index, 1)
+		LV_GetText(v_Trigger, 	A_Index, 2)
+		LV_GetText(v_Hotstring, 	A_Index, 3)
+		line := v_Options . "‖" . v_Trigger . "‖SI‖En‖" . v_Hotstring . "‖"
+		v_TheWholeFile .= line . "`n"
+		v_Progress := Round((A_Index / v_TotalLines) * 100)
+		GuiControl,, % IdImport_P1, % v_Progress
+		GuiControl,, % IdImport_T2, % TransA["Saved"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
 		. A_Space . "(" . v_Progress . A_Space . "%" . ")"
-		
-		GuiControlGet, v_OutVarTemp, Pos, % IdExport_T1
-		v_xNext := c_xmarg
-		v_yNext := c_ymarg
-		GuiControl, Move, % IdExport_T1, % "x" v_xNext . A_Space . "y" v_yNext
-	;Gui, Export: Show, Center AutoSize
-		v_yNext += HofText + c_ymarg
-		GuiControl, Move, % IdExport_T2, % "x" v_xNext . A_Space . "y" v_yNext
-	;Gui, Export: Show, Center AutoSize
-		GuiControlGet, v_OutVarTemp, Pos, % IdExport_T2
-		v_wNext := v_OutVarTempW
-		v_hNext := HofText
-		GuiControl, Move, % IdExport_P1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space . "w" v_wNext . A_Space . "h" . v_hNext
-		v_yNext += HofText + c_ymarg
-		GuiControl, Move, % IdExport_T2, % "x" v_xNext . A_Space . "y" v_yNext
-	;Gui, Export: Show, Center AutoSize
-		v_Progress   := 0
-		v_TotalLines := 0
-		GuiControl,, % IdExport_T2, % TransA["Exported"] . A_Space . v_TotalLines . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"] . A_Space . "(" . v_Progress . A_Space . "%" . ")"
-	;Gui, Export: Show, Center AutoSize	
-		Gui, Export: Show, Hide
-		
-		F_WhichGui()
-		Switch A_DefaultGui
-		{
-			Case "HS3": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd
-			Case "HS4": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS4GuiHwnd 
-		}
-		DetectHiddenWindows, On
-		WinGetPos, , , ExportGuiWinW, ExportGuiWinH, % "ahk_id" . ExportGuiHwnd
-		DetectHiddenWindows, Off
-		Gui, Export: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ExportGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ExportGuiWinH) / 2 . A_Space . "AutoSize"
-		Gui, % A_DefaultGui . ":" . A_Space . "+Disabled"
-		
-		FileRead, v_TheWholeFile, % v_LibraryName
-		Loop, Parse, v_TheWholeFile, `n, `r
-			if (A_LoopField)
-				v_TotalLines++
-		
-		if (v_TotalLines = 0)
-		{
-			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The selected file is empty. Process of export will be interrupted."]
-			return
-		}
-		line .= v_Header . "`n`n"
-		Loop, Parse, v_TheWholeFile, `n, `r
-		{
-			if (A_LoopField)
-			{
-				Loop, Parse, A_LoopField, ‖, %A_Space%%A_Tab%
-				{
-					Switch A_Index
-					{
-						Case 1: v_Options 	:= A_LoopField
-						Case 2: v_Trigger 	:= A_LoopField
-						Case 3: v_Function 	:= A_LoopField
-						Case 4: v_EnDis 	:= A_LoopField
-						Case 5: v_Hotstring := A_LoopField
-						Case 6: v_Comment 	:= A_LoopField
-					}
-				}
-				if (v_EnDis = "Dis")
-				{
-					line .= ";" . A_Space
-				}
-				if (InStr(v_Function, "M"))
-				{
-					a_MenuHotstring := StrSplit(v_Hotstring,"¦")
-					Loop, % a_MenuHotstring.MaxIndex()
-					{
-						if (A_Index = 1)
-						{
-						;line .= ":" v_Options . ":" . v_Trigger . "::" . a_MenuHotstring[A_Index] . A_Space
-							line .= "Hotstring(" . """" . ":" . v_Options . ":" . v_Trigger . """" . "," . A_Space . """" . a_MenuHotstring[A_Index] . """" . "," . A_Space . v_EnDis . ")"
-							if (v_Comment)
-								line .= ";" . v_Comment . A_Space . ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
-							else
-								line .= ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
-							line .= "`n"
-						}
-						else
-						{
-							line .=  ";" . A_Space . "Hotstring(" . """" . ":" . v_Options . ":" . v_Trigger . """" . "," . A_Space . """" . a_MenuHotstring[A_Index] . """" . "," . A_Space . v_EnDis . ")"
-							if (v_Comment)
-								line .= ";" . v_Comment . A_Space . ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
-							else
-								line .= ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
-							line .= "`n"
-						}
-					}
-				}
-				else
-				{
-					line .= "Hotstring(" . """" . ":" . v_Options . ":" . v_Trigger . """" . "," . A_Space . """" . v_Hotstring . """" . "," . A_Space . v_EnDis . ")"
-					if (v_Comment)
-						line .= ";" . v_Comment
-					line .= "`n"
-				}
-			}
-			
-			v_Progress := Round((A_Index / v_TotalLines) * 100)
-			GuiControl,, % IdExport_T2, % TransA["Exported"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
-			. A_Space . "(" . v_Progress . A_Space . "%" . ")"
-			GuiControl,, % IdExport_P1, % v_Progress
-		}
-		FileAppend, % line, % v_OutputFile, UTF-8
-		Gui, % A_DefaultGui . ":" . A_Space . "-Disabled"
-		Gui, Export: Destroy
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been exported"] . ":" . "`n`n" . v_OutputFile
-		return
-	}
+	}	
+	FileAppend, % v_TheWholeFile, % v_OutputFile, UTF-8
 	
+	LV_Delete()
+	GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
+	if (A_DefaultGui = "HS3")
+		Gui, HS4: Default
+	Gui, % A_DefaultGui . ":" . A_Space . "-Disabled"
+	Gui, Import: Destroy
 	
-; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
-	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
-	#If (v_Param != "l") 
-	^#h::		; Event
-	L_GUIInit:
-	
-	if (v_ResizingFlag) ;if run for the very first time
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been imported."]
+	if (f_ExistedLib)
 	{
-		Gui, HS3: +MinSize%HS3MinWidth%x%HS3MinHeight%
-		Gui, HS4: +MinSize%HS4MinWidth%x%HS4MinHeight%
-		ini_GuiReload := false
+		MsgBox, , 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], TransA["The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes."]
+		F_SaveGUIPos()
+		ini_GuiReload := true
 		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
-		
-		Switch ini_WhichGui
-		{
-			Case "HS3":
-			if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
-			{
-				Gui, HS3: Show, AutoSize Center
-				v_ResizingFlag := false
-				return
-			}
-			if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
-			{
-						;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
-				Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
-				Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
-				v_ResizingFlag := false
-				return
-			}
-			Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
-			v_ResizingFlag := false
-			return
-			Case "HS4":
-			if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
-			{
-					;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
-				Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
-				Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
-				v_ResizingFlag := false
-				return
-			}
-			if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
-			{
-				Gui, HS4: Show, AutoSize Center
-				v_ResizingFlag := false
-				return
-			}
-			Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
-			v_ResizingFlag := false
-			return
-		}
-		
+		Reload
 	}
-	else ;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakresem dostępnym na tym komputerze w momencie uruchomienia
+	else	
 	{
-		Switch ini_WhichGui
-		{
-			Case "HS3":
-			Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
-			Case "HS4":
-			Gui, HS4: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
-		}
-	}
-	return
-	#If	;#If (v_Param != "l") 
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	ALibOK:
-	Gui, ALib: Submit, NoHide
-	if (v_NewLib == "")
-	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Enter a name for the new library"]
-		return
-	}
-	v_NewLib .= ".csv"
-	IfNotExist, Libraries\%v_NewLib%
-	{
-		FileAppend,, Libraries\%v_NewLib%, UTF-8
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The library"] . A_Space . v_NewLib . A_Space . TransA["has been created."]
-		Gui, ALib: Destroy
-		
 		F_ValidateIniLibSections()
 		F_RefreshListOfLibraries()
 		F_RefreshListOfLibraryTips()
 		F_UpdateSelHotLibDDL()
+		F_LoadFile(OutNameNoExt . ".csv")
+		F_Searching("Reload")
 	}
-	else
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["A library with that name already exists!"]
 	return
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
-	ALibGuiEscape:
-	ALibGuiClose:
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_ExportLibraryStatic()
+{
+	global	;assume-global mode
+	local	v_LibraryName := "", v_Progress := "100", v_TotalLines := "0000"
+			,v_OutVarTemp := 0, v_OutVarTempX := 0, v_OutVarTempY := 0, v_OutVarTempW := 0, v_OutVarTempH := 0
+			,HS3GuiWinX := 0, HS3GuiWinY := 0, HS3GuiWinW := 0, HS3GuiWinH := 0, ExportGuiWinW := 0, ExportGuiWinH := 0
+			,OutFileName := "", OutNameNoExt := "", v_LibrariesDir := "", v_OutputFile := "", v_TheWholeFile := "", line := ""
+			,v_Options := "", v_Trigger := "", v_Function := "", v_EnDis := "", v_Hotstring := "", v_Comment := "", a_MenuHotstring := []
+			,v_Header := "
+(
+; This file is result of export from Hotstrings.ahk application (https://github.com/mslonik/Hotstrings).
+#SingleInstance force 			; Only one instance of this script may run at a time!
+#NoEnv  						; Recommended for performance and compatibility with future AutoHotkey releases.
+#Warn  						; Enable warnings to assist with detection of common errors.
+SendMode Input  				; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
+FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN
+)"
+	FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries", % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
+	if (!v_LibraryName)
+		return
+	
+	SplitPath, v_LibraryName, OutFileName, , , OutNameNoExt
+	v_LibrariesDir := % A_ScriptDir . "\ExportedLibraries"
+	if !InStr(FileExist(v_LibrariesDir),"D")
+		FileCreateDir, %v_LibrariesDir%
+	v_OutputFile := % A_ScriptDir . "\ExportedLibraries\" . OutNameNoExt . "." . "ahk"
+	
+	if (FileExist(v_OutputFile))
+	{
+		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Such file already exists"] . ":" . "`n`n" . v_OutputFile . "`n`n" . TransA["Do you want to delete it?"] . "`n`n" 
+			. TransA["If you answer ""Yes"", the existing file will be deleted. If you answer ""No"", the current task will be continued and new content will be added to existing file."]
+		IfMsgBox, Yes
+			FileDelete, % v_OutputFile
+	}	
+	
+	Gui, Export: New, 		+Border -Resize -MaximizeBox -MinimizeBox +HwndExportGuiHwnd +Owner +OwnDialogs, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Export to .ahk with static definitions of hotstrings"] 
+	Gui, Export: Margin,	% c_xmarg, % c_ymarg
+	Gui,	Export: Color,		% c_WindowColor, % c_ControlColor
+	Gui,	Export: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType	
+	
+	Gui, Export: Add, Text,		x0 y0 HwndIdExport_T1, TransA["Conversion of .csv library file into new .ahk file containing static (triggerstring, hotstring) definitions"]
+	Gui, Export: Add, Progress, 	x0 y0 HwndIdExport_P1 cBlue, 0
+	Gui, Export: Add, Text, 		x0 y0 HwndIdExport_T2, % TransA["Exported"] . A_Space . v_TotalLines . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
+		. A_Space . "(" . v_Progress . A_Space . "%" . ")"
+	
+	GuiControlGet, v_OutVarTemp, Pos, % IdExport_T1
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdExport_T1, % "x" v_xNext . A_Space . "y" v_yNext
+	;Gui, Export: Show, Center AutoSize
+	v_yNext += HofText + c_ymarg
+	GuiControl, Move, % IdExport_T2, % "x" v_xNext . A_Space . "y" v_yNext
+	;Gui, Export: Show, Center AutoSize
+	GuiControlGet, v_OutVarTemp, Pos, % IdExport_T2
+	v_wNext := v_OutVarTempW
+	v_hNext := HofText
+	GuiControl, Move, % IdExport_P1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space . "w" v_wNext . A_Space . "h" . v_hNext
+	v_yNext += HofText + c_ymarg
+	GuiControl, Move, % IdExport_T2, % "x" v_xNext . A_Space . "y" v_yNext
+	;Gui, Export: Show, Center AutoSize
+	v_Progress   := 0
+	v_TotalLines := 0
+	GuiControl,, % IdExport_T2, % TransA["Exported"] . A_Space . v_TotalLines . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"] . A_Space . "(" . v_Progress . A_Space . "%" . ")"
+	;Gui, Export: Show, Center AutoSize	
+	Gui, Export: Show, Hide
+	
+	F_WhichGui()
+	Switch A_DefaultGui
+	{
+		Case "HS3": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd
+		Case "HS4": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS4GuiHwnd 
+	}
+	DetectHiddenWindows, On
+	WinGetPos, , , ExportGuiWinW, ExportGuiWinH, % "ahk_id" . ExportGuiHwnd
+	DetectHiddenWindows, Off
+	Gui, Export: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ExportGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ExportGuiWinH) / 2 . A_Space . "AutoSize"
+	Gui, % A_DefaultGui . ":" . A_Space . "+Disabled"
+	
+	FileRead, v_TheWholeFile, % v_LibraryName
+	Loop, Parse, v_TheWholeFile, `n, `r
+		if (A_LoopField)
+			v_TotalLines++
+	
+	if (v_TotalLines = 0)
+	{
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The selected file is empty. Process of export will be interrupted."]
+		return
+	}
+	line .= v_Header . "`n`n"
+	Loop, Parse, v_TheWholeFile, `n, `r
+	{
+		if (A_LoopField)
+		{
+			Loop, Parse, A_LoopField, ‖, %A_Space%%A_Tab%
+			{
+				Switch A_Index
+				{
+					Case 1: v_Options 	:= A_LoopField
+					Case 2: v_Trigger 	:= A_LoopField
+					Case 3: v_Function 	:= A_LoopField
+					Case 4: v_EnDis 	:= A_LoopField
+					Case 5: v_Hotstring := A_LoopField
+					Case 6: v_Comment 	:= A_LoopField
+				}
+			}
+			if (v_EnDis = "Dis")
+			{
+				line .= ";" . A_Space
+			}
+			if (InStr(v_Function, "M"))
+			{
+				a_MenuHotstring := StrSplit(v_Hotstring,"¦")
+				Loop, % a_MenuHotstring.MaxIndex()
+				{
+					if (A_Index = 1)
+					{
+						line .= ":" v_Options . ":" . v_Trigger . "::" . a_MenuHotstring[A_Index] . A_Space
+						if (v_Comment)
+							line .= ";" . v_Comment . A_Space . ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
+						else
+							line .= ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
+						line .= "`n"
+					}
+					else
+					{
+						line .=  ";" . A_Space . ":" v_Options . ":" . v_Trigger . "::" . a_MenuHotstring[A_Index] . A_Space 
+						if (v_Comment)
+							line .= ";" . v_Comment . A_Space . ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
+						else
+							line .= ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
+						line .= "`n"
+					}
+				}
+			}
+			else
+			{
+				line .= ":" . v_Options . ":" . v_Trigger . "::" . v_Hotstring . A_Space
+				if (v_Comment)
+					line .= ";" . v_Comment
+				line .= "`n"
+			}
+		}
+		
+		v_Progress := Round((A_Index / v_TotalLines) * 100)
+		GuiControl,, % IdExport_T2, % TransA["Exported"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
+			. A_Space . "(" . v_Progress . A_Space . "%" . ")"
+		GuiControl,, % IdExport_P1, % v_Progress
+	}
+	FileAppend, % line, % v_OutputFile, UTF-8
+	Gui, % A_DefaultGui . ":" . A_Space . "-Disabled"
+	Gui, Export: Destroy
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been exported"] . ":" . "`n`n" . v_OutputFile
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_ExportLibraryDynamic()
+{
+	global	;assume-global mode
+	local	v_LibraryName := "", v_Progress := "100", v_TotalLines := "0000"
+			,v_OutVarTemp := 0, v_OutVarTempX := 0, v_OutVarTempY := 0, v_OutVarTempW := 0, v_OutVarTempH := 0
+			,HS3GuiWinX := 0, HS3GuiWinY := 0, HS3GuiWinW := 0, HS3GuiWinH := 0, ExportGuiWinW := 0, ExportGuiWinH := 0
+			,OutFileName := "", OutNameNoExt := "", v_LibrariesDir := "", v_OutputFile := "", v_TheWholeFile := "", line := ""
+			,v_Options := "", v_Trigger := "", v_Function := "", v_EnDis := "", v_Hotstring := "", v_Comment := "", a_MenuHotstring := []
+			,v_Header := "
+(
+; This file is result of export from Hotstrings.ahk application (https://github.com/mslonik/Hotstrings).
+#SingleInstance force 			; Only one instance of this script may run at a time!
+#NoEnv  						; Recommended for performance and compatibility with future AutoHotkey releases.
+#Warn  						; Enable warnings to assist with detection of common errors.
+SendMode Input  				; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
+FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN
+)"
+	FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries", % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
+	if (!v_LibraryName)
+		return
+	
+	SplitPath, v_LibraryName, OutFileName, , , OutNameNoExt
+	v_LibrariesDir := % A_ScriptDir . "\ExportedLibraries"
+	if !InStr(FileExist(v_LibrariesDir),"D")
+		FileCreateDir, %v_LibrariesDir%
+	v_OutputFile := % A_ScriptDir . "\ExportedLibraries\" . OutNameNoExt . "." . "ahk"
+	
+	if (FileExist(v_OutputFile))
+	{
+		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Such file already exists"] . ":" . "`n`n" . v_OutputFile . "`n`n" . TransA["Do you want to delete it?"] . "`n`n" 
+			. TransA["If you answer ""Yes"", the existing file will be deleted. If you answer ""No"", the current task will be continued and new content will be added to existing file."]
+		IfMsgBox, Yes
+			FileDelete, % v_OutputFile
+	}	
+	
+	Gui, Export: New, 		+Border -Resize -MaximizeBox -MinimizeBox +HwndExportGuiHwnd +Owner +OwnDialogs, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Export to .ahk with dynamic definitions of hotstrings"] 
+	Gui, Export: Margin,	% c_xmarg, % c_ymarg
+	Gui,	Export: Color,		% c_WindowColor, % c_ControlColor
+	Gui,	Export: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType	
+	
+	Gui, Export: Add, Text,		x0 y0 HwndIdExport_T1, TransA["Conversion of .csv library file into new .ahk file containing dynamic (triggerstring, hotstring) definitions"]
+	Gui, Export: Add, Progress, 	x0 y0 HwndIdExport_P1 cBlue, 0
+	Gui, Export: Add, Text, 		x0 y0 HwndIdExport_T2, % TransA["Exported"] . A_Space . v_TotalLines . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
+		. A_Space . "(" . v_Progress . A_Space . "%" . ")"
+	
+	GuiControlGet, v_OutVarTemp, Pos, % IdExport_T1
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdExport_T1, % "x" v_xNext . A_Space . "y" v_yNext
+	;Gui, Export: Show, Center AutoSize
+	v_yNext += HofText + c_ymarg
+	GuiControl, Move, % IdExport_T2, % "x" v_xNext . A_Space . "y" v_yNext
+	;Gui, Export: Show, Center AutoSize
+	GuiControlGet, v_OutVarTemp, Pos, % IdExport_T2
+	v_wNext := v_OutVarTempW
+	v_hNext := HofText
+	GuiControl, Move, % IdExport_P1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space . "w" v_wNext . A_Space . "h" . v_hNext
+	v_yNext += HofText + c_ymarg
+	GuiControl, Move, % IdExport_T2, % "x" v_xNext . A_Space . "y" v_yNext
+	;Gui, Export: Show, Center AutoSize
+	v_Progress   := 0
+	v_TotalLines := 0
+	GuiControl,, % IdExport_T2, % TransA["Exported"] . A_Space . v_TotalLines . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"] . A_Space . "(" . v_Progress . A_Space . "%" . ")"
+	;Gui, Export: Show, Center AutoSize	
+	Gui, Export: Show, Hide
+	
+	F_WhichGui()
+	Switch A_DefaultGui
+	{
+		Case "HS3": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd
+		Case "HS4": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS4GuiHwnd 
+	}
+	DetectHiddenWindows, On
+	WinGetPos, , , ExportGuiWinW, ExportGuiWinH, % "ahk_id" . ExportGuiHwnd
+	DetectHiddenWindows, Off
+	Gui, Export: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ExportGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ExportGuiWinH) / 2 . A_Space . "AutoSize"
+	Gui, % A_DefaultGui . ":" . A_Space . "+Disabled"
+	
+	FileRead, v_TheWholeFile, % v_LibraryName
+	Loop, Parse, v_TheWholeFile, `n, `r
+		if (A_LoopField)
+			v_TotalLines++
+	
+	if (v_TotalLines = 0)
+	{
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The selected file is empty. Process of export will be interrupted."]
+		return
+	}
+	line .= v_Header . "`n`n"
+	Loop, Parse, v_TheWholeFile, `n, `r
+	{
+		if (A_LoopField)
+		{
+			Loop, Parse, A_LoopField, ‖, %A_Space%%A_Tab%
+			{
+				Switch A_Index
+				{
+					Case 1: v_Options 	:= A_LoopField
+					Case 2: v_Trigger 	:= A_LoopField
+					Case 3: v_Function 	:= A_LoopField
+					Case 4: v_EnDis 	:= A_LoopField
+					Case 5: v_Hotstring := A_LoopField
+					Case 6: v_Comment 	:= A_LoopField
+				}
+			}
+			if (v_EnDis = "Dis")
+			{
+				line .= ";" . A_Space
+			}
+			if (InStr(v_Function, "M"))
+			{
+				a_MenuHotstring := StrSplit(v_Hotstring,"¦")
+				Loop, % a_MenuHotstring.MaxIndex()
+				{
+					if (A_Index = 1)
+					{
+						;line .= ":" v_Options . ":" . v_Trigger . "::" . a_MenuHotstring[A_Index] . A_Space
+						line .= "Hotstring(" . """" . ":" . v_Options . ":" . v_Trigger . """" . "," . A_Space . """" . a_MenuHotstring[A_Index] . """" . "," . A_Space . v_EnDis . ")"
+						if (v_Comment)
+							line .= ";" . v_Comment . A_Space . ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
+						else
+							line .= ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
+						line .= "`n"
+					}
+					else
+					{
+						line .=  ";" . A_Space . "Hotstring(" . """" . ":" . v_Options . ":" . v_Trigger . """" . "," . A_Space . """" . a_MenuHotstring[A_Index] . """" . "," . A_Space . v_EnDis . ")"
+						if (v_Comment)
+							line .= ";" . v_Comment . A_Space . ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
+						else
+							line .= ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
+						line .= "`n"
+					}
+				}
+			}
+			else
+			{
+				line .= "Hotstring(" . """" . ":" . v_Options . ":" . v_Trigger . """" . "," . A_Space . """" . v_Hotstring . """" . "," . A_Space . v_EnDis . ")"
+				if (v_Comment)
+					line .= ";" . v_Comment
+				line .= "`n"
+			}
+		}
+		
+		v_Progress := Round((A_Index / v_TotalLines) * 100)
+		GuiControl,, % IdExport_T2, % TransA["Exported"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
+			. A_Space . "(" . v_Progress . A_Space . "%" . ")"
+		GuiControl,, % IdExport_P1, % v_Progress
+	}
+	FileAppend, % line, % v_OutputFile, UTF-8
+	Gui, % A_DefaultGui . ":" . A_Space . "-Disabled"
+	Gui, Export: Destroy
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been exported"] . ":" . "`n`n" . v_OutputFile
+	return
+}
+
+
+; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
+#If (v_Param != "l") 
+^#h::		; Event
+L_GUIInit:
+
+if (v_ResizingFlag) ;if run for the very first time
+{
+	Gui, HS3: +MinSize%HS3MinWidth%x%HS3MinHeight%
+	Gui, HS4: +MinSize%HS4MinWidth%x%HS4MinHeight%
+	ini_GuiReload := false
+	IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
+	
+	Switch ini_WhichGui
+	{
+		Case "HS3":
+		if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
+		{
+			Gui, HS3: Show, AutoSize Center
+			v_ResizingFlag := false
+			return
+		}
+		if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
+		{
+						;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
+			Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+			Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+			v_ResizingFlag := false
+			return
+		}
+		Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+		v_ResizingFlag := false
+		return
+		Case "HS4":
+		if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
+		{
+					;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
+			Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+			Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+			v_ResizingFlag := false
+			return
+		}
+		if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
+		{
+			Gui, HS4: Show, AutoSize Center
+			v_ResizingFlag := false
+			return
+		}
+		Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+		v_ResizingFlag := false
+		return
+	}
+	
+}
+else ;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakresem dostępnym na tym komputerze w momencie uruchomienia
+{
+	Switch ini_WhichGui
+	{
+		Case "HS3":
+		Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
+		Case "HS4":
+		Gui, HS4: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
+	}
+}
+return
+#If	;#If (v_Param != "l") 
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+ALibOK:
+Gui, ALib: Submit, NoHide
+if (v_NewLib == "")
+{
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Enter a name for the new library"]
+	return
+}
+v_NewLib .= ".csv"
+IfNotExist, Libraries\%v_NewLib%
+{
+	FileAppend,, Libraries\%v_NewLib%, UTF-8
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The library"] . A_Space . v_NewLib . A_Space . TransA["has been created."]
 	Gui, ALib: Destroy
-	return
 	
+	F_ValidateIniLibSections()
+	F_RefreshListOfLibraries()
+	F_RefreshListOfLibraryTips()
+	F_UpdateSelHotLibDDL()
+}
+else
+	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["A library with that name already exists!"]
+return
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
+ALibGuiEscape:
+ALibGuiClose:
+Gui, ALib: Destroy
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	GuiAboutLink1:
-	Run, https://github.com/mslonik/Hotstrings
-	return
-	
-	GuiAboutLink2:
-	Run, https://www.autohotkey.com/docs/Hotstrings.htm
-	return
+
+GuiAboutLink1:
+Run, https://github.com/mslonik/Hotstrings
+return
+
+GuiAboutLink2:
+Run, https://www.autohotkey.com/docs/Hotstrings.htm
+return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	L_PublicLibraries:	
-	Run, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings/Libraries
-	return
+L_PublicLibraries:	
+Run, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings/Libraries
+return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	~F1::
-	AboutOkButton:
-	MyAboutGuiEscape:
-	MyAboutGuiClose: ; Showed when the window is closed by pressing its X button in the title bar.
-	Gui, MyAbout: Hide
-	return
-	
+~F1::
+AboutOkButton:
+MyAboutGuiEscape:
+MyAboutGuiClose: ; Showed when the window is closed by pressing its X button in the title bar.
+Gui, MyAbout: Hide
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; Future: save window position
-	HS3GuiClose:
-	HS3GuiEscape:
-	Gui,		HS3: Show, Hide
-	ini_WhichGui := "HS3"
-	return
+HS3GuiClose:
+HS3GuiEscape:
+Gui,		HS3: Show, Hide
+ini_WhichGui := "HS3"
+return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	HS4GuiClose:
-	HS4GuiEscape:
-	Gui,		HS4: Show, Hide
-	ini_WhichGui := "HS4"
-	return
+HS4GuiClose:
+HS4GuiEscape:
+Gui,		HS4: Show, Hide
+ini_WhichGui := "HS4"
+return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	MSPGuiClose:	
-	MSPGuiEscape:
-	
-	Switch A_ThisMenu
-	{
-		Case "OrdHisTrig":
-		IniWrite, % ini_OHSF, Config.ini, Event_BasicHotstring, OHSF
-		Iniwrite, % ini_OHSD, Config.ini, Event_BasicHotstring, OHSD
-		Case "MenuHisTrig":
-		IniWrite, % ini_MHSF, Config.ini, Event_BasicHotstring, MHSF
-		Iniwrite, % ini_MHSD, Config.ini, Event_BasicHotstring, MHSD
-		Case "UndoOfH":
-		IniWrite, % ini_UHSF, Config.ini, Event_BasicHotstring, UHSF
-		Iniwrite, % ini_UHSD, Config.ini, Event_BasicHotstring, UHSD
-	}
-	Gui, MSP: Destroy
-	return
+MSPGuiClose:	
+MSPGuiEscape:
+
+Switch A_ThisMenu
+{
+	Case "OrdHisTrig":
+	IniWrite, % ini_OHSF, Config.ini, Event_BasicHotstring, OHSF
+	Iniwrite, % ini_OHSD, Config.ini, Event_BasicHotstring, OHSD
+	Case "MenuHisTrig":
+	IniWrite, % ini_MHSF, Config.ini, Event_MenuHotstring, MHSF
+	Iniwrite, % ini_MHSD, Config.ini, Event_MenuHotstring, MHSD
+	Case "UndoOfH":
+	IniWrite, % ini_UHSF, Config.ini, Event_UndoHotstring, UHSF
+	Iniwrite, % ini_UHSD, Config.ini, Event_UndoHotstring, UHSD
+}
+Gui, MSP: Destroy
+return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	MoveLibsGuiEscape:
-	CancelMove:
-	Gui, MoveLibs: Destroy
-	return
-	
+MoveLibsGuiEscape:
+CancelMove:
+Gui, MoveLibs: Destroy
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	~^f::
-	~^s::
-	~F3::
-	HS3SearchGuiEscape:
-	HS3SearchGuiClose:
-	F_WhichGui()
-	Gui, HS3Search: Hide
-	return
-	
+
+~^f::
+~^s::
+~F3::
+HS3SearchGuiEscape:
+HS3SearchGuiClose:
+F_WhichGui()
+Gui, HS3Search: Hide
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	~F7::
-	HSDelGuiEscape:
-	HSDelGuiClose:
-	IniWrite, %ini_CPDelay%, Config.ini, Configuration, ClipBoardPasteDelay
-	Gui, HSDel: Destroy
-	return
-	
+
+~F7::
+HSDelGuiEscape:
+HSDelGuiClose:
+IniWrite, %ini_CPDelay%, Config.ini, Configuration, ClipBoardPasteDelay
+Gui, HSDel: Destroy
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	MonGuiEscape:
-	MonGuiClose:
-	Gui, Mon:Destroy
-	return
-	
+
+MonGuiEscape:
+MonGuiClose:
+Gui, Mon:Destroy
+return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	L_ChangeLanguage:
-	ini_Language := A_ThisMenuitem
-	IniWrite, %ini_Language%, Config.ini, GraphicalUserInterface, Language
-	Loop, %A_ScriptDir%\Languages\*.ini
-	{
-		Menu, SubmenuLanguage, Add, %A_LoopFileName%, L_ChangeLangage
-		if (ini_Language == A_LoopFileName)
-			Menu, SubmenuLanguage, Check, %A_LoopFileName%
-		else
-			Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
-	}
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Application language changed to:"] . A_Space 
+L_ChangeLanguage:
+ini_Language := A_ThisMenuitem
+IniWrite, %ini_Language%, Config.ini, GraphicalUserInterface, Language
+Loop, %A_ScriptDir%\Languages\*.ini
+{
+	Menu, SubmenuLanguage, Add, %A_LoopFileName%, L_ChangeLangage
+	if (ini_Language == A_LoopFileName)
+		Menu, SubmenuLanguage, Check, %A_LoopFileName%
+	else
+		Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
+}
+MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Application language changed to:"] . A_Space 
 		. SubStr(ini_Language, 1, -4) . "`n`n" . TransA["The application will be reloaded with the new language file."]
-	Reload
-	
-	L_TraySuspendHotkeys:
-	Suspend, Toggle
-	if (A_IsSuspended)
-	{
-		Menu, Tray, 		Check, 	% TransA["Suspend Hotkeys"]
-		Menu, AppSubmenu, 	Check, 	% TransA["Suspend Hotkeys"]
-	}
-	else
-	{
-		Menu, Tray, 		UnCheck, 	% TransA["Suspend Hotkeys"]
-		Menu, AppSubmenu,	UnCheck, 	% TransA["Suspend Hotkeys"]
-	}
-	return
-	
-	L_TrayPauseScript:
-	Pause, Toggle, 1
-	if (A_IsPaused)
-	{
-		Menu, Tray, 		Check, 	% TransA["Pause Application"]
-		Menu, AppSubmenu,	Check, 	% TransA["Pause Application"]
-	}
-	else
-	{
-		Menu, Tray, 		UnCheck, 	% TransA["Pause Application"]
-		Menu, AppSubmenu,	UnCheck, 	% TransA["Pause Application"]
-	}
-	return
-	
-	L_TrayReload:	;new thread starts here
-	F_WhichGui()
-	F_Reload()
-	return
-	
+Reload
+
+L_TraySuspendHotkeys:
+Suspend, Toggle
+if (A_IsSuspended)
+{
+	Menu, Tray, 		Check, 	% TransA["Suspend Hotkeys"]
+	Menu, AppSubmenu, 	Check, 	% TransA["Suspend Hotkeys"]
+}
+else
+{
+	Menu, Tray, 		UnCheck, 	% TransA["Suspend Hotkeys"]
+	Menu, AppSubmenu,	UnCheck, 	% TransA["Suspend Hotkeys"]
+}
+return
+
+L_TrayPauseScript:
+Pause, Toggle, 1
+if (A_IsPaused)
+{
+	Menu, Tray, 		Check, 	% TransA["Pause Application"]
+	Menu, AppSubmenu,	Check, 	% TransA["Pause Application"]
+}
+else
+{
+	Menu, Tray, 		UnCheck, 	% TransA["Pause Application"]
+	Menu, AppSubmenu,	UnCheck, 	% TransA["Pause Application"]
+}
+return
+
+L_TrayReload:	;new thread starts here
+F_WhichGui()
+F_Reload()
+return
+
 TurnOff_OHE:
-	ToolTip, ,, , 4
-	return
-	
+ToolTip, ,, , 4
+return
+
 /*
 	TurnOffTooltip:
-		ToolTip, ,, , 5
-		return
+	ToolTip, ,, , 5
+	return
 */
-	
+
 TurnOff_UHE:
-	ToolTip, ,, , 6
-	return
-	
+ToolTip, ,, , 6
+return
+
 TurnOffTttt:
-	ToolTip
-	return
-	
+ToolTip
+return
+
 L_TrayExit:
-	ExitApp, 2	;2 = by Tray
-	
+ExitApp, 2	;2 = by Tray
+
 STDGuiClose:
 STDGuiEscape:
-	Switch (A_ThisMenu)
-	{
-		Case "OrdHisTrig": 	IniWrite, % ini_OHTD, Config.ini, Event_BasicHotstring, 	OHTD
-		Case "UndoOfH":	IniWrite, % ini_UHTD, Config.ini, Event_UndoHotstring, 	UHTD
-		Case "TrigTips":	IniWrite, % ini_TTTD, Config.ini, Event_TriggerstringTips, 	TTTD
-	}
-	Gui, STD: Destroy
+Switch (A_ThisMenu)
+{
+	Case "OrdHisTrig": 	IniWrite, % ini_OHTD, Config.ini, Event_BasicHotstring, 	OHTD
+	Case "UndoOfH":	IniWrite, % ini_UHTD, Config.ini, Event_UndoHotstring, 	UHTD
+	Case "TrigTips":	IniWrite, % ini_TTTD, Config.ini, Event_TriggerstringTips, 	TTTD
+}
+Gui, STD: Destroy
 return
-	
+
 TMNTGuiClose:
 TMNTGuiEscape:
-	IniWrite, % ini_MNTT, Config.ini, Event_TriggerstringTips, MNTT
-	Gui, TMNT: Destroy
+IniWrite, % ini_MNTT, Config.ini, Event_TriggerstringTips, MNTT
+Gui, TMNT: Destroy
 return
