@@ -218,7 +218,7 @@ else
 	Menu, ConfGUI, UnCheck, % TransA["Show full GUI (F4)"]
 
 Menu, ConfGUI, 	Add	;To add a menu separator line, omit all three parameters.
-Menu, ConfGUI,		Add, Style of GUI,								:StyleGUIsubm
+Menu, ConfGUI,		Add, % TransA["Style of GUI"],								:StyleGUIsubm
 
 F_CreateMenu_SizeOfMargin()
 
@@ -866,80 +866,80 @@ F_PrepareTriggerstringTipsTables()
 	return
 }	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_GuiTrigShowNoOfTips()
-	{
-		global	;assume-global mode
-		local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
-		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
-		,NewWinPosX := 0, NewWinPosY := 0
-		,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
-		,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
-		,vWidthOfSliderAndInfo := 0, vWidthOfInfo := 0
-		
-	;+Owner to prevent display of a taskbar button
-		Gui, TMNT: New, -MinimizeBox -MaximizeBox +Owner +HwndMaxNoTrigTips, Set maximum number of shown triggerstring tips
-		Gui, TMNT: Margin,	% c_xmarg, % c_ymarg
-		Gui,	TMNT: Color,	% c_WindowColor, % c_ControlColor
-		Gui,	TMNT: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	;*[One]
-		Gui, TMNT: Add, Text, HwndIdTMNT_T1, This is the maximum length of list displayed on the screen in form of tooltip containing triggerstring tips.
-		
-		Gui, TMNT: Add, Slider, x0 y0 HwndIdTMNT_S1 vini_MNTT gF_SetNoOfTips Line1 Page1 Range1-25 TickInterval5 ToolTipBottom Buddy1ini_MNTT, % ini_MNTT
-		Gui, TMNT: Font, % "cBlue underline" . A_Space . "s" . c_FontSize + 2
-		Gui, TMNT: Add, Text, HwndIdTMNT_T4 gF_TooltipMNTTSliderInfo, ⓘ
-		Gui,	TMNT: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-		v_OutVarTemp := 25
-		Gui, TMNT: Add, Text, HwndIdTMNT_T3, Maximum number of shown triggerstring tips: %v_OutVarTemp%
-		
-		v_xNext := c_xmarg
-		v_yNext := c_ymarg
-		GuiControl, Move, % IdTMNT_T1, % "x" . v_xNext . A_Space . "y" . v_yNext
-		GuiControlGet, v_OutVarTemp, Pos, % IdTMNT_T1
-		vWidthOfSliderAndInfo := v_OutVarTempW
-		GuiControlGet, v_OutVarTemp, Pos, % IdTMNT_T4
-		vWidthOfInfo := v_OutVarTempW
-		v_xNext := c_xmarg
-		v_yNext += HofText
-		v_wNext := vWidthOfSliderAndInfo - (vWidthOfInfo + c_xmarg)
-		GuiControl, Move, % IdTMNT_S1, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
-		
-		GuiControlGet, v_OutVarTemp, Pos, % IdTMNT_S1
-		v_xNext := v_OutVarTempX + v_OutVarTempW
-		GuiControl, Move, % IdTMNT_T4, % "x" . v_xNext . A_Space . "y" . v_yNext
-		v_xNext := c_xmarg
-		v_yNext := v_OutVarTempY + v_OutVarTempH
-		GuiControl, Move, % IdTMNT_T3, % "x" v_xNext . A_Space . "y" v_yNext
-		
-		GuiControl,, % IdTMNT_T3, Maximum number of shown triggerstring tips: %ini_MNTT%
-		
-		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-		Gui, TMNT: Show, Hide AutoSize 
-		DetectHiddenWindows, On
-		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . MaxNoTrigTips
-		DetectHiddenWindows, Off
-		
-		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
-		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
-		
-		Gui, TMNT: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"	
-		return
-	}
+F_GuiTrigShowNoOfTips()
+{
+	global	;assume-global mode
+	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+	,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+	,NewWinPosX := 0, NewWinPosY := 0
+	,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+	,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+	,vWidthOfSliderAndInfo := 0, vWidthOfInfo := 0
+	
+;+Owner to prevent display of a taskbar button
+	Gui, TMNT: New, -MinimizeBox -MaximizeBox +Owner +HwndMaxNoTrigTips, % TransA["Set maximum number of shown triggerstring tips"]
+	Gui, TMNT: Margin,	% c_xmarg, % c_ymarg
+	Gui,	TMNT: Color,	% c_WindowColor, % c_ControlColor
+	Gui,	TMNT: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+;*[One]
+	Gui, TMNT: Add, Text, HwndIdTMNT_T1, % TransA["This is the maximum length of list displayed on the screen in form of tooltip containing triggerstring tips."]
+	
+	Gui, TMNT: Add, Slider, x0 y0 HwndIdTMNT_S1 vini_MNTT gF_SetNoOfTips Line1 Page1 Range1-25 TickInterval5 ToolTipBottom Buddy1ini_MNTT, % ini_MNTT
+	Gui, TMNT: Font, % "cBlue underline" . A_Space . "s" . c_FontSize + 2
+	Gui, TMNT: Add, Text, HwndIdTMNT_T4 gF_TooltipMNTTSliderInfo, ⓘ
+	Gui,	TMNT: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	v_OutVarTemp := 25
+	Gui, TMNT: Add, Text, HwndIdTMNT_T3, % TransA["Maximum number of shown triggerstring tips"] . ":" . A_Space . v_OutVarTemp
+	
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdTMNT_T1, % "x" . v_xNext . A_Space . "y" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTMNT_T1
+	vWidthOfSliderAndInfo := v_OutVarTempW
+	GuiControlGet, v_OutVarTemp, Pos, % IdTMNT_T4
+	vWidthOfInfo := v_OutVarTempW
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	v_wNext := vWidthOfSliderAndInfo - (vWidthOfInfo + c_xmarg)
+	GuiControl, Move, % IdTMNT_S1, % "x" . v_xNext . A_Space . "y" . v_yNext . A_Space . "w" . v_wNext
+	
+	GuiControlGet, v_OutVarTemp, Pos, % IdTMNT_S1
+	v_xNext := v_OutVarTempX + v_OutVarTempW
+	GuiControl, Move, % IdTMNT_T4, % "x" . v_xNext . A_Space . "y" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext := v_OutVarTempY + v_OutVarTempH
+	GuiControl, Move, % IdTMNT_T3, % "x" v_xNext . A_Space . "y" v_yNext
+	
+	GuiControl,, % IdTMNT_T3, % TransA["Maximum number of shown triggerstring tips"] . ":" . A_Space . ini_MNTT
+	
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, TMNT: Show, Hide AutoSize 
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . MaxNoTrigTips
+	DetectHiddenWindows, Off
+	
+	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+	
+	Gui, TMNT: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"	
+	return
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_SetNoOfTips()
-	{
-		global	;assume-global mode
-		Gui, TMNT: Submit, NoHide
-		GuiControl,, % IdTMNT_T3, Maximum number of shown triggerstring tips: %ini_MNTT%
-		return
-	}
+F_SetNoOfTips()
+{
+	global	;assume-global mode
+	Gui, TMNT: Submit, NoHide
+	GuiControl,, % IdTMNT_T3, % TransA["Maximum number of shown triggerstring tips"] . ":" . A_Space . ini_MNTT
+	return
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_TooltipMNTTSliderInfo()
-	{
-		global	;assume-global mode
-		TransA["F_TooltipMNTTSliderInfo"] := StrReplace(TransA["F_TooltipMNTTSliderInfo"], "``n", "`n")
-		ToolTip, % TransA["F_TooltipMNTTSliderInfo"]
-		return
-	}
+F_TooltipMNTTSliderInfo()
+{
+	global	;assume-global mode
+	TransA["F_TooltipMNTTSliderInfo"] := StrReplace(TransA["F_TooltipMNTTSliderInfo"], "``n", "`n")
+	ToolTip, % TransA["F_TooltipMNTTSliderInfo"]
+	return
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	/*
 		F_AllTooltipsOff() ;future
@@ -4209,6 +4209,7 @@ Loading hotstrings from libraries... 						= Loading hotstrings from libraries..
 Loading imported library. Please wait...					= Loading imported library. Please wait...
 Loaded												= Loaded
 Max. no. of shown tips									= Max. no. of shown tips
+Maximum number of shown triggerstring tips				= Maximum number of shown triggerstring tips
 Menu hotstring is triggered								= Menu hotstring is triggered
 Menu position: caret									= Menu position: caret
 Menu position: cursor									= Menu position: cursor
@@ -4257,6 +4258,7 @@ Set Clipboard Delay										= Set Clipboard Delay
 Set delay												= Set delay
 Set ""Hotstring was triggered"" tooltip timeout			= Set ""Hotstring was triggered"" tooltip timeout
 Set ""Undid the last hotstring!"" tooltip timeout		= Set ""Undid the last hotstring!"" tooltip timeout
+Set maximum number of shown triggerstring tips			= Set maximum number of shown triggerstring tips
 Set  triggerstring tip(s) tooltip timeout				= Set  triggerstring tip(s) tooltip timeout
 Set parameters of menu sound								= Set parameters of menu sound
 Set parameters of triggerstring sound						= Set parameters of triggerstring sound
@@ -4282,6 +4284,7 @@ Space												= Space
 Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
 Standard executable (Ahk2Exe.exe)							= Standard executable (Ahk2Exe.exe)
 Static hotstrings 										= &Static hotstrings
+Style of GUI											= Style of GUI
 Such file already exists									= Such file already exists
 Suspend Hotkeys										= Suspend Hotkeys
 )"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
@@ -4304,6 +4307,7 @@ There is no Libraries subfolder and no lbrary (*.csv) file exist! = There is no 
 The selected file is empty. Process of import will be interrupted. = The selected file is empty. Process of import will be interrupted.
 There is no											= There is no
 There was no Languages subfolder, so one now is created.		= There was no Languages subfolder, so one now is created.
+This is the maximum length of list displayed on the screen in form of tooltip containing triggerstring tips. = This is the maximum length of list displayed on the screen in form of tooltip containing triggerstring tips.
 This library:											= This library:
 This line do not comply to format required by this application.  = This line do not comply to format required by this application.
 This option is valid 									= In case you observe some hotstrings aren't pasted from clipboard increase this value. `nThis option is valid for CL and MCL hotstring output functions. 
