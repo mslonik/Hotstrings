@@ -539,7 +539,7 @@ F_Undo()
 			}
 		}
 			
-		if (ini_UHSEn)	;Basic Hotstring % TransA["Sound Enable"]d
+		if (ini_UHSEn)	;Basic Hotstring % TransA["Sound Enable"]
 			SoundBeep, % ini_UHSF, % ini_UHSD
 		
 		v_TypedTriggerstring := ""
@@ -1767,7 +1767,7 @@ F_SoundTestBut()
 		Gui, STD: Add, Radio, HwndIdSTD_R1 vFiniteTttimeout gF_STDRadio Checked%vRadioCheck% Group, % TransA["Yes"]
 		vRadioCheck := !vRadioCheck
 		Gui, STD: Add, Radio, HwndIdSTD_R2 gF_STDRadio Checked%vRadioCheck%, % TransA["No"]
-		Switch (A_ThisMenu)	;tu jestem
+		Switch (A_ThisMenu)	
 		{
 			Case "OrdHisTrig": 	Gui, STD: Add, Slider, x0 y0 HwndIdSTD_S1 vini_OHTD gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_OHTD, % ini_OHTD
 			Case "UndoOfH":	Gui, STD: Add, Slider, x0 y0 HwndIdSTD_S1 vini_UHTD gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_UHTD, % ini_UHTD
@@ -1779,9 +1779,9 @@ F_SoundTestBut()
 		v_OutVarTemp := 10000
 		Switch (A_ThisMenu)
 		{
-			Case "OrdHisTrig": 	Gui, STD: Add, Text, HwndIdSTD_T3, ""Hotstring was triggered"" in [ms]: %v_OutVarTemp%
-			Case "UndoOfH":	Gui, STD: Add, Text, HwndIdSTD_T3, ""Undid the last hotstring!"" in [ms]: %v_OutVarTemp%
-			Case "TrigTips":	Gui, STD: Add, Text, HwndIdSTD_T3, Triggerstring tip(s) in [ms]: %v_OutVarTemp%
+			Case "OrdHisTrig": 	Gui, STD: Add, Text, HwndIdSTD_T3, ""Hotstring was triggered"" tooltip timeout in [ms]: %v_OutVarTemp%
+			Case "UndoOfH":	Gui, STD: Add, Text, HwndIdSTD_T3, ""Undid the last hotstring!"" tooltip timeout in [ms]: %v_OutVarTemp%
+			Case "TrigTips":	Gui, STD: Add, Text, HwndIdSTD_T3, Triggerstring tip(s) tooltip timeout in [ms]: %v_OutVarTemp%
 		}
 		
 		v_xNext := c_xmarg
@@ -1809,9 +1809,9 @@ F_SoundTestBut()
 		GuiControl, Move, % IdSTD_T3, % "x" v_xNext . A_Space . "y" v_yNext
 		Switch (A_ThisMenu)
 		{
-			Case "OrdHisTrig": 	GuiControl,, % IdSTD_T3, ""Hotstring was triggered"" in [ms]: %ini_OHTD%
-			Case "UndoOfH":	GuiControl,, % IdSTD_T3, ""Undid the last hotstring!"" in [ms]: %ini_UHTD%
-			Case "TrigTips":	GuiControl,, % IdSTD_T3, Triggerstring tip(s) in [ms]: %ini_TTTD%
+			Case "OrdHisTrig": 	GuiControl,, % IdSTD_T3, ""Hotstring was triggered"" tooltip timeout in [ms]: %ini_OHTD%
+			Case "UndoOfH":	GuiControl,, % IdSTD_T3, ""Undid the last hotstring!"" tooltip timeout in [ms]: %ini_UHTD%
+			Case "TrigTips":	GuiControl,, % IdSTD_T3, Triggerstring tip(s) tooltip timeout in [ms]: %ini_TTTD%
 		}
 		
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
@@ -1824,7 +1824,6 @@ F_SoundTestBut()
 		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
 		
 		Gui, STD: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"	
-		F_STDRadio()
 		return
 	}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1848,15 +1847,15 @@ F_SoundTestBut()
 			Switch (A_ThisMenu)
 			{
 				Case "OrdHisTrig":
-				ini_OHTD := 1000
+				;ini_OHTD := 1000
 				GuiControl,, % IdSTD_T3, ""Hotstring was triggered"" tooltip timeout in [ms]: %ini_OHTD%
 				GuiControl,, % IdSTD_S1, % ini_OHTD
 				Case "UndoOfH":
-				ini_UHTD := 1000
+				;ini_UHTD := 1000
 				GuiControl,, % IdSTD_T3, ""Undid the last hotstring!"" tooltip timeout in [ms]: %ini_UHTD%
 				GuiControl,, % IdSTD_S1, % ini_UHTD
 				Case "TrigTips":
-				ini_TTTD := 1000
+				;ini_TTTD := 1000
 				GuiControl,, % IdSTD_T3, Triggerstring tip(s) tooltip timeout in [ms]: %ini_TTTD%
 				GuiControl,, % IdSTD_S1, % ini_TTTD
 			}
