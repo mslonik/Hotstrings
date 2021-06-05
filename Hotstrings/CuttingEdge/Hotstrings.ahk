@@ -2029,19 +2029,14 @@ F_SetHotstring()
 	
 	if (v_OptionImmediateExecute)
 		Options .= "*"
-	
 	if (v_OptionCaseSensitive)
 		Options .= "C"
-	
 	if (v_OptionNoBackspace)
 		Options .= "B0"
-	
 	if (v_OptionInsideWord)
 		Options .= "?"
-	
 	if (v_OptionNoEndChar)
 		Options .= "O"
-	
 	if (v_OptionDisable)
 	{
 		OnOff := "Off"
@@ -2098,7 +2093,7 @@ F_SetHotstring()
 					OldOptions := ""
 				else
 				{
-					OldOptions 	:= SubStr(A_LoopField, FirstSeparator - 1, FirstSeparator - 1)
+					OldOptions 	:= SubStr(A_LoopField, 1, FirstSeparator - 1)
 					if (InStr(OldOptions, "*"))
 						TurnOffOldOptions .= "*0"
 					if (InStr(OldOptions, "C"))
@@ -2114,8 +2109,9 @@ F_SetHotstring()
 				Try
 					Hotstring(":" . TurnOffOldOptions . ":" . v_TriggerString, , "Off") ;Disable existing hotstring
 				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion:"] . "`n`n" . v_TriggerString 
-					. A_Space . "OldOptions:" . A_Space . OldOptions . A_Tab . "TurnOffOldOptions:" . A_Space . TurnOffOldOptions . "`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 				
+					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion:"] . "`n`n" 
+					. "v_TriggerString:" . A_Space . v_TriggerString . "`n"
+					. A_Space . "OldOptions:" . A_Space . OldOptions . A_Tab . "TurnOffOldOptions:" . A_Space . TurnOffOldOptions . "`n`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 				
 				LV_Modify(A_Index, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)
 				ModifiedFlag := true
 			}
