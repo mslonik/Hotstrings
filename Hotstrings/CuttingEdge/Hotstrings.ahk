@@ -576,9 +576,11 @@ return
 
 ~Alt::
 ;Comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
-~MButton::
-~RButton::
-~LButton::
+/*
+	~MButton::
+	~RButton::
+	~LButton::
+*/
 ~LWin::
 ~RWin::
 ~Down::
@@ -3250,8 +3252,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_HSLV() 
-; copy content of List View 1 to editable fields of HS3 Gui
+F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 {
 	global ;assume-global mode
 	local Options := "", Fun := "", EnDis := "", TextInsert := "", OTextMenu := "", Comment := ""
@@ -3263,34 +3264,28 @@ F_HSLV()
 	LV_GetText(v_TriggerString, 	v_SelectedRow, 1)
 	GuiControl, HS3:, % IdEdit1, % v_TriggerString
 	GuiControl, HS4:, % IdEdit1, % v_TriggerString
-	
 	LV_GetText(Options, 		v_SelectedRow, 2)
-	Instr(Options,"*0") or (InStr(Options,"*") = 0) 							? F_CheckOption("No", 1) 	: F_CheckOption("Yes", 1)
-	((Instr(Options,"C0")) or (Instr(Options,"C1")) or (Instr(Options,"C") = 0)) 	? F_CheckOption("No", 2) 	: F_CheckOption("Yes", 2)
-	Instr(Options,"B0") 												? F_CheckOption("Yes", 3) 	: F_CheckOption("No", 3)
-	Instr(Options,"?") 													? F_CheckOption("Yes", 4) 	: F_CheckOption("No", 4)
-	(Instr(Options,"O0") or (InStr(Options,"O") = 0)) 						? F_CheckOption("No", 5) 	: F_CheckOption("Yes", 5)
+	InStr(Options, "*")		?	F_CheckOption("Yes", 1)	: 	F_CheckOption("No", 1)
+	InStr(Options, "C")		?	F_CheckOption("Yes", 2)	:	F_CheckOption("No", 2)
+	InStr(Options, "B0")	?	F_CheckOption("Yes", 3)	:	F_CheckOption("No", 3)
+	InStr(Options, "?")		?	F_CheckOption("Yes", 4)	:	F_CheckOption("No", 4)
+	InStr(Options, "O")		?	F_CheckOption("Yes", 5)	:	F_CheckOption("No", 5)
 	
 	LV_GetText(Fun, 			v_SelectedRow, 3)
-	if (Fun = "SI")
-	{ ;SendFun := "F_NormalWay"
-		GuiControl, HS3: Choose, v_SelectFunction, SendInput (SI)
-		GuiControl, HS4: Choose, v_SelectFunction, SendInput (SI)
-	}
-	else if (Fun = "CL")
-	{ ;SendFun := "F_ViaClipboard"
-		GuiControl, HS3: Choose, v_SelectFunction, Clipboard (CL)
-		GuiControl, HS4: Choose, v_SelectFunction, Clipboard (CL)
-	}
-	else if (Fun = "MCL")
-	{ ;SendFun := "F_MenuCli"
-		GuiControl, HS3: Choose, v_SelectFunction, Menu & Clipboard (MCL)
-		GuiControl, HS4: Choose, v_SelectFunction, Menu & Clipboard (MCL)
-	}
-	else if (Fun = "MSI")
-	{ ;SendFun := "F_MenuAHK"
-		GuiControl, HS3: Choose, v_SelectFunction, Menu & SendInput (MSI)
-		GuiControl, HS4: Choose, v_SelectFunction, Menu & SendInput (MSI)
+	Switch Fun
+	{
+		Case "SI":	;SendFun := "F_NormalWay"
+			GuiControl, HS3: Choose, v_SelectFunction, SendInput (SI)
+			GuiControl, HS4: Choose, v_SelectFunction, SendInput (SI)
+		Case "CL":	;SendFun := "F_ViaClipboard"
+			GuiControl, HS3: Choose, v_SelectFunction, Clipboard (CL)
+			GuiControl, HS4: Choose, v_SelectFunction, Clipboard (CL)
+		Case "MCL":	;SendFun := "F_MenuCli"
+			GuiControl, HS3: Choose, v_SelectFunction, Menu & Clipboard (MCL)
+			GuiControl, HS4: Choose, v_SelectFunction, Menu & Clipboard (MCL)
+		Case "MSI":	;SendFun := "F_MenuAHK"
+			GuiControl, HS3: Choose, v_SelectFunction, Menu & SendInput (MSI)
+			GuiControl, HS4: Choose, v_SelectFunction, Menu & SendInput (MSI)
 	}
 	
 	LV_GetText(EnDis, 		v_SelectedRow, 4)
@@ -4353,7 +4348,7 @@ Triggerstring 											= Triggerstring
 Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
 Triggerstring sound duration [ms]							= Triggerstring sound duration [ms]
 Triggerstring sound frequency range						= Triggerstring sound frequency range
-Triggerstring tip(s) tooltip timeout in [ms]			= Triggerstring tip(s) tooltip timeout in [ms]
+Triggerstring tip(s) tooltip timeout in [ms]					= Triggerstring tip(s) tooltip timeout in [ms]
 Triggerstring tips 										= Triggerstring tips
 Triggerstring tooltip timeout in [ms]						= Triggerstring tooltip timeout in [ms]
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
@@ -4372,12 +4367,12 @@ When timeout is set, the tooltip ""Undid the last hotstring!"" will dissapear af
 When timeout is set, the triggerstring tip(s) will dissapear after time reaches it. = When timeout is set, the triggerstring tip(s) will dissapear after time reaches it.
 When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
 Yes													= Yes
-""Basic hotstring"" sound duration [ms]					= ""Basic hotstring"" sound duration [ms]
+""Basic hotstring"" sound duration [ms]						= ""Basic hotstring"" sound duration [ms]
 ""Basic hotstring"" sound frequency						= ""Basic hotstring"" sound frequency
-""Hotstring menu"" sound duration [ms]					= ""Hotstring menu"" sound duration [ms]
-""Hotstring menu"" sound frequency						= ""Hotstring menu"" sound frequency
-""Undo hotstring"" sound duration [ms]					= ""Undo hotstring"" sound duration [ms]
-""Undo hotstring"" sound frequency						= ""Undo hotstring"" sound frequency
+""Hotstring menu"" sound duration [ms]						= ""Hotstring menu"" sound duration [ms]
+""Hotstring menu"" sound frequency							= ""Hotstring menu"" sound frequency
+""Undo hotstring"" sound duration [ms]						= ""Undo hotstring"" sound duration [ms]
+""Undo hotstring"" sound frequency							= ""Undo hotstring"" sound frequency
 F_TooltipTimeoutSlider									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 500 [ms]; `nInterval:         500 [ms]; `nRange:            1000 ÷ 10 000 [ms]. `n`nWhen required value is chosen just press Esc key to close this window or close it with mouse.
 F_SoundDurSliderInfo									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 50 [ms]; `nInterval:         150 [ms]; `nRange:            50 ÷ 2 000 [ms]. `n`nWhen required value is chosen just press Esc key to close this window or close it with mouse.`n`nTip: Recommended time is between 200 to 400 ms.
 F_SoundFreqSliderInfo									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 50; `nInterval:         3636; `nRange:            37 ÷ 32 767. `n`nWhen required value is chosen just press Esc key to close this window or close it with mouse.`n`nTip: Recommended value is between 200 to 2000. Mind that for your spcific PC some values outside of recommended range may not produce any sound.
