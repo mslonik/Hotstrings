@@ -563,7 +563,7 @@ return
 
 F9::	;new thread starts here
 	F_WhichGui()
-	F_SetHotstring()
+	F_AddHotstring()
 return
 
 F11::	;for debugging purposes, internal shortcut
@@ -1953,7 +1953,7 @@ F_SetTooltipTimeout()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_SetHotstring()
+F_AddHotstring()
 ;1. Read all inputs. 
 ;2. Create Hotstring definition according to inputs. 
 ;3. Read the library file into List View. 
@@ -4510,7 +4510,7 @@ F_LoadFile(nameoffile)
 	Loop, Parse, v_TheWholeFile, `n, `r
 	{
 		if (A_LoopField)
-			F_ini_StartHotstring(A_LoopField, nameoffile)
+			F_CreateHotstring(A_LoopField, nameoffile)
 		else
 			Break
 		Loop, Parse, A_LoopField, ‖
@@ -4652,7 +4652,7 @@ F_GuiHS4_CreateObject()
 	;GuiControl,	Hide,		% IdDDL2
 	
 	;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
-	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton2b gF_SetHotstring,						% TransA["Add hotstring (F9)"]
+	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton2b gF_AddHotstring,						% TransA["Add hotstring (F9)"]
 	;GuiControl,	HideSet% IdButton2
 	Gui, 	HS4: Add, 		Button, 		x0 y0 HwndIdButton3b gF_Clear,							% TransA["Clear (F5)"]
 	;GuiControl,	Hide,		% IdButton3
@@ -4788,7 +4788,7 @@ F_GuiMain_CreateObject()
 ;GuiControl,	Hide,		% IdDDL2
 	
 ;Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "bold cBlack", % c_FontType
-	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton2 gF_SetHotstring,							% TransA["Add hotstring (F9)"]
+	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton2 gF_AddHotstring,							% TransA["Add hotstring (F9)"]
 ;GuiControl,	HideSet% IdButton2
 	Gui, 		HS3:Add, 		Button, 		x0 y0 HwndIdButton3 gF_Clear,									% TransA["Clear (F5)"]
 ;GuiControl,	Hide,		% IdButton3
@@ -5650,7 +5650,7 @@ F_GuiMain_CreateObject()
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_ini_StartHotstring(txt, nameoffile) 
+F_CreateHotstring(txt, nameoffile) 
 { 
 	global	;assume-global mode
 	local Options := "", SendFun := "", EnDis := "", OnOff := "", TextInsert := "", Oflag := false
