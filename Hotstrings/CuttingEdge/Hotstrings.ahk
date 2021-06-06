@@ -312,8 +312,8 @@ F_EventTtPos()
 F_AmountOfCharacterTips()
 F_SortTipsAlphabetically()
 
-Menu, Submenu1, Add, % TransA["Undo the last hotstring: enable"], 	F_MUndo
-Menu, Submenu1, Add, % TransA["Undo the last hotstring: disable"],	F_MUndo
+Menu, Submenu1, Add, % TransA["Undo the last hotstring [Ctrl+F12]: enable"], 	F_MUndo
+Menu, Submenu1, Add, % TransA["Undo the last hotstring [Ctrl+F12]: disable"],	F_MUndo
 Menu, Submenu1, Add
 F_MUndo()
 
@@ -566,22 +566,20 @@ F9::	;new thread starts here
 	F_SetHotstring()
 return
 
-F11::
+F11::	;for debugging purposes, internal shortcut
 	SetTimer, TurnOff_UHE, Off
 	SetTimer, TurnOff_OHE, Off
-	SetTimer, TurnOffTttt, Off
+	SetTimer, TurnOff_Ttt, Off
 return
 
 #if
 
 ~Alt::
-;It's important to comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
-/*
-	~MButton::
-	~RButton::
-	~LButton::
-	~LWin::
-*/
+;Comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
+~MButton::
+~RButton::
+~LButton::
+~LWin::
 ~RWin::
 ~Down::
 ~Up::
@@ -741,10 +739,7 @@ F_Undo()
 		}
 		if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O"))) 
 			Send, % A_EndChar
-		;ToolTip, % TransA["Undid the last hotstring"], % A_CaretX, % A_CaretY - 20, 5
-		;SetTimer, TurnOffTooltip, -3000, 200 ;Priority = 200 to avoid conflicts with other threads 
 		
-				;*[One]
 		if (ini_UHTtEn)
 		{
 			ToolTip, ,, , 4	;Basic triggerstring was triggered
@@ -754,14 +749,14 @@ F_Undo()
 				{
 					ToolTip, % TransA["Undid the last hotstring"], % A_CaretX + 20, % A_CaretY - 20, 6
 					if (ini_UHTD > 0)
-						SetTimer, TurnOff_UHE, % "-" . ini_UHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+						SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
 				}
 				else
 				{
 					MouseGetPos, v_MouseX, v_MouseY
 					ToolTip, % TransA["Undid the last hotstring"], % v_MouseX + 20, % v_MouseY - 20, 6
 					if (ini_UHTD > 0)
-						SetTimer, TurnOff_UHE, % "-" . ini_UHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+						SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
 				}
 			}
 			if (ini_UHTP = 2)
@@ -769,7 +764,7 @@ F_Undo()
 				MouseGetPos, v_MouseX, v_MouseY
 				ToolTip, % TransA["Undid the last hotstring"], % v_MouseX + 20, % v_MouseY - 20, 6
 				if (ini_UHTD > 0)
-					SetTimer, TurnOff_UHE, % "-" . ini_UHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+					SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
 			}
 		}
 			
@@ -809,14 +804,14 @@ F_EventSigOrdHotstring()
 			{
 				ToolTip, % TransA["Hotstring was triggered!"], % A_CaretX + 20, % A_CaretY - 20, 4
 				if (ini_OHTD > 0)
-					SetTimer, TurnOff_OHE, % "-" . ini_OHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+					SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
 			}
 			else
 			{
 				MouseGetPos, v_MouseX, v_MouseY
 				ToolTip, % TransA["Hotstring was triggered!"], % v_MouseX + 20, % v_MouseY - 20, 4
 				if (ini_OHTD > 0)
-					SetTimer, TurnOff_OHE, % "-" . ini_OHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+					SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
 			}
 		}
 		if (ini_OHTP = 2)
@@ -824,7 +819,7 @@ F_EventSigOrdHotstring()
 			MouseGetPos, v_MouseX, v_MouseY
 			ToolTip, % TransA["Hotstring was triggered!"], % v_MouseX + 20, % v_MouseY - 20, 4
 			if (ini_OHTD > 0)
-				SetTimer, TurnOff_OHE, % "-" . ini_OHTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+				SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
 		}
 	}
 	
@@ -974,14 +969,14 @@ F_ShowTriggerstringTips()
 		{
 			ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
 			if ((ini_TTTtEn) and (ini_TTTD > 0))
-				SetTimer, TurnOffTttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 		}
 		else
 		{
 			MouseGetPos, v_MouseX, v_MouseY
 			ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
 			if ((ini_TTTtEn) and (ini_TTTD > 0))
-				SetTimer, TurnOffTttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 		}
 	}
 	if ((ini_TTTtEn) and (ini_TTTP = 2))
@@ -989,7 +984,7 @@ F_ShowTriggerstringTips()
 		MouseGetPos, v_MouseX, v_MouseY
 		ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
 		if ((ini_TTTtEn) and (ini_TTTD > 0))
-			SetTimer, TurnOffTttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+			SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 	}
 	return
 }
@@ -1197,15 +1192,15 @@ F_MUndo()
 	{
 		if (ini_HotstringUndo)
 		{
-			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: disable"]
-			Menu, Submenu1, Check,  % TransA["Undo the last hotstring: enable"]
+			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring [Ctrl+F12]: disable"]
+			Menu, Submenu1, Check,  % TransA["Undo the last hotstring [Ctrl+F12]: enable"]
 			Menu, SigOfEvents, Enable, % TransA["Undid the last hotstring"]
 			Hotkey, $^F12, F_Undo, On	
 		}
 		else
 		{
-			Menu, Submenu1, Check, % TransA["Undo the last hotstring: disable"]
-			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: enable"]
+			Menu, Submenu1, Check, % TransA["Undo the last hotstring [Ctrl+F12]: disable"]
+			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring [Ctrl+F12]: enable"]
 			Menu, SigOfEvents, Disable, % TransA["Undid the last hotstring"]
 			Hotkey, $^F12, F_Undo, Off
 		}
@@ -1215,15 +1210,15 @@ F_MUndo()
 	{
 		if (ini_HotstringUndo)
 		{
-			Menu, Submenu1, Check, % TransA["Undo the last hotstring: disable"]
-			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: enable"]
+			Menu, Submenu1, Check, % TransA["Undo the last hotstring [Ctrl+F12]: disable"]
+			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring [Ctrl+F12]: enable"]
 			Menu, SigOfEvents, Disable, % TransA["Undid the last hotstring"]				
 			Hotkey, $^F12, F_Undo, Off
 		}
 		else
 		{
-			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: disable"]
-			Menu, Submenu1, Check,  % TransA["Undo the last hotstring: enable"]
+			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring [Ctrl+F12]: disable"]
+			Menu, Submenu1, Check,  % TransA["Undo the last hotstring [Ctrl+F12]: enable"]
 			Menu, SigOfEvents, Enable, % TransA["Undid the last hotstring"]				
 			Hotkey, $^F12, F_Undo, On
 		}
@@ -4363,8 +4358,8 @@ Triggerstring tips 										= Triggerstring tips
 Triggerstring tooltip timeout in [ms]						= Triggerstring tooltip timeout in [ms]
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
 Underscore _											= Underscore _
-Undo the last hotstring: disable							= Undo the last hotstring: disable
-Undo the last hotstring: enable							= Undo the last hotstring: enable
+Undo the last hotstring [Ctrl+F12]: disable					= Undo the last hotstring [Ctrl+F12]: disable
+Undo the last hotstring [Ctrl+F12]: enable					= Undo the last hotstring [Ctrl+F12]: enable
 Undid the last hotstring 								= Undid the last hotstring
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
@@ -7030,17 +7025,11 @@ TurnOff_OHE:
 ToolTip, ,, , 4
 return
 
-/*
-	TurnOffTooltip:
-	ToolTip, ,, , 5
-	return
-*/
-
 TurnOff_UHE:
 ToolTip, ,, , 6
 return
 
-TurnOffTttt:
+TurnOff_Ttt:
 ToolTip
 return
 
