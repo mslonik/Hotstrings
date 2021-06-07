@@ -56,6 +56,7 @@ global HMenuCliHwnd				:= 0
 global HMenuAHKHwnd				:= 0
 
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+F_DetermineMonitors()
 Critical, On
 F_LoadCreateTranslationTxt() ;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
 F_CheckCreateConfigIni() ;1. Try to load up configuration file. If those files do not exist, create them.
@@ -165,22 +166,6 @@ if (v_Param == "d") ;If the script is run with command line parameter "d" like d
 	v_LogFileName := % "Logs\Logs" . A_DD . A_MM . "_" . A_Hour . A_Min . ".txt"
 	FileAppend, , %v_LogFileName%, UTF-8
 }
-
-; Multi monitor environment, initialization of monitor width and height parameters
-/*
-	SysGet, N, MonitorCount
-	Loop, % N
-	{
-		SysGet, Mon%A_Index%, Monitor, %A_Index%
-		W%A_Index% := Mon%A_Index%Right - Mon%A_Index%Left
-		H%A_Index% := Mon%A_Index%Bottom - Mon%A_Index%Top
-			;DPI%A_Index% := round(W%A_Index%/1920*(96/A_ScreenDPI), 2) ; original
-		DPI%A_Index% := 1			; added on 2021-01-31 in order to clean up GUI sizing
-	}
-	SysGet, PrimMon, MonitorPrimary
-	if (v_SelectedMonitor == 0)
-		v_SelectedMonitor := PrimMon
-*/
 
 Loop, %A_ScriptDir%\Languages\*.txt 
 {
@@ -713,6 +698,31 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 
+F_DetermineMonitors()	; Multi monitor environment, initialization of monitor width and height parameters
+;tu jestem
+{
+	global	;assume-global mode
+	local	NoOfMonitors
+			,Temp := 0, TempLeft := 0, TempRight := 0, TempTop := 0, TempBottom := 0, TempWidth := 0, TempHeight := 0
+	
+	MonitorCoordinates := {}
+	
+	;*[One]
+	SysGet, NoOfMonitors, MonitorCount	
+	Loop, % NoOfMonitors
+	{
+		SysGet, Temp, Monitor, % A_Index
+		MonitorCoordinates[A_Index] 			:= {}
+		MonitorCoordinates[A_Index].Left 		:= TempLeft
+		MonitorCoordinates[A_Index].Right 		:= TempRight
+		MonitorCoordinates[A_Index].Top 		:= TempTop
+		MonitorCoordinates[A_Index].Bottom 	:= TempBottom
+		MonitorCoordinates[A_Index].Width 		:= TempRight - TempLeft
+		MonitorCoordinates[A_Index].Height 	:= TempBottom - TempTop
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Undo()
 {
 	global	;assume-global mode
@@ -4065,7 +4075,7 @@ F_EnDisLib()
 	return
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
-F_UnloadFile(nameoffile)	;tu jestem
+F_UnloadFile(nameoffile)
 {
 	global ;assume-global mode
 	local	v_TheWholeFile := "",	Options := "",	TriggerString := ""
@@ -5881,6 +5891,7 @@ F_MenuCli(TextOptions, Oflag)
 {
 	global	;assume-global mode
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
+			,Window2X  := 0,	Window2Y  := 0,	Window2W  := 0,	Window2H  := 0
 	
 	v_TypedTriggerstring	:= A_ThisHotkey
 	if (ini_MHSEn)		;Second beep on purpose
@@ -5923,8 +5934,12 @@ F_MenuCli(TextOptions, Oflag)
 		MenuX := v_MouseX + 20
 		MenuY := v_MouseY + 20
 	}
-	Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate
-	
+	;Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate	;tu jestem
+	Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate Hide
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . HMenuCliHwnd
+	DetectHiddenWindows, Off
+	;*[One]
 	GuiControl, Choose, % Id_LB_HMenuCli, 1
 	Ovar := Oflag
 	v_HotstringFlag := true
