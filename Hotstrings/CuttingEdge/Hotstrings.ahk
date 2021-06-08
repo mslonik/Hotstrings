@@ -19,7 +19,7 @@ FileEncoding, UTF-16			; Sets the default encoding for FileRead, FileReadLine, L
 ; Warning! UTF-16 is not recognized by Notepad++ editor (2021), which recognizes correctly UCS-2 (defined by the International Standard ISO/IEC 10646). 
 ; BMP = Basic Multilingual Plane.
 CoordMode, Caret,	Screen 
-CoordMode, ToolTip,	Client
+CoordMode, ToolTip,	Screen
 CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
@@ -676,7 +676,7 @@ F_HMenuCli()
 	if (Ovar = false)
 		Send, % A_EndChar
 	if (ini_MHSEn)
-		SoundBeep, % ini_MHSF, % ini_MHSD	;Future: configurable parameters of the sound
+		SoundBeep, % ini_MHSF, % ini_MHSD	
 	
 	Sleep, %ini_CPDelay% ;Remember to sleep before restoring clipboard or it will fail
 	Clipboard 		 := ClipboardBack
@@ -707,7 +707,6 @@ F_DetermineMonitors()	; Multi monitor environment, initialization of monitor wid
 	
 	MonitorCoordinates := {}
 	
-	;*[One]
 	SysGet, NoOfMonitors, MonitorCount	
 	Loop, % NoOfMonitors
 	{
@@ -814,22 +813,23 @@ F_EventSigOrdHotstring()
 		{
 			if (A_CaretX and A_CaretY)
 			{
-				ToolTip, % TransA["Hotstring was triggered!"], % A_CaretX + 20, % A_CaretY - 20, 4
+				ToolTip, % TransA["Hotstring was triggered! [Ctrl+F12] to undo."], % A_CaretX + 20, % A_CaretY - 20, 4
 				if (ini_OHTD > 0)
 					SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
 			}
 			else
 			{
 				MouseGetPos, v_MouseX, v_MouseY
-				ToolTip, % TransA["Hotstring was triggered!"], % v_MouseX + 20, % v_MouseY - 20, 4
+				ToolTip, % TransA["Hotstring was triggered! [Ctrl+F12] to undo."], % v_MouseX + 20, % v_MouseY - 20, 4
 				if (ini_OHTD > 0)
 					SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
 			}
 		}
 		if (ini_OHTP = 2)
 		{
+			;*[One]
 			MouseGetPos, v_MouseX, v_MouseY
-			ToolTip, % TransA["Hotstring was triggered!"], % v_MouseX + 20, % v_MouseY - 20, 4
+			ToolTip, % TransA["Hotstring was triggered! [Ctrl+F12] to undo."], % v_MouseX + 20, % v_MouseY - 20, 4
 			if (ini_OHTD > 0)
 				SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
 		}
@@ -4220,9 +4220,9 @@ has been created. 										= has been created.
 Hotstring 											= Hotstring
 Hotstring added to the file								= Hotstring added to the file
 Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv) = Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
-Hotstring was triggered!									= Hotstring was triggered!
+Hotstring was triggered! [Ctrl+F12] to undo.					= Hotstring was triggered! [Ctrl+F12] to undo.
 ""Hotstring was triggered"" tooltip timeout in [ms]			= ""Hotstring was triggered"" tooltip timeout in [ms]
-""Undid the last hotstring!"" tooltip timeout in [ms]		= ""Undid the last hotstring!"" tooltip timeout in [ms]
+""Undid the last hotstring!"" tooltip timeout in [ms]			= ""Undid the last hotstring!"" tooltip timeout in [ms]
 Hotstring moved to the 									= Hotstring moved to the
 Hotstring paste from Clipboard delay 1 s 					= Hotstring paste from Clipboard delay 1 s
 Hotstring paste from Clipboard delay 						= Hotstring paste from Clipboard delay
@@ -5892,6 +5892,7 @@ F_MenuCli(TextOptions, Oflag)
 	global	;assume-global mode
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
 			,Window2X  := 0,	Window2Y  := 0,	Window2W  := 0,	Window2H  := 0
+			,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
 	
 	v_TypedTriggerstring	:= A_ThisHotkey
 	if (ini_MHSEn)		;Second beep on purpose
@@ -5901,7 +5902,6 @@ F_MenuCli(TextOptions, Oflag)
 	}
 	
 	v_MenuMax			 	:= 0
-;v_InputString 		 := ""
 	TextOptions 		 := F_AHKVariables(TextOptions)
 	Loop, Parse, TextOptions, ¦
 		v_MenuMax := A_Index
@@ -5934,11 +5934,25 @@ F_MenuCli(TextOptions, Oflag)
 		MenuX := v_MouseX + 20
 		MenuY := v_MouseY + 20
 	}
-	;Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate	;tu jestem
 	Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate Hide
 	DetectHiddenWindows, On
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . HMenuCliHwnd
 	DetectHiddenWindows, Off
+	
+	Loop % MonitorCoordinates.Count()
+		if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
+		{
+			Window1X := MonitorCoordinates[A_Index].Left
+			Window1H := MonitorCoordinates[A_Index].Height
+			Window1Y := MonitorCoordinates[A_Index].Top 
+			Window1W := MonitorCoordinates[A_Index].Width
+			Break
+		}
+	if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
+		MenuY -= Window2H
+	if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
+		MenuX -= Window2W
+	Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate	;tu jestem
 	;*[One]
 	GuiControl, Choose, % Id_LB_HMenuCli, 1
 	Ovar := Oflag
@@ -5965,6 +5979,7 @@ F_MouseMenuCli() ;The subroutine may consult the following built-in variables: A
 		if (Ovar = false)
 			Send, % A_EndChar
 		Sleep, %ini_CPDelay% ;Remember to sleep before restoring clipboard or it will fail
+		F_EventSigOrdHotstring()
 		v_TypedTriggerstring := OutputVarTemp
 		v_UndoHotstring 	 := OutputVarTemp
 		Clipboard 		 := ClipboardBack
@@ -5972,58 +5987,78 @@ F_MouseMenuCli() ;The subroutine may consult the following built-in variables: A
 	}
 	return
 }
-	
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MenuAHK(TextOptions, Oflag)	
+{
+	global	;assume-global mode
+	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
+			,Window2X  := 0,	Window2Y  := 0,	Window2W  := 0,	Window2H  := 0
+			,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
+	
+	v_TypedTriggerstring	:= A_ThisHotkey
+	if (ini_MHSEn)		;Second beep on purpose
+		SoundBeep, % ini_MHSF, % ini_MHSD
+	
+	v_MenuMax				:= 0
+	TextOptions 			:= F_AHKVariables(TextOptions)
+	Loop, Parse, TextOptions, ¦
+		v_MenuMax := A_Index
+	ToolTip,
+	Gui, HMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuAHKHwnd
+	Gui, HMenuAHK: Margin, 0, 0
+	Gui, HMenuAHK: Font, c766D69 s8	;Tooltip font color
+	Gui, HMenuAHK: Color,, White
+	Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenuAHK"
+	Loop, Parse, TextOptions, ¦
+		GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . "|"
+	
+	if (ini_MHMP = 1)
 	{
-		global	;assume-global mode
-		local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
-		
-		v_TypedTriggerstring	:= A_ThisHotkey
-		if (ini_MHSEn)		;Second beep on purpose
-			SoundBeep, % ini_MHSF, % ini_MHSD
-		
-		v_MenuMax				:= 0
-		TextOptions 			:= F_AHKVariables(TextOptions)
-		Loop, Parse, TextOptions, ¦
-			v_MenuMax := A_Index
-		ToolTip,
-		Gui, HMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuAHKHwnd
-		Gui, HMenuAHK: Margin, 0, 0
-		Gui, HMenuAHK: Font, c766D69 s8	;Tooltip font color
-		Gui, HMenuAHK: Color,, White
-		Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenuAHK"
-		Loop, Parse, TextOptions, ¦
-			GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . "|"
-		
-		if (ini_MHMP = 1)
+		if (A_CaretX and A_CaretY)
 		{
-			if (A_CaretX and A_CaretY)
-			{
-				MenuX := A_CaretX + 20
-				MenuY := A_CaretY - 20
-			}
-			else
-			{
-				MouseGetPos, v_MouseX, v_MouseY
-				MenuX := v_MouseX + 20
-				MenuY := v_MouseY + 20
-			}
+			MenuX := A_CaretX + 20
+			MenuY := A_CaretY - 20
 		}
-		if (ini_MHMP = 2) 
+		else
 		{
 			MouseGetPos, v_MouseX, v_MouseY
 			MenuX := v_MouseX + 20
 			MenuY := v_MouseY + 20
 		}
-		
-		Gui, HMenuAHK: Show, x%MenuX% y%MenuY% NoActivate
-		
-		GuiControl, Choose, % Id_LB_HMenuAHK, 1
-		Ovar := Oflag
-		v_HotstringFlag := true
-		return
 	}
+	if (ini_MHMP = 2) 
+	{
+		MouseGetPos, v_MouseX, v_MouseY
+		MenuX := v_MouseX + 20
+		MenuY := v_MouseY + 20
+	}
+	
+	Gui, HMenuAHK: Show, x%MenuX% y%MenuY% NoActivate Hide
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . HMenuAHKHwnd
+	DetectHiddenWindows, Off
+	
+	Loop % MonitorCoordinates.Count()
+		if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
+		{
+			Window1X := MonitorCoordinates[A_Index].Left
+			Window1H := MonitorCoordinates[A_Index].Height
+			Window1Y := MonitorCoordinates[A_Index].Top 
+			Window1W := MonitorCoordinates[A_Index].Width
+			Break
+		}
+	if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
+		MenuY -= Window2H
+	if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
+		MenuX -= Window2W
+	Gui, HMenuAHK: Show, x%MenuX% y%MenuY% NoActivate	;tu jestem
+	
+	GuiControl, Choose, % Id_LB_HMenuAHK, 1
+	Ovar := Oflag
+	v_HotstringFlag := true
+	return
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
@@ -6040,6 +6075,7 @@ F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A
 		Send, % OutputVarTemp
 		if (Ovar = false)
 			Send, % A_EndChar
+		F_EventSigOrdHotstring()
 		v_TypedTriggerstring := OutputVarTemp
 		v_UndoHotstring 	 := OutputVarTemp
 		Hotstring("Reset")
