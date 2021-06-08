@@ -1,7 +1,7 @@
 ﻿/* 
-	Author:      Jakub Masiak, Maciej Słojewski (mslonik, http://mslonik.pl)
+	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
-	Description: Hotstrings as in AutoHotkey (shortcuts), but editable with GUI and many more options.
+	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
 	License:     GNU GPL v.3
 */
 
@@ -561,11 +561,9 @@ return
 
 ~Alt::
 ;Comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
-/*
-	~MButton::
-	~RButton::
-	~LButton::
-*/
+~MButton::
+~RButton::
+~LButton::
 ~LWin::
 ~RWin::
 ~Down::
