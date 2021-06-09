@@ -32,6 +32,9 @@ global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -al
 ;@Ahk2Exe-Set OriginalScriptlocation, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings
 ;@Ahk2Exe-SetCompanyName  http://mslonik.pl
 ;@Ahk2Exe-SetFileVersion 4.0
+FileInstall, hotstrings.ico, hotstrings.ico, 0
+FileInstall, LICENSE, LICENSE, 0
+
 global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l or d
 
 global a_Triggers 				:= []		;Main loop of application
