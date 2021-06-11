@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -1980,6 +1980,7 @@ F_AddHotstring()
 			,OldOptions := "", TurnOffOldOptions := ""
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
 			,v_TheWholeFile := "", v_TotalLines := 0
+			,ExternalIndex := 0
 	
 	;1. Read all inputs. 
 	Gui, % A_DefaultGui . ":" A_Space . "Submit", NoHide
@@ -2084,7 +2085,8 @@ F_AddHotstring()
 	{
 		if (A_LoopField)
 		{
-			Loop, Parse, A_LoopField, %A_Space%%A_Tab%
+			ExternalIndex := A_Index
+			Loop, Parse, A_LoopField, ‖, %A_Space%%A_Tab%
 			{
 				Switch A_Index
 				{
@@ -2109,10 +2111,10 @@ F_AddHotstring()
 							MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
 								. "v_TriggerString:" . A_Space . v_TriggerString . "`n"
 								. A_Space . "OldOptions:" . A_Space . OldOptions . "`n`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 				
-						LV_Modify(A_Index, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)
+						LV_Modify(ExternalIndex, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)
 						ModifiedFlag := true
+						Break
 					}
-					
 				}
 			}
 		}
