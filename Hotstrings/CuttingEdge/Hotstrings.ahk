@@ -702,6 +702,8 @@ return
 F_TI_NoEndChar()
 {
 	global	;assume-global mode
+	TransA["F_TI_NoEndChar"] := StrReplace(TransA["F_TI_NoEndChar"], "``n", "`n")
+	ToolTip, % TransA["F_TI_NoEndChar"]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -714,6 +716,8 @@ F_TI_EnterTriggerstring()
 F_TI_ImmediateExecute()
 {
 	global	;assume-global mode
+	TransA["F_TI_ImmediateExecute"] := StrReplace(TransA["F_TI_ImmediateExecute"], "``n", "`n")
+	ToolTip, % TransA["F_TI_ImmediateExecute"]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -732,6 +736,8 @@ F_TI_CaseConforming()
 F_TI_NoBackSpace()
 {
 	global	;assume-global mode
+	TransA["F_TI_NoBackSpace"] := StrReplace(TransA["F_TI_NoBackSpace"], "``n", "`n")
+	ToolTip, % TransA["F_TI_NoBackSpace"]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -744,6 +750,8 @@ F_TI_CaseSensitive()
 F_TI_InsideWord()
 {
 	global	;assume-global mode
+	TransA["F_TI_InsideWord"] := StrReplace(TransA["F_TI_InsideWord"], "``n", "`n")
+	ToolTip, % TransA["F_TI_InsideWord"]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -762,12 +770,16 @@ F_TI_OptionDisable()
 F_TI_OptionRaw()
 {
 	global	;assume-global mode
+	TransA["F_TI_OptionRaw"] := StrReplace(TransA["F_TI_OptionRaw"], "``n", "`n")
+	ToolTip, % TransA["F_TI_OptionRaw"]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TI_OptionResetRecognizer()
 {
 	global	;assume-global mode
+	TransA["F_TI_OptionResetRecognizer"] := StrReplace(TransA["F_TI_OptionResetRecognizer"], "``n", "`n")
+	ToolTip, % TransA["F_TI_OptionResetRecognizer"]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4657,9 +4669,15 @@ Yes													= Yes
 ""Hotstring menu"" sound frequency							= ""Hotstring menu"" sound frequency
 ""Undo hotstring"" sound duration [ms]						= ""Undo hotstring"" sound duration [ms]
 ""Undo hotstring"" sound frequency							= ""Undo hotstring"" sound frequency
+F_TI_ImmediateExecute									= * (asterisk): An EndChar (e.g. Space, ., or Enter) is not required to trigger the hotstring. For example:`n`n:*:j@::jsmith@somedomain.com`n`nThe example above would send its replacement the moment you type the @ character.
+F_TI_InsideWord										= ? (question mark): The hotstring will be triggered even when it is inside another word; `n`nthat is, when the character typed immediately before it is alphanumeric. `nFor example, if :?:al::airline is a hotstring, `ntyping ""practical "" would produce ""practicairline "".
 F_TooltipTimeoutSlider									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 500 [ms]; `nInterval:         500 [ms]; `nRange:            1000 ÷ 10 000 [ms]. `n`nWhen required value is chosen just press Esc key to close this window or close it with mouse.
 F_SoundDurSliderInfo									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 50 [ms]; `nInterval:         150 [ms]; `nRange:            50 ÷ 2 000 [ms]. `n`nWhen required value is chosen just press Esc key to close this window or close it with mouse.`n`nTip: Recommended time is between 200 to 400 ms.
 F_SoundFreqSliderInfo									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 50; `nInterval:         3636; `nRange:            37 ÷ 32 767. `n`nWhen required value is chosen just press Esc key to close this window or close it with mouse.`n`nTip: Recommended value is between 200 to 2000. Mind that for your spcific PC some values outside of recommended range may not produce any sound.
+F_TI_NoBackSpace										= B0: Automatic backspacing is not done to erase the abbreviation you type. `n`nOne may send ← five times via {left 5}. For example, the following hotstring produces ""<em></em>"" and `nmoves the caret 5 places to the left (so that it's between the tags) `n`n::*b0:<em>::</em>{left 5}
+F_TI_NoEndChar											= O: Omit the ending character of auto-replace hotstrings when the replacement is produced. `n`nThis is useful when you want a hotstring to be kept unambiguous by still requiring an ending character, `nbut don't actually want the ending character to be shown on the screen. `nFor example, if :o:ar::aristocrat is a hotstring, typing ""ar"" followed by the spacebar will produce ""aristocrat"" with no trailing space, `nwhich allows you to make the word plural or possessive without having to press Backspace.
+F_TI_OptionRaw											= R: Send the replacement text raw; `n`nthat is, without translating {Enter} to Enter, ^c to Ctrl+C, etc. 
+F_TI_OptionResetRecognizer								= Z: Resets the hotstring recognizer after each triggering of the hotstring. `n`nIn other words, the script will begin waiting for an entirely new hotstring, eliminating from consideration anything you previously typed. `nThis can prevent unwanted triggerings of hotstrings. 
 F_TooltipMNTTSliderInfo									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 1; `nInterval:         5; `nRange:            1 ÷ 25 `n`nWhen required value is chosen just press Esc key to close this window or close it with mouse.
 ↓ Click here to select hotstring library ↓					= ↓ Click here to select hotstring library ↓
 )"
