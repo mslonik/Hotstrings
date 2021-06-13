@@ -698,88 +698,15 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
-
-F_TI_NoEndChar()
+F_ShowLongTooltip(string)
 {
-	global	;assume-global mode
-	TransA["F_TI_NoEndChar"] := StrReplace(TransA["F_TI_NoEndChar"], "``n", "`n")
-	ToolTip, % TransA["F_TI_NoEndChar"]
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TI_EnterTriggerstring()
-{
-	global	;assume-global mode
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TI_ImmediateExecute()
-{
-	global	;assume-global mode
-	TransA["F_TI_ImmediateExecute"] := StrReplace(TransA["F_TI_ImmediateExecute"], "``n", "`n")
-	ToolTip, % TransA["F_TI_ImmediateExecute"]
+	ToolTip, % StrReplace(string, "``n", "`n")
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_RadioCase()
 {
 	global	;assume-global mode
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TI_CaseConforming()
-{
-	global	;assume-global mode
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TI_NoBackSpace()
-{
-	global	;assume-global mode
-	TransA["F_TI_NoBackSpace"] := StrReplace(TransA["F_TI_NoBackSpace"], "``n", "`n")
-	ToolTip, % TransA["F_TI_NoBackSpace"]
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TI_CaseSensitive()
-{
-	global	;assume-global mode
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TI_InsideWord()
-{
-	global	;assume-global mode
-	TransA["F_TI_InsideWord"] := StrReplace(TransA["F_TI_InsideWord"], "``n", "`n")
-	ToolTip, % TransA["F_TI_InsideWord"]
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TI_NotCaseConforming()
-{
-	global	;assume-global mode
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TI_OptionDisable()
-{
-	global	;assume-global mode
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TI_OptionRaw()
-{
-	global	;assume-global mode
-	TransA["F_TI_OptionRaw"] := StrReplace(TransA["F_TI_OptionRaw"], "``n", "`n")
-	ToolTip, % TransA["F_TI_OptionRaw"]
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TI_OptionResetRecognizer()
-{
-	global	;assume-global mode
-	TransA["F_TI_OptionResetRecognizer"] := StrReplace(TransA["F_TI_OptionResetRecognizer"], "``n", "`n")
-	ToolTip, % TransA["F_TI_OptionResetRecognizer"]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2120,14 +2047,21 @@ F_AddHotstring()
 	
 	if (v_OptionImmediateExecute)
 		Options .= "*"
-	if (v_OptionCaseSensitive)
-		Options .= "C"
+	Switch v_RadioCaseGroup
+	{
+		Case 2: Options .= "C"
+		Case 3: Options .= "C1"
+	}
 	if (v_OptionNoBackspace)
 		Options .= "B0"
 	if (v_OptionInsideWord)
 		Options .= "?"
 	if (v_OptionNoEndChar)
 		Options .= "O"
+	if (v_OptionRaw)
+		Options .= "R"
+	if (v_OptionReset)
+		Options .= "Z"
 	if (v_OptionDisable)
 	{
 		OnOff := "Off"
@@ -2142,17 +2076,17 @@ F_AddHotstring()
 	Switch v_SelectFunction
 	{
 		Case "Clipboard (CL)": 			
-		SendFunHotstringCreate 	:= "F_HOF_CLI"
-		SendFunFileFormat 		:= "CL"
+			SendFunHotstringCreate 	:= "F_HOF_CLI"
+			SendFunFileFormat 		:= "CL"
 		Case "SendInput (SI)": 			
-		SendFunHotstringCreate 	:= "F_HOF_SI"
-		SendFunFileFormat 		:= "SI"
+			SendFunHotstringCreate 	:= "F_HOF_SI"
+			SendFunFileFormat 		:= "SI"
 		Case "Menu & Clipboard (MCL)": 	
-		SendFunHotstringCreate 	:= "F_HOF_MCLI"
-		SendFunFileFormat 		:= "MCL"
-		Case "Menu & SendInput (MSI)": 	SendFun := 
-		SendFunHotstringCreate 	:= "F_HOF_MSI"
-		SendFunFileFormat 		:= "MSI"
+			SendFunHotstringCreate 	:= "F_HOF_MCLI"
+			SendFunFileFormat 		:= "MCL"
+		Case "Menu & SendInput (MSI)": 
+			SendFunHotstringCreate 	:= "F_HOF_MSI"
+			SendFunFileFormat 		:= "MSI"
 	}
 	
 	;2. Create or modify (triggerstring, hotstring) definition according to inputs. 
@@ -4679,6 +4613,11 @@ F_TI_NoEndChar											= O: Omit the ending character of auto-replace hotstrin
 F_TI_OptionRaw											= R: Send the replacement text raw; `n`nthat is, without translating {Enter} to Enter, ^c to Ctrl+C, etc. 
 F_TI_OptionResetRecognizer								= Z: Resets the hotstring recognizer after each triggering of the hotstring. `n`nIn other words, the script will begin waiting for an entirely new hotstring, eliminating from consideration anything you previously typed. `nThis can prevent unwanted triggerings of hotstrings. 
 F_TooltipMNTTSliderInfo									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 1; `nInterval:         5; `nRange:            1 ÷ 25 `n`nWhen required value is chosen just press Esc key to close this window or close it with mouse.
+F_TI_CaseConforming										= By default (if option Case-Sensitive (C) or Not-Case-Sensitive (C1) aren't set) `ncase-conforming hotstrings produce their replacement text in all caps `nif you type the triggerstring in all caps. `nIf you type the first letter in caps, `nthe first letter of the replacement will also be capitalized (if it is a letter). `nIf you type the case in any other way, the replacement is sent exactly as defined.
+F_TI_CaseSensitive										= C: Case sensitive: `n`nWhen you type a triggerstring, `nit must exactly match the case defined.
+F_TI_NotCaseConforming									= C1: Do not conform to typed case. `n`nUse this option to make hotstrings case insensitive `nand prevent them from conforming to the case of the characters you actually type.
+F_TI_EnterTriggerstring									= Enter text of triggerstring. `n`nTip1: If you want to change capitalization in abbreviation, use no triggerstring options. `nE.g. ascii → ASCII. `n`nTip2: If you want exchange triggerstring of abbreviation into full phrase, `nend your triggerstring with ""/"" and `napply Immediate Execute (*) triggerstring option.
+F_TI_OptionDisable										= Disables the hotstring. `n`nIf ticked, this option is shown in red color. `nBe aware that triggerstring tooltips (if enabled) `nare displayed even for disabled (triggerstring, hotstring) definitions.
 ↓ Click here to select hotstring library ↓					= ↓ Click here to select hotstring library ↓
 )"
 		
@@ -4843,7 +4782,8 @@ F_GuiHS4_CreateObject()
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText1b,										% TransA["Enter triggerstring"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
-	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo1b gF_TI_EnterTriggerstring,				ⓘ
+	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo1b,									ⓘ
+	GuiControl +g, % IdTextInfo1b, % F_TI_EnterTriggerstring
 	
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit1b vv_TriggerString 
@@ -4854,52 +4794,62 @@ F_GuiHS4_CreateObject()
 	
 	Gui, 	HS4: Add, 	CheckBox, 	x0 y0 HwndIdCheckBox1b gF_Checkbox vv_OptionImmediateExecute,	% TransA["Immediate Execute (*)"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
-	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo2b gF_TI_ImmediateExecute,				ⓘ
+	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo2b,									ⓘ
+	GuiControl +g, % IdTextInfo2b, % F_TI_ImmediateExecute
 	
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
 	Gui,		HS4: Add,		Radio,		x0 y0 HwndIdRadioCaseCCb AltSubmit gF_RadioCase vv_RadioCaseGroup Checked,	% TransA["Case-Conforming"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
-	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo3b gF_TI_CaseConforming,					ⓘ
+	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo3b,									ⓘ
+	GuiControl +g, % IdTextInfo3b, % F_TI_CaseConforming
 	
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
 	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox3b gF_Checkbox vv_OptionNoBackspace,		% TransA["No Backspace (B0)"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
-	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo4b gF_TI_NoBackSpace,					ⓘ
+	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo4b,									ⓘ
+	GuiControl +g, % IdTextInfo4b, % F_TI_NoBackSpace
 	
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
 	Gui,		HS4: Add,		Radio,		x0 y0 HWndIdRadioCaseCSb AltSubmit gF_RadioCase,				% TransA["Case Sensitive (C)"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
-	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo5b gF_TI_CaseSensitive,					ⓘ
+	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo5b,									ⓘ
+	GuiControl +g, % IdTextInfo5b, % F_TI_CaseSensitive
 	
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
 	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox4b gF_Checkbox vv_OptionInsideWord, 		% TransA["Inside Word (?)"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
-	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo6b gF_TI_InsideWord,					ⓘ
+	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo6b,									ⓘ
+	GuiControl +g, % IdTextInfo6b, % F_TI_InsideWord
 	
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
 	Gui,		HS4: Add,		Radio,		x0 y0 HwndIdRadioCaseC1b AltSubmit gF_RadioCase,				% TransA["Not Case-Conforming (C1)"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
-	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo7b gF_TI_NotCaseConforming,				ⓘ
+	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo7b,									ⓘ
+	GuiControl +g, % IdTextInfo7b, % F_TI_NotCaseConforming
 	
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
 	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox5b gF_Checkbox vv_OptionNoEndChar, 		% TransA["No EndChar (O)"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
-	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo8b gF_TI_NotCaseConforming,				ⓘ
+	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo8b,									ⓘ
+	GuiControl +g, % IdTextInfo8b, % F_TI_NotCaseConforming
 	
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
 	Gui,		HS4: Add,		CheckBox,		x0 y0 HwndIdCheckBox7b gF_Checkbox vv_OptionRaw,				% TransA["Send Raw (R)"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
-	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo9b gF_TI_OptionRaw,						ⓘ
+	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo9b,									ⓘ
+	GuiControl +g, % IdTextInfo9b, % F_TI_OptionRaw
 	
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
 	Gui,		HS4: Add,		CheckBox,		x0 y0 HwndIdCheckBox8b gF_Checkbox vv_OptionReset,			% TransA["Reset Recognizer (Z)"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
-	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo10b gF_TI_OptionResetRecognizer,			ⓘ
+	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo10b,									ⓘ
+	GuiControl +g, % IdTextInfo10b, % F_TI_OptionResetRecognizer
 	
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
 	Gui, 	HS4: Add, 	CheckBox, 	x0 y0 HwndIdCheckBox6b gF_Checkbox vv_OptionDisable, 			% TransA["Disable"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
-	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo11b gF_TI_OptionDisable,					ⓘ
+	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo11b,									ⓘ
+	GuiControl +g, % IdTextInfo11b, % F_TI_OptionDisable
 	
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText3b,						 				% TransA["Select hotstring output function"]
@@ -4975,54 +4925,73 @@ F_GuiMain_CreateObject()
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText1, 										% TransA["Enter triggerstring"]
 	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2
-	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo1 gF_TI_EnterTriggerstring,				ⓘ
-	;GuiControl, 	Hide, 		% IdText1
+	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo1,									ⓘ
+	F_TI_EnterTriggerstring	:= func("F_ShowLongTooltip").bind(TransA["F_TI_EnterTriggerstring"])
+	GuiControl +g, % IdTextInfo1, % F_TI_EnterTriggerstring
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString 
-	;GuiControl,	Hide,		% IdEdit1
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui,			HS3: Add,			GroupBox, 	x0 y0 HwndIdGroupBox1, 									% TransA["Select triggerstring option(s)"]
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-;GuiControl,	Hide,		% IdGroupBox1
 	
 	Gui, 		HS3: Add, 		CheckBox, 	x0 y0 HwndIdCheckBox1 gF_Checkbox vv_OptionImmediateExecute,	% TransA["Immediate Execute (*)"]
 	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2
-	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo2 gF_TI_ImmediateExecute,				ⓘ
+	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo2,									ⓘ
+	F_TI_ImmediateExecute	:= func("F_ShowLongTooltip").bind(TransA["F_TI_ImmediateExecute"])
+	GuiControl +g, % IdTextInfo2, % F_TI_ImmediateExecute
 	
 	Gui, 		HS3: Font, 		% "s" . c_FontSize
 	Gui,			HS3: Add,			Radio,		x0 y0 HwndIdRadioCaseCC AltSubmit gF_RadioCase vv_RadioCaseGroup Checked,	% TransA["Case-Conforming"]
 	Gui,			HS3: Add,			Radio,		x0 y0 HWndIdRadioCaseCS AltSubmit gF_RadioCase,				% TransA["Case Sensitive (C)"]
 	Gui,			HS3: Add,			Radio,		x0 y0 HwndIdRadioCaseC1 AltSubmit gF_RadioCase,				% TransA["Not Case-Conforming (C1)"]
 	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2
-	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo3 gF_TI_CaseConforming,					ⓘ
-	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo5 gF_TI_CaseSensitive,					ⓘ
-	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo7 gF_TI_NotCaseConforming,				ⓘ
+	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo3,									ⓘ
+	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo5,									ⓘ
+	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo7,									ⓘ
+	F_TI_CaseConforming 	:= func("F_ShowLongTooltip").bind(TransA["F_TI_CaseConforming"])
+	F_TI_CaseSensitive		:= func("F_ShowLongTooltip").bind(TransA["F_TI_CaseSensitive"])
+	F_TI_NotCaseConforming	:= func("F_ShowLongTooltip").bind(TransA["F_TI_NotCaseConforming"])
+	GuiControl +g, % IdTextInfo3, % F_TI_CaseConforming
+	GuiControl +g, % IdTextInfo5, % F_TI_CaseSensitive
+	GuiControl +g, % IdTextInfo7, % F_TI_NotCaseConforming
 	
 	Gui, 		HS3: Font, 		% "s" . c_FontSize
 	Gui, 		HS3: Add,			CheckBox, 	x0 y0 HwndIdCheckBox3 gF_Checkbox vv_OptionNoBackspace,		% TransA["No Backspace (B0)"]
 	Gui, 		HS3: Add,			CheckBox, 	x0 y0 HwndIdCheckBox4 gF_Checkbox vv_OptionInsideWord, 		% TransA["Inside Word (?)"]
 	Gui, 		HS3: Add,			CheckBox, 	x0 y0 HwndIdCheckBox5 gF_Checkbox vv_OptionNoEndChar, 			% TransA["No EndChar (O)"]
 	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2
-	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo4 gF_TI_NoBackSpace,					ⓘ
-	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo6 gF_TI_InsideWord,						ⓘ
-	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo8 gF_TI_NoEndChar,						ⓘ
+	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo4,									ⓘ
+	F_TI_NoBackSpace 		:= func("F_ShowLongTooltip").bind(TransA["F_TI_NoBackSpace"])
+	GuiControl +g, % IdTextInfo4, % F_TI_NoBackSpace
+	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo6,									ⓘ
+	F_TI_InsideWord 		:= func("F_ShowLongTooltip").bind(TransA["F_TI_InsideWord"])
+	GuiControl +g, % IdTextInfo6, % F_TI_InsideWord
+	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo8,									ⓘ
+	F_TI_NoEndChar 		:= func("F_ShowLongTooltip").bind(TransA["F_TI_NoEndChar"]) 
+	GuiControl +g, % IdTextInfo8, % F_TI_NoEndChar						
 	
 	Gui, 		HS3: Font, 		% "s" . c_FontSize
 	Gui,			HS3: Add,			CheckBox,		x0 y0 HwndIdCheckBox7 gF_Checkbox vv_OptionRaw,				% TransA["Send Raw (R)"]
 	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2
-	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo9 gF_TI_OptionRaw,						ⓘ
+	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo9,									ⓘ
+	F_TI_OptionRaw			:= func("F_ShowLongTooltip").bind(TransA["F_TI_OptionRaw"])
+	GuiControl +g, % IdTextInfo9, % F_TI_OptionRaw	
 	
 	Gui, 		HS3: Font, 		% "s" . c_FontSize
 	Gui,			HS3: Add,			CheckBox,		x0 y0 HwndIdCheckBox8 gF_Checkbox vv_OptionReset,				% TransA["Reset Recognizer (Z)"]
 	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2
-	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo10 gF_TI_OptionResetRecognizer,			ⓘ
+	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo10,									ⓘ
+	F_TI_OptionResetRecognizer := func("F_ShowLongTooltip").bind(TransA["F_TI_OptionResetRecognizer"])
+	GuiControl +g, % IdTextInfo10, % F_TI_OptionResetRecognizer
 	
 	Gui, 		HS3: Font, 		% "s" . c_FontSize
 	Gui, 		HS3: Add, 		CheckBox, 	x0 y0 HwndIdCheckBox6 gF_Checkbox vv_OptionDisable, 			% TransA["Disable"]
 	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2
-	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo11 gF_TI_OptionDisable,					ⓘ
+	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo11,									ⓘ
+	F_TI_OptionDisable		:= func("F_ShowLongTooltip").bind(TransA["F_TI_OptionDisable"])
+	GuiControl +g, % IdTextInfo11, % F_TI_OptionDisable
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText3,						 				% TransA["Select hotstring output function"]
@@ -5714,7 +5683,7 @@ F_GuiMain_DetermineConstraints()
 ;5.3. Right column
 ;5.3.1. Position the text "Library content"
 	v_yNext := c_ymarg
-	v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
+	v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
 	GuiControl, Move, % IdText7, % "x" v_xNext "y" v_yNext
 	
 ;5.3.2. Position of hotstring statistics (in this library: IdText11 / total: IdText2)
