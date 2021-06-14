@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -701,12 +701,6 @@ return
 F_ShowLongTooltip(string)
 {
 	ToolTip, % StrReplace(string, "``n", "`n")
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_RadioCase()
-{
-	global	;assume-global mode
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4798,7 +4792,7 @@ F_GuiHS4_CreateObject()
 	GuiControl +g, % IdTextInfo2b, % F_TI_ImmediateExecute
 	
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
-	Gui,		HS4: Add,		Radio,		x0 y0 HwndIdRadioCaseCCb AltSubmit gF_RadioCase vv_RadioCaseGroup Checked,	% TransA["Case-Conforming"]
+	Gui,		HS4: Add,		Radio,		x0 y0 HwndIdRadioCaseCCb AltSubmit vv_RadioCaseGroup Checked,	% TransA["Case-Conforming"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
 	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo3b,									ⓘ
 	GuiControl +g, % IdTextInfo3b, % F_TI_CaseConforming
@@ -4810,7 +4804,7 @@ F_GuiHS4_CreateObject()
 	GuiControl +g, % IdTextInfo4b, % F_TI_NoBackSpace
 	
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
-	Gui,		HS4: Add,		Radio,		x0 y0 HWndIdRadioCaseCSb AltSubmit gF_RadioCase,				% TransA["Case Sensitive (C)"]
+	Gui,		HS4: Add,		Radio,		x0 y0 HWndIdRadioCaseCSb AltSubmit,						% TransA["Case Sensitive (C)"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
 	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo5b,									ⓘ
 	GuiControl +g, % IdTextInfo5b, % F_TI_CaseSensitive
@@ -4822,7 +4816,7 @@ F_GuiHS4_CreateObject()
 	GuiControl +g, % IdTextInfo6b, % F_TI_InsideWord
 	
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
-	Gui,		HS4: Add,		Radio,		x0 y0 HwndIdRadioCaseC1b AltSubmit gF_RadioCase,				% TransA["Not Case-Conforming (C1)"]
+	Gui,		HS4: Add,		Radio,		x0 y0 HwndIdRadioCaseC1b AltSubmit,						% TransA["Not Case-Conforming (C1)"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
 	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo7b,									ⓘ
 	GuiControl +g, % IdTextInfo7b, % F_TI_NotCaseConforming
@@ -4855,7 +4849,7 @@ F_GuiHS4_CreateObject()
 	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText3b,						 				% TransA["Select hotstring output function"]
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 	HS4: Add, 	DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
+	Gui, 	HS4: Add, 	DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (R) |SendText (T)|SendPlay (SP) | SendEvent (SE)
 	
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText4b,					 					% TransA["Enter hotstring"]
@@ -4943,9 +4937,9 @@ F_GuiMain_CreateObject()
 	GuiControl +g, % IdTextInfo2, % F_TI_ImmediateExecute
 	
 	Gui, 		HS3: Font, 		% "s" . c_FontSize
-	Gui,			HS3: Add,			Radio,		x0 y0 HwndIdRadioCaseCC AltSubmit gF_RadioCase vv_RadioCaseGroup Checked,	% TransA["Case-Conforming"]
-	Gui,			HS3: Add,			Radio,		x0 y0 HWndIdRadioCaseCS AltSubmit gF_RadioCase,				% TransA["Case Sensitive (C)"]
-	Gui,			HS3: Add,			Radio,		x0 y0 HwndIdRadioCaseC1 AltSubmit gF_RadioCase,				% TransA["Not Case-Conforming (C1)"]
+	Gui,			HS3: Add,			Radio,		x0 y0 HwndIdRadioCaseCC AltSubmit vv_RadioCaseGroup Checked,	% TransA["Case-Conforming"]
+	Gui,			HS3: Add,			Radio,		x0 y0 HWndIdRadioCaseCS AltSubmit,							% TransA["Case Sensitive (C)"]
+	Gui,			HS3: Add,			Radio,		x0 y0 HwndIdRadioCaseC1 AltSubmit,							% TransA["Not Case-Conforming (C1)"]
 	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2
 	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo3,									ⓘ
 	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo5,									ⓘ
@@ -4998,7 +4992,7 @@ F_GuiMain_CreateObject()
 ;GuiControl,	Hide,		% IdText3
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 			SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)
+	Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 			SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (R) |SendText (T)|SendPlay (SP) | SendEvent (SE)
 ;GuiControl,	Hide,		% IdDDL1
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
@@ -7335,20 +7329,20 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 		Menu, AppSubmenu,	UnCheck, 	% TransA["Suspend Hotkeys"]
 	}
 	return
-	
-	L_TrayPauseScript:
+
+L_TrayPauseScript:
 	Pause, Toggle, 1
 	if (A_IsPaused)
 	{
-		Menu, Tray, 		Check, 	% TransA["Pause Application"]
-		Menu, AppSubmenu,	Check, 	% TransA["Pause Application"]
+		Menu, Tray, 		Check, 	% TransA["Pause application"]
+		Menu, AppSubmenu,	Check, 	% TransA["Pause"]
 	}
 	else
 	{
-		Menu, Tray, 		UnCheck, 	% TransA["Pause Application"]
-		Menu, AppSubmenu,	UnCheck, 	% TransA["Pause Application"]
+		Menu, Tray, 		UnCheck, 	% TransA["Pause application"]
+		Menu, AppSubmenu,	UnCheck, 	% TransA["Pause"]
 	}
-	return
+return
 	
 	L_TrayReload:	;new thread starts here
 	F_WhichGui()
