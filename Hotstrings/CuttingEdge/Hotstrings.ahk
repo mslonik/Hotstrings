@@ -94,6 +94,8 @@ global ini_CPDelay 				:= 300		;1-1000 [ms], default: 300
 IniRead, ini_CPDelay, 					Config.ini, Configuration, ClipBoardPasteDelay,		300
 global ini_HotstringUndo			:= true
 IniRead, ini_HotstringUndo,				Config.ini, Configuration, HotstringUndo,			1
+global ini_ShowIntro			:= true
+IniRead, ini_ShowIntro,					Config.ini, Configuration, ShowIntro,				1	;GUI with introduction to Hotstrings application.
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
 F_LoadSignalingParams()
 
@@ -698,6 +700,24 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_ShowIntro()
+{
+	global	;assume-global mode
+	;1. Prepare MyAbout Gui
+	Gui, ShowIntro: New, 	-Resize +HwndShowIntroGuiHwnd +Owner -MaximizeBox -MinimizeBox, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . Introduction
+	Gui, ShowIntro: Margin,	% c_xmarg, % c_ymarg
+	Gui,	ShowIntro: Color,	% c_WindowColor, % c_ControlColor
+	
+	;2. Prepare all text objects according to mock-up.
+	Gui,	ShowIntro: Font,		% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, 					% c_FontType
+	Gui, ShowIntro: Add, 		Text,    x0 y0 HwndIdLine1, 													% TransA["Let's make your PC personal again..."]
+	Gui,	ShowIntro: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType
+	Gui, ShowIntro: Add, 		Text,    x0 y0 HwndIdLine2, 													The first steps after installation (...)
+	Gui, ShowIntro: Add, 		Button,  x0 y0 HwndIdAboutOkButton gAboutOkButton,								% TransA["OK"]
+	Gui, ShowIntro: Add,		Picture, x0 y0 HwndIdAboutPicture w96 h96, 										% AppIcon
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ShowLongTooltip(string)
 {
 	ToolTip, % StrReplace(string, "``n", "`n")
@@ -2631,93 +2651,93 @@ F_Move()
 		GuiControl, Move, % IdSearchB1, % "x" v_xNext "y" v_yNext "w" v_ButtonW
 		
 		return
-	}
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	HS3SearchGuiSize()
-	{
-		global	;assume-global mode
-		local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
+HS3SearchGuiSize()
+{
+	global	;assume-global mode
+	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
 		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0
 		,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
-		
-		if (A_EventInfo = 1) ;The window has been minimized.
-			return
-		if (A_EventInfo = 2) ;The window has been maximized.
-			return
-		
-		GuiControlGet, v_OutVarTemp1, Pos, % IdSearchLV1 
-		F_AutoXYWH("*wh", IdSearchLV1)
-		GuiControlGet, v_OutVarTemp2, Pos, % IdSearchLV1 ;Check position of ListView1 again after resizing
-		if (v_OutVarTemp2W != v_OutVarTemp1W)
-		{
-			LV_ModifyCol(1, Round(0.2 * v_OutVarTemp2W))
-			LV_ModifyCol(2, Round(0.1 * v_OutVarTemp2W))
-			LV_ModifyCol(3, Round(0.1 * v_OutVarTemp2W))	
-			LV_ModifyCol(4, Round(0.1 * v_OutVarTemp2W))
-			LV_ModifyCol(5, Round(0.1 * v_OutVarTemp2W))
-			LV_ModifyCol(6, Round(0.27 * v_OutVarTemp2W))
-			LV_ModifyCol(7, Round(0.1 * v_OutVarTemp2W) - 3)
-		}
-		v_xNext := c_xmarg
-		v_yNext := v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
-		GuiControl, MoveDraw, % IdSearchT4, % "x" v_xNext "y" v_yNext ;information about shortcuts
-		
-		GuiControlGet, v_OutVarTemp1, Pos, % IdSearchB1
-		v_xNext := HS3MinWidth + c_xmarg - v_OutVarTemp1W
-		v_yNext -= c_ymarg
-		GuiControl, MoveDraw, % IdSearchB1, % "x" v_xNext "y" v_yNext 
-		
-		return
-	}
 	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_RemoveConfigIni()
-	{
-		global	;assume-global mode
-		if (FileExist("Config.ini"))
-		{
-			MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure?"] 
-			IfMsgBox, Yes
-			{
-				FileDelete, Config.ini
-				Reload
-			}
-			IfMsgBox, No
-				return
-		}
-	}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_Checkbox()	
-	{
-		global	;assume-global
-		local v_OutputVar := 0
-		GuiControlGet, v_OutputVar, % A_Gui . ":", % A_GuiControl
-		
-		if (v_OutputVar)
-		{
-			if (A_GuiControl = "v_OptionDisable")
-			{
-				Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cRed Norm", % c_FontType
-				Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cRed Norm", % c_FontType
-			}
-			else
-			{
-				Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
-				Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
-			}
-		}
-		else 
-		{
-			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-		}
-		GuiControl, HS3: Font, % A_GuiControl
-		GuiControl, HS3:, % A_GuiControl, % v_OutputVar
-		GuiControl, HS4: Font, % A_GuiControl
-		GuiControl, HS4:, % A_GuiControl, % v_OutputVar
-	;OutputDebug, F_Checkbox()
+	if (A_EventInfo = 1) ;The window has been minimized.
 		return
+	if (A_EventInfo = 2) ;The window has been maximized.
+		return
+	
+	GuiControlGet, v_OutVarTemp1, Pos, % IdSearchLV1 
+	F_AutoXYWH("*wh", IdSearchLV1)
+	GuiControlGet, v_OutVarTemp2, Pos, % IdSearchLV1 ;Check position of ListView1 again after resizing
+	if (v_OutVarTemp2W != v_OutVarTemp1W)
+	{
+		LV_ModifyCol(1, Round(0.2 * v_OutVarTemp2W))
+		LV_ModifyCol(2, Round(0.1 * v_OutVarTemp2W))
+		LV_ModifyCol(3, Round(0.1 * v_OutVarTemp2W))	
+		LV_ModifyCol(4, Round(0.1 * v_OutVarTemp2W))
+		LV_ModifyCol(5, Round(0.1 * v_OutVarTemp2W))
+		LV_ModifyCol(6, Round(0.27 * v_OutVarTemp2W))
+		LV_ModifyCol(7, Round(0.1 * v_OutVarTemp2W) - 3)
 	}
+	v_xNext := c_xmarg
+	v_yNext := v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
+	GuiControl, MoveDraw, % IdSearchT4, % "x" v_xNext "y" v_yNext ;information about shortcuts
+	
+	GuiControlGet, v_OutVarTemp1, Pos, % IdSearchB1
+	v_xNext := HS3MinWidth + c_xmarg - v_OutVarTemp1W
+	v_yNext -= c_ymarg
+	GuiControl, MoveDraw, % IdSearchB1, % "x" v_xNext "y" v_yNext 
+	
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_RemoveConfigIni()
+{
+	global	;assume-global mode
+	if (FileExist("Config.ini"))
+	{
+		MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure?"] 
+		IfMsgBox, Yes
+		{
+			FileDelete, Config.ini
+			Reload
+		}
+		IfMsgBox, No
+			return
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_Checkbox()	
+{
+global	;assume-global
+	local v_OutputVar := 0
+	GuiControlGet, v_OutputVar, % A_Gui . ":", % A_GuiControl
+	
+	if (v_OutputVar)
+	{
+		if (A_GuiControl = "v_OptionDisable")
+		{
+			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cRed Norm", % c_FontType
+			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cRed Norm", % c_FontType
+		}
+		else
+		{
+			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+		}
+	}
+	else 
+	{
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+	}
+	GuiControl, HS3: Font, % A_GuiControl
+	GuiControl, HS3:, % A_GuiControl, % v_OutputVar
+	GuiControl, HS4: Font, % A_GuiControl
+	GuiControl, HS4:, % A_GuiControl, % v_OutputVar
+	;OutputDebug, F_Checkbox()
+	return
+}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	F_GuiHSdelay()
@@ -3921,20 +3941,21 @@ F_ToggleSandbox()
 			ini_WhichGui := "HS3"
 		
 		return
-	}
-	
+}
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_CheckCreateConfigIni()
+{
+	global ;assume-global mode
+	local ConfigIni := ""	; variable which is used as default content of Config.ini
 	
-	F_CheckCreateConfigIni()
-	{
-		global ;assume-global mode
-		local ConfigIni := ""	; variable which is used as default content of Config.ini
-		
-		ConfigIni := "			
+	ConfigIni := "			
 	(
 [Configuration]
 ClipBoardPasteDelay=300
 HotstringUndo=1
+ShowIntro=1
 [Event_BasicHotstring]
 OHTtEn=1
 OHTD=0
@@ -4007,13 +4028,13 @@ Tab=1
 [LoadLibraries]
 [ShowTipsLibraries]
 	)"
-		
-		if (!FileExist("Config.ini"))
-		{
-			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini is now created in location:"] . "`n`n" . A_ScriptDir
-			FileAppend, %ConfigIni%, Config.ini
-		}
-		return	
+	
+	if (!FileExist("Config.ini"))
+	{
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini is now created in location:"] . "`n`n" . A_ScriptDir
+		FileAppend, %ConfigIni%, Config.ini
+	}
+	return	
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4542,10 +4563,10 @@ F_TI_CaseSensitive										= C: Case sensitive: `n`nWhen you type a triggerstri
 F_TI_NotCaseConforming									= C1: Do not conform to typed case. `n`nUse this option to make hotstrings case insensitive `nand prevent them from conforming to the case of the characters you actually type.
 F_TI_EnterTriggerstring									= Enter text of triggerstring. `n`nTip1: If you want to change capitalization in abbreviation, use no triggerstring options. `nE.g. ascii → ASCII. `n`nTip2: If you want exchange triggerstring of abbreviation into full phrase, `nend your triggerstring with ""/"" and `napply Immediate Execute (*) triggerstring option.
 F_TI_OptionDisable										= Disables the hotstring. `n`nIf ticked, this option is shown in red color. `nBe aware that triggerstring tooltips (if enabled) `nare displayed even for disabled (triggerstring, hotstring) definitions.
-TI_SHOF												= TI_SHOF
+TI_SHOF												= Select function, which will be used to show up hotstring. `n`nAvailable options: `n`nSendInput (SI): SendInput is generally the preferred method because of its superior speed and reliability. `nUnder most conditions, SendInput is nearly instantaneous, even when sending long strings. `nSince SendInput is so fast, it is also more reliable because there is less opportunity for some other window to pop up unexpectedly `nand intercept the keystrokes. Reliability is further improved by the fact `nthat anything the user types during a SendInput is postponed until afterward. `n`nClipboard (CL): hotstring is copied from clipboard. `nIn case of long hotstrings this is the fastest method. The downside of this method is delay `nrequired for operating system to paste content into specific window. `nIn order to change value of this delay see ""Clipboard Delay (F7)"" option in menu. `n`nMenu and SendInput (MSI): One triggerstring can be used to enter up to 7 hotstrings which are desplayed in form of list (menu). `nFor entering of chosen hotstring again SendInput (SI) is used. `n`nMenu & Clipboard (MCL): One triggerstring can be used to enter up to 7 hotstrings which are desplayed in form of list (menu). `nFor entering of chosen hotstring Clipboard (CL) is used. `n`nSenRaw (R): All subsequent characters, including the special characters ^+!#{}, `nto be interpreted literally rather than translating {Enter} to Enter, ^c to Ctrl+C, etc. `n`nSendText (T): Similar to the Raw mode, except that no attempt is made to translate characters (other than `r, `n, `t and `b) to keycodes. `n`nSendPlay (SP): SendPlay's biggest advantage is its ability to ""play back"" keystrokes and mouse clicks in a broader variety of games `nthan the other modes. `nFor example, a particular game may accept hotstrings only when they have the SendPlay option. `n`nSendEvent (SE): SendEvent sends keystrokes using the same method as the pre-1.0.43 Send command.
 TI_EnterHotstring										= Enter hotstring corresponding to the triggerstring. `n`nTip: You can use special key names in curved brackets. E.g.: {left 5} will move caret by 5x characters to the left.`n{Backspace 3} or {BS 3} will remove 3 characters from the end of triggerstring. `n`nTo send an extra space or tab after a replacement, include the space or tab at the end of the replacement `nbut make the last character an accent/backtick (`). `nFor example: `n:*:btw::By the way `
 TI_AddComment											= You can add optional (not mandatory) comment to new (triggerstring, hotstring) definition. `n`nThe comment can be max. 64 characters long. `n`nTip: Put here link to Wikipedia definition or any other external resource containing reference to entered definition.
-TI_SelectHotstringLib									= TI_SelectHotstringLib
+TI_SelectHotstringLib									= Select .csv file containing (triggerstring, hotstring) definitions. `nBy default those files are located in C:\Users\<UserName>\Documents folder.
 TI_LibraryContent										= After pressing (F2) you can move up or down in the table by pressing ↑ or ↓ arrows. `n`nEach time you select any row, options of the selected definitions are automatically loaded to the left part of this window.
 TI_Sandbox											= Sandbox is used as editing field where you can test `nany (triggerstring, hotstring) definition, e.g. for testing purposes. `nThis area can be switched on/off and moves when you rescale `nthe main application window.
 ↓ Click here to select hotstring library ↓					= ↓ Click here to select hotstring library ↓
@@ -4822,8 +4843,14 @@ F_GuiHS4_CreateObject()
 	Gui, 	HS4:Add, 		Button, 		x0 y0 HwndIdButton3b gF_Clear,							% TransA["Clear (F5)"]
 	Gui, 	HS4:Add, 		Button, 		x0 y0 HwndIdButton4b gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
 	
-	Gui,		HS4: Add,		Button,		x0 y0 HwndIdButton5b gF_ToggleRightColumn,				⯈`nF4
+	Gui,		HS4: Add,		Button,		x0 y0 HwndIdButton5b gF_ToggleRightColumn,					⯈`nF4
+	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText10b,			 						% TransA["Sandbox (F6)"]
+	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2	
+	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo17b,									ⓘ
+	GuiControl +g, % IdTextInfo17b, % TI_Sandbox
+	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	
 	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit10b vv_Sandbox r3 							; r3 = 3x rows of text
 	
 	Gui,		HS4: Add,		Text,		x0 y0 HwndIdText11b, % TransA["This library:"] . A_Space
@@ -5043,45 +5070,56 @@ F_GuiHS4_Redraw()
 {
 	global ;assume-global mode
 	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_xNext := 0, v_yNext := 0, v_wNext := 0
 	
 	if (ini_Sandbox)
 	{
-		GuiControl, Move, % IdText10b, % "x" . c_xmarg . "y" . LeftColumnH + c_ymarg
-		GuiControl, Move, % IdEdit10b, % "x" . c_xmarg . "y" . LeftColumnH + c_ymarg + HofText . "w" . LeftColumnW - 2 * c_ymarg
+		v_xNext := c_xmarg
+		v_yNext := LeftColumnH + c_ymarg
+		GuiControl, Move, % IdText10b, % "x" . v_xNext . "y" . v_yNext
+		GuiControlGet, v_OutVarTemp, Pos, % IdText10b
+		v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
+		GuiControl, Move, % IdTextInfo17b, % "x" . v_xNext . "y" . v_yNext
+		v_xNext := c_xmarg
+		v_yNext := LeftColumnH + c_ymarg + HofText
+		v_wNext := LeftColumnW - 2 * c_ymarg
+		GuiControl, Move, % IdEdit10b, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 		GuiControl, Show, % IdText10b
+		GuiControl, Show, % IdTextInfo17b
 		GuiControl, Show, % IdEdit10b
 		;5.2. Position of counters
 		GuiControlGet, v_OutVarTemp, Pos, % IdEdit10b
 		v_xNext := c_xmarg
 		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg 
-		GuiControl, Move, % IdText11b,  % "x" v_xNext "y" v_yNext ;text: Hotstrings
+		GuiControl, Move, % IdText11b,  % "x" . v_xNext . "y" . v_yNext ;text: Hotstrings
 		GuiControlGet, v_OutVarTemp, Pos, % IdText11b
 		v_xNext := v_OutVarTempX + v_OutVarTempW
-		GuiControl, Move, % IdText13b,  % "x" v_xNext "y" v_yNext ;text: value of Hotstrings
+		GuiControl, Move, % IdText13b,  % "x" . v_xNext . "y" . v_yNext ;text: value of Hotstrings
 		GuiControlGet, v_OutVarTemp, Pos, % IdText13b
 		v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
-		GuiControl, Move, % IdText2b, % "x" v_xNext "y" v_yNext ;where to place text Total
+		GuiControl, Move, % IdText2b, % "x" . v_xNext . "y" . v_yNext ;where to place text Total
 		GuiControlGet, v_OutVarTemp, Pos, % IdText2
 		v_xNext += v_OutVarTempW
-		GuiControl, Move, % IdText12b, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
+		GuiControl, Move, % IdText12b, % "x" . v_xNext . "y" . v_yNext ;Where to place value of total counter
 	}
 	else
 	{
 		GuiControl, Hide, % IdText10b ;sandobx text
+		GuiControl, Hide, % IdTextInfo17b
 		GuiControl, Hide, % IdEdit10b ;sandbox edit field
 		;5.3. Position of counters
 		v_xNext := c_xmarg
 		v_yNext := LeftColumnH
-		GuiControl, Move, % IdText11b,  % "x" v_xNext "y" v_yNext ;text: "This library""
+		GuiControl, Move, % IdText11b,  % "x" . v_xNext . "y" . v_yNext ;text: "This library""
 		GuiControlGet, v_OutVarTemp, Pos, % IdText11b
 		v_xNext := v_OutVarTempX + v_OutVarTempW
-		GuiControl, Move, % IdText13b,  % "x" v_xNext "y" v_yNext ;text: value displayed after "This library"
+		GuiControl, Move, % IdText13b,  % "x" . v_xNext . "y" . v_yNext ;text: value displayed after "This library"
 		GuiControlGet, v_OutVarTemp, Pos, % IdText13b
 		v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
-		GuiControl, Move, % IdText2b, % "x" v_xNext "y" v_yNext ;where to place text "Total"
+		GuiControl, Move, % IdText2b, % "x" . v_xNext . "y" . v_yNext ;where to place text "Total"
 		GuiControlGet, v_OutVarTemp, Pos, % IdText2
 		v_xNext += v_OutVarTempW
-		GuiControl, Move, % IdText12b, % "x" v_xNext "y" v_yNext ;Where to place value after "Total"
+		GuiControl, Move, % IdText12b, % "x" . v_xNext . "y" . v_yNext ;Where to place value after "Total"
 	}
 	
 	;5.2. Button between left and right column
@@ -5735,35 +5773,35 @@ F_GuiAbout_DetermineConstraints()
 	
 	return
 }
-	
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_GuiAbout()
-	{
-		global ;assume-global mode
-		local FoundPos := "", NewStr := ""
+F_GuiAbout()
+{
+	global ;assume-global mode
+	local FoundPos := "", NewStr := ""
 		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
-		
-		NewStr := RegExReplace(TransA["About/Help (F1)"], "&", "")
-		NewStr := SubStr(NewStr, 1, -4)
-		
-		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-		Gui, MyAbout: Show, Hide Center AutoSize
-		
-		DetectHiddenWindows, On
-		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . MyAboutGuiHwnd
-		DetectHiddenWindows, Off
-		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
-		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+	
+	NewStr := RegExReplace(TransA["About/Help (F1)"], "&", "")
+	NewStr := SubStr(NewStr, 1, -4)
+	
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, MyAbout: Show, Hide Center AutoSize
+	
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . MyAboutGuiHwnd
+	DetectHiddenWindows, Off
+	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
 	;OutputDebug, % "Window2W:" . A_Space . Window2W . A_Space . "Window2H:" . A_Space . Window2H
 	;OutputDebug, % "NewWinPosX:" . A_Space . NewWinPosX . A_Space . "NewWinPosY:" . A_Space . NewWinPosY
-		if ((NewWinPosX != 0) and (NewWinPosY != 0))
-			Gui, MyAbout: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . NewStr
-		else 
-			Gui, MyAbout: Show, Center AutoSize, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . NewStr
-		return  
-	}
+	if ((NewWinPosX != 0) and (NewWinPosY != 0))
+		Gui, MyAbout: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . NewStr
+	else 
+		Gui, MyAbout: Show, Center AutoSize, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . NewStr
+	return  
+}
 	
 ; ------------------------------------------------------------------------------------------------------------------------------------
 	
