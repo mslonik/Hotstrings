@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -35,6 +35,7 @@ global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -al
 FileInstall, hotstrings.ico, hotstrings.ico, 0
 FileInstall, LICENSE, LICENSE, 0
 
+global HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" ; Hotstrings Application Data Libraries
 global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l or d
 
 global a_Triggers 				:= []		;Main loop of application
@@ -2050,7 +2051,7 @@ F_AddHotstring()
 	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
 	GuiControl, % "Count" . v_TotalLines . A_Space . "-Redraw", % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	
-	FileRead, v_TheWholeFile, Libraries\%v_SelectHotstringLibrary%
+	FileRead, v_TheWholeFile, % HADL . "\" . v_SelectHotstringLibrary
 	Loop, Parse, v_TheWholeFile, `n, `r
 		if (A_LoopField)
 			v_TotalLines++
@@ -2121,7 +2122,7 @@ F_AddHotstring()
 	;4. Sort List View. 
 	LV_ModifyCol(1, "Sort")
 	;5. Delete library file. 
-	FileDelete, % A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary
+	FileDelete, % HADL . "\" . v_SelectHotstringLibrary
 	
 	;6. Save List View into the library file.
 	Loop, % LV_GetCount()
@@ -2134,7 +2135,7 @@ F_AddHotstring()
 		LV_GetText(txt6, A_Index, 6)
 		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
 	}
-	FileAppend, % txt, Libraries\%v_SelectHotstringLibrary%, UTF-8
+	FileAppend, % txt, % HADL . "\" . v_SelectHotstringLibrary, UTF-8
 	GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 	;7. Increment library counter.
 	if !(ModifiedFlag) 
@@ -2174,8 +2175,6 @@ F_Clear()
 	GuiControl, HS3:, % IdCheckBox5, 0
 	GuiControl, HS3: Font, % IdCheckBox6
 	GuiControl, HS3:, % IdCheckBox6, 0
-	GuiControl, HS3: Font, % IdCheckBox7
-	GuiControl, HS3:, % IdCheckBox7, 0
 	GuiControl, HS3: Font, % IdCheckBox8
 	GuiControl, HS3:, % IdCheckBox8, 0
 	GuiControl, HS3: Choose, % IdDDL1, SendInput (SI) ;v_SelectFunction 
@@ -2218,8 +2217,6 @@ F_Clear()
 	GuiControl, HS4:, % IdCheckBox5b, 0
 	GuiControl, HS4: Font, % IdCheckBox6b
 	GuiControl, HS4:, % IdCheckBox6b, 0
-	GuiControl, HS4: Font, % IdCheckBox7b
-	GuiControl, HS4:, % IdCheckBox7b, 0
 	GuiControl, HS4: Font, % IdCheckBox8b
 	GuiControl, HS4:, % IdCheckBox8b, 0
 	GuiControl, HS4: Choose, % IdDDL1b, SendInput (SI) ;v_SelectFunction 
@@ -2279,7 +2276,7 @@ F_Move()
 	
 	LV_Add("", v_Triggerstring, v_TriggOpt, v_OutFun, v_EnDis, v_Hotstring, v_Comment) ;add to ListView
 	LV_ModifyCol(1, "Sort")
-	FileDelete, Libraries\%v_SelectHotstringLibrary%	;delete the old destination file.
+	FileDelete, % HADL . "\" . v_SelectHotstringLibrary	;delete the old destination file.
 	
 	Loop, % LV_GetCount() ;Saving the same destination filename but now containing moved (triggerstring, hotstring) definition.
 	{
@@ -2291,7 +2288,7 @@ F_Move()
 		LV_GetText(txt6, A_Index, 6)
 		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
 	}
-	FileAppend, % txt, Libraries\%v_SelectHotstringLibrary%, UTF-8
+	FileAppend, % txt, % HADL . "\" . v_SelectHotstringLibrary, UTF-8
 	
 	F_SelectLibrary() ;Remove the definition from source table / file.
 	Loop, % LV_GetCount()
@@ -2303,7 +2300,7 @@ F_Move()
 			break
 		}
 	}
-	FileDelete, Libraries\%v_SourceLibrary%	;delete the old source filename.
+	FileDelete, % HADL . "\" . v_SourceLibrary	;delete the old source filename.
 	Loop, % LV_GetCount() ;Saving the same filename but now without deleted (triggerstring, hotstring) definition.
 	{
 		LV_GetText(txt1, A_Index, 2)
@@ -2314,7 +2311,7 @@ F_Move()
 		LV_GetText(txt6, A_Index, 6)
 		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
 	}
-	FileAppend, % txt, Libraries\%v_SourceLibrary%, UTF-8
+	FileAppend, % txt, % HADL . "\" . v_SourceLibrary, UTF-8
 	F_Clear()
 	F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
 	F_Searching("ReloadAndView")
@@ -2946,7 +2943,7 @@ global	;assume-global
 		TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
 		
 	;1. Remove selected library file.
-		LibraryFullPathAndName := A_ScriptDir . "\Libraries\" . v_SelectHotstringLibrary
+		LibraryFullPathAndName := HADL . "\" . v_SelectHotstringLibrary
 		FileDelete, % LibraryFullPathAndName
 		
 	;4. Disable selected hotstring.
@@ -2971,7 +2968,7 @@ global	;assume-global
 			LV_GetText(txt6, A_Index, 6)
 			txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
 		}
-		FileAppend, % txt, Libraries\%v_SelectHotstringLibrary%, UTF-8
+		FileAppend, % txt, % HADL . "\" . v_SelectHotstringLibrary, UTF-8
 		
 	;5. Remove trigger hint. Remark: All trigger hints are deleted, so if triggerstring was duplicated, then all trigger hints are deleted!
 		Loop, % a_Triggers.MaxIndex()
@@ -3188,7 +3185,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			Gui, HS4: Submit, NoHide
 		
 		GuiControl, Enable, % IdButton4 ; button Delete hotstring (F8)
-		FileRead, v_TheWholeFile, Libraries\%v_SelectHotstringLibrary%
+		FileRead, v_TheWholeFile, % HADL . "\" . v_SelectHotstringLibrary
 		Loop, Parse, v_TheWholeFile, `n, `r
 			if (A_LoopField)
 				v_TotalLines++
@@ -4094,157 +4091,157 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_LoadHotstringsFromLibraries()
+F_LoadHotstringsFromLibraries()
+{
+	global ; assume-global mode
+	local key := "", value := "", PriorityFlag := false
+	a_Library 				:= []
+	a_TriggerOptions 			:= []
+	a_Triggerstring 			:= []
+	a_OutputFunction 			:= []
+	a_EnableDisable 			:= []
+	a_Hotstring				:= []
+	a_Comment 				:= []
+	
+; Prepare TrayTip message taking into account value of command line parameter.
+	if (v_Param == "d")
+		TrayTip, %A_ScriptName% - Debug mode, 	% TransA["Loading hotstrings from libraries..."], 1
+	else if (v_Param == "l")
+		TrayTip, %A_ScriptName% - Lite mode, 	% TransA["Loading hotstrings from libraries..."], 1
+	else	
+		TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
+	
+; Load (triggerstring, hotstring) definitions if enabled and triggerstring tips if enabled.
+	v_TotalHotstringCnt := 0
+	
+	for key, value in ini_LoadLib
 	{
-		global ; assume-global mode
-		local key := "", value := "", PriorityFlag := false
-		a_Library 				:= []
-		a_TriggerOptions 			:= []
-		a_Triggerstring 			:= []
-		a_OutputFunction 			:= []
-		a_EnableDisable 			:= []
-		a_Hotstring				:= []
-		a_Comment 				:= []
-		
-	; Prepare TrayTip message taking into account value of command line parameter.
-		if (v_Param == "d")
-			TrayTip, %A_ScriptName% - Debug mode, 	% TransA["Loading hotstrings from libraries..."], 1
-		else if (v_Param == "l")
-			TrayTip, %A_ScriptName% - Lite mode, 	% TransA["Loading hotstrings from libraries..."], 1
-		else	
-			TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
-		
-	; Load (triggerstring, hotstring) definitions if enabled and triggerstring tips if enabled.
-		v_TotalHotstringCnt := 0
-		
+		if ((key != "PriorityLibrary.csv") and (value))
+			F_LoadFile(key)
+		if ((key == "PriorityLibrary.csv") and (value))
+			PriorityFlag := true
+	}
+	if (PriorityFlag)
+	{
+		F_LoadFile("PriorityLibrary.csv")
+		PriorityFlag := false
+	}
+	return
+}
+	
+; ------------------------------------------------------------------------------------------------------------------------------------
+	
+F_UpdateSelHotLibDDL()
+;Load content of DDL2 and mark disabled libraries
+{
+	global ;assume-global mode
+	local key := "", value := "", FinalString := ""
+	
+	if (ini_LoadLib.Count()) ;if ini_LoadLib isn't empty
+	{
+		FinalString .= TransA["↓ Click here to select hotstring library ↓"] . "||"
 		for key, value in ini_LoadLib
 		{
-			if ((key != "PriorityLibrary.csv") and (value))
-				F_LoadFile(key)
-			if ((key == "PriorityLibrary.csv") and (value))
-				PriorityFlag := true
+			if !(value)
+			{
+				FinalString .= key . A_Space . TransA["DISABLED"]
+				
+			}
+			else
+			{
+				FinalString .= key 
+			}
+			FinalString .= "|"
 		}
-		if (PriorityFlag)
-		{
-			F_LoadFile("PriorityLibrary.csv")
-			PriorityFlag := false
-		}
-		return
 	}
+	else ;if ini_LoadLib is empty
+	{
+		FinalString .=  TransA["No libraries have been found!"] . "||" 
+	}
+	
+	GuiControl, , % IdDDL2, % "|" . FinalString 	;To replace (overwrite) the list instead, include a pipe as the first character
+	GuiControl, , % IdDDL2b, % "|" . FinalString	;To replace (overwrite) the list instead, include a pipe as the first character
+	return
+}
 	
 ; ------------------------------------------------------------------------------------------------------------------------------------
 	
+F_ToggleTipsLibrary()
+{
+	global ;assume-global mode
+	local v_LibraryFlag := 0 
+	
+	Menu, ToggleLibTrigTipsSubmenu, ToggleCheck, %A_ThisMenuitem%
+	IniRead, v_LibraryFlag, Config.ini, ShowTipsLibraries, %A_ThisMenuitem%
+	v_LibraryFlag := !(v_LibraryFlag)
+	IniWrite, %v_LibraryFlag%, Config.ini, ShowTipsLibraries, %A_ThisMenuitem%
+	
+	F_ValidateIniLibSections()
+	a_Triggers := []
+	F_LoadHotstringsFromLibraries()
+	return
+}
+	
+; ------------------------------------------------------------------------------------------------------------------------------------
+	
+F_EnDisLib() 
+{
+	global ;assume-global mode
+	local v_LibraryFlag := 0 ;, v_WhichLibraries := "", v_LibTemp := "", v_LibFlagTemp := ""
+	
+	Menu, EnDisLib, ToggleCheck, %A_ThisMenuItem%
+	IniRead, v_LibraryFlag,	Config.ini, LoadLibraries, %A_ThisMenuitem%
+	v_LibraryFlag := !(v_LibraryFlag)
+	Iniwrite, %v_LibraryFlag%,	Config.ini, LoadLibraries, %A_ThisMenuItem%
+	
+	if (v_LibraryFlag)
+	{
+		F_LoadFile(A_ThisMenuItem)
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The (triggerstring, hotstring) definitions have been uploaded from library file"] . ":"
+		. "`n`n" . A_ThisMenuItem
+	}
+	else
+	{
+		F_UnloadFile(A_ThisMenuItem)
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory"]
+		. ":" . "`n`n" . A_ThisMenuItem
+	}
+	
+	F_ValidateIniLibSections()
 	F_UpdateSelHotLibDDL()
-;Load content of DDL2 and mark disabled libraries
+	return
+}
+; ------------------------------------------------------------------------------------------------------------------------------------
+F_UnloadFile(nameoffile)
+{
+	global ;assume-global mode
+	local	v_TheWholeFile := "",	Options := "",	TriggerString := ""
+	
+	FileRead, v_TheWholeFile, % HADL . "\" . nameoffile
+	Loop, Parse, v_TheWholeFile, `n, `r
 	{
-		global ;assume-global mode
-		local key := "", value := "", FinalString := ""
-		
-		if (ini_LoadLib.Count()) ;if ini_LoadLib isn't empty
+		if (A_LoopField)
 		{
-			FinalString .= TransA["↓ Click here to select hotstring library ↓"] . "||"
-			for key, value in ini_LoadLib
+			Loop, Parse, A_LoopField, ‖
 			{
-				if !(value)
-				{
-					FinalString .= key . A_Space . TransA["DISABLED"]
-					
-				}
-				else
-				{
-					FinalString .= key 
-				}
-				FinalString .= "|"
+				if (A_Index = 1)
+					Options := A_LoopField
+				if (A_Index = 2)
+					TriggerString := A_LoopField
+				if (A_Index = 3)
+					Break
 			}
+			Try
+				Hotstring(":" . Options . ":" . TriggerString, , "Off") ;Disable existing hotstring
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with disabling of existing hotstring"] 
+				. ":" . "`n`n" . "TriggerString:" . A_Space . TriggerString . "`n" . A_Space . "Options:" . A_Space . Options . "`n`n" . TransA["Library name:"] 
+				. A_Space . nameoffile 				
+			Options := ""		
 		}
-		else ;if ini_LoadLib is empty
-		{
-			FinalString .=  TransA["No libraries have been found!"] . "||" 
-		}
-		
-		GuiControl, , % IdDDL2, % "|" . FinalString 	;To replace (overwrite) the list instead, include a pipe as the first character
-		GuiControl, , % IdDDL2b, % "|" . FinalString	;To replace (overwrite) the list instead, include a pipe as the first character
-		return
 	}
-	
-; ------------------------------------------------------------------------------------------------------------------------------------
-	
-	F_ToggleTipsLibrary()
-	{
-		global ;assume-global mode
-		local v_LibraryFlag := 0 
-		
-		Menu, ToggleLibTrigTipsSubmenu, ToggleCheck, %A_ThisMenuitem%
-		IniRead, v_LibraryFlag, Config.ini, ShowTipsLibraries, %A_ThisMenuitem%
-		v_LibraryFlag := !(v_LibraryFlag)
-		IniWrite, %v_LibraryFlag%, Config.ini, ShowTipsLibraries, %A_ThisMenuitem%
-		
-		F_ValidateIniLibSections()
-		a_Triggers := []
-		F_LoadHotstringsFromLibraries()
-		return
-	}
-	
-; ------------------------------------------------------------------------------------------------------------------------------------
-	
-	F_EnDisLib() 
-	{
-		global ;assume-global mode
-		local v_LibraryFlag := 0 ;, v_WhichLibraries := "", v_LibTemp := "", v_LibFlagTemp := ""
-		
-		Menu, EnDisLib, ToggleCheck, %A_ThisMenuItem%
-		IniRead, v_LibraryFlag,	Config.ini, LoadLibraries, %A_ThisMenuitem%
-		v_LibraryFlag := !(v_LibraryFlag)
-		Iniwrite, %v_LibraryFlag%,	Config.ini, LoadLibraries, %A_ThisMenuItem%
-		
-		if (v_LibraryFlag)
-		{
-			F_LoadFile(A_ThisMenuItem)
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The (triggerstring, hotstring) definitions have been uploaded from library file"] . ":"
-			. "`n`n" . A_ThisMenuItem
-		}
-		else
-		{
-			F_UnloadFile(A_ThisMenuItem)
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory"]
-			. ":" . "`n`n" . A_ThisMenuItem
-		}
-		
-		F_ValidateIniLibSections()
-		F_UpdateSelHotLibDDL()
-		return
-	}
-; ------------------------------------------------------------------------------------------------------------------------------------
-	F_UnloadFile(nameoffile)
-	{
-		global ;assume-global mode
-		local	v_TheWholeFile := "",	Options := "",	TriggerString := ""
-		
-		FileRead, v_TheWholeFile, % A_ScriptDir . "\Libraries\" . nameoffile
-		Loop, Parse, v_TheWholeFile, `n, `r
-		{
-			if (A_LoopField)
-			{
-				Loop, Parse, A_LoopField, ‖
-				{
-					if (A_Index = 1)
-						Options := A_LoopField
-					if (A_Index = 2)
-						TriggerString := A_LoopField
-					if (A_Index = 3)
-						Break
-				}
-				Try
-					Hotstring(":" . Options . ":" . TriggerString, , "Off") ;Disable existing hotstring
-				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with disabling of existing hotstring"] 
-					. ":" . "`n`n" . "TriggerString:" . A_Space . TriggerString . "`n" . A_Space . "Options:" . A_Space . Options . "`n`n" . TransA["Library name:"] 
-					. A_Space . nameoffile 				
-				Options := ""		
-			}
-		}
-		return
-	}
+	return
+}
 	
 ; ------------------------------------------------------------------------------------------------------------------------------------
 	
@@ -4500,7 +4497,7 @@ The already imported file already existed. As a consequence some (triggerstring,
 The library  											= The library 
 The file path is: 										= The file path is:
 the following line is found:								= the following line is found:
-There is no Libraries subfolder and no lbrary (*.csv) file exist! = There is no Libraries subfolder and no lbrary (*.csv) file exist!
+There is no Libraries subfolder and no lbrary (*.csv) file exists! = There is no Libraries subfolder and no lbrary (*.csv) file exists!
 The selected file is empty. Process of import will be interrupted. = The selected file is empty. Process of import will be interrupted.
 The (triggerstring, hotstring) definitions have been uploaded from library file = The (triggerstring, hotstring) definitions have been uploaded from library file
 The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory = The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory
@@ -4632,7 +4629,7 @@ F_LoadFile(nameoffile)
 		if ((key == nameoffile) and (value))
 			FlagLoadTriggerTips := true
 	
-	FileRead, v_TheWholeFile, % A_ScriptDir . "\Libraries\" . nameoffile
+	FileRead, v_TheWholeFile, % HADL . "\" . nameoffile
 	F_WhichGui()
 	if (A_DefaultGui = "HS3" or A_DefaultGui = "HS4")
 	{
@@ -5805,125 +5802,125 @@ F_GuiAbout()
 	
 ; ------------------------------------------------------------------------------------------------------------------------------------
 	
-	F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
+F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
+{
+	global ;assume-global mode
+	local v_IsLibraryEmpty := true, v_ConfigLibrary := ""
+	,o_Libraries := {}, v_LibFileName := "", key := 0, value := "", TempLoadLib := "", TempShowTipsLib := "", v_LibFlagTemp := ""
+	,FlagFound := false, PriorityFlag := false, ValueTemp := 0, SectionTemp := ""
+	
+	ini_LoadLib := {}, ini_ShowTipsLib := {}	; this associative array is used to store information about Libraries\*.csv files to be loaded
+	
+	IniRead, TempLoadLib,	Config.ini, LoadLibraries
+	
+;Check if Libraries subfolder exists. If not, create it and display warning.
+	v_IsLibraryEmpty := true
+	if (!Instr(FileExist(HADL), "D"))				; if  there is no "Libraries" subfolder 
 	{
-		global ;assume-global mode
-		local v_IsLibraryEmpty := true, v_ConfigLibrary := ""
-		,o_Libraries := {}, v_LibFileName := "", key := 0, value := "", TempLoadLib := "", TempShowTipsLib := "", v_LibFlagTemp := ""
-		,FlagFound := false, PriorityFlag := false, ValueTemp := 0, SectionTemp := ""
-		
-		ini_LoadLib := {}, ini_ShowTipsLib := {}	; this associative array is used to store information about Libraries\*.csv files to be loaded
-		
-		IniRead, TempLoadLib,	Config.ini, LoadLibraries
-		
-	;Check if Libraries subfolder exists. If not, create it and display warning.
-		v_IsLibraryEmpty := true
-		if (!Instr(FileExist(A_ScriptDir . "\Libraries"), "D"))				; if  there is no "Libraries" subfolder 
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exists!"] . "`n`n" . HADL . "`n`n" . TransA["folder is now created"] . "."
+		FileCreateDir, % HADL							; Future: check against errors
+	}
+	else
+	{
+	;Check if Libraries subfolder is empty. If it does, display warning.
+		Loop, Files, % HADL . "\*.csv"
 		{
-			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exist!"] . "`n`n" . A_ScriptDir . "\Libraries\" . "`n`n" . TransA["folder is now created"] . "."
-			FileCreateDir, %A_ScriptDir%\Libraries							; Future: check against errors
+			v_IsLibraryEmpty := false
+			break
 		}
+	}
+	if (v_IsLibraryEmpty)
+	{
+		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Libraries folder:"] . "`n`n" . HADL . A_Space . "`n`n"
+	. TransA["is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?"]
+		IfMsgBox, Yes
+		{
+			FileAppend, , % HADL . "\" . "PriorityLibrary.csv", UTF-8
+			F_ValidateIniLibSections()
+		}
+	}
+	
+;Read names library files (*.csv) from Library subfolder into object.
+	if !(v_IsLibraryEmpty)
+		Loop, Files, % HADL . "\*.csv"
+			o_Libraries.Push(A_LoopFileName)
+	
+;Check if Config.ini contains in section [Libraries] file names which are actually in library subfolder. Synchronize [Libraries] section with content of subfolder.
+;Parse the TempLoadLib.
+	IniRead, TempLoadLib, Config.ini, LoadLibraries
+	for key, value in o_Libraries
+	{
+		FlagFound := false
+		Loop, Parse, TempLoadLib, `n, `r
+		{
+			v_LibFileName 	:= SubStr(A_LoopField, 1, InStr(A_LoopField, "=") - 1)
+			v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=",, v_LibFileName) + 1)
+			if (value == v_LibFileName)
+			{
+				ini_LoadLib[value] := v_LibFlagTemp
+				FlagFound := true
+			}
+		}	
+		if !(FlagFound)
+			ini_LoadLib[value] := 1
+	}
+	
+;Delete and recreate [Libraries] section of Config.ini mirroring ini_LoadLib associative table. "PriorityLibrary.csv" as the last one.
+	IniDelete, Config.ini, LoadLibraries
+	for key, value in ini_LoadLib
+	{
+		if (key != "PriorityLibrary.csv")
+			SectionTemp .= key . "=" . value . "`n"
 		else
 		{
-		;Check if Libraries subfolder is empty. If it does, display warning.
-			Loop, Files, Libraries\*.csv
-			{
-				v_IsLibraryEmpty := false
-				break
-			}
+			PriorityFlag := true
+			ValueTemp := value
 		}
-		if (v_IsLibraryEmpty)
-		{
-			MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Libraries folder:"] . "`n`n" . A_ScriptDir . "\Libraries" . A_Space . "`n`n"
-		. TransA["is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?"]
-			IfMsgBox, Yes
-			{
-				FileAppend, , % A_ScriptDir . "\Libraries\PriorityLibrary.csv", UTF-8
-				F_ValidateIniLibSections()
-			}
-		}
-		
-	;Read names library files (*.csv) from Library subfolder into object.
-		if !(v_IsLibraryEmpty)
-			Loop, Files, Libraries\*.csv
-				o_Libraries.Push(A_LoopFileName)
-		
-	;Check if Config.ini contains in section [Libraries] file names which are actually in library subfolder. Synchronize [Libraries] section with content of subfolder.
-	;Parse the TempLoadLib.
-		IniRead, TempLoadLib, Config.ini, LoadLibraries
-		for key, value in o_Libraries
-		{
-			FlagFound := false
-			Loop, Parse, TempLoadLib, `n, `r
-			{
-				v_LibFileName 	:= SubStr(A_LoopField, 1, InStr(A_LoopField, "=") - 1)
-				v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=",, v_LibFileName) + 1)
-				if (value == v_LibFileName)
-				{
-					ini_LoadLib[value] := v_LibFlagTemp
-					FlagFound := true
-				}
-			}	
-			if !(FlagFound)
-				ini_LoadLib[value] := 1
-		}
-		
-	;Delete and recreate [Libraries] section of Config.ini mirroring ini_LoadLib associative table. "PriorityLibrary.csv" as the last one.
-		IniDelete, Config.ini, LoadLibraries
-		for key, value in ini_LoadLib
-		{
-			if (key != "PriorityLibrary.csv")
-				SectionTemp .= key . "=" . value . "`n"
-			else
-			{
-				PriorityFlag := true
-				ValueTemp := value
-			}
-		}
-		if (PriorityFlag)
-			SectionTemp .= "PriorityLibrary.csv" . "=" . ValueTemp
-		
-		IniWrite, % SectionTemp, Config.ini, LoadLibraries
-		
-		SectionTemp := ""
-	;Check if Config.ini contains in section [ShowTipsLibraries] file names which are actually in library subfolder. Synchronize [Libraries] section with content of subfolder.
-	;Parse the TempLoadLib.
-		IniRead, TempShowTipsLib, Config.ini, ShowTipsLibraries
-		for key, value in o_Libraries
-		{
-			FlagFound := false
-			Loop, Parse, TempShowTipsLib, `n, `r
-			{
-				v_LibFileName 	:= SubStr(A_LoopField, 1, InStr(A_LoopField, "=") - 1)
-				v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=",, v_LibFileName) + 1)
-				if (value == v_LibFileName)
-				{
-					ini_ShowTipsLib[value] := v_LibFlagTemp
-					FlagFound := true
-				}
-			}	
-			if !(FlagFound)
-				ini_ShowTipsLib[value] := 1
-		}
-		
-	;Delete and recreate [ShowTipsLibraries] section of Config.ini mirroring ini_ShowTipsLib associative table. "PriorityLibrary.csv" as the last one.
-		IniDelete, Config.ini, ShowTipsLibraries
-		for key, value in ini_ShowTipsLib
-		{
-			if (key != "PriorityLibrary.csv")
-				SectionTemp .= key . "=" . value . "`n"
-			else
-			{
-				PriorityFlag := true
-				ValueTemp := value
-			}
-		}
-		if (PriorityFlag)
-			SectionTemp .= "PriorityLibrary.csv" . "=" . ValueTemp
-		
-		IniWrite, % SectionTemp, Config.ini, ShowTipsLibraries
-		return
 	}
+	if (PriorityFlag)
+		SectionTemp .= "PriorityLibrary.csv" . "=" . ValueTemp
+	
+	IniWrite, % SectionTemp, Config.ini, LoadLibraries
+	
+	SectionTemp := ""
+;Check if Config.ini contains in section [ShowTipsLibraries] file names which are actually in library subfolder. Synchronize [Libraries] section with content of subfolder.
+;Parse the TempLoadLib.
+	IniRead, TempShowTipsLib, Config.ini, ShowTipsLibraries
+	for key, value in o_Libraries
+	{
+		FlagFound := false
+		Loop, Parse, TempShowTipsLib, `n, `r
+		{
+			v_LibFileName 	:= SubStr(A_LoopField, 1, InStr(A_LoopField, "=") - 1)
+			v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=",, v_LibFileName) + 1)
+			if (value == v_LibFileName)
+			{
+				ini_ShowTipsLib[value] := v_LibFlagTemp
+				FlagFound := true
+			}
+		}	
+		if !(FlagFound)
+			ini_ShowTipsLib[value] := 1
+	}
+		
+;Delete and recreate [ShowTipsLibraries] section of Config.ini mirroring ini_ShowTipsLib associative table. "PriorityLibrary.csv" as the last one.
+	IniDelete, Config.ini, ShowTipsLibraries
+	for key, value in ini_ShowTipsLib
+	{
+		if (key != "PriorityLibrary.csv")
+			SectionTemp .= key . "=" . value . "`n"
+		else
+		{
+			PriorityFlag := true
+			ValueTemp := value
+		}
+	}
+	if (PriorityFlag)
+		SectionTemp .= "PriorityLibrary.csv" . "=" . ValueTemp
+	
+	IniWrite, % SectionTemp, Config.ini, ShowTipsLibraries
+	return
+}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
@@ -5948,7 +5945,7 @@ F_GuiAbout()
 			TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
 		
 	;Here content of libraries is loaded into set of tables
-		Loop, Files, %A_ScriptDir%\Libraries\*.csv 
+		Loop, Files, % HADL . "\*.csv"
 		{
 			Loop
 			{
@@ -6659,7 +6656,7 @@ F_ImportLibrary()
 	if (!v_LibraryName)
 		return
 	SplitPath, v_LibraryName, ,,, OutNameNoExt
-	v_OutputFile := % A_ScriptDir . "\Libraries\" . OutNameNoExt . ".csv"
+	v_OutputFile := % HADL . "\" . OutNameNoExt . ".csv"
 	
 	if (FileExist(v_OutputFile))
 	{
@@ -6792,15 +6789,15 @@ F_ImportLibrary()
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_ExportLibraryStatic()
-	{
-		global	;assume-global mode
-		local	v_LibraryName := "", v_Progress := "100", v_TotalLines := "0000"
-			,v_OutVarTemp := 0, v_OutVarTempX := 0, v_OutVarTempY := 0, v_OutVarTempW := 0, v_OutVarTempH := 0
-			,HS3GuiWinX := 0, HS3GuiWinY := 0, HS3GuiWinW := 0, HS3GuiWinH := 0, ExportGuiWinW := 0, ExportGuiWinH := 0
-			,OutFileName := "", OutNameNoExt := "", v_LibrariesDir := "", v_OutputFile := "", v_TheWholeFile := "", line := ""
-			,v_Options := "", v_Trigger := "", v_Function := "", v_EnDis := "", v_Hotstring := "", v_Comment := "", a_MenuHotstring := []
-			,v_Header := "
+F_ExportLibraryStatic()
+{
+	global	;assume-global mode
+	local	v_LibraryName := "", v_Progress := "100", v_TotalLines := "0000"
+		,v_OutVarTemp := 0, v_OutVarTempX := 0, v_OutVarTempY := 0, v_OutVarTempW := 0, v_OutVarTempH := 0
+		,HS3GuiWinX := 0, HS3GuiWinY := 0, HS3GuiWinW := 0, HS3GuiWinH := 0, ExportGuiWinW := 0, ExportGuiWinH := 0
+		,OutFileName := "", OutNameNoExt := "", v_LibrariesDir := "", v_OutputFile := "", v_TheWholeFile := "", line := ""
+		,v_Options := "", v_Trigger := "", v_Function := "", v_EnDis := "", v_Hotstring := "", v_Comment := "", a_MenuHotstring := []
+		,v_Header := "
 (
 ; This file is result of export from Hotstrings.ahk application (https://github.com/mslonik/Hotstrings).
 #SingleInstance force 			; Only one instance of this script may run at a time!
@@ -6810,32 +6807,33 @@ SendMode Input  				; Recommended for new scripts due to its superior speed and 
 SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
 FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN
 )"
-		FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries", % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
-		if (!v_LibraryName)
-			return
+
+	FileSelectFile, v_LibraryName, 3, % HADL . "\", % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
+	if (!v_LibraryName)
+		return
+	
+	SplitPath, v_LibraryName, OutFileName, , , OutNameNoExt
+	v_LibrariesDir := % HADL . "\ExportedLibraries"
+	if !InStr(FileExist(v_LibrariesDir),"D")
+		FileCreateDir, %v_LibrariesDir%
+	v_OutputFile := % HADL . "\ExportedLibraries\" . OutNameNoExt . "." . "ahk"
+	
+	if (FileExist(v_OutputFile))
+	{
+		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Such file already exists"] . ":" . "`n`n" . v_OutputFile . "`n`n" . TransA["Do you want to delete it?"] . "`n`n" 
+		. TransA["If you answer ""Yes"", the existing file will be deleted. If you answer ""No"", the current task will be continued and new content will be added to existing file."]
+		IfMsgBox, Yes
+			FileDelete, % v_OutputFile
+	}	
 		
-		SplitPath, v_LibraryName, OutFileName, , , OutNameNoExt
-		v_LibrariesDir := % A_ScriptDir . "\ExportedLibraries"
-		if !InStr(FileExist(v_LibrariesDir),"D")
-			FileCreateDir, %v_LibrariesDir%
-		v_OutputFile := % A_ScriptDir . "\ExportedLibraries\" . OutNameNoExt . "." . "ahk"
-		
-		if (FileExist(v_OutputFile))
-		{
-			MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Such file already exists"] . ":" . "`n`n" . v_OutputFile . "`n`n" . TransA["Do you want to delete it?"] . "`n`n" 
-			. TransA["If you answer ""Yes"", the existing file will be deleted. If you answer ""No"", the current task will be continued and new content will be added to existing file."]
-			IfMsgBox, Yes
-				FileDelete, % v_OutputFile
-		}	
-		
-		Gui, Export: New, 		+Border -Resize -MaximizeBox -MinimizeBox +HwndExportGuiHwnd +Owner +OwnDialogs, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Export to .ahk with static definitions of hotstrings"] 
-		Gui, Export: Margin,	% c_xmarg, % c_ymarg
-		Gui,	Export: Color,		% c_WindowColor, % c_ControlColor
-		Gui,	Export: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType	
-		
-		Gui, Export: Add, Text,		x0 y0 HwndIdExport_T1, TransA["Conversion of .csv library file into new .ahk file containing static (triggerstring, hotstring) definitions"]
-		Gui, Export: Add, Progress, 	x0 y0 HwndIdExport_P1 cBlue, 0
-		Gui, Export: Add, Text, 		x0 y0 HwndIdExport_T2, % TransA["Exported"] . A_Space . v_TotalLines . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
+	Gui, Export: New, 		+Border -Resize -MaximizeBox -MinimizeBox +HwndExportGuiHwnd +Owner +OwnDialogs, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Export to .ahk with static definitions of hotstrings"] 
+	Gui, Export: Margin,	% c_xmarg, % c_ymarg
+	Gui,	Export: Color,		% c_WindowColor, % c_ControlColor
+	Gui,	Export: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType	
+	
+	Gui, Export: Add, Text,		x0 y0 HwndIdExport_T1, TransA["Conversion of .csv library file into new .ahk file containing static (triggerstring, hotstring) definitions"]
+	Gui, Export: Add, Progress, 	x0 y0 HwndIdExport_P1 cBlue, 0
+	Gui, Export: Add, Text, 		x0 y0 HwndIdExport_T2, % TransA["Exported"] . A_Space . v_TotalLines . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
 		. A_Space . "(" . v_Progress . A_Space . "%" . ")"
 		
 		GuiControlGet, v_OutVarTemp, Pos, % IdExport_T1
@@ -6968,15 +6966,15 @@ SendMode Input  				; Recommended for new scripts due to its superior speed and 
 SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
 FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN
 )"
-		FileSelectFile, v_LibraryName, 3, % A_ScriptDir . "\Libraries", % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
+		FileSelectFile, v_LibraryName, 3, % HADL, % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
 		if (!v_LibraryName)
 			return
 		
 		SplitPath, v_LibraryName, OutFileName, , , OutNameNoExt
-		v_LibrariesDir := % A_ScriptDir . "\ExportedLibraries"
+		v_LibrariesDir := % HADL . "\ExportedLibraries"
 		if !InStr(FileExist(v_LibrariesDir),"D")
 			FileCreateDir, %v_LibrariesDir%
-		v_OutputFile := % A_ScriptDir . "\ExportedLibraries\" . OutNameNoExt . "." . "ahk"
+		v_OutputFile := % HADL . "\ExportedLibraries\" . OutNameNoExt . "." . "ahk"
 		
 		if (FileExist(v_OutputFile))
 		{
@@ -7161,8 +7159,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 			Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
 			v_ResizingFlag := false
 			return
-		}
-		
+		}		
 	}
 	else ;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakresem dostępnym na tym komputerze w momencie uruchomienia
 	{
@@ -7186,9 +7183,9 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 		return
 	}
 	v_NewLib .= ".csv"
-	IfNotExist, Libraries\%v_NewLib%
+	IfNotExist, % HADL . "\" . v_NewLib
 	{
-		FileAppend,, Libraries\%v_NewLib%, UTF-8
+		FileAppend,, % HADL . "\" . v_NewLib, UTF-8
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The library"] . A_Space . v_NewLib . A_Space . TransA["has been created."]
 		Gui, ALib: Destroy
 		
