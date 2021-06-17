@@ -3350,24 +3350,6 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 		GuiControl, HS3:, % IdCheckBox5, 	0
 		GuiControl, HS4:, % IdCheckBox5b, 	0
 	}
-	if (InStr(Options, "R"))
-	{
-		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
-		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
-		GuiControl, HS3: Font, % IdCheckBox7
-		GuiControl, HS4: Font, % IdCheckBox7b
-		GuiControl, HS3:, % IdCheckBox7, 	1
-		GuiControl, HS4:, % IdCheckBox7b, 	1
-	}
-	else
-	{
-		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-		GuiControl, HS3: Font, % IdCheckBox7
-		GuiControl, HS4: Font, % IdCheckBox7b
-		GuiControl, HS3:, % IdCheckBox7, 	0
-		GuiControl, HS4:, % IdCheckBox7b, 	0
-	}
 	if (InStr(Options, "Z"))
 	{
 		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
@@ -6044,6 +6026,7 @@ F_CreateHotstring(txt, nameoffile)
 	;if (Options and v_TriggerString and TextInsert and OnOff)
 	if (v_TriggerString and OnOff)
 	{
+		;MsgBox, , Debugging, % "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
 		Try
 			Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, Oflag), OnOff)
 		Catch
