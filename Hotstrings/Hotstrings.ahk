@@ -793,15 +793,16 @@ F_GuiShowIntro()
 	Gui, ShowIntro: Margin,	% c_xmarg, % c_ymarg
 	Gui,	ShowIntro: Color,	% c_WindowColor, % c_ControlColor
 	
+	TransA["ShowInfoText"] := StrReplace(TransA["ShowInfoText"], "``n", "`n")
 	;2. Prepare all text objects according to mock-up.
-	Gui,	ShowIntro: Font,		% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, 					% c_FontType
-	Gui, ShowIntro: Add, 		Text,    x0 y0 HwndIdIntroLine1, 												Welcome to Hotstrings application!
-	Gui,	ShowIntro: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType
-	Gui, ShowIntro: Add, 		Text,    x0 y0 HwndIdIntroLine2,												In order to display graphical user interface (GUI) of the application just press shortcut: Win + Ctrl + H. `n`nSuggested steps after installation: `n`n1. Download some libraries (files containing (triggerstring, hotstring) definitions. You can do it from application menu:  → Libraries. `n`n2. After downloading of libraries restart application to apply the changes. Again, you can do it from application menu: Application → Restart. `n`n3. Application is preconfigured on the first start. Options available to be configured area available from GUI, application menu → Configuration. `n`n4.Application runs by default in default mode. If you don't wish to modify configuration, `nmay consider to run it in simplified mode: application menu → Application → Reload → Reload in silent mode. 
-	Gui, ShowIntro: Add, 		Text,    x0 y0 HwndIdIntroLine3,												Good luck and DFTBA (Don't Forget to be Awsome)!
-	Gui, ShowIntro: Add, 		Button,  x0 y0 HwndIdIntroOkButton gF_IntroOkButton,								% TransA["OK"]
-	Gui, ShowIntro: Add,		Picture, x0 y0 HwndIdAboutPicture w96 h96, 										% AppIcon
-	Gui, ShowIntro: Add,		CheckBox, x0 y0 HwndIdIntroCheckbox gF_ShowIntroCheckbox,							% TransA["Show Introduction window after application is restarted?"]
+	Gui,	ShowIntro: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, 		% c_FontType
+	Gui, ShowIntro: Add, 	Text,    x0 y0 HwndIdIntroLine1, 									% TransA["Welcome to Hotstrings application!"]
+	Gui,	ShowIntro: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 		% c_FontType
+	Gui, ShowIntro: Add, 	Text,    x0 y0 HwndIdIntroLine2,									% TransA["ShowInfoText"]
+	Gui, ShowIntro: Add, 	Text,    x0 y0 HwndIdIntroLine3,									% TransA["I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)!"]
+	Gui, ShowIntro: Add, 	Button,  x0 y0 HwndIdIntroOkButton gF_IntroOkButton,					% TransA["OK"]
+	Gui, ShowIntro: Add,	Picture, x0 y0 HwndIdAboutPicture w96 h96, 							% AppIcon
+	Gui, ShowIntro: Add,	CheckBox, x0 y0 HwndIdIntroCheckbox gF_ShowIntroCheckbox,				% TransA["Show Introduction window after application is restarted?"]
 	
 	;3. Determine constraints
 	v_xNext := c_xmarg
@@ -4376,7 +4377,7 @@ F_LoadCreateTranslationTxt(decision*)
 ; The right column contains text strings which are replaced instead of left column definitions. Exchange text strings in right columnt with localized translations of text strings. 
 ; You don't have to remove lines starting with semicolon. Those lines won't be read by Hotstrings application.
 )"
-	
+
 	TransConst .= "`n`n
 (Join`n `			
 About / Help 											= &About / Help
@@ -4471,6 +4472,7 @@ file is now created in the following subfolder:				= file is now created in the 
 Finite timeout?										= Finite timeout?
 folder is now created									= folder is now created
 Font type												= Font type
+I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)! = I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)!
 Graphical User Interface									= Graphical User Interface
 has been created. 										= has been created.
 Help: AutoHotkey Hotstrings reference guide					= Help: AutoHotkey Hotstrings reference guide
@@ -4656,6 +4658,7 @@ Undo the last hotstring [Ctrl+F12]: enable					= Undo the last hotstring [Ctrl+F
 Undid the last hotstring 								= Undid the last hotstring
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
+Welcome to Hotstrings application!							= Welcome to Hotstrings application!
 When ""basic hotsring"" event takes place, sound is emitted according to the following settings. = When ""basic hotsring"" event takes place, sound is emitted according to the following settings.
 When ""hotstring menu"" event takes place, sound is emitted according to the following settings. = When ""hotstring menu"" event takes place, sound is emitted according to the following settings.
 When ""undo hotstring"" event takes place, sound is emitted according to the following settings. = When ""undo hotstring"" event takes place, sound is emitted according to the following settings.
@@ -4675,6 +4678,7 @@ Yes													= Yes
 )"
 	TransConst .= "`n
 (Join`n `
+ShowInfoText											= In order to display graphical user interface (GUI) of the application just press shortcut: Win + Ctrl + H. `n`nSuggested steps after installation: `n`n1. Download some libraries (files containing (triggerstring, hotstring) definitions. You can do it from application menu:  → Libraries. `n`n2. After downloading of libraries restart application to apply the changes. Again, you can do it from application menu: Application → Restart. `n`n3. Application is preconfigured on the first start. Options available to be configured area available from GUI, application menu → Configuration. `n`n4. Application runs by default in default mode. If you don't wish to modify configuration, `nmay consider to run it in simplified mode: application menu → Application → Reload → Reload in silent mode.
 F_TI_ImmediateExecute									= * (asterisk): An EndChar (e.g. Space, ., or Enter) is not required to trigger the hotstring. For example:`n`n:*:j@::jsmith@somedomain.com`n`nThe example above would send its replacement the moment you type the @ character.
 F_TI_InsideWord										= ? (question mark): The hotstring will be triggered even when it is inside another word; `n`nthat is, when the character typed immediately before it is alphanumeric. `nFor example, if :?:al::airline is a hotstring, `ntyping ""practical "" would produce ""practicairline "".
 F_TooltipTimeoutSlider									= You may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 500 [ms]; `nInterval:         500 [ms]; `nRange:            1000 ÷ 10 000 [ms]. `n`nWhen required value is chosen just press Esc key to close this window or close it with mouse.
