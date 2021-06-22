@@ -1,4 +1,4 @@
-/* 
+﻿/* 
 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -310,29 +310,28 @@ Menu, Submenu1, Add, % TransA["Undo the last hotstring [Ctrl+F12]: disable"],	F_
 Menu, Submenu1, Add
 F_MUndo()
 
-Menu, SubmenuEndChars, Add, % TransA["Minus -"], 				F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Space"],				F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Opening Round Bracket ("],	F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Closing Round Bracket )"],	F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Opening Square Bracket ["],F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Closing Square Bracket ]"],F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Opening Curly Bracket {"], F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Closing Curly Bracket }"], F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Colon :"], 				F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Semicolon `;"], 			F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Apostrophe '"], 			F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Quote """], 			F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Slash /"], 				F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Backslash \"], 			F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Comma ,"], 				F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Dot ."], 				F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Question Mark ?"], 		F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 			F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Exclamation Mark !"], 	F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Enter"],				F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Tab"], 				F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Minus -"], 						F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Space"],						F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Round Bracket ("],			F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Round Bracket )"],			F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Square Bracket ["],		F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Square Bracket ]"],		F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Curly Bracket {"], 		F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Curly Bracket }"], 		F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Colon :"], 						F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Semicolon `;"], 					F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Apostrophe '"], 					F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Quote """], 					F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Slash /"], 						F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Backslash \"], 					F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Comma ,"], 						F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Dot ."], 						F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Question Mark ?"], 				F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 					F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Exclamation Mark !"], 			F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Enter"],						F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Tab"], 						F_ToggleEndChars
 F_ToggleEndChars()
-
 
 Menu, Submenu1,		Add, % TransA["Signaling of events"],			:SigOfEvents
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
@@ -341,7 +340,6 @@ Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 ;Menu, Submenu1,		Add, Turn off all events tooltips,				F_AllTooltipsOff
 Menu, Submenu1,		Add
 Menu, Submenu1,  	   	Add, % TransA["Toggle EndChars"], 				:SubmenuEndChars
-
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 				:Submenu1
 Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 		F_Searching
@@ -2165,7 +2163,7 @@ F_AddHotstring()
 		OnOff := "On"
 		EnDis := "En"
 	}
-	
+	;*[One]
 	Switch v_SelectFunction
 	{
 		Case "Clipboard (CL)": 			
@@ -2180,6 +2178,18 @@ F_AddHotstring()
 		Case "Menu & SendInput (MSI)": 
 			SendFunHotstringCreate 	:= "F_HOF_MSI"
 			SendFunFileFormat 		:= "MSI"
+		Case "SendRaw (SR)":
+			SendFunHotstringCreate 	:= "F_HOF_SR"
+			SendFunFileFormat 		:= "SR"
+		Case "SendPlay (SP)":
+			SendFunHotstringCreate 	:= "F_HOF_SP"
+			SendFunFileFormat 		:= "SP"
+		Case "SendEvent (SE)":
+			SendFunHotstringCreate 	:= "F_HOF_SE"
+			SendFunFileFormat 		:= "SE"
+		Case "SendText (T)":
+			SendFunHotstringCreate 	:= "F_HOF_T"
+			SendFunFileFormat 		:= "ST"
 	}
 	
 	;2. Create or modify (triggerstring, hotstring) definition according to inputs. 
@@ -2908,90 +2918,90 @@ global	;assume-global
 		
 		Gui, HSDel: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"	
 		return
-	}
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_HSdelay()
-	{
-		global	;assume-global mode
-		GuiControl,, % IdHD_T1, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_CPDelay . "`n`n" . TransA["This option is valid"]
-		return
-	}
+F_HSdelay()
+{
+	global	;assume-global mode
+	GuiControl,, % IdHD_T1, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_CPDelay . "`n`n" . TransA["This option is valid"]
+	return
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_WhichGui()
+F_WhichGui()
 ;This version is more robust: it doesn't take into account just "last active window" (A parameter), but just checks if there are active windows.
+{
+	global	;assume-global mode
+	local	WinHWND := 0
+	
+	WinGet, WinHWND, ID, % "ahk_id" HS3GuiHwnd
+	if (WinHWND)
 	{
-		global	;assume-global mode
-		local	WinHWND := 0
-		
-		WinGet, WinHWND, ID, % "ahk_id" HS3GuiHwnd
-		if (WinHWND)
-		{
-			Gui, HS3: Default
-			return
-		}
-		WinGet, WinHWND, ID, % "ahk_id" HS4GuiHwnd
-		if (WinHWND)
-		{
-			Gui, HS4: Default
-			return
-		}
+		Gui, HS3: Default
 		return
 	}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_GuiAddLibrary()
+	WinGet, WinHWND, ID, % "ahk_id" HS4GuiHwnd
+	if (WinHWND)
 	{
-		global	;assume-global mode
-		local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
+		Gui, HS4: Default
+		return
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiAddLibrary()
+{
+	global	;assume-global mode
+	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
 		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0
 		,IdText1 := 0, IdText2 := 0, IdEdit1 := 0, IdButt1 := 0, IdButt2 := 0
 		,vTempWidth := 2 * c_xmarg, v_WidthButt1 := 0, v_WidthButt2 := 0, xButt2 := 0
 		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
-		
+	
 	;+Owner to prevent display of a taskbar button
-		Gui, ALib: New, -Caption +Border +Owner +HwndAddLibrary
-		Gui, ALib: Margin,	% c_xmarg, % c_ymarg
-		Gui,	ALib: Color,	% c_WindowColor, % c_ControlColor
-		Gui,	ALib: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-		
-		Gui, ALib: Add, Text, HwndIdText1, % TransA["Enter a name for the new library"]
-		Gui, ALib: Add, Edit, HwndIdEdit1 vv_NewLib
-		
-		GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdText1
-		GuiControl, ALib: Move, % IdEdit1, % "w" c_xmarg + v_OutVarTemp1W
-		
-		Gui, ALib: Add, Text, HwndIdText2, .csv
-		GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdEdit1
-		vTempWidth += v_OutVarTemp1W
-		GuiControl, ALib: Move, % IdText2, % "x" v_OutVarTemp1X + v_OutVarTemp1W . A_Space . "y" v_OutVarTemp1Y
-		GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdText2
-		vTempWidth += v_OutVarTemp1W
-		
-		Gui, ALib: Add, Button, HwndIdButt1 Default gALibOK, 	% TransA["OK"]
-		Gui, ALib: Add, Button, HwndIdButt2 gALibGuiClose, 	% TransA["Cancel"]
-		GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdButt1
-		GuiControlGet, v_OutVarTemp2, ALib: Pos, % IdButt2
-		
-		v_WidthButt1 := v_OutVarTemp1W + 2 * c_xmarg
-		v_WidthButt2 := v_OutVarTemp2W + 2 * c_xmarg
-		xButt2	   := c_xmarg + v_WidthButt1 + vTempWidth - (2 * c_xmarg + v_WidthButt1 + v_WidthButt2)
-		
-		GuiControl, ALib: Move, % IdButt1, % "x" c_xmarg . A_Space . "w" v_WidthButt1
-		GuiControl, ALib: Move, % IdButt2, % "x" xButt2  . A_Space . "y" v_OutVarTemp1Y . A_Space . "w" v_WidthButt2
-		
-		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-		Gui, ALib: Show, Hide AutoSize
-		DetectHiddenWindows, On
-		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . AddLibrary
-		DetectHiddenWindows, Off
-		
-		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
-		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
-		
-		Gui, ALib: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"
-		return
-	}
+	Gui, ALib: New, -Caption +Border +Owner +HwndAddLibrary
+	Gui, ALib: Margin,	% c_xmarg, % c_ymarg
+	Gui,	ALib: Color,	% c_WindowColor, % c_ControlColor
+	Gui,	ALib: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
+	Gui, ALib: Add, Text, HwndIdText1, % TransA["Enter a name for the new library"]
+	Gui, ALib: Add, Edit, HwndIdEdit1 vv_NewLib
+	
+	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdText1
+	GuiControl, ALib: Move, % IdEdit1, % "w" c_xmarg + v_OutVarTemp1W
+	
+	Gui, ALib: Add, Text, HwndIdText2, .csv
+	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdEdit1
+	vTempWidth += v_OutVarTemp1W
+	GuiControl, ALib: Move, % IdText2, % "x" v_OutVarTemp1X + v_OutVarTemp1W . A_Space . "y" v_OutVarTemp1Y
+	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdText2
+	vTempWidth += v_OutVarTemp1W
+	
+	Gui, ALib: Add, Button, HwndIdButt1 Default gALibOK, 	% TransA["OK"]
+	Gui, ALib: Add, Button, HwndIdButt2 gALibGuiClose, 	% TransA["Cancel"]
+	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdButt1
+	GuiControlGet, v_OutVarTemp2, ALib: Pos, % IdButt2
+	
+	v_WidthButt1 := v_OutVarTemp1W + 2 * c_xmarg
+	v_WidthButt2 := v_OutVarTemp2W + 2 * c_xmarg
+	xButt2	   := c_xmarg + v_WidthButt1 + vTempWidth - (2 * c_xmarg + v_WidthButt1 + v_WidthButt2)
+	
+	GuiControl, ALib: Move, % IdButt1, % "x" c_xmarg . A_Space . "w" v_WidthButt1
+	GuiControl, ALib: Move, % IdButt2, % "x" xButt2  . A_Space . "y" v_OutVarTemp1Y . A_Space . "w" v_WidthButt2
+	
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, ALib: Show, Hide AutoSize
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . AddLibrary
+	DetectHiddenWindows, Off
+	
+	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+	
+	Gui, ALib: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"
+	return
+}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	F_RefreshListOfLibraryTips()
@@ -3508,17 +3518,29 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 	Switch Fun
 	{
 		Case "SI":	;SendFun := "F_HOF_SI"
-		GuiControl, HS3: Choose, v_SelectFunction, SendInput (SI)
-		GuiControl, HS4: Choose, v_SelectFunction, SendInput (SI)
+			GuiControl, HS3: Choose, v_SelectFunction, SendInput (SI)
+			GuiControl, HS4: Choose, v_SelectFunction, SendInput (SI)
 		Case "CL":	;SendFun := "F_HOF_CLI"
-		GuiControl, HS3: Choose, v_SelectFunction, Clipboard (CL)
-		GuiControl, HS4: Choose, v_SelectFunction, Clipboard (CL)
+			GuiControl, HS3: Choose, v_SelectFunction, Clipboard (CL)
+			GuiControl, HS4: Choose, v_SelectFunction, Clipboard (CL)
 		Case "MCL":	;SendFun := "F_HOF_MCLI"
-		GuiControl, HS3: Choose, v_SelectFunction, Menu & Clipboard (MCL)
-		GuiControl, HS4: Choose, v_SelectFunction, Menu & Clipboard (MCL)
+			GuiControl, HS3: Choose, v_SelectFunction, Menu & Clipboard (MCL)
+			GuiControl, HS4: Choose, v_SelectFunction, Menu & Clipboard (MCL)
 		Case "MSI":	;SendFun := "F_HOF_MSI"
-		GuiControl, HS3: Choose, v_SelectFunction, Menu & SendInput (MSI)
-		GuiControl, HS4: Choose, v_SelectFunction, Menu & SendInput (MSI)
+			GuiControl, HS3: Choose, v_SelectFunction, Menu & SendInput (MSI)
+			GuiControl, HS4: Choose, v_SelectFunction, Menu & SendInput (MSI)
+		Case "SR":	
+			GuiControl, HS3: Choose, v_SelectFunction, SendRaw (SR)
+			GuiControl, HS4: Choose, v_SelectFunction, SendRaw (SR)
+		Case "SP":
+			GuiControl, HS3: Choose, v_SelectFunction, SendPlay (SP)
+			GuiControl, HS4: Choose, v_SelectFunction, SendPlay (SP)
+		Case "SE":
+			GuiControl, HS3: Choose, v_SelectFunction, SendPlay (SE)
+			GuiControl, HS4: Choose, v_SelectFunction, SendPlay (SE)
+		Case "ST":
+			GuiControl, HS3: Choose, v_SelectFunction, SendText (T)
+			GuiControl, HS4: Choose, v_SelectFunction, SendText (T)
 	}
 	
 	LV_GetText(EnDis, 		v_SelectedRow, 4)
@@ -3789,128 +3811,127 @@ F_LoadFontSize()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_StyleOfGUI()
+F_StyleOfGUI()
+{
+	global ;assume-global mode
+	Switch A_ThisMenuItemPos
 	{
-		global ;assume-global mode
-		Switch A_ThisMenuItemPos
-		{
-			Case 1: ;Light (default)
-			c_FontColor				:= "Black"
-			c_FontColorHighlighted		:= "Blue"
-			c_WindowColor				:= "Default"
-			c_ControlColor 			:= "Default"
-			Menu, StyleGUIsubm, Check,   % TransA["Light (default)"]
-			Menu, StyleGUIsubm, UnCheck, % TransA["Dark"]
-			Case 2: ;Dark
-			c_FontColor				:= "White"
-			c_FontColorHighlighted		:= "Teal"
-			c_WindowColor				:= "Black"
-			c_ControlColor 			:= "Gray"
-			Menu, StyleGUIsubm, UnCheck, % TransA["Light (default)"]
-			Menu, StyleGUIsubm, Check,   % TransA["Dark"]
-		}
-		MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["In order to aplly new style it's necesssary to reload the application."]
+		Case 1: ;Light (default)
+		c_FontColor				:= "Black"
+		c_FontColorHighlighted		:= "Blue"
+		c_WindowColor				:= "Default"
+		c_ControlColor 			:= "Default"
+		Menu, StyleGUIsubm, Check,   % TransA["Light (default)"]
+		Menu, StyleGUIsubm, UnCheck, % TransA["Dark"]
+		Case 2: ;Dark
+		c_FontColor				:= "White"
+		c_FontColorHighlighted		:= "Teal"
+		c_WindowColor				:= "Black"
+		c_ControlColor 			:= "Gray"
+		Menu, StyleGUIsubm, UnCheck, % TransA["Light (default)"]
+		Menu, StyleGUIsubm, Check,   % TransA["Dark"]
+	}
+	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["In order to aplly new style it's necesssary to reload the application."]
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
 		. "`n`n" . TransA["Do you want to reload application now?"]
-		IfMsgBox, Yes
-		{
-			F_SaveGUIstyle()
-			ini_GuiReload := true
-			IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
-			Reload
-		}
-		IfMsgBox, No
-			return	
-	}
-	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_SaveGUIstyle()
+	IfMsgBox, Yes
 	{
-		global ;assume-global mode
-		
-		IniWrite, % c_FontColor,				Config.ini, GraphicalUserInterface, GuiFontColor
-		IniWrite, % c_FontColorHighlighted,	Config.ini, GraphicalUserInterface, GuiFontColorHighlighted
-		IniWrite, % c_WindowColor, 	  		Config.ini, GraphicalUserInterface, GuiWindowColor
-		Iniwrite, % c_ControlColor,			Config.ini, GraphicalUserInterface, GuiControlColor	
-		return
+		F_SaveGUIstyle()
+		ini_GuiReload := true
+		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
+		Reload
 	}
+	IfMsgBox, No
+		return	
+}
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_LoadGUIstyle()
+F_SaveGUIstyle()
+{
+	global ;assume-global mode
+	
+	IniWrite, % c_FontColor,				Config.ini, GraphicalUserInterface, GuiFontColor
+	IniWrite, % c_FontColorHighlighted,	Config.ini, GraphicalUserInterface, GuiFontColorHighlighted
+	IniWrite, % c_WindowColor, 	  		Config.ini, GraphicalUserInterface, GuiWindowColor
+	Iniwrite, % c_ControlColor,			Config.ini, GraphicalUserInterface, GuiControlColor	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_LoadGUIstyle()
+{
+	global ;assume-global mode
+	c_FontColor				:= ""
+	c_FontColorHighlighted		:= ""
+	c_WindowColor				:= ""
+	c_ControlColor 			:= ""
+	
+	IniRead, c_FontColor, 			Config.ini, GraphicalUserInterface, GuiFontColor, 		 Black
+	IniRead, c_FontColorHighlighted, 	Config.ini, GraphicalUserInterface, GuiFontColorHighlighted, Blue
+	IniRead, c_WindowColor, 			Config.ini, GraphicalUserInterface, GuiWindowColor, 		 Default
+	IniRead, c_ControlColor, 		Config.ini, GraphicalUserInterface, GuiControlColor, 		 Default
+	
+	if (!c_FontColor)
+		c_FontColor := "Black"
+	if (!c_FontColorHighlighted)
+		c_FontColorHighlighted := "Blue"
+	if (!c_WindowColor)
+		c_WindowColor := "Default"
+	if (!c_ControlColor)
+		c_ControlColor := "Default"
+	
+	return
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_CompileSubmenu()
+{
+	local v_TempOutStr := ""
+	Loop, Parse, %  A_AhkPath, "\"
 	{
-		global ;assume-global mode
-		c_FontColor				:= ""
-		c_FontColorHighlighted		:= ""
-		c_WindowColor				:= ""
-		c_ControlColor 			:= ""
-		
-		IniRead, c_FontColor, 			Config.ini, GraphicalUserInterface, GuiFontColor, 		 Black
-		IniRead, c_FontColorHighlighted, 	Config.ini, GraphicalUserInterface, GuiFontColorHighlighted, Blue
-		IniRead, c_WindowColor, 			Config.ini, GraphicalUserInterface, GuiWindowColor, 		 Default
-		IniRead, c_ControlColor, 		Config.ini, GraphicalUserInterface, GuiControlColor, 		 Default
-		
-		if (!c_FontColor)
-			c_FontColor := "Black"
-		if (!c_FontColorHighlighted)
-			c_FontColorHighlighted := "Blue"
-		if (!c_WindowColor)
-			c_WindowColor := "Default"
-		if (!c_ControlColor)
-			c_ControlColor := "Default"
-		
-		return
+		if (Instr(A_LoopField, ".exe"))
+			break
+		v_TempOutStr .= A_LoopField . "\"
 	}
+	v_TempOutStr .= "Compiler" . "\" 
 	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	F_CompileSubmenu()
+	if (FileExist(v_TempOutStr . "Ahk2Exe.exe"))
 	{
-		local v_TempOutStr := ""
-		Loop, Parse, %  A_AhkPath, "\"
-		{
-			if (Instr(A_LoopField, ".exe"))
-				break
-			v_TempOutStr .= A_LoopField . "\"
-		}
-		v_TempOutStr .= "Compiler" . "\" 
-		
-		if (FileExist(v_TempOutStr . "Ahk2Exe.exe"))
-		{
-			Menu, CompileSubmenu, Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
-			Menu,	AppSubmenu,		Add,	% TransA["Compile"],				:CompileSubmenu
+		Menu, CompileSubmenu, Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
+		Menu,	AppSubmenu,		Add,	% TransA["Compile"],				:CompileSubmenu
 		;Menu, TraySubmenu,	  Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
-		}
-		if (FileExist(v_TempOutStr . "upx.exe"))
-		{
-			Menu, CompileSubmenu, Add, % TransA["Compressed executable (upx.exe)"], F_Compile
-		;Menu, TraySubmenu,	  Add, % TransA["Compressed executable (upx.exe)"], F_Compile
-		}
-		if (FileExist(v_TempOutStr . "mpress.exe"))
-		{
-			Menu, CompileSubmenu, Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
-		;Menu, TraySubmenu,	  Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
-		}
-	if (!FileExist(A_AhkPath)) ;if AutoHotkey isn't installed
-		{
-		Menu, AppSubmenu,		Add,	% TransA["Compile"],		L_Compile
-		Menu,	AppSubmenu, Disable,							% TransA["Compile"]
-		}
-	
-	;Menu,	Tray,			Add, % TransA["Compile"],				:TraySubmenu
 	}
-	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_Compile()
-;https://www.autohotkey.com/boards/viewtopic.php?f=86&t=90196&p=398198#p398198
+	if (FileExist(v_TempOutStr . "upx.exe"))
 	{
-		local v_TempOutStr := "" ;, v_TempOutStr2 := "", v_TempOutStr3 := ""
-		
-		SplitPath, A_AhkPath, ,v_TempOutStr
-		v_TempOutStr .= "\" . "Compiler" . "\" 
-		
-		Switch A_ThisMenuItem
-		{
-			Case TransA["Standard executable (Ahk2Exe.exe)"]:
-			Run, % v_TempOutStr . "Ahk2Exe.exe" 
+		Menu, CompileSubmenu, Add, % TransA["Compressed executable (upx.exe)"], 	F_Compile
+		;Menu, TraySubmenu,	  Add, % TransA["Compressed executable (upx.exe)"], 	F_Compile
+	}
+	if (FileExist(v_TempOutStr . "mpress.exe"))
+	{
+		Menu, CompileSubmenu, Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
+		;Menu, TraySubmenu,	  Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
+	}
+	if (!FileExist(A_AhkPath)) ;if AutoHotkey isn't installed
+	{
+		Menu, AppSubmenu,		Add,	% TransA["Compile"],			L_Compile
+		Menu,	AppSubmenu, Disable,							% TransA["Compile"]
+	}
+	;Menu,	Tray,			Add, % TransA["Compile"],				:TraySubmenu
+}
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_Compile()
+;https://www.autohotkey.com/boards/viewtopic.php?f=86&t=90196&p=398198#p398198
+{
+	local v_TempOutStr := "" ;, v_TempOutStr2 := "", v_TempOutStr3 := ""
+	
+	SplitPath, A_AhkPath, ,v_TempOutStr
+	v_TempOutStr .= "\" . "Compiler" . "\" 
+	
+	Switch A_ThisMenuItem
+	{
+		Case TransA["Standard executable (Ahk2Exe.exe)"]:
+		RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in"       . A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out"      . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 				. A_Space . "/icon"     . A_Space . A_ScriptDir . "\" . AppIcon
@@ -3918,12 +3939,13 @@ F_LoadFontSize()
 				. A_Space . "/cp"       . A_Space . "65001"	;Unicode (UTF-8)
 				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" . A_Space . "0"
+		if (!ErrorLevel)		
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe, but not compressed:"]
-				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
-				. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
-			
-			Case TransA["Compressed executable (upx.exe)"]:
-			Run, % v_TempOutStr . "Ahk2Exe.exe" 
+					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
+					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
+		
+		Case TransA["Compressed executable (upx.exe)"]:
+		RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in"   	. A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out"  	. A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 				. A_Space . "/icon" 	. A_Space . A_ScriptDir . "\" . AppIcon 
@@ -3931,12 +3953,13 @@ F_LoadFontSize()
 				. A_Space . "/cp"   	. A_Space . "65001"	;Unicode (UTF-8)
 				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" 	. A_Space . "2" 
+		if (!ErrorLevel)		
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["The executable file is prepared by Ahk2Exe and compressed by upx.exe:"]
-				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
-				. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
-			
-			Case TransA["Compressed executable (mpress.exe)"]:
-			Run, % v_TempOutStr . "Ahk2Exe.exe" 
+					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
+					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
+		
+		Case TransA["Compressed executable (mpress.exe)"]:
+		RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 				. A_Space . "/icon" . A_Space . A_ScriptDir . "\" . AppIcon 
@@ -3944,11 +3967,12 @@ F_LoadFontSize()
 				. A_Space . "/cp"   	. A_Space . "65001"	;Unicode (UTF-8)
 				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" . A_Space . "1"
+		if (!ErrorLevel)
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe and compressed by mpress.exe:"]
-				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
-				. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
-		}
-		return
+					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
+					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
+	}
+	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Reload()
@@ -3982,20 +4006,20 @@ F_Reload()
 		}
 		else
 			Switch A_ThisMenuItem
-		{
-			Case % TransA["Reload in default mode"]:
-			Switch A_IsCompiled
 			{
-				Case % true:	Run, % A_ScriptFullPath 
-				Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
+				Case % TransA["Reload in default mode"]:
+					Switch A_IsCompiled
+					{
+						Case % true:	Run, % A_ScriptFullPath 
+						Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
+					}
+				Case % TransA["Reload in silent mode"]:
+					Switch A_IsCompiled
+					{
+						Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
+						Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
+					}
 			}
-			Case % TransA["Reload in silent mode"]:
-			Switch A_IsCompiled
-			{
-				Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
-				Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
-			}
-		}
 	}
 	IfMsgBox, No
 		return
@@ -4027,40 +4051,40 @@ F_ToggleSandbox()
 	Gui, % A_DefaultGui . ":" . A_Space . "Show", AutoSize
 	return
 }
-	
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_LoadGUIPos()
+{
+	global ;assume-global mode
+	local ini_ReadTemp := 0
 	
-	F_LoadGUIPos()
-	{
-		global ;assume-global mode
-		local ini_ReadTemp := 0
-		
-		ini_HS3WindoPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
-		ini_ListViewPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
-		ini_WhichGui := ""
-		ini_Sandbox := true
-		
-		IniRead, ini_ReadTemp, 						Config.ini, GraphicalUserInterface, MainWindowPosX, 0
-		ini_HS3WindoPos["X"] := ini_ReadTemp
-		IniRead, ini_ReadTemp, 						Config.ini, GraphicalUserInterface, MainWindowPosY, 0
-		ini_HS3WindoPos["Y"] := ini_ReadTemp
-		IniRead, ini_ReadTemp, 						Config.ini, GraphicalUserInterface, MainWindowPosW, 0
-		ini_HS3WindoPos["W"] := ini_ReadTemp
-		IniRead, ini_ReadTemp, 						Config.ini, GraphicalUserInterface, MainWindowPosH, 0
-		ini_HS3WindoPos["H"] := ini_ReadTemp
-		
-		IniRead, ini_ReadTemp,						Config.ini, GraphicalUserInterface, ListViewPosW, % A_Space
-		ini_ListViewPos["W"] := ini_ReadTemp
-		IniRead, ini_ReadTemp,						Config.ini, GraphicalUserInterface, ListViewPosH, % A_Space
-		ini_ListViewPos["H"] := ini_ReadTemp
-		
-		IniRead, ini_Sandbox, 						Config.ini, GraphicalUserInterface, Sandbox,				1
-		IniRead, ini_IsSandboxMoved,					Config.ini, GraphicalUserInterface, IsSandboxMoved 
-		IniRead, ini_WhichGui,						Config.ini, GraphicalUserInterface, WhichGui, %A_Space%
-		if !(ini_WhichGui)
-			ini_WhichGui := "HS3"
-		
-		return
+	ini_HS3WindoPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
+	ini_ListViewPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
+	ini_WhichGui := ""
+	ini_Sandbox := true
+	
+	IniRead, ini_ReadTemp, 						Config.ini, GraphicalUserInterface, MainWindowPosX, 0
+	ini_HS3WindoPos["X"] := ini_ReadTemp
+	IniRead, ini_ReadTemp, 						Config.ini, GraphicalUserInterface, MainWindowPosY, 0
+	ini_HS3WindoPos["Y"] := ini_ReadTemp
+	IniRead, ini_ReadTemp, 						Config.ini, GraphicalUserInterface, MainWindowPosW, 0
+	ini_HS3WindoPos["W"] := ini_ReadTemp
+	IniRead, ini_ReadTemp, 						Config.ini, GraphicalUserInterface, MainWindowPosH, 0
+	ini_HS3WindoPos["H"] := ini_ReadTemp
+	
+	IniRead, ini_ReadTemp,						Config.ini, GraphicalUserInterface, ListViewPosW, % A_Space
+	ini_ListViewPos["W"] := ini_ReadTemp
+	IniRead, ini_ReadTemp,						Config.ini, GraphicalUserInterface, ListViewPosH, % A_Space
+	ini_ListViewPos["H"] := ini_ReadTemp
+	
+	IniRead, ini_Sandbox, 						Config.ini, GraphicalUserInterface, Sandbox,				1
+	IniRead, ini_IsSandboxMoved,					Config.ini, GraphicalUserInterface, IsSandboxMoved 
+	IniRead, ini_WhichGui,						Config.ini, GraphicalUserInterface, WhichGui, %A_Space%
+	if !(ini_WhichGui)
+		ini_WhichGui := "HS3"
+	
+	return
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4936,7 +4960,7 @@ F_GuiHS4_CreateObject()
 	GuiControl +g, % IdTextInfo12b, % TI_SHOF
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 	HS4: Add, 	DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (R) |SendText (T)|SendPlay (SP) | SendEvent (SE)
+	Gui, 	HS4: Add, 	DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (SR)|SendText (T)|SendPlay (SP)|SendEvent (SE)
 	
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText4b,					 					% TransA["Enter hotstring"]
@@ -5089,7 +5113,7 @@ F_GuiMain_CreateObject()
 	GuiControl +g, % IdTextInfo12, % TI_SHOF
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 			SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (R) |SendText (T)|SendPlay (SP) | SendEvent (SE)
+	Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 			SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (SR)|SendText (T)|SendPlay (SP)|SendEvent (SE)
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText4,					 					% TransA["Enter hotstring"]
@@ -6143,6 +6167,10 @@ F_CreateHotstring(txt, nameoffile)
 				Case "CL": 	SendFun := "F_HOF_CLI"
 				Case "MCL": 	SendFun := "F_HOF_MCLI"
 				Case "MSI":	SendFun := "F_HOF_MSI"
+				Case "SR":	SendFun := "F_HOF_SR"
+				Case "SP":	SendFun := "F_HOF_SP"
+				Case "SE":	SendFun := "F_HOF_SE"
+				Case "ST":	SendFun := "F_HOF_T"
 			}
 			Case 4: 
 			Switch A_LoopField
@@ -6152,10 +6180,11 @@ F_CreateHotstring(txt, nameoffile)
 			}
 			Case 5:
 			TextInsert := A_LoopField
-			TextInsert := StrReplace(TextInsert, "``n", "`n") ;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
-			TextInsert := StrReplace(TextInsert, "``r", "`r")		
-			TextInsert := StrReplace(TextInsert, "``t", "`t")
-			TextInsert := StrReplace(TextInsert, "``", "`")
+			;TextInsert := StrReplace(TextInsert, "``n", "`n") ;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
+			;TextInsert := StrReplace(TextInsert, "``r", "`r")		
+			;TextInsert := StrReplace(TextInsert, "``t", "`t")
+			;TextInsert := StrReplace(TextInsert, "``", "`")
+			;TextInsert := StrReplace(TextInsert, "``b", "`b")
 		}
 	}
 	
@@ -6169,11 +6198,9 @@ F_CreateHotstring(txt, nameoffile)
 		IfMsgBox, Yes
 			return
 	}
-		;if !((Options == "") and (v_TriggerString == "") and (TextInsert == "") and (OnOff == ""))
-	;if (Options and v_TriggerString and TextInsert and OnOff)
 	if (v_TriggerString and OnOff)
 	{
-		;MsgBox, , Debugging, % "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
+		;OutputDebug, % "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
 		Try
 			Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, Oflag), OnOff)
 		Catch
@@ -6258,7 +6285,7 @@ F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_ChangingBrackets(string)
+F_ChangingBrackets(string)	;future: replace with RegExReplace()
 {
 	occ := 1
 	Loop
@@ -6285,10 +6312,8 @@ F_ChangingBrackets(string)
 	}
 	return string
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HOF_T(ReplacementString, Oflag)	;Hotstring Output Function _ Text mode
 {
 	global	;assume-global mode
 	local	ThisHotkey := A_ThisHotkey
@@ -6296,23 +6321,94 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 	v_InputString := ""
 	ReplacementString := F_AHKVariables(ReplacementString)
 	if (Oflag = false)
-		Send, % ReplacementString . A_EndChar
+		Send, % "{Text}" . ReplacementString . A_EndChar
+		;Send, {Text}%ReplacementString%%A_EndChar%
 	else
-		Send, % ReplacementString
-	v_UndoHotstring := ReplacementString
-	v_UndoHotstring := F_ChangingBrackets(v_UndoHotstring)
+		Send, % "{Text}" . ReplacementString
+	v_UndoHotstring := F_ChangingBrackets(ReplacementString)
 	
 	v_TypedTriggerstring := ThisHotkey 
-	
-	if (InStr(v_TypedTriggerstring, "{"))
-		v_TypedTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, "}") + 1 , StrLen(v_TypedTriggerstring) - InStr(v_TypedTriggerstring, "}")) ;future: not necessary anymore.
-	;Hotstring("Reset") ;not required in normal operation
 	v_HotstringFlag := true
 	F_EventSigOrdHotstring()
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
+{
+	global	;assume-global mode
+	local	ThisHotkey := A_ThisHotkey
+	
+	v_InputString := ""
+	ReplacementString := F_AHKVariables(ReplacementString)
+	if (Oflag = false)
+		SendEvent, % ReplacementString . A_EndChar
+	else
+		SendEvent, % ReplacementString
+	v_UndoHotstring := F_ChangingBrackets(ReplacementString)
+	
+	v_TypedTriggerstring := ThisHotkey 
+	v_HotstringFlag := true
+	F_EventSigOrdHotstring()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
+{
+	global	;assume-global mode
+	local	ThisHotkey := A_ThisHotkey
+	
+	v_InputString := ""
+	ReplacementString := F_AHKVariables(ReplacementString)
+	if (Oflag = false)
+		SendPlay, % ReplacementString . A_EndChar
+	else
+		SendPlay, % ReplacementString
+	v_UndoHotstring := F_ChangingBrackets(ReplacementString)
+	
+	v_TypedTriggerstring := ThisHotkey 
+	v_HotstringFlag := true
+	F_EventSigOrdHotstring()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
+{
+	global	;assume-global mode
+	local	ThisHotkey := A_ThisHotkey
+	
+	v_InputString := ""
+	ReplacementString := F_AHKVariables(ReplacementString)
+	if (Oflag = false)
+		SendRaw, % ReplacementString . A_EndChar
+	else
+		SendRaw, % ReplacementString
+	v_UndoHotstring := F_ChangingBrackets(ReplacementString)
+	
+	v_TypedTriggerstring := ThisHotkey 
+	v_HotstringFlag := true
+	F_EventSigOrdHotstring()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput tu jestem
+{
+	global	;assume-global mode
+	local	ThisHotkey := A_ThisHotkey
+	
+	v_InputString := ""
+	ReplacementString := F_AHKVariables(ReplacementString)
+	;ReplacementString := StrReplace(ReplacementString, "``r", "{Enter}")
+	ReplacementString := StrReplace(ReplacementString, "``r", "`r")
+	;ReplacementString := StrReplace(ReplacementString, "``b", "{Backspace}")
+	ReplacementString := StrReplace(ReplacementString, "``b", "`b")
+	;*[One]
+	if (Oflag = false)
+		SendInput, % ReplacementString . A_EndChar
+	else
+		SendInput, % ReplacementString
+	v_UndoHotstring := F_ChangingBrackets(v_UndoHotstring)
+	
+	v_TypedTriggerstring := ThisHotkey 
+	v_HotstringFlag := true
+	F_EventSigOrdHotstring()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_CLI(ReplacementString, Oflag) ;Hotstring Output Function _ Clipboard
 {
 	global	;assume-global mode
@@ -7473,24 +7569,24 @@ L_TrayPauseScript:
 	}
 return
 	
-	L_TrayReload:	;new thread starts here
+L_TrayReload:	;new thread starts here
 	F_WhichGui()
 	F_Reload()
-	return
+return
 	
-	TurnOff_OHE:
+TurnOff_OHE:
 	ToolTip, ,, , 4
-	return
+return
 	
-	TurnOff_UHE:
+TurnOff_UHE:
 	ToolTip, ,, , 6
-	return
+return
 	
-	TurnOff_Ttt:
+TurnOff_Ttt:
 	ToolTip
-	return
+return
 	
-	L_TrayExit:
+L_TrayExit:
 	ExitApp, 2	;2 = by Tray
 	
 STDGuiClose:
