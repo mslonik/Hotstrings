@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -132,8 +132,8 @@ Switch v_Param
 		Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 			L_GUIInit
 		Menu, Tray, Default, 	% TransA["Edit Hotstrings"]
 		Menu, Tray, Add										;separator line
-		Menu, Tray, Add,		% TransA["Application help"],			GuiAboutLink1
-		Menu, Tray, Add,		% TransA["Genuine hotstrings AutoHotkey documentation"], GuiAboutLink2
+		Menu, Tray, Add,		% TransA["Help: Hotstrings application"],			GuiAboutLink1
+		Menu, Tray, Add,		% TransA["Help: AutoHotkey Hotstrings reference guide"], GuiAboutLink2
 		Menu, Tray, Add										;separator line
 		Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],	L_TrayReload
 		Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],		L_TrayReload
@@ -236,8 +236,6 @@ Menu, ConfGUI,		Add, 	% TransA["Font type"],					:FontTypeMenu
 
 Menu, TrigSortOrder, 	Add, % TransA["Alphabetically"], 				F_SortTipsAlphabetically
 Menu, TrigSortOrder, 	Add, % TransA["By length"], 					F_SortTipsByLength
-F_SortTipsAlphabetically()
-F_SortTipsByLength()
 
 Menu, OrdHisTrig,		Add, % TransA["Tooltip enable"],				F_EventTtEn
 Menu, OrdHisTrig,		Add, % TransA["Tooltip disable"],				F_EventTtEn
@@ -305,6 +303,7 @@ F_EventTtEn()
 F_EventSoEn()
 F_EventTtPos()
 F_AmountOfCharacterTips()
+F_SortTipsAlphabetically()
 
 Menu, Submenu1, Add, % TransA["Undo the last hotstring [Ctrl+F12]: enable"], 	F_MUndo
 Menu, Submenu1, Add, % TransA["Undo the last hotstring [Ctrl+F12]: disable"],	F_MUndo
@@ -397,8 +396,6 @@ F_GuiAbout_DetermineConstraints()
 IniRead, ini_GuiReload, 						Config.ini, GraphicalUserInterface, GuiReload
 if (ini_GuiReload)
 	Gosub, L_GUIInit
-if (ini_ShowIntro)
-	Gui, ShowIntro: Show, AutoSize Center
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; Beginning of the main loop of application.
@@ -747,6 +744,43 @@ F_DownloadPublicLibraries()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_MenuShowIntro()
+{
+	global	;assume-global mode
+	static	FirstRun := true
+	
+	if (FirstRun)
+	{
+		if (ini_ShowIntro)
+		{
+			Menu,	IntroSubDecision, Check, 	% TransA["Yes"]
+			Menu,	IntroSubDecision, UnCheck, 	% TransA["No"]
+		}
+		else
+		{
+			Menu,	IntroSubDecision, UnCheck, 	% TransA["Yes"]
+			Menu,	IntroSubDecision, Check, 	% TransA["No"]
+		}
+		FirstRun := false
+	}
+	else
+	{
+		ini_ShowIntro := !ini_ShowIntro
+		if (ini_ShowIntro)
+		{
+			Menu,	IntroSubDecision, Check, 	% TransA["Yes"]
+			Menu,	IntroSubDecision, UnCheck, 	% TransA["No"]
+		}
+		else
+		{
+			Menu,	IntroSubDecision, UnCheck, 	% TransA["Yes"]
+			Menu,	IntroSubDecision, Check, 	% TransA["No"]
+		}
+		Iniwrite, % ini_ShowIntro, Config.ini, Configuration, ShowIntro
+	}
+return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiShowIntro()
 {
 	global	;assume-global mode
@@ -861,7 +895,7 @@ F_Undo()
 	{	
 		PosColon1 := InStr(v_TypedTriggerstring, ":", false, 1, 1) ;position of the first colon
 		PosColon2 := InStr(v_TypedTriggerstring, ":", false, 3, 1) ;position of the second colon
-		TriggerOpt := SubStr(v_TypedTriggerstring, PosColon1 + 1, PosColon2 - PosColon1 -1)
+		TriggerOpt := SubStr(v_TypedTriggerstring, PosColon1 + 1, PosColon2 - PosColon1 - 1)
 		if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O")))
 			Send, {BackSpace}
 		if (v_UndoHotstring)
@@ -973,27 +1007,24 @@ F_EventSigOrdHotstring()
 F_PrepareTriggerstringTipsTables()
 {
 	global	;assume-global mode
-	local	a_SelectedTriggers := [], s_SelectedTriggers := "", key := "", value := ""
+	local	vIntCnt := 0, a_SelectedTriggers := []
 	
 	;OutputDebug, % "Length of v_InputString:" . A_Space . StrLen(v_InputString) . A_Tab . "v_InputString:" . A_Space . v_InputString
-	if (StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn)	;TASAC = TipsAreShownAfterNoOfCharacters
+	if (StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn)
 	{
 		Loop, % a_Triggers.MaxIndex()
 		{
 			if (InStr(a_Triggers[A_Index], v_InputString) = 1)
 			{
-				a_SelectedTriggers[A_Index] := a_Triggers[A_Index]
+				vIntCnt++
+				a_SelectedTriggers[vIntCnt] := a_Triggers[A_Index]
+				if (vIntCnt = ini_MNTT)	
+					break
 			}
 		}
 		if (ini_TipsSortAlphabetically)
-		{
 		;a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
-			for key, value in a_SelectedTriggers	;table to string conversion
-				s_SelectedTriggers .= value . "`n"
-			Sort, s_SelectedTriggers
-			Loop, Parse, s_SelectedTriggers, `n	;string to table conversion
-				a_SelectedTriggers[A_Index] := A_LoopField
-		}
+			Sort, a_SelectedTriggers
 		if (ini_TipsSortByLength)
 			a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
 		v_Tips := ""
@@ -1002,8 +1033,6 @@ F_PrepareTriggerstringTipsTables()
 			if (v_Tips)
 				v_Tips .= "`n"
 			v_Tips .= a_SelectedTriggers[A_Index]
-			if (A_Index = ini_MNTT)
-				break
 		}
 	}
 	else
@@ -2139,7 +2168,6 @@ F_AddHotstring()
 		EnDis := "En"
 	}
 	
-	;*[One]
 	Switch v_SelectFunction
 	{
 		Case "Clipboard (CL)": 			
@@ -2154,22 +2182,6 @@ F_AddHotstring()
 		Case "Menu & SendInput (MSI)": 
 			SendFunHotstringCreate 	:= "F_HOF_MSI"
 			SendFunFileFormat 		:= "MSI"
-		Case "SendRaw (R)":			
-			SendFunHotstringCreate 	:= "F_HOF_SI"
-			SendFunFileFormat 		:= "SI"
-			Options .= "R"
-		Case "SendText (T)":		
-			SendFunHotstringCreate 	:= "F_HOF_SI"
-			SendFunFileFormat 		:= "SI"
-			Options .= "T"
-		Case "SendPlay (SP)":		
-			SendFunHotstringCreate 	:= "F_HOF_SI"
-			SendFunFileFormat 		:= "SI"
-			Options .= "SP"
-		Case "SendEvent (SE)":		
-			SendFunHotstringCreate 	:= "F_HOF_SI"
-			SendFunFileFormat 		:= "SI"
-			Options .= "SE"
 	}
 	
 	;2. Create or modify (triggerstring, hotstring) definition according to inputs. 
@@ -2225,7 +2237,7 @@ F_AddHotstring()
 		Try
 			Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
 		Catch
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong on time of hotstring setup"] . ":" . "`n`n"
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
 				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," . A_Space . OnOff . ")"
 	}
 	else
@@ -2233,7 +2245,7 @@ F_AddHotstring()
 		Try
 			Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
 		Catch
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong on time of hotstring setup"] . ":" . "`n`n"
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
 				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
 	}
 	;Hotstring("Reset") ;reset hotstring recognizer
@@ -2387,7 +2399,7 @@ F_Move()
 		v_Temp2 := LV_GetText(v_Temp1, A_Index, 1)
 		if (v_Temp1 == v_TriggerString)
 		{
-			MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The hostring"] . ":" . "`n`n" . v_Triggerstring . "`n`n" . TransA["exists in a file and will be now replaced."] 
+			MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The hostring"] . ":" . "`n`n" . v_Triggerstring . "`n`n" . TransA["exists in a file and will now be replaced."] 
 				. "`n" . v_SelectHotstringLibrary . "`n`n" . TransA["Do you want to proceed?"]
 			IfMsgBox, Yes
 			{
@@ -3498,29 +3510,17 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 	Switch Fun
 	{
 		Case "SI":	;SendFun := "F_HOF_SI"
-			GuiControl, HS3: Choose, v_SelectFunction, SendInput (SI)
-			GuiControl, HS4: Choose, v_SelectFunction, SendInput (SI)
+		GuiControl, HS3: Choose, v_SelectFunction, SendInput (SI)
+		GuiControl, HS4: Choose, v_SelectFunction, SendInput (SI)
 		Case "CL":	;SendFun := "F_HOF_CLI"
-			GuiControl, HS3: Choose, v_SelectFunction, Clipboard (CL)
-			GuiControl, HS4: Choose, v_SelectFunction, Clipboard (CL)
+		GuiControl, HS3: Choose, v_SelectFunction, Clipboard (CL)
+		GuiControl, HS4: Choose, v_SelectFunction, Clipboard (CL)
 		Case "MCL":	;SendFun := "F_HOF_MCLI"
-			GuiControl, HS3: Choose, v_SelectFunction, Menu & Clipboard (MCL)
-			GuiControl, HS4: Choose, v_SelectFunction, Menu & Clipboard (MCL)
+		GuiControl, HS3: Choose, v_SelectFunction, Menu & Clipboard (MCL)
+		GuiControl, HS4: Choose, v_SelectFunction, Menu & Clipboard (MCL)
 		Case "MSI":	;SendFun := "F_HOF_MSI"
-			GuiControl, HS3: Choose, v_SelectFunction, Menu & SendInput (MSI)
-			GuiControl, HS4: Choose, v_SelectFunction, Menu & SendInput (MSI)
-		Case "R":
-			GuiControl, HS3: Choose, v_SelectFunction, SendRaw (R)
-			GuiControl, HS4: Choose, v_SelectFunction, SendRaw (R)
-		Case "T":
-			GuiControl, HS3: Choose, v_SelectFunction, SendText (T)
-			GuiControl, HS4: Choose, v_SelectFunction, SendText (T)
-		Case "SP":
-			GuiControl, HS3: Choose, v_SelectFunction, SendPlay (SP)
-			GuiControl, HS4: Choose, v_SelectFunction, SendPlay (SP)
-		Case "SE":
-			GuiControl, HS3: Choose, v_SelectFunction, SendEvent (SE)
-			GuiControl, HS4: Choose, v_SelectFunction, SendEvent (SE)
+		GuiControl, HS3: Choose, v_SelectFunction, Menu & SendInput (MSI)
+		GuiControl, HS4: Choose, v_SelectFunction, Menu & SendInput (MSI)
 	}
 	
 	LV_GetText(EnDis, 		v_SelectedRow, 4)
@@ -3916,7 +3916,7 @@ F_LoadFontSize()
 				. A_Space . "/compress" . A_Space . "0"
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe, but not compressed:"]
 				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
-				. "`n" . TransA["Build with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
+				. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
 			
 			Case TransA["Compressed executable (upx.exe)"]:
 			Run, % v_TempOutStr . "Ahk2Exe.exe" 
@@ -3929,7 +3929,7 @@ F_LoadFontSize()
 				. A_Space . "/compress" 	. A_Space . "2" 
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["The executable file is prepared by Ahk2Exe and compressed by upx.exe:"]
 				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
-				. "`n" . TransA["Build with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
+				. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
 			
 			Case TransA["Compressed executable (mpress.exe)"]:
 			Run, % v_TempOutStr . "Ahk2Exe.exe" 
@@ -3942,7 +3942,7 @@ F_LoadFontSize()
 				. A_Space . "/compress" . A_Space . "1"
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe and compressed by mpress.exe:"]
 				. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
-				. "`n" . TransA["Build with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
+				. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
 		}
 		return
 }
@@ -4147,7 +4147,7 @@ Tab=1
 	
 	if (!FileExist("Config.ini"))
 	{
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini is now created in location:"] . "`n`n" . A_ScriptDir
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"] . "`n`n" . A_ScriptDir
 		FileAppend, %ConfigIni%, Config.ini
 	}
 	return	
@@ -4390,13 +4390,14 @@ A library with that name already exists! 					= A library with that name already
 Alphabetically 										= Alphabetically
 Apostrophe ' 											= Apostrophe '
 Application											= A&pplication
+Application help									= Application help
 Application language changed to: 							= Application language changed to:
 Are you sure you want to exit this application now?			= Are you sure you want to exit this application now?
-Are you sure you want to reload this application now?			= Are you sure you want to reload this application now
+Are you sure you want to reload this application now?			= Are you sure you want to reload this application now?
 Backslash \ 											= Backslash \
 Basic hotstring is triggered								= Basic hotstring is triggered
 Because of that the default AutoHotkey icon will be used instead = Because of that the default AutoHotkey icon will be used instead
-Build with Autohotkey.exe version							= Build with Autohotkey.exe version
+Built with Autohotkey.exe version							= Built with Autohotkey.exe version
 By length 											= By length
 Cancel 												= Cancel
 Case Sensitive (C) 										= Case Sensitive (C)
@@ -4420,7 +4421,7 @@ Comma , 												= Comma ,
 Compile												= Compile
 Compressed executable (upx.exe)							= Compressed executable (upx.exe)
 Compressed executable (mpress.exe)							= Compressed executable (mpress.exe)
-Config.ini wasn't found. The default Config.ini is now created in location: = Config.ini wasn't found. The default Config.ini is now created in location:
+Config.ini wasn't found. The default Config.ini has now been in location: = Config.ini wasn't found. The default Config.ini has now been created in location:
 Configuration 											= &Configuration
 Content of clipboard contain new line characters. Do you want to remove them? = Content of clipboard contain new line characters. Do you want to remove them?
 Continue reading the library file? If you answer ""No"" then application will exit! = Continue reading the library file? If you answer ""No"" then application will exit!
@@ -4457,7 +4458,7 @@ ErrorLevel was triggered by NewInput error. 					= ErrorLevel was triggered by N
 Error reading library file:								= Error reading library file:
 Exclamation Mark ! 										= Exclamation Mark !
 exists in the file										= exists in the file
-exists in a file and will be now replaced.					= exists in a file and will be now replaced.
+exists in a file and will now be replaced.					= exists in a file and will now be replaced.
 Exit													= Exit
 Exit application										= Exit application
 Export from .csv to .ahk 								= &Export from .csv to .ahk
@@ -4592,7 +4593,7 @@ Silent mode											= Silent mode
 Size of font											= Size of font
 Size of margin:										= Size of margin:
 Slash / 												= Slash /
-Something went wrong on time of hotstring setup				= Something went wrong on time of hotstring setup
+Something went wrong during hotstring setup				= Something went wrong during hotstring setup
 Something went wrong with disabling of existing hotstring		= Something went wrong with disabling of existing hotstring
 Something went wrong with (triggerstring, hotstring) creation	= Something went wrong with (triggerstring, hotstring) creation
 Something went wrong with hotstring deletion					= Something went wrong with hotstring deletion
@@ -4662,7 +4663,6 @@ Welcome to Hotstrings application!							= Welcome to Hotstrings application!
 When ""basic hotsring"" event takes place, sound is emitted according to the following settings. = When ""basic hotsring"" event takes place, sound is emitted according to the following settings.
 When ""hotstring menu"" event takes place, sound is emitted according to the following settings. = When ""hotstring menu"" event takes place, sound is emitted according to the following settings.
 When ""undo hotstring"" event takes place, sound is emitted according to the following settings. = When ""undo hotstring"" event takes place, sound is emitted according to the following settings.
-When hotstring menu event takes place, sound is emitted according to the following settings. = When hotstring menu event takes place, sound is emitted according to the following settings.
 When timeout is set, the tooltip ""Hotstring was triggered"" will dissapear after time reaches it. = When timeout is set, the tooltip ""Hotstring was triggered"" will dissapear after time reaches it.
 When timeout is set, the tooltip ""Undid the last hotstring!"" will dissapear after time reaches it. = When timeout is set, the tooltip ""Undid the last hotstring!"" will dissapear after time reaches it.
 When timeout is set, the triggerstring tip(s) will dissapear after time reaches it. = When timeout is set, the triggerstring tip(s) will dissapear after time reaches it.
@@ -4932,7 +4932,7 @@ F_GuiHS4_CreateObject()
 	GuiControl +g, % IdTextInfo12b, % TI_SHOF
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 	HS4: Add, 	DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (R)|SendText (T)|SendPlay (SP)|SendEvent (SE)
+	Gui, 	HS4: Add, 	DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (R) |SendText (T)|SendPlay (SP) | SendEvent (SE)
 	
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText4b,					 					% TransA["Enter hotstring"]
@@ -5085,7 +5085,7 @@ F_GuiMain_CreateObject()
 	GuiControl +g, % IdTextInfo12, % TI_SHOF
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 			SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (R)|SendText (T)|SendPlay (SP)|SendEvent (SE)
+	Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 			SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (R) |SendText (T)|SendPlay (SP) | SendEvent (SE)
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText4,					 					% TransA["Enter hotstring"]
@@ -6299,6 +6299,10 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 	v_UndoHotstring := F_ChangingBrackets(v_UndoHotstring)
 	
 	v_TypedTriggerstring := ThisHotkey 
+	
+	if (InStr(v_TypedTriggerstring, "{"))
+		v_TypedTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, "}") + 1 , StrLen(v_TypedTriggerstring) - InStr(v_TypedTriggerstring, "}")) ;future: not necessary anymore.
+	;Hotstring("Reset") ;not required in normal operation
 	v_HotstringFlag := true
 	F_EventSigOrdHotstring()
 }
@@ -7248,36 +7252,48 @@ L_GUIInit:
 				if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
 				{
 					Gui, HS3: Show, AutoSize Center
+					if (ini_ShowIntro)
+						Gui, ShowIntro: Show, AutoSize Center
 					v_ResizingFlag := false
 					return
 				}
 				if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
 				{
-					;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
+							;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
 					Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
 					Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+					if (ini_ShowIntro)
+						Gui, ShowIntro: Show, AutoSize Center
 					v_ResizingFlag := false
 					return
 				}
 				Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+				if (ini_ShowIntro)
+					Gui, ShowIntro: Show, AutoSize Center
 				v_ResizingFlag := false
 			return
 			Case "HS4":
 				if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
 				{
-					;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
+						;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
 					Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
 					Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+					if (ini_ShowIntro)
+						Gui, ShowIntro: Show, AutoSize Center
 					v_ResizingFlag := false
 					return
 				}
 				if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
 				{
 					Gui, HS4: Show, AutoSize Center
+					if (ini_ShowIntro)
+						Gui, ShowIntro: Show, AutoSize Center
 					v_ResizingFlag := false
 					return
 				}
 				Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+				if (ini_ShowIntro)
+					Gui, ShowIntro: Show, AutoSize Center
 				v_ResizingFlag := false
 			return
 		}		
