@@ -384,7 +384,7 @@ Menu,	AboutHelpSub,	Add
 Menu,	AboutHelpSub,	Add, % TransA["Show intro"],					L_ShowIntro
 
 if (!A_AhkPath) ;if AutoHotkey isn't installed
-	Menu,	ApplicationSubmenu, Disable,							% TransA["Compile"]
+	Menu,	AppSubmenu, Disable,							% TransA["Compile"]
 Menu, 	HSMenu,			Add, % TransA["Application"],				:AppSubmenu
 Menu, 	HSMenu, 			Add, % TransA["About / Help"], 			:AboutHelpSub
 Gui, 	HS3: Menu, HSMenu
@@ -4708,7 +4708,7 @@ TI_Sandbox											= Sandbox is used as editing field where you can test `nany
 	
 	if (decision[1] = "load")
 	{
-		FileRead, v_TheWholeFile, % A_ScriptDir . "\Languages\English.txt" 
+		FileRead, v_TheWholeFile, % A_ScriptDir . "\Languages\" . ini_Language
 		F_ParseLanguageFile(v_TheWholeFile)
 		return
 	}
