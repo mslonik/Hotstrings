@@ -985,7 +985,6 @@ F_PrepareTriggerstringTipsTables()
 				a_SelectedTriggers[A_Index] := a_Triggers[A_Index]
 			}
 		}
-	;*[One]
 		if (ini_TipsSortAlphabetically)
 		{
 		;a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
@@ -2140,6 +2139,7 @@ F_AddHotstring()
 		EnDis := "En"
 	}
 	
+	;*[One]
 	Switch v_SelectFunction
 	{
 		Case "Clipboard (CL)": 			
@@ -2154,6 +2154,22 @@ F_AddHotstring()
 		Case "Menu & SendInput (MSI)": 
 			SendFunHotstringCreate 	:= "F_HOF_MSI"
 			SendFunFileFormat 		:= "MSI"
+		Case "SendRaw (R)":			
+			SendFunHotstringCreate 	:= "F_HOF_SI"
+			SendFunFileFormat 		:= "SI"
+			Options .= "R"
+		Case "SendText (T)":		
+			SendFunHotstringCreate 	:= "F_HOF_SI"
+			SendFunFileFormat 		:= "SI"
+			Options .= "T"
+		Case "SendPlay (SP)":		
+			SendFunHotstringCreate 	:= "F_HOF_SI"
+			SendFunFileFormat 		:= "SI"
+			Options .= "SP"
+		Case "SendEvent (SE)":		
+			SendFunHotstringCreate 	:= "F_HOF_SI"
+			SendFunFileFormat 		:= "SI"
+			Options .= "SE"
 	}
 	
 	;2. Create or modify (triggerstring, hotstring) definition according to inputs. 
@@ -3482,17 +3498,29 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 	Switch Fun
 	{
 		Case "SI":	;SendFun := "F_HOF_SI"
-		GuiControl, HS3: Choose, v_SelectFunction, SendInput (SI)
-		GuiControl, HS4: Choose, v_SelectFunction, SendInput (SI)
+			GuiControl, HS3: Choose, v_SelectFunction, SendInput (SI)
+			GuiControl, HS4: Choose, v_SelectFunction, SendInput (SI)
 		Case "CL":	;SendFun := "F_HOF_CLI"
-		GuiControl, HS3: Choose, v_SelectFunction, Clipboard (CL)
-		GuiControl, HS4: Choose, v_SelectFunction, Clipboard (CL)
+			GuiControl, HS3: Choose, v_SelectFunction, Clipboard (CL)
+			GuiControl, HS4: Choose, v_SelectFunction, Clipboard (CL)
 		Case "MCL":	;SendFun := "F_HOF_MCLI"
-		GuiControl, HS3: Choose, v_SelectFunction, Menu & Clipboard (MCL)
-		GuiControl, HS4: Choose, v_SelectFunction, Menu & Clipboard (MCL)
+			GuiControl, HS3: Choose, v_SelectFunction, Menu & Clipboard (MCL)
+			GuiControl, HS4: Choose, v_SelectFunction, Menu & Clipboard (MCL)
 		Case "MSI":	;SendFun := "F_HOF_MSI"
-		GuiControl, HS3: Choose, v_SelectFunction, Menu & SendInput (MSI)
-		GuiControl, HS4: Choose, v_SelectFunction, Menu & SendInput (MSI)
+			GuiControl, HS3: Choose, v_SelectFunction, Menu & SendInput (MSI)
+			GuiControl, HS4: Choose, v_SelectFunction, Menu & SendInput (MSI)
+		Case "R":
+			GuiControl, HS3: Choose, v_SelectFunction, SendRaw (R)
+			GuiControl, HS4: Choose, v_SelectFunction, SendRaw (R)
+		Case "T":
+			GuiControl, HS3: Choose, v_SelectFunction, SendText (T)
+			GuiControl, HS4: Choose, v_SelectFunction, SendText (T)
+		Case "SP":
+			GuiControl, HS3: Choose, v_SelectFunction, SendPlay (SP)
+			GuiControl, HS4: Choose, v_SelectFunction, SendPlay (SP)
+		Case "SE":
+			GuiControl, HS3: Choose, v_SelectFunction, SendEvent (SE)
+			GuiControl, HS4: Choose, v_SelectFunction, SendEvent (SE)
 	}
 	
 	LV_GetText(EnDis, 		v_SelectedRow, 4)
@@ -4904,7 +4932,7 @@ F_GuiHS4_CreateObject()
 	GuiControl +g, % IdTextInfo12b, % TI_SHOF
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 	HS4: Add, 	DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (R) |SendText (T)|SendPlay (SP) | SendEvent (SE)
+	Gui, 	HS4: Add, 	DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (R)|SendText (T)|SendPlay (SP)|SendEvent (SE)
 	
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText4b,					 					% TransA["Enter hotstring"]
@@ -5057,7 +5085,7 @@ F_GuiMain_CreateObject()
 	GuiControl +g, % IdTextInfo12, % TI_SHOF
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 			SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (R) |SendText (T)|SendPlay (SP) | SendEvent (SE)
+	Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 			SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (R)|SendText (T)|SendPlay (SP)|SendEvent (SE)
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText4,					 					% TransA["Enter hotstring"]
