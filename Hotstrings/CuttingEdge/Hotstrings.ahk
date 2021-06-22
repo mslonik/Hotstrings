@@ -383,8 +383,6 @@ Menu,	AboutHelpSub,	Add,	% TransA["About this application..."],		F_GuiAbout
 Menu,	AboutHelpSub,	Add
 Menu,	AboutHelpSub,	Add, % TransA["Show intro"],					L_ShowIntro
 
-if (!A_AhkPath) ;if AutoHotkey isn't installed
-	Menu,	AppSubmenu, Disable,							% TransA["Compile"]
 Menu, 	HSMenu,			Add, % TransA["Application"],				:AppSubmenu
 Menu, 	HSMenu, 			Add, % TransA["About / Help"], 			:AboutHelpSub
 Gui, 	HS3: Menu, HSMenu
@@ -3878,6 +3876,7 @@ F_LoadFontSize()
 		if (FileExist(v_TempOutStr . "Ahk2Exe.exe"))
 		{
 			Menu, CompileSubmenu, Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
+			Menu,	AppSubmenu,		Add,	% TransA["Compile"],				:CompileSubmenu
 		;Menu, TraySubmenu,	  Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
 		}
 		if (FileExist(v_TempOutStr . "upx.exe"))
@@ -3890,7 +3889,12 @@ F_LoadFontSize()
 			Menu, CompileSubmenu, Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
 		;Menu, TraySubmenu,	  Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
 		}
-		Menu,	AppSubmenu,		Add,	% TransA["Compile"],				:CompileSubmenu
+	if (!FileExist(A_AhkPath)) ;if AutoHotkey isn't installed
+		{
+		Menu, AppSubmenu,		Add,	% TransA["Compile"],		L_Compile
+		Menu,	AppSubmenu, Disable,							% TransA["Compile"]
+		}
+	
 	;Menu,	Tray,			Add, % TransA["Compile"],				:TraySubmenu
 	}
 	
@@ -7513,4 +7517,7 @@ return
 L_ShowIntro:
 	F_GuiShowIntro()
 	Gui, ShowIntro: Show, AutoSize Center
+return
+
+L_Compile:
 return
