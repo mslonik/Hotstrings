@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -6319,6 +6319,9 @@ F_HOF_T(ReplacementString, Oflag)	;Hotstring Output Function _ Text mode
 	local	ThisHotkey := A_ThisHotkey
 	
 	v_InputString := ""
+	MsgBox,, Przed, % ReplacementString
+	ReplacementString := RegExReplace(ReplacementString, "(```)|(``n)|(``r)|(``b)|(``t)|(``v)|(``a)|(``f)|(f)", "`$0")
+	MsgBox,, Po, % ErrorLevel
 	ReplacementString := F_AHKVariables(ReplacementString)
 	if (Oflag = false)
 		Send, % "{Text}" . ReplacementString . A_EndChar
@@ -6392,11 +6395,14 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput tu jes
 	local	ThisHotkey := A_ThisHotkey
 	
 	v_InputString := ""
+	;ReplacementString := RegExReplace(ReplacementString, "(```)|(``n)|(``r)|(``b)|(``t)|(``v)|(``a)", "`$0")
+	ReplacementString := RegExReplace(ReplacementString, "``b", "`b")
+	;ToolTip, % ReplacementString
 	ReplacementString := F_AHKVariables(ReplacementString)
 	;ReplacementString := StrReplace(ReplacementString, "``r", "{Enter}")
-	ReplacementString := StrReplace(ReplacementString, "``r", "`r")
+	;ReplacementString := StrReplace(ReplacementString, "``r", "`r")
 	;ReplacementString := StrReplace(ReplacementString, "``b", "{Backspace}")
-	ReplacementString := StrReplace(ReplacementString, "``b", "`b")
+	;ReplacementString := StrReplace(ReplacementString, "``b", "`b")
 	;*[One]
 	if (Oflag = false)
 		SendInput, % ReplacementString . A_EndChar
