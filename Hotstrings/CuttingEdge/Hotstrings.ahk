@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -6349,6 +6349,7 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput tu jes
 	local	ThisHotkey := A_ThisHotkey
 	
 	v_InputString := ""
+
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	if (Oflag = false)
 		SendInput, % ReplacementString . A_EndChar
