@@ -503,9 +503,7 @@ F_PasteFromClipboard()
 #if WinActive("ahk_id" HS3GuiHwnd) or WinActive("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows are active at the moment. 
 
 F1::	;new thread starts here
-	F_WhichGui()
-	F_GuiAbout()
-return
+	Goto, GuiAboutLink1
 
 F2:: ;new thread starts here
 F_WhichGui()
@@ -649,13 +647,13 @@ F_HMenuCli()
 		{
 			IntCnt := v_MenuMax
 			if (ini_MHSEn)
-				SoundBeep, % ini_MHSF, % ini_MHSD	;Future: configurable parameters of the sound
+				SoundBeep, % ini_MHSF, % ini_MHSD	
 		}
 		if (IntCnt < 1)
 		{
 			IntCnt := 1
 			if (ini_MHSEn)
-				SoundBeep, % ini_MHSF, % ini_MHSD	;Future: configurable parameters of the sound
+				SoundBeep, % ini_MHSF, % ini_MHSD	
 		}
 		IsCursorPressed := false
 		return
@@ -886,7 +884,7 @@ F_Undo()
 	global	;assume-global mode
 	local	TriggerOpt := "", PosColon1 := 0, PosColon2 := 0, HowManyBackSpaces := 0, ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey
 			,OrigTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, ":", false, 1, 2) + 1)
-	
+	;*[One]
 	if (ini_UHTtEn and v_TypedTriggerstring and (ThisHotkey != PriorHotkey))
 	{	
 		PosColon1 := InStr(v_TypedTriggerstring, ":", false, 1, 1) ;position of the first colon
@@ -2187,9 +2185,6 @@ F_AddHotstring()
 		Case "SendEvent (SE)":
 			SendFunHotstringCreate 	:= "F_HOF_SE"
 			SendFunFileFormat 		:= "SE"
-		Case "SendText (T)":
-			SendFunHotstringCreate 	:= "F_HOF_T"
-			SendFunFileFormat 		:= "ST"
 	}
 	
 	;2. Create or modify (triggerstring, hotstring) definition according to inputs. 
@@ -3154,8 +3149,6 @@ F_GuiAddLibrary()
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-;In AutoHotkey there is no Guicontrol, Delete sub-command. As a consequence even if specific control is hidden (Guicontrol, Hide), the Gui size isn't changed, size is not decreased, as space for hidden control is maintained. To solve this issue, the separate gui have to be prepared. This requires a lot of work and is a matter of far future.
 F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui 
 {
 	global ;assume-global mode
@@ -3538,9 +3531,6 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 		Case "SE":
 			GuiControl, HS3: Choose, v_SelectFunction, SendPlay (SE)
 			GuiControl, HS4: Choose, v_SelectFunction, SendPlay (SE)
-		Case "ST":
-			GuiControl, HS3: Choose, v_SelectFunction, SendText (T)
-			GuiControl, HS4: Choose, v_SelectFunction, SendText (T)
 	}
 	
 	LV_GetText(EnDis, 		v_SelectedRow, 4)
@@ -4721,7 +4711,7 @@ F_TI_CaseSensitive										= C: Case sensitive: `n`nWhen you type a triggerstri
 F_TI_NotCaseConforming									= C1: Do not conform to typed case. `n`nUse this option to make hotstrings case insensitive `nand prevent them from conforming to the case of the characters you actually type.
 F_TI_EnterTriggerstring									= Enter text of triggerstring. `n`nTip1: If you want to change capitalization in abbreviation, use no triggerstring options. `nE.g. ascii → ASCII. `n`nTip2: If you want exchange triggerstring of abbreviation into full phrase, `nend your triggerstring with ""/"" and `napply Immediate Execute (*) triggerstring option.
 F_TI_OptionDisable										= Disables the hotstring. `n`nIf ticked, this option is shown in red color. `nBe aware that triggerstring tooltips (if enabled) `nare displayed even for disabled (triggerstring, hotstring) definitions.
-TI_SHOF												= Select function, which will be used to show up hotstring. `n`nAvailable options: `n`nSendInput (SI): SendInput is generally the preferred method because of its superior speed and reliability. `nUnder most conditions, SendInput is nearly instantaneous, even when sending long strings. `nSince SendInput is so fast, it is also more reliable because there is less opportunity for some other window to pop up unexpectedly `nand intercept the keystrokes. Reliability is further improved by the fact `nthat anything the user types during a SendInput is postponed until afterward. `n`nClipboard (CL): hotstring is copied from clipboard. `nIn case of long hotstrings this is the fastest method. The downside of this method is delay `nrequired for operating system to paste content into specific window. `nIn order to change value of this delay see ""Clipboard Delay (F7)"" option in menu. `n`nMenu and SendInput (MSI): One triggerstring can be used to enter up to 7 hotstrings which are desplayed in form of list (menu). `nFor entering of chosen hotstring again SendInput (SI) is used. `n`nMenu & Clipboard (MCL): One triggerstring can be used to enter up to 7 hotstrings which are desplayed in form of list (menu). `nFor entering of chosen hotstring Clipboard (CL) is used. `n`nSenRaw (R): All subsequent characters, including the special characters ^+!#{}, `nto be interpreted literally rather than translating {Enter} to Enter, ^c to Ctrl+C, etc. `n`nSendText (T): Similar to the Raw mode, except that no attempt is made to translate characters (other than `r, `n, `t and `b) to keycodes. `n`nSendPlay (SP): SendPlay's biggest advantage is its ability to ""play back"" keystrokes and mouse clicks in a broader variety of games `nthan the other modes. `nFor example, a particular game may accept hotstrings only when they have the SendPlay option. `n`nSendEvent (SE): SendEvent sends keystrokes using the same method as the pre-1.0.43 Send command.
+TI_SHOF												= Select function, which will be used to show up hotstring. `n`nAvailable options: `n`nSendInput (SI): SendInput is generally the preferred method because of its superior speed and reliability. `nUnder most conditions, SendInput is nearly instantaneous, even when sending long strings. `nSince SendInput is so fast, it is also more reliable because there is less opportunity for some other window to pop up unexpectedly `nand intercept the keystrokes. Reliability is further improved by the fact `nthat anything the user types during a SendInput is postponed until afterward. `n`nClipboard (CL): hotstring is copied from clipboard. `nIn case of long hotstrings this is the fastest method. The downside of this method is delay `nrequired for operating system to paste content into specific window. `nIn order to change value of this delay see ""Clipboard Delay (F7)"" option in menu. `n`nMenu and SendInput (MSI): One triggerstring can be used to enter up to 7 hotstrings which are desplayed in form of list (menu). `nFor entering of chosen hotstring again SendInput (SI) is used. `n`nMenu & Clipboard (MCL): One triggerstring can be used to enter up to 7 hotstrings which are desplayed in form of list (menu). `nFor entering of chosen hotstring Clipboard (CL) is used. `n`nSenRaw (R): All subsequent characters, including the special characters ^+!#{}, `nto be interpreted literally rather than translating {Enter} to Enter, ^c to Ctrl+C, etc. `n`nSendPlay (SP): SendPlay's biggest advantage is its ability to ""play back"" keystrokes and mouse clicks in a broader variety of games `nthan the other modes. `nFor example, a particular game may accept hotstrings only when they have the SendPlay option. `n`nSendEvent (SE): SendEvent sends keystrokes using the same method as the pre-1.0.43 Send command.
 TI_EnterHotstring										= Enter hotstring corresponding to the triggerstring. `n`nTip: You can use special key names in curved brackets. E.g.: {left 5} will move caret by 5x characters to the left.`n{Backspace 3} or {BS 3} will remove 3 characters from the end of triggerstring. `n`nTo send an extra space or tab after a replacement, include the space or tab at the end of the replacement `nbut make the last character an accent/backtick (`). `nFor example: `n:*:btw::By the way `
 TI_AddComment											= You can add optional (not mandatory) comment to new (triggerstring, hotstring) definition. `n`nThe comment can be max. 64 characters long. `n`nTip: Put here link to Wikipedia definition or any other external resource containing reference to entered definition.
 TI_SelectHotstringLib									= Select .csv file containing (triggerstring, hotstring) definitions. `nBy default those files are located in C:\Users\<UserName>\Documents folder.
@@ -4960,7 +4950,7 @@ F_GuiHS4_CreateObject()
 	GuiControl +g, % IdTextInfo12b, % TI_SHOF
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 	HS4: Add, 	DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (SR)|SendText (T)|SendPlay (SP)|SendEvent (SE)
+	Gui, 	HS4: Add, 	DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (SR)|SendPlay (SP)|SendEvent (SE)
 	
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText4b,					 					% TransA["Enter hotstring"]
@@ -5113,7 +5103,7 @@ F_GuiMain_CreateObject()
 	GuiControl +g, % IdTextInfo12, % TI_SHOF
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 			SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (SR)|SendText (T)|SendPlay (SP)|SendEvent (SE)
+	Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 			SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (SR)|SendPlay (SP)|SendEvent (SE)
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText4,					 					% TransA["Enter hotstring"]
@@ -6170,7 +6160,6 @@ F_CreateHotstring(txt, nameoffile)
 				Case "SR":	SendFun := "F_HOF_SR"
 				Case "SP":	SendFun := "F_HOF_SP"
 				Case "SE":	SendFun := "F_HOF_SE"
-				Case "ST":	SendFun := "F_HOF_T"
 			}
 			Case 4: 
 			Switch A_LoopField
@@ -6257,79 +6246,47 @@ F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t
 		} 
 	} 
 }
-	
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	F_AHKVariables(String)
-	{
-		String := StrReplace(String, "A_YYYY", 		A_YYYY)
-		String := StrReplace(String, "A_MMMM", 		A_MMMM)
-		String := StrReplace(String, "A_MMM", 		A_MMM)
-		String := StrReplace(String, "A_MM", 		A_MM)
-		String := StrReplace(String, "A_DDDD", 		A_DDDD)
-		String := StrReplace(String, "A_DDD", 		A_DDD)
-		String := StrReplace(String, "A_DD", 		A_DD)
-		String := StrReplace(String, "A_WDay", 		A_WDay)
-		String := StrReplace(String, "A_YDay", 		A_YDay)
-		String := StrReplace(String, "A_YWeek", 	A_YWeek)
-		String := StrReplace(String, "A_Hour",		A_Hour)
-		String := StrReplace(String, "A_Min", 		A_Min)
-		String := StrReplace(String, "A_Sec", 		A_Sec)
-		String := StrReplace(String, "A_MSec", 		A_MSec)
-		String := StrReplace(String, "A_Now", 		A_Now)
-		String := StrReplace(String, "A_NowUTC", 	A_NowUTC)
-		String := StrReplace(String, "A_TickCount", 	A_TickCount)
-		String := StrReplace(String, "``n",		"`n")	;dirty trick for new created hotstrings coming from clipboard
-		return String
+
+F_ReplaceAHKconstants(String)
+{
+	String := StrReplace(String, "A_YYYY", 		A_YYYY)
+	String := StrReplace(String, "A_MMMM", 		A_MMMM)
+	String := StrReplace(String, "A_MMM", 		A_MMM)
+	String := StrReplace(String, "A_MM", 		A_MM)
+	String := StrReplace(String, "A_DDDD", 		A_DDDD)
+	String := StrReplace(String, "A_DDD", 		A_DDD)
+	String := StrReplace(String, "A_DD", 		A_DD)
+	String := StrReplace(String, "A_WDay", 		A_WDay)
+	String := StrReplace(String, "A_YDay", 		A_YDay)
+	String := StrReplace(String, "A_YWeek", 	A_YWeek)
+	String := StrReplace(String, "A_Hour",		A_Hour)
+	String := StrReplace(String, "A_Min", 		A_Min)
+	String := StrReplace(String, "A_Sec", 		A_Sec)
+	String := StrReplace(String, "A_MSec", 		A_MSec)
+	String := StrReplace(String, "A_Now", 		A_Now)
+	String := StrReplace(String, "A_NowUTC", 	A_NowUTC)
+	String := StrReplace(String, "A_TickCount", 	A_TickCount)
+	String := StrReplace(String, "``n", "`n")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
+	String := StrReplace(String, "``r", "`r")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
+	String := StrReplace(String, "``b", "`b")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
+	String := StrReplace(String, "``t", "`t")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
+	String := StrReplace(String, "``v", "`v")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
+	String := StrReplace(String, "``a", "`a")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
+	String := StrReplace(String, "``f", "`f")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
+	return String
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_ChangingBrackets(string)	;future: replace with RegExReplace()
-{
-	occ := 1
-	Loop
-	{
-		PosStart := InStr(string, "{", 0, 1, occ)
-		if (PosStart)
-		{
-			PosEnd := InStr(string, "}", 0, 1, occ)
-			WBrack := SubStr(string, PosStart, PosEnd-PosStart+1)
-			If InStr(WBrack, "Backspace") or InStr(WBrack, "BS")
-			{
-				InBrack := ""
-			}
-			else
-			{
-				InBrack := SubStr(string, PosStart+1, PosEnd-PosStart-1)
-				InBrack := Trim(InBrack)
-			}
-			string := StrReplace(string, WBrack, InBrack,0,-1)
-			occ++
-		}
-		else
-			break
-	}
+F_PrepareUndo(string)
+{	;this function replaces from hotstring definition all characters which aren't necessary to undo last hotstring
+	if (InStr(string, "BackSpace")) or InStr(string, "BS")
+		string := RegExReplace(string, "Ui)({Backspace.*})|({BS.*})")
+	if (InStr(string, "{!}")) or (InStr(string, "{^}")) or (InStr(string, "{+}")) or (InStr(string, "{#}")) or (InStr(string, "{{}")) or (InStr(string, "{}}"))
+		string := RegExReplace(string, "U)({)|(})")
 	return string
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HOF_T(ReplacementString, Oflag)	;Hotstring Output Function _ Text mode
-{
-	global	;assume-global mode
-	local	ThisHotkey := A_ThisHotkey
-	
-	v_InputString := ""
-	ReplacementString := F_AHKVariables(ReplacementString)
-	if (Oflag = false)
-		Send, % "{Text}" . ReplacementString . A_EndChar
-		;Send, {Text}%ReplacementString%%A_EndChar%
-	else
-		Send, % "{Text}" . ReplacementString
-	v_UndoHotstring := F_ChangingBrackets(ReplacementString)
-	
-	v_TypedTriggerstring := ThisHotkey 
-	v_HotstringFlag := true
-	F_EventSigOrdHotstring()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
@@ -6338,14 +6295,14 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 	local	ThisHotkey := A_ThisHotkey
 	
 	v_InputString := ""
-	ReplacementString := F_AHKVariables(ReplacementString)
+	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	if (Oflag = false)
 		SendEvent, % ReplacementString . A_EndChar
 	else
 		SendEvent, % ReplacementString
-	v_UndoHotstring := F_ChangingBrackets(ReplacementString)
 	
 	v_TypedTriggerstring := ThisHotkey 
+	v_UndoHotstring := F_PrepareUndo(ReplacementString)
 	v_HotstringFlag := true
 	F_EventSigOrdHotstring()
 }
@@ -6356,14 +6313,14 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 	local	ThisHotkey := A_ThisHotkey
 	
 	v_InputString := ""
-	ReplacementString := F_AHKVariables(ReplacementString)
+	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	if (Oflag = false)
 		SendPlay, % ReplacementString . A_EndChar
 	else
 		SendPlay, % ReplacementString
-	v_UndoHotstring := F_ChangingBrackets(ReplacementString)
 	
 	v_TypedTriggerstring := ThisHotkey 
+	v_UndoHotstring := F_PrepareUndo(ReplacementString)
 	v_HotstringFlag := true
 	F_EventSigOrdHotstring()
 }
@@ -6374,14 +6331,14 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 	local	ThisHotkey := A_ThisHotkey
 	
 	v_InputString := ""
-	ReplacementString := F_AHKVariables(ReplacementString)
+	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	if (Oflag = false)
 		SendRaw, % ReplacementString . A_EndChar
 	else
 		SendRaw, % ReplacementString
-	v_UndoHotstring := F_ChangingBrackets(ReplacementString)
 	
 	v_TypedTriggerstring := ThisHotkey 
+	v_UndoHotstring := F_PrepareUndo(ReplacementString)
 	v_HotstringFlag := true
 	F_EventSigOrdHotstring()
 }
@@ -6392,19 +6349,14 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput tu jes
 	local	ThisHotkey := A_ThisHotkey
 	
 	v_InputString := ""
-	ReplacementString := F_AHKVariables(ReplacementString)
-	;ReplacementString := StrReplace(ReplacementString, "``r", "{Enter}")
-	ReplacementString := StrReplace(ReplacementString, "``r", "`r")
-	;ReplacementString := StrReplace(ReplacementString, "``b", "{Backspace}")
-	ReplacementString := StrReplace(ReplacementString, "``b", "`b")
-	;*[One]
+	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	if (Oflag = false)
 		SendInput, % ReplacementString . A_EndChar
 	else
 		SendInput, % ReplacementString
-	v_UndoHotstring := F_ChangingBrackets(v_UndoHotstring)
-	
+	;*[One]
 	v_TypedTriggerstring := ThisHotkey 
+	v_UndoHotstring := F_PrepareUndo(ReplacementString)
 	v_HotstringFlag := true
 	F_EventSigOrdHotstring()
 }
@@ -6417,11 +6369,11 @@ F_HOF_CLI(ReplacementString, Oflag) ;Hotstring Output Function _ Clipboard
 	v_InputString := ""
 	ToolTip,
 	v_UndoHotstring := ReplacementString
-	ReplacementString := F_AHKVariables(ReplacementString)
+	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	ClipboardBackup := ClipboardAll
 	Clipboard := ReplacementString
 	ClipWait
-	ifWinActive,, "Microsoft Word"
+	ifWinActive,, "Microsoft Word"	;future: is it still necessary?
 	{
 		oWord := ComObjActive("Word.Application")
 		oWord.Selection.Paste
@@ -6436,7 +6388,6 @@ F_HOF_CLI(ReplacementString, Oflag) ;Hotstring Output Function _ Clipboard
 	Clipboard := ClipboardBackup
 	ClipboardBackup := ""
 	v_TypedTriggerstring := ThisHotkey
-	;Hotstring("Reset") ;not required in normal operation
 	v_HotstringFlag := true
 	F_EventSigOrdHotstring()
 }
@@ -6457,7 +6408,7 @@ F_HOF_MCLI(TextOptions, Oflag)
 	}
 	
 	v_MenuMax			 	:= 0
-	TextOptions 		 := F_AHKVariables(TextOptions)
+	TextOptions 		 := F_ReplaceAHKconstants(TextOptions)
 	Loop, Parse, TextOptions, ¦
 		v_MenuMax := A_Index
 	ToolTip,
@@ -6556,7 +6507,7 @@ F_HOF_MSI(TextOptions, Oflag)
 		SoundBeep, % ini_MHSF, % ini_MHSD
 	
 	v_MenuMax				:= 0
-	TextOptions 			:= F_AHKVariables(TextOptions)
+	TextOptions 			:= F_ReplaceAHKconstants(TextOptions)
 	Loop, Parse, TextOptions, ¦
 		v_MenuMax := A_Index
 	ToolTip,
@@ -6633,7 +6584,6 @@ F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A
 		F_EventSigOrdHotstring()
 		v_TypedTriggerstring := OutputVarTemp
 		v_UndoHotstring 	 := OutputVarTemp
-		;Hotstring("Reset") it shouldn't be necessary here
 	}
 	return
 }
@@ -6686,13 +6636,13 @@ F_HMenuAHK()
 		{
 			IntCnt := v_MenuMax
 			if (ini_MHSEn)
-				SoundBeep, % ini_MHSF, % ini_MHSD	;Future: configurable parameters of the sound
+				SoundBeep, % ini_MHSF, % ini_MHSD	
 		}
 		if (IntCnt < 1)
 		{
 			IntCnt := 1
 			if (ini_MHSEn)
-				SoundBeep, % ini_MHSF, % ini_MHSD	;Future: configurable parameters of the sound
+				SoundBeep, % ini_MHSF, % ini_MHSD	
 		}
 		IsCursorPressed := false
 		return
@@ -6888,7 +6838,7 @@ F_ImportLibrary()
 	{
 		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Such file already exists"] . ":" . "`n`n" . v_OutputFile . "`n`n" . TransA["Do you want to delete it?"] . "`n`n" 
 			. TransA["If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file."]
-		IfMsgBox, Yes	;check if it was loaded. if yes, recommend restart of application, because "Total" counter and Hotstrings definitions will be incredible. Future: at first disable existing Hotstrings definitions and then reduce total counter.
+		IfMsgBox, Yes	;check if it was loaded. if yes, recommend restart of application, because "Total" counter and Hotstrings definitions will be incredible. 
 		{
 			for key, value in ini_LoadLib
 				if (key = OutNameNoExt)
@@ -7454,20 +7404,18 @@ L_PublicLibraries:
 	Run, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings/Libraries
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	~F1::
-	AboutOkButton:
-	MyAboutGuiEscape:
-	MyAboutGuiClose: ; Showed when the window is closed by pressing its X button in the title bar.
+AboutOkButton:
+MyAboutGuiEscape:
+MyAboutGuiClose: ; Showed when the window is closed by pressing its X button in the title bar.
 	Gui, MyAbout: Hide
-	return
+return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-; Future: save window position
-	HS3GuiClose:
-	HS3GuiEscape:
+HS3GuiClose:
+HS3GuiEscape:
 	Gui,		HS3: Show, Hide
 	ini_WhichGui := "HS3"
-	return
+return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	HS4GuiClose:
 	HS4GuiEscape:
