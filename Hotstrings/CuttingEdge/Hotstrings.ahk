@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -883,20 +883,22 @@ F_Undo()
 {
 	global	;assume-global mode
 	local	TriggerOpt := "", PosColon1 := 0, PosColon2 := 0, HowManyBackSpaces := 0, ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey
-			,OrigTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, ":", false, 1, 2) + 1)
+			;,OrigTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, ":", false, 1, 2) + 1)
 	;*[One]
 	if (ini_UHTtEn and v_TypedTriggerstring and (ThisHotkey != PriorHotkey))
 	{	
 		PosColon1 := InStr(v_TypedTriggerstring, ":", false, 1, 1) ;position of the first colon
 		PosColon2 := InStr(v_TypedTriggerstring, ":", false, 3, 1) ;position of the second colon
-		TriggerOpt := SubStr(v_TypedTriggerstring, PosColon1 + 1, PosColon2 - PosColon1 - 1)
+		TriggerOpt := SubStr(v_TypedTriggerstring, PosColon1 + 1, PosColon2 - PosColon1 - 1) ;future: ReExReplace
 		if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O")))
 			Send, {BackSpace}
 		if (v_UndoHotstring)
 		{
+			v_UndoHotstring := F_PrepareUndo(ReplacementString)
 			HowManyBackSpaces := StrLenUnicode(v_UndoHotstring)
 			Send, % "{BackSpace " . HowManyBackSpaces . "}"
-			Loop, Parse, OrigTriggerstring
+			Loop, Parse, v_UndoHotstring	;tu jestem: wypróbować, czy to zadziała
+			;Loop, Parse, OrigTriggerstring
 					Switch A_LoopField
 					{
 						Case "^", "+", "!", "#", "{", "}":
@@ -907,7 +909,7 @@ F_Undo()
 		}
 		if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O"))) 
 			Send, % A_EndChar
-		
+		;signaling only; future: move to separate function
 		if (ini_UHTtEn)
 		{
 			ToolTip, ,, , 4	;Basic triggerstring was triggered
@@ -6247,8 +6249,7 @@ F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t
 	} 
 }
 
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ReplaceAHKconstants(String)
 {
 	String := StrReplace(String, "A_YYYY", 		A_YYYY)
@@ -6277,8 +6278,7 @@ F_ReplaceAHKconstants(String)
 	String := StrReplace(String, "``f", "`f")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
 	return String
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 F_PrepareUndo(string)
 {	;this function replaces from hotstring definition all characters which aren't necessary to undo last hotstring
@@ -6349,6 +6349,7 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput tu jes
 	local	ThisHotkey := A_ThisHotkey
 	
 	v_InputString := ""
+	v_UndoHotstring := ReplacementString	;v_UndoHotstring is used to undo the hotstring; it's global variable applied by F_Undo function
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	if (Oflag = false)
 		SendInput, % ReplacementString . A_EndChar
@@ -6356,7 +6357,7 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput tu jes
 		SendInput, % ReplacementString
 	;*[One]
 	v_TypedTriggerstring := ThisHotkey 
-	v_UndoHotstring := F_PrepareUndo(ReplacementString)
+	;v_UndoHotstring := F_PrepareUndo(ReplacementString)	;future: move this function to F_Undo
 	v_HotstringFlag := true
 	F_EventSigOrdHotstring()
 }
