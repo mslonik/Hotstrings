@@ -4,6 +4,9 @@
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
 	License:     GNU GPL v.3
 */
+; W trybie cichym po restarcie wyświetla GUI.
+; W wersji .exe po przestawieniu EndChar wyświetla błąd.
+; Jak nie ma żadnych plików (Config.ini i Languages) to pierwszy komunikat MsgBox jest pusty, sama ścieżka.
 
 ; -----------Beginning of auto-execute section of the script -------------------------------------------------
 ; After the script has been loaded, it begins executing at the top line, continuing until a Return, Exit, hotkey/hotstring label, or the physical end of the script is encountered (whichever comes first). 
@@ -76,7 +79,7 @@ IniRead ini_Language, Config.ini, GraphicalUserInterface, Language				; Load fro
 if (!FileExist(A_ScriptDir . "\Languages\" . ini_Language))			; else if there is no ini_language .ini file, e.g. v_langugae == Polish.ini and there is no such file in Languages folder
 {
 	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no"] . A_Space . ini_Language . A_Space . TransA["file in Languages subfolder!"]
-	. "`n`n" . TransA["The default"] . A_Space . ini_Language . A_Space . TransA["file is now created in the following subfolder:"] . "`n`n"  A_ScriptDir . "\Languages\"
+	. "`n`n" . TransA["The default"] . A_Space . "English.ini" . A_Space . TransA["file is now created in the following subfolder:"] . "`n`n"  A_ScriptDir . "\Languages\"
 	F_LoadCreateTranslationTxt("create")
 }
 else
@@ -390,7 +393,7 @@ F_GuiAbout_CreateObjects()
 F_GuiAbout_DetermineConstraints()
 
 IniRead, ini_GuiReload, 						Config.ini, GraphicalUserInterface, GuiReload
-if (ini_GuiReload)
+if (ini_GuiReload) and (v_Param != "l")
 	Gosub, L_GUIInit
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -883,22 +886,20 @@ F_Undo()
 {
 	global	;assume-global mode
 	local	TriggerOpt := "", PosColon1 := 0, PosColon2 := 0, HowManyBackSpaces := 0, ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey
-			;,OrigTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, ":", false, 1, 2) + 1)
+			,OrigTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, ":", false, 1, 2) + 1)
 	;*[One]
 	if (ini_UHTtEn and v_TypedTriggerstring and (ThisHotkey != PriorHotkey))
 	{	
 		PosColon1 := InStr(v_TypedTriggerstring, ":", false, 1, 1) ;position of the first colon
 		PosColon2 := InStr(v_TypedTriggerstring, ":", false, 3, 1) ;position of the second colon
-		TriggerOpt := SubStr(v_TypedTriggerstring, PosColon1 + 1, PosColon2 - PosColon1 - 1) ;future: ReExReplace
+		TriggerOpt := SubStr(v_TypedTriggerstring, PosColon1 + 1, PosColon2 - PosColon1 - 1)
 		if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O")))
 			Send, {BackSpace}
 		if (v_UndoHotstring)
 		{
-			v_UndoHotstring := F_PrepareUndo(ReplacementString)
 			HowManyBackSpaces := StrLenUnicode(v_UndoHotstring)
 			Send, % "{BackSpace " . HowManyBackSpaces . "}"
-			Loop, Parse, v_UndoHotstring	;tu jestem: wypróbować, czy to zadziała
-			;Loop, Parse, OrigTriggerstring
+			Loop, Parse, OrigTriggerstring
 					Switch A_LoopField
 					{
 						Case "^", "+", "!", "#", "{", "}":
@@ -909,7 +910,7 @@ F_Undo()
 		}
 		if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O"))) 
 			Send, % A_EndChar
-		;signaling only; future: move to separate function
+		
 		if (ini_UHTtEn)
 		{
 			ToolTip, ,, , 4	;Basic triggerstring was triggered
@@ -1661,13 +1662,13 @@ F_ToggleEndChars()
 		{
 			Menu, SubmenuEndChars, UnCheck, % A_ThisMenuitem
 			a_HotstringEndChars[A_ThisMenuItem] := false
-			IniWrite, % false, Config.ini, EndChars, % A_ThisMenuItem
+			IniWrite, % false, Config.ini, EndChars, % A_ThisMenuItem	;tu jestem
 		}
 		else
 		{
 			Menu, SubmenuEndChars, Check, % A_ThisMenuitem
 			a_HotstringEndChars[A_ThisMenuItem] := true
-			IniWrite, % true, Config.ini, EndChars, % A_ThisMenuItem
+			IniWrite, % true, Config.ini, EndChars, % A_ThisMenuItem	;tu jestem
 		}
 		F_LoadEndChars()
 	}
@@ -6249,7 +6250,8 @@ F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t
 	} 
 }
 
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 F_ReplaceAHKconstants(String)
 {
 	String := StrReplace(String, "A_YYYY", 		A_YYYY)
@@ -6278,7 +6280,8 @@ F_ReplaceAHKconstants(String)
 	String := StrReplace(String, "``f", "`f")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
 	return String
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 F_PrepareUndo(string)
 {	;this function replaces from hotstring definition all characters which aren't necessary to undo last hotstring
@@ -6349,7 +6352,6 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput tu jes
 	local	ThisHotkey := A_ThisHotkey
 	
 	v_InputString := ""
-	v_UndoHotstring := ReplacementString	;v_UndoHotstring is used to undo the hotstring; it's global variable applied by F_Undo function
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	if (Oflag = false)
 		SendInput, % ReplacementString . A_EndChar
@@ -6357,7 +6359,7 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput tu jes
 		SendInput, % ReplacementString
 	;*[One]
 	v_TypedTriggerstring := ThisHotkey 
-	;v_UndoHotstring := F_PrepareUndo(ReplacementString)	;future: move this function to F_Undo
+	v_UndoHotstring := F_PrepareUndo(ReplacementString)
 	v_HotstringFlag := true
 	F_EventSigOrdHotstring()
 }
@@ -6687,7 +6689,7 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_LoadEndChars() ;Load from Config.ini
+F_LoadEndChars() ;Load from Config.ini tu jestem
 {
 	global	;assume-global mode
 	local	vOutputVarSection := "", key := "", val := "", tick := false, LastKey := ""
