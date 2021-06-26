@@ -1,13 +1,9 @@
-/* 
+﻿/* 
 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
 	License:     GNU GPL v.3
 */
-; W trybie cichym po restarcie wyświetla GUI.
-; W wersji .exe po przestawieniu EndChar wyświetla błąd.
-; Jak nie ma żadnych plików (Config.ini i Languages) to pierwszy komunikat MsgBox jest pusty, sama ścieżka.
-
 ; -----------Beginning of auto-execute section of the script -------------------------------------------------
 ; After the script has been loaded, it begins executing at the top line, continuing until a Return, Exit, hotkey/hotstring label, or the physical end of the script is encountered (whichever comes first). 
 
@@ -177,15 +173,11 @@ if (v_Param == "d") ;If the script is run with command line parameter "d" like d
 	v_LogFileName := % "Logs\Logs" . A_DD . A_MM . "_" . A_Hour . A_Min . ".txt"
 	FileAppend, , %v_LogFileName%, UTF-8
 }
+;*[One]
+Loop, Files, %A_ScriptDir%\Languages\*.txt
+	Menu, SubmenuLanguage, Add, %A_LoopFileName%, F_ChangeLanguage
+F_ChangeLanguage()
 
-Loop, %A_ScriptDir%\Languages\*.txt 
-{
-	Menu, SubmenuLanguage, Add, %A_LoopFileName%, L_ChangeLanguage
-	if (ini_Language == A_LoopFileName)
-		Menu, SubmenuLanguage, Check, %A_LoopFileName%
-	else
-		Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
-}
 Menu, StyleGUIsubm, Add, % TransA["Light (default)"],	F_StyleOfGUI
 Menu, StyleGUIsubm, Add, % TransA["Dark"],			F_StyleOfGUI
 Switch c_FontColor
@@ -312,28 +304,28 @@ Menu, Submenu1, Add, % TransA["Undo the last hotstring [Ctrl+F12]: enable"], 	F_
 Menu, Submenu1, Add, % TransA["Undo the last hotstring [Ctrl+F12]: disable"],	F_MUndo
 Menu, Submenu1, Add
 F_MUndo()
-
-Menu, SubmenuEndChars, Add, % TransA["Minus -"], 						F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Space"],						F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Opening Round Bracket ("],			F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Closing Round Bracket )"],			F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Opening Square Bracket ["],		F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Closing Square Bracket ]"],		F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Opening Curly Bracket {"], 		F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Closing Curly Bracket }"], 		F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Colon :"], 						F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Semicolon `;"], 					F_ToggleEndChars
+;Warning: order of SubmenuEndChars have to be alphabetical. Keep an eye on it. This is because after change of language specific menu items are related with associative array which also keeps to alphabetical order.
 Menu, SubmenuEndChars, Add, % TransA["Apostrophe '"], 					F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Quote """], 					F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Slash /"], 						F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Backslash \"], 					F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Curly Bracket }"], 		F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Round Bracket )"],			F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Square Bracket ]"],		F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Colon :"], 						F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Comma ,"], 						F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Dot ."], 						F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Question Mark ?"], 				F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 					F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Exclamation Mark !"], 			F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Enter"],						F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Exclamation Mark !"], 			F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Minus -"], 						F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Curly Bracket {"], 		F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Round Bracket ("],			F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Square Bracket ["],		F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Question Mark ?"], 				F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Quote """], 					F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Semicolon `;"], 					F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Slash /"], 						F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Space"],						F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Tab"], 						F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 					F_ToggleEndChars
 F_ToggleEndChars()
 
 Menu, Submenu1,		Add, % TransA["Signaling of events"],			:SigOfEvents
@@ -1639,16 +1631,17 @@ F_LoadSignalingParams()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ToggleEndChars()
+F_ToggleEndChars()	;tu jestem
 {	
 	global	;assume-global mode
 	local	key := "", val := ""
-	static OneTimeMemory := true
+	static OneTimeMemory := true, NextName := []
 	
 	if (OneTimeMemory)
 	{
 		for key, val in a_HotstringEndChars
 		{
+			NextName[A_Index] := key
 			if (a_HotstringEndChars[key])
 				Menu, SubmenuEndChars, Check, % TransA[key]
 			else
@@ -1658,17 +1651,18 @@ F_ToggleEndChars()
 	}
 	else
 	{
+		;*[One]
 		if (a_HotstringEndChars[A_ThisMenuItem])
 		{
 			Menu, SubmenuEndChars, UnCheck, % A_ThisMenuitem
 			a_HotstringEndChars[A_ThisMenuItem] := false
-			IniWrite, % false, Config.ini, EndChars, % A_ThisMenuItem	;tu jestem
+			IniWrite, % false, Config.ini, EndChars, % NextName[A_ThisMenuItemPos]	
 		}
 		else
 		{
 			Menu, SubmenuEndChars, Check, % A_ThisMenuitem
 			a_HotstringEndChars[A_ThisMenuItem] := true
-			IniWrite, % true, Config.ini, EndChars, % A_ThisMenuItem	;tu jestem
+			IniWrite, % true, Config.ini, EndChars, % NextName[A_ThisMenuItemPos]	
 		}
 		F_LoadEndChars()
 	}
@@ -2164,7 +2158,6 @@ F_AddHotstring()
 		OnOff := "On"
 		EnDis := "En"
 	}
-	;*[One]
 	Switch v_SelectFunction
 	{
 		Case "Clipboard (CL)": 			
@@ -2645,69 +2638,69 @@ F_Move()
 		}
 		GuiControl, +Redraw, % IdSearchLV1 ;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
 		return
-	}
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_Searching(ReloadListView*)
-	{
-		global	;assume-global mode
-		local	Window1X := 0, 	Window1Y := 0, 	Window1W := 0, 	Window1H := 0
+F_Searching(ReloadListView*)
+{
+	global	;assume-global mode
+	local	Window1X := 0, 	Window1Y := 0, 	Window1W := 0, 	Window1H := 0
 			,Window2X := 0, 	Window2Y := 0, 	Window2W := 0, 	Window2H := 0
 			,NewWinPosX := 0, 	NewWinPosY := 0
 			,WhichGui := ""
-		
-		Switch ReloadListView[1]
+	
+	Switch ReloadListView[1]
+	{
+		Case "ReloadAndView":
+		WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
+		Gui, HS3Search: Default
+		GuiControl, % "Count" . a_Library.MaxIndex() . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
+		LV_Delete()
+		Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
+			LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+		GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
+		Switch v_RadioGroup
 		{
-			Case "ReloadAndView":
+			Case 1: LV_ModifyCol(2, "Sort") ;by default: triggerstring
+			Case 2: LV_ModifyCol(6, "Sort")
+			Case 3: LV_ModifyCol(1, "Sort")
+		}
+		WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
+		Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
+		Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
+		Case "Reload":
+		Gui, HS3Search: Default
+		GuiControl, % "Count" . a_Library.MaxIndex() . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
+		LV_Delete()
+		Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
+			LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+		GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
+		Case TransA["Search Hotstrings (F3)"]:
+		Goto, ViewOnly
+		Case "": ;view only
+		ViewOnly:
+		F_WhichGui()
+		Switch A_DefaultGui
+		{
+			Case "HS3": 
 			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
-			Gui, HS3Search: Default
-			GuiControl, % "Count" . a_Library.MaxIndex() . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
-			LV_Delete()
-			Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
-				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
-			GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
-			Switch v_RadioGroup
-			{
-				Case 1: LV_ModifyCol(2, "Sort") ;by default: triggerstring
-				Case 2: LV_ModifyCol(6, "Sort")
-				Case 3: LV_ModifyCol(1, "Sort")
-			}
-			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
+			WhichGui := "HS3"
+			Case "HS4": 
+			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS4GuiHwnd 
+			WhichGui := "HS4"
+		}
+		Gui, HS3Search: Default
+		Switch WhichGui
+		{
+			Case "HS3":
 			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
 			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
-			Case "Reload":
-			Gui, HS3Search: Default
-			GuiControl, % "Count" . a_Library.MaxIndex() . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
-			LV_Delete()
-			Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
-				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
-			GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
-			Case TransA["Search Hotstrings (F3)"]:
-			Goto, ViewOnly
-			Case "": ;view only
-			ViewOnly:
-			F_WhichGui()
-			Switch A_DefaultGui
-			{
-				Case "HS3": 
-				WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
-				WhichGui := "HS3"
-				Case "HS4": 
-				WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS4GuiHwnd 
-				WhichGui := "HS4"
-			}
-			Gui, HS3Search: Default
-			Switch WhichGui
-			{
-				Case "HS3":
-				Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
-				Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
-				Case "HS4":
-				Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS4MinWidth . A_Space . "H" HS4MinHeight	;no idea why twice, but then it shows correct size
-				Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS4MinWidth . A_Space . "H" HS4MinHeight 
-			}
+			Case "HS4":
+			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS4MinWidth . A_Space . "H" HS4MinHeight	;no idea why twice, but then it shows correct size
+			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS4MinWidth . A_Space . "H" HS4MinHeight 
 		}
-		return
 	}
+	return
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	F_GuiSearch_CreateObject()
 	{
@@ -3312,67 +3305,67 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	;*[Two]
 	return
 }
-	
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_SelectLibrary()
-	{
-		global ;assume-global mode
-		local v_TheWholeFile := "", str1 := [], v_TotalLines := 0
+F_SelectLibrary()
+{
+	global ;assume-global mode
+	local v_TheWholeFile := "", str1 := [], v_TotalLines := 0
 		,v_OutVarTemp := 0, v_OutVarTempX := 0, v_OutVarTempY := 0, v_OutVarTempW := 0, v_OutVarTempH := 0
-		
-		if (A_DefaultGui = "HS3")
-			Gui, HS3: Submit, NoHide
-		if (A_DefaultGui = "HS4")
-			Gui, HS4: Submit, NoHide
-		
-		GuiControl, Enable, % IdButton4 ; button Delete hotstring (F8)
-		FileRead, v_TheWholeFile, % HADL . "\" . v_SelectHotstringLibrary
-		Loop, Parse, v_TheWholeFile, `n, `r
-			if (A_LoopField)
-				v_TotalLines++
-		
-		Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
-		GuiControl, % "Count" . v_TotalLines . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
-		LV_Delete()
-		v_LibHotstringCnt := 0
-		GuiControl, , % IdText13,  % v_LibHotstringCnt
-		GuiControl, , % IdText13b, % v_LibHotstringCnt
-		
-		Loop, Parse, v_TheWholeFile, `n, `r
+	
+	if (A_DefaultGui = "HS3")
+		Gui, HS3: Submit, NoHide
+	if (A_DefaultGui = "HS4")
+		Gui, HS4: Submit, NoHide
+	
+	GuiControl, Enable, % IdButton4 ; button Delete hotstring (F8)
+	FileRead, v_TheWholeFile, % HADL . "\" . v_SelectHotstringLibrary
+	Loop, Parse, v_TheWholeFile, `n, `r
+		if (A_LoopField)
+			v_TotalLines++
+	
+	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
+	GuiControl, % "Count" . v_TotalLines . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
+	LV_Delete()
+	v_LibHotstringCnt := 0
+	GuiControl, , % IdText13,  % v_LibHotstringCnt
+	GuiControl, , % IdText13b, % v_LibHotstringCnt
+	
+	Loop, Parse, v_TheWholeFile, `n, `r
+	{
+		if (A_LoopField)
 		{
-			if (A_LoopField)
+			Loop, Parse, A_LoopField, ‖
 			{
-				Loop, Parse, A_LoopField, ‖
+				Switch A_Index
 				{
-					Switch A_Index
-					{
-						Case 1: str1[1] := A_LoopField
-						Case 2: str1[2] := A_LoopField
-						Case 3: str1[3] := A_LoopField
-						Case 4: str1[4] := A_LoopField
-						Case 5: str1[5] := A_LoopField
-						Case 6: str1[6] := A_LoopField
-					}
+					Case 1: str1[1] := A_LoopField
+					Case 2: str1[2] := A_LoopField
+					Case 3: str1[3] := A_LoopField
+					Case 4: str1[4] := A_LoopField
+					Case 5: str1[5] := A_LoopField
+					Case 6: str1[6] := A_LoopField
 				}
-				LV_Add("", str1[2], str1[1], str1[3], str1[4],str1[5], str1[6])	
-				v_LibHotstringCnt := A_Index
-				GuiControl, , % IdText13,  % v_LibHotstringCnt
-				GuiControl, , % IdText13b, % v_LibHotstringCnt
 			}
-			else
-				Break
-		}	
-		LV_ModifyCol(1, "Sort")
-		GuiControlGet, v_OutVarTemp, Pos, % IdListView1 ;Check position of ListView1 again after resizing
-		LV_ModifyCol(1, Round(0.1 * v_OutVarTempW))
-		LV_ModifyCol(2, Round(0.1 * v_OutVarTempW))
-		LV_ModifyCol(3, Round(0.1 * v_OutVarTempW))	
-		LV_ModifyCol(4, Round(0.1 * v_OutVarTempW))
-		LV_ModifyCol(5, Round(0.4 * v_OutVarTempW))
-		LV_ModifyCol(6, Round(0.2 * v_OutVarTempW) - 3)
-		GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
-		return
-	}
+			LV_Add("", str1[2], str1[1], str1[3], str1[4],str1[5], str1[6])	
+			v_LibHotstringCnt := A_Index
+			GuiControl, , % IdText13,  % v_LibHotstringCnt
+			GuiControl, , % IdText13b, % v_LibHotstringCnt
+		}
+		else
+			Break
+	}	
+	LV_ModifyCol(1, "Sort")
+	GuiControlGet, v_OutVarTemp, Pos, % IdListView1 ;Check position of ListView1 again after resizing
+	LV_ModifyCol(1, Round(0.1 * v_OutVarTempW))
+	LV_ModifyCol(2, Round(0.1 * v_OutVarTempW))
+	LV_ModifyCol(3, Round(0.1 * v_OutVarTempW))	
+	LV_ModifyCol(4, Round(0.1 * v_OutVarTempW))
+	LV_ModifyCol(5, Round(0.4 * v_OutVarTempW))
+	LV_ModifyCol(6, Round(0.2 * v_OutVarTempW) - 3)
+	GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
+	return
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
 F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
@@ -4095,7 +4088,7 @@ HotstringUndo=1
 ShowIntro=1
 [Event_BasicHotstring]
 OHTtEn=1
-OHTD=0
+OHTD=2000
 OHTP=1
 OHSEn=0
 OHSF=500
@@ -4103,19 +4096,19 @@ OHSD=250
 [Event_MenuHotstring]
 MHMP=1
 MHSEn=1
-MHSF=500
+MHSF=400
 MHSD=250
 [Event_UndoHotstring]
 UHTtEn=1
-UHTD=0
-UHTP=1
+UHTD=1
+UHTP=2000
 UHSEn=0
-UHSF=500
+UHSF=600
 UHSD=250
 [Event_TriggerstringTips]
 TTTtEn=1
-TTTD=0
-TTTP=1
+TTTD=1
+TTTP=3000
 TipsSortAlphabetically=1
 TipsSortByLength=1
 TipsAreShownAfterNoOfCharacters=1
@@ -4141,27 +4134,27 @@ GuiFontType=Calibri
 GuiFontSize=10
 GuiReload=
 [EndChars]
-Minus -=1
-Space=1
-Opening Round Bracket (=1
-Closing Round Bracket )=1
-Opening Square Bracket [=1
-Closing Square Bracket ]=1
-Opening Curly Bracket {=1
-Closing Curly Bracket }=1
-Colon :=1
-Semicolon ;=1
 Apostrophe '=1
-Quote ""=1
-Slash /=0
 Backslash \=1
+Closing Curly Bracket }=1
+Closing Round Bracket )=1
+Closing Square Bracket ]=1
+Colon :=1
 Comma ,=1
 Dot .=1
-Question Mark ?=1
-Underscore _=0
-Exclamation Mark !=1
 Enter=1
+Exclamation Mark !=1
+Minus -=1
+Opening Curly Bracket {=1
+Opening Round Bracket (=1
+Opening Square Bracket [=1
+Question Mark ?=1
+Quote ""=1
+Semicolon ;=1
+Slash /=0
+Space=1
 Tab=1
+Underscore _=1
 [LoadLibraries]
 [ShowTipsLibraries]
 	)"
@@ -4442,7 +4435,7 @@ Comma , 												= Comma ,
 Compile												= Compile
 Compressed executable (upx.exe)							= Compressed executable (upx.exe)
 Compressed executable (mpress.exe)							= Compressed executable (mpress.exe)
-Config.ini wasn't found. The default Config.ini has now been in location: = Config.ini wasn't found. The default Config.ini has now been created in location:
+Config.ini wasn't found. The default Config.ini has now been created in location: = Config.ini wasn't found. The default Config.ini has now been created in location:
 Configuration 											= &Configuration
 Content of clipboard contain new line characters. Do you want to remove them? = Content of clipboard contain new line characters. Do you want to remove them?
 Continue reading the library file? If you answer ""No"" then application will exit! = Continue reading the library file? If you answer ""No"" then application will exit!
@@ -4875,7 +4868,7 @@ F_GuiHS4_CreateObject()
 	v_LibHotstringCnt			:= 0000 ;no of (triggerstring, hotstring) definitions in single library
 	
 ;1. Definition of HS4 GUI.
-	Gui, 	HS4: New, 	-Resize +HwndHS4GuiHwnd +OwnDialogs -MaximizeBox, % SubStr(A_ScriptName, 1, -4) 
+	Gui, 	HS4: New, 	-Resize +HwndHS4GuiHwnd +OwnDialogs -MaximizeBox, % A_ScriptName
 	Gui, 	HS4: Margin,	% c_xmarg, % c_ymarg
 	Gui,		HS4: Color,	% c_WindowColor, % c_ControlColor
 	
@@ -5029,7 +5022,7 @@ F_GuiMain_CreateObject()
 ;1. Definition of HS3 GUI.
 ;-DPIScale doesn't work in Microsoft Windows 10
 ;+Border doesn't work in Microsoft Windows 10
-	Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs -MaximizeBox, 						% SubStr(A_ScriptName, 1, -4)
+	Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs -MaximizeBox, 						% A_ScriptName
 	Gui, 		HS3: Margin,		% c_xmarg, % c_ymarg
 	Gui,			HS3: Color,		% c_WindowColor, % c_ControlColor
 	
@@ -5921,28 +5914,34 @@ F_GuiAbout_DetermineConstraints()
 F_GuiAbout()
 {
 	global ;assume-global mode
-	local FoundPos := "", NewStr := ""
+	local FoundPos := ""
 		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
 	
-	NewStr := RegExReplace(TransA["About / Help"], "&", "")
-	NewStr := SubStr(NewStr, 1, -4)
-	
-	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd))
+		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	Gui, MyAbout: Show, Hide Center AutoSize
 	
 	DetectHiddenWindows, On
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . MyAboutGuiHwnd
 	DetectHiddenWindows, Off
-	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
-	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+	if (Window1W)
+	{
+		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+		Gui, MyAbout: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Default mode"] . ":" . A_Space . TransA["About this application..."]	;tu jestem
+	}
+	else
+	{
+		if (v_Param = "l")
+			Gui, MyAbout: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Silent mode"] . ":" . A_Space . TransA["About this application..."]
+		else
+			Gui, MyAbout: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Silent mode"] . ":" . A_Space . TransA["Default mode"]
+		
+	}
 	;OutputDebug, % "Window2W:" . A_Space . Window2W . A_Space . "Window2H:" . A_Space . Window2H
 	;OutputDebug, % "NewWinPosX:" . A_Space . NewWinPosX . A_Space . "NewWinPosY:" . A_Space . NewWinPosY
-	if ((NewWinPosX != 0) and (NewWinPosY != 0))
-		Gui, MyAbout: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . NewStr
-	else 
-		Gui, MyAbout: Show, Center AutoSize, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . NewStr
 	return  
 }
 	
@@ -6689,7 +6688,7 @@ return
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-F_LoadEndChars() ;Load from Config.ini tu jestem
+F_LoadEndChars() ;Load from Config.ini 
 {
 	global	;assume-global mode
 	local	vOutputVarSection := "", key := "", val := "", tick := false, LastKey := ""
@@ -7477,22 +7476,45 @@ return
 	return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	L_ChangeLanguage:
-	ini_Language := A_ThisMenuitem
-	IniWrite, %ini_Language%, Config.ini, GraphicalUserInterface, Language
-	Loop, %A_ScriptDir%\Languages\*.ini
-	{
-		Menu, SubmenuLanguage, Add, %A_LoopFileName%, L_ChangeLangage
-		if (ini_Language == A_LoopFileName)
-			Menu, SubmenuLanguage, Check, %A_LoopFileName%
-		else
-			Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
-	}
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Application language changed to:"] . A_Space 
-		. SubStr(ini_Language, 1, -4) . "`n`n" . TransA["The application will be reloaded with the new language file."]
-	Reload
+F_ChangeLanguage()
+{
+	global	;assume-global mode
+	local	OneTimeOnly := true
 	
-	L_TraySuspendHotkeys:
+	if (OneTimeOnly)
+	{
+		Loop, Files, %A_ScriptDir%\Languages\*.txt
+		{
+			if (ini_Language == A_LoopFileName)
+				Menu, SubmenuLanguage, Check, %A_LoopFileName%
+			else
+				Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
+		}
+		OneTimeOnly := false
+	}
+	else
+	{
+		ini_Language := A_ThisMenuitem
+		IniWrite, %ini_Language%, Config.ini, GraphicalUserInterface, Language
+		Loop, Files, %A_ScriptDir%\Languages\*.txt
+		{
+			if (ini_Language == A_LoopFileName)
+				Menu, SubmenuLanguage, Check, %A_LoopFileName%
+			else
+				Menu, SubmenuLanguage, UnCheck, %A_LoopFileName%
+		}
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Application language changed to:"] . A_Space 
+			. SubStr(ini_Language, 1, -4) . "`n`n" . TransA["The application will be reloaded with the new language file."]
+		F_SaveFontType()
+		F_SaveGUIPos("reset")
+		ini_GuiReload := true
+		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
+		Reload
+	}
+	return
+}
+	
+L_TraySuspendHotkeys:
 	Suspend, Toggle
 	if (A_IsSuspended)
 	{
@@ -7504,7 +7526,7 @@ return
 		Menu, Tray, 		UnCheck, 	% TransA["Suspend Hotkeys"]
 		Menu, AppSubmenu,	UnCheck, 	% TransA["Suspend Hotkeys"]
 	}
-	return
+return
 
 L_TrayPauseScript:
 	Pause, Toggle, 1
