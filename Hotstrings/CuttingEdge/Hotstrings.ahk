@@ -173,7 +173,6 @@ if (v_Param == "d") ;If the script is run with command line parameter "d" like d
 	v_LogFileName := % "Logs\Logs" . A_DD . A_MM . "_" . A_Hour . A_Min . ".txt"
 	FileAppend, , %v_LogFileName%, UTF-8
 }
-;*[One]
 Loop, Files, %A_ScriptDir%\Languages\*.txt
 	Menu, SubmenuLanguage, Add, %A_LoopFileName%, F_ChangeLanguage
 F_ChangeLanguage()
@@ -877,28 +876,58 @@ F_DetermineMonitors()	; Multi monitor environment, initialization of monitor wid
 F_Undo()
 {
 	global	;assume-global mode
-	local	TriggerOpt := "", PosColon1 := 0, PosColon2 := 0, HowManyBackSpaces := 0, ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey
-			,OrigTriggerstring := SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, ":", false, 1, 2) + 1)
+	local	TriggerOpt := "", HowManyBackSpaces := 0, HowManyBackSpaces2 := 0
+			,ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey, OrigTriggerstring := ""
 	;*[One]
 	if (ini_UHTtEn and v_TypedTriggerstring and (ThisHotkey != PriorHotkey))
 	{	
-		PosColon1 := InStr(v_TypedTriggerstring, ":", false, 1, 1) ;position of the first colon
-		PosColon2 := InStr(v_TypedTriggerstring, ":", false, 3, 1) ;position of the second colon
-		TriggerOpt := SubStr(v_TypedTriggerstring, PosColon1 + 1, PosColon2 - PosColon1 - 1)
+		TriggerOpt := SubStr(RegExReplace(v_TypedTriggerstring, ".*\K:.*"), 2)
+		OrigTriggerstring := RegExReplace(v_TypedTriggerstring, ":.*:")
 		if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O")))
 			Send, {BackSpace}
 		if (v_UndoHotstring)
 		{
-			HowManyBackSpaces := StrLenUnicode(v_UndoHotstring)
+			if (v_LOF = "SI")
+			{
+				if (InStr(v_UndoHotstring, "{Enter}", false))
+					v_UndoHotstring := StrReplace(v_UndoHotstring, "{Enter}", "", HowManyBackSpaces)
+				if (InStr(v_UndoHotstring, "``r``n"))
+				{
+					v_UndoHotstring := StrReplace(v_UndoHotstring, "``r``n", "", HowManyBackSpaces2)
+					HowManyBackSpaces += HowManyBackSpaces2 + 1
+				}
+				if (InStr(v_UndoHotstring, "``r"))
+				{
+					v_UndoHotstring := StrReplace(v_UndoHotstring, "``r", "", HowManyBackSpaces2)
+					HowManyBackSpaces += HowManyBackSpaces2
+				}
+				if (InStr(v_UndoHotstring, "``n"))
+				{
+					v_UndoHotstring := StrReplace(v_UndoHotstring, "``n", "", HowManyBackSpaces2)
+					HowManyBackSpaces += HowManyBackSpaces2
+				}
+				if (InStr(v_UndoHotstring, "``b"))
+				{
+					v_UndoHotstring := StrReplace(v_UndoHotstring, "``b", "", HowManyBackSpaces2)
+					HowManyBackSpaces += HowManyBackSpaces2
+				}
+				if (InStr(v_UndoHotstring, "``t"))
+				{
+					v_UndoHotstring := StrReplace(v_UndoHotstring, "``t", "", HowManyBackSpaces2)
+					HowManyBackSpaces += HowManyBackSpaces2
+				}
+			}
+			v_UndoHotstring := F_PrepareUndo(v_UndoHotstring)
+			HowManyBackSpaces += StrLenUnicode(v_UndoHotstring)
 			Send, % "{BackSpace " . HowManyBackSpaces . "}"
 			Loop, Parse, OrigTriggerstring
-					Switch A_LoopField
-					{
-						Case "^", "+", "!", "#", "{", "}":
-							SendRaw, % A_LoopField
-						Default:
-							Send, % A_LoopField
-					}
+				Switch A_LoopField
+			{
+				Case "^", "+", "!", "#", "{", "}":
+				SendRaw, % A_LoopField
+				Default:
+				Send, % A_LoopField
+			}
 		}
 		if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O"))) 
 			Send, % A_EndChar
@@ -930,7 +959,7 @@ F_Undo()
 					SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
 			}
 		}
-			
+		
 		if (ini_UHSEn)	;Basic Hotstring % TransA["Sound Enable"]
 			SoundBeep, % ini_UHSF, % ini_UHSD
 		
@@ -6280,14 +6309,16 @@ F_ReplaceAHKconstants(String)
 	return String
 }
 
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 F_PrepareUndo(string)
 {	;this function replaces from hotstring definition all characters which aren't necessary to undo last hotstring
-	if (InStr(string, "BackSpace")) or InStr(string, "BS")
+	;if (InStr(string, "BackSpace")) or InStr(string, "BS")
 		string := RegExReplace(string, "Ui)({Backspace.*})|({BS.*})")
 	if (InStr(string, "{!}")) or (InStr(string, "{^}")) or (InStr(string, "{+}")) or (InStr(string, "{#}")) or (InStr(string, "{{}")) or (InStr(string, "{}}"))
 		string := RegExReplace(string, "U)({)|(})")
+	if (InStr(string, "Shift", false))
+		string := RegExReplace(string, "i){Shift.*?}")
 	return string
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6306,6 +6337,7 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 	v_TypedTriggerstring := ThisHotkey 
 	v_UndoHotstring := F_PrepareUndo(ReplacementString)
 	v_HotstringFlag := true
+	v_LOF := "SE"
 	F_EventSigOrdHotstring()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6324,6 +6356,7 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 	v_TypedTriggerstring := ThisHotkey 
 	v_UndoHotstring := F_PrepareUndo(ReplacementString)
 	v_HotstringFlag := true
+	v_LOF := "SP"
 	F_EventSigOrdHotstring()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6333,6 +6366,7 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 	local	ThisHotkey := A_ThisHotkey
 	
 	v_InputString := ""
+	v_UndoHotstring := ReplacementString
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	if (Oflag = false)
 		SendRaw, % ReplacementString . A_EndChar
@@ -6340,8 +6374,8 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 		SendRaw, % ReplacementString
 	
 	v_TypedTriggerstring := ThisHotkey 
-	v_UndoHotstring := F_PrepareUndo(ReplacementString)
 	v_HotstringFlag := true
+	v_LOF := "SR"
 	F_EventSigOrdHotstring()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6351,15 +6385,15 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput tu jes
 	local	ThisHotkey := A_ThisHotkey
 	
 	v_InputString := ""
+	v_UndoHotstring := ReplacementString
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	if (Oflag = false)
 		SendInput, % ReplacementString . A_EndChar
 	else
 		SendInput, % ReplacementString
-	;*[One]
 	v_TypedTriggerstring := ThisHotkey 
-	v_UndoHotstring := F_PrepareUndo(ReplacementString)
 	v_HotstringFlag := true
+	v_LOF := "SI"	;last (active) Output Function; this variable stores information about output function. it's used by F_Undo to correctly interpret special text strings, e.g. {Enter}
 	F_EventSigOrdHotstring()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7479,7 +7513,7 @@ return
 F_ChangeLanguage()
 {
 	global	;assume-global mode
-	local	OneTimeOnly := true
+	static	OneTimeOnly := true
 	
 	if (OneTimeOnly)
 	{
