@@ -6,7 +6,6 @@
 */
 ; -----------Beginning of auto-execute section of the script -------------------------------------------------
 ; After the script has been loaded, it begins executing at the top line, continuing until a Return, Exit, hotkey/hotstring label, or the physical end of the script is encountered (whichever comes first). 
-
 #Requires AutoHotkey v1.1.33+ 	; Displays an error and quits if a version requirement is not met.    
 #SingleInstance force 			; Only one instance of this script may run at a time!
 #NoEnv  						; Recommended for performance and compatibility with future AutoHotkey releases.
@@ -160,7 +159,8 @@ Gui, 1: Default	;this line is necessary to not show too many Guis on time of loa
 v_LibHotstringCnt := 0	;dirty trick to show initially 0 instead of 0000
 GuiControl, , % IdText13,  % v_LibHotstringCnt
 GuiControl, , % IdText13b, % v_LibHotstringCnt
-F_LoadHotstringsFromLibraries()
+F_LoadHotstringsFromLibraries()	;→ F_LoadFile()
+F_Sort_a_Triggers()
 F_GuiSearch_CreateObject()	;When all tables are full, initialize GuiSearch
 F_GuiSearch_DetermineConstraints()
 F_Searching("Reload")			;prepare content of Search tables
@@ -293,11 +293,12 @@ Menu, SigOfEvents,		Add, % TransA["Menu hotstring is triggered"],	:MenuHisTrig
 Menu, SigOfEvents,		Add, % TransA["Undid the last hotstring"],		:UndoOfH
 Menu, SigOfEvents,		Add, % TransA["Triggerstring tips"],			:TrigTips
 
+F_SortTipsByLength()
+F_SortTipsAlphabetically()
 F_EventTtEn()
 F_EventSoEn()
 F_EventTtPos()
 F_AmountOfCharacterTips()
-F_SortTipsAlphabetically()
 
 Menu, Submenu1, Add, % TransA["Undo the last hotstring [Ctrl+F12]: enable"], 	F_MUndo
 Menu, Submenu1, Add, % TransA["Undo the last hotstring [Ctrl+F12]: disable"],	F_MUndo
@@ -700,6 +701,26 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_Sort_a_Triggers()
+{	;sort now a_Triggers() so it's not necessary each time when user gets triggerstring tips; it should speed-up process significantly
+	global	;assume-global mode
+	local	key := "", value := "", s_SelectedTriggers := ""
+
+	if (ini_TipsSortAlphabetically)
+	{
+		;a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
+		for key, value in a_Triggers	;table to string Conversion
+			s_SelectedTriggers .= value . "`n"
+		Sort, s_SelectedTriggers
+		Loop, Parse, s_SelectedTriggers, `n	;string to table Conversion
+			a_Triggers[A_Index] := A_LoopField
+	}
+	if (ini_TipsSortByLength)
+		a_Triggers := F_SortArrayByLength(a_Triggers)
+
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DownloadPublicLibraries()
 {
 	global	;assume-global mode
@@ -935,7 +956,7 @@ F_Undo()
 		if (ini_UHTtEn)
 		{
 			ToolTip, ,, , 4	;Basic triggerstring was triggered
-			if (ini_UHTP = 1)
+			if (ini_UHTP = 1)	;Undo Hotstring Tooltip Position
 			{
 				if (A_CaretX and A_CaretY)
 				{
@@ -1025,32 +1046,23 @@ F_EventSigOrdHotstring()
 F_PrepareTriggerstringTipsTables()
 {
 	global	;assume-global mode
-	local	vIntCnt := 0, a_SelectedTriggers := []
+	local	HitCnt := 0
 	
 	;OutputDebug, % "Length of v_InputString:" . A_Space . StrLen(v_InputString) . A_Tab . "v_InputString:" . A_Space . v_InputString
-	if (StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn)
+	if (StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{
+		v_Tips := ""		
 		Loop, % a_Triggers.MaxIndex()
 		{
 			if (InStr(a_Triggers[A_Index], v_InputString) = 1)
 			{
-				vIntCnt++
-				a_SelectedTriggers[vIntCnt] := a_Triggers[A_Index]
-				if (vIntCnt = ini_MNTT)	
-					break
-			}
-		}
-		if (ini_TipsSortAlphabetically)
-		;a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
-			Sort, a_SelectedTriggers
-		if (ini_TipsSortByLength)
-			a_SelectedTriggers := F_SortArrayByLength(a_SelectedTriggers)
-		v_Tips := ""
-		Loop, % a_SelectedTriggers.MaxIndex()
-		{
 			if (v_Tips)
 				v_Tips .= "`n"
-			v_Tips .= a_SelectedTriggers[A_Index]
+			v_Tips .= a_Triggers[A_Index]
+			HitCnt++
+			if (HitCnt = ini_MNTT)	
+				break
+			}
 		}
 	}
 	else
@@ -1160,54 +1172,54 @@ F_ShowTriggerstringTips()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_SortTipsByLength()
+F_SortTipsByLength()
+{
+	global	;assume-global mode
+	static OneTimeMemory := true
+	
+	if (OneTimeMemory)
 	{
-		global	;assume-global mode
-		static OneTimeMemory := true
-		
-		if (OneTimeMemory)
-		{
-			if (ini_TipsSortByLength)
-				Menu, TrigSortOrder, Check, % TransA["By length"]
-			else
-				Menu, TrigSortOrder, UnCheck, % TransA["By length"]
-			OneTimeMemory := false
-		}
+		if (ini_TipsSortByLength)
+			Menu, TrigSortOrder, Check, % TransA["By length"]
 		else
-		{
-			ini_TipsSortByLength := !(ini_TipsSortByLength)
-			if (ini_TipsSortByLength)
-				Menu, TrigSortOrder, Check, % TransA["By length"]
-			else
-				Menu, TrigSortOrder, UnCheck, % TransA["By length"]
-			IniWrite, % ini_TipsSortByLength, Config.ini, Event_TriggerstringTips, TipsSortByLength
-		}
-		return
+			Menu, TrigSortOrder, UnCheck, % TransA["By length"]
+		OneTimeMemory := false
 	}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_SortTipsAlphabetically()
+	else
 	{
-		global	;assume-global mode
-		static OneTimeMemory := true
-		
-		if (OneTimeMemory)
-		{
-			if (ini_TipsSortAlphabetically)
-				Menu, TrigSortOrder, Check, % TransA["Alphabetically"]
-			else
-				Menu, TrigSortOrder, UnCheck, % TransA["Alphabetically"]
-			OneTimeMemory := false
-		}
+		ini_TipsSortByLength := !(ini_TipsSortByLength)
+		if (ini_TipsSortByLength)
+			Menu, TrigSortOrder, Check, % TransA["By length"]
 		else
-		{
-			ini_TipsSortAlphabetically := !(ini_TipsSortAlphabetically)
-			if (ini_TipsSortAlphabetically)
-				Menu, TrigSortOrder, Check, % TransA["Alphabetically"]
-			else
-				Menu, TrigSortOrder, UnCheck, % TransA["Alphabetically"]
-			IniWrite, % ini_TipsSortAlphabetically, Config.ini, Event_TriggerstringTips, TipsSortAlphabetically
-		}
-		return
+			Menu, TrigSortOrder, UnCheck, % TransA["By length"]
+		IniWrite, % ini_TipsSortByLength, Config.ini, Event_TriggerstringTips, TipsSortByLength
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SortTipsAlphabetically()
+{
+global	;assume-global mode
+	static OneTimeMemory := true
+	
+	if (OneTimeMemory)
+	{
+		if (ini_TipsSortAlphabetically)
+			Menu, TrigSortOrder, Check, % TransA["Alphabetically"]
+		else
+			Menu, TrigSortOrder, UnCheck, % TransA["Alphabetically"]
+		OneTimeMemory := false
+	}
+	else
+	{
+		ini_TipsSortAlphabetically := !(ini_TipsSortAlphabetically)
+		if (ini_TipsSortAlphabetically)
+			Menu, TrigSortOrder, Check, % TransA["Alphabetically"]
+		else
+			Menu, TrigSortOrder, UnCheck, % TransA["Alphabetically"]
+		IniWrite, % ini_TipsSortAlphabetically, Config.ini, Event_TriggerstringTips, TipsSortAlphabetically
+	}
+	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_AmountOfCharacterTips()
@@ -2282,6 +2294,7 @@ F_AddHotstring()
 	{
 		LV_Add("",  v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)
 		a_Triggers.Push(v_TriggerString) ;added to table of hotstring recognizer (a_Triggers)
+		F_Sort_a_Triggers()
 	}
 	
 	;4. Sort List View. 
@@ -2612,61 +2625,61 @@ F_Move()
 			}
 		}
 		return
-	}
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_SearchPhrase()
-	{
-		global	;assume-global mode
-		local	Each := 0, FileName := ""
-		
+F_SearchPhrase()
+{
+	global	;assume-global mode
+	local	Each := 0, FileName := ""
+	
 ;Gui, HS3Search:Default
-		Gui, HS3Search: Submit, NoHide
-		if getkeystate("CapsLock","T") ;I don't understand it
-			return
-		GuiControlGet, v_SearchTerm
-		GuiControl, -Redraw, % IdSearchLV1	;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
-		LV_Delete()
-		Switch v_RadioGroup
+	Gui, HS3Search: Submit, NoHide
+	if getkeystate("CapsLock","T") ;I don't understand it
+		return
+	GuiControlGet, v_SearchTerm
+	GuiControl, -Redraw, % IdSearchLV1	;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
+	LV_Delete()
+	Switch v_RadioGroup
+	{
+		Case 1:
+		For Each, FileName in a_Triggerstring
 		{
-			Case 1:
-			For Each, FileName in a_Triggerstring
+			if (v_SearchTerm)
 			{
-				if (v_SearchTerm)
-				{
-					if (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start ;for overall matching without = 1
-						LV_Add("", a_Library[A_Index], FileName, a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
-				}
-				else
+				if (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start ;for overall matching without = 1
 					LV_Add("", a_Library[A_Index], FileName, a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
 			}
-			LV_ModifyCol(2,"Sort") 	
-			Case 2:
-			For Each, FileName in a_Hotstring
+			else
+				LV_Add("", a_Library[A_Index], FileName, a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+		}
+		LV_ModifyCol(2,"Sort") 	
+		Case 2:
+		For Each, FileName in a_Hotstring
+		{
+			if (v_SearchTerm)
 			{
-				if (v_SearchTerm)
-				{
-					if (InStr(FileName, v_SearchTerm) = 1) ; for overall matching
-						LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], FileName, a_Comment[A_Index])
-				}
-				else
+				if (InStr(FileName, v_SearchTerm) = 1) ; for overall matching
 					LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], FileName, a_Comment[A_Index])
 			}
-			LV_ModifyCol(6, "Sort")	
-			Case 3:
-			For Each, FileName in a_Library
+			else
+				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], FileName, a_Comment[A_Index])
+		}
+		LV_ModifyCol(6, "Sort")	
+		Case 3:
+		For Each, FileName in a_Library
+		{
+			if (v_SearchTerm)
 			{
-				if (v_SearchTerm)
-				{
-					if (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
-						LV_Add("", FileName, a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
-				}
-				else
+				if (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
 					LV_Add("", FileName, a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
 			}
-			LV_ModifyCol(1,"Sort")
+			else
+				LV_Add("", FileName, a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
 		}
-		GuiControl, +Redraw, % IdSearchLV1 ;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
-		return
+		LV_ModifyCol(1,"Sort")
+	}
+	GuiControl, +Redraw, % IdSearchLV1 ;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
+	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Searching(ReloadListView*)
@@ -3048,129 +3061,129 @@ F_GuiAddLibrary()
 			Menu, ToggleLibTrigTipsSubmenu, Add, % TransA["No libraries have been found!"], F_ToggleTipsLibrary
 		Menu, 	LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	:ToggleLibTrigTipsSubmenu
 		return
-	}
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+F_RefreshListOfLibraries()
+{
+	global	;assume-global
+	local key := 0, value := 0
 	
-	F_RefreshListOfLibraries()
+	if (ini_LoadLib.Count())
 	{
-		global	;assume-global
-		local key := 0, value := 0
-		
-		if (ini_LoadLib.Count())
+		for key, value in ini_LoadLib
 		{
-			for key, value in ini_LoadLib
-			{
-				Menu, EnDisLib, Add, %key%, F_EnDisLib
-				if (value)
-					Menu, EnDisLib, Check, %key%
-				else
-					Menu, EnDisLib, UnCheck, %key%	
-			}
-			Menu, % TransA["No libraries have been found!"], UseErrorLevel, On ;check if this menu exists
-			if (!ErrorLevel)
-				Menu, EnDisLib, Delete, % TransA["No libraries have been found!"] ;if exists, delete it
-			Menu, % TransA["No libraries have been found!"], UseErrorLevel, Off
+			Menu, EnDisLib, Add, %key%, F_EnDisLib
+			if (value)
+				Menu, EnDisLib, Check, %key%
+			else
+				Menu, EnDisLib, UnCheck, %key%	
 		}
-		else
-			Menu, EnDisLib, Add, % TransA["No libraries have been found!"], F_EnDisLib
-		
-		Menu,	LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"],			:EnDisLib
-		return
+		Menu, % TransA["No libraries have been found!"], UseErrorLevel, On ;check if this menu exists
+		if (!ErrorLevel)
+			Menu, EnDisLib, Delete, % TransA["No libraries have been found!"] ;if exists, delete it
+		Menu, % TransA["No libraries have been found!"], UseErrorLevel, Off
 	}
+	else
+		Menu, EnDisLib, Add, % TransA["No libraries have been found!"], F_EnDisLib
+	
+	Menu,	LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"],			:EnDisLib
+	return
+}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	F_DeleteHotstring()
-	{
+F_DeleteHotstring()
+{
 	;1. Remove selected library file.
 	;2. Create library file of the same name as selected. its content will contain List View but without selected row.
 	;3. Remove selected row from List View.
 	;4. Disable selected hotstring.
 	;5. Remove trigger hint.
 	;6. Decrement library counter.
-		global ;assume-global mode
-		local 	LibraryFullPathAndName := "" 
+	global ;assume-global mode
+	local 	LibraryFullPathAndName := "" 
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
 			,v_SelectedRow := 0, v_Pointer := 0
 			,key := 0, val := ""
-		
-		Gui, HS3: +OwnDialogs
-		
-		v_SelectedRow := LV_GetNext()
-		if (!v_SelectedRow) 
-		{
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
-			return
-		}
-		MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Selected Hotstring will be deleted. Do you want to proceed?"]
-		IfMsgBox, No
-			return
-		TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
-		
-	;1. Remove selected library file.
-		LibraryFullPathAndName := HADL . "\" . v_SelectHotstringLibrary
-		FileDelete, % LibraryFullPathAndName
-		
-	;4. Disable selected hotstring.
-		LV_GetText(txt2, v_SelectedRow, 2)
-		Try
-			Hotstring(":" . txt2 . ":" . v_TriggerString, , "Off") 
-		Catch
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" . v_TriggerString 
-		. A_Space . txt2 . "`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 
-		
-	;3. Remove selected row from List View.
-		LV_Delete(v_SelectedRow)
-		
-	;4. Save List View into the library file.
-		Loop, % LV_GetCount()
-		{
-			LV_GetText(txt1, A_Index, 2)
-			LV_GetText(txt2, A_Index, 1)
-			LV_GetText(txt3, A_Index, 3)
-			LV_GetText(txt4, A_Index, 4)
-			LV_GetText(txt5, A_Index, 5)
-			LV_GetText(txt6, A_Index, 6)
-			txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
-		}
-		FileAppend, % txt, % HADL . "\" . v_SelectHotstringLibrary, UTF-8
-		
-	;5. Remove trigger hint. Remark: All trigger hints are deleted, so if triggerstring was duplicated, then all trigger hints are deleted!
-		Loop, % a_Triggers.MaxIndex()
-		{
-			if (InStr(a_Triggers[A_Index], v_TriggerString))
-				a_Triggers.RemoveAt(A_Index)
-		}
-		TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
-		
-	;6. Decrement library counter.
-		--v_LibHotstringCnt
-		--v_TotalHotstringCnt
-		GuiControl, , % IdText13,  % v_LibHotstringCnt
-		GuiControl, , % IdText13b, % v_LibHotstringCnt
-		GuiControl, , % IdText12,  % v_TotalHotstringCnt
-		GuiControl, , % IdText12b, % v_TotalHotstringCnt
-		
-	;Remove from "Search" tables. Unfortunately index (v_SelectedRow) is sufficient only for one table, and in Searching there is "super table" containing all definitions from all available tables.
-		for key, val in a_Library
-			if (val = SubStr(v_SelectHotstringLibrary, 1, -4))
-			{
-				v_Pointer := key
-				Break
-			}
-		v_Pointer += v_SelectedRow - 1
-		
-		a_Library.RemoveAt(v_Pointer)
-		a_Triggerstring.RemoveAt(v_Pointer)
-		a_TriggerOptions.RemoveAt(v_Pointer)
-		a_OutputFunction.RemoveAt(v_Pointer)
-		a_EnableDisable.RemoveAt(v_Pointer)
-		a_Hotstring.RemoveAt(v_Pointer)
-		a_Comment.RemoveAt(v_Pointer)
-		
-	;7. Update table for searching
-		F_Searching("Reload")
+	
+	Gui, HS3: +OwnDialogs
+	
+	v_SelectedRow := LV_GetNext()
+	if (!v_SelectedRow) 
+	{
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
 		return
+	}
+	MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Selected Hotstring will be deleted. Do you want to proceed?"]
+	IfMsgBox, No
+		return
+	TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
+	
+	;1. Remove selected library file.
+	LibraryFullPathAndName := HADL . "\" . v_SelectHotstringLibrary
+	FileDelete, % LibraryFullPathAndName
+	
+	;4. Disable selected hotstring.
+	LV_GetText(txt2, v_SelectedRow, 2)
+	Try
+		Hotstring(":" . txt2 . ":" . v_TriggerString, , "Off") 
+	Catch
+		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" . v_TriggerString 
+		. A_Space . txt2 . "`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 
+	
+	;3. Remove selected row from List View.
+	LV_Delete(v_SelectedRow)
+	
+	;4. Save List View into the library file.
+	Loop, % LV_GetCount()
+	{
+		LV_GetText(txt1, A_Index, 2)
+		LV_GetText(txt2, A_Index, 1)
+		LV_GetText(txt3, A_Index, 3)
+		LV_GetText(txt4, A_Index, 4)
+		LV_GetText(txt5, A_Index, 5)
+		LV_GetText(txt6, A_Index, 6)
+		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
+	}
+	FileAppend, % txt, % HADL . "\" . v_SelectHotstringLibrary, UTF-8
+	
+	;5. Remove trigger hint. Remark: All trigger hints are deleted, so if triggerstring was duplicated, then all trigger hints are deleted!
+	Loop, % a_Triggers.MaxIndex()
+	{
+		if (InStr(a_Triggers[A_Index], v_TriggerString))
+			a_Triggers.RemoveAt(A_Index)
+	}
+	TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
+	
+	;6. Decrement library counter.
+	--v_LibHotstringCnt
+	--v_TotalHotstringCnt
+	GuiControl, , % IdText13,  % v_LibHotstringCnt
+	GuiControl, , % IdText13b, % v_LibHotstringCnt
+	GuiControl, , % IdText12,  % v_TotalHotstringCnt
+	GuiControl, , % IdText12b, % v_TotalHotstringCnt
+	
+	;Remove from "Search" tables. Unfortunately index (v_SelectedRow) is sufficient only for one table, and in Searching there is "super table" containing all definitions from all available tables.
+	for key, val in a_Library
+		if (val = SubStr(v_SelectHotstringLibrary, 1, -4))
+		{
+			v_Pointer := key
+			Break
+		}
+	v_Pointer += v_SelectedRow - 1
+	
+	a_Library.RemoveAt(v_Pointer)
+	a_Triggerstring.RemoveAt(v_Pointer)
+	a_TriggerOptions.RemoveAt(v_Pointer)
+	a_OutputFunction.RemoveAt(v_Pointer)
+	a_EnableDisable.RemoveAt(v_Pointer)
+	a_Hotstring.RemoveAt(v_Pointer)
+	a_Comment.RemoveAt(v_Pointer)
+	
+	;7. Update table for searching
+	F_Searching("Reload")
+	return
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4129,15 +4142,15 @@ MHSF=400
 MHSD=250
 [Event_UndoHotstring]
 UHTtEn=1
-UHTD=1
-UHTP=2000
+UHTD=2000
+UHTP=1
 UHSEn=0
 UHSF=600
 UHSD=250
 [Event_TriggerstringTips]
 TTTtEn=1
-TTTD=1
-TTTP=3000
+TTTD=2000
+TTTP=1
 TipsSortAlphabetically=1
 TipsSortByLength=1
 TipsAreShownAfterNoOfCharacters=1
@@ -4341,6 +4354,7 @@ F_ToggleTipsLibrary()
 	F_ValidateIniLibSections()
 	a_Triggers := []
 	F_LoadHotstringsFromLibraries()
+	F_Sort_a_Triggers()
 	return
 }
 	
@@ -4846,7 +4860,6 @@ F_LoadFile(nameoffile)
 		DetectHiddenWindows, Off
 		Gui, LoadFile: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - LoadFileGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - LoadFileGuiWinH) / 2 . A_Space . "AutoSize"
 	}
-	
 	
 	name := SubStr(nameoffile, 1, -4) ;filename without extension
 	Loop, Parse, v_TheWholeFile, `n, `r
