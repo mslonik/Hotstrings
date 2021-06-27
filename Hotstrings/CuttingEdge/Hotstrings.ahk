@@ -5531,9 +5531,7 @@ F_GuiHS4_DetermineConstraints()
 	HS4MinHeight		:= LeftColumnH
 	return
 }
-
 ; ------------------------------------------------------------------------------------------------------------------------------------
-
 F_GuiMain_Redraw()
 {
 	global ;assume-global mode
@@ -5541,9 +5539,7 @@ F_GuiMain_Redraw()
 		,v_xNext := 0, v_yNext := 0,  v_wNext := 0,	v_hNext := 0
 	static b_FirstRun := true
 	
-	;position of the List View, but only when HS3 Gui is initiated: before showing. So this code is run only once.
-	
-	if (b_FirstRun) 
+	if (b_FirstRun) ;position of the List View, but only when HS3 Gui is initiated: before showing. So this code is run only once.
 	{
 		v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
 		v_yNext := c_ymarg + HofText
@@ -5560,7 +5556,7 @@ F_GuiMain_Redraw()
 			}
 			if !(ini_Sandbox)
 			{
-				v_hNext := LeftColumnH - (c_ymarg + HofText)
+				;v_hNext := LeftColumnH - (c_ymarg + HofText)
 				GuiControl, Hide, % IdText10
 				GuiControl, Hide, % IdTextInfo17
 				GuiControl, Hide, % IdEdit10
@@ -5569,36 +5565,25 @@ F_GuiMain_Redraw()
 		}
 		else
 			GuiControl, Move, % IdListView1, % "x" . v_xNext . "y" . v_yNext . "w" . ini_ListViewPos["W"] . "h" ini_ListViewPos["H"]
-		
 		b_FirstRun := false
 	}
 	else
 	{
+		;*[One]		;tu jestem
 		GuiControlGet, v_OutVarTemp, Pos, % IdListView1
-		
-		;Increase / decrease List View 1
-		if ((ini_Sandbox) and !(ini_IsSandboxMoved))
+		if (ini_Sandbox) and (!ini_IsSandboxMoved)
 		{
-			if (v_OutVarTempH + HofText > LeftColumnH)
-				ini_IsSandboxMoved := true
-			else
-			{
-				v_hNext := v_OutVarTempH - (c_HofSandbox + HofText + c_ymarg)
-				GuiControl, Move, % IdListView1, % "h" v_hNext
-				F_AutoXYWH("reset")	
-			}
-		}
-		
-		if (!(ini_Sandbox) and !(ini_IsSandboxMoved))
-		{
-			v_hNext := v_OutVarTempH + (c_HofSandbox + HofText + c_ymarg)
-			GuiControl, Move, % IdListView1, % "h" v_hNext
+			v_hNext := v_OutVarTempH - (c_HofSandbox + HofText + c_ymarg)	;decrease ListView
+			GuiControl, Move, % IdListView1, % "h" . v_hNext
 			F_AutoXYWH("reset")	
 		}
-		
-		if (!(ini_Sandbox) and ini_IsSandboxMoved)
-			ini_IsSandboxMoved := false
-	}
+		if (!ini_Sandbox) and (!ini_IsSandboxMoved)
+		{
+			v_hNext := v_OutVarTempH + (c_HofSandbox + HofText + c_ymarg)	;increase ListView
+			GuiControl, Move, % IdListView1, % "h" . v_hNext
+			F_AutoXYWH("reset")	
+		}
+	}	
 	
 	;5.3.3. Text Sandbox
 	;5.2.4. Sandbox edit text field
@@ -5612,14 +5597,13 @@ F_GuiMain_Redraw()
 		GuiControl, Move, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
 		v_xNext := c_xmarg
 		v_yNext += HofText
-		v_wNext := LeftColumnW
+		v_wNext := LeftColumnW - 2 * c_xmarg
 		GuiControl, Move, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 		GuiControl, Show, % IdText10
 		GuiControl, Show, % IdTextInfo17
 		GuiControl, Show, % IdEdit10
 	}
-	
-	if ((ini_Sandbox) and !(ini_IsSandboxMoved))	;tu jestem
+	if ((ini_Sandbox) and !(ini_IsSandboxMoved))
 	{
 		GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 		v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
@@ -5637,35 +5621,35 @@ F_GuiMain_Redraw()
 		GuiControl, Show, % IdTextInfo17
 		GuiControl, Show, % IdEdit10
 	}
-	
 	if !(ini_Sandbox)
 	{
 		GuiControl, Hide, % IdText10
 		GuiControl, Hide, % IdTextInfo17		
 		GuiControl, Hide, % IdEdit10
 	}
+	
 	;5.2. Button between left and right column
-	if ((ini_Sandbox) and !(ini_IsSandboxMoved))
-	{
-		v_xNext := LeftColumnW 
-		v_yNext := c_ymarg
-		v_hNext := HofText + v_OutVarTempH + c_ymarg + HofText + c_HofSandbox
-	}	
+	GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 	if ((ini_Sandbox) and (ini_IsSandboxMoved))
 	{
 		v_xNext := LeftColumnW 
 		v_yNext := c_ymarg
 		v_hNext := HofText + v_OutVarTempH
 	}
-	if !(ini_Sandbox)
+	if ((ini_Sandbox) and !(ini_IsSandboxMoved))
+	{
+		v_xNext := LeftColumnW 
+		v_yNext := c_ymarg
+		v_hNext := HofText + v_OutVarTempH + c_ymarg + HofText + c_HofSandbox
+	}	
+	if !(ini_Sandbox) 
 	{
 		v_xNext := LeftColumnW
 		v_yNext := c_ymarg
-		v_hNext := HofText + v_OutVarTempH
+		v_hNext :=  HofText + v_OutVarTempH
 	}
 	GuiControl, Move, % IdButton5, % "x" . v_xNext . "y" . v_yNext . "h" . v_hNext
 }
-	
 ; ------------------------------------------------------------------------------------------------------------------------------------
 	
 F_GuiMain_DetermineConstraints()
