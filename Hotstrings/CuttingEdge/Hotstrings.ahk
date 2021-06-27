@@ -1672,7 +1672,7 @@ F_LoadSignalingParams()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ToggleEndChars()	;tu jestem
+F_ToggleEndChars()
 {	
 	global	;assume-global mode
 	local	key := "", val := ""
@@ -1692,7 +1692,6 @@ F_ToggleEndChars()	;tu jestem
 	}
 	else
 	{
-		;*[One]
 		if (a_HotstringEndChars[A_ThisMenuItem])
 		{
 			Menu, SubmenuEndChars, UnCheck, % A_ThisMenuitem
@@ -3253,6 +3252,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
 		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0
 		,deltaW := 0, deltaH := 0
+		,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
 	
 	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "A_GuiHeight:" . A_Space .  A_GuiHeight
 	
@@ -3305,11 +3305,18 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	
 	if (ini_Sandbox) and (deltaH > 0) and !(ini_IsSandboxMoved) and (v_OutVarTemp2H + HofText > LeftColumnH) 
 	{
-		GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox ;increase
-		GuiControl, MoveDraw, % IdText10, % "x" c_xmarg "y" LeftColumnH + c_ymarg
+		v_hNext := v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox
+		GuiControl, MoveDraw, % IdListView1, % "h" . v_hNext  ;increase
+		v_xNext := c_xmarg
+		v_yNext := LeftColumnH + c_ymarg
+		GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
 		GuiControlGet, v_OutVarTemp1, Pos, % IdText10
-		GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg . "y" . LeftColumnH + c_ymarg
-		GuiControl, MoveDraw, % IdEdit10, % "x" c_xmarg "y" LeftColumnH + c_ymarg + HofText "w" LeftColumnW - 2 * c_xmarg
+		v_xNext := v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg
+		v_yNext := LeftColumnH + c_ymarg
+		GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
+		v_xNext := c_xmarg
+		v_yNext := LeftColumnH + c_ymarg + HofText "w" LeftColumnW - 2 * c_xmarg
+		GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext
 		ini_IsSandboxMoved := true
 		OutputDebug, % "Two:" . A_Space ini_IsSandboxMoved . A_Space . deltaH
 		F_AutoXYWH("reset")
@@ -3319,11 +3326,18 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	
 	if (ini_Sandbox) and (deltaH < 0) and (ini_IsSandboxMoved) and (v_OutVarTemp2H <  LeftColumnH + c_HofSandbox)
 	{
-		GuiControl, MoveDraw, % IdListView1, % "h" v_OutVarTemp2H - (c_ymarg + HofText + c_HofSandbox) ;decrease
-		GuiControl, MoveDraw, % IdText10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - (HofText + c_HofSandbox)
+		v_hNext := v_OutVarTemp2H - (c_ymarg + HofText + c_HofSandbox)
+		GuiControl, MoveDraw, % IdListView1, % "h" . v_hNext ;decrease
+		v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg
+		v_yNext := v_OutVarTemp2Y + v_OutVarTemp2H - (HofText + c_HofSandbox)
+		GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
 		GuiControlGet, v_OutVarTemp1, Pos, % IdText10
-		GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg . "y" . v_OutVarTemp2Y + v_OutVarTemp2H - (HofText + c_HofSandbox)
-		GuiControl, MoveDraw, % IdEdit10, % "x" LeftColumnW + c_xmarg + c_WofMiddleButton + c_xmarg "y" v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox "w" v_OutVarTemp2W
+		v_xNext := v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg
+		v_yNext := v_OutVarTemp2Y + v_OutVarTemp2H - (HofText + c_HofSandbox)
+		GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
+		v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
+		v_yNext := v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox "w" v_OutVarTemp2W
+		GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext
 		ini_IsSandboxMoved := false
 		OutputDebug, % "One:" . A_Space ini_IsSandboxMoved . A_Space . deltaH
 		F_AutoXYWH("reset")
@@ -3333,11 +3347,14 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	
 	if ((ini_Sandbox) and !(ini_IsSandboxMoved))
 	{
-		
-		GuiControl, MoveDraw, % IdText10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
+		v_yNext := v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
+		GuiControl, MoveDraw, % IdText10, % "y" . v_yNext
 		GuiControlGet, v_OutVarTemp1, Pos, % IdText10
-		GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg . "y" . v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
-		GuiControl, MoveDraw, % IdEdit10, % "y" v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText 
+		v_xNext := v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg
+		v_yNext := v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
+		GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
+		v_yNext := v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText 
+		GuiControl, MoveDraw, % IdEdit10, % "y" . v_yNext
 		;OutputDebug, % "Four" . A_Space . deltaH
 	}
 	
@@ -5065,6 +5082,7 @@ F_GuiMain_CreateObject()
 ;-DPIScale doesn't work in Microsoft Windows 10
 ;+Border doesn't work in Microsoft Windows 10
 	Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs -MaximizeBox, 						% A_ScriptName
+	;Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs,			 						% A_ScriptName
 	Gui, 		HS3: Margin,		% c_xmarg, % c_ymarg
 	Gui,			HS3: Color,		% c_WindowColor, % c_ControlColor
 	
@@ -5601,7 +5619,7 @@ F_GuiMain_Redraw()
 		GuiControl, Show, % IdEdit10
 	}
 	
-	if ((ini_Sandbox) and !(ini_IsSandboxMoved))
+	if ((ini_Sandbox) and !(ini_IsSandboxMoved))	;tu jestem
 	{
 		GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 		v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
@@ -5972,7 +5990,7 @@ F_GuiAbout()
 	{
 		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
 		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
-		Gui, MyAbout: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Default mode"] . ":" . A_Space . TransA["About this application..."]	;tu jestem
+		Gui, MyAbout: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Default mode"] . ":" . A_Space . TransA["About this application..."]
 	}
 	else
 	{
@@ -6341,6 +6359,7 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 	local	ThisHotkey := A_ThisHotkey
 	
 	v_InputString := ""
+	v_UndoHotstring := ReplacementString
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	if (Oflag = false)
 		SendEvent, % ReplacementString . A_EndChar
@@ -6348,7 +6367,6 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 		SendEvent, % ReplacementString
 	
 	v_TypedTriggerstring := ThisHotkey 
-	v_UndoHotstring := F_PrepareUndo(ReplacementString)
 	v_HotstringFlag := true
 	v_LOF := "SE"
 	F_EventSigOrdHotstring()
@@ -6360,6 +6378,7 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 	local	ThisHotkey := A_ThisHotkey
 	
 	v_InputString := ""
+	v_UndoHotstring := ReplacementString
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	if (Oflag = false)
 		SendPlay, % ReplacementString . A_EndChar
@@ -6367,7 +6386,6 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 		SendPlay, % ReplacementString
 	
 	v_TypedTriggerstring := ThisHotkey 
-	v_UndoHotstring := F_PrepareUndo(ReplacementString)
 	v_HotstringFlag := true
 	v_LOF := "SP"
 	F_EventSigOrdHotstring()
@@ -6392,7 +6410,7 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 	F_EventSigOrdHotstring()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput tu jestem
+F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 {
 	global	;assume-global mode
 	local	ThisHotkey := A_ThisHotkey
@@ -6507,7 +6525,7 @@ F_HOF_MCLI(TextOptions, Oflag)
 		MenuY -= Window2H
 	if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
 		MenuX -= Window2W
-	Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate	;tu jestem
+	Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate
 	;*[One]
 	GuiControl, Choose, % Id_LB_HMenuCli, 1
 	Ovar := Oflag
@@ -6607,7 +6625,7 @@ F_HOF_MSI(TextOptions, Oflag)
 		MenuY -= Window2H
 	if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
 		MenuX -= Window2W
-	Gui, HMenuAHK: Show, x%MenuX% y%MenuY% NoActivate	;tu jestem
+	Gui, HMenuAHK: Show, x%MenuX% y%MenuY% NoActivate	
 	
 	GuiControl, Choose, % Id_LB_HMenuAHK, 1
 	Ovar := Oflag
