@@ -33,7 +33,8 @@ global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -al
 FileInstall, hotstrings.ico, hotstrings.ico, 0
 FileInstall, LICENSE, LICENSE, 0
 
-global HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" ; Hotstrings Application Data Libraries
+global HADL 					:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries
+global HADConfig  				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\"	. "Config.ini"	;Hotstrings Application Data Config .ini
 global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l or d
 
 global a_Triggers 				:= []		;Main loop of application
@@ -70,7 +71,7 @@ if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "L
 	. A_ScriptDir . "\Languages"
 }
 
-IniRead ini_Language, Config.ini, GraphicalUserInterface, Language				; Load from Config.ini file specific parameter: language into variable ini_Language, e.g. ini_Language = English.ini
+IniRead ini_Language, % HADConfig, GraphicalUserInterface, Language				; Load from Config.ini file specific parameter: language into variable ini_Language, e.g. ini_Language = English.ini
 if (!FileExist(A_ScriptDir . "\Languages\" . ini_Language))			; else if there is no ini_language .ini file, e.g. v_langugae == Polish.ini and there is no such file in Languages folder
 {
 	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no"] . A_Space . ini_Language . A_Space . TransA["file in Languages subfolder!"]
@@ -90,11 +91,11 @@ F_LoadSizeOfMargin()
 F_LoadFontType()
 
 global ini_CPDelay 				:= 300		;1-1000 [ms], default: 300
-IniRead, ini_CPDelay, 					Config.ini, Configuration, ClipBoardPasteDelay,		300
+IniRead, ini_CPDelay, 					% HADConfig, Configuration, ClipBoardPasteDelay,		300
 global ini_HotstringUndo			:= true
-IniRead, ini_HotstringUndo,				Config.ini, Configuration, HotstringUndo,			1
+IniRead, ini_HotstringUndo,				% HADConfig, Configuration, HotstringUndo,			1
 global ini_ShowIntro			:= true
-IniRead, ini_ShowIntro,					Config.ini, Configuration, ShowIntro,				1	;GUI with introduction to Hotstrings application.
+IniRead, ini_ShowIntro,					% HADConfig, Configuration, ShowIntro,				1	;GUI with introduction to Hotstrings application.
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
 F_LoadSignalingParams()
 
@@ -384,7 +385,7 @@ Gui, 	HS4: Menu, HSMenu
 F_GuiAbout_CreateObjects()
 F_GuiAbout_DetermineConstraints()
 
-IniRead, ini_GuiReload, 						Config.ini, GraphicalUserInterface, GuiReload
+IniRead, ini_GuiReload, 						% HADConfig, GraphicalUserInterface, GuiReload
 if (ini_GuiReload) and (v_Param != "l")
 	Gosub, L_GUIInit
 
@@ -785,7 +786,7 @@ F_MenuShowIntro()
 			Menu,	IntroSubDecision, UnCheck, 	% TransA["Yes"]
 			Menu,	IntroSubDecision, Check, 	% TransA["No"]
 		}
-		Iniwrite, % ini_ShowIntro, Config.ini, Configuration, ShowIntro
+		Iniwrite, % ini_ShowIntro, % HADConfig, Configuration, ShowIntro
 	}
 return
 }
@@ -854,7 +855,7 @@ F_ShowIntroCheckbox()
 	else
 	{
 		GuiControlGet, ini_ShowIntro,, % IdIntroCheckbox
-		IniWrite, % ini_ShowIntro, Config.ini, Configuration, ShowIntro
+		IniWrite, % ini_ShowIntro, % HADConfig, Configuration, ShowIntro
 	}
 	return
 }
@@ -1192,7 +1193,7 @@ F_SortTipsByLength()
 			Menu, TrigSortOrder, Check, % TransA["By length"]
 		else
 			Menu, TrigSortOrder, UnCheck, % TransA["By length"]
-		IniWrite, % ini_TipsSortByLength, Config.ini, Event_TriggerstringTips, TipsSortByLength
+		IniWrite, % ini_TipsSortByLength, % HADConfig, Event_TriggerstringTips, TipsSortByLength
 	}
 	return
 }
@@ -1217,7 +1218,7 @@ global	;assume-global mode
 			Menu, TrigSortOrder, Check, % TransA["Alphabetically"]
 		else
 			Menu, TrigSortOrder, UnCheck, % TransA["Alphabetically"]
-		IniWrite, % ini_TipsSortAlphabetically, Config.ini, Event_TriggerstringTips, TipsSortAlphabetically
+		IniWrite, % ini_TipsSortAlphabetically, % HADConfig, Event_TriggerstringTips, TipsSortAlphabetically
 	}
 	return
 }
@@ -1250,7 +1251,7 @@ F_AmountOfCharacterTips()
 			Case 4:	Menu, Submenu4, Check, 4
 			Case 5:	Menu, Submenu4, Check, 5
 		}
-		IniWrite, % ini_TASAC, Config.ini, Event_TriggerstringTips, TipsAreShownAfterNoOfCharacters
+		IniWrite, % ini_TASAC, % HADConfig, Event_TriggerstringTips, TipsAreShownAfterNoOfCharacters
 		Loop, 5
 		{
 			if (A_Index != ini_TASAC)
@@ -1321,7 +1322,7 @@ F_EventTtPos()
 				Menu, OrdHisTrig, UnCheck, 	% TransA["Tooltip position: cursor"]
 				ini_OHTP := 1
 			}
-			IniWrite, % ini_OHTP, Config.ini, Event_BasicHotstring, OHTP
+			IniWrite, % ini_OHTP, % HADConfig, Event_BasicHotstring, OHTP
 			Case "MenuHisTrig":
 			Switch (ini_MHMP)
 			{
@@ -1334,7 +1335,7 @@ F_EventTtPos()
 				Menu, MenuHisTrig, UnCheck, % TransA["Menu position: cursor"]
 				ini_MHMP := 1
 			}
-			IniWrite, % ini_MHMP, Config.ini, Event_MenuHotstring, MHMP
+			IniWrite, % ini_MHMP, % HADConfig, Event_MenuHotstring, MHMP
 			Case "UndoOfH":
 			Switch (ini_UHTP)
 			{
@@ -1347,7 +1348,7 @@ F_EventTtPos()
 				Menu, UndoOfH, UnCheck, 	% TransA["Tooltip position: cursor"]
 				ini_UHTP := 1
 			}
-			IniWrite, % ini_UHTP, Config.ini, Event_UndoHotstring, UHTP
+			IniWrite, % ini_UHTP, % HADConfig, Event_UndoHotstring, UHTP
 			Case "TrigTips":
 			Switch (ini_TTTP)
 			{
@@ -1360,7 +1361,7 @@ F_EventTtPos()
 				Menu, TrigTips, UnCheck, % TransA["Tooltip position: cursor"]
 				ini_TTTP := 1
 			}
-			IniWrite, % ini_TTTP, Config.ini, Event_TriggerstringTips, TTTP
+			IniWrite, % ini_TTTP, % HADConfig, Event_TriggerstringTips, TTTP
 		}
 	}
 	return
@@ -1406,7 +1407,7 @@ F_MUndo()
 			Hotkey, $^F12, F_Undo, On
 		}
 		ini_HotstringUndo := !(ini_HotstringUndo)
-		IniWrite, % ini_HotstringUndo, Config.ini, Configuration, HotstringUndo
+		IniWrite, % ini_HotstringUndo, % HADConfig, Configuration, HotstringUndo
 	}
 	return
 }
@@ -1474,7 +1475,7 @@ F_EventSoEn()
 				Menu, % A_ThisMenu, Check, % TransA["Sound disable"]
 				Menu, % A_ThisMenu, Disable, % TransA["Sound parameters"]
 			}
-			IniWrite, % ini_OHSEn, Config.ini, Event_BasicHotstring, OHSEn
+			IniWrite, % ini_OHSEn, % HADConfig, Event_BasicHotstring, OHSEn
 			Case "MenuHisTrig":
 			ini_MHSEn := !ini_MHSEn
 			if (ini_MHSEn)
@@ -1489,7 +1490,7 @@ F_EventSoEn()
 				Menu, % A_ThisMenu, Check, % TransA["Sound disable"]
 				Menu, % A_ThisMenu, Disable, % TransA["Sound parameters"]
 			}
-			IniWrite, % ini_MHSEn, Config.ini, Event_MenuHotstring, MHSEn
+			IniWrite, % ini_MHSEn, % HADConfig, Event_MenuHotstring, MHSEn
 			Case "UndoOfH":
 			ini_UHSEn := !ini_UHSEn
 			if (ini_UHSEn)
@@ -1504,7 +1505,7 @@ F_EventSoEn()
 				Menu, % A_ThisMenu, Check, % TransA["Sound disable"]
 				Menu, % A_ThisMenu, Disable, % TransA["Sound parameters"]
 			}
-			IniWrite, % ini_UHSEn, Config.ini, Event_UndoHotstring, UHSEn
+			IniWrite, % ini_UHSEn, % HADConfig, Event_UndoHotstring, UHSEn
 		}
 	}
 	return
@@ -1594,7 +1595,7 @@ F_EventTtEn()	;Event "tooltip enable"
 			Menu, % A_ThisMenu, Disable, 	% TransA["Tooltip position: caret"]
 			Menu, % A_ThisMenu, Disable, 	% TransA["Tooltip position: cursor"]
 		}
-		IniWrite, % ini_OHTtEn, Config.ini, Event_BasicHotstring, OHTtEn
+		IniWrite, % ini_OHTtEn, % HADConfig, Event_BasicHotstring, OHTtEn
 		Case "UndoOfH":
 		ini_UHTtEn := !ini_UHTtEn
 		if (ini_UHTtEn)
@@ -1612,7 +1613,7 @@ F_EventTtEn()	;Event "tooltip enable"
 			Menu, % A_ThisMenu, Disable, % TransA["Tooltip position: caret"]
 			Menu, % A_ThisMenu, Disable, % TransA["Tooltip position: cursor"]
 		}
-		IniWrite, % ini_UHTtEn, Config.ini, Event_UndoHotstring, UHTtEn
+		IniWrite, % ini_UHTtEn, % HADConfig, Event_UndoHotstring, UHTtEn
 		Case "TrigTips":
 		ini_TTTtEn := !ini_TTTtEn
 		if (ini_TTTtEn)
@@ -1634,7 +1635,7 @@ F_EventTtEn()	;Event "tooltip enable"
 			Menu, % A_ThisMenu, Disable, % TransA["Sorting order"]
 			Menu, % A_ThisMenu, Disable, % TransA["Max. no. of shown tips"]
 		}
-		IniWrite, % ini_TTTtEn, Config.ini, Event_TriggerstringTips, TTTtEn
+		IniWrite, % ini_TTTtEn, % HADConfig, Event_TriggerstringTips, TTTtEn
 	}
 	return
 }
@@ -1646,29 +1647,29 @@ F_LoadSignalingParams()
 	,ini_MHSF := 500, 	ini_MHSD := 250, 	ini_UHTtEn := 1, 	ini_UHTD := 0, 	ini_UHTP := 1, 	ini_UHSEn := 1, 	ini_UHSF := 500, 	ini_UHSD := 250
 	,ini_TTTP := 1, 	ini_TTTtEn := 1, 	ini_TTTD := 0, 	ini_TipsSortAlphabetically := 1, 	ini_TipsSortByLength := 1, 	ini_TASAC := 1,	ini_MNTT := 5
 	
-	IniRead, ini_OHTtEn, 	Config.ini, Event_BasicHotstring, 	OHTtEn, 	1
-	IniRead, ini_OHTD,		Config.ini, Event_BasicHotstring,	OHTD,	0
-	IniRead, ini_OHTP,		Config.ini, Event_BasicHotstring,	OHTP,	1
-	IniRead, ini_OHSEn, 	Config.ini, Event_BasicHotstring,	OHSEn, 	1
-	IniRead, ini_OHSF,		Config.ini, Event_BasicHotstring,	OHSF,	500
-	IniRead, ini_OHSD,		Config.ini, Event_BasicHotstring,	OHSD,	250
-	IniRead, ini_MHMP,		Config.ini, Event_MenuHotstring,		MHMP,	1
-	IniRead, ini_MHSEn,		Config.ini, Event_MenuHotstring,		MHSEn,	1
-	IniRead, ini_MHSF,		Config.ini, Event_MenuHotstring,		MHSF,	500
-	IniRead, ini_MHSD,		Config.ini, Event_MenuHotstring,		MHSD,	250
-	IniRead, ini_UHTtEn, 	Config.ini, Event_UndoHotstring, 		UHTtEn, 	1
-	IniRead, ini_UHTD,		Config.ini, Event_UndoHotstring,		UHTD,	0
-	IniRead, ini_UHTP,		Config.ini, Event_UndoHotstring,		UHTP,	1
-	IniRead, ini_UHSEn,		Config.ini, Event_UndoHotstring,		UHSEn,	1
-	IniRead, ini_UHSF,		Config.ini, Event_UndoHotstring,		UHSF,	500
-	IniRead, ini_UHSD,		Config.ini, Event_UndoHotstring,		UHSD,	250
-	IniRead, ini_TTTP,		Config.ini, Event_TriggerstringTips,	TTTP,	1
-	IniRead, ini_TTTtEn, 	Config.ini, Event_TriggerstringTips,	TTTtEn, 	1
-	IniRead, ini_TTTD,		Config.ini, Event_TriggerstringTips,	TTTD,	0
-	IniRead, ini_TipsSortAlphabetically, Config.ini, Event_TriggerstringTips, TipsSortAlphabetically, 1
-	IniRead, ini_TipsSortByLength, Config.ini, Event_TriggerstringTips, TipsSortByLength, 1
-	IniRead, ini_TASAC, 	Config.ini, Event_TriggerstringTips, 	TipsAreShownAfterNoOfCharacters, 1
-	IniRead, ini_MNTT,		Config.ini, Event_TriggerstringTips,	MNTT,	5
+	IniRead, ini_OHTtEn, 	% HADConfig, Event_BasicHotstring, 	OHTtEn, 	1
+	IniRead, ini_OHTD,		% HADConfig, Event_BasicHotstring,	OHTD,	0
+	IniRead, ini_OHTP,		% HADConfig, Event_BasicHotstring,	OHTP,	1
+	IniRead, ini_OHSEn, 	% HADConfig, Event_BasicHotstring,	OHSEn, 	1
+	IniRead, ini_OHSF,		% HADConfig, Event_BasicHotstring,	OHSF,	500
+	IniRead, ini_OHSD,		% HADConfig, Event_BasicHotstring,	OHSD,	250
+	IniRead, ini_MHMP,		% HADConfig, Event_MenuHotstring,		MHMP,	1
+	IniRead, ini_MHSEn,		% HADConfig, Event_MenuHotstring,		MHSEn,	1
+	IniRead, ini_MHSF,		% HADConfig, Event_MenuHotstring,		MHSF,	500
+	IniRead, ini_MHSD,		% HADConfig, Event_MenuHotstring,		MHSD,	250
+	IniRead, ini_UHTtEn, 	% HADConfig, Event_UndoHotstring, 		UHTtEn, 	1
+	IniRead, ini_UHTD,		% HADConfig, Event_UndoHotstring,		UHTD,	0
+	IniRead, ini_UHTP,		% HADConfig, Event_UndoHotstring,		UHTP,	1
+	IniRead, ini_UHSEn,		% HADConfig, Event_UndoHotstring,		UHSEn,	1
+	IniRead, ini_UHSF,		% HADConfig, Event_UndoHotstring,		UHSF,	500
+	IniRead, ini_UHSD,		% HADConfig, Event_UndoHotstring,		UHSD,	250
+	IniRead, ini_TTTP,		% HADConfig, Event_TriggerstringTips,	TTTP,	1
+	IniRead, ini_TTTtEn, 	% HADConfig, Event_TriggerstringTips,	TTTtEn, 	1
+	IniRead, ini_TTTD,		% HADConfig, Event_TriggerstringTips,	TTTD,	0
+	IniRead, ini_TipsSortAlphabetically, % HADConfig, Event_TriggerstringTips, TipsSortAlphabetically, 1
+	IniRead, ini_TipsSortByLength, % HADConfig, Event_TriggerstringTips, TipsSortByLength, 1
+	IniRead, ini_TASAC, 	% HADConfig, Event_TriggerstringTips, 	TipsAreShownAfterNoOfCharacters, 1
+	IniRead, ini_MNTT,		% HADConfig, Event_TriggerstringTips,	MNTT,	5
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1696,13 +1697,13 @@ F_ToggleEndChars()
 		{
 			Menu, SubmenuEndChars, UnCheck, % A_ThisMenuitem
 			a_HotstringEndChars[A_ThisMenuItem] := false
-			IniWrite, % false, Config.ini, EndChars, % NextName[A_ThisMenuItemPos]	
+			IniWrite, % false, % HADConfig, EndChars, % NextName[A_ThisMenuItemPos]	
 		}
 		else
 		{
 			Menu, SubmenuEndChars, Check, % A_ThisMenuitem
 			a_HotstringEndChars[A_ThisMenuItem] := true
-			IniWrite, % true, Config.ini, EndChars, % NextName[A_ThisMenuItemPos]	
+			IniWrite, % true, % HADConfig, EndChars, % NextName[A_ThisMenuItemPos]	
 		}
 		F_LoadEndChars()
 	}
@@ -2868,12 +2869,12 @@ HS3SearchGuiSize()
 F_RemoveConfigIni()
 {
 	global	;assume-global mode
-	if (FileExist("Config.ini"))
+	if (FileExist(HADConfig))
 	{
 		MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure?"] 
 		IfMsgBox, Yes
 		{
-			FileDelete, Config.ini
+			FileDelete, % HADConfig
 			Reload
 		}
 		IfMsgBox, No
@@ -3720,7 +3721,7 @@ F_FontType()
 		F_SaveFontType()
 		F_SaveGUIPos("reset")
 		ini_GuiReload := true
-		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
+		IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
 		Reload
 	}
 	IfMsgBox, No
@@ -3733,7 +3734,7 @@ F_FontType()
 		global	;assume-global mode
 		c_FontType := ""
 		
-		IniRead, c_FontType, 			Config.ini, GraphicalUserInterface, GuiFontType, Calibri
+		IniRead, c_FontType, 			% HADConfig, GraphicalUserInterface, GuiFontType, Calibri
 		if (!c_FontType)
 			c_FontType := "Calibri"
 		
@@ -3743,7 +3744,7 @@ F_FontType()
 	F_SaveFontType()
 	{
 		global	;assume-global mode
-		IniWrite, % c_FontType,			Config.ini, GraphicalUserInterface, GuiFontType
+		IniWrite, % c_FontType,			% HADConfig, GraphicalUserInterface, GuiFontType
 		return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3777,7 +3778,7 @@ F_SizeOfMargin()
 		F_SaveSizeOfMargin()
 		F_SaveGUIPos("reset")
 		ini_GuiReload := true
-		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
+		IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
 		Reload
 	}
 	IfMsgBox, No
@@ -3789,8 +3790,8 @@ F_SizeOfMargin()
 F_SaveSizeOfMargin()
 {
 	global	;assume-global mode
-	IniWrite, % c_xmarg,				Config.ini, GraphicalUserInterface, GuiSizeOfMarginX
-	IniWrite, % c_ymarg,				Config.ini, GraphicalUserInterface, GuiSizeOfMarginY
+	IniWrite, % c_xmarg,				% HADConfig, GraphicalUserInterface, GuiSizeOfMarginX
+	IniWrite, % c_ymarg,				% HADConfig, GraphicalUserInterface, GuiSizeOfMarginY
 	return
 }
 
@@ -3803,8 +3804,8 @@ F_LoadSizeOfMargin()
 		c_xmarg := 10	;pixels
 		c_ymarg := 10	;pixels
 		
-		IniRead, c_xmarg, 			Config.ini, GraphicalUserInterface, GuiSizeOfMarginX, 10
-		IniRead, c_ymarg,			Config.ini, GraphicalUserInterface, GuiSizeOfMarginY, 10
+		IniRead, c_xmarg, 			% HADConfig, GraphicalUserInterface, GuiSizeOfMarginX, 10
+		IniRead, c_ymarg,			% HADConfig, GraphicalUserInterface, GuiSizeOfMarginY, 10
 		return
 	}
 	
@@ -3831,7 +3832,7 @@ F_SizeOfFont()
 		F_SaveFontSize()
 		F_SaveGUIPos("reset")
 		ini_GuiReload := true
-		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
+		IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
 		Reload
 	}
 	IfMsgBox, No
@@ -3841,7 +3842,7 @@ F_SizeOfFont()
 F_SaveFontSize()
 {
 	global ;assume-global mode
-	IniWrite, % c_FontSize,				Config.ini, GraphicalUserInterface, GuiFontSize
+	IniWrite, % c_FontSize,				% HADConfig, GraphicalUserInterface, GuiFontSize
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3850,7 +3851,7 @@ F_LoadFontSize()
 	global ;assume-global mode
 	c_FontSize 				:= 0 ;points
 	
-	IniRead, c_FontSize, 			Config.ini, GraphicalUserInterface, GuiFontSize, 10
+	IniRead, c_FontSize, 			% HADConfig, GraphicalUserInterface, GuiFontSize, 10
 	if (!c_FontSize)
 		c_FontSize := 10
 	return
@@ -3883,7 +3884,7 @@ F_StyleOfGUI()
 	{
 		F_SaveGUIstyle()
 		ini_GuiReload := true
-		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
+		IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
 		Reload
 	}
 	IfMsgBox, No
@@ -3895,10 +3896,10 @@ F_SaveGUIstyle()
 {
 	global ;assume-global mode
 	
-	IniWrite, % c_FontColor,				Config.ini, GraphicalUserInterface, GuiFontColor
-	IniWrite, % c_FontColorHighlighted,	Config.ini, GraphicalUserInterface, GuiFontColorHighlighted
-	IniWrite, % c_WindowColor, 	  		Config.ini, GraphicalUserInterface, GuiWindowColor
-	Iniwrite, % c_ControlColor,			Config.ini, GraphicalUserInterface, GuiControlColor	
+	IniWrite, % c_FontColor,				% HADConfig, GraphicalUserInterface, GuiFontColor
+	IniWrite, % c_FontColorHighlighted,	% HADConfig, GraphicalUserInterface, GuiFontColorHighlighted
+	IniWrite, % c_WindowColor, 	  		% HADConfig, GraphicalUserInterface, GuiWindowColor
+	Iniwrite, % c_ControlColor,			% HADConfig, GraphicalUserInterface, GuiControlColor	
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3910,10 +3911,10 @@ F_LoadGUIstyle()
 	c_WindowColor				:= ""
 	c_ControlColor 			:= ""
 	
-	IniRead, c_FontColor, 			Config.ini, GraphicalUserInterface, GuiFontColor, 		 Black
-	IniRead, c_FontColorHighlighted, 	Config.ini, GraphicalUserInterface, GuiFontColorHighlighted, Blue
-	IniRead, c_WindowColor, 			Config.ini, GraphicalUserInterface, GuiWindowColor, 		 Default
-	IniRead, c_ControlColor, 		Config.ini, GraphicalUserInterface, GuiControlColor, 		 Default
+	IniRead, c_FontColor, 			% HADConfig, GraphicalUserInterface, GuiFontColor, 		 Black
+	IniRead, c_FontColorHighlighted, 	% HADConfig, GraphicalUserInterface, GuiFontColorHighlighted, Blue
+	IniRead, c_WindowColor, 			% HADConfig, GraphicalUserInterface, GuiWindowColor, 		 Default
+	IniRead, c_ControlColor, 		% HADConfig, GraphicalUserInterface, GuiControlColor, 		 Default
 	
 	if (!c_FontColor)
 		c_FontColor := "Black"
@@ -4032,7 +4033,7 @@ F_Reload()
 		{
 			F_SaveGUIPos()
 			ini_GuiReload := true
-			IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
+			IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
 			Switch A_ThisMenuItem
 			{
 				Case % TransA["Reload in default mode"]:
@@ -4089,7 +4090,7 @@ F_ToggleSandbox()
 	
 	Menu, ConfGUI, ToggleCheck, % TransA["Show Sandbox (F6)"]
 	ini_Sandbox := !(ini_Sandbox)
-	Iniwrite, %ini_Sandbox%, Config.ini, GraphicalUserInterface, Sandbox
+	Iniwrite, %ini_Sandbox%, % HADConfig, GraphicalUserInterface, Sandbox
 	
 	F_GuiMain_Redraw()
 	F_GuiHS4_Redraw()
@@ -4109,23 +4110,23 @@ F_LoadGUIPos()
 	ini_WhichGui := ""
 	ini_Sandbox := true
 	
-	IniRead, ini_ReadTemp, 						Config.ini, GraphicalUserInterface, MainWindowPosX, 0
+	IniRead, ini_ReadTemp, 						% HADConfig, GraphicalUserInterface, MainWindowPosX, 0
 	ini_HS3WindoPos["X"] := ini_ReadTemp
-	IniRead, ini_ReadTemp, 						Config.ini, GraphicalUserInterface, MainWindowPosY, 0
+	IniRead, ini_ReadTemp, 						% HADConfig, GraphicalUserInterface, MainWindowPosY, 0
 	ini_HS3WindoPos["Y"] := ini_ReadTemp
-	IniRead, ini_ReadTemp, 						Config.ini, GraphicalUserInterface, MainWindowPosW, 0
+	IniRead, ini_ReadTemp, 						% HADConfig, GraphicalUserInterface, MainWindowPosW, 0
 	ini_HS3WindoPos["W"] := ini_ReadTemp
-	IniRead, ini_ReadTemp, 						Config.ini, GraphicalUserInterface, MainWindowPosH, 0
+	IniRead, ini_ReadTemp, 						% HADConfig, GraphicalUserInterface, MainWindowPosH, 0
 	ini_HS3WindoPos["H"] := ini_ReadTemp
 	
-	IniRead, ini_ReadTemp,						Config.ini, GraphicalUserInterface, ListViewPosW, % A_Space
+	IniRead, ini_ReadTemp,						% HADConfig, GraphicalUserInterface, ListViewPosW, % A_Space
 	ini_ListViewPos["W"] := ini_ReadTemp
-	IniRead, ini_ReadTemp,						Config.ini, GraphicalUserInterface, ListViewPosH, % A_Space
+	IniRead, ini_ReadTemp,						% HADConfig, GraphicalUserInterface, ListViewPosH, % A_Space
 	ini_ListViewPos["H"] := ini_ReadTemp
 	
-	IniRead, ini_Sandbox, 						Config.ini, GraphicalUserInterface, Sandbox,				1
-	IniRead, ini_IsSandboxMoved,					Config.ini, GraphicalUserInterface, IsSandboxMoved 
-	IniRead, ini_WhichGui,						Config.ini, GraphicalUserInterface, WhichGui, %A_Space%
+	IniRead, ini_Sandbox, 						% HADConfig, GraphicalUserInterface, Sandbox,				1
+	IniRead, ini_IsSandboxMoved,					% HADConfig, GraphicalUserInterface, IsSandboxMoved 
+	IniRead, ini_WhichGui,						% HADConfig, GraphicalUserInterface, WhichGui, %A_Space%
 	if !(ini_WhichGui)
 		ini_WhichGui := "HS3"
 	
@@ -4218,10 +4219,10 @@ Underscore _=1
 [ShowTipsLibraries]
 	)"
 	
-	if (!FileExist("Config.ini"))
+	if (!FileExist(HADConfig))
 	{
 		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"] . "`n`n" . A_ScriptDir
-		FileAppend, %ConfigIni%, Config.ini
+		FileAppend, %ConfigIni%, % HADConfig
 	}
 	return	
 }
@@ -4244,37 +4245,37 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 		{
 			WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
 		}
-		IniWrite, % WinX, 			  	Config.ini, GraphicalUserInterface, MainWindowPosX
-		IniWrite, % WinY, 			  	Config.ini, GraphicalUserInterface, MainWindowPosY
-		IniWrite, % "", 				Config.ini, GraphicalUserInterface, MainWindowPosW
-		IniWrite, % "", 				Config.ini, GraphicalUserInterface, MainWindowPosH
+		IniWrite, % WinX, 			  	% HADConfig, GraphicalUserInterface, MainWindowPosX
+		IniWrite, % WinY, 			  	% HADConfig, GraphicalUserInterface, MainWindowPosY
+		IniWrite, % "", 				% HADConfig, GraphicalUserInterface, MainWindowPosW
+		IniWrite, % "", 				% HADConfig, GraphicalUserInterface, MainWindowPosH
 		return
 	}	
 	
 	if (A_DefaultGui = "HS3")
 	{
 		WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
-		IniWrite,  HS3,			Config.ini, GraphicalUserInterface, WhichGui
-		IniWrite, % HS3_GuiWidth, 	Config.ini, GraphicalUserInterface, MainWindowPosW
-		IniWrite, % HS3_GuiHeight, 	Config.ini, GraphicalUserInterface, MainWindowPosH
+		IniWrite,  HS3,			% HADConfig, GraphicalUserInterface, WhichGui
+		IniWrite, % HS3_GuiWidth, 	% HADConfig, GraphicalUserInterface, MainWindowPosW
+		IniWrite, % HS3_GuiHeight, 	% HADConfig, GraphicalUserInterface, MainWindowPosH
 		GuiControlGet, TempPos,	Pos, % IdListView1
-		IniWrite, % TempPosW,		Config.ini, GraphicalUserInterface, ListViewPosW
-		IniWrite, % TempPosH,		Config.ini, GraphicalUserInterface, ListViewPosH
+		IniWrite, % TempPosW,		% HADConfig, GraphicalUserInterface, ListViewPosW
+		IniWrite, % TempPosH,		% HADConfig, GraphicalUserInterface, ListViewPosH
 	}
 	
 	if (A_DefaultGui = "HS4")
 	{
 		WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
-		IniWrite,  HS4,			Config.ini, GraphicalUserInterface, WhichGui
-		IniWrite, % HS4_GuiWidth, 	Config.ini, GraphicalUserInterface, MainWindowPosW
-		IniWrite, % HS4_GuiHeight, 	Config.ini, GraphicalUserInterface, MainWindowPosH
+		IniWrite,  HS4,			% HADConfig, GraphicalUserInterface, WhichGui
+		IniWrite, % HS4_GuiWidth, 	% HADConfig, GraphicalUserInterface, MainWindowPosW
+		IniWrite, % HS4_GuiHeight, 	% HADConfig, GraphicalUserInterface, MainWindowPosH
 	}
 	
-	IniWrite, % WinX, 			  Config.ini, GraphicalUserInterface, MainWindowPosX
-	IniWrite, % WinY, 			  Config.ini, GraphicalUserInterface, MainWindowPosY
+	IniWrite, % WinX, 			  % HADConfig, GraphicalUserInterface, MainWindowPosX
+	IniWrite, % WinY, 			  % HADConfig, GraphicalUserInterface, MainWindowPosY
 	
-	IniWrite, % ini_Sandbox, 	  Config.ini, GraphicalUserInterface, Sandbox
-	IniWrite, % ini_IsSandboxMoved, Config.ini, GraphicalUserInterface, IsSandboxMoved
+	IniWrite, % ini_Sandbox, 	  % HADConfig, GraphicalUserInterface, Sandbox
+	IniWrite, % ini_IsSandboxMoved, % HADConfig, GraphicalUserInterface, IsSandboxMoved
 	
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Position of main window is saved in Config.ini."]
 	return		
@@ -4364,9 +4365,9 @@ F_ToggleTipsLibrary()
 	local v_LibraryFlag := 0 
 	
 	Menu, ToggleLibTrigTipsSubmenu, ToggleCheck, %A_ThisMenuitem%
-	IniRead, v_LibraryFlag, Config.ini, ShowTipsLibraries, %A_ThisMenuitem%
+	IniRead, v_LibraryFlag, % HADConfig, ShowTipsLibraries, %A_ThisMenuitem%
 	v_LibraryFlag := !(v_LibraryFlag)
-	IniWrite, %v_LibraryFlag%, Config.ini, ShowTipsLibraries, %A_ThisMenuitem%
+	IniWrite, %v_LibraryFlag%, % HADConfig, ShowTipsLibraries, %A_ThisMenuitem%
 	
 	F_ValidateIniLibSections()
 	a_Triggers := []
@@ -4383,9 +4384,9 @@ F_EnDisLib()
 	local v_LibraryFlag := 0 ;, v_WhichLibraries := "", v_LibTemp := "", v_LibFlagTemp := ""
 	
 	Menu, EnDisLib, ToggleCheck, %A_ThisMenuItem%
-	IniRead, v_LibraryFlag,	Config.ini, LoadLibraries, %A_ThisMenuitem%
+	IniRead, v_LibraryFlag,	% HADConfig, LoadLibraries, %A_ThisMenuitem%
 	v_LibraryFlag := !(v_LibraryFlag)
-	Iniwrite, %v_LibraryFlag%,	Config.ini, LoadLibraries, %A_ThisMenuItem%
+	Iniwrite, %v_LibraryFlag%,	% HADConfig, LoadLibraries, %A_ThisMenuItem%
 	
 	if (v_LibraryFlag)
 	{
@@ -6000,7 +6001,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	
 	ini_LoadLib := {}, ini_ShowTipsLib := {}	; this associative array is used to store information about Libraries\*.csv files to be loaded
 	
-	IniRead, TempLoadLib,	Config.ini, LoadLibraries
+	IniRead, TempLoadLib,	% HADConfig, LoadLibraries
 	
 ;Check if Libraries subfolder exists. If not, create it and display warning.
 	v_IsLibraryEmpty := true
@@ -6036,7 +6037,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	
 ;Check if Config.ini contains in section [Libraries] file names which are actually in library subfolder. Synchronize [Libraries] section with content of subfolder.
 ;Parse the TempLoadLib.
-	IniRead, TempLoadLib, Config.ini, LoadLibraries
+	IniRead, TempLoadLib, % HADConfig, LoadLibraries
 	for key, value in o_Libraries
 	{
 		FlagFound := false
@@ -6055,7 +6056,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	}
 	
 ;Delete and recreate [Libraries] section of Config.ini mirroring ini_LoadLib associative table. "PriorityLibrary.csv" as the last one.
-	IniDelete, Config.ini, LoadLibraries
+	IniDelete, % HADConfig, LoadLibraries
 	for key, value in ini_LoadLib
 	{
 		if (key != "PriorityLibrary.csv")
@@ -6069,12 +6070,12 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	if (PriorityFlag)
 		SectionTemp .= "PriorityLibrary.csv" . "=" . ValueTemp
 	
-	IniWrite, % SectionTemp, Config.ini, LoadLibraries
+	IniWrite, % SectionTemp, % HADConfig, LoadLibraries
 	
 	SectionTemp := ""
 ;Check if Config.ini contains in section [ShowTipsLibraries] file names which are actually in library subfolder. Synchronize [Libraries] section with content of subfolder.
 ;Parse the TempLoadLib.
-	IniRead, TempShowTipsLib, Config.ini, ShowTipsLibraries
+	IniRead, TempShowTipsLib, % HADConfig, ShowTipsLibraries
 	for key, value in o_Libraries
 	{
 		FlagFound := false
@@ -6093,7 +6094,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	}
 		
 ;Delete and recreate [ShowTipsLibraries] section of Config.ini mirroring ini_ShowTipsLib associative table. "PriorityLibrary.csv" as the last one.
-	IniDelete, Config.ini, ShowTipsLibraries
+	IniDelete, % HADConfig, ShowTipsLibraries
 	for key, value in ini_ShowTipsLib
 	{
 		if (key != "PriorityLibrary.csv")
@@ -6107,7 +6108,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	if (PriorityFlag)
 		SectionTemp .= "PriorityLibrary.csv" . "=" . ValueTemp
 	
-	IniWrite, % SectionTemp, Config.ini, ShowTipsLibraries
+	IniWrite, % SectionTemp, % HADConfig, ShowTipsLibraries
 	return
 }
 	
@@ -6181,7 +6182,6 @@ F_CreateHotstring(txt, nameoffile)
 { 
 	global	;assume-global mode
 	local Options := "", SendFun := "", EnDis := "", OnOff := "", TextInsert := "", Oflag := false
-	;*[One]
 	Loop, Parse, txt, ‖
 	{
 		Switch A_Index
@@ -6745,7 +6745,7 @@ F_LoadEndChars() ;Load from Config.ini
 	HotstringEndChars 	:= ""
 	a_HotstringEndChars := {}
 	
-	IniRead, vOutputVarSection, Config.ini, EndChars
+	IniRead, vOutputVarSection, % HADConfig, EndChars
 	Loop, Parse, vOutputVarSection, =`n, `r%A_Tab%
 	{
 		if !(tick)
@@ -6999,7 +6999,7 @@ F_ImportLibrary()
 		MsgBox, , 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], TransA["The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes."]
 		F_SaveGUIPos()
 		ini_GuiReload := true
-		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
+		IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
 		Reload
 	}
 	else	
@@ -7345,7 +7345,7 @@ L_GUIInit:
 		Gui, HS3: +MinSize%HS3MinWidth%x%HS3MinHeight%
 		Gui, HS4: +MinSize%HS4MinWidth%x%HS4MinHeight%
 		ini_GuiReload := false
-		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
+		IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
 		
 		Switch ini_WhichGui
 		{
@@ -7480,14 +7480,14 @@ return
 	Switch A_ThisMenu
 	{
 		Case "OrdHisTrig":
-		IniWrite, % ini_OHSF, Config.ini, Event_BasicHotstring, OHSF
-		Iniwrite, % ini_OHSD, Config.ini, Event_BasicHotstring, OHSD
+		IniWrite, % ini_OHSF, % HADConfig, Event_BasicHotstring, OHSF
+		Iniwrite, % ini_OHSD, % HADConfig, Event_BasicHotstring, OHSD
 		Case "MenuHisTrig":
-		IniWrite, % ini_MHSF, Config.ini, Event_MenuHotstring, MHSF
-		Iniwrite, % ini_MHSD, Config.ini, Event_MenuHotstring, MHSD
+		IniWrite, % ini_MHSF, % HADConfig, Event_MenuHotstring, MHSF
+		Iniwrite, % ini_MHSD, % HADConfig, Event_MenuHotstring, MHSD
 		Case "UndoOfH":
-		IniWrite, % ini_UHSF, Config.ini, Event_UndoHotstring, UHSF
-		Iniwrite, % ini_UHSD, Config.ini, Event_UndoHotstring, UHSD
+		IniWrite, % ini_UHSF, % HADConfig, Event_UndoHotstring, UHSF
+		Iniwrite, % ini_UHSD, % HADConfig, Event_UndoHotstring, UHSD
 	}
 	Gui, MSP: Destroy
 	return
@@ -7513,7 +7513,7 @@ return
 	~F7::
 	HSDelGuiEscape:
 	HSDelGuiClose:
-	IniWrite, %ini_CPDelay%, Config.ini, Configuration, ClipBoardPasteDelay
+	IniWrite, %ini_CPDelay%, % HADConfig, Configuration, ClipBoardPasteDelay
 	Gui, HSDel: Destroy
 	return
 	
@@ -7544,7 +7544,7 @@ F_ChangeLanguage()
 	else
 	{
 		ini_Language := A_ThisMenuitem
-		IniWrite, %ini_Language%, Config.ini, GraphicalUserInterface, Language
+		IniWrite, %ini_Language%, % HADConfig, GraphicalUserInterface, Language
 		Loop, Files, %A_ScriptDir%\Languages\*.txt
 		{
 			if (ini_Language == A_LoopFileName)
@@ -7557,7 +7557,7 @@ F_ChangeLanguage()
 		F_SaveFontType()
 		F_SaveGUIPos("reset")
 		ini_GuiReload := true
-		IniWrite, % ini_GuiReload,		Config.ini, GraphicalUserInterface, GuiReload
+		IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
 		Reload
 	}
 	return
@@ -7615,16 +7615,16 @@ STDGuiClose:
 STDGuiEscape:
 	Switch (A_ThisMenu)
 	{
-		Case "OrdHisTrig": 	IniWrite, % ini_OHTD, Config.ini, Event_BasicHotstring, 	OHTD
-		Case "UndoOfH":	IniWrite, % ini_UHTD, Config.ini, Event_UndoHotstring, 	UHTD
-		Case "TrigTips":	IniWrite, % ini_TTTD, Config.ini, Event_TriggerstringTips, 	TTTD
+		Case "OrdHisTrig": 	IniWrite, % ini_OHTD, % HADConfig, Event_BasicHotstring, 	OHTD
+		Case "UndoOfH":	IniWrite, % ini_UHTD, % HADConfig, Event_UndoHotstring, 	UHTD
+		Case "TrigTips":	IniWrite, % ini_TTTD, % HADConfig, Event_TriggerstringTips, 	TTTD
 	}
 	Gui, STD: Destroy
 return
 	
 TMNTGuiClose:
 TMNTGuiEscape:
-	IniWrite, % ini_MNTT, Config.ini, Event_TriggerstringTips, MNTT
+	IniWrite, % ini_MNTT, % HADConfig, Event_TriggerstringTips, MNTT
 	Gui, TMNT: Destroy
 return
 
