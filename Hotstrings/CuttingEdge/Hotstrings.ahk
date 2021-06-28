@@ -3261,7 +3261,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		ini_WhichGui := "HS3"
 		return
 	}
-	if (v_ResizingFlag) ;Special case: FontSize set to 16 and some procedures are run twice
+	if (v_ResizingFlag) ;Special case: some procedures are run twice (see L_GUIInit)
 	{
 		HS3_GuiWidth  := A_GuiWidth
 		HS3_GuiHeight := A_GuiHeight
@@ -5081,8 +5081,8 @@ F_GuiMain_CreateObject()
 ;1. Definition of HS3 GUI.
 ;-DPIScale doesn't work in Microsoft Windows 10
 ;+Border doesn't work in Microsoft Windows 10
-	Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs -MaximizeBox, 						% A_ScriptName
-	;Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs,			 						% A_ScriptName
+	;Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs -MaximizeBox, 						% A_ScriptName
+	Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs,			 						% A_ScriptName
 	Gui, 		HS3: Margin,		% c_xmarg, % c_ymarg
 	Gui,			HS3: Color,		% c_WindowColor, % c_ControlColor
 	
@@ -6111,7 +6111,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	return
 }
 	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
 	F_LoadLibrariesToTables()
 	{ 
@@ -6176,50 +6176,49 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 		TrayTip, %A_ScriptName%, % TransA["Hotstrings have been loaded"], 1
 }
 
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_CreateHotstring(txt, nameoffile) 
 { 
 	global	;assume-global mode
 	local Options := "", SendFun := "", EnDis := "", OnOff := "", TextInsert := "", Oflag := false
-	
+	;*[One]
 	Loop, Parse, txt, ‖
 	{
 		Switch A_Index
 		{
 			Case 1:
-			Options := A_LoopField
-			Oflag := false
-			if (InStr(Options, "O", 0))
-				Oflag := true
-			else
+				Options := A_LoopField
 				Oflag := false
+				if (InStr(Options, "O", 0))
+					Oflag := true
+				else
+					Oflag := false
 			Case 2:
-			v_Triggerstring := A_LoopField
+				v_Triggerstring := A_LoopField
+				v_Triggerstring := StrReplace(v_Triggerstring, "``n", "`n") ;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
+				v_Triggerstring := StrReplace(v_Triggerstring, "``r", "`r")	;future: add more sequences like {Esc} etc.
+				v_Triggerstring := StrReplace(v_Triggerstring, "``t", "`t")
+				v_Triggerstring := StrReplace(v_Triggerstring, "``", "`")
+				v_Triggerstring := StrReplace(v_Triggerstring, "``b", "`b")
 			Case 3:
-			Switch A_LoopField
-			{
-				Case "SI": 	SendFun := "F_HOF_SI"
-				Case "CL": 	SendFun := "F_HOF_CLI"
-				Case "MCL": 	SendFun := "F_HOF_MCLI"
-				Case "MSI":	SendFun := "F_HOF_MSI"
-				Case "SR":	SendFun := "F_HOF_SR"
-				Case "SP":	SendFun := "F_HOF_SP"
-				Case "SE":	SendFun := "F_HOF_SE"
-			}
+				Switch A_LoopField
+				{
+					Case "SI": 	SendFun := "F_HOF_SI"
+					Case "CL": 	SendFun := "F_HOF_CLI"
+					Case "MCL": 	SendFun := "F_HOF_MCLI"
+					Case "MSI":	SendFun := "F_HOF_MSI"
+					Case "SR":	SendFun := "F_HOF_SR"
+					Case "SP":	SendFun := "F_HOF_SP"
+					Case "SE":	SendFun := "F_HOF_SE"
+				}
 			Case 4: 
-			Switch A_LoopField
-			{
-				Case "En":	OnOff := "On"
-				Case "Dis":	OnOff := "Off"	
-			}
+				Switch A_LoopField
+				{
+					Case "En":	OnOff := "On"
+					Case "Dis":	OnOff := "Off"	
+				}
 			Case 5:
-			TextInsert := A_LoopField
-			;TextInsert := StrReplace(TextInsert, "``n", "`n") ;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
-			;TextInsert := StrReplace(TextInsert, "``r", "`r")		
-			;TextInsert := StrReplace(TextInsert, "``t", "`t")
-			;TextInsert := StrReplace(TextInsert, "``", "`")
-			;TextInsert := StrReplace(TextInsert, "``b", "`b")
+				TextInsert := A_LoopField
 		}
 	}
 	
@@ -6233,7 +6232,7 @@ F_CreateHotstring(txt, nameoffile)
 		IfMsgBox, Yes
 			return
 	}
-	if (v_TriggerString and OnOff)
+	if (v_TriggerString and (OnOff = "On"))
 	{
 		;OutputDebug, % "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
 		Try
@@ -6400,6 +6399,7 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 	local	ThisHotkey := A_ThisHotkey
 	
 	v_InputString := ""
+	;*[One]
 	v_UndoHotstring := ReplacementString
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	if (Oflag = false)
