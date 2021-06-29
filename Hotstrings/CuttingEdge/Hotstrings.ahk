@@ -3228,26 +3228,26 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	HS4GuiSize() ;Gui event
+HS4GuiSize() ;Gui event
+{
+	global ;assume-global mode
+	
+	if (A_EventInfo = 1) ; The window has been minimized.
 	{
-		global ;assume-global mode
-		
-		if (A_EventInfo = 1) ; The window has been minimized.
-		{
 		;v_WhichGUIisMinimzed := "HS4"
-			ini_WhichGui := "HS4"
-			return
-		}
-		
-		HS4_GuiWidth  := A_GuiWidth
-		HS4_GuiHeight := A_GuiHeight
+		ini_WhichGui := "HS4"
 		return
 	}
+	
+	HS4_GuiWidth  := A_GuiWidth
+	HS4_GuiHeight := A_GuiHeight
+	return
+}
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
 HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
-{
+{	;This function toggles flag ini_IsSandboxMoved
 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 	global ;assume-global mode
 	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
@@ -3255,7 +3255,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		,deltaW := 0, deltaH := 0
 		,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
 	
-	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "A_GuiHeight:" . A_Space .  A_GuiHeight
+	;OutputDebug, % "HS3GuiSize" . A_Space . "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "A_GuiHeight:" . A_Space .  A_GuiHeight
 	
 	if (A_EventInfo = 1) ; The window has been minimized.
 	{
@@ -3282,8 +3282,13 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	F_AutoXYWH("*wh", IdListView1)
 	F_AutoXYWH("*h",  IdButton5)
 	
-	if (!ini_IsSandboxMoved)
-		F_AutoXYWH("*w", IdEdit10)
+	if (!ini_IsSandboxMoved)	;tu jestem
+	{
+		;F_AutoXYWH("*w", IdEdit10)
+		F_AutoXYWH("*y", IdText10)
+		F_AutoXYWH("*y", IdTextInfo17)
+		F_AutoXYWH("*yw", IdEdit10)
+	}
 	
 	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;Check position of ListView1 again after resizing
 	;OutputDebug, % "After:" . A_Space . v_OutVarTemp2H
@@ -3298,13 +3303,13 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W) - 3)
 	}	
 	
-	
+	;OutputDebug, % "v_ResizingFlag:" . A_Space . v_ResizingFlag . A_Tab . "HS3_GuiWidth:" . A_Space . HS3_GuiWidth . A_Tab . "HS3_GuiHeight:" . A_Space . HS3_GuiHeight
 	deltaW := A_GuiWidth -  HS3_GuiWidth
 	deltaH := A_GuiHeight - HS3_GuiHeight
+	;OutputDebug, % "deltaW:" . A_Space . deltaW . A_Tab . "deltaH:" . A_Space . deltaH 
 	
-	;OutputDebug, % "Width:" . A_Space . Width . A_Space . "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "Height:" . A_Space . Height . A_Space . "A_GuiHeight:" . A_Space . A_GuiHeight
-	
-	if (ini_Sandbox) and (deltaH > 0) and !(ini_IsSandboxMoved) and (v_OutVarTemp2H + HofText > LeftColumnH) 
+	;if (ini_Sandbox) and (deltaH > 0) and !(ini_IsSandboxMoved) and (v_OutVarTemp2H + HofText > LeftColumnH) 
+	if (ini_Sandbox) and !(ini_IsSandboxMoved) and (v_OutVarTemp2H + HofText > LeftColumnH) 
 	{
 		v_hNext := v_OutVarTemp2H + c_ymarg + HofText + c_HofSandbox
 		GuiControl, MoveDraw, % IdListView1, % "h" . v_hNext  ;increase
@@ -3319,13 +3324,20 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		v_yNext := LeftColumnH + c_ymarg + HofText "w" LeftColumnW - 2 * c_xmarg
 		GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext
 		ini_IsSandboxMoved := true
-		OutputDebug, % "Two:" . A_Space ini_IsSandboxMoved . A_Space . deltaH
+		OutputDebug, % "One:" . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved . A_Tab . "deltaH" . A_Space . deltaH
 		F_AutoXYWH("reset")
 		F_AutoXYWH("*wh", IdListView1)
 		F_AutoXYWH("*h", IdButton5)
 	}
+	;if (!ini_Sandbox) and (deltaH > 0) and !(ini_IsSandboxMoved) and (v_OutVarTemp2H + HofText > LeftColumnH)
+	if (!ini_Sandbox) and !(ini_IsSandboxMoved) and (v_OutVarTemp2H + HofText > LeftColumnH)
+	{
+		ini_IsSandboxMoved := true
+		OutputDebug, % "Two:" . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved . A_Tab . "deltaH" . A_Space . deltaH
+	}
 	
-	if (ini_Sandbox) and (deltaH < 0) and (ini_IsSandboxMoved) and (v_OutVarTemp2H <  LeftColumnH + c_HofSandbox)
+	;if (ini_Sandbox) and (deltaH < 0) and (ini_IsSandboxMoved) and (v_OutVarTemp2H <  LeftColumnH + c_HofSandbox)
+	if (ini_Sandbox) and (ini_IsSandboxMoved) and (v_OutVarTemp2H <  LeftColumnH + c_HofSandbox)
 	{
 		v_hNext := v_OutVarTemp2H - (c_ymarg + HofText + c_HofSandbox)
 		GuiControl, MoveDraw, % IdListView1, % "h" . v_hNext ;decrease
@@ -3340,28 +3352,21 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		v_yNext := v_OutVarTemp2Y + v_OutVarTemp2H - c_HofSandbox "w" v_OutVarTemp2W
 		GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext
 		ini_IsSandboxMoved := false
-		OutputDebug, % "One:" . A_Space ini_IsSandboxMoved . A_Space . deltaH
+		OutputDebug, % "Three:" . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved . A_Tab . "deltaH" . A_Space . deltaH
 		F_AutoXYWH("reset")
 		F_AutoXYWH("*wh", IdListView1)
 		F_AutoXYWH("*h", IdButton5)
 	}
-	
-	if ((ini_Sandbox) and !(ini_IsSandboxMoved))
+	;if (ini_Sandbox) and (deltaH < 0) and (ini_IsSandboxMoved) and (v_OutVarTemp2H <  LeftColumnH + c_HofSandbox)
+	if (!ini_Sandbox) and (ini_IsSandboxMoved) and (v_OutVarTemp2H <  LeftColumnH + c_HofSandbox)
 	{
-		v_yNext := v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
-		GuiControl, MoveDraw, % IdText10, % "y" . v_yNext
-		GuiControlGet, v_OutVarTemp1, Pos, % IdText10
-		v_xNext := v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg
-		v_yNext := v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
-		GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
-		v_yNext := v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg + HofText 
-		GuiControl, MoveDraw, % IdEdit10, % "y" . v_yNext
-		;OutputDebug, % "Four" . A_Space . deltaH
+		ini_IsSandboxMoved := false
+		OutputDebug, % "Four:" . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved . A_Tab . "deltaH" . A_Space . deltaH
 	}
 	
 	HS3_GuiWidth  := A_GuiWidth	;only GuiSize automatic subroutine is able to determine A_GuiWidth and A_GuiHeight, so the last value is stored in global variables.
 	HS3_GuiHeight := A_GuiHeight
-	;OutputDebug, % "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space "A_GuiHeight" . A_Space . A_GuiHeight
+	;OutputDebug, % "HS3_GuiWidth:" . A_Space . HS3_GuiWidth . A_Space "HS3_GuiHeight" . A_Space . HS3_GuiHeight
 	;*[Two]
 	return
 }
@@ -4094,7 +4099,7 @@ F_ToggleSandbox()
 	
 	F_GuiMain_Redraw()
 	F_GuiHS4_Redraw()
-	Gui, % A_DefaultGui . ":" . A_Space . "Show", AutoSize
+	;Gui, % A_DefaultGui . ":" . A_Space . "Show", AutoSize	;tu jestem
 	return
 }
 
@@ -5557,7 +5562,6 @@ F_GuiMain_Redraw()
 			}
 			if !(ini_Sandbox)
 			{
-				;v_hNext := LeftColumnH - (c_ymarg + HofText)
 				GuiControl, Hide, % IdText10
 				GuiControl, Hide, % IdTextInfo17
 				GuiControl, Hide, % IdEdit10
@@ -5570,7 +5574,7 @@ F_GuiMain_Redraw()
 	}
 	else
 	{
-		;*[One]		;tu jestem
+		OutputDebug, % "Redraw" . A_Space . "The first else" . A_Tab . "ini_Sandbox" . A_Space . ini_Sandbox . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved
 		GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 		if (ini_Sandbox) and (!ini_IsSandboxMoved)
 		{
