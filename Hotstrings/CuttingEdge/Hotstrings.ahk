@@ -3254,56 +3254,56 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		,deltaW := 0, deltaH := 0
 		,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
 	
-	;Critical, On
-	;OutputDebug, % "HS3GuiSize" . A_Space . "A_GuiWidth:" . A_Space . A_GuiWidth . A_Space . "A_GuiHeight:" . A_Space .  A_GuiHeight
-	
 	if (A_EventInfo = 1) ; The window has been minimized.
 	{
 		ini_WhichGui := "HS3"
 		return
 	}
-	if (v_ResizingFlag) ;Special case: some procedures are run twice (see L_GUIInit)
-	{
-		;HS3_GuiWidth  := A_GuiWidth
-		;HS3_GuiHeight := A_GuiHeight
-		;OutputDebug, return because of "v_ResizingFlag"
-		GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;Check position of ListView1 again after resizing
-		LV_ModifyCol(1, Round(0.1 * v_OutVarTemp2W))
-		LV_ModifyCol(2, Round(0.1 * v_OutVarTemp2W))
-		LV_ModifyCol(3, Round(0.1 * v_OutVarTemp2W))	
-		LV_ModifyCol(4, Round(0.1 * v_OutVarTemp2W))
-		LV_ModifyCol(5, Round(0.4 * v_OutVarTemp2W))
-		LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W) - 3)
-		return
-	}
+	HS3_GuiWidth  := A_GuiWidth	;used by F_SaveGUIPos()
+	HS3_GuiHeight := A_GuiHeight	;used by F_SaveGUIPos()
+
+	/*
+		if (v_ResizingFlag) ;Special case: some procedures are run twice (see L_GUIInit)
+		{
+			GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;Check position of ListView1 again after resizing
+			LV_ModifyCol(1, Round(0.1 * v_OutVarTemp2W))
+			LV_ModifyCol(2, Round(0.1 * v_OutVarTemp2W))
+			LV_ModifyCol(3, Round(0.1 * v_OutVarTemp2W))	
+			LV_ModifyCol(4, Round(0.1 * v_OutVarTemp2W))
+			LV_ModifyCol(5, Round(0.4 * v_OutVarTemp2W))
+			LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W) - 3)
+			OutputDebug, % "Fik"
+			return
+		}
+		
+	*/
 	
-	;GuiControlGet, v_OutVarTemp1, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.
-	
-	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;Check position of ListView1 again after resizing
-	;OutputDebug, % "After:" . A_Space . v_OutVarTemp2H
-	;OutputDebug, % "Height of ListView in rel to A_GuiHeight:" . A_Space . A_GuiHeight - v_OutVarTemp2H
 	;if (v_OutVarTemp2W != v_OutVarTemp1W)
 	;{
-		LV_ModifyCol(1, Round(0.1 * v_OutVarTemp2W))
-		LV_ModifyCol(2, Round(0.1 * v_OutVarTemp2W))
-		LV_ModifyCol(3, Round(0.1 * v_OutVarTemp2W))	
-		LV_ModifyCol(4, Round(0.1 * v_OutVarTemp2W))
-		LV_ModifyCol(5, Round(0.4 * v_OutVarTemp2W))
-		LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W) - 3)
+	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.	
+	LV_ModifyCol(1, Round(0.1 * v_OutVarTemp2W))
+	LV_ModifyCol(2, Round(0.1 * v_OutVarTemp2W))
+	LV_ModifyCol(3, Round(0.1 * v_OutVarTemp2W))	
+	LV_ModifyCol(4, Round(0.1 * v_OutVarTemp2W))
+	LV_ModifyCol(5, Round(0.4 * v_OutVarTemp2W))
+	LV_ModifyCol(6, Round(0.2 * v_OutVarTemp2W) - 3)
 	;}	
 	
 	if (!ini_Sandbox)
 	{
 		F_AutoXYWH("*h",  IdButton5)
 		F_AutoXYWH("*wh", IdListView1)
+		return
 	}
 	
+	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;Check position of ListView1 again after resizing
 	if (ini_Sandbox) and (!ini_IsSandboxMoved) 
 	{
 		if (v_OutVarTemp2H + HofText + c_ymarg >  LeftColumnH)
 		{
 			ini_IsSandboxMoved := true
-			v_hNext := v_OutVarTemp2H + (c_HofSandbox + HofText + c_ymarg) 
+			;v_hNext := v_OutVarTemp2H + (c_HofSandbox + HofText + c_ymarg)
+			v_hNext := A_GuiHeight - (2 * c_ymarg + HofText)
 			GuiControl, MoveDraw, % IdListView1, % "h" . v_hNext  ;increase
 			v_xNext := c_xmarg
 			v_yNext := LeftColumnH + c_ymarg
@@ -3316,38 +3316,36 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			v_yNext := LeftColumnH + c_ymarg + HofText 
 			v_wNext := LeftColumnW - 2 * c_xmarg
 			GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
-			;v_xNext := LeftColumnW 
-			;v_yNext := c_ymarg
-			v_hNext := HofText + v_OutVarTemp2H + (c_HofSandbox + HofText + c_ymarg)
+			;v_hNext := HofText + v_OutVarTemp2H + (c_HofSandbox + HofText + c_ymarg)
+			v_hNext := A_GuiHeight - (2 * c_ymarg)
 			GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
 			F_AutoXYWH("reset")
-			OutputDebug, % "One:" . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved . A_Tab . "deltaH" . A_Space . deltaH
+			OutputDebug, % "One:" . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved 
 			;MsgBox
 			return
 		}
 		else
-		{
-			F_AutoXYWH("*h",  IdButton5)
-			F_AutoXYWH("*wh", IdListView1)
-			F_AutoXYWH("*y", IdText10)
-			F_AutoXYWH("*y", IdTextInfo17)
-			F_AutoXYWH("*yw", IdEdit10)
+		{	;tu jestem
+			;F_AutoXYWH("*h",  IdButton5)
+			;F_AutoXYWH("*wh", IdListView1)
+			;F_AutoXYWH("*y", IdText10)
+			;F_AutoXYWH("*y", IdTextInfo17)
+			;F_AutoXYWH("*yw", IdEdit10)
 			OutputDebug, % "Two:" 
 			return
 		}
 	}
 	if (ini_Sandbox) and (ini_IsSandboxMoved)
 	{
-		;if (v_OutVarTemp2H + c_ymarg + HofText <= LeftColumnH + c_ymarg + HofText + HofEdit + 3 * c_ymarg)
 		if (v_OutVarTemp2H <= LeftColumnH + HofEdit + 3 * c_ymarg)
 		{
 			ini_IsSandboxMoved := false
-			v_hNext := v_OutVarTemp2H - (c_ymarg + HofText + c_HofSandbox)
+			;v_hNext := v_OutVarTemp2H - (c_ymarg + HofText + c_HofSandbox)
+			v_hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + c_HofSandbox + c_ymarg)
 			GuiControl, MoveDraw, % IdListView1, % "h" . v_hNext ;decrease
 			v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton
-			;GuiControlGet, v_OutVarTemp2, Pos, % IdListView1
-			;v_yNext := v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
-			v_yNext := c_ymarg + HofText + v_OutVarTemp2H - (c_ymarg + HofText + c_HofSandbox) + c_ymarg
+			;v_yNext := c_ymarg + HofText + v_OutVarTemp2H - (c_ymarg + HofText + c_HofSandbox) + c_ymarg
+			v_yNext := A_GuiHeight - (c_ymarg + HofText + c_HofSandbox)
 			GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
 			GuiControlGet, v_OutVarTemp1, Pos, % IdText10
 			v_xNext := v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg
@@ -3356,7 +3354,8 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			v_yNext += HofText
 			v_wNext := v_OutVarTemp2W
 			GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
-			v_hNext := HofText + v_OutVarTemp2H 
+			;v_hNext := HofText + v_OutVarTemp2H 
+			v_hNext := A_GuiHeight - 2 * c_ymarg 
 			GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
 			F_AutoXYWH("reset")
 			OutputDebug, % "Three:" . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved . A_Tab . "deltaH" . A_Space . deltaH
@@ -3365,8 +3364,12 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		}
 		else
 		{
-			F_AutoXYWH("*h",  IdButton5)
-			F_AutoXYWH("*wh", IdListView1)
+			;F_AutoXYWH("*h",  IdButton5)	;it seems to work even without this line
+			v_hNext := A_GuiHeight - (2 * c_ymarg)
+			GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
+			;F_AutoXYWH("*wh", IdListView1)	;it seems to work even without this line
+			v_hNext := A_GuiHeight - (2 * c_ymarg + HofText)
+			GuiControl, MoveDraw, % IdListView1, % "h" . v_hNext  ;increase
 			OutputDebug, % "Four:" 
 			return
 		}
@@ -4102,7 +4105,7 @@ F_ToggleSandbox()
 	
 	F_GuiMain_Redraw()
 	F_GuiHS4_Redraw()
-	;Gui, % A_DefaultGui . ":" . A_Space . "Show", AutoSize	;tu jestem
+	;Gui, % A_DefaultGui . ":" . A_Space . "Show", AutoSize	
 	return
 }
 
@@ -4259,8 +4262,8 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 		IniWrite, % "", 				% HADConfig, GraphicalUserInterface, MainWindowPosH
 		return
 	}	
-	
-	if (A_DefaultGui = "HS3")
+	;*[One]
+	if (A_DefaultGui = "HS3")	;tu jestem
 	{
 		WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
 		IniWrite,  HS3,			% HADConfig, GraphicalUserInterface, WhichGui
@@ -5607,7 +5610,6 @@ F_GuiMain_Redraw()
 				ini_IsSandboxMoved := true
 		}
 	}	
-	;*[One]
 	;5.3.3. Text Sandbox
 	;5.2.4. Sandbox edit text field
 	if ((ini_Sandbox) and (ini_IsSandboxMoved))
@@ -7361,7 +7363,6 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 #If (v_Param != "l") 
 ^#h::		; Event
 L_GUIInit:
-	
 	if (v_ResizingFlag) ;if run for the very first time
 	{
 		Gui, HS3: +MinSize%HS3MinWidth%x%HS3MinHeight%
@@ -7639,7 +7640,7 @@ STDGuiEscape:
 	{
 		Case "OrdHisTrig": 	IniWrite, % ini_OHTD, % HADConfig, Event_BasicHotstring, 	OHTD
 		Case "UndoOfH":	IniWrite, % ini_UHTD, % HADConfig, Event_UndoHotstring, 	UHTD
-		Case "TrigTips":	IniWrite, % ini_TTTD, % HADConfig, Event_TriggerstringTips, 	TTTD
+		Case "TrigTips":	IniWrite, % ini_TTTD, % HADConfig, Event_TriggerstringTips, TTTD
 	}
 	Gui, STD: Destroy
 return
