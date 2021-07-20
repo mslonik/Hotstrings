@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -71,12 +71,24 @@ if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "L
 	. A_ScriptDir . "\Languages"
 }
 
-IniRead ini_Language, % HADConfig, GraphicalUserInterface, Language				; Load from Config.ini file specific parameter: language into variable ini_Language, e.g. ini_Language = English.ini
-if (!FileExist(A_ScriptDir . "\Languages\" . ini_Language))			; else if there is no ini_language .ini file, e.g. v_langugae == Polish.ini and there is no such file in Languages folder
+IniRead ini_Language, % HADConfig, GraphicalUserInterface, Language				; Load from Config.ini file specific parameter: language into variable ini_Language, e.g. ini_Language = English.txt
+if (!ini_Language) or (ini_Language == "ERROR")
+{
+	MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["The parameter Language in section [GraphicalUserInterface] of Config.ini is missing. "]
+	. "`n`n" . TransA["The default"] . A_Space . "English.txt" . A_Space . TransA["is added in section  [GraphicalUserInterface] of Config.ini"] . "`n`n"  A_ScriptDir . "\Languages\"
+	ini_Language := "English.txt"
+	IniWrite, % ini_Language, % HADConfig,  GraphicalUserInterface, Language
+}
+	
+if (!FileExist(A_ScriptDir . "\Languages\" . ini_Language))			; else if there is no ini_language .ini file, e.g. v_langugae == Polish.txt and there is no such file in Languages folder
 {
 	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no"] . A_Space . ini_Language . A_Space . TransA["file in Languages subfolder!"]
-	. "`n`n" . TransA["The default"] . A_Space . "English.ini" . A_Space . TransA["file is now created in the following subfolder:"] . "`n`n"  A_ScriptDir . "\Languages\"
-	F_LoadCreateTranslationTxt("create")
+	. "`n`n" . TransA["The default"] . A_Space . "English.txt" . A_Space . TransA["file is now created in the following subfolder:"] . "`n`n"  A_ScriptDir . "\Languages\"
+	ini_Language := "English.txt"
+	if (!FileExist(A_ScriptDir . "\Languages\" . "English.txt"))
+		F_LoadCreateTranslationTxt("create")
+	else
+		F_LoadCreateTranslationTxt("load")	
 }
 else
 	F_LoadCreateTranslationTxt("load")
@@ -180,15 +192,7 @@ F_ChangeLanguage()
 
 Menu, StyleGUIsubm, Add, % TransA["Light (default)"],	F_StyleOfGUI
 Menu, StyleGUIsubm, Add, % TransA["Dark"],			F_StyleOfGUI
-Switch c_FontColor
-	{
-		Case "Black": ;Light (default)
-					Menu, StyleGUIsubm, Check,   % TransA["Light (default)"]
-					Menu, StyleGUIsubm, UnCheck, % TransA["Dark"]
-		Case "White": ;Dark
-					Menu, StyleGUIsubm, UnCheck, % TransA["Light (default)"]
-					Menu, StyleGUIsubm, Check,   % TransA["Dark"]
-}
+F_StyleOfGUI()
 
 Menu, ConfGUI,		Add, % TransA["Save position of application window"], 	F_SaveGUIPos
 Menu, ConfGUI,		Add, % TransA["Change language"], 					:SubmenuLanguage
@@ -3362,7 +3366,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			v_hNext := A_GuiHeight - 2 * c_ymarg 
 			GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
 			;F_AutoXYWH("reset")
-			OutputDebug, % "Three:" . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved . A_Tab . "deltaH" . A_Space . deltaH
+			OutputDebug, % "Three:" . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved 
 			;MsgBox
 			return
 		}
@@ -3877,6 +3881,24 @@ F_LoadFontSize()
 F_StyleOfGUI()
 {
 	global ;assume-global mode
+	static OneTimeMemory := true
+	
+	if (OneTimeMemory)
+	{
+		Switch c_FontColor
+		{
+			Case "Black": ;Light (default)
+				Menu, StyleGUIsubm, Check,   % TransA["Light (default)"]
+				Menu, StyleGUIsubm, UnCheck, % TransA["Dark"]
+			Case "White": ;Dark
+				Menu, StyleGUIsubm, UnCheck, % TransA["Light (default)"]
+				Menu, StyleGUIsubm, Check,   % TransA["Dark"]
+		}
+		OneTimeMemory := false
+		return
+	}	
+	else
+	{
 	Switch A_ThisMenuItemPos
 	{
 		Case 1: ;Light (default)
@@ -3906,6 +3928,7 @@ F_StyleOfGUI()
 	}
 	IfMsgBox, No
 		return	
+	}
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4200,11 +4223,11 @@ ListViewPosW=
 ListViewPosH=
 Sandbox=1
 IsSandboxMoved=0
-WhichGui=
-GuiFontColor=
-GuiFontColorHighlighted= 
-GuiWindowColor=
-GuiControlColor=
+WhichGui=HS3
+GuiFontColor=Black
+GuiFontColorHighlighted=Blue
+GuiWindowColor=Default
+GuiControlColor=Default
 GuiSizeOfMarginX=10
 GuiSizeOfMarginY=10
 GuiFontType=Calibri
@@ -4238,7 +4261,7 @@ Underscore _=1
 	
 	if (!FileExist(HADConfig))
 	{
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"] . "`n`n" . A_ScriptDir
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"] . "`n`n" . HADConfig
 		FileAppend, %ConfigIni%, % HADConfig
 	}
 	return	
@@ -4268,8 +4291,8 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 		IniWrite, % "", 				% HADConfig, GraphicalUserInterface, MainWindowPosH
 		return
 	}	
-	;*[One]
-	if (A_DefaultGui = "HS3")	;tu jestem
+	
+	if (A_DefaultGui = "HS3")
 	{
 		WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
 		IniWrite,  HS3,			% HADConfig, GraphicalUserInterface, WhichGui
