@@ -74,8 +74,8 @@ if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "L
 IniRead ini_Language, % HADConfig, GraphicalUserInterface, Language				; Load from Config.ini file specific parameter: language into variable ini_Language, e.g. ini_Language = English.txt
 if (!ini_Language) or (ini_Language == "ERROR")
 {
-	MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["The parameter Language in section [GraphicalUserInterface] of Config.ini is missing. "]
-	. "`n`n" . TransA["The default"] . A_Space . "English.txt" . A_Space . TransA["is added in section  [GraphicalUserInterface] of Config.ini"] . "`n`n"  A_ScriptDir . "\Languages\"
+	MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["The parameter Language in section [GraphicalUserInterface] of Config.ini is missing."]
+	. "`n`n" . TransA["The default"] . A_Space . "English.txt" . A_Space . TransA["is added in section  [GraphicalUserInterface] of Config.ini"]
 	ini_Language := "English.txt"
 	IniWrite, % ini_Language, % HADConfig,  GraphicalUserInterface, Language
 }
@@ -4672,6 +4672,7 @@ In order to aplly new font style it's necesssary to reload the application. 	= I
 In order to aplly new font type it's necesssary to reload the application. 	= In order to aplly new font type it's necesssary to reload the application.
 In order to aplly new size of margin it's necesssary to reload the application. = In order to aplly new size of margin it's necesssary to reload the application.
 In order to aplly new style it's necesssary to reload the application. 		= In order to aplly new style it's necesssary to reload the application.
+is added in section  [GraphicalUserInterface] of Config.ini		= is added in section  [GraphicalUserInterface] of Config.ini
 is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv? = is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?
 Introduction											= Introduction
 \Languages\`nMind that Config.ini Language variable is equal to 	= \Languages\`nMind that Config.ini Language variable is equal to
@@ -4799,6 +4800,7 @@ The library  											= The library
 The file path is: 										= The file path is:
 the following line is found:								= the following line is found:
 There is no Libraries subfolder and no lbrary (*.csv) file exists! = There is no Libraries subfolder and no lbrary (*.csv) file exists!
+The parameter Language in section [GraphicalUserInterface] of Config.ini is missing. = The parameter Language in section [GraphicalUserInterface] of Config.ini is missing.
 The selected file is empty. Process of import will be interrupted. = The selected file is empty. Process of import will be interrupted.
 The (triggerstring, hotstring) definitions have been uploaded from library file = The (triggerstring, hotstring) definitions have been uploaded from library file
 The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory = The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory
