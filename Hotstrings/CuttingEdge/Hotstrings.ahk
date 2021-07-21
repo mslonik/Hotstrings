@@ -2748,88 +2748,88 @@ F_Searching(ReloadListView*)
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_GuiSearch_CreateObject()
-	{
-		global	;assume-global mode
-		
+F_GuiSearch_CreateObject()
+{
+	global	;assume-global mode
+	
 	;1. Prepare Gui general parameters
-		Gui, HS3Search: New, 	% "+Resize +HwndHS3SearchHwnd +Owner +MinSize" HS3MinWidth + 3 * c_xmarg "x" HS3MinHeight, % TransA["Search Hotstrings"]
-		Gui, HS3Search: Margin,	% c_xmarg, % c_ymarg
-		Gui,	HS3Search: Color,	% c_WindowColor, % c_ControlColor
-		
+	Gui, HS3Search: New, 	% "+Resize +HwndHS3SearchHwnd +Owner +MinSize" HS3MinWidth + 3 * c_xmarg "x" HS3MinHeight, % TransA["Search Hotstrings"]
+	Gui, HS3Search: Margin,	% c_xmarg, % c_ymarg
+	Gui,	HS3Search: Color,	% c_WindowColor, % c_ControlColor
+	
 	;2. Prepare alll Gui objects
-		Gui,	HS3Search: Font,% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-		Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT1,								% TransA["Phrase to search for:"]
-		Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT2,								% TransA["Search by:"]
-		Gui,	HS3Search: Font, % "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 	% c_FontType
-		Gui, HS3Search: Add, Edit, 		x0 y0 HwndIdSearchE1 vv_SearchTerm gF_SearchPhrase
-		Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR1 vv_RadioGroup gF_SearchPhrase Checked, % TransA["Triggerstring"]
-		Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR2 gF_SearchPhrase, 					% TransA["Hotstring"]
-		Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR3 gF_SearchPhrase, 					% TransA["Library"]
-		Gui, HS3Search: Add, Button, 		x0 y0 HwndIdSearchB1 gF_MoveList Default,				% TransA["Move (F8)"]
-		Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 gF_HSLV2 +AltSubmit Grid -Multi,		% TransA["Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment"]
+	Gui,	HS3Search: Font,% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT1,								% TransA["Phrase to search for:"]
+	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT2,								% TransA["Search by:"]
+	Gui,	HS3Search: Font, % "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 	% c_FontType
+	Gui, HS3Search: Add, Edit, 		x0 y0 HwndIdSearchE1 vv_SearchTerm gF_SearchPhrase
+	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR1 vv_RadioGroup gF_SearchPhrase Checked, % TransA["Triggerstring"]
+	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR2 gF_SearchPhrase, 					% TransA["Hotstring"]
+	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR3 gF_SearchPhrase, 					% TransA["Library"]
+	Gui, HS3Search: Add, Button, 		x0 y0 HwndIdSearchB1 gF_MoveList Default,				% TransA["Move (F8)"]
+	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 gF_HSLV2 +AltSubmit Grid -Multi,		% TransA["Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment"]
 	;Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT3 0x7 vLine2						;0x7 = SS_BLACKFRAME Specifies a box with a frame drawn in the same color as the window frames. This color is black in the default color scheme.
-		Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT4, 								% TransA["F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries"]
-		
-		return
-	}
+	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT4, 								% TransA["F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries"]
+	
+	return
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_GuiSearch_DetermineConstraints()
-	{
-		global	;assume-global mode
-		local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+F_GuiSearch_DetermineConstraints()
+{
+	global	;assume-global mode
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
 		,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
 		,v_ButtonW := 0
-		
-		v_xNext := c_xmarg
-		v_yNext := c_ymarg
-		GuiControl, Move, % IdSearchT1, % "x" v_xNext "y" v_yNext ;Phrase to search
-		v_yNext += HofText
-		GuiControlGet, v_OutVarTemp, Pos, % IdSearchE1
-		v_wNext := v_OutVarTempW * 2
-		GuiControl, Move, % IdSearchE1, % "x" v_xNext "y" v_yNext "w" v_wNext
-		
-		GuiControlGet, v_OutVarTemp, Pos, % IdSearchE1
-		v_xNext := c_xmarg + v_OutVarTempW + 2 * c_xmarg
-		v_yNext := c_ymarg
-		GuiControl, Move, % IdSearchT2, % "x" v_xNext "y" v_yNext	;Search by
-		v_yNext += HofText
-		GuiControl, Move, % IdSearchR1, % "x" v_xNext "y" v_yNext
-		
-		GuiControlGet, v_OutVarTemp, Pos, % IdSearchR1
-		v_xNext += v_OutVarTempW + c_xmarg
-		GuiControl, Move, % IdSearchR2, % "x" v_xNext "y" v_yNext
-		GuiControlGet, v_OutVarTemp, Pos, % IdSearchR2
-		v_xNext += v_OutVarTempW + c_xmarg
-		GuiControl, Move, % IdSearchR3, % "x" v_xNext "y" v_yNext
-		
-		HofRadio := v_OutVarTempH
-		v_OutVarTemp := Max(HofRadio, HofEdit)
-		v_xNext := c_xmarg
-		v_yNext += v_OutVarTemp + c_ymarg
-		v_wNext := HS3MinWidth
-		v_hNext := HS3MinHeight - (c_ymarg + HofText + v_OutVarTemp + c_ymarg + HofText * 2)
-		GuiControl, Move, % IdSearchLV1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
-		
-		GuiControlGet, v_OutVarTemp, Pos, % IdSearchLV1
-		LV_ModifyCol(1, Round(0.2 * v_OutVarTempW))
-		LV_ModifyCol(2, Round(0.1 * v_OutVarTempW))
-		LV_ModifyCol(3, Round(0.1 * v_OutVarTempW))	
-		LV_ModifyCol(4, Round(0.1 * v_OutVarTempW))
-		LV_ModifyCol(5, Round(0.1 * v_OutVarTempW))
-		LV_ModifyCol(6, Round(0.27 * v_OutVarTempW))
-		LV_ModifyCol(7, Round(0.1 * v_OutVarTempW) - 3)
-		v_xNext := c_xmarg
-		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
-		GuiControl, Move, % IdSearchT4, % "x" v_xNext "y" v_yNext ;information about shortcuts
-		
-		GuiControlGet, v_OutVarTemp, Pos, % IdSearchB1
-		v_ButtonW := v_OutVarTempW + 2 * c_ymarg
-		v_xNext := HS3MinWidth + c_xmarg - v_ButtonW
-		v_yNext -= c_ymarg
-		GuiControl, Move, % IdSearchB1, % "x" v_xNext "y" v_yNext "w" v_ButtonW
-		
-		return
+	
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdSearchT1, % "x" v_xNext "y" v_yNext ;Phrase to search
+	v_yNext += HofText
+	GuiControlGet, v_OutVarTemp, Pos, % IdSearchE1
+	v_wNext := v_OutVarTempW * 2
+	GuiControl, Move, % IdSearchE1, % "x" v_xNext "y" v_yNext "w" v_wNext
+	
+	GuiControlGet, v_OutVarTemp, Pos, % IdSearchE1
+	v_xNext := c_xmarg + v_OutVarTempW + 2 * c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdSearchT2, % "x" v_xNext "y" v_yNext	;Search by
+	v_yNext += HofText
+	GuiControl, Move, % IdSearchR1, % "x" v_xNext "y" v_yNext
+	
+	GuiControlGet, v_OutVarTemp, Pos, % IdSearchR1
+	v_xNext += v_OutVarTempW + c_xmarg
+	GuiControl, Move, % IdSearchR2, % "x" v_xNext "y" v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdSearchR2
+	v_xNext += v_OutVarTempW + c_xmarg
+	GuiControl, Move, % IdSearchR3, % "x" v_xNext "y" v_yNext
+	
+	HofRadio := v_OutVarTempH
+	v_OutVarTemp := Max(HofRadio, HofEdit)
+	v_xNext := c_xmarg
+	v_yNext += v_OutVarTemp + c_ymarg
+	v_wNext := HS3MinWidth
+	v_hNext := HS3MinHeight - (c_ymarg + HofText + v_OutVarTemp + c_ymarg + HofText * 2)
+	GuiControl, Move, % IdSearchLV1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
+	
+	GuiControlGet, v_OutVarTemp, Pos, % IdSearchLV1
+	LV_ModifyCol(1, Round(0.2 * v_OutVarTempW))
+	LV_ModifyCol(2, Round(0.1 * v_OutVarTempW))
+	LV_ModifyCol(3, Round(0.1 * v_OutVarTempW))	
+	LV_ModifyCol(4, Round(0.1 * v_OutVarTempW))
+	LV_ModifyCol(5, Round(0.1 * v_OutVarTempW))
+	LV_ModifyCol(6, Round(0.27 * v_OutVarTempW))
+	LV_ModifyCol(7, Round(0.1 * v_OutVarTempW) - 3)
+	v_xNext := c_xmarg
+	v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
+	GuiControl, Move, % IdSearchT4, % "x" v_xNext "y" v_yNext ;information about shortcuts
+	
+	GuiControlGet, v_OutVarTemp, Pos, % IdSearchB1
+	v_ButtonW := v_OutVarTempW + 2 * c_ymarg
+	v_xNext := HS3MinWidth + c_xmarg - v_ButtonW
+	v_yNext -= c_ymarg
+	GuiControl, Move, % IdSearchB1, % "x" v_xNext "y" v_yNext "w" v_ButtonW
+	
+	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS3SearchGuiSize()
@@ -3263,7 +3263,115 @@ F_GuiMain_LVcolumnScale()
 	LV_ModifyCol(6, Round(0.2 * (ListViewWidth - 6)))
 	return
 }
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiMain_Resize2()
+{
+	global ;assume-global mode
+	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
+		,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
 
+	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
+	v_hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + c_HofSandbox + c_ymarg)
+	GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext . "h" . v_hNext
+	v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton
+	v_yNext := A_GuiHeight - (c_ymarg + HofText + c_HofSandbox)
+	GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
+	GuiControlGet, v_OutVarTemp1, Pos, % IdText10
+	v_xNext := v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg
+	GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
+	v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
+	v_yNext += HofText
+	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
+	GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
+	v_hNext := A_GuiHeight - 2 * c_ymarg 
+	GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
+	F_GuiMain_LVcolumnScale()
+	OutputDebug, % "Two:" 
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiMain_Resize4()
+{
+	global ;assume-global mode
+	local v_xNext := 0
+	
+	v_hNext := A_GuiHeight - (2 * c_ymarg)
+	GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
+	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
+	GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext
+	v_hNext := A_GuiHeight - (2 * c_ymarg + HofText)
+	GuiControl, MoveDraw, % IdListView1, % "h" . v_hNext  ;increase
+	F_GuiMain_LVcolumnScale()
+	OutputDebug, % "Four:" 
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiMain_Resize1()
+{
+	global ;assume-global mode
+	local	v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
+			,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
+	
+	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
+	v_hNext := A_GuiHeight - (2 * c_ymarg + HofText)
+	GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext . "h" . v_hNext  ;increase
+	v_xNext := c_xmarg
+	v_yNext := LeftColumnH + c_ymarg
+	GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
+	GuiControlGet, v_OutVarTemp1, Pos, % IdText10
+	v_xNext := v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg
+	v_yNext := LeftColumnH + c_ymarg
+	GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext := LeftColumnH + c_ymarg + HofText 
+	v_wNext := LeftColumnW - 2 * c_xmarg
+	GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
+	v_hNext := A_GuiHeight - (2 * c_ymarg)
+	GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
+	F_GuiMain_LVcolumnScale()
+	OutputDebug, % "One:" . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved 
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiMain_Resize3()
+{
+	global ;assume-global mode
+	local	v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
+			,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
+	
+	v_hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + c_HofSandbox + c_ymarg)
+	GuiControl, MoveDraw, % IdListView1, % "h" . v_hNext ;decrease
+	v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton
+	v_yNext := A_GuiHeight - (c_ymarg + HofText + c_HofSandbox)
+	GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
+	GuiControlGet, v_OutVarTemp1, Pos, % IdText10
+	v_xNext := v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg
+	GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
+	v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
+	v_yNext += HofText
+	v_wNext := v_OutVarTemp2W
+	GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
+	v_hNext := A_GuiHeight - 2 * c_ymarg 
+	GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
+	F_GuiMain_LVcolumnScale()
+	OutputDebug, % "Three:" . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved 
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiMain_Resize5()
+{
+	global ;assume-global mode
+	local	v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
+	
+	v_hNext := A_GuiHeight - (HofText + 2 * c_ymarg)
+	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
+	GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext . "h" . v_hNext
+	v_hNext := A_GuiHeight - (2 * c_ymarg)
+	GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext
+	F_GuiMain_LVcolumnScale()
+	OutputDebug, % "Five"
+	return
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 {	;This function toggles flag ini_IsSandboxMoved
@@ -3271,6 +3379,8 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	local v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 		,ListViewWidth := 0
 		,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
+	static FlagMaximized := false
+	
 	
 	if (A_EventInfo = 1) ; The window has been minimized.
 	{
@@ -3279,7 +3389,23 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	}
 	if (A_EventInfo = 2)	;The window has been maximized
 	{
-		MsgBox,, Tu jestem
+		FlagMaximized := true
+		if (ini_Sandbox)
+			F_GuiMain_Resize1()
+		else
+			F_GuiMain_Resize5()
+		return
+	}
+	if (!A_EventInfo) and (FlagMaximized) ;Window is restored after maximizing
+	{
+		FlagMaximized := false
+		if (ini_Sandbox) and (!ini_IsSandboxMoved)
+			F_GuiMain_Resize2()
+		if (ini_Sandbox) and (ini_IsSandboxMoved)
+			F_GuiMain_Resize4()
+		if (!ini_Sandbox)
+			F_GuiMain_Resize5()
+		return
 	}
 	
 	HS3_GuiWidth  := A_GuiWidth	;used by F_SaveGUIPos()
@@ -3287,13 +3413,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	
 	if (!ini_Sandbox)
 	{
-		v_hNext := A_GuiHeight - (HofText + 2 * c_ymarg)
-		v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
-		GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext . "h" . v_hNext
-		v_hNext := A_GuiHeight - (2 * c_ymarg)
-		GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext
-		F_GuiMain_LVcolumnScale()
-		OutputDebug, % "Not ini_Sandbox"
+		F_GuiMain_Resize5()		
 		return
 	}
 	
@@ -3303,84 +3423,24 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		if (v_OutVarTemp2H + HofText + c_ymarg >  LeftColumnH)
 		{
 			ini_IsSandboxMoved := true
-			v_hNext := A_GuiHeight - (2 * c_ymarg + HofText)
-			GuiControl, MoveDraw, % IdListView1, % "h" . v_hNext  ;increase
-			v_xNext := c_xmarg
-			v_yNext := LeftColumnH + c_ymarg
-			GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
-			GuiControlGet, v_OutVarTemp1, Pos, % IdText10
-			v_xNext := v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg
-			v_yNext := LeftColumnH + c_ymarg
-			GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
-			v_xNext := c_xmarg
-			v_yNext := LeftColumnH + c_ymarg + HofText 
-			v_wNext := LeftColumnW - 2 * c_xmarg
-			GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
-			v_hNext := A_GuiHeight - (2 * c_ymarg)
-			GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
-			F_GuiMain_LVcolumnScale()
-			OutputDebug, % "One:" . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved 
-			;MsgBox
+			F_GuiMain_Resize1()
 			return
 		}
 		else
-		{	
-			v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
-			v_hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + c_HofSandbox + c_ymarg)
-			GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext . "h" . v_hNext
-			v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton
-			v_yNext := A_GuiHeight - (c_ymarg + HofText + c_HofSandbox)
-			GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
-			GuiControlGet, v_OutVarTemp1, Pos, % IdText10
-			v_xNext := v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg
-			GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
-			v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
-			v_yNext += HofText
-			v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
-			GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
-			v_hNext := A_GuiHeight - 2 * c_ymarg 
-			GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
-			F_GuiMain_LVcolumnScale()
-			OutputDebug, % "Two:" 
-			return
-		}
+			F_GuiMain_Resize2()
+		return
 	}
 	if (ini_Sandbox) and (ini_IsSandboxMoved)
 	{
 		if (v_OutVarTemp2H <= LeftColumnH + HofEdit + 3 * c_ymarg)
 		{
 			ini_IsSandboxMoved := false
-			v_hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + c_HofSandbox + c_ymarg)
-			GuiControl, MoveDraw, % IdListView1, % "h" . v_hNext ;decrease
-			v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton
-			v_yNext := A_GuiHeight - (c_ymarg + HofText + c_HofSandbox)
-			GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
-			GuiControlGet, v_OutVarTemp1, Pos, % IdText10
-			v_xNext := v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg
-			GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
-			v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
-			v_yNext += HofText
-			v_wNext := v_OutVarTemp2W
-			GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
-			v_hNext := A_GuiHeight - 2 * c_ymarg 
-			GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
-			F_GuiMain_LVcolumnScale()
-			OutputDebug, % "Three:" . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved 
-			;MsgBox
+			F_GuiMain_Resize3()			
 			return
 		}
 		else
-		{
-			v_hNext := A_GuiHeight - (2 * c_ymarg)
-			GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
-			v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
-			GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext
-			v_hNext := A_GuiHeight - (2 * c_ymarg + HofText)
-			GuiControl, MoveDraw, % IdListView1, % "h" . v_hNext  ;increase
-			F_GuiMain_LVcolumnScale()
-			OutputDebug, % "Four:" 
-			return
-		}
+			F_GuiMain_Resize4()
+		return
 	}
 	return
 }
