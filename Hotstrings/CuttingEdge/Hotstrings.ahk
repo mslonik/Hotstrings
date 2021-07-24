@@ -904,7 +904,7 @@ F_Undo()
 	global	;assume-global mode
 	local	TriggerOpt := "", HowManyBackSpaces := 0, HowManyBackSpaces2 := 0
 			,ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey, OrigTriggerstring := ""
-	;*[One]
+
 	if (ini_UHTtEn and v_TypedTriggerstring and (ThisHotkey != PriorHotkey))
 	{	
 		TriggerOpt := SubStr(RegExReplace(v_TypedTriggerstring, ".*\K:.*"), 2)
@@ -944,6 +944,7 @@ F_Undo()
 				}
 			}
 			v_UndoHotstring := F_PrepareUndo(v_UndoHotstring)
+			v_UndoHotstring := RegExReplace(v_UndoHotstring, "{U+.*}", " ")
 			HowManyBackSpaces += StrLenUnicode(v_UndoHotstring)
 			Send, % "{BackSpace " . HowManyBackSpaces . "}"
 			Loop, Parse, OrigTriggerstring
@@ -6510,7 +6511,6 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 	local	ThisHotkey := A_ThisHotkey
 	
 	v_InputString := ""
-	;*[One]
 	v_UndoHotstring := ReplacementString
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	if (Oflag = false)
