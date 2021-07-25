@@ -1035,7 +1035,6 @@ F_EventSigOrdHotstring()
 		}
 		if (ini_OHTP = 2)
 		{
-			;*[One]
 			MouseGetPos, v_MouseX, v_MouseY
 			ToolTip, % TransA["Hotstring was triggered! [Ctrl+F12] to undo."], % v_MouseX + 20, % v_MouseY - 20, 4
 			if (ini_OHTD > 0)
@@ -2207,26 +2206,26 @@ F_AddHotstring()
 	Switch v_SelectFunction
 	{
 		Case "Clipboard (CL)": 			
-			SendFunHotstringCreate 	:= "F_HOF_CLI"
-			SendFunFileFormat 		:= "CL"
+		SendFunHotstringCreate 	:= "F_HOF_CLI"
+		SendFunFileFormat 		:= "CL"
 		Case "SendInput (SI)": 			
-			SendFunHotstringCreate 	:= "F_HOF_SI"
-			SendFunFileFormat 		:= "SI"
+		SendFunHotstringCreate 	:= "F_HOF_SI"
+		SendFunFileFormat 		:= "SI"
 		Case "Menu & Clipboard (MCL)": 	
-			SendFunHotstringCreate 	:= "F_HOF_MCLI"
-			SendFunFileFormat 		:= "MCL"
+		SendFunHotstringCreate 	:= "F_HOF_MCLI"
+		SendFunFileFormat 		:= "MCL"
 		Case "Menu & SendInput (MSI)": 
-			SendFunHotstringCreate 	:= "F_HOF_MSI"
-			SendFunFileFormat 		:= "MSI"
+		SendFunHotstringCreate 	:= "F_HOF_MSI"
+		SendFunFileFormat 		:= "MSI"
 		Case "SendRaw (SR)":
-			SendFunHotstringCreate 	:= "F_HOF_SR"
-			SendFunFileFormat 		:= "SR"
+		SendFunHotstringCreate 	:= "F_HOF_SR"
+		SendFunFileFormat 		:= "SR"
 		Case "SendPlay (SP)":
-			SendFunHotstringCreate 	:= "F_HOF_SP"
-			SendFunFileFormat 		:= "SP"
+		SendFunHotstringCreate 	:= "F_HOF_SP"
+		SendFunFileFormat 		:= "SP"
 		Case "SendEvent (SE)":
-			SendFunHotstringCreate 	:= "F_HOF_SE"
-			SendFunFileFormat 		:= "SE"
+		SendFunHotstringCreate 	:= "F_HOF_SE"
+		SendFunFileFormat 		:= "SE"
 	}
 	
 	;2. Create or modify (triggerstring, hotstring) definition according to inputs. 
@@ -2249,7 +2248,19 @@ F_AddHotstring()
 				{
 					Case 1:	
 					if (A_LoopField)
+					{
 						OldOptions := A_LoopField
+						;The following lines are necessary to correctly switch off existing hostring definitions. e.g. when existing hostring containing "*" option is just switched off (instead of "*0") and then switched on again (e.g. new added)
+						;it still remembered and recreated with old "*". Therefore it's necessary on time of deactivation ("off") to do it with the following options. This is not the case for ? and C, as written in AutoHotkey help for Hotstring.
+						if (InStr(OldOptions, "*") and !InStr(Options,"*"))
+							OldOptions := StrReplace(OldOptions, "*", "*0")
+						if (InStr(OldOptions, "B0") and !InStr(Options, "B0"))
+							OldOptions := StrReplace(OldOptions, "B0", "B")
+						if (InStr(OldOptions, "O") and !InStr(Options, "O"))
+							OldOptions := StrReplace(OldOptions, "O", "O0")
+						if (InStr(OldOptions, "Z") and !InStr(Options, "Z"))
+							OldOptions := StrReplace(OldOptions, "Z", "Z0")
+					}
 					else
 						OldOptions := ""
 					Case 2:	
@@ -2261,13 +2272,13 @@ F_AddHotstring()
 							. "`n`n" . TransA["If you answer ""Yes"" it will overwritten."]
 						IfMsgBox, No
 							return
-						
 						Try
 							Hotstring(":" . OldOptions . ":" . v_TriggerString, , "Off") ;Disable existing hotstring
 						Catch
 							MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
-								. "v_TriggerString:" . A_Space . v_TriggerString . "`n"
-								. A_Space . "OldOptions:" . A_Space . OldOptions . "`n`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 				
+								. "v_TriggerString:" . A_Tab . v_TriggerString . "`n"
+								. "OldOptions:" . A_Tab . OldOptions . "`n`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 				
+						;OutputDebug, % "v_TriggerString:" . A_Tab . v_TriggerString . "`n" . "OldOptions:" . A_Tab . OldOptions
 						LV_Modify(ExternalIndex, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)
 						ModifiedFlag := true
 						Break
@@ -6621,7 +6632,6 @@ F_HOF_MCLI(TextOptions, Oflag)
 	if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
 		MenuX -= Window2W
 	Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate
-	;*[One]
 	GuiControl, Choose, % Id_LB_HMenuCli, 1
 	Ovar := Oflag
 	v_HotstringFlag := true
