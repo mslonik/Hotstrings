@@ -1,4 +1,6 @@
-﻿*CB0?Z‖aaa‖SI‖En‖{Backspace 2}aa‖
+﻿;Order of definitions in this particular library matters. Don't change any of the definitions from GUI as it will change order of the 
+;definitions. You've been warned. 
+*CB0?Z‖aaa‖SI‖En‖{Backspace 2}aa‖
 *CB0?Z‖AAA‖SI‖En‖{Backspace 2}AA‖
 *CB0?‖aa‖SI‖En‖{Backspace 2}ą‖
 *CB0?‖AA‖SI‖En‖{Backspace 2}Ą‖
@@ -8,8 +10,8 @@
 *CB0?‖CC‖SI‖En‖{Backspace 2}Ć‖
 *CB0?Z‖eee‖SI‖En‖{Backspace 2}ee‖
 *CB0?Z‖EEE‖SI‖En‖{Backspace 2}EE‖
-*CB0?Z‖ee‖SI‖En‖{Backspace 2}ę‖
-*CB0?Z‖EE‖SI‖En‖{Backspace 2}Ę‖
+*CB0?‖ee‖SI‖En‖{Backspace 2}ę‖
+*CB0?‖EE‖SI‖En‖{Backspace 2}Ę‖
 *CB0?Z‖lll‖SI‖En‖{Backspace 2}ll‖
 *CB0?Z‖LLL‖SI‖En‖{Backspace 2}LL‖
 *CB0?‖ll‖SI‖En‖{Backspace 2}ł‖
