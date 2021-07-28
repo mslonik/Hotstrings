@@ -3361,7 +3361,8 @@ F_GuiMain_Resize3()
 	GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
 	v_yNext += HofText
-	v_wNext := v_OutVarTemp2W
+	;v_wNext := v_OutVarTemp2W	;tu jestem
+	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
 	GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 	v_hNext := A_GuiHeight - 2 * c_ymarg 
 	GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
@@ -3391,9 +3392,9 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	local v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 		,ListViewWidth := 0
 		,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
-	static FlagMaximized := false
 	
-	
+	HS3_GuiWidth  := A_GuiWidth	;used by F_SaveGUIPos()
+	HS3_GuiHeight := A_GuiHeight	;used by F_SaveGUIPos()
 	if (A_EventInfo = 1) ; The window has been minimized.
 	{
 		ini_WhichGui := "HS3"
@@ -3401,16 +3402,16 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	}
 	if (A_EventInfo = 2)	;The window has been maximized
 	{
-		FlagMaximized := true
+		ini_HS3GuiMaximized := true
 		if (ini_Sandbox)
 			F_GuiMain_Resize1()
 		else
 			F_GuiMain_Resize5()
 		return
 	}
-	if (!A_EventInfo) and (FlagMaximized) ;Window is restored after maximizing
+	if (!A_EventInfo) and (ini_HS3GuiMaximized) ;Window is restored after maximizing
 	{
-		FlagMaximized := false
+		ini_HS3GuiMaximized := false
 		if (ini_Sandbox) and (!ini_IsSandboxMoved)
 			F_GuiMain_Resize2()
 		if (ini_Sandbox) and (ini_IsSandboxMoved)
@@ -3419,9 +3420,6 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			F_GuiMain_Resize5()
 		return
 	}
-	
-	HS3_GuiWidth  := A_GuiWidth	;used by F_SaveGUIPos()
-	HS3_GuiHeight := A_GuiHeight	;used by F_SaveGUIPos()
 	
 	if (!ini_Sandbox)
 	{
@@ -4209,7 +4207,6 @@ F_ToggleSandbox()
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 F_LoadGUIPos()
 {
 	global ;assume-global mode
@@ -4239,10 +4236,9 @@ F_LoadGUIPos()
 	IniRead, ini_WhichGui,						% HADConfig, GraphicalUserInterface, WhichGui, %A_Space%
 	if !(ini_WhichGui)
 		ini_WhichGui := "HS3"
-	
+	IniRead, ini_HS3GuiMaximized,					% HADConfig, GraphicalUserInterface, GuiMaximized, 0
 	return
 }
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 F_CheckCreateConfigIni()
@@ -4303,6 +4299,7 @@ GuiSizeOfMarginY=10
 GuiFontType=Calibri
 GuiFontSize=10
 GuiReload=
+GuiMaximized=0
 [EndChars]
 Apostrophe '=1
 Backslash \=1
@@ -4371,6 +4368,7 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 		GuiControlGet, TempPos,	Pos, % IdListView1
 		IniWrite, % TempPosW,		% HADConfig, GraphicalUserInterface, ListViewPosW
 		IniWrite, % TempPosH,		% HADConfig, GraphicalUserInterface, ListViewPosH
+		IniWrite, % ini_HS3GuiMaximized, 	% HADConfig, GraphicalUserInterface, GuiMaximized
 	}
 	
 	if (A_DefaultGui = "HS4")
@@ -7488,7 +7486,10 @@ L_GUIInit:
 					v_ResizingFlag := false
 					return
 				}
-				Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+				if (ini_HS3GuiMaximized)
+					Gui, HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
+				else	
+					Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
 				if (ini_ShowIntro)
 					Gui, ShowIntro: Show, AutoSize Center
 				v_ResizingFlag := false
