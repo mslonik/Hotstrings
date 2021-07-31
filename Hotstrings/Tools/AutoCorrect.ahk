@@ -1,4 +1,9 @@
-﻿:B0:align::
+﻿	;Comment
+
+:B0:align::
+	/* Comment beginning
+	something
+	Comment end */
 :B0:antiforeign::
 :B0:arraign::
 :B0:assign::

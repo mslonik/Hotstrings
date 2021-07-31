@@ -2230,10 +2230,7 @@ F_AddHotstring()
 	
 	;2. Create or modify (triggerstring, hotstring) definition according to inputs. 
 	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
-	
-	;tu jestem 
 	GuiControl, -Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
-	
 	for key, value in a_Triggerstring
 	{
 		if (a_Triggerstring[key] = v_Triggerstring)
@@ -2244,7 +2241,6 @@ F_AddHotstring()
 				. "`n`n" . TransA["If you answer ""Yes"" it will overwritten."]
 			IfMsgBox, No
 				return
-			;*[One]
 			OldOptions := a_TriggerOptions[key]
 			if (InStr(OldOptions, "*") and !InStr(Options,"*"))
 				OldOptions := StrReplace(OldOptions, "*", "*0")
@@ -2284,67 +2280,6 @@ F_AddHotstring()
 			ModifiedFlag := true
 		}
 	}
-	/*
-		GuiControl, % "Count" . v_TotalLines . A_Space . "-Redraw", % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
-		
-		FileRead, v_TheWholeFile, % HADL . "\" . v_SelectHotstringLibrary
-		Loop, Parse, v_TheWholeFile, `n, `r
-			if (A_LoopField)
-				v_TotalLines++
-	*/
-	
-	/*
-		Loop, Parse, v_TheWholeFile, `n, `r	;Check in current library file if such definition do not exist. Future: Check if it exists in any file.
-		{
-			if (A_LoopField)
-			{
-				ExternalIndex := A_Index
-				Loop, Parse, A_LoopField, ‖, %A_Space%%A_Tab%
-				{
-					Switch A_Index
-					{
-						Case 1:	
-						if (A_LoopField)
-						{
-							OldOptions := A_LoopField
-							;The following lines are necessary to correctly switch off existing hostring definitions. e.g. when existing hostring containing "*" option is just switched off (instead of "*0") and then switched on again (e.g. new added)
-							;it still remembered and recreated with old "*". Therefore it's necessary on time of deactivation ("off") to do it with the following options. This is not the case for ? and C, as written in AutoHotkey help for Hotstring.
-							if (InStr(OldOptions, "*") and !InStr(Options,"*"))
-								OldOptions := StrReplace(OldOptions, "*", "*0")
-							if (InStr(OldOptions, "B0") and !InStr(Options, "B0"))
-								OldOptions := StrReplace(OldOptions, "B0", "B")
-							if (InStr(OldOptions, "O") and !InStr(Options, "O"))
-								OldOptions := StrReplace(OldOptions, "O", "O0")
-							if (InStr(OldOptions, "Z") and !InStr(Options, "Z"))
-								OldOptions := StrReplace(OldOptions, "Z", "Z0")
-						}
-						else
-							OldOptions := ""
-						Case 2:	
-						if (InStr(A_LoopField, v_TriggerString, true) and (StrLen(A_LoopField) = StrLen(v_Triggerstring)))
-						{
-							MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-								, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in the file"] . ":" . A_Space . v_SelectHotstringLibrary . "." . "`n`n" 
-								. TransA["Do you want to proceed?"]
-								. "`n`n" . TransA["If you answer ""Yes"" it will overwritten."]
-							IfMsgBox, No
-								return
-							Try
-								Hotstring(":" . OldOptions . ":" . v_TriggerString, , "Off") ;Disable existing hotstring
-							Catch
-								MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
-									. "v_TriggerString:" . A_Tab . v_TriggerString . "`n"
-									. "OldOptions:" . A_Tab . OldOptions . "`n`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 				
-							;OutputDebug, % "v_TriggerString:" . A_Tab . v_TriggerString . "`n" . "OldOptions:" . A_Tab . OldOptions
-							LV_Modify(ExternalIndex, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)
-							ModifiedFlag := true
-							Break
-						}
-					}
-				}
-			}
-		}	
-	*/
 	
 	if !(ModifiedFlag) 
 	{
@@ -3517,7 +3452,6 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	}
 	return
 }
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SelectLibrary()
 { 
@@ -3555,7 +3489,7 @@ F_SelectLibrary()
 			GuiControl, , % IdText13b, % v_LibHotstringCnt
 		}
 	}
-	LV_ModifyCol(1, "Sort")
+	;LV_ModifyCol(1, "Sort")	;without this line content of library is loaded in the same order as it was saved last time; keep in mind that after any change (e.g. change of exiting definition) the whole file is sorted and saved again
 	GuiControlGet, v_OutVarTemp, Pos, % IdListView1 ;Check position of ListView1 again after resizing
 	LV_ModifyCol(1, Round(0.1 * v_OutVarTempW))
 	LV_ModifyCol(2, Round(0.1 * v_OutVarTempW))
@@ -3567,7 +3501,6 @@ F_SelectLibrary()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
 F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 {
 	global ;assume-global mode
@@ -5030,7 +4963,7 @@ F_LoadFile(nameoffile)
 		,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY 	:= 0, 		v_OutVarTempW 	:= 0, 		v_OutVarTempH 	:= 0
 							,v_xNext 	    := 0, 	v_yNext 		:= 0, 		v_wNext 		:= 0, 		v_hNext 		:= 0
 		,v_Progress := 0
-		,IdLoadFile_T1 := 0, IdLoadFile_P1 := 0, IdLoadFile_T2 := 0
+		,IdLoadFile_T1 := 0, IdLoadFile_P1 := 0, IdLoadFile_T2 := 0, BegCom := false
 	
 	for key, value in ini_ShowTipsLib
 		if ((key == nameoffile) and (value))
@@ -5082,39 +5015,49 @@ F_LoadFile(nameoffile)
 	name := SubStr(nameoffile, 1, -4) ;filename without extension
 	Loop, Parse, v_TheWholeFile, `n, `r%A_Space%%A_Tab%
 	{
-		if (A_LoopField)
+		if (SubStr(A_LoopField, 1, 2) = "/*")	;ignore comments
 		{
-			if (SubStr(A_LoopField, 1, 1) != ";") ;don't read lines starting with ; (comments)
+			BegCom := true
+			Continue
+		}
+		if (BegCom) and (SubStr(A_LoopField, -1) = "*/") ;ignore comments
+		{
+			BegCom := false
+			Continue
+		}
+		if (BegCom)
+			Continue
+		if (SubStr(A_LoopField, 1, 1) = ";")	;ignore comments
+			Continue
+		if (!A_LoopField)	;ignore empty lines
+			Continue
+		
+		F_CreateHotstring(A_LoopField, nameoffile)
+		Loop, Parse, A_LoopField, ‖
+		{
+			Switch A_Index
 			{
-				F_CreateHotstring(A_LoopField, nameoffile)
-				Loop, Parse, A_LoopField, ‖
-				{
-					Switch A_Index
-					{
-						Case 1:	a_TriggerOptions.Push(A_LoopField)
-						Case 2:	
-						a_Triggerstring.Push(A_LoopField)
-						if (FlagLoadTriggerTips)
-							a_Triggers.Push(A_LoopField) ; a_Triggers is used in main loop of application for generating tips
-						Case 3:	a_OutputFunction.Push(A_LoopField)
-						Case 4:	a_EnableDisable.Push(A_LoopField)
-						Case 5:	a_Hotstring.Push(A_LoopField)
-						Case 6:	a_Comment.Push(A_LoopField)
-					}
-				}
-				a_Library.Push(name) ; function Search
-				++v_TotalHotstringCnt
-				if (A_DefaultGui = "LoadFile")
-				{
-					v_Progress := Round((A_Index / v_TotalLines) * 100)
-					GuiControl,, % IdLoadFile_T2, % TransA["Loaded"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
-						. A_Space . "(" . v_Progress . A_Space . "%" . ")"
-					GuiControl,, % IdLoadFile_P1, % v_Progress
-				}
+				Case 1:	a_TriggerOptions.Push(A_LoopField)
+				Case 2:	
+				a_Triggerstring.Push(A_LoopField)
+				if (FlagLoadTriggerTips)
+					a_Triggers.Push(A_LoopField) ; a_Triggers is used in main loop of application for generating tips
+				Case 3:	a_OutputFunction.Push(A_LoopField)
+				Case 4:	a_EnableDisable.Push(A_LoopField)
+				Case 5:	a_Hotstring.Push(A_LoopField)
+				Case 6:	a_Comment.Push(A_LoopField)
 			}
 		}
-		else
-			Break
+		a_Library.Push(name) ; function Search
+		++v_TotalHotstringCnt
+		if (A_DefaultGui = "LoadFile")
+		{
+			v_Progress := Round((A_Index / v_TotalLines) * 100)
+			GuiControl,, % IdLoadFile_T2, % TransA["Loaded"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
+						. A_Space . "(" . v_Progress . A_Space . "%" . ")"
+			GuiControl,, % IdLoadFile_P1, % v_Progress
+		}
+		
 	}	
 	GuiControl, , % IdText12,  % v_TotalHotstringCnt ; Text: Puts new contents into the control.
 	GuiControl, , % IdText12b, % v_TotalHotstringCnt ; Text: Puts new contents into the control.
@@ -6358,28 +6301,30 @@ F_LoadLibrariesToTables()
 			FileReadLine, varSearch, %A_LoopFileFullPath%, %A_Index%
 			if (ErrorLevel)
 				break
+			name 	:= SubStr(A_LoopFileName, 1, -4)
 			tabSearch := StrSplit(varSearch, "‖")
-			if (InStr(tabSearch[1], "*0"))	;future: check for what reason are the following lines
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "*0")
-			}
-			if (InStr(tabSearch[1], "O0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "O0")
-			}
-			if (InStr(tabSearch[1], "C0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "C0")
-			}
-			if (InStr(tabSearch[1], "?0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "?0")
-			}
-			if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
-			{
-				tabSearch[1] := StrReplace(tabSearch[1], "B")
-			}
-			name := SubStr(A_LoopFileName, 1, -4)
+			/*
+				if (InStr(tabSearch[1], "*0"))	;in case any library file (*.csv) contain option in switched off state, remove it; those lines are kept for backward compatibility and currently shouldn't be necessary.
+				{
+					tabSearch[1] := StrReplace(tabSearch[1], "*0")
+				}
+				if (InStr(tabSearch[1], "O0"))
+				{
+					tabSearch[1] := StrReplace(tabSearch[1], "O0")
+				}
+				if (InStr(tabSearch[1], "C0"))
+				{
+					tabSearch[1] := StrReplace(tabSearch[1], "C0")
+				}
+				if (InStr(tabSearch[1], "?0"))
+				{
+					tabSearch[1] := StrReplace(tabSearch[1], "?0")
+				}
+				if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
+				{
+					tabSearch[1] := StrReplace(tabSearch[1], "B")
+				}
+			*/
 			; LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4],tabSearch[5], tabSearch[6])
 			a_Library.Push(name)
 			a_TriggerOptions.Push(tabSearch[1])
@@ -6994,9 +6939,7 @@ F_LoadEndChars() ;Load from Config.ini
 			. "EndChars" . ":" . A_Space . HotstringEndChars
 	return	
 }
-	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
 	/*
 		F_SortArrayAlphabetically(a_array)
 		{
@@ -7051,7 +6994,6 @@ F_LoadEndChars() ;Load from Config.ini
 		}
 */
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 F_SortArrayByLength(a_array)
 {
 	local a_TempArray, v_Length, v_ActLen
@@ -7076,7 +7018,6 @@ F_SortArrayByLength(a_array)
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 F_ImportLibrary() 
 ;Future: omit commented lines of a imported script
 {
@@ -7091,7 +7032,7 @@ F_ImportLibrary()
 	,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
 	,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
 	,NewStr := "", v_LibraryName := ""
-	,key := "", value := 0, f_ExistedLib := false
+	,key := "", value := 0, f_ExistedLib := false, BegCom := false
 	
 	FileSelectFile, v_LibraryName, 3, %A_ScriptDir%, % TransA["Choose (.ahk) file containing (triggerstring, hotstring) definitions for import"], AutoHotkey (*.ahk)
 	if (!v_LibraryName)
@@ -7153,9 +7094,7 @@ F_ImportLibrary()
 	Gui, Import: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ImportGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ImportGuiWinH) / 2 . A_Space . "AutoSize"
 	
 	FileRead, v_TheWholeFile, % v_LibraryName
-	Loop, Parse, v_TheWholeFile, `n, `r
-		if (A_LoopField)
-			v_TotalLines++
+	v_TotalLines := F_HowManyLines(v_TheWholeFile)
 	
 	if (v_TotalLines = 0)
 	{
@@ -7166,8 +7105,26 @@ F_ImportLibrary()
 		Gui, HS3: Default
 	GuiControl, % "Count" . v_TotalLines . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	LV_Delete()
-	Loop, Parse, v_TheWholeFile, `n, `r
+	
+	BegCom := false
+	Loop, Parse, v_TheWholeFile, `n, `r%A_Space%%A_Tab%
 	{
+		if (!A_LoopField)							;ignore empty lines
+			Continue
+		if (SubStr(A_LoopField, 1, 2) = "/*") ;don't read lines containing comments
+		{
+			BegCom := true
+			Continue
+		}
+		if (BegCom) and (SubStr(A_LoopField, -1) = "*/") ;ignore lines containing comments
+		{
+			BegCom := false
+			Continue
+		}
+		if (BegCom)								;ignore lines containing comments
+			Continue
+		if (SubStr(A_LoopField, 1, 1) = ";")			;ignore lines containing comments
+			Continue
 		Loop, Parse, A_LoopField, :, `r
 		{
 			Switch A_Index
@@ -7227,9 +7184,34 @@ F_ImportLibrary()
 	}
 	return
 }
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HowManyLines(v_TheWholeFile) ;how many not empty lines, not commented out, contains a file
+{
+	local BegCom := false
 	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
+	Loop, Parse, v_TheWholeFile, `n, `r%A_Space%%A_Tab%
+	{
+		if (!A_LoopField)	;ignore empty lines
+			Continue
+		if (SubStr(A_LoopField, 1, 2) = "/*")	;ignore comments
+		{
+			BegCom := true
+			Continue
+		}
+		if (BegCom) and (SubStr(A_LoopField, -1) = "*/") ;ignore comments
+		{
+			BegCom := false
+			Continue
+		}
+		if (BegCom)
+			Continue
+		if (SubStr(A_LoopField, 1, 1) = ";")	;ignore comments
+			Continue
+		v_TotalLines++
+	}
+	return v_TotalLines
+}	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ExportLibraryStatic()
 {
 	global	;assume-global mode
@@ -7248,7 +7230,7 @@ SendMode Input  				; Recommended for new scripts due to its superior speed and 
 SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
 FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN
 )"
-
+	
 	FileSelectFile, v_LibraryName, 3, % HADL . "\", % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
 	if (!v_LibraryName)
 		return
@@ -7266,7 +7248,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 		IfMsgBox, Yes
 			FileDelete, % v_OutputFile
 	}	
-		
+	
 	Gui, Export: New, 		+Border -Resize -MaximizeBox -MinimizeBox +HwndExportGuiHwnd +Owner +OwnDialogs, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Export to .ahk with static definitions of hotstrings"] 
 	Gui, Export: Margin,	% c_xmarg, % c_ymarg
 	Gui,	Export: Color,		% c_WindowColor, % c_ControlColor
@@ -7276,119 +7258,130 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	Gui, Export: Add, Progress, 	x0 y0 HwndIdExport_P1 cBlue, 0
 	Gui, Export: Add, Text, 		x0 y0 HwndIdExport_T2, % TransA["Exported"] . A_Space . v_TotalLines . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
 		. A_Space . "(" . v_Progress . A_Space . "%" . ")"
-		
-		GuiControlGet, v_OutVarTemp, Pos, % IdExport_T1
-		v_xNext := c_xmarg
-		v_yNext := c_ymarg
-		GuiControl, Move, % IdExport_T1, % "x" v_xNext . A_Space . "y" v_yNext
+	
+	GuiControlGet, v_OutVarTemp, Pos, % IdExport_T1
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdExport_T1, % "x" v_xNext . A_Space . "y" v_yNext
 	;Gui, Export: Show, Center AutoSize
-		v_yNext += HofText + c_ymarg
-		GuiControl, Move, % IdExport_T2, % "x" v_xNext . A_Space . "y" v_yNext
+	v_yNext += HofText + c_ymarg
+	GuiControl, Move, % IdExport_T2, % "x" v_xNext . A_Space . "y" v_yNext
 	;Gui, Export: Show, Center AutoSize
-		GuiControlGet, v_OutVarTemp, Pos, % IdExport_T2
-		v_wNext := v_OutVarTempW
-		v_hNext := HofText
-		GuiControl, Move, % IdExport_P1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space . "w" v_wNext . A_Space . "h" . v_hNext
-		v_yNext += HofText + c_ymarg
-		GuiControl, Move, % IdExport_T2, % "x" v_xNext . A_Space . "y" v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdExport_T2
+	v_wNext := v_OutVarTempW
+	v_hNext := HofText
+	GuiControl, Move, % IdExport_P1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space . "w" v_wNext . A_Space . "h" . v_hNext
+	v_yNext += HofText + c_ymarg
+	GuiControl, Move, % IdExport_T2, % "x" v_xNext . A_Space . "y" v_yNext
 	;Gui, Export: Show, Center AutoSize
-		v_Progress   := 0
-		v_TotalLines := 0
-		GuiControl,, % IdExport_T2, % TransA["Exported"] . A_Space . v_TotalLines . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"] . A_Space . "(" . v_Progress . A_Space . "%" . ")"
+	v_Progress   := 0
+	v_TotalLines := 0
+	GuiControl,, % IdExport_T2, % TransA["Exported"] . A_Space . v_TotalLines . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"] . A_Space . "(" . v_Progress . A_Space . "%" . ")"
 	;Gui, Export: Show, Center AutoSize	
-		Gui, Export: Show, Hide
-		
-		F_WhichGui()
-		Switch A_DefaultGui
+	Gui, Export: Show, Hide
+	
+	F_WhichGui()
+	Switch A_DefaultGui
+	{
+		Case "HS3": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd
+		Case "HS4": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS4GuiHwnd 
+	}
+	DetectHiddenWindows, On
+	WinGetPos, , , ExportGuiWinW, ExportGuiWinH, % "ahk_id" . ExportGuiHwnd
+	DetectHiddenWindows, Off
+	Gui, Export: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ExportGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ExportGuiWinH) / 2 . A_Space . "AutoSize"
+	Gui, % A_DefaultGui . ":" . A_Space . "+Disabled"
+	
+	FileRead, v_TheWholeFile, % v_LibraryName
+	v_TotalLines := F_HowManyLines(v_TheWholeFile)
+	
+	if (v_TotalLines = 0)
+	{
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The selected file is empty. Process of export will be interrupted."]
+		return
+	}
+	line .= v_Header . "`n`n"
+	Loop, Parse, v_TheWholeFile, `n, `r%A_Space%%A_Tab%
+	{
+		if (SubStr(A_LoopField, 1, 2) = "/*")	;ignore comments
 		{
-			Case "HS3": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd
-			Case "HS4": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS4GuiHwnd 
+			BegCom := true
+			Continue
 		}
-		DetectHiddenWindows, On
-		WinGetPos, , , ExportGuiWinW, ExportGuiWinH, % "ahk_id" . ExportGuiHwnd
-		DetectHiddenWindows, Off
-		Gui, Export: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ExportGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ExportGuiWinH) / 2 . A_Space . "AutoSize"
-		Gui, % A_DefaultGui . ":" . A_Space . "+Disabled"
-		
-		FileRead, v_TheWholeFile, % v_LibraryName
-		Loop, Parse, v_TheWholeFile, `n, `r
-			if (A_LoopField)
-				v_TotalLines++
-		
-		if (v_TotalLines = 0)
+		if (BegCom) and (SubStr(A_LoopField, -1) = "*/") ;ignore comments
 		{
-			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The selected file is empty. Process of export will be interrupted."]
-			return
+			BegCom := false
+			Continue
 		}
-		line .= v_Header . "`n`n"
-		Loop, Parse, v_TheWholeFile, `n, `r
+		if (BegCom)
+			Continue
+		if (SubStr(A_LoopField, 1, 1) = ";")	;ignore comments
+			Continue
+		if (!A_LoopField)	;ignore empty lines
+			Continue
+		
+		Loop, Parse, A_LoopField, ‖, %A_Space%%A_Tab%
 		{
-			if (A_LoopField)
+			Switch A_Index
 			{
-				Loop, Parse, A_LoopField, ‖, %A_Space%%A_Tab%
+				Case 1: v_Options 	:= A_LoopField
+				Case 2: v_Trigger 	:= A_LoopField
+				Case 3: v_Function 	:= A_LoopField
+				Case 4: v_EnDis 	:= A_LoopField
+				Case 5: v_Hotstring := A_LoopField
+				Case 6: v_Comment 	:= A_LoopField
+			}
+		}
+		if (v_EnDis = "Dis")
+		{
+			line .= ";" . A_Space
+		}
+		if (InStr(v_Function, "M"))
+		{
+			a_MenuHotstring := StrSplit(v_Hotstring,"¦")
+			Loop, % a_MenuHotstring.MaxIndex()
+			{
+				if (A_Index = 1)
 				{
-					Switch A_Index
-					{
-						Case 1: v_Options 	:= A_LoopField
-						Case 2: v_Trigger 	:= A_LoopField
-						Case 3: v_Function 	:= A_LoopField
-						Case 4: v_EnDis 	:= A_LoopField
-						Case 5: v_Hotstring := A_LoopField
-						Case 6: v_Comment 	:= A_LoopField
-					}
-				}
-				if (v_EnDis = "Dis")
-				{
-					line .= ";" . A_Space
-				}
-				if (InStr(v_Function, "M"))
-				{
-					a_MenuHotstring := StrSplit(v_Hotstring,"¦")
-					Loop, % a_MenuHotstring.MaxIndex()
-					{
-						if (A_Index = 1)
-						{
-							line .= ":" v_Options . ":" . v_Trigger . "::" . a_MenuHotstring[A_Index] . A_Space
-							if (v_Comment)
-								line .= ";" . v_Comment . A_Space . ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
-							else
-								line .= ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
-							line .= "`n"
-						}
-						else
-						{
-							line .=  ";" . A_Space . ":" v_Options . ":" . v_Trigger . "::" . a_MenuHotstring[A_Index] . A_Space 
-							if (v_Comment)
-								line .= ";" . v_Comment . A_Space . ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
-							else
-								line .= ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
-							line .= "`n"
-						}
-					}
+					line .= ":" v_Options . ":" . v_Trigger . "::" . a_MenuHotstring[A_Index] . A_Space
+					if (v_Comment)
+						line .= ";" . v_Comment . A_Space . ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
+					else
+						line .= ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
+					line .= "`n"
 				}
 				else
 				{
-					line .= ":" . v_Options . ":" . v_Trigger . "::" . v_Hotstring . A_Space
+					line .=  ";" . A_Space . ":" v_Options . ":" . v_Trigger . "::" . a_MenuHotstring[A_Index] . A_Space 
 					if (v_Comment)
-						line .= ";" . v_Comment
+						line .= ";" . v_Comment . A_Space . ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
+					else
+						line .= ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
 					line .= "`n"
 				}
 			}
-			
-			v_Progress := Round((A_Index / v_TotalLines) * 100)
-			GuiControl,, % IdExport_T2, % TransA["Exported"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
-			. A_Space . "(" . v_Progress . A_Space . "%" . ")"
-			GuiControl,, % IdExport_P1, % v_Progress
 		}
-		FileAppend, % line, % v_OutputFile, UTF-8
-		Gui, % A_DefaultGui . ":" . A_Space . "-Disabled"
-		Gui, Export: Destroy
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been exported"] . ":" . "`n`n" . v_OutputFile
-		return
+		else
+		{
+			line .= ":" . v_Options . ":" . v_Trigger . "::" . v_Hotstring . A_Space
+			if (v_Comment)
+				line .= ";" . v_Comment
+			line .= "`n"
+		}
+		
+		v_Progress := Round((A_Index / v_TotalLines) * 100)
+		GuiControl,, % IdExport_T2, % TransA["Exported"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
+			. A_Space . "(" . v_Progress . A_Space . "%" . ")"
+		GuiControl,, % IdExport_P1, % v_Progress
+	}
+	FileAppend, % line, % v_OutputFile, UTF-8
+	Gui, % A_DefaultGui . ":" . A_Space . "-Disabled"
+	Gui, Export: Destroy
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been exported"] . ":" . "`n`n" . v_OutputFile
+	return
 }
 
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ExportLibraryDynamic()
 {
 	global	;assume-global mode
@@ -7469,9 +7462,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	Gui, % A_DefaultGui . ":" . A_Space . "+Disabled"
 	
 	FileRead, v_TheWholeFile, % v_LibraryName
-	Loop, Parse, v_TheWholeFile, `n, `r
-		if (A_LoopField)
-			v_TotalLines++
+	v_TotalLines := F_HowManyLines(v_TheWholeFile)
 	
 	if (v_TotalLines = 0)
 	{
@@ -7479,59 +7470,73 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 		return
 	}
 	line .= v_Header . "`n`n"
-	Loop, Parse, v_TheWholeFile, `n, `r
+	Loop, Parse, v_TheWholeFile, `n, `r%A_Space%%A_Tab%
 	{
-		if (A_LoopField)
+		if (!A_LoopField)	;ignore empty lines
+			Continue
+		if (SubStr(A_LoopField, 1, 2) = "/*")	;ignore comments
 		{
-			Loop, Parse, A_LoopField, ‖, %A_Space%%A_Tab%
+			BegCom := true
+			Continue
+		}
+		if (BegCom) and (SubStr(A_LoopField, -1) = "*/") ;ignore comments
+		{
+			BegCom := false
+			Continue
+		}
+		if (BegCom)
+			Continue
+		if (SubStr(A_LoopField, 1, 1) = ";")	;ignore comments
+			Continue
+		
+		Loop, Parse, A_LoopField, ‖, %A_Space%%A_Tab%
+		{
+			Switch A_Index
 			{
-				Switch A_Index
-				{
-					Case 1: v_Options 	:= A_LoopField
-					Case 2: v_Trigger 	:= A_LoopField
-					Case 3: v_Function 	:= A_LoopField
-					Case 4: v_EnDis 	:= A_LoopField
-					Case 5: v_Hotstring := A_LoopField
-					Case 6: v_Comment 	:= A_LoopField
-				}
+				Case 1: v_Options 	:= A_LoopField
+				Case 2: v_Trigger 	:= A_LoopField
+				Case 3: v_Function 	:= A_LoopField
+				Case 4: v_EnDis 	:= A_LoopField
+				Case 5: v_Hotstring := A_LoopField
+				Case 6: v_Comment 	:= A_LoopField
 			}
-			if (v_EnDis = "Dis")
+		}
+		if (v_EnDis = "Dis")
+		{
+			line .= ";" . A_Space
+		}
+		if (InStr(v_Function, "M"))
+		{
+			a_MenuHotstring := StrSplit(v_Hotstring,"¦")
+			Loop, % a_MenuHotstring.MaxIndex()
 			{
-				line .= ";" . A_Space
-			}
-			if (InStr(v_Function, "M"))
-			{
-				a_MenuHotstring := StrSplit(v_Hotstring,"¦")
-				Loop, % a_MenuHotstring.MaxIndex()
+				if (A_Index = 1)
 				{
-					if (A_Index = 1)
-					{
 						;line .= ":" v_Options . ":" . v_Trigger . "::" . a_MenuHotstring[A_Index] . A_Space
-						line .= "Hotstring(" . """" . ":" . v_Options . ":" . v_Trigger . """" . "," . A_Space . """" . a_MenuHotstring[A_Index] . """" . "," . A_Space . v_EnDis . ")"
-						if (v_Comment)
-							line .= ";" . v_Comment . A_Space . ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
-						else
-							line .= ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
-						line .= "`n"
-					}
+					line .= "Hotstring(" . """" . ":" . v_Options . ":" . v_Trigger . """" . "," . A_Space . """" . a_MenuHotstring[A_Index] . """" . "," . A_Space . v_EnDis . ")"
+					if (v_Comment)
+						line .= ";" . v_Comment . A_Space . ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
 					else
-					{
-						line .=  ";" . A_Space . "Hotstring(" . """" . ":" . v_Options . ":" . v_Trigger . """" . "," . A_Space . """" . a_MenuHotstring[A_Index] . """" . "," . A_Space . v_EnDis . ")"
-						if (v_Comment)
-							line .= ";" . v_Comment . A_Space . ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
-						else
-							line .= ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
-						line .= "`n"
-					}
+						line .= ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
+					line .= "`n"
+				}
+				else
+				{
+					line .=  ";" . A_Space . "Hotstring(" . """" . ":" . v_Options . ":" . v_Trigger . """" . "," . A_Space . """" . a_MenuHotstring[A_Index] . """" . "," . A_Space . v_EnDis . ")"
+					if (v_Comment)
+						line .= ";" . v_Comment . A_Space . ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
+					else
+						line .= ";" . TransA["Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details."]
+					line .= "`n"
 				}
 			}
-			else
-			{
-				line .= "Hotstring(" . """" . ":" . v_Options . ":" . v_Trigger . """" . "," . A_Space . """" . v_Hotstring . """" . "," . A_Space . v_EnDis . ")"
-				if (v_Comment)
-					line .= ";" . v_Comment
-				line .= "`n"
-			}
+		}
+		else
+		{
+			line .= "Hotstring(" . """" . ":" . v_Options . ":" . v_Trigger . """" . "," . A_Space . """" . v_Hotstring . """" . "," . A_Space . v_EnDis . ")"
+			if (v_Comment)
+				line .= ";" . v_Comment
+			line .= "`n"
 		}
 		
 		v_Progress := Round((A_Index / v_TotalLines) * 100)
