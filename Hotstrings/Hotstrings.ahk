@@ -4475,16 +4475,49 @@ F_ToggleTipsLibrary()
 F_EnDisLib() 
 {
 	global ;assume-global mode
-	local v_LibraryFlag := 0 ;, v_WhichLibraries := "", v_LibTemp := "", v_LibFlagTemp := ""
+	local v_LibraryFlag := 0, name := "", key := 0, value := "", FoundAmongKeys := false
 	
 	Menu, EnDisLib, ToggleCheck, %A_ThisMenuItem%
 	IniRead, v_LibraryFlag,	% HADConfig, LoadLibraries, %A_ThisMenuitem%
 	v_LibraryFlag := !(v_LibraryFlag)
 	Iniwrite, %v_LibraryFlag%,	% HADConfig, LoadLibraries, %A_ThisMenuItem%
+	name := SubStr(A_ThisMenuItem, 1, -4)	;removing of file extension
 	
 	if (v_LibraryFlag) ;tu jestem
 	{
-		F_LoadFile(A_ThisMenuItem)
+		for key, value in a_Library
+		{
+			if (value = name)
+			{
+				FoundAmongKeys := true
+				Options := a_TriggerOptions[key]
+				if (InStr(Options, "*0"))
+					Options := StrReplace(Options, "*0", "*")
+				if (InStr(Options, "B"))
+					Options := StrReplace(Options, "B", "B0")
+				if (InStr(Options, "O0"))
+					Options := StrReplace(Options, "O0", "O")
+				if (InStr(Options, "Z0"))
+					Options := StrReplace(Options, "Z0", "Z")
+				TriggerString := a_Triggerstring[key]
+				TriggerString := StrReplace(TriggerString, "``n", "`n") ;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
+				TriggerString := StrReplace(TriggerString, "``r", "`r") ;future: add more sequences like {Esc} etc.
+				TriggerString := StrReplace(TriggerString, "``t", "`t")
+				TriggerString := StrReplace(TriggerString, "``", "`")
+				TriggerString := StrReplace(TriggerString, "``b", "`b")
+				if (a_EnableDisable[key] = "En")
+				{
+					Try
+						Hotstring(":" . Options . ":" . TriggerString, , "On") ;Disable existing hotstring
+					Catch
+						MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with disabling of existing hotstring"] 
+					. ":" . "`n`n" . "TriggerString:" . A_Space . TriggerString . "`n" . A_Space . "Options:" . A_Space . Options . "`n`n" . TransA["Library name:"] 
+					. A_Space . nameoffile 				
+				}
+			}
+		}
+		if (!FoundAmongKeys)
+			F_LoadFile(A_ThisMenuItem)
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The (triggerstring, hotstring) definitions have been uploaded from library file"] . ":"
 		. "`n`n" . A_ThisMenuItem
 	}
@@ -4494,7 +4527,6 @@ F_EnDisLib()
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory"]
 		. ":" . "`n`n" . A_ThisMenuItem
 	}
-	
 	F_ValidateIniLibSections()
 	F_UpdateSelHotLibDDL()
 	F_Clear()
@@ -4538,34 +4570,6 @@ F_UnloadFile(nameoffile)
 			}
 		}
 	}
-	/*
-		FileRead, v_TheWholeFile, % HADL . "\" . nameoffile
-		Loop, Parse, v_TheWholeFile, `n, `r%A_Space%%A_Tab%
-		{
-			if (A_LoopField)
-			{
-				if (SubStr(A_LoopField, 1, 1) != ";") ;don't read lines starting with ; (comments)
-				{
-					Loop, Parse, A_LoopField, ‖
-					{
-						if (A_Index = 1)
-							Options := A_LoopField
-						if (A_Index = 2)
-							TriggerString := A_LoopField
-						if (A_Index = 3)
-							Break
-					}
-					Try
-						Hotstring(":" . Options . ":" . TriggerString, , "Off") ;Disable existing hotstring
-					Catch
-						MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with disabling of existing hotstring"] 
-					. ":" . "`n`n" . "TriggerString:" . A_Space . TriggerString . "`n" . A_Space . "Options:" . A_Space . Options . "`n`n" . TransA["Library name:"] 
-					. A_Space . nameoffile 				
-					Options := ""		
-				}
-			}
-		}
-	*/
 	return
 }
 	
