@@ -2106,7 +2106,6 @@ F_CreateMenu_SizeOfMargin()
 		Menu, SizeOfMY,	Check,	% c_ymarg
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 F_AddHotstring()
 ;1. Read all inputs. 
 ;2. Create Hotstring definition according to inputs. 
@@ -2124,6 +2123,7 @@ F_AddHotstring()
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
 			,v_TheWholeFile := "", v_TotalLines := 0
 			,ExternalIndex := 0
+			,name := "", key := 0, value := "", WhichRow := 0
 	
 	;1. Read all inputs. 
 	Gui, % A_DefaultGui . ":" A_Space . "Submit", NoHide
@@ -2230,90 +2230,154 @@ F_AddHotstring()
 	
 	;2. Create or modify (triggerstring, hotstring) definition according to inputs. 
 	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
-	GuiControl, % "Count" . v_TotalLines . A_Space . "-Redraw", % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	
-	FileRead, v_TheWholeFile, % HADL . "\" . v_SelectHotstringLibrary
-	Loop, Parse, v_TheWholeFile, `n, `r
-		if (A_LoopField)
-			v_TotalLines++
+	;tu jestem 
+	GuiControl, -Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	
-	Loop, Parse, v_TheWholeFile, `n, `r	;Check in current library file if such definition do not exist. Future: Check if it exists in any file.
+	for key, value in a_Triggerstring
 	{
-		if (A_LoopField)
+		if (a_Triggerstring[key] = v_Triggerstring)
 		{
-			ExternalIndex := A_Index
-			Loop, Parse, A_LoopField, ‖, %A_Space%%A_Tab%
+			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+				, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in the file"] . ":" . A_Space . v_SelectHotstringLibrary . "." . "`n`n" 
+				. TransA["Do you want to proceed?"]
+				. "`n`n" . TransA["If you answer ""Yes"" it will overwritten."]
+			IfMsgBox, No
+				return
+			;*[One]
+			OldOptions := a_TriggerOptions[key]
+			if (InStr(OldOptions, "*") and !InStr(Options,"*"))
+				OldOptions := StrReplace(OldOptions, "*", "*0")
+			if (InStr(OldOptions, "B0") and !InStr(Options, "B0"))
+				OldOptions := StrReplace(OldOptions, "B0", "B")
+			if (InStr(OldOptions, "O") and !InStr(Options, "O"))
+				OldOptions := StrReplace(OldOptions, "O", "O0")
+			if (InStr(OldOptions, "Z") and !InStr(Options, "Z"))
+				OldOptions := StrReplace(OldOptions, "Z", "Z0")
+			
+			Try
+				Hotstring(":" . OldOptions . ":" . v_TriggerString, , "Off") ;Disable existing hotstring
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
+					. "v_TriggerString:" . A_Tab . v_TriggerString . "`n"
+					. "OldOptions:" . A_Tab . OldOptions . "`n`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary
+			if (InStr(Options, "O", 0))	;Add new hotstring
 			{
-				Switch A_Index
+				Try
+					Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
+				Catch
+					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
+				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," . A_Space . OnOff . ")"
+			}
+			else
+			{
+				Try
+					Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
+				Catch
+					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
+				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
+			}
+			
+			WhichRow := LV_GetNext()		
+			LV_Modify(WhichRow, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)
+			a_TriggerOptions[key] := Options
+			ModifiedFlag := true
+		}
+	}
+	/*
+		GuiControl, % "Count" . v_TotalLines . A_Space . "-Redraw", % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
+		
+		FileRead, v_TheWholeFile, % HADL . "\" . v_SelectHotstringLibrary
+		Loop, Parse, v_TheWholeFile, `n, `r
+			if (A_LoopField)
+				v_TotalLines++
+	*/
+	
+	/*
+		Loop, Parse, v_TheWholeFile, `n, `r	;Check in current library file if such definition do not exist. Future: Check if it exists in any file.
+		{
+			if (A_LoopField)
+			{
+				ExternalIndex := A_Index
+				Loop, Parse, A_LoopField, ‖, %A_Space%%A_Tab%
 				{
-					Case 1:	
-					if (A_LoopField)
+					Switch A_Index
 					{
-						OldOptions := A_LoopField
-						;The following lines are necessary to correctly switch off existing hostring definitions. e.g. when existing hostring containing "*" option is just switched off (instead of "*0") and then switched on again (e.g. new added)
-						;it still remembered and recreated with old "*". Therefore it's necessary on time of deactivation ("off") to do it with the following options. This is not the case for ? and C, as written in AutoHotkey help for Hotstring.
-						if (InStr(OldOptions, "*") and !InStr(Options,"*"))
-							OldOptions := StrReplace(OldOptions, "*", "*0")
-						if (InStr(OldOptions, "B0") and !InStr(Options, "B0"))
-							OldOptions := StrReplace(OldOptions, "B0", "B")
-						if (InStr(OldOptions, "O") and !InStr(Options, "O"))
-							OldOptions := StrReplace(OldOptions, "O", "O0")
-						if (InStr(OldOptions, "Z") and !InStr(Options, "Z"))
-							OldOptions := StrReplace(OldOptions, "Z", "Z0")
-					}
-					else
-						OldOptions := ""
-					Case 2:	
-					if (InStr(A_LoopField, v_TriggerString, true) and (StrLen(A_LoopField) = StrLen(v_Triggerstring)))
-					{
-						MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-							, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in the file"] . ":" . A_Space . v_SelectHotstringLibrary . "." . "`n`n" 
-							. TransA["Do you want to proceed?"]
-							. "`n`n" . TransA["If you answer ""Yes"" it will overwritten."]
-						IfMsgBox, No
-							return
-						Try
-							Hotstring(":" . OldOptions . ":" . v_TriggerString, , "Off") ;Disable existing hotstring
-						Catch
-							MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
-								. "v_TriggerString:" . A_Tab . v_TriggerString . "`n"
-								. "OldOptions:" . A_Tab . OldOptions . "`n`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 				
-						;OutputDebug, % "v_TriggerString:" . A_Tab . v_TriggerString . "`n" . "OldOptions:" . A_Tab . OldOptions
-						LV_Modify(ExternalIndex, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)
-						ModifiedFlag := true
-						Break
+						Case 1:	
+						if (A_LoopField)
+						{
+							OldOptions := A_LoopField
+							;The following lines are necessary to correctly switch off existing hostring definitions. e.g. when existing hostring containing "*" option is just switched off (instead of "*0") and then switched on again (e.g. new added)
+							;it still remembered and recreated with old "*". Therefore it's necessary on time of deactivation ("off") to do it with the following options. This is not the case for ? and C, as written in AutoHotkey help for Hotstring.
+							if (InStr(OldOptions, "*") and !InStr(Options,"*"))
+								OldOptions := StrReplace(OldOptions, "*", "*0")
+							if (InStr(OldOptions, "B0") and !InStr(Options, "B0"))
+								OldOptions := StrReplace(OldOptions, "B0", "B")
+							if (InStr(OldOptions, "O") and !InStr(Options, "O"))
+								OldOptions := StrReplace(OldOptions, "O", "O0")
+							if (InStr(OldOptions, "Z") and !InStr(Options, "Z"))
+								OldOptions := StrReplace(OldOptions, "Z", "Z0")
+						}
+						else
+							OldOptions := ""
+						Case 2:	
+						if (InStr(A_LoopField, v_TriggerString, true) and (StrLen(A_LoopField) = StrLen(v_Triggerstring)))
+						{
+							MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+								, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in the file"] . ":" . A_Space . v_SelectHotstringLibrary . "." . "`n`n" 
+								. TransA["Do you want to proceed?"]
+								. "`n`n" . TransA["If you answer ""Yes"" it will overwritten."]
+							IfMsgBox, No
+								return
+							Try
+								Hotstring(":" . OldOptions . ":" . v_TriggerString, , "Off") ;Disable existing hotstring
+							Catch
+								MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
+									. "v_TriggerString:" . A_Tab . v_TriggerString . "`n"
+									. "OldOptions:" . A_Tab . OldOptions . "`n`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 				
+							;OutputDebug, % "v_TriggerString:" . A_Tab . v_TriggerString . "`n" . "OldOptions:" . A_Tab . OldOptions
+							LV_Modify(ExternalIndex, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)
+							ModifiedFlag := true
+							Break
+						}
 					}
 				}
 			}
-		}
-	}	
-	;OutputDebug, % "Options:" . A_Space . Options . A_Tab . "OldOptions:" . A_Space . OldOptions . A_Tab . "v_TriggerString:" . A_Space . v_TriggerString
-	if (InStr(Options, "O", 0))
-	{
-		Try
-			Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
-		Catch
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," . A_Space . OnOff . ")"
-	}
-	else
-	{
-		Try
-			Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
-		Catch
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
-	}
-	;Hotstring("Reset") ;reset hotstring recognizer
+		}	
+	*/
 	
 	if !(ModifiedFlag) 
 	{
-		LV_Add("",  v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)
+	;OutputDebug, % "Options:" . A_Space . Options . A_Tab . "OldOptions:" . A_Space . OldOptions . A_Tab . "v_TriggerString:" . A_Space . v_TriggerString
+		if (InStr(Options, "O", 0))
+		{
+			Try
+				Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
+				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," . A_Space . OnOff . ")"
+		}
+		else
+		{
+			Try
+				Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
+				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
+		}
+		LV_Add("",  v_Triggerstring, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)
 		a_Triggers.Push(v_TriggerString) ;added to table of hotstring recognizer (a_Triggers)
 		F_Sort_a_Triggers()
+		a_Library.Push(v_SelectHotstringLibrary)
+		a_Triggerstring.Push(v_Triggerstring)
+		a_TriggerOptions.Push(Options)
+		a_OutputFunction.Push(SendFunHotstringCreate)
+		a_EnableDisable.Push(OnOff)
+		a_Hotstring.Push(TextInsert)
+		a_Comment.Push(v_Comment)
 	}
 	
-	;4. Sort List View. 
+	;4. Sort List View. ;future: gui parameter for sorting 
 	LV_ModifyCol(1, "Sort")
 	;5. Delete library file. 
 	FileDelete, % HADL . "\" . v_SelectHotstringLibrary
@@ -4477,13 +4541,13 @@ F_EnDisLib()
 	global ;assume-global mode
 	local v_LibraryFlag := 0, name := "", key := 0, value := "", FoundAmongKeys := false
 	
-	Menu, EnDisLib, ToggleCheck, %A_ThisMenuItem%
+	Menu, EnDisLib, ToggleCheck, %A_ThisMenuItem%	;future: don't ready .ini file, instead use appropriate table
 	IniRead, v_LibraryFlag,	% HADConfig, LoadLibraries, %A_ThisMenuitem%
 	v_LibraryFlag := !(v_LibraryFlag)
 	Iniwrite, %v_LibraryFlag%,	% HADConfig, LoadLibraries, %A_ThisMenuItem%
 	name := SubStr(A_ThisMenuItem, 1, -4)	;removing of file extension
 	
-	if (v_LibraryFlag) ;tu jestem
+	if (v_LibraryFlag)
 	{
 		for key, value in a_Library
 		{
