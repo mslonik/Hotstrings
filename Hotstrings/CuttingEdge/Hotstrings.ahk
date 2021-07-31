@@ -3456,7 +3456,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SelectLibrary()
-{ ;Future: load content from tables instead of files.
+{ 
 	global ;assume-global mode
 	local v_TheWholeFile := "", str1 := [], v_TotalLines := 0
 		,v_OutVarTemp := 0, v_OutVarTempX := 0, v_OutVarTempY := 0, v_OutVarTempW := 0, v_OutVarTempH := 0
@@ -3468,21 +3468,13 @@ F_SelectLibrary()
 		Gui, HS4: Submit, NoHide
 	
 	GuiControl, Enable, % IdButton4 ; button Delete hotstring (F8)
-	/*
-		FileRead, v_TheWholeFile, % HADL . "\" . v_SelectHotstringLibrary
-		Loop, Parse, v_TheWholeFile, `n, `r
-			if (A_LoopField)
-				v_TotalLines++
-	*/
 	
 	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
-	;GuiControl, % "Count" . v_TotalLines . A_Space . "-Redraw", % IdListView1 ;The Redraw option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	GuiControl, -Redraw, % IdListView1 ;The Redraw option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	LV_Delete()
 	v_LibHotstringCnt := 0
 	GuiControl, , % IdText13,  % v_LibHotstringCnt
 	GuiControl, , % IdText13b, % v_LibHotstringCnt
-	;*[One]
 	for key, value in a_Library
 	{
 		if (value = SubStr(v_SelectHotstringLibrary, 1, -4))
@@ -3493,44 +3485,13 @@ F_SelectLibrary()
 			str1[4] := a_EnableDisable[key]
 			str1[5] := a_Hotstring[key]
 			str1[6] := a_Comment[key]
-			LV_Add("", str1[2], str1[1], str1[3], str1[4],str1[5], str1[6])	
+			LV_Add("", str1[1], str1[2], str1[3], str1[4],str1[5], str1[6])	
 			v_LibHotstringCnt := A_Index
 			GuiControl, , % IdText13,  % v_LibHotstringCnt
 			GuiControl, , % IdText13b, % v_LibHotstringCnt
 		}
 	}
-	
-	/*
-		Loop, Parse, v_TheWholeFile, `n, `r%A_Space%%A_Tab%
-		{
-			if (A_LoopField)
-			{
-				if (SubStr(A_LoopField, 1, 1) != ";") ;don't read lines starting with ; (comments)
-				{
-					Loop, Parse, A_LoopField, ‖
-					{
-						Switch A_Index
-						{
-							Case 1: str1[1] := A_LoopField
-							Case 2: str1[2] := A_LoopField
-							Case 3: str1[3] := A_LoopField
-							Case 4: str1[4] := A_LoopField
-							Case 5: str1[5] := A_LoopField
-							Case 6: str1[6] := A_LoopField
-						}
-					}
-					LV_Add("", str1[2], str1[1], str1[3], str1[4],str1[5], str1[6])	
-					v_LibHotstringCnt := A_Index
-					GuiControl, , % IdText13,  % v_LibHotstringCnt
-					GuiControl, , % IdText13b, % v_LibHotstringCnt
-				}
-			}
-			else
-				Break
-		}	
-	*/
-	;LV_ModifyCol(1, "Sort")
-	LV_ModifyCol(2, "Sort")
+	LV_ModifyCol(1, "Sort")
 	GuiControlGet, v_OutVarTemp, Pos, % IdListView1 ;Check position of ListView1 again after resizing
 	LV_ModifyCol(1, Round(0.1 * v_OutVarTempW))
 	LV_ModifyCol(2, Round(0.1 * v_OutVarTempW))
@@ -4511,7 +4472,6 @@ F_ToggleTipsLibrary()
 }
 	
 ; ------------------------------------------------------------------------------------------------------------------------------------
-	
 F_EnDisLib() 
 {
 	global ;assume-global mode
@@ -4522,7 +4482,7 @@ F_EnDisLib()
 	v_LibraryFlag := !(v_LibraryFlag)
 	Iniwrite, %v_LibraryFlag%,	% HADConfig, LoadLibraries, %A_ThisMenuItem%
 	
-	if (v_LibraryFlag)
+	if (v_LibraryFlag) ;tu jestem
 	{
 		F_LoadFile(A_ThisMenuItem)
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The (triggerstring, hotstring) definitions have been uploaded from library file"] . ":"
@@ -4537,40 +4497,75 @@ F_EnDisLib()
 	
 	F_ValidateIniLibSections()
 	F_UpdateSelHotLibDDL()
+	F_Clear()
 	return
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
-F_UnloadFile(nameoffile)
-{	;future: don't load content from the file but from existing tables
+F_UnloadFile(nameoffile)	
+{	
 	global ;assume-global mode
 	local	v_TheWholeFile := "",	Options := "",	TriggerString := ""
+			,key := 0,	value := "", FilenameWitoutExt := ""
 	
-	FileRead, v_TheWholeFile, % HADL . "\" . nameoffile
-	Loop, Parse, v_TheWholeFile, `n, `r%A_Space%%A_Tab%
+	FilenameWitoutExt := SubStr(nameoffile, 1, -4)
+	for key, value in a_Library
 	{
-		if (A_LoopField)
+		if (value = FilenameWitoutExt)
 		{
-			if (SubStr(A_LoopField, 1, 1) != ";") ;don't read lines starting with ; (comments)
+			Options := a_TriggerOptions[key]
+			if (InStr(Options, "*"))
+				Options := StrReplace(Options, "*", "*0")
+			if (InStr(Options, "B0"))
+				Options := StrReplace(Options, "B0", "B")
+			if (InStr(Options, "O"))
+				Options := StrReplace(Options, "O", "O0")
+			if (InStr(Options, "Z"))
+				Options := StrReplace(Options, "Z", "Z0")
+			TriggerString := a_Triggerstring[key]
+			TriggerString := StrReplace(TriggerString, "``n", "`n") ;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
+			TriggerString := StrReplace(TriggerString, "``r", "`r") ;future: add more sequences like {Esc} etc.
+			TriggerString := StrReplace(TriggerString, "``t", "`t")
+			TriggerString := StrReplace(TriggerString, "``", "`")
+			TriggerString := StrReplace(TriggerString, "``b", "`b")
+			if (a_EnableDisable[key] = "En")
 			{
-				Loop, Parse, A_LoopField, ‖
-				{
-					if (A_Index = 1)
-						Options := A_LoopField
-					if (A_Index = 2)
-						TriggerString := A_LoopField
-					if (A_Index = 3)
-						Break
-				}
 				Try
 					Hotstring(":" . Options . ":" . TriggerString, , "Off") ;Disable existing hotstring
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with disabling of existing hotstring"] 
-				. ":" . "`n`n" . "TriggerString:" . A_Space . TriggerString . "`n" . A_Space . "Options:" . A_Space . Options . "`n`n" . TransA["Library name:"] 
-				. A_Space . nameoffile 				
-				Options := ""		
+					. ":" . "`n`n" . "TriggerString:" . A_Space . TriggerString . "`n" . A_Space . "Options:" . A_Space . Options . "`n`n" . TransA["Library name:"] 
+					. A_Space . nameoffile 				
 			}
 		}
 	}
+	/*
+		FileRead, v_TheWholeFile, % HADL . "\" . nameoffile
+		Loop, Parse, v_TheWholeFile, `n, `r%A_Space%%A_Tab%
+		{
+			if (A_LoopField)
+			{
+				if (SubStr(A_LoopField, 1, 1) != ";") ;don't read lines starting with ; (comments)
+				{
+					Loop, Parse, A_LoopField, ‖
+					{
+						if (A_Index = 1)
+							Options := A_LoopField
+						if (A_Index = 2)
+							TriggerString := A_LoopField
+						if (A_Index = 3)
+							Break
+					}
+					Try
+						Hotstring(":" . Options . ":" . TriggerString, , "Off") ;Disable existing hotstring
+					Catch
+						MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with disabling of existing hotstring"] 
+					. ":" . "`n`n" . "TriggerString:" . A_Space . TriggerString . "`n" . A_Space . "Options:" . A_Space . Options . "`n`n" . TransA["Library name:"] 
+					. A_Space . nameoffile 				
+					Options := ""		
+				}
+			}
+		}
+	*/
 	return
 }
 	
@@ -4958,9 +4953,7 @@ F_ParseLanguageFile(argument)
 	}
 	return
 }
-
 ; ------------------------------------------------------------------------------------------------------------------------------------
-
 F_LoadFile(nameoffile)
 {
 	global ;assume-global mode
@@ -6298,7 +6291,7 @@ F_LoadLibrariesToTables()
 			if (ErrorLevel)
 				break
 			tabSearch := StrSplit(varSearch, "‖")
-			if (InStr(tabSearch[1], "*0"))
+			if (InStr(tabSearch[1], "*0"))	;future: check for what reason are the following lines
 			{
 				tabSearch[1] := StrReplace(tabSearch[1], "*0")
 			}
@@ -6318,7 +6311,7 @@ F_LoadLibrariesToTables()
 			{
 				tabSearch[1] := StrReplace(tabSearch[1], "B")
 			}
-			name := SubStr(A_LoopFileName, 1, StrLen(A_LoopFileName)-4)
+			name := SubStr(A_LoopFileName, 1, -4)
 			; LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4],tabSearch[5], tabSearch[6])
 			a_Library.Push(name)
 			a_TriggerOptions.Push(tabSearch[1])
