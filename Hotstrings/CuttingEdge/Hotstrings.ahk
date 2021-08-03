@@ -120,8 +120,12 @@ Switch v_Param
 		Menu, Tray, NoStandard									; remove all the rest of standard tray menu
 		if (!FileExist(AppIcon))
 		{
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." . A_Space . TransA["Because of that the default AutoHotkey icon will be used instead"] . "."
-			AppIcon := "*"
+			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Information"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." 
+				. A_Space . TransA["Would you like to download the icon file?"] . "`n`n" . TransA["If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used."]
+			IfMsgBox, Yes
+				URLDownloadToFile, https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/hotstrings.ico, % AppIcon
+			IfMsgBox, No
+				AppIcon := "*"
 		}
 		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
 		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"], F_GuiAbout
@@ -134,8 +138,12 @@ Switch v_Param
 		Menu, Tray, NoStandard									; remove all the rest of standard tray menu
 		if (!FileExist(AppIcon))
 		{
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." . A_Space . TransA["Because of that the default AutoHotkey icon will be used instead"] . "."
-			AppIcon := "*"
+			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Information"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." 
+				. A_Space . TransA["Would you like to download the icon file?"] . "`n`n" . TransA["If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used."]
+			IfMsgBox, Yes
+				URLDownloadToFile, https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/hotstrings.ico, % AppIcon
+			IfMsgBox, No
+				AppIcon := "*"
 		}
 		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
 		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Default mode"], F_GuiAbout
@@ -305,9 +313,15 @@ F_EventSoEn()
 F_EventTtPos()
 F_AmountOfCharacterTips()
 
-Menu, Submenu1, Add, % TransA["Undo the last hotstring [Ctrl+F12]: enable"], 	F_MUndo
-Menu, Submenu1, Add, % TransA["Undo the last hotstring [Ctrl+F12]: disable"],	F_MUndo
-Menu, Submenu1, Add
+Menu, Submenu1Shortcuts, Add, % TransA["Call this Graphical User Interface"],				F_ShorcutDefinition
+Menu, Submenu1Shortcuts, Add, % TransA["Copy clipboard content into ""Enter hotstring"""],	F_ShorcutDefinition
+Menu, Submenu1Shortcuts, Add, % TransA["Undo the last hotstring"],						F_ShorcutDefinition
+Menu, Submenu1, 		Add, % TransA["Shortcut (hotkey) definitions"],					:Submenu1Shortcuts
+Menu, Submenu1, 		Add
+Menu, Submenu1Choice, 	Add, % TransA["Enable"], 							F_MUndo
+Menu, Submenu1Choice, 	Add, % TransA["Disable"],							F_MUndo
+Menu, Submenu1, 		Add, % TransA["Undo the last hotstring [Ctrl+F12]"], 		:Submenu1Choice
+Menu, Submenu1, 		Add
 F_MUndo()
 ;Warning: order of SubmenuEndChars have to be alphabetical. Keep an eye on it. This is because after change of language specific menu items are related with associative array which also keeps to alphabetical order.
 Menu, SubmenuEndChars, Add, % TransA["Apostrophe '"], 					F_ToggleEndChars
@@ -706,6 +720,13 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_ShorcutDefinition()
+{
+	global	;assume-global mode
+	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Sort_a_Triggers()
 {	;sort now a_Triggers() so it's not necessary each time when user gets triggerstring tips; it should speed-up process significantly
 	global	;assume-global mode
@@ -764,6 +785,17 @@ F_DownloadPublicLibraries()
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Public library:"] . A_Tab . value . "`n`n" . TransA["has been downloaded to the location"] 
 			. "`n`n" . HADL
 		}
+	}
+	MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder? into memory?"]
+	IfMsgBox, Yes
+	{
+		F_LoadHotstringsFromLibraries()
+		F_Sort_a_Triggers()
+		F_ValidateIniLibSections()
+		F_RefreshListOfLibraries()
+		F_RefreshListOfLibraryTips()
+		F_UpdateSelHotLibDDL()
+		F_Searching("Reload")			;prepare content of Search tables
 	}
 	return
 }
@@ -1390,15 +1422,15 @@ F_MUndo()
 	{
 		if (ini_HotstringUndo)
 		{
-			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring [Ctrl+F12]: disable"]
-			Menu, Submenu1, Check,  % TransA["Undo the last hotstring [Ctrl+F12]: enable"]
+			Menu, Submenu1Choice, UnCheck, % TransA["Disable"]
+			Menu, Submenu1Choice, Check, % TransA["Enable"]
 			Menu, SigOfEvents, Enable, % TransA["Undid the last hotstring"]
 			Hotkey, $^F12, F_Undo, On	
 		}
 		else
 		{
-			Menu, Submenu1, Check, % TransA["Undo the last hotstring [Ctrl+F12]: disable"]
-			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring [Ctrl+F12]: enable"]
+			Menu, Submenu1Choice, Check, % TransA["Disable"]
+			Menu, Submenu1Choice, UnCheck, % TransA["Enable"]
 			Menu, SigOfEvents, Disable, % TransA["Undid the last hotstring"]
 			Hotkey, $^F12, F_Undo, Off
 		}
@@ -2058,48 +2090,48 @@ F_SetTooltipTimeout()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_AddToAutostart()
+F_AddToAutostart()
+{
+	global	;assume-global mode
+	local v_Temp1 := true, Target := "", LinkFile_DM := "", LinkFile_SM := "", Args_DM := "", Args_SM := "", Description := "", IconFile := "", WorkingDir := ""
+	
+	Target 		:= A_ScriptFullPath
+	LinkFile_DM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_DM" . "." . "lnk"
+	LinkFile_SM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_SM" . "." . "lnk"
+	WorkingDir 	:= A_ScriptDir
+	Args_DM 		:= ""
+	Args_SM		:= "l"
+	Description 	:= TransA["Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries"] . "."
+	IconFile 		:= A_ScriptDir . "\" . AppIcon
+	
+	Switch A_ThisMenuItem
 	{
-		global	;assume-global mode
-		local v_Temp1 := true, Target := "", LinkFile_DM := "", LinkFile_SM := "", Args_DM := "", Args_SM := "", Description := "", IconFile := "", WorkingDir := ""
-		
-		Target 		:= A_ScriptFullPath
-		LinkFile_DM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_DM" . "." . "lnk"
-		LinkFile_SM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_SM" . "." . "lnk"
-		WorkingDir 	:= A_ScriptDir
-		Args_DM 		:= ""
-		Args_SM		:= "l"
-		Description 	:= TransA["Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries"] . "."
-		IconFile 		:= A_ScriptDir . "\" . AppIcon
-		
-		Switch A_ThisMenuItem
+		Case TransA["Default mode"]:
+		Try
+			FileCreateShortcut, % Target, % LinkFile_DM, % WorkingDir, % Args_DM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+		Catch
 		{
-			Case TransA["Default mode"]:
-			Try
-				FileCreateShortcut, % Target, % LinkFile_DM, % WorkingDir, % Args_DM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
-			Catch
-			{
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something weng wrong with link file (.lnk) creation"] . ":" 
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something weng wrong with link file (.lnk) creation"] . ":" 
 				. A_Space . ErrorLevel
-			}
-			F_WhichGui()
-			if (!ErrorLevel)
-				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Link file (.lnk) was created in AutoStart folder"] . ":" . "`n`n"
-				. A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_DM" . "." . "lnk" . "," . A_Space . TransA["Default mode"]
-			Case TransA["Silent mode"]:
-			Try
-				FileCreateShortcut, % Target, % LinkFile_SM, % WorkingDir, % Args_SM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
-			Catch
-			{
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something weng wrong with link file (.lnk) creation"] . ":" 
-				. A_Space . ErrorLevel
-			}
-			F_WhichGui()
-			if (!ErrorLevel)
-				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Link file (.lnk) was created in AutoStart folder"] . ":" . "`n`n"
-				. A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_SM" . "." . "lnk" . "," . A_Space . TransA["Silent mode"]
 		}
-		return
+		F_WhichGui()
+		if (!ErrorLevel)
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Link file (.lnk) was created in AutoStart folder"] . ":" . "`n`n"
+				. A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_DM" . "." . "lnk" . "," . A_Space . TransA["Default mode"]
+		Case TransA["Silent mode"]:
+		Try
+			FileCreateShortcut, % Target, % LinkFile_SM, % WorkingDir, % Args_SM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+		Catch
+		{
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something weng wrong with link file (.lnk) creation"] . ":" 
+				. A_Space . ErrorLevel
+		}
+		F_WhichGui()
+		if (!ErrorLevel)
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Link file (.lnk) was created in AutoStart folder"] . ":" . "`n`n"
+				. A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_SM" . "." . "lnk" . "," . A_Space . TransA["Silent mode"]
+	}
+	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_CreateMenu_SizeOfMargin()
@@ -4580,9 +4612,7 @@ F_UnloadFile(nameoffile)
 	}
 	return
 }
-	
 ; ------------------------------------------------------------------------------------------------------------------------------------
-	
 F_LoadCreateTranslationTxt(decision*)
 {
 	global ;assume-global mode
@@ -4605,19 +4635,20 @@ Add comment (optional) 									= Add comment (optional)
 Add hotstring (F9) 										= Add hotstring (F9)
 Add library 											= Add library
 Add to Autostart										= Add to Autostart
+After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder? into memory? = After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder? into memory?
 A library with that name already exists! 					= A library with that name already exists!
 Alphabetically 										= Alphabetically
 Apostrophe ' 											= Apostrophe '
 Application											= A&pplication
-Application help									= Application help
+Application help										= Application help
 Application language changed to: 							= Application language changed to:
 Are you sure you want to exit this application now?			= Are you sure you want to exit this application now?
 Are you sure you want to reload this application now?			= Are you sure you want to reload this application now?
 Backslash \ 											= Backslash \
 Basic hotstring is triggered								= Basic hotstring is triggered
-Because of that the default AutoHotkey icon will be used instead = Because of that the default AutoHotkey icon will be used instead
 Built with Autohotkey.exe version							= Built with Autohotkey.exe version
 By length 											= By length
+Call this Graphical User Interface							= Call this Graphical User Interface
 Cancel 												= Cancel
 Case Sensitive (C) 										= Case Sensitive (C)
 Case-Conforming										= Case-Conforming
@@ -4648,6 +4679,7 @@ Conversion of .ahk file into new .csv file (library) and loading of that new lib
 Conversion of .csv library file into new .ahk file containing static (triggerstring, hotstring) definitions = Conversion of .csv library file into new .ahk file containing static (triggerstring, hotstring) definitions
 Conversion of .csv library file into new .ahk file containing dynamic (triggerstring, hotstring) definitions = Conversion of .csv library file into new .ahk file containing dynamic (triggerstring, hotstring) definitions
 Converted												= Converted
+Copy clipboard content into ""Enter hotstring""				= Copy clipboard content into ""Enter hotstring""
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
 Download public libraries								= Download public libraries
 Do you want to delete it?								= Do you want to delete it?
@@ -4664,6 +4696,7 @@ Do you want to reload application now?						= Do you want to reload application 
 doesn't exist in application folder						= doesn't exist in application folder
 Dynamic hotstrings 										= &Dynamic hotstrings
 Edit Hotstrings 										= Edit Hotstrings
+Enable												= Enable
 Enable/disable libraries									= Enable/disable &libraries
 Enable/disable triggerstring tips 							= Enable/disable triggerstring tips	
 Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 4th edition of this application, 2021 by Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
@@ -4709,6 +4742,7 @@ Hotstring paste from Clipboard delay 1 s 					= Hotstring paste from Clipboard d
 Hotstring paste from Clipboard delay 						= Hotstring paste from Clipboard delay
 Hotstrings have been loaded 								= Hotstrings have been loaded
 If you answer ""Yes"" it will overwritten.					= If you answer ""Yes"" it will overwritten.
+If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used. = If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used.
 If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file. = If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file.
 Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
@@ -4806,6 +4840,7 @@ Set parameters of triggerstring sound						= Set parameters of triggerstring sou
 Set sound parameters for event ""basic hotstring""			= Set sound parameters for event ""basic hotstring""
 Set sound parameters for event ""hotstring menu""				= Set sound parameters for event ""hotstring menu""
 Set sound parameters for event ""undo hotstring""				= Set sound parameters for event ""undo hotstring""
+Shortcut (hotkey) definitions								= Shortcut (hotkey) definitions
 Show full GUI (F4)										= Show full GUI (F4)
 Show intro											= Show intro
 Show Introduction window after application is restarted?		= Show Introduction window after application is restarted?
@@ -4877,8 +4912,8 @@ Triggerstring tips 										= Triggerstring tips
 Triggerstring tooltip timeout in [ms]						= Triggerstring tooltip timeout in [ms]
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
 Underscore _											= Underscore _
-Undo the last hotstring [Ctrl+F12]: disable					= Undo the last hotstring [Ctrl+F12]: disable
-Undo the last hotstring [Ctrl+F12]: enable					= Undo the last hotstring [Ctrl+F12]: enable
+Undo the last hotstring									= Undo the last hotstring
+Undo the last hotstring [Ctrl+F12]							= Undo the last hotstring [Ctrl+F12]
 Undid the last hotstring 								= Undid the last hotstring
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
@@ -4890,6 +4925,7 @@ When timeout is set, the tooltip ""Hotstring was triggered"" will dissapear afte
 When timeout is set, the tooltip ""Undid the last hotstring!"" will dissapear after time reaches it. = When timeout is set, the tooltip ""Undid the last hotstring!"" will dissapear after time reaches it.
 When timeout is set, the triggerstring tip(s) will dissapear after time reaches it. = When timeout is set, the triggerstring tip(s) will dissapear after time reaches it.
 When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
+Would you like to download the icon file?					= Would you like to download the icon file?
 Yes													= Yes
 ""Basic hotstring"" sound duration [ms]						= ""Basic hotstring"" sound duration [ms]
 ""Basic hotstring"" sound frequency						= ""Basic hotstring"" sound frequency
