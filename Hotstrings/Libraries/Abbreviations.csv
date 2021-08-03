@@ -2,14 +2,16 @@
 B0*?‖.csv‖SI‖En‖‖only for extensions
 B0*?‖.docx‖SI‖En‖‖only for extensions
 B0*?‖.easm‖SI‖En‖‖only for extensions
+B0*?‖.gif‖SI‖En‖‖
 B0*?‖.pdf‖SI‖En‖‖only for extensions
+B0*?‖.png‖SI‖En‖‖
 B0*?‖.svg‖SI‖En‖‖only for extensions
 B0*?‖.xlsx‖SI‖En‖‖only for extensions
 B0*?‖.xml‖SI‖En‖‖only for extensions
-O‖2d‖MSI‖En‖2D¦two-dimensional‖
+C*‖2d‖MSI‖En‖2D¦two-dimensional‖
 C‖2fa‖SI‖En‖2FA‖
 *‖2fa/‖SI‖En‖Two-Factor Authentication‖
-*‖3d ‖MSI‖En‖3D ¦three-dimensional‖
+C*‖3d‖MSI‖En‖3D ¦three-dimensional‖
 *‖a/‖SI‖En‖Availability‖
 C*‖a3‖MSI‖En‖A3¦297 × 420 [mm]‖size of paper sheet in Europe 
 C*‖a4‖MSI‖En‖A4¦210 × 297 [mm]‖
@@ -47,6 +49,8 @@ C‖cat‖SI‖En‖CAT‖
 *‖cat/‖CL‖En‖Computer Assisted Translation‖https://en.wikipedia.org/wiki/Computer-assisted_translation
 C‖ccms‖SI‖En‖CCMS‖
 *‖ccms/‖SI‖En‖Component Content Management System‖
+C‖cctv‖CL‖En‖CCTV‖
+*‖cctv/‖CL‖En‖Closed-Circuit Television‖
 C‖ceo‖SI‖En‖CEO‖
 *‖ceo/‖CL‖En‖Chief Executive Officer‖
 C‖cfo‖SI‖En‖CFO‖
@@ -149,6 +153,8 @@ C‖ga‖SI‖En‖GA‖Generic Application
 *‖ga/‖MSI‖En‖Generic Application¦generische Anwendung‖
 C‖gdpr‖SI‖En‖GDPR‖
 *‖gdpr/‖SI‖En‖General Data Protection Regulation‖
+C‖gif‖SI‖En‖GIF‖
+*‖gif/‖SI‖En‖Graphics Interchange Format‖
 C‖gmt‖SI‖En‖GMT‖
 *‖gmt/‖MSI‖En‖Greenwich Mean Time¦Poland: GMT + 01:00¦Polska: GMT + 01:00‖https://en.wikipedia.org/wiki/Greenwich_Mean_Time
 C‖gnu‖SI‖En‖GNU‖
@@ -167,6 +173,8 @@ C‖hdmi‖SI‖En‖HDMI‖
 *‖hdmi/‖CL‖En‖High-Definition Multimedia Interface‖
 C‖html‖SI‖En‖HTML‖
 *‖html/‖SI‖En‖HyperText Markup Language‖
+C‖hvac‖CL‖En‖HVAC‖
+*‖hvac/‖CL‖En‖Heating Ventilation Air Conditioning‖
 C‖hw‖SI‖En‖HW‖
 *‖hw/‖SI‖En‖hardware‖
 C‖ic‖SI‖En‖IC‖
@@ -239,6 +247,8 @@ C‖pcn‖SI‖En‖PCN‖
 *‖pcn/‖SI‖En‖Product Change Notification‖
 C‖pdf‖SI‖En‖PDF‖
 *‖pdf/‖CL‖En‖Portable Document Format‖
+C‖phd‖SI‖En‖PhD‖
+C‖phd/‖SI‖En‖philosophiae doctor‖
 C‖php‖SI‖En‖PHP‖
 *‖php/‖SI‖En‖Hypertext Preprocessor‖
 C‖pit‖SI‖En‖PIT‖
@@ -247,6 +257,10 @@ C‖plc‖SI‖En‖PLC‖
 *‖plc/‖SI‖En‖Programmable Logic Controller‖https://en.wikipedia.org/wiki/Programmable_logic_controller
 C‖plm‖SI‖En‖PLM‖
 *‖plm/‖CL‖En‖Product Lifecycle Management‖
+C‖png‖SI‖En‖PNG‖
+*‖png/‖SI‖En‖Portable Network Graphics‖
+‖pnp‖SI‖En‖PnP‖
+*‖pnp/‖MSI‖En‖device with a specification that facilitates the discovery of a hardware component in a system without the need for physical device configuration or user intervention in resolving resource conflicts¦Plug and Play‖https://en.wikipedia.org/wiki/Plug_and_play
 C‖poc‖SI‖En‖PoC‖
 *‖poc/‖CL‖En‖Proof of Concept‖
 C‖poe‖SI‖En‖PoE‖
@@ -286,10 +300,16 @@ C‖rohs‖SI‖En‖RoHS‖
 *‖rohs/‖SI‖En‖Restriction of Hazardous Substances Directive‖https://en.wikipedia.org/wiki/Restriction_of_Hazardous_Substance
 C‖rpa‖SI‖En‖RPA‖
 *‖rpa/‖SI‖En‖Robotics Process Automation‖
+C‖rpu‖SI‖En‖RPU‖
+*‖rpu/‖SI‖En‖Reinforced Polyurethane Hose‖"peszel"
+C‖rtc‖SI‖En‖RTC‖
+*‖rtc/‖SI‖En‖Real Time Clock‖
 C‖sa‖SI‖En‖SA‖
 *‖sa/‖CL‖En‖Specific Application‖
 C‖saas‖SI‖En‖SaaS‖
 *‖saas/‖SI‖En‖Software as a Service‖https://en.wikipedia.org/wiki/Software_as_a_service
+C‖scorm‖SI‖En‖SCORM‖
+*‖scorm/‖SI‖En‖Sharable Content Object Reference Model‖https://en.wikipedia.org/wiki/Sharable_Content_Object_Reference_
 C‖seo‖SI‖En‖SEO‖
 *‖seo/‖SI‖En‖Search Engine Optimization‖
 C‖sil‖SI‖En‖SIL‖
@@ -342,6 +362,8 @@ C‖vba‖SI‖En‖VBA‖
 *‖vba/‖CL‖En‖Visual Basic for Applications‖
 C‖vlan‖SI‖En‖VLAN‖
 *‖vlan/‖SI‖En‖Virtual LAN‖https://en.wikipedia.org/wiki/Virtual_LAN
+C‖voip‖CL‖En‖VoIP‖
+*‖voip/‖CL‖En‖Voice over Internet Protocol‖
 C‖vpn‖SI‖En‖VPN‖
 *‖vpn/‖CL‖En‖Virtual Private Network‖
 C‖vps‖SI‖En‖VPS‖
