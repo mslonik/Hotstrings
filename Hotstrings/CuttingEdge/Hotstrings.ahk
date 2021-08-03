@@ -3458,7 +3458,7 @@ F_SelectLibrary()
 	global ;assume-global mode
 	local v_TheWholeFile := "", str1 := [], v_TotalLines := 0
 		,v_OutVarTemp := 0, v_OutVarTempX := 0, v_OutVarTempY := 0, v_OutVarTempW := 0, v_OutVarTempH := 0
-		,key := 0, value := ""
+		,key := 0, value := "", name := ""
 	
 	if (A_DefaultGui = "HS3")
 		Gui, HS3: Submit, NoHide
@@ -3473,9 +3473,10 @@ F_SelectLibrary()
 	v_LibHotstringCnt := 0
 	GuiControl, , % IdText13,  % v_LibHotstringCnt
 	GuiControl, , % IdText13b, % v_LibHotstringCnt
+	name := SubStr(v_SelectHotstringLibrary, 1, -4)
 	for key, value in a_Library
 	{
-		if (value = SubStr(v_SelectHotstringLibrary, 1, -4))
+		if (value = name)
 		{
 			str1[1] := a_Triggerstring[key]
 			str1[2] := a_TriggerOptions[key]
@@ -3483,12 +3484,12 @@ F_SelectLibrary()
 			str1[4] := a_EnableDisable[key]
 			str1[5] := a_Hotstring[key]
 			str1[6] := a_Comment[key]
-			LV_Add("", str1[1], str1[2], str1[3], str1[4],str1[5], str1[6])	
-			v_LibHotstringCnt := A_Index
-			GuiControl, , % IdText13,  % v_LibHotstringCnt
-			GuiControl, , % IdText13b, % v_LibHotstringCnt
+			LV_Add("", str1[1], str1[2], str1[3], str1[4], str1[5], str1[6])	
+			v_LibHotstringCnt++
 		}
 	}
+	GuiControl, , % IdText13,  % v_LibHotstringCnt
+	GuiControl, , % IdText13b, % v_LibHotstringCnt
 	;LV_ModifyCol(1, "Sort")	;without this line content of library is loaded in the same order as it was saved last time; keep in mind that after any change (e.g. change of exiting definition) the whole file is sorted and saved again
 	GuiControlGet, v_OutVarTemp, Pos, % IdListView1 ;Check position of ListView1 again after resizing
 	LV_ModifyCol(1, Round(0.1 * v_OutVarTempW))
