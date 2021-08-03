@@ -729,8 +729,9 @@ F_Sort_a_Triggers()
 F_DownloadPublicLibraries()
 {
 	global	;assume-global mode
-	local	ToBeFiltered := "",	Result := "",	ToBeDownloaded := []
-			,URLconst := "https://gitHub.com/mslonik/Hotstrings/blob/master/Hotstrings/Libraries/", whr := ""
+	local	ToBeFiltered := "",	Result := "",	ToBeDownloaded := [], DownloadedFile := ""
+			,URLconst 	:= "https://gitHub.com/mslonik/Hotstrings/blob/master/Hotstrings/Libraries/", temp := ""
+			,URLraw 		:= "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Libraries/"
 	
 	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 	whr.Open("GET", URLconst, true)
@@ -747,13 +748,22 @@ F_DownloadPublicLibraries()
 	
 	for key, value in ToBeDownloaded
 	{
+		temp := URLraw . value
 		if (FileExist(HADL . "\" . value))
+		{
 			MsgBox, 51, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % value . "`n`n" . TransA["The file which you want to download from Internet, already exists on your local harddisk. Are you sure you want to download it?"]
-		IfMsgBox, Cancel
-			return
-		IfMsgBox, No
-			Continue
-		URLDownloadToFile, % URLconst, % HADL . "\" . value
+			IfMsgBox, Cancel
+				return
+			IfMsgBox, No
+				Continue
+			URLDownloadToFile, % temp, % HADL . "\" . value
+		}
+		else
+		{
+			URLDownloadToFile, % temp, % HADL . "\" . value
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Public library:"] . A_Tab . value . "`n`n" . TransA["has been downloaded to the location"] 
+			. "`n`n" . HADL
+		}
 	}
 	return
 }
@@ -4685,6 +4695,7 @@ Font type												= Font type
 I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)! = I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)!
 Graphical User Interface									= Graphical User Interface
 has been created. 										= has been created.
+has been downloaded to the location						= has been downloaded to the location
 Help: AutoHotkey Hotstrings reference guide					= Help: AutoHotkey Hotstrings reference guide
 Help: Hotstrings application								= Help: Hotstrings application
 Hotstring 											= Hotstring
@@ -4758,6 +4769,7 @@ Pause application										= Pause application
 Phrase to search for:									= Phrase to search for:
 pixels												= pixels
 Position of main window is saved in Config.ini.				= Position of main window is saved in Config.ini.	
+Public library:										= Public library:
 Visit public libraries webpage							= Visit public libraries webpage
 Reload												= Reload
 Reload in default mode									= Reload in default mode
