@@ -6194,7 +6194,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	if (v_IsLibraryEmpty)
 	{
 		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Libraries folder:"] . "`n`n" . HADL . A_Space . "`n`n"
-	. TransA["is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?"]
+			. TransA["is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?"]
 		IfMsgBox, Yes
 		{
 			FileAppend, , % HADL . "\" . "PriorityLibrary.csv", UTF-8
@@ -6356,6 +6356,8 @@ F_CreateHotstring(txt, nameoffile)
 { 
 	global	;assume-global mode
 	local Options := "", SendFun := "", EnDis := "", OnOff := "", TextInsert := "", Oflag := false
+	
+	v_TriggerString := ""
 	Loop, Parse, txt, ‖
 	{
 		Switch A_Index
