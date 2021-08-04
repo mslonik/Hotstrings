@@ -21,6 +21,7 @@ CoordMode, ToolTip,	Screen
 CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
+global AppVersion				:= "3.1.1"
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -29,7 +30,7 @@ global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -al
 ;@Ahk2Exe-SetProductName Original script name: %A_ScriptName%
 ;@Ahk2Exe-Set OriginalScriptlocation, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings
 ;@Ahk2Exe-SetCompanyName  http://mslonik.pl
-;@Ahk2Exe-SetFileVersion 4.0
+;@Ahk2Exe-SetFileVersion %U_vAppVersion%
 FileInstall, hotstrings.ico, hotstrings.ico, 0
 FileInstall, LICENSE, LICENSE, 0
 
@@ -394,6 +395,8 @@ Menu,	AboutHelpSub,	Add
 Menu,	AboutHelpSub,	Add,	% TransA["About this application..."],		F_GuiAbout
 Menu,	AboutHelpSub,	Add
 Menu,	AboutHelpSub,	Add, % TransA["Show intro"],					L_ShowIntro
+Menu,	AboutHelpSub,	Add
+Menu,	AboutHelpSub,	Add, % TransA["Version / Update"],				F_VersionUpdate	;tu jestem
 
 Menu, 	HSMenu,			Add, % TransA["Application"],				:AppSubmenu
 Menu, 	HSMenu, 			Add, % TransA["About / Help"], 			:AboutHelpSub
@@ -720,6 +723,69 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_GuiVersionUpdate_DetermineConstraints()
+{
+	global	;assume-global mode
+;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
+		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
+		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
+							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+	
+; Determine constraints, according to mock-up
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdVerUpd1, % "x" . v_xNext . "y" . v_yNext
+	v_yNext += HofText
+	GuiControl, Move, % IdVerUpd3, % "x" . v_xNext . "y" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdVerUpd3
+	v_xNext := v_OutVarTempX + v_OutVarTempW
+	GuiControl, Move, % IdVerUpd4, % "x" . v_xNext . "y" . v_yNext
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdVerUpd2, % "x" . v_xNext . "y" . v_yNext
+	v_yNext := v_OutVarTempY + HofText
+	v_xNext := c_xmarg
+	GuiControl, Move, % IdVerUpdCheckServ, % "x" . v_xNext . "y" . v_yNext
+	v_yNext += HofButton + c_ymarg
+	GuiControl, Move, % IdIdVerUpdDownload, % "x" . v_xNext . "y" . v_yNext
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiVersionUpdate_CreateObjects()
+{
+	global	;assume-global mode
+	local	ServerVer := "???"
+
+	;1. Prepare MyAbout Gui
+	Gui, VersionUpdate: New, 		-Resize +HwndMyAboutGuiHwnd +Owner -MaximizeBox -MinimizeBox
+	Gui, VersionUpdate: Margin,	% c_xmarg, % c_ymarg
+	Gui,	VersionUpdate: Color,	% c_WindowColor, % c_ControlColor
+	
+	;2. Prepare all text objects according to mock-up.
+	Gui, VersionUpdate: Add, 		Text,    x0 y0 HwndIdVerUpd1,											% TransA["Local version: "]
+	Gui, VersionUpdate: Add, 		Text,    x0 y0 HwndIdVerUpd2, 										% AppVersion
+	Gui, VersionUpdate: Add, 		Text,    x0 y0 HwndIdVerUpd3,											% TransA["Repository version: "]
+	Gui, VersionUpdate: Add, 		Text,    x0 y0 HwndIdVerUpd4, 										% ServerVer
+	Gui, VersionUpdate: Add, 		Button,  x0 y0 HwndIdVerUpdCheckServ gF_VerUpdCheckServ,					% TransA["Check repository version"]
+	Gui, VersionUpdate: Add, 		Button,  x0 y0 HwndIdVerUpdDownload  gF_VerUpdDownload,					% TransA["Download repository version"]
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_VerUpdDownload()
+{
+	global	;assume-global mode
+	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_VerUpdCheckServ()
+{
+	global	;assume-global mode
+	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ShorcutDefinition()
 {
 	global	;assume-global mode
@@ -4915,6 +4981,7 @@ Underscore _											= Underscore _
 Undo the last hotstring									= Undo the last hotstring
 Undo the last hotstring [Ctrl+F12]							= Undo the last hotstring [Ctrl+F12]
 Undid the last hotstring 								= Undid the last hotstring
+Version / Update										= Version / Update
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
 Welcome to Hotstrings application!							= Welcome to Hotstrings application!
@@ -6319,9 +6386,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	IniWrite, % SectionTemp, % HADConfig, ShowTipsLibraries
 	return
 }
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 F_LoadLibrariesToTables()
 { 
 	global	;assume-global mode
@@ -6374,7 +6439,6 @@ F_LoadLibrariesToTables()
 					tabSearch[1] := StrReplace(tabSearch[1], "B")
 				}
 			*/
-			; LV_Add("", name, tabSearch[2],tabSearch[1],tabSearch[3],tabSearch[4],tabSearch[5], tabSearch[6])
 			a_Library.Push(name)
 			a_TriggerOptions.Push(tabSearch[1])
 			a_Triggerstring.Push(tabSearch[2])
@@ -6386,7 +6450,6 @@ F_LoadLibrariesToTables()
 	}
 	TrayTip, %A_ScriptName%, % TransA["Hotstrings have been loaded"], 1
 }
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_CreateHotstring(txt, nameoffile) 
 { 
