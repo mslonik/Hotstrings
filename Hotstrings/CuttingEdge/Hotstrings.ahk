@@ -21,8 +21,9 @@ CoordMode, ToolTip,	Screen
 CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
-global AppVersion				:= "3.1.1"
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
+global AppVersion				:= "3.1.1"
+;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
 ;@Ahk2Exe-SetCopyright GNU GPL 3.x
@@ -2231,7 +2232,7 @@ F_AddHotstring()
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
 			,v_TheWholeFile := "", v_TotalLines := 0
 			,ExternalIndex := 0
-			,name := "", key := 0, value := "", WhichRow := 0
+			,name := "", key := 0, value := ""
 	
 	;1. Read all inputs. 
 	Gui, % A_DefaultGui . ":" A_Space . "Submit", NoHide
@@ -2382,13 +2383,12 @@ F_AddHotstring()
 				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
 			}
 			
-			WhichRow := LV_GetNext()		
-			LV_Modify(WhichRow, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)
+			LV_Modify(key, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)
 			a_TriggerOptions[key] := Options
 			ModifiedFlag := true
 		}
 	}
-	
+	;*[One]
 	if !(ModifiedFlag) 
 	{
 	;OutputDebug, % "Options:" . A_Space . Options . A_Tab . "OldOptions:" . A_Space . OldOptions . A_Tab . "v_TriggerString:" . A_Space . v_TriggerString
