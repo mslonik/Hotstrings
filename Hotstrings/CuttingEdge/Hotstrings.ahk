@@ -371,6 +371,9 @@ Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 ;Menu, Submenu1,		Add, Turn off all events tooltips,				F_AllTooltipsOff
 Menu, Submenu1,		Add
 Menu, Submenu1,  	   	Add, % TransA["Toggle EndChars"], 				:SubmenuEndChars
+Menu, Submenu1,		Add
+Menu, Submenu1,		Add, % TransA["Version / Update"],				F_GuiVersionUpdate
+
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 				:Submenu1
 Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 		F_Searching
@@ -411,8 +414,6 @@ Menu,	AboutHelpSub,	Add
 Menu,	AboutHelpSub,	Add,	% TransA["About this application..."],		F_GuiAbout
 Menu,	AboutHelpSub,	Add
 Menu,	AboutHelpSub,	Add, % TransA["Show intro"],					L_ShowIntro
-Menu,	AboutHelpSub,	Add
-Menu,	AboutHelpSub,	Add, % TransA["Version / Update"],				F_GuiVersionUpdate
 
 Menu, 	HSMenu,			Add, % TransA["Application"],				:AppSubmenu
 Menu, 	HSMenu, 			Add, % TransA["About / Help"], 			:AboutHelpSub
@@ -427,6 +428,8 @@ F_GuiVersionUpdate_DetermineConstraints()
 ;*[One]
 if (ini_CheckRepo)
 	F_VerUpdCheckServ("OnStartUp")
+if (ini_DownloadRepo) and (F_VerUpdCheckServ("ReturnResult"))
+	F_VerUpdDownload()
 
 IniRead, ini_GuiReload, 						% HADConfig, GraphicalUserInterface, GuiReload
 if (ini_GuiReload) and (v_Param != "l")
@@ -840,10 +843,11 @@ F_GuiVersionUpdate_CreateObjects()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_DwnlUpdOnStart()
+F_DwnlUpdOnStart()	;tu jestem
 {
 	global	;assume-global mode
-	
+	ini_DownloadRepo := !ini_DownloadRepo
+	IniWrite, % ini_DownloadRepo, % HADConfig, Configuration, DownloadRepo
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -865,7 +869,9 @@ F_VerUpdDownload()
 	{
 		URLDownloadToFile, % URLexe, 		% A_ScriptFullPath
 		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The application"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
+			. "`n" . TransA["The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually."]
 			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
+		FileDelete, % A_ScriptDir . "\Languages\English.txt" 	
 		IfMsgBox, Yes
 		{
 			Gui, VersionUpdate: Hide
@@ -877,7 +883,9 @@ F_VerUpdDownload()
 	{
 		URLDownloadToFile, % URLscript,	% A_ScriptFullPath
 		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The script"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
+			. "`n" . TransA["The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually."]
 			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
+		FileDelete, % A_ScriptDir . "\Languages\English.txt" 		
 		IfMsgBox, Yes
 		{
 			Gui, VersionUpdate: Hide
@@ -904,17 +912,24 @@ F_VerUpdCheckServ(param*)
 			RegExMatch(A_LoopField, "\d+.\d+.\d+", ServerVer)
 			Break
 		}
-	if (param[1] = "OnStartUp")	;tu jestem
+	Switch param[1]
 	{
-		if (ServerVer != AppVersion)
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["On start-up the local version of"] . A_Space . SubStr(A_ScriptName, 1, -4) . A_Space . TransA["was compared with repository version and difference was discovered:"] 
-				. "`n`n" . TransA["Local version:"]  . A_Tab . A_Tab . AppVersion
-				. "`n" .   TransA["Repository version:"] . A_Tab . A_Tab . ServerVer
-		return		
+		Case "OnStartUp":
+			if (ServerVer != AppVersion)
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["On start-up the local version of"] . A_Space . SubStr(A_ScriptName, 1, -4) . A_Space . TransA["was compared with repository version and difference was discovered:"] 
+					. "`n`n" . TransA["Local version:"]  . A_Tab . A_Tab . AppVersion
+					. "`n" .   TransA["Repository version:"] . A_Tab . A_Tab . ServerVer
+			whr := ""		
+			return
+		Case "ReturnResult":
+			whr := ""
+			if (ServerVer != AppVersion)
+				return true
+		Default:
+			whr := ""
+			GuiControl, , % IdVerUpd4, % ServerVer
+			return
 	}
-	else
-		GuiControl, , % IdVerUpd4, % ServerVer
-	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ShorcutDefinition()
@@ -5083,6 +5098,7 @@ The application										= The application
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
 The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure? = The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure?
 The default											= The default
+The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually. = The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually.
 The executable file is prepared by Ahk2Exe and compressed by mpress.exe: = The executable file is prepared by Ahk2Exe and compressed by mpress.exe:
 The executable file is prepared by Ahk2Exe and compressed by upx.exe: = The executable file is prepared by Ahk2Exe and compressed by upx.exe:
 The executable file is prepared by Ahk2Exe, but not compressed:	= The executable file is prepared by Ahk2Exe, but not compressed:
