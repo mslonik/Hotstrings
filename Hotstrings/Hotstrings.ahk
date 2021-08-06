@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.1.1"
+global AppVersion				:= "3.2.0"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -110,6 +110,21 @@ global ini_HotstringUndo			:= true
 IniRead, ini_HotstringUndo,				% HADConfig, Configuration, HotstringUndo,			1
 global ini_ShowIntro			:= true
 IniRead, ini_ShowIntro,					% HADConfig, Configuration, ShowIntro,				1	;GUI with introduction to Hotstrings application.
+global ini_CheckRepo			:= false
+IniRead, ini_CheckRepo,					% HADConfig, Configuration, CheckRepo,				% A_Space
+if (!ini_CheckRepo)	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+{
+	ini_CheckRepo := false
+	IniWrite, % ini_CheckRepo, % HADConfig, Configuration, CheckRepo
+}
+global ini_DownloadRepo			:= false
+IniRead, ini_DownloadRepo,				% HADConfig, Configuration, DownloadRepo,			% A_Space
+if (!ini_DownloadRepo) ;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+{
+	ini_DownloadRepo := false
+	IniWrite, % ini_DownloadRepo, % HADConfig, Configuration, DownloadRepo
+}
+
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
 F_LoadSignalingParams()
 
@@ -397,7 +412,7 @@ Menu,	AboutHelpSub,	Add,	% TransA["About this application..."],		F_GuiAbout
 Menu,	AboutHelpSub,	Add
 Menu,	AboutHelpSub,	Add, % TransA["Show intro"],					L_ShowIntro
 Menu,	AboutHelpSub,	Add
-Menu,	AboutHelpSub,	Add, % TransA["Version / Update"],				F_VersionUpdate	;tu jestem
+Menu,	AboutHelpSub,	Add, % TransA["Version / Update"],				F_GuiVersionUpdate
 
 Menu, 	HSMenu,			Add, % TransA["Application"],				:AppSubmenu
 Menu, 	HSMenu, 			Add, % TransA["About / Help"], 			:AboutHelpSub
@@ -405,7 +420,13 @@ Gui, 	HS3: Menu, HSMenu
 Gui, 	HS4: Menu, HSMenu
 
 F_GuiAbout_CreateObjects()
+F_GuiVersionUpdate_CreateObjects()
 F_GuiAbout_DetermineConstraints()
+F_GuiVersionUpdate_DetermineConstraints()
+
+;*[One]
+if (ini_CheckRepo)
+	F_VerUpdCheckServ("OnStartUp")
 
 IniRead, ini_GuiReload, 						% HADConfig, GraphicalUserInterface, GuiReload
 if (ini_GuiReload) and (v_Param != "l")
@@ -724,6 +745,37 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_GuiVersionUpdate()
+{
+	global ;assume-global mode
+	local FoundPos := ""
+		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,NewWinPosX := 0, NewWinPosY := 0
+	
+	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
+		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, VersionUpdate: Show, Hide Center AutoSize
+	
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . VersionUpdateHwnd
+	DetectHiddenWindows, Off
+	if (Window1W)
+	{
+		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+		Gui, VersionUpdate: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Version / Update"]
+	}
+	else
+	{
+		if (v_Param = "l")
+			Gui, VersionUpdate: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Version / Update"]
+		else
+			Gui, VersionUpdate: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Version / Update"]
+	}
+	return  
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiVersionUpdate_DetermineConstraints()
 {
 	global	;assume-global mode
@@ -733,6 +785,7 @@ F_GuiVersionUpdate_DetermineConstraints()
 		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
 		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
 							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+		,WhichIsWider := 0
 	
 ; Determine constraints, according to mock-up
 	v_xNext := c_xmarg
@@ -741,56 +794,132 @@ F_GuiVersionUpdate_DetermineConstraints()
 	v_yNext += HofText
 	GuiControl, Move, % IdVerUpd3, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdVerUpd3
-	v_xNext := v_OutVarTempX + v_OutVarTempW
+	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
 	GuiControl, Move, % IdVerUpd4, % "x" . v_xNext . "y" . v_yNext
 	v_yNext := c_ymarg
 	GuiControl, Move, % IdVerUpd2, % "x" . v_xNext . "y" . v_yNext
-	v_yNext := v_OutVarTempY + HofText
+	v_yNext := v_OutVarTempY + HofText + c_ymarg
 	v_xNext := c_xmarg
 	GuiControl, Move, % IdVerUpdCheckServ, % "x" . v_xNext . "y" . v_yNext
 	v_yNext += HofButton + c_ymarg
-	GuiControl, Move, % IdIdVerUpdDownload, % "x" . v_xNext . "y" . v_yNext
+	GuiControl, Move, % IdVerUpdDownload, % "x" . v_xNext . "y" . v_yNext
+	GuiControlGet, v_OutVarTemp1, Pos, % IdVerUpdCheckServ
+	GuiControlGet, v_OutVarTemp2, Pos, % IdVerUpdDownload
+	WhichIsWider := Max(v_OutVarTemp1W, v_OutVarTemp2W)
+	v_xNext := v_OutVarTemp1X + WhichIsWider + 2 * c_xmarg
+	v_yNext := v_OutVarTemp1Y
+	GuiControl, Move, % IdVerUpdCheckOnStart, % "x" . v_xNext . "y" . v_yNext
+	v_yNext := v_OutVarTemp2Y
+	GuiControl, Move, % IdVerUpdDwnlOnStart, % "x" . v_xNext . "y" . v_yNext
+	
+	if (ini_CheckRepo)
+		GuiControl,, % IdVerUpdCheckOnStart, 
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiVersionUpdate_CreateObjects()
 {
 	global	;assume-global mode
-	local	ServerVer := "???"
+	local	ServerVer := "?.??.??"
 
 	;1. Prepare MyAbout Gui
-	Gui, VersionUpdate: New, 		-Resize +HwndMyAboutGuiHwnd +Owner -MaximizeBox -MinimizeBox
+	Gui, VersionUpdate: New, 	-Resize +HwndVersionUpdateHwnd +Owner -MaximizeBox -MinimizeBox
 	Gui, VersionUpdate: Margin,	% c_xmarg, % c_ymarg
 	Gui,	VersionUpdate: Color,	% c_WindowColor, % c_ControlColor
 	
 	;2. Prepare all text objects according to mock-up.
-	Gui, VersionUpdate: Add, 		Text,    x0 y0 HwndIdVerUpd1,											% TransA["Local version: "]
-	Gui, VersionUpdate: Add, 		Text,    x0 y0 HwndIdVerUpd2, 										% AppVersion
-	Gui, VersionUpdate: Add, 		Text,    x0 y0 HwndIdVerUpd3,											% TransA["Repository version: "]
-	Gui, VersionUpdate: Add, 		Text,    x0 y0 HwndIdVerUpd4, 										% ServerVer
-	Gui, VersionUpdate: Add, 		Button,  x0 y0 HwndIdVerUpdCheckServ gF_VerUpdCheckServ,					% TransA["Check repository version"]
-	Gui, VersionUpdate: Add, 		Button,  x0 y0 HwndIdVerUpdDownload  gF_VerUpdDownload,					% TransA["Download repository version"]
+	Gui,	VersionUpdate: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd1,											% TransA["Local version:"]
+	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd2, 										% AppVersion
+	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd3,										% TransA["Repository version:"]
+	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd4, 										% ServerVer
+	Gui, VersionUpdate: Add, 	Button,  	x0 y0 HwndIdVerUpdCheckServ gF_VerUpdCheckServ,					% TransA["Check repository version"]
+	Gui, VersionUpdate: Add, 	Button,  	x0 y0 HwndIdVerUpdDownload  gF_VerUpdDownload,					% TransA["Download repository version"]
+	Gui, VersionUpdate: Add,		Checkbox,	x0 y0 HwndIdVerUpdCheckOnStart gF_CheckUpdOnStart Checked%ini_CheckRepo%,	% TransA["Check if update is available on startup?"]
+	Gui, VersionUpdate: Add,		Checkbox, x0 y0 HwndIdVerUpdDwnlOnStart gF_DwnlUpdOnStart Checked%ini_DownloadRepo%,	% TransA["Download if update is available on startup?"]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_VerUpdDownload()
+F_DwnlUpdOnStart()
 {
 	global	;assume-global mode
 	
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_VerUpdCheckServ()
+F_CheckUpdOnStart() 
 {
 	global	;assume-global mode
+	ini_CheckRepo := !ini_CheckRepo
+	Iniwrite, % ini_CheckRepo, % HADConfig, Configuration, CheckRepo
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_VerUpdDownload()	
+{
+	global	;assume-global mode
+	local	URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk"
+			,URLexe := "https://github.com/mslonik/Hotstrings/blob/master/Hotstrings/Hotstrings.exe"
 	
+	if (A_IsCompiled)
+	{
+		URLDownloadToFile, % URLexe, 		% A_ScriptFullPath
+		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The application"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
+			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
+		IfMsgBox, Yes
+		{
+			Gui, VersionUpdate: Hide
+			F_Reload()
+		}
+		return
+	}
+	else
+	{
+		URLDownloadToFile, % URLscript,	% A_ScriptFullPath
+		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The script"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
+			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
+		IfMsgBox, Yes
+		{
+			Gui, VersionUpdate: Hide
+			F_Reload()
+		}
+		return
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_VerUpdCheckServ(param*)	
+{
+	global	;assume-global mode
+	local	whr := "", URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk", ToBeFiltered := "", ServerVer := "", StartingPos := 0
+	
+	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+	whr.Open("GET", URLscript, true)
+	whr.Send()	; Using 'true' above and the call below allows the script to remain responsive.
+	whr.WaitForResponse()
+	ToBeFiltered := whr.ResponseText
+	
+	Loop, Parse, ToBeFiltered, `n
+		if (InStr(A_LoopField, "AppVersion"))
+		{
+			RegExMatch(A_LoopField, "\d+.\d+.\d+", ServerVer)
+			Break
+		}
+	if (param[1] = "OnStartUp")	;tu jestem
+	{
+		if (ServerVer != AppVersion)
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["On start-up the local version of"] . A_Space . SubStr(A_ScriptName, 1, -4) . A_Space . TransA["was compared with repository version and difference was discovered:"] 
+				. "`n`n" . TransA["Local version:"]  . A_Tab . A_Tab . AppVersion
+				. "`n" .   TransA["Repository version:"] . A_Tab . A_Tab . ServerVer
+		return		
+	}
+	else
+		GuiControl, , % IdVerUpd4, % ServerVer
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ShorcutDefinition()
 {
 	global	;assume-global mode
-	
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -817,7 +946,7 @@ F_Sort_a_Triggers()
 F_DownloadPublicLibraries()
 {
 	global	;assume-global mode
-	local	ToBeFiltered := "",	Result := "",	ToBeDownloaded := [], DownloadedFile := ""
+	local	ToBeFiltered := "",	Result := "",	ToBeDownloaded := [], DownloadedFile := "", whr := ""
 			,URLconst 	:= "https://gitHub.com/mslonik/Hotstrings/blob/master/Hotstrings/Libraries/", temp := ""
 			,URLraw 		:= "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Libraries/"
 	
@@ -4249,6 +4378,12 @@ F_Reload()
 					Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
 					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
 				}
+				Default:	;used when file was downloaded from GitHub repository
+				Switch A_IsCompiled
+				{
+					Case % true:	Run, % A_ScriptFullPath 
+					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
+				}
 			}
 		}
 		else
@@ -4345,6 +4480,8 @@ F_CheckCreateConfigIni()
 ClipBoardPasteDelay=300
 HotstringUndo=1
 ShowIntro=1
+CheckRepo=0
+DownloadRepo=0
 [Event_BasicHotstring]
 OHTtEn=1
 OHTD=2000
@@ -4719,6 +4856,8 @@ Cancel 												= Cancel
 Case Sensitive (C) 										= Case Sensitive (C)
 Case-Conforming										= Case-Conforming
 Change language 										= Change language
+Check if update is available on startup?					= Check if update is available on startup?
+Check repository version									= Check repository version
 Choose existing hotstring library file before saving new (triggerstring, hotstring) definition!	= Choose existing hotstring library file before saving new (triggerstring, hotstring) definition!
 Choose (.ahk) file containing (triggerstring, hotstring) definitions for import	= Choose (.ahk) file containing (triggerstring, hotstring) definitions for import
 Choose library file (.csv) for export 						= Choose library file (.csv) for export
@@ -4747,6 +4886,7 @@ Conversion of .csv library file into new .ahk file containing dynamic (triggerst
 Converted												= Converted
 Copy clipboard content into ""Enter hotstring""				= Copy clipboard content into ""Enter hotstring""
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
+Download if update is available on startup?					= Download if update is available on startup?
 Download public libraries								= Download public libraries
 Do you want to delete it?								= Do you want to delete it?
 Do you want to proceed? 									= Do you want to proceed?
@@ -4760,6 +4900,7 @@ DISABLED												= DISABLED
 Dot . 												= Dot .
 Do you want to reload application now?						= Do you want to reload application now?
 doesn't exist in application folder						= doesn't exist in application folder
+Download repository version								= Download repository version
 Dynamic hotstrings 										= &Dynamic hotstrings
 Edit Hotstrings 										= Edit Hotstrings
 Enable												= Enable
@@ -4841,6 +4982,7 @@ Loaded hotstrings: 										= Loaded hotstrings:
 Loading hotstrings from libraries... 						= Loading hotstrings from libraries...
 Loading imported library. Please wait...					= Loading imported library. Please wait...
 Loaded												= Loaded
+Local version:											= Local version:
 Max. no. of shown tips									= Max. no. of shown tips
 Maximum number of shown triggerstring tips				= Maximum number of shown triggerstring tips
 Menu hotstring is triggered								= Menu hotstring is triggered
@@ -4856,6 +4998,7 @@ Not Case-Conforming (C1)									= Not Case-Conforming (C1)
 Number of characters for tips 							= &Number of characters for tips
 of													= of
 OK													= &OK
+On start-up the local version of							= On start-up the local version of
 Open libraries folder in Explorer							= Open libraries folder in Explorer
 Opening Curly Bracket { 									= Opening Curly Bracket {
 Opening Round Bracket ( 									= Opening Round Bracket (
@@ -4876,6 +5019,7 @@ Reload in default mode									= Reload in default mode
 Reload in silent mode									= Reload in silent mode
 Remove Config.ini										= Remove Config.ini
 Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
+Repository version:										= Repository version:
 Reset Recognizer (Z)									= Reset Recognizer (Z)
 )"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
 	TransConst .= "`n
@@ -4935,6 +5079,7 @@ Style of GUI											= Style of GUI
 Such file already exists									= Such file already exists
 Suspend Hotkeys										= Suspend Hotkeys
 Tab 													= Tab 
+The application										= The application
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
 The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure? = The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure?
 The default											= The default
@@ -4950,6 +5095,7 @@ The file path is: 										= The file path is:
 the following line is found:								= the following line is found:
 There is no Libraries subfolder and no lbrary (*.csv) file exists! = There is no Libraries subfolder and no lbrary (*.csv) file exists!
 The parameter Language in section [GraphicalUserInterface] of Config.ini is missing. = The parameter Language in section [GraphicalUserInterface] of Config.ini is missing.
+The script											= The script
 The selected file is empty. Process of import will be interrupted. = The selected file is empty. Process of import will be interrupted.
 The (triggerstring, hotstring) definitions have been uploaded from library file = The (triggerstring, hotstring) definitions have been uploaded from library file
 The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory = The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory
@@ -4984,6 +5130,8 @@ Undid the last hotstring 								= Undid the last hotstring
 Version / Update										= Version / Update
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
+was compared with repository version and difference was discovered:	= was compared with repository version and difference was discovered:
+was successfully downloaded.								= was successfully downloaded.
 Welcome to Hotstrings application!							= Welcome to Hotstrings application!
 When ""basic hotsring"" event takes place, sound is emitted according to the following settings. = When ""basic hotsring"" event takes place, sound is emitted according to the following settings.
 When ""hotstring menu"" event takes place, sound is emitted according to the following settings. = When ""hotstring menu"" event takes place, sound is emitted according to the following settings.
@@ -4993,6 +5141,7 @@ When timeout is set, the tooltip ""Undid the last hotstring!"" will dissapear af
 When timeout is set, the triggerstring tip(s) will dissapear after time reaches it. = When timeout is set, the triggerstring tip(s) will dissapear after time reaches it.
 When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
 Would you like to download the icon file?					= Would you like to download the icon file?
+Would you like now to reload it in order to run the just downloaded version? = Would you like now to reload it in order to run the just downloaded version?
 Yes													= Yes
 ""Basic hotstring"" sound duration [ms]						= ""Basic hotstring"" sound duration [ms]
 ""Basic hotstring"" sound frequency						= ""Basic hotstring"" sound frequency
@@ -5506,7 +5655,6 @@ F_GuiMain_CreateObject()
 }
 	
 ; ------------------------------------------------------------------------------------------------------------------------------------
-	
 F_GuiMain_DefineConstants()
 {
 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
@@ -6173,9 +6321,7 @@ F_GuiAbout_CreateObjects()
 	Gui, MyAbout: Add,		Picture, x0 y0 HwndIdAboutPicture w96 h96, 										% AppIcon
 	return
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiAbout_DetermineConstraints()
 {
 	global ;assume-global mode
@@ -6229,8 +6375,7 @@ F_GuiAbout_DetermineConstraints()
 	GuiControl, Move, % IdAboutPicture, % "x" . v_xNext . "y" . v_yNext 
 	return
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_GuiAbout()
 {
 	global ;assume-global mode
@@ -6239,7 +6384,7 @@ F_GuiAbout()
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
 	
-	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd))
+	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	Gui, MyAbout: Show, Hide Center AutoSize
 	
@@ -7803,14 +7948,14 @@ HS3GuiEscape:
 	ini_WhichGui := "HS3"
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	HS4GuiClose:
-	HS4GuiEscape:
+HS4GuiClose:
+HS4GuiEscape:
 	Gui,		HS4: Show, Hide
 	ini_WhichGui := "HS4"
-	return
+return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	MSPGuiClose:	
-	MSPGuiEscape:
+MSPGuiClose:	
+MSPGuiEscape:
 	
 	Switch A_ThisMenu
 	{
@@ -7854,11 +7999,15 @@ return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	MonGuiEscape:
-	MonGuiClose:
-	Gui, Mon:Destroy
-	return
-	
+MonGuiEscape:
+MonGuiClose:
+	Gui, Mon: Destroy
+return
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+VersionUpdateGuiEscape:
+VersionUpdateGuiClose:
+	Gui, VersionUpdate: Hide
+return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ChangeLanguage()
 {
