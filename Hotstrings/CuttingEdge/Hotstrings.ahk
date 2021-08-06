@@ -110,6 +110,21 @@ global ini_HotstringUndo			:= true
 IniRead, ini_HotstringUndo,				% HADConfig, Configuration, HotstringUndo,			1
 global ini_ShowIntro			:= true
 IniRead, ini_ShowIntro,					% HADConfig, Configuration, ShowIntro,				1	;GUI with introduction to Hotstrings application.
+global ini_CheckRepo			:= false
+IniRead, ini_CheckRepo,					% HADConfig, Configuration, CheckRepo,				% A_Space
+if (!ini_CheckRepo)	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+{
+	ini_CheckRepo := false
+	IniWrite, % ini_CheckRepo, % HADConfig, Configuration, CheckRepo
+}
+global ini_DownloadRepo			:= false
+IniRead, ini_DownloadRepo,				% HADConfig, Configuration, DownloadRepo,			% A_Space
+if (!ini_DownloadRepo) ;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+{
+	ini_DownloadRepo := false
+	IniWrite, % ini_DownloadRepo, % HADConfig, Configuration, DownloadRepo
+}
+
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
 F_LoadSignalingParams()
 
@@ -408,6 +423,10 @@ F_GuiAbout_CreateObjects()
 F_GuiVersionUpdate_CreateObjects()
 F_GuiAbout_DetermineConstraints()
 F_GuiVersionUpdate_DetermineConstraints()
+
+;*[One]
+if (ini_CheckRepo)
+	F_VerUpdCheckServ("OnStartUp")
 
 IniRead, ini_GuiReload, 						% HADConfig, GraphicalUserInterface, GuiReload
 if (ini_GuiReload) and (v_Param != "l")
@@ -792,6 +811,9 @@ F_GuiVersionUpdate_DetermineConstraints()
 	GuiControl, Move, % IdVerUpdCheckOnStart, % "x" . v_xNext . "y" . v_yNext
 	v_yNext := v_OutVarTemp2Y
 	GuiControl, Move, % IdVerUpdDwnlOnStart, % "x" . v_xNext . "y" . v_yNext
+	
+	if (ini_CheckRepo)
+		GuiControl,, % IdVerUpdCheckOnStart, 
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -813,8 +835,8 @@ F_GuiVersionUpdate_CreateObjects()
 	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd4, 										% ServerVer
 	Gui, VersionUpdate: Add, 	Button,  	x0 y0 HwndIdVerUpdCheckServ gF_VerUpdCheckServ,					% TransA["Check repository version"]
 	Gui, VersionUpdate: Add, 	Button,  	x0 y0 HwndIdVerUpdDownload  gF_VerUpdDownload,					% TransA["Download repository version"]
-	Gui, VersionUpdate: Add,		Checkbox,	x0 y0 HwndIdVerUpdCheckOnStart gF_CheckUpdOnStart,				% TransA["Check if update is available on startup?"]
-	Gui, VersionUpdate: Add,		Checkbox, x0 y0 HwndIdVerUpdDwnlOnStart gF_DwnlUpdOnStart,					% TransA["Download if update is available on startup?"]
+	Gui, VersionUpdate: Add,		Checkbox,	x0 y0 HwndIdVerUpdCheckOnStart gF_CheckUpdOnStart Checked%ini_CheckRepo%,	% TransA["Check if update is available on startup?"]
+	Gui, VersionUpdate: Add,		Checkbox, x0 y0 HwndIdVerUpdDwnlOnStart gF_DwnlUpdOnStart Checked%ini_DownloadRepo%,	% TransA["Download if update is available on startup?"]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -825,20 +847,47 @@ F_DwnlUpdOnStart()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_CheckUpdOnStart()
+F_CheckUpdOnStart() 
 {
 	global	;assume-global mode
-	
+	ini_CheckRepo := !ini_CheckRepo
+	Iniwrite, % ini_CheckRepo, % HADConfig, Configuration, CheckRepo
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_VerUpdDownload()	
 {
 	global	;assume-global mode
-	return
+	local	URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk"
+			,URLexe := "https://github.com/mslonik/Hotstrings/blob/master/Hotstrings/Hotstrings.exe"
+	
+	if (A_IsCompiled)
+	{
+		URLDownloadToFile, % URLexe, 		% A_ScriptFullPath
+		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The application"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
+			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
+		IfMsgBox, Yes
+		{
+			Gui, VersionUpdate: Hide
+			F_Reload()
+		}
+		return
+	}
+	else
+	{
+		URLDownloadToFile, % URLscript,	% A_ScriptFullPath
+		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The script"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
+			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
+		IfMsgBox, Yes
+		{
+			Gui, VersionUpdate: Hide
+			F_Reload()
+		}
+		return
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_VerUpdCheckServ()	;tu jestem
+F_VerUpdCheckServ(param*)	
 {
 	global	;assume-global mode
 	local	whr := "", URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk", ToBeFiltered := "", ServerVer := "", StartingPos := 0
@@ -855,7 +904,16 @@ F_VerUpdCheckServ()	;tu jestem
 			RegExMatch(A_LoopField, "\d+.\d+.\d+", ServerVer)
 			Break
 		}
-	GuiControl, , % IdVerUpd4, % ServerVer
+	if (param[1] = "OnStartUp")	;tu jestem
+	{
+		if (ServerVer != AppVersion)
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["On start-up the local version of"] . A_Space . SubStr(A_ScriptName, 1, -4) . A_Space . TransA["was compared with repository version and difference was discovered:"] 
+				. "`n`n" . TransA["Local version:"]  . A_Tab . A_Tab . AppVersion
+				. "`n" .   TransA["Repository version:"] . A_Tab . A_Tab . ServerVer
+		return		
+	}
+	else
+		GuiControl, , % IdVerUpd4, % ServerVer
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4320,6 +4378,12 @@ F_Reload()
 					Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
 					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
 				}
+				Default:	;used when file was downloaded from GitHub repository
+				Switch A_IsCompiled
+				{
+					Case % true:	Run, % A_ScriptFullPath 
+					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
+				}
 			}
 		}
 		else
@@ -4416,6 +4480,8 @@ F_CheckCreateConfigIni()
 ClipBoardPasteDelay=300
 HotstringUndo=1
 ShowIntro=1
+CheckRepo=0
+DownloadRepo=0
 [Event_BasicHotstring]
 OHTtEn=1
 OHTD=2000
@@ -4932,6 +4998,7 @@ Not Case-Conforming (C1)									= Not Case-Conforming (C1)
 Number of characters for tips 							= &Number of characters for tips
 of													= of
 OK													= &OK
+On start-up the local version of							= On start-up the local version of
 Open libraries folder in Explorer							= Open libraries folder in Explorer
 Opening Curly Bracket { 									= Opening Curly Bracket {
 Opening Round Bracket ( 									= Opening Round Bracket (
@@ -5012,6 +5079,7 @@ Style of GUI											= Style of GUI
 Such file already exists									= Such file already exists
 Suspend Hotkeys										= Suspend Hotkeys
 Tab 													= Tab 
+The application										= The application
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
 The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure? = The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure?
 The default											= The default
@@ -5027,6 +5095,7 @@ The file path is: 										= The file path is:
 the following line is found:								= the following line is found:
 There is no Libraries subfolder and no lbrary (*.csv) file exists! = There is no Libraries subfolder and no lbrary (*.csv) file exists!
 The parameter Language in section [GraphicalUserInterface] of Config.ini is missing. = The parameter Language in section [GraphicalUserInterface] of Config.ini is missing.
+The script											= The script
 The selected file is empty. Process of import will be interrupted. = The selected file is empty. Process of import will be interrupted.
 The (triggerstring, hotstring) definitions have been uploaded from library file = The (triggerstring, hotstring) definitions have been uploaded from library file
 The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory = The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory
@@ -5061,6 +5130,8 @@ Undid the last hotstring 								= Undid the last hotstring
 Version / Update										= Version / Update
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
+was compared with repository version and difference was discovered:	= was compared with repository version and difference was discovered:
+was successfully downloaded.								= was successfully downloaded.
 Welcome to Hotstrings application!							= Welcome to Hotstrings application!
 When ""basic hotsring"" event takes place, sound is emitted according to the following settings. = When ""basic hotsring"" event takes place, sound is emitted according to the following settings.
 When ""hotstring menu"" event takes place, sound is emitted according to the following settings. = When ""hotstring menu"" event takes place, sound is emitted according to the following settings.
@@ -5070,6 +5141,7 @@ When timeout is set, the tooltip ""Undid the last hotstring!"" will dissapear af
 When timeout is set, the triggerstring tip(s) will dissapear after time reaches it. = When timeout is set, the triggerstring tip(s) will dissapear after time reaches it.
 When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
 Would you like to download the icon file?					= Would you like to download the icon file?
+Would you like now to reload it in order to run the just downloaded version? = Would you like now to reload it in order to run the just downloaded version?
 Yes													= Yes
 ""Basic hotstring"" sound duration [ms]						= ""Basic hotstring"" sound duration [ms]
 ""Basic hotstring"" sound frequency						= ""Basic hotstring"" sound frequency
