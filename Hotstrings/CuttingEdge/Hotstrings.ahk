@@ -125,6 +125,14 @@ if (!ini_DownloadRepo) ;thanks to this trick existing Config.ini do not have to 
 	IniWrite, % ini_DownloadRepo, % HADConfig, Configuration, DownloadRepo
 }
 
+global ini_HK_Main				:= "#^h"
+IniRead, ini_HK_Main,					% HADConfig, Configuration, HK_Main,				% A_Space
+if (!ini_HK_Main)
+{
+	ini_HK_Main := "#^h"
+	Iniwrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
+}
+
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
 F_LoadSignalingParams()
 
@@ -330,9 +338,9 @@ F_EventSoEn()
 F_EventTtPos()
 F_AmountOfCharacterTips()
 
-Menu, Submenu1Shortcuts, Add, % TransA["Call this Graphical User Interface"],				F_ShorcutDefinition
-Menu, Submenu1Shortcuts, Add, % TransA["Copy clipboard content into ""Enter hotstring"""],	F_ShorcutDefinition
-Menu, Submenu1Shortcuts, Add, % TransA["Undo the last hotstring"],						F_ShorcutDefinition
+Menu, Submenu1Shortcuts, Add, % TransA["Call Graphical User Interface"],					F_GuiShortDef
+Menu, Submenu1Shortcuts, Add, % TransA["Copy clipboard content into ""Enter hotstring"""],	F_GuiShortDef
+Menu, Submenu1Shortcuts, Add, % TransA["Undo the last hotstring"],						F_GuiShortDef
 Menu, Submenu1, 		Add, % TransA["Shortcut (hotkey) definitions"],					:Submenu1Shortcuts
 Menu, Submenu1, 		Add
 Menu, Submenu1Choice, 	Add, % TransA["Enable"], 							F_MUndo
@@ -371,9 +379,6 @@ Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 ;Menu, Submenu1,		Add, Turn off all events tooltips,				F_AllTooltipsOff
 Menu, Submenu1,		Add
 Menu, Submenu1,  	   	Add, % TransA["Toggle EndChars"], 				:SubmenuEndChars
-Menu, Submenu1,		Add
-Menu, Submenu1,		Add, % TransA["Version / Update"],				F_GuiVersionUpdate
-
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 				:Submenu1
 Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 		F_Searching
@@ -407,6 +412,8 @@ Menu,	AutoStartSub,	Add,	% TransA["Silent mode"],					F_AddToAutostart
 Menu,	AppSubmenu, 	Add, % TransA["Add to Autostart"],				:AutoStartSub
 
 F_CompileSubmenu()
+
+Menu, AppSubmenu,		Add, % TransA["Version / Update"],				F_GuiVersionUpdate
 
 Menu,	AboutHelpSub,	Add,	% TransA["Help: Hotstrings application"],	GuiAboutLink1
 Menu,	AboutHelpSub,	Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"], GuiAboutLink2
@@ -843,7 +850,7 @@ F_GuiVersionUpdate_CreateObjects()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_DwnlUpdOnStart()	;tu jestem
+F_DwnlUpdOnStart()	
 {
 	global	;assume-global mode
 	ini_DownloadRepo := !ini_DownloadRepo
@@ -932,10 +939,137 @@ F_VerUpdCheckServ(param*)
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ShorcutDefinition()
+F_GuiShortDef_DetermineConstraints()
 {
 	global	;assume-global mode
 	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiShortDef_CreateObjects()	;tu jestem
+{
+	global	;assume-global mode
+	local	IfWinModifier := false, ShortcutLong := "", Mini := false
+	
+	;1. Prepare MyAbout Gui
+	Gui, ShortDef: New, 	-Resize +HwndShortDefHwnd +Owner -MaximizeBox -MinimizeBox
+	Gui, ShortDef: Margin,	% c_xmarg, % c_ymarg
+	Gui,	ShortDef: Color,	% c_WindowColor, % c_ControlColor
+	
+	;2. Prepare all text objects according to mock-up.
+	Gui,	ShortDef: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,										% TransA["Shortcut (hotkey) definition"] . ":" . A_Space . TransA["Call Graphical User Interface (GUI)"]
+	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT2,										% TransA["Current shortcut (hotkey):"]
+	Loop, Parse, ini_HK_Main
+	{
+		Mini := false
+		Switch A_LoopField
+		{
+			Case "^":	
+				Mini := true
+				ShortcutLong .= "Ctrl"
+			Case "!":	
+				Mini := true
+				ShortcutLong .= "Alt"	
+			Case "+":	
+				Mini := true
+				ShortcutLong .= "Shift"
+			Case "#":
+				Mini := true
+				ShortcutLong .= "Win"
+			Default:
+				ShortcutLong .= A_LoopField
+		}
+		if (Mini)
+			ShortcutLong .= " + "
+	}
+	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 										% ShortcutLong
+	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT4,										ⓘ
+	F_HK_CallGUIInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_CallGUIInfo"])
+	GuiControl +g, % IdShortDefT4, % F_HK_CallGUIInfo
+	if (InStr(ini_HK_Main, "#"))
+		IfWinModifier := true
+	Gui, ShortDef: Add,		Checkbox,	x0 y0 HwndIdShortDefCB1 gF_ShortDefCB1 Checked%IfWinModifier%,		% TransA["Windows key modifier"]
+	Gui, ShortDef: Add,		Hotkey,	x0 y0 HwndIdShortDefH1 gF_ShortDefH1,							% ini_HK_Main
+	Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT5,										ⓘ
+	F_HK_GeneralInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_GeneralInfo"])
+	GuiControl +g, % IdShortDefT5, % F_HK_GeneralInfo
+	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB1 gF_ShortDefB1_SaveHotkey,					% TransA["Save hotkey"]
+	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB2 gF_ShortDefB2_RestoreHotkey,				% TransA["Restore default hotkey"]
+	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HK_GeneralInfo()
+{
+	global	;assume-global mode
+	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HK_CallGUIInfo()
+{
+	global	;assume-global mode
+	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ShortDefB2_RestoreHotkey()
+{
+	global	;assume-global mode
+	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ShortDefB1_SaveHotkey()
+{
+	global	;assume-global mode
+	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ShortDefH1()
+{
+	global	;assume-global mode
+	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ShortDefCB1()
+{
+	global	;assume-global mode
+	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiShortDef()	
+{
+	global	;assume-global mode
+	local FoundPos := ""
+		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,NewWinPosX := 0, NewWinPosY := 0
+	
+	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
+		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, ShortDef: Show, Hide Center AutoSize
+	
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . ShortDefHwnd
+	DetectHiddenWindows, Off
+	if (Window1W)
+	{
+		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+		Gui, ShortDef: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Shortcut (hotkey) definition"]
+	}
+	else
+	{
+		if (v_Param = "l")
+			Gui, ShortDef: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Shortcut (hotkey) definition"]
+		else
+			Gui, ShortDef: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Shortcut (hotkey) definition"]
+	}
+	return  
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Sort_a_Triggers()
@@ -4497,6 +4631,7 @@ HotstringUndo=1
 ShowIntro=1
 CheckRepo=0
 DownloadRepo=0
+HK_Main=#^h
 [Event_BasicHotstring]
 OHTtEn=1
 OHTD=2000
@@ -4866,7 +5001,7 @@ Backslash \ 											= Backslash \
 Basic hotstring is triggered								= Basic hotstring is triggered
 Built with Autohotkey.exe version							= Built with Autohotkey.exe version
 By length 											= By length
-Call this Graphical User Interface							= Call this Graphical User Interface
+Call Graphical User Interface								= Call Graphical User Interface
 Cancel 												= Cancel
 Case Sensitive (C) 										= Case Sensitive (C)
 Case-Conforming										= Case-Conforming
