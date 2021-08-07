@@ -431,8 +431,9 @@ F_GuiAbout_CreateObjects()
 F_GuiVersionUpdate_CreateObjects()
 F_GuiAbout_DetermineConstraints()
 F_GuiVersionUpdate_DetermineConstraints()
+F_GuiShortDef_CreateObjects()
+F_GuiShortDef_DetermineConstraints()
 
-;*[One]
 if (ini_CheckRepo)
 	F_VerUpdCheckServ("OnStartUp")
 if (ini_DownloadRepo) and (F_VerUpdCheckServ("ReturnResult"))
@@ -822,8 +823,8 @@ F_GuiVersionUpdate_DetermineConstraints()
 	v_yNext := v_OutVarTemp2Y
 	GuiControl, Move, % IdVerUpdDwnlOnStart, % "x" . v_xNext . "y" . v_yNext
 	
-	if (ini_CheckRepo)
-		GuiControl,, % IdVerUpdCheckOnStart, 
+	;if (ini_CheckRepo)
+		;GuiControl,, % IdVerUpdCheckOnStart, 
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -939,16 +940,53 @@ F_VerUpdCheckServ(param*)
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiShortDef_DetermineConstraints()
+F_GuiShortDef_DetermineConstraints() ;tu jestem
 {
 	global	;assume-global mode
+;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
+		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
+		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
+							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+		,WhichIsWider := 0
+	
+; Determine constraints, according to mock-up
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdShortDefT1, % "x" . v_xNext . "y" . v_yNext		;Call Graphical User Interface
+	v_yNext += 2 * HofText
+	GuiControl, Move, % IdShortDefT2, % "x" . v_xNext . "y" . v_yNext		;Current shortcut (hotkey):
+	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefT2
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 3 * c_xmarg
+	GuiControl, Move, % IdShortDefT3, % "x" . v_xNext . "y" . v_yNext		;% ShortcutLong
+	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefT3
+	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
+	GuiControl, Move, % IdShortDefT4, % "x" . v_xNext . "y" . v_yNext		;ⓘ
+	v_xNext := c_xmarg
+	v_yNext += 2 * HofText
+	GuiControl, Move, % IdShortDefT5, % "x" . v_xNext . "y" . v_yNext
+	v_yNext += HofText
+	GuiControl, Move, % IdShortDefCB1, % "x" . v_xNext . "y" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefCB1
+	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
+	GuiControl, Move, % IdShortDefH1, % "x" . v_xNext . "y" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefH1
+	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
+	GuiControl, Move, % IdShortDefT6, % "x" . v_xNext . "y" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += 2 * HofText
+	GuiControl, Move, % IdShortDefB1, % "x" . v_xNext . "y" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefB1
+	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
+	GuiControl, Move, % IdShortDefB2, % "x" . v_xNext . "y" . v_yNext
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiShortDef_CreateObjects()	;tu jestem
+F_GuiShortDef_CreateObjects()	
 {
 	global	;assume-global mode
-	local	IfWinModifier := false, ShortcutLong := "", Mini := false
+	local	IfWinModifier := false, ShortcutLong := "", Mini := false, HotkeyVar := ""
 	
 	;1. Prepare MyAbout Gui
 	Gui, ShortDef: New, 	-Resize +HwndShortDefHwnd +Owner -MaximizeBox -MinimizeBox
@@ -957,7 +995,7 @@ F_GuiShortDef_CreateObjects()	;tu jestem
 	
 	;2. Prepare all text objects according to mock-up.
 	Gui,	ShortDef: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,										% TransA["Shortcut (hotkey) definition"] . ":" . A_Space . TransA["Call Graphical User Interface (GUI)"]
+	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,										% TransA["Call Graphical User Interface"]
 	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT2,										% TransA["Current shortcut (hotkey):"]
 	Loop, Parse, ini_HK_Main
 	{
@@ -965,19 +1003,20 @@ F_GuiShortDef_CreateObjects()	;tu jestem
 		Switch A_LoopField
 		{
 			Case "^":	
-				Mini := true
-				ShortcutLong .= "Ctrl"
+			Mini := true
+			ShortcutLong .= "Ctrl"
 			Case "!":	
-				Mini := true
-				ShortcutLong .= "Alt"	
+			Mini := true
+			ShortcutLong .= "Alt"	
 			Case "+":	
-				Mini := true
-				ShortcutLong .= "Shift"
+			Mini := true
+			ShortcutLong .= "Shift"
 			Case "#":
-				Mini := true
-				ShortcutLong .= "Win"
+			Mini := true
+			ShortcutLong .= "Win"
 			Default:
-				ShortcutLong .= A_LoopField
+				StringUpper, HotkeyVar, A_LoopField 
+				ShortcutLong .= HotkeyVar
 		}
 		if (Mini)
 			ShortcutLong .= " + "
@@ -986,13 +1025,20 @@ F_GuiShortDef_CreateObjects()	;tu jestem
 	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT4,										ⓘ
 	F_HK_CallGUIInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_CallGUIInfo"])
 	GuiControl +g, % IdShortDefT4, % F_HK_CallGUIInfo
+	
 	if (InStr(ini_HK_Main, "#"))
+	{
 		IfWinModifier := true
+		HotkeyVar := StrReplace(ini_HK_Main, "#")
+	}
+	else
+		HotkeyVar := ini_HK_Main
+	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT5,										% TransA["New shortcut (hotkey)"] . ":"
 	Gui, ShortDef: Add,		Checkbox,	x0 y0 HwndIdShortDefCB1 gF_ShortDefCB1 Checked%IfWinModifier%,		% TransA["Windows key modifier"]
-	Gui, ShortDef: Add,		Hotkey,	x0 y0 HwndIdShortDefH1 gF_ShortDefH1,							% ini_HK_Main
-	Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT5,										ⓘ
+	Gui, ShortDef: Add,		Hotkey,	x0 y0 HwndIdShortDefH1 gF_ShortDefH1,							% HotkeyVar
+	Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT6,										ⓘ
 	F_HK_GeneralInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_GeneralInfo"])
-	GuiControl +g, % IdShortDefT5, % F_HK_GeneralInfo
+	GuiControl +g, % IdShortDefT6, % F_HK_GeneralInfo
 	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB1 gF_ShortDefB1_SaveHotkey,					% TransA["Save hotkey"]
 	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB2 gF_ShortDefB2_RestoreHotkey,				% TransA["Restore default hotkey"]
 	
@@ -5035,6 +5081,7 @@ Conversion of .csv library file into new .ahk file containing static (triggerstr
 Conversion of .csv library file into new .ahk file containing dynamic (triggerstring, hotstring) definitions = Conversion of .csv library file into new .ahk file containing dynamic (triggerstring, hotstring) definitions
 Converted												= Converted
 Copy clipboard content into ""Enter hotstring""				= Copy clipboard content into ""Enter hotstring""
+Current shortcut (hotkey):								= Current shortcut (hotkey):
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
 Download if update is available on startup?					= Download if update is available on startup?
 Download public libraries								= Download public libraries
@@ -5140,6 +5187,7 @@ Menu position: caret									= Menu position: caret
 Menu position: cursor									= Menu position: cursor
 Minus - 												= Minus -
 Move (F8)												= Move (F8)
+New shortcut (hotkey)									= New shortcut (hotkey)
 No													= No
 No Backspace (B0) 										= No Backspace (B0)
 No EndChar (O) 										= No EndChar (O)
@@ -5171,10 +5219,12 @@ Remove Config.ini										= Remove Config.ini
 Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
 Repository version:										= Repository version:
 Reset Recognizer (Z)									= Reset Recognizer (Z)
+Restore default hotkey									= Restore default hotkey
 )"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
 	TransConst .= "`n
 (Join`n `
 Sandbox (F6)											= Sandbox (F6)
+Save hotkey											= Save hotkey
 Save position of application window	 					= &Save position of application window
 Saved												= Saved
 Saving of sorted content into .csv file (library)				= Saving of sorted content into .csv file (library)
@@ -5200,6 +5250,7 @@ Set parameters of triggerstring sound						= Set parameters of triggerstring sou
 Set sound parameters for event ""basic hotstring""			= Set sound parameters for event ""basic hotstring""
 Set sound parameters for event ""hotstring menu""				= Set sound parameters for event ""hotstring menu""
 Set sound parameters for event ""undo hotstring""				= Set sound parameters for event ""undo hotstring""
+Shortcut (hotkey) definition								= Shortcut (hotkey) definition
 Shortcut (hotkey) definitions								= Shortcut (hotkey) definitions
 Show full GUI (F4)										= Show full GUI (F4)
 Show intro											= Show intro
@@ -5284,6 +5335,7 @@ Warning, code generated automatically for definitions based on menu, see documen
 was compared with repository version and difference was discovered:	= was compared with repository version and difference was discovered:
 was successfully downloaded.								= was successfully downloaded.
 Welcome to Hotstrings application!							= Welcome to Hotstrings application!
+Windows key modifier									= Windows key modifier
 When ""basic hotsring"" event takes place, sound is emitted according to the following settings. = When ""basic hotsring"" event takes place, sound is emitted according to the following settings.
 When ""hotstring menu"" event takes place, sound is emitted according to the following settings. = When ""hotstring menu"" event takes place, sound is emitted according to the following settings.
 When ""undo hotstring"" event takes place, sound is emitted according to the following settings. = When ""undo hotstring"" event takes place, sound is emitted according to the following settings.
@@ -8141,18 +8193,22 @@ MSPGuiEscape:
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	~F7::
+~F7::
 	HSDelGuiEscape:
 	HSDelGuiClose:
 	IniWrite, %ini_CPDelay%, % HADConfig, Configuration, ClipBoardPasteDelay
 	Gui, HSDel: Destroy
-	return
+return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
 MonGuiEscape:
 MonGuiClose:
 	Gui, Mon: Destroy
+return
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ShortDefGuiEscape:
+ShortDefGuiClose:
+	Gui, ShortDef: Hide
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 VersionUpdateGuiEscape:
