@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.1.1"
+global AppVersion				:= "3.3.0"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -105,11 +105,67 @@ F_LoadSizeOfMargin()
 F_LoadFontType()
 
 global ini_CPDelay 				:= 300		;1-1000 [ms], default: 300
-IniRead, ini_CPDelay, 					% HADConfig, Configuration, ClipBoardPasteDelay,		300
+IniRead, ini_CPDelay, 					% HADConfig, Configuration, ClipBoardPasteDelay,		% A_Space
+if (!ini_CPDelay)	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+{
+	ini_CPDelay := 300
+	IniWrite, % ini_CPDelay, % HADConfig, Configuration, ClipBoardPasteDelay 
+}
 global ini_HotstringUndo			:= true
-IniRead, ini_HotstringUndo,				% HADConfig, Configuration, HotstringUndo,			1
+IniRead, ini_HotstringUndo,				% HADConfig, Configuration, HotstringUndo,			% A_Space
+if (ini_HotstringUndo = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+{
+	ini_HotstringUndo := true
+	Iniwrite, % ini_HotstringUndo, % HADConfig, Configuration, HotstringUndo
+}
 global ini_ShowIntro			:= true
-IniRead, ini_ShowIntro,					% HADConfig, Configuration, ShowIntro,				1	;GUI with introduction to Hotstrings application.
+IniRead, ini_ShowIntro,					% HADConfig, Configuration, ShowIntro,				% A_Space	;GUI with introduction to Hotstrings application.
+if (ini_ShowIntro = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+{
+	ini_ShowIntro := true
+	Iniwrite, % ini_ShowIntro, % HADConfig, Configuration, ShowIntro
+}
+global ini_CheckRepo			:= false
+IniRead, ini_CheckRepo,					% HADConfig, Configuration, CheckRepo,				% A_Space
+if (ini_CheckRepo = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+{
+	ini_CheckRepo := false
+	IniWrite, % ini_CheckRepo, % HADConfig, Configuration, CheckRepo
+}
+global ini_DownloadRepo			:= false
+IniRead, ini_DownloadRepo,				% HADConfig, Configuration, DownloadRepo,			% A_Space
+if (ini_DownloadRepo = "") ;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+{
+	ini_DownloadRepo := false
+	IniWrite, % ini_DownloadRepo, % HADConfig, Configuration, DownloadRepo
+}
+
+global ini_HK_Main				:= "#^h"
+IniRead, ini_HK_Main,					% HADConfig, Configuration, HK_Main,				% A_Space
+if (!ini_HK_Main)	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+{
+	ini_HK_Main := "#^h"
+	IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
+}
+Hotkey, % ini_HK_Main, L_GUIInit, On
+
+global ini_HK_IntoEdit			:= "^c"
+IniRead, ini_HK_IntoEdit,				% HADConfig, Configuration, HK_IntoEdit,			% A_Space
+if (!ini_HK_IntoEdit)	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+{
+	ini_HK_IntoEdit := "~^c"
+	IniWrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
+}
+
+global ini_HK_UndoLH			:= "^F12"
+IniRead, ini_HK_UndoLH,					% HADConfig, Configuration, HK_UndoLH,				% A_Space
+if (!ini_HK_UndoLH)		;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+{
+	ini_HK_UndoLH := "^F12"
+	Iniwrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
+}
+Hotkey, % ini_HK_UndoLH, F_Undo, On	;tu jestem
+
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
 F_LoadSignalingParams()
 
@@ -176,6 +232,12 @@ F_GuiHS4_Redraw()
 F_GuiShowIntro()
 
 F_UpdateSelHotLibDDL()
+
+Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+Hotkey, IfWinExist
 
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
 Gui, 1: Default	;this line is necessary to not show too many Guis on time of loading hotstrings from library
@@ -262,8 +324,8 @@ Menu, OrdHisTrig,		Add, % TransA["Sound parameters"],				F_EventSoPar
 ;Menu, MenuHisTrig,		Add, % TransA["Tooltip disable"],				F_EventEnDis
 ;Menu, MenuHisTrig,		Add
 ;Menu, MenuHisTrig,		Add, Tooltip,								F_GuiSetTooltipTimeout
-Menu, MenuHisTrig,		Add, % TransA["Menu position: caret"],					F_EventTtPos
-Menu, MenuHisTrig,		Add, % TransA["Menu position: cursor"],					F_EventTtPos
+Menu, MenuHisTrig,		Add, % TransA["Menu position: caret"],			F_EventTtPos
+Menu, MenuHisTrig,		Add, % TransA["Menu position: cursor"],			F_EventTtPos
 Menu, MenuHisTrig,		Add
 Menu, MenuHisTrig,		Add, % TransA["Sound enable"],				F_EventSoEn
 Menu, MenuHisTrig,		Add, % TransA["Sound disable"],				F_EventSoEn
@@ -315,14 +377,14 @@ F_EventSoEn()
 F_EventTtPos()
 F_AmountOfCharacterTips()
 
-Menu, Submenu1Shortcuts, Add, % TransA["Call this Graphical User Interface"],				F_ShorcutDefinition
-Menu, Submenu1Shortcuts, Add, % TransA["Copy clipboard content into ""Enter hotstring"""],	F_ShorcutDefinition
-Menu, Submenu1Shortcuts, Add, % TransA["Undo the last hotstring"],						F_ShorcutDefinition
+Menu, Submenu1Shortcuts, Add, % TransA["Call Graphical User Interface"],					F_GuiShortDef
+Menu, Submenu1Shortcuts, Add, % TransA["Copy clipboard content into ""Enter hotstring"""],	F_GuiShortDef
+Menu, Submenu1Shortcuts, Add, % TransA["Undo the last hotstring"],						F_GuiShortDef
 Menu, Submenu1, 		Add, % TransA["Shortcut (hotkey) definitions"],					:Submenu1Shortcuts
 Menu, Submenu1, 		Add
 Menu, Submenu1Choice, 	Add, % TransA["Enable"], 							F_MUndo
 Menu, Submenu1Choice, 	Add, % TransA["Disable"],							F_MUndo
-Menu, Submenu1, 		Add, % TransA["Undo the last hotstring [Ctrl+F12]"], 		:Submenu1Choice
+Menu, Submenu1, 		Add, % TransA["Undo the last hotstring"], 		:Submenu1Choice
 Menu, Submenu1, 		Add
 F_MUndo()
 ;Warning: order of SubmenuEndChars have to be alphabetical. Keep an eye on it. This is because after change of language specific menu items are related with associative array which also keeps to alphabetical order.
@@ -390,14 +452,14 @@ Menu,	AppSubmenu, 	Add, % TransA["Add to Autostart"],				:AutoStartSub
 
 F_CompileSubmenu()
 
+Menu, AppSubmenu,		Add, % TransA["Version / Update"],				F_GuiVersionUpdate
+
 Menu,	AboutHelpSub,	Add,	% TransA["Help: Hotstrings application"],	GuiAboutLink1
 Menu,	AboutHelpSub,	Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"], GuiAboutLink2
 Menu,	AboutHelpSub,	Add
 Menu,	AboutHelpSub,	Add,	% TransA["About this application..."],		F_GuiAbout
 Menu,	AboutHelpSub,	Add
 Menu,	AboutHelpSub,	Add, % TransA["Show intro"],					L_ShowIntro
-Menu,	AboutHelpSub,	Add
-Menu,	AboutHelpSub,	Add, % TransA["Version / Update"],				F_VersionUpdate	;tu jestem
 
 Menu, 	HSMenu,			Add, % TransA["Application"],				:AppSubmenu
 Menu, 	HSMenu, 			Add, % TransA["About / Help"], 			:AboutHelpSub
@@ -405,7 +467,14 @@ Gui, 	HS3: Menu, HSMenu
 Gui, 	HS4: Menu, HSMenu
 
 F_GuiAbout_CreateObjects()
+F_GuiVersionUpdate_CreateObjects()
 F_GuiAbout_DetermineConstraints()
+F_GuiVersionUpdate_DetermineConstraints()
+
+if (ini_CheckRepo)
+	F_VerUpdCheckServ("OnStartUp")
+if (ini_DownloadRepo) and (F_VerUpdCheckServ("ReturnResult"))
+	F_VerUpdDownload()
 
 IniRead, ini_GuiReload, 						% HADConfig, GraphicalUserInterface, GuiReload
 if (ini_GuiReload) and (v_Param != "l")
@@ -487,12 +556,9 @@ else
 	}
 }
 return
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#if WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows exist at the moment.
-
-~^c::			; copy to edit field "Enter hotstring" content of Clipboard. 
+;#if WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows exist at the moment.
+;~^c::			; copy to edit field "Enter hotstring" content of Clipboard. 
 F_PasteFromClipboard()
 {
 	global	;assume-global mode
@@ -507,7 +573,7 @@ F_PasteFromClipboard()
 		IfMsgBox, Cancel
 			return
 		IfMsgBox, Yes
-			ContentOfClipboard := StrReplace(ContentOfClipboard, "`r`n", "")
+			ContentOfClipboard := StrReplace(ContentOfClipboard, "`r`n", " ")
 		IfMsgBox, No
 			ContentOfClipboard := StrReplace(ContentOfClipboard, "`r`n", "``n")
 	}
@@ -516,7 +582,7 @@ F_PasteFromClipboard()
 	Gui, % A_DefaultGui . ":" . A_Space . "Show"
 	return
 }
-#if
+;#if
 
 #if WinActive("ahk_id" HS3GuiHwnd) or WinActive("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows are active at the moment. 
 
@@ -724,6 +790,37 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_GuiVersionUpdate()
+{
+	global ;assume-global mode
+	local FoundPos := ""
+		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,NewWinPosX := 0, NewWinPosY := 0
+	
+	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
+		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, VersionUpdate: Show, Hide Center AutoSize
+	
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . VersionUpdateHwnd
+	DetectHiddenWindows, Off
+	if (Window1W)
+	{
+		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+		Gui, VersionUpdate: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Version / Update"]
+	}
+	else
+	{
+		if (v_Param = "l")
+			Gui, VersionUpdate: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Version / Update"]
+		else
+			Gui, VersionUpdate: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Version / Update"]
+	}
+	return  
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiVersionUpdate_DetermineConstraints()
 {
 	global	;assume-global mode
@@ -733,6 +830,7 @@ F_GuiVersionUpdate_DetermineConstraints()
 		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
 		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
 							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+		,WhichIsWider := 0
 	
 ; Determine constraints, according to mock-up
 	v_xNext := c_xmarg
@@ -741,57 +839,462 @@ F_GuiVersionUpdate_DetermineConstraints()
 	v_yNext += HofText
 	GuiControl, Move, % IdVerUpd3, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdVerUpd3
-	v_xNext := v_OutVarTempX + v_OutVarTempW
+	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
 	GuiControl, Move, % IdVerUpd4, % "x" . v_xNext . "y" . v_yNext
 	v_yNext := c_ymarg
 	GuiControl, Move, % IdVerUpd2, % "x" . v_xNext . "y" . v_yNext
-	v_yNext := v_OutVarTempY + HofText
+	v_yNext := v_OutVarTempY + HofText + c_ymarg
 	v_xNext := c_xmarg
 	GuiControl, Move, % IdVerUpdCheckServ, % "x" . v_xNext . "y" . v_yNext
 	v_yNext += HofButton + c_ymarg
-	GuiControl, Move, % IdIdVerUpdDownload, % "x" . v_xNext . "y" . v_yNext
+	GuiControl, Move, % IdVerUpdDownload, % "x" . v_xNext . "y" . v_yNext
+	GuiControlGet, v_OutVarTemp1, Pos, % IdVerUpdCheckServ
+	GuiControlGet, v_OutVarTemp2, Pos, % IdVerUpdDownload
+	WhichIsWider := Max(v_OutVarTemp1W, v_OutVarTemp2W)
+	v_xNext := v_OutVarTemp1X + WhichIsWider + 2 * c_xmarg
+	v_yNext := v_OutVarTemp1Y
+	GuiControl, Move, % IdVerUpdCheckOnStart, % "x" . v_xNext . "y" . v_yNext
+	v_yNext := v_OutVarTemp2Y
+	GuiControl, Move, % IdVerUpdDwnlOnStart, % "x" . v_xNext . "y" . v_yNext
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiVersionUpdate_CreateObjects()
 {
 	global	;assume-global mode
-	local	ServerVer := "???"
+	local	ServerVer := "?.??.??"
 
 	;1. Prepare MyAbout Gui
-	Gui, VersionUpdate: New, 		-Resize +HwndMyAboutGuiHwnd +Owner -MaximizeBox -MinimizeBox
+	Gui, VersionUpdate: New, 	-Resize +HwndVersionUpdateHwnd +Owner -MaximizeBox -MinimizeBox
 	Gui, VersionUpdate: Margin,	% c_xmarg, % c_ymarg
 	Gui,	VersionUpdate: Color,	% c_WindowColor, % c_ControlColor
 	
 	;2. Prepare all text objects according to mock-up.
-	Gui, VersionUpdate: Add, 		Text,    x0 y0 HwndIdVerUpd1,											% TransA["Local version: "]
-	Gui, VersionUpdate: Add, 		Text,    x0 y0 HwndIdVerUpd2, 										% AppVersion
-	Gui, VersionUpdate: Add, 		Text,    x0 y0 HwndIdVerUpd3,											% TransA["Repository version: "]
-	Gui, VersionUpdate: Add, 		Text,    x0 y0 HwndIdVerUpd4, 										% ServerVer
-	Gui, VersionUpdate: Add, 		Button,  x0 y0 HwndIdVerUpdCheckServ gF_VerUpdCheckServ,					% TransA["Check repository version"]
-	Gui, VersionUpdate: Add, 		Button,  x0 y0 HwndIdVerUpdDownload  gF_VerUpdDownload,					% TransA["Download repository version"]
+	Gui,	VersionUpdate: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd1,											% TransA["Local version:"]
+	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd2, 										% AppVersion
+	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd3,										% TransA["Repository version:"]
+	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd4, 										% ServerVer
+	Gui, VersionUpdate: Add, 	Button,  	x0 y0 HwndIdVerUpdCheckServ gF_VerUpdCheckServ,					% TransA["Check repository version"]
+	Gui, VersionUpdate: Add, 	Button,  	x0 y0 HwndIdVerUpdDownload  gF_VerUpdDownload,					% TransA["Download repository version"]
+	Gui, VersionUpdate: Add,		Checkbox,	x0 y0 HwndIdVerUpdCheckOnStart gF_CheckUpdOnStart Checked%ini_CheckRepo%,	% TransA["Check if update is available on startup?"]
+	Gui, VersionUpdate: Add,		Checkbox, x0 y0 HwndIdVerUpdDwnlOnStart gF_DwnlUpdOnStart Checked%ini_DownloadRepo%,	% TransA["Download if update is available on startup?"]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_VerUpdDownload()
+F_DwnlUpdOnStart()	
 {
 	global	;assume-global mode
-	
+	ini_DownloadRepo := !ini_DownloadRepo
+	IniWrite, % ini_DownloadRepo, % HADConfig, Configuration, DownloadRepo
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_VerUpdCheckServ()
+F_CheckUpdOnStart() 
 {
 	global	;assume-global mode
-	
+	ini_CheckRepo := !ini_CheckRepo
+	Iniwrite, % ini_CheckRepo, % HADConfig, Configuration, CheckRepo
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ShorcutDefinition()
+F_VerUpdDownload()	
 {
 	global	;assume-global mode
+	local	URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk"
+			,URLexe := "https://github.com/mslonik/Hotstrings/blob/master/Hotstrings/Hotstrings.exe"
 	
+	if (A_IsCompiled)
+	{
+		URLDownloadToFile, % URLexe, 		% A_ScriptFullPath
+		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The application"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
+			. "`n" . TransA["The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually."]
+			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
+		FileDelete, % A_ScriptDir . "\Languages\English.txt" 	
+		IfMsgBox, Yes
+		{
+			Gui, VersionUpdate: Hide
+			F_Reload()
+		}
+		return
+	}
+	else
+	{
+		URLDownloadToFile, % URLscript,	% A_ScriptFullPath
+		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The script"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
+			. "`n" . TransA["The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually."]
+			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
+		FileDelete, % A_ScriptDir . "\Languages\English.txt" 		
+		IfMsgBox, Yes
+		{
+			Gui, VersionUpdate: Hide
+			F_Reload()
+		}
+		return
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_VerUpdCheckServ(param*)	
+{
+	global	;assume-global mode
+	local	whr := "", URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk", ToBeFiltered := "", ServerVer := "", StartingPos := 0
+	
+	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+	whr.Open("GET", URLscript, true)
+	whr.Send()	; Using 'true' above and the call below allows the script to remain responsive.
+	whr.WaitForResponse()
+	ToBeFiltered := whr.ResponseText
+	
+	Loop, Parse, ToBeFiltered, `n
+		if (InStr(A_LoopField, "AppVersion"))
+		{
+			RegExMatch(A_LoopField, "\d+.\d+.\d+", ServerVer)
+			Break
+		}
+	Switch param[1]
+	{
+		Case "OnStartUp":
+			if (ServerVer != AppVersion)
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["On start-up the local version of"] . A_Space . SubStr(A_ScriptName, 1, -4) . A_Space . TransA["was compared with repository version and difference was discovered:"] 
+					. "`n`n" . TransA["Local version:"]  . A_Tab . A_Tab . AppVersion
+					. "`n" .   TransA["Repository version:"] . A_Tab . A_Tab . ServerVer
+			whr := ""		
+			return
+		Case "ReturnResult":
+			whr := ""
+			if (ServerVer != AppVersion)
+				return true
+		Default:
+			whr := ""
+			GuiControl, , % IdVerUpd4, % ServerVer
+			return
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiShortDef_DetermineConstraints() 
+{
+	global	;assume-global mode
+;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
+		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
+		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
+							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+		,WhichIsWider := 0
+	
+; Determine constraints, according to mock-up
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdShortDefT1, % "x" . v_xNext . "y" . v_yNext		;Call Graphical User Interface
+	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefT1
+	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
+	GuiControl, Move, % IdShortDefT4, % "x" . v_xNext . "y" . v_yNext		;ⓘ
+	v_xNext := c_xmarg
+	v_yNext += 2 * HofText
+	GuiControl, Move, % IdShortDefT2, % "x" . v_xNext . "y" . v_yNext		;Current shortcut (hotkey):
+	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefT2
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdShortDefT3, % "x" . v_xNext . "y" . v_yNext		;% ShortcutLong
+	v_xNext := c_xmarg
+	v_yNext += 2 * HofText
+	GuiControl, Move, % IdShortDefT5, % "x" . v_xNext . "y" . v_yNext		;New shortcut (hotkey)
+	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefT5
+	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
+	GuiControl, Move, % IdShortDefT6, % "x" . v_xNext . "y" . v_yNext		;ⓘ
+	v_xNext := c_xmarg
+	v_yNext += 2 * HofText
+	GuiControl, Move, % IdShortDefCB1, % "x" . v_xNext . "y" . v_yNext		;Windows key modifier
+	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefCB1						
+	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
+	GuiControl, Move, % IdShortDefH1, % "x" . v_xNext . "y" . v_yNext		;HotkeyVar
+	GuiControlGet, v_OutVarTemp1, Pos, % IdShortDefH1						;reserve more space for text string
+	v_wNext := v_OutVarTemp1W
+	GuiControl, Move, % IdShortDefT3, % "w" . v_wNext
+	v_xNext := c_xmarg
+	v_yNext += 3 * HofText
+	GuiControl, Move, % IdShortDefB1, % "x" . v_xNext . "y" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefB1
+	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
+	GuiControl, Move, % IdShortDefB2, % "x" . v_xNext . "y" . v_yNext
 	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ParseHotkey(ini_HK_Main)
+{
+	local Mini := false, ShortcutLong := "", HotkeyVar := ""
+	
+	Loop, Parse, ini_HK_Main
+	{
+		Mini := false
+		Switch A_LoopField
+		{
+			Case "^":	
+			Mini := true
+			ShortcutLong .= "Ctrl"
+			Case "!":	
+			Mini := true
+			ShortcutLong .= "Alt"	
+			Case "+":	
+			Mini := true
+			ShortcutLong .= "Shift"
+			Case "#":
+			Mini := true
+			ShortcutLong .= "Win"
+			Default:
+			StringUpper, HotkeyVar, A_LoopField 
+			ShortcutLong .= HotkeyVar
+		}
+		if (Mini)
+			ShortcutLong .= " + "
+	}
+	;MsgBox,, ShortcutLong, % ShortcutLong
+	return ShortcutLong
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiShortDef_CreateObjects()
+{
+	global	;assume-global mode
+	local	IfWinModifier := false, Mini := false, HotkeyVar := ""
+	
+	;1. Prepare Gui
+	/*
+		Switch A_ThisMenuItem
+		{
+			Case % TransA["Call Graphical User Interface"]:
+				Gui, ShortDef: New, 	-Resize +HwndShortDef1Hwnd +Owner -MaximizeBox -MinimizeBox
+			Case % TransA["Copy clipboard content into ""Enter hotstring"""]:	
+				Gui, ShortDef: New, 	-Resize +HwndShortDef2Hwnd +Owner -MaximizeBox -MinimizeBox
+			Case % TransA["Undo the last hotstring"]:
+				Gui, ShortDef: New, 	-Resize +HwndShortDef3Hwnd +Owner -MaximizeBox -MinimizeBox
+		}
+	*/
+	Gui, ShortDef: New, 	-Resize +HwndShortDefHwnd +Owner -MaximizeBox -MinimizeBox
+	Gui, ShortDef: Margin,	% c_xmarg, % c_ymarg
+	Gui,	ShortDef: Color,	% c_WindowColor, % c_ControlColor
+	
+	;2. Prepare all text objects according to mock-up.
+	Gui,	ShortDef: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	Switch A_ThisMenuItem
+	{
+		Case % TransA["Call Graphical User Interface"]:
+			Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,										% TransA["Call Graphical User Interface"]
+		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:	
+			Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,										% TransA["Copy clipboard content into ""Enter hotstring"""]
+		Case % TransA["Undo the last hotstring"]:
+			Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,										% TransA["Undo the last hotstring"]
+	}
+	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT2,										% TransA["Current shortcut (hotkey):"]
+	
+	Switch A_ThisMenuItem
+	{
+		Case % TransA["Call Graphical User Interface"]:
+			Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 										% F_ParseHotkey(ini_HK_Main)
+		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:	
+			Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 										% F_ParseHotkey(ini_HK_IntoEdit)
+		Case % TransA["Undo the last hotstring"]:
+			Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 										% F_ParseHotkey(ini_HK_UndoLH)
+	}
+	Gui, ShortDef: Font, 	% "s" . c_FontSize + 2 . A_Space . "cBlue",								% c_FontType
+	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT4,										ⓘ
+	Gui,	ShortDef: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	Switch A_ThisMenuItem
+	{
+		Case % TransA["Call Graphical User Interface"]:
+			F_HK_CallGUIInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_CallGUIInfo"])
+			GuiControl +g, % IdShortDefT4, % F_HK_CallGUIInfo
+			if (InStr(ini_HK_Main, "#"))
+			{
+				IfWinModifier := true
+				HotkeyVar := StrReplace(ini_HK_Main, "#")
+			}
+			else
+				HotkeyVar := ini_HK_Main
+		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
+			F_HK_ClipCopyInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_ClipCopyInfo"])
+			GuiControl +g, % IdShortDefT4, % F_HK_ClipCopyInfo
+			if (InStr(ini_HK_IntoEdit, "#"))
+			{
+				IfWinModifier := true
+				HotkeyVar := StrReplace(ini_HK_IntoEdit, "#")
+			}
+			else
+				HotkeyVar := ini_HK_IntoEdit
+		Case % TransA["Undo the last hotstring"]:
+			F_HK_UndoInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_UndoInfo"])
+			GuiControl +g, % IdShortDefT4, % F_HK_UndoInfo
+			if (InStr(ini_HK_UndoLH, "#"))
+			{
+				IfWinModifier := true
+				HotkeyVar := StrReplace(ini_HK_UndoLH, "#")
+			}
+			else
+				HotkeyVar := ini_HK_UndoLH
+	}
+	
+	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT5,										% TransA["New shortcut (hotkey)"] . ":"
+	Gui, ShortDef: Add,		Checkbox,	x0 y0 HwndIdShortDefCB1 Checked%IfWinModifier%,					% TransA["Windows key modifier"]
+	Gui, ShortDef: Add,		Hotkey,	x0 y0 HwndIdShortDefH1,										% HotkeyVar
+	Gui, ShortDef: Font, 	% "s" . c_FontSize + 2 . A_Space . "cBlue",								% c_FontType
+	Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT6,										ⓘ
+	Gui,	ShortDef: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	F_HK_GeneralInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_GeneralInfo"])
+	GuiControl +g, % IdShortDefT6, % F_HK_GeneralInfo
+	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB1 gF_ShortDefB1_SaveHotkey,					% TransA["Save hotkey"]
+	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB2 gF_ShortDefB2_RestoreHotkey,				% TransA["Restore default hotkey"]
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ShortDefB2_RestoreHotkey()
+{
+	global	;assume-global mode
+	local	OldHotkey := "", WindowKey := false
+	
+	GuiControlGet, OldHotkey, , % IdShortDefT3
+	OldHotkey := StrReplace(OldHotkey, "Shift", "+")
+	OldHotkey := StrReplace(OldHotkey, "Ctrl", "^")
+	OldHotkey := StrReplace(OldHotkey, "Alt", "!")
+	OldHotkey := StrReplace(OldHotkey, "Win", "#")
+	OldHotkey := StrReplace(OldHotkey, "+")
+	OldHotkey := StrReplace(OldHotkey, " ")
+	Switch A_ThisMenuItem
+	{
+		Case % TransA["Call Graphical User Interface"]:
+			Hotkey, % OldHotkey, L_GUIInit, Off
+			ini_HK_Main := "#^h"
+			Hotkey, % ini_HK_Main, L_GUIInit, On
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main)
+			IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
+		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
+			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			Hotkey, IfWinExist
+			ini_HK_IntoEdit := "~^c"
+			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+			Hotkey, IfWinExist
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit)
+			IniWrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
+		Case % TransA["Undo the last hotstring"]:
+			if (ini_HotstringUndo)
+			{
+				Hotkey, % OldHotkey, 	F_Undo, Off
+				ini_HK_UndoLH := "^F12"
+				Hotkey, % ini_HK_UndoLH, F_Undo, On
+			}
+			else
+			{
+				Hotkey, % OldHotkey, 	F_Undo, Off
+				ini_HK_UndoLH := "^F12"
+				Hotkey, % ini_HK_UndoLH, F_Undo, Off
+			}
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH)
+			IniWrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ShortDefB1_SaveHotkey()	;tu jestem
+{
+	global	;assume-global mode
+	local	OldHotkey := "", WindowKey := false
+	
+	GuiControlGet, WindowKey, , % IdShortDefCB1
+	Switch A_ThisMenuItem
+	{
+		Case % TransA["Call Graphical User Interface"]:
+			GuiControlGet, ini_HK_Main, , % IdShortDefH1
+			if (WindowKey)
+				ini_HK_Main := "#" . ini_HK_Main
+			IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
+		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
+			GuiControlGet, ini_HK_IntoEdit, , % IdShortDefH1
+			if (WindowKey)
+				ini_HK_IntoEdit := "#" . ini_HK_IntoEdit
+			IniWrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
+		Case % TransA["Undo the last hotstring"]:
+			GuiControlGet, ini_HK_UndoLH, , % IdShortDefH1
+			if (WindowKey)
+				ini_HK_UndoLH := "#" . ini_HK_UndoLH
+			IniWrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
+	}
+	GuiControlGet, OldHotkey, , % IdShortDefT3
+	;OldHotkey := RegExReplace(OldHotkey, "(Ctrl)|(Shift)|(Win)|(\+)|( )")	;future: trick from forum after my question
+	OldHotkey := StrReplace(OldHotkey, "Shift", "+")
+	OldHotkey := StrReplace(OldHotkey, "Ctrl", "^")
+	OldHotkey := StrReplace(OldHotkey, "Alt", "!")
+	OldHotkey := StrReplace(OldHotkey, "Win", "#")
+	OldHotkey := StrReplace(OldHotkey, "+")
+	OldHotkey := StrReplace(OldHotkey, " ")
+	Switch A_ThisMenuItem
+	{
+		Case % TransA["Call Graphical User Interface"]:
+		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main)
+		Hotkey, % OldHotkey, L_GUIInit, Off
+		Hotkey, % ini_HK_Main, L_GUIInit, On
+		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit)
+			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			Hotkey, IfWinExist
+			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+			Hotkey, IfWinExist
+		Case % TransA["Undo the last hotstring"]:
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH)
+			if (ini_HotstringUndo)
+			{
+				Hotkey, % OldHotkey, 	F_Undo, Off
+				Hotkey, % ini_HK_UndoLH, F_Undo, On
+			}
+			else
+			{
+				Hotkey, % OldHotkey, 	F_Undo, Off
+				Hotkey, % ini_HK_UndoLH, F_Undo, Off
+			}
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiShortDef()	
+{
+	global	;assume-global mode
+	local FoundPos := ""
+		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,NewWinPosX := 0, NewWinPosY := 0
+	
+	F_GuiShortDef_CreateObjects()
+	F_GuiShortDef_DetermineConstraints()
+	
+	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
+		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, ShortDef: Show, Hide Center AutoSize
+	
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . ShortDefHwnd
+	DetectHiddenWindows, Off
+	if (Window1W)
+	{
+		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+		Gui, ShortDef: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Shortcut (hotkey) definition"]
+	}
+	else
+	{
+		if (v_Param = "l")
+			Gui, ShortDef: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Shortcut (hotkey) definition"]
+		else
+			Gui, ShortDef: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Shortcut (hotkey) definition"]
+	}
+	return  
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Sort_a_Triggers()
@@ -817,7 +1320,7 @@ F_Sort_a_Triggers()
 F_DownloadPublicLibraries()
 {
 	global	;assume-global mode
-	local	ToBeFiltered := "",	Result := "",	ToBeDownloaded := [], DownloadedFile := ""
+	local	ToBeFiltered := "",	Result := "",	ToBeDownloaded := [], DownloadedFile := "", whr := ""
 			,URLconst 	:= "https://gitHub.com/mslonik/Hotstrings/blob/master/Hotstrings/Libraries/", temp := ""
 			,URLraw 		:= "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Libraries/"
 	
@@ -1492,14 +1995,14 @@ F_MUndo()
 			Menu, Submenu1Choice, UnCheck, % TransA["Disable"]
 			Menu, Submenu1Choice, Check, % TransA["Enable"]
 			Menu, SigOfEvents, Enable, % TransA["Undid the last hotstring"]
-			Hotkey, $^F12, F_Undo, On	
+			Hotkey, % ini_HK_UndoLH, F_Undo, On	
 		}
 		else
 		{
 			Menu, Submenu1Choice, Check, % TransA["Disable"]
 			Menu, Submenu1Choice, UnCheck, % TransA["Enable"]
 			Menu, SigOfEvents, Disable, % TransA["Undid the last hotstring"]
-			Hotkey, $^F12, F_Undo, Off
+			Hotkey, % ini_HK_UndoLH, F_Undo, Off
 		}
 		OneTimeMemory := false	
 	}
@@ -1507,17 +2010,17 @@ F_MUndo()
 	{
 		if (ini_HotstringUndo)
 		{
-			Menu, Submenu1, Check, % TransA["Undo the last hotstring [Ctrl+F12]: disable"]
-			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring [Ctrl+F12]: enable"]
+			Menu, Submenu1, Check, % TransA["Undo the last hotstring: disable"]
+			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: enable"]
 			Menu, SigOfEvents, Disable, % TransA["Undid the last hotstring"]				
-			Hotkey, $^F12, F_Undo, Off
+			Hotkey, % ini_HK_UndoLH, F_Undo, Off
 		}
 		else
 		{
-			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring [Ctrl+F12]: disable"]
-			Menu, Submenu1, Check,  % TransA["Undo the last hotstring [Ctrl+F12]: enable"]
+			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: disable"]
+			Menu, Submenu1, Check,  % TransA["Undo the last hotstring: enable"]
 			Menu, SigOfEvents, Enable, % TransA["Undid the last hotstring"]				
-			Hotkey, $^F12, F_Undo, On
+			Hotkey, % ini_HK_UndoLH, F_Undo, On
 		}
 		ini_HotstringUndo := !(ini_HotstringUndo)
 		IniWrite, % ini_HotstringUndo, % HADConfig, Configuration, HotstringUndo
@@ -4144,41 +4647,44 @@ F_CompileSubmenu()
 	
 	if (FileExist(v_TempOutStr . "Ahk2Exe.exe"))
 	{
-		Menu, CompileSubmenu, Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
-		Menu,	AppSubmenu,		Add,	% TransA["Compile"],				:CompileSubmenu
-		;Menu, TraySubmenu,	  Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
+		Menu, AhkBitSubmenu,	Add, 64-bit,									F_Compile
+		Menu, AhkBitSubmenu,	Add,	32-bit,									F_Compile
+		Menu, CompileSubmenu, 	Add, % TransA["Standard executable (Ahk2Exe.exe)"], 	:AhkBitSubmenu
+		Menu,	AppSubmenu,	Add,	% TransA["Compile"],						:CompileSubmenu
 	}
 	if (FileExist(v_TempOutStr . "upx.exe"))
 	{
-		Menu, CompileSubmenu, Add, % TransA["Compressed executable (upx.exe)"], 	F_Compile
-		;Menu, TraySubmenu,	  Add, % TransA["Compressed executable (upx.exe)"], 	F_Compile
+		Menu, UpxBitSubmenu,	Add, 64-bit,									F_Compile
+		Menu, UpxBitSubmenu,	Add, 32-bit,									F_Compile
+		Menu, CompileSubmenu, 	Add, % TransA["Compressed executable (upx.exe)"], 	:UpxBitSubmenu
 	}
 	if (FileExist(v_TempOutStr . "mpress.exe"))
 	{
-		Menu, CompileSubmenu, Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
-		;Menu, TraySubmenu,	  Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
+		Menu, MpressBitSubmenu,	Add, 64-bit,									F_Compile
+		Menu, MpressBitSubmenu,	Add, 32-bit,									F_Compile
+		Menu, CompileSubmenu, 	Add, % TransA["Compressed executable (mpress.exe)"], 	:MpressBitSubmenu
 	}
 	if (!FileExist(A_AhkPath)) ;if AutoHotkey isn't installed
 	{
-		Menu, AppSubmenu,		Add,	% TransA["Compile"],			L_Compile
-		Menu,	AppSubmenu, Disable,							% TransA["Compile"]
+		Menu, AppSubmenu,		Add,	% TransA["Compile"],						L_Compile
+		Menu, AppSubmenu, 		Disable,										% TransA["Compile"]
 	}
-	;Menu,	Tray,			Add, % TransA["Compile"],				:TraySubmenu
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Compile()
-;https://www.autohotkey.com/boards/viewtopic.php?f=86&t=90196&p=398198#p398198
-{
+{	;https://www.autohotkey.com/boards/viewtopic.php?f=86&t=90196&p=398198#p398198
 	local v_TempOutStr := "" ;, v_TempOutStr2 := "", v_TempOutStr3 := ""
 	
 	SplitPath, A_AhkPath, ,v_TempOutStr
 	v_TempOutStr .= "\" . "Compiler" . "\" 
-	
-	Switch A_ThisMenuItem
+	Switch A_ThisMenu
 	{
-		Case TransA["Standard executable (Ahk2Exe.exe)"]:
-		RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
+		;Case TransA["Standard executable (Ahk2Exe.exe)"]:
+		Case "AhkBitSubmenu":
+		if (A_ThisMenuItem = "64-bit")
+		{
+			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in"       . A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out"      . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 				. A_Space . "/icon"     . A_Space . A_ScriptDir . "\" . AppIcon
@@ -4186,13 +4692,30 @@ F_Compile()
 				. A_Space . "/cp"       . A_Space . "65001"	;Unicode (UTF-8)
 				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" . A_Space . "0"
-		if (!ErrorLevel)		
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe, but not compressed:"]
+			if (!ErrorLevel)		
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe, but not compressed:"]
 					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
 					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
-		
-		Case TransA["Compressed executable (upx.exe)"]:
-		RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
+		}
+		if (A_ThisMenuItem = "32-bit")
+		{
+			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
+				. A_Space . "/in"       . A_Space . A_ScriptDir . "\" . A_ScriptName 
+				. A_Space . "/out"      . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+				. A_Space . "/icon"     . A_Space . A_ScriptDir . "\" . AppIcon
+				. A_Space . "/bin"      . A_Space . """" . v_TempOutStr . "Unicode 32-bit.bin" . """"
+				. A_Space . "/cp"       . A_Space . "65001"	;Unicode (UTF-8)
+				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
+				. A_Space . "/compress" . A_Space . "0"
+			if (!ErrorLevel)		
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe, but not compressed:"]
+					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 32-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
+					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
+		}
+		Case "UpxBitSubmenu":
+		if (A_ThisMenuItem = "64-bit")
+		{
+			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in"   	. A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out"  	. A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 				. A_Space . "/icon" 	. A_Space . A_ScriptDir . "\" . AppIcon 
@@ -4200,13 +4723,30 @@ F_Compile()
 				. A_Space . "/cp"   	. A_Space . "65001"	;Unicode (UTF-8)
 				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" 	. A_Space . "2" 
-		if (!ErrorLevel)		
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["The executable file is prepared by Ahk2Exe and compressed by upx.exe:"]
+			if (!ErrorLevel)		
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["The executable file is prepared by Ahk2Exe and compressed by upx.exe:"]
 					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
 					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
-		
-		Case TransA["Compressed executable (mpress.exe)"]:
-		RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
+		}
+		if (A_ThisMenuItem = "32-bit")
+		{
+			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
+				. A_Space . "/in"   	. A_Space . A_ScriptDir . "\" . A_ScriptName 
+				. A_Space . "/out"  	. A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+				. A_Space . "/icon" 	. A_Space . A_ScriptDir . "\" . AppIcon 
+				. A_Space . "/bin"      . A_Space . """" . v_TempOutStr . "Unicode 32-bit.bin" . """"
+				. A_Space . "/cp"   	. A_Space . "65001"	;Unicode (UTF-8)
+				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
+				. A_Space . "/compress" 	. A_Space . "2" 
+			if (!ErrorLevel)		
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["The executable file is prepared by Ahk2Exe and compressed by upx.exe:"]
+					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 32-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
+					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
+		}
+		Case "MpressBitSubmenu":
+		if (A_ThisMenuItem = "64-bit")
+		{
+			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 				. A_Space . "/icon" . A_Space . A_ScriptDir . "\" . AppIcon 
@@ -4214,10 +4754,26 @@ F_Compile()
 				. A_Space . "/cp"   	. A_Space . "65001"	;Unicode (UTF-8)
 				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" . A_Space . "1"
-		if (!ErrorLevel)
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe and compressed by mpress.exe:"]
+			if (!ErrorLevel)
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe and compressed by mpress.exe:"]
 					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
 					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
+		}
+		if (A_ThisMenuItem = "32-bit")
+		{
+			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
+				. A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName 
+				. A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+				. A_Space . "/icon" . A_Space . A_ScriptDir . "\" . AppIcon 
+				. A_Space . "/bin"      . A_Space . """" . v_TempOutStr . "Unicode 32-bit.bin" . """"
+				. A_Space . "/cp"   	. A_Space . "65001"	;Unicode (UTF-8)
+				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
+				. A_Space . "/compress" . A_Space . "1"
+			if (!ErrorLevel)
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe and compressed by mpress.exe:"]
+					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 32-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
+					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion			
+		}
 	}
 	return
 }
@@ -4248,6 +4804,12 @@ F_Reload()
 				{
 					Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
 					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
+				}
+				Default:	;used when file was downloaded from GitHub repository
+				Switch A_IsCompiled
+				{
+					Case % true:	Run, % A_ScriptFullPath 
+					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
 				}
 			}
 		}
@@ -4345,6 +4907,11 @@ F_CheckCreateConfigIni()
 ClipBoardPasteDelay=300
 HotstringUndo=1
 ShowIntro=1
+CheckRepo=0
+DownloadRepo=0
+HK_Main=#^h
+HK_IntoEdit=~^c
+HK_UndoLH=^F12
 [Event_BasicHotstring]
 OHTtEn=1
 OHTD=2000
@@ -4692,7 +5259,7 @@ F_LoadCreateTranslationTxt(decision*)
 ; The right column contains text strings which are replaced instead of left column definitions. Exchange text strings in right columnt with localized translations of text strings. 
 ; You don't have to remove lines starting with semicolon. Those lines won't be read by Hotstrings application.
 )"
-
+	
 	TransConst .= "`n`n
 (Join`n `			
 About / Help 											= &About / Help
@@ -4714,11 +5281,13 @@ Backslash \ 											= Backslash \
 Basic hotstring is triggered								= Basic hotstring is triggered
 Built with Autohotkey.exe version							= Built with Autohotkey.exe version
 By length 											= By length
-Call this Graphical User Interface							= Call this Graphical User Interface
+Call Graphical User Interface								= Call Graphical User Interface
 Cancel 												= Cancel
 Case Sensitive (C) 										= Case Sensitive (C)
 Case-Conforming										= Case-Conforming
 Change language 										= Change language
+Check if update is available on startup?					= Check if update is available on startup?
+Check repository version									= Check repository version
 Choose existing hotstring library file before saving new (triggerstring, hotstring) definition!	= Choose existing hotstring library file before saving new (triggerstring, hotstring) definition!
 Choose (.ahk) file containing (triggerstring, hotstring) definitions for import	= Choose (.ahk) file containing (triggerstring, hotstring) definitions for import
 Choose library file (.csv) for export 						= Choose library file (.csv) for export
@@ -4746,7 +5315,9 @@ Conversion of .csv library file into new .ahk file containing static (triggerstr
 Conversion of .csv library file into new .ahk file containing dynamic (triggerstring, hotstring) definitions = Conversion of .csv library file into new .ahk file containing dynamic (triggerstring, hotstring) definitions
 Converted												= Converted
 Copy clipboard content into ""Enter hotstring""				= Copy clipboard content into ""Enter hotstring""
+Current shortcut (hotkey):								= Current shortcut (hotkey):
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
+Download if update is available on startup?					= Download if update is available on startup?
 Download public libraries								= Download public libraries
 Do you want to delete it?								= Do you want to delete it?
 Do you want to proceed? 									= Do you want to proceed?
@@ -4760,6 +5331,7 @@ DISABLED												= DISABLED
 Dot . 												= Dot .
 Do you want to reload application now?						= Do you want to reload application now?
 doesn't exist in application folder						= doesn't exist in application folder
+Download repository version								= Download repository version
 Dynamic hotstrings 										= &Dynamic hotstrings
 Edit Hotstrings 										= Edit Hotstrings
 Enable												= Enable
@@ -4841,6 +5413,7 @@ Loaded hotstrings: 										= Loaded hotstrings:
 Loading hotstrings from libraries... 						= Loading hotstrings from libraries...
 Loading imported library. Please wait...					= Loading imported library. Please wait...
 Loaded												= Loaded
+Local version:											= Local version:
 Max. no. of shown tips									= Max. no. of shown tips
 Maximum number of shown triggerstring tips				= Maximum number of shown triggerstring tips
 Menu hotstring is triggered								= Menu hotstring is triggered
@@ -4848,6 +5421,7 @@ Menu position: caret									= Menu position: caret
 Menu position: cursor									= Menu position: cursor
 Minus - 												= Minus -
 Move (F8)												= Move (F8)
+New shortcut (hotkey)									= New shortcut (hotkey)
 No													= No
 No Backspace (B0) 										= No Backspace (B0)
 No EndChar (O) 										= No EndChar (O)
@@ -4856,6 +5430,7 @@ Not Case-Conforming (C1)									= Not Case-Conforming (C1)
 Number of characters for tips 							= &Number of characters for tips
 of													= of
 OK													= &OK
+On start-up the local version of							= On start-up the local version of
 Open libraries folder in Explorer							= Open libraries folder in Explorer
 Opening Curly Bracket { 									= Opening Curly Bracket {
 Opening Round Bracket ( 									= Opening Round Bracket (
@@ -4876,11 +5451,14 @@ Reload in default mode									= Reload in default mode
 Reload in silent mode									= Reload in silent mode
 Remove Config.ini										= Remove Config.ini
 Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
+Repository version:										= Repository version:
 Reset Recognizer (Z)									= Reset Recognizer (Z)
+Restore default hotkey									= Restore default hotkey
 )"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
 	TransConst .= "`n
 (Join`n `
 Sandbox (F6)											= Sandbox (F6)
+Save hotkey											= Save hotkey
 Save position of application window	 					= &Save position of application window
 Saved												= Saved
 Saving of sorted content into .csv file (library)				= Saving of sorted content into .csv file (library)
@@ -4906,6 +5484,7 @@ Set parameters of triggerstring sound						= Set parameters of triggerstring sou
 Set sound parameters for event ""basic hotstring""			= Set sound parameters for event ""basic hotstring""
 Set sound parameters for event ""hotstring menu""				= Set sound parameters for event ""hotstring menu""
 Set sound parameters for event ""undo hotstring""				= Set sound parameters for event ""undo hotstring""
+Shortcut (hotkey) definition								= Shortcut (hotkey) definition
 Shortcut (hotkey) definitions								= Shortcut (hotkey) definitions
 Show full GUI (F4)										= Show full GUI (F4)
 Show intro											= Show intro
@@ -4935,9 +5514,11 @@ Style of GUI											= Style of GUI
 Such file already exists									= Such file already exists
 Suspend Hotkeys										= Suspend Hotkeys
 Tab 													= Tab 
+The application										= The application
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
 The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure? = The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure?
 The default											= The default
+The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually. = The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually.
 The executable file is prepared by Ahk2Exe and compressed by mpress.exe: = The executable file is prepared by Ahk2Exe and compressed by mpress.exe:
 The executable file is prepared by Ahk2Exe and compressed by upx.exe: = The executable file is prepared by Ahk2Exe and compressed by upx.exe:
 The executable file is prepared by Ahk2Exe, but not compressed:	= The executable file is prepared by Ahk2Exe, but not compressed:
@@ -4950,6 +5531,7 @@ The file path is: 										= The file path is:
 the following line is found:								= the following line is found:
 There is no Libraries subfolder and no lbrary (*.csv) file exists! = There is no Libraries subfolder and no lbrary (*.csv) file exists!
 The parameter Language in section [GraphicalUserInterface] of Config.ini is missing. = The parameter Language in section [GraphicalUserInterface] of Config.ini is missing.
+The script											= The script
 The selected file is empty. Process of import will be interrupted. = The selected file is empty. Process of import will be interrupted.
 The (triggerstring, hotstring) definitions have been uploaded from library file = The (triggerstring, hotstring) definitions have been uploaded from library file
 The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory = The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory
@@ -4979,12 +5561,15 @@ Triggerstring tooltip timeout in [ms]						= Triggerstring tooltip timeout in [m
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
 Underscore _											= Underscore _
 Undo the last hotstring									= Undo the last hotstring
-Undo the last hotstring [Ctrl+F12]							= Undo the last hotstring [Ctrl+F12]
+Undo the last hotstring							= Undo the last hotstring
 Undid the last hotstring 								= Undid the last hotstring
 Version / Update										= Version / Update
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
+was compared with repository version and difference was discovered:	= was compared with repository version and difference was discovered:
+was successfully downloaded.								= was successfully downloaded.
 Welcome to Hotstrings application!							= Welcome to Hotstrings application!
+Windows key modifier									= Windows key modifier
 When ""basic hotsring"" event takes place, sound is emitted according to the following settings. = When ""basic hotsring"" event takes place, sound is emitted according to the following settings.
 When ""hotstring menu"" event takes place, sound is emitted according to the following settings. = When ""hotstring menu"" event takes place, sound is emitted according to the following settings.
 When ""undo hotstring"" event takes place, sound is emitted according to the following settings. = When ""undo hotstring"" event takes place, sound is emitted according to the following settings.
@@ -4993,6 +5578,7 @@ When timeout is set, the tooltip ""Undid the last hotstring!"" will dissapear af
 When timeout is set, the triggerstring tip(s) will dissapear after time reaches it. = When timeout is set, the triggerstring tip(s) will dissapear after time reaches it.
 When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
 Would you like to download the icon file?					= Would you like to download the icon file?
+Would you like now to reload it in order to run the just downloaded version? = Would you like now to reload it in order to run the just downloaded version?
 Yes													= Yes
 ""Basic hotstring"" sound duration [ms]						= ""Basic hotstring"" sound duration [ms]
 ""Basic hotstring"" sound frequency						= ""Basic hotstring"" sound frequency
@@ -5025,6 +5611,10 @@ TI_AddComment											= You can add optional (not mandatory) comment to new (t
 TI_SelectHotstringLib									= Select .csv file containing (triggerstring, hotstring) definitions. `nBy default those files are located in C:\Users\<UserName>\Documents folder.
 TI_LibraryContent										= After pressing (F2) you can move up or down in the table by pressing ↑ or ↓ arrows. `n`nEach time you select any row, options of the selected definitions are automatically loaded to the left part of this window.
 TI_Sandbox											= Sandbox is used as editing field where you can test `nany (triggerstring, hotstring) definition, e.g. for testing purposes. `nThis area can be switched on/off and moves when you rescale `nthe main application window.
+F_HK_CallGUIInfo										= Remark: this hotkey is operating system wide, so before changing it be sure it's not in conflict with any other system wide hotkey.`n`nIt opens Graphical User Interface (GUI) of Hotstrings, even if window is minimized or invisible.
+F_HK_GeneralInfo										= You can enter any hotkey as combination of Shift, Ctrl, Alt modifier and any other keyboard key. `nIf you wish to have hotkey where Win modifier key is applied, use the checkbox separately.
+F_HK_ClipCopyInfo										= Remark: this hotkey is operating system wide, so before changing it be sure it's not in conflict with any other system wide hotkey. `n`nWhen Hotstrings window exists (it could be minimized) pressing this hotkey copies content of clipboard to ""Enter hotstring"" field. `nThanks to that you can prepare new definition much quicker.
+F_HK_UndoInfo											= Remark: this hotkey is operating system wide, so before changing it be sure it's not in conflict with any other system wide hotkey.`n`n When pressed, it undo the very last hotstring. Please note that result of undo depends on cursor position.
 )"
 	
 	TransA					:= {}	;this associative array (global) is used to store translations of this application text strings
@@ -5506,7 +6096,6 @@ F_GuiMain_CreateObject()
 }
 	
 ; ------------------------------------------------------------------------------------------------------------------------------------
-	
 F_GuiMain_DefineConstants()
 {
 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
@@ -6173,9 +6762,7 @@ F_GuiAbout_CreateObjects()
 	Gui, MyAbout: Add,		Picture, x0 y0 HwndIdAboutPicture w96 h96, 										% AppIcon
 	return
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiAbout_DetermineConstraints()
 {
 	global ;assume-global mode
@@ -6229,8 +6816,7 @@ F_GuiAbout_DetermineConstraints()
 	GuiControl, Move, % IdAboutPicture, % "x" . v_xNext . "y" . v_yNext 
 	return
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_GuiAbout()
 {
 	global ;assume-global mode
@@ -6239,7 +6825,7 @@ F_GuiAbout()
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
 	
-	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd))
+	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	Gui, MyAbout: Show, Hide Center AutoSize
 	
@@ -7670,7 +8256,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
 #If (v_Param != "l") 
-^#h::		; Event
+;^#h::		; Event
 L_GUIInit:
 	if (v_ResizingFlag) ;if run for the very first time
 	{
@@ -7803,14 +8389,14 @@ HS3GuiEscape:
 	ini_WhichGui := "HS3"
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	HS4GuiClose:
-	HS4GuiEscape:
+HS4GuiClose:
+HS4GuiEscape:
 	Gui,		HS4: Show, Hide
 	ini_WhichGui := "HS4"
-	return
+return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	MSPGuiClose:	
-	MSPGuiEscape:
+MSPGuiClose:	
+MSPGuiEscape:
 	
 	Switch A_ThisMenu
 	{
@@ -7827,38 +8413,46 @@ return
 	Gui, MSP: Destroy
 	return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	MoveLibsGuiEscape:
-	CancelMove:
+MoveLibsGuiEscape:
+CancelMove:
 	Gui, MoveLibs: Destroy
-	return
+return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	~^f::
-	~^s::
-	~F3::
-	HS3SearchGuiEscape:
-	HS3SearchGuiClose:
+~^f::
+~^s::
+~F3::
+HS3SearchGuiEscape:
+HS3SearchGuiClose:
 	F_WhichGui()
 	Gui, HS3Search: Hide
-	return
+return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
-	~F7::
+~F7::
 	HSDelGuiEscape:
 	HSDelGuiClose:
 	IniWrite, %ini_CPDelay%, % HADConfig, Configuration, ClipBoardPasteDelay
 	Gui, HSDel: Destroy
-	return
+return
 	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
-	MonGuiEscape:
-	MonGuiClose:
-	Gui, Mon:Destroy
-	return
-	
+MonGuiEscape:
+MonGuiClose:
+	Gui, Mon: Destroy
+return
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ShortDefGuiEscape:
+ShortDefGuiClose:
+	Gui, ShortDef: Hide
+return
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+VersionUpdateGuiEscape:
+VersionUpdateGuiClose:
+	Gui, VersionUpdate: Hide
+return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ChangeLanguage()
 {

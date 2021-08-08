@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.2.0"
+global AppVersion				:= "3.3.0"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -233,7 +233,9 @@ F_GuiShowIntro()
 
 F_UpdateSelHotLibDDL()
 
-Hotkey, IfWinExist, % ("ahk_id" HS3GuiHwnd) or ("ahk_id" HS4GuiHwnd)
+Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
 Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
 Hotkey, IfWinExist
 
@@ -554,9 +556,7 @@ else
 	}
 }
 return
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 ;#if WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows exist at the moment.
 ;~^c::			; copy to edit field "Enter hotstring" content of Clipboard. 
 F_PasteFromClipboard()
@@ -573,7 +573,7 @@ F_PasteFromClipboard()
 		IfMsgBox, Cancel
 			return
 		IfMsgBox, Yes
-			ContentOfClipboard := StrReplace(ContentOfClipboard, "`r`n", "")
+			ContentOfClipboard := StrReplace(ContentOfClipboard, "`r`n", " ")
 		IfMsgBox, No
 			ContentOfClipboard := StrReplace(ContentOfClipboard, "`r`n", "``n")
 	}
@@ -1085,7 +1085,7 @@ F_GuiShortDef_CreateObjects()
 	}
 	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT2,										% TransA["Current shortcut (hotkey):"]
 	
-	Switch A_ThisMenuItem ;tu jestem
+	Switch A_ThisMenuItem
 	{
 		Case % TransA["Call Graphical User Interface"]:
 			Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 										% F_ParseHotkey(ini_HK_Main)
@@ -1156,11 +1156,44 @@ F_ShortDefB2_RestoreHotkey()
 	OldHotkey := StrReplace(OldHotkey, "Win", "#")
 	OldHotkey := StrReplace(OldHotkey, "+")
 	OldHotkey := StrReplace(OldHotkey, " ")
-	Hotkey, % OldHotkey, L_GUIInit, Off
-	ini_HK_Main := "#^h"
-	Hotkey, % ini_HK_Main, L_GUIInit, On
-	GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main)
-	IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
+	Switch A_ThisMenuItem
+	{
+		Case % TransA["Call Graphical User Interface"]:
+			Hotkey, % OldHotkey, L_GUIInit, Off
+			ini_HK_Main := "#^h"
+			Hotkey, % ini_HK_Main, L_GUIInit, On
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main)
+			IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
+		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
+			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			Hotkey, IfWinExist
+			ini_HK_IntoEdit := "~^c"
+			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+			Hotkey, IfWinExist
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit)
+			IniWrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
+		Case % TransA["Undo the last hotstring"]:
+			if (ini_HotstringUndo)
+			{
+				Hotkey, % OldHotkey, 	F_Undo, Off
+				ini_HK_UndoLH := "^F12"
+				Hotkey, % ini_HK_UndoLH, F_Undo, On
+			}
+			else
+			{
+				Hotkey, % OldHotkey, 	F_Undo, Off
+				ini_HK_UndoLH := "^F12"
+				Hotkey, % ini_HK_UndoLH, F_Undo, Off
+			}
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH)
+			IniWrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
+	}
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1170,18 +1203,20 @@ F_ShortDefB1_SaveHotkey()	;tu jestem
 	local	OldHotkey := "", WindowKey := false
 	
 	GuiControlGet, WindowKey, , % IdShortDefCB1
-	GuiControlGet, ini_HK_Main, , % IdShortDefH1
 	Switch A_ThisMenuItem
 	{
 		Case % TransA["Call Graphical User Interface"]:
+			GuiControlGet, ini_HK_Main, , % IdShortDefH1
 			if (WindowKey)
 				ini_HK_Main := "#" . ini_HK_Main
 			IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
+			GuiControlGet, ini_HK_IntoEdit, , % IdShortDefH1
 			if (WindowKey)
 				ini_HK_IntoEdit := "#" . ini_HK_IntoEdit
 			IniWrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
 		Case % TransA["Undo the last hotstring"]:
+			GuiControlGet, ini_HK_UndoLH, , % IdShortDefH1
 			if (WindowKey)
 				ini_HK_UndoLH := "#" . ini_HK_UndoLH
 			IniWrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
@@ -1197,17 +1232,33 @@ F_ShortDefB1_SaveHotkey()	;tu jestem
 	Switch A_ThisMenuItem
 	{
 		Case % TransA["Call Graphical User Interface"]:
-			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main)
-			Hotkey, % OldHotkey, L_GUIInit, Off
-			Hotkey, % ini_HK_Main, L_GUIInit, On
+		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main)
+		Hotkey, % OldHotkey, L_GUIInit, Off
+		Hotkey, % ini_HK_Main, L_GUIInit, On
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
 			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit)
-			Hotkey, % OldHotkey, L_GUIInit, Off
-			Hotkey, % ini_HK_Main, L_GUIInit, On
+			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			Hotkey, IfWinExist
+			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+			Hotkey, IfWinExist
 		Case % TransA["Undo the last hotstring"]:
 			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH)
-			Hotkey, % OldHotkey, L_GUIInit, Off
-			Hotkey, % ini_HK_Main, L_GUIInit, On
+			if (ini_HotstringUndo)
+			{
+				Hotkey, % OldHotkey, 	F_Undo, Off
+				Hotkey, % ini_HK_UndoLH, F_Undo, On
+			}
+			else
+			{
+				Hotkey, % OldHotkey, 	F_Undo, Off
+				Hotkey, % ini_HK_UndoLH, F_Undo, Off
+			}
 	}
 	return
 }
@@ -4596,41 +4647,44 @@ F_CompileSubmenu()
 	
 	if (FileExist(v_TempOutStr . "Ahk2Exe.exe"))
 	{
-		Menu, CompileSubmenu, Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
-		Menu,	AppSubmenu,		Add,	% TransA["Compile"],				:CompileSubmenu
-		;Menu, TraySubmenu,	  Add, % TransA["Standard executable (Ahk2Exe.exe)"], F_Compile
+		Menu, AhkBitSubmenu,	Add, 64-bit,									F_Compile
+		Menu, AhkBitSubmenu,	Add,	32-bit,									F_Compile
+		Menu, CompileSubmenu, 	Add, % TransA["Standard executable (Ahk2Exe.exe)"], 	:AhkBitSubmenu
+		Menu,	AppSubmenu,	Add,	% TransA["Compile"],						:CompileSubmenu
 	}
 	if (FileExist(v_TempOutStr . "upx.exe"))
 	{
-		Menu, CompileSubmenu, Add, % TransA["Compressed executable (upx.exe)"], 	F_Compile
-		;Menu, TraySubmenu,	  Add, % TransA["Compressed executable (upx.exe)"], 	F_Compile
+		Menu, UpxBitSubmenu,	Add, 64-bit,									F_Compile
+		Menu, UpxBitSubmenu,	Add, 32-bit,									F_Compile
+		Menu, CompileSubmenu, 	Add, % TransA["Compressed executable (upx.exe)"], 	:UpxBitSubmenu
 	}
 	if (FileExist(v_TempOutStr . "mpress.exe"))
 	{
-		Menu, CompileSubmenu, Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
-		;Menu, TraySubmenu,	  Add, % TransA["Compressed executable (mpress.exe)"], F_Compile
+		Menu, MpressBitSubmenu,	Add, 64-bit,									F_Compile
+		Menu, MpressBitSubmenu,	Add, 32-bit,									F_Compile
+		Menu, CompileSubmenu, 	Add, % TransA["Compressed executable (mpress.exe)"], 	:MpressBitSubmenu
 	}
 	if (!FileExist(A_AhkPath)) ;if AutoHotkey isn't installed
 	{
-		Menu, AppSubmenu,		Add,	% TransA["Compile"],			L_Compile
-		Menu,	AppSubmenu, Disable,							% TransA["Compile"]
+		Menu, AppSubmenu,		Add,	% TransA["Compile"],						L_Compile
+		Menu, AppSubmenu, 		Disable,										% TransA["Compile"]
 	}
-	;Menu,	Tray,			Add, % TransA["Compile"],				:TraySubmenu
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Compile()
-;https://www.autohotkey.com/boards/viewtopic.php?f=86&t=90196&p=398198#p398198
-{
+{	;https://www.autohotkey.com/boards/viewtopic.php?f=86&t=90196&p=398198#p398198
 	local v_TempOutStr := "" ;, v_TempOutStr2 := "", v_TempOutStr3 := ""
 	
 	SplitPath, A_AhkPath, ,v_TempOutStr
 	v_TempOutStr .= "\" . "Compiler" . "\" 
-	
-	Switch A_ThisMenuItem
+	Switch A_ThisMenu
 	{
-		Case TransA["Standard executable (Ahk2Exe.exe)"]:
-		RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
+		;Case TransA["Standard executable (Ahk2Exe.exe)"]:
+		Case "AhkBitSubmenu":
+		if (A_ThisMenuItem = "64-bit")
+		{
+			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in"       . A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out"      . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 				. A_Space . "/icon"     . A_Space . A_ScriptDir . "\" . AppIcon
@@ -4638,13 +4692,30 @@ F_Compile()
 				. A_Space . "/cp"       . A_Space . "65001"	;Unicode (UTF-8)
 				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" . A_Space . "0"
-		if (!ErrorLevel)		
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe, but not compressed:"]
+			if (!ErrorLevel)		
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe, but not compressed:"]
 					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
 					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
-		
-		Case TransA["Compressed executable (upx.exe)"]:
-		RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
+		}
+		if (A_ThisMenuItem = "32-bit")
+		{
+			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
+				. A_Space . "/in"       . A_Space . A_ScriptDir . "\" . A_ScriptName 
+				. A_Space . "/out"      . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+				. A_Space . "/icon"     . A_Space . A_ScriptDir . "\" . AppIcon
+				. A_Space . "/bin"      . A_Space . """" . v_TempOutStr . "Unicode 32-bit.bin" . """"
+				. A_Space . "/cp"       . A_Space . "65001"	;Unicode (UTF-8)
+				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
+				. A_Space . "/compress" . A_Space . "0"
+			if (!ErrorLevel)		
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe, but not compressed:"]
+					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 32-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
+					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
+		}
+		Case "UpxBitSubmenu":
+		if (A_ThisMenuItem = "64-bit")
+		{
+			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in"   	. A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out"  	. A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 				. A_Space . "/icon" 	. A_Space . A_ScriptDir . "\" . AppIcon 
@@ -4652,13 +4723,30 @@ F_Compile()
 				. A_Space . "/cp"   	. A_Space . "65001"	;Unicode (UTF-8)
 				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" 	. A_Space . "2" 
-		if (!ErrorLevel)		
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["The executable file is prepared by Ahk2Exe and compressed by upx.exe:"]
+			if (!ErrorLevel)		
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["The executable file is prepared by Ahk2Exe and compressed by upx.exe:"]
 					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
 					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
-		
-		Case TransA["Compressed executable (mpress.exe)"]:
-		RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
+		}
+		if (A_ThisMenuItem = "32-bit")
+		{
+			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
+				. A_Space . "/in"   	. A_Space . A_ScriptDir . "\" . A_ScriptName 
+				. A_Space . "/out"  	. A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+				. A_Space . "/icon" 	. A_Space . A_ScriptDir . "\" . AppIcon 
+				. A_Space . "/bin"      . A_Space . """" . v_TempOutStr . "Unicode 32-bit.bin" . """"
+				. A_Space . "/cp"   	. A_Space . "65001"	;Unicode (UTF-8)
+				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
+				. A_Space . "/compress" 	. A_Space . "2" 
+			if (!ErrorLevel)		
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["The executable file is prepared by Ahk2Exe and compressed by upx.exe:"]
+					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 32-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
+					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
+		}
+		Case "MpressBitSubmenu":
+		if (A_ThisMenuItem = "64-bit")
+		{
+			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 				. A_Space . "/icon" . A_Space . A_ScriptDir . "\" . AppIcon 
@@ -4666,10 +4754,26 @@ F_Compile()
 				. A_Space . "/cp"   	. A_Space . "65001"	;Unicode (UTF-8)
 				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" . A_Space . "1"
-		if (!ErrorLevel)
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe and compressed by mpress.exe:"]
+			if (!ErrorLevel)
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe and compressed by mpress.exe:"]
 					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
 					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
+		}
+		if (A_ThisMenuItem = "32-bit")
+		{
+			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
+				. A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName 
+				. A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+				. A_Space . "/icon" . A_Space . A_ScriptDir . "\" . AppIcon 
+				. A_Space . "/bin"      . A_Space . """" . v_TempOutStr . "Unicode 32-bit.bin" . """"
+				. A_Space . "/cp"   	. A_Space . "65001"	;Unicode (UTF-8)
+				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
+				. A_Space . "/compress" . A_Space . "1"
+			if (!ErrorLevel)
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe and compressed by mpress.exe:"]
+					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 32-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
+					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion			
+		}
 	}
 	return
 }
