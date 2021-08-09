@@ -106,7 +106,7 @@ F_LoadFontType()
 
 global ini_CPDelay 				:= 300		;1-1000 [ms], default: 300
 IniRead, ini_CPDelay, 					% HADConfig, Configuration, ClipBoardPasteDelay,		% A_Space
-if (!ini_CPDelay)	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+if (ini_CPDelay = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 {
 	ini_CPDelay := 300
 	IniWrite, % ini_CPDelay, % HADConfig, Configuration, ClipBoardPasteDelay 
@@ -142,16 +142,17 @@ if (ini_DownloadRepo = "") ;thanks to this trick existing Config.ini do not have
 
 global ini_HK_Main				:= "#^h"
 IniRead, ini_HK_Main,					% HADConfig, Configuration, HK_Main,				% A_Space
-if (!ini_HK_Main)	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+if (ini_HK_Main = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 {
 	ini_HK_Main := "#^h"
 	IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
 }
-Hotkey, % ini_HK_Main, L_GUIInit, On
+if (ini_HK_Main != "none")
+	Hotkey, % ini_HK_Main, L_GUIInit, On
 
 global ini_HK_IntoEdit			:= "~^c"
 IniRead, ini_HK_IntoEdit,				% HADConfig, Configuration, HK_IntoEdit,			% A_Space
-if (!ini_HK_IntoEdit)	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+if (ini_HK_IntoEdit = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 {
 	ini_HK_IntoEdit := "~^c"
 	IniWrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
@@ -159,12 +160,13 @@ if (!ini_HK_IntoEdit)	;thanks to this trick existing Config.ini do not have to b
 
 global ini_HK_UndoLH			:= "~^F12"
 IniRead, ini_HK_UndoLH,					% HADConfig, Configuration, HK_UndoLH,				% A_Space
-if (!ini_HK_UndoLH)		;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+if (ini_HK_UndoLH = "")		;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 {
 	ini_HK_UndoLH := "^F12"
 	Iniwrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
 }
-Hotkey, % ini_HK_UndoLH, F_Undo, On
+if (ini_HK_UndoLH != "none")
+	Hotkey, % ini_HK_UndoLH, F_Undo, On
 
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
 F_LoadSignalingParams()
@@ -233,11 +235,14 @@ F_GuiShowIntro()
 
 F_UpdateSelHotLibDDL()
 
-Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
-Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
-Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
-Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
-Hotkey, IfWinExist
+if (ini_HK_IntoEdit != "none")
+{
+	Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+	Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+	Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+	Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+	Hotkey, IfWinExist
+}
 
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
 Gui, 1: Default	;this line is necessary to not show too many Guis on time of loading hotstrings from library
@@ -1027,38 +1032,41 @@ F_ParseHotkey(ini_HK_Main, space*)
 {
 	local Mini := false, ShortcutLong := "", HotkeyVar := ""
 	
-	Loop, Parse, ini_HK_Main
-	{
-		Mini := false
-		Switch A_LoopField
+	if (ini_HK_Main != "none")
+		Loop, Parse, ini_HK_Main
 		{
-			Case "~":
-				Mini := true
-				ShortcutLong .= "~"
-			Case "^":	
-				Mini := true
-				ShortcutLong .= "Ctrl"
-			Case "!":	
-				Mini := true
-				ShortcutLong .= "Alt"	
-			Case "+":	
-				Mini := true
-				ShortcutLong .= "Shift"
-			Case "#":
-				Mini := true
-				ShortcutLong .= "Win"
-			Default:
-				StringUpper, HotkeyVar, A_LoopField 
-				ShortcutLong .= HotkeyVar
+			Mini := false
+			Switch A_LoopField
+			{
+				Case "~":
+					Mini := true
+					ShortcutLong .= "~"
+				Case "^":	
+					Mini := true
+					ShortcutLong .= "Ctrl"
+				Case "!":	
+					Mini := true
+					ShortcutLong .= "Alt"	
+				Case "+":	
+					Mini := true
+					ShortcutLong .= "Shift"
+				Case "#":
+					Mini := true
+					ShortcutLong .= "Win"
+				Default:
+					StringUpper, HotkeyVar, A_LoopField 
+					ShortcutLong .= HotkeyVar
+			}
+			if (Mini)
+			{
+				if (space[1])
+					ShortcutLong .= " + "
+				else
+					ShortcutLong .= "+"
+			}
 		}
-		if (Mini)
-		{
-			if (space[1])
-				ShortcutLong .= " + "
-			else
-				ShortcutLong .= "+"
-		}
-	}
+	else
+		ShortcutLong := "None"
 	return ShortcutLong
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1186,17 +1194,21 @@ F_ShortDefB2_RestoreHotkey()
 	Switch A_ThisMenuItem
 	{
 		Case % TransA["Call Graphical User Interface"]:
-			Hotkey, % OldHotkey, L_GUIInit, Off
+			if (OldHotkey != "none")	;tu jestem
+				Hotkey, % OldHotkey, L_GUIInit, Off
 			ini_HK_Main := "#^h"
 			Hotkey, % ini_HK_Main, L_GUIInit, On
 			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
 			IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
-			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
-			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
-			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
-			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
-			Hotkey, IfWinExist
+			if (OldHotkey != "none")
+			{
+				Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+				Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+				Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+				Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+				Hotkey, IfWinExist
+			}
 			ini_HK_IntoEdit := "~^c"
 			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
 			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
@@ -1208,13 +1220,15 @@ F_ShortDefB2_RestoreHotkey()
 		Case % TransA["Undo the last hotstring"]:
 			if (ini_HotstringUndo)
 			{
-				Hotkey, % OldHotkey, 	F_Undo, Off
+				if (OldHotkey != "none")
+					Hotkey, % OldHotkey, 	F_Undo, Off
 				ini_HK_UndoLH := "~^F12"
 				Hotkey, % ini_HK_UndoLH, F_Undo, On
 			}
 			else
 			{
-				Hotkey, % OldHotkey, 	F_Undo, Off
+				if (OldHotkey != "none")
+					Hotkey, % OldHotkey, 	F_Undo, Off
 				ini_HK_UndoLH := "~^F12"
 				Hotkey, % ini_HK_UndoLH, F_Undo, Off
 			}
@@ -1239,21 +1253,39 @@ F_ShortDefB1_SaveHotkey()	;tu jestem
 				ini_HK_Main := "#" . ini_HK_Main
 			if (TildeKey)
 				ini_HK_Main := "~" . ini_HK_Main
-			IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
+			if (ini_HK_Main != "")
+				IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
+			else
+			{
+				ini_HK_Main := "none"
+				IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
+			}
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
 			GuiControlGet, ini_HK_IntoEdit, , % IdShortDefH1
 			if (WindowKey)
 				ini_HK_IntoEdit := "#" . ini_HK_IntoEdit
 			if (TildeKey)
 				ini_HK_IntoEdit := "~" . ini_HK_IntoEdit
-			IniWrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
+			if (ini_HK_IntoEdit != "")
+				IniWrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
+			else
+			{
+				ini_HK_IntoEdit := "none"
+				Iniwrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
+			}
 		Case % TransA["Undo the last hotstring"]:
 			GuiControlGet, ini_HK_UndoLH, , % IdShortDefH1
 			if (WindowKey)
 				ini_HK_UndoLH := "#" . ini_HK_UndoLH
 			if (TildeKey)
 				ini_HK_UndoLH := "~" . ini_HK_UndoLH
-			IniWrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
+			if (ini_HK_UndoLH != "")
+				IniWrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
+			else
+			{
+				ini_HK_UndoLH := "none"
+				IniWrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
+			}
 	}
 	GuiControlGet, OldHotkey, , % IdShortDefT3
 	;OldHotkey := RegExReplace(OldHotkey, "(Ctrl)|(Shift)|(Win)|(\+)|( )")	;future: trick from forum after my question
@@ -1268,7 +1300,8 @@ F_ShortDefB1_SaveHotkey()	;tu jestem
 		Case % TransA["Call Graphical User Interface"]:
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main)
 		Hotkey, % OldHotkey, L_GUIInit, Off
-		Hotkey, % ini_HK_Main, L_GUIInit, On
+		if (ini_HK_Main != "none")
+			Hotkey, % ini_HK_Main, L_GUIInit, On
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
 			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit)
 			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
@@ -1276,22 +1309,27 @@ F_ShortDefB1_SaveHotkey()	;tu jestem
 			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
 			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
 			Hotkey, IfWinExist
-			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
-			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
-			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
-			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
-			Hotkey, IfWinExist
+			if (ini_HK_IntoEdit != "none")
+			{
+				Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+				Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+				Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+				Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+				Hotkey, IfWinExist
+			}
 		Case % TransA["Undo the last hotstring"]:
 			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH)
 			if (ini_HotstringUndo)
 			{
 				Hotkey, % OldHotkey, 	F_Undo, Off
-				Hotkey, % ini_HK_UndoLH, F_Undo, On
+				if (ini_HK_UndoLH != "none")
+					Hotkey, % ini_HK_UndoLH, F_Undo, On
 			}
 			else
 			{
 				Hotkey, % OldHotkey, 	F_Undo, Off
-				Hotkey, % ini_HK_UndoLH, F_Undo, Off
+				if (ini_HK_UndoLH != "none")
+					Hotkey, % ini_HK_UndoLH, F_Undo, Off
 			}
 	}
 	return
