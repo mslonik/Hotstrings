@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.3.0"
+global AppVersion				:= "3.3.1"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -149,7 +149,7 @@ if (!ini_HK_Main)	;thanks to this trick existing Config.ini do not have to be er
 }
 Hotkey, % ini_HK_Main, L_GUIInit, On
 
-global ini_HK_IntoEdit			:= "^c"
+global ini_HK_IntoEdit			:= "~^c"
 IniRead, ini_HK_IntoEdit,				% HADConfig, Configuration, HK_IntoEdit,			% A_Space
 if (!ini_HK_IntoEdit)	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 {
@@ -157,14 +157,14 @@ if (!ini_HK_IntoEdit)	;thanks to this trick existing Config.ini do not have to b
 	IniWrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
 }
 
-global ini_HK_UndoLH			:= "^F12"
+global ini_HK_UndoLH			:= "~^F12"
 IniRead, ini_HK_UndoLH,					% HADConfig, Configuration, HK_UndoLH,				% A_Space
 if (!ini_HK_UndoLH)		;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 {
 	ini_HK_UndoLH := "^F12"
 	Iniwrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
 }
-Hotkey, % ini_HK_UndoLH, F_Undo, On	;tu jestem
+Hotkey, % ini_HK_UndoLH, F_Undo, On
 
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
 F_LoadSignalingParams()
@@ -1007,11 +1007,15 @@ F_GuiShortDef_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefCB1						
 	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
 	GuiControl, Move, % IdShortDefH1, % "x" . v_xNext . "y" . v_yNext		;HotkeyVar
+	v_xNext := c_xmarg
+	v_yNext := v_OutVarTempY + v_OutVarTempH
+	GuiControl, Move, % IdShortDefCB2, % "x" . v_xNext . "y" . v_yNext		;Tilde (~) key modifier
 	GuiControlGet, v_OutVarTemp1, Pos, % IdShortDefH1						;reserve more space for text string
 	v_wNext := v_OutVarTemp1W
 	GuiControl, Move, % IdShortDefT3, % "w" . v_wNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefCB2
 	v_xNext := c_xmarg
-	v_yNext += 3 * HofText
+	v_yNext := v_OutVarTempY + v_OutVarTempH + HofText
 	GuiControl, Move, % IdShortDefB1, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefB1
 	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
@@ -1019,7 +1023,7 @@ F_GuiShortDef_DetermineConstraints()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ParseHotkey(ini_HK_Main)
+F_ParseHotkey(ini_HK_Main, space*)
 {
 	local Mini := false, ShortcutLong := "", HotkeyVar := ""
 	
@@ -1028,46 +1032,42 @@ F_ParseHotkey(ini_HK_Main)
 		Mini := false
 		Switch A_LoopField
 		{
+			Case "~":
+				Mini := true
+				ShortcutLong .= "~"
 			Case "^":	
-			Mini := true
-			ShortcutLong .= "Ctrl"
+				Mini := true
+				ShortcutLong .= "Ctrl"
 			Case "!":	
-			Mini := true
-			ShortcutLong .= "Alt"	
+				Mini := true
+				ShortcutLong .= "Alt"	
 			Case "+":	
-			Mini := true
-			ShortcutLong .= "Shift"
+				Mini := true
+				ShortcutLong .= "Shift"
 			Case "#":
-			Mini := true
-			ShortcutLong .= "Win"
+				Mini := true
+				ShortcutLong .= "Win"
 			Default:
-			StringUpper, HotkeyVar, A_LoopField 
-			ShortcutLong .= HotkeyVar
+				StringUpper, HotkeyVar, A_LoopField 
+				ShortcutLong .= HotkeyVar
 		}
 		if (Mini)
-			ShortcutLong .= " + "
+		{
+			if (space[1])
+				ShortcutLong .= " + "
+			else
+				ShortcutLong .= "+"
+		}
 	}
-	;MsgBox,, ShortcutLong, % ShortcutLong
 	return ShortcutLong
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiShortDef_CreateObjects()
 {
 	global	;assume-global mode
-	local	IfWinModifier := false, Mini := false, HotkeyVar := ""
+	local	IfWinModifier := false, IfTildeModifier := false, Mini := false, HotkeyVar := ""
 	
 	;1. Prepare Gui
-	/*
-		Switch A_ThisMenuItem
-		{
-			Case % TransA["Call Graphical User Interface"]:
-				Gui, ShortDef: New, 	-Resize +HwndShortDef1Hwnd +Owner -MaximizeBox -MinimizeBox
-			Case % TransA["Copy clipboard content into ""Enter hotstring"""]:	
-				Gui, ShortDef: New, 	-Resize +HwndShortDef2Hwnd +Owner -MaximizeBox -MinimizeBox
-			Case % TransA["Undo the last hotstring"]:
-				Gui, ShortDef: New, 	-Resize +HwndShortDef3Hwnd +Owner -MaximizeBox -MinimizeBox
-		}
-	*/
 	Gui, ShortDef: New, 	-Resize +HwndShortDefHwnd +Owner -MaximizeBox -MinimizeBox
 	Gui, ShortDef: Margin,	% c_xmarg, % c_ymarg
 	Gui,	ShortDef: Color,	% c_WindowColor, % c_ControlColor
@@ -1077,22 +1077,22 @@ F_GuiShortDef_CreateObjects()
 	Switch A_ThisMenuItem
 	{
 		Case % TransA["Call Graphical User Interface"]:
-			Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,										% TransA["Call Graphical User Interface"]
+		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,										% TransA["Call Graphical User Interface"]
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:	
-			Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,										% TransA["Copy clipboard content into ""Enter hotstring"""]
+		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,										% TransA["Copy clipboard content into ""Enter hotstring"""]
 		Case % TransA["Undo the last hotstring"]:
-			Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,										% TransA["Undo the last hotstring"]
+		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,										% TransA["Undo the last hotstring"]
 	}
 	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT2,										% TransA["Current shortcut (hotkey):"]
 	
 	Switch A_ThisMenuItem
 	{
 		Case % TransA["Call Graphical User Interface"]:
-			Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 										% F_ParseHotkey(ini_HK_Main)
+		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 										% F_ParseHotkey(ini_HK_Main, "space")
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:	
-			Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 										% F_ParseHotkey(ini_HK_IntoEdit)
+		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 										% F_ParseHotkey(ini_HK_IntoEdit, "space")
 		Case % TransA["Undo the last hotstring"]:
-			Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 										% F_ParseHotkey(ini_HK_UndoLH)
+		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 										% F_ParseHotkey(ini_HK_UndoLH, "space")
 	}
 	Gui, ShortDef: Font, 	% "s" . c_FontSize + 2 . A_Space . "cBlue",								% c_FontType
 	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT4,										ⓘ
@@ -1109,6 +1109,13 @@ F_GuiShortDef_CreateObjects()
 			}
 			else
 				HotkeyVar := ini_HK_Main
+			if (InStr(ini_HK_Main, "~"))
+			{
+				IfTildeModifier := true
+				HotkeyVar := StrReplace(ini_HK_Main, "~")
+			}
+			else
+				HotkeyVar := ini_HK_Main
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
 			F_HK_ClipCopyInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_ClipCopyInfo"])
 			GuiControl +g, % IdShortDefT4, % F_HK_ClipCopyInfo
@@ -1116,6 +1123,13 @@ F_GuiShortDef_CreateObjects()
 			{
 				IfWinModifier := true
 				HotkeyVar := StrReplace(ini_HK_IntoEdit, "#")
+			}
+			else
+				HotkeyVar := ini_HK_IntoEdit
+			if (InStr(ini_HK_IntoEdit, "~"))
+			{
+				IfTildeModifier := true
+				HotkeyVar := StrReplace(ini_HK_IntoEdit, "~")
 			}
 			else
 				HotkeyVar := ini_HK_IntoEdit
@@ -1129,16 +1143,29 @@ F_GuiShortDef_CreateObjects()
 			}
 			else
 				HotkeyVar := ini_HK_UndoLH
+			if (InStr(ini_HK_UndoLH, "~"))
+			{
+				IfTildeModifier := true
+				HotkeyVar := StrReplace(ini_HK_UndoLH, "~")
+			}
+			else
+				HotkeyVar := ini_HK_UndoLH
 	}
 	
 	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT5,										% TransA["New shortcut (hotkey)"] . ":"
-	Gui, ShortDef: Add,		Checkbox,	x0 y0 HwndIdShortDefCB1 Checked%IfWinModifier%,					% TransA["Windows key modifier"]
-	Gui, ShortDef: Add,		Hotkey,	x0 y0 HwndIdShortDefH1,										% HotkeyVar
 	Gui, ShortDef: Font, 	% "s" . c_FontSize + 2 . A_Space . "cBlue",								% c_FontType
 	Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT6,										ⓘ
 	Gui,	ShortDef: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	F_HK_GeneralInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_GeneralInfo"])
 	GuiControl +g, % IdShortDefT6, % F_HK_GeneralInfo
+	Gui, ShortDef: Add,		Checkbox,	x0 y0 HwndIdShortDefCB1 Checked%IfWinModifier%,					% TransA["Windows key modifier"]
+	Gui, ShortDef: Add,		Hotkey,	x0 y0 HwndIdShortDefH1,										% HotkeyVar
+	Gui, ShortDef: Add,		Checkbox, x0 y0 HwndIdShortDefCB2 Checked%IfTildeModifier%,					% TransA["Tilde (~) key modifier"]
+	Gui, ShortDef: Font, 	% "s" . c_FontSize + 2 . A_Space . "cBlue",								% c_FontType
+	Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT7,										ⓘ
+	Gui,	ShortDef: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	F_HK_TildeModInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_TildeModInfo"])
+	GuiControl +g, % IdShortDefT7, % F_HK_TildeModInfo
 	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB1 gF_ShortDefB1_SaveHotkey,					% TransA["Save hotkey"]
 	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB2 gF_ShortDefB2_RestoreHotkey,				% TransA["Restore default hotkey"]
 	return
@@ -1162,7 +1189,7 @@ F_ShortDefB2_RestoreHotkey()
 			Hotkey, % OldHotkey, L_GUIInit, Off
 			ini_HK_Main := "#^h"
 			Hotkey, % ini_HK_Main, L_GUIInit, On
-			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main)
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
 			IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
 			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
@@ -1176,22 +1203,22 @@ F_ShortDefB2_RestoreHotkey()
 			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
 			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
 			Hotkey, IfWinExist
-			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit)
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit, "space")
 			IniWrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
 		Case % TransA["Undo the last hotstring"]:
 			if (ini_HotstringUndo)
 			{
 				Hotkey, % OldHotkey, 	F_Undo, Off
-				ini_HK_UndoLH := "^F12"
+				ini_HK_UndoLH := "~^F12"
 				Hotkey, % ini_HK_UndoLH, F_Undo, On
 			}
 			else
 			{
 				Hotkey, % OldHotkey, 	F_Undo, Off
-				ini_HK_UndoLH := "^F12"
+				ini_HK_UndoLH := "~^F12"
 				Hotkey, % ini_HK_UndoLH, F_Undo, Off
 			}
-			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH)
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH, "space")
 			IniWrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
 	}
 	return
@@ -1200,25 +1227,32 @@ F_ShortDefB2_RestoreHotkey()
 F_ShortDefB1_SaveHotkey()	;tu jestem
 {
 	global	;assume-global mode
-	local	OldHotkey := "", WindowKey := false
+	local	OldHotkey := "", WindowKey := false, TildeKey := false
 	
-	GuiControlGet, WindowKey, , % IdShortDefCB1
+	GuiControlGet, WindowKey, , 	% IdShortDefCB1
+	GuiControlGet, TildeKey, , 	% IdShortDefCB2
 	Switch A_ThisMenuItem
 	{
 		Case % TransA["Call Graphical User Interface"]:
 			GuiControlGet, ini_HK_Main, , % IdShortDefH1
 			if (WindowKey)
 				ini_HK_Main := "#" . ini_HK_Main
+			if (TildeKey)
+				ini_HK_Main := "~" . ini_HK_Main
 			IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
 			GuiControlGet, ini_HK_IntoEdit, , % IdShortDefH1
 			if (WindowKey)
 				ini_HK_IntoEdit := "#" . ini_HK_IntoEdit
+			if (TildeKey)
+				ini_HK_IntoEdit := "~" . ini_HK_IntoEdit
 			IniWrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
 		Case % TransA["Undo the last hotstring"]:
 			GuiControlGet, ini_HK_UndoLH, , % IdShortDefH1
 			if (WindowKey)
 				ini_HK_UndoLH := "#" . ini_HK_UndoLH
+			if (TildeKey)
+				ini_HK_UndoLH := "~" . ini_HK_UndoLH
 			IniWrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
 	}
 	GuiControlGet, OldHotkey, , % IdShortDefT3
@@ -1627,20 +1661,19 @@ F_EventSigOrdHotstring()
 	global	;assume-global mode
 	local 	v_MouseX := 0, v_MouseY := 0
 	if (ini_OHTtEn)
-		
 	{
 		if (ini_OHTP = 1)
 		{
 			if (A_CaretX and A_CaretY)
 			{
-				ToolTip, % TransA["Hotstring was triggered! [Ctrl+F12] to undo."], % A_CaretX + 20, % A_CaretY - 20, 4
+				ToolTip, % TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."], % A_CaretX + 20, % A_CaretY - 20, 4
 				if (ini_OHTD > 0)
 					SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
 			}
 			else
 			{
 				MouseGetPos, v_MouseX, v_MouseY
-				ToolTip, % TransA["Hotstring was triggered! [Ctrl+F12] to undo."], % v_MouseX + 20, % v_MouseY - 20, 4
+				ToolTip, % TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."], % v_MouseX + 20, % v_MouseY - 20, 4
 				if (ini_OHTD > 0)
 					SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
 			}
@@ -1648,7 +1681,7 @@ F_EventSigOrdHotstring()
 		if (ini_OHTP = 2)
 		{
 			MouseGetPos, v_MouseX, v_MouseY
-			ToolTip, % TransA["Hotstring was triggered! [Ctrl+F12] to undo."], % v_MouseX + 20, % v_MouseY - 20, 4
+			ToolTip, % TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."], % v_MouseX + 20, % v_MouseY - 20, 4
 			if (ini_OHTD > 0)
 				SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
 		}
@@ -4911,7 +4944,7 @@ CheckRepo=0
 DownloadRepo=0
 HK_Main=#^h
 HK_IntoEdit=~^c
-HK_UndoLH=^F12
+HK_UndoLH=~^F12
 [Event_BasicHotstring]
 OHTtEn=1
 OHTD=2000
@@ -5372,7 +5405,8 @@ Help: Hotstrings application								= Help: Hotstrings application
 Hotstring 											= Hotstring
 Hotstring added to the file								= Hotstring added to the file
 Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv) = Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
-Hotstring was triggered! [Ctrl+F12] to undo.					= Hotstring was triggered! [Ctrl+F12] to undo.
+Hotstring was triggered! 								= Hotstring was triggered!
+to undo.												= to undo.
 ""Hotstring was triggered"" tooltip timeout in [ms]			= ""Hotstring was triggered"" tooltip timeout in [ms]
 ""Undid the last hotstring!"" tooltip timeout in [ms]			= ""Undid the last hotstring!"" tooltip timeout in [ms]
 Hotstring moved to the 									= Hotstring moved to the
@@ -5541,6 +5575,7 @@ This is the maximum length of list displayed on the screen in form of tooltip co
 This library:											= This library:
 This line do not comply to format required by this application.  = This line do not comply to format required by this application.
 This option is valid 									= In case you observe some hotstrings aren't pasted from clipboard increase this value. `nThis option is valid for CL and MCL hotstring output functions. 
+Tilde (~) key modifier									= Tilde (~) key modifier
 Tip: If you copy text from PDF file it's adviced to remove them. = Tip: If you copy text from PDF file it's adviced to remove them.
 Tips are shown after no. of characters						= Tips are shown after no. of characters
 Toggle EndChars	 									= &Toggle EndChars
@@ -5615,6 +5650,7 @@ F_HK_CallGUIInfo										= Remark: this hotkey is operating system wide, so bef
 F_HK_GeneralInfo										= You can enter any hotkey as combination of Shift, Ctrl, Alt modifier and any other keyboard key. `nIf you wish to have hotkey where Win modifier key is applied, use the checkbox separately.
 F_HK_ClipCopyInfo										= Remark: this hotkey is operating system wide, so before changing it be sure it's not in conflict with any other system wide hotkey. `n`nWhen Hotstrings window exists (it could be minimized) pressing this hotkey copies content of clipboard to ""Enter hotstring"" field. `nThanks to that you can prepare new definition much quicker.
 F_HK_UndoInfo											= Remark: this hotkey is operating system wide, so before changing it be sure it's not in conflict with any other system wide hotkey.`n`n When pressed, it undo the very last hotstring. Please note that result of undo depends on cursor position.
+F_HK_TildeModInfo										= When the hotkey fires, its key's native function will not be blocked (hidden from the system). 
 )"
 	
 	TransA					:= {}	;this associative array (global) is used to store translations of this application text strings
