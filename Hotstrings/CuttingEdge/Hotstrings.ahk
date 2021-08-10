@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.3.1"
+global AppVersion				:= "3.3.2"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -387,10 +387,6 @@ Menu, Submenu1Shortcuts, Add, % TransA["Copy clipboard content into ""Enter hots
 Menu, Submenu1Shortcuts, Add, % TransA["Undo the last hotstring"],						F_GuiShortDef
 Menu, Submenu1, 		Add, % TransA["Shortcut (hotkey) definitions"],					:Submenu1Shortcuts
 Menu, Submenu1, 		Add
-Menu, Submenu1Choice, 	Add, % TransA["Enable"], 							F_MUndo
-Menu, Submenu1Choice, 	Add, % TransA["Disable"],							F_MUndo
-Menu, Submenu1, 		Add, % TransA["Undo the last hotstring"], 		:Submenu1Choice
-Menu, Submenu1, 		Add
 F_MUndo()
 ;Warning: order of SubmenuEndChars have to be alphabetical. Keep an eye on it. This is because after change of language specific menu items are related with associative array which also keeps to alphabetical order.
 Menu, SubmenuEndChars, Add, % TransA["Apostrophe '"], 					F_ToggleEndChars
@@ -423,6 +419,8 @@ Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 ;Menu, Submenu1,		Add, Turn off all events tooltips,				F_AllTooltipsOff
 Menu, Submenu1,		Add
 Menu, Submenu1,  	   	Add, % TransA["Toggle EndChars"], 				:SubmenuEndChars
+Menu, Submenu1,  	   	Add
+Menu, Submenu1,	 	Add, % TransA["Restore default configuration"],	F_RestoreDefaultConfig
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 				:Submenu1
 Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 		F_Searching
@@ -450,7 +448,6 @@ Menu,	AppSubmenu,	Add, % TransA["Suspend Hotkeys"],				L_TraySuspendHotkeys
 Menu,	AppSubmenu,	Add, % TransA["Pause"],						L_TrayPauseScript
 Menu,	AppSubmenu,	Add, % TransA["Exit"],						F_Exit
 Menu,	AppSubmenu,	Add	;To add a menu separator line, omit all three parameters.
-Menu,	AppSubmenu, 	Add, % TransA["Remove Config.ini"],			F_RemoveConfigIni
 Menu,	AutoStartSub,	Add, % TransA["Default mode"],				F_AddToAutostart
 Menu,	AutoStartSub,	Add,	% TransA["Silent mode"],					F_AddToAutostart
 Menu,	AppSubmenu, 	Add, % TransA["Add to Autostart"],				:AutoStartSub
@@ -1019,6 +1016,9 @@ F_GuiShortDef_DetermineConstraints()
 	v_wNext := v_OutVarTemp1W
 	GuiControl, Move, % IdShortDefT3, % "w" . v_wNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefCB2
+	v_xNext := v_OutVarTempX + v_OutVarTempW 
+	v_yNext := v_OutVarTempY 
+	GuiControl, Move, % IdShortDefT7, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := c_xmarg
 	v_yNext := v_OutVarTempY + v_OutVarTempH + HofText
 	GuiControl, Move, % IdShortDefB1, % "x" . v_xNext . "y" . v_yNext
@@ -1194,7 +1194,7 @@ F_ShortDefB2_RestoreHotkey()
 	Switch A_ThisMenuItem
 	{
 		Case % TransA["Call Graphical User Interface"]:
-			if (OldHotkey != "none")	;tu jestem
+			if (OldHotkey != "none")	
 				Hotkey, % OldHotkey, L_GUIInit, Off
 			ini_HK_Main := "#^h"
 			Hotkey, % ini_HK_Main, L_GUIInit, On
@@ -1238,7 +1238,7 @@ F_ShortDefB2_RestoreHotkey()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ShortDefB1_SaveHotkey()	;tu jestem
+F_ShortDefB1_SaveHotkey()	
 {
 	global	;assume-global mode
 	local	OldHotkey := "", WindowKey := false, TildeKey := false
@@ -2063,15 +2063,11 @@ F_MUndo()
 	{
 		if (ini_HotstringUndo)
 		{
-			Menu, Submenu1Choice, UnCheck, % TransA["Disable"]
-			Menu, Submenu1Choice, Check, % TransA["Enable"]
 			Menu, SigOfEvents, Enable, % TransA["Undid the last hotstring"]
 			Hotkey, % ini_HK_UndoLH, F_Undo, On	
 		}
 		else
 		{
-			Menu, Submenu1Choice, Check, % TransA["Disable"]
-			Menu, Submenu1Choice, UnCheck, % TransA["Enable"]
 			Menu, SigOfEvents, Disable, % TransA["Undid the last hotstring"]
 			Hotkey, % ini_HK_UndoLH, F_Undo, Off
 		}
@@ -2081,15 +2077,11 @@ F_MUndo()
 	{
 		if (ini_HotstringUndo)
 		{
-			Menu, Submenu1, Check, % TransA["Undo the last hotstring: disable"]
-			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: enable"]
 			Menu, SigOfEvents, Disable, % TransA["Undid the last hotstring"]				
 			Hotkey, % ini_HK_UndoLH, F_Undo, Off
 		}
 		else
 		{
-			Menu, Submenu1, UnCheck, % TransA["Undo the last hotstring: disable"]
-			Menu, Submenu1, Check,  % TransA["Undo the last hotstring: enable"]
 			Menu, SigOfEvents, Enable, % TransA["Undid the last hotstring"]				
 			Hotkey, % ini_HK_UndoLH, F_Undo, On
 		}
@@ -2806,7 +2798,7 @@ F_AddHotstring()
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
 			,v_TheWholeFile := "", v_TotalLines := 0
 			,ExternalIndex := 0
-			,name := "", key := 0, value := ""
+			,name := "", key := 0, value := "", Counter := 0, key2 := 0, value2 := ""
 	
 	;1. Read all inputs. 
 	Gui, % A_DefaultGui . ":" A_Space . "Submit", NoHide
@@ -2918,51 +2910,73 @@ F_AddHotstring()
 	{
 		if (a_Triggerstring[key] = v_Triggerstring)
 		{
-			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-				, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in the file"] . ":" . A_Space . v_SelectHotstringLibrary . "." . "`n`n" 
+			if (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))
+			{
+				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+				, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in the currently selected library"] . ":" . A_Space . a_Library[key] . ".csv" . "." . "`n`n" 
 				. TransA["Do you want to proceed?"]
 				. "`n`n" . TransA["If you answer ""Yes"" it will overwritten."]
-			IfMsgBox, No
-				return
-			OldOptions := a_TriggerOptions[key]
-			if (InStr(OldOptions, "*") and !InStr(Options,"*"))
-				OldOptions := StrReplace(OldOptions, "*", "*0")
-			if (InStr(OldOptions, "B0") and !InStr(Options, "B0"))
-				OldOptions := StrReplace(OldOptions, "B0", "B")
-			if (InStr(OldOptions, "O") and !InStr(Options, "O"))
-				OldOptions := StrReplace(OldOptions, "O", "O0")
-			if (InStr(OldOptions, "Z") and !InStr(Options, "Z"))
-				OldOptions := StrReplace(OldOptions, "Z", "Z0")
-			
-			Try
-				Hotstring(":" . OldOptions . ":" . v_TriggerString, , "Off") ;Disable existing hotstring
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
+				IfMsgBox, No
+					return
+				
+				OldOptions := a_TriggerOptions[key]
+				if (InStr(OldOptions, "*") and !InStr(Options,"*"))
+					OldOptions := StrReplace(OldOptions, "*", "*0")
+				if (InStr(OldOptions, "B0") and !InStr(Options, "B0"))
+					OldOptions := StrReplace(OldOptions, "B0", "B")
+				if (InStr(OldOptions, "O") and !InStr(Options, "O"))
+					OldOptions := StrReplace(OldOptions, "O", "O0")
+				if (InStr(OldOptions, "Z") and !InStr(Options, "Z"))
+					OldOptions := StrReplace(OldOptions, "Z", "Z0")
+				
+				Try
+					Hotstring(":" . OldOptions . ":" . v_TriggerString, , "Off") ;Disable existing hotstring
+				Catch
+					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
 					. "v_TriggerString:" . A_Tab . v_TriggerString . "`n"
 					. "OldOptions:" . A_Tab . OldOptions . "`n`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary
-			if (InStr(Options, "O", 0))	;Add new hotstring
-			{
-				Try
-					Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
-				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
+				if (InStr(Options, "O", 0))	;Add new hotstring
+				{
+					Try
+						Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
+					Catch
+						MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
 				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," . A_Space . OnOff . ")"
+				}
+				else
+				{
+					Try
+						Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
+					Catch
+						MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
+				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
+				}
+				a_TriggerOptions[key] 	:= Options
+				a_OutputFunction[key] 	:= SendFunHotstringCreate
+				a_Hotstring[key] 		:= TextInsert
+				a_Comment[key] 		:= v_Comment
+				ModifiedFlag 			:= true
+				if (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))
+					for key2, value2 in a_Library
+						if (value2 = SubStr(v_SelectHotstringLibrary, 1, -4))
+						{
+							Counter++
+							if (a_Triggerstring[key2] = v_Triggerstring)
+								Break
+						}
+				LV_Modify(Counter, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)		
 			}
 			else
 			{
-				Try
-					Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
-				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
+				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+					, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["already exists in another library"] . ":" . A_Space . a_Library[key] . ".csv" . "." . "`n`n" 
+					. TransA["Do you want to proceed?"] . "`n`n" . TransA["If you answer ""No"" edition of the current definition will be interrupted."]
+				IfMsgBox, No
+					return
 			}
-			
-			LV_Modify(key, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)
-			a_TriggerOptions[key] := Options
-			ModifiedFlag := true
 		}
 	}
-	;*[One]
+	
 	if !(ModifiedFlag) 
 	{
 	;OutputDebug, % "Options:" . A_Space . Options . A_Tab . "OldOptions:" . A_Space . OldOptions . A_Tab . "v_TriggerString:" . A_Space . v_TriggerString
@@ -3563,12 +3577,14 @@ HS3SearchGuiSize()
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_RemoveConfigIni()
+F_RestoreDefaultConfig()	;tu jestem
 {
 	global	;assume-global mode
 	if (FileExist(HADConfig))
 	{
-		MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure?"] 
+		MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"]
+			, % TransA["In order to restore default configuration, the current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and upon start the Config.ini with default settings will be created."] 
+			. "`n`n" .  TransA["Are you sure?"]
 		IfMsgBox, Yes
 		{
 			FileDelete, % HADConfig
@@ -4483,25 +4499,25 @@ F_FontType()
 	IfMsgBox, No
 		return	
 }
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_LoadFontType()
+{
+	global	;assume-global mode
+	c_FontType := ""
 	
+	IniRead, c_FontType, 			% HADConfig, GraphicalUserInterface, GuiFontType, Calibri
+	if (!c_FontType)
+		c_FontType := "Calibri"
+	
+	return
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_LoadFontType()
-	{
-		global	;assume-global mode
-		c_FontType := ""
-		
-		IniRead, c_FontType, 			% HADConfig, GraphicalUserInterface, GuiFontType, Calibri
-		if (!c_FontType)
-			c_FontType := "Calibri"
-		
-		return
-	}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_SaveFontType()
-	{
-		global	;assume-global mode
-		IniWrite, % c_FontType,			% HADConfig, GraphicalUserInterface, GuiFontType
-		return
+F_SaveFontType()
+{
+	global	;assume-global mode
+	IniWrite, % c_FontType,			% HADConfig, GraphicalUserInterface, GuiFontType
+	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SizeOfMargin()
@@ -5342,10 +5358,12 @@ Add to Autostart										= Add to Autostart
 After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder? into memory? = After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder? into memory?
 A library with that name already exists! 					= A library with that name already exists!
 Alphabetically 										= Alphabetically
+already exists in another library							= already exists in another library
 Apostrophe ' 											= Apostrophe '
 Application											= A&pplication
 Application help										= Application help
 Application language changed to: 							= Application language changed to:
+Are you sure?											= Are you sure?
 Are you sure you want to exit this application now?			= Are you sure you want to exit this application now?
 Are you sure you want to reload this application now?			= Are you sure you want to reload this application now?
 Backslash \ 											= Backslash \
@@ -5418,7 +5436,8 @@ Error												= Error
 ErrorLevel was triggered by NewInput error. 					= ErrorLevel was triggered by NewInput error.
 Error reading library file:								= Error reading library file:
 Exclamation Mark ! 										= Exclamation Mark !
-exists in the file										= exists in the file
+exists in the currently selected library					= exists in the currently selected library
+exists in the library									= exists in the library
 exists in a file and will now be replaced.					= exists in a file and will now be replaced.
 Exit													= Exit
 Exit application										= Exit application
@@ -5454,9 +5473,11 @@ Hotstrings have been loaded 								= Hotstrings have been loaded
 If you answer ""Yes"" it will overwritten.					= If you answer ""Yes"" it will overwritten.
 If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used. = If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used.
 If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file. = If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file.
+	If you answer ""No"" edition of the current definition will be interrupted. = If you answer ""No"" edition of the current definition will be interrupted.
 Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
 In order to display library content please at first select hotstring library = In order to display library content please at first select hotstring library
+In order to restore default configuration, the current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and upon start the Config.ini with default settings will be created. = In order to restore default configuration, the current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and upon start the Config.ini with default settings will be created.
 information											= information
 Inside Word (?) 										= Inside Word (?)
 In order to aplly new font style it's necesssary to reload the application. 	= In order to aplly new font style it's necesssary to reload the application.
@@ -5521,11 +5542,11 @@ Visit public libraries webpage							= Visit public libraries webpage
 Reload												= Reload
 Reload in default mode									= Reload in default mode
 Reload in silent mode									= Reload in silent mode
-Remove Config.ini										= Remove Config.ini
 Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
 Repository version:										= Repository version:
 Reset Recognizer (Z)									= Reset Recognizer (Z)
 Restore default hotkey									= Restore default hotkey
+Restore default configuration								= Restore default configuration
 )"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
 	TransConst .= "`n
 (Join`n `
@@ -5588,7 +5609,6 @@ Suspend Hotkeys										= Suspend Hotkeys
 Tab 													= Tab 
 The application										= The application
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
-The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure? = The current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and new Config.ini with default settings will be created. Are you sure?
 The default											= The default
 The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually. = The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually.
 The executable file is prepared by Ahk2Exe and compressed by mpress.exe: = The executable file is prepared by Ahk2Exe and compressed by mpress.exe:
