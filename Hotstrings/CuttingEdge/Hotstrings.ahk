@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.3.2"
+global AppVersion				:= "3.3.3"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -65,6 +65,7 @@ F_DetermineMonitors()
 Critical, On
 F_LoadCreateTranslationTxt() ;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
 F_CheckCreateConfigIni() ;1. Try to load up configuration file. If those files do not exist, create them.
+F_CheckScriptEncoding()
 
 if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "Languages" subfolder 
 {
@@ -792,6 +793,25 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_CheckScriptEncoding()
+{	;https://www.autohotkey.com/boards/viewtopic.php?t=65049
+	local file := "", RetrievedEncoding := ""
+	
+	if (!A_IsCompiled)
+	{
+		file := FileOpen(A_ScriptFullPath, "r")
+		RetrievedEncoding := file.Encoding
+		if (RetrievedEncoding != "UTF-8") and (File.Pos != 3)
+		{
+			MsgBox, 16, % A_ScriptName . ":" . A_Space . TransA["Error"], % TransA["Encoding of the script file:"] 
+				. "`n`n" . RetrievedEncoding . A_Space . "no-BOM"
+				. "`n`n" . "Required encoding: UTF-8 with BOM. Application will exit now."
+			Exit, 2	;no-bom
+		}
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiVersionUpdate()
 {
 	global ;assume-global mode
@@ -5427,6 +5447,7 @@ Enable												= Enable
 Enable/disable libraries									= Enable/disable &libraries
 Enable/disable triggerstring tips 							= Enable/disable triggerstring tips	
 Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 4th edition of this application, 2021 by Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
+Encoding of the script file:								= Encoding of the script file:
 Enter 												= Enter 
 Enter a name for the new library 							= Enter a name for the new library
 Enter hotstring 										= Enter hotstring
@@ -5544,6 +5565,7 @@ Reload in default mode									= Reload in default mode
 Reload in silent mode									= Reload in silent mode
 Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
 Repository version:										= Repository version:
+Required encoding: UTF-8 with BOM. Application will exit now.	= Required encoding: UTF-8 with BOM. Application will exit now.
 Reset Recognizer (Z)									= Reset Recognizer (Z)
 Restore default hotkey									= Restore default hotkey
 Restore default configuration								= Restore default configuration
