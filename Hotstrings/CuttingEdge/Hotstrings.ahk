@@ -659,9 +659,11 @@ return
 
 ~Alt::
 ;Comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
-~MButton::
-~RButton::
-~LButton::
+/*
+	~MButton::
+	~RButton::
+	~LButton::
+*/
 ~LWin::
 ~RWin::
 ~Down::
@@ -1060,7 +1062,10 @@ F_ParseHotkey(ini_HK_Main, space*)
 			{
 				Case "~":
 					Mini := true
-					ShortcutLong .= "~"
+					if (space[1])
+						ShortcutLong .= "~"
+					else
+						Continue
 				Case "^":	
 					Mini := true
 					ShortcutLong .= "Ctrl"
@@ -1853,19 +1858,42 @@ F_SetNoOfTips()
 F_ShowTriggerstringTips()
 {
 	global	;assume-global mode
+	local	v_MenuMax  := 0
+	;tu jestem
+	;*[One]
+	;MsgBox,, v_Tips, % v_Tips
 	
+	Gui, TMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndTMenuAHKHwnd
+	Gui, TMenuAHK: Margin, 0, 0
+	Gui, TMenuAHK: Font, cMagenta s8	;Tooltip font color
+	Gui, TMenuAHK: Color,, White
+	;Gui, TMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_TMenuAHK" . A_Space . "r" . v_Tips.Length() 
+	Gui, TMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_TMenuAHK" . A_Space . "r" . 5
+	; . A_Space . "g" . "F_MouseMenuAHK"
+	;for key, value in v_Tips
+		;GuiControl,, % Id_LB_TMenuAHK, % key . ". " . value . "|"
+	
+	;Loop, Parse, v_Tips, ¦
+		;GuiControl,, % Id_LB_TMenuAHK, % A_Index . ". " . A_LoopField . "|"
+	;Gui, TMenuAHK: Show, x%MenuX% y%MenuY% NoActivate	
+
+	GuiControl, Choose, % Id_LB_TMenuAHK, 1
+
+
 	if ((ini_TTTtEn) and (ini_TTTP = 1))
 	{
 		if (A_CaretX and A_CaretY)
 		{
-			ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
+			;ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
+			Gui, TMenuAHK: Show, % "x" . A_CaretX + 20 . A_Space . "y" . A_CaretY - 20 . A_Space . "NoActivate"
 			if ((ini_TTTtEn) and (ini_TTTD > 0))
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 		}
 		else
 		{
 			MouseGetPos, v_MouseX, v_MouseY
-			ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
+			;ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
+			Gui, TMenuAHK: Show, % "x" . v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 . A_Space . "NoActivate"
 			if ((ini_TTTtEn) and (ini_TTTD > 0))
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 		}
@@ -1873,7 +1901,8 @@ F_ShowTriggerstringTips()
 	if ((ini_TTTtEn) and (ini_TTTP = 2))
 	{
 		MouseGetPos, v_MouseX, v_MouseY
-		ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
+		;ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
+		Gui, TMenuAHK: Show, % "x" . v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 . A_Space . "NoActivate"
 		if ((ini_TTTtEn) and (ini_TTTD > 0))
 			SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 	}
@@ -2976,13 +3005,13 @@ F_AddHotstring()
 				a_Hotstring[key] 		:= TextInsert
 				a_Comment[key] 		:= v_Comment
 				ModifiedFlag 			:= true
-					for key2, value2 in a_Library
-						if (value2 = SubStr(v_SelectHotstringLibrary, 1, -4))
-						{
-							Counter++
-							if (a_Triggerstring[key2] = v_Triggerstring)
-								Break
-						}
+				for key2, value2 in a_Library
+					if (value2 = SubStr(v_SelectHotstringLibrary, 1, -4))
+					{
+						Counter++
+						if (a_Triggerstring[key2] = v_Triggerstring)
+							Break
+					}
 				LV_Modify(Counter, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)		
 			}
 			else
@@ -3597,7 +3626,7 @@ HS3SearchGuiSize()
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_RestoreDefaultConfig()	;tu jestem
+F_RestoreDefaultConfig()
 {
 	global	;assume-global mode
 	if (FileExist(HADConfig))
