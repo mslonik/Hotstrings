@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.3.5"
+global AppVersion				:= "3.3.6"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -667,11 +667,9 @@ return
 
 ~Alt::
 ;Comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
-/*
-	~MButton::
-	~RButton::
-	~LButton::
-*/
+~MButton::
+~RButton::
+~LButton::
 ~LWin::
 ~RWin::
 ~Down::
@@ -700,18 +698,41 @@ F_MoveList()
 
 #if WinExist("AHK_id" TMenuAHKHwnd)
 #InputLevel 1	;This trick enables back triggering of existing (triggerstring, hotstring) definitions; it rises up priority of calling existing triggerstrings
+Tab::
++Tab::
 Up::
 Down::
 Enter::
-
+1::
+2::
+3::
+4::
+5::
+6::
+7::
+8::
+9::
 F_TMenu()
 {
 	global	;assume-global moee
 	local	v_PressedKey := "",		v_Temp1 := "",		ClipboardBack := ""
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0, ShiftTabIsFound := false
 	
 	v_MenuMax := a_Tips.Count()
 	v_PressedKey := A_ThisHotkey
+	if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
+	{
+		IsCursorPressed := true
+		IntCnt--
+		ControlSend, , {Up}, % "ahk_id" Id_LB_TMenuAHK
+		ShiftTabIsFound := true
+	}
+	if (InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+	{
+		IsCursorPressed := true
+		IntCnt++
+		ControlSend, , {Down}, % "ahk_id" Id_LB_TMenuAHK
+	}
 	if (InStr(v_PressedKey, "Up"))
 	{
 		IsCursorPressed := true
@@ -751,16 +772,14 @@ F_TMenu()
 		v_PressedKey := IntCnt
 		IsCursorPressed := false
 		IntCnt := 1
-		OutputDebug, % "Enter" . ":" . A_Space . v_PressedKey
 	}
 	if (v_PressedKey > v_MenuMax)
 		return
 	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_TMenuAHK
-	OutputDebug, % "Id_LB_TMenuAHK" . A_Tab . Id_LB_TMenuAHK . A_Tab . "v_Temp1" . A_Tab . v_Temp1
 	Loop, Parse, v_Temp1, `n
 	{
 		if (A_Index = v_PressedKey)
-			v_Temp1 := SubStr(A_LoopField, 4)
+			v_Temp1 := SubStr(A_LoopField, InStr(A_LoopField, " ") + 1)
 	}
 	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
 	Hotstring("Reset")
@@ -773,6 +792,8 @@ F_TMenu()
 #if
 
 #if WinExist("ahk_id" HMenuCliHwnd)
+Tab::
++Tab::
 1::
 2::
 3::
@@ -788,22 +809,32 @@ F_HMenuCli()
 {
 	global	;assume-global moee
 	local	v_PressedKey := "",		v_Temp1 := "",		ClipboardBack := ""
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
 	
 	v_PressedKey := A_ThisHotkey
-	;OutputDebug, % "Beginning" . ":" . A_Space . A_ThisHotkey . A_Space . "v_MenuMax" . ":" . A_Space . v_MenuMax
+	if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
+	{
+		IsCursorPressed := true
+		IntCnt--
+		ControlSend, , {Up}, % "ahk_id" Id_LB_TMenuAHK
+		ShiftTabIsFound := true
+	}
+	if (InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+	{
+		IsCursorPressed := true
+		IntCnt++
+		ControlSend, , {Down}, % "ahk_id" Id_LB_TMenuAHK
+	}
 	if (InStr(v_PressedKey, "Up"))
 	{
 		IsCursorPressed := true
 		IntCnt--
-		;OutputDebug, % "Up" . ":" . A_Space IntCnt . A_Space . IsCursorPressed
 		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuCli
 	}
 	if (InStr(v_PressedKey, "Down"))
 	{
 		IsCursorPressed := true
 		IntCnt++
-		;OutputDebug, % "Down" . ":" . A_Space IntCnt . A_Space . IsCursorPressed
 		ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuCli
 	}
 	
@@ -836,11 +867,9 @@ F_HMenuCli()
 		v_PressedKey := IntCnt
 		IsCursorPressed := false
 		IntCnt := 1
-		;OutputDebug, % "Enter" . ":" . A_Space . v_PressedKey
 	}
 	if (v_PressedKey > v_MenuMax)
 	{
-		;OutputDebug, % "v_PressedKey" . ":" . A_Space . v_PressedKey
 		return
 	}
 	ClipboardBack := ClipboardAll ;backup clipboard
@@ -849,12 +878,8 @@ F_HMenuCli()
 	{
 		if (A_Index = v_PressedKey)
 			v_Temp1 := SubStr(A_LoopField, 4)
-		;if (InStr(A_LoopField, v_PressedKey . "."))
-			;v_Temp1 := SubStr(A_LoopField, 4)
 	}
-	
 	Clipboard := v_Temp1
-	
 	Send, ^v ;paste the text
 	if (Ovar = false)
 		Send, % A_EndChar
@@ -900,8 +925,13 @@ F_ShowTriggerstringTips2()
 	LongestString := WhichKey . ". " . WhichValue
 	F_GuiTrigTipsMenuDef(a_Tips.Count(), LongestString)
 	
-	for key, value in a_Tips
-		GuiControl,, % Id_LB_TMenuAHK, % key . ". " . value . "|"
+	for key, value in a_Tips	;keys 1-9 will be used to quick call of existing (triggerstring, hotstring) definitions in function F_TMenu()
+	{
+		if (key < 10)
+			GuiControl,, % Id_LB_TMenuAHK, % key . ". " . value . "|"
+		else
+			GuiControl,, % Id_LB_TMenuAHK, % value . "|"
+	}
 	
 	if (ini_MHMP = 1)
 	{
@@ -963,7 +993,7 @@ F_CheckScriptEncoding()
 			MsgBox, 16, % A_ScriptName . ":" . A_Space . TransA["Error"], % TransA["Recognized encoding of the script file:"] 
 				. "`n`n" . RetrievedEncoding . A_Space . "no-BOM"
 				. "`n`n" . TransA["Required encoding: UTF-8 with BOM. Application will exit now."]
-			ExitApp, 2	;no-bom
+			ExitApp, 3	;no-bom
 		}
 	}
 	return
@@ -5132,7 +5162,6 @@ F_Reload()
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 F_Exit()
 {
 	global ;assume-global mode
@@ -5143,7 +5172,6 @@ F_Exit()
 		return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 F_ToggleSandbox()
 {
 	global ;assume-global mode
@@ -5157,7 +5185,6 @@ F_ToggleSandbox()
 	;Gui, % A_DefaultGui . ":" . A_Space . "Show", AutoSize	
 	return
 }
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadGUIPos()
 {
@@ -7396,7 +7423,7 @@ F_CreateHotstring(txt, nameoffile)
 					. "`n" . txt . "`n`n" . TransA["This line do not comply to format required by this application."] . "`n`n" 
 					. TransA["Continue reading the library file? If you answer ""No"" then application will exit!"]
 		IfMsgBox, No
-			ExitApp, 1
+			ExitApp, 1	;error reading library file
 		IfMsgBox, Yes
 			return
 	}
@@ -7823,6 +7850,8 @@ F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A
 
 ;Future: move this section of code to Hotkeys
 #if WinExist("ahk_id" HMenuAHKHwnd)
+Tab::
++Tab::
 1::
 2::
 3::
@@ -7838,31 +7867,39 @@ F_HMenuAHK()
 {
 	global	;assume-global moee
 	local	v_PressedKey := "",		v_Temp1 := ""
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
 	
 	v_PressedKey := A_ThisHotkey
-;OutputDebug, % "Beginning" . ":" . A_Space . A_ThisHotkey
+	if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
+	{
+		IsCursorPressed := true
+		IntCnt--
+		ControlSend, , {Up}, % "ahk_id" Id_LB_TMenuAHK
+		ShiftTabIsFound := true
+	}
+	if (InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+	{
+		IsCursorPressed := true
+		IntCnt++
+		ControlSend, , {Down}, % "ahk_id" Id_LB_TMenuAHK
+	}
 	if (InStr(v_PressedKey, "Up"))
 	{
 		IsCursorPressed := true
 		IntCnt--
-	;OutputDebug, % "Up" . ":" . A_Space IntCnt
 		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
 	}
 	if (InStr(v_PressedKey, "Down"))
 	{
 		IsCursorPressed := true
 		IntCnt++
-	;OutputDebug, % "Down" . ":" . A_Space IntCnt
 		ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
 	}
-	
 	if ((v_MenuMax = 1) and IsCursorPressed)
 	{
 		IntCnt := 1
 		return
 	}
-	
 	if (IsCursorPressed)
 	{
 		if (IntCnt > v_MenuMax)
@@ -7880,17 +7917,14 @@ F_HMenuAHK()
 		IsCursorPressed := false
 		return
 	}		
-	
 	if (InStr(v_PressedKey, "Enter"))
 	{
 		v_PressedKey := IntCnt
 		IsCursorPressed := false
 		IntCnt := 1
-		;OutputDebug, % "Enter" . ":" . A_Space . v_PressedKey
 	}
 	if (v_PressedKey > v_MenuMax)
 	{
-		;OutputDebug, % "v_PressedKey" . ":" . A_Space . v_PressedKey
 		return
 	}
 	v_HotstringFlag := true
@@ -8840,34 +8874,33 @@ L_TrayPauseScript:
 	{
 		Menu, Tray, 		UnCheck, 	% TransA["Pause application"]
 		Menu, AppSubmenu,	UnCheck, 	% TransA["Pause"]
-	}
+}
 return
-	
+
 L_TrayReload:	;new thread starts here
-	F_WhichGui()
-	F_Reload()
+F_WhichGui()
+F_Reload()
 return
-	
+
 TurnOff_OHE:
-	ToolTip, ,, , 4
+ToolTip, ,, , 4
 return
-	
+
 TurnOff_UHE:
-	ToolTip, ,, , 6
+ToolTip, ,, , 6
 return
-	
+
 TurnOff_Ttt:
-	;ToolTip
-	Gui, TMenuAHK: Destroy
+Gui, TMenuAHK: Destroy	;ToolTip
 return
-	
+
 L_TrayExit:
-	ExitApp, 2	;2 = by Tray
-	
+ExitApp, 2	;2 = by Tray
+
 STDGuiClose:
 STDGuiEscape:
-	Switch (A_ThisMenu)
-	{
+Switch (A_ThisMenu)
+{
 		Case "OrdHisTrig": 	IniWrite, % ini_OHTD, % HADConfig, Event_BasicHotstring, 	OHTD
 		Case "UndoOfH":	IniWrite, % ini_UHTD, % HADConfig, Event_UndoHotstring, 	UHTD
 		Case "TrigTips":	IniWrite, % ini_TTTD, % HADConfig, Event_TriggerstringTips, TTTD
