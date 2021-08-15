@@ -59,7 +59,7 @@ global v_UndoHotstring 			:= ""		;used by output functions
 global v_ResizingFlag 			:= true 		;when Hotstrings Gui is displayed for the very first time
 global HMenuCliHwnd				:= 0
 global HMenuAHKHwnd				:= 0
-
+global TMenuAHKHwnd				:= 0 
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_DetermineMonitors()
 Critical, On
@@ -697,11 +697,13 @@ F8:: ;new thread starts here
 Gui, HS3Search: Default
 F_MoveList()
 #if
-	
+
 #if WinExist("AHK_id" TMenuAHKHwnd)
+#InputLevel 1	;This trick enables back triggering of existing (triggerstring, hotstring) definitions; it rises up priority of calling existing triggerstrings
 Up::
 Down::
 Enter::
+
 F_TMenu()
 {
 	global	;assume-global moee
@@ -710,20 +712,17 @@ F_TMenu()
 	
 	v_MenuMax := a_Tips.Count()
 	v_PressedKey := A_ThisHotkey
-	;*[One]
 	if (InStr(v_PressedKey, "Up"))
 	{
 		IsCursorPressed := true
 		IntCnt--
-		;OutputDebug, % "Up" . ":" . A_Space IntCnt . A_Space . IsCursorPressed
-		ControlSend, , {Up}, % "ahk_id" TMenuAHKHwnd
+		ControlSend, , {Up}, % "ahk_id" Id_LB_TMenuAHK
 	}
 	if (InStr(v_PressedKey, "Down"))
 	{
 		IsCursorPressed := true
 		IntCnt++
-		;OutputDebug, % "Down" . ":" . A_Space IntCnt . A_Space . IsCursorPressed
-		ControlSend, , {Down}, % "ahk_id" TMenuAHKHwnd
+		ControlSend, , {Down}, % "ahk_id" Id_LB_TMenuAHK
 	}
 	if ((v_MenuMax = 1) and IsCursorPressed)
 	{
@@ -752,26 +751,26 @@ F_TMenu()
 		v_PressedKey := IntCnt
 		IsCursorPressed := false
 		IntCnt := 1
-		;OutputDebug, % "Enter" . ":" . A_Space . v_PressedKey
+		OutputDebug, % "Enter" . ":" . A_Space . v_PressedKey
 	}
 	if (v_PressedKey > v_MenuMax)
-	{
-		;OutputDebug, % "v_PressedKey" . ":" . A_Space . v_PressedKey
 		return
-	}
 	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_TMenuAHK
+	OutputDebug, % "Id_LB_TMenuAHK" . A_Tab . Id_LB_TMenuAHK . A_Tab . "v_Temp1" . A_Tab . v_Temp1
 	Loop, Parse, v_Temp1, `n
 	{
-		if (InStr(A_LoopField, v_PressedKey . "."))
+		if (A_Index = v_PressedKey)
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
-	SendEvent, % v_Temp1
-	Gui, HMenuAHK: Destroy
-	F_EventSigOrdHotstring()
-	
+	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
+	Hotstring("Reset")
+	SendInput, % v_Temp1
+	Gui, TMenuAHK: Destroy
+	;F_EventSigOrdHotstring()
 	return
 }
-
+#InputLevel 0
+#if
 
 #if WinExist("ahk_id" HMenuCliHwnd)
 1::
@@ -798,14 +797,14 @@ F_HMenuCli()
 		IsCursorPressed := true
 		IntCnt--
 		;OutputDebug, % "Up" . ":" . A_Space IntCnt . A_Space . IsCursorPressed
-		ControlSend, , {Up}, % "ahk_id" HMenuCliHwnd
+		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuCli
 	}
 	if (InStr(v_PressedKey, "Down"))
 	{
 		IsCursorPressed := true
 		IntCnt++
 		;OutputDebug, % "Down" . ":" . A_Space IntCnt . A_Space . IsCursorPressed
-		ControlSend, , {Down}, % "ahk_id" HMenuCliHwnd
+		ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuCli
 	}
 	
 	if ((v_MenuMax = 1) and IsCursorPressed)
@@ -848,8 +847,10 @@ F_HMenuCli()
 	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuCli
 	Loop, Parse, v_Temp1, `n
 	{
-		if (InStr(A_LoopField, v_PressedKey . "."))
+		if (A_Index = v_PressedKey)
 			v_Temp1 := SubStr(A_LoopField, 4)
+		;if (InStr(A_LoopField, v_PressedKey . "."))
+			;v_Temp1 := SubStr(A_LoopField, 4)
 	}
 	
 	Clipboard := v_Temp1
@@ -7846,14 +7847,14 @@ F_HMenuAHK()
 		IsCursorPressed := true
 		IntCnt--
 	;OutputDebug, % "Up" . ":" . A_Space IntCnt
-		ControlSend, , {Up}, % "ahk_id" HMenuAHKHwnd
+		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
 	}
 	if (InStr(v_PressedKey, "Down"))
 	{
 		IsCursorPressed := true
 		IntCnt++
 	;OutputDebug, % "Down" . ":" . A_Space IntCnt
-		ControlSend, , {Down}, % "ahk_id" HMenuAHKHwnd
+		ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
 	}
 	
 	if ((v_MenuMax = 1) and IsCursorPressed)
