@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.3.5"
+global AppVersion				:= "3.3.6"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -925,10 +925,15 @@ F_VerUpdDownload()
 	global	;assume-global mode
 	local	URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk"
 			,URLexe := "https://github.com/mslonik/Hotstrings/blob/master/Hotstrings/Hotstrings.exe"
+			,e := ""
 	
 	if (A_IsCompiled)
 	{
-		URLDownloadToFile, % URLexe, 		% A_ScriptFullPath
+		try
+			URLDownloadToFile, % URLexe, 		% A_ScriptFullPath
+		catch e
+			MsgBox, 17, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Something went wrong on time of downloading executable file."
+				. "`n`n" . "Exception: " . "`n" . e
 		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The application"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
 			. "`n" . TransA["The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually."]
 			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
@@ -942,7 +947,11 @@ F_VerUpdDownload()
 	}
 	else
 	{
-		URLDownloadToFile, % URLscript,	% A_ScriptFullPath
+		try
+			URLDownloadToFile, % URLexe, 		% A_ScriptFullPath
+		catch e
+			MsgBox, 17, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Something went wrong on time of downloading executable file."
+				. "`n`n" . "Exception: " . "`n" . e
 		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The script"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
 			. "`n" . TransA["The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually."]
 			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
