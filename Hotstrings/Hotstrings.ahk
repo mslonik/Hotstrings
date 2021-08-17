@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.3.6"
+global AppVersion				:= "3.3.7"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -98,7 +98,7 @@ else
 
 ; 3. Load content of configuration file into configuration variables. The configuration variable names start with "ini_" prefix.
 ;Read all variables from specified language .ini file. In order to distinguish GUI text from any other string or variable used in this script, the GUI strings are defined with prefix "t_".
-
+OutputDebug, Here I am 1...
 F_LoadGUIPos()
 F_LoadGUIstyle()
 F_LoadFontSize()
@@ -479,7 +479,16 @@ if (ini_CheckRepo)
 if (ini_DownloadRepo) and (F_VerUpdCheckServ("ReturnResult"))
 	F_VerUpdDownload()
 
-IniRead, ini_GuiReload, 						% HADConfig, GraphicalUserInterface, GuiReload
+OutputDebug, Here I am 2...
+IniRead, ini_GuiReload, 					% HADConfig, GraphicalUserInterface, GuiReload,		% A_Space
+if (ini_GuiReload = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+{
+	ini_GuiReload := false
+	IniWrite, % ini_GuiReload, % HADConfig, GraphicalUserInterface, GuiReload
+}
+OutputDebug, % "ini_GuiReload" . A_Tab . ini_GuiReload . A_Tab . "A_ScriptDir" . A_Tab . A_ScriptDir
+if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_GuiReload is set also if Update function is run with Hostrings.exe. So after restart temp.exe is removed.
+	FileDelete, % A_ScriptDir . "\" . "temp.exe"
 if (ini_GuiReload) and (v_Param != "l")
 	Gosub, L_GUIInit
 
@@ -924,44 +933,57 @@ F_VerUpdDownload()
 {
 	global	;assume-global mode
 	local	URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk"
-			,URLexe := "https://github.com/mslonik/Hotstrings/blob/master/Hotstrings/Hotstrings.exe"
-			,e := ""
+			,URLexe := "https://github.com/mslonik/Hotstrings/raw/master/Hotstrings/Hotstrings.exe"
+			,whr := "", Result := "", e := ""
 	
 	if (A_IsCompiled)
 	{
 		try
-			URLDownloadToFile, % URLexe, 		% A_ScriptFullPath
-		catch e
-			MsgBox, 17, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Something went wrong on time of downloading executable file."
-				. "`n`n" . "Exception: " . "`n" . e
-		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The application"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
+			FileMove, % A_ScriptFullPath, temp.exe
+		Catch e
+			MsgBox, , Error, % "ErrorLevel" . A_Tab . ErrorLevel
+					. "`n`n" . "A_LastError" . A_Tab . A_LastError
+					. "`n`n" . "Exception" . A_Tab . e
+		try
+			URLDownloadToFile, % URLexe, % A_ScriptFullPath
+		catch
+			MsgBox,, Something wrong, Something wrong!
+		
+		if (!ErrorLevel)		
+		{
+			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The application"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
 			. "`n" . TransA["The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually."]
 			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
-		FileDelete, % A_ScriptDir . "\Languages\English.txt" 	
-		IfMsgBox, Yes
-		{
-			Gui, VersionUpdate: Hide
-			F_Reload()
+			IfMsgBox, Yes
+			{
+				FileDelete, % A_ScriptDir . "\Languages\English.txt" 	
+				Gui, VersionUpdate: Hide
+				ini_GuiReload := true
+				IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
+				F_Reload()
+			}
 		}
 		return
 	}
 	else
 	{
 		try
-			URLDownloadToFile, % URLexe, 		% A_ScriptFullPath
-		catch e
-			MsgBox, 17, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Something went wrong on time of downloading executable file."
-				. "`n`n" . "Exception: " . "`n" . e
-		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The script"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
+			URLDownloadToFile, % URLscript, 		% A_ScriptFullPath
+		catch
+			MsgBox, 17, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Something went wrong on time of downloading AutoHotkey script file."
+		if (!ErrorLevel)
+		{
+			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The script"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
 			. "`n" . TransA["The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually."]
 			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
-		FileDelete, % A_ScriptDir . "\Languages\English.txt" 		
-		IfMsgBox, Yes
-		{
-			Gui, VersionUpdate: Hide
-			F_Reload()
+			IfMsgBox, Yes
+			{
+				FileDelete, % A_ScriptDir . "\Languages\English.txt" 		
+				Gui, VersionUpdate: Hide
+				F_Reload()
+			}
+			return
 		}
-		return
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4923,6 +4945,7 @@ F_Reload()
 					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
 				}
 				Default:	;used when file was downloaded from GitHub repository
+				OutputDebug, Default...
 				Switch A_IsCompiled
 				{
 					Case % true:	Run, % A_ScriptFullPath 
