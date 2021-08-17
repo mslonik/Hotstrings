@@ -98,7 +98,6 @@ else
 
 ; 3. Load content of configuration file into configuration variables. The configuration variable names start with "ini_" prefix.
 ;Read all variables from specified language .ini file. In order to distinguish GUI text from any other string or variable used in this script, the GUI strings are defined with prefix "t_".
-OutputDebug, Here I am 1...
 F_LoadGUIPos()
 F_LoadGUIstyle()
 F_LoadFontSize()
@@ -479,14 +478,12 @@ if (ini_CheckRepo)
 if (ini_DownloadRepo) and (F_VerUpdCheckServ("ReturnResult"))
 	F_VerUpdDownload()
 
-OutputDebug, Here I am 2...
 IniRead, ini_GuiReload, 					% HADConfig, GraphicalUserInterface, GuiReload,		% A_Space
 if (ini_GuiReload = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 {
 	ini_GuiReload := false
 	IniWrite, % ini_GuiReload, % HADConfig, GraphicalUserInterface, GuiReload
 }
-OutputDebug, % "ini_GuiReload" . A_Tab . ini_GuiReload . A_Tab . "A_ScriptDir" . A_Tab . A_ScriptDir
 if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_GuiReload is set also if Update function is run with Hostrings.exe. So after restart temp.exe is removed.
 	FileDelete, % A_ScriptDir . "\" . "temp.exe"
 if (ini_GuiReload) and (v_Param != "l")
@@ -947,8 +944,7 @@ F_VerUpdDownload()
 		try
 			URLDownloadToFile, % URLexe, % A_ScriptFullPath
 		catch
-			MsgBox,, Something wrong, Something wrong!
-		
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % A_ThisFunc . A_Space TransA["caused problem on line URLDownloadToFile."]
 		if (!ErrorLevel)		
 		{
 			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The application"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
@@ -958,8 +954,6 @@ F_VerUpdDownload()
 			{
 				FileDelete, % A_ScriptDir . "\Languages\English.txt" 	
 				Gui, VersionUpdate: Hide
-				ini_GuiReload := true
-				IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
 				F_Reload()
 			}
 		}
@@ -4945,7 +4939,6 @@ F_Reload()
 					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
 				}
 				Default:	;used when file was downloaded from GitHub repository
-				OutputDebug, Default...
 				Switch A_IsCompiled
 				{
 					Case % true:	Run, % A_ScriptFullPath 
@@ -5427,6 +5420,7 @@ Call Graphical User Interface								= Call Graphical User Interface
 Cancel 												= Cancel
 Case Sensitive (C) 										= Case Sensitive (C)
 Case-Conforming										= Case-Conforming
+caused problem on line URLDownloadToFile.					= caused problem on line URLDownloadToFile.
 Change language 										= Change language
 Check if update is available on startup?					= Check if update is available on startup?
 Check repository version									= Check repository version
