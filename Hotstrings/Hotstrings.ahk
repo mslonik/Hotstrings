@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.3.7"
+global AppVersion				:= "3.3.8"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -3623,7 +3623,7 @@ HS3SearchGuiSize()
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_RestoreDefaultConfig()	;tu jestem
+F_RestoreDefaultConfig()
 {
 	global	;assume-global mode
 	if (FileExist(HADConfig))
@@ -5121,14 +5121,17 @@ Underscore _=1
 	
 	if (!FileExist(HADConfig))
 	{
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"] . "`n`n" . HADConfig
+		if (!Instr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4)), "D"))				; if  there is no folder...
+		{
+			FileCreateDir, % A_AppData . "\" . SubStr(A_ScriptName, 1, -4)					; Future: check against errors
+			;MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exists!"] . "`n`n" . HADL . "`n`n" . TransA["folder is now created"] . "."
+		}
 		FileAppend, %ConfigIni%, % HADConfig
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"] . "`n`n" . HADConfig
 	}
 	return	
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SaveGUIPos(param*) ;Save to Config.ini
 {
 	global ;assume-global mode
@@ -7012,8 +7015,8 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	v_IsLibraryEmpty := true
 	if (!Instr(FileExist(HADL), "D"))				; if  there is no "Libraries" subfolder 
 	{
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exists!"] . "`n`n" . HADL . "`n`n" . TransA["folder is now created"] . "."
 		FileCreateDir, % HADL							; Future: check against errors
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exists!"] . "`n`n" . HADL . "`n`n" . TransA["folder is now created"] . "."
 	}
 	else
 	{
@@ -7097,7 +7100,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 		if !(FlagFound)
 			ini_ShowTipsLib[value] := 1
 	}
-		
+	
 ;Delete and recreate [ShowTipsLibraries] section of Config.ini mirroring ini_ShowTipsLib associative table. "PriorityLibrary.csv" as the last one.
 	IniDelete, % HADConfig, ShowTipsLibraries
 	for key, value in ini_ShowTipsLib
