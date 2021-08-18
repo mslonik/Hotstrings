@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.3.6"
+global AppVersion				:= "3.3.8"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -479,7 +479,14 @@ if (ini_CheckRepo)
 if (ini_DownloadRepo) and (F_VerUpdCheckServ("ReturnResult"))
 	F_VerUpdDownload()
 
-IniRead, ini_GuiReload, 						% HADConfig, GraphicalUserInterface, GuiReload
+IniRead, ini_GuiReload, 					% HADConfig, GraphicalUserInterface, GuiReload,		% A_Space
+if (ini_GuiReload = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+{
+	ini_GuiReload := false
+	IniWrite, % ini_GuiReload, % HADConfig, GraphicalUserInterface, GuiReload
+}
+if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_GuiReload is set also if Update function is run with Hostrings.exe. So after restart temp.exe is removed.
+	FileDelete, % A_ScriptDir . "\" . "temp.exe"
 if (ini_GuiReload) and (v_Param != "l")
 	Gosub, L_GUIInit
 
@@ -703,15 +710,6 @@ Tab::
 Up::
 Down::
 Enter::
-1::
-2::
-3::
-4::
-5::
-6::
-7::
-8::
-9::
 F_TMenu()
 {
 	global	;assume-global moee
@@ -1111,35 +1109,54 @@ F_VerUpdDownload()
 {
 	global	;assume-global mode
 	local	URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk"
-			,URLexe := "https://github.com/mslonik/Hotstrings/blob/master/Hotstrings/Hotstrings.exe"
+			,URLexe := "https://github.com/mslonik/Hotstrings/raw/master/Hotstrings/Hotstrings.exe"
+			,whr := "", Result := "", e := ""
 	
 	if (A_IsCompiled)
 	{
-		URLDownloadToFile, % URLexe, 		% A_ScriptFullPath
-		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The application"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
+		try
+			FileMove, % A_ScriptFullPath, temp.exe
+		Catch e
+			MsgBox, , Error, % "ErrorLevel" . A_Tab . ErrorLevel
+					. "`n`n" . "A_LastError" . A_Tab . A_LastError
+					. "`n`n" . "Exception" . A_Tab . e
+		try
+			URLDownloadToFile, % URLexe, % A_ScriptFullPath
+		catch
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % A_ThisFunc . A_Space TransA["caused problem on line URLDownloadToFile."]
+		if (!ErrorLevel)		
+		{
+			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The application"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
 			. "`n" . TransA["The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually."]
 			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
-		FileDelete, % A_ScriptDir . "\Languages\English.txt" 	
-		IfMsgBox, Yes
-		{
-			Gui, VersionUpdate: Hide
-			F_Reload()
+			IfMsgBox, Yes
+			{
+				FileDelete, % A_ScriptDir . "\Languages\English.txt" 	
+				Gui, VersionUpdate: Hide
+				F_Reload()
+			}
 		}
 		return
 	}
 	else
 	{
-		URLDownloadToFile, % URLscript,	% A_ScriptFullPath
-		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The script"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
+		try
+			URLDownloadToFile, % URLscript, 		% A_ScriptFullPath
+		catch
+			MsgBox, 17, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Something went wrong on time of downloading AutoHotkey script file."
+		if (!ErrorLevel)
+		{
+			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The script"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
 			. "`n" . TransA["The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually."]
 			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
-		FileDelete, % A_ScriptDir . "\Languages\English.txt" 		
-		IfMsgBox, Yes
-		{
-			Gui, VersionUpdate: Hide
-			F_Reload()
+			IfMsgBox, Yes
+			{
+				FileDelete, % A_ScriptDir . "\Languages\English.txt" 		
+				Gui, VersionUpdate: Hide
+				F_Reload()
+			}
+			return
 		}
-		return
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1270,7 +1287,10 @@ F_ParseHotkey(ini_HK_Main, space*)
 			if (Mini)
 			{
 				if (space[1])
-					ShortcutLong .= " + "
+					if (ShortcutLong = "~")
+						Continue
+					else
+						ShortcutLong .= " + "
 				else
 					ShortcutLong .= "+"
 			}
@@ -1301,7 +1321,7 @@ F_GuiShortDef_CreateObjects()
 		Case % TransA["Undo the last hotstring"]:
 		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,										% TransA["Undo the last hotstring"]
 	}
-	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT2,										% TransA["Current shortcut (hotkey):"]
+	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT2,											% TransA["Current shortcut (hotkey):"]
 	
 	Switch A_ThisMenuItem
 	{
@@ -1508,12 +1528,12 @@ F_ShortDefB1_SaveHotkey()
 	Switch A_ThisMenuItem
 	{
 		Case % TransA["Call Graphical User Interface"]:
-		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main)
+		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
 		Hotkey, % OldHotkey, L_GUIInit, Off
 		if (ini_HK_Main != "none")
 			Hotkey, % ini_HK_Main, L_GUIInit, On
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
-			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit)
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit, "space")
 			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
 			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
 			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
@@ -1528,7 +1548,8 @@ F_ShortDefB1_SaveHotkey()
 				Hotkey, IfWinExist
 			}
 		Case % TransA["Undo the last hotstring"]:
-			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH)
+			MsgBox,, Debug, % ini_HK_UndoLH
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH, "space")
 			if (ini_HotstringUndo)
 			{
 				Hotkey, % OldHotkey, 	F_Undo, Off
@@ -5312,14 +5333,16 @@ Underscore _=1
 	
 	if (!FileExist(HADConfig))
 	{
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"] . "`n`n" . HADConfig
+		if (!InStr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4)), "D"))	;if there is no folder...
+		{
+			FileCreateDir, % A_AppData . "\" . SubStr(A_ScriptName, 1, -4)	;future: check against errors
+		}
 		FileAppend, %ConfigIni%, % HADConfig
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"] . "`n`n" . HADConfig
 	}
 	return	
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_SaveGUIPos(param*) ;Save to Config.ini
 {
 	global ;assume-global mode
@@ -5611,6 +5634,7 @@ Call Graphical User Interface								= Call Graphical User Interface
 Cancel 												= Cancel
 Case Sensitive (C) 										= Case Sensitive (C)
 Case-Conforming										= Case-Conforming
+caused problem on line URLDownloadToFile.					= caused problem on line URLDownloadToFile.
 Change language 										= Change language
 Check if update is available on startup?					= Check if update is available on startup?
 Check repository version									= Check repository version
@@ -7202,8 +7226,8 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	v_IsLibraryEmpty := true
 	if (!Instr(FileExist(HADL), "D"))				; if  there is no "Libraries" subfolder 
 	{
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exists!"] . "`n`n" . HADL . "`n`n" . TransA["folder is now created"] . "."
 		FileCreateDir, % HADL							; Future: check against errors
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exists!"] . "`n`n" . HADL . "`n`n" . TransA["folder is now created"] . "."
 	}
 	else
 	{
@@ -7287,7 +7311,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 		if !(FlagFound)
 			ini_ShowTipsLib[value] := 1
 	}
-		
+	
 ;Delete and recreate [ShowTipsLibraries] section of Config.ini mirroring ini_ShowTipsLib associative table. "PriorityLibrary.csv" as the last one.
 	IniDelete, % HADConfig, ShowTipsLibraries
 	for key, value in ini_ShowTipsLib
