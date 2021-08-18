@@ -774,11 +774,13 @@ F_TMenu()
 	if (v_PressedKey > v_MenuMax)
 		return
 	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_TMenuAHK
-	Loop, Parse, v_Temp1, `n
-	{
-		if (A_Index = v_PressedKey)
-			v_Temp1 := SubStr(A_LoopField, InStr(A_LoopField, " ") + 1)
-	}
+	/*
+		Loop, Parse, v_Temp1, `n
+		{
+			if (A_Index = v_PressedKey)
+				v_Temp1 := SubStr(A_LoopField, InStr(A_LoopField, " ") + 1)
+		}
+	*/
 	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
 	Hotstring("Reset")
 	SendInput, % v_Temp1
@@ -920,16 +922,11 @@ F_ShowTriggerstringTips2()
 			WhichValue := value
 		}
 	}
-	LongestString := WhichKey . ". " . WhichValue
+	LongestString := WhichValue
 	F_GuiTrigTipsMenuDef(a_Tips.Count(), LongestString)
 	
-	for key, value in a_Tips	;keys 1-9 will be used to quick call of existing (triggerstring, hotstring) definitions in function F_TMenu()
-	{
-		if (key < 10)
-			GuiControl,, % Id_LB_TMenuAHK, % key . ". " . value . "|"
-		else
-			GuiControl,, % Id_LB_TMenuAHK, % value . "|"
-	}
+	for key, value in a_Tips
+		GuiControl,, % Id_LB_TMenuAHK, % value . "|"
 	
 	if (ini_MHMP = 1)
 	{
