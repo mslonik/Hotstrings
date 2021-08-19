@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -7762,13 +7762,16 @@ F_MouseMenuCli() ;The subroutine may consult the following built-in variables: A
 F_GuiTrigTipsMenuDef(AmountOfRows, LongestString)
 {
 	global	;assume-global mode
-	local vOutput := 0, vOutputX := 0, vOutputY := 0, vOutputW := 0, vOutputH := 0
-
+	local vOutput := 0, vOutputX := 0, vOutputY := 0, vOutputW := 0, vOutputH := 0, OutputString := ""
+	
+	Loop, Parse, LongestString	;exchange all letters into "w"
+		OutputString .= "w"		;the widest ordinary letter in alphabet
 	Gui, TMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndTMenuAHKHwnd
 	Gui, TMenuAHK: Margin, 0, 0
 	Gui, TMenuAHK: Font, % "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . "Teal", % c_FontType
 	Gui, TMenuAHK: Color,, Red	;background of listbox
-	Gui, TMenuAHK: Add, Text, % "x0 y0 HwndId_T1_TMenuAHK", % LongestString
+	;Gui, TMenuAHK: Add, Text, % "x0 y0 HwndId_T1_TMenuAHK", % LongestString
+	Gui, TMenuAHK: Add, Text, % "x0 y0 HwndId_T1_TMenuAHK", % OutputString
 	GuiControlGet, vOutput, Pos, % Id_T1_TMenuAHK
 	Gui, TMenuAHK: Add, Listbox, % "x0 y0 HwndId_LB_TMenuAHK" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutputW + 4
 	GuiControl, Hide, % Id_T1_TMenuAHK
