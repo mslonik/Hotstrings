@@ -375,6 +375,7 @@ Menu, SigOfEvents,		Add, % TransA["Basic hotstring is triggered"],	:OrdHisTrig
 Menu, SigOfEvents,		Add, % TransA["Menu hotstring is triggered"],	:MenuHisTrig
 Menu, SigOfEvents,		Add, % TransA["Undid the last hotstring"],		:UndoOfH
 Menu, SigOfEvents,		Add, % TransA["Triggerstring tips"],			:TrigTips
+Menu, SigOfEvents,		Add, % TransA["Triggerstring tips styling"],		F_TTstyling
 
 F_SortTipsByLength()
 F_SortTipsAlphabetically()
@@ -905,6 +906,27 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_GuiTTstyling_CreateObjects()
+{
+	global ;assume-global mode
+	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiTTstyling_DetermineConstraints()
+{
+	global ;assume-global mode
+	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_TTstyling()
+{
+	global ;assume-global mode
+	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ShowTriggerstringTips2()
 {
 	global ;assume-global mode
@@ -5911,6 +5933,7 @@ Triggerstring sound duration [ms]							= Triggerstring sound duration [ms]
 Triggerstring sound frequency range						= Triggerstring sound frequency range
 Triggerstring tip(s) tooltip timeout in [ms]					= Triggerstring tip(s) tooltip timeout in [ms]
 Triggerstring tips 										= Triggerstring tips
+Triggerstring tips styling								= Triggerstring tips styling
 Triggerstring tooltip timeout in [ms]						= Triggerstring tooltip timeout in [ms]
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
 Underscore _											= Underscore _
