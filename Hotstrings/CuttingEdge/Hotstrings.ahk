@@ -1,4 +1,4 @@
-/* 
+﻿/* 
 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -910,6 +910,44 @@ F_GuiTTstyling_CreateObjects()
 {
 	global ;assume-global mode
 	
+	;1. Prepare Gui
+	Gui, TTstyling: New, 	-Resize +HwndTTstylingHwnd +Owner -MaximizeBox -MinimizeBox
+	Gui, TTstyling: Margin,	% c_xmarg, % c_ymarg
+	Gui,	TTstyling: Color,	% c_WindowColor, % c_ControlColor
+	
+	;2. Prepare all text objects according to mock-up.
+	Gui, TTstyling: Add,	Tab3,,	Triggerstring tips listbox styling|Hotstring listbox styling
+	Gui, TTstyling: Tab, Triggerstring tips listbox styling
+	Gui,	TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T1,	Background color
+	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T2, 	ⓘ
+	Gui, TTstyling: Add,	DropDownList,	% "x0 y0" . A_Space . HwndIdTTstyling_DDL1,	Black|Silver|Gray|White||Maroon|Red|Purple|Fuchsia|Green|Lime|Olive|Yellow|Navy|Blue|Teal|Aqua
+	Gui, TTstyling: Add,	Edit,		% "x0 y0" . A_Space . HwndIdTTstyling_E1,	HTML color RGB value, e.g. 00FF00
+	Gui, TTstyling: Add,	Button,		% "x0 y0" . A_Space . HwndIdTTstylingB1,	TransA["Default"]
+	
+	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T3,	Typeface color
+	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T4, 	ⓘ
+	Gui, TTstyling: Add,	DropDownList,	% "x0 y0" . A_Space . HwndIdTTstyling_DDL2,	Black|Silver|Gray|White||Maroon|Red|Purple|Fuchsia|Green|Lime|Olive|Yellow|Navy|Blue|Teal|Aqua
+	Gui, TTstyling: Add,	Edit,		% "x0 y0" . A_Space . HwndIdTTstyling_E2,	HTML color RGB value, e.g. 00FF00
+	Gui, TTstyling: Add,	Button,		% "x0 y0" . A_Space . HwndIdTTstylingB2,	TransA["Default"]
+
+	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T5,	Typeface font
+	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T6, 	ⓘ
+	Gui, TTstyling: Add,	DropDownList,	% "x0 y0" . A_Space . HwndIdTTstyling_DDL3,	Arial|Calibri||Comic Sans MS|Consolas|Courier|Fixedsys|Lucida Console|Microsoft Sans Serif|Script|System|Tahoma|Times New Roman|Verdana
+	Gui, TTstyling: Add,	Button,		% "x0 y0" . A_Space . HwndIdTTstylingB3,	TransA["Default"]
+
+	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T7,	Typeface size
+	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T8, 	ⓘ
+	Gui, TTstyling: Add,	DropDownList,	% "x0 y0" . A_Space . HwndIdTTstyling_DD4,	7|8|9|10||11|12|13|14|15|16
+	Gui, TTstyling: Add,	Button,		% "x0 y0" . A_Space . HwndIdTTstylingB4,	TransA["Default"]
+
+	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T9,	Preview:
+	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T10, 	ⓘ
+	Gui, TTstyling: Add,	Listbox, 		% "x0 y0" . A_Space . HwndIdTTstyling_LB1,	Row 1|Row 2|Row 3|Row 4|Row 5
+	
+	Gui, TTstyling: Add,	Button,		% "x0 y0" . A_Space . HwndIdTTstyling_B5,	Test styling
+	Gui, TTstyling: Add,	Button,		% "x0 y0" . A_Space . HwndIdTTstyling_B6,	Apply & Close
+	Gui, TTstyling: Add,	Button,		% "x0 y0" . A_Space . HwndIdTTstyling_B7,	Cancel
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -922,9 +960,36 @@ F_GuiTTstyling_DetermineConstraints()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTstyling()
 {
-	global ;assume-global mode
+	global	;assume-global mode
+	local FoundPos := ""
+		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,NewWinPosX := 0, NewWinPosY := 0
 	
-	return
+	F_GuiTTstyling_CreateObjects()
+	F_GuiTTstyling_DetermineConstraints()
+	
+	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
+		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, TTstyling: Show, Hide Center AutoSize
+	
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TTstylingHwnd
+	DetectHiddenWindows, Off
+	if (Window1W)
+	{
+		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+		Gui, TTstyling: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Triggerstring tips styling"]
+	}
+	else
+	{
+		if (v_Param = "l")
+			Gui, TTstyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Triggerstring tips styling"]
+		else
+			Gui, TTstyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Triggerstring tips styling"]
+	}
+	return  
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ShowTriggerstringTips2()
