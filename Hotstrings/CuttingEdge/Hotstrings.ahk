@@ -916,45 +916,119 @@ F_GuiTTstyling_CreateObjects()
 	Gui,	TTstyling: Color,	% c_WindowColor, % c_ControlColor
 	
 	;2. Prepare all text objects according to mock-up.
-	Gui, TTstyling: Add,	Tab3,,	Triggerstring tips listbox styling|Hotstring listbox styling
-	Gui, TTstyling: Tab, Triggerstring tips listbox styling
 	Gui,	TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T1,	Background color
-	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T2, 	ⓘ
-	Gui, TTstyling: Add,	DropDownList,	% "x0 y0" . A_Space . HwndIdTTstyling_DDL1,	Black|Silver|Gray|White||Maroon|Red|Purple|Fuchsia|Green|Lime|Olive|Yellow|Navy|Blue|Teal|Aqua
-	Gui, TTstyling: Add,	Edit,		% "x0 y0" . A_Space . HwndIdTTstyling_E1,	HTML color RGB value, e.g. 00FF00
-	Gui, TTstyling: Add,	Button,		% "x0 y0" . A_Space . HwndIdTTstylingB1,	TransA["Default"]
+	Gui, TTstyling: Add,	Tab3,,	Triggerstring tips styling|Hotstring styling
+	Gui, TTstyling: Tab, 	Triggerstring tips styling
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T1,	Background color
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T2, 	ⓘ
+	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL1,	Black|Silver|Gray|White||Maroon|Red|Purple|Fuchsia|Green|Lime|Olive|Yellow|Navy|Blue|Teal|Aqua
+	Gui, TTstyling: Add,	Edit,		HwndIdTTstyling_E1,	HTML color RGB value, e.g. 00FF00
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B1,	TransA["Default"]
 	
-	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T3,	Typeface color
-	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T4, 	ⓘ
-	Gui, TTstyling: Add,	DropDownList,	% "x0 y0" . A_Space . HwndIdTTstyling_DDL2,	Black|Silver|Gray|White||Maroon|Red|Purple|Fuchsia|Green|Lime|Olive|Yellow|Navy|Blue|Teal|Aqua
-	Gui, TTstyling: Add,	Edit,		% "x0 y0" . A_Space . HwndIdTTstyling_E2,	HTML color RGB value, e.g. 00FF00
-	Gui, TTstyling: Add,	Button,		% "x0 y0" . A_Space . HwndIdTTstylingB2,	TransA["Default"]
-
-	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T5,	Typeface font
-	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T6, 	ⓘ
-	Gui, TTstyling: Add,	DropDownList,	% "x0 y0" . A_Space . HwndIdTTstyling_DDL3,	Arial|Calibri||Comic Sans MS|Consolas|Courier|Fixedsys|Lucida Console|Microsoft Sans Serif|Script|System|Tahoma|Times New Roman|Verdana
-	Gui, TTstyling: Add,	Button,		% "x0 y0" . A_Space . HwndIdTTstylingB3,	TransA["Default"]
-
-	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T7,	Typeface size
-	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T8, 	ⓘ
-	Gui, TTstyling: Add,	DropDownList,	% "x0 y0" . A_Space . HwndIdTTstyling_DD4,	7|8|9|10||11|12|13|14|15|16
-	Gui, TTstyling: Add,	Button,		% "x0 y0" . A_Space . HwndIdTTstylingB4,	TransA["Default"]
-
-	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T9,	Preview:
-	Gui, TTstyling: Add,	Text, 		% "x0 y0" . A_Space . HwndIdTTstyling_T10, 	ⓘ
-	Gui, TTstyling: Add,	Listbox, 		% "x0 y0" . A_Space . HwndIdTTstyling_LB1,	Row 1|Row 2|Row 3|Row 4|Row 5
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T3,	Typeface color
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T4, 	ⓘ
+	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL2,	Black|Silver|Gray|White||Maroon|Red|Purple|Fuchsia|Green|Lime|Olive|Yellow|Navy|Blue|Teal|Aqua
+	Gui, TTstyling: Add,	Edit,		HwndIdTTstyling_E2,	HTML color RGB value, e.g. 00FF00
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B2,	TransA["Default"]
 	
-	Gui, TTstyling: Add,	Button,		% "x0 y0" . A_Space . HwndIdTTstyling_B5,	Test styling
-	Gui, TTstyling: Add,	Button,		% "x0 y0" . A_Space . HwndIdTTstyling_B6,	Apply & Close
-	Gui, TTstyling: Add,	Button,		% "x0 y0" . A_Space . HwndIdTTstyling_B7,	Cancel
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T5,	Typeface font
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T6, 	ⓘ
+	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL3,	Arial|Calibri||Comic Sans MS|Consolas|Courier|Fixedsys|Lucida Console|Microsoft Sans Serif|Script|System|Tahoma|Times New Roman|Verdana
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B3,	TransA["Default"]
+	
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T7,	Typeface size
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T8, 	ⓘ
+	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL4,	7|8|9|10||11|12|13|14|15|16
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B4,	TransA["Default"]
+	
+	;Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T9,	Preview:
+	;Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T10, 	ⓘ
+	;Gui, TTstyling: Add,	Listbox, 		HwndIdTTstyling_LB1,	Row 1|Row 2|Row 3|Row 4|Row 5
+	
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B5,	Test styling
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B6,	Apply & Close
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B7,	Cancel
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiTTstyling_DetermineConstraints()
 {
 	global ;assume-global mode
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
+		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
+		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
+		,v_OutVarTemp4 := 0, 	v_OutVarTemp4X := 0, 	v_OutVarTemp4Y := 0, 	v_OutVarTemp4W := 0, 	v_OutVarTemp4H := 0
+							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+		,TheWidestText := 0
 	
+	GuiControlGet, v_OutVarTemp1, Pos, IdTTstyling_T1
+	GuiControlGet, v_OutVarTemp2, Pos, IdTTstyling_T3
+	GuiControlGet, v_OutVarTemp3, Pos, IdTTstyling_T5
+	GuiControlGet, v_OutVarTemp4, Pos, IdTTstyling_T7
+	TheWidestText := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W, v_OutVarTemp4W)
+	
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdTTstyling_T1, % v_xNext . A_Space . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_T2, % v_xNext . A_Space . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdTTstyling_DDL1, % v_xNext . A_Space . v_yNext
+	v_xNext += 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_E1, % v_xNext . A_Space . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_E1
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_B1, % v_xNext . A_Space . v_yNext
+	                    
+	v_xNext := c_xmarg
+	v_yNext += 2 * c_ymarg
+	GuiControl, Move, % IdTTstyling_T3, % v_xNext . A_Space . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_T4, % v_xNext . A_Space . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdTTstyling_DDL2, % v_xNext . A_Space . v_yNext
+	v_xNext += 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_E2, % v_xNext . A_Space . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_E2
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_B2, % v_xNext . A_Space . v_yNext
+
+	v_xNext := c_xmarg
+	v_yNext += 2 * c_ymarg
+	GuiControl, Move, % IdTTstyling_T5, % v_xNext . A_Space . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_T6, % v_xNext . A_Space . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdTTstyling_DDL3, % v_xNext . A_Space . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_DDL3
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_B3, % v_xNext . A_Space . v_yNext
+
+	v_xNext := c_xmarg
+	v_yNext += 2 * c_ymarg
+	GuiControl, Move, % IdTTstyling_T7, % v_xNext . A_Space . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_T8, % v_xNext . A_Space . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdTTstyling_DDL4, % v_xNext . A_Space . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_DDL4
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_B4, % v_xNext . A_Space . v_yNext
+
+	v_xNext := c_xmarg
+	v_yNext += 2 * c_ymarg
+	GuiControl, Move, % IdTTstyling_B5, % v_xNext . A_Space . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_B5
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_B6, % v_xNext . A_Space . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_B5
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_B7, % v_xNext . A_Space . v_yNext
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
