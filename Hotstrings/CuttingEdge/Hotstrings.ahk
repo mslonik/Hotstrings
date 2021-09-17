@@ -552,7 +552,7 @@ Loop,
 
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
-
+#InputLevel 2	;Thanks to this line triggerstring tips will have lower priority; backspacing done in function F_TMenu() will not affect this label.
 ~BackSpace:: 
 if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 {
@@ -562,9 +562,7 @@ if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 else
 {
 	v_InputString := SubStr(v_InputString, 1, -1)
-	;F_PrepareTriggerstringTipsTables()
 	F_PrepareTriggerstringTipsTables2()
-	;F_ShowTriggerstringTips()
 	if (a_Tips.Count())
 		F_ShowTriggerstringTips2()
 	
@@ -575,6 +573,7 @@ else
 	}
 }
 return
+#InputLevel 2
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;#if WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows exist at the moment.
 ;~^c::			; copy to edit field "Enter hotstring" content of Clipboard. 
@@ -710,7 +709,8 @@ Tab::
 +Tab::
 Up::
 Down::
-Enter::
++Enter::
+^Enter::
 F_TMenu()
 {
 	global	;assume-global moee
@@ -766,7 +766,7 @@ F_TMenu()
 		IsCursorPressed := false
 		return
 	}		
-	if (InStr(v_PressedKey, "Enter"))
+	if (InStr(v_PressedKey, "+Enter") or InStr(v_PressedKey, "^Enter"))
 	{
 		v_PressedKey := IntCnt
 		IsCursorPressed := false
@@ -775,21 +775,20 @@ F_TMenu()
 	if (v_PressedKey > v_MenuMax)
 		return
 	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_TMenuAHK
-	/*
-		Loop, Parse, v_Temp1, `n
-		{
-			if (A_Index = v_PressedKey)
-				v_Temp1 := SubStr(A_LoopField, InStr(A_LoopField, " ") + 1)
-		}
-	*/
+	;OutputDebug, % "v_Temp1" . A_Tab . v_Temp1 . A_Tab . A_Tab . "v_PressedKey" . A_Tab . v_PressedKey
+	Loop, Parse, v_Temp1, `n
+	{
+		if (A_Index = v_PressedKey)
+			v_Temp1 := SubStr(A_LoopField, InStr(A_LoopField, " ") + 1)
+	}
 	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
 	Hotstring("Reset")
 	SendInput, % v_Temp1
 	Gui, TMenuAHK: Destroy
-	;F_EventSigOrdHotstring()
 	return
 }
 #InputLevel 0
+	
 #if
 
 #if WinExist("ahk_id" HMenuCliHwnd)
