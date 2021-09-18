@@ -916,37 +916,37 @@ F_GuiTTstyling_CreateObjects()
 	
 	;2. Prepare all text objects according to mock-up.
 	Gui,	TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, TTstyling: Add,	Tab3,,	Triggerstring tips styling|Hotstring styling
-	Gui, TTstyling: Tab, 	Triggerstring tips styling
-	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T1,	Background color
+	Gui, TTstyling: Add,	Tab3,,							% TransA["Triggerstring tips styling"] . "|" . TransA["Hotstring styling"]
+	Gui, TTstyling: Tab, 									% TransA["Triggerstring tips styling"]
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T1,		% TransA["Background color"] . ":"
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T2, 	ⓘ
-	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL1,	Black|Silver|Gray|White||Maroon|Red|Purple|Fuchsia|Green|Lime|Olive|Yellow|Navy|Blue|Teal|Aqua
-	Gui, TTstyling: Add,	Edit,		HwndIdTTstyling_E1,	HTML color RGB value, e.g. 00FF00
-	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B1,	TransA["Default"]
+	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL1,	% TransA["black"] . "|" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "||" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"]
+	Gui, TTstyling: Add,	Edit,		HwndIdTTstyling_E1,		% TransA["HTML color RGB value, e.g. 00FF00"]
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B1,		% TransA["Default"]
 	
-	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T3,	Typeface color
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T3,		% TransA["Typeface color"] . ":"
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T4, 	ⓘ
-	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL2,	Black|Silver|Gray|White||Maroon|Red|Purple|Fuchsia|Green|Lime|Olive|Yellow|Navy|Blue|Teal|Aqua
-	Gui, TTstyling: Add,	Edit,		HwndIdTTstyling_E2,	HTML color RGB value, e.g. 00FF00
-	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B2,	TransA["Default"]
+	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL2,	% TransA["black"] . "|" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "||" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"]
+	Gui, TTstyling: Add,	Edit,		HwndIdTTstyling_E2,		% TransA["HTML color RGB value, e.g. 00FF00"]
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B2,		% TransA["Default"]
 	
-	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T5,	Typeface font
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T5,		% TransA["Typeface font"] . ":"
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T6, 	ⓘ
 	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL3,	Arial|Calibri||Comic Sans MS|Consolas|Courier|Fixedsys|Lucida Console|Microsoft Sans Serif|Script|System|Tahoma|Times New Roman|Verdana
-	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B3,	TransA["Default"]
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B3,		% TransA["Default"]
 	
-	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T7,	Typeface size
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T7,		% TransA["Typeface size"] . ":"
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T8, 	ⓘ
 	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL4,	7|8|9|10||11|12|13|14|15|16
-	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B4,	TransA["Default"]
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B4,		% TransA["Default"]
 	
-	;Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T9,	Preview:
-	;Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T10, 	ⓘ
-	;Gui, TTstyling: Add,	Listbox, 		HwndIdTTstyling_LB1,	Row 1|Row 2|Row 3|Row 4|Row 5
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T9,		% TransA["Preview"] . ":"
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T10, 	ⓘ
+	Gui, TTstyling: Add,	Listbox, 		HwndIdTTstyling_LB1 r5,	% TransA["Row"] . " 1|" . TransA["Row"] . " 2|" . TransA["Row"] . " 3|" . TransA["Row"] . " 4|" . TransA["Row"] . " 5"
 	
-	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B5,	Test styling
-	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B6,	Apply & Close
-	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B7,	Cancel
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B5,		% TransA["Test styling"]
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B6,		% TransA["Apply && Close"]
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B7,		% TransA["Cancel"]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -961,73 +961,92 @@ F_GuiTTstyling_DetermineConstraints()
 							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
 		,TheWidestText := 0
 	
-	GuiControlGet, v_OutVarTemp1, Pos, IdTTstyling_T1
-	GuiControlGet, v_OutVarTemp2, Pos, IdTTstyling_T3
-	GuiControlGet, v_OutVarTemp3, Pos, IdTTstyling_T5
-	GuiControlGet, v_OutVarTemp4, Pos, IdTTstyling_T7
+	GuiControlGet, v_OutVarTemp1, Pos, % IdTTstyling_T1
+	GuiControlGet, v_OutVarTemp2, Pos, % IdTTstyling_T3
+	GuiControlGet, v_OutVarTemp3, Pos, % IdTTstyling_T5
+	GuiControlGet, v_OutVarTemp4, Pos, % IdTTstyling_T7
 	TheWidestText := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W, v_OutVarTemp4W)
 	
 	v_xNext := c_xmarg
 	v_yNext := c_ymarg
-	GuiControl, Move, % IdTTstyling_T1, % v_xNext . A_Space . v_yNext
+	GuiControl, Move, % IdTTstyling_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext += TheWidestText + 2 * c_xmarg
-	GuiControl, Move, % IdTTstyling_T2, % v_xNext . A_Space . v_yNext
+	GuiControl, Move, % IdTTstyling_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext := c_xmarg
 	v_yNext += HofText
-	GuiControl, Move, % IdTTstyling_DDL1, % v_xNext . A_Space . v_yNext
-	v_xNext += 2 * c_xmarg
-	GuiControl, Move, % IdTTstyling_E1, % v_xNext . A_Space . v_yNext
+	GuiControl, Move, % IdTTstyling_DDL1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_DDL1
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_E1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_E1
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdTTstyling_B1, % v_xNext . A_Space . v_yNext
+	GuiControl, Move, % IdTTstyling_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	                    
 	v_xNext := c_xmarg
-	v_yNext += 2 * c_ymarg
-	GuiControl, Move, % IdTTstyling_T3, % v_xNext . A_Space . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdTTstyling_T3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext += TheWidestText + 2 * c_xmarg
-	GuiControl, Move, % IdTTstyling_T4, % v_xNext . A_Space . v_yNext
+	GuiControl, Move, % IdTTstyling_T4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext := c_xmarg
 	v_yNext += HofText
-	GuiControl, Move, % IdTTstyling_DDL2, % v_xNext . A_Space . v_yNext
-	v_xNext += 2 * c_xmarg
-	GuiControl, Move, % IdTTstyling_E2, % v_xNext . A_Space . v_yNext
+	GuiControl, Move, % IdTTstyling_DDL2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_DDL2
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_E2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_E2
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdTTstyling_B2, % v_xNext . A_Space . v_yNext
+	GuiControl, Move, % IdTTstyling_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 
 	v_xNext := c_xmarg
-	v_yNext += 2 * c_ymarg
-	GuiControl, Move, % IdTTstyling_T5, % v_xNext . A_Space . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdTTstyling_T5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext += TheWidestText + 2 * c_xmarg
-	GuiControl, Move, % IdTTstyling_T6, % v_xNext . A_Space . v_yNext
+	GuiControl, Move, % IdTTstyling_T6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext := c_xmarg
 	v_yNext += HofText
-	GuiControl, Move, % IdTTstyling_DDL3, % v_xNext . A_Space . v_yNext
+	GuiControl, Move, % IdTTstyling_DDL3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_DDL3
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdTTstyling_B3, % v_xNext . A_Space . v_yNext
+	GuiControl, Move, % IdTTstyling_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	GuiControlGet, v_OutputVarTemp, Pos, % IdTTstyling_B3
+	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 5 * c_xmarg
+	GuiControl, Move, % IdTTstyling_T9, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutputVarTemp, Pos, % IdTTstyling_T9
+	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_T10, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutputVarTemp, Pos, % IdTTstyling_B3
+	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 5 * c_xmarg
+	v_OutputVarTemp := v_yNext
+	v_yNext += HofText
+	GuiControl, Move, % IdTTstyling_LB1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 
 	v_xNext := c_xmarg
-	v_yNext += 2 * c_ymarg
-	GuiControl, Move, % IdTTstyling_T7, % v_xNext . A_Space . v_yNext
+	v_yNext := v_OutputVarTemp
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdTTstyling_T7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext += TheWidestText + 2 * c_xmarg
-	GuiControl, Move, % IdTTstyling_T8, % v_xNext . A_Space . v_yNext
+	GuiControl, Move, % IdTTstyling_T8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext := c_xmarg
 	v_yNext += HofText
-	GuiControl, Move, % IdTTstyling_DDL4, % v_xNext . A_Space . v_yNext
+	GuiControl, Move, % IdTTstyling_DDL4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_DDL4
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdTTstyling_B4, % v_xNext . A_Space . v_yNext
+	GuiControl, Move, % IdTTstyling_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 
 	v_xNext := c_xmarg
-	v_yNext += 2 * c_ymarg
-	GuiControl, Move, % IdTTstyling_B5, % v_xNext . A_Space . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdTTstyling_B5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_B5
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdTTstyling_B6, % v_xNext . A_Space . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_B5
+	GuiControl, Move, % IdTTstyling_B6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_B6
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdTTstyling_B7, % v_xNext . A_Space . v_yNext
+	GuiControl, Move, % IdTTstyling_B7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5780,11 +5799,16 @@ Apostrophe ' 											= Apostrophe '
 Application											= A&pplication
 Application help										= Application help
 Application language changed to: 							= Application language changed to:
+Apply && Close											= Apply && Close
+aqua													= aqua
 Are you sure?											= Are you sure?
 Are you sure you want to exit this application now?			= Are you sure you want to exit this application now?
 Are you sure you want to reload this application now?			= Are you sure you want to reload this application now?
+Background color										= Background color
 Backslash \ 											= Backslash \
 Basic hotstring is triggered								= Basic hotstring is triggered
+black												= black
+blue													= blue
 Built with Autohotkey.exe version							= Built with Autohotkey.exe version
 By length 											= By length
 Call Graphical User Interface								= Call Graphical User Interface
@@ -5829,6 +5853,7 @@ Download public libraries								= Download public libraries
 Do you want to delete it?								= Do you want to delete it?
 Do you want to proceed? 									= Do you want to proceed?
 Dark													= Dark
+Default												= Default
 Default mode											= Default mode
 Delete hotstring (F8) 									= Delete hotstring (F8)
 Deleting hotstring... 									= Deleting hotstring...
@@ -5871,8 +5896,10 @@ file is now created in the following subfolder:				= file is now created in the 
 Finite timeout?										= Finite timeout?
 folder is now created									= folder is now created
 Font type												= Font type
-I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)! = I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)!
+fuchsia												= fuchsia
 Graphical User Interface									= Graphical User Interface
+gray													= gray
+green												= green
 has been created. 										= has been created.
 has been downloaded to the location						= has been downloaded to the location
 Help: AutoHotkey Hotstrings reference guide					= Help: AutoHotkey Hotstrings reference guide
@@ -5880,14 +5907,16 @@ Help: Hotstrings application								= Help: Hotstrings application
 Hotstring 											= Hotstring
 Hotstring added to the file								= Hotstring added to the file
 Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv) = Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
+Hotstring styling										= Hotstring styling
 Hotstring was triggered! 								= Hotstring was triggered!
-to undo.												= to undo.
 ""Hotstring was triggered"" tooltip timeout in [ms]			= ""Hotstring was triggered"" tooltip timeout in [ms]
 ""Undid the last hotstring!"" tooltip timeout in [ms]			= ""Undid the last hotstring!"" tooltip timeout in [ms]
 Hotstring moved to the 									= Hotstring moved to the
 Hotstring paste from Clipboard delay 1 s 					= Hotstring paste from Clipboard delay 1 s
 Hotstring paste from Clipboard delay 						= Hotstring paste from Clipboard delay
 Hotstrings have been loaded 								= Hotstrings have been loaded
+HTML color RGB value, e.g. 00FF00							= HTML color RGB value, e.g. 00FF00
+I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)! = I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)!
 If you answer ""Yes"" it will overwritten.					= If you answer ""Yes"" it will overwritten.
 If you answer ""Yes"" definition existing in another library will not be changed. = If you answer ""Yes"" definition existing in another library will not be changed.
 If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used. = If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used.
@@ -5918,6 +5947,7 @@ Library has been exported 								= Library has been exported
 Library has been imported. 								= Library has been imported.
 Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment = Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment
 Light (default)										= Light (default)
+lime													= lime
 Link file (.lnk) was created in AutoStart folder				= Link file (.lnk) was created in AutoStart folder
 Loading of (triggerstring, hotstring) definitions from the library file = Loading of (triggerstring, hotstring) definitions from the library file
 Loading file											= Loading file
@@ -5926,13 +5956,15 @@ Loading hotstrings from libraries... 						= Loading hotstrings from libraries..
 Loading imported library. Please wait...					= Loading imported library. Please wait...
 Loaded												= Loaded
 Local version:											= Local version:
+maroon												= maroon
 Max. no. of shown tips									= Max. no. of shown tips
-Maximum number of shown triggerstring tips				= Maximum number of shown triggerstring tips
+Maximum number of shown triggerstring tips					= Maximum number of shown triggerstring tips
 Menu hotstring is triggered								= Menu hotstring is triggered
 Menu position: caret									= Menu position: caret
 Menu position: cursor									= Menu position: cursor
 Minus - 												= Minus -
 Move (F8)												= Move (F8)
+navy													= navy
 New shortcut (hotkey)									= New shortcut (hotkey)
 No													= No
 No Backspace (B0) 										= No Backspace (B0)
@@ -5942,6 +5974,7 @@ Not Case-Conforming (C1)									= Not Case-Conforming (C1)
 Number of characters for tips 							= &Number of characters for tips
 of													= of
 OK													= &OK
+olive												= olive
 On start-up the local version of							= On start-up the local version of
 Open libraries folder in Explorer							= Open libraries folder in Explorer
 Opening Curly Bracket { 									= Opening Curly Bracket {
@@ -5956,9 +5989,11 @@ Pause application										= Pause application
 Phrase to search for:									= Phrase to search for:
 pixels												= pixels
 Position of main window is saved in Config.ini.				= Position of main window is saved in Config.ini.	
+Preview												= Preview
 Public library:										= Public library:
-Visit public libraries webpage							= Visit public libraries webpage
+purple												= purple
 Recognized encoding of the script file:						= Recognized encoding of the script file:
+red													= red
 Reload												= Reload
 Reload in default mode									= Reload in default mode
 Reload in silent mode									= Reload in silent mode
@@ -5968,6 +6003,7 @@ Required encoding: UTF-8 with BOM. Application will exit now.	= Required encodin
 Reset Recognizer (Z)									= Reset Recognizer (Z)
 Restore default hotkey									= Restore default hotkey
 Restore default configuration								= Restore default configuration
+Row													= Row
 )"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
 	TransConst .= "`n
 (Join`n `
@@ -6006,6 +6042,7 @@ Show Introduction window after application is restarted?		= Show Introduction wi
 Show Sandbox (F6)										= Show Sandbox (F6)
 Signaling of events										= Signaling of events
 Silent mode											= Silent mode
+silver												= silver
 Size of font											= Size of font
 Size of margin:										= Size of margin:
 Slash / 												= Slash /
@@ -6028,6 +6065,8 @@ Style of GUI											= Style of GUI
 Such file already exists									= Such file already exists
 Suspend Hotkeys										= Suspend Hotkeys
 Tab 													= Tab 
+teal													= teal
+Test styling											= Test styling
 The application										= The application
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
 The default											= The default
@@ -6064,6 +6103,7 @@ Tooltip position: caret									= Tooltip position: caret
 Tooltip position: cursor									= Tooltip position: cursor
 Tooltip timeout										= Tooltip timeout
 Total:												= Total:
+to undo.												= to undo.
 (triggerstring, hotstring) definitions						= (triggerstring, hotstring) definitions
 Triggerstring 											= Triggerstring
 Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
@@ -6074,11 +6114,15 @@ Triggerstring tips 										= Triggerstring tips
 Triggerstring tips styling								= Triggerstring tips styling
 Triggerstring tooltip timeout in [ms]						= Triggerstring tooltip timeout in [ms]
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
+Typeface color											= Typeface color
+Typeface font											= Typeface font
+Typeface size											= Typeface size
 Underscore _											= Underscore _
 Undo the last hotstring									= Undo the last hotstring
-Undo the last hotstring							= Undo the last hotstring
+Undo the last hotstring									= Undo the last hotstring
 Undid the last hotstring 								= Undid the last hotstring
 Version / Update										= Version / Update
+Visit public libraries webpage							= Visit public libraries webpage
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
 was compared with repository version and difference was discovered:	= was compared with repository version and difference was discovered:
@@ -6092,8 +6136,10 @@ When timeout is set, the tooltip ""Hotstring was triggered"" will dissapear afte
 When timeout is set, the tooltip ""Undid the last hotstring!"" will dissapear after time reaches it. = When timeout is set, the tooltip ""Undid the last hotstring!"" will dissapear after time reaches it.
 When timeout is set, the triggerstring tip(s) will dissapear after time reaches it. = When timeout is set, the triggerstring tip(s) will dissapear after time reaches it.
 When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
+white												= white
 Would you like to download the icon file?					= Would you like to download the icon file?
 Would you like now to reload it in order to run the just downloaded version? = Would you like now to reload it in order to run the just downloaded version?
+yellow												= yellow
 Yes													= Yes
 ""Basic hotstring"" sound duration [ms]						= ""Basic hotstring"" sound duration [ms]
 ""Basic hotstring"" sound frequency						= ""Basic hotstring"" sound frequency
