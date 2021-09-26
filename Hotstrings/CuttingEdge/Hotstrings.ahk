@@ -228,13 +228,10 @@ F_GuiMain_CreateObject()
 F_GuiMain_DefineConstants()
 F_GuiMain_DetermineConstraints()
 F_GuiMain_Redraw()
-
 F_GuiHS4_CreateObject()
 F_GuiHS4_DetermineConstraints()
 F_GuiHS4_Redraw()
-
 F_GuiShowIntro()
-
 F_UpdateSelHotLibDDL()
 
 if (ini_HK_IntoEdit != "none")
@@ -4927,6 +4924,8 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	
 	HS3_GuiWidth  := A_GuiWidth	;used by F_SaveGUIPos()
 	HS3_GuiHeight := A_GuiHeight	;used by F_SaveGUIPos()
+	if (v_ResizingFlag)
+		return
 	if (A_EventInfo = 1) ; The window has been minimized.
 	{
 		ini_WhichGui := "HS3"
@@ -4941,7 +4940,9 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			F_GuiMain_Resize5()
 		return
 	}
-	if (!A_EventInfo) and (ini_HS3GuiMaximized) ;Window is restored after maximizing
+	;tu jestem
+	;*[One]
+	if (!A_EventInfo) and (ini_HS3GuiMaximized)	;Window is restored after maximizing
 	{
 		ini_HS3GuiMaximized := false
 		if (ini_Sandbox) and (!ini_IsSandboxMoved)
@@ -9253,6 +9254,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 #If (v_Param != "l") 
 ;^#h::		; Event
 L_GUIInit:
+	;*[One]
 	if (v_ResizingFlag) ;if run for the very first time
 	{
 		Gui, HS3: +MinSize%HS3MinWidth%x%HS3MinHeight%
