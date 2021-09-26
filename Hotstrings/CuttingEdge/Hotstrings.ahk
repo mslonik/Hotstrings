@@ -1028,16 +1028,16 @@ F_GuiTTstyling_CreateObjects()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_StylingSwitch()	;tu jestem
+F_StylingSwitch()
 {
 	global ;assume-global mode
-	if (WinExist("ahk_id" TTstylingHwnd))
+	if (WinExist("ahk_id" TDemoHwnd))
 	{
 		Gui, TDemo: 		Destroy
 		F_ButtonHMTestStyling()
 		return
 	}
-	if (WinExist("ahk_id" HMstylingHwnd))
+	if (WinExist("ahk_id" HDemoHwnd))
 	{
 		Gui, HDemo: 		Destroy
 		F_ButtonTTTestStyling()
@@ -1160,7 +1160,7 @@ F_ButtonHMApplyClose()
 	IniWrite, % ini_HMTyFaceCol, 	% HADConfig, HotstringMenu_Styling, HotstringMenuTypefaceColor
 	IniWrite, % ini_HMTyFaceFont, % HADConfig, HotstringMenu_Styling, HotstringMenuTypefaceFont
 	IniWrite, % ini_HMTySize,	% HADConfig, HotstringMenu_Styling, HotstringMenuTypefaceSize
-	Gui, TDemo: 		Destroy
+	Gui, HDemo: 		Destroy
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8411,8 +8411,8 @@ F_HOF_MSI(TextOptions, Oflag)
 	ToolTip,
 	Gui, HMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuAHKHwnd
 	Gui, HMenuAHK: Margin, 0, 0
-	Gui, HMenuAHK: Font, c766D69 s8	;Tooltip font color
-	Gui, HMenuAHK: Color,, White
+	Gui, HMenuAHK: Font, % "c" . ini_HMTyFaceCol . A_Space . "s" . ini_HMTySize, % ini_HMTyFaceFont	;Tooltip font color: c766D69
+	Gui, HMenuAHK: Color,, % ini_HMBgrCol
 	Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenuAHK"
 	Loop, Parse, TextOptions, ¦
 		GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . "|"
