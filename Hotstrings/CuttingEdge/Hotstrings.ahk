@@ -105,6 +105,7 @@ F_LoadFontSize()
 F_LoadSizeOfMargin()
 F_LoadFontType()
 F_LoadTTStyling()
+F_LoadHMStyling()
 
 global ini_CPDelay 				:= 300		;1-1000 [ms], default: 300
 IniRead, ini_CPDelay, 					% HADConfig, Configuration, ClipBoardPasteDelay,		% A_Space
@@ -963,29 +964,39 @@ F_GuiTTstyling_CreateObjects()
 	Gui, TTstyling: Add,	Tab3,		gF_StylingSwitch,		% TransA["Triggerstring tips styling"] . "||" . TransA["Hotstring menu styling"]
 	Gui, TTstyling: Tab, 									% TransA["Triggerstring tips styling"]
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T1,		% TransA["Background color"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T2, 	ⓘ
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL1 vini_TTBgrCol,	% TransA["black"] . "|" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "||" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"]
 	Gui, TTstyling: Add,	Edit,		HwndIdTTstyling_E1,		% TransA["HTML color RGB value, e.g. 00FF00"]
 	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B1 gF_ButtonTTstylingB1,	% TransA["Default"]
 	
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T3,		% TransA["Typeface color"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T4, 	ⓘ
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL2 vini_TTTyFaceCol,	% TransA["black"] . "||" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "|" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"]
 	Gui, TTstyling: Add,	Edit,		HwndIdTTstyling_E2,		% TransA["HTML color RGB value, e.g. 00FF00"]
 	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B2 gF_ButtonTTStylingB2,	% TransA["Default"]
 	
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T5,		% TransA["Typeface font"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T6, 	ⓘ
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL3 vini_TTTyFaceFont,	Arial|Calibri||Comic Sans MS|Consolas|Courier|Fixedsys|Lucida Console|Microsoft Sans Serif|Script|System|Tahoma|Times New Roman|Verdana
 	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B3 gFButtonTTStylingB3,		% TransA["Default"]
 	
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T7,		% TransA["Typeface size"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T8, 	ⓘ
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL4 vini_TTTySize,	7|8|9|10||11|12|13|14|15|16
 	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B4 gFButtonTTStylingB4,		% TransA["Default"]
 	
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T9,		% TransA["Preview"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T10, 	ⓘ
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	Listbox, 		HwndIdTTstyling_LB1 r5,	% TransA["Row"] . " 1|" . TransA["Row"] . " 2|" . TransA["Row"] . " 3|" . TransA["Row"] . " 4|" . TransA["Row"] . " 5"
 	
 	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B5 gF_ButtonTTTestStyling,	% TransA["Test styling"]
@@ -994,29 +1005,39 @@ F_GuiTTstyling_CreateObjects()
 	
 	Gui, TTstyling: Tab, 									% TransA["Hotstring menu styling"]
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T1,		% TransA["Background color"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T2, 	ⓘ
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	DropDownList,	HwndIdHMstyling_DDL1 vini_HMBgrCol,	% TransA["black"] . "|" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "||" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"]
 	Gui, TTstyling: Add,	Edit,		HwndIdHMstyling_E1,		% TransA["HTML color RGB value, e.g. 00FF00"]
 	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B1 gF_ButtonHMstylingB1,	% TransA["Default"]
 	
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T3,		% TransA["Typeface color"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T4, 	ⓘ
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	DropDownList,	HwndIdHMstyling_DDL2 vini_HMTyFaceCol,	% TransA["black"] . "||" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "|" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"]
 	Gui, TTstyling: Add,	Edit,		HwndIdHMstyling_E2,		% TransA["HTML color RGB value, e.g. 00FF00"]
 	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B2 gF_ButtonHMStylingB2,	% TransA["Default"]
 	
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T5,		% TransA["Typeface font"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T6, 	ⓘ
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	DropDownList,	HwndIdHMstyling_DDL3 vini_HMTyFaceFont,	Arial|Calibri||Comic Sans MS|Consolas|Courier|Fixedsys|Lucida Console|Microsoft Sans Serif|Script|System|Tahoma|Times New Roman|Verdana
 	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B3 gF_ButtonHMStylingB3,		% TransA["Default"]
 	
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T7,		% TransA["Typeface size"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T8, 	ⓘ
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	DropDownList,	HwndIdHMstyling_DDL4 vini_HMTySize,	7|8|9|10||11|12|13|14|15|16
 	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B4 gF_ButtonHMStylingB4,		% TransA["Default"]
 	
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T9,		% TransA["Preview"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T10, 	ⓘ
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	Listbox, 		HwndIdHMstyling_LB1 r5,	% TransA["Row"] . " 1|" . TransA["Row"] . " 2|" . TransA["Row"] . " 3|" . TransA["Row"] . " 4|" . TransA["Row"] . " 5"
 	
 	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B5 gF_ButtonHMTestStyling,	% TransA["Test styling"]
@@ -1403,7 +1424,7 @@ F_GuiTTstyling_DetermineConstraints()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiTTStyling_LoadValues()
+F_GuiTTStyling_LoadValues()	;tu jestem
 {
 	global	;assume-global mode
 	local a_TTstyling_DDL1 := [TransA["black"], TransA["silver"], TransA["gray"], TransA["white"], TransA["maroon"], TransA["red"], TransA["purple"], TransA["fuchsia"], TransA["green"], TransA["lime"], TransA["olive"], TransA["yellow"], TransA["navy"], TransA["blue"], TransA["teal"], TransA["aqua"]]
@@ -4940,8 +4961,6 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			F_GuiMain_Resize5()
 		return
 	}
-	;tu jestem
-	;*[One]
 	if (!A_EventInfo) and (ini_HS3GuiMaximized)	;Window is restored after maximizing
 	{
 		ini_HS3GuiMaximized := false
