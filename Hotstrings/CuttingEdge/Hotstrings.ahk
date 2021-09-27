@@ -687,7 +687,7 @@ return
 ~Home::
 ~End::
 ~Esc::
-;ToolTip,
+ToolTip,	;this line is necessary to close tooltips.
 Gui, TMenuAHK: Destroy
 ToolTip, ,, , 4
 ToolTip, ,, , 6
@@ -950,12 +950,12 @@ F_LoadTTStyling()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiTTstyling_CreateObjects()
+F_GuiStyling_CreateObjects()
 {
 	global ;assume-global mode
 	
 	;1. Prepare Gui
-	Gui, TTstyling: New, 	-Resize +HwndTTstylingHwnd +Owner -MaximizeBox -MinimizeBox
+	Gui, TTstyling: New, 	-Resize +HwndTTstylingHwnd +Owner +OwnDialogs -MaximizeBox -MinimizeBox	;+OwnDialogs: for tooltips.
 	Gui, TTstyling: Margin,	% c_xmarg, % c_ymarg
 	Gui,	TTstyling: Color,	% c_WindowColor, % c_ControlColor
 	
@@ -966,36 +966,46 @@ F_GuiTTstyling_CreateObjects()
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T1,		% TransA["Background color"] . ":"
 	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T2, 	ⓘ
+	T_SBackgroundColorInfo := func("F_ShowLongTooltip").bind(TransA["T_SBackgroundColorInfo"])
+	GuiControl, +g, % IdTTstyling_T2, % T_SBackgroundColorInfo
 	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL1 vini_TTBgrCol,	% TransA["black"] . "|" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "||" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"]
-	Gui, TTstyling: Add,	Edit,		HwndIdTTstyling_E1,		% TransA["HTML color RGB value, e.g. 00FF00"]
-	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B1 gF_ButtonTTstylingB1,	% TransA["Default"]
+	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL1 vini_TTBgrCol gF_StylingTTDDL1,	% TransA["black"] . "|" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "||" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"] . "|" . TransA["custom"]
+	Gui, TTstyling: Add,	Edit,		HwndIdTTstyling_E1 Limit6,		% TransA["HTML color RGB value, e.g. 00FF00"]
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B1 gF_ButtonTTstylingB1,	% TransA["Restore default"]
 	
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T3,		% TransA["Typeface color"] . ":"
 	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T4, 	ⓘ
+	T_STypefaceColor := func("F_ShowLongTooltip").bind(TransA["T_STypefaceColor"])
+	GuiControl +g, % IdTTstyling_T4, % T_STypefaceColor
 	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL2 vini_TTTyFaceCol,	% TransA["black"] . "||" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "|" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"]
+	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL2 vini_TTTyFaceCol,	% TransA["black"] . "||" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "|" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"] . "|" . TransA["custom"]
 	Gui, TTstyling: Add,	Edit,		HwndIdTTstyling_E2,		% TransA["HTML color RGB value, e.g. 00FF00"]
-	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B2 gF_ButtonTTStylingB2,	% TransA["Default"]
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B2 gF_ButtonTTStylingB2,	% TransA["Restore default"]
 	
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T5,		% TransA["Typeface font"] . ":"
 	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T6, 	ⓘ
+	T_STypefaceFont := func("F_ShowLongTooltip").bind(TransA["T_STypefaceFont"])
+	GuiControl +g, % IdTTstyling_T6, % T_STypefaceFont
 	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL3 vini_TTTyFaceFont,	Arial|Calibri||Comic Sans MS|Consolas|Courier|Fixedsys|Lucida Console|Microsoft Sans Serif|Script|System|Tahoma|Times New Roman|Verdana
-	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B3 gFButtonTTStylingB3,		% TransA["Default"]
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B3 gFButtonTTStylingB3,		% TransA["Restore default"]
 	
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T7,		% TransA["Typeface size"] . ":"
 	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T8, 	ⓘ
+	T_STypefaceSize := func("F_ShowLongTooltip").bind(TransA["T_STypefaceSize"])
+	GuiControl +g, % IdTTstyling_T8, % T_STypefaceSize
 	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL4 vini_TTTySize,	7|8|9|10||11|12|13|14|15|16
-	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B4 gFButtonTTStylingB4,		% TransA["Default"]
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B4 gFButtonTTStylingB4,		% TransA["Restore default"]
 	
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T9,		% TransA["Preview"] . ":"
 	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T10, 	ⓘ
+	T_StylPreview := func("F_ShowLongTooltip").bind(TransA["T_StylPreview"])
+	GuiControl +g, % IdTTstyling_T10, % T_StylPreview
 	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	Listbox, 		HwndIdTTstyling_LB1 r5,	% TransA["Row"] . " 1|" . TransA["Row"] . " 2|" . TransA["Row"] . " 3|" . TransA["Row"] . " 4|" . TransA["Row"] . " 5"
 	
@@ -1007,42 +1017,71 @@ F_GuiTTstyling_CreateObjects()
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T1,		% TransA["Background color"] . ":"
 	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T2, 	ⓘ
+	GuiControl, +g, % IdHMstyling_T2, % T_SBackgroundColorInfo
 	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	Gui, TTstyling: Add,	DropDownList,	HwndIdHMstyling_DDL1 vini_HMBgrCol,	% TransA["black"] . "|" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "||" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"]
+	Gui, TTstyling: Add,	DropDownList,	HwndIdHMstyling_DDL1 vini_HMBgrCol gF_StylingHMDDL1,	% TransA["black"] . "|" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "||" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"]
 	Gui, TTstyling: Add,	Edit,		HwndIdHMstyling_E1,		% TransA["HTML color RGB value, e.g. 00FF00"]
-	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B1 gF_ButtonHMstylingB1,	% TransA["Default"]
+	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B1 gF_ButtonHMstylingB1,	% TransA["Restore default"]
 	
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T3,		% TransA["Typeface color"] . ":"
 	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T4, 	ⓘ
+	GuiControl +g, % IdHMstyling_T4, % T_STypefaceColor
 	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	DropDownList,	HwndIdHMstyling_DDL2 vini_HMTyFaceCol,	% TransA["black"] . "||" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "|" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"]
 	Gui, TTstyling: Add,	Edit,		HwndIdHMstyling_E2,		% TransA["HTML color RGB value, e.g. 00FF00"]
-	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B2 gF_ButtonHMStylingB2,	% TransA["Default"]
+	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B2 gF_ButtonHMStylingB2,	% TransA["Restore default"]
 	
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T5,		% TransA["Typeface font"] . ":"
 	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T6, 	ⓘ
+	GuiControl +g, % IdHMstyling_T6, % T_STypefaceFont
 	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	DropDownList,	HwndIdHMstyling_DDL3 vini_HMTyFaceFont,	Arial|Calibri||Comic Sans MS|Consolas|Courier|Fixedsys|Lucida Console|Microsoft Sans Serif|Script|System|Tahoma|Times New Roman|Verdana
-	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B3 gF_ButtonHMStylingB3,		% TransA["Default"]
+	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B3 gF_ButtonHMStylingB3,		% TransA["Restore default"]
 	
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T7,		% TransA["Typeface size"] . ":"
 	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T8, 	ⓘ
+	GuiControl +g, % IdHMstyling_T8, % T_STypefaceSize
 	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	DropDownList,	HwndIdHMstyling_DDL4 vini_HMTySize,	7|8|9|10||11|12|13|14|15|16
-	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B4 gF_ButtonHMStylingB4,		% TransA["Default"]
+	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B4 gF_ButtonHMStylingB4,		% TransA["Restore default"]
 	
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T9,		% TransA["Preview"] . ":"
 	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T10, 	ⓘ
+	GuiControl +g, % IdHMstyling_T10, % T_StylPreview
 	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	Listbox, 		HwndIdHMstyling_LB1 r5,	% TransA["Row"] . " 1|" . TransA["Row"] . " 2|" . TransA["Row"] . " 3|" . TransA["Row"] . " 4|" . TransA["Row"] . " 5"
 	
 	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B5 gF_ButtonHMTestStyling,	% TransA["Test styling"]
 	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B6 gF_ButtonHMApplyClose,	% TransA["Apply && Close"]
 	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B7 gF_ButtonHMCancel,		% TransA["Cancel"]
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_StylingHMDDL1()
+{
+	global ;assume-global mode
+	local OutputVarTemp := ""
+	GuiControlGet, OutputVarTemp,, % IdHMstyling_DDL1
+	if (OutputVarTemp = "custom")
+		GuiControl, Enable, % IdHMstyling_E1
+	else
+		GuiControl, Disable, % IdHMstyling_E1
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_StylingTTDDL1()
+{
+	global ;assume-global mode
+	local OutputVarTemp := ""
+	GuiControlGet, OutputVarTemp,, % IdTTstyling_DDL1
+	if (OutputVarTemp = "custom")
+		GuiControl, Enable, % IdTTstyling_E1
+	else
+		GuiControl, Disable, % IdTTstyling_E1
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1145,6 +1184,7 @@ F_ButtonTTCancel()
 	global ;assume-global mode
 	Gui, TTstyling: 	Destroy
 	Gui, TDemo: 		Destroy
+	F_LoadTTStyling()	;restore previous values
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1152,7 +1192,8 @@ F_ButtonHMCancel()
 {
 	global ;assume-global mode
 	Gui, TTstyling: 	Destroy
-	Gui, TDemo: 		Destroy
+	Gui, HDemo: 		Destroy
+	F_LoadHMStyling()	;restore previous values
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1182,16 +1223,29 @@ F_ButtonHMApplyClose()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ButtonTTTestStyling()
+F_ButtonTTTestStyling()	;tu jestem
 {
 	global ;assume-global mode
 	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
 		,OutputVarTemp := 0, OutputVarTempX := 0, OutputVarTempY := 0, OutputVarTempW := 0, OutputVarTempH := 0
 	
 	Gui, TTstyling: Submit, NoHide
+	GuiControlGet, OutputVarTemp,, % IdTTstyling_DDL1
+	if (OutputVarTemp = "custom")
+	{
+		GuiControlGet, OutputVarTemp,, % IdTTstyling_E1
+		if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
+		{
+			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
+			Gui, TDemo: Destroy
+			return
+		}
+		else 
+			ini_TTBgrCol := OutputVarTemp
+	}
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . TTstylingHwnd
 	ControlGetPos, OutputVarTempX, OutputVarTempY, , , , ahk_id %IdTTstyling_LB1%
-	Gui, TDemo: New, +AlwaysOnTop -Caption +ToolWindow +HwndTDemoHwnd
+	Gui, TDemo: New, -Caption +ToolWindow +HwndTDemoHwnd
 	Gui, TDemo: Margin, 0, 0
 	Gui, TDemo: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
 	Gui, TDemo: Color,, % ini_TTBgrCol
@@ -1207,9 +1261,21 @@ F_ButtonHMTestStyling()
 		,OutputVarTemp := 0, OutputVarTempX := 0, OutputVarTempY := 0, OutputVarTempW := 0, OutputVarTempH := 0
 	
 	Gui, TTstyling: Submit, NoHide
+	GuiControlGet, OutputVarTemp,, % IdTTstyling_DDL1
+	if (OutputVarTemp = "custom")
+	{
+		GuiControlGet, OutputVarTemp,, % IdTTstyling_E1
+		if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
+		{			
+			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
+			Gui, HDemo: Destroy
+		}
+		else 
+			ini_HMBgrCol := OutputVarTemp
+	}
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . TTstylingHwnd
 	ControlGetPos, OutputVarTempX, OutputVarTempY, , , , ahk_id %IdHMstyling_LB1%
-	Gui, HDemo: New, +AlwaysOnTop -Caption +ToolWindow +HwndHDemoHwnd
+	Gui, HDemo: New, -Caption +ToolWindow +HwndHDemoHwnd
 	Gui, HDemo: Margin, 0, 0
 	Gui, HDemo: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
 	Gui, HDemo: Color,, % ini_HMBgrCol
@@ -1316,7 +1382,7 @@ F_GuiHMstyling_DetermineConstraints()
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdHMstyling_B7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	
-	GuiControl, Hide, % IdHMstyling_E1	;future: add options to define other colors
+	GuiControl, Hide, % IdHMstyling_E1
 	GuiControl, Hide, % IdHMstyling_E2
 	return
 }
@@ -1419,48 +1485,79 @@ F_GuiTTstyling_DetermineConstraints()
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdTTstyling_B7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	
-	GuiControl, Hide, % IdTTstyling_E1	;future: add options to define other colors
-	GuiControl, Hide, % IdTTstyling_E2
+	GuiControl, Disable, % IdTTstyling_E1	;future: add options to define other colors
+	GuiControl, Disable, % IdTTstyling_E2
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiTTStyling_LoadValues()	;tu jestem
+F_GuiStyling_LoadValues()	
 {
 	global	;assume-global mode
-	local a_TTstyling_DDL1 := [TransA["black"], TransA["silver"], TransA["gray"], TransA["white"], TransA["maroon"], TransA["red"], TransA["purple"], TransA["fuchsia"], TransA["green"], TransA["lime"], TransA["olive"], TransA["yellow"], TransA["navy"], TransA["blue"], TransA["teal"], TransA["aqua"]]
-		,s_TTStyling_DDL1 := "|"
-		,a_TTstyling_DDL2 := [TransA["black"], TransA["silver"], TransA["gray"], TransA["white"], TransA["maroon"], TransA["red"], TransA["purple"], TransA["fuchsia"], TransA["green"], TransA["lime"], TransA["olive"], TransA["yellow"], TransA["navy"], TransA["blue"], TransA["teal"], TransA["aqua"]]
-		,s_TTStyling_DDL2 := "|"
-		,a_TTstyling_DDL3 := ["Arial", "Calibri", "Comic Sans MS", "Consolas", "Courier", "Fixedsys", "Lucida Console", "Microsoft Sans Serif", "Script", "System", "Tahoma", "Times New Roman", "Verdana"]
-		,s_TTStyling_DDL3 := "|"
-		,a_TTstyling_DDL4 := [7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
-		,s_TTStyling_DDL4 := "|"
+	local a_Styling_DDL1 := [TransA["black"], TransA["silver"], TransA["gray"], TransA["white"], TransA["maroon"], TransA["red"], TransA["purple"], TransA["fuchsia"], TransA["green"], TransA["lime"], TransA["olive"], TransA["yellow"], TransA["navy"], TransA["blue"], TransA["teal"], TransA["aqua"], TransA["custom"]]
+		,s_Styling_DDL1 := "|"
+		,a_Styling_DDL2 := [TransA["black"], TransA["silver"], TransA["gray"], TransA["white"], TransA["maroon"], TransA["red"], TransA["purple"], TransA["fuchsia"], TransA["green"], TransA["lime"], TransA["olive"], TransA["yellow"], TransA["navy"], TransA["blue"], TransA["teal"], TransA["aqua"], TransA["custom"]]
+		,s_Styling_DDL2 := "|"
+		,a_Styling_DDL3 := ["Arial", "Calibri", "Comic Sans MS", "Consolas", "Courier", "Fixedsys", "Lucida Console", "Microsoft Sans Serif", "Script", "System", "Tahoma", "Times New Roman", "Verdana"]
+		,s_Styling_DDL3 := "|"
+		,a_Styling_DDL4 := [7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+		,s_Styling_DDL4 := "|"
 		,key := 0, value := ""
 
-	for key, val in a_TTstyling_DDL1
+	for key, val in a_Styling_DDL1
 		if (val = ini_TTBgrCol)
-			s_TTStyling_DDL1 .= val . "||"
+			s_Styling_DDL1 .= val . "||"
 		else
-			s_TTStyling_DDL1 .= val . "|"
-	GuiControl,, % IdTTstyling_DDL1, % s_TTStyling_DDL1
-	for key, val in a_TTstyling_DDL2
+			s_Styling_DDL1 .= val . "|"
+	GuiControl,, % IdTTstyling_DDL1, % s_Styling_DDL1
+	s_Styling_DDL1 := "|"
+	for key, val in a_Styling_DDL1
+		if (val = ini_HMBgrCol)
+			s_Styling_DDL1 .= val . "||"
+		else
+			s_Styling_DDL1 .= val . "|"
+	GuiControl,, % IdHMstyling_DDL1, % s_Styling_DDL1
+
+	for key, val in a_Styling_DDL2
 		if (val = ini_TTTyFaceCol)
-			s_TTStyling_DDL2 .= val . "||"
+			s_Styling_DDL2 .= val . "||"
 		else
-			s_TTStyling_DDL2 .= val . "|"
-	GuiControl,, % IdTTstyling_DDL2, % s_TTStyling_DDL2
-	for key, val in a_TTstyling_DDL3
+			s_Styling_DDL2 .= val . "|"
+	GuiControl,, % IdTTstyling_DDL2, % s_Styling_DDL2
+	s_Styling_DDL2 := "|"
+	for key, val in a_Styling_DDL2
+		if (val = ini_HMTyFaceCol)
+			s_Styling_DDL2 .= val . "||"
+		else
+			s_Styling_DDL2 .= val . "|"
+	GuiControl,, % IdHMstyling_DDL2, % s_Styling_DDL2
+
+	for key, val in a_Styling_DDL3
 		if (val = ini_TTTyFaceFont)
-			s_TTStyling_DDL3 .= val . "||"
+			s_Styling_DDL3 .= val . "||"
 		else
-			s_TTStyling_DDL3 .= val . "|"
-	GuiControl,, % IdTTstyling_DDL3, % s_TTStyling_DDL3
-	for key, val in a_TTstyling_DDL4
+			s_Styling_DDL3 .= val . "|"
+	GuiControl,, % IdTTstyling_DDL3, % s_Styling_DDL3
+	s_Styling_DDL3 := "|"
+	for key, val in a_Styling_DDL3
+		if (val = ini_HMTyFaceFont)
+			s_Styling_DDL3 .= val . "||"
+		else
+			s_Styling_DDL3 .= val . "|"
+	GuiControl,, % IdHMstyling_DDL3, % s_Styling_DDL3
+
+	for key, val in a_Styling_DDL4
 		if (val = ini_TTTySize)
-			s_TTStyling_DDL4 .= val . "||"
+			s_Styling_DDL4 .= val . "||"
 		else
-			s_TTStyling_DDL4 .= val . "|"
-	GuiControl,, % IdTTstyling_DDL4, % s_TTStyling_DDL4
+			s_Styling_DDL4 .= val . "|"
+	GuiControl,, % IdTTstyling_DDL4, % s_Styling_DDL4
+	s_Styling_DDL4 := "|"
+	for key, val in a_Styling_DDL4
+		if (val = ini_HMTySize)
+			s_Styling_DDL4 .= val . "||"
+		else
+			s_Styling_DDL4 .= val . "|"
+	GuiControl,, % IdHMstyling_DDL4, % s_Styling_DDL4
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1472,10 +1569,10 @@ F_TTstyling()
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
 	
-	F_GuiTTstyling_CreateObjects()
+	F_GuiStyling_CreateObjects()
 	F_GuiTTstyling_DetermineConstraints()
 	F_GuiHMstyling_DetermineConstraints()
-	F_GuiTTStyling_LoadValues()
+	F_GuiStyling_LoadValues()
 		
 	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
@@ -6277,12 +6374,12 @@ Converted												= Converted
 Copy clipboard content into ""Enter hotstring""				= Copy clipboard content into ""Enter hotstring""
 Current shortcut (hotkey):								= Current shortcut (hotkey):
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
+custom												= custom
 Download if update is available on startup?					= Download if update is available on startup?
 Download public libraries								= Download public libraries
 Do you want to delete it?								= Do you want to delete it?
 Do you want to proceed? 									= Do you want to proceed?
 Dark													= Dark
-Default												= Default
 Default mode											= Default mode
 Delete hotstring (F8) 									= Delete hotstring (F8)
 Deleting hotstring... 									= Deleting hotstring...
@@ -6353,6 +6450,7 @@ If you answer ""Yes"", the existing file will be deleted. This is recommended ch
 	If you answer ""No"" edition of the current definition will be interrupted. = If you answer ""No"" edition of the current definition will be interrupted.
 Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
+Incorrect value. Select custom RGB hex value. Please try again.	= Incorrect value. Select custom RGB hex value. Please try again.
 In order to display library content please at first select hotstring library = In order to display library content please at first select hotstring library
 In order to restore default configuration, the current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and upon start the Config.ini with default settings will be created. = In order to restore default configuration, the current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and upon start the Config.ini with default settings will be created.
 information											= information
@@ -6421,6 +6519,9 @@ Position of main window is saved in Config.ini.				= Position of main window is 
 Preview												= Preview
 Public library:										= Public library:
 purple												= purple
+)"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
+	TransConst .= "`n
+(Join`n `
 Recognized encoding of the script file:						= Recognized encoding of the script file:
 red													= red
 Reload												= Reload
@@ -6430,12 +6531,10 @@ Replacement text is blank. Do you want to proceed? 			= Replacement text is blan
 Repository version:										= Repository version:
 Required encoding: UTF-8 with BOM. Application will exit now.	= Required encoding: UTF-8 with BOM. Application will exit now.
 Reset Recognizer (Z)									= Reset Recognizer (Z)
+Restore default										= Restore default
 Restore default hotkey									= Restore default hotkey
 Restore default configuration								= Restore default configuration
 Row													= Row
-)"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
-	TransConst .= "`n
-(Join`n `
 Sandbox (F6)											= Sandbox (F6)
 Save hotkey											= Save hotkey
 Save position of application window	 					= &Save position of application window
@@ -6607,6 +6706,11 @@ F_HK_GeneralInfo										= You can enter any hotkey as combination of Shift, Ct
 F_HK_ClipCopyInfo										= Remark: this hotkey is operating system wide, so before changing it be sure it's not in conflict with any other system wide hotkey. `n`nWhen Hotstrings window exists (it could be minimized) pressing this hotkey copies content of clipboard to ""Enter hotstring"" field. `nThanks to that you can prepare new definition much quicker.
 F_HK_UndoInfo											= Remark: this hotkey is operating system wide, so before changing it be sure it's not in conflict with any other system wide hotkey.`n`n When pressed, it undo the very last hotstring. Please note that result of undo depends on cursor position.
 F_HK_TildeModInfo										= When the hotkey fires, its key's native function will not be blocked (hidden from the system). 
+T_SBackgroundColorInfo									= Select from drop down list predefined color (one of 16 HTML colors) `nor select Custom one and then provide RGB value in HEX format (e.g. FF0000 for red). `nThe selected color will be displayed as background for on-screen menu.
+T_STypefaceColor										= Select from drop down list predefined color (one of 16 HTML colors) `nor select Custom one and then provide RGB value in HEX format (e.g. FF0000 for red). `nThe selected color will be displayed as font color for on-screen menu.
+T_STypefaceFont										= Select from drop down list predefined font type. `nThe selected font type will be used in on screen menu.
+T_STypefaceSize										= Select from drop down list predefined size of font. `nThe selected font size will be used in on screen menu.
+T_StylPreview											= Press the ""Test styling"" button to get look & feel of selected styling settings below.
 )"
 	
 	TransA					:= {}	;this associative array (global) is used to store translations of this application text strings
@@ -9273,7 +9377,6 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 #If (v_Param != "l") 
 ;^#h::		; Event
 L_GUIInit:
-	;*[One]
 	if (v_ResizingFlag) ;if run for the very first time
 	{
 		Gui, HS3: +MinSize%HS3MinWidth%x%HS3MinHeight%
