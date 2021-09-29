@@ -7704,9 +7704,8 @@ F_GuiMain_Redraw()
 	}
 	else
 	{
-		OutputDebug, % "Redraw" . A_Space . "The first else" . A_Tab . "ini_Sandbox" . A_Space . ini_Sandbox . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved
+		;OutputDebug, % "Redraw" . A_Space . "The first else" . A_Tab . "ini_Sandbox" . A_Space . ini_Sandbox . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved
 		GuiControlGet, v_OutVarTemp, Pos, % IdListView1
-		;if (ini_Sandbox) and (!ini_IsSandboxMoved)
 		if (ini_Sandbox)
 		{
 			if (v_OutVarTempH <  LeftColumnH + c_HofSandbox)
@@ -7718,7 +7717,6 @@ F_GuiMain_Redraw()
 			else
 				ini_IsSandboxMoved := true
 		}
-		;if (!ini_Sandbox) and (!ini_IsSandboxMoved)
 		if (!ini_Sandbox)
 		{
 			if (v_OutVarTempH <  LeftColumnH + c_HofSandbox)
@@ -9647,9 +9645,12 @@ L_GUIInit:
 		Switch ini_WhichGui
 		{
 			Case "HS3":
-			Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
+				if (ini_HS3GuiMaximized)
+					Gui, HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
+				else	
+					Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
 			Case "HS4":
-			Gui, HS4: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
+				Gui, HS4: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
 		}
 	}
 return
