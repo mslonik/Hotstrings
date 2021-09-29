@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.3.8"
+global AppVersion				:= "3.4.0"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -59,7 +59,7 @@ global v_UndoHotstring 			:= ""		;used by output functions
 global v_ResizingFlag 			:= true 		;when Hotstrings Gui is displayed for the very first time
 global HMenuCliHwnd				:= 0
 global HMenuAHKHwnd				:= 0
-
+global TMenuAHKHwnd				:= 0 
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_DetermineMonitors()
 Critical, On
@@ -98,11 +98,14 @@ else
 
 ; 3. Load content of configuration file into configuration variables. The configuration variable names start with "ini_" prefix.
 ;Read all variables from specified language .ini file. In order to distinguish GUI text from any other string or variable used in this script, the GUI strings are defined with prefix "t_".
+
 F_LoadGUIPos()
 F_LoadGUIstyle()
 F_LoadFontSize()
 F_LoadSizeOfMargin()
 F_LoadFontType()
+F_LoadTTStyling()
+F_LoadHMStyling()
 
 global ini_CPDelay 				:= 300		;1-1000 [ms], default: 300
 IniRead, ini_CPDelay, 					% HADConfig, Configuration, ClipBoardPasteDelay,		% A_Space
@@ -226,13 +229,10 @@ F_GuiMain_CreateObject()
 F_GuiMain_DefineConstants()
 F_GuiMain_DetermineConstraints()
 F_GuiMain_Redraw()
-
 F_GuiHS4_CreateObject()
 F_GuiHS4_DetermineConstraints()
 F_GuiHS4_Redraw()
-
 F_GuiShowIntro()
-
 F_UpdateSelHotLibDDL()
 
 if (ini_HK_IntoEdit != "none")
@@ -374,6 +374,7 @@ Menu, SigOfEvents,		Add, % TransA["Basic hotstring is triggered"],	:OrdHisTrig
 Menu, SigOfEvents,		Add, % TransA["Menu hotstring is triggered"],	:MenuHisTrig
 Menu, SigOfEvents,		Add, % TransA["Undid the last hotstring"],		:UndoOfH
 Menu, SigOfEvents,		Add, % TransA["Triggerstring tips"],			:TrigTips
+Menu, SigOfEvents,		Add, % TransA["Triggerstring tips and hotstring menu styling"],		F_TTstyling
 
 F_SortTipsByLength()
 F_SortTipsAlphabetically()
@@ -490,9 +491,8 @@ if (ini_GuiReload) and (v_Param != "l")
 	Gosub, L_GUIInit
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-; Beginning of the main loop of application.
+; The main application loop beginning .
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 Loop,
 {
 	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
@@ -505,7 +505,8 @@ Loop,
 	{
 		v_InputString := ""
 		out := ""
-		ToolTip,	;Triggerstring Tips tooltip
+		Gui, TMenuAHK: Destroy
+		;ToolTip,	;Triggerstring Tips tooltip
 		v_HotstringFlag := false
 	}
 	else
@@ -514,8 +515,13 @@ Loop,
 		ToolTip, ,, , 4	;Basic triggerstring was triggered
 		ToolTip, ,, , 6	;Undid the last hotstring
 		;OutputDebug, % "Before F_PrepareTriggerstringTipsTables:" . A_Space . v_InputString
-		F_PrepareTriggerstringTipsTables()		
-		F_ShowTriggerstringTips()
+		;F_PrepareTriggerstringTipsTables()		
+		F_PrepareTriggerstringTipsTables2()		
+		;F_ShowTriggerstringTips()
+		if (a_Tips.Count())
+			F_ShowTriggerstringTips2()
+		else
+			Gui, TMenuAHK: Destroy
 	}
 	
 	if (out and InStr(HotstringEndChars, out))	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. If "out" is empty, InStr returns true.
@@ -545,7 +551,7 @@ Loop,
 
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
-
+#InputLevel 2	;Thanks to this line triggerstring tips will have lower priority; backspacing done in function F_TMenu() will not affect this label.
 ~BackSpace:: 
 if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 {
@@ -555,8 +561,9 @@ if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 else
 {
 	v_InputString := SubStr(v_InputString, 1, -1)
-	F_PrepareTriggerstringTipsTables()
-	F_ShowTriggerstringTips()
+	F_PrepareTriggerstringTipsTables2()
+	if (a_Tips.Count())
+		F_ShowTriggerstringTips2()
 	
 	if (v_Param == "d")
 	{
@@ -565,6 +572,7 @@ else
 	}
 }
 return
+#InputLevel 2
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;#if WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows exist at the moment.
 ;~^c::			; copy to edit field "Enter hotstring" content of Clipboard. 
@@ -679,7 +687,8 @@ return
 ~Home::
 ~End::
 ~Esc::
-ToolTip,
+ToolTip,	;this line is necessary to close tooltips.
+Gui, TMenuAHK: Destroy
 ToolTip, ,, , 4
 ToolTip, ,, , 6
 ;OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString
@@ -693,7 +702,97 @@ Gui, HS3Search: Default
 F_MoveList()
 #if
 
+#if WinExist("AHK_id" TMenuAHKHwnd)
+#InputLevel 1	;This trick enables back triggering of existing (triggerstring, hotstring) definitions; it rises up priority of calling existing triggerstrings
+Tab::
++Tab::
+Up::
+Down::
++Enter::
+^Enter::
+F_TMenu()
+{
+	global	;assume-global moee
+	local	v_PressedKey := "",		v_Temp1 := "",		ClipboardBack := ""
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0, ShiftTabIsFound := false
+	
+	v_MenuMax := a_Tips.Count()
+	v_PressedKey := A_ThisHotkey
+	if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
+	{
+		IsCursorPressed := true
+		IntCnt--
+		ControlSend, , {Up}, % "ahk_id" Id_LB_TMenuAHK
+		ShiftTabIsFound := true
+	}
+	if (InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+	{
+		IsCursorPressed := true
+		IntCnt++
+		ControlSend, , {Down}, % "ahk_id" Id_LB_TMenuAHK
+	}
+	if (InStr(v_PressedKey, "Up"))
+	{
+		IsCursorPressed := true
+		IntCnt--
+		ControlSend, , {Up}, % "ahk_id" Id_LB_TMenuAHK
+	}
+	if (InStr(v_PressedKey, "Down"))
+	{
+		IsCursorPressed := true
+		IntCnt++
+		ControlSend, , {Down}, % "ahk_id" Id_LB_TMenuAHK
+	}
+	if ((v_MenuMax = 1) and IsCursorPressed)
+	{
+		IntCnt := 1
+		return
+	}
+	if (IsCursorPressed)
+	{
+		if (IntCnt > v_MenuMax)
+		{
+			IntCnt := v_MenuMax
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	
+		}
+		if (IntCnt < 1)
+		{
+			IntCnt := 1
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	
+		}
+		IsCursorPressed := false
+		return
+	}		
+	if (InStr(v_PressedKey, "+Enter") or InStr(v_PressedKey, "^Enter"))
+	{
+		v_PressedKey := IntCnt
+		IsCursorPressed := false
+		IntCnt := 1
+	}
+	if (v_PressedKey > v_MenuMax)
+		return
+	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_TMenuAHK
+	;OutputDebug, % "v_Temp1" . A_Tab . v_Temp1 . A_Tab . A_Tab . "v_PressedKey" . A_Tab . v_PressedKey
+	Loop, Parse, v_Temp1, `n
+	{
+		if (A_Index = v_PressedKey)
+			v_Temp1 := SubStr(A_LoopField, InStr(A_LoopField, " ") + 1)
+	}
+	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
+	Hotstring("Reset")
+	SendInput, % v_Temp1
+	Gui, TMenuAHK: Destroy
+	return
+}
+#InputLevel 0
+	
+#if
+
 #if WinExist("ahk_id" HMenuCliHwnd)
+Tab::
++Tab::
 1::
 2::
 3::
@@ -709,23 +808,33 @@ F_HMenuCli()
 {
 	global	;assume-global moee
 	local	v_PressedKey := "",		v_Temp1 := "",		ClipboardBack := ""
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
 	
 	v_PressedKey := A_ThisHotkey
-	;OutputDebug, % "Beginning" . ":" . A_Space . A_ThisHotkey . A_Space . "v_MenuMax" . ":" . A_Space . v_MenuMax
+	if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
+	{
+		IsCursorPressed := true
+		IntCnt--
+		ControlSend, , {Up}, % "ahk_id" Id_LB_TMenuAHK
+		ShiftTabIsFound := true
+	}
+	if (InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+	{
+		IsCursorPressed := true
+		IntCnt++
+		ControlSend, , {Down}, % "ahk_id" Id_LB_TMenuAHK
+	}
 	if (InStr(v_PressedKey, "Up"))
 	{
 		IsCursorPressed := true
 		IntCnt--
-		;OutputDebug, % "Up" . ":" . A_Space IntCnt . A_Space . IsCursorPressed
-		ControlSend, , {Up}, % "ahk_id" HMenuCliHwnd
+		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuCli
 	}
 	if (InStr(v_PressedKey, "Down"))
 	{
 		IsCursorPressed := true
 		IntCnt++
-		;OutputDebug, % "Down" . ":" . A_Space IntCnt . A_Space . IsCursorPressed
-		ControlSend, , {Down}, % "ahk_id" HMenuCliHwnd
+		ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuCli
 	}
 	
 	if ((v_MenuMax = 1) and IsCursorPressed)
@@ -757,23 +866,19 @@ F_HMenuCli()
 		v_PressedKey := IntCnt
 		IsCursorPressed := false
 		IntCnt := 1
-		;OutputDebug, % "Enter" . ":" . A_Space . v_PressedKey
 	}
 	if (v_PressedKey > v_MenuMax)
 	{
-		;OutputDebug, % "v_PressedKey" . ":" . A_Space . v_PressedKey
 		return
 	}
 	ClipboardBack := ClipboardAll ;backup clipboard
 	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuCli
 	Loop, Parse, v_Temp1, `n
 	{
-		if (InStr(A_LoopField, v_PressedKey . "."))
+		if (A_Index = v_PressedKey)
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
-	
 	Clipboard := v_Temp1
-	
 	Send, ^v ;paste the text
 	if (Ovar = false)
 		Send, % A_EndChar
@@ -799,20 +904,965 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_LoadHMStyling()
+{
+	global ;assume-global mode
+	ini_HMBgrCol		:= "white"
+	ini_HMTyFaceCol	:= "black"
+	ini_HMTyFaceFont	:= "Calibri"
+	ini_HMTySize		:= 10
+	
+	IniRead, ini_HMBgrCol, 			% HADConfig, HotstringMenu_Styling, HotstringMenuBackgroundColor, white
+	if (!ini_HMBgrCol)
+		ini_HMBgrCol := "white"
+	if (ini_HMBgrCol = "custom")
+		IniRead, ini_HMBgrColCus,	% HADConfig, HotstringMenu_Styling, HotstringMenuBackgroundColorCustom
+	IniRead, ini_HMTyFaceCol, 		% HADConfig, HotstringMenu_Styling, HotstringMenuTypefaceColor, black
+	if (!ini_HMTyFaceCol)
+		ini_HMTyFaceCol := "black"
+	if (ini_HMTyFaceCol = "custom")
+		IniRead, ini_HMTyFaceColCus,	% HADConfig, HotstringMenu_Styling, HotstringMenuTypefaceColorCustom
+	IniRead, ini_HMTyFaceFont, 		% HADConfig, HotstringMenu_Styling, HotstringMenuTypefaceFont, Calibri
+	if (!ini_HMTyFaceFont)
+		ini_HMTyFaceFont := "Calibri"
+	IniRead, ini_HMTySize,	 		% HADConfig, HotstringMenu_Styling, HotstringMenuTypefaceSize, 10
+	if (!ini_HMTySize)
+		ini_HMTySize := 10
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_LoadTTStyling()
+{
+	global ;assume-global mode
+	ini_TTBgrCol		:= "white"
+	ini_TTTyFaceCol	:= "black"
+	ini_TTTyFaceFont	:= "Calibri"
+	ini_TTTySize		:= 10
+	
+	IniRead, ini_TTBgrCol, 			% HADConfig, TriggerstringTips_Styling, TriggerstringTipsBackgroundColor, white
+	if (!ini_TTBgrCol)
+		ini_TTBgrCol := "white"
+	if (ini_TTBgrCol = "custom")
+		IniRead, ini_TTBgrColCus,	% HADConfig, TriggerstringTips_Styling, TriggerstringTipsBackgroundColorCustom
+	IniRead, ini_TTTyFaceCol, 		% HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceColor, black
+	if (!ini_TTTyFaceCol)
+		ini_TTTyFaceCol := "black"
+	if (ini_TTTyFaceCol = "custom")
+		IniRead, ini_TTTyFaceColCus,	% HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceColorCustom
+	IniRead, ini_TTTyFaceFont, 		% HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceFont, Calibri
+	if (!ini_TTTyFaceFont)
+		ini_TTTyFaceFont := "Calibri"
+	IniRead, ini_TTTySize,	 		% HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceSize, 10
+	if (!ini_TTTySize)
+		ini_TTTySize := 10
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiStyling_CreateObjects()
+{
+	global ;assume-global mode
+	
+	;1. Prepare Gui
+	Gui, TTstyling: New, 	-Resize +HwndTTstylingHwnd +Owner +OwnDialogs -MaximizeBox -MinimizeBox	;+OwnDialogs: for tooltips.
+	Gui, TTstyling: Margin,	% c_xmarg, % c_ymarg
+	Gui,	TTstyling: Color,	% c_WindowColor, % c_ControlColor
+	
+	;2. Prepare all text objects according to mock-up.
+	Gui,	TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	Gui, TTstyling: Add,	Tab3,		gF_StylingSwitch,		% TransA["Triggerstring tips styling"] . "||" . TransA["Hotstring menu styling"]
+	Gui, TTstyling: Tab, 									% TransA["Triggerstring tips styling"]
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T1,		% TransA["Background color"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T2, 	ⓘ
+	T_SBackgroundColorInfo := func("F_ShowLongTooltip").bind(TransA["T_SBackgroundColorInfo"])
+	GuiControl, +g, % IdTTstyling_T2, % T_SBackgroundColorInfo
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL1 vini_TTBgrCol gF_StylingTTDDL1,	% TransA["black"] . "|" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "||" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"] . "|" . TransA["custom"]
+	Gui, TTstyling: Add,	Edit,		HwndIdTTstyling_E1 Limit6,		% TransA["HTML color RGB value, e.g. 00FF00"]
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B1 gF_ButtonTTstylingB1,	% TransA["Restore default"]
+	
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T3,		% TransA["Typeface color"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T4, 	ⓘ
+	T_STypefaceColor := func("F_ShowLongTooltip").bind(TransA["T_STypefaceColor"])
+	GuiControl +g, % IdTTstyling_T4, % T_STypefaceColor
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL2 vini_TTTyFaceCol gF_StylingTTDDL2,	% TransA["black"] . "||" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "|" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"] . "|" . TransA["custom"]
+	Gui, TTstyling: Add,	Edit,		HwndIdTTstyling_E2 Limit6,		% TransA["HTML color RGB value, e.g. 00FF00"]
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B2 gF_ButtonTTStylingB2,	% TransA["Restore default"]
+	
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T5,		% TransA["Typeface font"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T6, 	ⓘ
+	T_STypefaceFont := func("F_ShowLongTooltip").bind(TransA["T_STypefaceFont"])
+	GuiControl +g, % IdTTstyling_T6, % T_STypefaceFont
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL3 vini_TTTyFaceFont,	Arial|Calibri||Comic Sans MS|Consolas|Courier|Fixedsys|Lucida Console|Microsoft Sans Serif|Script|System|Tahoma|Times New Roman|Verdana
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B3 gFButtonTTStylingB3,		% TransA["Restore default"]
+	
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T7,		% TransA["Typeface size"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T8, 	ⓘ
+	T_STypefaceSize := func("F_ShowLongTooltip").bind(TransA["T_STypefaceSize"])
+	GuiControl +g, % IdTTstyling_T8, % T_STypefaceSize
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, TTstyling: Add,	DropDownList,	HwndIdTTstyling_DDL4 vini_TTTySize,	7|8|9|10||11|12|13|14|15|16
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B4 gFButtonTTStylingB4,		% TransA["Restore default"]
+	
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T9,		% TransA["Preview"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T10, 	ⓘ
+	T_StylPreview := func("F_ShowLongTooltip").bind(TransA["T_StylPreview"])
+	GuiControl +g, % IdTTstyling_T10, % T_StylPreview
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, TTstyling: Add,	Listbox, 		HwndIdTTstyling_LB1 r5,	% TransA["Row"] . " 1|" . TransA["Row"] . " 2|" . TransA["Row"] . " 3|" . TransA["Row"] . " 4|" . TransA["Row"] . " 5"
+	
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B5 gF_ButtonTTTestStyling,	% TransA["Test styling"]
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B6 gF_ButtonTTApplyClose,		% TransA["Apply && Close"]
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B7 gF_ButtonTTCancel,		% TransA["Cancel"]
+	
+	Gui, TTstyling: Tab, 									% TransA["Hotstring menu styling"]
+	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T1,		% TransA["Background color"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T2, 	ⓘ
+	GuiControl, +g, % IdHMstyling_T2, % T_SBackgroundColorInfo
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, TTstyling: Add,	DropDownList,	HwndIdHMstyling_DDL1 vini_HMBgrCol gF_StylingHMDDL1,	% TransA["black"] . "|" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "||" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"] . "|" . TransA["custom"]
+	Gui, TTstyling: Add,	Edit,		HwndIdHMstyling_E1 Limit6,		% TransA["HTML color RGB value, e.g. 00FF00"]
+	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B1 gF_ButtonHMstylingB1,	% TransA["Restore default"]
+	
+	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T3,		% TransA["Typeface color"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T4, 	ⓘ
+	GuiControl +g, % IdHMstyling_T4, % T_STypefaceColor
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, TTstyling: Add,	DropDownList,	HwndIdHMstyling_DDL2 vini_HMTyFaceCol gF_StylingHMDDL2,	% TransA["black"] . "||" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "|" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"] . "|" . TransA["custom"]
+	Gui, TTstyling: Add,	Edit,		HwndIdHMstyling_E2 Limit6,		% TransA["HTML color RGB value, e.g. 00FF00"]
+	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B2 gF_ButtonHMStylingB2,	% TransA["Restore default"]
+	
+	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T5,		% TransA["Typeface font"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T6, 	ⓘ
+	GuiControl +g, % IdHMstyling_T6, % T_STypefaceFont
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, TTstyling: Add,	DropDownList,	HwndIdHMstyling_DDL3 vini_HMTyFaceFont,	Arial|Calibri||Comic Sans MS|Consolas|Courier|Fixedsys|Lucida Console|Microsoft Sans Serif|Script|System|Tahoma|Times New Roman|Verdana
+	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B3 gF_ButtonHMStylingB3,		% TransA["Restore default"]
+	
+	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T7,		% TransA["Typeface size"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T8, 	ⓘ
+	GuiControl +g, % IdHMstyling_T8, % T_STypefaceSize
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, TTstyling: Add,	DropDownList,	HwndIdHMstyling_DDL4 vini_HMTySize,	7|8|9|10||11|12|13|14|15|16
+	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B4 gF_ButtonHMStylingB4,		% TransA["Restore default"]
+	
+	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T9,		% TransA["Preview"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T10, 	ⓘ
+	GuiControl +g, % IdHMstyling_T10, % T_StylPreview
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, TTstyling: Add,	Listbox, 		HwndIdHMstyling_LB1 r5,	% TransA["Row"] . " 1|" . TransA["Row"] . " 2|" . TransA["Row"] . " 3|" . TransA["Row"] . " 4|" . TransA["Row"] . " 5"
+	
+	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B5 gF_ButtonHMTestStyling,	% TransA["Test styling"]
+	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B6 gF_ButtonHMApplyClose,	% TransA["Apply && Close"]
+	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B7 gF_ButtonHMCancel,		% TransA["Cancel"]
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_StylingHMDDL1()
+{
+	global ;assume-global mode
+	local OutputVarTemp := ""
+	GuiControlGet, OutputVarTemp,, % IdHMstyling_DDL1
+	if (OutputVarTemp = "custom")
+		GuiControl, Enable, % IdHMstyling_E1
+	else
+	{
+		GuiControl,, % IdHMstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
+		GuiControl, Disable, % IdHMstyling_E1
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_StylingHMDDL2()
+{
+	global ;assume-global mode
+	local OutputVarTemp := ""
+	GuiControlGet, OutputVarTemp,, % IdHMstyling_DDL2
+	if (OutputVarTemp = "custom")
+		GuiControl, Enable, % IdHMstyling_E2
+	else
+	{
+		GuiControl,, % IdHMstyling_E2, % TransA["HTML color RGB value, e.g. 00FF00"] 
+		GuiControl, Disable, % IdHMstyling_E2
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_StylingTTDDL1()
+{
+	global ;assume-global mode
+	local OutputVarTemp := ""
+	GuiControlGet, OutputVarTemp,, % IdTTstyling_DDL1
+	if (OutputVarTemp = "custom")
+		GuiControl, Enable, % IdTTstyling_E1
+	else
+	{
+		GuiControl,, % IdTTstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
+		GuiControl, Disable, % IdTTstyling_E1
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_StylingTTDDL2()
+{
+	global ;assume-global mode
+	local OutputVarTemp := ""
+	GuiControlGet, OutputVarTemp,, % IdTTstyling_DDL2
+	if (OutputVarTemp = "custom")
+		GuiControl, Enable, % IdTTstyling_E2
+	else
+	{
+		GuiControl,, % IdTTstyling_E2, % TransA["HTML color RGB value, e.g. 00FF00"] 
+		GuiControl, Disable, % IdTTstyling_E2
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_StylingSwitch()
+{
+	global ;assume-global mode
+	if (WinExist("ahk_id" TDemoHwnd))
+	{
+		Gui, TDemo: 		Destroy
+		F_ButtonHMTestStyling()
+		return
+	}
+	if (WinExist("ahk_id" HDemoHwnd))
+	{
+		Gui, HDemo: 		Destroy
+		F_ButtonTTTestStyling()
+		return
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonHMStylingB4()
+{
+	global ;assume-global mode
+	local s_HMstyling_DDL4 := "|7|8|9|10||11|12|13|14|15|16"
+	ini_HMTySize := 10
+	GuiControl,, % IdHMstyling_DDL4, % s_HMStyling_DDL4
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonHMStylingB3()
+{
+	global ;assume-global mode
+	local s_HMstyling_DDL3 := "|Arial|Calibri||Comic Sans MS|Consolas|Courier|Fixedsys|Lucida Console|Microsoft Sans Serif|Script|System|Tahoma|Times New Roman|Verdana"
+	ini_HMTyFaceFont := "Calibri"
+	GuiControl,, % IdHMstyling_DDL3, % s_HMStyling_DDL3
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonHMStylingB2()
+{
+	global ;assume-global mode
+	local s_HMstyling_DDL2 := "|" . TransA["black"] . "||" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "|" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"]
+	ini_HMTyFaceCol := "black"
+	GuiControl,, % IdHMstyling_DDL2, % s_HMStyling_DDL2
+	GuiControl,, % IdHMstyling_E2, % TransA["HTML color RGB value, e.g. 00FF00"] 
+	GuiControl, Disable, % IdHMstyling_E2
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonHMstylingB1()
+{
+	global ;assume-global mode
+	local s_HMstyling_DDL1 := "|" . TransA["black"] . "|" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "||" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"]
+	ini_HMBgrCol := "white"
+	GuiControl,, % IdHMstyling_DDL1, % s_HMStyling_DDL1
+	GuiControl,, % IdHMstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
+	GuiControl, Disable, % IdHMstyling_E1
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+FButtonTTStylingB4()
+{
+	global ;assume-global mode
+	local s_TTstyling_DDL4 := "|7|8|9|10||11|12|13|14|15|16"
+	
+	ini_TTTySize := 10
+	GuiControl,, % IdTTstyling_DDL4, % s_TTStyling_DDL4
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+FButtonTTStylingB3()
+{
+	global ;assume-global mode
+	local s_TTstyling_DDL3 := "|Arial|Calibri||Comic Sans MS|Consolas|Courier|Fixedsys|Lucida Console|Microsoft Sans Serif|Script|System|Tahoma|Times New Roman|Verdana"
+	
+	ini_TTTyFaceFont := "Calibri"
+	GuiControl,, % IdTTstyling_DDL3, % s_TTStyling_DDL3
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonTTStylingB2()
+{
+	global ;assume-global mode
+	local s_TTstyling_DDL2 := "|" . TransA["black"] . "||" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "|" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"]
+	ini_TTTyFaceCol := "black"
+	GuiControl,, % IdTTstyling_DDL2, % s_TTStyling_DDL2
+	GuiControl,, % IdTTstyling_E2, % TransA["HTML color RGB value, e.g. 00FF00"] 
+	GuiControl, Disable, % IdTTstyling_E2
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonTTstylingB1()
+{
+	global ;assume-global mode
+	local s_TTstyling_DDL1 := "|" . TransA["black"] . "|" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "||" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"]
+	ini_TTBgrCol := "white"
+	GuiControl,, % IdTTstyling_DDL1, % s_TTStyling_DDL1
+	GuiControl,, % IdTTstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
+	GuiControl, Disable, % IdTTstyling_E1
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonTTCancel()
+{
+	global ;assume-global mode
+	Gui, TTstyling: 	Destroy
+	Gui, TDemo: 		Destroy
+	F_LoadTTStyling()	;restore previous values
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonHMCancel()
+{
+	global ;assume-global mode
+	Gui, TTstyling: 	Destroy
+	Gui, HDemo: 		Destroy
+	F_LoadHMStyling()	;restore previous values
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonTTApplyClose()
+{
+	global ;assume-global mode
+	
+	Gui, TTstyling: 	Submit
+	IniWrite, % ini_TTBgrCol, 	% HADConfig, TriggerstringTips_Styling, TriggerstringTipsBackgroundColor
+	if (ini_TTBgrCol = "custom")
+	{
+		GuiControlGet, OutputVarTemp,, % IdTTstyling_E1
+		if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
+		{
+			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
+			Gui, TDemo: Destroy
+			return
+		}
+		else
+		{
+			ini_TTBgrColCus := OutputVarTemp
+			IniWrite, % ini_TTBgrColCus, 	% HADConfig, TriggerstringTips_Styling, TriggerstringTipsBackgroundColorCustom
+		}
+	}
+	else
+		IniWrite, "", 	% HADConfig, TriggerstringTips_Styling, TriggerstringTipsBackgroundColorCustom
+
+	IniWrite, % ini_TTTyFaceCol, 	% HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceColor
+	if (ini_TTTyFaceCol = "custom")
+	{
+		GuiControlGet, OutputVarTemp,, % IdTTstyling_E2
+		if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
+		{
+			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
+			Gui, TDemo: Destroy
+			return
+		}
+		else
+		{
+			ini_TTTyFaceColCus := OutputVarTemp
+			IniWrite, % ini_TTTyFaceColCus, 	% HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceColorCustom
+		}
+	}
+	else
+		IniWrite, "", 	% HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceColorCustom
+	IniWrite, % ini_TTTyFaceFont, % HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceFont
+	IniWrite, % ini_TTTySize,	% HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceSize
+	Gui, TDemo: 		Destroy
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonHMApplyClose()
+{
+	global ;assume-global mode
+	
+	Gui, TTstyling: 	Submit
+	IniWrite, % ini_HMBgrCol, 	% HADConfig, HotstringMenu_Styling, HotstringMenuBackgroundColor
+	if (ini_HMBgrCol = "custom")
+	{
+		GuiControlGet, OutputVarTemp,, % IdHMstyling_E1
+		if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
+		{
+			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
+			Gui, HDemo: Destroy
+			return
+		}
+		else
+		{
+			ini_HMBgrColCus := OutputVarTemp
+			IniWrite, % ini_HMBgrColCus, 	% HADConfig, HotstringMenu_Styling, HotstringMenuBackgroundColorCustom
+		}
+	}
+	else
+		IniWrite, "", 	% HADConfig, HotstringMenu_Styling, HotstringMenuBackgroundColorCustom
+
+	IniWrite, % ini_HMTyFaceCol, 	% HADConfig, HotstringMenu_Styling, HotstringMenuTypefaceColor
+	if (ini_HMTyFaceCol = "custom")
+	{
+		GuiControlGet, OutputVarTemp,, % IdHMstyling_E2
+		if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
+		{
+			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
+			Gui, HDemo: Destroy
+			return
+		}
+		else
+		{
+			ini_HMTyFaceColCus := OutputVarTemp
+			IniWrite, % ini_HMTyFaceColCus, 	% HADConfig, HotstringMenu_Styling, HotstringMenuTypefaceColorCustom
+		}
+	}
+	else
+		IniWrite, "", 	% HADConfig, HotstringMenu_Styling, HotstringMenuTypefaceColorCustom
+	IniWrite, % ini_HMTyFaceFont, % HADConfig, HotstringMenu_Styling, HotstringMenuTypefaceFont
+	IniWrite, % ini_HMTySize,	% HADConfig, HotstringMenu_Styling, HotstringMenuTypefaceSize
+	Gui, HDemo: 		Destroy
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonTTTestStyling()	;tu jestem
+{
+	global ;assume-global mode
+	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,OutputVarTemp := 0, OutputVarTempX := 0, OutputVarTempY := 0, OutputVarTempW := 0, OutputVarTempH := 0
+	
+	Gui, TTstyling: Submit, NoHide
+	if (ini_TTBgrCol = "custom")
+	{
+		GuiControlGet, OutputVarTemp,, % IdTTstyling_E1
+		if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
+		{
+			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
+			Gui, TDemo: Destroy
+			return
+		}
+		else 
+			ini_TTBgrColCus := OutputVarTemp
+	}
+	if (ini_TTTyFaceCol = "custom")
+	{
+		GuiControlGet, OutputVarTemp,, % IdTTstyling_E2
+		if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
+		{
+			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
+			Gui, TDemo: Destroy
+			return
+		}
+		else 
+			ini_TTTyFaceColCus := OutputVarTemp
+	}
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . TTstylingHwnd
+	ControlGetPos, OutputVarTempX, OutputVarTempY, , , , ahk_id %IdTTstyling_LB1%
+	Gui, TDemo: New, -Caption +ToolWindow +HwndTDemoHwnd
+	Gui, TDemo: Margin, 0, 0
+	if (ini_TTBgrCol = "custom")
+		Gui, TDemo: Color,, % ini_TTBgrColCus
+	else
+		Gui, TDemo: Color,, % ini_TTBgrCol
+	if (ini_TTTyFaceCol = "custom")		
+		Gui, TDemo: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceColCus, % ini_TTTyFaceFont
+	else
+		Gui, TDemo: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
+	Gui, TDemo: Add, Listbox, HwndIdTDemo r5, % TransA["Row"] . " 1|" . TransA["Row"] . " 2|" . TransA["Row"] . " 3|" . TransA["Row"] . " 4|" . TransA["Row"] . " 5"
+	Gui, TDemo: Show, % "x" . Window1X + OutputVarTempX . A_Space . "y" . Window1Y + OutputVarTempY . A_Space "NoActivate"	;future: prevent parent window from moving: https://autohotkey.com/board/topic/17759-window-system-menu-manipulator-library-v20/
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonHMTestStyling()
+{
+	global ;assume-global mode
+	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,OutputVarTemp := 0, OutputVarTempX := 0, OutputVarTempY := 0, OutputVarTempW := 0, OutputVarTempH := 0
+	
+	Gui, TTstyling: Submit, NoHide
+	if (ini_HMBgrCol = "custom")
+	{
+		GuiControlGet, OutputVarTemp,, % IdHMstyling_E1
+		if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
+		{
+			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
+			Gui, HDemo: Destroy
+			return
+		}
+		else 
+			ini_HMBgrColCus := OutputVarTemp
+	}
+	if (ini_HMTyFaceCol = "custom")
+	{
+		GuiControlGet, OutputVarTemp,, % IdHMstyling_E2
+		if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
+		{
+			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
+			Gui, HDemo: Destroy
+			return
+		}
+		else 
+			ini_HMTyFaceColCus := OutputVarTemp
+	}
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . TTstylingHwnd
+	ControlGetPos, OutputVarTempX, OutputVarTempY, , , , ahk_id %IdHMstyling_LB1%
+	Gui, HDemo: New, -Caption +ToolWindow +HwndHDemoHwnd
+	Gui, HDemo: Margin, 0, 0
+	if (ini_HMBgrCol = "custom")
+		Gui, HDemo: Color,, % ini_HMBgrColCus
+	else
+		Gui, HDemo: Color,, % ini_HMBgrCol
+	if (ini_HMTyFaceCol = "custom")		
+		Gui, HDemo: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
+	else
+		Gui, HDemo: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
+	Gui, HDemo: Add, Listbox, HwndIdHDemo r5, % TransA["Row"] . " 1|" . TransA["Row"] . " 2|" . TransA["Row"] . " 3|" . TransA["Row"] . " 4|" . TransA["Row"] . " 5"
+	Gui, HDemo: Show, % "x" . Window1X + OutputVarTempX . A_Space . "y" . Window1Y + OutputVarTempY . A_Space "NoActivate"	;future: prevent parent window from moving: https://autohotkey.com/board/topic/17759-window-system-menu-manipulator-library-v20/
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiHMstyling_DetermineConstraints()
+{
+	global ;assume-global mode
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
+		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
+		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
+		,v_OutVarTemp4 := 0, 	v_OutVarTemp4X := 0, 	v_OutVarTemp4Y := 0, 	v_OutVarTemp4W := 0, 	v_OutVarTemp4H := 0
+							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+		,TheWidestText := 0
+	
+	GuiControlGet, v_OutVarTemp1, Pos, % IdHMstyling_T1
+	GuiControlGet, v_OutVarTemp2, Pos, % IdHMstyling_T3
+	GuiControlGet, v_OutVarTemp3, Pos, % IdHMstyling_T5
+	GuiControlGet, v_OutVarTemp4, Pos, % IdHMstyling_T7
+	TheWidestText := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W, v_OutVarTemp4W)
+	
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdHMstyling_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdHMstyling_DDL1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_DDL1
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_E1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_E1
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	                    
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdHMstyling_T3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_T4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdHMstyling_DDL2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_DDL2
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_E2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_E2
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdHMstyling_T5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_T6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdHMstyling_DDL3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_DDL3
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	GuiControlGet, v_OutputVarTemp, Pos, % IdTTstyling_B3
+	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 5 * c_xmarg
+	GuiControl, Move, % IdHMstyling_T9, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutputVarTemp, Pos, % IdHMstyling_T9
+	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_T10, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutputVarTemp, Pos, % IdHMstyling_B3
+	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 5 * c_xmarg
+	v_OutputVarTemp := v_yNext
+	v_yNext += HofText
+	GuiControl, Move, % IdHMstyling_LB1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+
+	v_xNext := c_xmarg
+	v_yNext := v_OutputVarTemp
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdHMstyling_T7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_T8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdHMstyling_DDL4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_DDL4
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdHMstyling_B5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B5
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_B6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B6
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_B7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	GuiControl, Disable, % IdHMstyling_E1
+	GuiControl, Disable, % IdHMstyling_E2
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiTTstyling_DetermineConstraints()
+{
+	global ;assume-global mode
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
+		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
+		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
+		,v_OutVarTemp4 := 0, 	v_OutVarTemp4X := 0, 	v_OutVarTemp4Y := 0, 	v_OutVarTemp4W := 0, 	v_OutVarTemp4H := 0
+							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+		,TheWidestText := 0
+	
+	GuiControlGet, v_OutVarTemp1, Pos, % IdTTstyling_T1
+	GuiControlGet, v_OutVarTemp2, Pos, % IdTTstyling_T3
+	GuiControlGet, v_OutVarTemp3, Pos, % IdTTstyling_T5
+	GuiControlGet, v_OutVarTemp4, Pos, % IdTTstyling_T7
+	TheWidestText := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W, v_OutVarTemp4W)
+	
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdTTstyling_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdTTstyling_DDL1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_DDL1
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_E1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_E1
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	                    
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdTTstyling_T3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_T4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdTTstyling_DDL2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_DDL2
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_E2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_E2
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdTTstyling_T5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_T6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdTTstyling_DDL3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_DDL3
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	GuiControlGet, v_OutputVarTemp, Pos, % IdTTstyling_B3
+	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 5 * c_xmarg
+	GuiControl, Move, % IdTTstyling_T9, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutputVarTemp, Pos, % IdTTstyling_T9
+	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_T10, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutputVarTemp, Pos, % IdTTstyling_B3
+	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 5 * c_xmarg
+	v_OutputVarTemp := v_yNext
+	v_yNext += HofText
+	GuiControl, Move, % IdTTstyling_LB1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+
+	v_xNext := c_xmarg
+	v_yNext := v_OutputVarTemp
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdTTstyling_T7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_T8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdTTstyling_DDL4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_DDL4
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdTTstyling_B5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_B5
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_B6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdTTstyling_B6
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdTTstyling_B7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	GuiControl, Disable, % IdTTstyling_E1	;future: add options to define other colors
+	GuiControl, Disable, % IdTTstyling_E2
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiStyling_LoadValues()	
+{
+	global	;assume-global mode
+	local a_Styling_DDL1 := [TransA["black"], TransA["silver"], TransA["gray"], TransA["white"], TransA["maroon"], TransA["red"], TransA["purple"], TransA["fuchsia"], TransA["green"], TransA["lime"], TransA["olive"], TransA["yellow"], TransA["navy"], TransA["blue"], TransA["teal"], TransA["aqua"], TransA["custom"]]
+		,s_Styling_DDL1 := "|"
+		,a_Styling_DDL2 := [TransA["black"], TransA["silver"], TransA["gray"], TransA["white"], TransA["maroon"], TransA["red"], TransA["purple"], TransA["fuchsia"], TransA["green"], TransA["lime"], TransA["olive"], TransA["yellow"], TransA["navy"], TransA["blue"], TransA["teal"], TransA["aqua"], TransA["custom"]]
+		,s_Styling_DDL2 := "|"
+		,a_Styling_DDL3 := ["Arial", "Calibri", "Comic Sans MS", "Consolas", "Courier", "Fixedsys", "Lucida Console", "Microsoft Sans Serif", "Script", "System", "Tahoma", "Times New Roman", "Verdana"]
+		,s_Styling_DDL3 := "|"
+		,a_Styling_DDL4 := [7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+		,s_Styling_DDL4 := "|"
+		,key := 0, value := ""
+	
+	for key, val in a_Styling_DDL1
+		if (val = ini_TTBgrCol)
+			s_Styling_DDL1 .= val . "||"
+	else
+		s_Styling_DDL1 .= val . "|"
+	GuiControl,, % IdTTstyling_DDL1, % s_Styling_DDL1
+	if (ini_TTBgrCol = "custom")
+	{
+		GuiControl,, % IdTTstyling_E1, % ini_TTBgrColCus
+		GuiControl, Enable, % IdTTstyling_E1
+	}
+	
+	s_Styling_DDL1 := "|"
+	for key, val in a_Styling_DDL1
+		if (val = ini_HMBgrCol)
+			s_Styling_DDL1 .= val . "||"
+	else
+		s_Styling_DDL1 .= val . "|"
+	GuiControl,, % IdHMstyling_DDL1, % s_Styling_DDL1
+	if (ini_HMBgrCol = "custom")
+	{
+		GuiControl,, % IdHMstyling_E1, % ini_HMBgrColCus
+		GuiControl, Enable, % IdHMstyling_E1
+	}
+	
+	for key, val in a_Styling_DDL2
+		if (val = ini_TTTyFaceCol)
+			s_Styling_DDL2 .= val . "||"
+	else
+		s_Styling_DDL2 .= val . "|"
+	GuiControl,, % IdTTstyling_DDL2, % s_Styling_DDL2
+	if (ini_TTTyFaceCol = "custom")
+	{
+		GuiControl,, % IdTTstyling_E2, % ini_TTTyFaceColCus
+		GuiControl, Enable, % IdTTstyling_E2
+	}
+	
+	s_Styling_DDL2 := "|"
+	for key, val in a_Styling_DDL2
+		if (val = ini_HMTyFaceCol)
+			s_Styling_DDL2 .= val . "||"
+	else
+		s_Styling_DDL2 .= val . "|"
+	GuiControl,, % IdHMstyling_DDL2, % s_Styling_DDL2
+	if (ini_HMTyFaceCol = "custom")
+	{
+		GuiControl,, % IdHMstyling_E2, % ini_HMTyFaceColCus
+		GuiControl, Enable, % IdHMstyling_E2
+	}
+	
+	for key, val in a_Styling_DDL3
+		if (val = ini_TTTyFaceFont)
+			s_Styling_DDL3 .= val . "||"
+	else
+		s_Styling_DDL3 .= val . "|"
+	GuiControl,, % IdTTstyling_DDL3, % s_Styling_DDL3
+	s_Styling_DDL3 := "|"
+	for key, val in a_Styling_DDL3
+		if (val = ini_HMTyFaceFont)
+			s_Styling_DDL3 .= val . "||"
+	else
+		s_Styling_DDL3 .= val . "|"
+	GuiControl,, % IdHMstyling_DDL3, % s_Styling_DDL3
+	
+	for key, val in a_Styling_DDL4
+		if (val = ini_TTTySize)
+			s_Styling_DDL4 .= val . "||"
+	else
+		s_Styling_DDL4 .= val . "|"
+	GuiControl,, % IdTTstyling_DDL4, % s_Styling_DDL4
+	s_Styling_DDL4 := "|"
+	for key, val in a_Styling_DDL4
+		if (val = ini_HMTySize)
+			s_Styling_DDL4 .= val . "||"
+	else
+		s_Styling_DDL4 .= val . "|"
+	GuiControl,, % IdHMstyling_DDL4, % s_Styling_DDL4
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_TTstyling()
+{
+	global	;assume-global mode
+	local FoundPos := ""
+		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,NewWinPosX := 0, NewWinPosY := 0
+	
+	F_GuiStyling_CreateObjects()
+	F_GuiTTstyling_DetermineConstraints()
+	F_GuiHMstyling_DetermineConstraints()
+	F_GuiStyling_LoadValues()
+		
+	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
+		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, TTstyling: Show, Hide Center AutoSize
+	
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TTstylingHwnd
+	DetectHiddenWindows, Off
+	if (Window1W)
+	{
+		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+		Gui, TTstyling: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Triggerstring tips and hotstring menu styling"]
+	}
+	else
+	{
+		if (v_Param = "l")
+			Gui, TTstyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Triggerstring tips and hotstring menu styling"]
+		else
+			Gui, TTstyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Triggerstring tips and hotstring menu styling"]
+	}
+	GuiControl, Hide, % IdTTstyling_LB1	;tu jestem
+	GuiControl, Hide, % IdHMstyling_LB1
+	F_ButtonTTTestStyling()
+	Gui, TDemo: Hide
+	F_ButtonHMTestStyling()
+	Gui, HDemo: Hide
+	return  
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ShowTriggerstringTips2()
+{
+	global ;assume-global mode
+	local key := 0, value := "", ThisValue := 0, MaxValue := 0, WhichKey := 0, LongestString := ""
+	
+	Gui, TMenuAHK: Destroy
+	for key, value in a_Tips
+	{
+		ThisValue := StrLen(value)
+		if (ThisValue > MaxValue)
+		{
+			MaxValue := ThisValue
+			WhichKey := key
+			WhichValue := value
+		}
+	}
+	LongestString := WhichValue
+	F_GuiTrigTipsMenuDef(a_Tips.Count(), LongestString)
+	
+	for key, value in a_Tips
+		GuiControl,, % Id_LB_TMenuAHK, % value . "|"
+	
+	if (ini_MHMP = 1)
+	{
+		if (A_CaretX and A_CaretY)
+		{
+			MenuX := A_CaretX + 20
+			MenuY := A_CaretY - 20
+		}
+		else
+		{
+			MouseGetPos, v_MouseX, v_MouseY
+			MenuX := v_MouseX + 20
+			MenuY := v_MouseY + 20
+		}
+	}
+	if (ini_MHMP = 2) 
+	{
+		MouseGetPos, v_MouseX, v_MouseY
+		MenuX := v_MouseX + 20
+		MenuY := v_MouseY + 20
+	}
+	
+	Gui, TMenuAHK: Show, x%MenuX% y%MenuY% NoActivate Hide
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TMenuAHKHwnd
+	DetectHiddenWindows, Off
+	
+	Loop % MonitorCoordinates.Count()
+		if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
+		{
+			Window1X := MonitorCoordinates[A_Index].Left
+			Window1H := MonitorCoordinates[A_Index].Height
+			Window1Y := MonitorCoordinates[A_Index].Top 
+			Window1W := MonitorCoordinates[A_Index].Width
+			Break
+		}
+	if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
+		MenuY -= Window2H
+	if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
+		MenuX -= Window2W
+	GuiControl, Choose, % Id_LB_TMenuAHK, 1
+	Gui, TMenuAHK: Show, x%MenuX% y%MenuY% NoActivate	
+	if ((ini_TTTtEn) and (ini_TTTD > 0))
+		SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_CheckScriptEncoding()
 {	;https://www.autohotkey.com/boards/viewtopic.php?t=65049
-	local file := "", RetrievedEncoding := ""
+	local file := "", RetrievedEncoding := "", FilePos := 0
 	
 	if (!A_IsCompiled)
 	{
 		file := FileOpen(A_ScriptFullPath, "r")
 		RetrievedEncoding := file.Encoding
-		if (RetrievedEncoding != "UTF-8") and (File.Pos != 3)
+		FilePos := File.Pos
+		if !(((RetrievedEncoding = "UTF-8") and (FilePos = 3)) or ((RetrievedEncoding = "UTF-16") and (FilePos = 2)))
 		{
-			MsgBox, 16, % A_ScriptName . ":" . A_Space . TransA["Error"], % TransA["Encoding of the script file:"] 
+			MsgBox, 16, % A_ScriptName . ":" . A_Space . TransA["Error"], % TransA["Recognized encoding of the script file:"] 
 				. "`n`n" . RetrievedEncoding . A_Space . "no-BOM"
-				. "`n`n" . "Required encoding: UTF-8 with BOM. Application will exit now."
-			Exit, 2	;no-bom
+				. "`n`n" . TransA["Required encoding: UTF-8 with BOM. Application will exit now."]
+			ExitApp, 3	;no-bom
 		}
 	}
 	return
@@ -1085,7 +2135,10 @@ F_ParseHotkey(ini_HK_Main, space*)
 			{
 				Case "~":
 					Mini := true
-					ShortcutLong .= "~"
+					if (space[1])
+						ShortcutLong .= "~"
+					else
+						Continue
 				Case "^":	
 					Mini := true
 					ShortcutLong .= "Ctrl"
@@ -1105,7 +2158,10 @@ F_ParseHotkey(ini_HK_Main, space*)
 			if (Mini)
 			{
 				if (space[1])
-					ShortcutLong .= " + "
+					if (ShortcutLong = "~")
+						Continue
+					else
+						ShortcutLong .= " + "
 				else
 					ShortcutLong .= "+"
 			}
@@ -1136,7 +2192,7 @@ F_GuiShortDef_CreateObjects()
 		Case % TransA["Undo the last hotstring"]:
 		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,										% TransA["Undo the last hotstring"]
 	}
-	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT2,										% TransA["Current shortcut (hotkey):"]
+	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT2,											% TransA["Current shortcut (hotkey):"]
 	
 	Switch A_ThisMenuItem
 	{
@@ -1343,12 +2399,12 @@ F_ShortDefB1_SaveHotkey()
 	Switch A_ThisMenuItem
 	{
 		Case % TransA["Call Graphical User Interface"]:
-		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main)
+		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
 		Hotkey, % OldHotkey, L_GUIInit, Off
 		if (ini_HK_Main != "none")
 			Hotkey, % ini_HK_Main, L_GUIInit, On
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
-			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit)
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit, "space")
 			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
 			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
 			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
@@ -1363,7 +2419,8 @@ F_ShortDefB1_SaveHotkey()
 				Hotkey, IfWinExist
 			}
 		Case % TransA["Undo the last hotstring"]:
-			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH)
+			MsgBox,, Debug, % ini_HK_UndoLH
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH, "space")
 			if (ini_HotstringUndo)
 			{
 				Hotkey, % OldHotkey, 	F_Undo, Off
@@ -1724,7 +2781,8 @@ F_Undo()
 	}
 	else
 	{
-		ToolTip,
+		;ToolTip,
+		Gui, TMenuAHK: Destroy
 		If InStr(ThisHotkey, "^z")
 			SendInput, ^z
 		else if InStr(ThisHotkey, "!BackSpace")
@@ -1776,6 +2834,34 @@ F_EventSigOrdHotstring()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_PrepareTriggerstringTipsTables2()
+{
+	global	;assume-global mode
+	local	HitCnt := 0
+	
+	;OutputDebug, % "Length of v_InputString:" . A_Space . StrLen(v_InputString) . A_Tab . "v_InputString:" . A_Space . v_InputString
+	if (StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn)	;TASAC = TipsAreShownAfterNoOfCharacters
+	{
+		a_Tips := []		
+		Loop, % a_Triggers.MaxIndex()
+		{
+			if (InStr(a_Triggers[A_Index], v_InputString) = 1)
+			{
+				a_Tips.Push(a_Triggers[A_Index])
+				HitCnt++
+				if (HitCnt = ini_MNTT)	; MNTT = Maximum Number of Triggerstring Tips
+					Break
+			}
+		}
+	}
+	else
+	{
+		Gui, TMenuAHK: Destroy
+		a_Tips := []
+	}
+	return
+}	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PrepareTriggerstringTipsTables()
 {
 	global	;assume-global mode
@@ -1793,8 +2879,8 @@ F_PrepareTriggerstringTipsTables()
 				v_Tips .= "`n"
 			v_Tips .= a_Triggers[A_Index]
 			HitCnt++
-			if (HitCnt = ini_MNTT)	
-				break
+			if (HitCnt = ini_MNTT)	; MNTT = Maximum Number of Triggerstring Tips
+				Break
 			}
 		}
 	}
@@ -4137,6 +5223,8 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	
 	HS3_GuiWidth  := A_GuiWidth	;used by F_SaveGUIPos()
 	HS3_GuiHeight := A_GuiHeight	;used by F_SaveGUIPos()
+	if (v_ResizingFlag)
+		return
 	if (A_EventInfo = 1) ; The window has been minimized.
 	{
 		ini_WhichGui := "HS3"
@@ -4151,7 +5239,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			F_GuiMain_Resize5()
 		return
 	}
-	if (!A_EventInfo) and (ini_HS3GuiMaximized) ;Window is restored after maximizing
+	if (!A_EventInfo) and (ini_HS3GuiMaximized)	;Window is restored after maximizing
 	{
 		ini_HS3GuiMaximized := false
 		if (ini_Sandbox) and (!ini_IsSandboxMoved)
@@ -4968,7 +6056,6 @@ F_Reload()
 }
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 F_Exit()
 {
 	global ;assume-global mode
@@ -4979,7 +6066,6 @@ F_Exit()
 		return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 F_ToggleSandbox()
 {
 	global ;assume-global mode
@@ -4993,7 +6079,6 @@ F_ToggleSandbox()
 	;Gui, % A_DefaultGui . ":" . A_Space . "Show", AutoSize	
 	return
 }
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadGUIPos()
 {
@@ -5045,6 +6130,20 @@ DownloadRepo=0
 HK_Main=#^h
 HK_IntoEdit=~^c
 HK_UndoLH=~^F12
+[TriggerstringTips_Styling]
+TriggerstringTipsBackgroundColor=white
+TriggerstringTipsBackgroundColorCustom=
+TriggerstringTipsTypefaceColor=black
+TriggerstringTipsTypefaceColorCustom=
+TriggerstringTipsTypefaceFont=Calibri
+TriggerstringTipsTypefaceSize=10
+[HotstringMenu_Styling]
+HotstringMenuBackgroundColor=white
+HotstringMenuBackgroundColorCustom=
+HotstringMenuTypefaceColorCustom=
+HotstringMenuTypefaceColor=black
+HotstringMenuTypefaceFont=Calibri
+HotstringMenuTypefaceSize=10
 [Event_BasicHotstring]
 OHTtEn=1
 OHTD=2000
@@ -5121,17 +6220,16 @@ Underscore _=1
 	
 	if (!FileExist(HADConfig))
 	{
-		if (!Instr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4)), "D"))				; if  there is no folder...
+		if (!InStr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4)), "D"))	;if there is no folder...
 		{
-			FileCreateDir, % A_AppData . "\" . SubStr(A_ScriptName, 1, -4)					; Future: check against errors
-			;MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exists!"] . "`n`n" . HADL . "`n`n" . TransA["folder is now created"] . "."
+			FileCreateDir, % A_AppData . "\" . SubStr(A_ScriptName, 1, -4)	;future: check against errors
 		}
 		FileAppend, %ConfigIni%, % HADConfig
 		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"] . "`n`n" . HADConfig
 	}
 	return	
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_SaveGUIPos(param*) ;Save to Config.ini
 {
 	global ;assume-global mode
@@ -5412,11 +6510,16 @@ Apostrophe ' 											= Apostrophe '
 Application											= A&pplication
 Application help										= Application help
 Application language changed to: 							= Application language changed to:
+Apply && Close											= Apply && Close
+aqua													= aqua
 Are you sure?											= Are you sure?
 Are you sure you want to exit this application now?			= Are you sure you want to exit this application now?
 Are you sure you want to reload this application now?			= Are you sure you want to reload this application now?
+Background color										= Background color
 Backslash \ 											= Backslash \
 Basic hotstring is triggered								= Basic hotstring is triggered
+black												= black
+blue													= blue
 Built with Autohotkey.exe version							= Built with Autohotkey.exe version
 By length 											= By length
 Call Graphical User Interface								= Call Graphical User Interface
@@ -5456,6 +6559,7 @@ Converted												= Converted
 Copy clipboard content into ""Enter hotstring""				= Copy clipboard content into ""Enter hotstring""
 Current shortcut (hotkey):								= Current shortcut (hotkey):
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
+custom												= custom
 Download if update is available on startup?					= Download if update is available on startup?
 Download public libraries								= Download public libraries
 Do you want to delete it?								= Do you want to delete it?
@@ -5477,7 +6581,6 @@ Enable												= Enable
 Enable/disable libraries									= Enable/disable &libraries
 Enable/disable triggerstring tips 							= Enable/disable triggerstring tips	
 Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 4th edition of this application, 2021 by Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
-Encoding of the script file:								= Encoding of the script file:
 Enter 												= Enter 
 Enter a name for the new library 							= Enter a name for the new library
 Enter hotstring 										= Enter hotstring
@@ -5504,8 +6607,10 @@ file is now created in the following subfolder:				= file is now created in the 
 Finite timeout?										= Finite timeout?
 folder is now created									= folder is now created
 Font type												= Font type
-I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)! = I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)!
+fuchsia												= fuchsia
 Graphical User Interface									= Graphical User Interface
+gray													= gray
+green												= green
 has been created. 										= has been created.
 has been downloaded to the location						= has been downloaded to the location
 Help: AutoHotkey Hotstrings reference guide					= Help: AutoHotkey Hotstrings reference guide
@@ -5513,14 +6618,16 @@ Help: Hotstrings application								= Help: Hotstrings application
 Hotstring 											= Hotstring
 Hotstring added to the file								= Hotstring added to the file
 Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv) = Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
+Hotstring menu styling									= Hotstring menu styling
 Hotstring was triggered! 								= Hotstring was triggered!
-to undo.												= to undo.
 ""Hotstring was triggered"" tooltip timeout in [ms]			= ""Hotstring was triggered"" tooltip timeout in [ms]
 ""Undid the last hotstring!"" tooltip timeout in [ms]			= ""Undid the last hotstring!"" tooltip timeout in [ms]
 Hotstring moved to the 									= Hotstring moved to the
 Hotstring paste from Clipboard delay 1 s 					= Hotstring paste from Clipboard delay 1 s
 Hotstring paste from Clipboard delay 						= Hotstring paste from Clipboard delay
 Hotstrings have been loaded 								= Hotstrings have been loaded
+HTML color RGB value, e.g. 00FF00							= HTML color RGB value, e.g. 00FF00
+I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)! = I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)!
 If you answer ""Yes"" it will overwritten.					= If you answer ""Yes"" it will overwritten.
 If you answer ""Yes"" definition existing in another library will not be changed. = If you answer ""Yes"" definition existing in another library will not be changed.
 If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used. = If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used.
@@ -5528,6 +6635,7 @@ If you answer ""Yes"", the existing file will be deleted. This is recommended ch
 	If you answer ""No"" edition of the current definition will be interrupted. = If you answer ""No"" edition of the current definition will be interrupted.
 Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
+Incorrect value. Select custom RGB hex value. Please try again.	= Incorrect value. Select custom RGB hex value. Please try again.
 In order to display library content please at first select hotstring library = In order to display library content please at first select hotstring library
 In order to restore default configuration, the current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and upon start the Config.ini with default settings will be created. = In order to restore default configuration, the current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and upon start the Config.ini with default settings will be created.
 information											= information
@@ -5551,6 +6659,7 @@ Library has been exported 								= Library has been exported
 Library has been imported. 								= Library has been imported.
 Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment = Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment
 Light (default)										= Light (default)
+lime													= lime
 Link file (.lnk) was created in AutoStart folder				= Link file (.lnk) was created in AutoStart folder
 Loading of (triggerstring, hotstring) definitions from the library file = Loading of (triggerstring, hotstring) definitions from the library file
 Loading file											= Loading file
@@ -5559,13 +6668,15 @@ Loading hotstrings from libraries... 						= Loading hotstrings from libraries..
 Loading imported library. Please wait...					= Loading imported library. Please wait...
 Loaded												= Loaded
 Local version:											= Local version:
+maroon												= maroon
 Max. no. of shown tips									= Max. no. of shown tips
-Maximum number of shown triggerstring tips				= Maximum number of shown triggerstring tips
+Maximum number of shown triggerstring tips					= Maximum number of shown triggerstring tips
 Menu hotstring is triggered								= Menu hotstring is triggered
 Menu position: caret									= Menu position: caret
 Menu position: cursor									= Menu position: cursor
 Minus - 												= Minus -
 Move (F8)												= Move (F8)
+navy													= navy
 New shortcut (hotkey)									= New shortcut (hotkey)
 No													= No
 No Backspace (B0) 										= No Backspace (B0)
@@ -5575,6 +6686,7 @@ Not Case-Conforming (C1)									= Not Case-Conforming (C1)
 Number of characters for tips 							= &Number of characters for tips
 of													= of
 OK													= &OK
+olive												= olive
 On start-up the local version of							= On start-up the local version of
 Open libraries folder in Explorer							= Open libraries folder in Explorer
 Opening Curly Bracket { 									= Opening Curly Bracket {
@@ -5589,8 +6701,14 @@ Pause application										= Pause application
 Phrase to search for:									= Phrase to search for:
 pixels												= pixels
 Position of main window is saved in Config.ini.				= Position of main window is saved in Config.ini.	
+Preview												= Preview
 Public library:										= Public library:
-Visit public libraries webpage							= Visit public libraries webpage
+purple												= purple
+)"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
+	TransConst .= "`n
+(Join`n `
+Recognized encoding of the script file:						= Recognized encoding of the script file:
+red													= red
 Reload												= Reload
 Reload in default mode									= Reload in default mode
 Reload in silent mode									= Reload in silent mode
@@ -5598,11 +6716,10 @@ Replacement text is blank. Do you want to proceed? 			= Replacement text is blan
 Repository version:										= Repository version:
 Required encoding: UTF-8 with BOM. Application will exit now.	= Required encoding: UTF-8 with BOM. Application will exit now.
 Reset Recognizer (Z)									= Reset Recognizer (Z)
+Restore default										= Restore default
 Restore default hotkey									= Restore default hotkey
 Restore default configuration								= Restore default configuration
-)"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
-	TransConst .= "`n
-(Join`n `
+Row													= Row
 Sandbox (F6)											= Sandbox (F6)
 Save hotkey											= Save hotkey
 Save position of application window	 					= &Save position of application window
@@ -5638,6 +6755,7 @@ Show Introduction window after application is restarted?		= Show Introduction wi
 Show Sandbox (F6)										= Show Sandbox (F6)
 Signaling of events										= Signaling of events
 Silent mode											= Silent mode
+silver												= silver
 Size of font											= Size of font
 Size of margin:										= Size of margin:
 Slash / 												= Slash /
@@ -5660,6 +6778,8 @@ Style of GUI											= Style of GUI
 Such file already exists									= Such file already exists
 Suspend Hotkeys										= Suspend Hotkeys
 Tab 													= Tab 
+teal													= teal
+Test styling											= Test styling
 The application										= The application
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
 The default											= The default
@@ -5696,6 +6816,7 @@ Tooltip position: caret									= Tooltip position: caret
 Tooltip position: cursor									= Tooltip position: cursor
 Tooltip timeout										= Tooltip timeout
 Total:												= Total:
+to undo.												= to undo.
 (triggerstring, hotstring) definitions						= (triggerstring, hotstring) definitions
 Triggerstring 											= Triggerstring
 Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
@@ -5703,13 +6824,19 @@ Triggerstring sound duration [ms]							= Triggerstring sound duration [ms]
 Triggerstring sound frequency range						= Triggerstring sound frequency range
 Triggerstring tip(s) tooltip timeout in [ms]					= Triggerstring tip(s) tooltip timeout in [ms]
 Triggerstring tips 										= Triggerstring tips
+Triggerstring tips styling								= Triggerstring tips styling
+Triggerstring tips and hotstring menu styling				= Triggerstring tips and hotstring menu styling
 Triggerstring tooltip timeout in [ms]						= Triggerstring tooltip timeout in [ms]
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
+Typeface color											= Typeface color
+Typeface font											= Typeface font
+Typeface size											= Typeface size
 Underscore _											= Underscore _
 Undo the last hotstring									= Undo the last hotstring
-Undo the last hotstring							= Undo the last hotstring
+Undo the last hotstring									= Undo the last hotstring
 Undid the last hotstring 								= Undid the last hotstring
 Version / Update										= Version / Update
+Visit public libraries webpage							= Visit public libraries webpage
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
 was compared with repository version and difference was discovered:	= was compared with repository version and difference was discovered:
@@ -5723,8 +6850,10 @@ When timeout is set, the tooltip ""Hotstring was triggered"" will dissapear afte
 When timeout is set, the tooltip ""Undid the last hotstring!"" will dissapear after time reaches it. = When timeout is set, the tooltip ""Undid the last hotstring!"" will dissapear after time reaches it.
 When timeout is set, the triggerstring tip(s) will dissapear after time reaches it. = When timeout is set, the triggerstring tip(s) will dissapear after time reaches it.
 When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
+white												= white
 Would you like to download the icon file?					= Would you like to download the icon file?
 Would you like now to reload it in order to run the just downloaded version? = Would you like now to reload it in order to run the just downloaded version?
+yellow												= yellow
 Yes													= Yes
 ""Basic hotstring"" sound duration [ms]						= ""Basic hotstring"" sound duration [ms]
 ""Basic hotstring"" sound frequency						= ""Basic hotstring"" sound frequency
@@ -5762,6 +6891,11 @@ F_HK_GeneralInfo										= You can enter any hotkey as combination of Shift, Ct
 F_HK_ClipCopyInfo										= Remark: this hotkey is operating system wide, so before changing it be sure it's not in conflict with any other system wide hotkey. `n`nWhen Hotstrings window exists (it could be minimized) pressing this hotkey copies content of clipboard to ""Enter hotstring"" field. `nThanks to that you can prepare new definition much quicker.
 F_HK_UndoInfo											= Remark: this hotkey is operating system wide, so before changing it be sure it's not in conflict with any other system wide hotkey.`n`n When pressed, it undo the very last hotstring. Please note that result of undo depends on cursor position.
 F_HK_TildeModInfo										= When the hotkey fires, its key's native function will not be blocked (hidden from the system). 
+T_SBackgroundColorInfo									= Select from drop down list predefined color (one of 16 HTML colors) `nor select Custom one and then provide RGB value in HEX format (e.g. FF0000 for red). `nThe selected color will be displayed as background for on-screen menu.
+T_STypefaceColor										= Select from drop down list predefined color (one of 16 HTML colors) `nor select Custom one and then provide RGB value in HEX format (e.g. FF0000 for red). `nThe selected color will be displayed as font color for on-screen menu.
+T_STypefaceFont										= Select from drop down list predefined font type. `nThe selected font type will be used in on screen menu.
+T_STypefaceSize										= Select from drop down list predefined size of font. `nThe selected font size will be used in on screen menu.
+T_StylPreview											= Press the ""Test styling"" button to get look & feel of selected styling settings below.
 )"
 	
 	TransA					:= {}	;this associative array (global) is used to store translations of this application text strings
@@ -6570,9 +7704,8 @@ F_GuiMain_Redraw()
 	}
 	else
 	{
-		OutputDebug, % "Redraw" . A_Space . "The first else" . A_Tab . "ini_Sandbox" . A_Space . ini_Sandbox . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved
+		;OutputDebug, % "Redraw" . A_Space . "The first else" . A_Tab . "ini_Sandbox" . A_Space . ini_Sandbox . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved
 		GuiControlGet, v_OutVarTemp, Pos, % IdListView1
-		;if (ini_Sandbox) and (!ini_IsSandboxMoved)
 		if (ini_Sandbox)
 		{
 			if (v_OutVarTempH <  LeftColumnH + c_HofSandbox)
@@ -6584,7 +7717,6 @@ F_GuiMain_Redraw()
 			else
 				ini_IsSandboxMoved := true
 		}
-		;if (!ini_Sandbox) and (!ini_IsSandboxMoved)
 		if (!ini_Sandbox)
 		{
 			if (v_OutVarTempH <  LeftColumnH + c_HofSandbox)
@@ -6993,8 +8125,6 @@ F_GuiAbout()
 			Gui, MyAbout: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Silent mode"] . ":" . A_Space . TransA["Default mode"]
 		
 	}
-	;OutputDebug, % "Window2W:" . A_Space . Window2W . A_Space . "Window2H:" . A_Space . Window2H
-	;OutputDebug, % "NewWinPosX:" . A_Space . NewWinPosX . A_Space . "NewWinPosY:" . A_Space . NewWinPosY
 	return  
 }
 	
@@ -7236,7 +8366,7 @@ F_CreateHotstring(txt, nameoffile)
 					. "`n" . txt . "`n`n" . TransA["This line do not comply to format required by this application."] . "`n`n" 
 					. TransA["Continue reading the library file? If you answer ""No"" then application will exit!"]
 		IfMsgBox, No
-			ExitApp, 1
+			ExitApp, 1	;error reading library file
 		IfMsgBox, Yes
 			return
 	}
@@ -7472,8 +8602,14 @@ F_HOF_MCLI(TextOptions, Oflag)
 	ToolTip,
 	Gui, HMenuCli: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuCliHwnd
 	Gui, HMenuCli: Margin, 0, 0
-	Gui, HMenuCli: Font, c766D69 s8	;Tooltip font color
-	Gui, HMenuCli: Color,, White
+	if (ini_HMBgrCol = "custom")
+		Gui, HMenuCli: Color,, % ini_HMBgrColCus
+	else
+		Gui, HMenuCli: Color,, % ini_HMBgrCol
+	if (ini_HMTyFaceCol = "custom")
+		Gui, HMenuCli: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
+	else
+		Gui, HMenuCli: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
 	Gui, HMenuCli: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuCli" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenuCli"
 	Loop, Parse, TextOptions, ¦
 		GuiControl,, % Id_LB_HMenuCli, % A_Index . ". " . A_LoopField . "|"
@@ -7550,8 +8686,32 @@ F_MouseMenuCli() ;The subroutine may consult the following built-in variables: A
 	}
 	return
 }
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiTrigTipsMenuDef(AmountOfRows, LongestString)
+{
+	global	;assume-global mode
+	local vOutput := 0, vOutputX := 0, vOutputY := 0, vOutputW := 0, vOutputH := 0, OutputString := ""
 	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
+		OutputString .= "w"		;the widest ordinary letter in alphabet
+	Gui, TMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndTMenuAHKHwnd
+	Gui, TMenuAHK: Margin, 0, 0
+	if (ini_TTBgrCol = "custom")
+		Gui, TMenuAHK: Color,, % ini_TTBgrColCus	;background of listbox
+	else
+		Gui, TMenuAHK: Color,, % ini_TTBgrCol	;background of listbox
+	if (ini_TTTyFaceCol = "custom")		
+		Gui, TMenuAHK: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceColCus, % ini_TTTyFaceFont
+	else
+		Gui, TMenuAHK: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
+	Gui, TMenuAHK: Add, Text, % "x0 y0 HwndId_T1_TMenuAHK", % OutputString
+	GuiControlGet, vOutput, Pos, % Id_T1_TMenuAHK
+	Gui, TMenuAHK: Add, Listbox, % "x0 y0 HwndId_LB_TMenuAHK" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutputW + 4
+	GuiControl, Hide, % Id_T1_TMenuAHK
+	GuiControl, Font, % Id_LB_TMenuAHK		;fontcolor of listbox
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_MSI(TextOptions, Oflag)	
 {
 	global	;assume-global mode
@@ -7570,8 +8730,14 @@ F_HOF_MSI(TextOptions, Oflag)
 	ToolTip,
 	Gui, HMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuAHKHwnd
 	Gui, HMenuAHK: Margin, 0, 0
-	Gui, HMenuAHK: Font, c766D69 s8	;Tooltip font color
-	Gui, HMenuAHK: Color,, White
+	if (ini_HMBgrCol = "custom")	;Tooltip font color: c766D69
+		Gui, HMenuAHK: Color,, % ini_HMBgrColCus
+	else
+		Gui, HMenuAHK: Color,, % ini_HMBgrCol
+	if (ini_HMTyFaceCol = "custom")
+		Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
+	else
+		Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
 	Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenuAHK"
 	Loop, Parse, TextOptions, ¦
 		GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . "|"
@@ -7622,7 +8788,7 @@ F_HOF_MSI(TextOptions, Oflag)
 	v_HotstringFlag := true
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
@@ -7647,6 +8813,8 @@ F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A
 
 ;Future: move this section of code to Hotkeys
 #if WinExist("ahk_id" HMenuAHKHwnd)
+Tab::
++Tab::
 1::
 2::
 3::
@@ -7662,31 +8830,39 @@ F_HMenuAHK()
 {
 	global	;assume-global moee
 	local	v_PressedKey := "",		v_Temp1 := ""
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
 	
 	v_PressedKey := A_ThisHotkey
-;OutputDebug, % "Beginning" . ":" . A_Space . A_ThisHotkey
+	if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
+	{
+		IsCursorPressed := true
+		IntCnt--
+		ControlSend, , {Up}, % "ahk_id" Id_LB_TMenuAHK
+		ShiftTabIsFound := true
+	}
+	if (InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+	{
+		IsCursorPressed := true
+		IntCnt++
+		ControlSend, , {Down}, % "ahk_id" Id_LB_TMenuAHK
+	}
 	if (InStr(v_PressedKey, "Up"))
 	{
 		IsCursorPressed := true
 		IntCnt--
-	;OutputDebug, % "Up" . ":" . A_Space IntCnt
-		ControlSend, , {Up}, % "ahk_id" HMenuAHKHwnd
+		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
 	}
 	if (InStr(v_PressedKey, "Down"))
 	{
 		IsCursorPressed := true
 		IntCnt++
-	;OutputDebug, % "Down" . ":" . A_Space IntCnt
-		ControlSend, , {Down}, % "ahk_id" HMenuAHKHwnd
+		ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
 	}
-	
 	if ((v_MenuMax = 1) and IsCursorPressed)
 	{
 		IntCnt := 1
 		return
 	}
-	
 	if (IsCursorPressed)
 	{
 		if (IntCnt > v_MenuMax)
@@ -7704,17 +8880,14 @@ F_HMenuAHK()
 		IsCursorPressed := false
 		return
 	}		
-	
 	if (InStr(v_PressedKey, "Enter"))
 	{
 		v_PressedKey := IntCnt
 		IsCursorPressed := false
 		IntCnt := 1
-		;OutputDebug, % "Enter" . ":" . A_Space . v_PressedKey
 	}
 	if (v_PressedKey > v_MenuMax)
 	{
-		;OutputDebug, % "v_PressedKey" . ":" . A_Space . v_PressedKey
 		return
 	}
 	v_HotstringFlag := true
@@ -8472,9 +9645,12 @@ L_GUIInit:
 		Switch ini_WhichGui
 		{
 			Case "HS3":
-			Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
+				if (ini_HS3GuiMaximized)
+					Gui, HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
+				else	
+					Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
 			Case "HS4":
-			Gui, HS4: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
+				Gui, HS4: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
 		}
 	}
 return
@@ -8664,33 +9840,33 @@ L_TrayPauseScript:
 	{
 		Menu, Tray, 		UnCheck, 	% TransA["Pause application"]
 		Menu, AppSubmenu,	UnCheck, 	% TransA["Pause"]
-	}
+}
 return
-	
+
 L_TrayReload:	;new thread starts here
-	F_WhichGui()
-	F_Reload()
+F_WhichGui()
+F_Reload()
 return
-	
+
 TurnOff_OHE:
-	ToolTip, ,, , 4
+ToolTip, ,, , 4
 return
-	
+
 TurnOff_UHE:
-	ToolTip, ,, , 6
+ToolTip, ,, , 6
 return
-	
+
 TurnOff_Ttt:
-	ToolTip
+Gui, TMenuAHK: Destroy	;ToolTip
 return
-	
+
 L_TrayExit:
-	ExitApp, 2	;2 = by Tray
-	
+ExitApp, 2	;2 = by Tray
+
 STDGuiClose:
 STDGuiEscape:
-	Switch (A_ThisMenu)
-	{
+Switch (A_ThisMenu)
+{
 		Case "OrdHisTrig": 	IniWrite, % ini_OHTD, % HADConfig, Event_BasicHotstring, 	OHTD
 		Case "UndoOfH":	IniWrite, % ini_UHTD, % HADConfig, Event_UndoHotstring, 	UHTD
 		Case "TrigTips":	IniWrite, % ini_TTTD, % HADConfig, Event_TriggerstringTips, TTTD
