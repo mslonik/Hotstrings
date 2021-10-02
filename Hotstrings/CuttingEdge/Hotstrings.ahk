@@ -916,7 +916,7 @@ F_GuiEvents()
 	F_GuiEvents_CreateObjects()
 	F_GuiEvents_DetermineConstraints()
 	;F_GuiHMstyling_DetermineConstraints()
-	;F_GuiStyling_LoadValues()
+	F_GuiEvents_LoadValues()
 		
 	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
@@ -958,57 +958,34 @@ F_GuiEvents_CreateObjects()
 	;Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvBH_T1,						% TransA["Tooltip enable"] . ":"
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvBH_T2, 					ⓘ
-	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R1 vini_OHTtEn,			% TransA["Yes"]
-	Gui, GuiEvents: Add,	Radio, 	HwndIdEvBH_R2,						% TransA["No"]
+	;MsgBox,, Debug, % "ini_OHTtEn:" . A_Tab . ini_OHTtEn
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R1 vini_OHTtEn,			% TransA["yes"]
+	Gui, GuiEvents: Add,	Radio, 	HwndIdEvBH_R2,						% TransA["no"]
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T3,						% TransA["Tooltip timeout"] . ":"
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T4,						ⓘ
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T5,						% TransA["Finite timeout?"]
-	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R3 gF_STDRadio,			% TransA["Yes"]
-	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R4,						% TransA["No"]
-	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T6,						% "If not finite, define tooltip timeout" . ":"
-	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvBH_S1 vini_OHTD gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_OHTD, % ini_OHTD
-	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T7,						% "Timeout value [ms]" . ":" . A_Space . ini_OHTD
-	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T8,						% "Tooltip position" . ":"
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R3 vRadioFiniteTimeout,		% TransA["yes"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R4,						% TransA["no"]
+	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T6,						% TransA["If not finite, define tooltip timeout"] . ":"
+	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvBH_S1 vini_OHTD gF_EvBH_S1 Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_OHTD, % ini_OHTD
+	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T7,						% TransA["Timeout value [ms]"] . ":" . A_Space . ini_OHTD
+	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T8,						% TransA["Tooltip position"] . ":"
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T9,						ⓘ
-	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R5 vini_OHTP,				% "Caret"
-	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R6,						% "Cursor"
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R5 vini_OHTP,				% TransA["caret"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R6,						% TransA["cursor"]
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T10,					% TransA["Sound enable"] . "?"
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T11,					ⓘ
-	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R7 vini_UHSEn,			% TransA["Yes"]
-	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R8,						% TransA["No"]
-	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T12,					% "If sound is enabled, define it"	. ":"
-	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvBH_S2 vini_OHSF gF_SetSoundFrequency Line1 Page50 Range37-32767 TickInterval%TickInterval% ToolTipBottom Buddy1ini_OHSF, % ini_OHSF
-	Gui, GuiEvents: Add, 	Text, 	HwndIdEvBH_T13, 					% "Sound frequency" . ":" . A_Space . ini_OHSF
-	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvBH_S3 vini_OHSD gF_SetSoundDuration Line1 Page50 Range50-2000 TickInterval50 ToolTipBottom Buddy1ini_OHSD, % ini_OHSD
-	Gui, GuiEvents: Add, 	Text, 	HwndIdEvBH_T14, 					% "Sound duration [ms]" . ":" . A_Space . ini_OHSD
-	Gui, GuiEvents: Add, 	Button, 	HwndIdEvBH_B1 gF_ButtonEvBHTtTest,		% "Tooltip test"
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R7 vini_UHSEn,			% TransA["yes"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R8,						% TransA["no"]
+	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T12,					% TransA["If sound is enabled, define it"]	. ":"
+	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvBH_S2 vini_OHSF gF_EvBH_S2 Line1 Page50 Range37-32767 TickInterval%TickInterval% ToolTipBottom Buddy1ini_OHSF, % ini_OHSF
+	Gui, GuiEvents: Add, 	Text, 	HwndIdEvBH_T13, 					% TransA["Sound frequency"] . ":" . A_Space . "32768"
+	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvBH_S3 vini_OHSD gF_EvBH_S3 Line1 Page50 Range50-2000 TickInterval50 ToolTipBottom Buddy1ini_OHSD, % ini_OHSD
+	Gui, GuiEvents: Add, 	Text, 	HwndIdEvBH_T14, 					% TransA["Sound duration [ms]"] . ":" . A_Space . "2000"
+	Gui, GuiEvents: Add, 	Button, 	HwndIdEvBH_B1 gF_ButtonEvBHTtTest,		% TransA["Tooltip test"]
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvBH_B2 gF_ButtonEvBHSoundTest,	% TransA["Sound test"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvBH_B3 gF_ButtonEvBHApplyClose,	% TransA["Apply && Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvBH_B4 gF_ButtonEvBHCancel,		% TransA["Cancel"]
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ButtonEvBHTtTest()
-{
-	global ;assume-global mode
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ButtonEvBHSoundTest()
-{
-	global ;assume-global mode
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ButtonEvBHCancel()
-{
-	global ;assume-global mode
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ButtonEvBHApplyClose()
-{
-	global ;assume-global mode
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1095,7 +1072,8 @@ F_GuiEvents_DetermineConstraints()
 	v_xNext += 2 * c_xmarg + TheWidestText
 	GuiControl, Move, % IdEvBH_T13, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext := c_xmarg
-	v_yNext += HofText
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_S2
+	v_yNext += v_OutVarTempH
 	GuiControl, Move, % IdEvBH_S3, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext	
 	v_xNext += 2 * c_xmarg + TheWidestText
 	GuiControl, Move, % IdEvBH_T14, % "x+" . v_xNext . A_Space . "y+" . v_yNext
@@ -1111,7 +1089,79 @@ F_GuiEvents_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_B3
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvBH_S3()
+{
+	global ;assume-global mode
+	GuiControl,, % IdEvBH_T14, % TransA["Sound duration [ms]"] . ":" . A_Space . ini_OHSD
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvBH_S2()
+{
+	global ;assume-global mode
+	GuiControl,, % IdEvBH_T13, % TransA["Sound frequency"] . ":" . A_Space . ini_OHSF
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvBH_S1()
+{
+	global ;assume-global mode
+	GuiControl,, % IdEvBH_T7, % TransA["Timeout value [ms]"] . ":" . A_Space . ini_OHTD
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiEvents_LoadValues()
+{
+	global ;assume-global mode
+	Switch ini_OHTtEn
+	{
+		Case 0: 	GuiControl,, % IdEvBH_R2, 1
+		Case 1: 	GuiControl,, % IdEvBH_R1, 1
+	}
+	Switch ini_OHTD
+	{
+		Case 0: 	GuiControl,, % IdEvBH_R4, 1
+		Default:	GuiControl,, % IdEvBH_R3, 1
+	}
+	Switch ini_OHTP
+	{
+		Case 0: 	GuiControl,, % IdEvBH_R6, 1
+		Case 1: 	GuiControl,, % IdEvBH_R5, 1
+	}
+	Switch ini_OHSEn
+	{
+		Case 0: 	GuiControl,, % IdEvBH_R8, 1
+		Case 1: 	GuiControl,, % IdEvBH_R7, 1
+	}
+	GuiControl,, % IdEvBH_T13, % TransA["Sound frequency"] . ":" . A_Space . ini_OHSF
+	GuiControl,, % IdEvBH_T14, % TransA["Sound duration [ms]"] . ":" . A_Space . ini_OHSD
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonEvBHTtTest()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonEvBHSoundTest()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonEvBHCancel()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonEvBHApplyClose()
+{
+	global ;assume-global mode
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6735,6 +6785,7 @@ Built with Autohotkey.exe version							= Built with Autohotkey.exe version
 By length 											= By length
 Call Graphical User Interface								= Call Graphical User Interface
 Cancel 												= Cancel
+caret												= caret
 Case Sensitive (C) 										= Case Sensitive (C)
 Case-Conforming										= Case-Conforming
 caused problem on line URLDownloadToFile.					= caused problem on line URLDownloadToFile.
@@ -6770,6 +6821,7 @@ Converted												= Converted
 Copy clipboard content into ""Enter hotstring""				= Copy clipboard content into ""Enter hotstring""
 Current shortcut (hotkey):								= Current shortcut (hotkey):
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
+cursor												= cursor
 custom												= custom
 Download if update is available on startup?					= Download if update is available on startup?
 Download public libraries								= Download public libraries
@@ -6839,6 +6891,8 @@ Hotstring paste from Clipboard delay 						= Hotstring paste from Clipboard dela
 Hotstrings have been loaded 								= Hotstrings have been loaded
 HTML color RGB value, e.g. 00FF00							= HTML color RGB value, e.g. 00FF00
 I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)! = I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)!
+If not finite, define tooltip timeout						= If not finite, define tooltip timeout
+If sound is enabled, define it							= If sound is enabled, define it
 If you answer ""Yes"" it will overwritten.					= If you answer ""Yes"" it will overwritten.
 If you answer ""Yes"" definition existing in another library will not be changed. = If you answer ""Yes"" definition existing in another library will not be changed.
 If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used. = If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used.
@@ -6890,6 +6944,7 @@ Move (F8)												= Move (F8)
 navy													= navy
 New shortcut (hotkey)									= New shortcut (hotkey)
 No													= No
+no													= no
 No Backspace (B0) 										= No Backspace (B0)
 No EndChar (O) 										= No EndChar (O)
 No libraries have been found!								= No libraries have been found!
@@ -6970,14 +7025,16 @@ silver												= silver
 Size of font											= Size of font
 Size of margin:										= Size of margin:
 Slash / 												= Slash /
-Something went wrong during hotstring setup				= Something went wrong during hotstring setup
+Something went wrong during hotstring setup					= Something went wrong during hotstring setup
 Something went wrong with disabling of existing hotstring		= Something went wrong with disabling of existing hotstring
 Something went wrong with (triggerstring, hotstring) creation	= Something went wrong with (triggerstring, hotstring) creation
 Something went wrong with hotstring deletion					= Something went wrong with hotstring deletion
 Something went wrong with hotstring EndChars					= Something went wrong with hotstring EndChars
 Something weng wrong with link file (.lnk) creation			= Something weng wrong with link file (.lnk) creation
 Sound disable											= Sound disable
+Sound duration [ms]										= Sound duration [ms]
 Sound enable											= Sound enable
+Sound frequency										= Sound frequency
 Sound parameters										= Sound parameters
 Sound test											= Sound test
 Sorting order											= Sorting order
@@ -7017,14 +7074,17 @@ This is the maximum length of list displayed on the screen in form of tooltip co
 This library:											= This library:
 This line do not comply to format required by this application.  = This line do not comply to format required by this application.
 This option is valid 									= In case you observe some hotstrings aren't pasted from clipboard increase this value. `nThis option is valid for CL and MCL hotstring output functions. 
+Timeout value [ms]										= Timeout value [ms]
 Tilde (~) key modifier									= Tilde (~) key modifier
 Tip: If you copy text from PDF file it's adviced to remove them. = Tip: If you copy text from PDF file it's adviced to remove them.
 Tips are shown after no. of characters						= Tips are shown after no. of characters
 Toggle EndChars	 									= &Toggle EndChars
 Tooltip disable										= Tooltip disable
 Tooltip enable											= Tooltip enable
+Tooltip position										= Tooltip position
 Tooltip position: caret									= Tooltip position: caret
 Tooltip position: cursor									= Tooltip position: cursor
+Tooltip test											= Tooltip test
 Tooltip timeout										= Tooltip timeout
 Total:												= Total:
 to undo.												= to undo.
@@ -7066,6 +7126,7 @@ Would you like to download the icon file?					= Would you like to download the i
 Would you like now to reload it in order to run the just downloaded version? = Would you like now to reload it in order to run the just downloaded version?
 yellow												= yellow
 Yes													= Yes
+yes													= yes
 ""Basic hotstring"" sound duration [ms]						= ""Basic hotstring"" sound duration [ms]
 ""Basic hotstring"" sound frequency						= ""Basic hotstring"" sound frequency
 ""Hotstring menu"" sound duration [ms]						= ""Hotstring menu"" sound duration [ms]
