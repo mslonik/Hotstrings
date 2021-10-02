@@ -414,6 +414,7 @@ Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 					F_ToggleEndChars
 F_ToggleEndChars()
 
 Menu, Submenu1,		Add, % TransA["Signaling of events"],			:SigOfEvents
+Menu, Submenu1,		Add, Events,								F_GuiEvents
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 ;Menu, Submenu1,		Add
 ;Menu, Submenu1,		Add, Mute all events sound,					F_AllMute
@@ -904,6 +905,118 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_GuiEvents()
+{
+	global ;assume-global mode
+	local FoundPos := ""
+		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,NewWinPosX := 0, NewWinPosY := 0
+	
+	F_GuiEvents_CreateObjects()
+	F_GuiEvents_DetermineConstraints()
+	;F_GuiHMstyling_DetermineConstraints()
+	;F_GuiStyling_LoadValues()
+		
+	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
+		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, GuiEvents: Show, Hide Center AutoSize
+	
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . GuiEventsHwnd
+	DetectHiddenWindows, Off
+	if (Window1W)
+	{
+		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+		Gui, GuiEvents: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . "Events configuration"
+	}
+	else
+	{
+		if (v_Param = "l")
+			Gui, GuiEvents: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . "Events configuration"
+		else
+			Gui, GuiEvents: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . "Events configuration"
+	}
+	return  
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiEvents_CreateObjects()
+{
+	global ;assume-global mode
+	local TickInterval := (32767 - 37) / 9
+	;1. Prepare Gui
+	Gui, GuiEvents: New, 	-Resize +HwndGuiEventsHwnd +Owner +OwnDialogs -MaximizeBox -MinimizeBox	;+OwnDialogs: for tooltips.
+	Gui, GuiEvents: Margin,	% c_xmarg, % c_ymarg
+	Gui,	GuiEvents: Color,	% c_WindowColor, % c_ControlColor
+	
+	;2. Prepare all text objects according to mock-up.
+	Gui,	GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	Gui, GuiEvents: Add,	Tab3,		,							% TransA["Basic hotstring is triggered"] . "||" . TransA["Menu hotstring is triggered"] . "|" . TransA["Undid the last hotstring"] . "|" . TransA["Triggerstring tips"]
+	
+	Gui, GuiEvents: Tab, 											% TransA["Basic hotstring is triggered"]
+	;Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvBH_T1,						% TransA["Tooltip enable"] . ":"
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvBH_T2, 					ⓘ
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R1 vini_OHTtEn,			% TransA["Yes"]
+	Gui, GuiEvents: Add,	Radio, 	HwndIdEvBH_R2,						% TransA["No"]
+	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T3,						% TransA["Tooltip timeout"] . ":"
+	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T4,						ⓘ
+	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T5,						% TransA["Finite timeout?"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R3 gF_STDRadio,			% TransA["Yes"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R4,						% TransA["No"]
+	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T6,						% "If not finite, define tooltip timeout" . ":"
+	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvBH_S1 vini_OHTD gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_OHTD, % ini_OHTD
+	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T7,						% "Tooltip position"
+	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T8,						ⓘ
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R5 vini_OHTP,				% "Caret"
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R6,						% "Cursor"
+	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T9,						% TransA["Sound enable"] . "?"
+	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T10,					ⓘ
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R7 vini_UHSEn,			% TransA["Yes"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R8,						% TransA["No"]
+	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T11,					% "If sound is enabled, define it"	. "."
+	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvBH_S2 vini_OHSF gF_SetSoundFrequency Line1 Page50 Range37-32767 TickInterval%TickInterval% ToolTipBottom Buddy1ini_OHSF, % ini_OHSF
+	Gui, GuiEvents: Add, 	Text, 	HwndIdEvBH_T12, 					% "Sound frequency" . ":" . A_Space . ini_OHSF
+	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvBH_S3 vini_OHSD gF_SetSoundDuration Line1 Page50 Range50-2000 TickInterval50 ToolTipBottom Buddy1ini_OHSD, % ini_OHSD
+	Gui, GuiEvents: Add, 	Text, 	HwndIdEvBH_T13, 					% "Sound duration [ms]" . ":" . A_Space . ini_OHSD
+	Gui, GuiEvents: Add, 	Button, 	HwndIdEvBH_B1 gF_ButtonEvBHTtTest,		% "Tooltip test"
+	Gui, GuiEvents: Add, 	Button, 	HwndIdEvBH_B1 gF_ButtonEvBHSoundTest,	% TransA["Sound test"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvBH_B6 gF_ButtonEvBHApplyClose,	% TransA["Apply && Close"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvBH_B7 gF_ButtonEvBHCancel,		% TransA["Cancel"]
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonEvBHTtTest()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonEvBHSoundTest()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonEvBHCancel()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ButtonEvBHApplyClose()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiEvents_DetermineConstraints()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadHMStyling()
 {
 	global ;assume-global mode
@@ -1751,7 +1864,7 @@ F_TTstyling()
 	F_GuiHMstyling_DetermineConstraints()
 	F_GuiStyling_LoadValues()
 		
-	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
+	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	Gui, TTstyling: Show, Hide Center AutoSize
 	
@@ -3742,7 +3855,7 @@ F_GuiSetTooltipTimeout()
 	Gui, STD: Add, Radio, HwndIdSTD_R2 gF_STDRadio Checked%vRadioCheck%, % TransA["No"]
 	Switch (A_ThisMenu)	
 	{
-		Case "OrdHisTrig": 	Gui, STD: Add, Slider, x0 y0 HwndIdSTD_S1 vini_OHTD gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_OHTD, % ini_OHTD
+		;Case "OrdHisTrig": 	Gui, STD: Add, Slider, x0 y0 HwndIdSTD_S1 vini_OHTD gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_OHTD, % ini_OHTD
 		Case "UndoOfH":	Gui, STD: Add, Slider, x0 y0 HwndIdSTD_S1 vini_UHTD gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_UHTD, % ini_UHTD
 		Case "TrigTips":	Gui, STD: Add, Slider, x0 y0 HwndIdSTD_S1 vini_TTTD gF_SetTooltipTimeout Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_TTTD, % ini_TTTD
 	}
