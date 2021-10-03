@@ -959,33 +959,33 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvBH_T1,						% TransA["Tooltip enable"] . ":"
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvBH_T2, 					ⓘ
 	;MsgBox,, Debug, % "ini_OHTtEn:" . A_Tab . ini_OHTtEn
-	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R1 vini_OHTtEn,			% TransA["yes"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R1 vEvBH_R1R2,			% TransA["yes"]
 	Gui, GuiEvents: Add,	Radio, 	HwndIdEvBH_R2,						% TransA["no"]
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T3,						% TransA["Tooltip timeout"] . ":"
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T4,						ⓘ
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T5,						% TransA["Finite timeout?"]
-	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R3 vRadioFiniteTimeout,		% TransA["yes"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R3 vEvBH_R3R4,			% TransA["yes"]
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R4,						% TransA["no"]
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T6,						% TransA["If not finite, define tooltip timeout"] . ":"
 	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvBH_S1 vini_OHTD gF_EvBH_S1 Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1ini_OHTD, % ini_OHTD
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T7,						% TransA["Timeout value [ms]"] . ":" . A_Space . ini_OHTD
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T8,						% TransA["Tooltip position"] . ":"
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T9,						ⓘ
-	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R5 vini_OHTP,				% TransA["caret"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R5 vEvBH_R5R6,			% TransA["caret"]
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R6,						% TransA["cursor"]
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T10,					% TransA["Sound enable"] . "?"
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T11,					ⓘ
-	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R7 vini_UHSEn,			% TransA["yes"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R7 vEvBH_R7R8,			% TransA["yes"]
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R8,						% TransA["no"]
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T12,					% TransA["If sound is enabled, define it"]	. ":"
 	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvBH_S2 vini_OHSF gF_EvBH_S2 Line1 Page50 Range37-32767 TickInterval%TickInterval% ToolTipBottom Buddy1ini_OHSF, % ini_OHSF
 	Gui, GuiEvents: Add, 	Text, 	HwndIdEvBH_T13, 					% TransA["Sound frequency"] . ":" . A_Space . "32768"
 	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvBH_S3 vini_OHSD gF_EvBH_S3 Line1 Page50 Range50-2000 TickInterval50 ToolTipBottom Buddy1ini_OHSD, % ini_OHSD
 	Gui, GuiEvents: Add, 	Text, 	HwndIdEvBH_T14, 					% TransA["Sound duration [ms]"] . ":" . A_Space . "2000"
-	Gui, GuiEvents: Add, 	Button, 	HwndIdEvBH_B1 gF_ButtonEvBHTtTest,		% TransA["Tooltip test"]
-	Gui, GuiEvents: Add, 	Button, 	HwndIdEvBH_B2 gF_ButtonEvBHSoundTest,	% TransA["Sound test"]
-	Gui, GuiEvents: Add,	Button,	HwndIdEvBH_B3 gF_ButtonEvBHApplyClose,	% TransA["Apply && Close"]
-	Gui, GuiEvents: Add,	Button,	HwndIdEvBH_B4 gF_ButtonEvBHCancel,		% TransA["Cancel"]
+	Gui, GuiEvents: Add, 	Button, 	HwndIdEvBH_B1 gF_EvBH_B1,			% TransA["Tooltip test"]
+	Gui, GuiEvents: Add, 	Button, 	HwndIdEvBH_B2 gF_EvBH_B2,			% TransA["Sound test"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvBH_B3 gF_EvBH_B3,			% TransA["Apply && Close"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvBH_B4 gF_EvBH_B4,			% TransA["Cancel"]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1092,6 +1092,73 @@ F_GuiEvents_DetermineConstraints()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvBH_B1() ;Button Tooltip test
+{
+	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
+	;MsgBox,, Debug, % "ini_OHTtEn:" . A_Tab . ini_OHTtEn
+	Switch EvBH_R1R2	;Tooltip enable
+	{
+		Case 1:	ini_OHTtEn := true
+		Case 2:	ini_OHTtEn := false
+	}
+	Switch EvBH_R3R4	;Finite timeout
+	{
+		;Case 1:	ini_OHTD
+		Case 2:	ini_OHTD := 0
+	}
+	Switch EvBH_R5R6	;Tooltip position
+	{
+		Case 1:	ini_OHTP := 1
+		Case 2:	ini_OHTP := 2
+	}
+	if (ini_OHTtEn)
+	{
+		if (ini_OHTP = 1)
+		{
+			if (A_CaretX and A_CaretY)
+			{
+				ToolTip, % TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."], % A_CaretX + 20, % A_CaretY - 20, 4
+				if (ini_OHTD > 0)
+					SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
+			}
+			else
+			{
+				MouseGetPos, v_MouseX, v_MouseY
+				ToolTip, % TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."], % v_MouseX + 20, % v_MouseY - 20, 4
+				if (ini_OHTD > 0)
+					SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
+			}
+		}
+		if (ini_OHTP = 2)
+		{
+			MouseGetPos, v_MouseX, v_MouseY
+			ToolTip, % TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."], % v_MouseX + 20, % v_MouseY - 20, 4
+			if (ini_OHTD > 0)
+				SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
+		}
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvBH_B2()	;Button Sound test
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvBH_B4()	;Button Cancel
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvBH_B3()	;Button Apply & Close
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvBH_S3()
 {
 	global ;assume-global mode
@@ -1136,32 +1203,8 @@ F_GuiEvents_LoadValues()
 		Case 0: 	GuiControl,, % IdEvBH_R8, 1
 		Case 1: 	GuiControl,, % IdEvBH_R7, 1
 	}
-	GuiControl,, % IdEvBH_T13, % TransA["Sound frequency"] . ":" . A_Space . ini_OHSF
-	GuiControl,, % IdEvBH_T14, % TransA["Sound duration [ms]"] . ":" . A_Space . ini_OHSD
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ButtonEvBHTtTest()
-{
-	global ;assume-global mode
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ButtonEvBHSoundTest()
-{
-	global ;assume-global mode
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ButtonEvBHCancel()
-{
-	global ;assume-global mode
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ButtonEvBHApplyClose()
-{
-	global ;assume-global mode
+	GuiControl,, % IdEvBH_T13, % TransA["Sound frequency"] . ":" 		. A_Space . ini_OHSF
+	GuiControl,, % IdEvBH_T14, % TransA["Sound duration [ms]"] . ":" 	. A_Space . ini_OHSD
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
