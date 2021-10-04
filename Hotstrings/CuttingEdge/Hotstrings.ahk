@@ -938,7 +938,6 @@ F_GuiEvents()
 	return  
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;F_GuiEvents_CreateObjects(EvBH_S1, EvBH_S2, EvBH_S3, EvBH_R1R2, EvBH_R3R4, EvBH_R5R6, EvBH_R7R8)
 F_GuiEvents_CreateObjects()
 {
 	global ;assume-global mode
@@ -953,31 +952,49 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Tab3,		,							% TransA["Basic hotstring is triggered"] . "||" . TransA["Menu hotstring is triggered"] . "|" . TransA["Undid the last hotstring"] . "|" . TransA["Triggerstring tips"]
 	
 	Gui, GuiEvents: Tab, 											% TransA["Basic hotstring is triggered"]
-	;Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvBH_T1,						% TransA["Tooltip enable"] . ":"
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvBH_T2, 					ⓘ
-	;MsgBox,, Debug, % "ini_OHTtEn:" . A_Tab . ini_OHTtEn
-	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R1 vEvBH_R1R2,			% TransA["yes"]
-	Gui, GuiEvents: Add,	Radio, 	HwndIdEvBH_R2,						% TransA["no"]
+	T_TooltipEnable := func("F_ShowLongTooltip").bind(TransA["T_TooltipEnable"])
+	GuiControl, +g, % IdEvBH_T2, % T_TooltipEnable
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R1 vEvBH_R1R2 gF_EvBH_R1R2,	% TransA["yes"]
+	Gui, GuiEvents: Add,	Radio, 	HwndIdEvBH_R2 gF_EvBH_R1R2,			% TransA["no"]
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvBH_T15 0x7					; horizontal line → black
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T3,						% TransA["Tooltip timeout"] . ":"
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T4,						ⓘ
+	T_TooltipTimeout := func("F_ShowLongTooltip").bind(TransA["T_TooltipTimeout"])
+	GuiControl, +g, % IdEvBH_T4, % T_TooltipTimeout
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T5,						% TransA["Finite timeout?"]
-	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R3 vEvBH_R3R4,			% TransA["yes"]
-	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R4,						% TransA["no"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R3 vEvBH_R3R4 gF_EvBH_R3R4,	% TransA["yes"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R4 gF_EvBH_R3R4,			% TransA["no"]
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T6,						% TransA["If not finite, define tooltip timeout"] . ":"
 	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvBH_S1 vEvBH_S1 gF_EvBH_S1 Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1EvBH_S1, % EvBH_S1
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T7,						% TransA["Timeout value [ms]"] . ":" . A_Space . 10000
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvBH_T16 0x7					; horizontal line → black
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T8,						% TransA["Tooltip position"] . ":"
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T9,						ⓘ
+	T_TooltipPosition := func("F_ShowLongTooltip").bind(TransA["T_TooltipPosition"])
+	GuiControl, +g, % IdEvBH_T9, % T_TooltipPosition
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R5 vEvBH_R5R6,			% TransA["caret"]
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R6,						% TransA["cursor"]
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvBH_T17 0x7					; horizontal line → black
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T10,					% TransA["Sound enable"] . "?"
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T11,					ⓘ
-	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R7 vEvBH_R7R8,			% TransA["yes"]
-	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R8,						% TransA["no"]
+	T_SoundEnable := func("F_ShowLongTooltip").bind(TransA["T_SoundEnable"])
+	GuiControl, +g, % IdEvBH_T11, % T_SoundEnable
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R7 vEvBH_R7R8 gF_EvBH_R7R8,	% TransA["yes"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R8 gF_EvBH_R7R8,			% TransA["no"]
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T12,					% TransA["If sound is enabled, define it"]	. ":"
 	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvBH_S2 vEvBH_S2 gF_EvBH_S2 Line1 Page50 Range37-32767 TickInterval%TickInterval% ToolTipBottom Buddy1EvBH_S2, % EvBH_S2
 	Gui, GuiEvents: Add, 	Text, 	HwndIdEvBH_T13, 					% TransA["Sound frequency"] . ":" . A_Space . "32768"
@@ -1098,6 +1115,86 @@ F_GuiEvents_DetermineConstraints()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvBH_R3R4()
+{
+	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvBH_R3R4
+	{
+		Case 1:
+			GuiControl, Enable,		% IdEvBH_T6
+			GuiControl, Enable,		% IdEvBH_S1
+			GuiControl, Enable,		% IdEvBH_T7
+		Case 2:
+			GuiControl, Disable,	% IdEvBH_T6
+			GuiControl, Disable,	% IdEvBH_S1
+			GuiControl, Disable,	% IdEvBH_T7
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvBH_R7R8()
+{
+	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvBH_R7R8
+	{
+		Case 1:
+			GuiControl, Enable,		% IdEvBH_T12
+			GuiControl, Enable,		% IdEvBH_S2
+			GuiControl, Enable,		% IdEvBH_T13
+			GuiControl, Enable,		% IdEvBH_S3
+			GuiControl, Enable,		% IdEvBH_T14
+			GuiControl, Enable,		% IdEvBH_B2
+		Case 2:
+			GuiControl, Disable,	% IdEvBH_T12
+			GuiControl, Disable,	% IdEvBH_S2
+			GuiControl, Disable,	% IdEvBH_T13
+			GuiControl, Disable,	% IdEvBH_S3
+			GuiControl, Disable,	% IdEvBH_T14
+			GuiControl, Disable,	% IdEvBH_B2
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvBH_R1R2()
+{
+	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvBH_R1R2
+	{
+		Case 1:
+			GuiControl, Enable, 	% IdEvBH_T3
+			GuiControl, Enable, 	% IdEvBH_T4
+			GuiControl, Enable, 	% IdEvBH_T5
+			GuiControl, Enable, 	% IdEvBH_R3
+			GuiControl, Enable, 	% IdEvBH_R4
+			GuiControl, Enable, 	% IdEvBH_T6
+			GuiControl, Enable, 	% IdEvBH_S1
+			GuiControl, Enable, 	% IdEvBH_T7
+			GuiControl, Enable, 	% IdEvBH_T8
+			GuiControl, Enable, 	% IdEvBH_T9
+			GuiControl, Enable, 	% IdEvBH_R5
+			GuiControl, Enable, 	% IdEvBH_R6
+			GuiControl, Enable, 	% IdEvBH_B2
+		Case 2:
+			GuiControl, Disable, 	% IdEvBH_T3
+			GuiControl, Disable, 	% IdEvBH_T4
+			GuiControl, Disable, 	% IdEvBH_T5
+			GuiControl, Disable, 	% IdEvBH_R3
+			GuiControl, Disable, 	% IdEvBH_R4
+			GuiControl, Disable, 	% IdEvBH_T6
+			GuiControl, Disable, 	% IdEvBH_S1
+			GuiControl, Disable, 	% IdEvBH_T7
+			GuiControl, Disable, 	% IdEvBH_T8
+			GuiControl, Disable, 	% IdEvBH_T9
+			GuiControl, Disable, 	% IdEvBH_R5
+			GuiControl, Disable, 	% IdEvBH_R6
+			GuiControl, Disable, 	% IdEvBH_B2
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvBH_B1() ;Events Basic Hotstring (is triggered) Button Tooltip test
 {
 	global ;assume-global mode
@@ -1166,7 +1263,20 @@ F_EvBH_B3()	;Events Basic Hotstring (is triggered) Button Apply & Close
 		Case 1:	ini_OHTP := 1
 		Case 2:	ini_OHTP := 2
 	}
+	Switch EvBH_R7R8	;Sound enable
+	{
+		Case 1:	ini_OHSEn := 1
+		Case 2:	ini_OHSEn := 0
+	}
 	ini_OHSF := EvBH_S2, ini_OHSD := EvBH_S3
+	IniWrite, % ini_OHTtEn, 	% HADConfig, Event_BasicHotstring, 	OHTtEn
+	IniWrite, % ini_OHTD,	% HADConfig, Event_BasicHotstring,		OHTD
+	IniWrite, % ini_OHTP,	% HADConfig, Event_BasicHotstring,		OHTP
+	IniWrite, % ini_OHSEn, 	% HADConfig, Event_BasicHotstring,		OHSEn
+	IniWrite, % ini_OHSF,	% HADConfig, Event_BasicHotstring,		OHSF
+	IniWrite, % ini_OHSD,	% HADConfig, Event_BasicHotstring,		OHSD
+	Tooltip,,,, 4
+	Gui, GuiEvents: Destroy
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1207,8 +1317,8 @@ F_GuiEvents_InitiateValues()
 	}
 	Switch ini_OHTP
 	{
-		Case false: 	EvBH_R5R6 := 1
-		Case true: 	EvBH_R5R6 := 2
+		Case 1: 	EvBH_R5R6 := 1
+		Case 2: 	EvBH_R5R6 := 2
 	}
 	Switch ini_OHSEn
 	{
@@ -1236,8 +1346,8 @@ F_GuiEvents_LoadValues()
 	GuiControl,, % IdEvBH_T7, 	% TransA["Timeout value [ms]"] . ":" . A_Space . ini_OHTD
 	Switch ini_OHTP
 	{
-		Case false: 	GuiControl,, % IdEvBH_R6, 1
-		Case true: 	GuiControl,, % IdEvBH_R5, 1
+		Case 1: 		GuiControl,, % IdEvBH_R6, 1
+		Case 2: 		GuiControl,, % IdEvBH_R5, 1
 	}
 	Switch ini_OHSEn
 	{
@@ -2118,7 +2228,7 @@ F_TTstyling()
 		else
 			Gui, TTstyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Triggerstring tips and hotstring menu styling"]
 	}
-	GuiControl, Hide, % IdTTstyling_LB1	;tu jestem
+	GuiControl, Hide, % IdTTstyling_LB1	
 	GuiControl, Hide, % IdHMstyling_LB1
 	F_ButtonTTTestStyling()
 	Gui, TDemo: Hide
@@ -3804,29 +3914,67 @@ F_LoadSignalingParams()
 	,ini_MHSF := 500, 	ini_MHSD := 250, 	ini_UHTtEn := 1, 	ini_UHTD := 0, 	ini_UHTP := 1, 	ini_UHSEn := 1, 	ini_UHSF := 500, 	ini_UHSD := 250
 	,ini_TTTP := 1, 	ini_TTTtEn := 1, 	ini_TTTD := 0, 	ini_TipsSortAlphabetically := 1, 	ini_TipsSortByLength := 1, 	ini_TASAC := 1,	ini_MNTT := 5
 	
-	IniRead, ini_OHTtEn, 	% HADConfig, Event_BasicHotstring, 	OHTtEn, 	1
-	IniRead, ini_OHTD,		% HADConfig, Event_BasicHotstring,	OHTD,	0
-	IniRead, ini_OHTP,		% HADConfig, Event_BasicHotstring,	OHTP,	1
-	IniRead, ini_OHSEn, 	% HADConfig, Event_BasicHotstring,	OHSEn, 	1
-	IniRead, ini_OHSF,		% HADConfig, Event_BasicHotstring,	OHSF,	500
-	IniRead, ini_OHSD,		% HADConfig, Event_BasicHotstring,	OHSD,	250
-	IniRead, ini_MHMP,		% HADConfig, Event_MenuHotstring,		MHMP,	1
-	IniRead, ini_MHSEn,		% HADConfig, Event_MenuHotstring,		MHSEn,	1
-	IniRead, ini_MHSF,		% HADConfig, Event_MenuHotstring,		MHSF,	500
-	IniRead, ini_MHSD,		% HADConfig, Event_MenuHotstring,		MHSD,	250
-	IniRead, ini_UHTtEn, 	% HADConfig, Event_UndoHotstring, 		UHTtEn, 	1
-	IniRead, ini_UHTD,		% HADConfig, Event_UndoHotstring,		UHTD,	0
-	IniRead, ini_UHTP,		% HADConfig, Event_UndoHotstring,		UHTP,	1
-	IniRead, ini_UHSEn,		% HADConfig, Event_UndoHotstring,		UHSEn,	1
-	IniRead, ini_UHSF,		% HADConfig, Event_UndoHotstring,		UHSF,	500
-	IniRead, ini_UHSD,		% HADConfig, Event_UndoHotstring,		UHSD,	250
-	IniRead, ini_TTTP,		% HADConfig, Event_TriggerstringTips,	TTTP,	1
-	IniRead, ini_TTTtEn, 	% HADConfig, Event_TriggerstringTips,	TTTtEn, 	1
-	IniRead, ini_TTTD,		% HADConfig, Event_TriggerstringTips,	TTTD,	0
-	IniRead, ini_TipsSortAlphabetically, % HADConfig, Event_TriggerstringTips, TipsSortAlphabetically, 1
-	IniRead, ini_TipsSortByLength, % HADConfig, Event_TriggerstringTips, TipsSortByLength, 1
-	IniRead, ini_TASAC, 	% HADConfig, Event_TriggerstringTips, 	TipsAreShownAfterNoOfCharacters, 1
-	IniRead, ini_MNTT,		% HADConfig, Event_TriggerstringTips,	MNTT,	5
+	IniRead, ini_OHTtEn, 	% HADConfig, Event_BasicHotstring, 	OHTtEn, 	% A_Space
+	if (ini_OHTtEn = "")
+	{
+		ini_OHTtEn := 1
+		IniWrite, % ini_OHTtEn, % HADConfig, Event_BasicHotstring,	OHTtEn
+	}
+	IniRead, ini_OHTD,		% HADConfig, Event_BasicHotstring,		OHTD,	% A_Space
+	if (ini_OHTD = "")
+	{
+		ini_OHTD := 0
+		IniWrite, % ini_OHTD, % HADConfig, Event_BasicHotstring,	OHTD
+	}
+	IniRead, ini_OHTP,		% HADConfig, Event_BasicHotstring,		OHTP,	% A_Space
+	if (ini_OHTP = "")
+	{
+		ini_OHTP := 1
+		IniWrite, % ini_OHTP, % HADConfig, Event_BasicHotstring,	OHTP
+	}
+	IniRead, ini_OHSEn, 	% HADConfig, Event_BasicHotstring,		OHSEn, 	% A_Space
+	if (ini_OHSEn = "")
+	{
+		ini_OHSEn := 1
+		IniWrite, % ini_OHSEn, % HADConfig, Event_BasicHotstring,	OHSEn
+	}
+	IniRead, ini_OHSF,		% HADConfig, Event_BasicHotstring,		OHSF,	% A_Space
+	if (ini_OHSF = "")
+	{
+		ini_OHSF := 500
+		IniWrite, % ini_OHSF, % HADConfig, Event_BasicHotstring,	OHSF
+	}
+	IniRead, ini_OHSD,		% HADConfig, Event_BasicHotstring,		OHSD,	% A_Space
+	if (ini_OHSD = "")
+	{
+		ini_OHSD := 250
+		IniWrite, % ini_OHSD, % HADConfig, Event_BasicHotstring,	OHSD
+	} ;tu jestem
+	IniRead, ini_MHMP,		% HADConfig, Event_MenuHotstring,		MHMP,	% A_Space
+	IniRead, ini_MHSEn,		% HADConfig, Event_MenuHotstring,		MHSEn,	% A_Space
+	IniRead, ini_MHSF,		% HADConfig, Event_MenuHotstring,		MHSF,	% A_Space
+	IniRead, ini_MHSD,		% HADConfig, Event_MenuHotstring,		MHSD,	% A_Space
+	IniRead, ini_UHTtEn, 	% HADConfig, Event_UndoHotstring, 		UHTtEn, 	% A_Space
+	IniRead, ini_UHTD,		% HADConfig, Event_UndoHotstring,		UHTD,	% A_Space
+	IniRead, ini_UHTP,		% HADConfig, Event_UndoHotstring,		UHTP,	% A_Space
+	IniRead, ini_UHSEn,		% HADConfig, Event_UndoHotstring,		UHSEn,	% A_Space
+	IniRead, ini_UHSF,		% HADConfig, Event_UndoHotstring,		UHSF,	% A_Space
+	IniRead, ini_UHSD,		% HADConfig, Event_UndoHotstring,		UHSD,	% A_Space
+	IniRead, ini_TTTP,		% HADConfig, Event_TriggerstringTips,	TTTP,	% A_Space
+	IniRead, ini_TTTtEn, 	% HADConfig, Event_TriggerstringTips,	TTTtEn, 	% A_Space
+	IniRead, ini_TTTD,		% HADConfig, Event_TriggerstringTips,	TTTD,	% A_Space
+	IniRead, ini_TipsSortAlphabetically, % HADConfig, Event_TriggerstringTips, TipsSortAlphabetically, % A_Space
+	IniRead, ini_TipsSortByLength, % HADConfig, Event_TriggerstringTips, TipsSortByLength, % A_Space
+	IniRead, ini_TASAC, 	% HADConfig, Event_TriggerstringTips, 	TipsAreShownAfterNoOfCharacters, % A_Space
+	IniRead, ini_MNTT,		% HADConfig, Event_TriggerstringTips,	MNTT,	% A_Space
+	
+global ini_CPDelay 				:= 300		;1-1000 [ms], default: 300
+IniRead, ini_CPDelay, 					% HADConfig, Configuration, ClipBoardPasteDelay,		% A_Space
+if (ini_CPDelay = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+{
+	ini_CPDelay := 300
+	IniWrite, % ini_CPDelay, % HADConfig, Configuration, ClipBoardPasteDelay 
+}	
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4386,7 +4534,7 @@ F_AddHotstring()
 	GuiControl, -Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	for key, value in a_Triggerstring
 	{
-		if (a_Triggerstring[key] = v_Triggerstring)
+		if (a_Triggerstring[key] == v_Triggerstring)	;case sensitive string comparison!
 		{
 			if (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))
 			{
@@ -6983,7 +7131,7 @@ If you answer ""Yes"" it will overwritten.					= If you answer ""Yes"" it will o
 If you answer ""Yes"" definition existing in another library will not be changed. = If you answer ""Yes"" definition existing in another library will not be changed.
 If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used. = If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used.
 If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file. = If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file.
-	If you answer ""No"" edition of the current definition will be interrupted. = If you answer ""No"" edition of the current definition will be interrupted.
+If you answer ""No"" edition of the current definition will be interrupted. = If you answer ""No"" edition of the current definition will be interrupted.
 Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
 Incorrect value. Select custom RGB hex value. Please try again.	= Incorrect value. Select custom RGB hex value. Please try again.
@@ -7254,6 +7402,10 @@ T_STypefaceColor										= Select from drop down list predefined color (one of 
 T_STypefaceFont										= Select from drop down list predefined font type. `nThe selected font type will be used in on screen menu.
 T_STypefaceSize										= Select from drop down list predefined size of font. `nThe selected font size will be used in on screen menu.
 T_StylPreview											= Press the ""Test styling"" button to get look & feel of selected styling settings below.
+T_SoundEnable											= Sound can be emitted each time when event takes place. `nOne can specify sound frequency and duration.`n`nYou may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 50 [ms]; `nInterval:         150 [ms]; `nRange:            50 ÷ 2 000 [ms]. `n`nTip: Recommended time is between 200 to 400 ms. `n`nPgUp / PgDn step: 50 [ms]; `nInterval:         150 [ms]; `nRange:            50 ÷ 2 000 [ms]. `n`nTip: Recommended time is between 200 to 400 ms.
+T_TooltipEnable										= You can enable or disable the following tooltip: ""Hotstring was triggered! [Shortcut] to undo."" `nIf enabled, this tooltip is shown each time when even of displaying hotstring upon triggering it takes place. `nNext you can set accompanying features like timeout, position and even sound. 
+T_TooltipPosition										= Specify where tooltip should be displayed by default.`n`nWarning: some applications do not accept caret position. `n`nThen automatically cursor position is followed.
+T_TooltipTimeout										= The finite tooltip stays displayed on a screen till next event is triggered. `nIt's adviced to set finite tooltip. `n`nYou may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 500 [ms]; `nInterval:         500 [ms]; `nRange:            1000 ÷ 10 000 [ms].
 )"
 	
 	TransA					:= {}	;this associative array (global) is used to store translations of this application text strings
