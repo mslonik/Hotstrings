@@ -3951,30 +3951,107 @@ F_LoadSignalingParams()
 		IniWrite, % ini_OHSD, % HADConfig, Event_BasicHotstring,	OHSD
 	} ;tu jestem
 	IniRead, ini_MHMP,		% HADConfig, Event_MenuHotstring,		MHMP,	% A_Space
+	if (ini_MHMP = "")
+	{
+		ini_MHMP := 1
+		IniWrite, % ini_MHMP, % HADConfig, Event_MenuHotstring,	MHMP
+	}
 	IniRead, ini_MHSEn,		% HADConfig, Event_MenuHotstring,		MHSEn,	% A_Space
+	if (ini_MHSEn = "")
+	{
+		ini_MHSEn := 1
+		IniWrite, % ini_MHSEn, % HADConfig, Event_MenuHotstring,	MHSEn
+	}
 	IniRead, ini_MHSF,		% HADConfig, Event_MenuHotstring,		MHSF,	% A_Space
+	if (ini_MHSF = "")
+	{
+		ini_MHSF := 500
+		IniWrite, % ini_MHSF, % HADConfig, Event_MenuHotstring,	MHSF
+	}
 	IniRead, ini_MHSD,		% HADConfig, Event_MenuHotstring,		MHSD,	% A_Space
+	if (ini_MHSD = "")
+	{
+		ini_MHSD := 250
+		IniWrite, % ini_MHSD, % HADConfig, Event_MenuHotstring,	MHSD
+	}
 	IniRead, ini_UHTtEn, 	% HADConfig, Event_UndoHotstring, 		UHTtEn, 	% A_Space
+	if (ini_UHTtEn = "")
+	{
+		ini_UHTtEn := 1
+		IniWrite, % ini_UHTtEn, % HADConfig, Event_UndoHotstring, 	UHTtEn
+	}
 	IniRead, ini_UHTD,		% HADConfig, Event_UndoHotstring,		UHTD,	% A_Space
+	if (ini_UHTD = "")
+	{
+		ini_UHTD := 0
+		IniWrite, % ini_UHTD, % HADConfig, Event_UndoHotstring,	UHTD
+	}
 	IniRead, ini_UHTP,		% HADConfig, Event_UndoHotstring,		UHTP,	% A_Space
+	if (ini_UHTP = "")
+	{
+		ini_UHTP := 1
+		IniWrite, % ini_UHTP, % HADConfig, Event_UndoHotstring,	UHTP
+	}
 	IniRead, ini_UHSEn,		% HADConfig, Event_UndoHotstring,		UHSEn,	% A_Space
+	if (ini_UHSEn = "")
+	{
+		ini_UHSEn := 1
+		IniWrite, % ini_UHSEn, % HADConfig, Event_UndoHotstring,	UHSEn
+	}
 	IniRead, ini_UHSF,		% HADConfig, Event_UndoHotstring,		UHSF,	% A_Space
+	if (ini_UHSF = "")
+	{
+		ini_UHSF := 500
+		IniWrite, % ini_UHSF, % HADConfig, Event_UndoHotstring,	UHSF
+	}
 	IniRead, ini_UHSD,		% HADConfig, Event_UndoHotstring,		UHSD,	% A_Space
+	if (ini_UHSD = "")
+	{
+		ini_UHSD := 250
+		IniWrite, % ini_UHSD, % HADConfig, Event_UndoHotstring,	UHSD
+	}
 	IniRead, ini_TTTP,		% HADConfig, Event_TriggerstringTips,	TTTP,	% A_Space
+	if (ini_TTTP = "")
+	{
+		ini_TTTP := 1
+		IniWrite, % ini_TTTP, % HADConfig, Event_TriggerstringTips,	TTTP
+	}
 	IniRead, ini_TTTtEn, 	% HADConfig, Event_TriggerstringTips,	TTTtEn, 	% A_Space
+	if (ini_TTTtEn = "")
+	{
+		ini_TTTtEn := 1
+		IniWrite, % ini_TTTtEn, % HADConfig, Event_TriggerstringTips,	TTTtEn
+	}
 	IniRead, ini_TTTD,		% HADConfig, Event_TriggerstringTips,	TTTD,	% A_Space
+	if (ini_TTTD = "")
+	{
+		ini_TTTD := 0
+		IniWrite, % ini_TTTD, % HADConfig, Event_TriggerstringTips,	TTTD
+	}
 	IniRead, ini_TipsSortAlphabetically, % HADConfig, Event_TriggerstringTips, TipsSortAlphabetically, % A_Space
+	if (ini_TipsSortAlphabetically = "")
+	{
+		ini_TipsSortAlphabetically := 1
+		IniWrite, % ini_TipsSortAlphabetically, % HADConfig, Event_TriggerstringTips, TipsSortAlphabetically
+	}
 	IniRead, ini_TipsSortByLength, % HADConfig, Event_TriggerstringTips, TipsSortByLength, % A_Space
+	if (ini_TipsSortByLength = "")
+	{
+		ini_TipsSortByLength := 1
+		IniWrite, % ini_TipsSortByLength, % HADConfig, Event_TriggerstringTips, TipsSortByLength
+	}
 	IniRead, ini_TASAC, 	% HADConfig, Event_TriggerstringTips, 	TipsAreShownAfterNoOfCharacters, % A_Space
+	if (ini_TASAC = "")
+	{
+		ini_TASAC := 1
+		Iniwrite, % ini_TASAC, % HADConfig, Event_TriggerstringTips, 	TipsAreShownAfterNoOfCharacters
+	}
 	IniRead, ini_MNTT,		% HADConfig, Event_TriggerstringTips,	MNTT,	% A_Space
-	
-global ini_CPDelay 				:= 300		;1-1000 [ms], default: 300
-IniRead, ini_CPDelay, 					% HADConfig, Configuration, ClipBoardPasteDelay,		% A_Space
-if (ini_CPDelay = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-{
-	ini_CPDelay := 300
-	IniWrite, % ini_CPDelay, % HADConfig, Configuration, ClipBoardPasteDelay 
-}	
+	if (ini_MNTT = "")
+	{
+		ini_MNTT := 5
+		IniWrite, % ini_MNTT, % HADConfig, Event_TriggerstringTips,	MNTT
+	}
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
