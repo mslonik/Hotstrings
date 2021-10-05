@@ -1004,6 +1004,71 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvBH_B2 gF_EvBH_B2,			% TransA["Sound test"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvBH_B3 gF_EvBH_B3,			% TransA["Apply && Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvBH_B4 gF_EvBH_B4,			% TransA["Cancel"]
+	
+	Gui, GuiEvents: Tab, 											% TransA["Menu hotstring is triggered"]
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvMH_T1,						% TransA["Menu position"] . ":"
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvMH_T2,						ⓘ
+	T_MenuPosition := func("F_ShowLongTooltip").bind(TransA["T_MenuPosition"])
+	GuiControl, +g, % IdEvMH_T2, % T_MenuPosition
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvMH_R1 vEvMH_R1R2,			% TransA["caret"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvMH_R2,						% TransA["cursor"]
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvMH_T3 0x7					; horizontal line → black
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvMH_T4,						% TransA["Sound enable"] . "?"
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvMH_T5,						ⓘ
+	T_SoundEnable := func("F_ShowLongTooltip").bind(TransA["T_SoundEnable"])
+	GuiControl, +g, % IdEvMH_T5, % T_SoundEnable
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvMH_R3 vEvMH_R3R4 gF_EvMH_R3R4,	% TransA["yes"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvMH_R4 gF_EvMH_R3R4,			% TransA["no"]
+	Gui, GuiEvents: Add,	Text,	HwndIdEvMH_T6,						% TransA["If sound is enabled, define it"]	. ":"
+	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvMH_S1 vEvMH_S1 gF_EvMH_S1 Line1 Page50 Range37-32767 TickInterval%TickInterval% ToolTipBottom Buddy1EvMH_S1, % EvMH_S1
+	Gui, GuiEvents: Add, 	Text, 	HwndIdEvMH_T7, 					% TransA["Sound frequency"] . ":" . A_Space . "32768"
+	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvMH_S2 vEvMH_S2 gF_EvMH_S2 Line1 Page50 Range50-2000 TickInterval50 ToolTipBottom Buddy1EvMH_S2, % EvMH_S2
+	Gui, GuiEvents: Add, 	Text, 	HwndIdEvMH_T8, 					% TransA["Sound duration [ms]"] . ":" . A_Space . "2000"
+	Gui, GuiEvents: Add, 	Button, 	HwndIdEvMH_B1 gF_EvMH_B1,			% TransA["Sound test"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvMH_B2 gF_EvMH_B2,			% TransA["Apply && Close"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvMH_B3 gF_EvMH_B3,			% TransA["Cancel"]
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvMH_B3()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvMH_B2()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvMH_B1()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvMH_S2()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvMH_S1()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvMH_R3R4()
+{
+	global ;assume-global mode
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1304,7 +1369,7 @@ F_EvBH_S1()
 F_GuiEvents_InitiateValues()
 {
 	global ;assume-global mode
-	EvBH_S1 := ini_OHTD, 	EvBH_S2 := ini_OHSF,	EvBH_S3 := ini_OHSD	
+	EvBH_S1 := ini_OHTD, 	EvBH_S2 := ini_OHSF,	EvBH_S3 := ini_OHSD,	EvMH_S1 := ini_MHSF,	EvMH_S2 := ini_MHSD
 	Switch ini_OHTtEn
 	{
 		Case false: 	EvBH_R1R2 := 1
@@ -1317,13 +1382,23 @@ F_GuiEvents_InitiateValues()
 	}
 	Switch ini_OHTP
 	{
-		Case 1: 	EvBH_R5R6 := 1
-		Case 2: 	EvBH_R5R6 := 2
+		Case 1: 		EvBH_R5R6 := 1
+		Case 2: 		EvBH_R5R6 := 2
 	}
 	Switch ini_OHSEn
 	{
 		Case false: 	EvBH_R7R8 := 1
 		Case true: 	EvBH_R7R8 := 2
+	}
+	Switch ini_MHMP
+	{
+		Case 1:		EvMH_R1R2 := 1
+		Case 2:		EvMH_R1R2 := 2
+	}
+	Switch ini_MHSEn
+	{
+		Case false:	EvMH_R3R4 := 1
+		Case true:	EvMH_R3R4 := 2
 	}
 	return
 }
@@ -7248,6 +7323,7 @@ maroon												= maroon
 Max. no. of shown tips									= Max. no. of shown tips
 Maximum number of shown triggerstring tips					= Maximum number of shown triggerstring tips
 Menu hotstring is triggered								= Menu hotstring is triggered
+Menu position											= Menu position
 Menu position: caret									= Menu position: caret
 Menu position: cursor									= Menu position: cursor
 Minus - 												= Minus -
