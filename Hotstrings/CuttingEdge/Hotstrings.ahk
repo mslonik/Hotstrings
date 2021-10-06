@@ -1036,39 +1036,80 @@ F_GuiEvents_CreateObjects()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvMH_B3()
+F_EvMH_B3()	;Menu Hotstring (is triggered) Button Cancel
 {
 	global ;assume-global mode
+	Tooltip,,,, 4
+	Gui, GuiEvents: Destroy
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvMH_B2()
+F_EvMH_B2()	;Apply & Close
 {
 	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvMH_R1R2	;Tooltip position
+	{
+		Case 1:	ini_MHMP := 1
+		Case 2:	ini_MHMP := 2
+	}
+	Switch EvMH_R3R4	;Sound enable
+	{
+		Case 1:	ini_MHSEn := 1
+		Case 2:	ini_MHSEn := 0
+	}
+	ini_MHSF := EvMH_S1, ini_MHSD := EvMH_S2
+	IniWrite, % ini_MHMP,	% HADConfig, Event_MenuHotstring,		MHMP
+	IniWrite, % ini_MHSEn, 	% HADConfig, Event_MenuHotstring,		MHSEn
+	IniWrite, % ini_MHSF,	% HADConfig, Event_MenuHotstring,		MHSF
+	IniWrite, % ini_MHSD,	% HADConfig, Event_MenuHotstring,		MHSD
+	Tooltip,,,, 4
+	Gui, GuiEvents: Destroy
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvMH_B1()
+F_EvMH_B1()	;Sound test
 {
 	global ;assume-global mode
+	SoundBeep, % EvMH_S1, % EvMH_S2
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvMH_S2()
+F_EvMH_S2()	;Sound duration
 {
 	global ;assume-global mode
+	GuiControl,, % IdEvMH_T8, % TransA["Sound duration [ms]"] . ":" . A_Space . EvMH_S2
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvMH_S1()
+F_EvMH_S1()	;Sound frequency
 {
 	global ;assume-global mode
+	GuiControl,, % IdEvMH_T7, % TransA["Sound frequency"] . ":" . A_Space . EvMH_S1
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvMH_R3R4()
 {
 	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvMH_R3R4
+	{
+		Case 1:
+			GuiControl, Enable,		% IdEvMH_T6
+			GuiControl, Enable,		% IdEvMH_S1
+			GuiControl, Enable,		% IdEvMH_T7
+			GuiControl, Enable,		% IdEvMH_S2
+			GuiControl, Enable,		% IdEvMH_T8
+			GuiControl, Enable,		% IdEvMH_B1
+		Case 2:
+			GuiControl, Disable,	% IdEvMH_T6
+			GuiControl, Disable,	% IdEvMH_S1
+			GuiControl, Disable,	% IdEvMH_T7
+			GuiControl, Disable,	% IdEvMH_S2
+			GuiControl, Disable,	% IdEvMH_T8
+			GuiControl, Disable,	% IdEvMH_B1
+	}
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1177,6 +1218,54 @@ F_GuiEvents_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_B3
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdEvMH_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_T1
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvMH_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdEvMH_R1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_R1
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvMH_R2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += 3 * HofText
+	GuiControl, Move, % IdEvMH_T3, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
+	GuiControl, Move, % IdEvMH_T4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_T4
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvMH_T5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdEvMH_R3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_R3
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvMH_R4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdEvMH_T6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_yNext += HofText
+	GuiControl, Move, % IdEvMH_S1, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
+	v_xNext += 2 * c_xmarg + TheWidestText
+	GuiControl, Move, % IdEvMH_T7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_S1
+	v_yNext += v_OutVarTempH
+	GuiControl, Move, % IdEvMH_S2, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext	
+	v_xNext += 2 * c_xmarg + TheWidestText
+	GuiControl, Move, % IdEvMH_T8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += 3 * HofText
+	GuiControl, Move, % IdEvMH_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_B1
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvMH_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_B2
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 4 * c_xmarg
+	GuiControl, Move, % IdEvMH_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1406,7 +1495,6 @@ F_GuiEvents_InitiateValues()
 F_GuiEvents_LoadValues()
 {
 	global ;assume-global mode
-	
 	Switch ini_OHTtEn
 	{
 		Case false: 	GuiControl,, % IdEvBH_R2, 1
@@ -1433,6 +1521,21 @@ F_GuiEvents_LoadValues()
 	GuiControl,, % IdEvBH_T13, 	% TransA["Sound frequency"] . ":" 		. A_Space . ini_OHSF
 	GuiControl,, % IdEvBH_S3, 	% ini_OHSD
 	GuiControl,, % IdEvBH_T14, 	% TransA["Sound duration [ms]"] . ":" 	. A_Space . ini_OHSD
+
+	Switch ini_MHMP
+	{
+		Case 1: 		GuiControl,, % IdEvMH_R1, 1
+		Case 2: 		GuiControl,, % IdEvMH_R2, 1
+	}
+	Switch ini_MHSEn
+	{
+		Case false: 	GuiControl,, % IdEvMH_R3, 1
+		Case true: 	GuiControl,, % IdEvMH_R4, 1
+	}
+	GuiControl,, % IdEvMH_S1, 	% ini_MHSF
+	GuiControl,, % IdEvMH_T7, 	% TransA["Sound frequency"] . ":" 		. A_Space . ini_MHSF
+	GuiControl,, % IdEvMH_S2, 	% ini_MHSD
+	GuiControl,, % IdEvMH_T8, 	% TransA["Sound duration [ms]"] . ":" 	. A_Space . ini_MHSD
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
