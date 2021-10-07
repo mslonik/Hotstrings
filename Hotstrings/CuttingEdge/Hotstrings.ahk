@@ -914,6 +914,13 @@ F_GuiEvents()
 	F_GuiEvents_CreateObjects()
 	F_GuiEvents_DetermineConstraints()
 	F_GuiEvents_LoadValues()	;load values to guicontrols
+	F_EvBH_R1R2()
+	F_EvBH_R3R4()
+	F_EvBH_R7R8()
+	F_EvMH_R3R4()
+	F_EvUH_R1R2()
+	F_EvUH_R3R4()
+	F_EvUH_R7R8()
 	
 	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
@@ -1033,6 +1040,246 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvMH_B1 gF_EvMH_B1,			% TransA["Sound test"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvMH_B2 gF_EvMH_B2,			% TransA["Apply && Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvMH_B3 gF_EvMH_B3,			% TransA["Cancel"]
+	
+	Gui, GuiEvents: Tab,											%  TransA["Undid the last hotstring"]
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvUH_T1,						% TransA["Tooltip enable"] . ":"
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvUH_T2, 					ⓘ
+	T_TooltipEnable := func("F_ShowLongTooltip").bind(TransA["T_TooltipEnable"])
+	GuiControl, +g, % IdEvUH_T2, % T_TooltipEnable
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvUH_R1 vEvUH_R1R2 gF_EvUH_R1R2,	% TransA["yes"]
+	Gui, GuiEvents: Add,	Radio, 	HwndIdEvUH_R2 gF_EvUH_R1R2,			% TransA["no"]
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvUH_T15 0x7					; horizontal line → black
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvUH_T3,						% TransA["Tooltip timeout"] . ":"
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvUH_T4,						ⓘ
+	T_TooltipTimeout := func("F_ShowLongTooltip").bind(TransA["T_TooltipTimeout"])
+	GuiControl, +g, % IdEvUH_T4, % T_TooltipTimeout
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvUH_T5,						% TransA["Finite timeout?"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvUH_R3 vEvUH_R3R4 gF_EvUH_R3R4,	% TransA["yes"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvUH_R4 gF_EvUH_R3R4,			% TransA["no"]
+	Gui, GuiEvents: Add,	Text,	HwndIdEvUH_T6,						% TransA["If not finite, define tooltip timeout"] . ":"
+	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvUH_S1 vEvUH_S1 gF_EvUH_S1 Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1EvUH_S1, % EvUH_S1
+	Gui, GuiEvents: Add,	Text,	HwndIdEvUH_T7,						% TransA["Timeout value [ms]"] . ":" . A_Space . 10000
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvUH_T16 0x7					; horizontal line → black
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvUH_T8,						% TransA["Tooltip position"] . ":"
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvUH_T9,						ⓘ
+	T_TooltipPosition := func("F_ShowLongTooltip").bind(TransA["T_TooltipPosition"])
+	GuiControl, +g, % IdEvUH_T9, % T_TooltipPosition
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvUH_R5 vEvUH_R5R6,			% TransA["caret"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvUH_R6,						% TransA["cursor"]
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvUH_T17 0x7					; horizontal line → black
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvUH_T10,					% TransA["Sound enable"] . "?"
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvUH_T11,					ⓘ
+	T_SoundEnable := func("F_ShowLongTooltip").bind(TransA["T_SoundEnable"])
+	GuiControl, +g, % IdEvUH_T11, % T_SoundEnable
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvUH_R7 vEvUH_R7R8 gF_EvUH_R7R8,	% TransA["yes"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvUH_R8 gF_EvUH_R7R8,			% TransA["no"]
+	Gui, GuiEvents: Add,	Text,	HwndIdEvUH_T12,					% TransA["If sound is enabled, define it"]	. ":"
+	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvUH_S2 vEvUH_S2 gF_EvUH_S2 Line1 Page50 Range37-32767 TickInterval%TickInterval% ToolTipBottom Buddy1EvUH_S2, % EvUH_S2
+	Gui, GuiEvents: Add, 	Text, 	HwndIdEvUH_T13, 					% TransA["Sound frequency"] . ":" . A_Space . "32768"
+	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvUH_S3 vEvUH_S3 gF_EvUH_S3 Line1 Page50 Range50-2000 TickInterval50 ToolTipBottom Buddy1EvUH_S3, % EvUH_S3
+	Gui, GuiEvents: Add, 	Text, 	HwndIdEvUH_T14, 					% TransA["Sound duration [ms]"] . ":" . A_Space . "2000"
+	Gui, GuiEvents: Add, 	Button, 	HwndIdEvUH_B1 gF_EvUH_B1,			% TransA["Tooltip test"]
+	Gui, GuiEvents: Add, 	Button, 	HwndIdEvUH_B2 gF_EvUH_B2,			% TransA["Sound test"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvUH_B3 gF_EvUH_B3,			% TransA["Apply && Close"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvUH_B4 gF_EvUH_B4,			% TransA["Cancel"]
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvUH_B1() ;Event Undo Hotstring (is triggered) Button Tooltip test
+{
+	global ;assume-global mode
+	local	tmp_UHTtEn := false, tmp_UHTD := 0, tmp_UHTP := 0 ;temporary variables, for testing purpose
+	Gui, GuiEvents: Submit, NoHide
+	if (EvUH_R1R2 = 1)
+	{
+		if (EvUH_R5R6 = 1)
+		{
+			if (A_CaretX and A_CaretY)
+			{
+				ToolTip, % TransA["Undid the last hotstring"], % A_CaretX + 20, % A_CaretY - 20, 6
+				if (ini_UHTD > 0)
+					SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
+			}
+			else
+			{
+				MouseGetPos, v_MouseX, v_MouseY
+				ToolTip, % TransA["Undid the last hotstring"], % v_MouseX + 20, % v_MouseY - 20, 6
+				if (ini_UHTD > 0)
+					SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
+			}
+		}
+	}
+	if (EvUH_R5R6 = 2)
+	{
+		MouseGetPos, v_MouseX, v_MouseY
+		ToolTip, % TransA["Undid the last hotstring"], % v_MouseX + 20, % v_MouseY - 20, 6
+		if (ini_UHTD > 0)
+			SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvUH_B2()	;Event Undo Hotstring (is triggered) Button Sound test
+{
+	global ;assume-global mode
+	SoundBeep, % EvUH_S2, % EvUH_S3
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvUH_B3()	;Event Undo Hotstring (is triggered) Button Apply & Close
+{
+	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvUH_R1R2	;Tooltip enable
+	{
+		Case 1:	ini_UHTtEn := true
+		Case 2:	ini_UHTtEn := false
+	}
+	Switch EvUH_R3R4	;Finite timeout
+	{
+		Case 1:	ini_UHTD := EvUH_S1
+		Case 2:	ini_UHTD := 0
+	}
+	Switch EvUH_R5R6	;Tooltip position
+	{
+		Case 1:	ini_UHTP := 1
+		Case 2:	ini_UHTP := 2
+	}
+	Switch EvUH_R7R8	;Sound enable
+	{
+		Case 1:	ini_UHSEn := 1
+		Case 2:	ini_UHSEn := 0
+	}
+	ini_UHSF := EvUH_S2, ini_UHSD := EvUH_S3
+	IniWrite, % ini_UHTtEn, 	% HADConfig, Event_BasicHotstring, 	UHTtEn
+	IniWrite, % ini_UHTD,	% HADConfig, Event_BasicHotstring,		UHTD
+	IniWrite, % ini_UHTP,	% HADConfig, Event_BasicHotstring,		UHTP
+	IniWrite, % ini_UHSEn, 	% HADConfig, Event_BasicHotstring,		UHSEn
+	IniWrite, % ini_UHSF,	% HADConfig, Event_BasicHotstring,		UHSF
+	IniWrite, % ini_UHSD,	% HADConfig, Event_BasicHotstring,		UHSD
+	Tooltip,,,, 4
+	Gui, GuiEvents: Destroy
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvUH_B4()	;Event Undo Hotstring (is triggered) Button Cancel
+{
+	global ;assume-global mode
+	Tooltip,,,, 4
+	Gui, GuiEvents: Destroy
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvUH_S3()
+{
+	global ;assume-global mode
+	GuiControl,, % IdEvUH_T14, % TransA["Sound duration [ms]"] . ":" . A_Space . EvUH_S3
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvUH_S2()
+{
+	global ;assume-global mode
+	GuiControl,, % IdEvUH_T13, % TransA["Sound frequency"] . ":" . A_Space . EvUH_S2
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvUH_S1()
+{
+	global ;assume-global mode
+	GuiControl,, % IdEvUH_T7, % TransA["Timeout value [ms]"] . ":" . A_Space . EvUH_S1
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvUH_R3R4()
+{
+	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvUH_R3R4
+	{
+		Case 1:
+			GuiControl, Enable,		% IdEvUH_T6
+			GuiControl, Enable,		% IdEvUH_S1
+			GuiControl, Enable,		% IdEvUH_T7
+		Case 2:
+			GuiControl, Disable,	% IdEvUH_T6
+			GuiControl, Disable,	% IdEvUH_S1
+			GuiControl, Disable,	% IdEvUH_T7
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvUH_R7R8()
+{
+	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvUH_R7R8
+	{
+		Case 1:
+			GuiControl, Enable,		% IdEvUH_T12
+			GuiControl, Enable,		% IdEvUH_S2
+			GuiControl, Enable,		% IdEvUH_T13
+			GuiControl, Enable,		% IdEvUH_S3
+			GuiControl, Enable,		% IdEvUH_T14
+			GuiControl, Enable,		% IdEvUH_B2
+		Case 2:
+			GuiControl, Disable,	% IdEvUH_T12
+			GuiControl, Disable,	% IdEvUH_S2
+			GuiControl, Disable,	% IdEvUH_T13
+			GuiControl, Disable,	% IdEvUH_S3
+			GuiControl, Disable,	% IdEvUH_T14
+			GuiControl, Disable,	% IdEvUH_B2
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvUH_R1R2()
+{
+	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvUH_R1R2
+	{
+		Case 1:
+			GuiControl, Enable, 	% IdEvUH_T3
+			GuiControl, Enable, 	% IdEvUH_T4
+			GuiControl, Enable, 	% IdEvUH_T5
+			GuiControl, Enable, 	% IdEvUH_R3
+			GuiControl, Enable, 	% IdEvUH_R4
+			GuiControl, Enable, 	% IdEvUH_T6
+			GuiControl, Enable, 	% IdEvUH_S1
+			GuiControl, Enable, 	% IdEvUH_T7
+			GuiControl, Enable, 	% IdEvUH_T8
+			GuiControl, Enable, 	% IdEvUH_T9
+			GuiControl, Enable, 	% IdEvUH_R5
+			GuiControl, Enable, 	% IdEvUH_R6
+			GuiControl, Enable, 	% IdEvUH_B2
+		Case 2:
+			GuiControl, Disable, 	% IdEvUH_T3
+			GuiControl, Disable, 	% IdEvUH_T4
+			GuiControl, Disable, 	% IdEvUH_T5
+			GuiControl, Disable, 	% IdEvUH_R3
+			GuiControl, Disable, 	% IdEvUH_R4
+			GuiControl, Disable, 	% IdEvUH_T6
+			GuiControl, Disable, 	% IdEvUH_S1
+			GuiControl, Disable, 	% IdEvUH_T7
+			GuiControl, Disable, 	% IdEvUH_T8
+			GuiControl, Disable, 	% IdEvUH_T9
+			GuiControl, Disable, 	% IdEvUH_R5
+			GuiControl, Disable, 	% IdEvUH_R6
+			GuiControl, Disable, 	% IdEvUH_B2
+	}
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1116,13 +1363,7 @@ F_EvMH_R3R4()
 F_GuiEvents_DetermineConstraints()
 {
 	global ;assume-global mode
-	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
-		,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
-		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
-		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
-		,v_OutVarTemp4 := 0, 	v_OutVarTemp4X := 0, 	v_OutVarTemp4Y := 0, 	v_OutVarTemp4W := 0, 	v_OutVarTemp4H := 0
-							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
-		,TheWidestText := 0, TotalWidth := 0
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0, v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0, v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0, v_OutVarTemp4 := 0, 	v_OutVarTemp4X := 0, 	v_OutVarTemp4Y := 0, 	v_OutVarTemp4W := 0, 	v_OutVarTemp4H := 0, v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0, TheWidestText := 0, TotalWidth := 0
 	
 	GuiControlGet, v_OutVarTemp1, Pos, % IdEvBH_T6
 	GuiControlGet, v_OutVarTemp2, Pos, % IdEvBH_T11
@@ -1130,71 +1371,58 @@ F_GuiEvents_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp3, Pos, % IdEvBH_T7
 	TotalWidth 	:= v_OutVarTemp1W + v_OutVarTemp3W + 2 * c_xmarg
 	
-	v_xNext := c_xmarg
-	v_yNext := c_ymarg
+	v_xNext := c_xmarg, v_yNext := c_ymarg
 	GuiControl, Move, % IdEvBH_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_T1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += HofText
 	GuiControl, Move, % IdEvBH_R1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_R1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_R2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
 	GuiControl, Move, % IdEvBH_T15, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
 	GuiControl, Move, % IdEvBH_T3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_T3
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_T4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += HofText
 	GuiControl, Move, % IdEvBH_T5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += HofText
 	GuiControl, Move, % IdEvBH_R3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_R3
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_R4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += HofText
 	GuiControl, Move, % IdEvBH_T6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
-	v_wNext := TheWidestText
+	v_xNext := c_xmarg, v_yNext += HofText, v_wNext := TheWidestText
 	GuiControl, Move, % IdEvBH_S1, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
 	v_xNext += 2 * c_xmarg + TheWidestText
 	GuiControl, Move, % IdEvBH_T7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
 	GuiControl, Move, % IdEvBH_T16, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
 	GuiControl, Move, % IdEvBH_T8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_T8
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_T9, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += HofText
 	GuiControl, Move, % IdEvBH_R5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_R5
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_R6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
 	GuiControl, Move, % IdEvBH_T17, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
 	GuiControl, Move, % IdEvBH_T10, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_T10
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_T11, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += HofText
 	GuiControl, Move, % IdEvBH_R7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_R7
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_R8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += HofText
 	GuiControl, Move, % IdEvBH_T12, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_yNext += HofText
 	GuiControl, Move, % IdEvBH_S2, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
@@ -1206,8 +1434,7 @@ F_GuiEvents_DetermineConstraints()
 	GuiControl, Move, % IdEvBH_S3, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext	
 	v_xNext += 2 * c_xmarg + TheWidestText
 	GuiControl, Move, % IdEvBH_T14, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
 	GuiControl, Move, % IdEvBH_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_B1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
@@ -1219,33 +1446,28 @@ F_GuiEvents_DetermineConstraints()
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 
-	v_xNext := c_xmarg
-	v_yNext := c_ymarg
+	v_xNext := c_xmarg, v_yNext := c_ymarg
 	GuiControl, Move, % IdEvMH_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_T1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvMH_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += HofText
 	GuiControl, Move, % IdEvMH_R1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_R1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvMH_R2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
 	GuiControl, Move, % IdEvMH_T3, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
 	GuiControl, Move, % IdEvMH_T4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_T4
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvMH_T5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += HofText
 	GuiControl, Move, % IdEvMH_R3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_R3
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvMH_R4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += HofText
 	GuiControl, Move, % IdEvMH_T6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_yNext += HofText
 	GuiControl, Move, % IdEvMH_S1, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
@@ -1257,8 +1479,7 @@ F_GuiEvents_DetermineConstraints()
 	GuiControl, Move, % IdEvMH_S2, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext	
 	v_xNext += 2 * c_xmarg + TheWidestText
 	GuiControl, Move, % IdEvMH_T8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
 	GuiControl, Move, % IdEvMH_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_B1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
@@ -1266,6 +1487,87 @@ F_GuiEvents_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_B2
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 4 * c_xmarg
 	GuiControl, Move, % IdEvMH_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+
+	GuiControlGet, v_OutVarTemp1, Pos, % IdEvUH_T6
+	GuiControlGet, v_OutVarTemp2, Pos, % IdEvUH_T11
+	TheWidestText 	:= Max(v_OutVarTemp1W, v_OutVarTemp2W)
+	GuiControlGet, v_OutVarTemp3, Pos, % IdEvUH_T7
+	TotalWidth 	:= v_OutVarTemp1W + v_OutVarTemp3W + 2 * c_xmarg
+	
+	v_xNext := c_xmarg, v_yNext := c_ymarg
+	GuiControl, Move, % IdEvUH_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_T1
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvUH_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdEvUH_R1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_R1
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvUH_R2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	GuiControl, Move, % IdEvUH_T15, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
+	GuiControl, Move, % IdEvUH_T3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_T3
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvUH_T4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdEvUH_T5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdEvUH_R3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_R3
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvUH_R4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdEvUH_T6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText, v_wNext := TheWidestText
+	GuiControl, Move, % IdEvUH_S1, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
+	v_xNext += 2 * c_xmarg + TheWidestText
+	GuiControl, Move, % IdEvUH_T7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	GuiControl, Move, % IdEvUH_T16, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
+	GuiControl, Move, % IdEvUH_T8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_T8
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvUH_T9, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdEvUH_R5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_R5
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvUH_R6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	GuiControl, Move, % IdEvUH_T17, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
+	GuiControl, Move, % IdEvUH_T10, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_T10
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvUH_T11, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdEvUH_R7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_R7
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvUH_R8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdEvUH_T12, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_yNext += HofText
+	GuiControl, Move, % IdEvUH_S2, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
+	v_xNext += 2 * c_xmarg + TheWidestText
+	GuiControl, Move, % IdEvUH_T13, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_S2
+	v_yNext += v_OutVarTempH
+	GuiControl, Move, % IdEvUH_S3, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext	
+	v_xNext += 2 * c_xmarg + TheWidestText
+	GuiControl, Move, % IdEvUH_T14, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	GuiControl, Move, % IdEvUH_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_B1
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvUH_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_B2
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 4 * c_xmarg
+	GuiControl, Move, % IdEvUH_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_B3
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvUH_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1458,7 +1760,7 @@ F_EvBH_S1()
 F_GuiEvents_InitiateValues()
 {
 	global ;assume-global mode
-	EvBH_S1 := ini_OHTD, 	EvBH_S2 := ini_OHSF,	EvBH_S3 := ini_OHSD,	EvMH_S1 := ini_MHSF,	EvMH_S2 := ini_MHSD
+	EvBH_S1 := ini_OHTD, EvBH_S2 := ini_OHSF, EvBH_S3 := ini_OHSD, EvMH_S1 := ini_MHSF, EvMH_S2 := ini_MHSD, EvUH_S1 := ini_UHTD, EvUH_S2 := ini_UHSF, EvUH_S3 := ini_UHSD
 	Switch ini_OHTtEn
 	{
 		Case false: 	EvBH_R1R2 := 1
@@ -1488,6 +1790,26 @@ F_GuiEvents_InitiateValues()
 	{
 		Case false:	EvMH_R3R4 := 1
 		Case true:	EvMH_R3R4 := 2
+	}
+	Switch ini_UHTtEn
+	{
+		Case false: 	EvUH_R1R2 := 1
+		Case true: 	EvUH_R1R2 := 2
+	}
+	Switch ini_UHTD
+	{
+		Case 0: 		EvUH_R3R4 := 1
+		Default:		EvUH_R3R4 := 2
+	}
+	Switch ini_UHTP
+	{
+		Case 1: 		EvUH_R5R6 := 1
+		Case 2: 		EvUH_R5R6 := 2
+	}
+	Switch ini_UHSEn
+	{
+		Case false: 	EvUH_R7R8 := 1
+		Case true: 	EvUH_R7R8 := 2
 	}
 	return
 }
@@ -1536,6 +1858,33 @@ F_GuiEvents_LoadValues()
 	GuiControl,, % IdEvMH_T7, 	% TransA["Sound frequency"] . ":" 		. A_Space . ini_MHSF
 	GuiControl,, % IdEvMH_S2, 	% ini_MHSD
 	GuiControl,, % IdEvMH_T8, 	% TransA["Sound duration [ms]"] . ":" 	. A_Space . ini_MHSD
+
+	Switch ini_UHTtEn
+	{
+		Case false: 	GuiControl,, % IdEvUH_R2, 1
+		Case true: 	GuiControl,, % IdEvUH_R1, 1
+	}
+	Switch ini_UHTD
+	{
+		Case 0: 		GuiControl,, % IdEvUH_R4, 1
+		Default:		GuiControl,, % IdEvUH_R3, 1
+	}
+	GuiControl,, % IdEvUH_S1, 	% ini_UHTD
+	GuiControl,, % IdEvUH_T7, 	% TransA["Timeout value [ms]"] . ":" . A_Space . ini_UHTD
+	Switch ini_UHTP
+	{
+		Case 1: 		GuiControl,, % IdEvUH_R6, 1
+		Case 2: 		GuiControl,, % IdEvUH_R5, 1
+	}
+	Switch ini_UHSEn
+	{
+		Case false: 	GuiControl,, % IdEvUH_R8, 1
+		Case true: 	GuiControl,, % IdEvUH_R7, 1
+	}
+	GuiControl,, % IdEvUH_S2, 	% ini_UHSF
+	GuiControl,, % IdEvUH_T13, 	% TransA["Sound frequency"] . ":" 		. A_Space . ini_UHSF
+	GuiControl,, % IdEvUH_S3, 	% ini_UHSD
+	GuiControl,, % IdEvUH_T14, 	% TransA["Sound duration [ms]"] . ":" 	. A_Space . ini_UHSD
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
