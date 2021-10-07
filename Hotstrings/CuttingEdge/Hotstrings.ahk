@@ -1163,12 +1163,12 @@ F_EvUH_B3()	;Event Undo Hotstring (is triggered) Button Apply & Close
 		Case 2:	ini_UHSEn := 0
 	}
 	ini_UHSF := EvUH_S2, ini_UHSD := EvUH_S3
-	IniWrite, % ini_UHTtEn, 	% HADConfig, Event_BasicHotstring, 	UHTtEn
-	IniWrite, % ini_UHTD,	% HADConfig, Event_BasicHotstring,		UHTD
-	IniWrite, % ini_UHTP,	% HADConfig, Event_BasicHotstring,		UHTP
-	IniWrite, % ini_UHSEn, 	% HADConfig, Event_BasicHotstring,		UHSEn
-	IniWrite, % ini_UHSF,	% HADConfig, Event_BasicHotstring,		UHSF
-	IniWrite, % ini_UHSD,	% HADConfig, Event_BasicHotstring,		UHSD
+	IniWrite, % ini_UHTtEn, 	% HADConfig, Event_UndoHotstring, 	UHTtEn
+	IniWrite, % ini_UHTD,	% HADConfig, Event_UndoHotstring,	UHTD
+	IniWrite, % ini_UHTP,	% HADConfig, Event_UndoHotstring,	UHTP
+	IniWrite, % ini_UHSEn, 	% HADConfig, Event_UndoHotstring,	UHSEn
+	IniWrite, % ini_UHSF,	% HADConfig, Event_UndoHotstring,	UHSF
+	IniWrite, % ini_UHSD,	% HADConfig, Event_UndoHotstring,	UHSD
 	Tooltip,,,, 4
 	Gui, GuiEvents: Destroy
 	return
@@ -5140,6 +5140,7 @@ F_AddHotstring()
 	{
 		if (a_Triggerstring[key] == v_Triggerstring)	;case sensitive string comparison!
 		{
+			;*[One]
 			if (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))
 			{
 				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
@@ -5165,7 +5166,7 @@ F_AddHotstring()
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
 					. "v_TriggerString:" . A_Tab . v_TriggerString . "`n"
 					. "OldOptions:" . A_Tab . OldOptions . "`n`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary
-				if (InStr(Options, "O", 0))	;Add new hotstring
+				if (InStr(Options, "O"))	;Add new hotstring
 				{
 					Try
 						Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
@@ -5186,13 +5187,13 @@ F_AddHotstring()
 				a_Hotstring[key] 		:= TextInsert
 				a_Comment[key] 		:= v_Comment
 				ModifiedFlag 			:= true
-					for key2, value2 in a_Library
-						if (value2 = SubStr(v_SelectHotstringLibrary, 1, -4))
-						{
-							Counter++
-							if (a_Triggerstring[key2] = v_Triggerstring)
-								Break
-						}
+				for key2, value2 in a_Library
+					if (value2 = SubStr(v_SelectHotstringLibrary, 1, -4))
+					{
+						Counter++
+						if (a_Triggerstring[key2] == v_Triggerstring)	;case sensitive string comparison!
+							Break
+					}
 				LV_Modify(Counter, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)		
 			}
 			else
@@ -5211,7 +5212,7 @@ F_AddHotstring()
 	if !(ModifiedFlag) 
 	{
 	;OutputDebug, % "Options:" . A_Space . Options . A_Tab . "OldOptions:" . A_Space . OldOptions . A_Tab . "v_TriggerString:" . A_Space . v_TriggerString
-		if (InStr(Options, "O", 0))
+		if (InStr(Options, "O"))
 		{
 			Try
 				Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
@@ -6381,6 +6382,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			F_GuiMain_Resize4()
 		return
 	}
+	;*[One]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
