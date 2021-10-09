@@ -106,71 +106,7 @@ F_LoadSizeOfMargin()
 F_LoadFontType()
 F_LoadTTStyling()
 F_LoadHMStyling()
-
-global ini_CPDelay 				:= 300		;1-1000 [ms], default: 300
-IniRead, ini_CPDelay, 					% HADConfig, Configuration, ClipBoardPasteDelay,		% A_Space
-if (ini_CPDelay = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-{
-	ini_CPDelay := 300
-	IniWrite, % ini_CPDelay, % HADConfig, Configuration, ClipBoardPasteDelay 
-}
-global ini_HotstringUndo			:= true
-IniRead, ini_HotstringUndo,				% HADConfig, Configuration, HotstringUndo,			% A_Space
-if (ini_HotstringUndo = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-{
-	ini_HotstringUndo := true
-	Iniwrite, % ini_HotstringUndo, % HADConfig, Configuration, HotstringUndo
-}
-global ini_ShowIntro			:= true
-IniRead, ini_ShowIntro,					% HADConfig, Configuration, ShowIntro,				% A_Space	;GUI with introduction to Hotstrings application.
-if (ini_ShowIntro = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-{
-	ini_ShowIntro := true
-	Iniwrite, % ini_ShowIntro, % HADConfig, Configuration, ShowIntro
-}
-global ini_CheckRepo			:= false
-IniRead, ini_CheckRepo,					% HADConfig, Configuration, CheckRepo,				% A_Space
-if (ini_CheckRepo = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-{
-	ini_CheckRepo := false
-	IniWrite, % ini_CheckRepo, % HADConfig, Configuration, CheckRepo
-}
-global ini_DownloadRepo			:= false
-IniRead, ini_DownloadRepo,				% HADConfig, Configuration, DownloadRepo,			% A_Space
-if (ini_DownloadRepo = "") ;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-{
-	ini_DownloadRepo := false
-	IniWrite, % ini_DownloadRepo, % HADConfig, Configuration, DownloadRepo
-}
-
-global ini_HK_Main				:= "#^h"
-IniRead, ini_HK_Main,					% HADConfig, Configuration, HK_Main,				% A_Space
-if (ini_HK_Main = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-{
-	ini_HK_Main := "#^h"
-	IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
-}
-if (ini_HK_Main != "none")
-	Hotkey, % ini_HK_Main, L_GUIInit, On
-
-global ini_HK_IntoEdit			:= "~^c"
-IniRead, ini_HK_IntoEdit,				% HADConfig, Configuration, HK_IntoEdit,			% A_Space
-if (ini_HK_IntoEdit = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-{
-	ini_HK_IntoEdit := "~^c"
-	IniWrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
-}
-
-global ini_HK_UndoLH			:= "~^F12"
-IniRead, ini_HK_UndoLH,					% HADConfig, Configuration, HK_UndoLH,				% A_Space
-if (ini_HK_UndoLH = "")		;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-{
-	ini_HK_UndoLH := "^F12"
-	Iniwrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
-}
-if (ini_HK_UndoLH != "none")
-	Hotkey, % ini_HK_UndoLH, F_Undo, On
-
+F_LoadConfiguration()
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
 F_LoadSignalingParams()
 
@@ -325,10 +261,6 @@ Menu, OrdHisTrig,		Add, % TransA["Sound disable"],				F_EventSoEn
 Menu, OrdHisTrig,		Add
 Menu, OrdHisTrig,		Add, % TransA["Sound parameters"],				F_EventSoPar
 
-;Menu, MenuHisTrig,		Add, % TransA["Tooltip enable"],				F_EventEnDis
-;Menu, MenuHisTrig,		Add, % TransA["Tooltip disable"],				F_EventEnDis
-;Menu, MenuHisTrig,		Add
-;Menu, MenuHisTrig,		Add, Tooltip,								F_GuiSetTooltipTimeout
 Menu, MenuHisTrig,		Add, % TransA["Menu position: caret"],			F_EventTtPos
 Menu, MenuHisTrig,		Add, % TransA["Menu position: cursor"],			F_EventTtPos
 Menu, MenuHisTrig,		Add
@@ -356,10 +288,6 @@ Menu, TrigTips,		Add, % TransA["Tooltip timeout"],				F_GuiSetTooltipTimeout
 Menu, TrigTips,		Add, % TransA["Tooltip position: caret"],		F_EventTtPos
 Menu, TrigTips,		Add, % TransA["Tooltip position: cursor"],		F_EventTtPos
 Menu, TrigTips,		Add
-;Menu, TrigTips,		Add, % TransA["Sound enable"],				F_EventSoEn
-;Menu, TrigTips,		Add, % TransA["Sound disable"],				F_EventSoEn
-;Menu, TrigTips,		Add
-;Menu, TrigTips,		Add, % TransA["Sound parameters"],				F_EventSoPar
 Menu, TrigTips,		Add, % TransA["Sorting order"],				:TrigSortOrder								
 Menu, TrigTips,		Add,	% TransA["Max. no. of shown tips"],		F_GuiTrigShowNoOfTips
 
@@ -416,9 +344,6 @@ F_ToggleEndChars()
 Menu, Submenu1,		Add, % TransA["Signaling of events"],			:SigOfEvents
 Menu, Submenu1,		Add, Events,								F_GuiEvents
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
-;Menu, Submenu1,		Add
-;Menu, Submenu1,		Add, Mute all events sound,					F_AllMute
-;Menu, Submenu1,		Add, Turn off all events tooltips,				F_AllTooltipsOff
 Menu, Submenu1,		Add
 Menu, Submenu1,  	   	Add, % TransA["Toggle EndChars"], 				:SubmenuEndChars
 Menu, Submenu1,  	   	Add
@@ -905,6 +830,74 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_LoadConfiguration()
+{
+	global ;assume-global mode
+	ini_CPDelay 				:= 300		;1-1000 [ms], default: 300
+	IniRead, ini_CPDelay, 					% HADConfig, Configuration, ClipBoardPasteDelay,		% A_Space
+	if (ini_CPDelay = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_CPDelay := 300
+		IniWrite, % ini_CPDelay, % HADConfig, Configuration, ClipBoardPasteDelay 
+	}
+	ini_HotstringUndo			:= true
+	IniRead, ini_HotstringUndo,				% HADConfig, Configuration, HotstringUndo,			% A_Space
+	if (ini_HotstringUndo = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_HotstringUndo := true
+		Iniwrite, % ini_HotstringUndo, % HADConfig, Configuration, HotstringUndo
+	}
+	ini_ShowIntro			:= true
+	IniRead, ini_ShowIntro,					% HADConfig, Configuration, ShowIntro,				% A_Space	;GUI with introduction to Hotstrings application.
+	if (ini_ShowIntro = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_ShowIntro := true
+		Iniwrite, % ini_ShowIntro, % HADConfig, Configuration, ShowIntro
+	}
+	ini_CheckRepo			:= false
+	IniRead, ini_CheckRepo,					% HADConfig, Configuration, CheckRepo,				% A_Space
+	if (ini_CheckRepo = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_CheckRepo := false
+		IniWrite, % ini_CheckRepo, % HADConfig, Configuration, CheckRepo
+	}
+	ini_DownloadRepo			:= false
+	IniRead, ini_DownloadRepo,				% HADConfig, Configuration, DownloadRepo,			% A_Space
+	if (ini_DownloadRepo = "") ;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_DownloadRepo := false
+		IniWrite, % ini_DownloadRepo, % HADConfig, Configuration, DownloadRepo
+	}
+	ini_HK_Main				:= "#^h"
+	IniRead, ini_HK_Main,					% HADConfig, Configuration, HK_Main,				% A_Space
+	if (ini_HK_Main = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_HK_Main := "#^h"
+		IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
+	}
+	if (ini_HK_Main != "none")
+		Hotkey, % ini_HK_Main, L_GUIInit, On
+	
+	ini_HK_IntoEdit			:= "~^c"
+	IniRead, ini_HK_IntoEdit,				% HADConfig, Configuration, HK_IntoEdit,			% A_Space
+	if (ini_HK_IntoEdit = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_HK_IntoEdit := "~^c"
+		IniWrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
+	}
+	
+	ini_HK_UndoLH			:= "~^F12"
+	IniRead, ini_HK_UndoLH,					% HADConfig, Configuration, HK_UndoLH,				% A_Space
+	if (ini_HK_UndoLH = "")		;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_HK_UndoLH := "^F12"
+		Iniwrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
+	}
+	if (ini_HK_UndoLH != "none")
+		Hotkey, % ini_HK_UndoLH, F_Undo, On
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiEvents()
 {
 	global ;assume-global mode
@@ -4476,7 +4469,7 @@ F_LoadSignalingParams()
 	{
 		ini_OHSD := 250
 		IniWrite, % ini_OHSD, % HADConfig, Event_BasicHotstring,	OHSD
-	} ;tu jestem
+	}
 	IniRead, ini_MHMP,		% HADConfig, Event_MenuHotstring,		MHMP,	% A_Space
 	if (ini_MHMP = "")
 	{
@@ -5235,7 +5228,7 @@ F_AddHotstring()
 		a_Triggerstring.Push(v_Triggerstring)
 		a_TriggerOptions.Push(Options)
 		a_OutputFunction.Push(SendFunFileFormat)
-		a_EnableDisable.Push(OnOff)
+		a_EnableDisable.Push(EnDis)	;here was a bug: OnOff instead of EnDis
 		a_Hotstring.Push(TextInsert)
 		a_Comment.Push(v_Comment)
 	}
@@ -6334,7 +6327,10 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	{
 		ini_HS3GuiMaximized := true
 		if (ini_Sandbox)
+		{
 			F_GuiMain_Resize1()
+			ini_IsSandboxMoved := true	;tu jestem
+		}
 		else
 			F_GuiMain_Resize5()
 		return
@@ -8891,6 +8887,7 @@ F_GuiMain_Redraw()
 	
 	;5.2. Button between left and right column
 	GuiControlGet, v_OutVarTemp, Pos, % IdListView1
+	OutputDebug, % "ini_Sandbox:" . A_Tab . ini_Sandbox . A_Tab . "ini_IsSandboxMoved:" . A_Tab . ini_IsSandboxMoved	;tu jestem
 	if ((ini_Sandbox) and (ini_IsSandboxMoved))
 	{
 		v_xNext := LeftColumnW 
@@ -10699,61 +10696,63 @@ L_GUIInit:
 	{
 		Gui, HS3: +MinSize%HS3MinWidth%x%HS3MinHeight%
 		Gui, HS4: +MinSize%HS4MinWidth%x%HS4MinHeight%
+		;OutputDebug, % "ini_GuiReload:" . A_Tab . ini_GuiReload . A_Tab . "ini_WhichGui:" . A_Tab . ini_WhichGui
 		ini_GuiReload := false
 		IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
 		
 		Switch ini_WhichGui
 		{
 			Case "HS3":
-				if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
-				{
-					Gui, HS3: Show, AutoSize Center
-					if (ini_ShowIntro)
-						Gui, ShowIntro: Show, AutoSize Center
-					v_ResizingFlag := false
-					return
-				}
-				if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
-				{
-							;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
-					Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
-					Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
-					if (ini_ShowIntro)
-						Gui, ShowIntro: Show, AutoSize Center
-					v_ResizingFlag := false
-					return
-				}
-				if (ini_HS3GuiMaximized)
-					Gui, HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
-				else	
-					Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+			if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
+			{
+				Gui, HS3: Show, AutoSize Center
 				if (ini_ShowIntro)
 					Gui, ShowIntro: Show, AutoSize Center
 				v_ResizingFlag := false
+				return
+			}
+			if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
+			{	;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
+				Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+				Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+				if (ini_ShowIntro)
+					Gui, ShowIntro: Show, AutoSize Center
+				v_ResizingFlag := false
+				return
+			}
+			if (ini_HS3GuiMaximized)
+			{
+				;OutputDebug, Tu jestem
+				Gui, HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
+			}
+			else	
+				Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+			if (ini_ShowIntro)
+				Gui, ShowIntro: Show, AutoSize Center
+			v_ResizingFlag := false
 			return
 			Case "HS4":
-				if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
-				{
-						;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
-					Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
-					Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
-					if (ini_ShowIntro)
-						Gui, ShowIntro: Show, AutoSize Center
-					v_ResizingFlag := false
-					return
-				}
-				if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
-				{
-					Gui, HS4: Show, AutoSize Center
-					if (ini_ShowIntro)
-						Gui, ShowIntro: Show, AutoSize Center
-					v_ResizingFlag := false
-					return
-				}
-				Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+			if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
+			{	;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
+				Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+				Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
 				if (ini_ShowIntro)
 					Gui, ShowIntro: Show, AutoSize Center
 				v_ResizingFlag := false
+				return
+			}
+			if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
+			{
+				Gui, HS4: Show, AutoSize Center
+				if (ini_ShowIntro)
+					Gui, ShowIntro: Show, AutoSize Center
+				v_ResizingFlag := false
+				return
+			}
+			Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+			if (ini_ShowIntro)
+				Gui, ShowIntro: Show, AutoSize Center
+			v_ResizingFlag := false
 			return
 		}		
 	}
