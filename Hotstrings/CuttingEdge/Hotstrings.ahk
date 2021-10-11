@@ -5136,63 +5136,71 @@ F_AddHotstring()
 			;*[One]
 			if (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))
 			{
-				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-				, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in the currently selected library"] . ":" . A_Space . a_Library[key] . ".csv" . "." . "`n`n" 
-				. TransA["Do you want to proceed?"]
-				. "`n`n" . TransA["If you answer ""Yes"" it will overwritten."]
-				IfMsgBox, No
-					return
-				
 				OldOptions := a_TriggerOptions[key]
-				if (InStr(OldOptions, "*") and !InStr(Options,"*"))
-					OldOptions := StrReplace(OldOptions, "*", "*0")
-				if (InStr(OldOptions, "B0") and !InStr(Options, "B0"))
-					OldOptions := StrReplace(OldOptions, "B0", "B")
-				if (InStr(OldOptions, "O") and !InStr(Options, "O"))
-					OldOptions := StrReplace(OldOptions, "O", "O0")
-				if (InStr(OldOptions, "Z") and !InStr(Options, "Z"))
-					OldOptions := StrReplace(OldOptions, "Z", "Z0")
-				
-				Try
-					Hotstring(":" . OldOptions . ":" . v_TriggerString, , "Off") ;Disable existing hotstring
-				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
-					. "v_TriggerString:" . A_Tab . v_TriggerString . "`n"
-					. "OldOptions:" . A_Tab . OldOptions . "`n`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary
-				if (InStr(Options, "O"))	;Add new hotstring
+				if (!InStr(OldOptions, "C1") and InStr(OldOptions, "C") and !InStr(Options, "C1") and InStr(Options, "C") and (EnDis != "Dis"))	;tu jestem 
 				{
-					Try
-						Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
-					Catch
-						MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," . A_Space . OnOff . ")"
-				}
-				else
+					ModifiedFlag 			:= false
+				}				
+				else 
 				{
-					Try
-						Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
-					Catch
-						MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
-				}
-				a_TriggerOptions[key] 	:= Options
-				a_OutputFunction[key] 	:= SendFunFileFormat
-				a_Hotstring[key] 		:= TextInsert
-				a_Comment[key] 		:= v_Comment
-				ModifiedFlag 			:= true
-				for key2, value2 in a_Library
-					if (value2 = SubStr(v_SelectHotstringLibrary, 1, -4))
+					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+						, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in the currently selected library"] . ":" . A_Space . a_Library[key] . ".csv" . "." . "`n`n" 
+						. TransA["Do you want to proceed?"]
+						. "`n`n" . TransA["If you answer ""Yes"" it will overwritten."]
+					IfMsgBox, No
+						return
+					IfMsgBox, Yes
 					{
-						Counter++
-						if (a_Triggerstring[key2] == v_Triggerstring)	;case sensitive string comparison!
-							Break
+						if (InStr(OldOptions, "*") and !InStr(Options,"*"))
+							OldOptions := StrReplace(OldOptions, "*", "*0")
+						if (InStr(OldOptions, "B0") and !InStr(Options, "B0"))
+							OldOptions := StrReplace(OldOptions, "B0", "B")
+						if (InStr(OldOptions, "O") and !InStr(Options, "O"))
+							OldOptions := StrReplace(OldOptions, "O", "O0")
+						if (InStr(OldOptions, "Z") and !InStr(Options, "Z"))
+							OldOptions := StrReplace(OldOptions, "Z", "Z0")
+						Try
+							Hotstring(":" . OldOptions . ":" . v_TriggerString, , "Off") ;Disables existing hotstring
+						Catch
+							MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
+								. "v_TriggerString:" . A_Tab . v_TriggerString . "`n"
+								. "OldOptions:" . A_Tab . OldOptions . "`n`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary
+						if (InStr(Options, "O"))	;Add new hotstring which replaces the old one
+						{
+							Try
+								Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
+							Catch
+								MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
+								. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," . A_Space . OnOff . ")"
+						}
+						else
+						{
+							Try
+								Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
+							Catch
+								MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
+								. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
+						}
+						a_TriggerOptions[key] 	:= Options
+						a_OutputFunction[key] 	:= SendFunFileFormat
+						a_Hotstring[key] 		:= TextInsert
+						a_Comment[key] 		:= v_Comment
+						ModifiedFlag 			:= true
+						for key2, value2 in a_Library
+							if (value2 = SubStr(v_SelectHotstringLibrary, 1, -4))
+							{
+								Counter++
+								if (a_Triggerstring[key2] == v_Triggerstring)	;case sensitive string comparison!
+									Break
+							}
+						;*[One]
+						LV_Modify(Counter, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)		
 					}
-				LV_Modify(Counter, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)		
+				}
 			}
 			else
 			{
 				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-					; , % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["already exists in another library"] . ":" . A_Space . a_Library[key] . ".csv" . "." . "`n`n" 
 					, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["already exists in another library"] . ":" . A_Space . a_Library[key] . "." . "`n`n" 
 					. TransA["Do you want to proceed?"] . "`n`n" . TransA["If you answer ""No"" edition of the current definition will be interrupted."]
 					. "`n" . TransA["If you answer ""Yes"" definition existing in another library will not be changed."]
@@ -6063,7 +6071,7 @@ F_DeleteHotstring()
 	FileDelete, % LibraryFullPathAndName
 	
 	;4. Disable selected hotstring.
-	LV_GetText(txt2, v_SelectedRow, 2)
+	LV_GetText(txt2, v_SelectedRow, 2)	;tu jestem
 	Try
 		Hotstring(":" . txt2 . ":" . v_TriggerString, , "Off") 
 	Catch
@@ -6089,7 +6097,7 @@ F_DeleteHotstring()
 	;5. Remove trigger hint. Remark: All trigger hints are deleted, so if triggerstring was duplicated, then all trigger hints are deleted!
 	Loop, % a_Triggers.MaxIndex()
 	{
-		if (InStr(a_Triggers[A_Index], v_TriggerString))
+		if (InStr(a_Triggers[A_Index], v_TriggerString, true))	;case sensitive comparison on purpose
 			a_Triggers.RemoveAt(A_Index)
 	}
 	TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
@@ -6329,7 +6337,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		if (ini_Sandbox)
 		{
 			F_GuiMain_Resize1()
-			ini_IsSandboxMoved := true	;tu jestem
+			ini_IsSandboxMoved := true
 		}
 		else
 			F_GuiMain_Resize5()
@@ -8887,7 +8895,6 @@ F_GuiMain_Redraw()
 	
 	;5.2. Button between left and right column
 	GuiControlGet, v_OutVarTemp, Pos, % IdListView1
-	OutputDebug, % "ini_Sandbox:" . A_Tab . ini_Sandbox . A_Tab . "ini_IsSandboxMoved:" . A_Tab . ini_IsSandboxMoved	;tu jestem
 	if ((ini_Sandbox) and (ini_IsSandboxMoved))
 	{
 		v_xNext := LeftColumnW 
@@ -9488,7 +9495,7 @@ F_CreateHotstring(txt, nameoffile)
 	{
 		;OutputDebug, % "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
 		Try
-			Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, Oflag), OnOff)
+			Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, Oflag), OnOff)	;tu jestem
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
@@ -9648,19 +9655,94 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 {
 	global	;assume-global mode
-	local	ThisHotkey := A_ThisHotkey
+	local	ThisHotkey := A_ThisHotkey, vFirstLetter1 := "", vFirstLetter2 := "", vOutputVar := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, fFirstLetterCap := false
 	
-	v_InputString := ""
 	v_UndoHotstring := ReplacementString
-	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
-	if (Oflag = false)
-		SendInput, % ReplacementString . A_EndChar
-	else
-		SendInput, % ReplacementString
 	v_TypedTriggerstring := ThisHotkey 
 	v_HotstringFlag := true
 	v_LOF := "SI"	;last (active) Output Function; this variable stores information about output function. it's used by F_Undo to correctly interpret special text strings, e.g. {Enter}
-	F_EventSigOrdHotstring()
+	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
+	if (!InStr(ThisHotkey, "C"))	
+	{
+		vFirstLetter1 		:= SubStr(v_InputString, 1, 1)
+		vRestOfLetters 	:= SubStr(v_InputString, 2)
+		if vFirstLetter1 is upper
+			fFirstLetterCap 	:= true
+		if vRestOfLetters is upper
+			fRestOfLettersCap 	:= true
+		if (fFirstLetterCap and fRestOfLettersCap)
+		{
+			StringUpper, NewReplacementString, ReplacementString
+			if (Oflag = false)
+			{
+				SendInput, % NewReplacementString . A_EndChar
+				F_EventSigOrdHotstring()
+				v_InputString := ""
+				return
+			}
+			else
+			{
+				SendInput, % NewReplacementString
+				F_EventSigOrdHotstring()
+				v_InputString := ""
+				return
+			}
+		}
+		if (fFirstLetterCap and !fRestOfLettersCap)
+		{
+			vFirstLetter2 := SubStr(ReplacementString, 1, 1)
+			StringUpper, vFirstLetter2, vFirstLetter2
+			NewReplacementString := vFirstLetter2 . SubStr(ReplacementString, 2)
+			if (Oflag = false)
+			{
+				SendInput, % NewReplacementString . A_EndChar
+				F_EventSigOrdHotstring()
+				v_InputString := ""
+				return
+			}
+			else
+			{
+				SendInput, % NewReplacementString
+				F_EventSigOrdHotstring()
+				v_InputString := ""
+				return
+			}
+		}
+		if (!fFirstLetterCap)
+		{
+			if (Oflag = false)
+			{
+				SendInput, % ReplacementString . A_EndChar
+				F_EventSigOrdHotstring()
+				v_InputString := ""
+				return
+			}
+			else
+			{
+				SendInput, % ReplacementString
+				F_EventSigOrdHotstring()
+				v_InputString := ""
+				return
+			}
+		}
+	}
+	if (InStr(ThisHotkey, "C") or InStr(ThisHotkey, "C1"))	;tu jestem
+	{
+		if (Oflag = false)
+		{
+			SendInput, % ReplacementString . A_EndChar
+			F_EventSigOrdHotstring()
+			v_InputString := ""
+			return
+		}
+		else
+		{
+			SendInput, % ReplacementString
+			F_EventSigOrdHotstring()
+			v_InputString := ""
+			return
+		}
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_CLI(ReplacementString, Oflag) ;Hotstring Output Function _ Clipboard
@@ -10722,7 +10804,6 @@ L_GUIInit:
 			}
 			if (ini_HS3GuiMaximized)
 			{
-				;OutputDebug, Tu jestem
 				Gui, HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
 			}
 			else	
