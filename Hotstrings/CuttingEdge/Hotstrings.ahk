@@ -5022,6 +5022,7 @@ F_AddHotstring()
 			,v_TheWholeFile := "", v_TotalLines := 0
 			,ExternalIndex := 0
 			,name := "", key := 0, value := "", Counter := 0, key2 := 0, value2 := ""
+			,f_GeneralMatch := false, f_CaseMatch := false
 	
 	;1. Read all inputs. 
 	Gui, % A_DefaultGui . ":" A_Space . "Submit", NoHide
@@ -5131,20 +5132,25 @@ F_AddHotstring()
 	GuiControl, -Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	for key, value in a_Triggerstring
 	{
-		if (a_Triggerstring[key] == v_Triggerstring)	;case sensitive string comparison!
+		f_GeneralMatch 	:= false
+		f_CaseMatch 		:= false
+		if (a_Triggerstring[key] = v_Triggerstring)	;case insensitive string comparison!
 		{
+			f_GeneralMatch := true
+			if (a_Triggerstring[key] == v_Triggerstring)
+				f_CaseMatch := true
 			;*[One]
 			if (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))
 			{
 				OldOptions := a_TriggerOptions[key]
-				if (!InStr(OldOptions, "C1") and InStr(OldOptions, "C") and !InStr(Options, "C1") and InStr(Options, "C") and (EnDis != "Dis"))	;tu jestem 
+				if (f_CaseMatch and !InStr(OldOptions, "C1") and InStr(OldOptions, "C") and !InStr(Options, "C1") and InStr(Options, "C"))	;tu jestem 
 				{
 					ModifiedFlag 			:= false
 				}				
 				else 
 				{
 					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-						, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["exists in the currently selected library"] . ":" . A_Space . a_Library[key] . ".csv" . "." . "`n`n" 
+						, % TransA["The hostring"] . A_Space . """" .  a_Triggerstring[key] . """" . A_Space .  TransA["exists in the currently selected library"] . ":" . A_Space . a_Library[key] . ".csv" . "." . "`n`n" 
 						. TransA["Do you want to proceed?"]
 						. "`n`n" . TransA["If you answer ""Yes"" it will overwritten."]
 					IfMsgBox, No
@@ -5186,14 +5192,42 @@ F_AddHotstring()
 						a_Hotstring[key] 		:= TextInsert
 						a_Comment[key] 		:= v_Comment
 						ModifiedFlag 			:= true
-						for key2, value2 in a_Library
-							if (value2 = SubStr(v_SelectHotstringLibrary, 1, -4))
+						
+						local SelectedLibraryName := SubStr(v_SelectHotstringLibrary, 1, -4))
+						local MaxTableElements	 := a_Library.Count
+						local NoOfIterations	 := 0
+						local FirstTableIndex	 := 0
+						
+						NoOfIterations := MaxTableElements
+						Loop, NoOfIterations
+						{
+							FirstTableIndex++
+							if (a_Library[FirstTableIndex] = SelectedLibraryName
 							{
 								Counter++
-								if (a_Triggerstring[key2] == v_Triggerstring)	;case sensitive string comparison!
+								if (a_Triggerstring[FirstTableIndex] = v_Triggerstring)	;case insensitive string comparison!
 									Break
 							}
-						;*[One]
+						}
+						NoOfIterations := FirstTableIndex
+						/*
+							for key2, value2 in a_Library
+								if (value2 = SubStr(v_SelectHotstringLibrary, 1, -4))
+								{
+									Counter++
+									if (f_CaseMatch)
+									{
+										if (a_Triggerstring[key2] == v_Triggerstring)	;case sensitive string comparison!
+											Break
+									}
+									else
+									{
+										if (a_Triggerstring[key2] = v_Triggerstring)	;case insensitive string comparison!
+											Break
+									}
+								}
+							;*[One]
+						*/
 						LV_Modify(Counter, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)		
 					}
 				}
