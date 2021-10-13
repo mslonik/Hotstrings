@@ -5023,6 +5023,10 @@ F_AddHotstring()
 			,ExternalIndex := 0
 			,name := "", key := 0, value := "", Counter := 0, key2 := 0, value2 := ""
 			,f_GeneralMatch := false, f_CaseMatch := false
+			,SelectedLibraryName := SubStr(v_SelectHotstringLibrary, 1, -4)
+			,MaxTableElements	 := a_Library.Count()
+			,NoOfIterations	 := MaxTableElements
+			,FirstTableIndex	 := 0
 	
 	;1. Read all inputs. 
 	Gui, % A_DefaultGui . ":" A_Space . "Submit", NoHide
@@ -5154,7 +5158,7 @@ F_AddHotstring()
 						. TransA["Do you want to proceed?"]
 						. "`n`n" . TransA["If you answer ""Yes"" it will overwritten."]
 					IfMsgBox, No
-						return
+						Break
 					IfMsgBox, Yes
 					{
 						if (InStr(OldOptions, "*") and !InStr(Options,"*"))
@@ -5190,44 +5194,23 @@ F_AddHotstring()
 						a_TriggerOptions[key] 	:= Options
 						a_OutputFunction[key] 	:= SendFunFileFormat
 						a_Hotstring[key] 		:= TextInsert
+						a_EnableDisable[key]	:= EnDis
 						a_Comment[key] 		:= v_Comment
 						ModifiedFlag 			:= true
 						
-						local SelectedLibraryName := SubStr(v_SelectHotstringLibrary, 1, -4))
-						local MaxTableElements	 := a_Library.Count
-						local NoOfIterations	 := 0
-						local FirstTableIndex	 := 0
-						
-						NoOfIterations := MaxTableElements
-						Loop, NoOfIterations
+						;*[One]
+						Loop, % NoOfIterations
 						{
 							FirstTableIndex++
-							if (a_Library[FirstTableIndex] = SelectedLibraryName
+							if (a_Library[FirstTableIndex] = SelectedLibraryName)
 							{
 								Counter++
 								if (a_Triggerstring[FirstTableIndex] = v_Triggerstring)	;case insensitive string comparison!
 									Break
 							}
 						}
-						NoOfIterations := FirstTableIndex
-						/*
-							for key2, value2 in a_Library
-								if (value2 = SubStr(v_SelectHotstringLibrary, 1, -4))
-								{
-									Counter++
-									if (f_CaseMatch)
-									{
-										if (a_Triggerstring[key2] == v_Triggerstring)	;case sensitive string comparison!
-											Break
-									}
-									else
-									{
-										if (a_Triggerstring[key2] = v_Triggerstring)	;case insensitive string comparison!
-											Break
-									}
-								}
-							;*[One]
-						*/
+						NoOfIterations := MaxTableElements - FirstTableIndex
+						;*[One]
 						LV_Modify(Counter, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)		
 					}
 				}
