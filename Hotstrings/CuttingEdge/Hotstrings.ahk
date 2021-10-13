@@ -8225,7 +8225,7 @@ F_GuiHS4_CreateObject()
 	GuiControl +g, % IdTextInfo2b, % F_TI_ImmediateExecute
 	
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
-	Gui,		HS4: Add,		Radio,		x0 y0 HwndIdRadioCaseCCb AltSubmit vv_RadioCaseGroup Checked,	% TransA["Case-Conforming"]
+	Gui,		HS4: Add,		Radio,		x0 y0 HwndIdRadioCaseCCb AltSubmit vv_RadioCaseGroup Checked gF_RadioCaseCol,	% TransA["Case-Conforming"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
 	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo3b,									ⓘ
 	GuiControl +g, % IdTextInfo3b, % F_TI_CaseConforming
@@ -8237,7 +8237,7 @@ F_GuiHS4_CreateObject()
 	GuiControl +g, % IdTextInfo4b, % F_TI_NoBackSpace
 	
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
-	Gui,		HS4: Add,		Radio,		x0 y0 HWndIdRadioCaseCSb AltSubmit,						% TransA["Case Sensitive (C)"]
+	Gui,		HS4: Add,		Radio,		x0 y0 HWndIdRadioCaseCSb AltSubmit gF_RadioCaseCol,			% TransA["Case Sensitive (C)"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
 	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo5b,									ⓘ
 	GuiControl +g, % IdTextInfo5b, % F_TI_CaseSensitive
@@ -8249,7 +8249,7 @@ F_GuiHS4_CreateObject()
 	GuiControl +g, % IdTextInfo6b, % F_TI_InsideWord
 	
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
-	Gui,		HS4: Add,		Radio,		x0 y0 HwndIdRadioCaseC1b AltSubmit,						% TransA["Not Case-Conforming (C1)"]
+	Gui,		HS4: Add,		Radio,		x0 y0 HwndIdRadioCaseC1b AltSubmit gF_RadioCaseCol,			% TransA["Not Case-Conforming (C1)"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
 	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo7b,									ⓘ
 	GuiControl +g, % IdTextInfo7b, % F_TI_NotCaseConforming
@@ -8338,9 +8338,7 @@ F_GuiHS4_CreateObject()
 	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText12b, % v_TotalHotstringCnt
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 }
-
 ; ------------------------------------------------------------------------------------------------------------------------------------
-
 F_GuiMain_CreateObject()
 {
 	global ;assume-global mode
@@ -8382,9 +8380,9 @@ F_GuiMain_CreateObject()
 	GuiControl +g, % IdTextInfo2, % F_TI_ImmediateExecute
 	
 	Gui, 		HS3: Font, 		% "s" . c_FontSize
-	Gui,			HS3: Add,			Radio,		x0 y0 HwndIdRadioCaseCC AltSubmit vv_RadioCaseGroup Checked,	% TransA["Case-Conforming"]
-	Gui,			HS3: Add,			Radio,		x0 y0 HWndIdRadioCaseCS AltSubmit,							% TransA["Case Sensitive (C)"]
-	Gui,			HS3: Add,			Radio,		x0 y0 HwndIdRadioCaseC1 AltSubmit,							% TransA["Not Case-Conforming (C1)"]
+	Gui,			HS3: Add,			Radio,		x0 y0 HwndIdRadioCaseCC AltSubmit vv_RadioCaseGroup Checked gF_RadioCaseCol,	% TransA["Case-Conforming"]
+	Gui,			HS3: Add,			Radio,		x0 y0 HWndIdRadioCaseCS AltSubmit gF_RadioCaseCol,			% TransA["Case Sensitive (C)"]
+	Gui,			HS3: Add,			Radio,		x0 y0 HwndIdRadioCaseC1 AltSubmit gF_RadioCaseCol,			% TransA["Not Case-Conforming (C1)"]
 	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2
 	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo3,									ⓘ
 	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo5,									ⓘ
@@ -8539,7 +8537,43 @@ F_GuiMain_DefineConstants()
 	GuiControlGet, v_OutVarTemp, Pos, % IdButton5
 	c_WofMiddleButton   := v_OutVarTempW
 }
-
+; ------------------------------------------------------------------------------------------------------------------------------------
+F_RadioCaseCol()
+{
+	global ;assume-global mode
+	local vOutputVar := 0
+	
+	Gui, HS3: Submit, NoHide	;tu jestem; pobrać aktywne gui
+	Switch v_RadioCaseGroup
+	{
+		Case 1:
+			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+			GuiControl, HS3: Font, % TransA["Case Sensitive (C)"]
+			GuiControl, HS4: Font, % TransA["Case Sensitive (C)"]
+			GuiControl, HS3: Font, % TransA["Case-Conforming"]
+			GuiControl, HS4: Font, % TransA["Case-Conforming"]
+			GuiControl, HS3: Font, % TransA["Not Case-Conforming (C1)"]
+			GuiControl, HS4: Font, % TransA["Not Case-Conforming (C1)"]
+			GuiControl, HS3:, % TransA["Case-Conforming"], 1
+			GuiControl, HS4:, % TransA["Case-Conforming"], 1
+		Case 2:
+			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+			GuiControl, HS3: Font, % TransA["Case Sensitive (C)"]
+			GuiControl, HS4: Font, % TransA["Case Sensitive (C)"]
+			GuiControl, HS3:, % TransA["Case Sensitive (C)"], 1
+			GuiControl, HS4:, % TransA["Case Sensitive (C)"], 1
+		Case 3: 
+			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+			GuiControl, HS3: Font, % TransA["Not Case-Conforming (C1)"]
+			GuiControl, HS4: Font, % TransA["Not Case-Conforming (C1)"]
+			GuiControl, HS3:, % TransA["Not Case-Conforming (C1)"], 1
+			GuiControl, HS4:, % TransA["Not Case-Conforming (C1)"], 1
+	}
+	return
+}
 ; ------------------------------------------------------------------------------------------------------------------------------------
 
 F_GuiHS4_Redraw()
