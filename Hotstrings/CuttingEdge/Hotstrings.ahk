@@ -949,7 +949,8 @@ F_GuiEvents_CreateObjects()
 	
 	;2. Prepare all text objects according to mock-up.
 	Gui,	GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, GuiEvents: Add,	Tab3,		,							% TransA["Basic hotstring is triggered"] . "||" . TransA["Menu hotstring is triggered"] . "|" . TransA["Undid the last hotstring"] . "|" . TransA["Triggerstring tips"]
+	Gui, GuiEvents: Add,	Tab3,		,							% TransA["Basic hotstring is triggered"] . "|" . TransA["Menu hotstring is triggered"] . "|" 
+		. TransA["Undid the last hotstring"] . "|" . TransA["Triggerstring tips"] . "||"
 	
 	Gui, GuiEvents: Tab, 											% TransA["Basic hotstring is triggered"]
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
@@ -1087,6 +1088,167 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvUH_B2 gF_EvUH_B2,			% TransA["Sound test"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvUH_B3 gF_EvUH_B3,			% TransA["Apply && Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvUH_B4 gF_EvUH_B4,			% TransA["Cancel"]
+	
+	Gui, GuiEvents: Tab,											%  TransA["Triggerstring tips"]
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvTt_T1,						% TransA["Tooltip enable"] . ":"
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvTt_T2, 					ⓘ
+	T_TooltipEnable := func("F_ShowLongTooltip").bind(TransA["T_TooltipEnable"])
+	GuiControl, +g, % IdEvTt_T2, % T_TooltipEnable
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvTt_R1 vEvTt_R1R2 gF_EvTt_R1R2,	% TransA["yes"]
+	Gui, GuiEvents: Add,	Radio, 	HwndIdEvTt_R2 gF_EvTt_R1R2,			% TransA["no"]	
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvTt_T3 0x7					; horizontal line → black
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T4,						% TransA["Tooltip timeout"] . ":"
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T5,						ⓘ
+	T_TooltipTimeout := func("F_ShowLongTooltip").bind(TransA["T_TooltipTimeout"])
+	GuiControl, +g, % IdEvTt_T4, % T_TooltipTimeout
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T6,						% TransA["Finite timeout?"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvTt_R3 vEvTt_R3R4 gF_EvTt_R3R4,	% TransA["yes"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvTt_R4 gF_EvTt_R3R4,			% TransA["no"]
+	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T7,						% TransA["If not finite, define tooltip timeout"] . ":"
+	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvTt_S1 vEvTt_S1 gF_EvTt_S1 Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1EvTt_S1, % EvTt_S1
+	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T8,						% TransA["Timeout value [ms]"] . ":" . A_Space . 10000
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvTt_T9 0x7					; horizontal line → black
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T10,					% TransA["Tooltip position"] . ":"
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T11,					ⓘ
+	T_TooltipPosition := func("F_ShowLongTooltip").bind(TransA["T_TooltipPosition"])
+	GuiControl, +g, % IdEvTt_T9, % T_TooltipPosition
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvTt_R5 vEvTt_R5R6,			% TransA["caret"]
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvTt_R6,						% TransA["cursor"]
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvTt_T12 0x7					; horizontal line → black
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T13,					% TransA["Sorting order"]
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T14,					ⓘ
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Checkbox, HwndIdEvTt_C1 vEvTt_C1,				% TransA["Alphabetically"]
+	Gui, GuiEvents: Add,	Checkbox, HwndIdEvTt_C2 vEvTt_C2,				% TransA["By length"]
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvTt_T15 0x7					; horizontal line → black
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvTt_T16,					% TransA["Max. no. of shown tips"]
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T17,					ⓘ
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Slider,	HwndIdEvTt_S2 vini_MNTT gF_EvTt_S2 Line1 Page1 Range1-25 TickInterval5 ToolTipBottom Buddy1ini_MNTT, % ini_MNTT
+	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T18,					20
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvTt_T19 0x7					; horizontal line → black
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T20,					% TransA["Tips are shown after no. of characters"] . ":"
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T21,					ⓘ
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	DropDownList, HwndIdEvTt_DDL1 vIdEvTt_DDL1,		1||2|3|4|5
+	Gui, GuiEvents: Add, 	Button, 	HwndIdEvTt_B1 gF_EvTt_B1,			% TransA["Tooltip test"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B2 gF_EvTt_B2,			% TransA["Apply && Close"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B3 gF_EvTt_B3,			% TransA["Cancel"]
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvTt_B1()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvTt_B2()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvTt_B3()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvTt_S2()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvTt_S1()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvTt_R3R4()
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvTt_R1R2()
+{
+	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvTt_R1R2
+	{
+		Case 1:
+		GuiControl, Enable, 	% IdEvTt_T3
+		GuiControl, Enable, 	% IdEvTt_T4
+		GuiControl, Enable, 	% IdEvTt_T5
+		GuiControl, Enable, 	% IdEvTt_R3
+		GuiControl, Enable, 	% IdEvTt_R4
+		GuiControl, Enable, 	% IdEvTt_T6
+		GuiControl, Enable, 	% IdEvTt_S1
+		GuiControl, Enable, 	% IdEvTt_T7
+		GuiControl, Enable, 	% IdEvTt_T8
+		GuiControl, Enable, 	% IdEvTt_T9
+		GuiControl, Enable, 	% IdEvTt_T10
+		GuiControl, Enable, 	% IdEvTt_T11
+		GuiControl, Enable, 	% IdEvTt_R5
+		GuiControl, Enable, 	% IdEvTt_R6
+		GuiControl, Enable, 	% IdEvTt_T13
+		GuiControl, Enable, 	% IdEvTt_T14
+		GuiControl, Enable, 	% IdEvTt_C1
+		GuiControl, Enable, 	% IdEvTt_C2
+		GuiControl, Enable, 	% IdEvTt_T16
+		GuiControl, Enable, 	% IdEvTt_T17
+		GuiControl, Enable, 	% IdEvTt_S2
+		GuiControl, Enable, 	% IdEvTt_B2
+		GuiControl, Enable, 	% IdEvTt_T18
+		GuiControl, Enable, 	% IdEvTt_T20
+		GuiControl, Enable, 	% IdEvTt_T21
+		GuiControl, Enable, 	% IdEvTt_DDL1
+		Case 2:
+		GuiControl, Disable, 	% IdEvTt_T3
+		GuiControl, Disable, 	% IdEvTt_T4
+		GuiControl, Disable, 	% IdEvTt_T5
+		GuiControl, Disable, 	% IdEvTt_R3
+		GuiControl, Disable, 	% IdEvTt_R4
+		GuiControl, Disable, 	% IdEvTt_T6
+		GuiControl, Disable, 	% IdEvTt_S1
+		GuiControl, Disable, 	% IdEvTt_T7
+		GuiControl, Disable, 	% IdEvTt_T8
+		GuiControl, Disable, 	% IdEvTt_T9
+		GuiControl, Disable, 	% IdEvTt_T10
+		GuiControl, Disable, 	% IdEvTt_T11
+		GuiControl, Disable, 	% IdEvTt_R5
+		GuiControl, Disable, 	% IdEvTt_R6
+		GuiControl, Disable, 	% IdEvTt_T13
+		GuiControl, Disable, 	% IdEvTt_T14
+		GuiControl, Disable, 	% IdEvTt_C1
+		GuiControl, Disable, 	% IdEvTt_C2
+		GuiControl, Disable, 	% IdEvTt_T16
+		GuiControl, Disable, 	% IdEvTt_T17
+		GuiControl, Disable, 	% IdEvTt_S2
+		GuiControl, Disable, 	% IdEvTt_B2
+		GuiControl, Disable, 	% IdEvTt_T18
+		GuiControl, Disable, 	% IdEvTt_T20
+		GuiControl, Disable, 	% IdEvTt_T21
+		GuiControl, Disable, 	% IdEvTt_DDL1
+	}
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1561,6 +1723,85 @@ F_GuiEvents_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_B3
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvUH_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	v_xNext := c_xmarg, v_yNext := c_ymarg
+	GuiControl, Move, % IdEvTt_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_T1
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvTt_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdEvTt_R1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_R1
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvTt_R2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	GuiControl, Move, % IdEvTt_T3, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
+	GuiControl, Move, % IdEvTt_T4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_T4
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvTt_T5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdEvTt_T6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdEvTt_R3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_R3
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvTt_R4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdEvTt_T7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText, v_wNext := TheWidestText
+	GuiControl, Move, % IdEvTt_S1, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
+	v_xNext += 2 * c_xmarg + TheWidestText
+	GuiControl, Move, % IdEvTt_T8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	GuiControl, Move, % IdEvTt_T9, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
+	GuiControl, Move, % IdEvTt_T10, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_T10
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvTt_T11, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdEvTt_R5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_R5
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvTt_R6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	GuiControl, Move, % IdEvTt_T12, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
+	GuiControl, Move, % IdEvTt_T13, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_T13
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvTt_T14, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdEvTt_C1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_C1
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvTt_C2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	GuiControl, Move, % IdEvTt_T15, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
+	GuiControl, Move, % IdEvTt_T16, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_T16
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvTt_T17, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText, v_wNext := TheWidestText
+	GuiControl, Move, % IdEvTt_S2, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
+	v_xNext += 2 * c_xmarg + TheWidestText
+	GuiControl, Move, % IdEvTt_T18, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	GuiControl, Move, % IdEvTt_T19, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
+	GuiControl, Move, % IdEvTt_T20, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_T20
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvTt_T21, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText, v_wNext := TheWidestText
+	GuiControl, Move, % IdEvTt_DDL1, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
+
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	GuiControl, Move, % IdEvTt_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_B1
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvTt_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_B2
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 4 * c_xmarg
+	GuiControl, Move, % IdEvTt_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6053,9 +6294,7 @@ F_RefreshListOfLibraries()
 	Menu,	LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"],			:EnDisLib
 	return
 }
-	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
 F_DeleteHotstring()
 {
 	;1. Remove selected library file.
@@ -6148,7 +6387,6 @@ F_DeleteHotstring()
 	F_Searching("Reload")
 	return
 }
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui 
 {
@@ -6188,7 +6426,6 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 		Menu, ConfGUI, Check, 	% TransA["Show full GUI (F4)"]
 	else
 		Menu, ConfGUI, UnCheck, % TransA["Show full GUI (F4)"]
-	
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7622,7 +7859,7 @@ F_LoadCreateTranslationTxt(decision*)
 About / Help 											= &About / Help
 About this application...								= About this application...
 Add comment (optional) 									= Add comment (optional)
-Add hotstring (F9) 										= Add hotstring (F9)
+Add / Edit hotstring (F9) 								= Add / Edit hotstring (F9)
 Add library 											= Add library
 Add to Autostart										= Add to Autostart
 After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder? into memory? = After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder? into memory?
@@ -8316,9 +8553,9 @@ F_GuiHS4_CreateObject()
 	Gui, 	HS4: Add, 	Button, 		x0 y0 HwndIdButton1b gF_GuiAddLibrary, 						% TransA["Add library"]
 	Gui,		HS4: Add,		DropDownList,	x0 y0 HwndIdDDL2b vv_SelectHotstringLibrary gF_SelectLibrary Sort
 	
-	Gui, 	HS4: Add,		Button, 		x0 y0 HwndIdButton2b gF_AddHotstring,						% TransA["Add hotstring (F9)"]
-	Gui, 	HS4:Add, 		Button, 		x0 y0 HwndIdButton3b gF_Clear,							% TransA["Clear (F5)"]
-	Gui, 	HS4:Add, 		Button, 		x0 y0 HwndIdButton4b gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
+	Gui, 	HS4: Add,		Button, 		x0 y0 HwndIdButton2b gF_AddHotstring,						% TransA["Add / Edit hotstring (F9)"]
+	Gui, 	HS4: Add, 	Button, 		x0 y0 HwndIdButton3b gF_Clear,							% TransA["Clear (F5)"]
+	Gui, 	HS4: Add, 	Button, 		x0 y0 HwndIdButton4b gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
 	
 	Gui,		HS4: Add,		Button,		x0 y0 HwndIdButton5b gF_ToggleRightColumn,					⯈`nF4
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
@@ -8354,7 +8591,6 @@ F_GuiMain_CreateObject()
 ;1. Definition of HS3 GUI.
 ;-DPIScale doesn't work in Microsoft Windows 10
 ;+Border doesn't work in Microsoft Windows 10
-	;Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs -MaximizeBox, 						% A_ScriptName
 	Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs,			 						% A_ScriptName
 	Gui, 		HS3: Margin,		% c_xmarg, % c_ymarg
 	Gui,			HS3: Color,		% c_WindowColor, % c_ControlColor
@@ -8473,7 +8709,7 @@ F_GuiMain_CreateObject()
 	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton1 gF_GuiAddLibrary, 						% TransA["Add library"]
 	Gui,			HS3: Add,			DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SelectLibrary Sort
 	
-	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton2 gF_AddHotstring,						% TransA["Add hotstring (F9)"]
+	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton2 gF_AddHotstring,						% TransA["Add / Edit hotstring (F9)"]
 	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton3 gF_Clear,								% TransA["Clear (F5)"]
 	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton4 gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
 	Gui,			HS3: Add,			Button,		x0 y0 HwndIdButton5 gF_ToggleRightColumn,					⯇`nF4
@@ -8544,7 +8780,6 @@ F_RadioCaseCol()
 	global ;assume-global mode
 	
 	F_WhichGui()
-	;*[One]
 	Switch A_DefaultGui
 	{
 		Case "HS3": 
@@ -10016,7 +10251,7 @@ F_HOF_MSI(TextOptions, Oflag)
 	ToolTip,
 	Gui, HMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuAHKHwnd
 	Gui, HMenuAHK: Margin, 0, 0
-	if (ini_HMBgrCol = "custom")	;Tooltip font color: c766D69
+	if (ini_HMBgrCol = "custom")
 		Gui, HMenuAHK: Color,, % ini_HMBgrColCus
 	else
 		Gui, HMenuAHK: Color,, % ini_HMBgrCol
