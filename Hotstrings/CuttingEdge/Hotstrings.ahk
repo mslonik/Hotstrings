@@ -1137,7 +1137,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T17,					ⓘ
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	Gui, GuiEvents: Add,	Slider,	HwndIdEvTt_S2 vini_MNTT gF_EvTt_S2 Line1 Page1 Range1-25 TickInterval5 ToolTipBottom Buddy1ini_MNTT, % ini_MNTT
+	Gui, GuiEvents: Add,	Slider,	HwndIdEvTt_S2 vEvTt_S2 gF_EvTt_S2 Line1 Page1 Range1-25 TickInterval1 ToolTipBottom Buddy1EvTt_S2, % EvTt_S2
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T18,					20
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvTt_T19 0x7					; horizontal line → black
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
@@ -1145,46 +1145,101 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T21,					ⓘ
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	Gui, GuiEvents: Add,	DropDownList, HwndIdEvTt_DDL1 vIdEvTt_DDL1,		1||2|3|4|5
+	Gui, GuiEvents: Add,	DropDownList, HwndIdEvTt_DDL1 vEvTt_DDL1 AltSubmit,		1|2|3|4|5
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvTt_B1 gF_EvTt_B1,			% TransA["Tooltip test"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B2 gF_EvTt_B2,			% TransA["Apply && Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B3 gF_EvTt_B3,			% TransA["Cancel"]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvTt_B1()
+F_EvTt_B1()	;Event Tooltip (is triggered) Button Tooltip test
 {
 	global ;assume-global mode
+	if (EvTt_R1R2 = 1)
+	{
+		a_Tips := []
+		Loop, % EvTt_S2
+		{
+			if (A_Index = 1)
+				a_Tips[A_Index] := "A" . Chr(64 + A_Index) . A_Space . "Demo" . A_Space . A_Index
+			else
+				a_Tips[A_Index] := Chr(64 + A_Index) . A_Space . "Demo" . A_Space . A_Index
+		}
+		F_Sort_a_Triggers()
+		F_ShowTriggerstringTips2()	;tu jestem
+	}
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvTt_B2()
+F_EvTt_B2()	;Event Tooltip (is triggered) Button Apply & Close
 {
 	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvTt_R1R2	;Tooltip enable
+	{
+		Case 1:	ini_TTTtEn := true
+		Case 2:	ini_TTTtEn := false
+	}
+	Switch EvTt_R3R4	;Finite timeout
+	{
+		Case 1:	ini_TTTD := EvTt_S1
+		Case 2:	ini_TTTD := 0
+	}
+	Switch EvTt_R5R6	;Tooltip position
+	{
+		Case 1:	ini_TTTP := 1
+		Case 2:	ini_TTTP := 2
+	}
+	ini_TipsSortAlphabetically := EvTt_C1, ini_TipsSortByLength := EvTt_C2, ini_MNTT := EvTt_S2,	ini_TASAC := EvTt_DDL1
+	IniWrite, % ini_TTTtEn, 	% HADConfig, Event_TriggerstringTips, 	TTTtEn
+	IniWrite, % ini_TTTD,	% HADConfig, Event_TriggerstringTips,	TTTD
+	IniWrite, % ini_TTTP,	% HADConfig, Event_TriggerstringTips,	TTTP
+	IniWrite, % ini_TipsSortAlphabetically, 	% HADConfig, Event_TriggerstringTips,	TipsSortAlphabetically
+	IniWrite, % ini_TipsSortByLength,	% HADConfig, Event_TriggerstringTips,	TipsSortByLength
+	IniWrite, % ini_MNTT,	% HADConfig, Event_TriggerstringTips,	MNTT
+	IniWrite, % ini_TASAC,	% HADConfig, Event_TriggerstringTips,	TipsAreShownAfterNoOfCharacters
+	Tooltip,,,, 4
+	Gui, GuiEvents: Destroy
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvTt_B3()
+F_EvTt_B3()	;Event Tooltip (is triggered) Button Cancel
 {
 	global ;assume-global mode
+	Tooltip,,,, 4
+	Gui, GuiEvents: Destroy
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvTt_S2()
 {
 	global ;assume-global mode
+	GuiControl,, % IdEvTt_T18, % EvTt_S2
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvTt_S1()
 {
 	global ;assume-global mode
+	GuiControl,, % IdEvTt_T8, % TransA["Timeout value [ms]"] . ":" . A_Space . EvTt_S1	
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvTt_R3R4()
 {
 	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvTt_R3R4
+	{
+		Case 1:
+			GuiControl, Enable,		% IdEvTt_T7
+			GuiControl, Enable,		% IdEvTt_S1
+			GuiControl, Enable,		% IdEvTt_T8
+		Case 2:
+			GuiControl, Disable,	% IdEvTt_T7
+			GuiControl, Disable,	% IdEvTt_S1
+			GuiControl, Disable,	% IdEvTt_T8
+	}
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1216,11 +1271,21 @@ F_EvTt_R1R2()
 		GuiControl, Enable, 	% IdEvTt_T16
 		GuiControl, Enable, 	% IdEvTt_T17
 		GuiControl, Enable, 	% IdEvTt_S2
-		GuiControl, Enable, 	% IdEvTt_B2
 		GuiControl, Enable, 	% IdEvTt_T18
 		GuiControl, Enable, 	% IdEvTt_T20
 		GuiControl, Enable, 	% IdEvTt_T21
 		GuiControl, Enable, 	% IdEvTt_DDL1
+		Switch EvTt_R3R4
+		{
+			Case 1:
+			GuiControl, Enable,		% IdEvTt_T7
+			GuiControl, Enable,		% IdEvTt_S1
+			GuiControl, Enable,		% IdEvTt_T8
+			Case 2:
+			GuiControl, Disable,	% IdEvTt_T7
+			GuiControl, Disable,	% IdEvTt_S1
+			GuiControl, Disable,	% IdEvTt_T8
+		}
 		Case 2:
 		GuiControl, Disable, 	% IdEvTt_T3
 		GuiControl, Disable, 	% IdEvTt_T4
@@ -1243,7 +1308,6 @@ F_EvTt_R1R2()
 		GuiControl, Disable, 	% IdEvTt_T16
 		GuiControl, Disable, 	% IdEvTt_T17
 		GuiControl, Disable, 	% IdEvTt_S2
-		GuiControl, Disable, 	% IdEvTt_B2
 		GuiControl, Disable, 	% IdEvTt_T18
 		GuiControl, Disable, 	% IdEvTt_T20
 		GuiControl, Disable, 	% IdEvTt_T21
@@ -1420,6 +1484,17 @@ F_EvUH_R1R2()
 			GuiControl, Enable, 	% IdEvUH_R5
 			GuiControl, Enable, 	% IdEvUH_R6
 			GuiControl, Enable, 	% IdEvUH_B2
+			Switch EvUH_R3R4
+			{
+				Case 1:
+				GuiControl, Enable,		% IdEvUH_T6
+				GuiControl, Enable,		% IdEvUH_S1
+				GuiControl, Enable,		% IdEvUH_T7
+				Case 2:
+				GuiControl, Disable,	% IdEvUH_T6
+				GuiControl, Disable,	% IdEvUH_S1
+				GuiControl, Disable,	% IdEvUH_T7
+			}
 		Case 2:
 			GuiControl, Disable, 	% IdEvUH_T3
 			GuiControl, Disable, 	% IdEvUH_T4
@@ -1867,6 +1942,17 @@ F_EvBH_R1R2()
 			GuiControl, Enable, 	% IdEvBH_R5
 			GuiControl, Enable, 	% IdEvBH_R6
 			GuiControl, Enable, 	% IdEvBH_B2
+			Switch EvBH_R3R4
+			{
+				Case 1:
+					GuiControl, Enable,		% IdEvBH_T6
+					GuiControl, Enable,		% IdEvBH_S1
+					GuiControl, Enable,		% IdEvBH_T7
+				Case 2:
+					GuiControl, Disable,	% IdEvBH_T6
+					GuiControl, Disable,	% IdEvBH_S1
+					GuiControl, Disable,	% IdEvBH_T7
+			}
 		Case 2:
 			GuiControl, Disable, 	% IdEvBH_T3
 			GuiControl, Disable, 	% IdEvBH_T4
@@ -1994,7 +2080,10 @@ F_EvBH_S1()
 F_GuiEvents_InitiateValues()
 {
 	global ;assume-global mode
-	EvBH_S1 := ini_OHTD, EvBH_S2 := ini_OHSF, EvBH_S3 := ini_OHSD, EvMH_S1 := ini_MHSF, EvMH_S2 := ini_MHSD, EvUH_S1 := ini_UHTD, EvUH_S2 := ini_UHSF, EvUH_S3 := ini_UHSD
+	EvBH_S1 := ini_OHTD, EvBH_S2 := ini_OHSF, EvBH_S3 := ini_OHSD
+	, EvMH_S1 := ini_MHSF, EvMH_S2 := ini_MHSD 
+	, EvUH_S1 := ini_UHTD, EvUH_S2 := ini_UHSF, EvUH_S3 := ini_UHSD
+	, EvTt_S1 := ini_TTTD, EvTt_S2 := ini_MNTT, EvTt_C1 := ini_TipsSortAlphabetically, EvTt_C2 := ini_TipsSortByLength, EvTt_DDL1 := ini_TASAC ;(Tips Are Shown After No of Characters)
 	Switch ini_OHTtEn
 	{
 		Case false: 	EvBH_R1R2 := 1
@@ -2045,12 +2134,29 @@ F_GuiEvents_InitiateValues()
 		Case false: 	EvUH_R7R8 := 1
 		Case true: 	EvUH_R7R8 := 2
 	}
+	Switch ini_TTTtEn
+	{
+		Case false: 	EvTt_R1R2 := 1
+		Case true: 	EvTt_R1R2 := 2
+	}
+	Switch ini_TTTD
+	{
+		Case 0: 		EvTt_R3R4 := 1
+		Default: 		EvTt_R3R4 := 2
+	}
+	Switch ini_TTTP
+	{
+		Case 1:		EvTt_R5R6 := 1
+		Case 2: 		EvTt_R5R6 := 2
+	}
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiEvents_LoadValues()
 {
 	global ;assume-global mode
+	local	a_Styling_DDL1 := [1, 2, 3, 4, 5],	s_Styling_DDL1 := "|",	key := 0,	value := ""
+
 	Switch ini_OHTtEn
 	{
 		Case false: 	GuiControl,, % IdEvBH_R2, 1
@@ -2077,7 +2183,7 @@ F_GuiEvents_LoadValues()
 	GuiControl,, % IdEvBH_T13, 	% TransA["Sound frequency"] . ":" 		. A_Space . ini_OHSF
 	GuiControl,, % IdEvBH_S3, 	% ini_OHSD
 	GuiControl,, % IdEvBH_T14, 	% TransA["Sound duration [ms]"] . ":" 	. A_Space . ini_OHSD
-
+	
 	Switch ini_MHMP
 	{
 		Case 1: 		GuiControl,, % IdEvMH_R1, 1
@@ -2092,7 +2198,7 @@ F_GuiEvents_LoadValues()
 	GuiControl,, % IdEvMH_T7, 	% TransA["Sound frequency"] . ":" 		. A_Space . ini_MHSF
 	GuiControl,, % IdEvMH_S2, 	% ini_MHSD
 	GuiControl,, % IdEvMH_T8, 	% TransA["Sound duration [ms]"] . ":" 	. A_Space . ini_MHSD
-
+	
 	Switch ini_UHTtEn
 	{
 		Case false: 	GuiControl,, % IdEvUH_R2, 1
@@ -2119,6 +2225,33 @@ F_GuiEvents_LoadValues()
 	GuiControl,, % IdEvUH_T13, 	% TransA["Sound frequency"] . ":" 		. A_Space . ini_UHSF
 	GuiControl,, % IdEvUH_S3, 	% ini_UHSD
 	GuiControl,, % IdEvUH_T14, 	% TransA["Sound duration [ms]"] . ":" 	. A_Space . ini_UHSD
+	Switch ini_TTTtEn
+	{
+		Case false: 	GuiControl,, % IdEvTt_R2, 1
+		Case true: 	GuiControl,, % IdEvTt_R1, 1
+	}
+	Switch ini_TTTD
+	{
+		Case 0: 		GuiControl,, % IdEvTt_R4, 1
+		Default:		GuiControl,, % IdEvTt_R3, 1
+	}
+	GuiControl,, % IdEvTt_S1, 	% ini_TTTD
+	GuiControl,, % IdEvTt_T8, 	% TransA["Timeout value [ms]"] . ":" . A_Space . ini_TTTD
+	Switch ini_TTTP
+	{
+		Case 1: 		GuiControl,, % IdEvTt_R6, 1
+		Case 2: 		GuiControl,, % IdEvTt_R5, 1
+	}
+	GuiControl,, % IdEvTt_C1,	% ini_TipsSortAlphabetically
+	GuiControl,, % IdEvTt_C2,	% ini_TipsSortByLength
+	GuiControl,, % IdEvTt_S2,	% ini_MNTT
+	GuiControl,, % IdEvTt_T18,	% ini_MNTT
+	for key, val in a_Styling_DDL1
+		if (val = ini_TASAC)
+			s_Styling_DDL1 .= val . "||"
+		else
+			s_Styling_DDL1 .= val . "|"
+	GuiControl,, % IdEvTt_DDL1, % s_Styling_DDL1
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4060,7 +4193,7 @@ F_PrepareTriggerstringTipsTables2()
 	;OutputDebug, % "Length of v_InputString:" . A_Space . StrLen(v_InputString) . A_Tab . "v_InputString:" . A_Space . v_InputString
 	if (StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{
-		a_Tips := []		
+		a_Tips := []
 		Loop, % a_Triggers.MaxIndex()
 		{
 			if (InStr(a_Triggers[A_Index], v_InputString) = 1)
@@ -5388,7 +5521,7 @@ F_AddHotstring()
 			if (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))
 			{
 				OldOptions := a_TriggerOptions[key]
-				if (f_CaseMatch and !InStr(OldOptions, "C1") and InStr(OldOptions, "C") and !InStr(Options, "C1") and InStr(Options, "C"))	;tu jestem 
+				if (f_CaseMatch and !InStr(OldOptions, "C1") and InStr(OldOptions, "C") and !InStr(Options, "C1") and InStr(Options, "C"))
 				{
 					ModifiedFlag 			:= false
 				}				
@@ -6327,7 +6460,7 @@ F_DeleteHotstring()
 	FileDelete, % LibraryFullPathAndName
 	
 	;4. Disable selected hotstring.
-	LV_GetText(txt2, v_SelectedRow, 2)	;tu jestem
+	LV_GetText(txt2, v_SelectedRow, 2)
 	Try
 		Hotstring(":" . txt2 . ":" . v_TriggerString, , "Off") 
 	Catch
@@ -9820,7 +9953,7 @@ F_CreateHotstring(txt, nameoffile)
 	{
 		;OutputDebug, % "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
 		Try
-			Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, Oflag), OnOff)	;tu jestem
+			Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, Oflag), OnOff)
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
@@ -10051,7 +10184,7 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 			}
 		}
 	}
-	if (InStr(ThisHotkey, "C") or InStr(ThisHotkey, "C1"))	;tu jestem
+	if (InStr(ThisHotkey, "C") or InStr(ThisHotkey, "C1"))
 	{
 		if (Oflag = false)
 		{
