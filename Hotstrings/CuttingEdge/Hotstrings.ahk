@@ -186,7 +186,7 @@ v_LibHotstringCnt := 0	;dirty trick to show initially 0 instead of 0000
 GuiControl, , % IdText13,  % v_LibHotstringCnt
 GuiControl, , % IdText13b, % v_LibHotstringCnt
 F_LoadHotstringsFromLibraries()	;→ F_LoadFile()
-F_Sort_a_Triggers()
+F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 F_GuiSearch_CreateObject()	;When all tables are full, initialize GuiSearch
 F_GuiSearch_DetermineConstraints()
 F_Searching("Reload")			;prepare content of Search tables
@@ -445,7 +445,11 @@ Loop,
 		F_PrepareTriggerstringTipsTables2()		
 		;F_ShowTriggerstringTips()
 		if (a_Tips.Count())
+		{
 			F_ShowTriggerstringTips2()
+			if ((ini_TTTtEn) and (ini_TTTD > 0))
+				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
+		}
 		else
 			Gui, TMenuAHK: Destroy
 	}
@@ -489,7 +493,11 @@ else
 	v_InputString := SubStr(v_InputString, 1, -1)
 	F_PrepareTriggerstringTipsTables2()
 	if (a_Tips.Count())
+	{
 		F_ShowTriggerstringTips2()
+		if ((ini_TTTtEn) and (ini_TTTD > 0))
+			SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+	}
 	
 	if (v_Param == "d")
 	{
@@ -914,7 +922,9 @@ F_GuiEvents()
 	F_EvUH_R1R2()
 	F_EvUH_R3R4()
 	F_EvUH_R7R8()
-	
+	F_EvTt_R1R2()
+	F_EvTt_R3R4()
+
 	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	Gui, GuiEvents: Show, Hide Center AutoSize
@@ -974,7 +984,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R3 vEvBH_R3R4 gF_EvBH_R3R4,	% TransA["yes"]
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R4 gF_EvBH_R3R4,			% TransA["no"]
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T6,						% TransA["If not finite, define tooltip timeout"] . ":"
-	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvBH_S1 vEvBH_S1 gF_EvBH_S1 Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1EvBH_S1, % EvBH_S1
+	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvBH_S1 vEvBH_S1 gF_EvBH_S1 Line1 Page500 Range500-10000 TickInterval500 ToolTipBottom Buddy1EvBH_S1, % EvBH_S1
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T7,						% TransA["Timeout value [ms]"] . ":" . A_Space . 10000
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvBH_T16 0x7					; horizontal line → black
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
@@ -1057,7 +1067,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvUH_R3 vEvUH_R3R4 gF_EvUH_R3R4,	% TransA["yes"]
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvUH_R4 gF_EvUH_R3R4,			% TransA["no"]
 	Gui, GuiEvents: Add,	Text,	HwndIdEvUH_T6,						% TransA["If not finite, define tooltip timeout"] . ":"
-	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvUH_S1 vEvUH_S1 gF_EvUH_S1 Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1EvUH_S1, % EvUH_S1
+	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvUH_S1 vEvUH_S1 gF_EvUH_S1 Line1 Page500 Range500-10000 TickInterval500 ToolTipBottom Buddy1EvUH_S1, % EvUH_S1
 	Gui, GuiEvents: Add,	Text,	HwndIdEvUH_T7,						% TransA["Timeout value [ms]"] . ":" . A_Space . 10000
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvUH_T16 0x7					; horizontal line → black
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
@@ -1104,14 +1114,14 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T4,						% TransA["Tooltip timeout"] . ":"
 	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T5,						ⓘ
-	T_TooltipTimeout := func("F_ShowLongTooltip").bind(TransA["T_TooltipTimeout"])
+	T_TooltipTimeout := func("F_ShowLongTooltip").bind(TransA["T_TooltipTimeout"])	;tu jestem
 	GuiControl, +g, % IdEvTt_T4, % T_TooltipTimeout
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T6,						% TransA["Finite timeout?"]
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvTt_R3 vEvTt_R3R4 gF_EvTt_R3R4,	% TransA["yes"]
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvTt_R4 gF_EvTt_R3R4,			% TransA["no"]
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T7,						% TransA["If not finite, define tooltip timeout"] . ":"
-	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvTt_S1 vEvTt_S1 gF_EvTt_S1 Line1 Page500 Range1000-10000 TickInterval500 ToolTipBottom Buddy1EvTt_S1, % EvTt_S1
+	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvTt_S1 vEvTt_S1 gF_EvTt_S1 Line1 Page500 Range500-10000 TickInterval500 ToolTipBottom Buddy1EvTt_S1, % EvTt_S1
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T8,						% TransA["Timeout value [ms]"] . ":" . A_Space . 10000
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvTt_T9 0x7					; horizontal line → black
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
@@ -1155,18 +1165,22 @@ F_GuiEvents_CreateObjects()
 F_EvTt_B1()	;Event Tooltip (is triggered) Button Tooltip test
 {
 	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
 	if (EvTt_R1R2 = 1)
 	{
 		a_Tips := []
 		Loop, % EvTt_S2
 		{
 			if (A_Index = 1)
-				a_Tips[A_Index] := "A" . Chr(64 + A_Index) . A_Space . "Demo" . A_Space . A_Index
+				a_Tips[A_Index] := "A" . Chr(65 + EvTt_S2 - A_Index) . A_Space . "Demo" . A_Space . A_Index
 			else
-				a_Tips[A_Index] := Chr(64 + A_Index) . A_Space . "Demo" . A_Space . A_Index
+				a_Tips[A_Index] := Chr(65 + EvTt_S2 - A_Index) . A_Space . "Demo" . A_Space . A_Index
 		}
-		F_Sort_a_Triggers()
-		F_ShowTriggerstringTips2()	;tu jestem
+		;*[One]
+		F_Sort_a_Triggers(a_Tips, EvTt_C1, EvTt_C2)
+		F_ShowTriggerstringTips2()
+		if ((EvTt_R1R2 = 1) and (EvTt_R3R4 = 1))
+			SetTimer, TurnOff_Ttt, % "-" . EvTt_S1	 ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 	}
 	return
 }
@@ -1235,6 +1249,7 @@ F_EvTt_R3R4()
 			GuiControl, Enable,		% IdEvTt_T7
 			GuiControl, Enable,		% IdEvTt_S1
 			GuiControl, Enable,		% IdEvTt_T8
+			F_EvTt_S1()
 		Case 2:
 			GuiControl, Disable,	% IdEvTt_T7
 			GuiControl, Disable,	% IdEvTt_S1
@@ -1432,6 +1447,7 @@ F_EvUH_R3R4()
 			GuiControl, Enable,		% IdEvUH_T6
 			GuiControl, Enable,		% IdEvUH_S1
 			GuiControl, Enable,		% IdEvUH_T7
+			F_EvUH_S2()
 		Case 2:
 			GuiControl, Disable,	% IdEvUH_T6
 			GuiControl, Disable,	% IdEvUH_S1
@@ -1890,6 +1906,7 @@ F_EvBH_R3R4()
 			GuiControl, Enable,		% IdEvBH_T6
 			GuiControl, Enable,		% IdEvBH_S1
 			GuiControl, Enable,		% IdEvBH_T7
+			F_EvBH_S2()
 		Case 2:
 			GuiControl, Disable,	% IdEvBH_T6
 			GuiControl, Disable,	% IdEvBH_S1
@@ -2091,8 +2108,8 @@ F_GuiEvents_InitiateValues()
 	}
 	Switch ini_OHTD
 	{
-		Case 0: 		EvBH_R3R4 := 1
-		Default:		EvBH_R3R4 := 2
+		Case 0: 		EvBH_R3R4 := 2
+		Default:		EvBH_R3R4 := 1
 	}
 	Switch ini_OHTP
 	{
@@ -2121,8 +2138,8 @@ F_GuiEvents_InitiateValues()
 	}
 	Switch ini_UHTD
 	{
-		Case 0: 		EvUH_R3R4 := 1
-		Default:		EvUH_R3R4 := 2
+		Case 0: 		EvUH_R3R4 := 2
+		Default:		EvUH_R3R4 := 1
 	}
 	Switch ini_UHTP
 	{
@@ -2141,8 +2158,8 @@ F_GuiEvents_InitiateValues()
 	}
 	Switch ini_TTTD
 	{
-		Case 0: 		EvTt_R3R4 := 1
-		Default: 		EvTt_R3R4 := 2
+		Case 0: 		EvTt_R3R4 := 2	
+		Default: 		EvTt_R3R4 := 1
 	}
 	Switch ini_TTTP
 	{
@@ -3150,8 +3167,10 @@ F_ShowTriggerstringTips2()
 	LongestString := WhichValue
 	F_GuiTrigTipsMenuDef(a_Tips.Count(), LongestString)
 	
+	ThisValue := ""
 	for key, value in a_Tips
-		GuiControl,, % Id_LB_TMenuAHK, % value . "|"
+		ThisValue .= value . "|"
+	GuiControl,, % Id_LB_TMenuAHK, % ThisValue
 	
 	if (ini_MHMP = 1)
 	{
@@ -3192,10 +3211,9 @@ F_ShowTriggerstringTips2()
 		MenuY -= Window2H
 	if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
 		MenuX -= Window2W
+	
 	GuiControl, Choose, % Id_LB_TMenuAHK, 1
 	Gui, TMenuAHK: Show, x%MenuX% y%MenuY% NoActivate	
-	if ((ini_TTTtEn) and (ini_TTTD > 0))
-		SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3822,22 +3840,23 @@ F_GuiShortDef()
 	return  
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Sort_a_Triggers()
+F_Sort_a_Triggers(ByRef a_Table, f_SortAlpha, f_SortByLength)
 {	;sort now a_Triggers() so it's not necessary each time when user gets triggerstring tips; it should speed-up process significantly
 	global	;assume-global mode
 	local	key := "", value := "", s_SelectedTriggers := ""
 
-	if (ini_TipsSortAlphabetically)
+	if (f_SortAlpha)
 	{
 		;a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
-		for key, value in a_Triggers	;table to string Conversion
+		for key, value in a_Table	;table to string Conversion
 			s_SelectedTriggers .= value . "`n"
 		Sort, s_SelectedTriggers
 		Loop, Parse, s_SelectedTriggers, `n	;string to table Conversion
-			a_Triggers[A_Index] := A_LoopField
+			if (A_LoopField)
+				a_Table[A_Index] := A_LoopField
 	}
-	if (ini_TipsSortByLength)
-		a_Triggers := F_SortArrayByLength(a_Triggers)
+	if (f_SortByLength)
+		a_Table := F_SortArrayByLength(a_Table)
 
 	return
 }
@@ -3885,7 +3904,7 @@ F_DownloadPublicLibraries()
 	IfMsgBox, Yes
 	{
 		F_LoadHotstringsFromLibraries()
-		F_Sort_a_Triggers()
+		F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 		F_ValidateIniLibSections()
 		F_RefreshListOfLibraries()
 		F_RefreshListOfLibraryTips()
@@ -5622,7 +5641,7 @@ F_AddHotstring()
 		}
 		LV_Add("",  v_Triggerstring, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)
 		a_Triggers.Push(v_TriggerString) ;added to table of hotstring recognizer (a_Triggers)
-		F_Sort_a_Triggers()
+		F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 		a_Library.Push(SubStr(v_SelectHotstringLibrary, 1, -4))
 		a_Triggerstring.Push(v_Triggerstring)
 		a_TriggerOptions.Push(Options)
@@ -7853,7 +7872,6 @@ F_UpdateSelHotLibDDL()
 }
 	
 ; ------------------------------------------------------------------------------------------------------------------------------------
-	
 F_ToggleTipsLibrary()
 {
 	global ;assume-global mode
@@ -7867,10 +7885,9 @@ F_ToggleTipsLibrary()
 	F_ValidateIniLibSections()
 	a_Triggers := []
 	F_LoadHotstringsFromLibraries()
-	F_Sort_a_Triggers()
+	F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 	return
 }
-	
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_EnDisLib() 
 {
@@ -10675,7 +10692,7 @@ F_SortArrayByLength(a_array)
 	v_Length := 0
 	Loop, % a_array.MaxIndex()
 	{
-		v_Length := Max(StrLen(a_array[A_Index]),v_Length)
+		v_Length := Max(StrLen(a_array[A_Index]), v_Length)
 	}
 	Loop, % v_Length
 	{
@@ -10688,9 +10705,9 @@ F_SortArrayByLength(a_array)
 			}
 		}
 	}
+	;*[One]
 	return a_TempArray
 }
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ImportLibrary() 
 ;Future: omit commented lines of a imported script
