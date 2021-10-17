@@ -298,11 +298,11 @@ Menu, Submenu4, 		Add, 4, 									F_AmountOfCharacterTips
 Menu, Submenu4, 		Add, 5, 									F_AmountOfCharacterTips
 Menu, TrigTips, 		Add, % TransA["Tips are shown after no. of characters"],		:Submenu4		
 
-Menu, SigOfEvents,		Add, % TransA["Basic hotstring is triggered"],	:OrdHisTrig
-Menu, SigOfEvents,		Add, % TransA["Menu hotstring is triggered"],	:MenuHisTrig
-Menu, SigOfEvents,		Add, % TransA["Undid the last hotstring"],		:UndoOfH
-Menu, SigOfEvents,		Add, % TransA["Triggerstring tips"],			:TrigTips
-Menu, SigOfEvents,		Add, % TransA["Triggerstring tips and hotstring menu styling"],		F_TTstyling
+;Menu, SigOfEvents,		Add, % TransA["Basic hotstring is triggered"],	:OrdHisTrig
+;Menu, SigOfEvents,		Add, % TransA["Menu hotstring is triggered"],	:MenuHisTrig
+;Menu, SigOfEvents,		Add, % TransA["Undid the last hotstring"],		:UndoOfH
+;Menu, SigOfEvents,		Add, % TransA["Triggerstring tips"],			:TrigTips
+;Menu, SigOfEvents,		Add, % TransA["Triggerstring tips and hotstring menu styling"],		F_TTstyling
 
 F_SortTipsByLength()
 F_SortTipsAlphabetically()
@@ -316,7 +316,7 @@ Menu, Submenu1Shortcuts, Add, % TransA["Copy clipboard content into ""Enter hots
 Menu, Submenu1Shortcuts, Add, % TransA["Undo the last hotstring"],						F_GuiShortDef
 Menu, Submenu1, 		Add, % TransA["Shortcut (hotkey) definitions"],					:Submenu1Shortcuts
 Menu, Submenu1, 		Add
-F_MUndo()
+;F_MUndo()
 ;Warning: order of SubmenuEndChars have to be alphabetical. Keep an eye on it. This is because after change of language specific menu items are related with associative array which also keeps to alphabetical order.
 Menu, SubmenuEndChars, Add, % TransA["Apostrophe '"], 					F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Backslash \"], 					F_ToggleEndChars
@@ -341,8 +341,9 @@ Menu, SubmenuEndChars, Add, % TransA["Tab"], 						F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 					F_ToggleEndChars
 F_ToggleEndChars()
 
-Menu, Submenu1,		Add, % TransA["Signaling of events"],			:SigOfEvents
-Menu, Submenu1,		Add, Events,								F_GuiEvents
+Menu, Submenu1,		Add, % TransA["Signalling of events"],			F_GuiEvents	;tu jestem
+Menu, Submenu1,		Add, % TransA["Triggerstring tips and hotstring menu styling"],		F_TTstyling
+;Menu, Submenu1,		Add, Events,								F_GuiEvents
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 Menu, Submenu1,		Add
 Menu, Submenu1,  	   	Add, % TransA["Toggle EndChars"], 				:SubmenuEndChars
@@ -1104,8 +1105,8 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvTt_T1,						% TransA["Tooltip enable"] . ":"
 	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvTt_T2, 					ⓘ
-	T_TooltipEnable := func("F_ShowLongTooltip").bind(TransA["T_TooltipEnable"])
-	GuiControl, +g, % IdEvTt_T2, % T_TooltipEnable
+	T_TriggerstringTips := func("F_ShowLongTooltip").bind(TransA["T_TriggerstringTips"])
+	GuiControl, +g, % IdEvTt_T2, % T_TriggerstringTips
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvTt_R1 vEvTt_R1R2 gF_EvTt_R1R2,	% TransA["yes"]
 	Gui, GuiEvents: Add,	Radio, 	HwndIdEvTt_R2 gF_EvTt_R1R2,			% TransA["no"]	
@@ -1115,7 +1116,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T5,						ⓘ
 	T_TooltipTimeout := func("F_ShowLongTooltip").bind(TransA["T_TooltipTimeout"])	;tu jestem
-	GuiControl, +g, % IdEvTt_T4, % T_TooltipTimeout
+	GuiControl, +g, % IdEvTt_T5, % T_TooltipTimeout
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T6,						% TransA["Finite timeout?"]
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvTt_R3 vEvTt_R3R4 gF_EvTt_R3R4,	% TransA["yes"]
@@ -1129,7 +1130,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T11,					ⓘ
 	T_TooltipPosition := func("F_ShowLongTooltip").bind(TransA["T_TooltipPosition"])
-	GuiControl, +g, % IdEvTt_T9, % T_TooltipPosition
+	GuiControl, +g, % IdEvTt_T11, % T_TooltipPosition
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvTt_R5 vEvTt_R5R6,			% TransA["caret"]
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvTt_R6,						% TransA["cursor"]
@@ -1138,6 +1139,8 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T13,					% TransA["Sorting order"]
 	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T14,					ⓘ
+	T_TtSortingOrder := func("F_ShowLongTooltip").bind(TransA["T_TtSortingOrder"])
+	GuiControl, +g, % IdEvTt_T14, % T_TtSortingOrder
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Checkbox, HwndIdEvTt_C1 vEvTt_C1,				% TransA["Alphabetically"]
 	Gui, GuiEvents: Add,	Checkbox, HwndIdEvTt_C2 vEvTt_C2,				% TransA["By length"]
@@ -1146,6 +1149,8 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvTt_T16,					% TransA["Max. no. of shown tips"]
 	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T17,					ⓘ
+	T_TtMaxNoOfTips := func("F_ShowLongTooltip").bind(TransA["T_TtMaxNoOfTips"])
+	GuiControl, +g, % IdEvTt_T17, % T_TtMaxNoOfTips
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Slider,	HwndIdEvTt_S2 vEvTt_S2 gF_EvTt_S2 Line1 Page1 Range1-25 TickInterval1 ToolTipBottom Buddy1EvTt_S2, % EvTt_S2
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T18,					20
@@ -1154,6 +1159,8 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T20,					% TransA["Tips are shown after no. of characters"] . ":"
 	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T21,					ⓘ
+	T_TtNoOfChars := func("F_ShowLongTooltip").bind(TransA["T_TtNoOfChars"])
+	GuiControl, +g, % IdEvTt_T21, % T_TtNoOfChars
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	DropDownList, HwndIdEvTt_DDL1 vEvTt_DDL1 AltSubmit,		1|2|3|4|5
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvTt_B1 gF_EvTt_B1,			% TransA["Tooltip test"]
@@ -8269,7 +8276,7 @@ Show full GUI (F4)										= Show full GUI (F4)
 Show intro											= Show intro
 Show Introduction window after application is restarted?		= Show Introduction window after application is restarted?
 Show Sandbox (F6)										= Show Sandbox (F6)
-Signaling of events										= Signaling of events
+Signalling of events									= Signalling of events
 Silent mode											= Silent mode
 silver												= silver
 Size of font											= Size of font
@@ -8421,7 +8428,11 @@ T_StylPreview											= Press the ""Test styling"" button to get look & feel o
 T_SoundEnable											= Sound can be emitted each time when event takes place. `nOne can specify sound frequency and duration.`n`nYou may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 50 [ms]; `nInterval:         150 [ms]; `nRange:            50 ÷ 2 000 [ms]. `n`nTip: Recommended time is between 200 to 400 ms. `n`nPgUp / PgDn step: 50 [ms]; `nInterval:         150 [ms]; `nRange:            50 ÷ 2 000 [ms]. `n`nTip: Recommended time is between 200 to 400 ms.
 T_TooltipEnable										= You can enable or disable the following tooltip: ""Hotstring was triggered! [Shortcut] to undo."" `nIf enabled, this tooltip is shown each time when even of displaying hotstring upon triggering it takes place. `nNext you can set accompanying features like timeout, position and even sound. 
 T_TooltipPosition										= Specify where tooltip should be displayed by default.`n`nWarning: some applications do not accept caret position. `n`nThen automatically cursor position is followed.
-T_TooltipTimeout										= The finite tooltip stays displayed on a screen till next event is triggered. `nIt's adviced to set finite tooltip. `n`nYou may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 500 [ms]; `nInterval:         500 [ms]; `nRange:            1000 ÷ 10 000 [ms].
+T_TooltipTimeout										= The infinite tooltip stays displayed on a screen till next event is triggered. `nIt's adviced to set finite tooltip. `n`nYou may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 500 [ms]; `nInterval:         500 [ms]; `nRange:            1000 ÷ 10 000 [ms].
+T_TriggerstringTips										= The triggerstring tips are displayed to help you recognize which triggerstrings are defined or available. `nThey are displayed in form of short list (tooltips).`n`nYou can define styling of triggerstring tips: Menu → Configuration.
+T_TtSortingOrder										= The sorting order let you define how the triggerstring tips list positions are sorted out. `nThere are two options, which can be active on the same time: alphabetically or by length. `nYou can check out the differences by pressing the Tooltip test button.
+T_TtMaxNoOfTips										= Maximum length of the triggerstring tips list. `n`nIf currently available list is longer, only the specified amount of triggerstring tips is displayed. `nPlease mind that displayed list could be just shorter.
+T_TtNoOfChars											= It is possible to configure triggerstring tips to be displayed only if some first characters are already entered. `nE.g. if this parameter is set to 2, the first list appears if 2 or more characters of any existing triggerstring tip are entered.
 )"
 	
 	TransA					:= {}	;this associative array (global) is used to store translations of this application text strings
