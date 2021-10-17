@@ -246,50 +246,50 @@ Menu, FontTypeMenu, Add,		Verdana,								F_FontType
 Menu, FontTypeMenu, Check,	% c_FontType
 Menu, ConfGUI,		Add, 	% TransA["Font type"],					:FontTypeMenu
 
-Menu, TrigSortOrder, 	Add, % TransA["Alphabetically"], 				F_SortTipsAlphabetically
-Menu, TrigSortOrder, 	Add, % TransA["By length"], 					F_SortTipsByLength
+;Menu, TrigSortOrder, 	Add, % TransA["Alphabetically"], 				F_SortTipsAlphabetically
+;Menu, TrigSortOrder, 	Add, % TransA["By length"], 					F_SortTipsByLength
 
-Menu, OrdHisTrig,		Add, % TransA["Tooltip enable"],				F_EventTtEn
-Menu, OrdHisTrig,		Add, % TransA["Tooltip disable"],				F_EventTtEn
-Menu, OrdHisTrig,		Add
-Menu, OrdHisTrig,		Add, % TransA["Tooltip timeout"],				F_GuiSetTooltipTimeout
-Menu, OrdHisTrig,		Add, % TransA["Tooltip position: caret"],		F_EventTtPos
-Menu, OrdHisTrig,		Add, % TransA["Tooltip position: cursor"],		F_EventTtPos
-Menu, OrdHisTrig,		Add
-Menu, OrdHisTrig,		Add, % TransA["Sound enable"],				F_EventSoEn
-Menu, OrdHisTrig,		Add, % TransA["Sound disable"],				F_EventSoEn
-Menu, OrdHisTrig,		Add
-Menu, OrdHisTrig,		Add, % TransA["Sound parameters"],				F_EventSoPar
+;Menu, OrdHisTrig,		Add, % TransA["Tooltip enable"],				F_EventTtEn
+;Menu, OrdHisTrig,		Add, % TransA["Tooltip disable"],				F_EventTtEn
+;Menu, OrdHisTrig,		Add
+;Menu, OrdHisTrig,		Add, % TransA["Tooltip timeout"],				F_GuiSetTooltipTimeout
+;Menu, OrdHisTrig,		Add, % TransA["Tooltip position: caret"],		F_EventTtPos
+;Menu, OrdHisTrig,		Add, % TransA["Tooltip position: cursor"],		F_EventTtPos
+;Menu, OrdHisTrig,		Add
+;Menu, OrdHisTrig,		Add, % TransA["Sound enable"],				F_EventSoEn
+;Menu, OrdHisTrig,		Add, % TransA["Sound disable"],				F_EventSoEn
+;Menu, OrdHisTrig,		Add
+;Menu, OrdHisTrig,		Add, % TransA["Sound parameters"],				F_EventSoPar
 
-Menu, MenuHisTrig,		Add, % TransA["Menu position: caret"],			F_EventTtPos
-Menu, MenuHisTrig,		Add, % TransA["Menu position: cursor"],			F_EventTtPos
-Menu, MenuHisTrig,		Add
-Menu, MenuHisTrig,		Add, % TransA["Sound enable"],				F_EventSoEn
-Menu, MenuHisTrig,		Add, % TransA["Sound disable"],				F_EventSoEn
-Menu, MenuHisTrig,		Add
-Menu, MenuHisTrig,		Add, % TransA["Sound parameters"],				F_EventSoPar
+;Menu, MenuHisTrig,		Add, % TransA["Menu position: caret"],			F_EventTtPos
+;Menu, MenuHisTrig,		Add, % TransA["Menu position: cursor"],			F_EventTtPos
+;Menu, MenuHisTrig,		Add
+;Menu, MenuHisTrig,		Add, % TransA["Sound enable"],				F_EventSoEn
+;Menu, MenuHisTrig,		Add, % TransA["Sound disable"],				F_EventSoEn
+;Menu, MenuHisTrig,		Add
+;Menu, MenuHisTrig,		Add, % TransA["Sound parameters"],				F_EventSoPar
 
-Menu, UndoOfH,			Add, % TransA["Tooltip enable"],				F_EventTtEn
-Menu, UndoOfH,			Add, % TransA["Tooltip disable"],				F_EventTtEn
-Menu, UndoOfH,			Add
-Menu, UndoOfH,			Add, % TransA["Tooltip timeout"],				F_GuiSetTooltipTimeout
-Menu, UndoOfH,			Add, % TransA["Tooltip position: caret"],		F_EventTtPos
-Menu, UndoOfH,			Add, % TransA["Tooltip position: cursor"],		F_EventTtPos
-Menu, UndoOfH,			Add
-Menu, UndoOfH,			Add, % TransA["Sound enable"],				F_EventSoEn
-Menu, UndoOfH,			Add, % TransA["Sound disable"],				F_EventSoEn
-Menu, UndoOfH,			Add
-Menu, UndoOfH,			Add, % TransA["Sound parameters"],				F_EventSoPar
+;Menu, UndoOfH,			Add, % TransA["Tooltip enable"],				F_EventTtEn
+;Menu, UndoOfH,			Add, % TransA["Tooltip disable"],				F_EventTtEn
+;Menu, UndoOfH,			Add
+;Menu, UndoOfH,			Add, % TransA["Tooltip timeout"],				F_GuiSetTooltipTimeout
+;Menu, UndoOfH,			Add, % TransA["Tooltip position: caret"],		F_EventTtPos
+;Menu, UndoOfH,			Add, % TransA["Tooltip position: cursor"],		F_EventTtPos
+;Menu, UndoOfH,			Add
+;Menu, UndoOfH,			Add, % TransA["Sound enable"],				F_EventSoEn
+;Menu, UndoOfH,			Add, % TransA["Sound disable"],				F_EventSoEn
+;Menu, UndoOfH,			Add
+;Menu, UndoOfH,			Add, % TransA["Sound parameters"],				F_EventSoPar
 
-Menu, TrigTips,		Add, % TransA["Tooltip enable"],				F_EventTtEn
-Menu, TrigTips,		Add, % TransA["Tooltip disable"],				F_EventTtEn
-Menu, TrigTips,		Add
-Menu, TrigTips,		Add, % TransA["Tooltip timeout"],				F_GuiSetTooltipTimeout
-Menu, TrigTips,		Add, % TransA["Tooltip position: caret"],		F_EventTtPos
-Menu, TrigTips,		Add, % TransA["Tooltip position: cursor"],		F_EventTtPos
-Menu, TrigTips,		Add
-Menu, TrigTips,		Add, % TransA["Sorting order"],				:TrigSortOrder								
-Menu, TrigTips,		Add,	% TransA["Max. no. of shown tips"],		F_GuiTrigShowNoOfTips
+;Menu, TrigTips,		Add, % TransA["Tooltip enable"],				F_EventTtEn
+;Menu, TrigTips,		Add, % TransA["Tooltip disable"],				F_EventTtEn
+;Menu, TrigTips,		Add
+;Menu, TrigTips,		Add, % TransA["Tooltip timeout"],				F_GuiSetTooltipTimeout
+;Menu, TrigTips,		Add, % TransA["Tooltip position: caret"],		F_EventTtPos
+;Menu, TrigTips,		Add, % TransA["Tooltip position: cursor"],		F_EventTtPos
+;Menu, TrigTips,		Add
+;Menu, TrigTips,		Add, % TransA["Sorting order"],				:TrigSortOrder								
+;Menu, TrigTips,		Add,	% TransA["Max. no. of shown tips"],		F_GuiTrigShowNoOfTips
 
 Menu, Submenu4, 		Add, 1, 									F_AmountOfCharacterTips
 Menu, Submenu4, 		Add, 2, 									F_AmountOfCharacterTips
@@ -302,14 +302,13 @@ Menu, TrigTips, 		Add, % TransA["Tips are shown after no. of characters"],		:Sub
 ;Menu, SigOfEvents,		Add, % TransA["Menu hotstring is triggered"],	:MenuHisTrig
 ;Menu, SigOfEvents,		Add, % TransA["Undid the last hotstring"],		:UndoOfH
 ;Menu, SigOfEvents,		Add, % TransA["Triggerstring tips"],			:TrigTips
-;Menu, SigOfEvents,		Add, % TransA["Triggerstring tips and hotstring menu styling"],		F_TTstyling
 
-F_SortTipsByLength()
-F_SortTipsAlphabetically()
-F_EventTtEn()
-F_EventSoEn()
-F_EventTtPos()
-F_AmountOfCharacterTips()
+;F_SortTipsByLength()
+;F_SortTipsAlphabetically()
+;F_EventTtEn()
+;F_EventSoEn()
+;F_EventTtPos()
+;F_AmountOfCharacterTips()
 
 Menu, Submenu1Shortcuts, Add, % TransA["Call Graphical User Interface"],					F_GuiShortDef
 Menu, Submenu1Shortcuts, Add, % TransA["Copy clipboard content into ""Enter hotstring"""],	F_GuiShortDef
@@ -341,7 +340,7 @@ Menu, SubmenuEndChars, Add, % TransA["Tab"], 						F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 					F_ToggleEndChars
 F_ToggleEndChars()
 
-Menu, Submenu1,		Add, % TransA["Signalling of events"],			F_GuiEvents	;tu jestem
+Menu, Submenu1,		Add, % TransA["Signalling of events"],			F_GuiEvents
 Menu, Submenu1,		Add, % TransA["Triggerstring tips and hotstring menu styling"],		F_TTstyling
 ;Menu, Submenu1,		Add, Events,								F_GuiEvents
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
@@ -813,7 +812,7 @@ F_HMenuCli()
 		if (A_Index = v_PressedKey)
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
-	Clipboard := v_Temp1
+	Clipboard := v_Temp1		;tu jestem
 	Send, ^v ;paste the text
 	if (Ovar = false)
 		Send, % A_EndChar
@@ -1115,7 +1114,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T4,						% TransA["Tooltip timeout"] . ":"
 	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T5,						ⓘ
-	T_TooltipTimeout := func("F_ShowLongTooltip").bind(TransA["T_TooltipTimeout"])	;tu jestem
+	T_TooltipTimeout := func("F_ShowLongTooltip").bind(TransA["T_TooltipTimeout"])	
 	GuiControl, +g, % IdEvTt_T5, % T_TooltipTimeout
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T6,						% TransA["Finite timeout?"]
@@ -1183,7 +1182,6 @@ F_EvTt_B1()	;Event Tooltip (is triggered) Button Tooltip test
 			else
 				a_Tips[A_Index] := Chr(65 + EvTt_S2 - A_Index) . A_Space . "Demo" . A_Space . A_Index
 		}
-		;*[One]
 		F_Sort_a_Triggers(a_Tips, EvTt_C1, EvTt_C2)
 		F_ShowTriggerstringTips2()
 		if ((EvTt_R1R2 = 1) and (EvTt_R3R4 = 1))
@@ -5498,37 +5496,28 @@ F_AddHotstring()
 		Options .= "Z"
 	if (v_OptionDisable)
 	{
-		OnOff := "Off"
-		EnDis := "Dis"	
+		OnOff := "Off", EnDis := "Dis"	
 	}
 	else
 	{
-		OnOff := "On"
-		EnDis := "En"
+		OnOff := "On", EnDis := "En"
 	}
 	Switch v_SelectFunction
 	{
 		Case "Clipboard (CL)": 			
-		SendFunHotstringCreate 	:= "F_HOF_CLI"
-		SendFunFileFormat 		:= "CL"
+		SendFunHotstringCreate 	:= "F_HOF_CLI", SendFunFileFormat 		:= "CL"
 		Case "SendInput (SI)": 			
-		SendFunHotstringCreate 	:= "F_HOF_SI"
-		SendFunFileFormat 		:= "SI"
+		SendFunHotstringCreate 	:= "F_HOF_SI", SendFunFileFormat 		:= "SI"
 		Case "Menu & Clipboard (MCL)": 	
-		SendFunHotstringCreate 	:= "F_HOF_MCLI"
-		SendFunFileFormat 		:= "MCL"
+		SendFunHotstringCreate 	:= "F_HOF_MCLI", SendFunFileFormat 	:= "MCL"
 		Case "Menu & SendInput (MSI)": 
-		SendFunHotstringCreate 	:= "F_HOF_MSI"
-		SendFunFileFormat 		:= "MSI"
+		SendFunHotstringCreate 	:= "F_HOF_MSI", SendFunFileFormat 		:= "MSI"
 		Case "SendRaw (SR)":
-		SendFunHotstringCreate 	:= "F_HOF_SR"
-		SendFunFileFormat 		:= "SR"
+		SendFunHotstringCreate 	:= "F_HOF_SR", SendFunFileFormat 		:= "SR"
 		Case "SendPlay (SP)":
-		SendFunHotstringCreate 	:= "F_HOF_SP"
-		SendFunFileFormat 		:= "SP"
+		SendFunHotstringCreate 	:= "F_HOF_SP", SendFunFileFormat 		:= "SP"
 		Case "SendEvent (SE)":
-		SendFunHotstringCreate 	:= "F_HOF_SE"
-		SendFunFileFormat 		:= "SE"
+		SendFunHotstringCreate 	:= "F_HOF_SE", SendFunFileFormat 		:= "SE"
 	}
 	
 	;2. Create or modify (triggerstring, hotstring) definition according to inputs. 
@@ -5536,14 +5525,12 @@ F_AddHotstring()
 	GuiControl, -Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	for key, value in a_Triggerstring
 	{
-		f_GeneralMatch 	:= false
-		f_CaseMatch 		:= false
+		f_GeneralMatch 	:= false, f_CaseMatch 		:= false
 		if (a_Triggerstring[key] = v_Triggerstring)	;case insensitive string comparison!
 		{
 			f_GeneralMatch := true
 			if (a_Triggerstring[key] == v_Triggerstring)
 				f_CaseMatch := true
-			;*[One]
 			if (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))
 			{
 				OldOptions := a_TriggerOptions[key]
@@ -5591,14 +5578,8 @@ F_AddHotstring()
 								MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
 								. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
 						}
-						a_TriggerOptions[key] 	:= Options
-						a_OutputFunction[key] 	:= SendFunFileFormat
-						a_Hotstring[key] 		:= TextInsert
-						a_EnableDisable[key]	:= EnDis
-						a_Comment[key] 		:= v_Comment
-						ModifiedFlag 			:= true
-						
-						;*[One]
+						a_TriggerOptions[key] := Options, a_OutputFunction[key] := SendFunFileFormat, a_Hotstring[key] := TextInsert, a_EnableDisable[key] := EnDis
+						, a_Comment[key] := v_Comment, ModifiedFlag := true
 						Loop, % NoOfIterations
 						{
 							FirstTableIndex++
@@ -5610,7 +5591,6 @@ F_AddHotstring()
 							}
 						}
 						NoOfIterations := MaxTableElements - FirstTableIndex
-						;*[One]
 						LV_Modify(Counter, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)		
 					}
 				}
@@ -10138,20 +10118,47 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 	F_EventSigOrdHotstring()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
+F_SendInput(string, Oflag)
 {
 	global	;assume-global mode
-	local	ThisHotkey := A_ThisHotkey, vFirstLetter1 := "", vFirstLetter2 := "", vOutputVar := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, fFirstLetterCap := false
+	if (Oflag = false)
+	{
+		SendInput, % string . A_EndChar
+		F_EventSigOrdHotstring()
+		v_InputString := ""
+		return
+	}
+	else
+	{
+		SendInput, % string
+		F_EventSigOrdHotstring()
+		v_InputString := ""
+		return
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HOF_SI(ReplacementString, Oflag, HigherTypedTriggerstring*)	;Hotstring Output Function _ SendInput
+{
+	global	;assume-global mode
+	local	ThisHotkey := A_ThisHotkey, vFirstLetter1 := "", vFirstLetter2 := "", vOutputVar := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false
+			, fFirstLetterCap := false, InputString := ""
 	
+	;*[One]
+	if (HigherTypedTriggerstring[1])
+	{
+		ThisHotkey := HigherTypedTriggerstring[1]
+		v_InputString := v_MenuInputString
+	}
 	v_UndoHotstring := ReplacementString
 	v_TypedTriggerstring := ThisHotkey 
 	v_HotstringFlag := true
 	v_LOF := "SI"	;last (active) Output Function; this variable stores information about output function. it's used by F_Undo to correctly interpret special text strings, e.g. {Enter}
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
+	OutputDebug, % "v_InputString in F_HOF_SI:" . A_Tab . v_InputString
 	if (!InStr(ThisHotkey, "C"))	
 	{
-		vFirstLetter1 		:= SubStr(v_InputString, 1, 1)
-		vRestOfLetters 	:= SubStr(v_InputString, 2)
+		vFirstLetter1 		:= SubStr(v_InputString, 1, 1)	;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
+		vRestOfLetters 	:= SubStr(v_InputString, 2)		;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
 		if vFirstLetter1 is upper
 			fFirstLetterCap 	:= true
 		if vRestOfLetters is upper
@@ -10159,110 +10166,104 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 		if (fFirstLetterCap and fRestOfLettersCap)
 		{
 			StringUpper, NewReplacementString, ReplacementString
-			if (Oflag = false)
-			{
-				SendInput, % NewReplacementString . A_EndChar
-				F_EventSigOrdHotstring()
-				v_InputString := ""
-				return
-			}
-			else
-			{
-				SendInput, % NewReplacementString
-				F_EventSigOrdHotstring()
-				v_InputString := ""
-				return
-			}
+			F_SendInput(NewReplacementString, Oflag)
+			return
 		}
 		if (fFirstLetterCap and !fRestOfLettersCap)
 		{
 			vFirstLetter2 := SubStr(ReplacementString, 1, 1)
 			StringUpper, vFirstLetter2, vFirstLetter2
 			NewReplacementString := vFirstLetter2 . SubStr(ReplacementString, 2)
-			if (Oflag = false)
-			{
-				SendInput, % NewReplacementString . A_EndChar
-				F_EventSigOrdHotstring()
-				v_InputString := ""
-				return
-			}
-			else
-			{
-				SendInput, % NewReplacementString
-				F_EventSigOrdHotstring()
-				v_InputString := ""
-				return
-			}
+			F_SendInput(NewReplacementString, Oflag)
+			return
 		}
 		if (!fFirstLetterCap)
 		{
-			if (Oflag = false)
-			{
-				SendInput, % ReplacementString . A_EndChar
-				F_EventSigOrdHotstring()
-				v_InputString := ""
-				return
-			}
-			else
-			{
-				SendInput, % ReplacementString
-				F_EventSigOrdHotstring()
-				v_InputString := ""
-				return
-			}
+			F_SendInput(ReplacementString, Oflag)
+			return
 		}
 	}
 	if (InStr(ThisHotkey, "C") or InStr(ThisHotkey, "C1"))
 	{
-		if (Oflag = false)
-		{
-			SendInput, % ReplacementString . A_EndChar
-			F_EventSigOrdHotstring()
-			v_InputString := ""
-			return
-		}
-		else
-		{
-			SendInput, % ReplacementString
-			F_EventSigOrdHotstring()
-			v_InputString := ""
-			return
-		}
+		F_SendInput(ReplacementString, Oflag)
+		return
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ClipboardPaste(string, Oflag)
+{
+	global	;assume-global mode
+	local ClipboardBackup := ClipboardAll
+	if (Oflag = false)
+	{
+		Clipboard := string . A_EndChar
+		ClipWait
+		Send, ^v
+		Sleep, %ini_CPDelay% ; this sleep is required surprisingly
+		F_EventSigOrdHotstring()
+		v_InputString := ""
+		Clipboard := ClipboardBackup
+		return
+	}
+	else
+	{
+		Clipboard := string
+		ClipWait
+		Send, ^v
+		Sleep, %ini_CPDelay% ; this sleep is required surprisingly
+		F_EventSigOrdHotstring()
+		v_InputString := ""
+		Clipboard := ClipboardBackup
+		return
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_CLI(ReplacementString, Oflag) ;Hotstring Output Function _ Clipboard
 {
 	global	;assume-global mode
-	local oWord := "", ThisHotkey := A_ThisHotkey
+	local oWord := "", ThisHotkey := A_ThisHotkey, vFirstLetter1 := "", vFirstLetter2 := "", vOutputVar := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false
+		, fFirstLetterCap := false, InputString := ""
 	
-	v_InputString := ""
-	ToolTip,
 	v_UndoHotstring := ReplacementString
-	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
-	ClipboardBackup := ClipboardAll
-	Clipboard := ReplacementString
-	ClipWait
-	ifWinActive,, "Microsoft Word"	;future: is it still necessary?
-	{
-		oWord := ComObjActive("Word.Application")
-		oWord.Selection.Paste
-		oWord := ""
-	}
-	else
-		Send, ^v
-	
-	if (Oflag == 0)
-		Send, % A_EndChar
-	Sleep, %ini_CPDelay% ; this sleep is required surprisingly
-	Clipboard := ClipboardBackup
-	ClipboardBackup := ""
 	v_TypedTriggerstring := ThisHotkey
 	v_HotstringFlag := true
-	F_EventSigOrdHotstring()
+	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
+	ClipboardBackup := ClipboardAll
+	if (!InStr(ThisHotkey, "C"))	
+	{
+		vFirstLetter1 		:= SubStr(v_InputString, 1, 1)	;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
+		vRestOfLetters 	:= SubStr(v_InputString, 2)		;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
+		if vFirstLetter1 is upper
+			fFirstLetterCap 	:= true
+		if vRestOfLetters is upper
+			fRestOfLettersCap 	:= true
+		if (fFirstLetterCap and fRestOfLettersCap)
+		{
+			StringUpper, NewReplacementString, ReplacementString
+			F_ClipboardPaste(NewReplacementString, Oflag)
+			return
+		}
+		if (fFirstLetterCap and !fRestOfLettersCap)
+		{
+			vFirstLetter2 := SubStr(ReplacementString, 1, 1)
+			StringUpper, vFirstLetter2, vFirstLetter2
+			NewReplacementString := vFirstLetter2 . SubStr(ReplacementString, 2)
+			F_ClipboardPaste(NewReplacementString, Oflag)
+			return
+		}
+		if (!fFirstLetterCap)
+		{
+			F_ClipboardPaste(ReplacementString, Oflag)
+			return
+		}
+	}
+	if (InStr(ThisHotkey, "C") or InStr(ThisHotkey, "C1"))
+	{
+		F_ClipboardPaste(ReplacementString, Oflag)
+		return
+	}
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_MCLI(TextOptions, Oflag)
 {
 	global	;assume-global mode
@@ -10338,7 +10339,6 @@ F_HOF_MCLI(TextOptions, Oflag)
 	GuiControl, Choose, % Id_LB_HMenuCli, 1
 	Ovar := Oflag
 	v_HotstringFlag := true
-	
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10364,7 +10364,6 @@ F_MouseMenuCli() ;The subroutine may consult the following built-in variables: A
 		v_TypedTriggerstring := OutputVarTemp
 		v_UndoHotstring 	 := OutputVarTemp
 		Clipboard 		 := ClipboardBack
-		;Hotstring("Reset") ;mouse click resets hotstring recognizer anyway
 	}
 	return
 }
@@ -10400,7 +10399,7 @@ F_HOF_MSI(TextOptions, Oflag)
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
 			,Window2X  := 0,	Window2Y  := 0,	Window2W  := 0,	Window2H  := 0
 			,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
-	
+	;*[One]
 	v_TypedTriggerstring	:= A_ThisHotkey
 	if (ini_MHSEn)		;Second beep on purpose
 		SoundBeep, % ini_MHSF, % ini_MHSD
@@ -10468,6 +10467,9 @@ F_HOF_MSI(TextOptions, Oflag)
 	GuiControl, Choose, % Id_LB_HMenuAHK, 1
 	Ovar := Oflag
 	v_HotstringFlag := true
+	v_MenuInputString := v_InputString
+	;Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1	future
+	OutputDebug, % "v_InputString in F_HOF_MSI:" . A_Tab . v_InputString
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10572,20 +10574,16 @@ F_HMenuAHK()
 	{
 		return
 	}
-	v_HotstringFlag := true
+	;v_HotstringFlag := true
 	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuAHK
 	Loop, Parse, v_Temp1, `n
 	{
 		if (InStr(A_LoopField, v_PressedKey . "."))
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
-	Send, % v_Temp1 
-	if (Ovar = false)
-		Send, % A_EndChar
-	v_UndoHotstring 	 := v_Temp1
-	Hotstring("Reset")
+	;*[One]
+	F_HOF_SI(v_Temp1, Ovar, v_TypedTriggerstring)	;tu jestem
 	Gui, HMenuAHK: Destroy
-	F_EventSigOrdHotstring()
 	return
 }
 
@@ -10716,7 +10714,6 @@ F_SortArrayByLength(a_array)
 			}
 		}
 	}
-	;*[One]
 	return a_TempArray
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
