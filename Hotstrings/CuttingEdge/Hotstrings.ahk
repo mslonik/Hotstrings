@@ -10467,7 +10467,7 @@ F_HOF_MSI(TextOptions, Oflag)
 	GuiControl, Choose, % Id_LB_HMenuAHK, 1
 	Ovar := Oflag
 	v_HotstringFlag := true
-	v_MenuInputString := v_InputString
+	v_MenuInputString := v_InputString		;global variable to store v_InputString as it will be erased by v_HotstringFlag := true; v_InputString is preserved to recognize letter size if MSI is used
 	;Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1	future
 	OutputDebug, % "v_InputString in F_HOF_MSI:" . A_Tab . v_InputString
 	return
@@ -10485,7 +10485,7 @@ F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A
 		v_HotstringFlag := true
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
 		Gui, HMenuAHK: Destroy
-		Send, % OutputVarTemp
+		Send, % OutputVarTemp	;tu jestem
 		if (Ovar = false)
 			Send, % A_EndChar
 		F_EventSigOrdHotstring()
