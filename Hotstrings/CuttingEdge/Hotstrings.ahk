@@ -4065,10 +4065,11 @@ F_Undo()
 	global	;assume-global mode
 	local	TriggerOpt := "", HowManyBackSpaces := 0, HowManyBackSpaces2 := 0
 			,ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey, OrigTriggerstring := ""
-
+	;*[One]
 	if (ini_UHTtEn and v_TypedTriggerstring and (ThisHotkey != PriorHotkey))
 	{	
-		TriggerOpt := SubStr(RegExReplace(v_TypedTriggerstring, ".*\K:.*"), 2)
+		;TriggerOpt := SubStr(RegExReplace(v_TypedTriggerstring, ".*\K:.*"), 2)
+		TriggerOpt := SubStr(v_TypedTriggerstring, 1, InStr(v_TypedTriggerstring, ":", false, 1, 2))
 		OrigTriggerstring := RegExReplace(v_TypedTriggerstring, ":.*:")
 		if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O")))
 			Send, {BackSpace}
@@ -10141,21 +10142,27 @@ F_HOF_SI(ReplacementString, Oflag, HigherTypedTriggerstring*)	;Hotstring Output 
 {
 	global	;assume-global mode
 	local	ThisHotkey := A_ThisHotkey, vFirstLetter1 := "", vFirstLetter2 := "", vOutputVar := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false
-			, fFirstLetterCap := false, InputString := ""
+			, fFirstLetterCap := false, InputString := "", TriggerChar := "", TriggOptions := ""
 	
-	;*[One]
+	TriggOptions := SubStr(ThisHotkey, 1, InStr(ThisHotkey, ":", false, 1, 2))
 	if (HigherTypedTriggerstring[1])
 	{
 		ThisHotkey := HigherTypedTriggerstring[1]
 		v_InputString := v_MenuInputString
 	}
 	v_UndoHotstring := ReplacementString
-	v_TypedTriggerstring := ThisHotkey 
+	if (InStr(TriggOptions, "*"))
+	{
+		TriggerChar := SubStr(ThisHotkey, 0)	;extracts the last character
+		v_TypedTriggerstring	:= TriggOptions . v_InputString . TriggerChar	;This form is important to run correctly F_Undo 
+	}
+	else
+		v_TypedTriggerstring := TriggOptions . v_InputString					;This form is important to run correctly F_Undo 
+	
 	v_HotstringFlag := true
 	v_LOF := "SI"	;last (active) Output Function; this variable stores information about output function. it's used by F_Undo to correctly interpret special text strings, e.g. {Enter}
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
-	OutputDebug, % "v_InputString in F_HOF_SI:" . A_Tab . v_InputString
-	if (!InStr(ThisHotkey, "C"))	
+	if (!InStr(TriggOptions, "C"))	
 	{
 		vFirstLetter1 		:= SubStr(v_InputString, 1, 1)	;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
 		vRestOfLetters 	:= SubStr(v_InputString, 2)		;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
@@ -10183,7 +10190,7 @@ F_HOF_SI(ReplacementString, Oflag, HigherTypedTriggerstring*)	;Hotstring Output 
 			return
 		}
 	}
-	if (InStr(ThisHotkey, "C") or InStr(ThisHotkey, "C1"))
+	if (InStr(TriggOptions, "C") or InStr(TriggOptions, "C1"))
 	{
 		F_SendInput(ReplacementString, Oflag)
 		return
@@ -10399,8 +10406,8 @@ F_HOF_MSI(TextOptions, Oflag)
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
 			,Window2X  := 0,	Window2Y  := 0,	Window2W  := 0,	Window2H  := 0
 			,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
-	;*[One]
-	v_TypedTriggerstring	:= A_ThisHotkey
+			,TriggerChar := ""
+
 	if (ini_MHSEn)		;Second beep on purpose
 		SoundBeep, % ini_MHSF, % ini_MHSD
 	
@@ -10477,20 +10484,21 @@ F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A
 {
 	global	;assume-global mode
 	local	OutputVarTemp := "",	MouseCtl := 0,		ThisHotkey := A_ThisHotkey
-	
-	MouseGetPos, , , , MouseCtl, 2
+	;*[One]
+	MouseGetPos, , , , MouseCtl, 2	;2 = Stores the control's HWND in OutputVarControl rather than the control's ClassNN.
 	if ((A_GuiEvent = "Normal") and (MouseCtl = Id_LB_HMenuAHK) and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down"))) ;only Basic mouse left click
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuAHK 
 		v_HotstringFlag := true
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
+		F_HOF_SI(OutputVarTemp, Ovar, true)	;tu jestem
 		Gui, HMenuAHK: Destroy
-		Send, % OutputVarTemp	;tu jestem
-		if (Ovar = false)
-			Send, % A_EndChar
-		F_EventSigOrdHotstring()
-		v_TypedTriggerstring := OutputVarTemp
-		v_UndoHotstring 	 := OutputVarTemp
+		;Send, % OutputVarTemp	
+		;if (Ovar = false)
+			;Send, % A_EndChar
+		;F_EventSigOrdHotstring()
+		;v_TypedTriggerstring := OutputVarTemp
+		;v_UndoHotstring 	 := OutputVarTemp
 	}
 	return
 }
@@ -10581,8 +10589,7 @@ F_HMenuAHK()
 		if (InStr(A_LoopField, v_PressedKey . "."))
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
-	;*[One]
-	F_HOF_SI(v_Temp1, Ovar, v_TypedTriggerstring)	;tu jestem
+	F_HOF_SI(v_Temp1, Ovar, true)	;tu jestem
 	Gui, HMenuAHK: Destroy
 	return
 }
