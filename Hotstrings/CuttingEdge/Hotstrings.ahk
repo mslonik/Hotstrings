@@ -4065,48 +4065,44 @@ F_Undo()
 	global	;assume-global mode
 	local	TriggerOpt := "", HowManyBackSpaces := 0, HowManyBackSpaces2 := 0
 			,ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey, OrigTriggerstring := ""
-
+	
 	if (ini_UHTtEn and v_Triggerstring and (ThisHotkey != PriorHotkey))
 	{	
 		if (!(InStr(v_Options, "*")) and !(InStr(v_Options, "O")))
 			Send, {BackSpace}
 		if (v_UndoHotstring)
 		{
-			;if (v_LOF = "SI")
-			;{
-				if (InStr(v_UndoHotstring, "{Enter}", false))
-					v_UndoHotstring := StrReplace(v_UndoHotstring, "{Enter}", "", HowManyBackSpaces)
-				if (InStr(v_UndoHotstring, "``r``n"))
-				{
-					v_UndoHotstring := StrReplace(v_UndoHotstring, "``r``n", "", HowManyBackSpaces2)
-					HowManyBackSpaces += HowManyBackSpaces2 + 1
-				}
-				if (InStr(v_UndoHotstring, "``r"))
-				{
-					v_UndoHotstring := StrReplace(v_UndoHotstring, "``r", "", HowManyBackSpaces2)
-					HowManyBackSpaces += HowManyBackSpaces2
-				}
-				if (InStr(v_UndoHotstring, "``n"))
-				{
-					v_UndoHotstring := StrReplace(v_UndoHotstring, "``n", "", HowManyBackSpaces2)
-					HowManyBackSpaces += HowManyBackSpaces2
-				}
-				if (InStr(v_UndoHotstring, "``b"))
-				{
-					v_UndoHotstring := StrReplace(v_UndoHotstring, "``b", "", HowManyBackSpaces2)
-					HowManyBackSpaces += HowManyBackSpaces2
-				}
-				if (InStr(v_UndoHotstring, "``t"))
-				{
-					v_UndoHotstring := StrReplace(v_UndoHotstring, "``t", "", HowManyBackSpaces2)
-					HowManyBackSpaces += HowManyBackSpaces2
-				}
-			;}
+			if (InStr(v_UndoHotstring, "{Enter}", false))
+				v_UndoHotstring := StrReplace(v_UndoHotstring, "{Enter}", "", HowManyBackSpaces)
+			if (InStr(v_UndoHotstring, "``r``n"))
+			{
+				v_UndoHotstring := StrReplace(v_UndoHotstring, "``r``n", "", HowManyBackSpaces2)
+				HowManyBackSpaces += HowManyBackSpaces2 + 1
+			}
+			if (InStr(v_UndoHotstring, "``r"))
+			{
+				v_UndoHotstring := StrReplace(v_UndoHotstring, "``r", "", HowManyBackSpaces2)
+				HowManyBackSpaces += HowManyBackSpaces2
+			}
+			if (InStr(v_UndoHotstring, "``n"))
+			{
+				v_UndoHotstring := StrReplace(v_UndoHotstring, "``n", "", HowManyBackSpaces2)
+				HowManyBackSpaces += HowManyBackSpaces2
+			}
+			if (InStr(v_UndoHotstring, "``b"))
+			{
+				v_UndoHotstring := StrReplace(v_UndoHotstring, "``b", "", HowManyBackSpaces2)
+				HowManyBackSpaces += HowManyBackSpaces2
+			}
+			if (InStr(v_UndoHotstring, "``t"))
+			{
+				v_UndoHotstring := StrReplace(v_UndoHotstring, "``t", "", HowManyBackSpaces2)
+				HowManyBackSpaces += HowManyBackSpaces2
+			}
 			v_UndoHotstring := F_PrepareUndo(v_UndoHotstring)
 			v_UndoHotstring := RegExReplace(v_UndoHotstring, "{U+.*}", " ")
 			HowManyBackSpaces += StrLenUnicode(v_UndoHotstring)
 			Send, % "{BackSpace " . HowManyBackSpaces . "}"
-			;Loop, Parse, OrigTriggerstring
 			Loop, Parse, v_Triggerstring
 				Switch A_LoopField
 			{
@@ -4116,16 +4112,12 @@ F_Undo()
 				Send, % A_LoopField
 			}
 		}
-		;if (!(InStr(TriggerOpt, "*")) and !(InStr(TriggerOpt, "O"))) 
-		;if (!(InStr(v_Options, "*")) and !(InStr(v_Options, "O"))) 
-			;Send, % A_EndChar
-			Send, % v_EndChar
+		Send, % v_EndChar
 		F_UndoSignalling()
 		v_HotstringFlag := true
 	}
 	else
 	{
-		;ToolTip,
 		Gui, TMenuAHK: Destroy
 		If InStr(ThisHotkey, "^z")
 			SendInput, ^z
@@ -10022,7 +10014,6 @@ F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t
 		} 
 	} 
 }
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ReplaceAHKconstants(String)
 {
@@ -10128,14 +10119,12 @@ F_SendInput(string, Oflag)
 	if (Oflag = false)
 	{
 		SendInput, % string . A_EndChar
-		F_EventSigOrdHotstring()
 		v_InputString := ""
 		return
 	}
 	else
 	{
 		SendInput, % string
-		F_EventSigOrdHotstring()
 		v_InputString := ""
 		return
 	}
@@ -10150,8 +10139,8 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 	global	;assume-global mode
 	F_DeterminePartStrings(ReplacementString)
 	v_HotstringFlag := true
-	v_LOF := "SI"	;last (active) Output Function; this variable stores information about output function. it's used by F_Undo to correctly interpret special text strings, e.g. {Enter}
 	F_PrepareSendInput(ReplacementString, Oflag)
+	F_EventSigOrdHotstring()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeterminePartStrings(ReplacementString)
@@ -10172,17 +10161,18 @@ F_DeterminePartStrings(ReplacementString)
 F_PrepareSendInput(ReplacementString, Oflag)
 {
 	global	;assume-global mode
-	local vFirstLetter1 := "", vFirstLetter2 := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, fFirstLetterCap := false, InputString := "", TriggOptions := ""
-	
+	local vFirstLetter1 := "", vFirstLetter2 := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, fFirstLetterCap := false
+	;*[One]
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	if (!InStr(v_Options, "C"))	
 	{
-		vFirstLetter1 		:= SubStr(v_Triggerstring, 1, 1)	;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
-		vRestOfLetters 	:= SubStr(v_Triggerstring, 2)		;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
+		vFirstLetter1 		:= SubStr(v_Triggerstring, 1, 1)	;it must be v_Triggerstring, because A_ThisHotkey do not preserve letter size!
+		vRestOfLetters 	:= SubStr(v_Triggerstring, 2)		;it must be v_Triggerstring, because A_ThisHotkey do not preserve letter size!
 		if vFirstLetter1 is upper
 			fFirstLetterCap 	:= true
-		if vRestOfLetters is upper
-			fRestOfLettersCap 	:= true
+		if (vRestOfLetters)	;if vRestOfLetters is not empty
+			if vRestOfLetters is upper
+				fRestOfLettersCap 	:= true
 		if (fFirstLetterCap and fRestOfLettersCap)
 		{
 			StringUpper, NewReplacementString, ReplacementString
@@ -10220,7 +10210,6 @@ F_ClipboardPaste(string, Oflag)
 		ClipWait
 		Send, ^v
 		Sleep, %ini_CPDelay% ; this sleep is required surprisingly
-		F_EventSigOrdHotstring()
 		v_InputString := ""
 		Clipboard := ClipboardBackup
 		return
@@ -10231,7 +10220,6 @@ F_ClipboardPaste(string, Oflag)
 		ClipWait
 		Send, ^v
 		Sleep, %ini_CPDelay% ; this sleep is required surprisingly
-		F_EventSigOrdHotstring()
 		v_InputString := ""
 		Clipboard := ClipboardBackup
 		return
@@ -10244,15 +10232,23 @@ F_HOF_CLI(ReplacementString, Oflag) ;Hotstring Output Function _ Clipboard
 	local oWord := "", ThisHotkey := A_ThisHotkey, vFirstLetter1 := "", vFirstLetter2 := "", vOutputVar := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false
 		, fFirstLetterCap := false, InputString := ""
 	
-	v_UndoHotstring := ReplacementString
-	v_TypedTriggerstring := ThisHotkey
+	F_DeterminePartStrings(ReplacementString)
 	v_HotstringFlag := true
+	F_PrepareSendClipboard(ReplacementString, Oflag)
+	F_EventSigOrdHotstring()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_PrepareSendClipboard(ReplacementString, Oflag)
+{
+	global	;assume-global mode
+	local vFirstLetter1 := "", vFirstLetter2 := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, fFirstLetterCap := false
+	
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	ClipboardBackup := ClipboardAll
-	if (!InStr(ThisHotkey, "C"))	
+	if (!InStr(v_Options, "C"))	
 	{
-		vFirstLetter1 		:= SubStr(v_InputString, 1, 1)	;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
-		vRestOfLetters 	:= SubStr(v_InputString, 2)		;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
+		vFirstLetter1 		:= SubStr(v_TriggerString, 1, 1)	;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
+		vRestOfLetters 	:= SubStr(v_TriggerString, 2)		;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
 		if vFirstLetter1 is upper
 			fFirstLetterCap 	:= true
 		if vRestOfLetters is upper
@@ -10277,12 +10273,12 @@ F_HOF_CLI(ReplacementString, Oflag) ;Hotstring Output Function _ Clipboard
 			return
 		}
 	}
-	if (InStr(ThisHotkey, "C") or InStr(ThisHotkey, "C1"))
+	if (InStr(v_Options, "C") or InStr(v_Options, "C1"))
 	{
 		F_ClipboardPaste(ReplacementString, Oflag)
 		return
 	}
-}
+}	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_MCLI(TextOptions, Oflag)
 {
@@ -10291,7 +10287,6 @@ F_HOF_MCLI(TextOptions, Oflag)
 			,Window2X  := 0,	Window2Y  := 0,	Window2W  := 0,	Window2H  := 0
 			,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
 	
-	v_TypedTriggerstring	:= A_ThisHotkey
 	if (ini_MHSEn)		;Second beep on purpose
 	{
 		SoundBeep, % ini_MHSF, % ini_MHSD
@@ -10302,7 +10297,6 @@ F_HOF_MCLI(TextOptions, Oflag)
 	TextOptions 		 := F_ReplaceAHKconstants(TextOptions)
 	Loop, Parse, TextOptions, ¦
 		v_MenuMax := A_Index
-	ToolTip,
 	Gui, HMenuCli: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuCliHwnd
 	Gui, HMenuCli: Margin, 0, 0
 	if (ini_HMBgrCol = "custom")
@@ -10359,31 +10353,23 @@ F_HOF_MCLI(TextOptions, Oflag)
 	GuiControl, Choose, % Id_LB_HMenuCli, 1
 	Ovar := Oflag
 	v_HotstringFlag := true
+	F_DeterminePartStrings(TextOptions)
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenuCli() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
-	local	OutputVarTemp := "",	MouseCtl := 0,		ThisHotkey := A_ThisHotkey
+	local	OutputVarTemp := ""
 	
-	MouseGetPos, , , , MouseCtl, 2
-	if ((A_GuiEvent = "Normal") and (MouseCtl = Id_LB_HMenuCli) and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down"))) ;only Basic mouse left click
+	if ((A_GuiEvent = "Normal") and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down")) and !(InStr(ThisHotkey, "Tab"))) ;only Basic mouse left click
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuCli 
-		v_HotstringFlag := true
-		ClipboardBack := ClipboardAll ;backup clipboard
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
 		Gui, HMenuCli: Destroy
-		Clipboard := OutputvarTemp 
-		Send, ^v ;paste the text
-		if (Ovar = false)
-			Send, % A_EndChar
-		Sleep, %ini_CPDelay% ;Remember to sleep before restoring clipboard or it will fail
-		F_EventSigOrdHotstring()
-		v_TypedTriggerstring := OutputVarTemp
 		v_UndoHotstring 	 := OutputVarTemp
-		Clipboard 		 := ClipboardBack
+		F_PrepareSendClipboard(OutputVarTemp, Ovar)
+		F_EventSigOrdHotstring()
 	}
 	return
 }
@@ -10420,15 +10406,16 @@ F_HOF_MSI(TextOptions, Oflag)
 			,Window2X  := 0,	Window2Y  := 0,	Window2W  := 0,	Window2H  := 0
 			,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
 			,TriggerChar := ""
-
-	if (ini_MHSEn)		;Second beep on purpose
-		SoundBeep, % ini_MHSF, % ini_MHSD
 	
+	if (ini_MHSEn)		;Second beep on purpose
+	{
+		SoundBeep, % ini_MHSF, % ini_MHSD
+		SoundBeep, % ini_MHSF, % ini_MHSD
+	}
 	v_MenuMax				:= 0
 	TextOptions 			:= F_ReplaceAHKconstants(TextOptions)
 	Loop, Parse, TextOptions, ¦	;determine amount of rows for Listbox
 		v_MenuMax := A_Index
-	;ToolTip,
 	Gui, HMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuAHKHwnd
 	Gui, HMenuAHK: Margin, 0, 0
 	if (ini_HMBgrCol = "custom")
@@ -10495,7 +10482,7 @@ F_HOF_MSI(TextOptions, Oflag)
 F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
-	local	OutputVarTemp := "",	ThisHotkey := A_ThisHotkey
+	local	OutputVarTemp := "", ThisHotkey := A_ThisHotkey
 	
 	if ((A_GuiEvent = "Normal") and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down")) and !(InStr(ThisHotkey, "Tab"))) ;only Basic mouse left click
 	{
@@ -10504,6 +10491,7 @@ F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A
 		Gui, HMenuAHK: Destroy
 		v_UndoHotstring := OutputVarTemp
 		F_PrepareSendInput(OutputVarTemp, Ovar)
+		F_EventSigOrdHotstring()
 	}
 	return
 }
@@ -10528,7 +10516,6 @@ F_HMenuAHK()
 	global	;assume-global moee
 	local	v_PressedKey := "",		v_Temp1 := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
-	;*[One]
 	v_PressedKey := A_ThisHotkey
 	if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
@@ -10595,7 +10582,8 @@ F_HMenuAHK()
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
 	;F_HOF_SI(v_Temp1, Ovar, true)	;tu jestem
-	F_HOF_SI(v_Temp1, Ovar)	
+	;F_HOF_SI(v_Temp1, Ovar)
+	F_PrepareSendInput(v_Temp1, Ovar)
 	Gui, HMenuAHK: Destroy
 	return
 }
