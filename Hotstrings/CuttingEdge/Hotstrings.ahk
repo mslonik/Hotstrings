@@ -749,14 +749,14 @@ F_HMenuCli()
 	{
 		IsCursorPressed := true
 		IntCnt--
-		ControlSend, , {Up}, % "ahk_id" Id_LB_TMenuAHK
+		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
 		ShiftTabIsFound := true
 	}
 	if (InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
 	{
 		IsCursorPressed := true
 		IntCnt++
-		ControlSend, , {Down}, % "ahk_id" Id_LB_TMenuAHK
+		ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
 	}
 	if (InStr(v_PressedKey, "Up"))
 	{
@@ -812,28 +812,17 @@ F_HMenuCli()
 		if (A_Index = v_PressedKey)
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
-	Clipboard := v_Temp1		;tu jestem
-	Send, ^v ;paste the text
-	if (Ovar = false)
-		Send, % A_EndChar
+	v_UndoHotstring := v_Temp1
+	F_PrepareSendClipboard(v_Temp1, Ovar)
+	Gui, HMenuCli: Destroy
 	if (ini_MHSEn)
 		SoundBeep, % ini_MHSF, % ini_MHSD	
-	
-	Sleep, %ini_CPDelay% ;Remember to sleep before restoring clipboard or it will fail
-	Clipboard 		 := ClipboardBack
-	v_UndoHotstring 	 := v_Temp1
-	Hotstring("Reset")
-	v_HotstringFlag := true
-	Gui, HMenuCli: Destroy
-	F_EventSigOrdHotstring()
 	return
 }
 
 Esc::
 	Gui, HMenuCli: Destroy
-	Send, % SubStr(v_TypedTriggerstring, InStr(v_TypedTriggerstring, ":", false, 1, 2) + 1) 
-	v_InputString := ""	;I'm not sure if this line is necessary anymore.
-	v_HotstringFlag := true
+	Send, % v_Triggerstring . v_EndChar
 return
 #If
 
@@ -4065,7 +4054,7 @@ F_Undo()
 	global	;assume-global mode
 	local	TriggerOpt := "", HowManyBackSpaces := 0, HowManyBackSpaces2 := 0
 			,ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey, OrigTriggerstring := ""
-	
+	;*[One]
 	if (ini_UHTtEn and v_Triggerstring and (ThisHotkey != PriorHotkey))
 	{	
 		if (!(InStr(v_Options, "*")) and !(InStr(v_Options, "O")))
@@ -10059,38 +10048,18 @@ F_PrepareUndo(string)
 F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 {
 	global	;assume-global mode
-	local	ThisHotkey := A_ThisHotkey
-	
-	v_InputString := ""
-	v_UndoHotstring := ReplacementString
-	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
-	if (Oflag = false)
-		SendEvent, % ReplacementString . A_EndChar
-	else
-		SendEvent, % ReplacementString
-	
-	v_TypedTriggerstring := ThisHotkey 
+	F_DeterminePartStrings(ReplacementString)
 	v_HotstringFlag := true
-	v_LOF := "SE"
+	F_PrepareSend(ReplacementString, Oflag, "SendEvent")
 	F_EventSigOrdHotstring()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 {
 	global	;assume-global mode
-	local	ThisHotkey := A_ThisHotkey
-	
-	v_InputString := ""
-	v_UndoHotstring := ReplacementString
-	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
-	if (Oflag = false)
-		SendPlay, % ReplacementString . A_EndChar
-	else
-		SendPlay, % ReplacementString
-	
-	v_TypedTriggerstring := ThisHotkey 
+	F_DeterminePartStrings(ReplacementString)
 	v_HotstringFlag := true
-	v_LOF := "SP"
+	F_PrepareSend(ReplacementString, Oflag, "SendPlay")
 	F_EventSigOrdHotstring()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10099,35 +10068,40 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 	global	;assume-global mode
 	local	ThisHotkey := A_ThisHotkey
 	
-	v_InputString := ""
-	v_UndoHotstring := ReplacementString
-	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
-	if (Oflag = false)
-		SendRaw, % ReplacementString . A_EndChar
-	else
-		SendRaw, % ReplacementString
-	
-	v_TypedTriggerstring := ThisHotkey 
+	F_DeterminePartStrings(ReplacementString)
 	v_HotstringFlag := true
-	v_LOF := "SR"
+	F_PrepareSend(ReplacementString, Oflag, "SendRaw")
 	F_EventSigOrdHotstring()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SendInput(string, Oflag)
+F_SendIsOflag(string, Oflag, SendFunctionName)
 {
 	global	;assume-global mode
-	if (Oflag = false)
+	;*[One]
+	Switch SendFunctionName
 	{
-		SendInput, % string . A_EndChar
-		v_InputString := ""
-		return
+		Case "SendInput":
+			if (Oflag = false)
+				SendInput, % string . A_EndChar
+			else
+				SendInput, % string
+		Case "SendEvent":
+			if (Oflag = false)
+				SendEvent, % string . A_EndChar
+			else
+				SendEvent, % string
+		Case "SendPlay":
+			if (Oflag = false)
+				SendPlay, % string . A_EndChar
+			else
+				SendPlay, % string
+		Case "SendRaw":
+			if (Oflag = false)
+				SendRaw, % string . A_EndChar
+			else
+				SendRaw, % string 
 	}
-	else
-	{
-		SendInput, % string
-		v_InputString := ""
-		return
-	}
+	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
@@ -10137,9 +10111,10 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 	;v_Triggerstring		→ stored v_InputString
 	;v_EndChar			→ stored value of A_EndChar
 	global	;assume-global mode
+	local	FuncObject := func("SendInput")
 	F_DeterminePartStrings(ReplacementString)
 	v_HotstringFlag := true
-	F_PrepareSendInput(ReplacementString, Oflag)
+	F_PrepareSend(ReplacementString, Oflag, "SendInput")
 	F_EventSigOrdHotstring()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10158,11 +10133,11 @@ F_DeterminePartStrings(ReplacementString)
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_PrepareSendInput(ReplacementString, Oflag)
+F_PrepareSend(ReplacementString, Oflag, SendFunctionName)
 {
 	global	;assume-global mode
 	local vFirstLetter1 := "", vFirstLetter2 := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, fFirstLetterCap := false
-	;*[One]
+
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	if (!InStr(v_Options, "C"))	
 	{
@@ -10176,7 +10151,7 @@ F_PrepareSendInput(ReplacementString, Oflag)
 		if (fFirstLetterCap and fRestOfLettersCap)
 		{
 			StringUpper, NewReplacementString, ReplacementString
-			F_SendInput(NewReplacementString, Oflag)
+			F_SendIsOflag(NewReplacementString, Oflag, SendFunctionName)
 			return
 		}
 		if (fFirstLetterCap and !fRestOfLettersCap)
@@ -10184,18 +10159,18 @@ F_PrepareSendInput(ReplacementString, Oflag)
 			vFirstLetter2 := SubStr(ReplacementString, 1, 1)
 			StringUpper, vFirstLetter2, vFirstLetter2
 			NewReplacementString := vFirstLetter2 . SubStr(ReplacementString, 2)
-			F_SendInput(NewReplacementString, Oflag)
+			F_SendIsOflag(NewReplacementString, Oflag, SendFunctionName)
 			return
 		}
 		if (!fFirstLetterCap)
 		{
-			F_SendInput(ReplacementString, Oflag)
+			F_SendIsOflag(ReplacementString, Oflag, SendFunctionName)
 			return
 		}
 	}
 	if (InStr(v_Options, "C") or InStr(v_Options, "C1"))
 	{
-		F_SendInput(ReplacementString, Oflag)
+		F_SendIsOflag(ReplacementString, Oflag, SendFunctionName)
 		return
 	}
 }
@@ -10293,7 +10268,7 @@ F_HOF_MCLI(TextOptions, Oflag)
 		SoundBeep, % ini_MHSF, % ini_MHSD
 	}
 	
-	v_MenuMax			 	:= 0
+	v_MenuMax			 := 0
 	TextOptions 		 := F_ReplaceAHKconstants(TextOptions)
 	Loop, Parse, TextOptions, ¦
 		v_MenuMax := A_Index
@@ -10360,7 +10335,7 @@ F_HOF_MCLI(TextOptions, Oflag)
 F_MouseMenuCli() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
-	local	OutputVarTemp := ""
+	local	OutputVarTemp := "", ThisHotkey := A_ThisHotkey
 	
 	if ((A_GuiEvent = "Normal") and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down")) and !(InStr(ThisHotkey, "Tab"))) ;only Basic mouse left click
 	{
@@ -10490,7 +10465,7 @@ F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
 		Gui, HMenuAHK: Destroy
 		v_UndoHotstring := OutputVarTemp
-		F_PrepareSendInput(OutputVarTemp, Ovar)
+		F_PrepareSend(OutputVarTemp, Ovar, "SendInput")
 		F_EventSigOrdHotstring()
 	}
 	return
@@ -10574,17 +10549,17 @@ F_HMenuAHK()
 	{
 		return
 	}
-	;v_HotstringFlag := true
 	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuAHK
 	Loop, Parse, v_Temp1, `n
 	{
 		if (InStr(A_LoopField, v_PressedKey . "."))
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
-	;F_HOF_SI(v_Temp1, Ovar, true)	;tu jestem
-	;F_HOF_SI(v_Temp1, Ovar)
-	F_PrepareSendInput(v_Temp1, Ovar)
+	v_UndoHotstring := v_Temp1
+	F_PrepareSend(v_Temp1, Ovar, "SendInput")
 	Gui, HMenuAHK: Destroy
+	if (ini_MHSEn)
+		SoundBeep, % ini_MHSF, % ini_MHSD	
 	return
 }
 
