@@ -636,14 +636,14 @@ Gui, HS3Search: Default
 F_MoveList()
 #if
 
-#if WinExist("AHK_id" TMenuAHKHwnd)
+#if WinExist("ahk_id" TMenuAHKHwnd)
 #InputLevel 1	;This trick enables back triggering of existing (triggerstring, hotstring) definitions; it rises up priority of calling existing triggerstrings
-Tab::
-+Tab::
-Up::
-Down::
-+Enter::
-^Enter::
+;Tab::
+;+Tab::
+;Up::
+;Down::
+;+Enter::
+;^Enter::
 F_TMenu()
 {
 	global	;assume-global moee
@@ -721,12 +721,12 @@ F_TMenu()
 	return
 }
 #InputLevel 0
-	
+
 #if
 
 #if WinExist("ahk_id" HMenuCliHwnd)
-Tab::
-+Tab::
+;Tab::
+;+Tab::
 1::
 2::
 3::
@@ -4054,7 +4054,7 @@ F_Undo()
 	global	;assume-global mode
 	local	TriggerOpt := "", HowManyBackSpaces := 0, HowManyBackSpaces2 := 0
 			,ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey, OrigTriggerstring := ""
-	;*[One]
+
 	if (ini_UHTtEn and v_Triggerstring and (ThisHotkey != PriorHotkey))
 	{	
 		if (!(InStr(v_Options, "*")) and !(InStr(v_Options, "O")))
@@ -6767,7 +6767,6 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			F_GuiMain_Resize4()
 		return
 	}
-	;*[One]
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10032,7 +10031,6 @@ F_ReplaceAHKconstants(String)
 	String := StrReplace(String, "``f", "`f")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
 	return String
 }
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PrepareUndo(string)
 {	;this function replaces from hotstring definition all characters which aren't necessary to undo last hotstring
@@ -10066,8 +10064,6 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 {
 	global	;assume-global mode
-	local	ThisHotkey := A_ThisHotkey
-	
 	F_DeterminePartStrings(ReplacementString)
 	v_HotstringFlag := true
 	F_PrepareSend(ReplacementString, Oflag, "SendRaw")
@@ -10077,7 +10073,6 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 F_SendIsOflag(string, Oflag, SendFunctionName)
 {
 	global	;assume-global mode
-	;*[One]
 	Switch SendFunctionName
 	{
 		Case "SendInput":
@@ -10378,9 +10373,10 @@ F_HOF_MSI(TextOptions, Oflag)
 {
 	global	;assume-global mode
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
-			,Window2X  := 0,	Window2Y  := 0,	Window2W  := 0,	Window2H  := 0
-			,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
-			,TriggerChar := ""
+		,Window2X  := 0,	Window2Y  := 0,	Window2W  := 0,	Window2H  := 0
+		,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
+		,TriggerChar := "", UserInput := ""
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
 	
 	if (ini_MHSEn)		;Second beep on purpose
 	{
@@ -10450,125 +10446,215 @@ F_HOF_MSI(TextOptions, Oflag)
 	Ovar := Oflag
 	v_HotstringFlag := true
 	F_DeterminePartStrings(TextOptions)
-	;Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1	future
-	return
+	
+	Loop,	;tu jestem
+	{
+		Input, UserInput, L1, {Esc}{Down}{Up}{Enter} ; V = Visible, L1 = Length 1
+		OutputDebug, % "UserInput:" . A_Tab . UserInput
+		;*[One]
+		if (UserInput)
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	
+		
+		if (InStr(ErrorLevel, "EndKey:Escape"))
+		{
+			Gui, HMenuAHK: Destroy
+			Send, % v_Triggerstring . v_EndChar
+			return
+		}
+		/*
+			if (UserInput = "+Tab")	;the same as "up"; modified keys are not supported by Input command!
+			{
+				IsCursorPressed := true
+				IntCnt--
+				ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
+				ShiftTabIsFound := true
+			}
+			if (InStr(ErrorLevel, "EndKey:Tab") and (!ShiftTabIsFound))	;the same as "down"
+			{
+				IsCursorPressed := true
+				IntCnt++
+				ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
+			}
+		*/
+		if (InStr(ErrorLevel, "EndKey:Up"))
+		{
+			IsCursorPressed := true
+			IntCnt--
+			ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
+		}
+		if (InStr(ErrorLevel, "EndKey:Down"))
+		{
+			IsCursorPressed := true
+			IntCnt++
+			ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
+		}
+		if ((v_MenuMax = 1) and IsCursorPressed)
+		{
+			IntCnt := 1
+			Continue
+		}
+		if (IsCursorPressed)
+		{
+			if (IntCnt > v_MenuMax)
+			{
+				IntCnt := v_MenuMax
+				if (ini_MHSEn)
+					SoundBeep, % ini_MHSF, % ini_MHSD	
+			}
+			if (IntCnt < 1)
+			{
+				IntCnt := 1
+				if (ini_MHSEn)
+					SoundBeep, % ini_MHSF, % ini_MHSD	
+			}
+			IsCursorPressed := false
+			Continue
+		}		
+		if (InStr(ErrorLevel, "EndKey:Enter"))
+		{
+			UserInput := IntCnt
+			IsCursorPressed := false
+			IntCnt := 1
+		}
+		if (UserInput > v_MenuMax)
+		{
+			Continue
+		}
+		
+		ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuAHK
+		Loop, Parse, v_Temp1, `n
+		{
+			if (InStr(A_LoopField, UserInput . "."))
+				v_Temp1 := SubStr(A_LoopField, 4)
+		}
+		v_UndoHotstring := v_Temp1
+		F_PrepareSend(v_Temp1, Ovar, "SendInput")
+		Gui, HMenuAHK: Destroy
+		if (ini_MHSEn)
+			SoundBeep, % ini_MHSF, % ini_MHSD	
+		return
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
-	local	OutputVarTemp := "", ThisHotkey := A_ThisHotkey
-	
-	if ((A_GuiEvent = "Normal") and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down")) and !(InStr(ThisHotkey, "Tab"))) ;only Basic mouse left click
+	local	OutputVarTemp := "", ThisHotkey := A_ThisHotkey, v_PressedKey := "",		v_Temp1 := ""
+	;if ((A_GuiEvent = "Normal") and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down")) and !(InStr(ThisHotkey, "Tab")))
+	if (InStr(ThisHotkey, "LButton"))
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuAHK 
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
 		Gui, HMenuAHK: Destroy
 		v_UndoHotstring := OutputVarTemp
 		F_PrepareSend(OutputVarTemp, Ovar, "SendInput")
-		F_EventSigOrdHotstring()
+		if (ini_MHSEn)
+			SoundBeep, % ini_MHSF, % ini_MHSD	
 	}
 	return
 }
 
 ;Future: move this section of code to Hotkeys
-#if WinExist("ahk_id" HMenuAHKHwnd)
-Tab::
-+Tab::
-1::
-2::
-3::
-4::
-5::
-6::
-7::
-Enter:: 
-Up::
-Down::
-
-F_HMenuAHK()
-{
-	global	;assume-global moee
-	local	v_PressedKey := "",		v_Temp1 := ""
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
-	v_PressedKey := A_ThisHotkey
-	if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
+/*
+	#if WinExist("ahk_id" HMenuAHKHwnd)
+	Tab::
+	+Tab::
+	1::
+	2::
+	3::
+	4::
+	5::
+	6::
+	7::
+	Enter:: 
+	Up::
+	Down::
+	
+	F_HMenuAHK()
 	{
-		IsCursorPressed := true
-		IntCnt--
-		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
-		ShiftTabIsFound := true
-	}
-	if (InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
-	{
-		IsCursorPressed := true
-		IntCnt++
-		ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
-	}
-	if (InStr(v_PressedKey, "Up"))
-	{
-		IsCursorPressed := true
-		IntCnt--
-		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
-	}
-	if (InStr(v_PressedKey, "Down"))
-	{
-		IsCursorPressed := true
-		IntCnt++
-		ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
-	}
-	if ((v_MenuMax = 1) and IsCursorPressed)
-	{
-		IntCnt := 1
-		return
-	}
-	if (IsCursorPressed)
-	{
-		if (IntCnt > v_MenuMax)
+		global	;assume-global moee
+		local	v_PressedKey := "",		v_Temp1 := ""
+		static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
+		v_PressedKey := A_ThisHotkey
+		if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
 		{
-			IntCnt := v_MenuMax
-			if (ini_MHSEn)
-				SoundBeep, % ini_MHSF, % ini_MHSD	
+			IsCursorPressed := true
+			IntCnt--
+			ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
+			ShiftTabIsFound := true
 		}
-		if (IntCnt < 1)
+		if (InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+		{
+			IsCursorPressed := true
+			IntCnt++
+			ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
+		}
+		if (InStr(v_PressedKey, "Up"))
+		{
+			IsCursorPressed := true
+			IntCnt--
+			ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
+		}
+		if (InStr(v_PressedKey, "Down"))
+		{
+			IsCursorPressed := true
+			IntCnt++
+			ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
+		}
+		if ((v_MenuMax = 1) and IsCursorPressed)
 		{
 			IntCnt := 1
-			if (ini_MHSEn)
-				SoundBeep, % ini_MHSF, % ini_MHSD	
+			return
 		}
-		IsCursorPressed := false
+		if (IsCursorPressed)
+		{
+			if (IntCnt > v_MenuMax)
+			{
+				IntCnt := v_MenuMax
+				if (ini_MHSEn)
+					SoundBeep, % ini_MHSF, % ini_MHSD	
+			}
+			if (IntCnt < 1)
+			{
+				IntCnt := 1
+				if (ini_MHSEn)
+					SoundBeep, % ini_MHSF, % ini_MHSD	
+			}
+			IsCursorPressed := false
+			return
+		}		
+		if (InStr(v_PressedKey, "Enter"))
+		{
+			v_PressedKey := IntCnt
+			IsCursorPressed := false
+			IntCnt := 1
+		}
+		if (v_PressedKey > v_MenuMax)
+		{
+			return
+		}
+		ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuAHK
+		Loop, Parse, v_Temp1, `n
+		{
+			if (InStr(A_LoopField, v_PressedKey . "."))
+				v_Temp1 := SubStr(A_LoopField, 4)
+		}
+		v_UndoHotstring := v_Temp1
+		F_PrepareSend(v_Temp1, Ovar, "SendInput")
+		Gui, HMenuAHK: Destroy
+		if (ini_MHSEn)
+			SoundBeep, % ini_MHSF, % ini_MHSD	
 		return
-	}		
-	if (InStr(v_PressedKey, "Enter"))
-	{
-		v_PressedKey := IntCnt
-		IsCursorPressed := false
-		IntCnt := 1
 	}
-	if (v_PressedKey > v_MenuMax)
-	{
-		return
-	}
-	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuAHK
-	Loop, Parse, v_Temp1, `n
-	{
-		if (InStr(A_LoopField, v_PressedKey . "."))
-			v_Temp1 := SubStr(A_LoopField, 4)
-	}
-	v_UndoHotstring := v_Temp1
-	F_PrepareSend(v_Temp1, Ovar, "SendInput")
-	Gui, HMenuAHK: Destroy
-	if (ini_MHSEn)
-		SoundBeep, % ini_MHSF, % ini_MHSD	
+	
+	Esc::
+		Gui, HMenuAHK: Destroy
+		Send, % v_Triggerstring . v_EndChar
 	return
-}
-
-Esc::
-	Gui, HMenuAHK: Destroy
-	Send, % v_Triggerstring . v_EndChar
-return
-#If
-
+	#If
+	
+*/
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadEndChars() ;Load from Config.ini 
 {
