@@ -419,7 +419,6 @@ if (ini_GuiReload) and (v_Param != "l")
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; The main application loop beginning .
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-SetBatchLines, -1
 Loop,
 {
 	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
@@ -959,7 +958,7 @@ F_GuiEvents_CreateObjects()
 	;2. Prepare all text objects according to mock-up.
 	Gui,	GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	Gui, GuiEvents: Add,	Tab3,		,							% TransA["Basic hotstring is triggered"] . "|" . TransA["Menu hotstring is triggered"] . "|" 
-		. TransA["Undid the last hotstring"] . "|" . TransA["Triggerstring tips"] . "||"
+		. TransA["Undid the last hotstring"] . "|" . TransA["Triggerstring tips"] . "|" . TransA["Active triggerstring tips"] . "||"
 	
 	Gui, GuiEvents: Tab, 											% TransA["Basic hotstring is triggered"]
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
@@ -1164,6 +1163,55 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvTt_B1 gF_EvTt_B1,			% TransA["Tooltip test"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B2 gF_EvTt_B2,			% TransA["Apply && Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B3 gF_EvTt_B3,			% TransA["Cancel"]
+	
+	Gui, GuiEvents: Tab, 											% TransA["Active triggerstring tips"]
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvAT_T1,						% TransA["Active triggerstring tips"] . ":"
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvAT_T2, 					ⓘ
+	T_ATT1 := func("F_ShowLongTooltip").bind(TransA["T_ATT1"])
+	GuiControl, +g, % IdEvAT_T2, % T_ATT1
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvAT_R1 vEvAT_R1R2 gF_EvAT_R1R2,	% TransA["enable"]
+	Gui, GuiEvents: Add,	Radio, 	HwndIdEvAT_R2 gF_EvAT_R1R2,			% TransA["disable"]	
+	Gui, GuiEvents: Add, 	Button, 	HwndIdEvAT_B1 gF_EvAT_B1,			% TransA["Tooltip test"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B2 gF_EvAT_B2,			% TransA["Apply && Close"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B3 gF_EvAT_B3,			% TransA["Cancel"]
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvAT_B3()	;Event Active Triggerstring Tips Button Cancel
+{
+	global ;assume-global mode
+	Tooltip,,,, 4
+	Gui, GuiEvents: Destroy
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvAT_B2()	;Event Active Triggerstring Tips Button Apply & Close
+{
+	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvAT_R1R2	;Tooltip enable
+	{
+		Case 1:	ini_ATEn := true
+		Case 2:	ini_ATEn := false
+	}
+	IniWrite, % ini_ATEn, 	% HADConfig, Event_ActiveTriggerstringTips, 	ATEn
+	Tooltip,,,, 4
+	Gui, GuiEvents: Destroy
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvAT_B1()	;Event Active Triggerstring Tips Button Tooltip test
+{
+	global ;assume-global mode
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvAT_R1R2()
+{
+	global ;assume-global mode
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1888,7 +1936,6 @@ F_GuiEvents_DetermineConstraints()
 	GuiControl, Move, % IdEvTt_T21, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext := c_xmarg, v_yNext += HofText, v_wNext := TheWidestText
 	GuiControl, Move, % IdEvTt_DDL1, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
-
 	v_xNext := c_xmarg, v_yNext += 3 * HofText
 	GuiControl, Move, % IdEvTt_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_B1
@@ -1897,6 +1944,25 @@ F_GuiEvents_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_B2
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 4 * c_xmarg
 	GuiControl, Move, % IdEvTt_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	v_xNext := c_xmarg, v_yNext := c_ymarg
+	GuiControl, Move, % IdEvAT_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_T1
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvAT_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdEvAT_R1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_R1
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvAT_R2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	GuiControl, Move, % IdEvAT_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_B1
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvAT_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_B2
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 4 * c_xmarg
+	GuiControl, Move, % IdEvAT_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2170,6 +2236,11 @@ F_GuiEvents_InitiateValues()
 		Case 1:		EvTt_R5R6 := 1
 		Case 2: 		EvTt_R5R6 := 2
 	}
+	Switch ini_ATEn
+	{
+		Case false:	EvAT_R1R2 := 2
+		Case true:	EvAT_R1R2 := 1
+	}
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2273,6 +2344,11 @@ F_GuiEvents_LoadValues()
 		else
 			s_Styling_DDL1 .= val . "|"
 	GuiControl,, % IdEvTt_DDL1, % s_Styling_DDL1
+	Switch ini_ATEn
+	{
+		Case true:	GuiControl,, % IdEvAT_R1, 1
+		Case false:	GuiControl,, % IdEvAT_R2, 1
+	}
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4828,6 +4904,7 @@ F_LoadSignalingParams()
 	ini_OHTtEn := 1, 	ini_OHTD := 0, 	ini_OHTP := 1, 	ini_OHSEn := 1, 	ini_OHSF := 500, 	ini_OHSD := 250, 	ini_MHMP := 1, 	ini_MHSEn := 1
 	,ini_MHSF := 500, 	ini_MHSD := 250, 	ini_UHTtEn := 1, 	ini_UHTD := 0, 	ini_UHTP := 1, 	ini_UHSEn := 1, 	ini_UHSF := 500, 	ini_UHSD := 250
 	,ini_TTTP := 1, 	ini_TTTtEn := 1, 	ini_TTTD := 0, 	ini_TipsSortAlphabetically := 1, 	ini_TipsSortByLength := 1, 	ini_TASAC := 1,	ini_MNTT := 5
+	,ini_ATEn := 0
 	
 	IniRead, ini_OHTtEn, 	% HADConfig, Event_BasicHotstring, 	OHTtEn, 	% A_Space
 	if (ini_OHTtEn = "")
@@ -4966,6 +5043,12 @@ F_LoadSignalingParams()
 	{
 		ini_MNTT := 5
 		IniWrite, % ini_MNTT, % HADConfig, Event_TriggerstringTips,	MNTT
+	}
+	IniRead, ini_ATEn,		% HADConfig, Event_ActiveTriggerstringTips, ATEn, % A_Space
+	if (ini_ATEn = "")
+	{
+		ini_ATEn := 0
+		IniWrite, % ini_ATEn, % HADConfig, Event_ActiveTriggerstringTips, ATEn
 	}
 	return
 }
@@ -7639,6 +7722,8 @@ HotstringMenuTypefaceColorCustom=
 HotstringMenuTypefaceColor=black
 HotstringMenuTypefaceFont=Calibri
 HotstringMenuTypefaceSize=10
+[Event_ActiveTriggerstringTips]
+ATEn=0
 [Event_BasicHotstring]
 OHTtEn=1
 OHTD=2000
@@ -7991,6 +8076,7 @@ F_LoadCreateTranslationTxt(decision*)
 (Join`n `			
 About / Help 											= &About / Help
 About this application...								= About this application...
+Active triggerstring tips								= Active triggerstring tips
 Add comment (optional) 									= Add comment (optional)
 Add / Edit hotstring (F9) 								= Add / Edit hotstring (F9)
 Add library 											= Add library
@@ -8055,17 +8141,18 @@ Current shortcut (hotkey):								= Current shortcut (hotkey):
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
 cursor												= cursor
 custom												= custom
-Download if update is available on startup?					= Download if update is available on startup?
-Download public libraries								= Download public libraries
-Do you want to delete it?								= Do you want to delete it?
-Do you want to proceed? 									= Do you want to proceed?
 Dark													= Dark
 Default mode											= Default mode
 Delete hotstring (F8) 									= Delete hotstring (F8)
 Deleting hotstring... 									= Deleting hotstring...
 Deleting hotstring. Please wait... 						= Deleting hotstring. Please wait...
 Disable 												= Disable
+disable												= disable
 DISABLED												= DISABLED
+Download if update is available on startup?					= Download if update is available on startup?
+Download public libraries								= Download public libraries
+Do you want to delete it?								= Do you want to delete it?
+Do you want to proceed? 									= Do you want to proceed?
 Dot . 												= Dot .
 Do you want to reload application now?						= Do you want to reload application now?
 doesn't exist in application folder						= doesn't exist in application folder
@@ -8073,6 +8160,7 @@ Download repository version								= Download repository version
 Dynamic hotstrings 										= &Dynamic hotstrings
 Edit Hotstrings 										= Edit Hotstrings
 Enable												= Enable
+enable												= enable
 Enable/disable libraries									= Enable/disable &libraries
 Enable/disable triggerstring tips 							= Enable/disable triggerstring tips	
 Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 4th edition of this application, 2021 by Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
@@ -8409,6 +8497,7 @@ T_TriggerstringTips										= The triggerstring tips are displayed to help you 
 T_TtSortingOrder										= The sorting order let you define how the triggerstring tips list positions are sorted out. `nThere are two options, which can be active on the same time: alphabetically or by length. `nYou can check out the differences by pressing the Tooltip test button.
 T_TtMaxNoOfTips										= Maximum length of the triggerstring tips list. `n`nIf currently available list is longer, only the specified amount of triggerstring tips is displayed. `nPlease mind that displayed list could be just shorter.
 T_TtNoOfChars											= It is possible to configure triggerstring tips to be displayed only if some first characters are already entered. `nE.g. if this parameter is set to 2, the first list appears if 2 or more characters of any existing triggerstring tip are entered.
+T_ATT1												= If active triggerstring tips are enabled, then it is possible to use keyboard shortcuts `nto enter one of the triggerstrings from currently displayed list. `n`nActive triggerstring shortcuts: `n`nShift + Enter to enter any of the triggerstring tips `n↓ or ↑ to move down or up on the list `nTab or Shift + Tab to move down or up on the list.
 )"
 	
 	TransA					:= {}	;this associative array (global) is used to store translations of this application text strings
@@ -10342,7 +10431,8 @@ F_MouseMenuCli() ;The subroutine may consult the following built-in variables: A
 	global	;assume-global mode
 	local	OutputVarTemp := "", ThisHotkey := A_ThisHotkey
 	
-	if ((A_GuiEvent = "Normal") and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down")) and !(InStr(ThisHotkey, "Tab"))) ;only Basic mouse left click
+	;if ((A_GuiEvent = "Normal") and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down")) and !(InStr(ThisHotkey, "Tab"))) ;only Basic mouse left click
+	if (InStr(ThisHotkey, "LButton"))	;only Basic mouse left click
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuCli 
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
@@ -10552,7 +10642,7 @@ F_HOF_MSI(TextOptions, Oflag)
 F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
-	local	OutputVarTemp := "", ThisHotkey := A_ThisHotkey, v_PressedKey := "",		v_Temp1 := ""
+	local	OutputVarTemp := "", ThisHotkey := A_ThisHotkey
 	;if ((A_GuiEvent = "Normal") and !(InStr(ThisHotkey, "Up")) and !(InStr(ThisHotkey, "Down")) and !(InStr(ThisHotkey, "Tab")))
 	if (InStr(ThisHotkey, "LButton"))
 	{
