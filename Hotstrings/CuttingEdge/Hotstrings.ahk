@@ -416,6 +416,7 @@ if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_Gui
 if (ini_GuiReload) and (v_Param != "l")
 	Gosub, L_GUIInit
 
+F_TMenuAHK_Hotkeys()
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; The main application loop beginning .
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -427,7 +428,6 @@ Loop,
 		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["ErrorLevel was triggered by NewInput error."]
 	
 	;OutputDebug, % "out" . ":" . A_Space . Ord(out) . A_Space . out
-	;*[One]
 	;OutputDebug, % "After:" . A_Space . v_InputString
 	if (v_HotstringFlag)	;v_HotstringFlag = 1, triggerstring was fired = hotstring was shown
 	{
@@ -515,10 +515,8 @@ else
 	}
 }
 return
-#InputLevel 2
+#InputLevel 0
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;#if WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows exist at the moment.
-;~^c::			; copy to edit field "Enter hotstring" content of Clipboard. 
 F_PasteFromClipboard()
 {
 	global	;assume-global mode
@@ -542,7 +540,6 @@ F_PasteFromClipboard()
 	Gui, % A_DefaultGui . ":" . A_Space . "Show"
 	return
 }
-;#if
 
 #if WinActive("ahk_id" HS3GuiHwnd) or WinActive("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows are active at the moment. 
 
@@ -614,6 +611,7 @@ return
 
 #if
 
+;The following lines are hotkeys to handle all combinations which are not covered by the main function loop.
 ~Alt::
 ;Comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
 ~MButton::
@@ -645,93 +643,19 @@ Gui, HS3Search: Default
 F_MoveList()
 #if
 
-#if WinExist("ahk_id" TMenuAHKHwnd)
-#InputLevel 1	;This trick enables back triggering of existing (triggerstring, hotstring) definitions; it rises up priority of calling existing triggerstrings
-Tab::
-+Tab::
-Up::
-Down::
-+Enter::
-^Enter::
-F_TMenu()
-{
-	global	;assume-global moee
-	local	v_PressedKey := "",		v_Temp1 := "",		ClipboardBack := ""
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0, ShiftTabIsFound := false
+/*
+	#if WinExist("ahk_id" TMenuAHKHwnd)
+	#InputLevel 1	;This trick enables back triggering of existing (triggerstring, hotstring) definitions; it rises up priority of calling existing triggerstrings
+	Tab::
+	+Tab::
+	Up::
+	Down::
+	+Enter::
+	^Enter::
 	
-	v_MenuMax := a_Tips.Count()
-	v_PressedKey := A_ThisHotkey
-	if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
-	{
-		IsCursorPressed := true
-		IntCnt--
-		ControlSend, , {Up}, % "ahk_id" Id_LB_TMenuAHK
-		ShiftTabIsFound := true
-	}
-	if (InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
-	{
-		IsCursorPressed := true
-		IntCnt++
-		ControlSend, , {Down}, % "ahk_id" Id_LB_TMenuAHK
-	}
-	if (InStr(v_PressedKey, "Up"))
-	{
-		IsCursorPressed := true
-		IntCnt--
-		ControlSend, , {Up}, % "ahk_id" Id_LB_TMenuAHK
-	}
-	if (InStr(v_PressedKey, "Down"))
-	{
-		IsCursorPressed := true
-		IntCnt++
-		ControlSend, , {Down}, % "ahk_id" Id_LB_TMenuAHK
-	}
-	if ((v_MenuMax = 1) and IsCursorPressed)
-	{
-		IntCnt := 1
-		return
-	}
-	if (IsCursorPressed)
-	{
-		if (IntCnt > v_MenuMax)
-		{
-			IntCnt := v_MenuMax
-			if (ini_MHSEn)
-				SoundBeep, % ini_MHSF, % ini_MHSD	
-		}
-		if (IntCnt < 1)
-		{
-			IntCnt := 1
-			if (ini_MHSEn)
-				SoundBeep, % ini_MHSF, % ini_MHSD	
-		}
-		IsCursorPressed := false
-		return
-	}		
-	if (InStr(v_PressedKey, "+Enter") or InStr(v_PressedKey, "^Enter"))
-	{
-		v_PressedKey := IntCnt
-		IsCursorPressed := false
-		IntCnt := 1
-	}
-	if (v_PressedKey > v_MenuMax)
-		return
-	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_TMenuAHK
-	;OutputDebug, % "v_Temp1" . A_Tab . v_Temp1 . A_Tab . A_Tab . "v_PressedKey" . A_Tab . v_PressedKey
-	Loop, Parse, v_Temp1, `n
-	{
-		if (A_Index = v_PressedKey)
-			v_Temp1 := SubStr(A_LoopField, InStr(A_LoopField, " ") + 1)
-	}
-	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
-	Hotstring("Reset")
-	SendInput, % v_Temp1
-	Gui, TMenuAHK: Destroy
-	return
-}
-#InputLevel 0
-
-#if
+	#InputLevel 0
+	#if
+*/
 
 #if WinExist("ahk_id" HMenuCliHwnd)
 ;Tab::
@@ -751,7 +675,7 @@ F_HMenuCli()
 {
 	global	;assume-global moee
 	local	v_PressedKey := "",		v_Temp1 := "",		ClipboardBack := ""
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false, v_MenuMax := 0
 	
 	v_PressedKey := A_ThisHotkey
 	if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
@@ -836,6 +760,84 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_TMenu()
+{
+	global	;assume-global moee
+	local	v_PressedKey := "",		v_Temp1 := "",		ClipboardBack := ""
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0, ShiftTabIsFound := false
+	OutputDebug, % "F_TMenu"
+	;*[One]
+	v_MenuMax := a_Tips.Count()
+	v_PressedKey := A_ThisHotkey
+	if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
+	{
+		IsCursorPressed := true
+		IntCnt--
+		ControlSend, , {Up}, % "ahk_id" Id_LB_TMenuAHK
+		ShiftTabIsFound := true
+	}
+	if (InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+	{
+		IsCursorPressed := true
+		IntCnt++
+		ControlSend, , {Down}, % "ahk_id" Id_LB_TMenuAHK
+	}
+	if (InStr(v_PressedKey, "Up"))
+	{
+		IsCursorPressed := true
+		IntCnt--
+		ControlSend, , {Up}, % "ahk_id" Id_LB_TMenuAHK
+	}
+	if (InStr(v_PressedKey, "Down"))
+	{
+		IsCursorPressed := true
+		IntCnt++
+		ControlSend, , {Down}, % "ahk_id" Id_LB_TMenuAHK
+	}
+	if ((v_MenuMax = 1) and IsCursorPressed)
+	{
+		IntCnt := 1
+		return
+	}
+	if (IsCursorPressed)
+	{
+		if (IntCnt > v_MenuMax)
+		{
+			IntCnt := v_MenuMax
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	
+		}
+		if (IntCnt < 1)
+		{
+			IntCnt := 1
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	
+		}
+		IsCursorPressed := false
+		return
+	}		
+	if (InStr(v_PressedKey, "+Enter") or InStr(v_PressedKey, "^Enter"))
+	{
+		v_PressedKey := IntCnt
+		IsCursorPressed := false
+		IntCnt := 1
+	}
+	if (v_PressedKey > v_MenuMax)
+		return
+	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_TMenuAHK
+	;OutputDebug, % "v_Temp1" . A_Tab . v_Temp1 . A_Tab . A_Tab . "v_PressedKey" . A_Tab . v_PressedKey
+	Loop, Parse, v_Temp1, `n
+	{
+		if (A_Index = v_PressedKey)
+			v_Temp1 := SubStr(A_LoopField, InStr(A_LoopField, " ") + 1)
+	}
+	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
+	Hotstring("Reset")
+	SendInput, % v_Temp1
+	Gui, TMenuAHK: Destroy
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadConfiguration()
 {
 	global ;assume-global mode
@@ -1209,9 +1211,40 @@ F_EvAT_B1()	;Event Active Triggerstring Tips Button Tooltip test
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_TMenuAHK_Hotkeys()
+{
+	global ;assume-global mode
+	if (ini_ATEn)	;tu jestem
+	{
+		Hotkey, IfWinExist, % "ahk_id" TMenuAHKHwnd
+		Hotkey, ^Tab, 		F_TMenu, I1 On
+		Hotkey, +^Tab, 	F_TMenu, I1 On
+		Hotkey, ^Up,		F_TMenu, I1 On
+		Hotkey, ^Down,		F_TMenu, I1 On
+		Hotkey, ^Enter,	F_TMenu, I1 On
+		Hotkey, ^Space,	F_TMenu, On
+		;Hotkey, IfWinExist
+	}
+	else
+	{
+		Hotkey, IfWinExist, % "ahk_id" TMenuAHKHwnd
+		Hotkey, ^Tab, 		F_TMenu, I1 Off
+		Hotkey, +^Tab, 	F_TMenu, I1 Off
+		Hotkey, ^Up,		F_TMenu, I1 Off
+		Hotkey, ^Down,		F_TMenu, I1 Off
+		Hotkey, ^Enter,	F_TMenu, I1 Off
+		;Hotkey, IfWinExist
+	}
+	OutputDebug, % "F_TMenuAHK_Hotkeys" . ":" 
+	;ListHotkeys
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvAT_R1R2()
 {
 	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
+	F_TMenuAHK_Hotkeys()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3294,6 +3327,9 @@ F_ShowTriggerstringTips2()
 	
 	GuiControl, Choose, % Id_LB_TMenuAHK, 1
 	Gui, TMenuAHK: Show, x%MenuX% y%MenuY% NoActivate	
+	;OutputDebug, % "Active TMenuAHKHwnd"	;tu jestem
+	;F_TMenuAHK_Hotkeys()
+	;ListHotkeys
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6745,7 +6781,7 @@ F_GuiMain_Resize1()
 	v_hNext := A_GuiHeight - (2 * c_ymarg)
 	GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
 	F_GuiMain_LVcolumnScale()
-	OutputDebug, % "One:" . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved 
+	;OutputDebug, % "One:" . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved 
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6770,7 +6806,7 @@ F_GuiMain_Resize3()
 	v_hNext := A_GuiHeight - 2 * c_ymarg 
 	GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
 	F_GuiMain_LVcolumnScale()
-	OutputDebug, % "Three:" . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved 
+	;OutputDebug, % "Three:" . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved 
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6785,7 +6821,7 @@ F_GuiMain_Resize5()
 	v_hNext := A_GuiHeight - (2 * c_ymarg)
 	GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext
 	F_GuiMain_LVcolumnScale()
-	OutputDebug, % "Five"
+	;OutputDebug, % "Five"
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10546,96 +10582,6 @@ F_HOF_MSI(TextOptions, Oflag)
 	Ovar := Oflag
 	v_HotstringFlag := true
 	F_DeterminePartStrings(TextOptions)
-	;*[One]
-	/*
-		Loop,
-		{
-			if (F_HOFMSI)
-				break
-			else
-			{
-				;Input, UserInput, L1, {Esc}{Down}{Up}{Enter} ; L1 = Length 1
-				Input, UserInput, L1,  ; L1 = Length 1
-				if (UserInput)
-					if (ini_MHSEn)
-						SoundBeep, % ini_MHSF, % ini_MHSD	
-			}
-		}
-		
-	*/
-	/*
-		Loop,	;tu jestem
-		{
-			Input, UserInput, L1, {Esc}{Down}{Up}{Enter} ; V = Visible, L1 = Length 1
-			OutputDebug, % "UserInput:" . A_Tab . UserInput
-			;*[One]
-			if (UserInput)
-				if (ini_MHSEn)
-					SoundBeep, % ini_MHSF, % ini_MHSD	
-			
-			if (InStr(ErrorLevel, "EndKey:Escape"))
-			{
-				Gui, HMenuAHK: Destroy
-				Send, % v_Triggerstring . v_EndChar
-				return
-			}
-			if (InStr(ErrorLevel, "EndKey:Up"))
-			{
-				IsCursorPressed := true
-				IntCnt--
-				ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
-			}
-			if (InStr(ErrorLevel, "EndKey:Down"))
-			{
-				IsCursorPressed := true
-				IntCnt++
-				ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
-			}
-			if ((v_MenuMax = 1) and IsCursorPressed)
-			{
-				IntCnt := 1
-				Continue
-			}
-			if (IsCursorPressed)
-			{
-				if (IntCnt > v_MenuMax)
-				{
-					IntCnt := v_MenuMax
-					if (ini_MHSEn)
-						SoundBeep, % ini_MHSF, % ini_MHSD	
-				}
-				if (IntCnt < 1)
-				{
-					IntCnt := 1
-					if (ini_MHSEn)
-						SoundBeep, % ini_MHSF, % ini_MHSD	
-				}
-				IsCursorPressed := false
-				Continue
-			}		
-			if (InStr(ErrorLevel, "EndKey:Enter"))
-			{
-				UserInput := IntCnt
-				IsCursorPressed := false
-				IntCnt := 1
-			}
-			if (UserInput > v_MenuMax)
-			{
-				Continue
-			}
-			
-			ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuAHK
-			Loop, Parse, v_Temp1, `n
-			{
-				if (InStr(A_LoopField, UserInput . "."))
-					v_Temp1 := SubStr(A_LoopField, 4)
-			}
-			v_UndoHotstring := v_Temp1
-			F_PrepareSend(v_Temp1, Ovar, "SendInput")
-			Gui, HMenuAHK: Destroy
-			if (ini_MHSEn)
-				SoundBeep, % ini_MHSF, % ini_MHSD	
-	*/
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
