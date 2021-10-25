@@ -40,15 +40,15 @@ global HADConfig  				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\"	. "
 global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l or d
 
 global a_Triggers 				:= []		;Main loop of application
-global v_HotstringFlag 			:= false		;Main loop of application
-global v_InputString 			:= ""		;Main loop of application
+global v_HotstringFlag 			:= false		;Main loop of application; this flag is set (1) if any of the hotstring functions is triggered.
+global v_InputString 			:= ""		;Main loop of application; this variable stores information about keys pressed by user which can differ in size from actual hotstring definition.
 global v_MouseX 				:= 0			;Main loop of application
 global v_MouseY 				:= 0			;Main loop of application
 global v_Tips 					:= ""		;Main loop of application
 global v_TipsFlag 				:= false		;Main loop of application
 
 global ini_GuiReload			:= false
-global ini_Language 			:= "English.txt"
+global ini_Language 			:= "English.txt"	;default value of variable ini_Language
 
 global v_IndexLog 				:= 1			;for logging, if Hotstrings application is run with d parameter.
 
@@ -59,7 +59,6 @@ global v_UndoHotstring 			:= ""		;used by output functions
 global v_ResizingFlag 			:= true 		;when Hotstrings Gui is displayed for the very first time
 global HMenuCliHwnd				:= 0
 global HMenuAHKHwnd				:= 0
-global TMenuAHKHwnd				:= 0 
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_DetermineMonitors()
 Critical, On
@@ -416,7 +415,6 @@ if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_Gui
 if (ini_GuiReload) and (v_Param != "l")
 	Gosub, L_GUIInit
 
-F_TMenuAHK_Hotkeys()
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; The main application loop beginning .
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1216,14 +1214,14 @@ F_TMenuAHK_Hotkeys()
 	global ;assume-global mode
 	if (ini_ATEn)	;tu jestem
 	{
-		Hotkey, IfWinExist, % "ahk_id" TMenuAHKHwnd
+		Hotkey, IfWinExist, % "ahk_id" TMenuAHKHwnd	;in order to work the TMenuAHKHwnd variable must exist prior to definition of the following Hotkeys.
 		Hotkey, ^Tab, 		F_TMenu, I1 On
 		Hotkey, +^Tab, 	F_TMenu, I1 On
 		Hotkey, ^Up,		F_TMenu, I1 On
 		Hotkey, ^Down,		F_TMenu, I1 On
 		Hotkey, ^Enter,	F_TMenu, I1 On
 		Hotkey, ^Space,	F_TMenu, On
-		;Hotkey, IfWinExist
+		Hotkey, IfWinExist
 	}
 	else
 	{
@@ -1233,10 +1231,8 @@ F_TMenuAHK_Hotkeys()
 		Hotkey, ^Up,		F_TMenu, I1 Off
 		Hotkey, ^Down,		F_TMenu, I1 Off
 		Hotkey, ^Enter,	F_TMenu, I1 Off
-		;Hotkey, IfWinExist
+		Hotkey, IfWinExist
 	}
-	OutputDebug, % "F_TMenuAHK_Hotkeys" . ":" 
-	;ListHotkeys
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3278,8 +3274,9 @@ F_ShowTriggerstringTips2()
 		}
 	}
 	LongestString := WhichValue
-	F_GuiTrigTipsMenuDef(a_Tips.Count(), LongestString)
-	
+	F_GuiTrigTipsMenuDef(a_Tips.Count(), LongestString)	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
+	;Gui, TMenuAHK: Show, Hide
+	F_TMenuAHK_Hotkeys()	;tu jestem
 	ThisValue := ""
 	for key, value in a_Tips
 		ThisValue .= value . "|"
@@ -3327,9 +3324,6 @@ F_ShowTriggerstringTips2()
 	
 	GuiControl, Choose, % Id_LB_TMenuAHK, 1
 	Gui, TMenuAHK: Show, x%MenuX% y%MenuY% NoActivate	
-	;OutputDebug, % "Active TMenuAHKHwnd"	;tu jestem
-	;F_TMenuAHK_Hotkeys()
-	;ListHotkeys
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9010,7 +9004,6 @@ F_GuiMain_CreateObject()
 	
 	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 }
-	
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_GuiMain_DefineConstants()
 {
@@ -10487,6 +10480,7 @@ F_GuiTrigTipsMenuDef(AmountOfRows, LongestString)
 	
 	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
 		OutputString .= "w"		;the widest ordinary letter in alphabet
+	;*[One]
 	Gui, TMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndTMenuAHKHwnd
 	Gui, TMenuAHK: Margin, 0, 0
 	if (ini_TTBgrCol = "custom")
