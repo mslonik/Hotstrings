@@ -40,7 +40,7 @@ global HADConfig  				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\"	. "
 global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l or d
 
 global a_Triggers 				:= []		;Main loop of application
-global v_HotstringFlag 			:= false		;Main loop of application; this flag is set (1) if any of the hotstring functions is triggered.
+global f_HTriggered 			:= false		;Main loop of application; this flag is set (1) if any of the hotstring functions is triggered.
 global v_InputString 			:= ""		;Main loop of application; this variable stores information about keys pressed by user which can differ in size from actual hotstring definition.
 global v_MouseX 				:= 0			;Main loop of application
 global v_MouseY 				:= 0			;Main loop of application
@@ -369,7 +369,7 @@ Menu, 	HSMenu, 		Add, % TransA["Libraries"], 					:LibrariesSubmenu
 Menu, 	HSMenu, 		Add, % TransA["Clipboard Delay (F7)"], 			F_GuiHSdelay
 
 if (v_Param != "l")
-	Menu, 	AppSubmenu, 	Add,	% TransA["Reload"],						:SubmenuReload
+	Menu, 	AppSubmenu, 	Add,	% TransA["Reload"],					:SubmenuReload
 Menu,	AppSubmenu,	Add, % TransA["Suspend Hotkeys"],				L_TraySuspendHotkeys
 Menu,	AppSubmenu,	Add, % TransA["Pause"],						L_TrayPauseScript
 Menu,	AppSubmenu,	Add, % TransA["Exit"],						F_Exit
@@ -381,6 +381,10 @@ Menu,	AppSubmenu, 	Add, % TransA["Add to Autostart"],				:AutoStartSub
 F_CompileSubmenu()
 
 Menu, AppSubmenu,		Add, % TransA["Version / Update"],				F_GuiVersionUpdate
+Menu, AppSubmenu,		Add
+Menu, SubmenuLog,		Add,	% TransA["enable"],						F_MenuLogEnDis
+Menu, SubmenuLog,		Add, % TransA["disable"],					F_MenuLogEnDis
+Menu, AppSubmenu,		Add, Log triggered hotstrings,				:SubmenuLog	;tu jestem
 
 Menu,	AboutHelpSub,	Add,	% TransA["Help: Hotstrings application"],	GuiAboutLink1
 Menu,	AboutHelpSub,	Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"], GuiAboutLink2
@@ -426,13 +430,13 @@ Loop,
 	
 	;OutputDebug, % "out" . ":" . A_Space . Ord(out) . A_Space . out
 	;OutputDebug, % "After:" . A_Space . v_InputString
-	if (v_HotstringFlag)	;v_HotstringFlag = 1, triggerstring was fired = hotstring was shown
+	if (f_HTriggered)	;f_HTriggered = 1, triggerstring was fired = hotstring was shown
 	{
 		v_InputString := ""
 		out := ""
 		Gui, TMenuAHK: Destroy
 		;ToolTip,	;Triggerstring Tips tooltip
-		v_HotstringFlag := false
+		f_HTriggered := false
 	}
 	else
 	{
@@ -452,7 +456,7 @@ Loop,
 		;F_ShowTriggerstringTips()
 		if (a_Tips.Count())
 		{
-			OutputDebug, % "Main loop:" . A_Tab . A_Index
+			;OutputDebug, % "Main loop:" . A_Tab . A_Index
 			F_ShowTriggerstringTips2()
 			F_TMenuAHK_Hotkeys()	;this function must be called when TMenuAHKHwnd variable is available and initialized
 			if ((ini_TTTtEn) and (ini_TTTD > 0))
@@ -616,7 +620,7 @@ return
 ;Comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
 ~MButton::
 ~RButton::
-;~LButton::	;from now LButton click will not close TMenuAHK; LButton is used to trigger F_MouseMenuTT by "g" in F_GuiTrigTipsMenuDef ;tu jestem
+;~LButton::	;from now LButton click will not close TMenuAHK; LButton is used to trigger F_MouseMenuTT by "g" in F_GuiTrigTipsMenuDef 
 ~LWin::
 ~RWin::
 ~Down::
@@ -643,20 +647,6 @@ Gui, HS3Search: Default
 F_MoveList()
 #if
 
-/*
-	#if WinExist("ahk_id" TMenuAHKHwnd)
-	#InputLevel 1	;This trick enables back triggering of existing (triggerstring, hotstring) definitions; it rises up priority of calling existing triggerstrings
-	Tab::
-	+Tab::
-	Up::
-	Down::
-	+Enter::
-	^Enter::
-	
-	#InputLevel 0
-	#if
-*/
-
 #if WinExist("ahk_id" HMenuCliHwnd)
 Tab::
 +Tab::
@@ -674,8 +664,8 @@ Down::
 F_HMenuCli()
 {
 	global	;assume-global moee
-	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := ""
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false, v_MenuMax := 0
+	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", ShiftTabIsFound := false
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	;*[One]
 	if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
@@ -759,11 +749,17 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_MenuLogEnDis()
+{
+	global	;assume-global moee
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TMenu()	;there must be a separate function to handle "interrupt" coming from "g" event
 {
 	global	;assume-global moee
-	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := ""
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0, ShiftTabIsFound := false
+	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0
 	OutputDebug, % "F_TMenu"
 	;*[One]
 	v_MenuMax := a_Tips.Count()
@@ -823,16 +819,15 @@ F_TMenu()	;there must be a separate function to handle "interrupt" coming from "
 	if (v_PressedKey > v_MenuMax)
 		return
 	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_TMenuAHK
-	;OutputDebug, % "v_Temp1" . A_Tab . v_Temp1 . A_Tab . A_Tab . "v_PressedKey" . A_Tab . v_PressedKey
 	Loop, Parse, v_Temp1, `n
 	{
 		if (A_Index = v_PressedKey)
 			v_Temp1 := SubStr(A_LoopField, InStr(A_LoopField, " ") + 1)
 	}
 	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
-	;Hotstring("Reset")
 	SendInput, % v_Temp1
 	Gui, TMenuAHK: Destroy
+	f_HTriggered := true
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1213,7 +1208,7 @@ F_TMenuAHK_Hotkeys()
 {
 	global ;assume-global mode
 	static Temp1 := 0
-	if (ini_ATEn)	;tu jestem
+	if (ini_ATEn)
 	{
 		OutputDebug, % ++Temp1 . A_Tab . "F_TMenuAHK_Hotkeys"
 		Hotkey, IfWinExist, % "ahk_id" TMenuAHKHwnd	;in order to work the TMenuAHKHwnd variable must exist prior to definition of the following Hotkeys.
@@ -1223,26 +1218,6 @@ F_TMenuAHK_Hotkeys()
 		Hotkey, ^Down,		F_TMenu, I1 On
 		Hotkey, ^Enter,	F_TMenu, I1 On
 		Hotkey, IfWinExist
-		;Hotkey, IfWinActive, % "ahk_id" TMenuAHKHwnd
-		;Hotkey, IfWinExist, % "ahk_id" TMenuAHKHwnd
-		/*
-			if (ErrorLevel)
-				MsgBox,, % "ErrorLevel:" . A_Space . ErrorLevel . A_Space . "after IfWinActive, % ""ahk_id"" TMenuAHKHwnd"
-			Hotkey,  ^LButton,	F_TMenu, I1 On UseErrorLevel
-			if (ErrorLevel) 
-				MsgBox, , Catastrophy!
-			Switch ErrorLevel
-			{
-				Case 1:	MsgBox,, RButton hotkey error, % ErrorLevel . "`nThe Label parameter specifies a nonexistent label name."
-				Case 2:	MsgBox,, RButton hotkey error, % ErrorLevel . "`nThe KeyName parameter specifies one or more keys that are either not recognized or not supported by the current keyboard layout/language."
-				Case 3:	MsgBox,, RButton hotkey error, % ErrorLevel . "`nUnsupported prefix key."
-				Case 4:	MsgBox,, RButton hotkey error, % ErrorLevel . "`nThe KeyName parameter is not suitable for use with the AltTab or ShiftAltTab actions."
-				Case 5:	MsgBox,, RButton hotkey error, % ErrorLevel . "`nThe command attempted to modify a nonexistent hotkey."
-				Case 6:	MsgBox,, RButton hotkey error, % ErrorLevel . "`nThe command attempted to modify a nonexistent variant of an existing hotkey."
-				Case 98:	MsgBox,, RButton hotkey error, % ErrorLevel . "`nCreating this hotkey would exceed the limit of hotkeys per script."
-				Case 99:	MsgBox,, RButton hotkey error, % ErrorLevel . "`nOut of memory."
-			}
-		*/
 	}
 	else
 	{
@@ -1252,8 +1227,6 @@ F_TMenuAHK_Hotkeys()
 		Hotkey, ^Up,		F_TMenu, I1 Off
 		Hotkey, ^Down,		F_TMenu, I1 Off
 		Hotkey, ^Enter,	F_TMenu, I1 Off
-		;Hotkey, LButton,	F_MouseMenuTT, I1 Off
-		;Hotkey, LButton,	F_TMenu, I1 Off
 		Hotkey, IfWinExist
 	}
 	return
@@ -4241,7 +4214,7 @@ F_Undo()
 		}
 		Send, % v_EndChar
 		F_UndoSignalling()
-		v_HotstringFlag := true
+		f_HTriggered := true
 	}
 	else
 	{
@@ -6022,9 +5995,7 @@ F_GuiMoveLibs_CreateDetermine()
 			LV_Add("", key)
 	return
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MoveList() 
 {
 	global	;assume-global mode
@@ -6064,8 +6035,7 @@ F_MoveList()
 	Gui, MoveLibs: Show, % "AutoSize" . A_Space . "X" . NewWinPosX . A_Space . "Y" . NewWinPosY . A_Space . "yCenter"
 	return
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HSLV2() ;load content of chosen row from Search Gui into HS3 Gui
 {
 	global	;assume-global mode
@@ -10197,7 +10167,7 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 {
 	global	;assume-global mode
 	F_DeterminePartStrings(ReplacementString)
-	v_HotstringFlag := true
+	f_HTriggered := true
 	F_PrepareSend(ReplacementString, Oflag, "SendEvent")
 	F_EventSigOrdHotstring()
 }
@@ -10206,7 +10176,7 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 {
 	global	;assume-global mode
 	F_DeterminePartStrings(ReplacementString)
-	v_HotstringFlag := true
+	f_HTriggered := true
 	F_PrepareSend(ReplacementString, Oflag, "SendPlay")
 	F_EventSigOrdHotstring()
 }
@@ -10215,7 +10185,7 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 {
 	global	;assume-global mode
 	F_DeterminePartStrings(ReplacementString)
-	v_HotstringFlag := true
+	f_HTriggered := true
 	F_PrepareSend(ReplacementString, Oflag, "SendRaw")
 	F_EventSigOrdHotstring()
 }
@@ -10258,7 +10228,7 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 	global	;assume-global mode
 	local	FuncObject := func("SendInput")
 	F_DeterminePartStrings(ReplacementString)
-	v_HotstringFlag := true
+	f_HTriggered := true
 	F_PrepareSend(ReplacementString, Oflag, "SendInput")
 	F_EventSigOrdHotstring()
 }
@@ -10353,7 +10323,7 @@ F_HOF_CLI(ReplacementString, Oflag) ;Hotstring Output Function _ Clipboard
 		, fFirstLetterCap := false, InputString := ""
 	
 	F_DeterminePartStrings(ReplacementString)
-	v_HotstringFlag := true
+	f_HTriggered := true
 	F_PrepareSendClipboard(ReplacementString, Oflag)
 	F_EventSigOrdHotstring()
 }
@@ -10472,7 +10442,7 @@ F_HOF_MCLI(TextOptions, Oflag)
 	Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate
 	GuiControl, Choose, % Id_LB_HMenuCli, 1
 	Ovar := Oflag
-	v_HotstringFlag := true
+	f_HTriggered := true
 	F_DeterminePartStrings(TextOptions)
 	return
 }
@@ -10513,9 +10483,7 @@ F_GuiTrigTipsMenuDef(AmountOfRows, LongestString)
 		Gui, TMenuAHK: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
 	Gui, TMenuAHK: Add, Text, % "x0 y0 HwndId_T1_TMenuAHK", % OutputString
 	GuiControlGet, vOutput, Pos, % Id_T1_TMenuAHK
-	;Gui, TMenuAHK: Add, Listbox, % "x0 y0 HwndId_LB_TMenuAHK" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutputW + 4 . A_Space . "g" . "F_TMenu"
 	Gui, TMenuAHK: Add, Listbox, % "x0 y0 HwndId_LB_TMenuAHK" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutputW + 4 . A_Space . "g" . "F_MouseMenuTT"
-	;Gui, TMenuAHK: Add, Listbox, % "x0 y0 HwndId_LB_TMenuAHK" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutputW + 4 ;tak działa, ale za drugim razem
 	GuiControl, Hide, % Id_T1_TMenuAHK
 	GuiControl, Font, % Id_LB_TMenuAHK		;fontcolor of listbox
 	return
@@ -10596,7 +10564,7 @@ F_HOF_MSI(TextOptions, Oflag)
 	
 	GuiControl, Choose, % Id_LB_HMenuAHK, 1
 	Ovar := Oflag
-	v_HotstringFlag := true
+	f_HTriggered := true
 	F_DeterminePartStrings(TextOptions)
 	return
 }
@@ -10620,10 +10588,8 @@ F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
-	;*[One]
 	global	;assume-global mode
 	local	OutputVarTemp := ""
-	;OutputDebug, % "F_MouseMenuTT"
 	if (A_PriorKey = "LButton")
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_TMenuAHK
@@ -10634,6 +10600,7 @@ F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_
 		SendLevel, 1	;in order to backtrigger the chosen triggerstring 
 		SendInput, % OutputVarTemp
 		SendLevel, 0
+		f_HTriggered := true	;setting this flag prevenst from dispaling next TTmenu which without is triggered by SendLevel 1
 	}
 	return
 }
@@ -10656,7 +10623,7 @@ Down::
 F_HMenuAHK()
 {
 	global	;assume-global moee
-	local	v_PressedKey := "",		v_Temp1 := "", ShiftTabIsFound := false	;tu jestem
+	local	v_PressedKey := "",		v_Temp1 := "", ShiftTabIsFound := false
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	v_PressedKey := A_ThisHotkey
 	;*[One]
