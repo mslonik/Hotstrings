@@ -384,7 +384,7 @@ Menu, AppSubmenu,		Add, % TransA["Version / Update"],				F_GuiVersionUpdate
 Menu, AppSubmenu,		Add
 Menu, SubmenuLog,		Add,	% TransA["enable"],						F_MenuLogEnDis
 Menu, SubmenuLog,		Add, % TransA["disable"],					F_MenuLogEnDis
-Menu, AppSubmenu,		Add, Log triggered hotstrings,				:SubmenuLog	;tu jestem
+Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],		:SubmenuLog	;tu jestem
 
 Menu,	AboutHelpSub,	Add,	% TransA["Help: Hotstrings application"],	GuiAboutLink1
 Menu,	AboutHelpSub,	Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"], GuiAboutLink2
@@ -393,8 +393,8 @@ Menu,	AboutHelpSub,	Add,	% TransA["About this application..."],		F_GuiAbout
 Menu,	AboutHelpSub,	Add
 Menu,	AboutHelpSub,	Add, % TransA["Show intro"],					L_ShowIntro
 
-Menu, 	HSMenu,			Add, % TransA["Application"],				:AppSubmenu
-Menu, 	HSMenu, 			Add, % TransA["About / Help"], 			:AboutHelpSub
+Menu, 	HSMenu,		Add, % TransA["Application"],					:AppSubmenu
+Menu, 	HSMenu, 		Add, % TransA["About / Help"], 				:AboutHelpSub
 Gui, 	HS3: Menu, HSMenu
 Gui, 	HS4: Menu, HSMenu
 
@@ -749,15 +749,15 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
-F_MenuLogEnDis()
+F_MenuLogEnDis()	;tu jestem
 {
-	global	;assume-global moee
+	global	;assume-global mode
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TMenu()	;there must be a separate function to handle "interrupt" coming from "g" event
 {
-	global	;assume-global moee
+	global	;assume-global mode
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0
 	OutputDebug, % "F_TMenu"
@@ -6425,7 +6425,7 @@ F_WhichGui()
 	}
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiAddLibrary()
 {
 	global	;assume-global mode
@@ -8275,6 +8275,7 @@ Loading hotstrings from libraries... 						= Loading hotstrings from libraries..
 Loading imported library. Please wait...					= Loading imported library. Please wait...
 Loaded												= Loaded
 Local version:											= Local version:
+Log triggered hotstrings									= Log triggered hotstrings
 maroon												= maroon
 Max. no. of shown tips									= Max. no. of shown tips
 Maximum number of shown triggerstring tips					= Maximum number of shown triggerstring tips
