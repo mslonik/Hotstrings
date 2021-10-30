@@ -398,6 +398,7 @@ Menu, 	HSMenu, 		Add, % TransA["About / Help"], 				:AboutHelpSub
 Gui, 	HS3: Menu, HSMenu
 Gui, 	HS4: Menu, HSMenu
 
+F_MenuLogEnDis()
 F_GuiAbout_CreateObjects()
 F_GuiVersionUpdate_CreateObjects()
 F_GuiAbout_DetermineConstraints()
@@ -752,6 +753,31 @@ return
 F_MenuLogEnDis()	;tu jestem
 {
 	global	;assume-global mode
+	static OneTimeMemory := true
+	
+	if (OneTimeMemory)
+	{
+		if (ini_THLog)
+			Menu, SubmenuLog,	Check,	% TransA["enable"]
+		else
+			Menu, SubmenuLog,	Check,	% TransA["disable"]
+		OneTimeMemory := false
+	}
+	else
+	{
+		ini_THLog := !(ini_THLog)
+		if (ini_THLog)
+		{
+			Menu, SubmenuLog,	Check,	% TransA["enable"]
+			Menu, SubmenuLog,	UnCheck,	% TransA["disable"]
+		}
+		else
+		{
+			Menu, SubmenuLog,	Check,	% TransA["disable"]
+			Menu, SubmenuLog,	UnCheck,	% TransA["enable"]
+		}
+		IniWrite, % ini_THLog, % HADConfig, Configuration, THLog
+	}
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -890,10 +916,17 @@ F_LoadConfiguration()
 	if (ini_HK_UndoLH = "")		;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
 		ini_HK_UndoLH := "^F12"
-		Iniwrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
+		IniWrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
 	}
 	if (ini_HK_UndoLH != "none")
 		Hotkey, % ini_HK_UndoLH, F_Undo, On
+	ini_THLog				:= false
+	IniRead, ini_THLog,						% HADConfig, Configuration, THLog,					% A_Space
+	if (ini_THLog = "")			;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_THLog := false
+		IniWrite, % ini_THLog, % HADConfig, Configuration, THLog
+	}
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1196,7 +1229,7 @@ F_EvAT_B2()	;Event Active Triggerstring Tips Button Apply & Close
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvAT_B1()	;Event Active Triggerstring Tips Button Tooltip test ;tu jestem
+F_EvAT_B1()	;Event Active Triggerstring Tips Button Tooltip test
 {
 	global ;assume-global mode
 	local BinParameter := 0
@@ -7808,6 +7841,7 @@ DownloadRepo=0
 HK_Main=#^h
 HK_IntoEdit=~^c
 HK_UndoLH=~^F12
+THLog=0
 [TriggerstringTips_Styling]
 TriggerstringTipsBackgroundColor=white
 TriggerstringTipsBackgroundColorCustom=
