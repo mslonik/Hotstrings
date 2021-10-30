@@ -132,7 +132,7 @@ Switch v_Param
 		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			L_TraySuspendHotkeys
 		Menu, Tray, Add,		% TransA["Pause application"],		L_TrayPauseScript
 		Menu  Tray, Add,		% TransA["Exit application"],			L_TrayExit		
-	Case "", "d":
+	Case "":
 		Menu, Tray, NoStandard									; remove all the rest of standard tray menu
 		if (!FileExist(AppIcon))
 		{
@@ -495,11 +495,6 @@ Loop,
 		if !(v_TipsFlag)
 			v_InputString := ""
 	}		  
-	if (v_Param == "d")
-	{
-		FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_TASAC . "|" . ini_TTTtEn . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
-		v_IndexLog++
-	}
 	;OutputDebug, % "End of main loop." . A_Tab . A_Index
 }
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -525,12 +520,6 @@ else
 		F_ShowTriggerstringTips2()
 		if ((ini_TTTtEn) and (ini_TTTD > 0))
 			SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-	}
-	
-	if (v_Param == "d")
-	{
-		FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_TASAC . "|" . ini_TTTtEn . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
-		v_IndexLog++
 	}
 }
 return
@@ -7973,9 +7962,7 @@ F_LoadHotstringsFromLibraries()
 	a_Comment 				:= []
 	
 ; Prepare TrayTip message taking into account value of command line parameter.
-	if (v_Param == "d")
-		TrayTip, %A_ScriptName% - Debug mode, 	% TransA["Loading hotstrings from libraries..."], 1
-	else if (v_Param == "l")
+	if (v_Param == "l")
 		TrayTip, %A_ScriptName% - Lite mode, 	% TransA["Loading hotstrings from libraries..."], 1
 	else	
 		TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
@@ -10029,9 +10016,7 @@ F_LoadLibrariesToTables()
 	a_Comment 				:= []
 	
 	; Prepare TrayTip message taking into account value of command line parameter.
-	if (v_Param == "d")
-		TrayTip, %A_ScriptName% - Debug mode, 	% TransA["Loading hotstrings from libraries..."], 1
-	else if (v_Param == "l")
+	if (v_Param == "l")
 		TrayTip, %A_ScriptName% - Lite mode, 	% TransA["Loading hotstrings from libraries..."], 1
 	else	
 		TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
@@ -10046,28 +10031,6 @@ F_LoadLibrariesToTables()
 				break
 			name 	:= SubStr(A_LoopFileName, 1, -4)
 			tabSearch := StrSplit(varSearch, "‖")
-			/*
-				if (InStr(tabSearch[1], "*0"))	;in case any library file (*.csv) contain option in switched off state, remove it; those lines are kept for backward compatibility and currently shouldn't be necessary.
-				{
-					tabSearch[1] := StrReplace(tabSearch[1], "*0")
-				}
-				if (InStr(tabSearch[1], "O0"))
-				{
-					tabSearch[1] := StrReplace(tabSearch[1], "O0")
-				}
-				if (InStr(tabSearch[1], "C0"))
-				{
-					tabSearch[1] := StrReplace(tabSearch[1], "C0")
-				}
-				if (InStr(tabSearch[1], "?0"))
-				{
-					tabSearch[1] := StrReplace(tabSearch[1], "?0")
-				}
-				if (InStr(tabSearch[1], "B")) and !(InStr(tabSearch[1], "B0"))
-				{
-					tabSearch[1] := StrReplace(tabSearch[1], "B")
-				}
-			*/
 			a_Library.Push(name)
 			a_TriggerOptions.Push(tabSearch[1])
 			a_Triggerstring.Push(tabSearch[2])
