@@ -458,7 +458,7 @@ Loop,
 		{
 			;OutputDebug, % "Main loop:" . A_Tab . A_Index
 			F_ShowTriggerstringTips2()
-			F_TMenuAHK_Hotkeys()	;this function must be called when TMenuAHKHwnd variable is available and initialized
+			F_TMenuAHK_Hotkeys(ini_ATEn)	;this function must be called when TMenuAHKHwnd variable is available and initialized
 			if ((ini_TTTtEn) and (ini_TTTD > 0))
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
 		}
@@ -1198,17 +1198,40 @@ F_EvAT_B2()	;Event Active Triggerstring Tips Button Apply & Close
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvAT_B1()	;Event Active Triggerstring Tips Button Tooltip test
+F_EvAT_B1()	;Event Active Triggerstring Tips Button Tooltip test ;tu jestem
 {
 	global ;assume-global mode
+	local BinParameter := 0
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvAT_R1R2
+	{
+		Case 1: BinParameter := 1
+		Case 2: BinParameter := 0
+	}
+	;if (EvAT_R1R2 = 1)
+	;{
+		a_Tips := []
+		Loop, % EvTt_S2
+		{
+			if (A_Index = 1)
+				a_Tips[A_Index] := "A" . Chr(65 + EvTt_S2 - A_Index) . A_Space . "Demo" . A_Space . A_Index
+			else
+				a_Tips[A_Index] := Chr(65 + EvTt_S2 - A_Index) . A_Space . "Demo" . A_Space . A_Index
+		}
+		F_Sort_a_Triggers(a_Tips, EvTt_C1, EvTt_C2)
+		F_ShowTriggerstringTips2()
+		F_TMenuAHK_Hotkeys(BinParameter)
+		if ((EvTt_R1R2 = 1) and (EvTt_R3R4 = 1))
+			SetTimer, TurnOff_Ttt, % "-" . EvTt_S1	 ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+	;}
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TMenuAHK_Hotkeys()
+F_TMenuAHK_Hotkeys(BinParameter)
 {
 	global ;assume-global mode
 	static Temp1 := 0
-	if (ini_ATEn)
+	if (BinParameter)
 	{
 		OutputDebug, % ++Temp1 . A_Tab . "F_TMenuAHK_Hotkeys"
 		Hotkey, IfWinExist, % "ahk_id" TMenuAHKHwnd	;in order to work the TMenuAHKHwnd variable must exist prior to definition of the following Hotkeys.
@@ -1236,7 +1259,7 @@ F_EvAT_R1R2()
 {
 	global ;assume-global mode
 	Gui, GuiEvents: Submit, NoHide
-	F_TMenuAHK_Hotkeys()
+	F_TMenuAHK_Hotkeys(EvAT_R1R2)
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
