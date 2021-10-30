@@ -681,7 +681,6 @@ F_HMenuCli()
 	global	;assume-global moee
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", ShiftTabIsFound := false, ReplacementString := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
-	;*[One]
 	if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -3249,93 +3248,37 @@ F_GuiStyling_DetermineConstraints()
 F_GuiStyling_LoadValues()	
 {
 	global	;assume-global mode
-	local a_Styling_DDL1 := [TransA["black"], TransA["silver"], TransA["gray"], TransA["white"], TransA["maroon"], TransA["red"], TransA["purple"], TransA["fuchsia"], TransA["green"], TransA["lime"], TransA["olive"], TransA["yellow"], TransA["navy"], TransA["blue"], TransA["teal"], TransA["aqua"], TransA["custom"]]
-		,s_Styling_DDL1 := "|"
-		,a_Styling_DDL2 := [TransA["black"], TransA["silver"], TransA["gray"], TransA["white"], TransA["maroon"], TransA["red"], TransA["purple"], TransA["fuchsia"], TransA["green"], TransA["lime"], TransA["olive"], TransA["yellow"], TransA["navy"], TransA["blue"], TransA["teal"], TransA["aqua"], TransA["custom"]]
-		,s_Styling_DDL2 := "|"
-		,a_Styling_DDL3 := ["Arial", "Calibri", "Comic Sans MS", "Consolas", "Courier", "Fixedsys", "Lucida Console", "Microsoft Sans Serif", "Script", "System", "Tahoma", "Times New Roman", "Verdana"]
-		,s_Styling_DDL3 := "|"
-		,a_Styling_DDL4 := [7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
-		,s_Styling_DDL4 := "|"
-		,key := 0, value := ""
-	
-	for key, val in a_Styling_DDL1
-		if (val = ini_TTBgrCol)
-			s_Styling_DDL1 .= val . "||"
-	else
-		s_Styling_DDL1 .= val . "|"
-	GuiControl,, % IdTTstyling_DDL1, % s_Styling_DDL1
+	GuiControl, ChooseString, % IdTTstyling_DDL1, % ini_TTBgrCol
 	if (ini_TTBgrCol = "custom")
 	{
 		GuiControl,, % IdTTstyling_E1, % ini_TTBgrColCus
 		GuiControl, Enable, % IdTTstyling_E1
 	}
-	
-	s_Styling_DDL1 := "|"
-	for key, val in a_Styling_DDL1
-		if (val = ini_HMBgrCol)
-			s_Styling_DDL1 .= val . "||"
-	else
-		s_Styling_DDL1 .= val . "|"
-	GuiControl,, % IdHMstyling_DDL1, % s_Styling_DDL1
+	GuiControl, ChooseString, % IdHMstyling_DDL1, % ini_HMBgrCol
 	if (ini_HMBgrCol = "custom")
 	{
 		GuiControl,, % IdHMstyling_E1, % ini_HMBgrColCus
 		GuiControl, Enable, % IdHMstyling_E1
 	}
 	
-	for key, val in a_Styling_DDL2
-		if (val = ini_TTTyFaceCol)
-			s_Styling_DDL2 .= val . "||"
-	else
-		s_Styling_DDL2 .= val . "|"
-	GuiControl,, % IdTTstyling_DDL2, % s_Styling_DDL2
+	GuiControl, ChooseString, % IdTTstyling_DDL2, % ini_TTTyFaceCol
 	if (ini_TTTyFaceCol = "custom")
 	{
 		GuiControl,, % IdTTstyling_E2, % ini_TTTyFaceColCus
 		GuiControl, Enable, % IdTTstyling_E2
 	}
 	
-	s_Styling_DDL2 := "|"
-	for key, val in a_Styling_DDL2
-		if (val = ini_HMTyFaceCol)
-			s_Styling_DDL2 .= val . "||"
-	else
-		s_Styling_DDL2 .= val . "|"
-	GuiControl,, % IdHMstyling_DDL2, % s_Styling_DDL2
+	GuiControl, ChooseString, % IdHMstyling_DDL2, % ini_HMTyFaceCol
 	if (ini_HMTyFaceCol = "custom")
 	{
 		GuiControl,, % IdHMstyling_E2, % ini_HMTyFaceColCus
 		GuiControl, Enable, % IdHMstyling_E2
 	}
 	
-	for key, val in a_Styling_DDL3
-		if (val = ini_TTTyFaceFont)
-			s_Styling_DDL3 .= val . "||"
-	else
-		s_Styling_DDL3 .= val . "|"
-	GuiControl,, % IdTTstyling_DDL3, % s_Styling_DDL3
-	s_Styling_DDL3 := "|"
-	for key, val in a_Styling_DDL3
-		if (val = ini_HMTyFaceFont)
-			s_Styling_DDL3 .= val . "||"
-	else
-		s_Styling_DDL3 .= val . "|"
-	GuiControl,, % IdHMstyling_DDL3, % s_Styling_DDL3
-	
-	for key, val in a_Styling_DDL4
-		if (val = ini_TTTySize)
-			s_Styling_DDL4 .= val . "||"
-	else
-		s_Styling_DDL4 .= val . "|"
-	GuiControl,, % IdTTstyling_DDL4, % s_Styling_DDL4
-	s_Styling_DDL4 := "|"
-	for key, val in a_Styling_DDL4
-		if (val = ini_HMTySize)
-			s_Styling_DDL4 .= val . "||"
-	else
-		s_Styling_DDL4 .= val . "|"
-	GuiControl,, % IdHMstyling_DDL4, % s_Styling_DDL4
+	GuiControl, ChooseString, % IdTTstyling_DDL3, % ini_TTTyFaceFont
+	GuiControl, ChooseString, % IdHMstyling_DDL3, % ini_HMTyFaceFont
+	GuiControl, ChooseString, % IdTTstyling_DDL4, % ini_TTTySize
+	GuiControl, ChooseString, % IdHMstyling_DDL4, % ini_HMTySize
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7061,7 +7004,7 @@ F_SelectLibrary()
 	GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 {
 	global ;assume-global mode
@@ -7201,26 +7144,26 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 	Switch Fun
 	{
 		Case "SI":	;SendFun := "F_HOF_SI"
-			GuiControl, HS3: Choose, v_SelectFunction, SendInput (SI)
-			GuiControl, HS4: Choose, v_SelectFunction, SendInput (SI)
+			GuiControl, HS3: ChooseString, % IdDDL1, 	SendInput (SI)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	SendInput (SI)
 		Case "CL":	;SendFun := "F_HOF_CLI"
-			GuiControl, HS3: Choose, v_SelectFunction, Clipboard (CL)
-			GuiControl, HS4: Choose, v_SelectFunction, Clipboard (CL)
+			GuiControl, HS3: ChooseString, % IdDDL1, 	Clipboard (CL)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	Clipboard (CL)
 		Case "MCL":	;SendFun := "F_HOF_MCLI"
-			GuiControl, HS3: Choose, v_SelectFunction, Menu & Clipboard (MCL)
-			GuiControl, HS4: Choose, v_SelectFunction, Menu & Clipboard (MCL)
+			GuiControl, HS3: ChooseString, % IdDDL1, 	Menu & Clipboard (MCL)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	Menu & Clipboard (MCL)
 		Case "MSI":	;SendFun := "F_HOF_MSI"
-			GuiControl, HS3: Choose, v_SelectFunction, Menu & SendInput (MSI)
-			GuiControl, HS4: Choose, v_SelectFunction, Menu & SendInput (MSI)
+			GuiControl, HS3: ChooseString, % IdDDL1, 	Menu & SendInput (MSI)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	Menu & SendInput (MSI)
 		Case "SR":	
-			GuiControl, HS3: Choose, v_SelectFunction, SendRaw (SR)
-			GuiControl, HS4: Choose, v_SelectFunction, SendRaw (SR)
+			GuiControl, HS3: ChooseString, % IdDDL1, 	SendRaw (SR)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	SendRaw (SR)
 		Case "SP":
-			GuiControl, HS3: Choose, v_SelectFunction, SendPlay (SP)
-			GuiControl, HS4: Choose, v_SelectFunction, SendPlay (SP)
+			GuiControl, HS3: ChooseString, % IdDDL1, 	SendPlay (SP)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	SendPlay (SP)
 		Case "SE":
-			GuiControl, HS3: Choose, v_SelectFunction, SendPlay (SE)
-			GuiControl, HS4: Choose, v_SelectFunction, SendPlay (SE)
+			GuiControl, HS3: ChooseString, % IdDDL1, 	SendEvent (SE)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	SendEvent (SE)
 	}
 	
 	LV_GetText(EnDis, 		v_SelectedRow, 4)
@@ -7276,62 +7219,62 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_SelectFunction()
+F_SelectFunction()
+{
+	global ;assume-global mode
+	
+	if (A_DefaultGui = "HS3")
 	{
-		global ;assume-global mode
-		
-		if (A_DefaultGui = "HS3")
-		{
-			GuiControlGet, v_SelectFunction, HS3: ;Retrieves the contents of the control. 
-		}
-		if (A_DefaultGui = "HS4")
-		{
-			GuiControlGet, v_SelectFunction, HS4: ;Retrieves the contents of the control. 
-		}
-		
-		if InStr(v_SelectFunction, "Menu")
-		{
-			GuiControl, HS3: Enable, v_EnterHotstring1
-			GuiControl, HS4: Enable, v_EnterHotstring1
-			GuiControl, HS3: Enable, v_EnterHotstring2
-			GuiControl, HS4: Enable, v_EnterHotstring2
-			GuiControl, HS3: Enable, v_EnterHotstring3
-			GuiControl, HS4: Enable, v_EnterHotstring3
-			GuiControl, HS3: Enable, v_EnterHotstring4
-			GuiControl, HS4: Enable, v_EnterHotstring4
-			GuiControl, HS3: Enable, v_EnterHotstring5
-			GuiControl, HS4: Enable, v_EnterHotstring5
-			GuiControl, HS3: Enable, v_EnterHotstring6
-			GuiControl, HS4: Enable, v_EnterHotstring6
-		}
-		else
-		{
-			GuiControl, HS3:, v_EnterHotstring1 ;Puts new contents into the control. Value := "". Makes empty this control.
-			GuiControl, HS4:, v_EnterHotstring1 ;Puts new contents into the control. Value := "". Makes empty this control.
-			GuiControl, HS3:, v_EnterHotstring2
-			GuiControl, HS4:, v_EnterHotstring2
-			GuiControl, HS3:, v_EnterHotstring3
-			GuiControl, HS4:, v_EnterHotstring3
-			GuiControl, HS3:, v_EnterHotstring4
-			GuiControl, HS4:, v_EnterHotstring4
-			GuiControl, HS3:, v_EnterHotstring5
-			GuiControl, HS4:, v_EnterHotstring5
-			GuiControl, HS3:, v_EnterHotstring6
-			GuiControl, HS4:, v_EnterHotstring6
-			GuiControl, HS3: Disable, v_EnterHotstring1
-			GuiControl, HS4: Disable, v_EnterHotstring1
-			GuiControl, HS3: Disable, v_EnterHotstring2
-			GuiControl, HS4: Disable, v_EnterHotstring2
-			GuiControl, HS3: Disable, v_EnterHotstring3
-			GuiControl, HS4: Disable, v_EnterHotstring3
-			GuiControl, HS3: Disable, v_EnterHotstring4
-			GuiControl, HS4: Disable, v_EnterHotstring4
-			GuiControl, HS3: Disable, v_EnterHotstring5
-			GuiControl, HS4: Disable, v_EnterHotstring5
-			GuiControl, HS3: Disable, v_EnterHotstring6
-			GuiControl, HS4: Disable, v_EnterHotstring6
-		}
-		return
+		GuiControlGet, v_SelectFunction, HS3: ;Retrieves the contents of the control. 
+	}
+	if (A_DefaultGui = "HS4")
+	{
+		GuiControlGet, v_SelectFunction, HS4: ;Retrieves the contents of the control. 
+	}
+	
+	if InStr(v_SelectFunction, "Menu")
+	{
+		GuiControl, HS3: Enable, v_EnterHotstring1
+		GuiControl, HS4: Enable, v_EnterHotstring1
+		GuiControl, HS3: Enable, v_EnterHotstring2
+		GuiControl, HS4: Enable, v_EnterHotstring2
+		GuiControl, HS3: Enable, v_EnterHotstring3
+		GuiControl, HS4: Enable, v_EnterHotstring3
+		GuiControl, HS3: Enable, v_EnterHotstring4
+		GuiControl, HS4: Enable, v_EnterHotstring4
+		GuiControl, HS3: Enable, v_EnterHotstring5
+		GuiControl, HS4: Enable, v_EnterHotstring5
+		GuiControl, HS3: Enable, v_EnterHotstring6
+		GuiControl, HS4: Enable, v_EnterHotstring6
+	}
+	else
+	{
+		GuiControl, HS3:, v_EnterHotstring1 ;Puts new contents into the control. Value := "". Makes empty this control.
+		GuiControl, HS4:, v_EnterHotstring1 ;Puts new contents into the control. Value := "". Makes empty this control.
+		GuiControl, HS3:, v_EnterHotstring2
+		GuiControl, HS4:, v_EnterHotstring2
+		GuiControl, HS3:, v_EnterHotstring3
+		GuiControl, HS4:, v_EnterHotstring3
+		GuiControl, HS3:, v_EnterHotstring4
+		GuiControl, HS4:, v_EnterHotstring4
+		GuiControl, HS3:, v_EnterHotstring5
+		GuiControl, HS4:, v_EnterHotstring5
+		GuiControl, HS3:, v_EnterHotstring6
+		GuiControl, HS4:, v_EnterHotstring6
+		GuiControl, HS3: Disable, v_EnterHotstring1
+		GuiControl, HS4: Disable, v_EnterHotstring1
+		GuiControl, HS3: Disable, v_EnterHotstring2
+		GuiControl, HS4: Disable, v_EnterHotstring2
+		GuiControl, HS3: Disable, v_EnterHotstring3
+		GuiControl, HS4: Disable, v_EnterHotstring3
+		GuiControl, HS3: Disable, v_EnterHotstring4
+		GuiControl, HS4: Disable, v_EnterHotstring4
+		GuiControl, HS3: Disable, v_EnterHotstring5
+		GuiControl, HS4: Disable, v_EnterHotstring5
+		GuiControl, HS3: Disable, v_EnterHotstring6
+		GuiControl, HS4: Disable, v_EnterHotstring6
+	}
+	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_FontType()
