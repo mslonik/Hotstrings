@@ -192,12 +192,6 @@ F_Searching("Reload")			;prepare content of Search tables
 TrayTip, %A_ScriptName%, % TransA["Hotstrings have been loaded"], 1
 Critical, Off
 
-if (v_Param == "d") ;If the script is run with command line parameter "d" like debug, prepare new folder and create file named as specified in the following pattern.
-{	
-	FileCreateDir, Logs
-	v_LogFileName := % "Logs\Logs" . A_DD . A_MM . "_" . A_Hour . A_Min . ".txt"
-	FileAppend, , %v_LogFileName%, UTF-8
-}
 Loop, Files, %A_ScriptDir%\Languages\*.txt
 	Menu, SubmenuLanguage, Add, %A_LoopFileName%, F_ChangeLanguage
 F_ChangeLanguage()
@@ -384,7 +378,7 @@ Menu, AppSubmenu,		Add, % TransA["Version / Update"],				F_GuiVersionUpdate
 Menu, AppSubmenu,		Add
 Menu, SubmenuLog,		Add,	% TransA["enable"],						F_MenuLogEnDis
 Menu, SubmenuLog,		Add, % TransA["disable"],					F_MenuLogEnDis
-Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],		:SubmenuLog	;tu jestem
+Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],		:SubmenuLog
 
 Menu,	AboutHelpSub,	Add,	% TransA["Help: Hotstrings application"],	GuiAboutLink1
 Menu,	AboutHelpSub,	Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"], GuiAboutLink2
@@ -398,7 +392,27 @@ Menu, 	HSMenu, 		Add, % TransA["About / Help"], 				:AboutHelpSub
 Gui, 	HS3: Menu, HSMenu
 Gui, 	HS4: Menu, HSMenu
 
-F_MenuLogEnDis()
+F_MenuLogEnDis()	;tu jestem
+if (ini_THLog) ;If logging is enabled, prepare new folder and create file named as specified in the following pattern.
+{	
+	if (!InStr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log"), "D"))
+	{
+		FileCreateDir, % A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log"
+		v_LogFileName := % A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log" . "\" . A_YYYY . A_MM . A_DD . "_" . "HotstringsLog" . ".txt"
+		FileAppend, % "-----------------------------------------------------------------------------------------------------------------------------" . "`n" 
+			. "hotstring counter" . "|" . "entered triggerstring" . "|" . "trigger" . "|" . "triggerstring options" . "|" . "hotstring" . "|" "`n", % v_LogFileName, UTF-8
+		v_LogCounter := 0
+	}
+	else
+	{
+		v_LogFileName := % A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log" . "\" . A_YYYY . A_MM . A_DD . "_" . "HotstringsLog" . ".txt"
+		FileAppend, % "-----------------------------------------------------------------------------------------------------------------------------" . "`n" 
+			. "hotstring counter" . "|" . "entered triggerstring" . "|" . "trigger" . "|" . "triggerstring options" . "|" . "hotstring" . "|" "`n", % v_LogFileName, UTF-8
+		v_LogCounter := 0
+	}
+}
+
+
 F_GuiAbout_CreateObjects()
 F_GuiVersionUpdate_CreateObjects()
 F_GuiAbout_DetermineConstraints()
@@ -665,7 +679,7 @@ Down::
 F_HMenuCli()
 {
 	global	;assume-global moee
-	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", ShiftTabIsFound := false
+	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", ShiftTabIsFound := false, ReplacementString := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	;*[One]
 	if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
@@ -736,10 +750,13 @@ F_HMenuCli()
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
 	v_UndoHotstring := v_Temp1
-	F_PrepareSendClipboard(v_Temp1, Ovar)
+	ReplacementString := F_PrepareSend(v_Temp1, Ovar)
+	F_ClipboardPaste(ReplacementString, Ovar)
 	Gui, HMenuCli: Destroy
 	if (ini_MHSEn)
-		SoundBeep, % ini_MHSF, % ini_MHSD	
+		SoundBeep, % ini_MHSF, % ini_MHSD
+	if (ini_THLog)
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MCL" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
 	return
 }
 
@@ -750,7 +767,7 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
-F_MenuLogEnDis()	;tu jestem
+F_MenuLogEnDis()
 {
 	global	;assume-global mode
 	static OneTimeMemory := true
@@ -10281,8 +10298,11 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 	global	;assume-global mode
 	F_DeterminePartStrings(ReplacementString)
 	f_HTriggered := true
-	F_PrepareSend(ReplacementString, Oflag, "SendEvent")
+	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
+	F_SendIsOflag(ReplacementString, Oflag, "SendEvent")
 	F_EventSigOrdHotstring()
+	if (ini_THLog)
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SE" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
@@ -10290,8 +10310,11 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 	global	;assume-global mode
 	F_DeterminePartStrings(ReplacementString)
 	f_HTriggered := true
-	F_PrepareSend(ReplacementString, Oflag, "SendPlay")
+	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
+	F_SendIsOflag(ReplacementString, Oflag, "SendPlay")
 	F_EventSigOrdHotstring()
+	if (ini_THLog)
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SP" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
@@ -10299,8 +10322,11 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 	global	;assume-global mode
 	F_DeterminePartStrings(ReplacementString)
 	f_HTriggered := true
-	F_PrepareSend(ReplacementString, Oflag, "SendRaw")
+	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
+	F_SendIsOflag(ReplacementString, Oflag, "SendRaw")
 	F_EventSigOrdHotstring()
+	if (ini_THLog)
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SR" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SendIsOflag(string, Oflag, SendFunctionName)
@@ -10339,11 +10365,14 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 	;v_Triggerstring		→ stored v_InputString
 	;v_EndChar			→ stored value of A_EndChar
 	global	;assume-global mode
-	local	FuncObject := func("SendInput")
 	F_DeterminePartStrings(ReplacementString)
 	f_HTriggered := true
-	F_PrepareSend(ReplacementString, Oflag, "SendInput")
+	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
+	F_SendIsOflag(ReplacementString, Oflag, "SendInput")
 	F_EventSigOrdHotstring()
+	if (ini_THLog)
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeterminePartStrings(ReplacementString)
@@ -10361,7 +10390,8 @@ F_DeterminePartStrings(ReplacementString)
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_PrepareSend(ReplacementString, Oflag, SendFunctionName)
+;F_PrepareSend(ReplacementString, Oflag, SendFunctionName)	;tu jestem
+F_PrepareSend(ReplacementString, Oflag)	;tu jestem
 {
 	global	;assume-global mode
 	local vFirstLetter1 := "", vFirstLetter2 := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, fFirstLetterCap := false
@@ -10379,27 +10409,27 @@ F_PrepareSend(ReplacementString, Oflag, SendFunctionName)
 		if (fFirstLetterCap and fRestOfLettersCap)
 		{
 			StringUpper, NewReplacementString, ReplacementString
-			F_SendIsOflag(NewReplacementString, Oflag, SendFunctionName)
-			return
+			;F_SendIsOflag(NewReplacementString, Oflag, SendFunctionName)
+			return NewReplacementString
 		}
 		if (fFirstLetterCap and !fRestOfLettersCap)
 		{
 			vFirstLetter2 := SubStr(ReplacementString, 1, 1)
 			StringUpper, vFirstLetter2, vFirstLetter2
 			NewReplacementString := vFirstLetter2 . SubStr(ReplacementString, 2)
-			F_SendIsOflag(NewReplacementString, Oflag, SendFunctionName)
-			return
+			;F_SendIsOflag(NewReplacementString, Oflag, SendFunctionName)
+			return NewReplacementString
 		}
 		if (!fFirstLetterCap)
 		{
-			F_SendIsOflag(ReplacementString, Oflag, SendFunctionName)
-			return
+			;F_SendIsOflag(ReplacementString, Oflag, SendFunctionName)
+			return ReplacementString
 		}
 	}
 	if (InStr(v_Options, "C") or InStr(v_Options, "C1"))
 	{
-		F_SendIsOflag(ReplacementString, Oflag, SendFunctionName)
-		return
+		;F_SendIsOflag(ReplacementString, Oflag, SendFunctionName)
+		return ReplacementString
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10437,51 +10467,12 @@ F_HOF_CLI(ReplacementString, Oflag) ;Hotstring Output Function _ Clipboard
 	
 	F_DeterminePartStrings(ReplacementString)
 	f_HTriggered := true
-	F_PrepareSendClipboard(ReplacementString, Oflag)
+	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
+	F_ClipboardPaste(ReplacementString, Oflag)
 	F_EventSigOrdHotstring()
+	if (ini_THLog)
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "CLI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_PrepareSendClipboard(ReplacementString, Oflag)
-{
-	global	;assume-global mode
-	local vFirstLetter1 := "", vFirstLetter2 := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, fFirstLetterCap := false
-	
-	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
-	ClipboardBackup := ClipboardAll
-	if (!InStr(v_Options, "C"))	
-	{
-		vFirstLetter1 		:= SubStr(v_TriggerString, 1, 1)	;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
-		vRestOfLetters 	:= SubStr(v_TriggerString, 2)		;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
-		if vFirstLetter1 is upper
-			fFirstLetterCap 	:= true
-		if vRestOfLetters is upper
-			fRestOfLettersCap 	:= true
-		if (fFirstLetterCap and fRestOfLettersCap)
-		{
-			StringUpper, NewReplacementString, ReplacementString
-			F_ClipboardPaste(NewReplacementString, Oflag)
-			return
-		}
-		if (fFirstLetterCap and !fRestOfLettersCap)
-		{
-			vFirstLetter2 := SubStr(ReplacementString, 1, 1)
-			StringUpper, vFirstLetter2, vFirstLetter2
-			NewReplacementString := vFirstLetter2 . SubStr(ReplacementString, 2)
-			F_ClipboardPaste(NewReplacementString, Oflag)
-			return
-		}
-		if (!fFirstLetterCap)
-		{
-			F_ClipboardPaste(ReplacementString, Oflag)
-			return
-		}
-	}
-	if (InStr(v_Options, "C") or InStr(v_Options, "C1"))
-	{
-		F_ClipboardPaste(ReplacementString, Oflag)
-		return
-	}
-}	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_MCLI(TextOptions, Oflag)
 {
@@ -10495,7 +10486,6 @@ F_HOF_MCLI(TextOptions, Oflag)
 		SoundBeep, % ini_MHSF, % ini_MHSD
 		SoundBeep, % ini_MHSF, % ini_MHSD
 	}
-	
 	v_MenuMax			 := 0
 	TextOptions 		 := F_ReplaceAHKconstants(TextOptions)
 	Loop, Parse, TextOptions, ¦
@@ -10570,9 +10560,12 @@ F_MouseMenuCli() ;The subroutine may consult the following built-in variables: A
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
 		Gui, HMenuCli: Destroy
 		v_UndoHotstring 	 := OutputVarTemp
-		F_PrepareSendClipboard(OutputVarTemp, Ovar)
+		ReplacementString := F_PrepareSend(OutputVarTemp, Ovar)
+		F_ClipboardPaste(ReplacementString, Ovar)
 		if (ini_MHSEn)
-			SoundBeep, % ini_MHSF, % ini_MHSD	
+			SoundBeep, % ini_MHSF, % ini_MHSD
+		if (ini_THLog)
+			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MCL" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
 	}
 	return
 }
@@ -10610,7 +10603,6 @@ F_HOF_MSI(TextOptions, Oflag)
 		,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
 		,TriggerChar := "", UserInput := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
-	F_HOFMSI := false
 	if (ini_MHSEn)		;Second beep on purpose
 	{
 		SoundBeep, % ini_MHSF, % ini_MHSD
@@ -10685,16 +10677,20 @@ F_HOF_MSI(TextOptions, Oflag)
 F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
-	local	OutputVarTemp := ""	
+	local	OutputVarTemp := "", ReplacementString := ""
 	if (A_PriorKey = "LButton")
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuAHK 
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
 		Gui, HMenuAHK: Destroy
 		v_UndoHotstring := OutputVarTemp
-		F_PrepareSend(OutputVarTemp, Ovar, "SendInput")
+		ReplacementString := F_PrepareSend(OutputVarTemp, Ovar)
+		F_SendIsOflag(ReplacementString, Ovar, "SendInput")
+		f_HTriggered := true
 		if (ini_MHSEn)
-			SoundBeep, % ini_MHSF, % ini_MHSD	
+			SoundBeep, % ini_MHSF, % ini_MHSD
+		if (ini_THLog)
+			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
 	}
 	return
 }
@@ -10735,10 +10731,9 @@ Down::
 F_HMenuAHK()
 {
 	global	;assume-global moee
-	local	v_PressedKey := "",		v_Temp1 := "", ShiftTabIsFound := false
+	local	v_PressedKey := "",		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	v_PressedKey := A_ThisHotkey
-	;*[One]
 	if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -10758,7 +10753,6 @@ F_HMenuAHK()
 		IsCursorPressed := true
 		IntCnt--
 		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
-		;ShiftTabIsFound := true
 	}
 	if (InStr(v_PressedKey, "Down"))
 	{
@@ -10805,11 +10799,14 @@ F_HMenuAHK()
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
 	v_UndoHotstring := v_Temp1
-	F_PrepareSend(v_Temp1, Ovar, "SendInput")
-	F_HOFMSI := true
+	ReplacementString := F_PrepareSend(v_Temp1, Ovar)
+	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
 	Gui, HMenuAHK: Destroy
+	f_HTriggered := true
 	if (ini_MHSEn)
 		SoundBeep, % ini_MHSF, % ini_MHSD	
+	if (ini_THLog)
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
 	return
 }
 
@@ -11160,7 +11157,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	
 	SplitPath, v_LibraryName, OutFileName, , , OutNameNoExt
 	v_LibrariesDir := % HADL . "\ExportedLibraries"
-	if !InStr(FileExist(v_LibrariesDir),"D")
+	if !InStr(FileExist(v_LibrariesDir), "D")
 		FileCreateDir, %v_LibrariesDir%
 	v_OutputFile := % HADL . "\ExportedLibraries\" . OutNameNoExt . "." . "ahk"
 	
