@@ -4907,8 +4907,7 @@ F_AddHotstring()
 	
 	return
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Clear()
 {
 	global	;assume-global mode
@@ -4995,7 +4994,7 @@ F_Clear()
 	GuiControl, HS4: ChooseString, % IdDDL2b, % TransA["↓ Click here to select hotstring library ↓"]
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Move()
 {
 	global	;assume-global mode
@@ -5200,7 +5199,7 @@ F_HSLV2() ;load content of chosen row from Search Gui into HS3 Gui
 	}
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SearchPhrase()
 {
 	global	;assume-global mode
@@ -5255,7 +5254,7 @@ F_SearchPhrase()
 	GuiControl, +Redraw, % IdSearchLV1 ;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Searching(ReloadListView*)
 {
 	global	;assume-global mode
@@ -5317,7 +5316,7 @@ F_Searching(ReloadListView*)
 	}
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiSearch_CreateObject()
 {
 	global	;assume-global mode
@@ -5338,12 +5337,10 @@ F_GuiSearch_CreateObject()
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR3 gF_SearchPhrase, 					% TransA["Library"]
 	Gui, HS3Search: Add, Button, 		x0 y0 HwndIdSearchB1 gF_MoveList Default,				% TransA["Move (F8)"]
 	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 gF_HSLV2 +AltSubmit Grid -Multi,		% TransA["Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment"]
-	;Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT3 0x7 vLine2						;0x7 = SS_BLACKFRAME Specifies a box with a frame drawn in the same color as the window frames. This color is black in the default color scheme.
 	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT4, 								% TransA["F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries"]
-	
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiSearch_DetermineConstraints()
 {
 	global	;assume-global mode
@@ -5401,7 +5398,7 @@ F_GuiSearch_DetermineConstraints()
 	
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS3SearchGuiSize()
 {
 	global	;assume-global mode
@@ -5438,8 +5435,7 @@ HS3SearchGuiSize()
 	
 	return
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_RestoreDefaultConfig()
 {
 	global	;assume-global mode
@@ -5457,7 +5453,7 @@ F_RestoreDefaultConfig()
 			return
 	}
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Checkbox()	
 {
 global	;assume-global
@@ -5489,7 +5485,6 @@ global	;assume-global
 	;OutputDebug, F_Checkbox()
 	return
 }
-	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	F_GuiHSdelay()
 	{
@@ -5611,8 +5606,7 @@ F_GuiAddLibrary()
 	Gui, ALib: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"
 	return
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_RefreshListOfLibraryTips()
 {
 	global	;assume-global
@@ -5638,8 +5632,7 @@ F_RefreshListOfLibraryTips()
 	Menu, 	LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	:ToggleLibTrigTipsSubmenu
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_RefreshListOfLibraries()
 {
 	global	;assume-global
@@ -5666,7 +5659,7 @@ F_RefreshListOfLibraries()
 	Menu,	LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"],			:EnDisLib
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeleteHotstring()
 {
 	;1. Remove selected library file.
@@ -6015,7 +6008,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	}
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SelectLibrary()
 { 
 	global ;assume-global mode
@@ -6278,7 +6271,7 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 	F_SelectFunction()
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SelectFunction()
 {
 	global ;assume-global mode
@@ -6336,7 +6329,7 @@ F_SelectFunction()
 	}
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_FontType()
 {
 	global	;assume-global mode
@@ -6364,8 +6357,7 @@ F_FontType()
 	IfMsgBox, No
 		return	
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadFontType()
 {
 	global	;assume-global mode
@@ -6377,14 +6369,14 @@ F_LoadFontType()
 	
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SaveFontType()
 {
 	global	;assume-global mode
 	IniWrite, % c_FontType,			% HADConfig, GraphicalUserInterface, GuiFontType
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SizeOfMargin()
 {
 	global	;assume-global mode
@@ -6421,9 +6413,7 @@ F_SizeOfMargin()
 	IfMsgBox, No
 		return	
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SaveSizeOfMargin()
 {
 	global	;assume-global mode
@@ -6431,9 +6421,7 @@ F_SaveSizeOfMargin()
 	IniWrite, % c_ymarg,				% HADConfig, GraphicalUserInterface, GuiSizeOfMarginY
 	return
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_LoadSizeOfMargin()
 {
 		global	;assume-global mode
@@ -6445,9 +6433,7 @@ F_LoadSizeOfMargin()
 		IniRead, c_ymarg,			% HADConfig, GraphicalUserInterface, GuiSizeOfMarginY, 10
 		return
 	}
-	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
 F_SizeOfFont()
 {
 	global ;assume-global mode
@@ -6475,14 +6461,14 @@ F_SizeOfFont()
 	IfMsgBox, No
 		return	
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_SaveFontSize()
 {
 	global ;assume-global mode
 	IniWrite, % c_FontSize,				% HADConfig, GraphicalUserInterface, GuiFontSize
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_LoadFontSize()
 {
 	global ;assume-global mode
@@ -6493,7 +6479,7 @@ F_LoadFontSize()
 		c_FontSize := 10
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
 F_StyleOfGUI()
 {
 	global ;assume-global mode
@@ -6546,8 +6532,7 @@ F_StyleOfGUI()
 		return	
 	}
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SaveGUIstyle()
 {
 	global ;assume-global mode
@@ -6558,7 +6543,7 @@ F_SaveGUIstyle()
 	Iniwrite, % c_ControlColor,			% HADConfig, GraphicalUserInterface, GuiControlColor	
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadGUIstyle()
 {
 	global ;assume-global mode
@@ -6580,12 +6565,9 @@ F_LoadGUIstyle()
 		c_WindowColor := "Default"
 	if (!c_ControlColor)
 		c_ControlColor := "Default"
-	
 	return
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_CompileSubmenu()
 {
 	local v_TempOutStr := ""
@@ -6622,8 +6604,7 @@ F_CompileSubmenu()
 		Menu, AppSubmenu, 		Disable,										% TransA["Compile"]
 	}
 }
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Compile()
 {	;https://www.autohotkey.com/boards/viewtopic.php?f=86&t=90196&p=398198#p398198
 	local v_TempOutStr := "" ;, v_TempOutStr2 := "", v_TempOutStr3 := ""
@@ -6729,7 +6710,7 @@ F_Compile()
 	}
 	return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Reload()
 {
 	global ;assume-global mode
@@ -6785,7 +6766,6 @@ F_Reload()
 	IfMsgBox, No
 		return
 }
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Exit()
 {
@@ -6844,7 +6824,6 @@ F_LoadGUIPos()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 F_CheckCreateConfigIni()
 {
 	global ;assume-global mode
@@ -7015,11 +6994,8 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 	
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Position of main window is saved in Config.ini."]
 	return		
-	
 }
-	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadHotstringsFromLibraries()
 {
 	global ; assume-global mode
@@ -7055,9 +7031,7 @@ F_LoadHotstringsFromLibraries()
 	}
 	return
 }
-	
 ; ------------------------------------------------------------------------------------------------------------------------------------
-	
 F_UpdateSelHotLibDDL()
 ;Load content of DDL2 and mark disabled libraries
 {
@@ -7090,7 +7064,6 @@ F_UpdateSelHotLibDDL()
 	GuiControl, , % IdDDL2b, % "|" . FinalString	;To replace (overwrite) the list instead, include a pipe as the first character
 	return
 }
-	
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_ToggleTipsLibrary()
 {
@@ -7776,9 +7749,7 @@ F_LoadFile(nameoffile)
 	Gui, LoadFile: Destroy
 	return
 }
-
 ; ------------------------------------------------------------------------------------------------------------------------------------
-
 F_GuiHS4_CreateObject()
 {
 	global ;assume-global mode
@@ -8261,9 +8232,7 @@ F_GuiHS4_Redraw()
 	v_hNext := v_OutVarTempY + v_OutVarTempH - c_ymarg
 	GuiControl, Move, % IdButton5b, % "x" . v_xNext ". y" . v_yNext . "h" . v_hNext
 }
-	
 ; ------------------------------------------------------------------------------------------------------------------------------------
-	
 F_GuiHS4_DetermineConstraints()
 {
 	;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.
@@ -8589,7 +8558,6 @@ F_GuiMain_Redraw()
 	GuiControl, Move, % IdButton5, % "x" . v_xNext . "y" . v_yNext . "h" . v_hNext
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
-	
 F_GuiMain_DetermineConstraints()
 {
 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.
@@ -8813,9 +8781,7 @@ F_GuiMain_DetermineConstraints()
 	HS3MinHeight		:= LeftColumnH + c_ymarg
 	return
 }
-	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	
 F_GuiAbout_CreateObjects()
 {
 	global ;assume-global mode
@@ -8921,9 +8887,7 @@ F_GuiAbout()
 	}
 	return  
 }
-	
 ; ------------------------------------------------------------------------------------------------------------------------------------
-	
 F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 {
 	global ;assume-global mode
@@ -9337,8 +9301,7 @@ F_DeterminePartStrings(ReplacementString)
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;F_PrepareSend(ReplacementString, Oflag, SendFunctionName)	;tu jestem
-F_PrepareSend(ReplacementString, Oflag)	;tu jestem
+F_PrepareSend(ReplacementString, Oflag)
 {
 	global	;assume-global mode
 	local vFirstLetter1 := "", vFirstLetter2 := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, fFirstLetterCap := false
@@ -9762,7 +9725,6 @@ Gui, HMenuAHK: Destroy
 Send, % v_Triggerstring . v_EndChar
 return
 #If
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadEndChars() ;Load from Config.ini 
 {
@@ -10247,7 +10209,6 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been exported"] . ":" . "`n`n" . v_OutputFile
 	return
 }
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ExportLibraryDynamic()
 {
