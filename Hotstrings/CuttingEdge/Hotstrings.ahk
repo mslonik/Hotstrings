@@ -485,7 +485,7 @@ Loop,
 		FileAppend, % v_IndexLog . "|" . v_InputString . "|" . ini_TASAC . "|" . ini_TTTtEn . "|" . v_Tips . "`n- - - - - - - - - - - - - - - - - - - - - - - - - -`n", %v_LogFileName%
 		v_IndexLog++
 	}
-	OutputDebug, % "End of main loop." . A_Tab . A_Index
+	;OutputDebug, % "End of main loop." . A_Tab . A_Index
 }
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; The end of the main loop of application.
@@ -760,8 +760,6 @@ F_TMenu()	;there must be a separate function to handle "interrupt" coming from "
 	global	;assume-global mode
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0
-	OutputDebug, % "F_TMenu"
-	;*[One]
 	v_MenuMax := a_Tips.Count()
 	if (InStr(v_PressedKey, "+^Tab"))	;the same as "up"
 	{
@@ -952,8 +950,8 @@ F_GuiEvents_CreateObjects()
 	
 	;2. Prepare all text objects according to mock-up.
 	Gui,	GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, GuiEvents: Add,	Tab3,		,							% TransA["Basic hotstring is triggered"] . "|" . TransA["Menu hotstring is triggered"] . "|" 
-		. TransA["Undid the last hotstring"] . "|" . TransA["Triggerstring tips"] . "|" . TransA["Active triggerstring tips"] . "||"
+	Gui, GuiEvents: Add,	Tab3,		,							% TransA["Basic hotstring is triggered"] . "||" . TransA["Menu hotstring is triggered"] . "|" 
+		. TransA["Undid the last hotstring"] . "|" . TransA["Triggerstring tips"] . "|" . TransA["Active triggerstring tips"] . "|"
 	
 	Gui, GuiEvents: Tab, 											% TransA["Basic hotstring is triggered"]
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
@@ -1208,22 +1206,19 @@ F_EvAT_B1()	;Event Active Triggerstring Tips Button Tooltip test ;tu jestem
 		Case 1: BinParameter := 1
 		Case 2: BinParameter := 0
 	}
-	;if (EvAT_R1R2 = 1)
-	;{
-		a_Tips := []
-		Loop, % EvTt_S2
-		{
-			if (A_Index = 1)
-				a_Tips[A_Index] := "A" . Chr(65 + EvTt_S2 - A_Index) . A_Space . "Demo" . A_Space . A_Index
-			else
-				a_Tips[A_Index] := Chr(65 + EvTt_S2 - A_Index) . A_Space . "Demo" . A_Space . A_Index
-		}
-		F_Sort_a_Triggers(a_Tips, EvTt_C1, EvTt_C2)
-		F_ShowTriggerstringTips2()
-		F_TMenuAHK_Hotkeys(BinParameter)
-		if ((EvTt_R1R2 = 1) and (EvTt_R3R4 = 1))
-			SetTimer, TurnOff_Ttt, % "-" . EvTt_S1	 ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-	;}
+	a_Tips := []
+	Loop, % EvTt_S2
+	{
+		if (A_Index = 1)
+			a_Tips[A_Index] := "A" . Chr(65 + EvTt_S2 - A_Index) . A_Space . "Demo" . A_Space . A_Index
+		else
+			a_Tips[A_Index] := Chr(65 + EvTt_S2 - A_Index) . A_Space . "Demo" . A_Space . A_Index
+	}
+	F_Sort_a_Triggers(a_Tips, EvTt_C1, EvTt_C2)
+	F_ShowTriggerstringTips2()
+	F_TMenuAHK_Hotkeys(BinParameter)
+	if ((EvTt_R1R2 = 1) and (EvTt_R3R4 = 1))
+		SetTimer, TurnOff_Ttt, % "-" . EvTt_S1	 ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1233,7 +1228,6 @@ F_TMenuAHK_Hotkeys(BinParameter)
 	static Temp1 := 0
 	if (BinParameter)
 	{
-		OutputDebug, % ++Temp1 . A_Tab . "F_TMenuAHK_Hotkeys"
 		Hotkey, IfWinExist, % "ahk_id" TMenuAHKHwnd	;in order to work the TMenuAHKHwnd variable must exist prior to definition of the following Hotkeys.
 		Hotkey, ^Tab, 		F_TMenu, I1 On
 		Hotkey, +^Tab, 	F_TMenu, I1 On
@@ -1709,7 +1703,14 @@ F_EvMH_R3R4()
 F_GuiEvents_DetermineConstraints()
 {
 	global ;assume-global mode
-	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0, v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0, v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0, v_OutVarTemp4 := 0, 	v_OutVarTemp4X := 0, 	v_OutVarTemp4Y := 0, 	v_OutVarTemp4W := 0, 	v_OutVarTemp4H := 0, v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0, TheWidestText := 0, TotalWidth := 0
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_OutVarTemp1 := 0,	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
+		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
+		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
+		,v_OutVarTemp4 := 0, 	v_OutVarTemp4X := 0, 	v_OutVarTemp4Y := 0, 	v_OutVarTemp4W := 0, 	v_OutVarTemp4H := 0
+		,maxY1 := 0, 	maxY2 := 0, 	maxY3 := 0, 	maxY4 := 0, 	maxY5 := 0
+		,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0, TheWidestText := 0, TotalWidth := 0
+		,MaxY := 0
 	
 	GuiControlGet, v_OutVarTemp1, Pos, % IdEvBH_T6
 	GuiControlGet, v_OutVarTemp2, Pos, % IdEvBH_T11
@@ -1783,14 +1784,15 @@ F_GuiEvents_DetermineConstraints()
 	v_xNext := c_xmarg, v_yNext += 3 * HofText
 	GuiControl, Move, % IdEvBH_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_B1
-	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_B2
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 4 * c_xmarg
+	v_xNext += v_OutVarTempW + 4 * c_xmarg
 	GuiControl, Move, % IdEvBH_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_B3
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	maxY1 := v_yNext
 
 	v_xNext := c_xmarg, v_yNext := c_ymarg
 	GuiControl, Move, % IdEvMH_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
@@ -1828,11 +1830,12 @@ F_GuiEvents_DetermineConstraints()
 	v_xNext := c_xmarg, v_yNext += 3 * HofText
 	GuiControl, Move, % IdEvMH_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_B1
-	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	v_xNext += v_OutVarTempW + 4 * c_xmarg
 	GuiControl, Move, % IdEvMH_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_B2
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 4 * c_xmarg
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvMH_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	maxY2 := v_yNext
 
 	GuiControlGet, v_OutVarTemp1, Pos, % IdEvUH_T6
 	GuiControlGet, v_OutVarTemp2, Pos, % IdEvUH_T11
@@ -1906,14 +1909,15 @@ F_GuiEvents_DetermineConstraints()
 	v_xNext := c_xmarg, v_yNext += 3 * HofText
 	GuiControl, Move, % IdEvUH_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_B1
-	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvUH_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_B2
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 4 * c_xmarg
+	v_xNext += v_OutVarTempW + 4 * c_xmarg
 	GuiControl, Move, % IdEvUH_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_B3
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvUH_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	maxY3 := v_yNext
 	
 	v_xNext := c_xmarg, v_yNext := c_ymarg
 	GuiControl, Move, % IdEvTt_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
@@ -1987,11 +1991,12 @@ F_GuiEvents_DetermineConstraints()
 	v_xNext := c_xmarg, v_yNext += 3 * HofText
 	GuiControl, Move, % IdEvTt_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_B1
-	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_B2
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 4 * c_xmarg
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	maxY4 := v_yNext
 	
 	v_xNext := c_xmarg, v_yNext := c_ymarg
 	GuiControl, Move, % IdEvAT_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
@@ -2006,10 +2011,60 @@ F_GuiEvents_DetermineConstraints()
 	v_xNext := c_xmarg, v_yNext += 3 * HofText
 	GuiControl, Move, % IdEvAT_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_B1
-	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	v_xNext += v_OutVarTempW + 4 * c_xmarg
 	GuiControl, Move, % IdEvAT_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_B2
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 4 * c_xmarg
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvAT_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	maxY5 := v_yNext
+	
+	;Bottom alignment of buttons over all tabs.
+	MaxY := Max(maxY1, maxY2, maxY3, maxY4, maxY5)
+	v_xNext := c_xmarg, v_yNext := MaxY
+	GuiControl, Move, % IdEvBH_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_B1
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvBH_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_B2
+	v_xNext += v_OutVarTempW + 4 * c_xmarg
+	GuiControl, Move, % IdEvBH_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_B3
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvBH_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext := MaxY
+	
+	GuiControl, Move, % IdEvMH_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += v_OutVarTempW + 4 * c_xmarg
+	GuiControl, Move, % IdEvMH_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_B2
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvMH_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	v_xNext := c_xmarg, v_yNext := MaxY
+	GuiControl, Move, % IdEvUH_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvUH_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_B2
+	v_xNext += v_OutVarTempW + 4 * c_xmarg
+	GuiControl, Move, % IdEvUH_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_B3
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvUH_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	v_xNext := c_xmarg, v_yNext := MaxY
+	GuiControl, Move, % IdEvTt_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvTt_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_B2
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvTt_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	v_xNext := c_xmarg, v_yNext := MaxY
+	GuiControl, Move, % IdEvAT_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += v_OutVarTempW + 4 * c_xmarg
+	GuiControl, Move, % IdEvAT_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_B2
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvAT_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	return
 }
@@ -6747,7 +6802,7 @@ F_GuiMain_Resize2()
 	v_hNext := A_GuiHeight - 2 * c_ymarg 
 	GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
 	F_GuiMain_LVcolumnScale()
-	OutputDebug, % "Two:" 
+	;OutputDebug, % "Two:" 
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6763,7 +6818,7 @@ F_GuiMain_Resize4()
 	v_hNext := A_GuiHeight - (2 * c_ymarg + HofText)
 	GuiControl, MoveDraw, % IdListView1, % "h" . v_hNext  ;increase
 	F_GuiMain_LVcolumnScale()
-	OutputDebug, % "Four:" 
+	;OutputDebug, % "Four:" 
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9378,7 +9433,7 @@ F_GuiHS4_DetermineConstraints()
 	GuiControl, Move, % IdButton4b, % "x" . v_xNext . "y" . v_yNext
 	v_yNext += HofButton
 	LeftColumnH := v_yNext
-;OutputDebug, % "LeftColumnH:" . A_Space . LeftColumnH
+	;OutputDebug, % "LeftColumnH:" . A_Space . LeftColumnH
 	HS4MinWidth		:= LeftColumnW 
 	HS4MinHeight		:= LeftColumnH
 	return
@@ -9708,7 +9763,7 @@ F_GuiMain_DetermineConstraints()
 	GuiControl, Move, % IdButton4, % "x" . v_xNext . "y" . v_yNext
 	v_yNext += HofButton
 	LeftColumnH := v_yNext
-;OutputDebug, % "LeftColumnH:" . A_Space . LeftColumnH
+	;OutputDebug, % "LeftColumnH:" . A_Space . LeftColumnH
 	
 ;5.3. Right column
 ;5.3.1. Position the text "Library content"
@@ -10617,7 +10672,6 @@ F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_
 	if (A_PriorKey = "LButton")
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_TMenuAHK
-		OutputDebug, % "OutputVarTemp" . A_Tab . OutputVarTemp
 		Gui, TMenuAHK: Destroy
 		v_UndoHotstring := OutputVarTemp
 		SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
