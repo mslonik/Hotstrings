@@ -4795,7 +4795,7 @@ F_AddHotstring()
 							if (a_Library[FirstTableIndex] = SelectedLibraryName)
 							{
 								Counter++
-								if (a_Triggerstring[FirstTableIndex] = v_Triggerstring)	;case insensitive string comparison!
+								if (a_Triggerstring[FirstTableIndex] == v_Triggerstring)	;case sensitive string comparison!
 									Break
 							}
 						}
