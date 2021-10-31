@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.4.0"
+global AppVersion				:= "3.5.0"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -44,7 +44,6 @@ global f_HTriggered 			:= false		;Main loop of application; this flag is set (1)
 global v_InputString 			:= ""		;Main loop of application; this variable stores information about keys pressed by user which can differ in size from actual hotstring definition.
 global v_MouseX 				:= 0			;Main loop of application
 global v_MouseY 				:= 0			;Main loop of application
-global v_Tips 					:= ""		;Main loop of application
 global v_TipsFlag 				:= false		;Main loop of application
 
 global ini_GuiReload			:= false
@@ -169,6 +168,8 @@ F_GuiHS4_DetermineConstraints()
 F_GuiHS4_Redraw()
 F_GuiShowIntro()
 F_UpdateSelHotLibDDL()
+
+F_GuiTrigTipsMenuDef(1, 1)
 
 if (ini_HK_IntoEdit != "none")
 {
@@ -326,27 +327,7 @@ Menu, 	HSMenu, 		Add, % TransA["About / Help"], 				:AboutHelpSub
 Gui, 	HS3: Menu, HSMenu
 Gui, 	HS4: Menu, HSMenu
 
-F_MenuLogEnDis()	;tu jestem
-if (ini_THLog) ;If logging is enabled, prepare new folder and create file named as specified in the following pattern.
-{	
-	if (!InStr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log"), "D"))
-	{
-		FileCreateDir, % A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log"
-		v_LogFileName := % A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log" . "\" . A_YYYY . A_MM . A_DD . "_" . "HotstringsLog" . ".txt"
-		FileAppend, % "-----------------------------------------------------------------------------------------------------------------------------" . "`n" 
-			. "hotstring counter" . "|" . "entered triggerstring" . "|" . "trigger" . "|" . "triggerstring options" . "|" . "hotstring" . "|" "`n", % v_LogFileName, UTF-8
-		v_LogCounter := 0
-	}
-	else
-	{
-		v_LogFileName := % A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log" . "\" . A_YYYY . A_MM . A_DD . "_" . "HotstringsLog" . ".txt"
-		FileAppend, % "-----------------------------------------------------------------------------------------------------------------------------" . "`n" 
-			. "hotstring counter" . "|" . "entered triggerstring" . "|" . "trigger" . "|" . "triggerstring options" . "|" . "hotstring" . "|" "`n", % v_LogFileName, UTF-8
-		v_LogCounter := 0
-	}
-}
-
-
+F_MenuLogEnDis()	
 F_GuiAbout_CreateObjects()
 F_GuiVersionUpdate_CreateObjects()
 F_GuiAbout_DetermineConstraints()
@@ -558,7 +539,7 @@ return
 ;Comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
 ~MButton::
 ~RButton::
-;~LButton::	;from now LButton click will not close TMenuAHK; LButton is used to trigger F_MouseMenuTT by "g" in F_GuiTrigTipsMenuDef 
+;~LButton::	;from now LButton click will not close TMenuAHK; LButton is used to trigger F_MouseMenuTT by "g" in F_GuiTrigTipsMenuDef ;tu jestem: jeżeli A_ThisFunc != TMenu Mouse, to zamknij TMenuAHK
 ~LWin::
 ~RWin::
 ~Down::
@@ -683,12 +664,63 @@ F_HMenuCli()
 }
 
 Esc::
-	Gui, HMenuCli: Destroy
-	Send, % v_Triggerstring . v_EndChar
+Gui, HMenuCli: Destroy
+Send, % v_Triggerstring . v_EndChar
 return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_GuiTrigTipsMenuDef(AmountOfRows, LongestString)
+{
+	global	;assume-global mode
+	local vOutput := 0, vOutputX := 0, vOutputY := 0, vOutputW := 0, vOutputH := 0, OutputString := ""
+	
+	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
+		OutputString .= "w"		;the widest ordinary letter in alphabet
+	Gui, TMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndTMenuAHKHwnd
+	Gui, TMenuAHK: Margin, 0, 0
+	if (ini_TTBgrCol = "custom")
+		Gui, TMenuAHK: Color,, % ini_TTBgrColCus	;background of listbox
+	else
+		Gui, TMenuAHK: Color,, % ini_TTBgrCol	;background of listbox
+	if (ini_TTTyFaceCol = "custom")		
+		Gui, TMenuAHK: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceColCus, % ini_TTTyFaceFont
+	else
+		Gui, TMenuAHK: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
+	Gui, TMenuAHK: Add, Text, % "x0 y0 HwndId_T1_TMenuAHK", % OutputString
+	GuiControlGet, vOutput, Pos, % Id_T1_TMenuAHK
+	Gui, TMenuAHK: Add, Listbox, % "x0 y0 HwndId_LB_TMenuAHK" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutputW + 4 . A_Space . "g" . "F_MouseMenuTT"	;thanks to "g" it will not be a separate thread even upon mouse click
+	GuiControl, Hide, % Id_T1_TMenuAHK
+	GuiControl, Font, % Id_LB_TMenuAHK		;fontcolor of listbox
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_TMenuAHK_Hotkeys(BinParameter)
+{
+	global ;assume-global mode
+	if (BinParameter)
+	{
+		Hotkey, IfWinExist, % "ahk_id" TMenuAHKHwnd	;in order to work the TMenuAHKHwnd variable must exist prior to definition of the following Hotkeys.
+		Hotkey, ^Tab, 		F_TMenu, I1 On
+		Hotkey, +^Tab, 	F_TMenu, I1 On
+		Hotkey, ^Up,		F_TMenu, I1 On
+		Hotkey, ^Down,		F_TMenu, I1 On
+		Hotkey, ^Enter,	F_TMenu, I1 On
+		Hotkey, IfWinExist
+	}
+	else
+	{
+		Hotkey, IfWinExist, % "ahk_id" TMenuAHKHwnd
+		Hotkey, ^Tab, 		F_TMenu, I1 Off
+		Hotkey, +^Tab, 	F_TMenu, I1 Off
+		Hotkey, ^Up,		F_TMenu, I1 Off
+		Hotkey, ^Down,		F_TMenu, I1 Off
+		Hotkey, ^Enter,	F_TMenu, I1 Off
+		Hotkey, IfWinExist
+	}
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MenuLogEnDis()
 {
 	global	;assume-global mode
@@ -716,6 +748,24 @@ F_MenuLogEnDis()
 			Menu, SubmenuLog,	UnCheck,	% TransA["enable"]
 		}
 		IniWrite, % ini_THLog, % HADConfig, Configuration, THLog
+	}
+	if (ini_THLog) ;If logging is enabled, prepare new folder and create file named as specified in the following pattern.
+	{	
+		if (!InStr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log"), "D"))
+		{
+			FileCreateDir, % A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log"
+			v_LogFileName := % A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log" . "\" . A_YYYY . A_MM . A_DD . "_" . "HotstringsLog" . ".txt"
+			FileAppend, % "-----------------------------------------------------------------------------------------------------------------------------" . "`n" 
+			. "hotstring counter" . "|" . "entered triggerstring" . "|" . "trigger" . "|" . "triggerstring options" . "|" . "hotstring" . "|" "`n", % v_LogFileName, UTF-8
+			v_LogCounter := 0
+		}
+		else
+		{
+			v_LogFileName := % A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log" . "\" . A_YYYY . A_MM . A_DD . "_" . "HotstringsLog" . ".txt"
+			FileAppend, % "-----------------------------------------------------------------------------------------------------------------------------" . "`n" 
+			. "hotstring counter" . "|" . "entered triggerstring" . "|" . "trigger" . "|" . "triggerstring options" . "|" . "hotstring" . "|" "`n", % v_LogFileName, UTF-8
+			v_LogCounter := 0
+		}
 	}
 	return
 }
@@ -1191,33 +1241,6 @@ F_EvAT_B1()	;Event Active Triggerstring Tips Button Tooltip test
 	F_TMenuAHK_Hotkeys(BinParameter)
 	if ((EvTt_R1R2 = 1) and (EvTt_R3R4 = 1))
 		SetTimer, TurnOff_Ttt, % "-" . EvTt_S1	 ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TMenuAHK_Hotkeys(BinParameter)
-{
-	global ;assume-global mode
-	static Temp1 := 0
-	if (BinParameter)
-	{
-		Hotkey, IfWinExist, % "ahk_id" TMenuAHKHwnd	;in order to work the TMenuAHKHwnd variable must exist prior to definition of the following Hotkeys.
-		Hotkey, ^Tab, 		F_TMenu, I1 On
-		Hotkey, +^Tab, 	F_TMenu, I1 On
-		Hotkey, ^Up,		F_TMenu, I1 On
-		Hotkey, ^Down,		F_TMenu, I1 On
-		Hotkey, ^Enter,	F_TMenu, I1 On
-		Hotkey, IfWinExist
-	}
-	else
-	{
-		Hotkey, IfWinExist, % "ahk_id" TMenuAHKHwnd
-		Hotkey, ^Tab, 		F_TMenu, I1 Off
-		Hotkey, +^Tab, 	F_TMenu, I1 Off
-		Hotkey, ^Up,		F_TMenu, I1 Off
-		Hotkey, ^Down,		F_TMenu, I1 Off
-		Hotkey, ^Enter,	F_TMenu, I1 Off
-		Hotkey, IfWinExist
-	}
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3266,7 +3289,14 @@ F_ShowTriggerstringTips2()
 	}
 	LongestString := WhichValue
 	F_GuiTrigTipsMenuDef(a_Tips.Count(), LongestString)	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
-	ThisValue := ""
+	
+	;for key, value in a_TipsOpt	;tu jestem
+		;if (InStr(value, "*"))
+			;a_Tips[key] .= "̳ "	;{U+0333}; Combining Double Low Line
+		;else
+			;a_Tips[key] .= "✓" ;{U+2713}	;✓
+	
+	ThisValue := ""	
 	for key, value in a_Tips
 		ThisValue .= value . "|"
 	GuiControl,, % Id_LB_TMenuAHK, % ThisValue
@@ -3409,7 +3439,7 @@ F_GuiVersionUpdate_CreateObjects()
 {
 	global	;assume-global mode
 	local	ServerVer := "?.??.??"
-
+	
 	;1. Prepare MyAbout Gui
 	Gui, VersionUpdate: New, 	-Resize +HwndVersionUpdateHwnd +Owner -MaximizeBox -MinimizeBox
 	Gui, VersionUpdate: Margin,	% c_xmarg, % c_ymarg
@@ -3519,20 +3549,20 @@ F_VerUpdCheckServ(param*)
 	Switch param[1]
 	{
 		Case "OnStartUp":
-			if (ServerVer != AppVersion)
-				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["On start-up the local version of"] . A_Space . SubStr(A_ScriptName, 1, -4) . A_Space . TransA["was compared with repository version and difference was discovered:"] 
+		if (ServerVer != AppVersion)
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["On start-up the local version of"] . A_Space . SubStr(A_ScriptName, 1, -4) . A_Space . TransA["was compared with repository version and difference was discovered:"] 
 					. "`n`n" . TransA["Local version:"]  . A_Tab . A_Tab . AppVersion
 					. "`n" .   TransA["Repository version:"] . A_Tab . A_Tab . ServerVer
-			whr := ""		
-			return
+		whr := ""		
+		return
 		Case "ReturnResult":
-			whr := ""
-			if (ServerVer != AppVersion)
-				return true
+		whr := ""
+		if (ServerVer != AppVersion)
+			return true
 		Default:
-			whr := ""
-			GuiControl, , % IdVerUpd4, % ServerVer
-			return
+		whr := ""
+		GuiControl, , % IdVerUpd4, % ServerVer
+		return
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3602,34 +3632,34 @@ F_ParseHotkey(ini_HK_Main, space*)
 			Switch A_LoopField
 			{
 				Case "~":
-					Mini := true
-					if (space[1])
-						ShortcutLong .= "~"
-					else
-						Continue
+				Mini := true
+				if (space[1])
+					ShortcutLong .= "~"
+				else
+					Continue
 				Case "^":	
-					Mini := true
-					ShortcutLong .= "Ctrl"
+				Mini := true
+				ShortcutLong .= "Ctrl"
 				Case "!":	
-					Mini := true
-					ShortcutLong .= "Alt"	
+				Mini := true
+				ShortcutLong .= "Alt"	
 				Case "+":	
-					Mini := true
-					ShortcutLong .= "Shift"
+				Mini := true
+				ShortcutLong .= "Shift"
 				Case "#":
-					Mini := true
-					ShortcutLong .= "Win"
+				Mini := true
+				ShortcutLong .= "Win"
 				Default:
-					StringUpper, HotkeyVar, A_LoopField 
-					ShortcutLong .= HotkeyVar
+				StringUpper, HotkeyVar, A_LoopField 
+				ShortcutLong .= HotkeyVar
 			}
 			if (Mini)
 			{
 				if (space[1])
 					if (ShortcutLong = "~")
 						Continue
-					else
-						ShortcutLong .= " + "
+				else
+					ShortcutLong .= " + "
 				else
 					ShortcutLong .= "+"
 			}
@@ -3677,56 +3707,56 @@ F_GuiShortDef_CreateObjects()
 	Switch A_ThisMenuItem
 	{
 		Case % TransA["Call Graphical User Interface"]:
-			F_HK_CallGUIInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_CallGUIInfo"])
-			GuiControl +g, % IdShortDefT4, % F_HK_CallGUIInfo
-			if (InStr(ini_HK_Main, "#"))
-			{
-				IfWinModifier := true
-				HotkeyVar := StrReplace(ini_HK_Main, "#")
-			}
-			else
-				HotkeyVar := ini_HK_Main
-			if (InStr(ini_HK_Main, "~"))
-			{
-				IfTildeModifier := true
-				HotkeyVar := StrReplace(ini_HK_Main, "~")
-			}
-			else
-				HotkeyVar := ini_HK_Main
+		F_HK_CallGUIInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_CallGUIInfo"])
+		GuiControl +g, % IdShortDefT4, % F_HK_CallGUIInfo
+		if (InStr(ini_HK_Main, "#"))
+		{
+			IfWinModifier := true
+			HotkeyVar := StrReplace(ini_HK_Main, "#")
+		}
+		else
+			HotkeyVar := ini_HK_Main
+		if (InStr(ini_HK_Main, "~"))
+		{
+			IfTildeModifier := true
+			HotkeyVar := StrReplace(ini_HK_Main, "~")
+		}
+		else
+			HotkeyVar := ini_HK_Main
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
-			F_HK_ClipCopyInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_ClipCopyInfo"])
-			GuiControl +g, % IdShortDefT4, % F_HK_ClipCopyInfo
-			if (InStr(ini_HK_IntoEdit, "#"))
-			{
-				IfWinModifier := true
-				HotkeyVar := StrReplace(ini_HK_IntoEdit, "#")
-			}
-			else
-				HotkeyVar := ini_HK_IntoEdit
-			if (InStr(ini_HK_IntoEdit, "~"))
-			{
-				IfTildeModifier := true
-				HotkeyVar := StrReplace(ini_HK_IntoEdit, "~")
-			}
-			else
-				HotkeyVar := ini_HK_IntoEdit
+		F_HK_ClipCopyInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_ClipCopyInfo"])
+		GuiControl +g, % IdShortDefT4, % F_HK_ClipCopyInfo
+		if (InStr(ini_HK_IntoEdit, "#"))
+		{
+			IfWinModifier := true
+			HotkeyVar := StrReplace(ini_HK_IntoEdit, "#")
+		}
+		else
+			HotkeyVar := ini_HK_IntoEdit
+		if (InStr(ini_HK_IntoEdit, "~"))
+		{
+			IfTildeModifier := true
+			HotkeyVar := StrReplace(ini_HK_IntoEdit, "~")
+		}
+		else
+			HotkeyVar := ini_HK_IntoEdit
 		Case % TransA["Undo the last hotstring"]:
-			F_HK_UndoInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_UndoInfo"])
-			GuiControl +g, % IdShortDefT4, % F_HK_UndoInfo
-			if (InStr(ini_HK_UndoLH, "#"))
-			{
-				IfWinModifier := true
-				HotkeyVar := StrReplace(ini_HK_UndoLH, "#")
-			}
-			else
-				HotkeyVar := ini_HK_UndoLH
-			if (InStr(ini_HK_UndoLH, "~"))
-			{
-				IfTildeModifier := true
-				HotkeyVar := StrReplace(ini_HK_UndoLH, "~")
-			}
-			else
-				HotkeyVar := ini_HK_UndoLH
+		F_HK_UndoInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_UndoInfo"])
+		GuiControl +g, % IdShortDefT4, % F_HK_UndoInfo
+		if (InStr(ini_HK_UndoLH, "#"))
+		{
+			IfWinModifier := true
+			HotkeyVar := StrReplace(ini_HK_UndoLH, "#")
+		}
+		else
+			HotkeyVar := ini_HK_UndoLH
+		if (InStr(ini_HK_UndoLH, "~"))
+		{
+			IfTildeModifier := true
+			HotkeyVar := StrReplace(ini_HK_UndoLH, "~")
+		}
+		else
+			HotkeyVar := ini_HK_UndoLH
 	}
 	
 	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT5,										% TransA["New shortcut (hotkey)"] . ":"
@@ -3763,46 +3793,46 @@ F_ShortDefB2_RestoreHotkey()
 	Switch A_ThisMenuItem
 	{
 		Case % TransA["Call Graphical User Interface"]:
-			if (OldHotkey != "none")	
-				Hotkey, % OldHotkey, L_GUIInit, Off
-			ini_HK_Main := "#^h"
-			Hotkey, % ini_HK_Main, L_GUIInit, On
-			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
-			IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
+		if (OldHotkey != "none")	
+			Hotkey, % OldHotkey, L_GUIInit, Off
+		ini_HK_Main := "#^h"
+		Hotkey, % ini_HK_Main, L_GUIInit, On
+		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
+		IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
-			if (OldHotkey != "none")
-			{
-				Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
-				Hotkey, % OldHotkey, F_PasteFromClipboard, Off
-				Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
-				Hotkey, % OldHotkey, F_PasteFromClipboard, Off
-				Hotkey, IfWinExist
-			}
-			ini_HK_IntoEdit := "~^c"
+		if (OldHotkey != "none")
+		{
 			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
-			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
 			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
-			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
 			Hotkey, IfWinExist
-			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit, "space")
-			IniWrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
+		}
+		ini_HK_IntoEdit := "~^c"
+		Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+		Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+		Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+		Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+		Hotkey, IfWinExist
+		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit, "space")
+		IniWrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
 		Case % TransA["Undo the last hotstring"]:
-			if (ini_HotstringUndo)
-			{
-				if (OldHotkey != "none")
-					Hotkey, % OldHotkey, 	F_Undo, Off
-				ini_HK_UndoLH := "~^F12"
-				Hotkey, % ini_HK_UndoLH, F_Undo, On
-			}
-			else
-			{
-				if (OldHotkey != "none")
-					Hotkey, % OldHotkey, 	F_Undo, Off
-				ini_HK_UndoLH := "~^F12"
-				Hotkey, % ini_HK_UndoLH, F_Undo, Off
-			}
-			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH, "space")
-			IniWrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
+		if (ini_HotstringUndo)
+		{
+			if (OldHotkey != "none")
+				Hotkey, % OldHotkey, 	F_Undo, Off
+			ini_HK_UndoLH := "~^F12"
+			Hotkey, % ini_HK_UndoLH, F_Undo, On
+		}
+		else
+		{
+			if (OldHotkey != "none")
+				Hotkey, % OldHotkey, 	F_Undo, Off
+			ini_HK_UndoLH := "~^F12"
+			Hotkey, % ini_HK_UndoLH, F_Undo, Off
+		}
+		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH, "space")
+		IniWrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
 	}
 	return
 }
@@ -3817,44 +3847,44 @@ F_ShortDefB1_SaveHotkey()
 	Switch A_ThisMenuItem
 	{
 		Case % TransA["Call Graphical User Interface"]:
-			GuiControlGet, ini_HK_Main, , % IdShortDefH1
-			if (WindowKey)
-				ini_HK_Main := "#" . ini_HK_Main
-			if (TildeKey)
-				ini_HK_Main := "~" . ini_HK_Main
-			if (ini_HK_Main != "")
-				IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
-			else
-			{
-				ini_HK_Main := "none"
-				IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
-			}
+		GuiControlGet, ini_HK_Main, , % IdShortDefH1
+		if (WindowKey)
+			ini_HK_Main := "#" . ini_HK_Main
+		if (TildeKey)
+			ini_HK_Main := "~" . ini_HK_Main
+		if (ini_HK_Main != "")
+			IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
+		else
+		{
+			ini_HK_Main := "none"
+			IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
+		}
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
-			GuiControlGet, ini_HK_IntoEdit, , % IdShortDefH1
-			if (WindowKey)
-				ini_HK_IntoEdit := "#" . ini_HK_IntoEdit
-			if (TildeKey)
-				ini_HK_IntoEdit := "~" . ini_HK_IntoEdit
-			if (ini_HK_IntoEdit != "")
-				IniWrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
-			else
-			{
-				ini_HK_IntoEdit := "none"
-				Iniwrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
-			}
+		GuiControlGet, ini_HK_IntoEdit, , % IdShortDefH1
+		if (WindowKey)
+			ini_HK_IntoEdit := "#" . ini_HK_IntoEdit
+		if (TildeKey)
+			ini_HK_IntoEdit := "~" . ini_HK_IntoEdit
+		if (ini_HK_IntoEdit != "")
+			IniWrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
+		else
+		{
+			ini_HK_IntoEdit := "none"
+			Iniwrite, % ini_HK_IntoEdit, % HADConfig, Configuration, HK_IntoEdit
+		}
 		Case % TransA["Undo the last hotstring"]:
-			GuiControlGet, ini_HK_UndoLH, , % IdShortDefH1
-			if (WindowKey)
-				ini_HK_UndoLH := "#" . ini_HK_UndoLH
-			if (TildeKey)
-				ini_HK_UndoLH := "~" . ini_HK_UndoLH
-			if (ini_HK_UndoLH != "")
-				IniWrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
-			else
-			{
-				ini_HK_UndoLH := "none"
-				IniWrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
-			}
+		GuiControlGet, ini_HK_UndoLH, , % IdShortDefH1
+		if (WindowKey)
+			ini_HK_UndoLH := "#" . ini_HK_UndoLH
+		if (TildeKey)
+			ini_HK_UndoLH := "~" . ini_HK_UndoLH
+		if (ini_HK_UndoLH != "")
+			IniWrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
+		else
+		{
+			ini_HK_UndoLH := "none"
+			IniWrite, % ini_HK_UndoLH, % HADConfig, Configuration, HK_UndoLH
+		}
 	}
 	GuiControlGet, OldHotkey, , % IdShortDefT3
 	;OldHotkey := RegExReplace(OldHotkey, "(Ctrl)|(Shift)|(Win)|(\+)|( )")	;future: trick from forum after my question
@@ -3872,35 +3902,35 @@ F_ShortDefB1_SaveHotkey()
 		if (ini_HK_Main != "none")
 			Hotkey, % ini_HK_Main, L_GUIInit, On
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
-			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit, "space")
+		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit, "space")
+		Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+		Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+		Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+		Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+		Hotkey, IfWinExist
+		if (ini_HK_IntoEdit != "none")
+		{
 			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
-			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
 			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
-			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
 			Hotkey, IfWinExist
-			if (ini_HK_IntoEdit != "none")
-			{
-				Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
-				Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
-				Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
-				Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
-				Hotkey, IfWinExist
-			}
+		}
 		Case % TransA["Undo the last hotstring"]:
-			MsgBox,, Debug, % ini_HK_UndoLH
-			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH, "space")
-			if (ini_HotstringUndo)
-			{
-				Hotkey, % OldHotkey, 	F_Undo, Off
-				if (ini_HK_UndoLH != "none")
-					Hotkey, % ini_HK_UndoLH, F_Undo, On
-			}
-			else
-			{
-				Hotkey, % OldHotkey, 	F_Undo, Off
-				if (ini_HK_UndoLH != "none")
-					Hotkey, % ini_HK_UndoLH, F_Undo, Off
-			}
+		MsgBox,, Debug, % ini_HK_UndoLH
+		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH, "space")
+		if (ini_HotstringUndo)
+		{
+			Hotkey, % OldHotkey, 	F_Undo, Off
+			if (ini_HK_UndoLH != "none")
+				Hotkey, % ini_HK_UndoLH, F_Undo, On
+		}
+		else
+		{
+			Hotkey, % OldHotkey, 	F_Undo, Off
+			if (ini_HK_UndoLH != "none")
+				Hotkey, % ini_HK_UndoLH, F_Undo, Off
+		}
 	}
 	return
 }
@@ -3943,8 +3973,8 @@ F_Sort_a_Triggers(ByRef a_Table, f_SortAlpha, f_SortByLength)
 {	;sort now a_Triggers() so it's not necessary each time when user gets triggerstring tips; it should speed-up process significantly
 	global	;assume-global mode
 	local	key := "", value := "", s_SelectedTriggers := ""
-
-	if (f_SortAlpha)
+	
+	if (f_SortAlpha)	;tu jestem: polaczyc na moment sortowania a_Triggers z a_Options, a potem znowu podzielic
 	{
 		;a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
 		for key, value in a_Table	;table to string Conversion
@@ -3956,7 +3986,7 @@ F_Sort_a_Triggers(ByRef a_Table, f_SortAlpha, f_SortByLength)
 	}
 	if (f_SortByLength)
 		a_Table := F_SortArrayByLength(a_Table)
-
+	
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4047,7 +4077,7 @@ F_MenuShowIntro()
 		}
 		Iniwrite, % ini_ShowIntro, % HADConfig, Configuration, ShowIntro
 	}
-return
+	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiShowIntro()
@@ -4159,7 +4189,7 @@ F_Undo()
 	global	;assume-global mode
 	local	TriggerOpt := "", HowManyBackSpaces := 0, HowManyBackSpaces2 := 0
 			,ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey, OrigTriggerstring := ""
-
+	
 	if (ini_UHTtEn and v_Triggerstring and (ThisHotkey != PriorHotkey))
 	{	
 		if (!(InStr(v_Options, "*")) and !(InStr(v_Options, "O")))
@@ -4308,13 +4338,15 @@ F_PrepareTriggerstringTipsTables2()
 	
 	;OutputDebug, % "Length of v_InputString:" . A_Space . StrLen(v_InputString) . A_Tab . "v_InputString:" . A_Space . v_InputString
 	if (StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn)	;TASAC = TipsAreShownAfterNoOfCharacters
-	{
-		a_Tips := []
+	{ ;tu jestem
+		a_Tips 	:= []	;collect within global array a_Tips subset from full set a_Triggers full set  
+		;a_TipsOpt	:= []	;collect withing global array a_TipsOpt subset from full set a_TriggerOptions; next it will be used to show triggering character in F_ShowTriggerstringTips2()
 		Loop, % a_Triggers.MaxIndex()
 		{
 			if (InStr(a_Triggers[A_Index], v_InputString) = 1)
 			{
 				a_Tips.Push(a_Triggers[A_Index])
+				;a_TipsOpt.Push(a_TriggerOptions[A_Index])
 				HitCnt++
 				if (HitCnt = ini_MNTT)	; MNTT = Maximum Number of Triggerstring Tips
 					Break
@@ -4323,71 +4355,11 @@ F_PrepareTriggerstringTipsTables2()
 	}
 	else
 	{
-		Gui, TMenuAHK: Destroy
-		a_Tips := []
+		Gui, TMenuAHK: Destroy	;this line is necessary to destroy GUI when backspacing goes to length 0 of inputstring
+		a_Tips := [], a_TipsOpt	:= []
 	}
 	return
 }	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_PrepareTriggerstringTipsTables()
-{
-	global	;assume-global mode
-	local	HitCnt := 0
-	
-	;OutputDebug, % "Length of v_InputString:" . A_Space . StrLen(v_InputString) . A_Tab . "v_InputString:" . A_Space . v_InputString
-	if (StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn)	;TASAC = TipsAreShownAfterNoOfCharacters
-	{
-		v_Tips := ""		
-		Loop, % a_Triggers.MaxIndex()
-		{
-			if (InStr(a_Triggers[A_Index], v_InputString) = 1)
-			{
-			if (v_Tips)
-				v_Tips .= "`n"
-			v_Tips .= a_Triggers[A_Index]
-			HitCnt++
-			if (HitCnt = ini_MNTT)	; MNTT = Maximum Number of Triggerstring Tips
-				Break
-			}
-		}
-	}
-	else
-	{
-		ToolTip,
-		v_Tips := ""
-	}
-	return
-}	
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ShowTriggerstringTips()
-{
-	global	;assume-global mode
-	
-	if ((ini_TTTtEn) and (ini_TTTP = 1))
-	{
-		if (A_CaretX and A_CaretY)
-		{
-			ToolTip, %v_Tips%, A_CaretX + 20, A_CaretY - 20
-			if ((ini_TTTtEn) and (ini_TTTD > 0))
-				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-		}
-		else
-		{
-			MouseGetPos, v_MouseX, v_MouseY
-			ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
-			if ((ini_TTTtEn) and (ini_TTTD > 0))
-				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-		}
-	}
-	if ((ini_TTTtEn) and (ini_TTTP = 2))
-	{
-		MouseGetPos, v_MouseX, v_MouseY
-		ToolTip, %v_Tips%, v_MouseX + 20, v_MouseY - 20
-		if ((ini_TTTtEn) and (ini_TTTD > 0))
-			SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-	}
-	return
-}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadSignalingParams()
 {
@@ -4629,14 +4601,14 @@ F_CreateMenu_SizeOfMargin()
 {
 	global	;assume-global mode
 	local	key := 0, value := 0
-		
-		for key, value in SizeOfMargin
-			Menu, SizeOfMX, Add, % SizeOfMargin[key], F_SizeOfMargin
-		for key, value in SizeOfMargin
-			Menu, SizeOfMY, Add, % SizeOfMargin[key], F_SizeOfMargin
-		
-		Menu, SizeOfMX,	Check,	% c_xmarg
-		Menu, SizeOfMY,	Check,	% c_ymarg
+	
+	for key, value in SizeOfMargin
+		Menu, SizeOfMX, Add, % SizeOfMargin[key], F_SizeOfMargin
+	for key, value in SizeOfMargin
+		Menu, SizeOfMY, Add, % SizeOfMargin[key], F_SizeOfMargin
+	
+	Menu, SizeOfMX,	Check,	% c_xmarg
+	Menu, SizeOfMY,	Check,	% c_ymarg
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_AddHotstring()
@@ -5456,7 +5428,7 @@ F_RestoreDefaultConfig()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Checkbox()	
 {
-global	;assume-global
+	global	;assume-global
 	local v_OutputVar := 0
 	GuiControlGet, v_OutputVar, % A_Gui . ":", % A_GuiControl
 	
@@ -5486,42 +5458,42 @@ global	;assume-global
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	F_GuiHSdelay()
-	{
-		global	;assume-global mode
-		local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+F_GuiHSdelay()
+{
+	global	;assume-global mode
+	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
 		,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
 		,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
 	;+Owner to prevent display of a taskbar button
-		Gui, HSDel: New, -MinimizeBox -MaximizeBox +Owner +HwndHotstringDelay, % TransA["Set Clipboard Delay"]
-		Gui, HSDel: Margin,	% c_xmarg, % c_ymarg
-		Gui,	HSDel: Color,	% c_WindowColor, % c_ControlColor
-		Gui,	HSDel: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-		
-		Gui, HSDel: Add, Slider, x0 y0 HwndIdHD_S1 vini_CPDelay gF_HSdelay Range100-1000 ToolTipBottom Buddy1999, % ini_CPDelay
-		TransA["This option is valid"] := StrReplace(TransA["This option is valid"], "``n", "`n")
+	Gui, HSDel: New, -MinimizeBox -MaximizeBox +Owner +HwndHotstringDelay, % TransA["Set Clipboard Delay"]
+	Gui, HSDel: Margin,	% c_xmarg, % c_ymarg
+	Gui,	HSDel: Color,	% c_WindowColor, % c_ControlColor
+	Gui,	HSDel: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	
+	Gui, HSDel: Add, Slider, x0 y0 HwndIdHD_S1 vini_CPDelay gF_HSdelay Range100-1000 ToolTipBottom Buddy1999, % ini_CPDelay
+	TransA["This option is valid"] := StrReplace(TransA["This option is valid"], "``n", "`n")
 	;Gui, HSDel: Add, Text, HwndIdHD_T1 vDelayText, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_CPDelay . "`n`n" . TransA["This option is valid"]
-		Gui, HSDel: Add, Text, HwndIdHD_T1, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_CPDelay . "`n`n" . TransA["This option is valid"]
-		GuiControlGet, v_OutVarTemp, Pos, % IdHD_T1
-		v_xNext := c_xmarg
-		v_yNext := c_ymarg
-		v_wNext := v_OutVarTempW
-		GuiControl, Move, % IdHD_S1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space "w" v_wNext
-		GuiControl, Move, % IdHD_T1, % "x" v_xNext
-		
-		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-		Gui, HSDel: Show, Hide AutoSize 
-		DetectHiddenWindows, On
-		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . HotstringDelay
-		DetectHiddenWindows, Off
-		
-		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
-		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
-		
-		Gui, HSDel: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"	
-		return
+	Gui, HSDel: Add, Text, HwndIdHD_T1, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_CPDelay . "`n`n" . TransA["This option is valid"]
+	GuiControlGet, v_OutVarTemp, Pos, % IdHD_T1
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	v_wNext := v_OutVarTempW
+	GuiControl, Move, % IdHD_S1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space "w" v_wNext
+	GuiControl, Move, % IdHD_T1, % "x" v_xNext
+	
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, HSDel: Show, Hide AutoSize 
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . HotstringDelay
+	DetectHiddenWindows, Off
+	
+	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+	
+	Gui, HSDel: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"	
+	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HSdelay()
@@ -5761,31 +5733,31 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 	Switch A_DefaultGui
 	{
 		Case "HS3":
-			WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
-			Gui, HS3: Submit, NoHide
-			Gui, HS4: Default
-			F_UpdateSelHotLibDDL()
-			GuiControl,, % IdEdit1b, % v_TriggerString
-			GuiControl,, % IdEdit2b, % v_EnterHotstring
-			GuiControl, ChooseString, % IdDDL2b, % v_SelectHotstringLibrary
-			Gui, HS3: Show, Hide
-			Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
-			Gui, HS4: Show, AutoSize ;don't know why it has to be doubled to properly display...
-			F_HS4RadioCaseGroup(v_RadioCaseGroup)
-			ini_WhichGui := "HS4"
+		WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
+		Gui, HS3: Submit, NoHide
+		Gui, HS4: Default
+		F_UpdateSelHotLibDDL()
+		GuiControl,, % IdEdit1b, % v_TriggerString
+		GuiControl,, % IdEdit2b, % v_EnterHotstring
+		GuiControl, ChooseString, % IdDDL2b, % v_SelectHotstringLibrary
+		Gui, HS3: Show, Hide
+		Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
+		Gui, HS4: Show, AutoSize ;don't know why it has to be doubled to properly display...
+		F_HS4RadioCaseGroup(v_RadioCaseGroup)
+		ini_WhichGui := "HS4"
 		Case "HS4":
-			WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
-			Gui, HS4: Submit, NoHide
-			Gui, HS3: Default
-			F_UpdateSelHotLibDDL()
-			GuiControl,, % IdEdit1, % v_TriggerString
-			GuiControl,, % IdEdit2, % v_EnterHotstring
-			GuiControl, ChooseString, % IdDDL2, % v_SelectHotstringLibrary
-			Gui, HS4: Show, Hide
-			Gui, HS3: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
-			Gui, HS3: Show, AutoSize ;don't know why it has to be doubled to properly display...
-			F_HS3RadioCaseGroup(v_RadioCaseGroup)
-			ini_WhichGui := "HS3"
+		WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
+		Gui, HS4: Submit, NoHide
+		Gui, HS3: Default
+		F_UpdateSelHotLibDDL()
+		GuiControl,, % IdEdit1, % v_TriggerString
+		GuiControl,, % IdEdit2, % v_EnterHotstring
+		GuiControl, ChooseString, % IdDDL2, % v_SelectHotstringLibrary
+		Gui, HS4: Show, Hide
+		Gui, HS3: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
+		Gui, HS3: Show, AutoSize ;don't know why it has to be doubled to properly display...
+		F_HS3RadioCaseGroup(v_RadioCaseGroup)
+		ini_WhichGui := "HS3"
 	}
 	if (ini_WhichGui = "HS3")
 		Menu, ConfGUI, Check, 	% TransA["Show full GUI (F4)"]
@@ -5814,7 +5786,7 @@ F_GuiMain_LVcolumnScale()
 {
 	global ;assume-global mode
 	local v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.		
-
+	
 	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.	
 	ListViewWidth := v_OutVarTemp2W
 	LV_ModifyCol(1, Round(0.1 * ListViewWidth))
@@ -5831,7 +5803,7 @@ F_GuiMain_Resize2()
 	global ;assume-global mode
 	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 		,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
-
+	
 	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
 	v_hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + c_HofSandbox + c_ymarg)
 	GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext . "h" . v_hNext
@@ -6197,26 +6169,26 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 	Switch Fun
 	{
 		Case "SI":	;SendFun := "F_HOF_SI"
-			GuiControl, HS3: ChooseString, % IdDDL1, 	SendInput (SI)
-			GuiControl, HS4: ChooseString, % IdDDL1b, 	SendInput (SI)
+		GuiControl, HS3: ChooseString, % IdDDL1, 	SendInput (SI)
+		GuiControl, HS4: ChooseString, % IdDDL1b, 	SendInput (SI)
 		Case "CL":	;SendFun := "F_HOF_CLI"
-			GuiControl, HS3: ChooseString, % IdDDL1, 	Clipboard (CL)
-			GuiControl, HS4: ChooseString, % IdDDL1b, 	Clipboard (CL)
+		GuiControl, HS3: ChooseString, % IdDDL1, 	Clipboard (CL)
+		GuiControl, HS4: ChooseString, % IdDDL1b, 	Clipboard (CL)
 		Case "MCL":	;SendFun := "F_HOF_MCLI"
-			GuiControl, HS3: ChooseString, % IdDDL1, 	Menu & Clipboard (MCL)
-			GuiControl, HS4: ChooseString, % IdDDL1b, 	Menu & Clipboard (MCL)
+		GuiControl, HS3: ChooseString, % IdDDL1, 	Menu & Clipboard (MCL)
+		GuiControl, HS4: ChooseString, % IdDDL1b, 	Menu & Clipboard (MCL)
 		Case "MSI":	;SendFun := "F_HOF_MSI"
-			GuiControl, HS3: ChooseString, % IdDDL1, 	Menu & SendInput (MSI)
-			GuiControl, HS4: ChooseString, % IdDDL1b, 	Menu & SendInput (MSI)
+		GuiControl, HS3: ChooseString, % IdDDL1, 	Menu & SendInput (MSI)
+		GuiControl, HS4: ChooseString, % IdDDL1b, 	Menu & SendInput (MSI)
 		Case "SR":	
-			GuiControl, HS3: ChooseString, % IdDDL1, 	SendRaw (SR)
-			GuiControl, HS4: ChooseString, % IdDDL1b, 	SendRaw (SR)
+		GuiControl, HS3: ChooseString, % IdDDL1, 	SendRaw (SR)
+		GuiControl, HS4: ChooseString, % IdDDL1b, 	SendRaw (SR)
 		Case "SP":
-			GuiControl, HS3: ChooseString, % IdDDL1, 	SendPlay (SP)
-			GuiControl, HS4: ChooseString, % IdDDL1b, 	SendPlay (SP)
+		GuiControl, HS3: ChooseString, % IdDDL1, 	SendPlay (SP)
+		GuiControl, HS4: ChooseString, % IdDDL1b, 	SendPlay (SP)
 		Case "SE":
-			GuiControl, HS3: ChooseString, % IdDDL1, 	SendEvent (SE)
-			GuiControl, HS4: ChooseString, % IdDDL1b, 	SendEvent (SE)
+		GuiControl, HS3: ChooseString, % IdDDL1, 	SendEvent (SE)
+		GuiControl, HS4: ChooseString, % IdDDL1b, 	SendEvent (SE)
 	}
 	
 	LV_GetText(EnDis, 		v_SelectedRow, 4)
@@ -6424,15 +6396,15 @@ F_SaveSizeOfMargin()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_LoadSizeOfMargin()
 {
-		global	;assume-global mode
-		SizeOfMargin				:= {1: 0, 2: 5, 3: 10, 4: 15, 5: 20} ;pixels
-		c_xmarg := 10	;pixels
-		c_ymarg := 10	;pixels
-		
-		IniRead, c_xmarg, 			% HADConfig, GraphicalUserInterface, GuiSizeOfMarginX, 10
-		IniRead, c_ymarg,			% HADConfig, GraphicalUserInterface, GuiSizeOfMarginY, 10
-		return
-	}
+	global	;assume-global mode
+	SizeOfMargin				:= {1: 0, 2: 5, 3: 10, 4: 15, 5: 20} ;pixels
+	c_xmarg := 10	;pixels
+	c_ymarg := 10	;pixels
+	
+	IniRead, c_xmarg, 			% HADConfig, GraphicalUserInterface, GuiSizeOfMarginX, 10
+	IniRead, c_ymarg,			% HADConfig, GraphicalUserInterface, GuiSizeOfMarginY, 10
+	return
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
 F_SizeOfFont()
 {
@@ -6490,46 +6462,46 @@ F_StyleOfGUI()
 		Switch c_FontColor
 		{
 			Case "Black": ;Light (default)
-				Menu, StyleGUIsubm, Check,   % TransA["Light (default)"]
-				Menu, StyleGUIsubm, UnCheck, % TransA["Dark"]
+			Menu, StyleGUIsubm, Check,   % TransA["Light (default)"]
+			Menu, StyleGUIsubm, UnCheck, % TransA["Dark"]
 			Case "White": ;Dark
-				Menu, StyleGUIsubm, UnCheck, % TransA["Light (default)"]
-				Menu, StyleGUIsubm, Check,   % TransA["Dark"]
+			Menu, StyleGUIsubm, UnCheck, % TransA["Light (default)"]
+			Menu, StyleGUIsubm, Check,   % TransA["Dark"]
 		}
 		OneTimeMemory := false
 		return
 	}	
 	else
 	{
-	Switch A_ThisMenuItemPos
-	{
-		Case 1: ;Light (default)
-		c_FontColor				:= "Black"
-		c_FontColorHighlighted		:= "Blue"
-		c_WindowColor				:= "Default"
-		c_ControlColor 			:= "Default"
-		Menu, StyleGUIsubm, Check,   % TransA["Light (default)"]
-		Menu, StyleGUIsubm, UnCheck, % TransA["Dark"]
-		Case 2: ;Dark
-		c_FontColor				:= "White"
-		c_FontColorHighlighted		:= "Teal"
-		c_WindowColor				:= "Black"
-		c_ControlColor 			:= "Gray"
-		Menu, StyleGUIsubm, UnCheck, % TransA["Light (default)"]
-		Menu, StyleGUIsubm, Check,   % TransA["Dark"]
-	}
-	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["In order to aplly new style it's necesssary to reload the application."]
+		Switch A_ThisMenuItemPos
+		{
+			Case 1: ;Light (default)
+			c_FontColor				:= "Black"
+			c_FontColorHighlighted		:= "Blue"
+			c_WindowColor				:= "Default"
+			c_ControlColor 			:= "Default"
+			Menu, StyleGUIsubm, Check,   % TransA["Light (default)"]
+			Menu, StyleGUIsubm, UnCheck, % TransA["Dark"]
+			Case 2: ;Dark
+			c_FontColor				:= "White"
+			c_FontColorHighlighted		:= "Teal"
+			c_WindowColor				:= "Black"
+			c_ControlColor 			:= "Gray"
+			Menu, StyleGUIsubm, UnCheck, % TransA["Light (default)"]
+			Menu, StyleGUIsubm, Check,   % TransA["Dark"]
+		}
+		MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["In order to aplly new style it's necesssary to reload the application."]
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
 		. "`n`n" . TransA["Do you want to reload application now?"]
-	IfMsgBox, Yes
-	{
-		F_SaveGUIstyle()
-		ini_GuiReload := true
-		IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
-		Reload
-	}
-	IfMsgBox, No
-		return	
+		IfMsgBox, Yes
+		{
+			F_SaveGUIstyle()
+			ini_GuiReload := true
+			IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
+			Reload
+		}
+		IfMsgBox, No
+			return	
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6748,20 +6720,20 @@ F_Reload()
 		}
 		else
 			Switch A_ThisMenuItem
+		{
+			Case % TransA["Reload in default mode"]:
+			Switch A_IsCompiled
 			{
-				Case % TransA["Reload in default mode"]:
-					Switch A_IsCompiled
-					{
-						Case % true:	Run, % A_ScriptFullPath 
-						Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
-					}
-				Case % TransA["Reload in silent mode"]:
-					Switch A_IsCompiled
-					{
-						Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
-						Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
-					}
+				Case % true:	Run, % A_ScriptFullPath 
+				Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
 			}
+			Case % TransA["Reload in silent mode"]:
+			Switch A_IsCompiled
+			{
+				Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
+				Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
+			}
+		}
 	}
 	IfMsgBox, No
 		return
@@ -8102,11 +8074,11 @@ F_RadioCaseCol()
 	Switch A_DefaultGui
 	{
 		Case "HS3": 
-			Gui, HS3: Submit, NoHide
-			F_HS3RadioCaseGroup(v_RadioCaseGroup)
+		Gui, HS3: Submit, NoHide
+		F_HS3RadioCaseGroup(v_RadioCaseGroup)
 		Case "HS4": 
-			Gui, HS4: Submit, NoHide
-			F_HS4RadioCaseGroup(v_RadioCaseGroup)
+		Gui, HS4: Submit, NoHide
+		F_HS4RadioCaseGroup(v_RadioCaseGroup)
 	}
 	return
 }
@@ -8117,25 +8089,25 @@ F_HS3RadioCaseGroup(v_RadioCaseGroup)
 	Switch v_RadioCaseGroup
 	{
 		Case 1:
-			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-			GuiControl, HS3: Font, % TransA["Case Sensitive (C)"]
-			GuiControl, HS3: Font, % TransA["Case-Conforming"]
-			GuiControl, HS3: Font, % TransA["Not Case-Conforming (C1)"]
-			GuiControl, HS3:, % TransA["Case-Conforming"], 1
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+		GuiControl, HS3: Font, % TransA["Case Sensitive (C)"]
+		GuiControl, HS3: Font, % TransA["Case-Conforming"]
+		GuiControl, HS3: Font, % TransA["Not Case-Conforming (C1)"]
+		GuiControl, HS3:, % TransA["Case-Conforming"], 1
 		Case 2:
-			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
-			GuiControl, HS3: Font, % TransA["Case Sensitive (C)"]
-			GuiControl, HS3:, % TransA["Case Sensitive (C)"], 1
-			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-			GuiControl, HS3: Font, % TransA["Case-Conforming"]
-			GuiControl, HS3: Font, % TransA["Not Case-Conforming (C1)"]
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+		GuiControl, HS3: Font, % TransA["Case Sensitive (C)"]
+		GuiControl, HS3:, % TransA["Case Sensitive (C)"], 1
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+		GuiControl, HS3: Font, % TransA["Case-Conforming"]
+		GuiControl, HS3: Font, % TransA["Not Case-Conforming (C1)"]
 		Case 3:
-			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
-			GuiControl, HS3: Font, % TransA["Not Case-Conforming (C1)"]
-			GuiControl, HS3:, % TransA["Not Case-Conforming (C1)"], 1
-			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType					
-			GuiControl, HS3: Font, % TransA["Case Sensitive (C)"]
-			GuiControl, HS3: Font, % TransA["Case-Conforming"]
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+		GuiControl, HS3: Font, % TransA["Not Case-Conforming (C1)"]
+		GuiControl, HS3:, % TransA["Not Case-Conforming (C1)"], 1
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType					
+		GuiControl, HS3: Font, % TransA["Case Sensitive (C)"]
+		GuiControl, HS3: Font, % TransA["Case-Conforming"]
 	}
 	return		
 }
@@ -8146,25 +8118,25 @@ F_HS4RadioCaseGroup(v_RadioCaseGroup)
 	Switch v_RadioCaseGroup
 	{
 		Case 1:
-			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-			GuiControl, HS4: Font, % TransA["Case Sensitive (C)"]
-			GuiControl, HS4: Font, % TransA["Case-Conforming"]
-			GuiControl, HS4: Font, % TransA["Not Case-Conforming (C1)"]
-			GuiControl, HS4:, % TransA["Case-Conforming"], 1
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+		GuiControl, HS4: Font, % TransA["Case Sensitive (C)"]
+		GuiControl, HS4: Font, % TransA["Case-Conforming"]
+		GuiControl, HS4: Font, % TransA["Not Case-Conforming (C1)"]
+		GuiControl, HS4:, % TransA["Case-Conforming"], 1
 		Case 2:
-			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
-			GuiControl, HS4: Font, % TransA["Case Sensitive (C)"]
-			GuiControl, HS4:, % TransA["Case Sensitive (C)"], 1
-			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-			GuiControl, HS4: Font, % TransA["Case-Conforming"]
-			GuiControl, HS4: Font, % TransA["Not Case-Conforming (C1)"]
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+		GuiControl, HS4: Font, % TransA["Case Sensitive (C)"]
+		GuiControl, HS4:, % TransA["Case Sensitive (C)"], 1
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+		GuiControl, HS4: Font, % TransA["Case-Conforming"]
+		GuiControl, HS4: Font, % TransA["Not Case-Conforming (C1)"]
 		Case 3: 
-			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
-			GuiControl, HS4: Font, % TransA["Not Case-Conforming (C1)"]
-			GuiControl, HS4:, % TransA["Not Case-Conforming (C1)"], 1
-			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-			GuiControl, HS4: Font, % TransA["Case Sensitive (C)"]
-			GuiControl, HS4: Font, % TransA["Case-Conforming"]
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+		GuiControl, HS4: Font, % TransA["Not Case-Conforming (C1)"]
+		GuiControl, HS4:, % TransA["Not Case-Conforming (C1)"], 1
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+		GuiControl, HS4: Font, % TransA["Case Sensitive (C)"]
+		GuiControl, HS4: Font, % TransA["Case-Conforming"]
 	}
 	return
 }
@@ -8279,7 +8251,7 @@ F_GuiHS4_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp1, Pos, % IdText1b
 	v_xNext += v_OutVarTemp1W + c_xmarg
 	GuiControl, Move, % IdTextInfo1b, % "x" . v_xNext . "y" . v_yNext
- 	v_xNext += W_InfoSign + c_xmarg
+	v_xNext += W_InfoSign + c_xmarg
 	v_wNext := LeftColumnW - v_xNext - c_xmarg
 	GuiControl, Move, % IdEdit1b, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 	
@@ -8608,7 +8580,7 @@ F_GuiMain_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp1, Pos, % IdText1
 	v_xNext += v_OutVarTemp1W + c_xmarg
 	GuiControl, Move, % IdTextInfo1, % "x" . v_xNext . "y" . v_yNext
- 	v_xNext += W_InfoSign + c_xmarg
+	v_xNext += W_InfoSign + c_xmarg
 	v_wNext := LeftColumnW - v_xNext - c_xmarg
 	GuiControl, Move, % IdEdit1, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 	
@@ -9059,38 +9031,38 @@ F_CreateHotstring(txt, nameoffile)
 		Switch A_Index
 		{
 			Case 1:
-				Options := A_LoopField
+			Options := A_LoopField
+			Oflag := false
+			if (InStr(Options, "O", 0))
+				Oflag := true
+			else
 				Oflag := false
-				if (InStr(Options, "O", 0))
-					Oflag := true
-				else
-					Oflag := false
 			Case 2:
-				v_Triggerstring := A_LoopField
-				v_Triggerstring := StrReplace(v_Triggerstring, "``n", "`n") ;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
-				v_Triggerstring := StrReplace(v_Triggerstring, "``r", "`r")	;future: add more sequences like {Esc} etc.
-				v_Triggerstring := StrReplace(v_Triggerstring, "``t", "`t")
-				v_Triggerstring := StrReplace(v_Triggerstring, "``", "`")
-				v_Triggerstring := StrReplace(v_Triggerstring, "``b", "`b")
+			v_Triggerstring := A_LoopField
+			v_Triggerstring := StrReplace(v_Triggerstring, "``n", "`n") ;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
+			v_Triggerstring := StrReplace(v_Triggerstring, "``r", "`r")	;future: add more sequences like {Esc} etc.
+			v_Triggerstring := StrReplace(v_Triggerstring, "``t", "`t")
+			v_Triggerstring := StrReplace(v_Triggerstring, "``", "`")
+			v_Triggerstring := StrReplace(v_Triggerstring, "``b", "`b")
 			Case 3:
-				Switch A_LoopField
-				{
-					Case "SI": 	SendFun := "F_HOF_SI"
-					Case "CL": 	SendFun := "F_HOF_CLI"
-					Case "MCL": 	SendFun := "F_HOF_MCLI"
-					Case "MSI":	SendFun := "F_HOF_MSI"
-					Case "SR":	SendFun := "F_HOF_SR"
-					Case "SP":	SendFun := "F_HOF_SP"
-					Case "SE":	SendFun := "F_HOF_SE"
-				}
+			Switch A_LoopField
+			{
+				Case "SI": 	SendFun := "F_HOF_SI"
+				Case "CL": 	SendFun := "F_HOF_CLI"
+				Case "MCL": 	SendFun := "F_HOF_MCLI"
+				Case "MSI":	SendFun := "F_HOF_MSI"
+				Case "SR":	SendFun := "F_HOF_SR"
+				Case "SP":	SendFun := "F_HOF_SP"
+				Case "SE":	SendFun := "F_HOF_SE"
+			}
 			Case 4: 
-				Switch A_LoopField
-				{
-					Case "En":	OnOff := "On"
-					Case "Dis":	OnOff := "Off"	
-				}
+			Switch A_LoopField
+			{
+				Case "En":	OnOff := "On"
+				Case "Dis":	OnOff := "Off"	
+			}
 			Case 5:
-				TextInsert := A_LoopField
+			TextInsert := A_LoopField
 		}
 	}
 	
@@ -9115,7 +9087,7 @@ F_CreateHotstring(txt, nameoffile)
 	}
 	return
 }
-	
+
 ; =================================================================================
 ; Function: AutoXYWH
 ;   Move and resize control automatically when GUI resizes.
@@ -9196,7 +9168,7 @@ F_ReplaceAHKconstants(String)
 F_PrepareUndo(string)
 {	;this function replaces from hotstring definition all characters which aren't necessary to undo last hotstring
 	;if (InStr(string, "BackSpace")) or InStr(string, "BS")
-		string := RegExReplace(string, "Ui)({Backspace.*})|({BS.*})")
+	string := RegExReplace(string, "Ui)({Backspace.*})|({BS.*})")
 	if (InStr(string, "{!}")) or (InStr(string, "{^}")) or (InStr(string, "{+}")) or (InStr(string, "{#}")) or (InStr(string, "{{}")) or (InStr(string, "{}}"))
 		string := RegExReplace(string, "U)({)|(})")
 	if (InStr(string, "Shift", false))
@@ -9246,25 +9218,25 @@ F_SendIsOflag(string, Oflag, SendFunctionName)
 	Switch SendFunctionName
 	{
 		Case "SendInput":
-			if (Oflag = false)
-				SendInput, % string . A_EndChar
-			else
-				SendInput, % string
+		if (Oflag = false)
+			SendInput, % string . A_EndChar
+		else
+			SendInput, % string
 		Case "SendEvent":
-			if (Oflag = false)
-				SendEvent, % string . A_EndChar
-			else
-				SendEvent, % string
+		if (Oflag = false)
+			SendEvent, % string . A_EndChar
+		else
+			SendEvent, % string
 		Case "SendPlay":
-			if (Oflag = false)
-				SendPlay, % string . A_EndChar
-			else
-				SendPlay, % string
+		if (Oflag = false)
+			SendPlay, % string . A_EndChar
+		else
+			SendPlay, % string
 		Case "SendRaw":
-			if (Oflag = false)
-				SendRaw, % string . A_EndChar
-			else
-				SendRaw, % string 
+		if (Oflag = false)
+			SendRaw, % string . A_EndChar
+		else
+			SendRaw, % string 
 	}
 	return
 }
@@ -9305,7 +9277,7 @@ F_PrepareSend(ReplacementString, Oflag)
 {
 	global	;assume-global mode
 	local vFirstLetter1 := "", vFirstLetter2 := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, fFirstLetterCap := false
-
+	
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	if (!InStr(v_Options, "C"))	
 	{
@@ -9480,31 +9452,6 @@ F_MouseMenuCli() ;The subroutine may consult the following built-in variables: A
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiTrigTipsMenuDef(AmountOfRows, LongestString)
-{
-	global	;assume-global mode
-	local vOutput := 0, vOutputX := 0, vOutputY := 0, vOutputW := 0, vOutputH := 0, OutputString := ""
-	
-	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
-		OutputString .= "w"		;the widest ordinary letter in alphabet
-	Gui, TMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndTMenuAHKHwnd
-	Gui, TMenuAHK: Margin, 0, 0
-	if (ini_TTBgrCol = "custom")
-		Gui, TMenuAHK: Color,, % ini_TTBgrColCus	;background of listbox
-	else
-		Gui, TMenuAHK: Color,, % ini_TTBgrCol	;background of listbox
-	if (ini_TTTyFaceCol = "custom")		
-		Gui, TMenuAHK: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceColCus, % ini_TTTyFaceFont
-	else
-		Gui, TMenuAHK: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
-	Gui, TMenuAHK: Add, Text, % "x0 y0 HwndId_T1_TMenuAHK", % OutputString
-	GuiControlGet, vOutput, Pos, % Id_T1_TMenuAHK
-	Gui, TMenuAHK: Add, Listbox, % "x0 y0 HwndId_LB_TMenuAHK" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutputW + 4 . A_Space . "g" . "F_MouseMenuTT"
-	GuiControl, Hide, % Id_T1_TMenuAHK
-	GuiControl, Font, % Id_LB_TMenuAHK		;fontcolor of listbox
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_MSI(TextOptions, Oflag)	
 {
 	global	;assume-global mode
@@ -9584,10 +9531,44 @@ F_HOF_MSI(TextOptions, Oflag)
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
+{
+	global	;assume-global mode
+	local	OutputVarTemp := ""
+	GuiControlGet, OutputVarTemp, , % Id_LB_TMenuAHK
+	Gui, TMenuAHK: Destroy
+	v_UndoHotstring := OutputVarTemp
+	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
+	SendLevel, 1	;in order to backtrigger the chosen triggerstring 
+	SendInput, % OutputVarTemp
+	SendLevel, 0
+	f_HTriggered := true	;setting this flag prevenst from dispaling next TTmenu which without is triggered by SendLevel 1
+	return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#InputLevel 2	;thanks to this trick event of left mouse click is ignored by "main level" of hotkeys.
+~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected.
+F_LButtonHandling()
+{
+	global	;assume-global mode
+	local	OutputVar := 0, OutputVarWin := 0, OutputVarControl := "", OutputVarTemp := ""
+	OutputDebug, % "LButton:" 
+	if (WinExist("ahk_id" TMenuAHKHwnd))
+	{
+		MouseGetPos, , , OutputVarWin, OutputVarControl
+		WinGet, OutputVar, ID, % "ahk_id" TMenuAHKHwnd 
+		if (OutputVarWin != OutputVar)
+			Gui, TMenuAHK: Destroy
+	}
+	return
+}
+#InputLevel 0	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
 	local	OutputVarTemp := "", ReplacementString := ""
+	OutputDebug, % "F_MouseMenuAHK()"
 	if (A_PriorKey = "LButton")
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuAHK 
@@ -9605,26 +9586,7 @@ F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
-{
-	global	;assume-global mode
-	local	OutputVarTemp := ""
-	if (A_PriorKey = "LButton")
-	{
-		GuiControlGet, OutputVarTemp, , % Id_LB_TMenuAHK
-		Gui, TMenuAHK: Destroy
-		v_UndoHotstring := OutputVarTemp
-		SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
-		SendLevel, 1	;in order to backtrigger the chosen triggerstring 
-		SendInput, % OutputVarTemp
-		SendLevel, 0
-		f_HTriggered := true	;setting this flag prevenst from dispaling next TTmenu which without is triggered by SendLevel 1
-	}
-	return
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;Future: move this section of code to Hotkeys
-#if WinExist("ahk_id" HMenuAHKHwnd)
+#if WinExist("ahk_id" HMenuAHKHwnd) ;Future: move this section of code to Hotkeys
 Tab::
 +Tab::
 1::
@@ -10380,11 +10342,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 }
 
 ; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;v_BlockHotkeysFlag := 1 ; Block hotkeys of this application for the time when (triggerstring, hotstring) definitions are uploaded from liberaries.
 #If (v_Param != "l") 
-;^#h::		; Event
 L_GUIInit:
 if (v_ResizingFlag) ;if run for the very first time
 {
@@ -10465,7 +10423,6 @@ else ;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakr
 return
 #If	;#If (v_Param != "l") 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 ALibOK:
 Gui, ALib: Submit, NoHide
 if (v_NewLib == "")
@@ -10493,9 +10450,7 @@ ALibGuiEscape:
 ALibGuiClose:
 Gui, ALib: Destroy
 return
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 GuiAboutLink1:
 Run, https://github.com/mslonik/Hotstrings
 return
@@ -10513,7 +10468,6 @@ MyAboutGuiEscape:
 MyAboutGuiClose: ; Showed when the window is closed by pressing its X button in the title bar.
 Gui, MyAbout: Hide
 return
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS3GuiClose:
 HS3GuiEscape:
@@ -10549,9 +10503,7 @@ MoveLibsGuiEscape:
 CancelMove:
 Gui, MoveLibs: Destroy
 return
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 ~^f::
 ~^s::
 ~F3::
@@ -10560,16 +10512,13 @@ HS3SearchGuiClose:
 F_WhichGui()
 Gui, HS3Search: Hide
 return
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 ~F7::
 HSDelGuiEscape:
 HSDelGuiClose:
 IniWrite, %ini_CPDelay%, % HADConfig, Configuration, ClipBoardPasteDelay
 Gui, HSDel: Destroy
 return
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 MonGuiEscape:
 MonGuiClose:
@@ -10623,7 +10572,7 @@ F_ChangeLanguage()
 	}
 	return
 }
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 L_TraySuspendHotkeys:
 Suspend, Toggle
 if (A_IsSuspended)
