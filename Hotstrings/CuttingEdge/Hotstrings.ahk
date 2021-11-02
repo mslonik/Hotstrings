@@ -783,19 +783,19 @@ F_TMenu()	;there must be a separate function to handle "interrupt" coming from "
 		ControlSend, , {Up}, % "ahk_id" Id_LB_TMenuAHK
 		ShiftTabIsFound := true
 	}
-	if (InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+	if (InStr(v_PressedKey, "^Tab")) and (!ShiftTabIsFound)	;the same as "down"
 	{
 		IsCursorPressed := true
 		IntCnt++
 		ControlSend, , {Down}, % "ahk_id" Id_LB_TMenuAHK
 	}
-	if (InStr(v_PressedKey, "Up"))
+	if (InStr(v_PressedKey, "^Up"))
 	{
 		IsCursorPressed := true
 		IntCnt--
 		ControlSend, , {Up}, % "ahk_id" Id_LB_TMenuAHK
 	}
-	if (InStr(v_PressedKey, "Down"))
+	if (InStr(v_PressedKey, "^Down"))
 	{
 		IsCursorPressed := true
 		IntCnt++
@@ -823,7 +823,7 @@ F_TMenu()	;there must be a separate function to handle "interrupt" coming from "
 		IsCursorPressed := false
 		return
 	}		
-	if (InStr(v_PressedKey, "+Enter") or InStr(v_PressedKey, "^Enter"))
+	if InStr(v_PressedKey, "^Enter")
 	{
 		v_PressedKey := IntCnt
 		IsCursorPressed := false
@@ -4762,7 +4762,6 @@ F_AddHotstring()
 							OldOptions := StrReplace(OldOptions, "O", "O0")
 						if (InStr(OldOptions, "Z") and !InStr(Options, "Z"))
 							OldOptions := StrReplace(OldOptions, "Z", "Z0")
-						;*[One]
 						Try
 							Hotstring(":" . OldOptions . ":" . v_TriggerString, , "Off") ;Disables existing hotstring
 						Catch
@@ -7560,7 +7559,7 @@ T_TriggerstringTips										= The triggerstring tips are displayed to help you 
 T_TtSortingOrder										= The sorting order let you define how the triggerstring tips list positions are sorted out. `nThere are two options, which can be active on the same time: alphabetically or by length. `nYou can check out the differences by pressing the Tooltip test button.
 T_TtMaxNoOfTips										= Maximum length of the triggerstring tips list. `n`nIf currently available list is longer, only the specified amount of triggerstring tips is displayed. `nPlease mind that displayed list could be just shorter.
 T_TtNoOfChars											= It is possible to configure triggerstring tips to be displayed only if some first characters are already entered. `nE.g. if this parameter is set to 2, the first list appears if 2 or more characters of any existing triggerstring tip are entered.
-T_ATT1												= If active triggerstring tips are enabled, then it is possible to use keyboard shortcuts `nto enter one of the triggerstrings from currently displayed list. `n`nActive triggerstring shortcuts: `n`nShift + Enter to enter any of the triggerstring tips `n↓ or ↑ to move down or up on the list `nTab or Shift + Tab to move down or up on the list.
+T_ATT1												= If active triggerstring tips are enabled, then it is possible to use keyboard shortcuts `nto enter one of the triggerstrings from currently displayed list. `n`nActive triggerstring shortcuts: `n`nControl + Enter to enter any of the triggerstring tips `nControl + ↓ or Control + ↑ to move down or up on the list `n Control + Tab or Control + Shift + Tab to move down or up on the list.
 )"
 	
 	TransA					:= {}	;this associative array (global) is used to store translations of this application text strings
@@ -9529,15 +9528,20 @@ F_HOF_MSI(TextOptions, Oflag)
 F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
-	local	OutputVarTemp := ""
-	GuiControlGet, OutputVarTemp, , % Id_LB_TMenuAHK
-	Gui, TMenuAHK: Destroy
-	v_UndoHotstring := OutputVarTemp
-	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
-	SendLevel, 1	;in order to backtrigger the chosen triggerstring 
-	SendInput, % OutputVarTemp
-	SendLevel, 0
-	f_HTriggered := true	;setting this flag prevenst from dispaling next TTmenu which without is triggered by SendLevel 1
+	local	OutputVarTemp := "",	ThisHotkey := A_ThisHotkey ;tu jestem
+	;*[One]
+	if (InStr(ThisHotkey, "LButton"))
+	{
+		GuiControlGet, OutputVarTemp, , % Id_LB_TMenuAHK
+		Gui, TMenuAHK: Destroy
+		v_UndoHotstring := OutputVarTemp
+		SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
+		SendLevel, 1	;in order to backtrigger the chosen triggerstring 
+		SendInput, % OutputVarTemp
+		SendLevel, 0
+		f_HTriggered := true	;setting this flag prevenst from dispaling next TTmenu which without is triggered by SendLevel 1
+		return
+	}
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9563,7 +9567,6 @@ F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A
 {
 	global	;assume-global mode
 	local	OutputVarTemp := "", ReplacementString := ""
-	OutputDebug, % "F_MouseMenuAHK()"
 	if (A_PriorKey = "LButton")
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuAHK 
