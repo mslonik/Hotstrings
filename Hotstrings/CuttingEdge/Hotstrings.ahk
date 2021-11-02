@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.5.0"
+global AppVersion				:= "3.5.1"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -4631,9 +4631,6 @@ F_AddHotstring()
 			,name := "", key := 0, value := "", Counter := 0, key2 := 0, value2 := ""
 			,f_GeneralMatch := false, f_CaseMatch := false
 			,SelectedLibraryName := SubStr(v_SelectHotstringLibrary, 1, -4)
-			,MaxTableElements	 := a_Library.Count()
-			,NoOfIterations	 := MaxTableElements
-			,FirstTableIndex	 := 0
 	
 	;1. Read all inputs. 
 	Gui, % A_DefaultGui . ":" A_Space . "Submit", NoHide
@@ -4765,6 +4762,7 @@ F_AddHotstring()
 							OldOptions := StrReplace(OldOptions, "O", "O0")
 						if (InStr(OldOptions, "Z") and !InStr(Options, "Z"))
 							OldOptions := StrReplace(OldOptions, "Z", "Z0")
+						;*[One]
 						Try
 							Hotstring(":" . OldOptions . ":" . v_TriggerString, , "Off") ;Disables existing hotstring
 						Catch
@@ -4789,18 +4787,15 @@ F_AddHotstring()
 						}
 						a_TriggerOptions[key] := Options, a_OutputFunction[key] := SendFunFileFormat, a_Hotstring[key] := TextInsert, a_EnableDisable[key] := EnDis
 						, a_Comment[key] := v_Comment, ModifiedFlag := true
-						Loop, % NoOfIterations
+						Loop, 
 						{
-							FirstTableIndex++
-							if (a_Library[FirstTableIndex] = SelectedLibraryName)
+							LV_GetText(Temp1, A_Index)
+							if (Temp1 == v_Triggerstring)
 							{
-								Counter++
-								if (a_Triggerstring[FirstTableIndex] == v_Triggerstring)	;case sensitive string comparison!
-									Break
+								LV_Modify(A_Index, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)		
+								Break
 							}
 						}
-						NoOfIterations := MaxTableElements - FirstTableIndex
-						LV_Modify(Counter, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)		
 					}
 				}
 			}
