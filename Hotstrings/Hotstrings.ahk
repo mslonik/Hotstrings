@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.5.2"
+global AppVersion				:= "3.3.1"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -56,6 +56,7 @@ global v_UndoHotstring 			:= ""		;used by output functions
 
 ;Flags to control application
 global v_ResizingFlag 			:= true 		;when Hotstrings Gui is displayed for the very first time
+global TMenuAHKHwnd 			:= 0 ;This is a trick to initialize global variable HwndTMenuAHKHwnd without warning (#Warn)
 global HMenuCliHwnd				:= 0
 global HMenuAHKHwnd				:= 0
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -168,8 +169,6 @@ F_GuiHS4_DetermineConstraints()
 F_GuiHS4_Redraw()
 F_GuiShowIntro()
 F_UpdateSelHotLibDDL()
-
-TMenuAHKHwnd := 0 ;This is a trick to initialize global variable HwndTMenuAHKHwnd without warning (#Warn)
 
 if (ini_HK_IntoEdit != "none")
 {
@@ -333,19 +332,33 @@ F_GuiVersionUpdate_CreateObjects()
 F_GuiAbout_DetermineConstraints()
 F_GuiVersionUpdate_DetermineConstraints()
 
-if (ini_CheckRepo)
-	F_VerUpdCheckServ("OnStartUp")
-if (ini_DownloadRepo) and (F_VerUpdCheckServ("ReturnResult"))
-	F_VerUpdDownload()
 
 IniRead, ini_GuiReload, 					% HADConfig, GraphicalUserInterface, GuiReload,		% A_Space
+;OutputDebug, % "IniRead, ini_GuiReload:" . A_Tab . ini_GuiReload
 if (ini_GuiReload = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 {
+	;OutputDebug, tu jestem
 	ini_GuiReload := false
 	IniWrite, % ini_GuiReload, % HADConfig, GraphicalUserInterface, GuiReload
 }
+if (ini_CheckRepo) and (!ini_GuiReload)
+	F_VerUpdCheckServ("OnStartUp")
+if (ini_DownloadRepo) and (F_VerUpdCheckServ("ReturnResult"))
+	F_VerUpdDownload()
 if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_GuiReload is set also if Update function is run with Hostrings.exe. So after restart temp.exe is removed.
-	FileDelete, % A_ScriptDir . "\" . "temp.exe"
+{
+	;OutputDebug, % "ini_GuiReload:" . A_Tab . ini_GuiReload . A_Tab . FileExist(A_ScriptDir . "\" . "temp.exe")
+	try
+		FileDelete, % A_ScriptDir . "\" . "temp.exe"
+	catch e
+	{
+		MsgBox, , Error, % "ErrorLevel" . A_Tab . ErrorLevel
+					. "`n`n" . "A_LastError" . A_Tab . A_LastError	;183 : Cannot create a file when that file already exists.
+					. "`n`n" . "Exception" . A_Tab . e
+	}
+	
+	;OutputDebug, Should be deleted
+}
 if (ini_GuiReload) and (v_Param != "l")
 	Gosub, L_GUIInit
 
@@ -3477,24 +3490,26 @@ F_CheckUpdOnStart()
 F_VerUpdDownload()	
 {
 	global	;assume-global mode
-	local	URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk"
-			,URLexe := "https://github.com/mslonik/Hotstrings/raw/master/Hotstrings/Hotstrings.exe"
+	local	URLscript := 	"https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk"
+			;,URLexe := "https://github.com/mslonik/Hotstrings/raw/master/Hotstrings/Hotstrings.exe"
+			,URLexe := 	"https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.exe"
 			,whr := "", Result := "", e := ""
 	
 	if (A_IsCompiled)
 	{
-		if (FileExist(A_ScriptDir . "\" . temp.exe))
-			FileDelete, % A_ScriptDir . "\" . temp.exe
 		try
-			FileMove, % A_ScriptFullPath, % A_ScriptDir . "\" . temp.exe
+			FileMove, % A_ScriptFullPath, % A_ScriptDir . "\" . "temp.exe"
 		catch e
+		{
 			MsgBox, , Error, % "ErrorLevel" . A_Tab . ErrorLevel
 					. "`n`n" . "A_LastError" . A_Tab . A_LastError	;183 : Cannot create a file when that file already exists.
 					. "`n`n" . "Exception" . A_Tab . e
 			ExitApp, 4 ; File move unsuccessful.		
+		}
 		try
-			URLDownloadToFile, % URLexe, % A_ScriptFullPath
-		catch
+			;URLDownloadToFile, % URLexe, % A_ScriptFullPath
+			URLDownloadToFile, % URLexe, % A_ScriptDir . "\" . "Hotstrings.exe"
+		catch e
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % A_ThisFunc . A_Space TransA["caused problem on line URLDownloadToFile."]
 		if (!ErrorLevel)		
 		{
@@ -3554,8 +3569,8 @@ F_VerUpdCheckServ(param*)
 		Case "OnStartUp":
 		if (ServerVer != AppVersion)
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["On start-up the local version of application was compared with repository version and difference was discovered:"]  
-					. "`n`n" . TransA["Local version:"]  . A_Tab . A_Tab . AppVersion
-					. "`n" .   TransA["Repository version:"] . A_Tab . ServerVer
+					. "`n`n" . TransA["Local version:"]  		. A_Tab . A_Tab . AppVersion
+					. "`n" .   TransA["Repository version:"] 	. A_Tab . A_Tab . ServerVer
 		whr := ""		
 		return
 		Case "ReturnResult":
@@ -6692,9 +6707,10 @@ F_Compile()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Reload()
+F_Reload()	;tu jestem
 {
 	global ;assume-global mode
+	;*[One]
 	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["Are you sure you want to reload this application now?"]
 		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
 	
@@ -6722,26 +6738,27 @@ F_Reload()
 				Default:	;used when file was downloaded from GitHub repository
 				Switch A_IsCompiled
 				{
-					Case % true:	Run, % A_ScriptFullPath 
+					;Case % true:	Run, % A_ScriptFullPath 
+					Case % true:	Run, % A_ScriptDir . "\" . "Hotstrings.exe"
 					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
 				}
 			}
 		}
 		else
-			Switch A_ThisMenuItem
+			;Switch A_ThisMenuItem
 		{
-			Case % TransA["Reload in default mode"]:
+			;Case % TransA["Reload in default mode"]:
 			Switch A_IsCompiled
 			{
 				Case % true:	Run, % A_ScriptFullPath 
 				Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
 			}
-			Case % TransA["Reload in silent mode"]:
-			Switch A_IsCompiled
-			{
-				Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
-				Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
-			}
+			;Case % TransA["Reload in silent mode"]:
+			;Switch A_IsCompiled
+			;{
+				;Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
+				;Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
+			;}
 		}
 	}
 	IfMsgBox, No
@@ -8832,7 +8849,6 @@ F_GuiAbout_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp2, Pos, % IdAboutT3
 	GuiControlGet, v_OutVarTemp3, Pos, % IdAboutT5
 	MaxText := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W)
-	;*[One]
 	GuiControlGet, v_OutVarTemp, Pos, % IdLine2
 	v_xNext := c_xmarg, v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg
 	GuiControl, Move, % IdAboutT1, % "x" . v_xNext . A_Space . "y" . v_yNext
