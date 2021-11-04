@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.5.1"
+global AppVersion				:= "3.5.2"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -169,7 +169,7 @@ F_GuiHS4_Redraw()
 F_GuiShowIntro()
 F_UpdateSelHotLibDDL()
 
-F_GuiTrigTipsMenuDef(1, 1)
+Gui, TMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndTMenuAHKHwnd	;This is a trick to initialize global variable HwndTMenuAHKHwnd
 
 if (ini_HK_IntoEdit != "none")
 {
@@ -677,7 +677,7 @@ F_GuiTrigTipsMenuDef(AmountOfRows, LongestString)
 	
 	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
 		OutputString .= "w"		;the widest ordinary letter in alphabet
-	Gui, TMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndTMenuAHKHwnd
+	;Gui, TMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndTMenuAHKHwnd
 	Gui, TMenuAHK: Margin, 0, 0
 	if (ini_TTBgrCol = "custom")
 		Gui, TMenuAHK: Color,, % ini_TTBgrColCus	;background of listbox
@@ -3483,12 +3483,15 @@ F_VerUpdDownload()
 	
 	if (A_IsCompiled)
 	{
+		if (FileExist(A_ScriptDir . "\" . temp.exe))
+			FileDelete, % A_ScriptDir . "\" . temp.exe
 		try
-			FileMove, % A_ScriptFullPath, temp.exe
-		Catch e
+			FileMove, % A_ScriptFullPath, % A_ScriptDir . "\" . temp.exe
+		catch e
 			MsgBox, , Error, % "ErrorLevel" . A_Tab . ErrorLevel
-					. "`n`n" . "A_LastError" . A_Tab . A_LastError
+					. "`n`n" . "A_LastError" . A_Tab . A_LastError	;183 : Cannot create a file when that file already exists.
 					. "`n`n" . "Exception" . A_Tab . e
+			ExitApp, 4 ; File move unsuccessful.		
 		try
 			URLDownloadToFile, % URLexe, % A_ScriptFullPath
 		catch
@@ -3550,9 +3553,9 @@ F_VerUpdCheckServ(param*)
 	{
 		Case "OnStartUp":
 		if (ServerVer != AppVersion)
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["On start-up the local version of"] . A_Space . SubStr(A_ScriptName, 1, -4) . A_Space . TransA["was compared with repository version and difference was discovered:"] 
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["On start-up the local version of application was compared with repository version and difference was discovered:"]  
 					. "`n`n" . TransA["Local version:"]  . A_Tab . A_Tab . AppVersion
-					. "`n" .   TransA["Repository version:"] . A_Tab . A_Tab . ServerVer
+					. "`n" .   TransA["Repository version:"] . A_Tab . ServerVer
 		whr := ""		
 		return
 		Case "ReturnResult":
@@ -6583,6 +6586,8 @@ F_Compile()
 		Case "AhkBitSubmenu":
 		if (A_ThisMenuItem = "64-bit")
 		{
+			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in"       . A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out"      . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
@@ -6598,6 +6603,8 @@ F_Compile()
 		}
 		if (A_ThisMenuItem = "32-bit")
 		{
+			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in"       . A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out"      . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
@@ -6614,6 +6621,8 @@ F_Compile()
 		Case "UpxBitSubmenu":
 		if (A_ThisMenuItem = "64-bit")
 		{
+			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in"   	. A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out"  	. A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
@@ -6629,6 +6638,8 @@ F_Compile()
 		}
 		if (A_ThisMenuItem = "32-bit")
 		{
+			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in"   	. A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out"  	. A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
@@ -6645,6 +6656,8 @@ F_Compile()
 		Case "MpressBitSubmenu":
 		if (A_ThisMenuItem = "64-bit")
 		{
+			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
@@ -6660,6 +6673,8 @@ F_Compile()
 		}
 		if (A_ThisMenuItem = "32-bit")
 		{
+			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
@@ -7180,6 +7195,7 @@ Apostrophe ' 											= Apostrophe '
 Application											= A&pplication
 Application help										= Application help
 Application language changed to: 							= Application language changed to:
+Application mode:										= Application mode:
 Apply && Close											= Apply && Close
 aqua													= aqua
 Are you sure?											= Are you sure?
@@ -7233,7 +7249,7 @@ Current shortcut (hotkey):								= Current shortcut (hotkey):
 cursor												= cursor
 custom												= custom
 Dark													= Dark
-Default mode											= Default mode
+default 												= default
 Delete hotstring (F8) 									= Delete hotstring (F8)
 Deleting hotstring... 									= Deleting hotstring...
 Deleting hotstring. Please wait... 						= Deleting hotstring. Please wait...
@@ -7350,6 +7366,7 @@ Menu position											= Menu position
 Menu position: caret									= Menu position: caret
 Menu position: cursor									= Menu position: cursor
 Minus - 												= Minus -
+Mode of operation:										= Mode of operation:
 Move (F8)												= Move (F8)
 navy													= navy
 New shortcut (hotkey)									= New shortcut (hotkey)
@@ -7363,7 +7380,7 @@ Number of characters for tips 							= &Number of characters for tips
 of													= of
 OK													= &OK
 olive												= olive
-On start-up the local version of							= On start-up the local version of
+On start-up the local version of application was compared with repository version and difference was discovered: = On start-up the local version of application was compared with repository version and difference was discovered:
 Open libraries folder in Explorer							= Open libraries folder in Explorer
 Opening Curly Bracket { 									= Opening Curly Bracket {
 Opening Round Bracket ( 									= Opening Round Bracket (
@@ -7506,10 +7523,10 @@ Undo the last hotstring									= Undo the last hotstring
 Undo the last hotstring									= Undo the last hotstring
 Undid the last hotstring 								= Undid the last hotstring
 Version / Update										= Version / Update
+Version:												= Version:
 Visit public libraries webpage							= Visit public libraries webpage
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
-was compared with repository version and difference was discovered:	= was compared with repository version and difference was discovered:
 was successfully downloaded.								= was successfully downloaded.
 Welcome to Hotstrings application!							= Welcome to Hotstrings application!
 Windows key modifier									= Windows key modifier
@@ -8759,12 +8776,18 @@ F_GuiAbout_CreateObjects()
 	
 	TransA["Enables Convenient Definition"] := StrReplace(TransA["Enables Convenient Definition"], "``n", "`n")
 	;2. Prepare all text objects according to mock-up.
-	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, 					% c_FontType
-	Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLine1, 													% TransA["Let's make your PC personal again..."]
-	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType
-	Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLine2, 													% TransA["Enables Convenient Definition"]
-	Gui, MyAbout: Add, 		Button,  x0 y0 HwndIdAboutOkButton gAboutOkButton,								% TransA["OK"]
-	Gui, MyAbout: Add,		Picture, x0 y0 HwndIdAboutPicture w96 h96, 										% AppIcon
+	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, 		% c_FontType
+	Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLine1, 										% TransA["Let's make your PC personal again..."]
+	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 		% c_FontType
+	Gui, MyAbout: Add, 		Text,    	x0 y0 HwndIdLine2, 										% TransA["Enables Convenient Definition"]
+	Gui, MyAbout: Add, 		Button,  	x0 y0 HwndIdAboutOkButton gAboutOkButton,					% TransA["OK"]
+	Gui, MyAbout: Add,		Picture, 	x0 y0 HwndIdAboutPicture w96 h96, 							% AppIcon
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT1,									% TransA["Version:"]
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT2,									% AppVersion
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT3,									% TransA["Mode of operation:"]
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT4,									% TransA["default"]
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT5,									% TransA["Application mode:"]
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT6,									ahk
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8777,12 +8800,11 @@ F_GuiAbout_DetermineConstraints()
 		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
 		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
 							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
-		,HwndIdLongest := 0, 	IdLongest := 0
+		,HwndIdLongest := 0, 	IdLongest := 0, MaxText := 0
 	
 ;4. Determine constraints, according to mock-up
-	v_xNext := c_xmarg
-	v_yNext := c_ymarg
-	GuiControl, Move, % IdLine1, % "x" v_xNext "y" v_yNext
+	v_xNext := c_xmarg, v_yNext := c_ymarg
+	GuiControl, Move, % IdLine1, % "x" . v_xNext . "y"  . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdLine1
 	v_yNext += v_OutVarTempH + c_ymarg
 	GuiControl, Move, % IdLine2, % "x" v_xNext "y" v_yNext
@@ -8800,25 +8822,50 @@ F_GuiAbout_DetermineConstraints()
 		{
 			Gui, MyAbout: Add, Text, x0 y0 HwndIdLongest, % Trim(A_LoopField)
 			GuiControlGet, v_OutVarTemp, Pos, % IdLine1
-			v_xNext := c_xmarg
-			v_yNext := c_ymarg + v_OutVarTempH + c_ymarg
+			v_xNext := c_xmarg, v_yNext := c_ymarg + v_OutVarTempH + c_ymarg
 			GuiControl, Move, % IdLongest, % "x" . v_xNext . "y" . v_yNext 
 			GuiControl, Hide, % IdLongest
 			Break
 		}
 	}
+	GuiControlGet, v_OutVarTemp1, Pos, % IdAboutT1
+	GuiControlGet, v_OutVarTemp2, Pos, % IdAboutT3
+	GuiControlGet, v_OutVarTemp3, Pos, % IdAboutT5
+	MaxText := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W)
+	;*[One]
+	GuiControlGet, v_OutVarTemp, Pos, % IdLine2
+	v_xNext := c_xmarg, v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdAboutT1, % "x" . v_xNext . A_Space . "y" . v_yNext
+	v_xNext := MaxText + 3 * c_xmarg
+	GuiControl, Move, % IdAboutT2, % "x" . v_xNext . A_Space . "y" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdAboutT3, % "x" . v_xNext . A_Space . "y" . v_yNext
+	v_xNext := MaxText + 3 * c_xmarg
+	if (v_Param = "l")
+		GuiControl, , % IdAboutT4, % TransA["silent"]
+	else
+		GuiControl, , % IdAboutT4, % TransA["default"]
+	GuiControl, Move, % IdAboutT4, % "x" . v_xNext . A_Space . "y" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdAboutT5, % "x" . v_xNext . A_Space . "y" . v_yNext
+	v_xNext := MaxText + 3 * c_xmarg
+	if (A_IsCompiled)
+		GuiControl, , % IdAboutT6, exe
+	else
+		GuiControl, , % IdAboutT6, ahk
+	GuiControl, Move, % IdAboutT6, % "x" . v_xNext . A_Space . "y" . v_yNext
 	
 	GuiControlGet, v_OutVarTemp1, Pos, % IdLongest ; weight of the longest text
 	GuiControlGet, v_OutVarTemp2, Pos, % IdAboutOkButton 
 	v_wNext := v_OutVarTemp2W + 2 * c_xmarg
 	v_xNext := (v_OutVarTemp1W // 2) - (v_wNext // 2)
 	GuiControlGet, v_OutVarTemp, Pos, % IdLine2
-	v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg
-	GuiControl, Move, % IdAboutOkButton, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
+	v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg + 3 * HofText
+	GuiControl, Move, % IdAboutOkButton, % "x" . v_xNext . "y" . A_Space . v_yNext . "w" . v_wNext
 	
 	v_xNext := v_OutVarTemp1X + v_OutVarTemp1W - 96 ;96 = chosen size of icon
 	v_yNext := v_OutVarTemp1Y + v_OutVarTemp1H
-	GuiControl, Move, % IdAboutPicture, % "x" . v_xNext . "y" . v_yNext 
+	GuiControl, Move, % IdAboutPicture, % "x" . v_xNext . A_Space . "y" . v_yNext 
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -8841,16 +8888,10 @@ F_GuiAbout()
 	{
 		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
 		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
-		Gui, MyAbout: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Default mode"] . ":" . A_Space . TransA["About this application..."]
+		Gui, MyAbout: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["About this application..."]
 	}
 	else
-	{
-		if (v_Param = "l")
-			Gui, MyAbout: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Silent mode"] . ":" . A_Space . TransA["About this application..."]
-		else
-			Gui, MyAbout: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Silent mode"] . ":" . A_Space . TransA["Default mode"]
-		
-	}
+		Gui, MyAbout: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["About this application..."]
 	return  
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
