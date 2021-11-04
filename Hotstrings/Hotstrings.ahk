@@ -169,7 +169,7 @@ F_GuiHS4_Redraw()
 F_GuiShowIntro()
 F_UpdateSelHotLibDDL()
 
-Gui, TMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndTMenuAHKHwnd	;This is a trick to initialize global variable HwndTMenuAHKHwnd
+TMenuAHKHwnd := 0 ;This is a trick to initialize global variable HwndTMenuAHKHwnd without warning (#Warn)
 
 if (ini_HK_IntoEdit != "none")
 {
@@ -677,7 +677,7 @@ F_GuiTrigTipsMenuDef(AmountOfRows, LongestString)
 	
 	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
 		OutputString .= "w"		;the widest ordinary letter in alphabet
-	;Gui, TMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndTMenuAHKHwnd
+	Gui, TMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndTMenuAHKHwnd
 	Gui, TMenuAHK: Margin, 0, 0
 	if (ini_TTBgrCol = "custom")
 		Gui, TMenuAHK: Color,, % ini_TTBgrColCus	;background of listbox
