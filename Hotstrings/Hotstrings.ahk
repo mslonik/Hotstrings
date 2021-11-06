@@ -38,7 +38,6 @@ FileInstall, LICENSE, LICENSE, 0
 global HADL 					:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries
 global HADConfig  				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\"	. "Config.ini"	;Hotstrings Application Data Config .ini
 global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l like "silent mode"
-OutputDebug, % "v_Param:" . A_Tab . v_Param
 global a_Triggers 				:= []		;Main loop of application
 global f_HTriggered 			:= false		;Main loop of application; this flag is set (1) if any of the hotstring functions is triggered.
 global v_InputString 			:= ""		;Main loop of application; this variable stores information about keys pressed by user which can differ in size from actual hotstring definition.
@@ -921,7 +920,11 @@ F_LoadConfiguration()
 		IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
 	}
 	if (ini_HK_Main != "none")
+	{
+		#If v_Param != "l"
+		Hotkey, If, v_Param != "l" 
 		Hotkey, % ini_HK_Main, L_GUIInit, On
+	}
 	
 	ini_HK_IntoEdit			:= "~^c"
 	IniRead, ini_HK_IntoEdit,				% HADConfig, Configuration, HK_IntoEdit,			% A_Space
@@ -984,10 +987,7 @@ F_GuiEvents()
 	}
 	else
 	{
-		if (v_Param = "l")
-			Gui, GuiEvents: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . "Events configuration"
-		else
-			Gui, GuiEvents: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . "Events configuration"
+		Gui, GuiEvents: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . "Events configuration"
 	}
 	return  
 }
@@ -3287,10 +3287,7 @@ F_TTstyling()
 	}
 	else
 	{
-		if (v_Param = "l")
-			Gui, TTstyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Triggerstring tips and hotstring menu styling"]
-		else
-			Gui, TTstyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Triggerstring tips and hotstring menu styling"]
+		Gui, TTstyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Triggerstring tips and hotstring menu styling"]
 	}
 	GuiControl, Hide, % IdTTstyling_LB1	
 	GuiControl, Hide, % IdHMstyling_LB1
@@ -3420,10 +3417,7 @@ F_GuiVersionUpdate()
 	}
 	else
 	{
-		if (v_Param = "l")
-			Gui, VersionUpdate: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Version / Update"]
-		else
-			Gui, VersionUpdate: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Version / Update"]
+		Gui, VersionUpdate: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Version / Update"]
 	}
 	return  
 }
@@ -3994,10 +3988,7 @@ F_GuiShortDef()
 	}
 	else
 	{
-		if (v_Param = "l")
-			Gui, ShortDef: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Shortcut (hotkey) definition"]
-		else
-			Gui, ShortDef: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Shortcut (hotkey) definition"]
+		Gui, ShortDef: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Shortcut (hotkey) definition"]
 	}
 	return  
 }
@@ -6752,8 +6743,8 @@ F_ReloadUniversal()	;tu jestem
 				Default:	;when button was pressed "Download repository version" 
 				Switch A_IsCompiled
 				{
-					Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
-					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
+					Case % true:	Run, % A_ScriptFullPath
+					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath
 				}
 			}
 		}
@@ -10401,7 +10392,6 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 }
 
 ; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
-#If (v_Param != "l") 
 L_GUIInit:
 OutputDebug, % "v_ResizingFlag:" . A_Tab . v_ResizingFlag . A_Tab . "ini_GuiReload:" . A_Tab . ini_GuiReload
 if (v_ResizingFlag) ;if run for the very first time
@@ -10481,7 +10471,6 @@ else ;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakr
 	}
 }
 return
-#If	;#If (v_Param != "l") 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ALibOK:
 Gui, ALib: Submit, NoHide
