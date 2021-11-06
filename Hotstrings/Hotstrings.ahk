@@ -37,8 +37,8 @@ FileInstall, LICENSE, LICENSE, 0
 
 global HADL 					:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries
 global HADConfig  				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\"	. "Config.ini"	;Hotstrings Application Data Config .ini
-global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l or d
-
+global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l like "silent mode"
+OutputDebug, % "v_Param:" . A_Tab . v_Param
 global a_Triggers 				:= []		;Main loop of application
 global f_HTriggered 			:= false		;Main loop of application; this flag is set (1) if any of the hotstring functions is triggered.
 global v_InputString 			:= ""		;Main loop of application; this variable stores information about keys pressed by user which can differ in size from actual hotstring definition.
@@ -9612,7 +9612,7 @@ F_LButtonHandling()
 {
 	global	;assume-global mode
 	local	OutputVar := 0, OutputVarWin := 0, OutputVarControl := "", OutputVarTemp := ""
-	OutputDebug, % "LButton:" 
+	;OutputDebug, % "LButton:" 
 	if (WinExist("ahk_id" TMenuAHKHwnd))
 	{
 		MouseGetPos, , , OutputVarWin, OutputVarControl
