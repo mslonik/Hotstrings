@@ -194,7 +194,8 @@ v_LibHotstringCnt := 0	;dirty trick to show initially 0 instead of 0000
 GuiControl, , % IdText13,  % v_LibHotstringCnt
 GuiControl, , % IdText13b, % v_LibHotstringCnt
 F_LoadHotstringsFromLibraries()	;→ F_LoadFile()
-F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)
+F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)	;tu jestem
+F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 F_GuiSearch_CreateObject()	;When all tables are full, initialize GuiSearch
 F_GuiSearch_DetermineConstraints()
 F_Searching("Reload")			;prepare content of Search tables
@@ -375,7 +376,7 @@ Loop,
 		v_InputString .= out
 		ToolTip, ,, , 4	;Basic triggerstring was triggered
 		ToolTip, ,, , 6	;Undid the last hotstring
-		F_PrepareTriggerstringTipsTables2()	;F_PrepareTriggerstringTipsTables()
+		F_PrepareTriggerstringTipsTables2()	;old version: F_PrepareTriggerstringTipsTables()
 		if (a_Tips.Count())
 		{
 			F_ShowTriggerstringTips2()
@@ -693,7 +694,6 @@ F_Load_ini_GuiReload()
 	;OutputDebug, % "IniRead, ini_GuiReload:" . A_Tab . ini_GuiReload
 	if (ini_GuiReload = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
-	;OutputDebug, tu jestem
 		ini_GuiReload := false
 		IniWrite, % ini_GuiReload, % HADConfig, GraphicalUserInterface, GuiReload
 	}
@@ -4363,14 +4363,22 @@ F_PrepareTriggerstringTipsTables2()
 	;OutputDebug, % "Length of v_InputString:" . A_Space . StrLen(v_InputString) . A_Tab . "v_InputString:" . A_Space . v_InputString
 	if (StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{ ;tu jestem
-		a_Tips 	:= []	;collect within global array a_Tips subset from full set a_Triggers full set  
-		;a_TipsOpt	:= []	;collect withing global array a_TipsOpt subset from full set a_TriggerOptions; next it will be used to show triggering character in F_ShowTriggerstringTips2()
+		a_Tips 		:= []	;collect within global array a_Tips subset from full set a_Triggers full set  
+		a_TipsOpt		:= []	;collect withing global array a_TipsOpt subset from full set a_TriggerOptions; next it will be used to show triggering character in F_ShowTriggerstringTips2()
+		a_TipsEnDis	:= []
 		Loop, % a_Triggers.MaxIndex()
 		{
 			if (InStr(a_Triggers[A_Index], v_InputString) = 1)
 			{
 				a_Tips.Push(a_Triggers[A_Index])
-				;a_TipsOpt.Push(a_TriggerOptions[A_Index])
+				;*[One]
+				Loop, Parse, % a_Combined[A_Index], |	;tu jestem
+				{
+					if (A_Index = 2) 
+						a_TipsOpt.Push(A_LoopField)
+					if (A_Index = 3) 
+						a_TipsEnDis.Push(A_LoopField)
+				}
 				HitCnt++
 				if (HitCnt = ini_MNTT)	; MNTT = Maximum Number of Triggerstring Tips
 					Break
@@ -4380,9 +4388,8 @@ F_PrepareTriggerstringTipsTables2()
 	else
 	{
 		Gui, TMenuAHK: Destroy	;this line is necessary to destroy GUI when backspacing goes to length 0 of inputstring
-		a_Tips := [], a_TipsOpt	:= []
+		a_Tips := [], a_TipsOpt	:= [], a_TipsEnDis	:= []
 	}
-	return
 }	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadSignalingParams()
@@ -6713,7 +6720,7 @@ F_Compile()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ReloadUniversal()	;tu jestem
+F_ReloadUniversal()
 {
 	global ;assume-global mode
 	
@@ -7000,6 +7007,7 @@ F_LoadHotstringsFromLibraries()
 	a_EnableDisable 			:= []
 	a_Hotstring				:= []
 	a_Comment 				:= []
+	a_Combined				:= []
 	
 ; Prepare TrayTip message taking into account value of command line parameter.
 	if (v_Param == "l")
@@ -7645,6 +7653,7 @@ F_LoadFile(nameoffile)
 							,v_xNext 	    := 0, 	v_yNext 		:= 0, 		v_wNext 		:= 0, 		v_hNext 		:= 0
 		,v_Progress := 0
 		,IdLoadFile_T1 := 0, IdLoadFile_P1 := 0, IdLoadFile_T2 := 0, BegCom := false
+		,tmp1 := "", tmp2 := "", tmp3 := ""
 	
 	for key, value in ini_ShowTipsLib
 		if ((key == nameoffile) and (value))
@@ -7718,17 +7727,25 @@ F_LoadFile(nameoffile)
 		{
 			Switch A_Index
 			{
-				Case 1:	a_TriggerOptions.Push(A_LoopField)
+				Case 1:	
+				a_TriggerOptions.Push(A_LoopField)
+				tmp2 := A_LoopField
 				Case 2:	
 				a_Triggerstring.Push(A_LoopField)
 				if (FlagLoadTriggerTips)
+				{
 					a_Triggers.Push(A_LoopField) ; a_Triggers is used in main loop of application for generating tips
+					tmp1 := A_LoopField
+				}
 				Case 3:	a_OutputFunction.Push(A_LoopField)
-				Case 4:	a_EnableDisable.Push(A_LoopField)
+				Case 4:	
+					a_EnableDisable.Push(A_LoopField)
+					tmp3 := A_LoopField
 				Case 5:	a_Hotstring.Push(A_LoopField)
 				Case 6:	a_Comment.Push(A_LoopField)
 			}
 		}
+		a_Combined.Push(tmp1 . "|" . tmp2 . "|" . tmp3)	;tu jestem
 		a_Library.Push(name) ; function Search
 		++v_TotalHotstringCnt
 		if (A_DefaultGui = "LoadFile")
@@ -9599,7 +9616,7 @@ F_HOF_MSI(TextOptions, Oflag)
 F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
-	local	OutputVarTemp := "",	ThisHotkey := A_ThisHotkey ;tu jestem
+	local	OutputVarTemp := "",	ThisHotkey := A_ThisHotkey 
 	if (InStr(ThisHotkey, "LButton"))
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_TMenuAHK
@@ -9609,7 +9626,7 @@ F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_
 		SendLevel, 1	;in order to backtrigger the chosen triggerstring 
 		SendInput, % OutputVarTemp
 		SendLevel, 0
-		f_HTriggered := true	;setting this flag prevenst from dispaling next TTmenu which without is triggered by SendLevel 1
+		f_HTriggered := true	;setting this flag prevenst from displaying next TTmenu which without is triggered by SendLevel 1
 		return
 	}
 	return
@@ -9751,9 +9768,9 @@ F_HMenuAHK()
 
 Esc::
 Gui, HMenuAHK: Destroy
-	Input ;This line blocks temporarily Input command in the main loop. 
-	Send, % v_Triggerstring . v_EndChar
-	f_HTriggered := true
+Input ;This line blocks temporarily Input command in the main loop. 
+Send, % v_Triggerstring . v_EndChar
+f_HTriggered := true
 return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
