@@ -46,9 +46,6 @@ global v_MouseX 				:= 0			;Main loop of application
 global v_MouseY 				:= 0			;Main loop of application
 global v_TipsFlag 				:= false		;Main loop of application
 
-global ini_GuiReload			:= false
-global ini_Language 			:= "English.txt"	;default value of variable ini_Language
-
 global v_IndexLog 				:= 1			;for logging, if Hotstrings application is run with d parameter.
 
 global v_TypedTriggerstring 		:= ""		;used by output functions
@@ -669,14 +666,6 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
-F_ButtonDownloadRepV()
-{
-	global	;assume-global mode
-	ini_GuiReload := true
-	IniWrite, % ini_GuiReload, % HADConfig, GraphicalUserInterface, GuiReload
-	F_VerUpdDownload()
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Load_ini_DownloadRepo()
 {
 	global	;assume-global mode
@@ -3494,7 +3483,7 @@ F_GuiVersionUpdate_CreateObjects()
 	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd3,											% TransA["Repository version"] . ":"
 	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd4, 											% ServerVer
 	Gui, VersionUpdate: Add, 	Button,  	x0 y0 HwndIdVerUpdCheckServ gF_VerUpdCheckServ,						% TransA["Check repository version"]
-	Gui, VersionUpdate: Add, 	Button,  	x0 y0 HwndIdVerUpdDownload  gF_ButtonDownloadRepV,					% TransA["Download repository version"]
+	Gui, VersionUpdate: Add, 	Button,  	x0 y0 HwndIdVerUpdDownload  gF_VerUpdDownload,						% TransA["Download repository version"]
 	Gui, VersionUpdate: Add,		Checkbox,	x0 y0 HwndIdVerUpdCheckOnStart gF_CheckUpdOnStart Checked%ini_CheckRepo%,	% TransA["Check if update is available on startup?"]
 	Gui, VersionUpdate: Add,		Checkbox, x0 y0 HwndIdVerUpdDwnlOnStart gF_DwnlUpdOnStart Checked%ini_DownloadRepo%,	% TransA["Download if update is available on startup?"]
 	return
@@ -6980,7 +6969,7 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 		IniWrite, % "", 				% HADConfig, GraphicalUserInterface, MainWindowPosH
 		return
 	}	
-	
+	F_WhichGui()		;This line is necessary in case when last Gui is not equal to HS3 or HS4. This is a case e.g. if Gui_VersionUpdate is active
 	if (A_DefaultGui = "HS3")
 	{
 		WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
@@ -6992,7 +6981,6 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 		IniWrite, % TempPosH,		% HADConfig, GraphicalUserInterface, ListViewPosH
 		IniWrite, % ini_HS3GuiMaximized, 	% HADConfig, GraphicalUserInterface, GuiMaximized
 	}
-	
 	if (A_DefaultGui = "HS4")
 	{
 		WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
@@ -9604,7 +9592,6 @@ F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_
 {
 	global	;assume-global mode
 	local	OutputVarTemp := "",	ThisHotkey := A_ThisHotkey ;tu jestem
-	;*[One]
 	if (InStr(ThisHotkey, "LButton"))
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_TMenuAHK
@@ -10428,7 +10415,7 @@ if (v_ResizingFlag) ;if run for the very first time
 	Switch ini_WhichGui
 	{
 		Case "HS3":
-		if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
+		if (ini_HS3WindoPos["X"] != "") or (ini_HS3WindoPos["Y"] != "")
 		{
 			Gui, HS3: Show, AutoSize Center
 			if (ini_ShowIntro)
@@ -10436,7 +10423,7 @@ if (v_ResizingFlag) ;if run for the very first time
 			v_ResizingFlag := false
 			return
 		}
-		if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
+		if (ini_HS3WindoPos["W"] != "") or (ini_HS3WindoPos["H"] != "")
 		{	;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
 			Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
 			Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
@@ -10456,7 +10443,7 @@ if (v_ResizingFlag) ;if run for the very first time
 		v_ResizingFlag := false
 		return
 		Case "HS4":
-		if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
+		if (ini_HS3WindoPos["W"] != "") or (ini_HS3WindoPos["H"] != "")
 		{	;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
 			Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
 			Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
@@ -10465,7 +10452,7 @@ if (v_ResizingFlag) ;if run for the very first time
 			v_ResizingFlag := false
 			return
 		}
-		if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
+		if (ini_HS3WindoPos["X"] != "") or !(ini_HS3WindoPos["Y"] != "")
 		{
 			Gui, HS4: Show, AutoSize Center
 			if (ini_ShowIntro)
