@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.5.2"
+global AppVersion				:= "3.5.3"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -65,6 +65,26 @@ Critical, On
 F_LoadCreateTranslationTxt() ;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
 F_CheckCreateConfigIni() ;1. Try to load up configuration file. If those files do not exist, create them.
 F_CheckScriptEncoding()
+F_Load_ini_GuiReload()
+F_Load_ini_CheckRepo()
+F_Load_ini_DownloadRepo()
+if (ini_CheckRepo) and (!ini_GuiReload)
+	F_VerUpdCheckServ("OnStartUp")
+if (ini_DownloadRepo) and (F_VerUpdCheckServ("ReturnResult"))
+	F_VerUpdDownload()
+if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_GuiReload is set also if Update function is run with Hostrings.exe. So after restart temp.exe is removed.
+{
+	;OutputDebug, % "ini_GuiReload:" . A_Tab . ini_GuiReload . A_Tab . FileExist(A_ScriptDir . "\" . "temp.exe")
+	try
+		FileDelete, % A_ScriptDir . "\" . "temp.exe"
+	catch e
+	{
+		MsgBox, , Error, % "ErrorLevel" . A_Tab . ErrorLevel
+					. "`n`n" . "A_LastError" . A_Tab . A_LastError	;183 : Cannot create a file when that file already exists.
+					. "`n`n" . "Exception" . A_Tab . e
+	}
+	;OutputDebug, Should be deleted
+}
 
 if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "Languages" subfolder 
 {
@@ -73,16 +93,8 @@ if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "L
 	. A_ScriptDir . "\Languages"
 }
 
-IniRead ini_Language, % HADConfig, GraphicalUserInterface, Language				; Load from Config.ini file specific parameter: language into variable ini_Language, e.g. ini_Language = English.txt
-if (!ini_Language) or (ini_Language == "ERROR")
-{
-	MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["The parameter Language in section [GraphicalUserInterface] of Config.ini is missing."]
-	. "`n`n" . TransA["The default"] . A_Space . "English.txt" . A_Space . TransA["is added in section  [GraphicalUserInterface] of Config.ini"]
-	ini_Language := "English.txt"
-	IniWrite, % ini_Language, % HADConfig,  GraphicalUserInterface, Language
-}
-	
-if (!FileExist(A_ScriptDir . "\Languages\" . ini_Language))			; else if there is no ini_language .ini file, e.g. v_langugae == Polish.txt and there is no such file in Languages folder
+F_Load_ini_Language()
+if (!FileExist(A_ScriptDir . "\Languages\" . ini_Language))			; if there is no ini_language .ini file, e.g. v_langugae == Polish.txt and there is no such file in Languages folder
 {
 	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no"] . A_Space . ini_Language . A_Space . TransA["file in Languages subfolder!"]
 	. "`n`n" . TransA["The default"] . A_Space . "English.txt" . A_Space . TransA["file is now created in the following subfolder:"] . "`n`n"  A_ScriptDir . "\Languages\"
@@ -332,33 +344,6 @@ F_GuiVersionUpdate_CreateObjects()
 F_GuiAbout_DetermineConstraints()
 F_GuiVersionUpdate_DetermineConstraints()
 
-
-IniRead, ini_GuiReload, 					% HADConfig, GraphicalUserInterface, GuiReload,		% A_Space
-;OutputDebug, % "IniRead, ini_GuiReload:" . A_Tab . ini_GuiReload
-if (ini_GuiReload = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-{
-	;OutputDebug, tu jestem
-	ini_GuiReload := false
-	IniWrite, % ini_GuiReload, % HADConfig, GraphicalUserInterface, GuiReload
-}
-if (ini_CheckRepo) and (!ini_GuiReload)
-	F_VerUpdCheckServ("OnStartUp")
-if (ini_DownloadRepo) and (F_VerUpdCheckServ("ReturnResult"))
-	F_VerUpdDownload()
-if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_GuiReload is set also if Update function is run with Hostrings.exe. So after restart temp.exe is removed.
-{
-	;OutputDebug, % "ini_GuiReload:" . A_Tab . ini_GuiReload . A_Tab . FileExist(A_ScriptDir . "\" . "temp.exe")
-	try
-		FileDelete, % A_ScriptDir . "\" . "temp.exe"
-	catch e
-	{
-		MsgBox, , Error, % "ErrorLevel" . A_Tab . ErrorLevel
-					. "`n`n" . "A_LastError" . A_Tab . A_LastError	;183 : Cannot create a file when that file already exists.
-					. "`n`n" . "Exception" . A_Tab . e
-	}
-	
-	;OutputDebug, Should be deleted
-}
 if (ini_GuiReload) and (v_Param != "l")
 	Gosub, L_GUIInit
 
@@ -552,7 +537,7 @@ return
 ;Comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
 ~MButton::
 ~RButton::
-;~LButton::	;from now LButton click will not close TMenuAHK; LButton is used to trigger F_MouseMenuTT by "g" in F_GuiTrigTipsMenuDef ;tu jestem: jeżeli A_ThisFunc != TMenu Mouse, to zamknij TMenuAHK
+;~LButton::	;from now LButton click will not close TMenuAHK; LButton is used to trigger F_MouseMenuTT by "g" in F_GuiTrigTipsMenuDef ;if A_ThisFunc != F_MouseMenuTT, then close TMenuAHK
 ~LWin::
 ~RWin::
 ~Down::
@@ -683,6 +668,55 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_Load_ini_DownloadRepo()
+{
+	global	;assume-global mode
+	ini_DownloadRepo			:= false		;global variable
+	IniRead, ini_DownloadRepo,				% HADConfig, Configuration, DownloadRepo,			% A_Space
+	if (ini_DownloadRepo = "") ;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_DownloadRepo := false
+		IniWrite, % ini_DownloadRepo, % HADConfig, Configuration, DownloadRepo
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_Load_ini_CheckRepo()
+{
+	global	;assume-global mode
+	ini_CheckRepo			:= false			;global variable
+	IniRead, ini_CheckRepo,					% HADConfig, Configuration, CheckRepo,				% A_Space
+	if (ini_CheckRepo = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_CheckRepo := false
+		IniWrite, % ini_CheckRepo, % HADConfig, Configuration, CheckRepo
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_Load_ini_GuiReload()
+{
+	global	;assume-global mode
+	ini_GuiReload			:= false			;global variable
+	IniRead, ini_GuiReload, 					% HADConfig, GraphicalUserInterface, GuiReload,		% A_Space
+	;OutputDebug, % "IniRead, ini_GuiReload:" . A_Tab . ini_GuiReload
+	if (ini_GuiReload = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+	;OutputDebug, tu jestem
+		ini_GuiReload := false
+		IniWrite, % ini_GuiReload, % HADConfig, GraphicalUserInterface, GuiReload
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_Load_ini_Language()
+{
+	global	;assume global-mode
+	IniRead ini_Language, % HADConfig, GraphicalUserInterface, Language				; Load from Config.ini file specific parameter: language into variable ini_Language, e.g. ini_Language = English.txt
+	if (ini_Language = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_Language := "English.txt"
+		IniWrite, % ini_Language, % HADConfig,  GraphicalUserInterface, Language
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiTrigTipsMenuDef(AmountOfRows, LongestString)
 {
 	global	;assume-global mode
@@ -880,20 +914,6 @@ F_LoadConfiguration()
 	{
 		ini_ShowIntro := true
 		Iniwrite, % ini_ShowIntro, % HADConfig, Configuration, ShowIntro
-	}
-	ini_CheckRepo			:= false
-	IniRead, ini_CheckRepo,					% HADConfig, Configuration, CheckRepo,				% A_Space
-	if (ini_CheckRepo = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-	{
-		ini_CheckRepo := false
-		IniWrite, % ini_CheckRepo, % HADConfig, Configuration, CheckRepo
-	}
-	ini_DownloadRepo			:= false
-	IniRead, ini_DownloadRepo,				% HADConfig, Configuration, DownloadRepo,			% A_Space
-	if (ini_DownloadRepo = "") ;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-	{
-		ini_DownloadRepo := false
-		IniWrite, % ini_DownloadRepo, % HADConfig, Configuration, DownloadRepo
 	}
 	ini_HK_Main				:= "#^h"
 	IniRead, ini_HK_Main,					% HADConfig, Configuration, HK_Main,				% A_Space
@@ -3459,13 +3479,13 @@ F_GuiVersionUpdate_CreateObjects()
 	Gui,	VersionUpdate: Color,	% c_WindowColor, % c_ControlColor
 	
 	;2. Prepare all text objects according to mock-up.
-	Gui,	VersionUpdate: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd1,											% TransA["Local version:"]
-	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd2, 										% AppVersion
-	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd3,										% TransA["Repository version:"]
-	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd4, 										% ServerVer
-	Gui, VersionUpdate: Add, 	Button,  	x0 y0 HwndIdVerUpdCheckServ gF_VerUpdCheckServ,					% TransA["Check repository version"]
-	Gui, VersionUpdate: Add, 	Button,  	x0 y0 HwndIdVerUpdDownload  gF_VerUpdDownload,					% TransA["Download repository version"]
+	Gui,	VersionUpdate: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 				% c_FontType
+	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd1,											% TransA["Local version"] . ":"
+	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd2, 											% AppVersion
+	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd3,											% TransA["Repository version"] . ":"
+	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd4, 											% ServerVer
+	Gui, VersionUpdate: Add, 	Button,  	x0 y0 HwndIdVerUpdCheckServ gF_VerUpdCheckServ,						% TransA["Check repository version"]
+	Gui, VersionUpdate: Add, 	Button,  	x0 y0 HwndIdVerUpdDownload  gF_VerUpdDownload,						% TransA["Download repository version"]
 	Gui, VersionUpdate: Add,		Checkbox,	x0 y0 HwndIdVerUpdCheckOnStart gF_CheckUpdOnStart Checked%ini_CheckRepo%,	% TransA["Check if update is available on startup?"]
 	Gui, VersionUpdate: Add,		Checkbox, x0 y0 HwndIdVerUpdDwnlOnStart gF_DwnlUpdOnStart Checked%ini_DownloadRepo%,	% TransA["Download if update is available on startup?"]
 	return
@@ -3508,7 +3528,8 @@ F_VerUpdDownload()
 		}
 		try
 			;URLDownloadToFile, % URLexe, % A_ScriptFullPath
-			URLDownloadToFile, % URLexe, % A_ScriptDir . "\" . "Hotstrings.exe"
+			;URLDownloadToFile, % URLexe, % A_ScriptDir . "\" . "Hotstrings.exe"
+			URLDownloadToFile, % URLexe, % A_ScriptDir . "\" . A_ScriptName
 		catch e
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % A_ThisFunc . A_Space TransA["caused problem on line URLDownloadToFile."]
 		if (!ErrorLevel)		
@@ -3518,9 +3539,9 @@ F_VerUpdDownload()
 			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
 			IfMsgBox, Yes
 			{
-				FileDelete, % A_ScriptDir . "\Languages\English.txt" 	
+				FileDelete, % A_ScriptDir . "\Languages\English.txt" 	;this file is deleted because often after update of Hotstrings.exe the language definitions are updated too.
 				Gui, VersionUpdate: Hide
-				F_Reload()
+				F_ReloadUniversal()
 			}
 		}
 		return
@@ -3540,7 +3561,7 @@ F_VerUpdDownload()
 			{
 				FileDelete, % A_ScriptDir . "\Languages\English.txt" 		
 				Gui, VersionUpdate: Hide
-				F_Reload()
+				F_ReloadUniversal()
 			}
 			return
 		}
@@ -3569,8 +3590,8 @@ F_VerUpdCheckServ(param*)
 		Case "OnStartUp":
 		if (ServerVer != AppVersion)
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["On start-up the local version of application was compared with repository version and difference was discovered:"]  
-					. "`n`n" . TransA["Local version:"]  		. A_Tab . A_Tab . AppVersion
-					. "`n" .   TransA["Repository version:"] 	. A_Tab . A_Tab . ServerVer
+					. "`n`n" . TransA["Local version"] . ":"	 . A_Tab . A_Tab . AppVersion
+					. "`n" .   TransA["Repository version"] . ":" . A_Tab . A_Tab . ServerVer
 		whr := ""		
 		return
 		Case "ReturnResult":
@@ -6707,7 +6728,73 @@ F_Compile()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Reload()	;tu jestem
+F_ReloadBasic()
+{	;This function reloads Hotstrings application without additional questions / answers.
+	global ;assume-global mode
+	ini_GuiReload := true
+	IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
+	if (v_Param = "l")				;silent mode
+	{
+		Switch A_IsCompiled
+		{
+			Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
+			Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
+		}
+	}
+	else 						;default mode
+	{
+		Switch A_IsCompiled
+		{
+			Case % true:	Run, % A_ScriptFullPath 
+			Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
+		}
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ReloadUniversal()	;tu jestem
+{
+	global ;assume-global mode
+	;*[One]
+	
+	if (WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd))
+	{
+		MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["Are you sure you want to reload this application now?"]
+		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
+		IfMsgBox, Yes
+		{
+			F_SaveGUIPos()
+			ini_GuiReload := true
+			IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
+			Switch A_ThisMenuItem
+			{
+				Case % TransA["Reload in default mode"]:
+				Switch A_IsCompiled
+				{
+					Case % true:	Run, % A_ScriptFullPath 
+					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
+				}
+				Case % TransA["Reload in silent mode"]:
+				Switch A_IsCompiled
+				{
+					Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
+					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
+				}
+			}
+		}
+		IfMsgBox, No
+			return
+		else
+		{
+			Switch A_IsCompiled
+			{
+				Case % true:	Run, % A_ScriptDir . "\" . A_ScriptName
+				Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
+			}
+		}
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ReloadFromMenu()	;tu jestem
 {
 	global ;assume-global mode
 	;*[One]
@@ -6735,31 +6822,35 @@ F_Reload()	;tu jestem
 					Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
 					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
 				}
-				Default:	;used when file was downloaded from GitHub repository
+				/*
+					Default:	;used when file was downloaded from GitHub repository
+					Switch A_IsCompiled
+					{
+						;Case % true:	Run, % A_ScriptFullPath 
+						Case % true:	Run, % A_ScriptDir . "\" . "Hotstrings.exe"
+						Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
+					}
+				*/
+			}
+		}
+		/*
+			else
+				;Switch A_ThisMenuItem
+			{
+				;Case % TransA["Reload in default mode"]:
 				Switch A_IsCompiled
 				{
-					;Case % true:	Run, % A_ScriptFullPath 
-					Case % true:	Run, % A_ScriptDir . "\" . "Hotstrings.exe"
+					Case % true:	Run, % A_ScriptFullPath 
 					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
 				}
+				;Case % TransA["Reload in silent mode"]:
+				;Switch A_IsCompiled
+				;{
+					;Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
+					;Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
+				;}
 			}
-		}
-		else
-			;Switch A_ThisMenuItem
-		{
-			;Case % TransA["Reload in default mode"]:
-			Switch A_IsCompiled
-			{
-				Case % true:	Run, % A_ScriptFullPath 
-				Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
-			}
-			;Case % TransA["Reload in silent mode"]:
-			;Switch A_IsCompiled
-			;{
-				;Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
-				;Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
-			;}
-		}
+		*/
 	}
 	IfMsgBox, No
 		return
@@ -7212,7 +7303,7 @@ Apostrophe ' 											= Apostrophe '
 Application											= A&pplication
 Application help										= Application help
 Application language changed to: 							= Application language changed to:
-Application mode:										= Application mode:
+Application mode										= Application mode
 Apply && Close											= Apply && Close
 aqua													= aqua
 Are you sure?											= Are you sure?
@@ -7374,7 +7465,7 @@ Loaded hotstrings: 										= Loaded hotstrings:
 Loading hotstrings from libraries... 						= Loading hotstrings from libraries...
 Loading imported library. Please wait...					= Loading imported library. Please wait...
 Loaded												= Loaded
-Local version:											= Local version:
+Local version											= Local version
 Log triggered hotstrings									= Log triggered hotstrings
 maroon												= maroon
 Max. no. of shown tips									= Max. no. of shown tips
@@ -7383,7 +7474,7 @@ Menu position											= Menu position
 Menu position: caret									= Menu position: caret
 Menu position: cursor									= Menu position: cursor
 Minus - 												= Minus -
-Mode of operation:										= Mode of operation:
+Mode of operation										= Mode of operation
 Move (F8)												= Move (F8)
 navy													= navy
 New shortcut (hotkey)									= New shortcut (hotkey)
@@ -7423,7 +7514,7 @@ Reload												= Reload
 Reload in default mode									= Reload in default mode
 Reload in silent mode									= Reload in silent mode
 Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
-Repository version:										= Repository version:
+Repository version										= Repository version
 Required encoding: UTF-8 with BOM. Application will exit now.	= Required encoding: UTF-8 with BOM. Application will exit now.
 Reset Recognizer (Z)									= Reset Recognizer (Z)
 Restore default										= Restore default
@@ -7540,7 +7631,7 @@ Undo the last hotstring									= Undo the last hotstring
 Undo the last hotstring									= Undo the last hotstring
 Undid the last hotstring 								= Undid the last hotstring
 Version / Update										= Version / Update
-Version:												= Version:
+Version												= Version
 Visit public libraries webpage							= Visit public libraries webpage
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
@@ -8799,11 +8890,11 @@ F_GuiAbout_CreateObjects()
 	Gui, MyAbout: Add, 		Text,    	x0 y0 HwndIdLine2, 										% TransA["Enables Convenient Definition"]
 	Gui, MyAbout: Add, 		Button,  	x0 y0 HwndIdAboutOkButton gAboutOkButton,					% TransA["OK"]
 	Gui, MyAbout: Add,		Picture, 	x0 y0 HwndIdAboutPicture w96 h96, 							% AppIcon
-	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT1,									% TransA["Version:"]
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT1,									% TransA["Version"] . ":"
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT2,									% AppVersion
-	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT3,									% TransA["Mode of operation:"]
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT3,									% TransA["Mode of operation"] . ":"
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT4,									% TransA["default"]
-	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT5,									% TransA["Application mode:"]
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT5,									% TransA["Application mode"] . ":"
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT6,									ahk
 	return
 }
@@ -10657,8 +10748,8 @@ else
 return
 
 L_TrayReload:	;new thread starts here
-F_WhichGui()
-F_Reload()
+;F_WhichGui()
+F_ReloadUniversal()
 return
 
 TurnOff_OHE:
