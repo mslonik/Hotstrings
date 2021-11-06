@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.5.1"
+global AppVersion				:= "3.5.3"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -37,17 +37,13 @@ FileInstall, LICENSE, LICENSE, 0
 
 global HADL 					:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries
 global HADConfig  				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\"	. "Config.ini"	;Hotstrings Application Data Config .ini
-global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l or d
-
+global v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l like "silent mode"
 global a_Triggers 				:= []		;Main loop of application
 global f_HTriggered 			:= false		;Main loop of application; this flag is set (1) if any of the hotstring functions is triggered.
 global v_InputString 			:= ""		;Main loop of application; this variable stores information about keys pressed by user which can differ in size from actual hotstring definition.
 global v_MouseX 				:= 0			;Main loop of application
 global v_MouseY 				:= 0			;Main loop of application
 global v_TipsFlag 				:= false		;Main loop of application
-
-global ini_GuiReload			:= false
-global ini_Language 			:= "English.txt"	;default value of variable ini_Language
 
 global v_IndexLog 				:= 1			;for logging, if Hotstrings application is run with d parameter.
 
@@ -56,14 +52,36 @@ global v_UndoHotstring 			:= ""		;used by output functions
 
 ;Flags to control application
 global v_ResizingFlag 			:= true 		;when Hotstrings Gui is displayed for the very first time
-global HMenuCliHwnd				:= 0
-global HMenuAHKHwnd				:= 0
+global TMenuAHKHwnd 			:= 0, HMenuCliHwnd := 0, HMenuAHKHwnd	:= 0, HS3GuiHwnd := 0, HS4GuiHwnd := 0 ;This is a trick to initialize global variable HwndTMenuAHKHwnd in order to not get warning (#Warn) message
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_DetermineMonitors()
 Critical, On
 F_LoadCreateTranslationTxt() ;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
 F_CheckCreateConfigIni() ;1. Try to load up configuration file. If those files do not exist, create them.
 F_CheckScriptEncoding()
+F_Load_ini_GuiReload()
+F_Load_ini_CheckRepo()
+F_Load_ini_DownloadRepo()
+;if (ini_CheckRepo) and (!ini_GuiReload)
+if (ini_CheckRepo)
+	F_VerUpdCheckServ("OnStartUp")
+if (ini_DownloadRepo) and (F_VerUpdCheckServ("ReturnResult"))
+{
+	ini_GuiReload := true
+	IniWrite, % ini_GuiReload, % HADConfig, GraphicalUserInterface, GuiReload
+	F_VerUpdDownload()
+}
+if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_GuiReload is set also if Update function is run with Hostrings.exe. So after restart temp.exe is removed.
+{
+	try
+		FileDelete, % A_ScriptDir . "\" . "temp.exe"
+	catch e
+	{
+		MsgBox, , Error, % "ErrorLevel" . A_Tab . ErrorLevel
+					. "`n`n" . "A_LastError" . A_Tab . A_LastError	;183 : Cannot create a file when that file already exists.
+					. "`n`n" . "Exception" . A_Tab . e
+	}
+}
 
 if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "Languages" subfolder 
 {
@@ -72,16 +90,8 @@ if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "L
 	. A_ScriptDir . "\Languages"
 }
 
-IniRead ini_Language, % HADConfig, GraphicalUserInterface, Language				; Load from Config.ini file specific parameter: language into variable ini_Language, e.g. ini_Language = English.txt
-if (!ini_Language) or (ini_Language == "ERROR")
-{
-	MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["The parameter Language in section [GraphicalUserInterface] of Config.ini is missing."]
-	. "`n`n" . TransA["The default"] . A_Space . "English.txt" . A_Space . TransA["is added in section  [GraphicalUserInterface] of Config.ini"]
-	ini_Language := "English.txt"
-	IniWrite, % ini_Language, % HADConfig,  GraphicalUserInterface, Language
-}
-	
-if (!FileExist(A_ScriptDir . "\Languages\" . ini_Language))			; else if there is no ini_language .ini file, e.g. v_langugae == Polish.txt and there is no such file in Languages folder
+F_Load_ini_Language()
+if (!FileExist(A_ScriptDir . "\Languages\" . ini_Language))			; if there is no ini_language .ini file, e.g. v_langugae == Polish.txt and there is no such file in Languages folder
 {
 	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no"] . A_Space . ini_Language . A_Space . TransA["file in Languages subfolder!"]
 	. "`n`n" . TransA["The default"] . A_Space . "English.txt" . A_Space . TransA["file is now created in the following subfolder:"] . "`n`n"  A_ScriptDir . "\Languages\"
@@ -168,8 +178,6 @@ F_GuiHS4_DetermineConstraints()
 F_GuiHS4_Redraw()
 F_GuiShowIntro()
 F_UpdateSelHotLibDDL()
-
-F_GuiTrigTipsMenuDef(1, 1)
 
 if (ini_HK_IntoEdit != "none")
 {
@@ -333,19 +341,6 @@ F_GuiVersionUpdate_CreateObjects()
 F_GuiAbout_DetermineConstraints()
 F_GuiVersionUpdate_DetermineConstraints()
 
-if (ini_CheckRepo)
-	F_VerUpdCheckServ("OnStartUp")
-if (ini_DownloadRepo) and (F_VerUpdCheckServ("ReturnResult"))
-	F_VerUpdDownload()
-
-IniRead, ini_GuiReload, 					% HADConfig, GraphicalUserInterface, GuiReload,		% A_Space
-if (ini_GuiReload = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-{
-	ini_GuiReload := false
-	IniWrite, % ini_GuiReload, % HADConfig, GraphicalUserInterface, GuiReload
-}
-if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_GuiReload is set also if Update function is run with Hostrings.exe. So after restart temp.exe is removed.
-	FileDelete, % A_ScriptDir . "\" . "temp.exe"
 if (ini_GuiReload) and (v_Param != "l")
 	Gosub, L_GUIInit
 
@@ -354,10 +349,18 @@ if (ini_GuiReload) and (v_Param != "l")
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Loop,
 {
+	if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn))
+	{
+		Loop,	
+		{
+			if (f_HTriggered)
+				Break
+			SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
+			Input, OneChar, L1, {Esc} ; L1 = Length 1	;future: replace Input with InputHook() to overcome overload of Input command.
+			OutputDebug, % "OneChar:" . A_Tab . OneChar
+		}
+	}
 	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
-	if (ErrorLevel = "NewInput")
-		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["ErrorLevel was triggered by NewInput error."]
-	
 	;OutputDebug, % "out" . ":" . A_Space . Ord(out) . A_Space . out
 	;OutputDebug, % "After:" . A_Space . v_InputString
 	if (f_HTriggered)	;f_HTriggered = 1, triggerstring was fired = hotstring was shown
@@ -365,28 +368,16 @@ Loop,
 		v_InputString := ""
 		out := ""
 		Gui, TMenuAHK: Destroy
-		;ToolTip,	;Triggerstring Tips tooltip
 		f_HTriggered := false
 	}
 	else
 	{
-		if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn))
-		{
-			SendInput, {BS}
-			SoundBeep, % ini_MHSF, % ini_MHSD	
-			v_InputString := ""
-			Continue
-		}
 		v_InputString .= out
 		ToolTip, ,, , 4	;Basic triggerstring was triggered
 		ToolTip, ,, , 6	;Undid the last hotstring
-		;OutputDebug, % "Before F_PrepareTriggerstringTipsTables:" . A_Space . v_InputString
-		;F_PrepareTriggerstringTipsTables()		
-		F_PrepareTriggerstringTipsTables2()	
-		;F_ShowTriggerstringTips()
+		F_PrepareTriggerstringTipsTables2()	;F_PrepareTriggerstringTipsTables()
 		if (a_Tips.Count())
 		{
-			;OutputDebug, % "Main loop:" . A_Tab . A_Index
 			F_ShowTriggerstringTips2()
 			F_TMenuAHK_Hotkeys(ini_ATEn)	;this function must be called when TMenuAHKHwnd variable is available and initialized
 			if ((ini_TTTtEn) and (ini_TTTD > 0))
@@ -415,8 +406,6 @@ Loop,
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; The end of the main loop of application.
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
 #InputLevel 2	;Thanks to this line triggerstring tips will have lower priority; backspacing done in function F_TMenu() will not affect this label.
@@ -539,7 +528,7 @@ return
 ;Comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
 ~MButton::
 ~RButton::
-;~LButton::	;from now LButton click will not close TMenuAHK; LButton is used to trigger F_MouseMenuTT by "g" in F_GuiTrigTipsMenuDef ;tu jestem: jeżeli A_ThisFunc != TMenu Mouse, to zamknij TMenuAHK
+;~LButton::	;from now LButton click will not close TMenuAHK; LButton is used to trigger F_MouseMenuTT by "g" in F_GuiTrigTipsMenuDef ;if A_ThisFunc != F_MouseMenuTT, then close TMenuAHK
 ~LWin::
 ~RWin::
 ~Down::
@@ -665,11 +654,62 @@ F_HMenuCli()
 
 Esc::
 Gui, HMenuCli: Destroy
-Send, % v_Triggerstring . v_EndChar
+	Input ;This line blocks temporarily Input command in the main loop. 
+	Send, % v_Triggerstring . v_EndChar
+	f_HTriggered := true
 return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_Load_ini_DownloadRepo()
+{
+	global	;assume-global mode
+	ini_DownloadRepo			:= false		;global variable
+	IniRead, ini_DownloadRepo,				% HADConfig, Configuration, DownloadRepo,			% A_Space
+	if (ini_DownloadRepo = "") ;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_DownloadRepo := false
+		IniWrite, % ini_DownloadRepo, % HADConfig, Configuration, DownloadRepo
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_Load_ini_CheckRepo()
+{
+	global	;assume-global mode
+	ini_CheckRepo			:= false			;global variable
+	IniRead, ini_CheckRepo,					% HADConfig, Configuration, CheckRepo,				% A_Space
+	if (ini_CheckRepo = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_CheckRepo := false
+		IniWrite, % ini_CheckRepo, % HADConfig, Configuration, CheckRepo
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_Load_ini_GuiReload()
+{
+	global	;assume-global mode
+	ini_GuiReload			:= false			;global variable
+	IniRead, ini_GuiReload, 					% HADConfig, GraphicalUserInterface, GuiReload,		% A_Space
+	;OutputDebug, % "IniRead, ini_GuiReload:" . A_Tab . ini_GuiReload
+	if (ini_GuiReload = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+	;OutputDebug, tu jestem
+		ini_GuiReload := false
+		IniWrite, % ini_GuiReload, % HADConfig, GraphicalUserInterface, GuiReload
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_Load_ini_Language()
+{
+	global	;assume global-mode
+	IniRead ini_Language, % HADConfig, GraphicalUserInterface, Language				; Load from Config.ini file specific parameter: language into variable ini_Language, e.g. ini_Language = English.txt
+	if (ini_Language = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_Language := "English.txt"
+		IniWrite, % ini_Language, % HADConfig,  GraphicalUserInterface, Language
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiTrigTipsMenuDef(AmountOfRows, LongestString)
 {
 	global	;assume-global mode
@@ -868,20 +908,6 @@ F_LoadConfiguration()
 		ini_ShowIntro := true
 		Iniwrite, % ini_ShowIntro, % HADConfig, Configuration, ShowIntro
 	}
-	ini_CheckRepo			:= false
-	IniRead, ini_CheckRepo,					% HADConfig, Configuration, CheckRepo,				% A_Space
-	if (ini_CheckRepo = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-	{
-		ini_CheckRepo := false
-		IniWrite, % ini_CheckRepo, % HADConfig, Configuration, CheckRepo
-	}
-	ini_DownloadRepo			:= false
-	IniRead, ini_DownloadRepo,				% HADConfig, Configuration, DownloadRepo,			% A_Space
-	if (ini_DownloadRepo = "") ;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-	{
-		ini_DownloadRepo := false
-		IniWrite, % ini_DownloadRepo, % HADConfig, Configuration, DownloadRepo
-	}
 	ini_HK_Main				:= "#^h"
 	IniRead, ini_HK_Main,					% HADConfig, Configuration, HK_Main,				% A_Space
 	if (ini_HK_Main = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
@@ -890,7 +916,11 @@ F_LoadConfiguration()
 		IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
 	}
 	if (ini_HK_Main != "none")
+	{
+		#If v_Param != "l"
+		Hotkey, If, v_Param != "l" 
 		Hotkey, % ini_HK_Main, L_GUIInit, On
+	}
 	
 	ini_HK_IntoEdit			:= "~^c"
 	IniRead, ini_HK_IntoEdit,				% HADConfig, Configuration, HK_IntoEdit,			% A_Space
@@ -953,10 +983,7 @@ F_GuiEvents()
 	}
 	else
 	{
-		if (v_Param = "l")
-			Gui, GuiEvents: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . "Events configuration"
-		else
-			Gui, GuiEvents: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . "Events configuration"
+		Gui, GuiEvents: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . "Events configuration"
 	}
 	return  
 }
@@ -3256,10 +3283,7 @@ F_TTstyling()
 	}
 	else
 	{
-		if (v_Param = "l")
-			Gui, TTstyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Triggerstring tips and hotstring menu styling"]
-		else
-			Gui, TTstyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Triggerstring tips and hotstring menu styling"]
+		Gui, TTstyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Triggerstring tips and hotstring menu styling"]
 	}
 	GuiControl, Hide, % IdTTstyling_LB1	
 	GuiControl, Hide, % IdHMstyling_LB1
@@ -3389,10 +3413,7 @@ F_GuiVersionUpdate()
 	}
 	else
 	{
-		if (v_Param = "l")
-			Gui, VersionUpdate: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Version / Update"]
-		else
-			Gui, VersionUpdate: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Version / Update"]
+		Gui, VersionUpdate: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Version / Update"]
 	}
 	return  
 }
@@ -3446,13 +3467,13 @@ F_GuiVersionUpdate_CreateObjects()
 	Gui,	VersionUpdate: Color,	% c_WindowColor, % c_ControlColor
 	
 	;2. Prepare all text objects according to mock-up.
-	Gui,	VersionUpdate: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd1,											% TransA["Local version:"]
-	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd2, 										% AppVersion
-	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd3,										% TransA["Repository version:"]
-	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd4, 										% ServerVer
-	Gui, VersionUpdate: Add, 	Button,  	x0 y0 HwndIdVerUpdCheckServ gF_VerUpdCheckServ,					% TransA["Check repository version"]
-	Gui, VersionUpdate: Add, 	Button,  	x0 y0 HwndIdVerUpdDownload  gF_VerUpdDownload,					% TransA["Download repository version"]
+	Gui,	VersionUpdate: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 				% c_FontType
+	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd1,											% TransA["Local version"] . ":"
+	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd2, 											% AppVersion
+	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd3,											% TransA["Repository version"] . ":"
+	Gui, VersionUpdate: Add, 	Text,    	x0 y0 HwndIdVerUpd4, 											% ServerVer
+	Gui, VersionUpdate: Add, 	Button,  	x0 y0 HwndIdVerUpdCheckServ gF_VerUpdCheckServ,						% TransA["Check repository version"]
+	Gui, VersionUpdate: Add, 	Button,  	x0 y0 HwndIdVerUpdDownload  gF_VerUpdDownload,						% TransA["Download repository version"]
 	Gui, VersionUpdate: Add,		Checkbox,	x0 y0 HwndIdVerUpdCheckOnStart gF_CheckUpdOnStart Checked%ini_CheckRepo%,	% TransA["Check if update is available on startup?"]
 	Gui, VersionUpdate: Add,		Checkbox, x0 y0 HwndIdVerUpdDwnlOnStart gF_DwnlUpdOnStart Checked%ini_DownloadRepo%,	% TransA["Download if update is available on startup?"]
 	return
@@ -3477,33 +3498,35 @@ F_CheckUpdOnStart()
 F_VerUpdDownload()	
 {
 	global	;assume-global mode
-	local	URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk"
-			,URLexe := "https://github.com/mslonik/Hotstrings/raw/master/Hotstrings/Hotstrings.exe"
+	local	URLscript := 	"https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk"
+			,URLexe := 	"https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.exe"
 			,whr := "", Result := "", e := ""
 	
 	if (A_IsCompiled)
 	{
 		try
-			FileMove, % A_ScriptFullPath, temp.exe
-		Catch e
+			FileMove, % A_ScriptFullPath, % A_ScriptDir . "\" . "temp.exe"
+		catch e
+		{
 			MsgBox, , Error, % "ErrorLevel" . A_Tab . ErrorLevel
-					. "`n`n" . "A_LastError" . A_Tab . A_LastError
+					. "`n`n" . "A_LastError" . A_Tab . A_LastError	;183 : Cannot create a file when that file already exists.
 					. "`n`n" . "Exception" . A_Tab . e
+			ExitApp, 4 ; File move unsuccessful.		
+		}
 		try
 			URLDownloadToFile, % URLexe, % A_ScriptFullPath
-		catch
+		catch e
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % A_ThisFunc . A_Space TransA["caused problem on line URLDownloadToFile."]
 		if (!ErrorLevel)		
 		{
-			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The application"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
-			. "`n" . TransA["The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually."]
-			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
-			IfMsgBox, Yes
-			{
-				FileDelete, % A_ScriptDir . "\Languages\English.txt" 	
-				Gui, VersionUpdate: Hide
-				F_Reload()
-			}
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "According to your wish the new version of application was found on the server and downloaded. The old version is already overwritten. "
+			;% TransA["The application"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
+			. "`n" . "Now the default language file (English.txt) will be deleted. "
+			. "`n`n" . "Next application will be reloaded."
+			. "`n`n" . "Next application will restart and default language file (English.txt) will be recreated."
+			FileDelete, % A_ScriptDir . "\Languages\English.txt" 	;this file is deleted because often after update of Hotstrings.exe the language definitions are updated too.
+			Gui, VersionUpdate: Hide
+			F_ReloadUniversal()
 		}
 		return
 	}
@@ -3522,7 +3545,7 @@ F_VerUpdDownload()
 			{
 				FileDelete, % A_ScriptDir . "\Languages\English.txt" 		
 				Gui, VersionUpdate: Hide
-				F_Reload()
+				F_ReloadUniversal()
 			}
 			return
 		}
@@ -3550,9 +3573,9 @@ F_VerUpdCheckServ(param*)
 	{
 		Case "OnStartUp":
 		if (ServerVer != AppVersion)
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["On start-up the local version of"] . A_Space . SubStr(A_ScriptName, 1, -4) . A_Space . TransA["was compared with repository version and difference was discovered:"] 
-					. "`n`n" . TransA["Local version:"]  . A_Tab . A_Tab . AppVersion
-					. "`n" .   TransA["Repository version:"] . A_Tab . A_Tab . ServerVer
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["On start-up the local version of application was compared with repository version and difference was discovered:"]  
+					. "`n`n" . TransA["Local version"] . ":"	 . A_Tab . A_Tab . AppVersion
+					. "`n" .   TransA["Repository version"] . ":" . A_Tab . A_Tab . ServerVer
 		whr := ""		
 		return
 		Case "ReturnResult":
@@ -3796,6 +3819,7 @@ F_ShortDefB2_RestoreHotkey()
 		if (OldHotkey != "none")	
 			Hotkey, % OldHotkey, L_GUIInit, Off
 		ini_HK_Main := "#^h"
+		Hotkey, If, v_Param != "l" 
 		Hotkey, % ini_HK_Main, L_GUIInit, On
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
 		IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
@@ -3900,7 +3924,10 @@ F_ShortDefB1_SaveHotkey()
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
 		Hotkey, % OldHotkey, L_GUIInit, Off
 		if (ini_HK_Main != "none")
+		{
+			Hotkey, If, v_Param != "l" 
 			Hotkey, % ini_HK_Main, L_GUIInit, On
+		}
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit, "space")
 		Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
@@ -3961,10 +3988,7 @@ F_GuiShortDef()
 	}
 	else
 	{
-		if (v_Param = "l")
-			Gui, ShortDef: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Shortcut (hotkey) definition"]
-		else
-			Gui, ShortDef: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Shortcut (hotkey) definition"]
+		Gui, ShortDef: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Shortcut (hotkey) definition"]
 	}
 	return  
 }
@@ -6583,6 +6607,8 @@ F_Compile()
 		Case "AhkBitSubmenu":
 		if (A_ThisMenuItem = "64-bit")
 		{
+			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in"       . A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out"      . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
@@ -6598,6 +6624,8 @@ F_Compile()
 		}
 		if (A_ThisMenuItem = "32-bit")
 		{
+			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in"       . A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out"      . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
@@ -6614,6 +6642,8 @@ F_Compile()
 		Case "UpxBitSubmenu":
 		if (A_ThisMenuItem = "64-bit")
 		{
+			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in"   	. A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out"  	. A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
@@ -6629,6 +6659,8 @@ F_Compile()
 		}
 		if (A_ThisMenuItem = "32-bit")
 		{
+			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in"   	. A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out"  	. A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
@@ -6645,6 +6677,8 @@ F_Compile()
 		Case "MpressBitSubmenu":
 		if (A_ThisMenuItem = "64-bit")
 		{
+			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
@@ -6660,6 +6694,8 @@ F_Compile()
 		}
 		if (A_ThisMenuItem = "32-bit")
 		{
+			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
 				. A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName 
 				. A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
@@ -6677,15 +6713,15 @@ F_Compile()
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Reload()
+F_ReloadUniversal()	;tu jestem
 {
 	global ;assume-global mode
-	MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["Are you sure you want to reload this application now?"]
-		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
 	
-	IfMsgBox, Yes
+	if (WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd))
 	{
-		if (WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd))
+		MsgBox, 36, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["Are you sure you want to reload this application now?"]
+		. "`n" . TransA["(Current configuration will be saved befor reload takes place)."]
+		IfMsgBox, Yes
 		{
 			F_SaveGUIPos()
 			ini_GuiReload := true
@@ -6704,35 +6740,27 @@ F_Reload()
 					Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
 					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
 				}
-				Default:	;used when file was downloaded from GitHub repository
+				Default:	;when button was pressed "Download repository version" 
 				Switch A_IsCompiled
 				{
-					Case % true:	Run, % A_ScriptFullPath 
-					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
+					Case % true:	Run, % A_ScriptFullPath
+					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath
 				}
 			}
 		}
-		else
-			Switch A_ThisMenuItem
+		IfMsgBox, No
+			return
+	}
+	else
+	{
+		Switch A_IsCompiled
 		{
-			Case % TransA["Reload in default mode"]:
-			Switch A_IsCompiled
-			{
-				Case % true:	Run, % A_ScriptFullPath 
-				Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
-			}
-			Case % TransA["Reload in silent mode"]:
-			Switch A_IsCompiled
-			{
-				Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
-				Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
-			}
+			Case % true:	Run, % A_ScriptDir . "\" . A_ScriptName
+			Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
 		}
 	}
-	IfMsgBox, No
-		return
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Exit()
 {
 	global ;assume-global mode
@@ -6931,7 +6959,7 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 		IniWrite, % "", 				% HADConfig, GraphicalUserInterface, MainWindowPosH
 		return
 	}	
-	
+	F_WhichGui()		;This line is necessary in case when last Gui is not equal to HS3 or HS4. This is a case e.g. if Gui_VersionUpdate is active
 	if (A_DefaultGui = "HS3")
 	{
 		WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
@@ -6943,7 +6971,6 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 		IniWrite, % TempPosH,		% HADConfig, GraphicalUserInterface, ListViewPosH
 		IniWrite, % ini_HS3GuiMaximized, 	% HADConfig, GraphicalUserInterface, GuiMaximized
 	}
-	
 	if (A_DefaultGui = "HS4")
 	{
 		WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
@@ -7180,6 +7207,7 @@ Apostrophe ' 											= Apostrophe '
 Application											= A&pplication
 Application help										= Application help
 Application language changed to: 							= Application language changed to:
+Application mode										= Application mode
 Apply && Close											= Apply && Close
 aqua													= aqua
 Are you sure?											= Are you sure?
@@ -7233,6 +7261,7 @@ Current shortcut (hotkey):								= Current shortcut (hotkey):
 cursor												= cursor
 custom												= custom
 Dark													= Dark
+default 												= default
 Default mode											= Default mode
 Delete hotstring (F8) 									= Delete hotstring (F8)
 Deleting hotstring... 									= Deleting hotstring...
@@ -7341,7 +7370,7 @@ Loaded hotstrings: 										= Loaded hotstrings:
 Loading hotstrings from libraries... 						= Loading hotstrings from libraries...
 Loading imported library. Please wait...					= Loading imported library. Please wait...
 Loaded												= Loaded
-Local version:											= Local version:
+Local version											= Local version
 Log triggered hotstrings									= Log triggered hotstrings
 maroon												= maroon
 Max. no. of shown tips									= Max. no. of shown tips
@@ -7350,6 +7379,7 @@ Menu position											= Menu position
 Menu position: caret									= Menu position: caret
 Menu position: cursor									= Menu position: cursor
 Minus - 												= Minus -
+Mode of operation										= Mode of operation
 Move (F8)												= Move (F8)
 navy													= navy
 New shortcut (hotkey)									= New shortcut (hotkey)
@@ -7363,7 +7393,7 @@ Number of characters for tips 							= &Number of characters for tips
 of													= of
 OK													= &OK
 olive												= olive
-On start-up the local version of							= On start-up the local version of
+On start-up the local version of application was compared with repository version and difference was discovered: = On start-up the local version of application was compared with repository version and difference was discovered:
 Open libraries folder in Explorer							= Open libraries folder in Explorer
 Opening Curly Bracket { 									= Opening Curly Bracket {
 Opening Round Bracket ( 									= Opening Round Bracket (
@@ -7389,7 +7419,7 @@ Reload												= Reload
 Reload in default mode									= Reload in default mode
 Reload in silent mode									= Reload in silent mode
 Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
-Repository version:										= Repository version:
+Repository version										= Repository version
 Required encoding: UTF-8 with BOM. Application will exit now.	= Required encoding: UTF-8 with BOM. Application will exit now.
 Reset Recognizer (Z)									= Reset Recognizer (Z)
 Restore default										= Restore default
@@ -7506,10 +7536,10 @@ Undo the last hotstring									= Undo the last hotstring
 Undo the last hotstring									= Undo the last hotstring
 Undid the last hotstring 								= Undid the last hotstring
 Version / Update										= Version / Update
+Version												= Version
 Visit public libraries webpage							= Visit public libraries webpage
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
-was compared with repository version and difference was discovered:	= was compared with repository version and difference was discovered:
 was successfully downloaded.								= was successfully downloaded.
 Welcome to Hotstrings application!							= Welcome to Hotstrings application!
 Windows key modifier									= Windows key modifier
@@ -8759,12 +8789,18 @@ F_GuiAbout_CreateObjects()
 	
 	TransA["Enables Convenient Definition"] := StrReplace(TransA["Enables Convenient Definition"], "``n", "`n")
 	;2. Prepare all text objects according to mock-up.
-	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, 					% c_FontType
-	Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLine1, 													% TransA["Let's make your PC personal again..."]
-	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 					% c_FontType
-	Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLine2, 													% TransA["Enables Convenient Definition"]
-	Gui, MyAbout: Add, 		Button,  x0 y0 HwndIdAboutOkButton gAboutOkButton,								% TransA["OK"]
-	Gui, MyAbout: Add,		Picture, x0 y0 HwndIdAboutPicture w96 h96, 										% AppIcon
+	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, 		% c_FontType
+	Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLine1, 										% TransA["Let's make your PC personal again..."]
+	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 		% c_FontType
+	Gui, MyAbout: Add, 		Text,    	x0 y0 HwndIdLine2, 										% TransA["Enables Convenient Definition"]
+	Gui, MyAbout: Add, 		Button,  	x0 y0 HwndIdAboutOkButton gAboutOkButton,					% TransA["OK"]
+	Gui, MyAbout: Add,		Picture, 	x0 y0 HwndIdAboutPicture w96 h96, 							% AppIcon
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT1,									% TransA["Version"] . ":"
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT2,									% AppVersion
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT3,									% TransA["Mode of operation"] . ":"
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT4,									% TransA["default"]
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT5,									% TransA["Application mode"] . ":"
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT6,									ahk
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8777,12 +8813,11 @@ F_GuiAbout_DetermineConstraints()
 		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
 		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
 							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
-		,HwndIdLongest := 0, 	IdLongest := 0
+		,HwndIdLongest := 0, 	IdLongest := 0, MaxText := 0
 	
 ;4. Determine constraints, according to mock-up
-	v_xNext := c_xmarg
-	v_yNext := c_ymarg
-	GuiControl, Move, % IdLine1, % "x" v_xNext "y" v_yNext
+	v_xNext := c_xmarg, v_yNext := c_ymarg
+	GuiControl, Move, % IdLine1, % "x" . v_xNext . "y"  . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdLine1
 	v_yNext += v_OutVarTempH + c_ymarg
 	GuiControl, Move, % IdLine2, % "x" v_xNext "y" v_yNext
@@ -8800,25 +8835,49 @@ F_GuiAbout_DetermineConstraints()
 		{
 			Gui, MyAbout: Add, Text, x0 y0 HwndIdLongest, % Trim(A_LoopField)
 			GuiControlGet, v_OutVarTemp, Pos, % IdLine1
-			v_xNext := c_xmarg
-			v_yNext := c_ymarg + v_OutVarTempH + c_ymarg
+			v_xNext := c_xmarg, v_yNext := c_ymarg + v_OutVarTempH + c_ymarg
 			GuiControl, Move, % IdLongest, % "x" . v_xNext . "y" . v_yNext 
 			GuiControl, Hide, % IdLongest
 			Break
 		}
 	}
+	GuiControlGet, v_OutVarTemp1, Pos, % IdAboutT1
+	GuiControlGet, v_OutVarTemp2, Pos, % IdAboutT3
+	GuiControlGet, v_OutVarTemp3, Pos, % IdAboutT5
+	MaxText := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W)
+	GuiControlGet, v_OutVarTemp, Pos, % IdLine2
+	v_xNext := c_xmarg, v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdAboutT1, % "x" . v_xNext . A_Space . "y" . v_yNext
+	v_xNext := MaxText + 3 * c_xmarg
+	GuiControl, Move, % IdAboutT2, % "x" . v_xNext . A_Space . "y" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdAboutT3, % "x" . v_xNext . A_Space . "y" . v_yNext
+	v_xNext := MaxText + 3 * c_xmarg
+	if (v_Param = "l")
+		GuiControl, , % IdAboutT4, % TransA["silent"]
+	else
+		GuiControl, , % IdAboutT4, % TransA["default"]
+	GuiControl, Move, % IdAboutT4, % "x" . v_xNext . A_Space . "y" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdAboutT5, % "x" . v_xNext . A_Space . "y" . v_yNext
+	v_xNext := MaxText + 3 * c_xmarg
+	if (A_IsCompiled)
+		GuiControl, , % IdAboutT6, exe
+	else
+		GuiControl, , % IdAboutT6, ahk
+	GuiControl, Move, % IdAboutT6, % "x" . v_xNext . A_Space . "y" . v_yNext
 	
 	GuiControlGet, v_OutVarTemp1, Pos, % IdLongest ; weight of the longest text
 	GuiControlGet, v_OutVarTemp2, Pos, % IdAboutOkButton 
 	v_wNext := v_OutVarTemp2W + 2 * c_xmarg
 	v_xNext := (v_OutVarTemp1W // 2) - (v_wNext // 2)
 	GuiControlGet, v_OutVarTemp, Pos, % IdLine2
-	v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg
-	GuiControl, Move, % IdAboutOkButton, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
+	v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg + 3 * HofText
+	GuiControl, Move, % IdAboutOkButton, % "x" . v_xNext . "y" . A_Space . v_yNext . "w" . v_wNext
 	
 	v_xNext := v_OutVarTemp1X + v_OutVarTemp1W - 96 ;96 = chosen size of icon
 	v_yNext := v_OutVarTemp1Y + v_OutVarTemp1H
-	GuiControl, Move, % IdAboutPicture, % "x" . v_xNext . "y" . v_yNext 
+	GuiControl, Move, % IdAboutPicture, % "x" . v_xNext . A_Space . "y" . v_yNext 
 	return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -8841,16 +8900,10 @@ F_GuiAbout()
 	{
 		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
 		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
-		Gui, MyAbout: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Default mode"] . ":" . A_Space . TransA["About this application..."]
+		Gui, MyAbout: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["About this application..."]
 	}
 	else
-	{
-		if (v_Param = "l")
-			Gui, MyAbout: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Silent mode"] . ":" . A_Space . TransA["About this application..."]
-		else
-			Gui, MyAbout: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Silent mode"] . ":" . A_Space . TransA["Default mode"]
-		
-	}
+		Gui, MyAbout: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["About this application..."]
 	return  
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -9206,31 +9259,55 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SR" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SendIsOflag(string, Oflag, SendFunctionName)
+F_SendIsOflag(OtputString, Oflag, SendFunctionName)
 {
 	global	;assume-global mode
 	Switch SendFunctionName
 	{
 		Case "SendInput":
 		if (Oflag = false)
-			SendInput, % string . A_EndChar
+		{
+			Input ;This line blocks temporarily Input command in the main loop. 
+			SendInput, % OtputString . A_EndChar
+		}
 		else
-			SendInput, % string
+		{
+			Input ;This line blocks temporarily Input command in the main loop. 
+			SendInput, % OtputString
+		}
 		Case "SendEvent":
 		if (Oflag = false)
-			SendEvent, % string . A_EndChar
+		{
+			Input ;This line blocks temporarily Input command in the main loop. 
+			SendEvent, % OtputString . A_EndChar
+		}
 		else
-			SendEvent, % string
+		{
+			Input ;This line blocks temporarily Input command in the main loop. 
+			SendEvent, % OtputString
+		}
 		Case "SendPlay":
 		if (Oflag = false)
-			SendPlay, % string . A_EndChar
+		{
+			Input ;This line blocks temporarily Input command in the main loop. 
+			SendPlay, % OtputString . A_EndChar
+		}
 		else
-			SendPlay, % string
+		{
+			Input ;This line blocks temporarily Input command in the main loop. 
+			SendPlay, % OtputString
+		}
 		Case "SendRaw":
 		if (Oflag = false)
-			SendRaw, % string . A_EndChar
+		{
+			Input ;This line blocks temporarily Input command in the main loop. 
+			SendRaw, % OtputString . A_EndChar
+		}
 		else
-			SendRaw, % string 
+		{
+			Input ;This line blocks temporarily Input command in the main loop. 
+			SendRaw, % OtputString 
+		}
 	}
 	return
 }
@@ -9357,11 +9434,8 @@ F_HOF_MCLI(TextOptions, Oflag)
 			,Window2X  := 0,	Window2Y  := 0,	Window2W  := 0,	Window2H  := 0
 			,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
 	
-	if (ini_MHSEn)		;Second beep on purpose
-	{
+	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop
 		SoundBeep, % ini_MHSF, % ini_MHSD
-		SoundBeep, % ini_MHSF, % ini_MHSD
-	}
 	v_MenuMax			 := 0
 	TextOptions 		 := F_ReplaceAHKconstants(TextOptions)
 	Loop, Parse, TextOptions, ¦
@@ -9454,11 +9528,8 @@ F_HOF_MSI(TextOptions, Oflag)
 		,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
 		,TriggerChar := "", UserInput := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
-	if (ini_MHSEn)		;Second beep on purpose
-	{
+	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop 
 		SoundBeep, % ini_MHSF, % ini_MHSD
-		SoundBeep, % ini_MHSF, % ini_MHSD
-	}
 	v_MenuMax				:= 0
 	TextOptions 			:= F_ReplaceAHKconstants(TextOptions)
 	Loop, Parse, TextOptions, ¦	;determine amount of rows for Listbox
@@ -9529,7 +9600,6 @@ F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_
 {
 	global	;assume-global mode
 	local	OutputVarTemp := "",	ThisHotkey := A_ThisHotkey ;tu jestem
-	;*[One]
 	if (InStr(ThisHotkey, "LButton"))
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_TMenuAHK
@@ -9551,7 +9621,7 @@ F_LButtonHandling()
 {
 	global	;assume-global mode
 	local	OutputVar := 0, OutputVarWin := 0, OutputVarControl := "", OutputVarTemp := ""
-	OutputDebug, % "LButton:" 
+	;OutputDebug, % "LButton:" 
 	if (WinExist("ahk_id" TMenuAHKHwnd))
 	{
 		MouseGetPos, , , OutputVarWin, OutputVarControl
@@ -9677,12 +9747,13 @@ F_HMenuAHK()
 		SoundBeep, % ini_MHSF, % ini_MHSD	
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	return
 }
 
 Esc::
 Gui, HMenuAHK: Destroy
-Send, % v_Triggerstring . v_EndChar
+	Input ;This line blocks temporarily Input command in the main loop. 
+	Send, % v_Triggerstring . v_EndChar
+	f_HTriggered := true
 return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10340,8 +10411,8 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 }
 
 ; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
-#If (v_Param != "l") 
 L_GUIInit:
+OutputDebug, % "v_ResizingFlag:" . A_Tab . v_ResizingFlag . A_Tab . "ini_GuiReload:" . A_Tab . ini_GuiReload
 if (v_ResizingFlag) ;if run for the very first time
 {
 	Gui, HS3: +MinSize%HS3MinWidth%x%HS3MinHeight%
@@ -10353,7 +10424,7 @@ if (v_ResizingFlag) ;if run for the very first time
 	Switch ini_WhichGui
 	{
 		Case "HS3":
-		if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
+		if (ini_HS3WindoPos["X"] != "") or (ini_HS3WindoPos["Y"] != "")
 		{
 			Gui, HS3: Show, AutoSize Center
 			if (ini_ShowIntro)
@@ -10361,7 +10432,7 @@ if (v_ResizingFlag) ;if run for the very first time
 			v_ResizingFlag := false
 			return
 		}
-		if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
+		if (ini_HS3WindoPos["W"] != "") or (ini_HS3WindoPos["H"] != "")
 		{	;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
 			Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
 			Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
@@ -10381,7 +10452,7 @@ if (v_ResizingFlag) ;if run for the very first time
 		v_ResizingFlag := false
 		return
 		Case "HS4":
-		if (!(ini_HS3WindoPos["W"]) or !(ini_HS3WindoPos["H"]))
+		if (ini_HS3WindoPos["W"] != "") or (ini_HS3WindoPos["H"] != "")
 		{	;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
 			Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
 			Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
@@ -10390,7 +10461,7 @@ if (v_ResizingFlag) ;if run for the very first time
 			v_ResizingFlag := false
 			return
 		}
-		if (!(ini_HS3WindoPos["X"]) or !(ini_HS3WindoPos["Y"]))
+		if (ini_HS3WindoPos["X"] != "") or !(ini_HS3WindoPos["Y"] != "")
 		{
 			Gui, HS4: Show, AutoSize Center
 			if (ini_ShowIntro)
@@ -10419,7 +10490,6 @@ else ;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakr
 	}
 }
 return
-#If	;#If (v_Param != "l") 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ALibOK:
 Gui, ALib: Submit, NoHide
@@ -10600,8 +10670,8 @@ else
 return
 
 L_TrayReload:	;new thread starts here
-F_WhichGui()
-F_Reload()
+;F_WhichGui()
+F_ReloadUniversal()
 return
 
 TurnOff_OHE:

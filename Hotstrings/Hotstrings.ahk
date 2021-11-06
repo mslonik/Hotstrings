@@ -349,10 +349,18 @@ if (ini_GuiReload) and (v_Param != "l")
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Loop,
 {
+	if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn))
+	{
+		Loop,	
+		{
+			if (f_HTriggered)
+				Break
+			SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
+			Input, OneChar, L1, {Esc} ; L1 = Length 1	;future: replace Input with InputHook() to overcome overload of Input command.
+			OutputDebug, % "OneChar:" . A_Tab . OneChar
+		}
+	}
 	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
-	if (ErrorLevel = "NewInput")
-		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["ErrorLevel was triggered by NewInput error."]
-	
 	;OutputDebug, % "out" . ":" . A_Space . Ord(out) . A_Space . out
 	;OutputDebug, % "After:" . A_Space . v_InputString
 	if (f_HTriggered)	;f_HTriggered = 1, triggerstring was fired = hotstring was shown
@@ -360,28 +368,16 @@ Loop,
 		v_InputString := ""
 		out := ""
 		Gui, TMenuAHK: Destroy
-		;ToolTip,	;Triggerstring Tips tooltip
 		f_HTriggered := false
 	}
 	else
 	{
-		if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn))
-		{
-			SendInput, {BS}
-			SoundBeep, % ini_MHSF, % ini_MHSD	
-			v_InputString := ""
-			Continue
-		}
 		v_InputString .= out
 		ToolTip, ,, , 4	;Basic triggerstring was triggered
 		ToolTip, ,, , 6	;Undid the last hotstring
-		;OutputDebug, % "Before F_PrepareTriggerstringTipsTables:" . A_Space . v_InputString
-		;F_PrepareTriggerstringTipsTables()		
-		F_PrepareTriggerstringTipsTables2()	
-		;F_ShowTriggerstringTips()
+		F_PrepareTriggerstringTipsTables2()	;F_PrepareTriggerstringTipsTables()
 		if (a_Tips.Count())
 		{
-			;OutputDebug, % "Main loop:" . A_Tab . A_Index
 			F_ShowTriggerstringTips2()
 			F_TMenuAHK_Hotkeys(ini_ATEn)	;this function must be called when TMenuAHKHwnd variable is available and initialized
 			if ((ini_TTTtEn) and (ini_TTTD > 0))
@@ -410,8 +406,6 @@ Loop,
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; The end of the main loop of application.
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
 #InputLevel 2	;Thanks to this line triggerstring tips will have lower priority; backspacing done in function F_TMenu() will not affect this label.
@@ -660,7 +654,9 @@ F_HMenuCli()
 
 Esc::
 Gui, HMenuCli: Destroy
-Send, % v_Triggerstring . v_EndChar
+	Input ;This line blocks temporarily Input command in the main loop. 
+	Send, % v_Triggerstring . v_EndChar
+	f_HTriggered := true
 return
 #If
 
@@ -3823,6 +3819,7 @@ F_ShortDefB2_RestoreHotkey()
 		if (OldHotkey != "none")	
 			Hotkey, % OldHotkey, L_GUIInit, Off
 		ini_HK_Main := "#^h"
+		Hotkey, If, v_Param != "l" 
 		Hotkey, % ini_HK_Main, L_GUIInit, On
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
 		IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
@@ -3927,7 +3924,10 @@ F_ShortDefB1_SaveHotkey()
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
 		Hotkey, % OldHotkey, L_GUIInit, Off
 		if (ini_HK_Main != "none")
+		{
+			Hotkey, If, v_Param != "l" 
 			Hotkey, % ini_HK_Main, L_GUIInit, On
+		}
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit, "space")
 		Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
@@ -9259,31 +9259,55 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SR" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SendIsOflag(string, Oflag, SendFunctionName)
+F_SendIsOflag(OtputString, Oflag, SendFunctionName)
 {
 	global	;assume-global mode
 	Switch SendFunctionName
 	{
 		Case "SendInput":
 		if (Oflag = false)
-			SendInput, % string . A_EndChar
+		{
+			Input ;This line blocks temporarily Input command in the main loop. 
+			SendInput, % OtputString . A_EndChar
+		}
 		else
-			SendInput, % string
+		{
+			Input ;This line blocks temporarily Input command in the main loop. 
+			SendInput, % OtputString
+		}
 		Case "SendEvent":
 		if (Oflag = false)
-			SendEvent, % string . A_EndChar
+		{
+			Input ;This line blocks temporarily Input command in the main loop. 
+			SendEvent, % OtputString . A_EndChar
+		}
 		else
-			SendEvent, % string
+		{
+			Input ;This line blocks temporarily Input command in the main loop. 
+			SendEvent, % OtputString
+		}
 		Case "SendPlay":
 		if (Oflag = false)
-			SendPlay, % string . A_EndChar
+		{
+			Input ;This line blocks temporarily Input command in the main loop. 
+			SendPlay, % OtputString . A_EndChar
+		}
 		else
-			SendPlay, % string
+		{
+			Input ;This line blocks temporarily Input command in the main loop. 
+			SendPlay, % OtputString
+		}
 		Case "SendRaw":
 		if (Oflag = false)
-			SendRaw, % string . A_EndChar
+		{
+			Input ;This line blocks temporarily Input command in the main loop. 
+			SendRaw, % OtputString . A_EndChar
+		}
 		else
-			SendRaw, % string 
+		{
+			Input ;This line blocks temporarily Input command in the main loop. 
+			SendRaw, % OtputString 
+		}
 	}
 	return
 }
@@ -9410,11 +9434,8 @@ F_HOF_MCLI(TextOptions, Oflag)
 			,Window2X  := 0,	Window2Y  := 0,	Window2W  := 0,	Window2H  := 0
 			,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
 	
-	if (ini_MHSEn)		;Second beep on purpose
-	{
+	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop
 		SoundBeep, % ini_MHSF, % ini_MHSD
-		SoundBeep, % ini_MHSF, % ini_MHSD
-	}
 	v_MenuMax			 := 0
 	TextOptions 		 := F_ReplaceAHKconstants(TextOptions)
 	Loop, Parse, TextOptions, ¦
@@ -9507,11 +9528,8 @@ F_HOF_MSI(TextOptions, Oflag)
 		,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
 		,TriggerChar := "", UserInput := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
-	if (ini_MHSEn)		;Second beep on purpose
-	{
+	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop 
 		SoundBeep, % ini_MHSF, % ini_MHSD
-		SoundBeep, % ini_MHSF, % ini_MHSD
-	}
 	v_MenuMax				:= 0
 	TextOptions 			:= F_ReplaceAHKconstants(TextOptions)
 	Loop, Parse, TextOptions, ¦	;determine amount of rows for Listbox
@@ -9729,12 +9747,13 @@ F_HMenuAHK()
 		SoundBeep, % ini_MHSF, % ini_MHSD	
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	return
 }
 
 Esc::
 Gui, HMenuAHK: Destroy
-Send, % v_Triggerstring . v_EndChar
+	Input ;This line blocks temporarily Input command in the main loop. 
+	Send, % v_Triggerstring . v_EndChar
+	f_HTriggered := true
 return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
