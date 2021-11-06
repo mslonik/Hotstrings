@@ -68,11 +68,16 @@ F_CheckScriptEncoding()
 F_Load_ini_GuiReload()
 F_Load_ini_CheckRepo()
 F_Load_ini_DownloadRepo()
-if (ini_CheckRepo) and (!ini_GuiReload)
+;if (ini_CheckRepo) and (!ini_GuiReload)
+if (ini_CheckRepo)
 	F_VerUpdCheckServ("OnStartUp")
 if (ini_DownloadRepo) and (F_VerUpdCheckServ("ReturnResult"))
+{
+	ini_GuiReload := true
 	F_VerUpdDownload()
+}
 if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_GuiReload is set also if Update function is run with Hostrings.exe. So after restart temp.exe is removed.
+;if (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_GuiReload is set also if Update function is run with Hostrings.exe. So after restart temp.exe is removed.
 {
 	;OutputDebug, % "ini_GuiReload:" . A_Tab . ini_GuiReload . A_Tab . FileExist(A_ScriptDir . "\" . "temp.exe")
 	try
@@ -3534,15 +3539,16 @@ F_VerUpdDownload()
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % A_ThisFunc . A_Space TransA["caused problem on line URLDownloadToFile."]
 		if (!ErrorLevel)		
 		{
-			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The application"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The application"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
 			. "`n" . TransA["The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually."]
-			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
-			IfMsgBox, Yes
-			{
+			;. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
+			. "`n`n" . "Next application will be reloaded."
+			;IfMsgBox, Yes
+			;{
 				FileDelete, % A_ScriptDir . "\Languages\English.txt" 	;this file is deleted because often after update of Hotstrings.exe the language definitions are updated too.
 				Gui, VersionUpdate: Hide
 				F_ReloadUniversal()
-			}
+			;}
 		}
 		return
 	}
@@ -6783,13 +6789,13 @@ F_ReloadUniversal()	;tu jestem
 		}
 		IfMsgBox, No
 			return
-		else
+	}
+	else
+	{
+		Switch A_IsCompiled
 		{
-			Switch A_IsCompiled
-			{
-				Case % true:	Run, % A_ScriptDir . "\" . A_ScriptName
-				Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
-			}
+			Case % true:	Run, % A_ScriptDir . "\" . A_ScriptName
+			Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
 		}
 	}
 }
