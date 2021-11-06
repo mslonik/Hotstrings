@@ -3509,7 +3509,6 @@ F_VerUpdDownload()
 {
 	global	;assume-global mode
 	local	URLscript := 	"https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk"
-			;,URLexe := "https://github.com/mslonik/Hotstrings/raw/master/Hotstrings/Hotstrings.exe"
 			,URLexe := 	"https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.exe"
 			,whr := "", Result := "", e := ""
 	
@@ -10404,6 +10403,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 ; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
 #If (v_Param != "l") 
 L_GUIInit:
+OutputDebug, % "v_ResizingFlag:" . A_Tab . v_ResizingFlag . A_Tab . "ini_GuiReload:" . A_Tab . ini_GuiReload
 if (v_ResizingFlag) ;if run for the very first time
 {
 	Gui, HS3: +MinSize%HS3MinWidth%x%HS3MinHeight%
