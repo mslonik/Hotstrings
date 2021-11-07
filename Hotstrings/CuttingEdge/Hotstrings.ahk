@@ -52,7 +52,7 @@ global 	HADL 				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libra
 
 ;Flags to control application
 ,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time
-,		TMenuAHK_C1_Hwnd 			:= 0, HMenuCliHwnd := 0, HMenuAHKHwnd	:= 0, HS3GuiHwnd := 0, HS4GuiHwnd := 0 ;This is a trick to initialize global variable HwndTMenuAHK_C1_Hwnd in order to not get warning (#Warn) message
+,		TMenuAHK_C1_Hwnd 		:= 0, HMenuCliHwnd := 0, HMenuAHKHwnd	:= 0, HS3GuiHwnd := 0, HS4GuiHwnd := 0 ;This is a trick to initialize global variable HwndTMenuAHK_C1_Hwnd in order to not get warning (#Warn) message
 
 global	ini_TTCn				:= 2			;Triggerstring Tips Column number: (1 = Triggerstring Tip, 2 = Triggerstring Tip + Triggerstring Trigger, 3 = Triggerstring Tip + Triggerstring Trigger + Triggerstring Hotstring)
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -382,6 +382,7 @@ Loop,
 		if (ini_TTTtEn)
 		{
 			F_PrepareTriggerstringTipsTables2()	;old version: F_PrepareTriggerstringTipsTables()
+			;*[One]
 			if (a_Tips.Count())
 			{
 				F_ShowTriggerstringTips2()
@@ -733,7 +734,7 @@ F_GuiTrigTipsMenuDefC2(AmountOfRows, LongestString)	;tu jestem
 		Gui, TMenuAHK_C2: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceColCus, % ini_TTTyFaceFont
 	else
 		Gui, TMenuAHK_C2: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
-	Gui, TMenuAHK_C2: Add, Text, % "x0 y0 HwndId_T1_TMenuAHK_C1", % OutputString
+	Gui, TMenuAHK_C2: Add, Text, % "x0 y0 HwndId_T1_TMenuAHK_C2", % OutputString
 	GuiControlGet, vOutput, Pos, % Id_T1_TMenuAHK_C2
 	Gui, TMenuAHK_C2: Add, Listbox, % "x0 y0 HwndId_LB1_TMenuAHK_C2" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutputW + 4 . A_Space . "g" . "F_MouseMenuTT"	;thanks to "g" it will not be a separate thread even upon mouse click
 	Gui, TMenuAHK_C2: Add, Listbox, % "x0 y0 HwndId_LB2_TMenuAHK_C2" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutputW + 4 . A_Space . "g" . "F_MouseMenuTT"	;thanks to "g" it will not be a separate thread even upon mouse click
@@ -781,7 +782,7 @@ F_TMenuAHK_Hotkeys(BinParameter)
 	}
 	else
 	{
-		Hotkey, IfWinExist, % "ahk_id" TMenuAHK_C1Hwnd
+		Hotkey, IfWinExist, % "ahk_id" TMenuAHK_C1_Hwnd
 		Hotkey, ^Tab, 		F_TMenu, I1 Off
 		Hotkey, +^Tab, 	F_TMenu, I1 Off
 		Hotkey, ^Up,		F_TMenu, I1 Off
@@ -3354,9 +3355,10 @@ F_ShowTriggerstringTips2()	;tu jestem
 			GuiControl,, % Id_LB1_TMenuAHK_C1, % ThisValue
 		Case 2: ;tu jestem
 			F_GuiTrigTipsMenuDefC2(a_Tips.Count(), LongestString)
+			;*[One]
 			for key, value in a_Tips
 				ThisValue .= value . "|"
-			GuiControl,, % Id_LB1_TMenuAHK_C1, % ThisValue
+			GuiControl,, % Id_LB1_TMenuAHK_C2, % ThisValue
 			for key, value in a_TipsOpt
 				if (a_TipsEnDis[key] = "En") and (InStr(value, "*"))
 					ThisValue .= "✓" . "|"		;"✓" ;{U+2713}	;Immediate Execute
@@ -4427,7 +4429,6 @@ F_PrepareTriggerstringTipsTables2()
 {
 	global	;assume-global mode
 	local	HitCnt := 0
-	
 	;OutputDebug, % "Length of v_InputString:" . A_Space . StrLen(v_InputString) . A_Tab . "v_InputString:" . A_Space . v_InputString
 	if (StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{ ;tu jestem
@@ -4435,17 +4436,24 @@ F_PrepareTriggerstringTipsTables2()
 		a_TipsOpt		:= []	;collect withing global array a_TipsOpt subset from full set a_TriggerOptions; next it will be used to show triggering character in F_ShowTriggerstringTips2()
 		a_TipsEnDis	:= []
 		a_TipsHS		:= []	;HS = Hotstrings
-		Loop, % a_Triggers.MaxIndex()
+		;Loop, % a_Triggers.MaxIndex()
+		Loop, % a_Combined.MaxIndex()
 		{
-			if (InStr(a_Triggers[A_Index], v_InputString) = 1)
+			;if (InStr(a_Triggers[A_Index], v_InputString) = 1)
+			if (InStr(a_Combined[A_Index], v_InputString) = 1)
 			{
 				Switch ini_TTCn
 				{
 					Case 1:	;only column 1: Triggerstring Tips
-					a_Tips.Push(a_Triggers[A_Index])
+					Loop, Parse % a_Combined[A_Index], |
+						if (A_Index = 1)
+							a_Tips.Push(A_LoopField)
+					;a_Tips.Push(a_Triggers[A_Index])
 					Case 2:	;2 columns: Triggerstring Tips + Triggerstring Trigger
 					Loop, Parse, % a_Combined[A_Index], |	;tu jestem
 					{
+						if (A_Index = 1)
+							a_Tips.Push(A_LoopField)
 						if (A_Index = 2) 
 							a_TipsOpt.Push(A_LoopField)
 						if (A_Index = 3) 
@@ -4454,6 +4462,8 @@ F_PrepareTriggerstringTipsTables2()
 					Case 3:	;3 columns: Triggerstring Tips + Triggerstring Trigger + Triggerstring Hotstring
 					Loop, Parse, % a_Combined[A_Index], |
 					{
+						if (A_Index = 1)
+							a_Tips.Push(A_LoopField)
 						if (A_Index = 2) 
 							a_TipsOpt.Push(A_LoopField)
 						if (A_Index = 3) 
