@@ -3803,15 +3803,12 @@ F_VerUpdDownload()
 			MsgBox, 17, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Something went wrong on time of downloading AutoHotkey script file."
 		if (!ErrorLevel)
 		{
-			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The script"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The script"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
 			. "`n" . TransA["The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually."]
 			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
-			IfMsgBox, Yes
-			{
-				FileDelete, % A_ScriptDir . "\Languages\English.txt" 		
-				Gui, VersionUpdate: Hide
-				F_ReloadUniversal()
-			}
+			FileDelete, % A_ScriptDir . "\Languages\English.txt" 		
+			Gui, VersionUpdate: Hide
+			F_ReloadUniversal()
 			return
 		}
 	}
