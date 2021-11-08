@@ -1,19 +1,20 @@
-﻿B0*?‖.ahk‖SI‖En‖‖only for extensions
-B0*?‖.csv‖SI‖En‖‖only for extensions
-B0*?‖.docx‖SI‖En‖‖only for extensions
-B0*?‖.easm‖SI‖En‖‖only for extensions
-B0*?‖.gif‖SI‖En‖‖
-B0*?‖.pdf‖SI‖En‖‖only for extensions
-B0*?‖.png‖SI‖En‖‖
-B0*?‖.svg‖SI‖En‖‖only for extensions
-B0*?‖.xlsx‖SI‖En‖‖only for extensions
-B0*?‖.xml‖SI‖En‖‖only for extensions
+﻿B0?‖.ahk‖SI‖En‖‖only for extensions
+B0?‖.csv‖SI‖En‖‖only for extensions
+B0?‖.docx‖SI‖En‖‖only for extensions
+B0?‖.easm‖SI‖En‖‖only for extensions
+B0?‖.exe‖SI‖En‖‖
+B0?‖.gif‖SI‖En‖‖
+B0?‖.pdf‖SI‖En‖‖only for extensions
+B0?‖.png‖SI‖En‖‖
+B0?‖.svg‖SI‖En‖‖only for extensions
+B0?‖.xlsx‖SI‖En‖‖only for extensions
+B0?‖.xml‖SI‖En‖‖only for extensions
 C*‖2d‖MSI‖En‖2D¦two-dimensional‖
 C‖2fa‖SI‖En‖2FA‖
 *‖2fa/‖SI‖En‖Two-Factor Authentication‖
 C*‖3d‖MSI‖En‖3D ¦three-dimensional‖
 *‖a/‖SI‖En‖Availability‖
-C*‖a3‖MSI‖En‖A3¦297 × 420 [mm]‖size of paper sheet in Europe 
+C*‖a3‖MSI‖En‖A3¦297 × 420 [mm]‖size of paper sheet in Europe
 C*‖a4‖MSI‖En‖A4¦210 × 297 [mm]‖
 C‖ac‖SI‖En‖AC‖
 *‖ac/‖MSI‖En‖Alternating Current¦Axle Counter‖
@@ -35,6 +36,8 @@ C‖ascii‖SI‖En‖ASCII‖
 *‖ascii/‖SI‖En‖American Standard Code for Information Interchange‖https://en.wikipedia.org/wiki/ASCII
 C‖ato‖SI‖En‖ATO‖
 *‖ato/‖MCL‖En‖Assembly To Order¦Automatic Train Operation‖
+‖b2b‖SI‖En‖B2B‖
+*‖b2b/‖SI‖En‖Business-to-Business‖
 C‖bios‖SI‖En‖BIOS‖
 *‖bios/‖SI‖En‖Basic Input/Output System‖https://en.wikipedia.org/wiki/BIOS
 C‖bom‖SI‖En‖BOM‖
@@ -51,14 +54,20 @@ C‖ccms‖SI‖En‖CCMS‖
 *‖ccms/‖SI‖En‖Component Content Management System‖
 C‖cctv‖CL‖En‖CCTV‖
 *‖cctv/‖CL‖En‖Closed-Circuit Television‖
+‖ce‖SI‖En‖CE‖
+*‖ce/‖MSI‖En‖Conformité Européenne¦The CE mark indicates that the product may be sold freely in any part of the European Economic Area, regardless of its country of origin.‖
+*‖ce/‖MSI‖En‖Conformité Européenne¦The CE mark indicates that the product may be sold freely in any part of the European Economic Area, regardless of its country of origin.¦Znak CE wskazuje, że produkt może zostać wprowadzony do obrotu w każdym z państw europejskiej  wspólnoty gospodarczej, bez względu na jego kraj pochodzenia.‖
 C‖ceo‖SI‖En‖CEO‖
 *‖ceo/‖CL‖En‖Chief Executive Officer‖
 C‖cfo‖SI‖En‖CFO‖
 *‖cfo/‖SI‖En‖Chief Financial Officer‖
+‖cli‖SI‖En‖CLI‖
+*‖cli/‖SI‖En‖Command Line Interface‖
 C‖cms‖SI‖En‖CMS‖
 *‖cms/‖SI‖En‖Content Management System‖
-C‖com‖SI‖En‖COM‖
+C‖com‖SI‖Dis‖COM‖
 *‖com/‖MCL‖En‖a serial port interface on IBM PC-compatible computers¦Component Object Model, a Microsoft software interface technology‖https://en.wikipedia.org/wiki/Com
+*C‖com`t‖SI‖En‖COM‖
 C‖cop‖SI‖En‖CoP‖
 *‖cop/‖CL‖En‖Code of Practice‖
 C‖cot‖SI‖En‖CoT‖
@@ -81,6 +90,8 @@ C‖dc‖SI‖En‖DC‖
 *‖dc/‖CL‖En‖Direct Current‖
 C‖ddns‖SI‖En‖DDNS‖
 *‖ddns/‖CL‖En‖Dynamic DNS‖https://en.wikipedia.org/wiki/Dynamic_DNS
+‖dftba‖SI‖En‖DFTBA‖
+*‖dftba/‖SI‖En‖Don't Forget To Be Awsome‖
 C‖dhcp‖SI‖En‖DHCP‖
 *‖dhcp/‖SI‖En‖Dynamic Host Configuration Protocol‖https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protoco
 C*‖din‖SI‖En‖DIN‖
@@ -99,7 +110,7 @@ C‖dslr‖SI‖En‖DSLR‖
 C‖dvd‖SI‖En‖DVD‖
 *‖dvd/‖SI‖En‖Digital Versatile Disc‖https://en.wikipedia.org/wiki/DVD
 C‖dwg‖SI‖En‖DWG‖
-*‖dwg/‖SI‖Dis‖Drawing Exchange Format‖
+*‖dwg/‖SI‖En‖Drawings binary file format‖https://en.wikipedia.org/wiki/.dwg
 C‖dxf‖SI‖En‖DXF‖
 *‖dxf/‖SI‖En‖Drawing Exchange Format‖
 C‖easm‖SI‖En‖EASM‖
@@ -129,6 +140,8 @@ C‖erp‖SI‖En‖ERP‖
 *‖erp/‖CL‖En‖Enterprise Resource Planning‖
 C‖ertms‖SI‖En‖ERTMS‖
 *‖ertms/‖CL‖En‖European Rail Traffic Management System‖
+C‖esd‖SI‖En‖ESD‖
+*C‖esd/‖SI‖En‖Electro Static Discharge‖
 C‖etcs‖SI‖En‖ETCS‖
 *‖etcs/‖SI‖En‖European Train Control System‖
 C‖eto‖SI‖En‖ETO‖
@@ -137,6 +150,8 @@ C‖eu‖SI‖En‖EU‖
 *‖eu/‖SI‖En‖European Union‖
 C‖eut‖SI‖En‖EUT‖
 *‖eut/‖SI‖En‖Equipment Under Test‖
+CB0?‖exe‖SI‖En‖EXE‖
+*C‖exe/‖SI‖En‖executable‖
 C‖fai‖SI‖En‖FAI‖
 *‖fai/‖CL‖En‖First Article Inspection‖
 C‖faq‖SI‖En‖FAQ‖
@@ -217,6 +232,8 @@ C‖mdt‖SI‖En‖MDT‖
 *‖mdt/‖CL‖En‖Mean Down Time‖
 C‖mfa‖SI‖En‖MFA‖
 *‖mfa/‖SI‖En‖Multi Factor Authentication‖
+‖mom‖SI‖En‖MoM‖
+*‖mom/‖SI‖En‖Minutes of Meeting‖
 C‖mtbf‖SI‖En‖MTBF‖
 *‖mtbf/‖CL‖En‖Mean Time Between Failures‖
 C‖mtbm‖SI‖En‖MTBM‖
@@ -239,8 +256,12 @@ C‖nda‖SI‖En‖NDA‖
 *‖nda/‖CL‖En‖Non-Disclosure Agreement‖
 *‖nic/‖SI‖En‖Network Interface Card‖
 *‖nic`t‖SI‖En‖NIC‖
+‖ntp‖SI‖En‖NTP‖
+*‖ntp/‖SI‖En‖Network Time Protocol‖https://en.wikipedia.org/wiki/Network_Time_Protocol
 C‖oem‖SI‖En‖OEM‖
 *‖oem/‖SI‖En‖Original Equipment Manufacturer‖
+‖pbs‖SI‖En‖PBS‖
+*‖pbs/‖SI‖En‖Product Breakdown Structure‖
 C‖pcb‖SI‖En‖PCB‖
 *‖pcb/‖CL‖En‖Printed Circuit Board‖
 C‖pcn‖SI‖En‖PCN‖
@@ -265,6 +286,8 @@ C‖poc‖SI‖En‖PoC‖
 *‖poc/‖CL‖En‖Proof of Concept‖
 C‖poe‖SI‖En‖PoE‖
 *‖poe/‖SI‖En‖Power over Ethernet‖
+‖pov‖SI‖En‖POV‖
+*‖pov/‖SI‖En‖Point of View‖
 C‖ppi‖SI‖En‖PPI‖
 *‖ppi/‖SI‖En‖Point Per Inch‖
 C‖pwm‖SI‖En‖PWM‖
@@ -286,6 +309,8 @@ C‖rams‖SI‖En‖RAMS‖
 *‖rams/‖CL‖En‖Reliability, Availability, Maintainability and Safety‖
 C‖rap‖SI‖En‖RAP‖
 *‖rap/‖CL‖En‖Risk Acceptance Principle‖
+‖rcd‖SI‖En‖RCD‖
+*‖rcd/‖SI‖En‖Residual Current Device‖
 C‖rfid‖SI‖En‖RFID‖
 *‖rfid/‖SI‖En‖Radio Frequency Identification‖
 C‖rgb‖SI‖En‖RGB‖
@@ -308,8 +333,14 @@ C‖sa‖SI‖En‖SA‖
 *‖sa/‖CL‖En‖Specific Application‖
 C‖saas‖SI‖En‖SaaS‖
 *‖saas/‖SI‖En‖Software as a Service‖https://en.wikipedia.org/wiki/Software_as_a_service
+‖scada‖SI‖En‖SCADA‖
+*‖scada/‖SI‖En‖Supervisory Control and Data Acquisition‖https://en.wikipedia.org/wiki/SCADA
+‖scm‖SI‖En‖SCM‖
+*‖scm/‖SI‖En‖Supply Chain Management‖
 C‖scorm‖SI‖En‖SCORM‖
 *‖scorm/‖SI‖En‖Sharable Content Object Reference Model‖https://en.wikipedia.org/wiki/Sharable_Content_Object_Reference_
+‖sdk‖SI‖En‖SDK‖
+*‖sdk/‖SI‖En‖Software Development Kit‖https://en.wikipedia.org/wiki/Software_development_kit
 C‖seo‖SI‖En‖SEO‖
 *‖seo/‖SI‖En‖Search Engine Optimization‖
 C‖sil‖SI‖En‖SIL‖
@@ -320,10 +351,14 @@ C‖sms‖SI‖En‖SMS‖
 *‖sms/‖CL‖En‖Short Message Service‖
 C‖snmp‖SI‖En‖SNMP‖
 *‖snmp/‖SI‖En‖Simple Network Management Protocol‖https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol
+‖spd‖SI‖En‖SPD‖
+*‖spd/‖SI‖En‖Surge Protection Device‖
 C‖sql‖SI‖En‖SQL‖
 *‖sql/‖CL‖En‖Structured Query Language‖
 C‖srac‖SI‖En‖SRAC‖
 *‖srac/‖CL‖En‖Safety Related Application Condition‖
+‖stem‖SI‖En‖STEM‖
+*‖stem/‖SI‖En‖Science Technology Engineering and Mathematics‖
 C‖suv‖SI‖En‖SUV‖
 *‖suv/‖SI‖En‖Sport Utility Vehicle‖
 C‖svg‖SI‖En‖SVG‖
@@ -336,6 +371,8 @@ C‖tffr‖SI‖En‖TFFR‖
 *‖tffr/‖CL‖En‖Tolerable Functional Failure Rate‖
 C‖thr‖SI‖En‖THR‖
 *‖thr/‖MSI‖En‖Tolerable Hazard Rate¦współczynnik tolerowanego zagrożenia‖
+‖toc‖SI‖En‖TOC‖
+*‖toc/‖SI‖En‖Table of Content‖
 C‖tsi‖SI‖En‖TSI‖
 *‖tsi/‖CL‖En‖Technical Specifications for Interoperability‖
 C‖uefi‖SI‖En‖UEFI‖
@@ -350,6 +387,8 @@ C‖url‖SI‖En‖URL‖
 *‖url/‖SI‖En‖Uniform Resource Locator‖https://en.wikipedia.org/wiki/URL
 C‖usb‖SI‖En‖USB‖
 *‖usb/‖CL‖En‖Universal Serial Bus‖
+‖utc‖SI‖En‖UTC‖https://en.wikipedia.org/wiki/Network_Time_Protocol
+*‖utc/‖SI‖En‖Coordinated Universal Time‖https://en.wikipedia.org/wiki/Network_Time_Protocol
 C‖utf‖SI‖En‖UTF‖
 *‖utf/‖CL‖En‖Unicode Transformation Format‖
 C‖uv‖SI‖En‖UV‖
@@ -360,6 +399,8 @@ C‖vat‖SI‖En‖VAT‖
 *‖vat/‖CL‖En‖Value Added Tax‖
 C‖vba‖SI‖En‖VBA‖
 *‖vba/‖CL‖En‖Visual Basic for Applications‖
+‖vip‖SI‖En‖VIP‖
+*‖vip/‖MSI‖En‖Very Important Person¦Very Individual Person‖
 C‖vlan‖SI‖En‖VLAN‖
 *‖vlan/‖SI‖En‖Virtual LAN‖https://en.wikipedia.org/wiki/Virtual_LAN
 C‖voip‖CL‖En‖VoIP‖
@@ -370,6 +411,8 @@ C‖vps‖SI‖En‖VPS‖
 *‖vps/‖SI‖En‖Virtual Private Server‖
 C‖vr‖CL‖En‖VR‖
 *‖vr/‖CL‖En‖Virtual Reality‖
+‖wcag‖SI‖En‖WCAG‖
+*‖wcag/‖SI‖En‖Web Content Accessibility Guidelines‖
 C‖wmf‖SI‖En‖WMF‖
 *‖wmf/‖CL‖En‖Windows Metafile‖https://en.wikipedia.org/wiki/Windows_Metafile#EMF
 C‖wol‖SI‖En‖WoL‖
@@ -380,4 +423,3 @@ C‖wysiwyg‖SI‖En‖WYSIWYG‖
 *‖wysiwyg/‖SI‖En‖What You See Is What You Get‖
 C‖xlsx‖SI‖En‖XLSX‖
 C‖xml‖SI‖En‖XML‖
-*‖xml/‖SI‖En‖Extensible Markup Language‖https://en.wikipedia.org/wiki/XML
