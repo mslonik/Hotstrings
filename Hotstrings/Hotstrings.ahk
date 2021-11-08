@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.5.3"
+global AppVersion				:= "3.5.4"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -3556,7 +3556,7 @@ F_VerUpdCheckServ(param*)
 {
 	global	;assume-global mode
 	local	whr := "", URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk", ToBeFiltered := "", ServerVer := "", StartingPos := 0
-	
+			, ServerVer1 := 0, ServerVer2 := 0, ServerVer3 := 0, AppVersion1 := 0, AppVersion2 := 0, AppVersion3 := 0,
 	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 	whr.Open("GET", URLscript, true)
 	whr.Send()	; Using 'true' above and the call below allows the script to remain responsive.
@@ -3581,7 +3581,32 @@ F_VerUpdCheckServ(param*)
 		Case "ReturnResult":
 		whr := ""
 		if (ServerVer != AppVersion)
-			return true
+		{
+			Loop, Parse, ServerVer, .
+			{
+				Switch A_LoopField
+				{
+					Case 1: ServerVer1 := A_LoopField
+					Case 2: ServerVer2 := A_LoopField
+					Case 3: ServerVer3 := A_LoopField
+				}
+			}
+			Loop, Parse, AppVersion, .
+			{
+				Switch A_LoopField
+				{
+					Case 1: AppVersion1 := A_LoopField
+					Case 2: AppVersion2 := A_LoopField
+					Case 3: AppVersion3 := A_LoopField
+				}
+			}
+			if (ServerVer1 > AppVersion1)	
+				return true
+			if (ServerVer1 = AppVersion1) and (ServerVer2 > AppVersion2)
+				return true
+			if (ServerVer1 = AppVersion1) and (ServerVer2 = AppVersion2) and (ServerVer3 > AppVersion3)
+				return true
+		}
 		Default:
 		whr := ""
 		GuiControl, , % IdVerUpd4, % ServerVer
@@ -9751,9 +9776,9 @@ F_HMenuAHK()
 
 Esc::
 Gui, HMenuAHK: Destroy
-	Input ;This line blocks temporarily Input command in the main loop. 
-	Send, % v_Triggerstring . v_EndChar
-	f_HTriggered := true
+Input ;This line blocks temporarily Input command in the main loop. 
+Send, % v_Triggerstring . v_EndChar
+f_HTriggered := true
 return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10424,7 +10449,7 @@ if (v_ResizingFlag) ;if run for the very first time
 	Switch ini_WhichGui
 	{
 		Case "HS3":
-		if (ini_HS3WindoPos["X"] != "") or (ini_HS3WindoPos["Y"] != "")
+		if (ini_HS3WindoPos["X"] = "") or (ini_HS3WindoPos["Y"] = "")
 		{
 			Gui, HS3: Show, AutoSize Center
 			if (ini_ShowIntro)
@@ -10432,7 +10457,7 @@ if (v_ResizingFlag) ;if run for the very first time
 			v_ResizingFlag := false
 			return
 		}
-		if (ini_HS3WindoPos["W"] != "") or (ini_HS3WindoPos["H"] != "")
+		if (ini_HS3WindoPos["W"] = "") or (ini_HS3WindoPos["H"] = "")
 		{	;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
 			Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
 			Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
@@ -10452,7 +10477,7 @@ if (v_ResizingFlag) ;if run for the very first time
 		v_ResizingFlag := false
 		return
 		Case "HS4":
-		if (ini_HS3WindoPos["W"] != "") or (ini_HS3WindoPos["H"] != "")
+		if (ini_HS3WindoPos["W"] = "") or (ini_HS3WindoPos["H"] = "")
 		{	;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
 			Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
 			Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
@@ -10461,7 +10486,7 @@ if (v_ResizingFlag) ;if run for the very first time
 			v_ResizingFlag := false
 			return
 		}
-		if (ini_HS3WindoPos["X"] != "") or !(ini_HS3WindoPos["Y"] != "")
+		if (ini_HS3WindoPos["X"] = "") or !(ini_HS3WindoPos["Y"] = "")
 		{
 			Gui, HS4: Show, AutoSize Center
 			if (ini_ShowIntro)
