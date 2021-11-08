@@ -67,6 +67,8 @@ F_Load_ini_DownloadRepo()
 ;if (ini_CheckRepo) and (!ini_GuiReload)
 if (ini_CheckRepo)
 	F_VerUpdCheckServ("OnStartUp")
+;*[One]
+what := F_VerUpdCheckServ("ReturnResult")
 if (ini_DownloadRepo) and (F_VerUpdCheckServ("ReturnResult"))
 {
 	ini_GuiReload := true
@@ -3819,7 +3821,7 @@ F_VerUpdCheckServ(param*)
 {
 	global	;assume-global mode
 	local	whr := "", URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk", ToBeFiltered := "", ServerVer := "", StartingPos := 0
-	
+			, ServerVer1 := 0, ServerVer2 := 0, ServerVer3 := 0, AppVersion1 := 0, AppVersion2 := 0, AppVersion3 := 0,	
 	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 	whr.Open("GET", URLscript, true)
 	whr.Send()	; Using 'true' above and the call below allows the script to remain responsive.
@@ -3832,6 +3834,7 @@ F_VerUpdCheckServ(param*)
 			RegExMatch(A_LoopField, "\d+.\d+.\d+", ServerVer)
 			Break
 		}
+	;*[One]	
 	Switch param[1]
 	{
 		Case "OnStartUp":
@@ -3844,7 +3847,33 @@ F_VerUpdCheckServ(param*)
 		Case "ReturnResult":
 		whr := ""
 		if (ServerVer != AppVersion)
-			return true
+		{
+			Loop, Parse, ServerVer, .
+			{
+				Switch A_Index
+				{
+					Case 1: ServerVer1 := A_LoopField
+					Case 2: ServerVer2 := A_LoopField
+					Case 3: ServerVer3 := A_LoopField
+				}
+			}
+			Loop, Parse, AppVersion, .
+			{
+				Switch A_Index
+				{
+					Case 1: AppVersion1 := A_LoopField
+					Case 2: AppVersion2 := A_LoopField
+					Case 3: AppVersion3 := A_LoopField
+				}
+			}
+			if (ServerVer1 > AppVersion1)	
+				return true
+			if (ServerVer1 = AppVersion1) and (ServerVer2 > AppVersion2)
+				return true
+			if (ServerVer1 = AppVersion1) and (ServerVer2 = AppVersion2) and (ServerVer3 > AppVersion3)
+				return true
+		}
+		return false
 		Default:
 		whr := ""
 		GuiControl, , % IdVerUpd4, % ServerVer
