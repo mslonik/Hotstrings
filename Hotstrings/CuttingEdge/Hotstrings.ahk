@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -3803,10 +3803,11 @@ F_VerUpdDownload()
 			MsgBox, 17, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Something went wrong on time of downloading AutoHotkey script file."
 		if (!ErrorLevel)
 		{
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The script"] . A_Space . A_ScriptName . A_Space . TransA["was successfully downloaded."]
-			. "`n" . TransA["The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually."]
-			. "`n`n" . TransA["Would you like now to reload it in order to run the just downloaded version?"]
-			FileDelete, % A_ScriptDir . "\Languages\English.txt" 		
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["According to your wish the new version of application was found on the server and downloaded."]
+			. A_Space . TransA["The old version is already overwritten."]
+			. "`n" . TransA["Next the default language file (English.txt) will be deleted,"]
+			. "`n" . TransA["reloaded and fresh language file (English.txt) will be recreated."]
+			FileDelete, % A_ScriptDir . "\Languages\English.txt" 	;this file is deleted because often after update of Hotstrings.exe the language definitions are updated too.
 			Gui, VersionUpdate: Hide
 			F_ReloadUniversal()
 			return
@@ -9468,6 +9469,11 @@ F_GuiHS4_CreateObject()
 			IfMsgBox, Yes
 				return
 		}
+		if (OnOff = "")	;This is consequence of hard lesson: mismatch of "column name". This line hopefullly protects against this kind of event in the future.
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+			. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
+			. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
+		
 		if (v_TriggerString and (OnOff = "On"))
 		{
 		;OutputDebug, % "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
@@ -9476,6 +9482,7 @@ F_GuiHS4_CreateObject()
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
+				. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 		}
 		return
 	}
