@@ -54,7 +54,6 @@ global 	HADL 				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libra
 ,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time
 ,		TT_C1_Hwnd 			:= 0, TT_C2_Hwnd := 0, TT_C3_Hwnd := 0, HMenuCliHwnd := 0, HMenuAHKHwnd	:= 0, HS3GuiHwnd := 0, HS4GuiHwnd := 0 ;This is a trick to initialize global variable HwndTMenuAHK_C1_Hwnd in order to not get warning (#Warn) message
 
-global	ini_TTCn				:= 3			;Triggerstring Tips Column number: (1 = Triggerstring Tip, 2 = Triggerstring Tip + Triggerstring Trigger, 3 = Triggerstring Tip + Triggerstring Trigger + Triggerstring Hotstring)
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_DetermineMonitors()
 Critical, On
@@ -340,7 +339,7 @@ Loop,
 			F_PrepareTriggerstringTipsTables2()	;old version: F_PrepareTriggerstringTipsTables()
 			if (a_Tips.Count())
 			{
-				F_ShowTriggerstringTips2()
+				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 				F_TMenuAHK_Hotkeys(ini_ATEn)	;this function must be called when TMenuAHK_C1_Hwnd variable is available and initialized
 				if (ini_TTTD > 0)
 					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
@@ -390,7 +389,7 @@ else
 	F_PrepareTriggerstringTipsTables2()
 	if (a_Tips.Count())
 	{
-		F_ShowTriggerstringTips2()
+		F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		if ((ini_TTTtEn) and (ini_TTTD > 0))
 			SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 	}
@@ -1413,7 +1412,7 @@ F_GuiEvents_CreateObjects()
 	GuiControl, +g, % IdEvTt_T24, % T_TtComposition
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	DropDownList, HwndIdEvTt_DDL2 vEvTt_DDL2 AltSubmit, % TransA["Triggerstring tips"] . "|" . TransA["Triggerstring tips"] . A_Space . "+" . A_Space 
-		. TransA["Triggers"] . "||" . TransA["Triggerstring tips"] . A_Space . "+" . A_Space . TransA["Triggers"] . A_Space . "+" . A_Space . TransA["Hotstrings"]	;tu jestem
+		. TransA["Triggers"] . "|" . TransA["Triggerstring tips"] . A_Space . "+" . A_Space . TransA["Triggers"] . A_Space . "+" . A_Space . TransA["Hotstrings"]	;tu jestem
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvTt_B1 gF_EvTt_B1,			% TransA["Tooltip test"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B2 gF_EvTt_B2,			% TransA["Apply && Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B3 gF_EvTt_B3,			% TransA["Cancel"]
@@ -1460,14 +1459,13 @@ F_EvAT_B2()	;Event Active Triggerstring Tips Button Apply & Close
 F_EvAT_B1()	;Event Active Triggerstring Tips Button Tooltip test
 {
 	global ;assume-global mode
-	local BinParameter := 0
+	local BinParameter := 0, a_Tips := []
 	Gui, GuiEvents: Submit, NoHide
 	Switch EvAT_R1R2
 	{
 		Case 1: BinParameter := 1
 		Case 2: BinParameter := 0
 	}
-	a_Tips := []
 	Loop, % EvTt_S2
 	{
 		if (A_Index = 1)
@@ -1476,7 +1474,7 @@ F_EvAT_B1()	;Event Active Triggerstring Tips Button Tooltip test
 			a_Tips[A_Index] := Chr(65 + EvTt_S2 - A_Index) . A_Space . "Demo" . A_Space . A_Index
 	}
 	F_Sort_a_Triggers(a_Tips, EvTt_C1, EvTt_C2)
-	F_ShowTriggerstringTips2()
+	F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 	F_TMenuAHK_Hotkeys(BinParameter)
 	if ((EvTt_R1R2 = 1) and (EvTt_R3R4 = 1))
 		SetTimer, TurnOff_Ttt, % "-" . EvTt_S1	 ;, 200 ;Priority = 200 to avoid conflicts with other threads 
@@ -1489,28 +1487,44 @@ F_EvAT_R1R2()
 	F_TMenuAHK_Hotkeys(EvAT_R1R2)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvTt_B1()	;Event Tooltip (is triggered) Button Tooltip test
+F_EvTt_B1()	;Event Tooltip (is triggered) Button Tooltip test tu jestem
 {
 	global ;assume-global mode
+	local a_Tips := []
+		, a_TipsOpt	:= []	;collect withing global array a_TipsOpt subset from full set a_TriggerOptions; next it will be used to show triggering character in F_ShowTriggerstringTips2()
+		, a_TipsEnDis	:= []
+		, a_TipsHS	:= []	;HS = Hotstrings
+		, a_Combined	:= []
+	
 	Gui, GuiEvents: Submit, NoHide
 	if (EvTt_R1R2 = 1)
 	{
-		a_Tips := []
 		Loop, % EvTt_S2
 		{
 			if (A_Index = 1)
-				a_Tips[A_Index] := "A" . Chr(65 + EvTt_S2 - A_Index) . A_Space . "Demo" . A_Space . A_Index
+			{
+				a_Tips[A_Index] 		:= "A" . Chr(65 + EvTt_S2 - A_Index) . A_Space . "Demo" . A_Space . A_Index
+				, a_TipsOpt[A_Index] 	:= "C"
+				, a_TipsEnDis[A_Index]	:= "Dis"
+				, a_TipsHS[A_Index]		:= "Ex HotString" . A_Index
+			}
 			else
-				a_Tips[A_Index] := Chr(65 + EvTt_S2 - A_Index) . A_Space . "Demo" . A_Space . A_Index
+			{
+				a_Tips[A_Index] 		:= Chr(65 + EvTt_S2 - A_Index) . A_Space . "Demo" . A_Space . A_Index
+				, a_TipsOpt[A_Index]	:= "*"
+				, a_TipsEnDis[A_Index]	:= "En"
+				, a_TipsHS[A_Index]		:= "Ex HotString" . A_Index
+			}
+			a_Combined[A_Index]			:= a_Tips[A_Index] . "|" . a_TipsOpt[A_Index] . "|" . a_TipsEnDis[A_Index] . "|" . a_TipsHS[A_Index]
 		}
-		F_Sort_a_Triggers(a_Tips, EvTt_C1, EvTt_C2)
-		F_ShowTriggerstringTips2()
+		F_Sort_a_Triggers(a_Combined, EvTt_C1, EvTt_C2)
+		F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, EvTt_DDL2)	;tu jestem
 		if ((EvTt_R1R2 = 1) and (EvTt_R3R4 = 1))
 			SetTimer, TurnOff_Ttt, % "-" . EvTt_S1	 ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvTt_B2()	;Event Tooltip (is triggered) Button Apply & Close
+F_EvTt_B2()	;Event Tooltip (is triggered) Button Apply & Close 
 {
 	global ;assume-global mode
 	Gui, GuiEvents: Submit, NoHide
@@ -1529,7 +1543,7 @@ F_EvTt_B2()	;Event Tooltip (is triggered) Button Apply & Close
 		Case 1:	ini_TTTP := 1
 		Case 2:	ini_TTTP := 2
 	}
-	ini_TipsSortAlphabetically := EvTt_C1, ini_TipsSortByLength := EvTt_C2, ini_MNTT := EvTt_S2,	ini_TASAC := EvTt_DDL1
+	ini_TipsSortAlphabetically := EvTt_C1, ini_TipsSortByLength := EvTt_C2, ini_MNTT := EvTt_S2,	ini_TASAC := EvTt_DDL1,	ini_TTCn := EvTt_DDL2
 	IniWrite, % ini_TTTtEn, 	% HADConfig, Event_TriggerstringTips, 	TTTtEn
 	IniWrite, % ini_TTTD,	% HADConfig, Event_TriggerstringTips,	TTTD
 	IniWrite, % ini_TTTP,	% HADConfig, Event_TriggerstringTips,	TTTP
@@ -1537,6 +1551,7 @@ F_EvTt_B2()	;Event Tooltip (is triggered) Button Apply & Close
 	IniWrite, % ini_TipsSortByLength,	% HADConfig, Event_TriggerstringTips,	TipsSortByLength
 	IniWrite, % ini_MNTT,	% HADConfig, Event_TriggerstringTips,	MNTT
 	IniWrite, % ini_TASAC,	% HADConfig, Event_TriggerstringTips,	TipsAreShownAfterNoOfCharacters
+	IniWrite, % ini_TTCn,	% HADConfig, Event_TriggerstringTips,	TTCn
 	Tooltip,,,, 4
 	Gui, GuiEvents: Destroy
 }
@@ -2204,7 +2219,7 @@ F_GuiEvents_DetermineConstraints()
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_T24, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_T25
-	v_xNext := c_xmarg, v_yNext += HofText, v_wNext := v_OutVarTempW + 2 * c_ymarg
+	v_xNext := c_xmarg, v_yNext += HofText, v_wNext := v_OutVarTempW + 3 * c_ymarg
 	GuiControl, Move, % IdEvTt_DDL2, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext	;tu jestem
 	v_xNext := c_xmarg, v_yNext += HofText
 	GuiControl, Move, % IdEvTt_T25, % "x+" . v_xNext . A_Space . "y+" . v_yNext	;fake text, just to measure its width, but unfortunately as it cannot be deleted, it has to be shifted somewhere
@@ -2483,6 +2498,7 @@ F_GuiEvents_InitiateValues()
 	, EvMH_S1 := ini_MHSF, EvMH_S2 := ini_MHSD 
 	, EvUH_S1 := ini_UHTD, EvUH_S2 := ini_UHSF, EvUH_S3 := ini_UHSD
 	, EvTt_S1 := ini_TTTD, EvTt_S2 := ini_MNTT, EvTt_C1 := ini_TipsSortAlphabetically, EvTt_C2 := ini_TipsSortByLength, EvTt_DDL1 := ini_TASAC ;(Tips Are Shown After No of Characters)
+	, EvTt_DDL2 := ini_TTCn
 	Switch ini_OHTtEn
 	{
 		Case false: 	EvBH_R1R2 := 1
@@ -2558,7 +2574,7 @@ F_GuiEvents_InitiateValues()
 F_GuiEvents_LoadValues()
 {
 	global ;assume-global mode
-	local	a_Styling_DDL1 := [1, 2, 3, 4, 5],	s_Styling_DDL1 := "|",	key := 0,	value := ""
+	local	a_Styling_DDL1 := [1, 2, 3, 4, 5],	s_Styling_DDL1 := "|"
 
 	Switch ini_OHTtEn
 	{
@@ -2649,12 +2665,13 @@ F_GuiEvents_LoadValues()
 	GuiControl,, % IdEvTt_C2,	% ini_TipsSortByLength
 	GuiControl,, % IdEvTt_S2,	% ini_MNTT
 	GuiControl,, % IdEvTt_T18,	% ini_MNTT
-	for key, val in a_Styling_DDL1
-		if (val = ini_TASAC)
-			s_Styling_DDL1 .= val . "||"
-		else
-			s_Styling_DDL1 .= val . "|"
-	GuiControl,, % IdEvTt_DDL1, % s_Styling_DDL1
+	GuiControl, ChooseString, % IdEvTt_DDL1, % ini_TASAC	;tu jestem
+	Switch ini_TTCn
+	{
+		Case 1:	GuiControl, ChooseString, % IdEvTt_DDL2, % TransA["Triggerstring tips"]
+		Case 2:	GuiControl, ChooseString, % IdEvTt_DDL2, % TransA["Triggerstring tips"] . A_Space . "+" . A_Space . TransA["Triggers"]
+		Case 3:	GuiControl, ChooseString, % IdEvTt_DDL2, % TransA["Triggerstring tips"] . A_Space . "+" . A_Space . TransA["Triggers"] . A_Space . "+" . A_Space . TransA["Hotstrings"]
+	}
 	Switch ini_ATEn
 	{
 		Case true:	GuiControl,, % IdEvAT_R1, 1
@@ -3453,7 +3470,7 @@ F_TTstyling()
 	Gui, HDemo: Hide
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ShowTriggerstringTips2()
+F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 {
 	global ;assume-global mode
 	local key := 0, value := "", ThisValue := 0
@@ -7250,13 +7267,13 @@ F_LoadHotstringsFromLibraries()
 	global ; assume-global mode
 	local key := "", value := "", PriorityFlag := false
 	a_Library 				:= []
-	a_TriggerOptions 			:= []
-	a_Triggerstring 			:= []
-	a_OutputFunction 			:= []
-	a_EnableDisable 			:= []
-	a_Hotstring				:= []
-	a_Comment 				:= []
-	a_Combined				:= []
+	, a_TriggerOptions 			:= []
+	, a_Triggerstring 			:= []
+	, a_OutputFunction 			:= []
+	, a_EnableDisable 			:= []
+	, a_Hotstring				:= []
+	, a_Comment 				:= []
+	, a_Combined				:= []
 	
 ; Prepare TrayTip message taking into account value of command line parameter.
 	if (v_Param == "l")
@@ -9877,8 +9894,16 @@ F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #InputLevel 2	;thanks to this trick event of left mouse click is ignored by "main level" of hotkeys.
-;~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected.
-F_LButtonHandling()
+~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected.
+F_LButtonHandling()	;tu jestem
+/*
+	{
+		Gui, TT_C1: Destroy
+		Gui, TT_C2: Destroy
+		Gui, TT_C3: Destroy
+		Tooltip, ;switch off tooltips created when i Unicode symbol is clicked
+	}
+*/
 {
 	global	;assume-global mode
 	local	OutputVar := 0, OutputVarWin := 0, OutputVarControl := "", OutputVarTemp := ""
@@ -9901,7 +9926,7 @@ F_LButtonHandling()
 				Case 3: Gui, TT_C3: Destroy
 			}
 	}
-	Tooltip, ;switch off tooltips created when i sign is clicked
+	Tooltip, ;switch off tooltips created when i Unicode symbol is clicked
 }
 #InputLevel 0	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10070,61 +10095,7 @@ F_LoadEndChars() ;Load from Config.ini
 		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring EndChars"] . ":" . "`n`n"
 			. "EndChars" . ":" . A_Space . HotstringEndChars
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	/*
-		F_SortArrayAlphabetically(a_array)
-		{
-			local a_TempArray, v_ActualArray, v_TempArray, flag, cnt, no
-			a_TempArray := []
-			Loop, % a_array.MaxIndex()
-			{
-				cnt := A_Index
-				a_TempArray[cnt] := a_array[cnt]
-				Loop, % cnt - 1
-				{
-					If (Asc(a_array[cnt]) < Asc(a_TempArray[A_Index]))
-					{
-						Loop, % cnt - A_Index
-						{
-							a_TempArray[cnt - (A_Index - 1)] := a_TempArray[cnt - A_Index]
-						}
-						a_TempArray[A_Index] := a_array[cnt]
-						break
-					}
-					else if (Asc(a_array[cnt]) == Asc(a_TempArray[A_Index]))
-					{
-						flag := 0
-						no := A_Index
-						v_ActualArray := a_array[cnt]
-						v_TempArray := a_TempArray[no]
-						Loop, % Max(StrLen(v_ActualArray), StrLen(v_TempArray))
-						{
-							v_ActualArray := SubStr(v_ActualArray, 2)
-							v_TempArray := SubStr(v_TempArray, 2)
-							If (Asc(v_ActualArray) < Asc(v_TempArray))
-							{
-								Loop, % cnt - no
-								{
-									a_TempArray[cnt - A_Index + 1] := a_TempArray[cnt - A_Index]
-								}
-								a_TempArray[no] := a_array[cnt]
-								flag := 1
-								Break
-							}
-							else if (Asc(v_ActualArray) > Asc(v_TempArray)22)
-							{
-								Break
-							}
-						}
-						if (flag)
-							Break
-					}
-				}
-			}
-			return a_TempArray
-		}
-*/
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SortArrayByLength(a_array)
 {
 	local a_TempArray, v_Length, v_ActLen
