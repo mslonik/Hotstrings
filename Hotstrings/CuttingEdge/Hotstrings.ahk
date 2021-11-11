@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.5.4"
+global AppVersion				:= "3.5.5"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -64,11 +64,9 @@ F_CheckScriptEncoding()
 F_Load_ini_GuiReload()
 F_Load_ini_CheckRepo()
 F_Load_ini_DownloadRepo()
-;if (ini_CheckRepo) and (!ini_GuiReload)
+F_LoadSignalingParams()
 if (ini_CheckRepo)
 	F_VerUpdCheckServ("OnStartUp")
-;*[One]
-what := F_VerUpdCheckServ("ReturnResult")
 if (ini_DownloadRepo) and (F_VerUpdCheckServ("ReturnResult"))
 {
 	ini_GuiReload := true
@@ -120,58 +118,10 @@ F_LoadTTStyling()
 F_LoadHMStyling()
 F_LoadConfiguration()
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
-F_LoadSignalingParams()
 
 F_ValidateIniLibSections() 
 
-;If application wasn't run with "l" parameter (standing for "light / lightweight"), prepare tray menu.
-Switch v_Param
-{
-	Case "l":
-		Menu, Tray, NoStandard									; remove all the rest of standard tray menu
-		if (!FileExist(AppIcon))
-		{
-			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Information"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." 
-				. A_Space . TransA["Would you like to download the icon file?"] . "`n`n" . TransA["If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used."]
-			IfMsgBox, Yes
-				URLDownloadToFile, https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/hotstrings.ico, % AppIcon
-			IfMsgBox, No
-				AppIcon := "*"
-		}
-		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
-		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"], F_GuiAbout
-		Menu, Tray, Default,	% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"]
-		Menu, Tray, Add										;separator line
-		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			L_TraySuspendHotkeys
-		Menu, Tray, Add,		% TransA["Pause application"],		L_TrayPauseScript
-		Menu  Tray, Add,		% TransA["Exit application"],			L_TrayExit		
-	Case "":
-		Menu, Tray, NoStandard									; remove all the rest of standard tray menu
-		if (!FileExist(AppIcon))
-		{
-			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Information"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." 
-				. A_Space . TransA["Would you like to download the icon file?"] . "`n`n" . TransA["If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used."]
-			IfMsgBox, Yes
-				URLDownloadToFile, https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/hotstrings.ico, % AppIcon
-			IfMsgBox, No
-				AppIcon := "*"
-		}
-		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
-		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Default mode"], F_GuiAbout
-		Menu, Tray, Add										;separator line
-		Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 			L_GUIInit
-		Menu, Tray, Default, 	% TransA["Edit Hotstrings"]
-		Menu, Tray, Add										;separator line
-		Menu, Tray, Add,		% TransA["Help: Hotstrings application"],			GuiAboutLink1
-		Menu, Tray, Add,		% TransA["Help: AutoHotkey Hotstrings reference guide"], GuiAboutLink2
-		Menu, Tray, Add										;separator line
-		Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],	L_TrayReload
-		Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],		L_TrayReload
-		Menu, Tray, Add,		% TransA["Reload"],					:SubmenuReload
-		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			L_TraySuspendHotkeys
-		Menu, Tray, Add,		% TransA["Pause application"],		L_TrayPauseScript
-		Menu  Tray, Add,		% TransA["Exit application"],			L_TrayExit
-}
+F_InitiateTrayMenus(v_Param)
 
 F_GuiMain_CreateObject()
 F_GuiMain_DefineConstants()
@@ -197,7 +147,7 @@ Gui, 1: Default	;this line is necessary to not show too many Guis on time of loa
 v_LibHotstringCnt := 0	;dirty trick to show initially 0 instead of 0000
 GuiControl, , % IdText13,  % v_LibHotstringCnt
 GuiControl, , % IdText13b, % v_LibHotstringCnt
-F_LoadHotstringsFromLibraries()	;→ F_LoadFile()
+F_LoadHotstringsFromLibraries()	;→ F_LoadFile() -> F_CreateHotstring
 if (ini_TTTtEn)	;Triggerstring Tips Column Trigger
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 F_GuiSearch_CreateObject()	;When all tables are full, initialize GuiSearch
@@ -348,7 +298,6 @@ F_GuiVersionUpdate_DetermineConstraints()
 
 if (ini_GuiReload) and (v_Param != "l")
 	Gosub, L_GUIInit
-
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; The main application loop beginning .
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -684,6 +633,58 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_InitiateTrayMenus(v_Param)
+{
+	global	;assume-global mode
+	Switch v_Param
+	{
+		Case "l":
+		Menu, Tray, NoStandard									; remove all the rest of standard tray menu
+		if (!FileExist(AppIcon))
+		{
+			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Information"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." 
+				. A_Space . TransA["Would you like to download the icon file?"] . "`n`n" . TransA["If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used."]
+			IfMsgBox, Yes
+				URLDownloadToFile, https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/hotstrings.ico, % AppIcon
+			IfMsgBox, No
+				AppIcon := "*"
+		}
+		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
+		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"], F_GuiAbout
+		Menu, Tray, Default,	% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"]
+		Menu, Tray, Add										;separator line
+		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			L_TraySuspendHotkeys
+		Menu, Tray, Add,		% TransA["Pause application"],		L_TrayPauseScript
+		Menu  Tray, Add,		% TransA["Exit application"],			L_TrayExit		
+		Case "":
+		Menu, Tray, NoStandard									; remove all the rest of standard tray menu
+		if (!FileExist(AppIcon))
+		{
+			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Information"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." 
+				. A_Space . TransA["Would you like to download the icon file?"] . "`n`n" . TransA["If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used."]
+			IfMsgBox, Yes
+				URLDownloadToFile, https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/hotstrings.ico, % AppIcon
+			IfMsgBox, No
+				AppIcon := "*"
+		}
+		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
+		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Default mode"], F_GuiAbout
+		Menu, Tray, Add										;separator line
+		Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 			L_GUIInit
+		Menu, Tray, Default, 	% TransA["Edit Hotstrings"]
+		Menu, Tray, Add										;separator line
+		Menu, Tray, Add,		% TransA["Help: Hotstrings application"],			GuiAboutLink1
+		Menu, Tray, Add,		% TransA["Help: AutoHotkey Hotstrings reference guide"], GuiAboutLink2
+		Menu, Tray, Add										;separator line
+		Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],	L_TrayReload
+		Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],		L_TrayReload
+		Menu, Tray, Add,		% TransA["Reload"],					:SubmenuReload
+		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			L_TraySuspendHotkeys
+		Menu, Tray, Add,		% TransA["Pause application"],		L_TrayPauseScript
+		Menu  Tray, Add,		% TransA["Exit application"],			L_TrayExit
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ChangeLanguage()
 {
 	global	;assume-global mode
@@ -775,7 +776,7 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestString)
 	local  vOutput1 := 0, vOutput1X := 0, vOutput1Y := 0, vOutput1W := 0, vOutput1H := 0
 		, vOutput2 := 0, vOutput2X := 0, vOutput2Y := 0, vOutput2W := 0, vOutput2H := 0
 		, OutputString := ""
-		
+	
 	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
 		OutputString .= "w"		;the widest ordinary letter in alphabet
 	Gui, TT_C3: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C3_Hwnd
@@ -790,7 +791,7 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestString)
 		Gui, TT_C2: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
 	Gui, TT_C3: Add, Text, % "x0 y0 HwndIdTT_C3_T1", % OutputString
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_T1
-	Gui, TT_C3: Add, Listbox, % "x0 y0 HwndIdTT_C3_LB1" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutput1W + 4 . A_Space . "g" . "F_MouseMenuTT"	;thanks to "g" it will not be a separate thread even upon mouse click
+	Gui, TT_C3: Add, Listbox, % "x0 y0 HwndIdTT_C3_LB1" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutput1W + 4 
 	Gui, TT_C3: Add, Text, % "x0 y0 HwndIdTT_C3_T2", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
 	GuiControlGet, vOutput2, Pos, % IdTT_C3_T2
 	Gui, TT_C3: Add, Listbox, % "HwndIdTT_C3_LB2" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutput2W + 4 . A_Space . "g" . "F_MouseMenuTT"
@@ -3823,14 +3824,15 @@ F_VerUpdCheckServ(param*)
 			RegExMatch(A_LoopField, "\d+.\d+.\d+", ServerVer)
 			Break
 		}
-	;*[One]	
 	Switch param[1]
 	{
 		Case "OnStartUp":
 		if (ServerVer != AppVersion)
+		{
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["On start-up the local version of application was compared with repository version and difference was discovered:"]  
 					. "`n`n" . TransA["Local version"] . ":"	 . A_Tab . A_Tab . AppVersion
 					. "`n" .   TransA["Repository version"] . ":" . A_Tab . A_Tab . ServerVer
+		}
 		whr := ""		
 		return
 		Case "ReturnResult":
@@ -7891,7 +7893,7 @@ F_ParseLanguageFile(argument)
 	}
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
-F_LoadFile(nameoffile)
+F_LoadFile(nameoffile) ; -> F_CreateHotstring
 {
 	global ;assume-global mode
 	local name := "", FlagLoadTriggerTips := false, key := "", value := "", v_TheWholeFile := "", v_TotalLines := 0
@@ -9466,6 +9468,7 @@ F_ReplaceAHKconstants(String)
 	String := StrReplace(String, "``v", "`v")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
 	String := StrReplace(String, "``a", "`a")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
 	String := StrReplace(String, "``f", "`f")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
+	return String
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PrepareUndo(string)
@@ -9573,6 +9576,7 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 	;v_Options 			→ triggerstring options
 	;v_Triggerstring		→ stored v_InputString
 	;v_EndChar			→ stored value of A_EndChar
+	;*[One]
 	F_DeterminePartStrings(ReplacementString)
 	f_HTriggered := true
 	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
@@ -9873,7 +9877,7 @@ F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #InputLevel 2	;thanks to this trick event of left mouse click is ignored by "main level" of hotkeys.
-~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected.
+;~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected.
 F_LButtonHandling()
 {
 	global	;assume-global mode
