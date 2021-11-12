@@ -52,8 +52,8 @@ global 	HADL 				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libra
 
 ;Flags to control application
 ,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time
-,		TT_C1_Hwnd 			:= 0, TT_C2_Hwnd := 0, TT_C3_Hwnd := 0, HMenuCliHwnd := 0, HMenuAHKHwnd	:= 0, HS3GuiHwnd := 0, HS4GuiHwnd := 0 ;This is a trick to initialize global variable HwndTMenuAHK_C1_Hwnd in order to not get warning (#Warn) message
-
+,		TT_C1_Hwnd 			:= 0, TT_C2_Hwnd := 0, TT_C3_Hwnd := 0, HMenuCliHwnd := 0, HMenuAHKHwnd	:= 0, HS3GuiHwnd := 0, HS4GuiHwnd := 0, TT_C4_Hwnd := 0 ;This is a trick to initialize global variable HwndTMenuAHK_C1_Hwnd in order to not get warning (#Warn) message
+,		WhichMenu := ""
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_DetermineMonitors()
 Critical, On
@@ -352,13 +352,12 @@ Loop,
 					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
 			}
 			else
-				;Gui, TMenuAHK_C1: Destroy
 				Switch ini_TTCn
-			{
-				Case 1: Gui, TT_C1: Destroy
-				Case 2: Gui, TT_C2: Destroy
-				Case 3: Gui, TT_C3: Destroy
-			}
+				{
+					Case 1: Gui, TT_C1: Destroy
+					Case 2: Gui, TT_C2: Destroy
+					Case 3: Gui, TT_C3: Destroy
+				}
 		}
 	}
 	
@@ -551,34 +550,22 @@ Down::
 F_HMenuCli()
 {
 	global	;assume-global moee
-	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", ShiftTabIsFound := false, ReplacementString := ""
+	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",	ShiftTabIsFound := false, ReplacementString := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
-	if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
+	;*[One]
+	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
 		IntCnt--
 		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuCli
 		ShiftTabIsFound := true
 	}
-	if (InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+	if (InStr(v_PressedKey, "Down") or InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
 	{
 		IsCursorPressed := true
 		IntCnt++
 		ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuCli
 	}
-	if (InStr(v_PressedKey, "Up"))
-	{
-		IsCursorPressed := true
-		IntCnt--
-		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuCli
-	}
-	if (InStr(v_PressedKey, "Down"))
-	{
-		IsCursorPressed := true
-		IntCnt++
-		ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuCli
-	}
-	
 	if ((v_MenuMax = 1) and IsCursorPressed)
 	{
 		IntCnt := 1
@@ -613,7 +600,6 @@ F_HMenuCli()
 	{
 		return
 	}
-	ClipboardBack := ClipboardAll ;backup clipboard
 	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuCli
 	Loop, Parse, v_Temp1, `n
 	{
@@ -624,6 +610,7 @@ F_HMenuCli()
 	ReplacementString := F_PrepareSend(v_Temp1, Ovar)
 	F_ClipboardPaste(ReplacementString, Ovar)
 	Gui, HMenuCli: Destroy
+	f_HTriggered := true
 	if (ini_MHSEn)
 		SoundBeep, % ini_MHSF, % ini_MHSD
 	if (ini_THLog)
@@ -632,9 +619,9 @@ F_HMenuCli()
 
 Esc::
 Gui, HMenuCli: Destroy
-	Input ;This line blocks temporarily Input command in the main loop. 
-	Send, % v_Triggerstring . v_EndChar
-	f_HTriggered := true
+Input ;This line blocks temporarily Input command in the main loop. 
+Send, % v_Triggerstring . v_EndChar
+f_HTriggered := true
 return
 #If
 
@@ -800,14 +787,20 @@ F_GuiTrigTipsMenuDefC4()	;tu jestem
 	Gui, TT_C4: Add, Listbox, % "x0 y0 HwndIdTT_C4_LB1" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput1W + 4 . A_Space . "g" . "F_MouseMenuTT"
 	Gui, TT_C4: Add, Text, % "x0 y0 HwndIdTT_C4_T2", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
 	GuiControlGet, vOutput2, Pos, % IdTT_C4_T2
-	Gui, TT_C4: Add, Listbox, % "HwndIdTT_C4_LB2" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput2W + 4 . A_Space . "g" . "F_MouseMenuTT"
-	Gui, TT_C4: Add, Listbox, % "HwndIdTT_C4_LB3" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput1W * 2 + 4 . A_Space . "g" . "F_MouseMenuTT"
+	Gui, TT_C4: Add, Listbox, % "HwndIdTT_C4_LB2" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput2W + 4 	. A_Space . "g" . "F_MouseMenuTT"
+	Gui, TT_C4: Add, Listbox, % "HwndIdTT_C4_LB3" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput1W * 2 + 4 	. A_Space . "g" . "F_MouseMenuTT"
 	GuiControl, Hide, % IdTT_C4_T1
 	GuiControl, Hide, % IdTT_C4_T2
 	GuiControl, Font, % IdTT_C4_LB1		;fontcolor of listbox
 	GuiControl, Font, % IdTT_C4_LB2		;fontcolor of listbox
 	GuiControl, Font, % IdTT_C4_LB3		;fontcolor of listbox
-	
+	if (ini_HMTyFaceCol = "custom")
+		Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
+	else
+		Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
+	Gui, TT_C4: Add, Listbox, % "x0 y0 w250 HwndIdTT_C4_LB4" . A_Space . "r" . 7 . A_Space . "g" . "F_MouseMenuAHK"
+	GuiControl, Font, % IdTT_C4_LB4
+
 	GuiControl, Choose, % IdTT_C4_LB1, 1
 	GuiControlGet, PosOutputVar, Pos, % IdTT_C4_LB1
 	GuiControl, Move, % IdTT_C4_LB2, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
@@ -815,6 +808,8 @@ F_GuiTrigTipsMenuDefC4()	;tu jestem
 	GuiControlGet, PosOutputVar, Pos, % IdTT_C4_LB2
 	GuiControl, Move, % IdTT_C4_LB3, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
 	GuiControl, Choose, % IdTT_C4_LB3, 1
+	GuiControlGet, PosOutputVar, Pos, % IdTT_C4_LB3
+	GuiControl, Move, % IdTT_C4_LB4, % "x" . PosOutputVarX + PosOutputVarW + 2 * c_xmarg . A_Space . "y" . PosOutputVarY
 	
 	Gui, TT_C4: Show, Center AutoSize NoActivate
 }
@@ -4738,7 +4733,6 @@ F_PrepareTriggerstringTipsTables2()
 		{
 			if (InStr(a_Combined[A_Index], v_InputString) = 1)
 			{
-				;*[One]
 				Switch ini_TTCn
 				{
 					Case 1:	;only column 1: Triggerstring Tips
@@ -9794,60 +9788,72 @@ F_HOF_MCLI(TextOptions, Oflag)
 	TextOptions 		 := F_ReplaceAHKconstants(TextOptions)
 	Loop, Parse, TextOptions, ¦
 		v_MenuMax := A_Index
-	Gui, HMenuCli: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuCliHwnd
-	Gui, HMenuCli: Margin, 0, 0
-	if (ini_HMBgrCol = "custom")
-		Gui, HMenuCli: Color,, % ini_HMBgrColCus
-	else
-		Gui, HMenuCli: Color,, % ini_HMBgrCol
-	if (ini_HMTyFaceCol = "custom")
-		Gui, HMenuCli: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
-	else
-		Gui, HMenuCli: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
-	Gui, HMenuCli: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuCli" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenuCli"
-	Loop, Parse, TextOptions, ¦
-		GuiControl,, % Id_LB_HMenuCli, % A_Index . ". " . A_LoopField . "|"
-	
-	if (ini_MHMP = 1)
+	if (ini_TTCn != 4)	;tu jestem
 	{
-		if (A_CaretX and A_CaretY)
-		{
-			MenuX := A_CaretX + 20
-			MenuY := A_CaretY - 20
-		}
+		Gui, HMenuCli: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuCliHwnd
+		Gui, HMenuCli: Margin, 0, 0
+		if (ini_HMBgrCol = "custom")
+			Gui, HMenuCli: Color,, % ini_HMBgrColCus
 		else
+			Gui, HMenuCli: Color,, % ini_HMBgrCol
+		if (ini_HMTyFaceCol = "custom")
+			Gui, HMenuCli: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
+		else
+			Gui, HMenuCli: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
+		Gui, HMenuCli: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuCli" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenuCli"
+		Loop, Parse, TextOptions, ¦
+			GuiControl,, % Id_LB_HMenuCli, % A_Index . ". " . A_LoopField . "|"
+		
+		if (ini_MHMP = 1)
+		{
+			if (A_CaretX and A_CaretY)
+			{
+				MenuX := A_CaretX + 20
+				MenuY := A_CaretY - 20
+			}
+			else
+			{
+				MouseGetPos, v_MouseX, v_MouseY
+				MenuX := v_MouseX + 20
+				MenuY := v_MouseY + 20
+			}
+		}
+		if (ini_MHMP = 2)
 		{
 			MouseGetPos, v_MouseX, v_MouseY
 			MenuX := v_MouseX + 20
 			MenuY := v_MouseY + 20
 		}
+		Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate Hide
+		DetectHiddenWindows, On
+		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . HMenuCliHwnd
+		DetectHiddenWindows, Off
+		
+		Loop % MonitorCoordinates.Count()
+			if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
+			{
+				Window1X := MonitorCoordinates[A_Index].Left
+				Window1H := MonitorCoordinates[A_Index].Height
+				Window1Y := MonitorCoordinates[A_Index].Top 
+				Window1W := MonitorCoordinates[A_Index].Width
+				Break
+			}
+		if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
+			MenuY -= Window2H
+		if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
+			MenuX -= Window2W
+		Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate
+		GuiControl, Choose, % Id_LB_HMenuCli, 1
 	}
-	if (ini_MHMP = 2)
+	else	;(ini_MHMP = 4);tu jestem
 	{
-		MouseGetPos, v_MouseX, v_MouseY
-		MenuX := v_MouseX + 20
-		MenuY := v_MouseY + 20
+		PreviousWindowID := WinExist("A")
+		Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
+			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . "|"
+		GuiControl, Choose, % IdTT_C4_LB4, 1
+		WinActivate, % "ahk_id" TT_C4_Hwnd
+		WhichMenu := "CLI"
 	}
-	Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate Hide
-	DetectHiddenWindows, On
-	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . HMenuCliHwnd
-	DetectHiddenWindows, Off
-	
-	Loop % MonitorCoordinates.Count()
-		if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
-		{
-			Window1X := MonitorCoordinates[A_Index].Left
-			Window1H := MonitorCoordinates[A_Index].Height
-			Window1Y := MonitorCoordinates[A_Index].Top 
-			Window1W := MonitorCoordinates[A_Index].Width
-			Break
-		}
-	if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
-		MenuY -= Window2H
-	if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
-		MenuX -= Window2W
-	Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate
-	GuiControl, Choose, % Id_LB_HMenuCli, 1
 	Ovar := Oflag
 	f_HTriggered := true
 	F_DeterminePartStrings(TextOptions)
@@ -9886,62 +9892,75 @@ F_HOF_MSI(TextOptions, Oflag)
 	TextOptions 			:= F_ReplaceAHKconstants(TextOptions)
 	Loop, Parse, TextOptions, ¦	;determine amount of rows for Listbox
 		v_MenuMax := A_Index
-	Gui, HMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuAHKHwnd
-	Gui, HMenuAHK: Margin, 0, 0
-	if (ini_HMBgrCol = "custom")
-		Gui, HMenuAHK: Color,, % ini_HMBgrColCus
-	else
-		Gui, HMenuAHK: Color,, % ini_HMBgrCol
-	if (ini_HMTyFaceCol = "custom")
-		Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
-	else
-		Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
-	Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenuAHK"
-	Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
-		GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . "|"
 	
-	if (ini_MHMP = 1)
+	if (ini_TTCn != 4)
 	{
-		if (A_CaretX and A_CaretY)
-		{
-			MenuX := A_CaretX + 20
-			MenuY := A_CaretY - 20
-		}
+		Gui, HMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuAHKHwnd
+		Gui, HMenuAHK: Margin, 0, 0
+		if (ini_HMBgrCol = "custom")
+			Gui, HMenuAHK: Color,, % ini_HMBgrColCus
 		else
+			Gui, HMenuAHK: Color,, % ini_HMBgrCol
+		if (ini_HMTyFaceCol = "custom")	
+			Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
+		else
+			Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
+		Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenuAHK"
+		Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
+			GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . "|"
+		
+		if (ini_MHMP = 1)
+		{
+			if (A_CaretX and A_CaretY)
+			{
+				MenuX := A_CaretX + 20
+				MenuY := A_CaretY - 20
+			}
+			else
+			{
+				MouseGetPos, v_MouseX, v_MouseY
+				MenuX := v_MouseX + 20
+				MenuY := v_MouseY + 20
+			}
+		}
+		if (ini_MHMP = 2) 
 		{
 			MouseGetPos, v_MouseX, v_MouseY
 			MenuX := v_MouseX + 20
 			MenuY := v_MouseY + 20
 		}
+		
+		Gui, HMenuAHK: Show, x%MenuX% y%MenuY% NoActivate Hide
+		DetectHiddenWindows, On
+		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . HMenuAHKHwnd
+		DetectHiddenWindows, Off
+		
+		Loop % MonitorCoordinates.Count()
+			if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
+			{
+				Window1X := MonitorCoordinates[A_Index].Left
+				Window1H := MonitorCoordinates[A_Index].Height
+				Window1Y := MonitorCoordinates[A_Index].Top 
+				Window1W := MonitorCoordinates[A_Index].Width
+				Break
+			}
+		if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
+			MenuY -= Window2H
+		if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
+			MenuX -= Window2W
+		Gui, HMenuAHK: Show, x%MenuX% y%MenuY% NoActivate	
+		GuiControl, Choose, % Id_LB_HMenuAHK, 1
 	}
-	if (ini_MHMP = 2) 
+	else	;(ini_MHMP = 4);tu jestem
 	{
-		MouseGetPos, v_MouseX, v_MouseY
-		MenuX := v_MouseX + 20
-		MenuY := v_MouseY + 20
+		PreviousWindowID := WinExist("A")
+		OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID
+		Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
+			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . "|"
+		GuiControl, Choose, % IdTT_C4_LB4, 1
+		WinActivate, % "ahk_id" TT_C4_Hwnd
+		WhichMenu := "AHK"
 	}
-	
-	Gui, HMenuAHK: Show, x%MenuX% y%MenuY% NoActivate Hide
-	DetectHiddenWindows, On
-	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . HMenuAHKHwnd
-	DetectHiddenWindows, Off
-	
-	Loop % MonitorCoordinates.Count()
-		if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
-		{
-			Window1X := MonitorCoordinates[A_Index].Left
-			Window1H := MonitorCoordinates[A_Index].Height
-			Window1Y := MonitorCoordinates[A_Index].Top 
-			Window1W := MonitorCoordinates[A_Index].Width
-			Break
-		}
-	if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
-		MenuY -= Window2H
-	if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
-		MenuX -= Window2W
-	Gui, HMenuAHK: Show, x%MenuX% y%MenuY% NoActivate	
-	
-	GuiControl, Choose, % Id_LB_HMenuAHK, 1
 	Ovar := Oflag
 	f_HTriggered := true
 	F_DeterminePartStrings(TextOptions)
@@ -10031,7 +10050,7 @@ F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#if WinExist("ahk_id" HMenuAHKHwnd) ;Future: move this section of code to Hotkeys
+#if WinExist("ahk_id" HMenuAHKHwnd)	;Future: move this section of code to Hotkeys
 Tab::
 +Tab::
 1::
@@ -10051,31 +10070,20 @@ F_HMenuAHK()
 	local	v_PressedKey := "",		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	v_PressedKey := A_ThisHotkey
-	if (InStr(v_PressedKey, "+Tab"))	;the same as "up"
+	;*[One]
+	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
 		IntCnt--
 		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
 		ShiftTabIsFound := true
 	}
-	if (InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+	if (InStr(v_PressedKey, "Down") or InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
 	{
 		IsCursorPressed := true
 		IntCnt++
 		ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
 		ShiftTabIsFound := false
-	}
-	if (InStr(v_PressedKey, "Up"))
-	{
-		IsCursorPressed := true
-		IntCnt--
-		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
-	}
-	if (InStr(v_PressedKey, "Down"))
-	{
-		IsCursorPressed := true
-		IntCnt++
-		ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
 	}
 	if ((v_MenuMax = 1) and IsCursorPressed)
 	{
@@ -10101,6 +10109,7 @@ F_HMenuAHK()
 	}		
 	if (InStr(v_PressedKey, "Enter"))
 	{
+		;*[One]
 		v_PressedKey := IntCnt
 		IsCursorPressed := false
 		IntCnt := 1
@@ -10117,6 +10126,8 @@ F_HMenuAHK()
 	}
 	v_UndoHotstring := v_Temp1
 	ReplacementString := F_PrepareSend(v_Temp1, Ovar)
+	OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
+	WinActivate, % "ahk_id" PreviousWindowID
 	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
 	Gui, HMenuAHK: Destroy
 	f_HTriggered := true
@@ -10128,6 +10139,110 @@ F_HMenuAHK()
 
 Esc::
 Gui, HMenuAHK: Destroy
+Input ;This line blocks temporarily Input command in the main loop. 
+Send, % v_Triggerstring . v_EndChar
+f_HTriggered := true
+return
+#If
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#if WinActive("ahk_id" TT_C4_Hwnd)	;Future: move this section of code to Hotkeys
+Tab::
++Tab::
+1::
+2::
+3::
+4::
+5::
+6::
+7::
+Enter:: 
+Up::
+Down::
+
+F_HMenuStatic()	;tu jestem
+{
+	global	;assume-global moee
+	local	v_PressedKey := "",		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
+	v_PressedKey := A_ThisHotkey
+	;*[One]
+	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
+	{
+		IsCursorPressed := true
+		IntCnt--
+		ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB4
+		ShiftTabIsFound := true
+	}
+	if (InStr(v_PressedKey, "Down") or InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+	{
+		IsCursorPressed := true
+		IntCnt++
+		ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB4
+		ShiftTabIsFound := false
+	}
+	if ((v_MenuMax = 1) and IsCursorPressed)
+	{
+		IntCnt := 1
+		return
+	}
+	if (IsCursorPressed)
+	{
+		if (IntCnt > v_MenuMax)
+		{
+			IntCnt := v_MenuMax
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	
+		}
+		if (IntCnt < 1)
+		{
+			IntCnt := 1
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	
+		}
+		IsCursorPressed := false
+		return
+	}		
+	if (InStr(v_PressedKey, "Enter"))
+	{
+		;*[One]
+		v_PressedKey := IntCnt
+		IsCursorPressed := false
+		IntCnt := 1
+	}
+	if (v_PressedKey > v_MenuMax)
+	{
+		return
+	}
+	ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C4_LB4
+	Loop, Parse, v_Temp1, `n
+	{
+		if (InStr(A_LoopField, v_PressedKey . "."))
+			v_Temp1 := SubStr(A_LoopField, 4)
+	}
+	v_UndoHotstring := v_Temp1
+	ReplacementString := F_PrepareSend(v_Temp1, Ovar)
+	
+	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
+	WinActivate, % "ahk_id" PreviousWindowID
+	Switch WhichMenu
+	{
+		Case "AHK":
+		F_SendIsOflag(ReplacementString, Ovar, "SendInput")
+		Case "CLI":
+		ClipboardBack := ClipboardAll ;backup clipboard
+		F_ClipboardPaste(ReplacementString, Ovar)
+	}
+	
+	GuiControl,, % IdTT_C4_LB4, |
+	f_HTriggered := true
+	if (ini_MHSEn)
+		SoundBeep, % ini_MHSF, % ini_MHSD	
+	if (ini_THLog)
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+}
+
+Esc::
+GuiControl,, % IdTT_C4_LB4, |
 Input ;This line blocks temporarily Input command in the main loop. 
 Send, % v_Triggerstring . v_EndChar
 f_HTriggered := true
