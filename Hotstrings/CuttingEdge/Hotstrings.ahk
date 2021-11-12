@@ -790,7 +790,7 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestString)
 		Gui, TT_C2: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
 	Gui, TT_C3: Add, Text, % "x0 y0 HwndIdTT_C3_T1", % OutputString
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_T1
-	Gui, TT_C3: Add, Listbox, % "x0 y0 HwndIdTT_C3_LB1" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutput1W + 4 
+	Gui, TT_C3: Add, Listbox, % "x0 y0 HwndIdTT_C3_LB1" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutput1W + 4 . A_Space . "g" . "F_MouseMenuTT"
 	Gui, TT_C3: Add, Text, % "x0 y0 HwndIdTT_C3_T2", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
 	GuiControlGet, vOutput2, Pos, % IdTT_C3_T2
 	Gui, TT_C3: Add, Listbox, % "HwndIdTT_C3_LB2" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutput2W + 4 . A_Space . "g" . "F_MouseMenuTT"
@@ -9593,7 +9593,6 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 	;v_Options 			→ triggerstring options
 	;v_Triggerstring		→ stored v_InputString
 	;v_EndChar			→ stored value of A_EndChar
-	;*[One]
 	F_DeterminePartStrings(ReplacementString)
 	f_HTriggered := true
 	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
@@ -9869,18 +9868,26 @@ F_HOF_MSI(TextOptions, Oflag)
 F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
-	local	OutputVarTemp := "",	ThisHotkey := A_ThisHotkey 
+	local	OutputVarTemp := "",	ThisHotkey := A_ThisHotkey
+			, OutputVarTemp2 := "", ChoicePos := 0
+	MouseGetPos, , , , OutputVarTemp	;to store the name (ClassNN) of the control under the mouse cursor
+	SendMessage, 0x0188, 0, 0, % OutputVarTemp	;retrieve the position of the selected item
+	ChoicePos := ErrorLevel<<32>>32			;Convert UInt to Int to have -1 if there is no item selected.
+	ChoicePos += 1							;Convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.
 	if (InStr(ThisHotkey, "LButton"))
 	{
 		Switch ini_TTCn
 		{
 			Case 1: 
+			GuiControl, Choose, % IdTT_C1_LB1, % ChoicePos
 			GuiControlGet, OutputVarTemp, , % IdTT_C1_LB1
 			Gui, TT_C1: Destroy
 			Case 2: 
+			GuiControl, Choose, % IdTT_C2_LB1, % ChoicePos
 			GuiControlGet, OutputVarTemp, , % IdTT_C2_LB1 
 			Gui, TT_C2: Destroy
 			Case 3: 
+			GuiControl, Choose, % IdTT_C3_LB1, % ChoicePos
 			GuiControlGet, OutputVarTemp, , % IdTT_C3_LB1 
 			Gui, TT_C3: Destroy
 		}
