@@ -296,7 +296,7 @@ F_GuiAbout_DetermineConstraints()
 F_GuiVersionUpdate_DetermineConstraints()
 
 ini_TTCn := 4
-if (ini_TTCn = 4)
+if (ini_TTCn = 4)	;static triggerstring / hotstring GUI 
 	F_GuiTrigTipsMenuDefC4()
 if (ini_GuiReload) and (v_Param != "l")
 	Gosub, L_GUIInit
@@ -772,7 +772,7 @@ F_GuiTrigTipsMenuDefC4()	;tu jestem
 		, PosOutputVar := 0, PosOutputVarX := 0, PosOutputVarY := 0, PosOutputVarW := 0, PosOutputVarH := 0
 	
 		;OutputString .= "w"		;the widest ordinary letter in alphabet
-	Gui, TT_C4: New, +AlwaysOnTop +Caption +HwndTT_C4_Hwnd +Resize, % A_ScriptName . ":" . A_Space . "static triggerstring / hotstring menus"
+	Gui, TT_C4: New, +AlwaysOnTop +Caption +HwndTT_C4_Hwnd +Resize, % A_ScriptName . ":" . A_Space . TransA["static triggerstring / hotstring menus"]
 	Gui, TT_C4: Margin, 0, 0
 	if (ini_TTBgrCol = "custom")
 		Gui, TT_C4: Color,, % ini_TTBgrColCus	;background of listbox
@@ -795,9 +795,9 @@ F_GuiTrigTipsMenuDefC4()	;tu jestem
 	GuiControl, Font, % IdTT_C4_LB2		;fontcolor of listbox
 	GuiControl, Font, % IdTT_C4_LB3		;fontcolor of listbox
 	if (ini_HMTyFaceCol = "custom")
-		Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
+		Gui, TT_C4: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
 	else
-		Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
+		Gui, TT_C4: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
 	Gui, TT_C4: Add, Listbox, % "x0 y0 w250 HwndIdTT_C4_LB4" . A_Space . "r" . 7 . A_Space . "g" . "F_MouseMenuAHK"
 	GuiControl, Font, % IdTT_C4_LB4
 
@@ -7825,6 +7825,7 @@ Space												= Space
 Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
 Standard executable (Ahk2Exe.exe)							= Standard executable (Ahk2Exe.exe)
 Static hotstrings 										= &Static hotstrings
+static triggerstring / hotstring menus						= static triggerstring / hotstring menus
 Style of GUI											= Style of GUI
 Such file already exists									= Such file already exists
 Suspend Hotkeys										= Suspend Hotkeys
@@ -9954,7 +9955,7 @@ F_HOF_MSI(TextOptions, Oflag)
 	else	;(ini_MHMP = 4);tu jestem
 	{
 		PreviousWindowID := WinExist("A")
-		OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID
+		;OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID
 		Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
 			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . "|"
 		GuiControl, Choose, % IdTT_C4_LB4, 1
@@ -9971,7 +9972,7 @@ F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_
 	global	;assume-global mode
 	local	OutputVarTemp := "",	ThisHotkey := A_ThisHotkey
 			, OutputVarTemp2 := "", ChoicePos := 0
-	MouseGetPos, , , , OutputVarTemp	;to store the name (ClassNN) of the control under the mouse cursor
+	MouseGetPos, , , , OutputVarTemp			;to store the name (ClassNN) of the control under the mouse cursor
 	SendMessage, 0x0188, 0, 0, % OutputVarTemp	;retrieve the position of the selected item
 	ChoicePos := ErrorLevel<<32>>32			;Convert UInt to Int to have -1 if there is no item selected.
 	ChoicePos += 1							;Convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.
@@ -10033,12 +10034,23 @@ F_LButtonHandling()	;the priority of gT_MenuTT is lower than this "interrupt"
 F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
-	local	OutputVarTemp := "", ReplacementString := ""
+	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0
 	if (A_PriorKey = "LButton")
 	{
-		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuAHK 
+		MouseGetPos, , , , OutputVarControl			;to store the name (ClassNN) of the control under the mouse cursor
+		SendMessage, 0x0188, 0, 0, % OutputVarControl	;retrieve the position of the selected item
+		ChoicePos := ErrorLevel<<32>>32				;Convert UInt to Int to have -1 if there is no item selected.
+		ChoicePos += 1								;Convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.		
+		GuiControl, Choose, % OutputVarControl, % ChoicePos
+		GuiControlGet, OutputVarTemp, , % OutputVarControl
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
-		Gui, HMenuAHK: Destroy
+		if (WinExist("ahk_id" HMenuAHKHwnd))
+			Gui, HMenuAHK: Destroy
+		else
+		{
+			GuiControl,, % IdTT_C4_LB4, |
+			WinActivate, % "ahk_id" PreviousWindowID
+		}
 		v_UndoHotstring := OutputVarTemp
 		ReplacementString := F_PrepareSend(OutputVarTemp, Ovar)
 		F_SendIsOflag(ReplacementString, Ovar, "SendInput")
@@ -10126,7 +10138,7 @@ F_HMenuAHK()
 	}
 	v_UndoHotstring := v_Temp1
 	ReplacementString := F_PrepareSend(v_Temp1, Ovar)
-	OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
+	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
 	WinActivate, % "ahk_id" PreviousWindowID
 	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
 	Gui, HMenuAHK: Destroy
