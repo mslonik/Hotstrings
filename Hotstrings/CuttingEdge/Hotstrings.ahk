@@ -295,6 +295,9 @@ F_GuiVersionUpdate_CreateObjects()
 F_GuiAbout_DetermineConstraints()
 F_GuiVersionUpdate_DetermineConstraints()
 
+ini_TTCn := 4
+if (ini_TTCn = 4)
+	F_GuiTrigTipsMenuDefC4()
 if (ini_GuiReload) and (v_Param != "l")
 	Gosub, L_GUIInit
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -326,6 +329,10 @@ Loop,
 			Case 1: Gui, TT_C1: Destroy
 			Case 2: Gui, TT_C2: Destroy
 			Case 3: Gui, TT_C3: Destroy
+			Case 4: 	;tu jestem
+			GuiControl,, % IdTT_C4_LB1, |
+			GuiControl,, % IdTT_C4_LB2, |
+			GuiControl,, % IdTT_C4_LB3, |
 		}
 		f_HTriggered := false
 	}
@@ -769,6 +776,49 @@ F_Load_ini_Language()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiTrigTipsMenuDefC4()	;tu jestem
+{
+	global	;assume-global mode
+	local  vOutput1 := 0, vOutput1X := 0, vOutput1Y := 0, vOutput1W := 0, vOutput1H := 0
+		, vOutput2 := 0, vOutput2X := 0, vOutput2Y := 0, vOutput2W := 0, vOutput2H := 0
+		, OutputString := ""
+		, PosOutputVar := 0, PosOutputVarX := 0, PosOutputVarY := 0, PosOutputVarW := 0, PosOutputVarH := 0
+	
+		;OutputString .= "w"		;the widest ordinary letter in alphabet
+	Gui, TT_C4: New, +AlwaysOnTop +Caption +HwndTT_C4_Hwnd +Resize, % A_ScriptName . ":" . A_Space . "static triggerstring / hotstring menus"
+	Gui, TT_C4: Margin, 0, 0
+	if (ini_TTBgrCol = "custom")
+		Gui, TT_C4: Color,, % ini_TTBgrColCus	;background of listbox
+	else
+		Gui, TT_C4: Color,, % ini_TTBgrCol	;background of listbox
+	if (ini_TTTyFaceCol = "custom")		
+		Gui, TT_C4: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceColCus, % ini_TTTyFaceFont
+	else
+		Gui, TT_C4: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
+	Gui, TT_C4: Add, Text, % "x0 y0 HwndIdTT_C4_T1", Whatever
+	GuiControlGet, vOutput1, Pos, % IdTT_C4_T1
+	Gui, TT_C4: Add, Listbox, % "x0 y0 HwndIdTT_C4_LB1" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput1W + 4 . A_Space . "g" . "F_MouseMenuTT"
+	Gui, TT_C4: Add, Text, % "x0 y0 HwndIdTT_C4_T2", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
+	GuiControlGet, vOutput2, Pos, % IdTT_C4_T2
+	Gui, TT_C4: Add, Listbox, % "HwndIdTT_C4_LB2" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput2W + 4 . A_Space . "g" . "F_MouseMenuTT"
+	Gui, TT_C4: Add, Listbox, % "HwndIdTT_C4_LB3" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput1W * 2 + 4 . A_Space . "g" . "F_MouseMenuTT"
+	GuiControl, Hide, % IdTT_C4_T1
+	GuiControl, Hide, % IdTT_C4_T2
+	GuiControl, Font, % IdTT_C4_LB1		;fontcolor of listbox
+	GuiControl, Font, % IdTT_C4_LB2		;fontcolor of listbox
+	GuiControl, Font, % IdTT_C4_LB3		;fontcolor of listbox
+	
+	GuiControl, Choose, % IdTT_C4_LB1, 1
+	GuiControlGet, PosOutputVar, Pos, % IdTT_C4_LB1
+	GuiControl, Move, % IdTT_C4_LB2, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
+	GuiControl, Choose, % IdTT_C4_LB2, 1
+	GuiControlGet, PosOutputVar, Pos, % IdTT_C4_LB2
+	GuiControl, Move, % IdTT_C4_LB3, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
+	GuiControl, Choose, % IdTT_C4_LB3, 1
+	
+	Gui, TT_C4: Show, Center AutoSize NoActivate
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestString)
 {
 	global	;assume-global mode
@@ -787,7 +837,7 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestString)
 	if (ini_TTTyFaceCol = "custom")		
 		Gui, TT_C3: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceColCus, % ini_TTTyFaceFont
 	else
-		Gui, TT_C2: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
+		Gui, TT_C3: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
 	Gui, TT_C3: Add, Text, % "x0 y0 HwndIdTT_C3_T1", % OutputString
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_T1
 	Gui, TT_C3: Add, Listbox, % "x0 y0 HwndIdTT_C3_LB1" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutput1W + 4 . A_Space . "g" . "F_MouseMenuTT"
@@ -1412,7 +1462,7 @@ F_GuiEvents_CreateObjects()
 	GuiControl, +g, % IdEvTt_T24, % T_TtComposition
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	DropDownList, HwndIdEvTt_DDL2 vEvTt_DDL2 AltSubmit, % TransA["Triggerstring tips"] . "|" . TransA["Triggerstring tips"] . A_Space . "+" . A_Space 
-		. TransA["Triggers"] . "|" . TransA["Triggerstring tips"] . A_Space . "+" . A_Space . TransA["Triggers"] . A_Space . "+" . A_Space . TransA["Hotstrings"]	;tu jestem
+		. TransA["Triggers"] . "|" . TransA["Triggerstring tips"] . A_Space . "+" . A_Space . TransA["Triggers"] . A_Space . "+" . A_Space . TransA["Hotstrings"]
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvTt_B1 gF_EvTt_B1,			% TransA["Tooltip test"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B2 gF_EvTt_B2,			% TransA["Apply && Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B3 gF_EvTt_B3,			% TransA["Cancel"]
@@ -1487,7 +1537,7 @@ F_EvAT_R1R2()
 	F_TMenuAHK_Hotkeys(EvAT_R1R2)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvTt_B1()	;Event Tooltip (is triggered) Button Tooltip test tu jestem
+F_EvTt_B1()	;Event Tooltip (is triggered) Button Tooltip test 
 {
 	global ;assume-global mode
 	local a_Tips := []
@@ -1518,7 +1568,7 @@ F_EvTt_B1()	;Event Tooltip (is triggered) Button Tooltip test tu jestem
 			a_Combined[A_Index]			:= a_Tips[A_Index] . "|" . a_TipsOpt[A_Index] . "|" . a_TipsEnDis[A_Index] . "|" . a_TipsHS[A_Index]
 		}
 		F_Sort_a_Triggers(a_Combined, EvTt_C1, EvTt_C2)
-		F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, EvTt_DDL2)	;tu jestem
+		F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, EvTt_DDL2)
 		if ((EvTt_R1R2 = 1) and (EvTt_R3R4 = 1))
 			SetTimer, TurnOff_Ttt, % "-" . EvTt_S1	 ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 	}
@@ -2220,7 +2270,7 @@ F_GuiEvents_DetermineConstraints()
 	GuiControl, Move, % IdEvTt_T24, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_T25
 	v_xNext := c_xmarg, v_yNext += HofText, v_wNext := v_OutVarTempW + 3 * c_ymarg
-	GuiControl, Move, % IdEvTt_DDL2, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext	;tu jestem
+	GuiControl, Move, % IdEvTt_DDL2, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
 	v_xNext := c_xmarg, v_yNext += HofText
 	GuiControl, Move, % IdEvTt_T25, % "x+" . v_xNext . A_Space . "y+" . v_yNext	;fake text, just to measure its width, but unfortunately as it cannot be deleted, it has to be shifted somewhere
 	v_xNext := c_xmarg, v_yNext += 3 * HofText
@@ -2665,7 +2715,7 @@ F_GuiEvents_LoadValues()
 	GuiControl,, % IdEvTt_C2,	% ini_TipsSortByLength
 	GuiControl,, % IdEvTt_S2,	% ini_MNTT
 	GuiControl,, % IdEvTt_T18,	% ini_MNTT
-	GuiControl, ChooseString, % IdEvTt_DDL1, % ini_TASAC	;tu jestem
+	GuiControl, ChooseString, % IdEvTt_DDL1, % ini_TASAC
 	Switch ini_TTCn
 	{
 		Case 1:	GuiControl, ChooseString, % IdEvTt_DDL2, % TransA["Triggerstring tips"]
@@ -3544,6 +3594,31 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		for key, value in a_TipsHS
 			ThisValue .= value . "|"
 		GuiControl,, % IdTT_C3_LB3, % ThisValue
+		
+		Case 4:	;tu jestem
+		GuiControl,, % IdTT_C4_LB1, |
+		GuiControl,, % IdTT_C4_LB2, |
+		GuiControl,, % IdTT_C4_LB3, |
+		ThisValue := ""
+		for key, value in a_Tips
+			ThisValue .= value . "|"
+		GuiControl,, % IdTT_C4_LB1, % ThisValue
+		ThisValue := ""
+		for key, value in a_TipsOpt
+		{
+			if (a_TipsEnDis[key] = "En") and (InStr(value, "*"))
+				ThisValue .= "✓" . "|"	
+			if (a_TipsEnDis[key] = "En") and (!InStr(value, "*"))						
+				ThisValue .= "↓" . "|"	
+			if (a_TipsEnDis[key] = "Dis")
+				ThisValue .= "╳" . "|"	
+		}
+		GuiControl,, % IdTT_C4_LB2, % ThisValue
+		ThisValue := ""
+		for key, value in a_TipsHS
+			ThisValue .= value . "|"
+		GuiControl,, % IdTT_C4_LB3, % ThisValue
+		
 	}
 	
 	if (ini_MHMP = 1)
@@ -3648,6 +3723,12 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		GuiControl, Move, % IdTT_C3_LB3, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
 		GuiControl, Choose, % IdTT_C3_LB3, 1
 		Gui, TT_C3: Show, x%MenuX% y%MenuY% NoActivate AutoSize
+		
+		Case 4:	;tu jestem
+		GuiControl, Choose, % IdTT_C4_LB1, 1
+		GuiControl, Choose, % IdTT_C4_LB2, 1
+		GuiControl, Choose, % IdTT_C4_LB3, 1
+		Gui, TT_C4: Show, NoActivate AutoSize
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4657,6 +4738,7 @@ F_PrepareTriggerstringTipsTables2()
 		{
 			if (InStr(a_Combined[A_Index], v_InputString) = 1)
 			{
+				;*[One]
 				Switch ini_TTCn
 				{
 					Case 1:	;only column 1: Triggerstring Tips
@@ -4673,7 +4755,7 @@ F_PrepareTriggerstringTipsTables2()
 						if (A_Index = 3) 
 							a_TipsEnDis.Push(A_LoopField)
 					}
-					Case 3:	;3 columns: Triggerstring Tips + Triggerstring Trigger + Triggerstring Hotstring
+					Case 3, 4:	;3 columns: Triggerstring Tips + Triggerstring Trigger + Triggerstring Hotstring ;tu jestem
 					Loop, Parse, % a_Combined[A_Index], |
 					{
 						if (A_Index = 1)
@@ -9902,15 +9984,7 @@ F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #InputLevel 2	;thanks to this trick event of left mouse click is ignored by "main level" of hotkeys.
 ~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected.
-F_LButtonHandling()	;tu jestem
-/*
-	{
-		Gui, TT_C1: Destroy
-		Gui, TT_C2: Destroy
-		Gui, TT_C3: Destroy
-		Tooltip, ;switch off tooltips created when i Unicode symbol is clicked
-	}
-*/
+F_LButtonHandling()	;the priority of gT_MenuTT is lower than this "interrupt"
 {
 	global	;assume-global mode
 	local	OutputVar := 0, OutputVarWin := 0, OutputVarControl := "", OutputVarTemp := ""
