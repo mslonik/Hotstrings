@@ -928,6 +928,13 @@ F_TMenuAHK_Hotkeys(BinParameter)
 			Hotkey, ^Up,		F_TMenu, I1 On
 			Hotkey, ^Down,		F_TMenu, I1 On
 			Hotkey, ^Enter,	F_TMenu, I1 On
+			Case 4:
+			Hotkey, IfWinExist, % "ahk_id" TT_C4_Hwnd	;in order to work the TT_C3_Hwnd variable must exist prior to definition of the following Hotkeys.
+			Hotkey, ^Tab, 		F_TMenu, I1 On
+			Hotkey, +^Tab, 	F_TMenu, I1 On
+			Hotkey, ^Up,		F_TMenu, I1 On
+			Hotkey, ^Down,		F_TMenu, I1 On
+			Hotkey, ^Enter,	F_TMenu, I1 On
 		}
 		Hotkey, IfWinExist
 	}
@@ -951,6 +958,13 @@ F_TMenuAHK_Hotkeys(BinParameter)
 			Hotkey, ^Enter,	F_TMenu, I1 Off
 			Case 3:
 			Hotkey, IfWinExist, % "ahk_id" TT_C3_Hwnd
+			Hotkey, ^Tab, 		F_TMenu, I1 Off
+			Hotkey, +^Tab, 	F_TMenu, I1 Off
+			Hotkey, ^Up,		F_TMenu, I1 Off
+			Hotkey, ^Down,		F_TMenu, I1 Off
+			Hotkey, ^Enter,	F_TMenu, I1 Off
+			Case 4:
+			Hotkey, IfWinExist, % "ahk_id" TT_C4_Hwnd
 			Hotkey, ^Tab, 		F_TMenu, I1 Off
 			Hotkey, +^Tab, 	F_TMenu, I1 Off
 			Hotkey, ^Up,		F_TMenu, I1 Off
@@ -1015,7 +1029,7 @@ F_TMenu()	;there must be a separate function to handle "interrupt" coming from "
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0
 	v_MenuMax := a_Tips.Count()
-	if (InStr(v_PressedKey, "+^Tab"))	;the same as "up"
+	if (InStr(v_PressedKey, "^Up") or InStr(v_PressedKey, "+^Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
 		IntCnt--
@@ -1029,10 +1043,14 @@ F_TMenu()	;there must be a separate function to handle "interrupt" coming from "
 			ControlSend, , {Up}, % "ahk_id" IdTT_C3_LB1
 			ControlSend, , {Up}, % "ahk_id" IdTT_C3_LB2
 			ControlSend, , {Up}, % "ahk_id" IdTT_C3_LB3
+			Case 4:
+			ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB1
+			ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB2
+			ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB3
 		}
 		ShiftTabIsFound := true
 	}
-	if (InStr(v_PressedKey, "^Tab")) and (!ShiftTabIsFound)	;the same as "down"
+	if (InStr(v_PressedKey, "^Down") or (InStr(v_PressedKey, "^Tab")) and (!ShiftTabIsFound))	;the same as "down"
 	{
 		IsCursorPressed := true
 		IntCnt++
@@ -1046,38 +1064,10 @@ F_TMenu()	;there must be a separate function to handle "interrupt" coming from "
 			ControlSend, , {Down}, % "ahk_id" IdTT_C3_LB1
 			ControlSend, , {Down}, % "ahk_id" IdTT_C3_LB2
 			ControlSend, , {Down}, % "ahk_id" IdTT_C3_LB3
-		}
-	}
-	if (InStr(v_PressedKey, "^Up"))
-	{
-		IsCursorPressed := true
-		IntCnt--
-		Switch ini_TTCn
-		{
-			Case 1: ControlSend, , {Up}, % "ahk_id" IdTT_C1_LB1
-			Case 2: 
-			ControlSend, , {Up}, % "ahk_id" IdTT_C2_LB1
-			ControlSend, , {Up}, % "ahk_id" IdTT_C2_LB2
-			Case 3: 
-			ControlSend, , {Up}, % "ahk_id" IdTT_C3_LB1
-			ControlSend, , {Up}, % "ahk_id" IdTT_C3_LB2
-			ControlSend, , {Up}, % "ahk_id" IdTT_C3_LB3
-		}
-	}
-	if (InStr(v_PressedKey, "^Down"))
-	{
-		IsCursorPressed := true
-		IntCnt++
-		Switch ini_TTCn
-		{
-			Case 1: ControlSend, , {Down}, % "ahk_id" IdTT_C1_LB1
-			Case 2: 
-			ControlSend, , {Down}, % "ahk_id" IdTT_C2_LB1
-			ControlSend, , {Down}, % "ahk_id" IdTT_C2_LB2
-			Case 3: 
-			ControlSend, , {Down}, % "ahk_id" IdTT_C3_LB1
-			ControlSend, , {Down}, % "ahk_id" IdTT_C3_LB2
-			ControlSend, , {Down}, % "ahk_id" IdTT_C3_LB3
+			Case 4:
+			ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB1
+			ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB2
+			ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB3
 		}
 	}
 	if ((v_MenuMax = 1) and IsCursorPressed)
@@ -1115,12 +1105,15 @@ F_TMenu()	;there must be a separate function to handle "interrupt" coming from "
 		Case 1: ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C1_LB1
 		Case 2: ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C2_LB1
 		Case 3: ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C3_LB1
+		Case 4: ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C4_LB1
 	}
 	Loop, Parse, v_Temp1, `n
 	{
 		if (A_Index = v_PressedKey)
 			v_Temp1 := SubStr(A_LoopField, InStr(A_LoopField, " ") + 1)
-	}
+	}	
+	if (ini_TTCn = 4)
+		WinActivate, % "ahk_id" PreviousWindowID
 	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
 	SendInput, % v_Temp1
 	Switch ini_TTCn
@@ -1128,6 +1121,10 @@ F_TMenu()	;there must be a separate function to handle "interrupt" coming from "
 		Case 1: Gui, TT_C1: Destroy
 		Case 2: Gui, TT_C2: Destroy
 		Case 3: Gui, TT_C3: Destroy
+		Case 4: 
+		GuiControl,, % IdTT_C4_LB1, |
+		GuiControl,, % IdTT_C4_LB2, |
+		GuiControl,, % IdTT_C4_LB3, |
 	}
 	f_HTriggered := true
 }
@@ -9978,21 +9975,15 @@ F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_
 		Switch ini_TTCn
 		{
 			Case 1: 
-			;GuiControl, Choose, % IdTT_C1_LB1, % ChoicePos
 			GuiControlGet, OutputVarTemp, , % IdTT_C1_LB1
 			Gui, TT_C1: Destroy
 			Case 2: 
-			;GuiControl, Choose, % IdTT_C2_LB1, % ChoicePos
 			GuiControlGet, OutputVarTemp, , % IdTT_C2_LB1 
 			Gui, TT_C2: Destroy
 			Case 3: 
-			;GuiControl, Choose, % IdTT_C3_LB1, % ChoicePos
 			GuiControlGet, OutputVarTemp, , % IdTT_C3_LB1 
 			Gui, TT_C3: Destroy
 			Case 4:
-			;GuiControl, Choose, % IdTT_C4_LB1, % ChoicePos
-			;GuiControl, Choose, % IdTT_C4_LB2, % ChoicePos
-			;GuiControl, Choose, % IdTT_C4_LB3, % ChoicePos
 			GuiControlGet, OutputVarTemp, , % IdTT_C4_LB1 
 			WinActivate, % "ahk_id" PreviousWindowID
 		}
