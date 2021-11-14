@@ -313,7 +313,7 @@ Loop,
 				Break
 			SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
 			Input, OneChar, L1, {Esc} ; L1 = Length 1	;future: replace Input with InputHook() to overcome overload of Input command.
-			OutputDebug, % "OneChar:" . A_Tab . OneChar
+			;OutputDebug, % "OneChar:" . A_Tab . OneChar
 		}
 	}
 	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
@@ -334,20 +334,15 @@ Loop,
 		if (ini_TTTtEn)
 		{
 			F_PrepareTriggerstringTipsTables2()	;old version: F_PrepareTriggerstringTipsTables()
-			if (a_Tips.Count())
+			if (a_Tips.Count())	;if tips are available display them
 			{
 				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 				F_TMenuAHK_Hotkeys(ini_ATEn)	;this function must be called when TMenuAHK_C1_Hwnd variable is available and initialized
 				if (ini_TTTD > 0)
 					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
 			}
-			else
-				Switch ini_TTCn
-				{
-					Case 1: Gui, TT_C1: Destroy
-					Case 2: Gui, TT_C2: Destroy
-					Case 3: Gui, TT_C3: Destroy
-				}
+			else	;or destroy previously visible tips
+				DestroyTriggerstringTips(ini_TTCn)
 		}
 	}
 	
