@@ -295,7 +295,7 @@ F_GuiVersionUpdate_CreateObjects()
 F_GuiAbout_DetermineConstraints()
 F_GuiVersionUpdate_DetermineConstraints()
 
-ini_TTCn := 4
+ini_TTCn := 4	;tu jestem
 if (ini_TTCn = 4)	;static triggerstring / hotstring GUI 
 	F_GuiTrigTipsMenuDefC4()
 if (ini_GuiReload) and (v_Param != "l")
@@ -323,17 +323,7 @@ Loop,
 	{
 		v_InputString := ""
 		out := ""
-		;Gui, TMenuAHK_C1: Destroy
-		Switch ini_TTCn
-		{
-			Case 1: Gui, TT_C1: Destroy
-			Case 2: Gui, TT_C2: Destroy
-			Case 3: Gui, TT_C3: Destroy
-			Case 4: 	;tu jestem
-			GuiControl,, % IdTT_C4_LB1, |
-			GuiControl,, % IdTT_C4_LB2, |
-			GuiControl,, % IdTT_C4_LB3, |
-		}
+		DestroyTriggerstringTips(ini_TTCn)
 		f_HTriggered := false
 	}
 	else
@@ -626,6 +616,21 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+DestroyTriggerstringTips(ini_TTCn)
+{
+	global	;assume-global mode
+	Switch ini_TTCn
+	{
+		Case 1: Gui, TT_C1: Destroy
+		Case 2: Gui, TT_C2: Destroy
+		Case 3: Gui, TT_C3: Destroy
+		Case 4:
+		GuiControl,, % IdTT_C4_LB1, |
+		GuiControl,, % IdTT_C4_LB2, |
+		GuiControl,, % IdTT_C4_LB3, |
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateTrayMenus(v_Param)
 {
 	global	;assume-global mode
@@ -763,7 +768,7 @@ F_Load_ini_Language()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiTrigTipsMenuDefC4()	;tu jestem
+F_GuiTrigTipsMenuDefC4()
 {
 	global	;assume-global mode
 	local  vOutput1 := 0, vOutput1X := 0, vOutput1Y := 0, vOutput1W := 0, vOutput1H := 0
@@ -1243,7 +1248,7 @@ F_GuiEvents_CreateObjects()
 	;2. Prepare all text objects according to mock-up.
 	Gui,	GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	Gui, GuiEvents: Add,	Tab3,		,							% TransA["Basic hotstring is triggered"] . "||" . TransA["Menu hotstring is triggered"] . "|" 
-		. TransA["Undid the last hotstring"] . "|" . TransA["Triggerstring tips"] . "|" . TransA["Active triggerstring tips"] . "|"
+		. TransA["Undid the last hotstring"] . "|" . TransA["Triggerstring tips"] . "|" . TransA["Active triggerstring tips"] . "|" . TransA["static triggerstring / hotstring menus"] . "|"
 	
 	Gui, GuiEvents: Tab, 											% TransA["Basic hotstring is triggered"]
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
@@ -1475,6 +1480,40 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvAT_B1 gF_EvAT_B1,			% TransA["Tooltip test"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B2 gF_EvAT_B2,			% TransA["Apply && Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B3 gF_EvAT_B3,			% TransA["Cancel"]
+	
+	Gui, GuiEvents: Tab,											% TransA["static triggerstring / hotstring menus"]	;tu jestem
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvSM_T1,						% TransA["static triggerstring / hotstring menus"] . ":"
+	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvSM_T2, 					ⓘ
+	T_SMT2 := func("F_ShowLongTooltip").bind(TransA["T_SMT2"])
+	GuiControl, +g, % IdEvSM_T2, % T_SMT2
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Add,	Radio,	HwndIdEvSM_R1 vEvSM_R1R2 gF_EvSM_R1R2,	% TransA["enable"]
+	Gui, GuiEvents: Add,	Radio, 	HwndIdEvSM_R2 gF_EvSM_R1R2,			% TransA["disable"]	
+	Gui, GuiEvents: Add, 	Button, 	HwndIdEvSM_B1 gF_EvSM_B1,			% TransA["Preview"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B2 gF_EvSM_B2,			% TransA["Apply && Close"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B3 gF_EvSM_B3,			% TransA["Cancel"]
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvSM_B3()
+{
+	global ;assume-global mode
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvSM_B2()
+{
+	global ;assume-global mode
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvSM_B1()
+{
+	global ;assume-global mode
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvSM_R1R2()	;tu jestem
+{
+	global ;assume-global mode
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvAT_B3()	;Event Active Triggerstring Tips Button Cancel
@@ -1974,7 +2013,7 @@ F_GuiEvents_DetermineConstraints()
 		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
 		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
 		,v_OutVarTemp4 := 0, 	v_OutVarTemp4X := 0, 	v_OutVarTemp4Y := 0, 	v_OutVarTemp4W := 0, 	v_OutVarTemp4H := 0
-		,maxY1 := 0, 	maxY2 := 0, 	maxY3 := 0, 	maxY4 := 0, 	maxY5 := 0
+		,maxY1 := 0, 	maxY2 := 0, 	maxY3 := 0, 	maxY4 := 0, 	maxY5 := 0,	maxY6 := 0
 		,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0, TheWidestText := 0, TotalWidth := 0
 		,MaxY := 0
 	
@@ -2295,9 +2334,30 @@ F_GuiEvents_DetermineConstraints()
 	GuiControl, Move, % IdEvAT_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	maxY5 := v_yNext
 	
+	v_xNext := c_xmarg, v_yNext := c_ymarg ;beginning of static triggerstring / hostring menus ;tu jestem
+	GuiControl, Move, % IdEvSM_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_T1
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvSM_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdEvSM_R1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_R1
+	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvSM_R2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	GuiControl, Move, % IdEvSM_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_B1
+	v_xNext += v_OutVarTempW + 4 * c_xmarg
+	GuiControl, Move, % IdEvSM_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_B2
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvSM_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	maxY6 := v_yNext
+	
 	;Bottom alignment of buttons over all tabs.
-	MaxY := Max(maxY1, maxY2, maxY3, maxY4, maxY5)
-	v_xNext := c_xmarg, v_yNext := MaxY
+	MaxY := Max(maxY1, maxY2, maxY3, maxY4, maxY5, maxY6)
+
+	v_xNext := c_xmarg, v_yNext := MaxY	;alignment of tab 1:
 	GuiControl, Move, % IdEvBH_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_B1
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
@@ -2343,6 +2403,14 @@ F_GuiEvents_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_B2
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvAT_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+
+	v_xNext := c_xmarg, v_yNext := MaxY	;alignment of tab 6: static triggerstring tips / hotstring menus
+	GuiControl, Move, % IdEvSM_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += v_OutVarTempW + 4 * c_xmarg
+	GuiControl, Move, % IdEvSM_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_B2
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvSM_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvBH_R3R4()
@@ -3584,7 +3652,7 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			ThisValue .= value . "|"
 		GuiControl,, % IdTT_C3_LB3, % ThisValue
 		
-		Case 4:	;tu jestem
+		Case 4:
 		GuiControl,, % IdTT_C4_LB1, |	;this line is necessary to display new menu each time this function is called.
 		GuiControl,, % IdTT_C4_LB2, |	;this line is necessary to display new menu each time this function is called.
 		GuiControl,, % IdTT_C4_LB3, |	;this line is necessary to display new menu each time this function is called.
@@ -3714,7 +3782,7 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		GuiControl, Choose, % IdTT_C3_LB3, 1
 		Gui, TT_C3: Show, x%MenuX% y%MenuY% NoActivate AutoSize
 		
-		Case 4:	;tu jestem
+		Case 4:
 		GuiControl, Choose, % IdTT_C4_LB1, 1
 		GuiControl, Choose, % IdTT_C4_LB2, 1
 		GuiControl, Choose, % IdTT_C4_LB3, 1
@@ -4744,7 +4812,7 @@ F_PrepareTriggerstringTipsTables2()
 						if (A_Index = 3) 
 							a_TipsEnDis.Push(A_LoopField)
 					}
-					Case 3, 4:	;3 columns: Triggerstring Tips + Triggerstring Trigger + Triggerstring Hotstring ;tu jestem
+					Case 3, 4:	;3 columns: Triggerstring Tips + Triggerstring Trigger + Triggerstring Hotstring
 					Loop, Parse, % a_Combined[A_Index], |
 					{
 						if (A_Index = 1)
@@ -7939,6 +8007,7 @@ T_TtMaxNoOfTips										= Maximum length of the triggerstring tips list. `n`nIf
 T_TtNoOfChars											= It is possible to configure triggerstring tips to be displayed only if some first characters are already entered. `nE.g. if this parameter is set to 2, the first list appears if 2 or more characters of any existing triggerstring tip are entered.
 T_ATT1												= If active triggerstring tips are enabled, then it is possible to use keyboard shortcuts `nto enter one of the triggerstrings from currently displayed list. `n`nActive triggerstring shortcuts: `n`nControl + Enter to enter any of the triggerstring tips `nControl + ↓ or Control + ↑ to move down or up on the list `n Control + Tab or Control + Shift + Tab to move down or up on the list.
 T_TtComposition										= `n`nOf course if additional columns are chosen, window will become wider.
+T_SMT2												= This option let's you to display permanent, ""static"" window `nwhere you can always find up-to-date ""triggerstring tips"" and ""hotstring menus"". `n`nOptions are combinations of other ""events"" options (set in other tabs).
 )"
 	
 	TransA					:= {}	;this associative array (global) is used to store translations of this application text strings
@@ -9784,7 +9853,7 @@ F_HOF_MCLI(TextOptions, Oflag)
 	TextOptions 		 := F_ReplaceAHKconstants(TextOptions)
 	Loop, Parse, TextOptions, ¦
 		v_MenuMax := A_Index
-	if (ini_TTCn != 4)	;tu jestem
+	if (ini_TTCn != 4)
 	{
 		Gui, HMenuCli: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuCliHwnd
 		Gui, HMenuCli: Margin, 0, 0
@@ -9841,7 +9910,7 @@ F_HOF_MCLI(TextOptions, Oflag)
 		Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate
 		GuiControl, Choose, % Id_LB_HMenuCli, 1
 	}
-	else	;(ini_MHMP = 4);tu jestem
+	else	;(ini_MHMP = 4)
 	{
 		PreviousWindowID := WinExist("A")
 		Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
@@ -9947,7 +10016,7 @@ F_HOF_MSI(TextOptions, Oflag)
 		Gui, HMenuAHK: Show, x%MenuX% y%MenuY% NoActivate	
 		GuiControl, Choose, % Id_LB_HMenuAHK, 1
 	}
-	else	;(ini_MHMP = 4);tu jestem
+	else	;(ini_MHMP = 4)
 	{
 		PreviousWindowID := WinExist("A")
 		;OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID
@@ -10188,7 +10257,7 @@ Enter::
 Up::
 Down::
 
-F_HMenuStatic()	;tu jestem
+F_HMenuStatic()
 {
 	global	;assume-global moee
 	local	v_PressedKey := "",		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
@@ -11090,61 +11159,59 @@ return
 	{
 		Menu, Tray, 		UnCheck, 	% TransA["Pause application"]
 		Menu, AppSubmenu,	UnCheck, 	% TransA["Pause"]
-	}
-	return
-	
-	L_TrayReload:	;new thread starts here
+}
+return
+
+L_TrayReload:	;new thread starts here
 ;F_WhichGui()
-	F_ReloadUniversal()
-	return
-	
-	TurnOff_OHE:
-	ToolTip, ,, , 4
-	return
-	
-	TurnOff_UHE:
-	ToolTip, ,, , 6
-	return
-	
-	TurnOff_Ttt:
-	;Gui, TMenuAHK_C1: Destroy	;ToolTip
-	Switch ini_TTCn
-	{
+F_ReloadUniversal()
+return
+
+TurnOff_OHE:
+ToolTip, ,, , 4
+return
+
+TurnOff_UHE:
+ToolTip, ,, , 6
+return
+
+TurnOff_Ttt:
+Switch ini_TTCn
+{
 		Case 1: Gui, TT_C1: Destroy
 		Case 2: Gui, TT_C2: Destroy
 		Case 3: Gui, TT_C3: Destroy
-	}
-	
-	return
-	
-	L_TrayExit:
-	ExitApp, 2	;2 = by Tray
-	
-	STDGuiClose:
-	STDGuiEscape:
-	Switch (A_ThisMenu)
-	{
-		Case "OrdHisTrig": 	IniWrite, % ini_OHTD, % HADConfig, Event_BasicHotstring, 	OHTD
-		Case "UndoOfH":	IniWrite, % ini_UHTD, % HADConfig, Event_UndoHotstring, 	UHTD
-		Case "TrigTips":	IniWrite, % ini_TTTD, % HADConfig, Event_TriggerstringTips, TTTD
-	}
-	Gui, STD: Destroy
-	return
-	
-	TMNTGuiClose:
-	TMNTGuiEscape:
-	IniWrite, % ini_MNTT, % HADConfig, Event_TriggerstringTips, MNTT
-	Gui, TMNT: Destroy
-	return
-	
-	L_OpenLibrariesFolderInExplorer:
-	Run, explore %HADL%
-	return
-	
-	L_ShowIntro:
-	F_GuiShowIntro()
-	Gui, ShowIntro: Show, AutoSize Center
-	return
-	
-	L_Compile:
-	return
+}
+return
+
+L_TrayExit:
+ExitApp, 2	;2 = by Tray
+
+STDGuiClose:
+STDGuiEscape:
+Switch (A_ThisMenu)
+{
+	Case "OrdHisTrig": 	IniWrite, % ini_OHTD, % HADConfig, Event_BasicHotstring, 	OHTD
+	Case "UndoOfH":	IniWrite, % ini_UHTD, % HADConfig, Event_UndoHotstring, 	UHTD
+	Case "TrigTips":	IniWrite, % ini_TTTD, % HADConfig, Event_TriggerstringTips, TTTD
+}
+Gui, STD: Destroy
+return
+
+TMNTGuiClose:
+TMNTGuiEscape:
+IniWrite, % ini_MNTT, % HADConfig, Event_TriggerstringTips, MNTT
+Gui, TMNT: Destroy
+return
+
+L_OpenLibrariesFolderInExplorer:
+Run, explore %HADL%
+return
+
+L_ShowIntro:
+F_GuiShowIntro()
+Gui, ShowIntro: Show, AutoSize Center
+return
+
+L_Compile:
+return
