@@ -295,7 +295,6 @@ F_GuiVersionUpdate_CreateObjects()
 F_GuiAbout_DetermineConstraints()
 F_GuiVersionUpdate_DetermineConstraints()
 
-ini_TTCn := 4	;tu jestem
 if (ini_TTCn = 4)	;static triggerstring / hotstring GUI 
 	F_GuiTrigTipsMenuDefC4()
 if (ini_GuiReload) and (v_Param != "l")
@@ -772,7 +771,7 @@ F_GuiTrigTipsMenuDefC4()
 		, PosOutputVar := 0, PosOutputVarX := 0, PosOutputVarY := 0, PosOutputVarW := 0, PosOutputVarH := 0
 	
 		;OutputString .= "w"		;the widest ordinary letter in alphabet
-	Gui, TT_C4: New, +AlwaysOnTop +Caption +HwndTT_C4_Hwnd +Resize, % A_ScriptName . ":" . A_Space . TransA["static triggerstring / hotstring menus"]
+	Gui, TT_C4: New, +AlwaysOnTop +Caption +HwndTT_C4_Hwnd +Resize, % A_ScriptName . ":" . A_Space . TransA["Static triggerstring / hotstring menus"]
 	Gui, TT_C4: Margin, 0, 0
 	if (ini_TTBgrCol = "custom")
 		Gui, TT_C4: Color,, % ini_TTBgrColCus	;background of listbox
@@ -1199,9 +1198,11 @@ F_GuiEvents()
 	local FoundPos := "", Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0, Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0, NewWinPosX := 0, NewWinPosY := 0
 	
 	F_GuiEvents_InitiateValues()	;initial values 
+	;OutputDebug, % "F_EvTT_R1R2 po F_GuiEvents_InitiateValues:" . A_Tab . EvTT_R1R2
 	F_GuiEvents_CreateObjects()
 	F_GuiEvents_DetermineConstraints()
 	F_GuiEvents_LoadValues()	;load values to guicontrols
+	;OutputDebug, % "F_EvTT_R1R2 po F_GuiEvents_LoadValues:" . A_Tab . EvTT_R1R2
 	F_EvBH_R1R2()
 	F_EvBH_R3R4()
 	F_EvBH_R7R8()
@@ -1209,8 +1210,11 @@ F_GuiEvents()
 	F_EvUH_R1R2()
 	F_EvUH_R3R4()
 	F_EvUH_R7R8()
+	;OutputDebug, % "F_EvTT_R1R2 przed F_EvTt_R1R2:" . A_Tab . EvTT_R1R2
 	F_EvTt_R1R2()
+	;OutputDebug, % "F_EvTT_R1R2 po F_EvTt_R1R2:" . A_Tab . EvTT_R1R2
 	F_EvTt_R3R4()
+	F_EvSM_R1R2()
 
 	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
@@ -1243,7 +1247,7 @@ F_GuiEvents_CreateObjects()
 	;2. Prepare all text objects according to mock-up.
 	Gui,	GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	Gui, GuiEvents: Add,	Tab3,		,							% TransA["Basic hotstring is triggered"] . "||" . TransA["Menu hotstring is triggered"] . "|" 
-		. TransA["Undid the last hotstring"] . "|" . TransA["Triggerstring tips"] . "|" . TransA["Active triggerstring tips"] . "|" . TransA["static triggerstring / hotstring menus"] . "|"
+		. TransA["Undid the last hotstring"] . "|" . TransA["Triggerstring tips"] . "|" . TransA["Active triggerstring tips"] . "|" . TransA["Static triggerstring / hotstring menus"] . "|"
 	
 	Gui, GuiEvents: Tab, 											% TransA["Basic hotstring is triggered"]
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
@@ -1476,9 +1480,9 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B2 gF_EvAT_B2,			% TransA["Apply && Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B3 gF_EvAT_B3,			% TransA["Cancel"]
 	
-	Gui, GuiEvents: Tab,											% TransA["static triggerstring / hotstring menus"]	;tu jestem
+	Gui, GuiEvents: Tab,											% TransA["Static triggerstring / hotstring menus"]
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
-	Gui, GuiEvents: Add,	Text, 	HwndIdEvSM_T1,						% TransA["static triggerstring / hotstring menus"] . ":"
+	Gui, GuiEvents: Add,	Text, 	HwndIdEvSM_T1,						% TransA["Static triggerstring / hotstring menus"] . ":"
 	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvSM_T2, 					ⓘ
 	T_SMT2 := func("F_ShowLongTooltip").bind(TransA["T_SMT2"])
@@ -1491,25 +1495,79 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B3 gF_EvSM_B3,			% TransA["Cancel"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvSM_B3()
+F_EvSM_B3()	;static menus, button Cancel
+{
+	global ;assume-global mode
+	Tooltip,,,, 4
+	Gui, GuiEvents: Destroy
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvSM_B2()	;static menus, button Apply & Close
+{
+	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvSM_R1R2	;static triggerstring / hostring menu enable / disable
+	{
+		Case 1:	;enable
+		Switch ini_TTCn	;previous value of ini_TTCn
+		{
+			Case 1: Gui, TT_C1:		Destroy
+			Case 2: Gui, TT_C2:		Destroy
+			Case 3: Gui, TT_C3:		Destroy
+		}
+		ini_TTCn := 4	;enable
+		F_GuiTrigTipsMenuDefC4()	
+		Case 2:	;disable: 
+		Gui, TT_C4:		Destroy
+		ini_TTCn := 2	; default value: Composition of triggerstring tips = Triggerstring tips + triggers
+	}
+	IniWrite, % ini_TTCn,	% HADConfig, Event_TriggerstringTips,	TTCn
+	Tooltip,,,, 4
+	Gui, GuiEvents:	Destroy
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvSM_B1()	;static menus, button Preview	;tu jestem
 {
 	global ;assume-global mode
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvSM_B2()
+F_EvSM_R1R2()
 {
 	global ;assume-global mode
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvSM_B1()
-{
-	global ;assume-global mode
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvSM_R1R2()	;tu jestem
-{
-	global ;assume-global mode
-}
+	Gui, GuiEvents: Submit, NoHide
+	;OutputDebug, % "EvTt_R1R2 after submit:" . A_Tab . EvTt_R1R2
+	Switch EvSM_R1R2
+	{
+		Case 1:	;static triggering / hotstring menu Enable
+		GuiControl, Disable, 	% IdEvTt_R1
+		GuiControl, Disable, 	% IdEvTt_R2
+		GuiControl, Disable, 	% IdEvTt_T6
+		GuiControl, Disable, 	% IdEvTt_R3
+		GuiControl, Disable, 	% IdEvTt_R4
+		GuiControl, Disable, 	% IdEvTt_T7
+		GuiControl, Disable, 	% IdEvTt_S1
+		GuiControl, Disable, 	% IdEvTt_T8
+		GuiControl, Disable, 	% IdEvTt_R5
+		GuiControl, Disable, 	% IdEvTt_R6
+		GuiControl, Disable, 	% IdEvTt_DDL2
+		GuiControl, Disable, 	% IdEvMH_R1
+		GuiControl, Disable, 	% IdEvMH_R2
+		Case 2:	;static triggering / hotstring menu Disable
+		GuiControl, Enable, 	% IdEvTt_R1
+		GuiControl, Enable, 	% IdEvTt_R2
+		GuiControl, Enable, 	% IdEvTt_T6
+		GuiControl, Enable, 	% IdEvTt_R3
+		GuiControl, Enable, 	% IdEvTt_R4
+		GuiControl, Enable, 	% IdEvTt_T7
+		GuiControl, Enable, 	% IdEvTt_S1
+		GuiControl, Enable, 	% IdEvTt_T8
+		GuiControl, Enable, 	% IdEvTt_R5
+		GuiControl, Enable, 	% IdEvTt_R6
+		GuiControl, Enable, 	% IdEvTt_DDL2
+		GuiControl, Enable, 	% IdEvMH_R1
+		GuiControl, Enable, 	% IdEvMH_R2
+	}
+}	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvAT_B3()	;Event Active Triggerstring Tips Button Cancel
 {
@@ -1672,7 +1730,9 @@ F_EvTt_R3R4()
 F_EvTt_R1R2()
 {
 	global ;assume-global mode
+	;OutputDebug, % "EvTt_R1R2 before submit:" . A_Tab . EvTt_R1R2
 	Gui, GuiEvents: Submit, NoHide
+	;OutputDebug, % "EvTt_R1R2 after submit:" . A_Tab . EvTt_R1R2
 	Switch EvTt_R1R2
 	{
 		Case 1:
@@ -2329,7 +2389,7 @@ F_GuiEvents_DetermineConstraints()
 	GuiControl, Move, % IdEvAT_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	maxY5 := v_yNext
 	
-	v_xNext := c_xmarg, v_yNext := c_ymarg ;beginning of static triggerstring / hostring menus ;tu jestem
+	v_xNext := c_xmarg, v_yNext := c_ymarg ;beginning of static triggerstring / hostring menus
 	GuiControl, Move, % IdEvSM_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_T1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
@@ -2603,7 +2663,6 @@ F_GuiEvents_InitiateValues()
 	, EvMH_S1 := ini_MHSF, EvMH_S2 := ini_MHSD 
 	, EvUH_S1 := ini_UHTD, EvUH_S2 := ini_UHSF, EvUH_S3 := ini_UHSD
 	, EvTt_S1 := ini_TTTD, EvTt_S2 := ini_MNTT, EvTt_C1 := ini_TipsSortAlphabetically, EvTt_C2 := ini_TipsSortByLength, EvTt_DDL1 := ini_TASAC ;(Tips Are Shown After No of Characters)
-	, EvTt_DDL2 := ini_TTCn
 	Switch ini_OHTtEn
 	{
 		Case false: 	EvBH_R1R2 := 1
@@ -2669,6 +2728,12 @@ F_GuiEvents_InitiateValues()
 		Case 1:		EvTt_R5R6 := 1
 		Case 2: 		EvTt_R5R6 := 2
 	}
+	Switch ini_TTCn
+	{
+		Case 1, 2, 3: 	EvTt_DDL2 := ini_TTCn, EvSM_R1R2 := 4
+		Case 4:		EvSM_R1R2 := 3			
+	}
+	
 	Switch ini_ATEn
 	{
 		Case false:	EvAT_R1R2 := 2
@@ -2677,7 +2742,7 @@ F_GuiEvents_InitiateValues()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiEvents_LoadValues()
-{
+{	;This function loads state of ini_* configuration parameter into GuiControls
 	global ;assume-global mode
 	local	a_Styling_DDL1 := [1, 2, 3, 4, 5],	s_Styling_DDL1 := "|"
 
@@ -2771,11 +2836,20 @@ F_GuiEvents_LoadValues()
 	GuiControl,, % IdEvTt_S2,	% ini_MNTT
 	GuiControl,, % IdEvTt_T18,	% ini_MNTT
 	GuiControl, ChooseString, % IdEvTt_DDL1, % ini_TASAC
+	;*[One]
 	Switch ini_TTCn
 	{
-		Case 1:	GuiControl, ChooseString, % IdEvTt_DDL2, % TransA["Triggerstring tips"]
-		Case 2:	GuiControl, ChooseString, % IdEvTt_DDL2, % TransA["Triggerstring tips"] . A_Space . "+" . A_Space . TransA["Triggers"]
-		Case 3:	GuiControl, ChooseString, % IdEvTt_DDL2, % TransA["Triggerstring tips"] . A_Space . "+" . A_Space . TransA["Triggers"] . A_Space . "+" . A_Space . TransA["Hotstrings"]
+		Case 1:	
+		GuiControl, ChooseString, % IdEvTt_DDL2, % TransA["Triggerstring tips"]
+		GuiControl,, % IdEvSM_R2, 1
+		Case 2:	
+		GuiControl, ChooseString, % IdEvTt_DDL2, % TransA["Triggerstring tips"] . A_Space . "+" . A_Space . TransA["Triggers"]
+		GuiControl,, % IdEvSM_R2, 1
+		Case 3:	
+		GuiControl, ChooseString, % IdEvTt_DDL2, % TransA["Triggerstring tips"] . A_Space . "+" . A_Space . TransA["Triggers"] . A_Space . "+" . A_Space . TransA["Hotstrings"]
+		GuiControl,, % IdEvSM_R2, 1
+		Case 4:	
+		GuiControl,, % IdEvSM_R1, 1
 	}
 	Switch ini_ATEn
 	{
@@ -7883,7 +7957,7 @@ Space												= Space
 Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
 Standard executable (Ahk2Exe.exe)							= Standard executable (Ahk2Exe.exe)
 Static hotstrings 										= &Static hotstrings
-static triggerstring / hotstring menus						= static triggerstring / hotstring menus
+Static triggerstring / hotstring menus						= Static triggerstring / hotstring menus
 Style of GUI											= Style of GUI
 Such file already exists									= Such file already exists
 Suspend Hotkeys										= Suspend Hotkeys
