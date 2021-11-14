@@ -301,7 +301,7 @@ if (ini_TTCn = 4)	;static triggerstring / hotstring GUI
 if (ini_GuiReload) and (v_Param != "l")
 	Gosub, L_GUIInit
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-; The main application loop beginning .
+; The main application loop beginning.
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Loop,
 {
@@ -798,7 +798,7 @@ F_GuiTrigTipsMenuDefC4()	;tu jestem
 		Gui, TT_C4: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
 	else
 		Gui, TT_C4: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
-	Gui, TT_C4: Add, Listbox, % "x0 y0 w250 HwndIdTT_C4_LB4" . A_Space . "r" . 7 . A_Space . "g" . "F_MouseMenuAHK"
+	Gui, TT_C4: Add, Listbox, % "x0 y0 w250 HwndIdTT_C4_LB4" . A_Space . "r" . 7 . A_Space . "g" . "F_MouseMenuCombined"
 	GuiControl, Font, % IdTT_C4_LB4
 
 	GuiControl, Choose, % IdTT_C4_LB1, 1
@@ -3523,12 +3523,6 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 	, PosOutputVar := 0, PosOutputVarX := 0, PosOutputVarY := 0, PosOutputVarW := 0, PosOutputVarH := 0
 	, MenuX := 0, MenuY := 0, MouseX := 0, MouseY := 0
 	
-	Switch ini_TTCn	;this line is necessary to not display next menu after last trigger
-	{
-		Case 1: Gui, TT_C1: Destroy
-		Case 2: Gui, TT_C2: Destroy
-		Case 3: Gui, TT_C3: Destroy
-	}	
 	for key, value in a_Tips
 	{
 		ThisValue := StrLen(value)
@@ -3544,6 +3538,7 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 	Switch ini_TTCn
 	{
 		Case 1: 
+		Gui, TT_C1: Destroy	;this line is necessary to display new menu each time this function is called.
 		F_GuiTrigTipsMenuDefC1(a_Tips.Count(), LongestString)	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
 		ThisValue := ""	
 		for key, value in a_Tips
@@ -3551,6 +3546,7 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		GuiControl,, % IdTT_C1_LB1, % ThisValue
 		
 		Case 2: 
+		Gui, TT_C2: Destroy	;this line is necessary to display new menu each time this function is called.
 		F_GuiTrigTipsMenuDefC2(a_Tips.Count(), LongestString)
 		ThisValue := ""
 		for key, value in a_Tips
@@ -3569,6 +3565,7 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		GuiControl,, % IdTT_C2_LB2, % ThisValue
 		
 		Case 3: 
+		Gui, TT_C3: Destroy	;this line is necessary to display new menu each time this function is called.
 		F_GuiTrigTipsMenuDefC3(a_Tips.Count(), LongestString)
 		ThisValue := ""
 		for key, value in a_Tips
@@ -3591,9 +3588,10 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		GuiControl,, % IdTT_C3_LB3, % ThisValue
 		
 		Case 4:	;tu jestem
-		GuiControl,, % IdTT_C4_LB1, |
-		GuiControl,, % IdTT_C4_LB2, |
-		GuiControl,, % IdTT_C4_LB3, |
+		GuiControl,, % IdTT_C4_LB1, |	;this line is necessary to display new menu each time this function is called.
+		GuiControl,, % IdTT_C4_LB2, |	;this line is necessary to display new menu each time this function is called.
+		GuiControl,, % IdTT_C4_LB3, |	;this line is necessary to display new menu each time this function is called.
+		PreviousWindowID := WinExist("A")
 		ThisValue := ""
 		for key, value in a_Tips
 			ThisValue .= value . "|"
@@ -9960,7 +9958,7 @@ F_HOF_MSI(TextOptions, Oflag)
 			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . "|"
 		GuiControl, Choose, % IdTT_C4_LB4, 1
 		WinActivate, % "ahk_id" TT_C4_Hwnd
-		WhichMenu := "AHK"
+		WhichMenu := "SI"
 	}
 	Ovar := Oflag
 	f_HTriggered := true
@@ -9974,25 +9972,31 @@ F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_
 			, OutputVarTemp2 := "", ChoicePos := 0
 	MouseGetPos, , , , OutputVarTemp			;to store the name (ClassNN) of the control under the mouse cursor
 	SendMessage, 0x0188, 0, 0, % OutputVarTemp	;retrieve the position of the selected item
-	ChoicePos := ErrorLevel<<32>>32			;Convert UInt to Int to have -1 if there is no item selected.
-	ChoicePos += 1							;Convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.
+	ChoicePos := (ErrorLevel<<32>>32) + 1		;Convert UInt to Int to have -1 if there is no item selected. Convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.
 	if (InStr(ThisHotkey, "LButton"))
 	{
 		Switch ini_TTCn
 		{
 			Case 1: 
-			GuiControl, Choose, % IdTT_C1_LB1, % ChoicePos
+			;GuiControl, Choose, % IdTT_C1_LB1, % ChoicePos
 			GuiControlGet, OutputVarTemp, , % IdTT_C1_LB1
 			Gui, TT_C1: Destroy
 			Case 2: 
-			GuiControl, Choose, % IdTT_C2_LB1, % ChoicePos
+			;GuiControl, Choose, % IdTT_C2_LB1, % ChoicePos
 			GuiControlGet, OutputVarTemp, , % IdTT_C2_LB1 
 			Gui, TT_C2: Destroy
 			Case 3: 
-			GuiControl, Choose, % IdTT_C3_LB1, % ChoicePos
+			;GuiControl, Choose, % IdTT_C3_LB1, % ChoicePos
 			GuiControlGet, OutputVarTemp, , % IdTT_C3_LB1 
 			Gui, TT_C3: Destroy
+			Case 4:
+			;GuiControl, Choose, % IdTT_C4_LB1, % ChoicePos
+			;GuiControl, Choose, % IdTT_C4_LB2, % ChoicePos
+			;GuiControl, Choose, % IdTT_C4_LB3, % ChoicePos
+			GuiControlGet, OutputVarTemp, , % IdTT_C4_LB1 
+			WinActivate, % "ahk_id" PreviousWindowID
 		}
+		OutputDebug, % "ini_TTCn:" . A_Tab . ini_TTCn
 		v_UndoHotstring := OutputVarTemp
 		SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
 		SendLevel, 1	;in order to backtrigger the chosen triggerstring 
@@ -10031,6 +10035,35 @@ F_LButtonHandling()	;the priority of gT_MenuTT is lower than this "interrupt"
 }
 #InputLevel 0	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_MouseMenuCombined() ;Valid if static triggerstring / hotstring menus GUI is available. "Combined" because it chooses between "SI" and "CLI".
+{
+	global	;assume-global mode
+	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0
+	if (A_PriorKey = "LButton")
+	{
+		MouseGetPos, , , , OutputVarControl			;to store the name (ClassNN) of the control under the mouse cursor
+		SendMessage, 0x0188, 0, 0, % OutputVarControl	;retrieve the position of the selected item
+		ChoicePos := (ErrorLevel<<32>>32) + 1			;Convert UInt to Int to have -1 if there is no item selected and convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.
+		GuiControl, Choose, % OutputVarControl, % ChoicePos
+		GuiControlGet, OutputVarTemp, , % OutputVarControl
+		OutputVarTemp := SubStr(OutputVarTemp, 4)
+		GuiControl,, % IdTT_C4_LB4, |
+		WinActivate, % "ahk_id" PreviousWindowID
+		v_UndoHotstring := OutputVarTemp
+		ReplacementString := F_PrepareSend(OutputVarTemp, Ovar)
+		Switch WhichMenu
+		{
+			Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
+			Case "CLI":	F_ClipboardPaste(ReplacementString, Ovar)
+		}
+		f_HTriggered := true
+		if (ini_MHSEn)
+			SoundBeep, % ini_MHSF, % ini_MHSD
+		if (ini_THLog)
+			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
@@ -10039,18 +10072,11 @@ F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A
 	{
 		MouseGetPos, , , , OutputVarControl			;to store the name (ClassNN) of the control under the mouse cursor
 		SendMessage, 0x0188, 0, 0, % OutputVarControl	;retrieve the position of the selected item
-		ChoicePos := ErrorLevel<<32>>32				;Convert UInt to Int to have -1 if there is no item selected.
-		ChoicePos += 1								;Convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.		
+		ChoicePos := (ErrorLevel<<32>>32) + 1			;Convert UInt to Int to have -1 if there is no item selected and convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.
 		GuiControl, Choose, % OutputVarControl, % ChoicePos
 		GuiControlGet, OutputVarTemp, , % OutputVarControl
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
-		if (WinExist("ahk_id" HMenuAHKHwnd))
-			Gui, HMenuAHK: Destroy
-		else
-		{
-			GuiControl,, % IdTT_C4_LB4, |
-			WinActivate, % "ahk_id" PreviousWindowID
-		}
+		Gui, HMenuAHK: Destroy
 		v_UndoHotstring := OutputVarTemp
 		ReplacementString := F_PrepareSend(OutputVarTemp, Ovar)
 		F_SendIsOflag(ReplacementString, Ovar, "SendInput")
@@ -10238,7 +10264,7 @@ F_HMenuStatic()	;tu jestem
 	WinActivate, % "ahk_id" PreviousWindowID
 	Switch WhichMenu
 	{
-		Case "AHK":
+		Case "SI":
 		F_SendIsOflag(ReplacementString, Ovar, "SendInput")
 		Case "CLI":
 		ClipboardBack := ClipboardAll ;backup clipboard
