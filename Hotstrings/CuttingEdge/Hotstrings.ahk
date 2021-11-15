@@ -53,7 +53,7 @@ global 	HADL 				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libra
 ;Flags to control application
 ,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time
 ,		TT_C1_Hwnd 			:= 0, TT_C2_Hwnd := 0, TT_C3_Hwnd := 0, HMenuCliHwnd := 0, HMenuAHKHwnd	:= 0, HS3GuiHwnd := 0, HS4GuiHwnd := 0, TT_C4_Hwnd := 0 ;This is a trick to initialize global variable HwndTMenuAHK_C1_Hwnd in order to not get warning (#Warn) message
-,		WhichMenu := ""
+,		WhichMenu := "",	v_EndChar := "" ;initialization of this variable is important in case user would like to hit "Esc" and GUI TT_C4 exists.
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_DetermineMonitors()
 Critical, On
@@ -296,7 +296,10 @@ F_GuiAbout_DetermineConstraints()
 F_GuiVersionUpdate_DetermineConstraints()
 
 if (ini_TTCn = 4)	;static triggerstring / hotstring GUI 
+{
+	F_LoadGUIstatic()
 	F_GuiTrigTipsMenuDefC4()
+}
 if (ini_GuiReload) and (v_Param != "l")
 	Gosub, L_GUIInit
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -304,7 +307,7 @@ if (ini_GuiReload) and (v_Param != "l")
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Loop,
 {
-	if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn))
+	if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn)) or (WinActive("ahk_id" TT_C4_Hwnd) and (ini_MHSEn))
 	{
 		Loop,	
 		{
@@ -322,7 +325,7 @@ Loop,
 	{
 		v_InputString := ""
 		out := ""
-		DestroyTriggerstringTips(ini_TTCn)
+		F_DestroyTriggerstringTips(ini_TTCn)
 		f_HTriggered := false
 	}
 	else
@@ -341,7 +344,7 @@ Loop,
 					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
 			}
 			else	;or destroy previously visible tips
-				DestroyTriggerstringTips(ini_TTCn)
+				F_DestroyTriggerstringTips(ini_TTCn)
 		}
 	}
 	
@@ -536,7 +539,6 @@ F_HMenuCli()
 	global	;assume-global moee
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",	ShiftTabIsFound := false, ReplacementString := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
-	;*[One]
 	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -610,7 +612,57 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
-DestroyTriggerstringTips(ini_TTCn)
+F_LoadGUIstatic()	;tu jestem
+{
+	global	;assume-global mode
+	local	ini_ReadTemp := 0
+	ini_SWPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
+	IniRead, ini_ReadTemp, 						% HADConfig, StaticTriggerstringHotstring, SWPosX, % A_Space
+	if (ini_ReadTemp = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+		IniWrite, % ini_ReadTemp, % HADConfig, StaticTriggerstringHotstring, SWPosX
+	ini_SWPos["X"] := ini_ReadTemp
+	IniRead, ini_ReadTemp, 						% HADConfig, StaticTriggerstringHotstring, SWPosY, % A_Space
+	if (ini_ReadTemp = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+		IniWrite, % ini_ReadTemp, % HADConfig, StaticTriggerstringHotstring, SWPosY
+	ini_SWPos["Y"] := ini_ReadTemp
+	IniRead, ini_ReadTemp, 						% HADConfig, StaticTriggerstringHotstring, SWPosW, % A_Space
+	if (ini_ReadTemp = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+		IniWrite, % ini_ReadTemp, % HADConfig, StaticTriggerstringHotstring, SWPosW
+	ini_SWPos["W"] := ini_ReadTemp
+	IniRead, ini_ReadTemp, 						% HADConfig, StaticTriggerstringHotstring, SWPosH, % A_Space
+	if (ini_ReadTemp = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+		IniWrite, % ini_ReadTemp, % HADConfig, StaticTriggerstringHotstring, SWPosH
+	ini_SWPos["H"] := ini_ReadTemp
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_RecreateGuiStatic()
+{
+	global	;assume-global mode
+	local	f_TT_C4visible := false,	f_TT_C4hidden := false
+	if (ini_TTCn = 4)	;static triggerstring / hostring menu
+	{
+		if (WinExist("ahk_id" TT_C4_Hwnd))
+			f_TT_C4visible := true
+		if (f_TT_C4visible)
+		{
+			Gui, TT_C4: Destroy
+			F_GuiTrigTipsMenuDefC4()
+			return
+		}
+		DetectHiddenWindows, On
+		if (WinExist("ahk_id" TT_C4_Hwnd))
+			f_TT_C4hidden := true
+		DetectHiddenWindows, Off
+		if (f_TT_C4hidden)
+		{
+			Gui, TT_C4: Destroy
+			F_GuiTrigTipsMenuDefC4()
+			Gui, TT_C4: Hide
+		}
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_DestroyTriggerstringTips(ini_TTCn)
 {
 	global	;assume-global mode
 	Switch ini_TTCn
@@ -743,7 +795,6 @@ F_Load_ini_GuiReload()
 	global	;assume-global mode
 	ini_GuiReload			:= false			;global variable
 	IniRead, ini_GuiReload, 					% HADConfig, GraphicalUserInterface, GuiReload,		% A_Space
-	;OutputDebug, % "IniRead, ini_GuiReload:" . A_Tab . ini_GuiReload
 	if (ini_GuiReload = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
 		ini_GuiReload := false
@@ -774,20 +825,21 @@ F_GuiTrigTipsMenuDefC4()
 	Gui, TT_C4: New, +AlwaysOnTop +Caption +HwndTT_C4_Hwnd +Resize, % A_ScriptName . ":" . A_Space . TransA["Static triggerstring / hotstring menus"]
 	Gui, TT_C4: Margin, 0, 0
 	if (ini_TTBgrCol = "custom")
-		Gui, TT_C4: Color,, % ini_TTBgrColCus	;background of listbox
+		Gui, TT_C4: Color,, 	% ini_TTBgrColCus	;background of listbox
 	else
-		Gui, TT_C4: Color,, % ini_TTBgrCol	;background of listbox
+		Gui, TT_C4: Color,, 	% ini_TTBgrCol	;background of listbox
 	if (ini_TTTyFaceCol = "custom")		
-		Gui, TT_C4: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceColCus, % ini_TTTyFaceFont
+		Gui, TT_C4: Font, 		% "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceColCus, % ini_TTTyFaceFont
 	else
-		Gui, TT_C4: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
-	Gui, TT_C4: Add, Text, % "x0 y0 HwndIdTT_C4_T1", Whatever
+		Gui, TT_C4: Font, 		% "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
+	Gui, TT_C4: Add, Text, 		% "x0 y0 HwndIdTT_C4_T1", Whatever
 	GuiControlGet, vOutput1, Pos, % IdTT_C4_T1
 	Gui, TT_C4: Add, Listbox, % "x0 y0 HwndIdTT_C4_LB1" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput1W + 4 . A_Space . "g" . "F_MouseMenuTT"
-	Gui, TT_C4: Add, Text, % "x0 y0 HwndIdTT_C4_T2", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
+	Gui, TT_C4: Add, Text, 		% "x0 y0 HwndIdTT_C4_T2", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
 	GuiControlGet, vOutput2, Pos, % IdTT_C4_T2
-	Gui, TT_C4: Add, Listbox, % "HwndIdTT_C4_LB2" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput2W + 4 	. A_Space . "g" . "F_MouseMenuTT"
-	Gui, TT_C4: Add, Listbox, % "HwndIdTT_C4_LB3" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput1W * 2 + 4 	. A_Space . "g" . "F_MouseMenuTT"
+	Gui, TT_C4: Add, Listbox, 	% "HwndIdTT_C4_LB2" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput2W + 4 	. A_Space . "g" . "F_MouseMenuTT"
+	Gui, TT_C4: Add, Listbox, 	% "HwndIdTT_C4_LB3" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput1W * 2 + 4 	. A_Space . "g" . "F_MouseMenuTT"
+	Gui, TT_C4: Add, Button,  	% "x0 y0 HwndIdTT_C4_B1" . A_Space . "g" . "F_TT_C4_B1", % TransA["Save window position"]
 	GuiControl, Hide, % IdTT_C4_T1
 	GuiControl, Hide, % IdTT_C4_T2
 	GuiControl, Font, % IdTT_C4_LB1		;fontcolor of listbox
@@ -809,8 +861,23 @@ F_GuiTrigTipsMenuDefC4()
 	GuiControl, Choose, % IdTT_C4_LB3, 1
 	GuiControlGet, PosOutputVar, Pos, % IdTT_C4_LB3
 	GuiControl, Move, % IdTT_C4_LB4, % "x" . PosOutputVarX + PosOutputVarW + 2 * c_xmarg . A_Space . "y" . PosOutputVarY
+	GuiControlGet, PosOutputVar, Pos, % IdTT_C4_LB4
+	GuiControl, Move, % IdTT_C4_B1, % "x" . PosOutputVarX . A_Space . "y" . PosOutputVarY + PosOutputVarH + c_ymarg
 	
-	Gui, TT_C4: Show, Center AutoSize NoActivate
+	if (ini_SWPos["X"] = "") or (ini_SWPos["Y"] = "")	;tu jestem
+		Gui, TT_C4: Show, Center AutoSize NoActivate
+	else
+		;Gui, TT_C4: Show, % "X" . ini_SWPos["X"] . A_Space . "Y" . ini_SWPos["Y"] . A_Space . "W" . ini_SWPos["W"] . A_Space . "H" . ini_SWPos["H"] . "NoActivate"
+		Gui, TT_C4: Show, % "X" . ini_SWPos["X"] . A_Space . "Y" . ini_SWPos["Y"] . A_Space . "NoActivate" . A_Space . "AutoSize"
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_TT_C4_B1()	;Button: save position of "static" triggerstring / hotstring window
+{	;tu jestem
+	global	;assume-global mode
+	local	WinX := 0, WinY := 0
+	WinGetPos, WinX, WinY, , , % "ahk_id" . TT_C4_Hwnd
+	IniWrite, % WinX, 			  	% HADConfig, StaticTriggerstringHotstring, SWPosX
+	IniWrite, % WinY, 			  	% HADConfig, StaticTriggerstringHotstring, SWPosY
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestString)
@@ -929,11 +996,11 @@ F_TMenuAHK_Hotkeys(BinParameter)
 			Hotkey, ^Enter,	F_TMenu, I1 On
 			Case 4:
 			Hotkey, IfWinExist, % "ahk_id" TT_C4_Hwnd	;in order to work the TT_C3_Hwnd variable must exist prior to definition of the following Hotkeys.
-			Hotkey, ^Tab, 		F_TMenu, I1 On
-			Hotkey, +^Tab, 	F_TMenu, I1 On
-			Hotkey, ^Up,		F_TMenu, I1 On
-			Hotkey, ^Down,		F_TMenu, I1 On
-			Hotkey, ^Enter,	F_TMenu, I1 On
+			Hotkey, ~^Tab, 	F_TMenu, I1 On
+			Hotkey, ~+^Tab, 	F_TMenu, I1 On
+			Hotkey, ~^Up,		F_TMenu, I1 On
+			Hotkey, ~^Down,	F_TMenu, I1 On
+			Hotkey, ~^Enter,	F_TMenu, I1 On
 		}
 		Hotkey, IfWinExist
 	}
@@ -2836,7 +2903,6 @@ F_GuiEvents_LoadValues()
 	GuiControl,, % IdEvTt_S2,	% ini_MNTT
 	GuiControl,, % IdEvTt_T18,	% ini_MNTT
 	GuiControl, ChooseString, % IdEvTt_DDL1, % ini_TASAC
-	;*[One]
 	Switch ini_TTCn
 	{
 		Case 1:	
@@ -2970,7 +3036,7 @@ F_GuiStyling_CreateObjects()
 	Gui, TTstyling: Add,	Listbox, 		HwndIdTTstyling_LB1 r5,	% TransA["Row"] . " 1|" . TransA["Row"] . " 2|" . TransA["Row"] . " 3|" . TransA["Row"] . " 4|" . TransA["Row"] . " 5"
 	
 	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B5 gF_ButtonTTTestStyling,	% TransA["Test styling"]
-	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B6 gF_ButtonTTApplyClose,		% TransA["Apply && Close"]
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B6 gF_ButtonTTApplyClose,	% TransA["Apply && Close"]
 	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B7 gF_ButtonTTCancel,		% TransA["Cancel"]
 	
 	Gui, TTstyling: Tab, 									% TransA["Hotstring menu styling"]
@@ -3186,7 +3252,7 @@ F_ButtonHMCancel()
 F_ButtonTTApplyClose()
 {
 	global ;assume-global mode
-	
+	local	f_TT_C4visible := false,	f_TT_C4hidden := false
 	Gui, TTstyling: 	Submit
 	IniWrite, % ini_TTBgrCol, 	% HADConfig, TriggerstringTips_Styling, TriggerstringTipsBackgroundColor
 	if (ini_TTBgrCol = "custom")
@@ -3206,7 +3272,7 @@ F_ButtonTTApplyClose()
 	}
 	else
 		IniWrite, "", 	% HADConfig, TriggerstringTips_Styling, TriggerstringTipsBackgroundColorCustom
-
+	
 	IniWrite, % ini_TTTyFaceCol, 	% HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceColor
 	if (ini_TTTyFaceCol = "custom")
 	{
@@ -3228,6 +3294,7 @@ F_ButtonTTApplyClose()
 	IniWrite, % ini_TTTyFaceFont, % HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceFont
 	IniWrite, % ini_TTTySize,	% HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceSize
 	Gui, TDemo: 		Destroy
+	F_RecreateGuiStatic()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ButtonHMApplyClose()
@@ -3275,6 +3342,7 @@ F_ButtonHMApplyClose()
 	IniWrite, % ini_HMTyFaceFont, % HADConfig, HotstringMenu_Styling, HotstringMenuTypefaceFont
 	IniWrite, % ini_HMTySize,	% HADConfig, HotstringMenu_Styling, HotstringMenuTypefaceSize
 	Gui, HDemo: 		Destroy
+	F_RecreateGuiStatic()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ButtonTTTestStyling()
@@ -3857,6 +3925,12 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		GuiControl, Choose, % IdTT_C4_LB3, 1
 		Gui, TT_C4: Show, NoActivate AutoSize
 	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+TT_C4GuiEscape()
+{
+	if (WinActive("ahk_id" TT_C4_Hwnd))
+		Gui, TT_C4: Hide
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_CheckScriptEncoding()
@@ -7361,6 +7435,11 @@ TipsSortByLength=1
 TipsAreShownAfterNoOfCharacters=1
 MNTT=20
 TTCn=2
+[StaticTriggerstringHotstring]
+SWPosX=
+SWPosY=
+SWPosW=
+SWPosH=
 [GraphicalUserInterface]
 Language=English.txt
 MainWindowPosX=
@@ -7911,6 +7990,7 @@ Row													= Row
 Sandbox (F6)											= Sandbox (F6)
 Save hotkey											= Save hotkey
 Save position of application window	 					= &Save position of application window
+Save window position									= Save window position
 Saved												= Saved
 Saving of sorted content into .csv file (library)				= Saving of sorted content into .csv file (library)
 Search by: 											= Search by:
@@ -9986,6 +10066,7 @@ F_HOF_MCLI(TextOptions, Oflag)
 			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . "|"
 		GuiControl, Choose, % IdTT_C4_LB4, 1
 		WinActivate, % "ahk_id" TT_C4_Hwnd
+		Gui, TT_C4: Flash	;future: flashing (blinking) in a loop until user do not take action
 		WhichMenu := "CLI"
 	}
 	Ovar := Oflag
@@ -10093,6 +10174,7 @@ F_HOF_MSI(TextOptions, Oflag)
 			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . "|"
 		GuiControl, Choose, % IdTT_C4_LB4, 1
 		WinActivate, % "ahk_id" TT_C4_Hwnd
+		Gui, TT_C4: Flash	;future: flashing (blinking) in a loop until user do not take action
 		WhichMenu := "SI"
 	}
 	Ovar := Oflag
@@ -10237,7 +10319,6 @@ F_HMenuAHK()
 	local	v_PressedKey := "",		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	v_PressedKey := A_ThisHotkey
-	;*[One]
 	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -10276,7 +10357,6 @@ F_HMenuAHK()
 	}		
 	if (InStr(v_PressedKey, "Enter"))
 	{
-		;*[One]
 		v_PressedKey := IntCnt
 		IsCursorPressed := false
 		IntCnt := 1
@@ -10332,7 +10412,6 @@ F_HMenuStatic()
 	local	v_PressedKey := "",		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	v_PressedKey := A_ThisHotkey
-	;*[One]
 	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -10371,7 +10450,6 @@ F_HMenuStatic()
 	}		
 	if (InStr(v_PressedKey, "Enter"))
 	{
-		;*[One]
 		v_PressedKey := IntCnt
 		IsCursorPressed := false
 		IntCnt := 1
@@ -10408,10 +10486,16 @@ F_HMenuStatic()
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
 }
 
-Esc::
+~Esc::	;tilde in order to run function TT_C4GuiEscape
 GuiControl,, % IdTT_C4_LB4, |
 Input ;This line blocks temporarily Input command in the main loop. 
-Send, % v_Triggerstring . v_EndChar
+OutputDebug, % "v_Triggerstring:" . A_Tab . v_Triggerstring . A_Tab . "v_EndChar:" . A_Tab . v_EndChar
+if (v_Triggerstring != "")
+{
+	WinActivate, % "ahk_id" PreviousWindowID
+	Send, % v_Triggerstring . v_EndChar
+	v_Triggerstring := ""
+}
 f_HTriggered := true
 return
 #If
