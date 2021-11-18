@@ -311,6 +311,7 @@ Loop,
 	{
 		Loop,	
 		{
+			OutputDebug, % "f_HTriggered:" . A_Tab . f_HTriggered
 			if (f_HTriggered)
 				Break
 			SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
@@ -1092,10 +1093,13 @@ F_MenuLogEnDis()
 F_TMenu()	;there must be a separate function to handle "interrupt" coming from "g" event
 {
 	global	;assume-global mode
-	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
+	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false, IsHMenu := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0
-	v_MenuMax := a_Tips.Count()
-	if (InStr(v_PressedKey, "^Up") or InStr(v_PressedKey, "+^Tab"))	;the same as "up"
+	v_MenuMax := a_Tips.Count()	;tu jestem
+	GuiControlGet, IsHMenu, , % IdTT_C4_LB4
+	;OutputDebug, % "IsHMenu:" . A_Tab . IsHMenu . A_Tab . "v_PressedKey:" . A_Tab . v_PressedKey . A_Tab . "!IsHMenu:" . A_Tab . !IsHMenu
+	if ((!IsHMenu) and InStr(v_PressedKey, "^Up") or InStr(v_PressedKey, "+^Tab"))	;the same as "up"
+	;if (InStr(v_PressedKey, "^Up") or InStr(v_PressedKey, "+^Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
 		IntCnt--
@@ -1116,7 +1120,8 @@ F_TMenu()	;there must be a separate function to handle "interrupt" coming from "
 		}
 		ShiftTabIsFound := true
 	}
-	if (InStr(v_PressedKey, "^Down") or (InStr(v_PressedKey, "^Tab")) and (!ShiftTabIsFound))	;the same as "down"
+	if (((!IsHMenu) and InStr(v_PressedKey, "^Down")) or ((!IsHMenu) and (InStr(v_PressedKey, "^Tab")) and (!ShiftTabIsFound)))	;the same as "down"
+	;if ((InStr(v_PressedKey, "^Down")) or (InStr(v_PressedKey, "^Tab") and (!ShiftTabIsFound)))	;the same as "down"
 	{
 		IsCursorPressed := true
 		IntCnt++
@@ -1136,6 +1141,14 @@ F_TMenu()	;there must be a separate function to handle "interrupt" coming from "
 			ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB3
 		}
 	}
+	if ((!IsHMenu) and InStr(v_PressedKey, "^Enter"))
+	{
+		v_PressedKey := IntCnt
+		IsCursorPressed := false
+		IntCnt := 1
+	}
+	else
+		return
 	if ((v_MenuMax = 1) and IsCursorPressed)
 	{
 		IntCnt := 1
@@ -1158,12 +1171,6 @@ F_TMenu()	;there must be a separate function to handle "interrupt" coming from "
 		IsCursorPressed := false
 		return
 	}		
-	if InStr(v_PressedKey, "^Enter")
-	{
-		v_PressedKey := IntCnt
-		IsCursorPressed := false
-		IntCnt := 1
-	}
 	if (v_PressedKey > v_MenuMax)
 		return
 	Switch ini_TTCn
@@ -9955,6 +9962,7 @@ F_ClipboardPaste(string, Oflag)
 	if (Oflag = false)
 	{
 		Clipboard := string . A_EndChar
+		OutputDebug, % "string:" . A_Tab . string
 		ClipWait
 		Send, ^v
 		Sleep, %ini_CPDelay% ; this sleep is required surprisingly
@@ -10474,8 +10482,9 @@ F_HMenuStatic()
 		Case "SI":
 		F_SendIsOflag(ReplacementString, Ovar, "SendInput")
 		Case "CLI":
-		ClipboardBack := ClipboardAll ;backup clipboard
+		Input ;This line blocks temporarily Input command in the main loop.
 		F_ClipboardPaste(ReplacementString, Ovar)
+		;*[One]
 	}
 	
 	GuiControl,, % IdTT_C4_LB4, |
@@ -10484,6 +10493,7 @@ F_HMenuStatic()
 		SoundBeep, % ini_MHSF, % ini_MHSD	
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	;OutputDebug, teraz tu
 }
 
 ~Esc::	;tilde in order to run function TT_C4GuiEscape
