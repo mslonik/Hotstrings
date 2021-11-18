@@ -311,7 +311,7 @@ Loop,
 	{
 		Loop,	
 		{
-			OutputDebug, % "f_HTriggered:" . A_Tab . f_HTriggered
+			;OutputDebug, % "f_HTriggered:" . A_Tab . f_HTriggered
 			if (f_HTriggered)
 				Break
 			SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
@@ -997,11 +997,11 @@ F_TMenuAHK_Hotkeys(BinParameter)
 			Hotkey, ^Enter,	F_TMenu, I1 On
 			Case 4:
 			Hotkey, IfWinExist, % "ahk_id" TT_C4_Hwnd	;in order to work the TT_C3_Hwnd variable must exist prior to definition of the following Hotkeys.
-			Hotkey, ~^Tab, 	F_TMenu, I1 On
-			Hotkey, ~+^Tab, 	F_TMenu, I1 On
-			Hotkey, ~^Up,		F_TMenu, I1 On
-			Hotkey, ~^Down,	F_TMenu, I1 On
-			Hotkey, ~^Enter,	F_TMenu, I1 On
+			Hotkey, ^Tab, 	F_TMenu, I1 On
+			Hotkey, +^Tab, 	F_TMenu, I1 On
+			Hotkey, ^Up,		F_TMenu, I1 On
+			Hotkey, ^Down,	F_TMenu, I1 On
+			Hotkey, ^Enter,	F_TMenu, I1 On
 		}
 		Hotkey, IfWinExist
 	}
@@ -1093,13 +1093,26 @@ F_MenuLogEnDis()
 F_TMenu()	;there must be a separate function to handle "interrupt" coming from "g" event
 {
 	global	;assume-global mode
-	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false, IsHMenu := ""
+	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0
 	v_MenuMax := a_Tips.Count()	;tu jestem
-	GuiControlGet, IsHMenu, , % IdTT_C4_LB4
-	;OutputDebug, % "IsHMenu:" . A_Tab . IsHMenu . A_Tab . "v_PressedKey:" . A_Tab . v_PressedKey . A_Tab . "!IsHMenu:" . A_Tab . !IsHMenu
-	if ((!IsHMenu) and InStr(v_PressedKey, "^Up") or InStr(v_PressedKey, "+^Tab"))	;the same as "up"
-	;if (InStr(v_PressedKey, "^Up") or InStr(v_PressedKey, "+^Tab"))	;the same as "up"
+	;OutputDebug, % "v_PressedKey:" . A_Tab . v_PressedKey
+	ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C4_LB1	;check if triggerstring tips listbox is empty.
+	if (!v_Temp1)	;if it is empty and one of the special shortcuts has been pressed, give it back (let it run)
+	{
+		Switch v_PressedKey
+		{
+			Case "^Tab":	v_PressedKey := "{Ctrl down}" . "{Tab}" . "{Ctrl up}"
+			Case "+^Tab":	v_PressedKey := "{Shift down}" . "{Ctrl down}" . "{Tab}" . "{Ctrl up}" . "{Shift up}"
+			Case "^Up":	v_PressedKey := "{Ctrl down}" . "{Up}" . "{Ctrl up}"
+			Case "^Down":	v_PressedKey := "{Ctrl down}" . "{Down}" . "{Ctrl up}"
+			Case "^Enter":	v_PressedKey := "{Ctrl down}" . "{Enter}" . "{Ctrl up}"
+		}
+		SendInput, % v_PressedKey
+		;OutputDebug, % "v_PressedKey:" . A_Tab . v_PressedKey
+		return
+	}
+	if (InStr(v_PressedKey, "^Up") or InStr(v_PressedKey, "+^Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
 		IntCnt--
@@ -1120,8 +1133,7 @@ F_TMenu()	;there must be a separate function to handle "interrupt" coming from "
 		}
 		ShiftTabIsFound := true
 	}
-	if (((!IsHMenu) and InStr(v_PressedKey, "^Down")) or ((!IsHMenu) and (InStr(v_PressedKey, "^Tab")) and (!ShiftTabIsFound)))	;the same as "down"
-	;if ((InStr(v_PressedKey, "^Down")) or (InStr(v_PressedKey, "^Tab") and (!ShiftTabIsFound)))	;the same as "down"
+	if ((InStr(v_PressedKey, "^Down")) or (InStr(v_PressedKey, "^Tab") and (!ShiftTabIsFound)))	;the same as "down"
 	{
 		IsCursorPressed := true
 		IntCnt++
@@ -1141,14 +1153,12 @@ F_TMenu()	;there must be a separate function to handle "interrupt" coming from "
 			ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB3
 		}
 	}
-	if ((!IsHMenu) and InStr(v_PressedKey, "^Enter"))
+	if InStr(v_PressedKey, "^Enter")
 	{
 		v_PressedKey := IntCnt
 		IsCursorPressed := false
 		IntCnt := 1
 	}
-	else
-		return
 	if ((v_MenuMax = 1) and IsCursorPressed)
 	{
 		IntCnt := 1
@@ -10420,6 +10430,7 @@ F_HMenuStatic()
 	local	v_PressedKey := "",		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	v_PressedKey := A_ThisHotkey
+	OutputDebug, Here I am
 	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -10484,7 +10495,6 @@ F_HMenuStatic()
 		Case "CLI":
 		Input ;This line blocks temporarily Input command in the main loop.
 		F_ClipboardPaste(ReplacementString, Ovar)
-		;*[One]
 	}
 	
 	GuiControl,, % IdTT_C4_LB4, |
