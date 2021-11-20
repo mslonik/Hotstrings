@@ -1413,7 +1413,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvMH_S2 vEvMH_S2 gF_EvMH_S2 Line1 Page50 Range50-2000 TickInterval50 ToolTipBottom Buddy1EvMH_S2, % EvMH_S2
 	Gui, GuiEvents: Add, 	Text, 	HwndIdEvMH_T8, 					% TransA["Sound duration [ms]"] . ":" . A_Space . "2000"
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvMH_B1 gF_EvMH_B1,			% TransA["Sound test"]
-	Gui, GuiEvents: Add,	Button,	HwndIdEvMH_B2 gF_EvMH_B2,			% TransA["Apply"]	;tu jestem
+	Gui, GuiEvents: Add,	Button,	HwndIdEvMH_B2 gF_EvMH_B2,			% TransA["Apply"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvMH_B3 gF_EvMH_B3,			% TransA["Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvMH_B4 gF_EvMH_B4,			% TransA["Cancel"]
 	
@@ -1467,9 +1467,10 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvUH_S3 vEvUH_S3 gF_EvUH_S3 Line1 Page50 Range50-2000 TickInterval50 ToolTipBottom Buddy1EvUH_S3, % EvUH_S3
 	Gui, GuiEvents: Add, 	Text, 	HwndIdEvUH_T14, 					% TransA["Sound duration [ms]"] . ":" . A_Space . "2000"
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvUH_B1 gF_EvUH_B1,			% TransA["Tooltip test"]
-	Gui, GuiEvents: Add, 	Button, 	HwndIdEvUH_B2 gF_EvUH_B2,			% TransA["Sound test"]
-	Gui, GuiEvents: Add,	Button,	HwndIdEvUH_B3 gF_EvUH_B3,			% TransA["Apply && Close"]
-	Gui, GuiEvents: Add,	Button,	HwndIdEvUH_B4 gF_EvUH_B4,			% TransA["Cancel"]
+	Gui, GuiEvents: Add, 	Button, 	HwndIdEvUH_B2 gF_EvUH_B2,			% TransA["Sound test"]	
+	Gui, GuiEvents: Add,	Button,	HwndIdEvUH_B3 gF_EvUH_B3,			% TransA["Apply"]	
+	Gui, GuiEvents: Add,	Button,	HwndIdEvUH_B4 gF_EvUH_B4,			% TransA["Close"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvUH_B5 gF_EvUH_B5,			% TransA["Cancel"]
 	
 	Gui, GuiEvents: Tab,											%  TransA["Triggerstring tips"]
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
@@ -1544,9 +1545,10 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	DropDownList, HwndIdEvTt_DDL2 vEvTt_DDL2 AltSubmit, % TransA["Triggerstring tips"] . "|" . TransA["Triggerstring tips"] . A_Space . "+" . A_Space 
 		. TransA["Triggers"] . "|" . TransA["Triggerstring tips"] . A_Space . "+" . A_Space . TransA["Triggers"] . A_Space . "+" . A_Space . TransA["Hotstrings"]
-	Gui, GuiEvents: Add, 	Button, 	HwndIdEvTt_B1 gF_EvTt_B1,			% TransA["Tooltip test"]
-	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B2 gF_EvTt_B2,			% TransA["Apply && Close"]
-	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B3 gF_EvTt_B3,			% TransA["Cancel"]
+	Gui, GuiEvents: Add, 	Button, 	HwndIdEvTt_B1 gF_EvTt_B1,			% TransA["Tooltip test"]	
+	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B2 gF_EvTt_B2,			% TransA["Apply"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B3 gF_EvTt_B3,			% TransA["Close"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B4 gF_EvTt_B4,			% TransA["Cancel"]
 	
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T25,					% TransA["Triggerstring tips"] . A_Space . "+" . A_Space . TransA["Triggers"] . A_Space . "+" . A_Space . TransA["Hotstrings"]
 	GuiControl, Hide, % IdEvTt_T25
@@ -1562,8 +1564,9 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvAT_R1 vEvAT_R1R2 gF_EvAT_R1R2,	% TransA["enable"]
 	Gui, GuiEvents: Add,	Radio, 	HwndIdEvAT_R2 gF_EvAT_R1R2,			% TransA["disable"]	
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvAT_B1 gF_EvAT_B1,			% TransA["Tooltip test"]
-	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B2 gF_EvAT_B2,			% TransA["Apply && Close"]
-	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B3 gF_EvAT_B3,			% TransA["Cancel"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B2 gF_EvAT_B2,			% TransA["Apply"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B3 gF_EvAT_B3,			% TransA["Close"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B4 gF_EvAT_B4,			% TransA["Cancel"]
 	
 	Gui, GuiEvents: Tab,											% TransA["Static triggerstring / hotstring menus"]
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
@@ -1576,18 +1579,25 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvSM_R1 vEvSM_R1R2 gF_EvSM_R1R2,	% TransA["enable"]
 	Gui, GuiEvents: Add,	Radio, 	HwndIdEvSM_R2 gF_EvSM_R1R2,			% TransA["disable"]	
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvSM_B1 gF_EvSM_B1,			% TransA["Preview"]
-	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B2 gF_EvSM_B2,			% TransA["Apply && Close"]
-	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B3 gF_EvSM_B3,			% TransA["Cancel"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B2 gF_EvSM_B2,			% TransA["Apply"]	;tu jestem
+	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B3 gF_EvSM_B3,			% TransA["Close"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B4 gF_EvSM_B4,			% TransA["Cancel"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvSM_B3()	;static menus, button Cancel
+F_EvSM_B4()	;static menus, button Cancel
 {
 	global ;assume-global mode
 	Tooltip,,,, 4
 	Gui, GuiEvents: Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvSM_B2()	;static menus, button Apply & Close
+F_EvSM_B2()	;static menus, button Apply
+{
+	global ;assume-global mode
+	
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvSM_B3()	;static menus, button Close
 {
 	global ;assume-global mode
 	Gui, GuiEvents: Submit, NoHide
@@ -1654,14 +1664,20 @@ F_EvSM_R1R2()
 	}
 }	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvAT_B3()	;Event Active Triggerstring Tips Button Cancel
+F_EvAT_B4()	;Event Active Triggerstring Tips Button Cancel
 {
 	global ;assume-global mode
 	Tooltip,,,, 4
 	Gui, GuiEvents: Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvAT_B2()	;Event Active Triggerstring Tips Button Apply & Close
+F_EvAT_B2()	;Event Active Triggerstring Tips Button Apply
+{
+	global ;assume-global mode
+	
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvAT_B3()	;Event Active Triggerstring Tips Button Close
 {
 	global ;assume-global mode
 	Gui, GuiEvents: Submit, NoHide
@@ -1743,7 +1759,13 @@ F_EvTt_B1()	;Event Tooltip (is triggered) Button Tooltip test
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvTt_B2()	;Event Tooltip (is triggered) Button Apply & Close 
+F_EvTt_B2()	;Event Tooltip (is triggered) Button Apply
+{
+	global ;assume-global mode
+	
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvTt_B3()	;Event Tooltip (is triggered) Button Close 
 {
 	global ;assume-global mode
 	Gui, GuiEvents: Submit, NoHide
@@ -1775,7 +1797,7 @@ F_EvTt_B2()	;Event Tooltip (is triggered) Button Apply & Close
 	Gui, GuiEvents: Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvTt_B3()	;Event Tooltip (is triggered) Button Cancel
+F_EvTt_B4()	;Event Tooltip (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	Tooltip,,,, 4
@@ -1925,7 +1947,13 @@ F_EvUH_B2()	;Event Undo Hotstring (is triggered) Button Sound test
 	SoundBeep, % EvUH_S2, % EvUH_S3
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvUH_B3()	;Event Undo Hotstring (is triggered) Button Apply & Close
+F_EvUH_B3()	;Event Undo Hotstring (is triggered) Button Apply	;tu jestem
+{
+	global ;assume-global mode
+	
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvUH_B4()	;Event Undo Hotstring (is triggered) Button Close
 {
 	global ;assume-global mode
 	Gui, GuiEvents: Submit, NoHide
@@ -1960,7 +1988,7 @@ F_EvUH_B3()	;Event Undo Hotstring (is triggered) Button Apply & Close
 	Gui, GuiEvents: Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvUH_B4()	;Event Undo Hotstring (is triggered) Button Cancel
+F_EvUH_B5()	;Event Undo Hotstring (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	Tooltip,,,, 4
@@ -2283,7 +2311,7 @@ F_GuiEvents_DetermineConstraints()
 	GuiControl, Move, % IdEvMH_T8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext := c_xmarg, v_yNext += 3 * HofText
 	GuiControl, Move, % IdEvMH_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_B1	;tu jestem
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_B1	
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvMH_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_B2
@@ -2369,11 +2397,14 @@ F_GuiEvents_DetermineConstraints()
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvUH_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_B2
-	v_xNext += v_OutVarTempW + 4 * c_xmarg
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvUH_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_B3
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvUH_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_B4
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvUH_B5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	maxY3 := v_yNext
 	
 	v_xNext := c_xmarg, v_yNext := c_ymarg
@@ -2464,6 +2495,9 @@ F_GuiEvents_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_B2
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_B3
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvTt_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	maxY4 := v_yNext
 	
 	v_xNext := c_xmarg, v_yNext := c_ymarg
@@ -2477,13 +2511,16 @@ F_GuiEvents_DetermineConstraints()
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvAT_R2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext := c_xmarg, v_yNext += 3 * HofText
-	GuiControl, Move, % IdEvAT_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControl, Move, % IdEvAT_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext	
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_B1
-	v_xNext += v_OutVarTempW + 4 * c_xmarg
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvAT_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_B2
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvAT_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_B3
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvAT_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	maxY5 := v_yNext
 	
 	v_xNext := c_xmarg, v_yNext := c_ymarg ;beginning of static triggerstring / hostring menus
@@ -2499,11 +2536,14 @@ F_GuiEvents_DetermineConstraints()
 	v_xNext := c_xmarg, v_yNext += 3 * HofText
 	GuiControl, Move, % IdEvSM_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_B1
-	v_xNext += v_OutVarTempW + 4 * c_xmarg
-	GuiControl, Move, % IdEvSM_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvSM_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext	;tu jestem
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_B2
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvSM_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_B3
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvSM_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	maxY6 := v_yNext
 	
 	;Bottom alignment of buttons over all tabs.
@@ -2534,42 +2574,58 @@ F_GuiEvents_DetermineConstraints()
 	GuiControl, Move, % IdEvMH_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_B3
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdEvMH_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext	;tu jestem
+	GuiControl, Move, % IdEvMH_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext := c_xmarg, v_yNext := MaxY
 	
 	GuiControl, Move, % IdEvUH_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_B1
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvUH_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_B2
-	v_xNext += v_OutVarTempW + 4 * c_xmarg
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvUH_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_B3
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvUH_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_B4
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvUH_B5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	
 	v_xNext := c_xmarg, v_yNext := MaxY
 	GuiControl, Move, % IdEvTt_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_B1
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_B2
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_B3
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvTt_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext	
 	
 	v_xNext := c_xmarg, v_yNext := MaxY
 	GuiControl, Move, % IdEvAT_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext += v_OutVarTempW + 4 * c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_B1
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvAT_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_B2
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvAT_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_B3
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvAT_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext	
 	
 	v_xNext := c_xmarg, v_yNext := MaxY	;alignment of tab 6: static triggerstring tips / hotstring menus
 	GuiControl, Move, % IdEvSM_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext += v_OutVarTempW + 4 * c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_B1
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvSM_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_B2
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvSM_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_B3
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdEvSM_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext	;tu jestem
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvBH_R3R4()
