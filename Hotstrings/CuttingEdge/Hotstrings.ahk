@@ -878,6 +878,7 @@ F_TT_C4_B1()	;Button: save position of "static" triggerstring / hotstring window
 	WinGetPos, WinX, WinY, , , % "ahk_id" . TT_C4_Hwnd
 	IniWrite, % WinX, 			  	% HADConfig, StaticTriggerstringHotstring, SWPosX
 	IniWrite, % WinY, 			  	% HADConfig, StaticTriggerstringHotstring, SWPosY
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Position of this window is saved in Config.ini."]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestString)
@@ -1280,6 +1281,8 @@ F_GuiEvents()
 	global ;assume-global mode
 	local FoundPos := "", Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0, Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0, NewWinPosX := 0, NewWinPosY := 0
 	
+	;OutputDebug, % "A_Gui:" . A_Tab . A_Gui
+	Gui, % A_Gui . ": +Disabled"	;tu jestem
 	F_GuiEvents_InitiateValues()	;initial values 
 	;OutputDebug, % "F_EvTT_R1R2 po F_GuiEvents_InitiateValues:" . A_Tab . EvTT_R1R2
 	F_GuiEvents_CreateObjects()
@@ -1298,7 +1301,8 @@ F_GuiEvents()
 	;OutputDebug, % "F_EvTT_R1R2 po F_EvTt_R1R2:" . A_Tab . EvTT_R1R2
 	F_EvTt_R3R4()
 	F_EvSM_R1R2()
-
+	F_EvTab3()
+	
 	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	Gui, GuiEvents: Show, Hide Center AutoSize
@@ -1329,7 +1333,7 @@ F_GuiEvents_CreateObjects()
 	
 	;2. Prepare all text objects according to mock-up.
 	Gui,	GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, GuiEvents: Add,	Tab3,		,							% TransA["Basic hotstring is triggered"] . "||" . TransA["Menu hotstring is triggered"] . "|" 
+	Gui, GuiEvents: Add,	Tab3, vEvTab3 gF_EvTab3,						% TransA["Basic hotstring is triggered"] . "||" . TransA["Menu hotstring is triggered"] . "|" 
 		. TransA["Undid the last hotstring"] . "|" . TransA["Triggerstring tips"] . "|" . TransA["Active triggerstring tips"] . "|" . TransA["Static triggerstring / hotstring menus"] . "|"
 	
 	Gui, GuiEvents: Tab, 											% TransA["Basic hotstring is triggered"]
@@ -1579,22 +1583,231 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvSM_R1 vEvSM_R1R2 gF_EvSM_R1R2,	% TransA["enable"]
 	Gui, GuiEvents: Add,	Radio, 	HwndIdEvSM_R2 gF_EvSM_R1R2,			% TransA["disable"]	
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvSM_B1 gF_EvSM_B1,			% TransA["Preview"]
-	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B2 gF_EvSM_B2,			% TransA["Apply"]	;tu jestem
+	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B2 gF_EvSM_B2,			% TransA["Apply"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B3 gF_EvSM_B3,			% TransA["Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B4 gF_EvSM_B4,			% TransA["Cancel"]
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvTab3()	;tu jestem
+{
+	global ;assume-global mode
+	static PreviousEvTab3 := ""
+			, PreviousEvBH_R1R2 := "", PreviousEvBH_R3R4 := "", PreviousEvBH_R5R6 := "", PreviousEvBH_R7R8 := "", PreviousEvBH_S2 := "", PreviousEvBH_S3 := ""
+			, PreviousEvMH_R1R2 := "", PreviousEvMH_R3R4 := "", PreviousEvMH_S1 := "", PreviousEvMH_S2 := ""
+			, OneTime := true
+	;*[One]
+	if (OneTime)
+	{
+		PreviousEvTab3 := EvTab3
+		, PreviousEvBH_R1R2 := EvBH_R1R2, PreviousEvBH_R3R4 := EvBH_R3R4, PreviousEvBH_R5R6 := EvBH_R5R6, PreviousEvBH_R7R8 := EvBH_R7R8, PreviousEvBH_S2 := EvBH_S2, PreviousEvBH_S3 := EvBH_S3
+		, PreviousEvMH_R1R2 := EvMH_R1R2, PreviousEvMH_R3R4 := EvMH_R3R4, PreviousEvMH_S1 := EvMH_S1, PreviousEvMH_S2 := EvMH_S1
+		, PreviousEvUH_R1R2 := EvUH_R1R2, PreviousEvUH_R3R4 := EvUH_R3R4, PreviousEvUH_R5R6 := EvUH_R5R6, PreviousEvUH_R7R8 := EvUH_R7R8, PreviousEvUH_S1 := EvUH_S1, PreviousEvUH_S2 := EvUH_S2, PreviousEvUH_S3 := EvUH_S3
+		, PreviousEvTt_R1R2 := EvTt_R1R2, PreviousEvTt_R3R4 := EvTt_R3R4, PreviousEvTt_R5R6 := EvTt_R5R6, PreviousEvTt_C1 := EvTt_C1, PreviousEvTt_C2 := EvTt_C2, PreviousEvTt_S1 := EvTt_S1, PreviousEvTt_S2 := EvTt_S2, PreviousEvTt_DDL1 := EvTt_DDL1, PreviousEvTt_DDL2 := EvTt_DDL2
+		, PreviousEvAT_R1R2 := EvAT_R1R2
+		, PreviousEvSM_R1R2 := EvSM_R1R2
+		OneTime := false
+	}
+
+	Gui, GuiEvents: Submit
+	if (EvTab3 != PreviousEvTab3)
+		Switch PreviousEvTab3
+	{
+		Case % TransA["Basic hotstring is triggered"]:
+		if (EvBH_R1R2 != PreviousEvBH_R1R2) or (EvBH_R3R4 != PreviousEvBH_R3R4) or (EvBH_R5R6 != PreviousEvBH_R5R6) or (EvBH_R7R8 != PreviousEvBH_R7R8) or (EvBH_S2 != PreviousEvBH_S2) or (EvBH_S3 != PreviousEvBH_S3)
+		{
+			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % "You've changed at least one configuration parameter, but didn't yet apply it." 
+			. "If you won't apply it, previous changes will be lost."
+			. "`n`n" . "Do you wish to apply your changes?"
+			IfMsgBox, Yes
+			{
+				F_EvBH_B3()
+				Gui, GuiEvents: Show
+				PreviousEvTab3 := EvTab3
+				return
+			}
+			IfMsgBox, No
+			{
+				Gui, GuiEvents: Show
+				PreviousEvTab3 := EvTab3
+				return
+			}
+		}
+		else
+		{
+			Gui, GuiEvents: Show
+			PreviousEvTab3 := EvTab3
+			return
+		}
+		
+		Case % TransA["Menu hotstring is triggered"]:
+		if (EvMH_R1R2 != PreviousEvMH_R1R2) or (EvMH_R3R4 != PreviousEvMH_R3R4) or (EvMH_S1 != PreviousEvMH_S1) or (EvMH_S1 != PreviousEvMH_S2)
+		{
+			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % "You've changed at least one configuration parameter, but didn't yet apply it." 
+			. "If you won't apply it, previous changes will be lost."
+			. "`n`n" . "Do you wish to apply your changes?"
+			IfMsgBox, Yes
+			{
+				F_EvMH_B2()
+				Gui, GuiEvents: Show
+				PreviousEvTab3 := EvTab3
+				return
+			}
+			IfMsgBox, No
+			{
+				Gui, GuiEvents: Show
+				PreviousEvTab3 := EvTab3
+				return
+			}			
+		}
+		else
+		{
+			Gui, GuiEvents: Show
+			PreviousEvTab3 := EvTab3
+			return
+		}
+		
+		Case % TransA["Undid the last hotstring"]:
+		if (EvUH_R1R2 != PreviousEvUH_R1R2) or (EvUH_R3R4 != PreviousEvUH_R3R4) or (EvUH_R5R6 != PreviousEvUH_R5R6) or (EvUH_R7R8 != PreviousEvUH_R7R8) or (EvUH_S1 != PreviousEvUH_S1) or (EvUH_S2 != PreviousEvUH_S2) or (EvUH_S3 != PreviousEvUH_S3)
+		{
+			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % "You've changed at least one configuration parameter, but didn't yet apply it." 
+			. "If you won't apply it, previous changes will be lost."
+			. "`n`n" . "Do you wish to apply your changes?"
+			IfMsgBox, Yes
+			{
+				F_EvUH_B3() 
+				Gui, GuiEvents: Show
+				PreviousEvTab3 := EvTab3
+				return
+			}
+			IfMsgBox, No
+			{
+				Gui, GuiEvents: Show
+				PreviousEvTab3 := EvTab3
+				return
+			}			
+		}
+		else
+		{
+			Gui, GuiEvents: Show
+			PreviousEvTab3 := EvTab3
+			return
+		}
+			
+		Case % TransA["Triggerstring tips"]:
+		if (EvTt_R1R2 != PreviousEvTt_R1R2) or (EvTt_R3R4 != PreviousEvTt_R3R4) or (EvTt_R5R6 != PreviousEvTt_R5R6) or (EvTt_C1 != PreviousEvTt_C1) or (EvTt_C2 != PreviousEvTt_C2) or (EvTt_S1 != PreviousEvTt_S1) or (EvTt_S2 != PreviousEvTt_S2) or (EvTt_DDL1 != PreviousEvTt_DDL1) or (EvTt_DDL2 != PreviousEvTt_DDL2)
+		{
+			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % "You've changed at least one configuration parameter, but didn't yet apply it." 
+			. "If you won't apply it, previous changes will be lost."
+			. "`n`n" . "Do you wish to apply your changes?"
+			IfMsgBox, Yes
+			{
+				F_EvTt_B2() 
+				Gui, GuiEvents: Show
+				PreviousEvTab3 := EvTab3
+				return
+			}
+			IfMsgBox, No
+			{
+				Gui, GuiEvents: Show
+				PreviousEvTab3 := EvTab3
+				return
+			}			
+		}
+		else
+		{
+			Gui, GuiEvents: Show
+			PreviousEvTab3 := EvTab3
+			return
+		}
+		
+		Case % TransA["Active triggerstring tips"]:
+		if (EvAT_R1R2 != PreviousEvAT_R1R2)
+		{
+			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % "You've changed at least one configuration parameter, but didn't yet apply it." 
+			. "If you won't apply it, previous changes will be lost."
+			. "`n`n" . "Do you wish to apply your changes?"
+			IfMsgBox, Yes
+			{
+				F_EvAT_B2() 
+				Gui, GuiEvents: Show
+				PreviousEvTab3 := EvTab3
+				return
+			}
+			IfMsgBox, No
+			{
+				Gui, GuiEvents: Show
+				PreviousEvTab3 := EvTab3
+				return
+			}			
+		}
+		else
+		{
+			Gui, GuiEvents: Show
+			PreviousEvTab3 := EvTab3
+			return
+		}
+			
+		Case % TransA["Static triggerstring / hotstring menus"]:
+		if (EvSM_R1R2 != PreviousEvSM_R1R2)
+		{
+			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % "You've changed at least one configuration parameter, but didn't yet apply it." 
+			. "If you won't apply it, previous changes will be lost."
+			. "`n`n" . "Do you wish to apply your changes?"
+			IfMsgBox, Yes
+			{
+				F_EvSM_B2() 
+				Gui, GuiEvents: Show
+				PreviousEvTab3 := EvTab3
+				return
+			}
+			IfMsgBox, No
+			{
+				Gui, GuiEvents: Show
+				PreviousEvTab3 := EvTab3
+				return
+			}			
+		}
+		else
+		{
+			Gui, GuiEvents: Show
+			PreviousEvTab3 := EvTab3
+			return
+		}
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvSM_B4()	;static menus, button Cancel
 {
 	global ;assume-global mode
 	Tooltip,,,, 4
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled	;tu jestem
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	;tu jestem
 	Gui, GuiEvents: Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvSM_B2()	;static menus, button Apply
 {
 	global ;assume-global mode
-	
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvSM_R1R2	;static triggerstring / hostring menu enable / disable
+	{
+		Case 1:	;enable
+		Switch ini_TTCn	;previous value of ini_TTCn
+		{
+			Case 1: Gui, TT_C1:		Destroy
+			Case 2: Gui, TT_C2:		Destroy
+			Case 3: Gui, TT_C3:		Destroy
+		}
+		ini_TTCn := 4	;enable
+		F_GuiTrigTipsMenuDefC4()	
+		Case 2:	;disable: 
+		Gui, TT_C4:		Destroy
+		ini_TTCn := 2	; default value: Composition of triggerstring tips = Triggerstring tips + triggers
+	}
+	IniWrite, % ini_TTCn,	% HADConfig, Event_TriggerstringTips,	TTCn
+	Tooltip,,,, 4	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvSM_B3()	;static menus, button Close
@@ -1668,13 +1881,24 @@ F_EvAT_B4()	;Event Active Triggerstring Tips Button Cancel
 {
 	global ;assume-global mode
 	Tooltip,,,, 4
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled	;tu jestem
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	;tu jestem
 	Gui, GuiEvents: Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvAT_B2()	;Event Active Triggerstring Tips Button Apply
 {
 	global ;assume-global mode
-	
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvAT_R1R2	;Tooltip enable
+	{
+		Case 1:	ini_ATEn := true
+		Case 2:	ini_ATEn := false
+	}
+	IniWrite, % ini_ATEn, 	% HADConfig, Event_ActiveTriggerstringTips, 	ATEn
+	Tooltip,,,, 4	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvAT_B3()	;Event Active Triggerstring Tips Button Close
@@ -1688,6 +1912,10 @@ F_EvAT_B3()	;Event Active Triggerstring Tips Button Close
 	}
 	IniWrite, % ini_ATEn, 	% HADConfig, Event_ActiveTriggerstringTips, 	ATEn
 	Tooltip,,,, 4
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled	;tu jestem
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	;tu jestem
 	Gui, GuiEvents: Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1762,7 +1990,32 @@ F_EvTt_B1()	;Event Tooltip (is triggered) Button Tooltip test
 F_EvTt_B2()	;Event Tooltip (is triggered) Button Apply
 {
 	global ;assume-global mode
-	
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvTt_R1R2	;Tooltip enable
+	{
+		Case 1:	ini_TTTtEn := true
+		Case 2:	ini_TTTtEn := false
+	}
+	Switch EvTt_R3R4	;Finite timeout
+	{
+		Case 1:	ini_TTTD := EvTt_S1
+		Case 2:	ini_TTTD := 0
+	}
+	Switch EvTt_R5R6	;Tooltip position
+	{
+		Case 1:	ini_TTTP := 1
+		Case 2:	ini_TTTP := 2
+	}
+	ini_TipsSortAlphabetically := EvTt_C1, ini_TipsSortByLength := EvTt_C2, ini_MNTT := EvTt_S2,	ini_TASAC := EvTt_DDL1,	ini_TTCn := EvTt_DDL2
+	IniWrite, % ini_TTTtEn, 	% HADConfig, Event_TriggerstringTips, 	TTTtEn
+	IniWrite, % ini_TTTD,	% HADConfig, Event_TriggerstringTips,	TTTD
+	IniWrite, % ini_TTTP,	% HADConfig, Event_TriggerstringTips,	TTTP
+	IniWrite, % ini_TipsSortAlphabetically, 	% HADConfig, Event_TriggerstringTips,	TipsSortAlphabetically
+	IniWrite, % ini_TipsSortByLength,	% HADConfig, Event_TriggerstringTips,	TipsSortByLength
+	IniWrite, % ini_MNTT,	% HADConfig, Event_TriggerstringTips,	MNTT
+	IniWrite, % ini_TASAC,	% HADConfig, Event_TriggerstringTips,	TipsAreShownAfterNoOfCharacters
+	IniWrite, % ini_TTCn,	% HADConfig, Event_TriggerstringTips,	TTCn
+	Tooltip,,,, 4	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvTt_B3()	;Event Tooltip (is triggered) Button Close 
@@ -1794,6 +2047,10 @@ F_EvTt_B3()	;Event Tooltip (is triggered) Button Close
 	IniWrite, % ini_TASAC,	% HADConfig, Event_TriggerstringTips,	TipsAreShownAfterNoOfCharacters
 	IniWrite, % ini_TTCn,	% HADConfig, Event_TriggerstringTips,	TTCn
 	Tooltip,,,, 4
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled	;tu jestem
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	;tu jestem
 	Gui, GuiEvents: Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1801,6 +2058,10 @@ F_EvTt_B4()	;Event Tooltip (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	Tooltip,,,, 4
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled	;tu jestem
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	;tu jestem
 	Gui, GuiEvents: Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1947,10 +2208,38 @@ F_EvUH_B2()	;Event Undo Hotstring (is triggered) Button Sound test
 	SoundBeep, % EvUH_S2, % EvUH_S3
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvUH_B3()	;Event Undo Hotstring (is triggered) Button Apply	;tu jestem
+F_EvUH_B3()	;Event Undo Hotstring (is triggered) Button Apply
 {
 	global ;assume-global mode
-	
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvUH_R1R2	;Tooltip enable
+	{
+		Case 1:	ini_UHTtEn := true
+		Case 2:	ini_UHTtEn := false
+	}
+	Switch EvUH_R3R4	;Finite timeout
+	{
+		Case 1:	ini_UHTD := EvUH_S1
+		Case 2:	ini_UHTD := 0
+	}
+	Switch EvUH_R5R6	;Tooltip position
+	{
+		Case 1:	ini_UHTP := 1
+		Case 2:	ini_UHTP := 2
+	}
+	Switch EvUH_R7R8	;Sound enable
+	{
+		Case 1:	ini_UHSEn := 1
+		Case 2:	ini_UHSEn := 0
+	}
+	ini_UHSF := EvUH_S2, ini_UHSD := EvUH_S3
+	IniWrite, % ini_UHTtEn, 	% HADConfig, Event_UndoHotstring, 	UHTtEn
+	IniWrite, % ini_UHTD,	% HADConfig, Event_UndoHotstring,	UHTD
+	IniWrite, % ini_UHTP,	% HADConfig, Event_UndoHotstring,	UHTP
+	IniWrite, % ini_UHSEn, 	% HADConfig, Event_UndoHotstring,	UHSEn
+	IniWrite, % ini_UHSF,	% HADConfig, Event_UndoHotstring,	UHSF
+	IniWrite, % ini_UHSD,	% HADConfig, Event_UndoHotstring,	UHSD
+	Tooltip,,,, 4	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvUH_B4()	;Event Undo Hotstring (is triggered) Button Close
@@ -1985,6 +2274,10 @@ F_EvUH_B4()	;Event Undo Hotstring (is triggered) Button Close
 	IniWrite, % ini_UHSF,	% HADConfig, Event_UndoHotstring,	UHSF
 	IniWrite, % ini_UHSD,	% HADConfig, Event_UndoHotstring,	UHSD
 	Tooltip,,,, 4
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled	;tu jestem
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	;tu jestem
 	Gui, GuiEvents: Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1992,6 +2285,10 @@ F_EvUH_B5()	;Event Undo Hotstring (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	Tooltip,,,, 4
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled	;tu jestem
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	;tu jestem
 	Gui, GuiEvents: Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2106,13 +2403,33 @@ F_EvMH_B4()	;Menu Hotstring (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	Tooltip,,,, 4
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled	;tu jestem
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	;tu jestem
 	Gui, GuiEvents: Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvMH_B2()	;Apply ;tu jestem
+F_EvMH_B2()	;Apply
 {
 	global ;assume-global mode
-	
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvMH_R1R2	;Tooltip position
+	{
+		Case 1:	ini_MHMP := 1
+		Case 2:	ini_MHMP := 2
+	}
+	Switch EvMH_R3R4	;Sound enable
+	{
+		Case 1:	ini_MHSEn := 1
+		Case 2:	ini_MHSEn := 0
+	}
+	ini_MHSF := EvMH_S1, ini_MHSD := EvMH_S2
+	IniWrite, % ini_MHMP,	% HADConfig, Event_MenuHotstring,		MHMP
+	IniWrite, % ini_MHSEn, 	% HADConfig, Event_MenuHotstring,		MHSEn
+	IniWrite, % ini_MHSF,	% HADConfig, Event_MenuHotstring,		MHSF
+	IniWrite, % ini_MHSD,	% HADConfig, Event_MenuHotstring,		MHSD
+	Tooltip,,,, 4	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvMH_B3()	;Close	
@@ -2135,6 +2452,10 @@ F_EvMH_B3()	;Close
 	IniWrite, % ini_MHSF,	% HADConfig, Event_MenuHotstring,		MHSF
 	IniWrite, % ini_MHSD,	% HADConfig, Event_MenuHotstring,		MHSD
 	Tooltip,,,, 4
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled	;tu jestem
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	;tu jestem
 	Gui, GuiEvents: Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2537,7 +2858,7 @@ F_GuiEvents_DetermineConstraints()
 	GuiControl, Move, % IdEvSM_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_B1
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdEvSM_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext	;tu jestem
+	GuiControl, Move, % IdEvSM_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_B2
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvSM_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
@@ -2625,7 +2946,7 @@ F_GuiEvents_DetermineConstraints()
 	GuiControl, Move, % IdEvSM_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_B3
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdEvSM_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext	;tu jestem
+	GuiControl, Move, % IdEvSM_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvBH_R3R4()
@@ -2760,16 +3081,14 @@ F_EvBH_B5()	;Events Basic Hotstring (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	Tooltip,,,, 4
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled	;tu jestem
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	;tu jestem
 	Gui, GuiEvents: Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvBH_B3()	;Events Basic Hotstring (is triggered) Button Apply	;tu jestem
-{
-	global ;assume-global mode
-	
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvBH_B4()	;Events Basic Hotstring (is triggered) Button Close
+F_EvBH_B3()	;Events Basic Hotstring (is triggered) Button Apply
 {
 	global ;assume-global mode
 	Gui, GuiEvents: Submit, NoHide
@@ -2801,6 +3120,44 @@ F_EvBH_B4()	;Events Basic Hotstring (is triggered) Button Close
 	IniWrite, % ini_OHSF,	% HADConfig, Event_BasicHotstring,		OHSF
 	IniWrite, % ini_OHSD,	% HADConfig, Event_BasicHotstring,		OHSD
 	Tooltip,,,, 4
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EvBH_B4(CloseGuiEvents)	;Events Basic Hotstring (is triggered) Button Close
+{
+	global ;assume-global mode
+	Gui, GuiEvents: Submit, NoHide
+	Switch EvBH_R1R2	;Tooltip enable
+	{
+		Case 1:	ini_OHTtEn := true
+		Case 2:	ini_OHTtEn := false
+	}
+	Switch EvBH_R3R4	;Finite timeout
+	{
+		Case 1:	ini_OHTD := EvBH_S1
+		Case 2:	ini_OHTD := 0
+	}
+	Switch EvBH_R5R6	;Tooltip position
+	{
+		Case 1:	ini_OHTP := 1
+		Case 2:	ini_OHTP := 2
+	}
+	Switch EvBH_R7R8	;Sound enable
+	{
+		Case 1:	ini_OHSEn := 1
+		Case 2:	ini_OHSEn := 0
+	}
+	ini_OHSF := EvBH_S2, ini_OHSD := EvBH_S3
+	IniWrite, % ini_OHTtEn, 	% HADConfig, Event_BasicHotstring, 	OHTtEn
+	IniWrite, % ini_OHTD,	% HADConfig, Event_BasicHotstring,		OHTD
+	IniWrite, % ini_OHTP,	% HADConfig, Event_BasicHotstring,		OHTP
+	IniWrite, % ini_OHSEn, 	% HADConfig, Event_BasicHotstring,		OHSEn
+	IniWrite, % ini_OHSF,	% HADConfig, Event_BasicHotstring,		OHSF
+	IniWrite, % ini_OHSD,	% HADConfig, Event_BasicHotstring,		OHSD
+	Tooltip,,,, 4
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled	;tu jestem
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	;tu jestem
 	Gui, GuiEvents: Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6207,8 +6564,7 @@ F_HSdelay()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_WhichGui()
-;This version is more robust: it doesn't take into account just "last active window" (A parameter), but just checks if there are active windows.
-{
+{	;This version is more robust: it doesn't take into account just "last active window" (A parameter), but just checks if there are active windows.
 	global	;assume-global mode
 	local	WinHWND := 0
 	
@@ -7645,7 +8001,7 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 	IniWrite, % ini_Sandbox, 	  % HADConfig, GraphicalUserInterface, Sandbox
 	IniWrite, % ini_IsSandboxMoved, % HADConfig, GraphicalUserInterface, IsSandboxMoved
 	
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Position of main window is saved in Config.ini."]
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Position of this window is saved in Config.ini."]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadHotstringsFromLibraries()
@@ -8071,7 +8427,7 @@ Pause application										= Pause application
 Phrase to search for:									= Phrase to search for:
 pixels												= pixels
 Please wait, uploading .csv files... 						= Please wait, uploading .csv files...
-Position of main window is saved in Config.ini.				= Position of main window is saved in Config.ini.	
+Position of this window is saved in Config.ini.				= Position of this window is saved in Config.ini.	
 Preview												= Preview
 Public library:										= Public library:
 purple												= purple
