@@ -1282,26 +1282,32 @@ F_GuiEvents(OneTime*)
 	global ;assume-global mode
 	local FoundPos := "", Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0, Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0, NewWinPosX := 0, NewWinPosY := 0
 	
-	;OutputDebug, % "A_Gui:" . A_Tab . A_Gui
-	Gui, % A_Gui . ": +Disabled"
+	Gui, % A_Gui . ": +Disabled"	;in order to block user interaction with background window
 	F_GuiEvents_InitiateValues()	;initial values 
-	;OutputDebug, % "F_EvTT_R1R2 po F_GuiEvents_InitiateValues:" . A_Tab . EvTT_R1R2
 	F_GuiEvents_CreateObjects()
 	F_GuiEvents_DetermineConstraints()
 	F_GuiEvents_LoadValues()	;load values to guicontrols
-	;OutputDebug, % "F_EvTT_R1R2 po F_GuiEvents_LoadValues:" . A_Tab . EvTT_R1R2
 	F_EvBH_R1R2()
 	F_EvBH_R3R4()
 	F_EvBH_R7R8()
+	F_EvBH_S1()
+	F_EvBH_S2()
+	F_EvBH_S3()
 	F_EvMH_R3R4()
+	F_EvMH_S1()
+	F_EvMH_S2()
 	F_EvUH_R1R2()
 	F_EvUH_R3R4()
 	F_EvUH_R7R8()
-	;OutputDebug, % "F_EvTT_R1R2 przed F_EvTt_R1R2:" . A_Tab . EvTT_R1R2
+	F_EvUH_S1()
+	F_EvUH_S2()
+	F_EvUH_S3()
 	F_EvTt_R1R2()
-	;OutputDebug, % "F_EvTT_R1R2 po F_EvTt_R1R2:" . A_Tab . EvTT_R1R2
 	F_EvTt_R3R4()
+	F_EvTt_S1()
+	F_EvTt_S2()
 	F_EvSM_R1R2()
+	F_EvAT_R1R2()
 	F_EvTab3(OneTime[1])	;OneTime is used
 	
 	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
@@ -1623,10 +1629,9 @@ F_EvTab3(OneTime*)
 					. "`n`n" . TransA["Do you wish to apply your changes?"]
 				IfMsgBox, Yes
 				{
-					F_EvBH_B3()
-					PreviousEvTab3 := EvTab3
+					F_EvBH_B3()	;Apply changes
 				}
-				IfMsgBox, No
+				IfMsgBox, No	;restore previous values to each GuiControl
 				{
 					if (EvBH_R1R2 != PreviousEvBH_R1R2)
 					{
@@ -1660,24 +1665,19 @@ F_EvTab3(OneTime*)
 							Case 2: GuiControl, , % IdEvBH_R8, 1
 						}
 					}
-					OutputDebug, % "PreviousEvBH_S1:" . A_Tab . PreviousEvBH_S1 . A_Tab . "EvBH_S1:" . A_Tab . EvBH_S1
 					if (EvBH_S1 != PreviousEvBH_S1)
-					{
-						GuiControl, , % IdEvBH_S1, % PreviousEvBH_S1	;tu jestem
-						F_EvBH_S1()
-						;OutputDebug, Tu jestem
-					}
+						GuiControl, , % IdEvBH_S1, % PreviousEvBH_S1	
 					if (EvBH_S2 != PreviousEvBH_S2)
 						GuiControl, , % IdEvBH_S2, % PreviousEvBH_S2
 					if (EvBH_S3 != PreviousEvBH_S3)
 						GuiControl, , % IdEvBH_S3, % PreviousEvBH_S3
-					PreviousEvTab3 := EvTab3
 				}
 			}
 			else
 			{
-				PreviousEvTab3 := EvTab3
+				F_UpdateTab()
 			}
+			PreviousEvTab3 := EvTab3
 			
 			Case % TransA["Menu hotstring is triggered"]:
 			if (EvMH_R1R2 != PreviousEvMH_R1R2) or (EvMH_R3R4 != PreviousEvMH_R3R4) or (EvMH_S1 != PreviousEvMH_S1) or (EvMH_S1 != PreviousEvMH_S2)
@@ -1687,22 +1687,37 @@ F_EvTab3(OneTime*)
 					. "`n`n" . TransA["Do you wish to apply your changes?"]
 				IfMsgBox, Yes
 				{
-					F_EvMH_B2()
-					PreviousEvTab3 := EvTab3
+					F_EvMH_B2()	;Apply changes
 				}
-				IfMsgBox, No
+				IfMsgBox, No	;restore previous values to each GuiControl
 				{
-					PreviousEvTab3 := EvTab3
+					if (EvMH_R1R2 != PreviousEvMH_R1R2)
+					{
+						Switch PreviousEvMH_R1R2
+						{
+							Case 1: GuiControl, , % IdEvMH_R1, 1
+							Case 2: GuiControl, , % IdEvMH_R2, 1
+						}
+					}
+					if (EvMH_R3R4 != PreviousEvMH_R3R4)
+					{
+						Switch PreviousEvMH_R3R4
+						{
+							Case 1: GuiControl, , % IdEvMH_R3, 1
+							Case 2: GuiControl, , % IdEvMH_R4, 1
+						}
+					}
+					if (EvMH_S1 != PreviousEvMH_S1)
+						GuiControl, , % IdEvMH_S1, % PreviousEvMH_S1
+					if (EvMH_S1 != PreviousEvMH_S2)
+						GuiControl, , % IdEvMH_S2, % PreviousEvMH_S2
 				}			
 			}
 			else
 			{
-				;*[One]
-				OutputDebug, tu jestem 2
-				;GuiControl, , % IdEvBH_S1, 7000	;tu jestem
-				;F_EvBH_S1()
-				PreviousEvTab3 := EvTab3
+				F_UpdateTab()
 			}
+			PreviousEvTab3 := EvTab3
 			
 			Case % TransA["Undid the last hotstring"]:
 			if (EvUH_R1R2 != PreviousEvUH_R1R2) or (EvUH_R3R4 != PreviousEvUH_R3R4) or (EvUH_R5R6 != PreviousEvUH_R5R6) or (EvUH_R7R8 != PreviousEvUH_R7R8) or (EvUH_S1 != PreviousEvUH_S1) or (EvUH_S2 != PreviousEvUH_S2) or (EvUH_S3 != PreviousEvUH_S3)
@@ -1712,18 +1727,55 @@ F_EvTab3(OneTime*)
 					. "`n`n" . TransA["Do you wish to apply your changes?"]
 				IfMsgBox, Yes
 				{
-					F_EvUH_B3() 
-					PreviousEvTab3 := EvTab3
+					F_EvUH_B3() ;Apply changes
 				}
-				IfMsgBox, No
+				IfMsgBox, No	;restore previous values to each GuiControl
 				{
-					PreviousEvTab3 := EvTab3
+					if (EvUH_R1R2 != PreviousEvUH_R1R2)
+					{
+						Switch PreviousEvUH_R1R2
+						{
+							Case 1: GuiControl, , % IdEvUH_R1, 1
+							Case 2: GuiControl, , % IdEvUH_R2, 1
+						}
+					}
+					if (EvUH_R3R4 != PreviousEvUH_R3R4)
+					{
+						Switch PreviousEvUH_R3R4
+						{
+							Case 1: GuiControl, , % IdEvUH_R3, 1
+							Case 2: GuiControl, , % IdEvUH_R4, 1
+						}
+					}
+					if (EvUH_R5R6 != PreviousEvUH_R5R6)
+					{
+						Switch PreviousEvUH_R5R6
+						{
+							Case 1: GuiControl, , % IdEvUH_R5, 1
+							Case 2: GuiControl, , % IdEvUH_R6, 1
+						}
+					}
+					if (EvUH_R7R8 != PreviousEvUH_R7R8)
+					{
+						Switch PreviousEvUH_R7R8
+						{
+							Case 1: GuiControl, , % IdEvUH_R7, 1
+							Case 2: GuiControl, , % IdEvUH_R8, 1
+						}
+					}
+					if (EvUH_S1 != PreviousEvUH_S1)
+						GuiControl, , % IdEvUH_S1, % PreviousEvUH_S1
+					if (EvUH_S2 != PreviousEvUH_S2)
+						GuiControl, , % IdEvUH_S2, % PreviousEvUH_S2
+					if (EvUH_S3 != PreviousEvUH_S3)
+						GuiControl, , % IdEvUH_S3, % PreviousEvUH_S3
 				}			
 			}
 			else
 			{
-				PreviousEvTab3 := EvTab3
+				F_UpdateTab()
 			}
+			PreviousEvTab3 := EvTab3
 			
 			Case % TransA["Triggerstring tips"]:
 			if (EvTt_R1R2 != PreviousEvTt_R1R2) or (EvTt_R3R4 != PreviousEvTt_R3R4) or (EvTt_R5R6 != PreviousEvTt_R5R6) or (EvTt_C1 != PreviousEvTt_C1) or (EvTt_C2 != PreviousEvTt_C2) or (EvTt_S1 != PreviousEvTt_S1) or (EvTt_S2 != PreviousEvTt_S2) or (EvTt_DDL1 != PreviousEvTt_DDL1) or (EvTt_DDL2 != PreviousEvTt_DDL2)
@@ -1733,18 +1785,65 @@ F_EvTab3(OneTime*)
 					. "`n`n" . TransA["Do you wish to apply your changes?"]
 				IfMsgBox, Yes
 				{
-					F_EvTt_B2() 
-					PreviousEvTab3 := EvTab3
+					F_EvTt_B2() ;Apply changes
 				}
-				IfMsgBox, No
+				IfMsgBox, No	;restore previous values to each GuiControl
 				{
-					PreviousEvTab3 := EvTab3
+					if (EvTt_R1R2 != PreviousEvTt_R1R2)
+					{
+						Switch PreviousEvTt_R1R2
+						{
+							Case 1: GuiControl, , % IdEvTt_R1, 1
+							Case 2: GuiControl, , % IdEvTt_R2, 1
+						}
+					}
+					if (EvTt_R3R4 != PreviousEvTt_R3R4)
+					{
+						Switch PreviousEvTt_R3R4
+						{
+							Case 1: GuiControl, , % IdEvTt_R3, 1
+							Case 2: GuiControl, , % IdEvTt_R4, 1
+						}
+					}
+					if (EvTt_R5R6 != PreviousEvTt_R5R6)
+					{
+						Switch PreviousEvTt_R5R6
+						{
+							Case 1: GuiControl, , % IdEvTt_R5, 1
+							Case 2: GuiControl, , % IdEvTt_R6, 1
+						}
+					}
+					if (EvTt_C1 != PreviousEvTt_C1)
+					{
+						Switch PreviousEvTt_C1
+						{
+							Case 0: GuiControl, , % IdEvTt_C1, 0
+							Case 1: GuiControl, , % IdEvTt_C1, 1
+						}
+					}
+					if (EvTt_C2 != PreviousEvTt_C2)
+					{
+						Switch PreviousEvTt_C2
+						{
+							Case 0: GuiControl, , % IdEvTt_C2, 0
+							Case 1: GuiControl, , % IdEvTt_C2, 1
+						}
+					}
+					if (EvTt_S1 != PreviousEvTt_S1)
+						GuiControl, , % IdEvTt_S1, % PreviousEvTt_S1
+					if (EvTt_S2 != PreviousEvTt_S2)
+						GuiControl, , % IdEvTt_S2, % PreviousEvTt_S2
+					if (EvTt_DDL1 != PreviousEvTt_DDL1)
+						GuiControl, ChooseString, % IdEvTt_DDL1, % PreviousEvTt_S2 
+					if (EvTt_DDL2 != PreviousEvTt_DDL2)
+						GuiControl, ChooseString, % IdEvTt_DDL2, % PreviousEvTt_S2 
 				}			
 			}
 			else
 			{
-				PreviousEvTab3 := EvTab3
+				F_UpdateTab()
 			}
+			PreviousEvTab3 := EvTab3
 			
 			Case % TransA["Active triggerstring tips"]:
 			if (EvAT_R1R2 != PreviousEvAT_R1R2)
@@ -1754,18 +1853,18 @@ F_EvTab3(OneTime*)
 					. "`n`n" . TransA["Do you wish to apply your changes?"]
 				IfMsgBox, Yes
 				{
-					F_EvAT_B2() 
-					PreviousEvTab3 := EvTab3
+					F_EvAT_B2() ;Apply changes
 				}
-				IfMsgBox, No
-				{
-					PreviousEvTab3 := EvTab3
+				IfMsgBox, No	;restore previous values to each GuiControl
+				{ ;tu jestem
+					if (EvAT_R1R2 != PreviousEvAT_R1R2)
 				}			
 			}
 			else
 			{
-				PreviousEvTab3 := EvTab3
+				F_UpdateTab()
 			}
+			PreviousEvTab3 := EvTab3
 			
 			Case % TransA["Static triggerstring / hotstring menus"]:
 			if (EvSM_R1R2 != PreviousEvSM_R1R2)
@@ -1775,25 +1874,56 @@ F_EvTab3(OneTime*)
 					. "`n`n" . TransA["Do you wish to apply your changes?"]
 				IfMsgBox, Yes
 				{
-					F_EvSM_B2() 
-					PreviousEvTab3 := EvTab3
+					F_EvSM_B2() ;Apply changes
 				}
-				IfMsgBox, No
+				IfMsgBox, No	;restore previous values to each GuiControl
 				{
-					PreviousEvTab3 := EvTab3
+					if (EvSM_R1R2 != PreviousEvSM_R1R2)
 				}			
 			}
 			else
 			{
-				PreviousEvTab3 := EvTab3
+				F_UpdateTab()
 			}
+			PreviousEvTab3 := EvTab3
 		}
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-^F2::
-GuiControl, , % IdEvBH_S1, 7000
-return
+F_UpdateTab()
+{
+	global ;assume-global mode
+	Switch EvTab3
+	{
+		Case % TransA["Basic hotstring is triggered"]:
+		F_EvBH_R1R2()
+		F_EvBH_R3R4()
+		F_EvBH_R7R8()
+		F_EvBH_S1()
+		F_EvBH_S2()
+		F_EvBH_S3()
+		Case % TransA["Menu hotstring is triggered"]:
+		F_EvMH_R3R4()
+		F_EvMH_S1()
+		F_EvMH_S2()
+		Case % TransA["Undid the last hotstring"]:
+		F_EvUH_R1R2()
+		F_EvUH_R3R4()
+		F_EvUH_R7R8()
+		F_EvUH_S1()
+		F_EvUH_S2()
+		F_EvUH_S3()
+		Case % TransA["Triggerstring tips"]:
+		F_EvTt_R1R2()
+		F_EvTt_R3R4()
+		F_EvTt_S1()
+		F_EvTt_S2()
+		Case % TransA["Active triggerstring tips"]:
+		F_EvSM_R1R2()
+		Case % TransA["Static triggerstring / hotstring menus"]:
+		F_EvAT_R1R2()
+	}
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvSM_B4()	;static menus, button Cancel
 {
