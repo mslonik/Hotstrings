@@ -1283,7 +1283,7 @@ F_GuiEvents(OneTime*)
 {
 	global ;assume-global mode
 	local FoundPos := "", Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0, Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0, NewWinPosX := 0, NewWinPosY := 0
-	if (!OneTime[1])
+	if (OneTime[3])
 		Gui, % A_Gui . ": +Disabled"	;in order to block user interaction with background window
 	F_GuiEvents_CreateObjects()
 	F_GuiEvents_DetermineConstraints()
@@ -1311,7 +1311,7 @@ F_GuiEvents(OneTime*)
 	F_EvAT_R1R2()
 	F_EvTab3(OneTime[1])	;OneTime is used
 	
-	if (!OneTime[1])
+	if (OneTime[3])
 	{
 		if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 			WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
