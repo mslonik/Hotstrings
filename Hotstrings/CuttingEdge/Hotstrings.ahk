@@ -150,7 +150,7 @@ F_LoadHotstringsFromLibraries()	;→ F_LoadFile() -> F_CreateHotstring
 if (ini_TTTtEn)	;Triggerstring Tips Column Trigger
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 F_GuiSearch_CreateObject()	;When all tables are full, initialize GuiSearch
-F_GuiSearch_DetermineConstraints()
+;F_GuiSearch_DetermineConstraints()
 F_Searching("Reload")			;prepare content of Search tables
 TrayTip, %A_ScriptName%, % TransA["Hotstrings have been loaded"], 1
 Critical, Off
@@ -298,11 +298,9 @@ F_GuiVersionUpdate_CreateObjects()
 F_GuiAbout_DetermineConstraints()
 F_GuiVersionUpdate_DetermineConstraints()
 
+F_LoadGUIstatic()
 if (ini_TTCn = 4)	;static triggerstring / hotstring GUI 
-{
-	F_LoadGUIstatic()
 	F_GuiTrigTipsMenuDefC4()
-}
 if (ini_GuiReload) and (v_Param != "l")
 	Gosub, L_GUIInit
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -443,6 +441,7 @@ if (A_DefaultGui = "HS3")
 ^f::
 ^s::
 F3:: ;new thread starts here
+F_GuiSearch_DetermineConstraints()
 F_Searching()
 return
 
@@ -616,6 +615,37 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+HS3SearchGuiEscape() ; Gui event!
+{
+	global	;assume-global mode
+	;F_WhichGui()	;sets A_DefaultGui to one of the current windows
+	if (WinExist("ahk_id" HS3GuiHwnd))	;activates one of the main Windows
+		Gui, HS3: -Disabled
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled		
+	Gui, HS3Search: Hide
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+HS3SearchGuiClose() ; Gui event!
+{
+	HS3SearchGuiEscape()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+MyAboutGuiClose() ; Gui event!
+{
+	global	;assume-global mode of operation
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	
+	Gui, MyAbout: Hide
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+MyAboutGuiEscape()	; Gui event!
+{
+	MyAboutGuiClose()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadGUIstatic()
 {
 	global	;assume-global mode
@@ -1595,7 +1625,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B4 gF_EvSM_B4,			% TransA["Cancel"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvTab3(OneTime*)	;tu jestem
+F_EvTab3(OneTime*)	;tu jestem. if (OneTime = "zero") potrzebna jest flaga, która jest ustawiana, gdy nie było żadnej zmiany żadnego z parametrów
 {
 	global ;assume-global mode
 	static PreviousEvTab3 := ""
@@ -1614,7 +1644,7 @@ F_EvTab3(OneTime*)	;tu jestem
 		return
 	}
 	
-	Gui, GuiEvents: Submit, NoHide
+	Gui, GuiEvents: Submit, NoHide	;Loads EvTab3 with current value 
 	;OutputDebug, % "EvTab3:" . A_Tab . EvTab3 . A_Tab . "PreviousEvTab3" . A_Tab . PreviousEvTab3
 	if (EvTab3 != PreviousEvTab3)
 	{
@@ -1993,6 +2023,10 @@ F_EvSM_B3()	;static menus, button Close
 	}
 	IniWrite, % ini_TTCn,	% HADConfig, Event_TriggerstringTips,	TTCn
 	Tooltip,,,, 4
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled	
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	
 	Gui, GuiEvents:	Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3509,7 +3543,7 @@ F_LoadTTStyling()
 		ini_TTTySize := 10
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiStyling_CreateObjects()	;tu jestem
+F_GuiStyling_CreateObjects()
 {
 	global ;assume-global mode
 	Gui, TTstyling: New, 	-Resize +HwndTTstylingHwnd +Owner +OwnDialogs -MaximizeBox -MinimizeBox	;+OwnDialogs: for tooltips.
@@ -3664,7 +3698,7 @@ F_TTstyling_DDL2()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TTStylingTab3(OneTime*)	;tu jestem
+F_TTStylingTab3(OneTime*)
 {
 	global ;assume-global mode
 	static PreviousTab3 := ""
@@ -4404,13 +4438,12 @@ F_TTstyling(OneTime*)
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
 	
-	;*[One]
 	if (OneTime[3])	
 		Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	F_GuiStyling_CreateObjects()
 	F_GuiStyling_DetermineConstraints()
 	F_GuiHMstyling_DetermineConstraints()
-	F_GuiStyling_LoadValues()	;tu jestem
+	F_GuiStyling_LoadValues()
 	Gui, TTstyling: Submit		;this line is necessary to correctly initialize some global variables
 	F_TTStylingTab3(OneTime[1])			;OneTime is used now
 	
@@ -6572,7 +6605,6 @@ F_Searching(ReloadListView*)
 			,Window2X := 0, 	Window2Y := 0, 	Window2W := 0, 	Window2H := 0
 			,NewWinPosX := 0, 	NewWinPosY := 0
 			,WhichGui := ""
-	
 	Switch ReloadListView[1]
 	{
 		Case "ReloadAndView":
@@ -6592,6 +6624,7 @@ F_Searching(ReloadListView*)
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
 		Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
 		Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
+		
 		Case "Reload":
 		Gui, HS3Search: Default
 		GuiControl, % "Count" . a_Library.MaxIndex() . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
@@ -6599,30 +6632,42 @@ F_Searching(ReloadListView*)
 		Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
 			LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
 		GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
+		
 		Case TransA["Search Hotstrings (F3)"]:
-		Goto, ViewOnly
-		Case "": ;view only
-		ViewOnly:
+		Case "": ;new thread starts here
+		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A	;Retrieves the position of the active window.
 		F_WhichGui()
+		;WhichGui := A_DefaultGui
+		Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 		Switch A_DefaultGui
 		{
 			Case "HS3": 
-			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
-			WhichGui := "HS3"
+			Gui, HS3Search: Show, % "x" . Window1X . A_Space . "y" . Window1Y . A_Space . "w" . HS3_GuiWidth . A_Space . "h" . HS3_GuiHeight 
 			Case "HS4": 
-			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS4GuiHwnd 
-			WhichGui := "HS4"
+			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" . HS4_GuiWidth . A_Space . "H" . HS4_GuiHeight
 		}
-		Gui, HS3Search: Default
-		Switch WhichGui
-		{
-			Case "HS3":
-			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
-			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
-			Case "HS4":
-			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS4MinWidth . A_Space . "H" HS4MinHeight	;no idea why twice, but then it shows correct size
-			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS4MinWidth . A_Space . "H" HS4MinHeight 
-		}
+		;Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y 	;tu jestem
+		/*
+			Switch A_DefaultGui
+			{
+				Case "HS3": 
+				WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
+				WhichGui := "HS3"
+				Case "HS4": 
+				WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS4GuiHwnd 
+				WhichGui := "HS4"
+			}
+			Gui, HS3Search: Default
+			Switch WhichGui
+			{
+				Case "HS3":
+				Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
+				Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
+				Case "HS4":
+				Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS4MinWidth . A_Space . "H" HS4MinHeight	;no idea why twice, but then it shows correct size
+				Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS4MinWidth . A_Space . "H" HS4MinHeight 
+			}
+		*/
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6660,7 +6705,7 @@ F_GuiSearch_DetermineConstraints()
 	v_yNext := c_ymarg
 	GuiControl, Move, % IdSearchT1, % "x" v_xNext "y" v_yNext ;Phrase to search
 	v_yNext += HofText
-	GuiControlGet, v_OutVarTemp, Pos, % IdSearchE1
+	GuiControlGet, v_OutVarTemp, Pos, % IdSearchT1
 	v_wNext := v_OutVarTempW * 2
 	GuiControl, Move, % IdSearchE1, % "x" v_xNext "y" v_yNext "w" v_wNext
 	
@@ -6681,11 +6726,15 @@ F_GuiSearch_DetermineConstraints()
 	HofRadio := v_OutVarTempH
 	v_OutVarTemp := Max(HofRadio, HofEdit)
 	v_xNext := c_xmarg
-	v_yNext += v_OutVarTemp + c_ymarg
-	v_wNext := HS3MinWidth
-	v_hNext := HS3MinHeight - (c_ymarg + HofText + v_OutVarTemp + c_ymarg + HofText * 2)
-	GuiControl, Move, % IdSearchLV1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
+	v_yNext += v_OutVarTemp + c_ymarg	;tu jestem
+	;OutputDebug, % "HS3_GuiWidth:" . A_Tab . HS3_GuiWidth
+	;v_wNext := HS3MinWidth
+	v_wNext := HS3_GuiWidth - 2 * c_ymarg
+	;v_hNext := HS3MinHeight - (c_ymarg + HofText + v_OutVarTemp + c_ymarg + HofText * 2)
+	v_hNext := HS3_GuiHeight - (c_ymarg + HofText + v_OutVarTemp + c_ymarg + HofText * 2)
+	GuiControl, MoveDraw, % IdSearchLV1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
 	
+	Gui, HS3Search: Default	;in order to enable LV_ModifyCol
 	GuiControlGet, v_OutVarTemp, Pos, % IdSearchLV1
 	LV_ModifyCol(1, Round(0.2 * v_OutVarTempW))
 	LV_ModifyCol(2, Round(0.1 * v_OutVarTempW))
@@ -6694,6 +6743,7 @@ F_GuiSearch_DetermineConstraints()
 	LV_ModifyCol(5, Round(0.1 * v_OutVarTempW))
 	LV_ModifyCol(6, Round(0.27 * v_OutVarTempW))
 	LV_ModifyCol(7, Round(0.1 * v_OutVarTempW) - 3)
+	GuiControl, +Redraw, % IdSearchLV1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 	v_xNext := c_xmarg
 	v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
 	GuiControl, Move, % IdSearchT4, % "x" v_xNext "y" v_yNext ;information about shortcuts
@@ -7091,14 +7141,11 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 HS4GuiSize() ;Gui event
 {
 	global ;assume-global mode
-	
 	if (A_EventInfo = 1) ; The window has been minimized.
 	{
-		;v_WhichGUIisMinimzed := "HS4"
 		ini_WhichGui := "HS4"
 		return
 	}
-	
 	HS4_GuiWidth  := A_GuiWidth
 	HS4_GuiHeight := A_GuiHeight
 }
@@ -10086,7 +10133,7 @@ F_GuiAbout_CreateObjects()
 	Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLine1, 										% TransA["Let's make your PC personal again..."]
 	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 		% c_FontType
 	Gui, MyAbout: Add, 		Text,    	x0 y0 HwndIdLine2, 										% TransA["Enables Convenient Definition"]
-	Gui, MyAbout: Add, 		Button,  	x0 y0 HwndIdAboutOkButton gAboutOkButton,					% TransA["OK"]
+	Gui, MyAbout: Add, 		Button,  	x0 y0 HwndIdAboutOkButton gMyAboutGuiClose,					% TransA["OK"]
 	Gui, MyAbout: Add,		Picture, 	x0 y0 HwndIdAboutPicture w96 h96, 							% AppIcon
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT1,									% TransA["Version"] . ":"
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT2,									% AppVersion
@@ -10187,6 +10234,7 @@ F_GuiAbout()
 	DetectHiddenWindows, On
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . MyAboutGuiHwnd
 	DetectHiddenWindows, Off
+	Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	if (Window1W)
 	{
 		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
@@ -11945,11 +11993,7 @@ L_PublicLibraries:
 Run, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings/Libraries
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-AboutOkButton:
-MyAboutGuiEscape:
-MyAboutGuiClose: ; Showed when the window is closed by pressing its X button in the title bar.
-Gui, MyAbout: Hide
-return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS3GuiClose:
 HS3GuiEscape:
@@ -11986,14 +12030,11 @@ CancelMove:
 Gui, MoveLibs: Destroy
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-~^f::
+~^f::	;tu jestem
 ~^s::
 ~F3::
-HS3SearchGuiEscape:
-HS3SearchGuiClose:
-F_WhichGui()
-Gui, HS3Search: Hide
-return
+HS3SearchGuiEscape()
+return	;end of this thread
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ~F7::
 HSDelGuiEscape:
