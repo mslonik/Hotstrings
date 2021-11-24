@@ -129,7 +129,9 @@ F_GuiMain_Redraw()
 F_GuiHS4_CreateObject()
 F_GuiHS4_DetermineConstraints()
 F_GuiHS4_Redraw()
-F_GuiShowIntro()
+
+if (ini_ShowIntro)
+	F_GuiShowIntro()
 F_UpdateSelHotLibDDL()
 
 if (ini_HK_IntoEdit != "none")
@@ -264,8 +266,8 @@ Menu, 	HSMenu, 		Add, % TransA["Clipboard Delay (F7)"], 			F_GuiHSdelay
 
 if (v_Param != "l")
 	Menu, 	AppSubmenu, 	Add,	% TransA["Reload"],					:SubmenuReload
-Menu,	AppSubmenu,	Add, % TransA["Suspend Hotkeys"],				L_TraySuspendHotkeys
-Menu,	AppSubmenu,	Add, % TransA["Pause"],						L_TrayPauseScript
+Menu,	AppSubmenu,	Add, % TransA["Suspend Hotkeys"],				F_TraySuspendHotkeys
+Menu,	AppSubmenu,	Add, % TransA["Pause"],						F_TrayPauseScript
 Menu,	AppSubmenu,	Add, % TransA["Exit"],						F_Exit
 Menu,	AppSubmenu,	Add	;To add a menu separator line, omit all three parameters.
 Menu,	AutoStartSub,	Add, % TransA["Default mode"],				F_AddToAutostart
@@ -285,7 +287,7 @@ Menu,	AboutHelpSub,	Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"]
 Menu,	AboutHelpSub,	Add
 Menu,	AboutHelpSub,	Add,	% TransA["About this application..."],		F_GuiAbout
 Menu,	AboutHelpSub,	Add
-Menu,	AboutHelpSub,	Add, % TransA["Show intro"],					L_ShowIntro
+Menu,	AboutHelpSub,	Add, % TransA["Show intro"],					F_GuiShowIntro
 
 Menu, 	HSMenu,		Add, % TransA["Application"],					:AppSubmenu
 Menu, 	HSMenu, 		Add, % TransA["About / Help"], 				:AboutHelpSub
@@ -615,6 +617,73 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_TrayExit()
+{
+	ExitApp, 2	;2 = by Tray
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_TrayPauseScript()
+{
+	global	;assume  global mode
+	Pause, Toggle, 1
+	if (A_IsPaused)
+	{
+		Menu, Tray, 		Check, 	% TransA["Pause application"]
+		Menu, AppSubmenu,	Check, 	% TransA["Pause"]
+	}
+	else
+	{
+		Menu, Tray, 		UnCheck, 	% TransA["Pause application"]
+		Menu, AppSubmenu,	UnCheck, 	% TransA["Pause"]
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_TraySuspendHotkeys()
+{
+	global	;assume-global mode
+	Suspend, Toggle
+	if (A_IsSuspended)
+	{
+		Menu, Tray, 		Check, 	% TransA["Suspend Hotkeys"]
+		Menu, AppSubmenu, 	Check, 	% TransA["Suspend Hotkeys"]
+	}
+	else
+	{
+		Menu, Tray, 		UnCheck, 	% TransA["Suspend Hotkeys"]
+		Menu, AppSubmenu,	UnCheck, 	% TransA["Suspend Hotkeys"]
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ShowIntroGuiEscape()	;Gui event
+{
+	global	;assume global mode
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	
+	Gui, ShowIntro: Hide
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ShowIntroGuiClose()
+{
+	ShowIntroGuiEscape()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ShortDefGuiEscape()
+{
+	global	;assume global mode
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	
+	Gui, ShortDef: Hide
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ShortDefGuiClose()
+{
+	ShortDefGuiEscape()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS3SearchGuiEscape() ; Gui event!
 {
 	global	;assume-global mode
@@ -731,9 +800,9 @@ F_InitiateTrayMenus(v_Param)
 		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"], F_GuiAbout
 		Menu, Tray, Default,	% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"]
 		Menu, Tray, Add										;separator line
-		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			L_TraySuspendHotkeys
-		Menu, Tray, Add,		% TransA["Pause application"],		L_TrayPauseScript
-		Menu  Tray, Add,		% TransA["Exit application"],			L_TrayExit		
+		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			F_TraySuspendHotkeys
+		Menu, Tray, Add,		% TransA["Pause application"],		F_TrayPauseScript
+		Menu  Tray, Add,		% TransA["Exit application"],			F_TrayExit		
 		Case "":
 		Menu, Tray, NoStandard									; remove all the rest of standard tray menu
 		if (!FileExist(AppIcon))
@@ -754,12 +823,12 @@ F_InitiateTrayMenus(v_Param)
 		Menu, Tray, Add,		% TransA["Help: Hotstrings application"],			GuiAboutLink1
 		Menu, Tray, Add,		% TransA["Help: AutoHotkey Hotstrings reference guide"], GuiAboutLink2
 		Menu, Tray, Add										;separator line
-		Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],	L_TrayReload
-		Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],		L_TrayReload
+		Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],	F_ReloadUniversal
+		Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],		F_ReloadUniversal
 		Menu, Tray, Add,		% TransA["Reload"],					:SubmenuReload
-		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			L_TraySuspendHotkeys
-		Menu, Tray, Add,		% TransA["Pause application"],		L_TrayPauseScript
-		Menu  Tray, Add,		% TransA["Exit application"],			L_TrayExit
+		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			F_TraySuspendHotkeys
+		Menu, Tray, Add,		% TransA["Pause application"],		F_TrayPauseScript
+		Menu  Tray, Add,		% TransA["Exit application"],			F_TrayExit
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1312,7 +1381,7 @@ F_LoadConfiguration()
 F_GuiEvents(OneTime*)
 {
 	global ;assume-global mode
-	local FoundPos := "", Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0, Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0, NewWinPosX := 0, NewWinPosY := 0
+	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0, Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0, NewWinPosX := 0, NewWinPosY := 0
 	if (OneTime[3])
 		Gui, % A_Gui . ": +Disabled"	;in order to block user interaction with background window
 	F_GuiEvents_CreateObjects()
@@ -1625,7 +1694,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B4 gF_EvSM_B4,			% TransA["Cancel"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvTab3(OneTime*)	;tu jestem. if (OneTime = "zero") potrzebna jest flaga, która jest ustawiana, gdy nie było żadnej zmiany żadnego z parametrów
+F_EvTab3(OneTime*)
 {
 	global ;assume-global mode
 	static PreviousEvTab3 := ""
@@ -1646,6 +1715,7 @@ F_EvTab3(OneTime*)	;tu jestem. if (OneTime = "zero") potrzebna jest flaga, któr
 	
 	Gui, GuiEvents: Submit, NoHide	;Loads EvTab3 with current value 
 	;OutputDebug, % "EvTab3:" . A_Tab . EvTab3 . A_Tab . "PreviousEvTab3" . A_Tab . PreviousEvTab3
+	;*[One]
 	if (EvTab3 != PreviousEvTab3)
 	{
 		Switch PreviousEvTab3
@@ -3378,12 +3448,11 @@ F_EvBH_S1()
 F_GuiEvents_LoadValues()
 {	;This function loads state of ini_* configuration parameter into GuiControls
 	global ;assume-global mode
-	local	a_Styling_DDL1 := [1, 2, 3, 4, 5],	s_Styling_DDL1 := "|"
 	
 	Switch ini_OHTtEn
 	{
-		Case false: 	GuiControl,, % IdEvBH_R2, 1
 		Case true: 	GuiControl,, % IdEvBH_R1, 1
+		Case false: 	GuiControl,, % IdEvBH_R2, 1
 	}
 	Switch ini_OHTD
 	{
@@ -3399,8 +3468,8 @@ F_GuiEvents_LoadValues()
 	}
 	Switch ini_OHSEn
 	{
-		Case false: 	GuiControl,, % IdEvBH_R8, 1
 		Case true: 	GuiControl,, % IdEvBH_R7, 1
+		Case false: 	GuiControl,, % IdEvBH_R8, 1
 	}
 	GuiControl,, % IdEvBH_S2, 	% ini_OHSF
 	GuiControl,, % IdEvBH_T13, 	% TransA["Sound frequency"] . ":" 		. A_Space . ini_OHSF
@@ -3414,8 +3483,8 @@ F_GuiEvents_LoadValues()
 	}
 	Switch ini_MHSEn
 	{
-		Case false: 	GuiControl,, % IdEvMH_R3, 1
-		Case true: 	GuiControl,, % IdEvMH_R4, 1
+		Case true: 	GuiControl,, % IdEvMH_R3, 1
+		Case false: 	GuiControl,, % IdEvMH_R4, 1
 	}
 	GuiControl,, % IdEvMH_S1, 	% ini_MHSF
 	GuiControl,, % IdEvMH_T7, 	% TransA["Sound frequency"] . ":" 		. A_Space . ini_MHSF
@@ -3424,8 +3493,8 @@ F_GuiEvents_LoadValues()
 	
 	Switch ini_UHTtEn
 	{
-		Case false: 	GuiControl,, % IdEvUH_R2, 1
 		Case true: 	GuiControl,, % IdEvUH_R1, 1
+		Case false: 	GuiControl,, % IdEvUH_R2, 1
 	}
 	Switch ini_UHTD
 	{
@@ -3441,8 +3510,8 @@ F_GuiEvents_LoadValues()
 	}
 	Switch ini_UHSEn
 	{
-		Case false: 	GuiControl,, % IdEvUH_R8, 1
 		Case true: 	GuiControl,, % IdEvUH_R7, 1
+		Case false: 	GuiControl,, % IdEvUH_R8, 1
 	}
 	GuiControl,, % IdEvUH_S2, 	% ini_UHSF
 	GuiControl,, % IdEvUH_T13, 	% TransA["Sound frequency"] . ":" 		. A_Space . ini_UHSF
@@ -3450,8 +3519,8 @@ F_GuiEvents_LoadValues()
 	GuiControl,, % IdEvUH_T14, 	% TransA["Sound duration [ms]"] . ":" 	. A_Space . ini_UHSD
 	Switch ini_TTTtEn
 	{
-		Case false: 	GuiControl,, % IdEvTt_R2, 1
 		Case true: 	GuiControl,, % IdEvTt_R1, 1
+		Case false: 	GuiControl,, % IdEvTt_R2, 1
 	}
 	Switch ini_TTTD
 	{
@@ -4433,8 +4502,7 @@ F_GuiStyling_LoadValues()
 F_TTstyling(OneTime*)
 {
 	global	;assume-global mode
-	local FoundPos := ""
-		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
 	
@@ -4713,8 +4781,7 @@ F_CheckScriptEncoding()
 F_GuiVersionUpdate()
 {
 	global ;assume-global mode
-	local FoundPos := ""
-		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
 	
@@ -5298,17 +5365,17 @@ F_ShortDefB1_SaveHotkey()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiShortDef()	
+F_GuiShortDef()
 {
 	global	;assume-global mode
-	local FoundPos := ""
-		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
 	
 	F_GuiShortDef_CreateObjects()
 	F_GuiShortDef_DetermineConstraints()
 	
+	Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	Gui, ShortDef: Show, Hide Center AutoSize
@@ -5454,9 +5521,9 @@ F_GuiShowIntro()
 	Gui,	ShowIntro: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 		% c_FontType
 	Gui, ShowIntro: Add, 	Text,    x0 y0 HwndIdIntroLine2,									% TransA["ShowInfoText"]
 	Gui, ShowIntro: Add, 	Text,    x0 y0 HwndIdIntroLine3,									% TransA["I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)!"]
-	Gui, ShowIntro: Add, 	Button,  x0 y0 HwndIdIntroOkButton gF_IntroOkButton,					% TransA["OK"]
+	Gui, ShowIntro: Add, 	Button,  x0 y0 HwndIdIntroOkButton gShowIntroGuiClose,					% TransA["OK"]
 	Gui, ShowIntro: Add,	Picture, x0 y0 HwndIdAboutPicture w96 h96, 							% AppIcon
-	Gui, ShowIntro: Add,	CheckBox, x0 y0 HwndIdIntroCheckbox gF_ShowIntroCheckbox,				% TransA["Show Introduction window after application is restarted?"]
+	Gui, ShowIntro: Add,	CheckBox, x0 y0 HwndIdIntroCheckbox vIntroCheckbox gF_ShowIntroCheckbox,	% TransA["Show Introduction window after application is restarted?"]
 	
 	;3. Determine constraints
 	v_xNext := c_xmarg
@@ -5481,30 +5548,18 @@ F_GuiShowIntro()
 	v_xNext := c_xmarg
 	v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
 	GuiControl, Move,			% IdIntroCheckbox, % "x" . v_xNext . "y" . v_yNext
-	F_ShowIntroCheckbox()
+	
+	GuiControl,, % IdIntroCheckbox, % ini_ShowIntro	;load initial value
+	Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+	Gui, ShowIntro: Show, AutoSize Center
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ShowIntroCheckbox()
 {
 	global	;assume-global mode
-	static FirstRun := true
-	
 	Gui, ShowIntro: Submit, NoHide
-	if (FirstRun)
-	{
-		GuiControl,, % IdIntroCheckbox, % ini_ShowIntro
-		FirstRun := false
-	}
-	else
-	{
-		GuiControlGet, ini_ShowIntro,, % IdIntroCheckbox
-		IniWrite, % ini_ShowIntro, % HADConfig, Configuration, ShowIntro
-	}
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_IntroOkButton()
-{
-	Gui, ShowIntro: Destroy
+	ini_ShowIntro := IntroCheckbox
+	IniWrite, % ini_ShowIntro, % HADConfig, Configuration, ShowIntro
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ShowLongTooltip(string)
@@ -6646,28 +6701,6 @@ F_Searching(ReloadListView*)
 			Case "HS4": 
 			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" . HS4_GuiWidth . A_Space . "H" . HS4_GuiHeight
 		}
-		;Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y 	;tu jestem
-		/*
-			Switch A_DefaultGui
-			{
-				Case "HS3": 
-				WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
-				WhichGui := "HS3"
-				Case "HS4": 
-				WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS4GuiHwnd 
-				WhichGui := "HS4"
-			}
-			Gui, HS3Search: Default
-			Switch WhichGui
-			{
-				Case "HS3":
-				Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
-				Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
-				Case "HS4":
-				Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS4MinWidth . A_Space . "H" HS4MinHeight	;no idea why twice, but then it shows correct size
-				Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS4MinWidth . A_Space . "H" HS4MinHeight 
-			}
-		*/
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6726,11 +6759,8 @@ F_GuiSearch_DetermineConstraints()
 	HofRadio := v_OutVarTempH
 	v_OutVarTemp := Max(HofRadio, HofEdit)
 	v_xNext := c_xmarg
-	v_yNext += v_OutVarTemp + c_ymarg	;tu jestem
-	;OutputDebug, % "HS3_GuiWidth:" . A_Tab . HS3_GuiWidth
-	;v_wNext := HS3MinWidth
+	v_yNext += v_OutVarTemp + c_ymarg
 	v_wNext := HS3_GuiWidth - 2 * c_ymarg
-	;v_hNext := HS3MinHeight - (c_ymarg + HofText + v_OutVarTemp + c_ymarg + HofText * 2)
 	v_hNext := HS3_GuiHeight - (c_ymarg + HofText + v_OutVarTemp + c_ymarg + HofText * 2)
 	GuiControl, MoveDraw, % IdSearchLV1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
 	
@@ -10222,8 +10252,7 @@ F_GuiAbout_DetermineConstraints()
 F_GuiAbout()
 {
 	global ;assume-global mode
-	local FoundPos := ""
-		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
 	
@@ -11993,8 +12022,6 @@ L_PublicLibraries:
 Run, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings/Libraries
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS3GuiClose:
 HS3GuiEscape:
 Gui,		HS3: Show, Hide
@@ -12007,30 +12034,12 @@ Gui,		HS4: Show, Hide
 ini_WhichGui := "HS4"
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-MSPGuiClose:	
-MSPGuiEscape:
-
-Switch A_ThisMenu
-{
-	Case "OrdHisTrig":
-	IniWrite, % ini_OHSF, % HADConfig, Event_BasicHotstring, OHSF
-	Iniwrite, % ini_OHSD, % HADConfig, Event_BasicHotstring, OHSD
-	Case "MenuHisTrig":
-	IniWrite, % ini_MHSF, % HADConfig, Event_MenuHotstring, MHSF
-	Iniwrite, % ini_MHSD, % HADConfig, Event_MenuHotstring, MHSD
-	Case "UndoOfH":
-	IniWrite, % ini_UHSF, % HADConfig, Event_UndoHotstring, UHSF
-	Iniwrite, % ini_UHSD, % HADConfig, Event_UndoHotstring, UHSD
-}
-Gui, MSP: Destroy
-return
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 MoveLibsGuiEscape:
 CancelMove:
 Gui, MoveLibs: Destroy
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-~^f::	;tu jestem
+~^f::
 ~^s::
 ~F3::
 HS3SearchGuiEscape()
@@ -12043,54 +12052,11 @@ IniWrite, %ini_CPDelay%, % HADConfig, Configuration, ClipBoardPasteDelay
 Gui, HSDel: Destroy
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-MonGuiEscape:
-MonGuiClose:
-Gui, Mon: Destroy
-return
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-ShortDefGuiEscape:
-ShortDefGuiClose:
-Gui, ShortDef: Hide
-return
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 VersionUpdateGuiEscape:
 VersionUpdateGuiClose:
 Gui, VersionUpdate: Hide
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-L_TraySuspendHotkeys:
-Suspend, Toggle
-if (A_IsSuspended)
-{
-	Menu, Tray, 		Check, 	% TransA["Suspend Hotkeys"]
-	Menu, AppSubmenu, 	Check, 	% TransA["Suspend Hotkeys"]
-}
-else
-{
-	Menu, Tray, 		UnCheck, 	% TransA["Suspend Hotkeys"]
-	Menu, AppSubmenu,	UnCheck, 	% TransA["Suspend Hotkeys"]
-}
-return
-
-L_TrayPauseScript:
-Pause, Toggle, 1
-if (A_IsPaused)
-{
-	Menu, Tray, 		Check, 	% TransA["Pause application"]
-	Menu, AppSubmenu,	Check, 	% TransA["Pause"]
-}
-else
-{
-	Menu, Tray, 		UnCheck, 	% TransA["Pause application"]
-	Menu, AppSubmenu,	UnCheck, 	% TransA["Pause"]
-}
-return
-
-L_TrayReload:	;new thread starts here
-;F_WhichGui()
-F_ReloadUniversal()
-return
-
 TurnOff_OHE:
 ToolTip, ,, , 4
 return
@@ -12108,33 +12074,8 @@ Switch ini_TTCn
 }
 return
 
-L_TrayExit:
-ExitApp, 2	;2 = by Tray
-
-STDGuiClose:
-STDGuiEscape:
-Switch (A_ThisMenu)
-{
-	Case "OrdHisTrig": 	IniWrite, % ini_OHTD, % HADConfig, Event_BasicHotstring, 	OHTD
-	Case "UndoOfH":	IniWrite, % ini_UHTD, % HADConfig, Event_UndoHotstring, 	UHTD
-	Case "TrigTips":	IniWrite, % ini_TTTD, % HADConfig, Event_TriggerstringTips, TTTD
-}
-Gui, STD: Destroy
-return
-
-TMNTGuiClose:
-TMNTGuiEscape:
-IniWrite, % ini_MNTT, % HADConfig, Event_TriggerstringTips, MNTT
-Gui, TMNT: Destroy
-return
-
 L_OpenLibrariesFolderInExplorer:
 Run, explore %HADL%
-return
-
-L_ShowIntro:
-F_GuiShowIntro()
-Gui, ShowIntro: Show, AutoSize Center
 return
 
 L_Compile:
