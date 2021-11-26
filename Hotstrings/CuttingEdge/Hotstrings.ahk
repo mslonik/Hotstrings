@@ -53,6 +53,7 @@ global 	HADL 				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libra
 ;Flags to control application
 ,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time
 ,		TT_C1_Hwnd 			:= 0, TT_C2_Hwnd := 0, TT_C3_Hwnd := 0, HMenuCliHwnd := 0, HMenuAHKHwnd	:= 0, HS3GuiHwnd := 0, HS4GuiHwnd := 0, TT_C4_Hwnd := 0, TDemoHwnd := 0, HDemoHwnd := 0 ;This is a trick to initialize global variables in order to not get warning (#Warn) message
+,		HotstringDelay			:= 0
 ,		WhichMenu := "",	v_EndChar := "" ;initialization of this variable is important in case user would like to hit "Esc" and GUI TT_C4 exists.
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_DetermineMonitors()
@@ -282,8 +283,8 @@ Menu, SubmenuLog,		Add,	% TransA["enable"],						F_MenuLogEnDis
 Menu, SubmenuLog,		Add, % TransA["disable"],					F_MenuLogEnDis
 Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],		:SubmenuLog
 
-Menu,	AboutHelpSub,	Add,	% TransA["Help: Hotstrings application"],	GuiAboutLink1
-Menu,	AboutHelpSub,	Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"], GuiAboutLink2
+Menu,	AboutHelpSub,	Add,	% TransA["Help: Hotstrings application"],	F_GuiAboutLink1
+Menu,	AboutHelpSub,	Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"], F_GuiAboutLink2
 Menu,	AboutHelpSub,	Add
 Menu,	AboutHelpSub,	Add,	% TransA["About this application..."],		F_GuiAbout
 Menu,	AboutHelpSub,	Add
@@ -394,33 +395,27 @@ else
 return
 #InputLevel 0
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_PasteFromClipboard()
-{
-	global	;assume-global mode
-	local	ContentOfClipboard := ""
-	
-	Sleep, % ini_CPDelay
-	ContentOfClipboard := Clipboard
-	if (InStr(ContentOfClipboard, "`r`n") or InStr(ContentOfClipboard, "`n"))
-	{
-		MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Content of clipboard contain new line characters. Do you want to remove them?"] . "`n`n" 
-			. TransA["Tip: If you copy text from PDF file it's adviced to remove them."]
-		IfMsgBox, Cancel
-			return
-		IfMsgBox, Yes
-			ContentOfClipboard := StrReplace(ContentOfClipboard, "`r`n", " ")
-		IfMsgBox, No
-			ContentOfClipboard := StrReplace(ContentOfClipboard, "`r`n", "``n")
-	}
-	ControlSetText, Edit2, % ContentOfClipboard
-	F_WhichGui()
-	Gui, % A_DefaultGui . ":" . A_Space . "Show"
-}
+
+#if WinActive("ahk_id" HS3SearchHwnd)
+~^f::
+~^s::
+~F3::
+HS3SearchGuiEscape()
+return	;end of this thread
+#if
+
+#if WinActive("ahk_id" HotstringDelay)
+~F7::
+HSDelGuiClose()	;Gui event!
+HSDelGuiEscape()	;Gui event!
+return
+#if
 
 #if WinActive("ahk_id" HS3GuiHwnd) or WinActive("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows are active at the moment. 
 
 F1::	;new thread starts here
-Goto, GuiAboutLink1
+F_GuiAboutLink1()
+return
 
 F2:: ;new thread starts here
 F_WhichGui()
@@ -462,8 +457,9 @@ F_WhichGui()
 F_ToggleSandbox()
 return
 
-F7:: ;new thread starts here
+F7:: ;new thread starts here ;tu jestem
 F_WhichGui()
+Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 F_GuiHSdelay()
 return
 
@@ -617,6 +613,55 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_PasteFromClipboard()
+{
+	global	;assume-global mode
+	local	ContentOfClipboard := ""
+	
+	Sleep, % ini_CPDelay
+	ContentOfClipboard := Clipboard
+	if (InStr(ContentOfClipboard, "`r`n") or InStr(ContentOfClipboard, "`n"))
+	{
+		MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Content of clipboard contain new line characters. Do you want to remove them?"] . "`n`n" 
+			. TransA["Tip: If you copy text from PDF file it's adviced to remove them."]
+		IfMsgBox, Cancel
+			return
+		IfMsgBox, Yes
+			ContentOfClipboard := StrReplace(ContentOfClipboard, "`r`n", " ")
+		IfMsgBox, No
+			ContentOfClipboard := StrReplace(ContentOfClipboard, "`r`n", "``n")
+	}
+	ControlSetText, Edit2, % ContentOfClipboard
+	F_WhichGui()
+	Gui, % A_DefaultGui . ":" . A_Space . "Show"
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+HSDelGuiClose()	;Gui event!
+{
+	HSDelGuiEscape()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+HSDelGuiEscape()	;Gui event!
+{
+	global	;assume global mode
+	IniWrite, %ini_CPDelay%, % HADConfig, Configuration, ClipBoardPasteDelay
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled		
+	Gui, HSDel: Destroy
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiAboutLink1()
+{
+	Run, https://github.com/mslonik/Hotstrings
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiAboutLink2()
+{
+	Run, https://www.autohotkey.com/docs/Hotstrings.htm
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TrayExit()
 {
 	ExitApp, 2	;2 = by Tray
@@ -820,8 +865,8 @@ F_InitiateTrayMenus(v_Param)
 		Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 			L_GUIInit
 		Menu, Tray, Default, 	% TransA["Edit Hotstrings"]
 		Menu, Tray, Add										;separator line
-		Menu, Tray, Add,		% TransA["Help: Hotstrings application"],			GuiAboutLink1
-		Menu, Tray, Add,		% TransA["Help: AutoHotkey Hotstrings reference guide"], GuiAboutLink2
+		Menu, Tray, Add,		% TransA["Help: Hotstrings application"],			F_GuiAboutLink1
+		Menu, Tray, Add,		% TransA["Help: AutoHotkey Hotstrings reference guide"], F_GuiAboutLink2
 		Menu, Tray, Add										;separator line
 		Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],	F_ReloadUniversal
 		Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],		F_ReloadUniversal
@@ -6885,7 +6930,6 @@ F_GuiHSdelay()
 	
 	Gui, HSDel: Add, Slider, x0 y0 HwndIdHD_S1 vini_CPDelay gF_HSdelay Range100-1000 ToolTipBottom Buddy1999, % ini_CPDelay
 	TransA["This option is valid"] := StrReplace(TransA["This option is valid"], "``n", "`n")
-	;Gui, HSDel: Add, Text, HwndIdHD_T1 vDelayText, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_CPDelay . "`n`n" . TransA["This option is valid"]
 	Gui, HSDel: Add, Text, HwndIdHD_T1, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_CPDelay . "`n`n" . TransA["This option is valid"]
 	GuiControlGet, v_OutVarTemp, Pos, % IdHD_T1
 	v_xNext := c_xmarg
@@ -12010,14 +12054,6 @@ ALibGuiClose:
 Gui, ALib: Destroy
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-GuiAboutLink1:
-Run, https://github.com/mslonik/Hotstrings
-return
-
-GuiAboutLink2:
-Run, https://www.autohotkey.com/docs/Hotstrings.htm
-return
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 L_PublicLibraries:	
 Run, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings/Libraries
 return
@@ -12037,19 +12073,6 @@ return
 MoveLibsGuiEscape:
 CancelMove:
 Gui, MoveLibs: Destroy
-return
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-~^f::
-~^s::
-~F3::
-HS3SearchGuiEscape()
-return	;end of this thread
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-~F7::
-HSDelGuiEscape:
-HSDelGuiClose:
-IniWrite, %ini_CPDelay%, % HADConfig, Configuration, ClipBoardPasteDelay
-Gui, HSDel: Destroy
 return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 VersionUpdateGuiEscape:
