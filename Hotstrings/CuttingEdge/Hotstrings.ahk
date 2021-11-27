@@ -241,9 +241,11 @@ Menu, Submenu1,		Add, % TransA["Triggerstring tips and hotstring menu styling"],
 F_GuiStylingMenu.Call(true)
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
 Menu, Submenu1,		Add
-Menu, Submenu1,  	   	Add, % TransA["Toggle EndChars"], 				:SubmenuEndChars
+Menu, Submenu1,  	   	Add, % TransA["Toggle trigger characters (↓ or EndChars)"], 				:SubmenuEndChars
 Menu, Submenu1,  	   	Add
 Menu, Submenu1,	 	Add, % TransA["Restore default configuration"],	F_RestoreDefaultConfig
+Menu, Submenu1,		Add, % TransA["Open folder where Config.ini is located"],	F_OpenConfigIniLocation	
+Menu, Submenu1,		Add, % TransA["Open Config.ini in your default editor"],		F_OpenConfigIniInEditor
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 				:Submenu1
 Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 		F_Searching
@@ -281,7 +283,8 @@ Menu, AppSubmenu,		Add, % TransA["Version / Update"],				F_GuiVersionUpdate
 Menu, AppSubmenu,		Add
 Menu, SubmenuLog,		Add,	% TransA["enable"],						F_MenuLogEnDis
 Menu, SubmenuLog,		Add, % TransA["disable"],					F_MenuLogEnDis
-Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],		:SubmenuLog
+Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],		:SubmenuLog	
+Menu, AppSubmenu,		add, % TransA["Open folder where log files are located"], F_OpenLogFolder
 
 Menu,	AboutHelpSub,	Add,	% TransA["Help: Hotstrings application"],	F_GuiAboutLink1
 Menu,	AboutHelpSub,	Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"], F_GuiAboutLink2
@@ -305,7 +308,7 @@ F_LoadGUIstatic()
 if (ini_TTCn = 4)	;static triggerstring / hotstring GUI 
 	F_GuiTrigTipsMenuDefC4()
 if (ini_GuiReload) and (v_Param != "l")
-	Gosub, L_GUIInit
+	F_GUIinit()
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; The main application loop beginning.
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -616,6 +619,95 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_GUIinit()	;tu jestem
+{
+	global	;assume-global mode
+	if (f_MainGUIresizing) ;if run for the very first time
+	{
+		Gui, HS3: +MinSize%HS3MinWidth%x%HS3MinHeight%
+		Gui, HS4: +MinSize%HS4MinWidth%x%HS4MinHeight%
+		;OutputDebug, % "ini_GuiReload:" . A_Tab . ini_GuiReload . A_Tab . "ini_WhichGui:" . A_Tab . ini_WhichGui
+		ini_GuiReload := false
+		IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
+		F_SaveGUIPos("reset")		;save position of main window
+		
+		Switch ini_WhichGui
+		{
+			Case "HS3":
+			if (ini_HS3WindoPos["X"] = "") or (ini_HS3WindoPos["Y"] = "")
+			{
+				Gui, HS3: Show, AutoSize Center
+				if (ini_ShowIntro)
+					Gui, ShowIntro: Show, AutoSize Center
+				f_MainGUIresizing := false
+				return
+			}
+			if (ini_HS3WindoPos["W"] = "") or (ini_HS3WindoPos["H"] = "")
+			{
+				Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+				if (ini_ShowIntro)
+					Gui, ShowIntro: Show, AutoSize Center
+				f_MainGUIresizing := false
+				return
+			}
+			if (ini_HS3GuiMaximized)
+				Gui, HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
+			else	
+				Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+			
+			Case "HS4":
+			if (ini_HS3WindoPos["W"] = "") or (ini_HS3WindoPos["H"] = "")
+			{	
+				Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+				if (ini_ShowIntro)
+					Gui, ShowIntro: Show, AutoSize Center
+				f_MainGUIresizing := false
+				return
+			}
+			if (ini_HS3WindoPos["X"] = "") or !(ini_HS3WindoPos["Y"] = "")
+			{
+				Gui, HS4: Show, AutoSize Center
+				if (ini_ShowIntro)
+					Gui, ShowIntro: Show, AutoSize Center
+				f_MainGUIresizing := false
+				return
+			}
+			Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+		}
+		if (ini_ShowIntro)
+			Gui, ShowIntro: Show, AutoSize Center
+		f_MainGUIresizing := false
+	}		
+	else ;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakresem dostępnym na tym komputerze w momencie uruchomienia
+	{
+		Switch ini_WhichGui
+		{
+			Case "HS3":
+			if (ini_HS3GuiMaximized)
+				Gui, HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
+			else	
+				Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
+			Case "HS4":
+			Gui, HS4: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
+		}
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_OpenLogFolder()
+{
+	Run, % "explore" . A_Space . A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log" 
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_OpenConfigIniLocation()
+{
+	Run, % "explore" . A_Space . A_AppData . "\" . SubStr(A_ScriptName, 1, -4)	
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_OpenConfigIniInEditor()
+{
+	Run, edit %HADConfig%
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 MoveLibsGuiCancel()	;Gui event
 {
 	global	;assume-global mode
@@ -977,7 +1069,7 @@ F_InitiateTrayMenus(v_Param)
 		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
 		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Default mode"], F_GuiAbout
 		Menu, Tray, Add										;separator line
-		Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 			L_GUIInit
+		Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 			F_GUIinit
 		Menu, Tray, Default, 	% TransA["Edit Hotstrings"]
 		Menu, Tray, Add										;separator line
 		Menu, Tray, Add,		% TransA["Help: Hotstrings application"],			F_GuiAboutLink1
@@ -1509,7 +1601,7 @@ F_LoadConfiguration()
 	{
 		#If v_Param != "l"
 		Hotkey, If, v_Param != "l" 
-		Hotkey, % ini_HK_Main, L_GUIInit, On
+		Hotkey, % ini_HK_Main, F_GUIInit, On
 	}
 	
 	ini_HK_IntoEdit			:= "~^c"
@@ -2172,7 +2264,6 @@ F_EvTab3(OneTime*)
 F_EvUpdateTab()
 {
 	global ;assume-global mode
-	;*[One]
 	Switch EvTab3
 	{
 		Case % TransA["Basic hotstring is triggered"]:
@@ -5452,10 +5543,10 @@ F_ShortDefB2_RestoreHotkey()
 	{
 		Case % TransA["Call Graphical User Interface"]:
 		if (OldHotkey != "none")	
-			Hotkey, % OldHotkey, L_GUIInit, Off
+			Hotkey, % OldHotkey, F_GUIInit, Off
 		ini_HK_Main := "#^h"
 		Hotkey, If, v_Param != "l" 
-		Hotkey, % ini_HK_Main, L_GUIInit, On
+		Hotkey, % ini_HK_Main, F_GUIInit, On
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
 		IniWrite, % ini_HK_Main, % HADConfig, Configuration, HK_Main
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
@@ -5556,11 +5647,11 @@ F_ShortDefB1_SaveHotkey()
 	{
 		Case % TransA["Call Graphical User Interface"]:
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
-		Hotkey, % OldHotkey, L_GUIInit, Off
+		Hotkey, % OldHotkey, F_GUIInit, Off
 		if (ini_HK_Main != "none")
 		{
 			Hotkey, If, v_Param != "l" 
-			Hotkey, % ini_HK_Main, L_GUIInit, On
+			Hotkey, % ini_HK_Main, F_GUIInit, On
 		}
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit, "space")
@@ -5777,7 +5868,7 @@ F_GuiShowIntro()
 	GuiControlGet, v_OutVarTemp, Pos, % IdIntroOkButton
 	v_xNext := c_xmarg
 	v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
-	GuiControl, Move,			% IdIntroCheckbox, % "x" . v_xNext . "y" . v_yNexto
+	GuiControl, Move,			% IdIntroCheckbox, % "x" . v_xNext . "y" . v_yNext
 	
 	GuiControl,, % IdIntroCheckbox, % ini_ShowIntro	;load initial value
 	if (WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd))
@@ -8994,6 +9085,9 @@ of													= of
 OK													= &OK
 olive												= olive
 On start-up the local version of application was compared with repository version and difference was discovered: = On start-up the local version of application was compared with repository version and difference was discovered:
+Open Config.ini in your default editor						= Open Config.ini in your default editor
+Open folder where Config.ini is located						= Open folder where Config.ini is located
+Open folder where log files are located						= Open folder where log files are located
 Open libraries folder in Explorer							= Open libraries folder in Explorer
 Opening Curly Bracket { 									= Opening Curly Bracket {
 Opening Round Bracket ( 									= Opening Round Bracket (
@@ -9110,7 +9204,7 @@ Timeout value [ms]										= Timeout value [ms]
 Tilde (~) key modifier									= Tilde (~) key modifier
 Tip: If you copy text from PDF file it's adviced to remove them. = Tip: If you copy text from PDF file it's adviced to remove them.
 Tips are shown after no. of characters						= Tips are shown after no. of characters
-Toggle EndChars	 									= &Toggle EndChars
+Toggle trigger characters (↓ or EndChars)					= &Toggle trigger characters (↓ or EndChars)
 Tooltip disable										= Tooltip disable
 Tooltip enable											= Tooltip enable
 Tooltip position										= Tooltip position
@@ -12136,86 +12230,6 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 }
 
 ; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
-L_GUIInit:
-if (f_MainGUIresizing) ;if run for the very first time
-{
-	Gui, HS3: +MinSize%HS3MinWidth%x%HS3MinHeight%
-	Gui, HS4: +MinSize%HS4MinWidth%x%HS4MinHeight%
-		;OutputDebug, % "ini_GuiReload:" . A_Tab . ini_GuiReload . A_Tab . "ini_WhichGui:" . A_Tab . ini_WhichGui
-	ini_GuiReload := false
-	IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
-	
-	Switch ini_WhichGui
-	{
-		Case "HS3":
-		if (ini_HS3WindoPos["X"] = "") or (ini_HS3WindoPos["Y"] = "")
-		{
-			Gui, HS3: Show, AutoSize Center
-			if (ini_ShowIntro)
-				Gui, ShowIntro: Show, AutoSize Center
-			f_MainGUIresizing := false
-			return
-		}
-		if (ini_HS3WindoPos["W"] = "") or (ini_HS3WindoPos["H"] = "")
-		{	;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
-			Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
-			Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
-			if (ini_ShowIntro)
-				Gui, ShowIntro: Show, AutoSize Center
-			f_MainGUIresizing := false
-			return
-		}
-		if (ini_HS3GuiMaximized)
-		{
-			Gui, HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
-		}
-		else	
-			Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
-		if (ini_ShowIntro)
-			Gui, ShowIntro: Show, AutoSize Center
-		f_MainGUIresizing := false
-		return
-		Case "HS4":
-		if (ini_HS3WindoPos["W"] = "") or (ini_HS3WindoPos["H"] = "")
-		{	;one of the Windows mysteries, why I need to run the following line twice if c_FontSize > 10
-			Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
-			Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
-			if (ini_ShowIntro)
-				Gui, ShowIntro: Show, AutoSize Center
-			f_MainGUIresizing := false
-			return
-		}
-		if (ini_HS3WindoPos["X"] = "") or !(ini_HS3WindoPos["Y"] = "")
-		{
-			Gui, HS4: Show, AutoSize Center
-			if (ini_ShowIntro)
-				Gui, ShowIntro: Show, AutoSize Center
-			f_MainGUIresizing := false
-			return
-		}
-		Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
-		if (ini_ShowIntro)
-			Gui, ShowIntro: Show, AutoSize Center
-		f_MainGUIresizing := false
-		return
-	}		
-}
-else ;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakresem dostępnym na tym komputerze w momencie uruchomienia
-{
-	Switch ini_WhichGui
-	{
-		Case "HS3":
-		if (ini_HS3GuiMaximized)
-			Gui, HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
-		else	
-			Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
-		Case "HS4":
-		Gui, HS4: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
-	}
-}
-return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 TurnOff_OHE:
 ToolTip, ,, , 4
 return
