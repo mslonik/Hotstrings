@@ -253,8 +253,8 @@ F_RefreshListOfLibraries()
 Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	F_RefreshListOfLibraryTips
 F_RefreshListOfLibraryTips()
 Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.
-Menu, LibrariesSubmenu,	Add, % TransA["Visit public libraries webpage"],	L_PublicLibraries
-Menu, LibrariesSubmenu,	Add, % TransA["Open libraries folder in Explorer"], L_OpenLibrariesFolderInExplorer
+Menu, LibrariesSubmenu,	Add, % TransA["Visit public libraries webpage"],	F_PublicLibraries
+Menu, LibrariesSubmenu,	Add, % TransA["Open libraries folder in Explorer"], F_OpenLibrariesFolderInExplorer
 Menu, LibrariesSubmenu,	Add, % TransA["Download public libraries"],		F_DownloadPublicLibraries
 Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.
 Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],		F_ImportLibrary
@@ -457,7 +457,7 @@ F_WhichGui()
 F_ToggleSandbox()
 return
 
-F7:: ;new thread starts here ;tu jestem
+F7:: ;new thread starts here
 F_WhichGui()
 Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 F_GuiHSdelay()
@@ -518,6 +518,7 @@ return
 #if WinActive("ahk_id" HS3SearchHwnd)
 F8:: ;new thread starts here
 Gui, HS3Search: Default
+Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 F_MoveList()
 #if
 
@@ -613,6 +614,118 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+MoveLibsGuiCancel()	;Gui event
+{
+	global	;assume-global mode
+	if (WinExist("ahk_id" MoveLibsHwnd))
+		Gui, HS3SearchHwnd: -Disabled
+	Gui, MoveLibs: Destroy
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+MoveLibsGuiEscape()	;Gui event
+{
+	MoveLibsGuiCancel()	
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+HS4GuiEscape()	;Gui event
+{
+	global	;assume-global mode
+	ini_WhichGui := "HS4"
+	Gui,		HS4: Show, Hide
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+HS4GuiClose()	;Gui event
+{
+	HS4GuiEscape()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+HS3GuiEscape()	;Gui event
+{
+	global	;assume-global mode
+	ini_WhichGui := "HS3"
+	Gui,		HS3: Show, Hide
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+HS3GuiClose()	;Gui event
+{
+	HS3GuiEscape()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ALibOK()
+{
+	global	;assume-global mode
+	Gui, ALib: Submit, NoHide
+	if (v_NewLib == "")
+	{
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Enter a name for the new library"]
+		if (WinExist("ahk_id" HS3GuiHwnd))
+			Gui, HS3: -Disabled
+		if (WinExist("ahk_id" HS4GuiHwnd))
+			Gui, HS4: -Disabled
+		return
+	}
+	v_NewLib .= ".csv"
+	IfNotExist, % HADL . "\" . v_NewLib
+	{
+		FileAppend,, % HADL . "\" . v_NewLib, UTF-8
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The library"] . A_Space . v_NewLib . A_Space . TransA["has been created."]
+		if (WinExist("ahk_id" HS3GuiHwnd))
+			Gui, HS3: -Disabled
+		if (WinExist("ahk_id" HS4GuiHwnd))
+			Gui, HS4: -Disabled
+		Gui, ALib: Destroy
+		
+		F_ValidateIniLibSections()
+		F_RefreshListOfLibraries()
+		F_RefreshListOfLibraryTips()
+		F_UpdateSelHotLibDDL()
+	}
+	else
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["A library with that name already exists!"]
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ALibGuiEscape()	;Gui event
+{
+	global	;assume-global mode
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	
+	Gui, ALib: Destroy
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ALibGuiClose()	;Gui event
+{
+	ALibGuiEscape()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+VersionUpdateGuiEscape()	;Gui event
+{
+	global	;assume-global mode
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	
+	Gui, VersionUpdate: Hide
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+VersionUpdateGuiClose()	;Gui event
+{
+	VersionUpdateGuiEscape()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_OpenLibrariesFolderInExplorer()
+{
+	global	;assume global-mode
+	Run, explore %HADL%
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_PublicLibraries()
+{
+	Run, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings/Libraries
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PasteFromClipboard()
 {
 	global	;assume-global mode
@@ -1760,7 +1873,7 @@ F_EvTab3(OneTime*)
 	
 	Gui, GuiEvents: Submit, NoHide	;Loads EvTab3 with current value 
 	;OutputDebug, % "EvTab3:" . A_Tab . EvTab3 . A_Tab . "PreviousEvTab3" . A_Tab . PreviousEvTab3
-	;*[One]
+	F_EvUpdateTab()
 	if (EvTab3 != PreviousEvTab3)
 	{
 		Switch PreviousEvTab3
@@ -1774,6 +1887,7 @@ F_EvTab3(OneTime*)
 				IfMsgBox, Yes
 				{
 					F_EvBH_B3()	;Apply changes
+					F_EvUpdateTab()
 				}
 				IfMsgBox, No	;restore previous values to each GuiControl
 				{
@@ -1832,6 +1946,7 @@ F_EvTab3(OneTime*)
 				IfMsgBox, Yes
 				{
 					F_EvMH_B2()	;Apply changes
+					F_EvUpdateTab()
 				}
 				IfMsgBox, No	;restore previous values to each GuiControl
 				{
@@ -1872,6 +1987,7 @@ F_EvTab3(OneTime*)
 				IfMsgBox, Yes
 				{
 					F_EvUH_B3() ;Apply changes
+					F_EvUpdateTab()
 				}
 				IfMsgBox, No	;restore previous values to each GuiControl
 				{
@@ -1930,6 +2046,7 @@ F_EvTab3(OneTime*)
 				IfMsgBox, Yes
 				{
 					F_EvTt_B2() ;Apply changes
+					F_EvUpdateTab()
 				}
 				IfMsgBox, No	;restore previous values to each GuiControl
 				{
@@ -1998,6 +2115,7 @@ F_EvTab3(OneTime*)
 				IfMsgBox, Yes
 				{
 					F_EvAT_B2() ;Apply changes
+					F_EvUpdateTab()
 				}
 				IfMsgBox, No	;restore previous values to each GuiControl
 				{ 
@@ -2017,7 +2135,7 @@ F_EvTab3(OneTime*)
 			}
 			PreviousEvTab3 := EvTab3
 			
-			Case % TransA["Static triggerstring / hotstring menus"]:
+			Case % TransA["Static triggerstring / hotstring menus"]:	;tu jestem
 			if (EvSM_R1R2 != PreviousEvSM_R1R2)
 			{
 				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
@@ -2026,6 +2144,7 @@ F_EvTab3(OneTime*)
 				IfMsgBox, Yes
 				{
 					F_EvSM_B2() ;Apply changes
+					F_EvUpdateTab()
 				}
 				IfMsgBox, No	;restore previous values to each GuiControl
 				{
@@ -2051,19 +2170,76 @@ F_EvTab3(OneTime*)
 F_EvUpdateTab()
 {
 	global ;assume-global mode
+	;*[One]
 	Switch EvTab3
 	{
 		Case % TransA["Basic hotstring is triggered"]:
-		F_EvBH_R1R2()
-		F_EvBH_R3R4()
-		F_EvBH_R7R8()
-		F_EvBH_S1()
-		F_EvBH_S2()
-		F_EvBH_S3()
+		Switch EvSM_R1R2
+		{
+			Case 1:	;enable
+			GuiControl, Disable, 	% IdEvBH_T1
+			GuiControl, Disable, 	% IdEvBH_T2
+			GuiControl, Disable, 	% IdEvBH_R1
+			GuiControl, Disable, 	% IdEvBH_R2
+			GuiControl, Disable, 	% IdEvBH_T3
+			GuiControl, Disable, 	% IdEvBH_T4
+			GuiControl, Disable, 	% IdEvBH_T5
+			GuiControl, Disable, 	% IdEvBH_R3
+			GuiControl, Disable, 	% IdEvBH_R4
+			GuiControl, Disable, 	% IdEvBH_T6
+			GuiControl, Disable, 	% IdEvBH_S1
+			GuiControl, Disable, 	% IdEvBH_T7
+			GuiControl, Disable, 	% IdEvBH_T8
+			GuiControl, Disable, 	% IdEvBH_T9
+			GuiControl, Disable, 	% IdEvBH_R5
+			GuiControl, Disable, 	% IdEvBH_R6
+			GuiControl, Disable, 	% IdEvMH_T1
+			GuiControl, Disable, 	% IdEvMH_T2
+			GuiControl, Disable, 	% IdEvMH_R1
+			GuiControl, Disable, 	% IdEvMH_R2
+			
+			Case 2:	;disable
+			GuiControl, Enable, 	% IdEvBH_T1
+			GuiControl, Enable, 	% IdEvBH_T2
+			GuiControl, Enable, 	% IdEvBH_R1
+			GuiControl, Enable, 	% IdEvBH_R2
+			GuiControl, Enable, 	% IdEvBH_T3
+			GuiControl, Enable, 	% IdEvBH_T4
+			GuiControl, Enable, 	% IdEvBH_T5
+			GuiControl, Enable, 	% IdEvBH_R3
+			GuiControl, Enable, 	% IdEvBH_R4
+			GuiControl, Enable, 	% IdEvBH_T6
+			GuiControl, Enable, 	% IdEvBH_S1
+			GuiControl, Enable, 	% IdEvBH_T7
+			GuiControl, Enable, 	% IdEvBH_T8
+			GuiControl, Enable, 	% IdEvBH_T9
+			GuiControl, Enable, 	% IdEvBH_R5
+			GuiControl, Enable, 	% IdEvBH_R6
+			F_EvBH_R1R2()
+			F_EvBH_R3R4()
+			F_EvBH_R7R8()
+			F_EvBH_S1()
+			F_EvBH_S2()
+			F_EvBH_S3()
+		}
 		Case % TransA["Menu hotstring is triggered"]:
-		F_EvMH_R3R4()
-		F_EvMH_S1()
-		F_EvMH_S2()
+		Switch EvSM_R1R2
+		{
+			Case 1:	;enable
+			GuiControl, Disable, 	% IdEvMH_T1
+			GuiControl, Disable, 	% IdEvMH_T2
+			GuiControl, Disable, 	% IdEvMH_R1
+			GuiControl, Disable, 	% IdEvMH_R2
+			
+			Case 2:	;disable
+			GuiControl, Enable, 	% IdEvMH_T1
+			GuiControl, Enable, 	% IdEvMH_T2
+			GuiControl, Enable, 	% IdEvMH_R1
+			GuiControl, Enable, 	% IdEvMH_R2
+			F_EvMH_R3R4()
+			F_EvMH_S1()
+			F_EvMH_S2()
+		}
 		Case % TransA["Undid the last hotstring"]:
 		F_EvUH_R1R2()
 		F_EvUH_R3R4()
@@ -2115,6 +2291,7 @@ F_EvSM_B2()	;static menus, button Apply
 	}
 	IniWrite, % ini_TTCn,	% HADConfig, Event_TriggerstringTips,	TTCn
 	Tooltip,,,, 4	
+	F_EvTab3(true)	;to memory that something was applied
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvSM_B3()	;static menus, button Close
@@ -2210,6 +2387,7 @@ F_EvAT_B2()	;Event Active Triggerstring Tips Button Apply
 	}
 	IniWrite, % ini_ATEn, 	% HADConfig, Event_ActiveTriggerstringTips, 	ATEn
 	Tooltip,,,, 4	
+	F_EvTab3(true)	;to memory that something was applied
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvAT_B3()	;Event Active Triggerstring Tips Button Close
@@ -2327,6 +2505,7 @@ F_EvTt_B2()	;Event Tooltip (is triggered) Button Apply
 	IniWrite, % ini_TASAC,	% HADConfig, Event_TriggerstringTips,	TipsAreShownAfterNoOfCharacters
 	IniWrite, % ini_TTCn,	% HADConfig, Event_TriggerstringTips,	TTCn
 	Tooltip,,,, 4	
+	F_EvTab3(true)	;to memory that something was applied
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvTt_B3()	;Event Tooltip (is triggered) Button Close
@@ -2551,6 +2730,7 @@ F_EvUH_B3()	;Event Undo Hotstring (is triggered) Button Apply
 	IniWrite, % ini_UHSF,	% HADConfig, Event_UndoHotstring,	UHSF
 	IniWrite, % ini_UHSD,	% HADConfig, Event_UndoHotstring,	UHSD
 	Tooltip,,,, 4	
+	F_EvTab3(true)	;to memory that something was applied
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvUH_B4()	;Event Undo Hotstring (is triggered) Button Close
@@ -2721,7 +2901,7 @@ F_EvMH_B4()	;Menu Hotstring (is triggered) Button Cancel
 	Gui, GuiEvents: Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvMH_B2()	;Apply
+F_EvMH_B2()	;Apply Button
 {
 	global ;assume-global mode
 	Gui, GuiEvents: Submit, NoHide
@@ -2741,6 +2921,7 @@ F_EvMH_B2()	;Apply
 	IniWrite, % ini_MHSF,	% HADConfig, Event_MenuHotstring,		MHSF
 	IniWrite, % ini_MHSD,	% HADConfig, Event_MenuHotstring,		MHSD
 	Tooltip,,,, 4	
+	F_EvTab3(true)	;to memory that something was applied
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvMH_B3()	;Button Close	
@@ -3431,6 +3612,7 @@ F_EvBH_B3()	;Events Basic Hotstring (is triggered) Button Apply
 	IniWrite, % ini_OHSF,	% HADConfig, Event_BasicHotstring,		OHSF
 	IniWrite, % ini_OHSD,	% HADConfig, Event_BasicHotstring,		OHSD
 	Tooltip,,,, 4
+	F_EvTab3(true)	;to memory that something was applied
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvBH_B4(CloseGuiEvents)	;Events Basic Hotstring (is triggered) Button Close
@@ -4837,6 +5019,7 @@ F_GuiVersionUpdate()
 	DetectHiddenWindows, On
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . VersionUpdateHwnd
 	DetectHiddenWindows, Off
+	Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	if (Window1W)
 	{
 		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
@@ -6540,7 +6723,7 @@ F_GuiMoveLibs_CreateDetermine()
 	Gui, MoveLibs: Add, Text,     x0 y0 HwndIdMoveLibs_T1, 						% TransA["Select the target library:"]
 	Gui, MoveLibs: Add, ListView, x0 y0 HwndIdMoveLibs_LV LV0x1 +AltSubmit -Hdr -Multi, 	| 	;-Hdr (minus Hdr) to omit the header (the special top row that contains column titles). "|" is required!
 	Gui, MoveLibs: Add, Button, 	x0 y0 HwndIdMoveLibs_B1 Default gF_Move,			% TransA["Move (F8)"]
-	Gui, MoveLibs: Add, Button, 	x0 y0 HwndIdMoveLibs_B2 gCancelMove, 				% TransA["Cancel"]
+	Gui, MoveLibs: Add, Button, 	x0 y0 HwndIdMoveLibs_B2 gMoveLibsGuiCancel,			% TransA["Cancel"]
 	
 	v_xNext := c_xmarg
 	v_yNext := c_ymarg
@@ -6597,6 +6780,8 @@ F_MoveList()
 	if !(v_SelectedRow) 
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
+		if (WinExist("ahk_id" MoveLibsHwnd))
+			Gui, HS3: -Disabled
 		return
 	}
 	;The following lines will be used by "next function": Move, moving of (triggerstrin, hotstring) definition between libraries.
@@ -7005,7 +7190,7 @@ F_GuiAddLibrary()
 	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdText2
 	vTempWidth += v_OutVarTemp1W
 	
-	Gui, ALib: Add, Button, HwndIdButt1 Default gALibOK, 	% TransA["OK"]
+	Gui, ALib: Add, Button, HwndIdButt1 Default gF_ALibOK, 	% TransA["OK"]
 	Gui, ALib: Add, Button, HwndIdButt2 gALibGuiClose, 	% TransA["Cancel"]
 	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdButt1
 	GuiControlGet, v_OutVarTemp2, ALib: Pos, % IdButt2
@@ -7025,7 +7210,7 @@ F_GuiAddLibrary()
 	
 	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
 	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
-	
+	Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	Gui, ALib: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7995,7 +8180,7 @@ F_CompileSubmenu()
 	}
 	if (!FileExist(A_AhkPath)) ;if AutoHotkey isn't installed
 	{
-		Menu, AppSubmenu,		Add,	% TransA["Compile"],						L_Compile
+		Menu, AppSubmenu,		Add,	% TransA["Compile"],						F_Compile
 		Menu, AppSubmenu, 		Disable,										% TransA["Compile"]
 	}
 }
@@ -12025,61 +12210,8 @@ else ;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakr
 	}
 }
 return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-ALibOK:
-Gui, ALib: Submit, NoHide
-if (v_NewLib == "")
-{
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Enter a name for the new library"]
-	return
-}
-v_NewLib .= ".csv"
-IfNotExist, % HADL . "\" . v_NewLib
-{
-	FileAppend,, % HADL . "\" . v_NewLib, UTF-8
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The library"] . A_Space . v_NewLib . A_Space . TransA["has been created."]
-	Gui, ALib: Destroy
-	
-	F_ValidateIniLibSections()
-	F_RefreshListOfLibraries()
-	F_RefreshListOfLibraryTips()
-	F_UpdateSelHotLibDDL()
-}
-else
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["A library with that name already exists!"]
-return
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
-ALibGuiEscape:
-ALibGuiClose:
-Gui, ALib: Destroy
-return
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-L_PublicLibraries:	
-Run, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings/Libraries
-return
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-HS3GuiClose:
-HS3GuiEscape:
-Gui,		HS3: Show, Hide
-ini_WhichGui := "HS3"
-return
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-HS4GuiClose:
-HS4GuiEscape:
-Gui,		HS4: Show, Hide
-ini_WhichGui := "HS4"
-return
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-MoveLibsGuiEscape:
-CancelMove:
-Gui, MoveLibs: Destroy
-return
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-VersionUpdateGuiEscape:
-VersionUpdateGuiClose:
-Gui, VersionUpdate: Hide
-return
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 TurnOff_OHE:
 ToolTip, ,, , 4
 return
@@ -12095,11 +12227,4 @@ Switch ini_TTCn
 	Case 2: Gui, TT_C2: Destroy
 	Case 3: Gui, TT_C3: Destroy
 }
-return
-
-L_OpenLibrariesFolderInExplorer:
-Run, explore %HADL%
-return
-
-L_Compile:
 return
