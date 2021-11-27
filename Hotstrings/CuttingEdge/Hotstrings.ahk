@@ -596,6 +596,8 @@ F_HMenuCli()
 	}
 	v_UndoHotstring := v_Temp1
 	ReplacementString := F_PrepareSend(v_Temp1, Ovar)
+	if (ini_MHMP = 4)
+		WinActivate, % "ahk_id" PreviousWindowID
 	F_ClipboardPaste(ReplacementString, Ovar)
 	Gui, HMenuCli: Destroy
 	f_HTriggered := true
@@ -2135,7 +2137,7 @@ F_EvTab3(OneTime*)
 			}
 			PreviousEvTab3 := EvTab3
 			
-			Case % TransA["Static triggerstring / hotstring menus"]:	;tu jestem
+			Case % TransA["Static triggerstring / hotstring menus"]:
 			if (EvSM_R1R2 != PreviousEvSM_R1R2)
 			{
 				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
@@ -5775,10 +5777,11 @@ F_GuiShowIntro()
 	GuiControlGet, v_OutVarTemp, Pos, % IdIntroOkButton
 	v_xNext := c_xmarg
 	v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
-	GuiControl, Move,			% IdIntroCheckbox, % "x" . v_xNext . "y" . v_yNext
+	GuiControl, Move,			% IdIntroCheckbox, % "x" . v_xNext . "y" . v_yNexto
 	
 	GuiControl,, % IdIntroCheckbox, % ini_ShowIntro	;load initial value
-	Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+	if (WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd))
+		Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	Gui, ShowIntro: Show, AutoSize Center
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11409,7 +11412,8 @@ F_HMenuAHK()
 	v_UndoHotstring := v_Temp1
 	ReplacementString := F_PrepareSend(v_Temp1, Ovar)
 	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
-	WinActivate, % "ahk_id" PreviousWindowID
+	if (ini_MHMP = 4)
+		WinActivate, % "ahk_id" PreviousWindowID
 	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
 	Gui, HMenuAHK: Destroy
 	f_HTriggered := true
@@ -11526,7 +11530,7 @@ F_HMenuStatic()
 ~Esc::	;tilde in order to run function TT_C4GuiEscape
 GuiControl,, % IdTT_C4_LB4, |
 Input ;This line blocks temporarily Input command in the main loop. 
-OutputDebug, % "v_Triggerstring:" . A_Tab . v_Triggerstring . A_Tab . "v_EndChar:" . A_Tab . v_EndChar
+;OutputDebug, % "v_Triggerstring:" . A_Tab . v_Triggerstring . A_Tab . "v_EndChar:" . A_Tab . v_EndChar
 if (v_Triggerstring != "")
 {
 	WinActivate, % "ahk_id" PreviousWindowID
