@@ -12,6 +12,7 @@
 *‖alpha/‖CL‖En‖α‖
 *‖approx/‖CL‖En‖≈‖
 *‖beta/‖CL‖En‖β‖
+*‖bullets/‖MSI‖En‖•¦»¦‣¦⦿¦⦾¦◘¦▪‖
 *?‖deg/‖CL‖En‖°‖
 *‖delta/‖CL‖En‖∆‖
 *‖diameter/‖SI‖En‖Ø‖U+00D8
@@ -39,6 +40,7 @@
 *‖pi/‖CL‖En‖π‖
 *‖plusminus‖CL‖En‖±‖
 *‖ppb/‖SI‖En‖{U+00BB}‖Power Point Bullet
+*‖recycling/‖MSI‖En‖♻¦♲¦♺‖{U+267B}|{U+2672}|{U+267A}
 *‖space/‖MSI‖En‖{U+2000}¦{U+2003}¦{U+2004}¦{U+2005}¦{U+2006}¦&nbsp;¦&emsp;‖useful in Mardown https://unicode-table.com/en/blocks/general-pu
 *‖stopc/‖CL‖En‖°‖
 *‖theta/‖CL‖En‖θ‖
