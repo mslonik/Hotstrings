@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.0"
+global AppVersion				:= "3.6.1"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -50,8 +50,7 @@ global 	HADL 				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libra
 ,		v_TypedTriggerstring 	:= ""		;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
 ,		v_UndoHotstring 		:= ""		;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
 
-;Flags to control application
-,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time
+,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time; f_ stands for "flag"
 ,		TT_C1_Hwnd 			:= 0, TT_C2_Hwnd := 0, TT_C3_Hwnd := 0, HMenuCliHwnd := 0, HMenuAHKHwnd	:= 0, HS3GuiHwnd := 0, HS4GuiHwnd := 0, TT_C4_Hwnd := 0, TDemoHwnd := 0, HDemoHwnd := 0 ;This is a trick to initialize global variables in order to not get warning (#Warn) message
 ,		HotstringDelay			:= 0
 ,		WhichMenu := "",	v_EndChar := "" ;initialization of this variable is important in case user would like to hit "Esc" and GUI TT_C4 exists.
@@ -5741,6 +5740,7 @@ F_DownloadPublicLibraries()
 	local	ToBeFiltered := "",	Result := "",	ToBeDownloaded := [], DownloadedFile := "", whr := ""
 			,URLconst 	:= "https://gitHub.com/mslonik/Hotstrings/blob/master/Hotstrings/Libraries/", temp := ""
 			,URLraw 		:= "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Libraries/"
+			,ExistingLibraries := "", NewLibraries := "", part := 0
 	
 	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 	whr.Open("GET", URLconst, true)
@@ -5755,31 +5755,39 @@ F_DownloadPublicLibraries()
 			ToBeDownloaded.Push(SubStr(Result, 4))
 		}
 	
+	Gui, DLG: New, +HwndDLGHwnd +OwnDialogs,	% A_ScriptName	;DLG: Download Libraries Gui
+	Gui, DLG: Add, Text,, % TransA["Downloading public library files" . "(0 ÷ 100%):"]
+	Gui, DLG: Add, Progress, w200 h20 HwndLibProgress, cBlue, 0
+	Gui, DLG: Show, AutoSize
+	part := (1 / ToBeDownloaded.Count()) * 100
 	for key, value in ToBeDownloaded
 	{
 		temp := URLraw . value
+		GuiControl,, % LibProgress, % "+" . part
 		if (FileExist(HADL . "\" . value))
-		{
-			MsgBox, 51, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % value . "`n`n" . TransA["The file which you want to download from Internet, already exists on your local harddisk. Are you sure you want to download it?"]
-			IfMsgBox, Cancel
-				return
-			IfMsgBox, No
-				Continue
-			URLDownloadToFile, % temp, % HADL . "\" . value
-		}
+			ExistingLibraries .= value . "`n"
 		else
 		{
+			NewLibraries  .= value . "`n"
 			URLDownloadToFile, % temp, % HADL . "\" . value
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Public library:"] . A_Tab . value . "`n`n" . TransA["has been downloaded to the location"] 
-			. "`n`n" . HADL
 		}
 	}
-	MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder? into memory?"]
-	IfMsgBox, Yes
+	Gui, DLG: Destroy
+	if (ExistingLibraries)
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The following file(s) haven't been downloaded as they are already present in the location"] . ":" 
+			. "`n" . HADL
+			. "`n`n" . ExistingLibraries
+	
+	if (NewLibraries)
+		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Public library:"] . "`n`n" . NewLibraries . "`n" . TransA["has been downloaded to the location"] 
+			. "`n" . HADL
+			. "`n`n" . TransA["After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder into memory?"]
+	
+	IfMsgBox, Yes	;tu jestem
 	{
+		F_ValidateIniLibSections()
 		F_LoadHotstringsFromLibraries()
 		F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)
-		F_ValidateIniLibSections()
 		F_RefreshListOfLibraries()
 		F_RefreshListOfLibraryTips()
 		F_UpdateSelHotLibDDL()
@@ -8880,7 +8888,7 @@ Add comment (optional) 									= Add comment (optional)
 Add / Edit hotstring (F9) 								= Add / Edit hotstring (F9)
 Add library 											= Add library
 Add to Autostart										= Add to Autostart
-After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder? into memory? = After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder? into memory?
+After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder into memory? = After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder into memory?
 A library with that name already exists! 					= A library with that name already exists!
 Alphabetically 										= Alphabetically
 already exists in another library							= already exists in another library
@@ -8961,6 +8969,7 @@ Dot . 												= Dot .
 Do you want to reload application now?						= Do you want to reload application now?
 doesn't exist in application folder						= doesn't exist in application folder
 Download repository version								= Download repository version
+Downloading public library files							= Downloading public library files
 Dynamic hotstrings 										= &Dynamic hotstrings
 Edit Hotstrings 										= Edit Hotstrings
 Enable												= Enable
@@ -9187,6 +9196,7 @@ The hostring 											= The hostring
 The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes. = The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes.
 The library  											= The library 
 The file path is: 										= The file path is:
+The following file(s) haven't been downloaded as they are already present in the location = The following file(s) haven't been downloaded as they are already present in the location
 the following line is found:								= the following line is found:
 There is no Libraries subfolder and no lbrary (*.csv) file exists! = There is no Libraries subfolder and no lbrary (*.csv) file exists!
 The parameter Language in section [GraphicalUserInterface] of Config.ini is missing. = The parameter Language in section [GraphicalUserInterface] of Config.ini is missing.
@@ -10612,15 +10622,14 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	IniRead, TempLoadLib,	% HADConfig, LoadLibraries
 	
 ;Check if Libraries subfolder exists. If not, create it and display warning.
-	v_IsLibraryEmpty := true
+	;v_IsLibraryEmpty := true
 	if (!Instr(FileExist(HADL), "D"))				; if  there is no "Libraries" subfolder 
 	{
 		FileCreateDir, % HADL							; Future: check against errors
 		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exists!"] . "`n`n" . HADL . "`n`n" . TransA["folder is now created"] . "."
 	}
-	else
+	else 	;Check if Libraries subfolder is empty. If it does, display warning.
 	{
-	;Check if Libraries subfolder is empty. If it does, display warning.
 		Loop, Files, % HADL . "\*.csv"
 		{
 			v_IsLibraryEmpty := false
@@ -10637,9 +10646,8 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 			F_ValidateIniLibSections()
 		}
 	}
-	
-;Read names library files (*.csv) from Library subfolder into object.
-	if !(v_IsLibraryEmpty)
+	;if !(v_IsLibraryEmpty)
+	else	;Read names library files (*.csv) from Library subfolder into object o_Libraries
 		Loop, Files, % HADL . "\*.csv"
 			o_Libraries.Push(A_LoopFileName)
 	
