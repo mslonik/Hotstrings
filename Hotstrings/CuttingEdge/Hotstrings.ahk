@@ -6395,7 +6395,7 @@ F_AddHotstring()
 	local 	TextInsert := "", Options := "", ModifiedFlag := false
 			,OnOff := "", EnDis := ""
 			,SendFunHotstringCreate := "", SendFunFileFormat := ""
-			,OldOptions := "", TurnOffOldOptions := ""
+			,OldOptions := "", OldEnDis := "", TurnOffOldOptions := ""
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
 			,v_TheWholeFile := "", v_TotalLines := 0
 			,ExternalIndex := 0
@@ -6510,7 +6510,8 @@ F_AddHotstring()
 				f_CaseMatch := true
 			if (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))
 			{
-				OldOptions := a_TriggerOptions[key]
+				OldOptions 	:= a_TriggerOptions[key]
+				OldEnDis	:= a_EnableDisable[key]
 				if (f_CaseMatch and !InStr(OldOptions, "C1") and InStr(OldOptions, "C") and !InStr(Options, "C1") and InStr(Options, "C"))
 				{
 					ModifiedFlag 			:= false
@@ -6533,12 +6534,15 @@ F_AddHotstring()
 							OldOptions := StrReplace(OldOptions, "O", "O0")
 						if (InStr(OldOptions, "Z") and !InStr(Options, "Z"))
 							OldOptions := StrReplace(OldOptions, "Z", "Z0")
-						Try
-							Hotstring(":" . OldOptions . ":" . v_TriggerString, , "Off") ;Disables existing hotstring
-						Catch
-							MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
-								. "v_TriggerString:" . A_Tab . v_TriggerString . "`n"
-								. "OldOptions:" . A_Tab . OldOptions . "`n`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary
+						if (OldEnDis = "En")
+						{
+							Try
+								Hotstring(":" . OldOptions . ":" . v_TriggerString, , "Off") ;Disables existing hotstring
+							Catch
+								MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
+									. "v_TriggerString:" . A_Tab . v_TriggerString . "`n"
+									. "OldOptions:" . A_Tab . OldOptions . "`n`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary
+						}
 						if (InStr(Options, "O"))	;Add new hotstring which replaces the old one
 						{
 							Try
