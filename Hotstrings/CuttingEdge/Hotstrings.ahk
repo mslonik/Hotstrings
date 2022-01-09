@@ -155,7 +155,7 @@ F_GuiSearch_CreateObject()	;When all tables are full, initialize GuiSearch
 ;F_GuiSearch_DetermineConstraints()
 F_Searching("Reload")			;prepare content of Search tables
 TrayTip, % A_ScriptName, % TransA["Hotstrings have been loaded"], , 1 ;1 = Info icon
-SetTimer, HideTrayTip, -5000
+SetTimer, HideTrayTip, -5000											;more general approach; for details see https://www.autohotkey.com/docs/commands/TrayTip.htm#Remarks										;more universal approach. For details see https://www.autohotkey.com/docs/commands/TrayTip.htm#Remarks
 Critical, Off
 
 Loop, Files, %A_ScriptDir%\Languages\*.txt
@@ -1634,7 +1634,7 @@ F_GuiEvents(OneTime*)
 {
 	global ;assume-global mode
 	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0, Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0, NewWinPosX := 0, NewWinPosY := 0
-	if (OneTime[3])
+	if (OneTime[3])	;this is a trick: if F_GuiEvents is called from menu, its parameter is Array of 3 elements.
 		Gui, % A_Gui . ": +Disabled"	;in order to block user interaction with background window
 	F_GuiEvents_CreateObjects()
 	F_GuiEvents_DetermineConstraints()
@@ -1705,7 +1705,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R1 vEvBH_R1R2 gF_EvBH_R1R2,	% TransA["yes"]
 	Gui, GuiEvents: Add,	Radio, 	HwndIdEvBH_R2 gF_EvBH_R1R2,			% TransA["no"]
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvBH_T15 0x7					; horizontal line → black
-	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T3,						% TransA["Tooltip timeout"] . ":"
 	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T4,						ⓘ
@@ -1952,7 +1952,12 @@ F_EvTab3(OneTime*)
 	static PreviousEvTab3 := ""
 			, PreviousEvBH_R1R2 := "", PreviousEvBH_R3R4 := "", PreviousEvBH_R5R6 := "", PreviousEvBH_R7R8 := "", PreviousEvBH_S1 := "", PreviousEvBH_S2 := "", PreviousEvBH_S3 := ""
 			, PreviousEvMH_R1R2 := "", PreviousEvMH_R3R4 := "", PreviousEvMH_S1 := "", PreviousEvMH_S2 := ""
+			, PreviousEvUH_R1R2 := "", PreviousEvUH_R3R4 := "", PreviousEvUH_R5R6 := "", PreviousEvUH_R7R8 := "", PreviousEvUH_S1 := "", PreviousEvUH_S2 := "", PreviousEvUH_S3 := ""
+			, PreviousEvTt_R1R2 := "", PreviousEvTt_R3R4 := "", PreviousEvTt_R5R6 := "", PreviousEvTt_C1 := "", PreviousEvTt_C2 := "", PreviousEvTt_S1 := "", PreviousEvTt_S2 := "", PreviousEvTt_DDL1 := "", PreviousEvTt_DDL2 := ""
+			, PreviousEvAT_R1R2 := ""
+			, PreviousEvSM_R1R2 := ""
 	;OutputDebug, % "OneTime[1]:" . A_Tab . OneTime[1]
+	Gui, GuiEvents: Submit, NoHide	;Loads EvTab3 with current value 
 	if (OneTime[1] = true)
 	{
 		PreviousEvTab3 := EvTab3
@@ -1965,7 +1970,6 @@ F_EvTab3(OneTime*)
 		return
 	}
 	
-	Gui, GuiEvents: Submit, NoHide	;Loads EvTab3 with current value 
 	;OutputDebug, % "EvTab3:" . A_Tab . EvTab3 . A_Tab . "PreviousEvTab3" . A_Tab . PreviousEvTab3
 	F_EvUpdateTab()
 	if (EvTab3 != PreviousEvTab3)
@@ -1976,7 +1980,7 @@ F_EvTab3(OneTime*)
 			if (EvBH_R1R2 != PreviousEvBH_R1R2) or (EvBH_R3R4 != PreviousEvBH_R3R4) or (EvBH_R5R6 != PreviousEvBH_R5R6) or (EvBH_R7R8 != PreviousEvBH_R7R8) or (EvBH_S1 != PreviousEvBH_S1) or (EvBH_S2 != PreviousEvBH_S2) or (EvBH_S3 != PreviousEvBH_S3)
 			{
 				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
-					. TransA["If you don't apply it, previous changes will be lost."]
+					. A_Space . TransA["If you don't apply it, previous changes will be lost."]
 					. "`n`n" . TransA["Do you wish to apply your changes?"]
 				IfMsgBox, Yes
 				{
@@ -2408,6 +2412,7 @@ F_EvSM_B3()	;static menus, button Close
 	}
 	IniWrite, % ini_TTCn,	% HADConfig, Event_TriggerstringTips,	TTCn
 	Tooltip,,,, 4
+	F_EvTab3(true)	;to memory that something was applied
 	if (WinExist("ahk_id" HS3GuiHwnd))
 		Gui, HS3: -Disabled	
 	if (WinExist("ahk_id" HS4GuiHwnd))
@@ -2494,6 +2499,7 @@ F_EvAT_B3()	;Event Active Triggerstring Tips Button Close
 	}
 	IniWrite, % ini_ATEn, 	% HADConfig, Event_ActiveTriggerstringTips, 	ATEn
 	Tooltip,,,, 4
+	F_EvTab3(true)	;to memory that something was applied
 	if (WinExist("ahk_id" HS3GuiHwnd))
 		Gui, HS3: -Disabled	
 	if (WinExist("ahk_id" HS4GuiHwnd))
@@ -2630,6 +2636,7 @@ F_EvTt_B3()	;Event Tooltip (is triggered) Button Close
 	IniWrite, % ini_TASAC,	% HADConfig, Event_TriggerstringTips,	TipsAreShownAfterNoOfCharacters
 	IniWrite, % ini_TTCn,	% HADConfig, Event_TriggerstringTips,	TTCn
 	Tooltip,,,, 4
+	F_EvTab3(true)	;to memory that something was applied
 	if (WinExist("ahk_id" HS3GuiHwnd))
 		Gui, HS3: -Disabled	
 	if (WinExist("ahk_id" HS4GuiHwnd))
@@ -2712,6 +2719,9 @@ F_EvTt_R1R2()
 		GuiControl, Enable, 	% IdEvTt_T20
 		GuiControl, Enable, 	% IdEvTt_T21
 		GuiControl, Enable, 	% IdEvTt_DDL1
+		GuiControl, Enable,		% IdEvTt_T23
+		GuiControl, Enable,		% IdEvTt_T24
+		GuiControl, Enable, 	% IdEvTt_DDL2
 		Switch EvTt_R3R4
 		{
 			Case 1:
@@ -2749,6 +2759,9 @@ F_EvTt_R1R2()
 		GuiControl, Disable, 	% IdEvTt_T20
 		GuiControl, Disable, 	% IdEvTt_T21
 		GuiControl, Disable, 	% IdEvTt_DDL1
+		GuiControl, Disable,	% IdEvTt_T23
+		GuiControl, Disable,	% IdEvTt_T24
+		GuiControl, Disable, 	% IdEvTt_DDL2
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2858,6 +2871,7 @@ F_EvUH_B4()	;Event Undo Hotstring (is triggered) Button Close
 	IniWrite, % ini_UHSF,	% HADConfig, Event_UndoHotstring,	UHSF
 	IniWrite, % ini_UHSD,	% HADConfig, Event_UndoHotstring,	UHSD
 	Tooltip,,,, 4
+	F_EvTab3(true)	;to memory that something was applied
 	if (WinExist("ahk_id" HS3GuiHwnd))
 		Gui, HS3: -Disabled	
 	if (WinExist("ahk_id" HS4GuiHwnd))
@@ -3037,6 +3051,7 @@ F_EvMH_B3()	;Button Close
 	IniWrite, % ini_MHSF,	% HADConfig, Event_MenuHotstring,		MHSF
 	IniWrite, % ini_MHSD,	% HADConfig, Event_MenuHotstring,		MHSD
 	Tooltip,,,, 4
+	F_EvTab3(true)	;to memory that something was applied
 	if (WinExist("ahk_id" HS3GuiHwnd))
 		Gui, HS3: -Disabled	
 	if (WinExist("ahk_id" HS4GuiHwnd))
@@ -3740,6 +3755,7 @@ F_EvBH_B4(CloseGuiEvents)	;Events Basic Hotstring (is triggered) Button Close
 	IniWrite, % ini_OHSF,	% HADConfig, Event_BasicHotstring,		OHSF
 	IniWrite, % ini_OHSD,	% HADConfig, Event_BasicHotstring,		OHSD
 	Tooltip,,,, 4
+	F_EvTab3(true)	;to memory that something was applied
 	if (WinExist("ahk_id" HS3GuiHwnd))
 		Gui, HS3: -Disabled
 	if (WinExist("ahk_id" HS4GuiHwnd))
@@ -3851,8 +3867,8 @@ F_GuiEvents_LoadValues()
 	GuiControl,, % IdEvTt_T8, 	% TransA["Timeout value [ms]"] . ":" . A_Space . ini_TTTD
 	Switch ini_TTTP
 	{
-		Case 1: 		GuiControl,, % IdEvTt_R6, 1
-		Case 2: 		GuiControl,, % IdEvTt_R5, 1
+		Case 1: 		GuiControl,, % IdEvTt_R5, 1
+		Case 2: 		GuiControl,, % IdEvTt_R6, 1
 	}
 	GuiControl,, % IdEvTt_C1,	% ini_TipsSortAlphabetically
 	GuiControl,, % IdEvTt_C2,	% ini_TipsSortByLength
