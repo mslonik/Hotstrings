@@ -154,7 +154,8 @@ if (ini_TTTtEn)	;Triggerstring Tips Column Trigger
 F_GuiSearch_CreateObject()	;When all tables are full, initialize GuiSearch
 ;F_GuiSearch_DetermineConstraints()
 F_Searching("Reload")			;prepare content of Search tables
-TrayTip, %A_ScriptName%, % TransA["Hotstrings have been loaded"], 1
+TrayTip, % A_ScriptName, % TransA["Hotstrings have been loaded"], , 1 ;1 = Info icon
+SetTimer, HideTrayTip, -5000
 Critical, Off
 
 Loop, Files, %A_ScriptDir%\Languages\*.txt
@@ -12240,6 +12241,18 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	Gui, Export: Destroy
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been exported"] . ":" . "`n`n" . v_OutputFile
 }
+
+HideTrayTip() 
+{
+    TrayTip  ; Attempt to hide it the normal way.
+    if SubStr(A_OSVersion,1,3) = "10." 
+	{
+        Menu Tray, NoIcon
+        Sleep 200  ; It may be necessary to adjust this sleep.
+        Menu Tray, Icon
+    }
+}
+
 
 ; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
 TurnOff_OHE:
