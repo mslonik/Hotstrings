@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -5755,9 +5755,11 @@ F_DownloadPublicLibraries()
 {
 	global	;assume-global mode
 	local	ToBeFiltered := "",	Result := "",	ToBeDownloaded := [], DownloadedFile := "", whr := ""
-			,URLconst 	:= "https://gitHub.com/mslonik/Hotstrings/blob/master/Hotstrings/Libraries/", temp := ""
-			,URLraw 		:= "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Libraries/"
-			,ExistingLibraries := "", NewLibraries := "", part := 0
+;			,URLconst 	:= "https://gitHub.com/mslonik/Hotstrings/blob/master/Hotstrings/Libraries/", temp := ""	;https://github.com/mslonik/Hotstrings/tree/master/Hotstrings/Libraries
+			,URLconst 	:= "https://github.com/mslonik/Hotstrings-Libraries/", temp := ""	
+;			,URLraw 		:= "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Libraries/"
+			,URLraw 		:= "https://raw.githubusercontent.com/mslonik/Hotstrings-Libraries/main/"
+			,ExistingLibraries := "", NewLibraries := "", part := 0, key := "", value := ""
 	
 	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 	whr.Open("GET", URLconst, true)
@@ -5779,14 +5781,17 @@ F_DownloadPublicLibraries()
 	part := (1 / ToBeDownloaded.Count()) * 100
 	for key, value in ToBeDownloaded
 	{
-		temp := URLraw . value
-		GuiControl,, % LibProgress, % "+" . part
-		if (FileExist(HADL . "\" . value))
-			ExistingLibraries .= value . "`n"
-		else
+		if (value)
 		{
-			NewLibraries  .= value . "`n"
-			URLDownloadToFile, % temp, % HADL . "\" . value
+			temp := URLraw . value
+			GuiControl,, % LibProgress, % "+" . part
+			if (FileExist(HADL . "\" . value))
+				ExistingLibraries .= value . "`n"
+			else
+			{
+				NewLibraries  .= value . "`n"
+				URLDownloadToFile, % temp, % HADL . "\" . value
+			}
 		}
 	}
 	Gui, DLG: Destroy
