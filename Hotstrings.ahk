@@ -1,4 +1,4 @@
-/* 
+﻿/* 
 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -309,10 +309,16 @@ if (ini_TTCn = 4)	;static triggerstring / hotstring GUI
 	F_GuiTrigTipsMenuDefC4()
 if (ini_GuiReload) and (v_Param != "l")
 	F_GUIinit()
+
+ih := InputHook("L0 V")
+ih.OnChar 	:= Func("OneCharPressed")
+; ih.OnEnd		:= Func("EndCharPressed")
+ih.Start()
+
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; The main application loop beginning.
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-Loop,
+/* Loop,
 {
 	if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn)) or (WinActive("ahk_id" TT_C4_Hwnd) and (ini_MHSEn))
 	{
@@ -372,9 +378,64 @@ Loop,
 	}		  
 	;OutputDebug, % "End of main loop." . A_Tab . A_Index
 }
-;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ */
+ ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; The end of the main loop of application.
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+OneCharPressed(InputHook, Char)
+{
+	global	;assume-global mode of operation
+	if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn)) or (WinActive("ahk_id" TT_C4_Hwnd) and (ini_MHSEn))
+	{
+		ih.VisibleText := false
+		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
+	}
+
+	if (f_HTriggered)	;f_HTriggered = 1, triggerstring was fired = hotstring was shown
+	{
+		InputHook.VisibleText := true
+		v_InputString := ""
+		; out := ""
+		F_DestroyTriggerstringTips(ini_TTCn)
+		f_HTriggered := false
+	}
+	else
+	{
+		v_InputString .= Char
+		ToolTip, ,, , 4	;Basic triggerstring was triggered
+		ToolTip, ,, , 6	;Undid the last hotstring
+		if (ini_TTTtEn)
+		{
+			F_PrepareTriggerstringTipsTables2()	;old version: F_PrepareTriggerstringTipsTables()
+			if (a_Tips.Count())	;if tips are available display them
+			{
+				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
+				F_TMenuAHK_Hotkeys(ini_ATEn)	;this function must be called when TMenuAHK_C1_Hwnd variable is available and initialized
+				if (ini_TTTD > 0)
+					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
+			}
+			else	;or destroy previously visible tips
+				F_DestroyTriggerstringTips(ini_TTCn)
+		}
+	}
+	if (Char and InStr(HotstringEndChars, Char))	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. If "out" is empty, InStr returns true.
+	{
+		v_TipsFlag := false
+		Loop, % a_Triggers.MaxIndex()
+		{
+			if (InStr(a_Triggers[A_Index], v_InputString) = 1) ;if in string a_Triggers is found v_InputString from the first position 
+			{
+				v_TipsFlag := true
+				Break
+			}
+		}
+		if !(v_TipsFlag)
+			v_InputString := ""
+	}		  
+}
+
+
+
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
 #InputLevel 2	;Thanks to this line triggerstring tips will have lower priority; backspacing done in function F_TMenu() will not affect this label.
@@ -5098,12 +5159,12 @@ TT_C4GuiEscape()
 F_CheckScriptEncoding()
 {	;https://www.autohotkey.com/boards/viewtopic.php?t=65049
 	local file := "", RetrievedEncoding := "", FilePos := 0
-	
+
 	if (!A_IsCompiled)
 	{
 		file := FileOpen(A_ScriptFullPath, "r")
 		RetrievedEncoding := file.Encoding
-		FilePos := File.Pos
+		FilePos := file.Pos
 		if !(((RetrievedEncoding = "UTF-8") and (FilePos = 3)) or ((RetrievedEncoding = "UTF-16") and (FilePos = 2)))
 		{
 			MsgBox, 16, % A_ScriptName . ":" . A_Space . TransA["Error"], % TransA["Recognized encoding of the script file:"] 
@@ -10902,7 +10963,8 @@ F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t
 			For i, dim in (a := StrSplit(RegExReplace(DimSize, "i)[^xywh]")))
 				If !RegExMatch(DimSize, "i)" dim "\s*\K[\d.-]+", f%dim%)
 					f%dim% := 1
-			cInfo[ctrlID]     := { x:ix, fx:fx, y:iy, fy:fy, w:iw, fw:fw, h:ih, fh:fh, gw:A_GuiWidth, gh:A_GuiHeight, a:a , m:MMD}
+			cInfo[ctrlID]     := { x:ix, fx:fx, y:iy, fy:fy, w:iw, fw:fw, h:vh, fh:fh, gw:A_GuiWidth, gh:A_GuiHeight, a:a , m:MMD}
+			; cInfo[ctrlID]     := { x:ix, fx:fx, y:iy, fy:fy, w:iw, fw:fw, h:ih, fh:fh, gw:A_GuiWidth, gh:A_GuiHeight, a:a , m:MMD}
 		}
 		Else If ( cInfo[ctrlID].a.1) 
 		{
