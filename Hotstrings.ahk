@@ -311,6 +311,7 @@ if (ini_GuiReload) and (v_Param != "l")
 	F_GUIinit()
 
 ih := InputHook("L0 V")
+; ih := InputHook("L0 V", "{Space}")
 ih.OnChar 	:= Func("OneCharPressed")
 ; ih.OnEnd		:= Func("EndCharPressed")
 ih.Start()
@@ -383,40 +384,30 @@ ih.Start()
 ; The end of the main loop of application.
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 OneCharPressed(InputHook, Char)
-{
+{	;pomysł jest taki: kończyć na zwykły znak EndChar ALE wywoływać funkcję OnEnd i kontynuować zapis do v_InputString skoro nie została wywołana żadna z funkcji Hotstring.
 	global	;assume-global mode of operation
 	if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn)) or (WinActive("ahk_id" TT_C4_Hwnd) and (ini_MHSEn))
 	{
 		ih.VisibleText := false
 		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
+		return
 	}
 
-	if (f_HTriggered)	;f_HTriggered = 1, triggerstring was fired = hotstring was shown
+	v_InputString .= Char
+	ToolTip, ,, , 4	;Basic triggerstring was triggered
+	ToolTip, ,, , 6	;Undid the last hotstring
+	if (ini_TTTtEn)
 	{
-		InputHook.VisibleText := true
-		v_InputString := ""
-		; out := ""
-		F_DestroyTriggerstringTips(ini_TTCn)
-		f_HTriggered := false
-	}
-	else
-	{
-		v_InputString .= Char
-		ToolTip, ,, , 4	;Basic triggerstring was triggered
-		ToolTip, ,, , 6	;Undid the last hotstring
-		if (ini_TTTtEn)
+		F_PrepareTriggerstringTipsTables2()	;old version: F_PrepareTriggerstringTipsTables()
+		if (a_Tips.Count())	;if tips are available display them
 		{
-			F_PrepareTriggerstringTipsTables2()	;old version: F_PrepareTriggerstringTipsTables()
-			if (a_Tips.Count())	;if tips are available display them
-			{
-				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
-				F_TMenuAHK_Hotkeys(ini_ATEn)	;this function must be called when TMenuAHK_C1_Hwnd variable is available and initialized
-				if (ini_TTTD > 0)
-					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
-			}
-			else	;or destroy previously visible tips
-				F_DestroyTriggerstringTips(ini_TTCn)
+			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
+			F_TMenuAHK_Hotkeys(ini_ATEn)	;this function must be called when TMenuAHK_C1_Hwnd variable is available and initialized
+			if (ini_TTTD > 0)
+				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
 		}
+		else	;or destroy previously visible tips
+			F_DestroyTriggerstringTips(ini_TTCn)
 	}
 	if (Char and InStr(HotstringEndChars, Char))	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. If "out" is empty, InStr returns true.
 	{
@@ -549,7 +540,7 @@ return
 #if
 
 ;The following lines are hotkeys to handle all combinations which are not covered by the main function loop.
-~Alt::
+; ~Alt::	;if commented out, only for debugging reasons
 ;Comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
 ~MButton::
 ~RButton::
@@ -5039,7 +5030,7 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		
 	}
 	
-	if (ini_MHMP = 1)
+	if (ini_TTTP = 1)	;Menu Hotstring Menu Position = 1 (caret)
 	{
 		if (A_CaretX and A_CaretY)
 		{
@@ -5053,7 +5044,7 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			MenuY := MouseY + 20
 		}
 	}
-	if (ini_MHMP = 2) 
+	if (ini_TTTP = 2)	;Menu Hotstring Menu Position = 2 (mouse coursor)
 	{
 		MouseGetPos, MouseX, MouseY
 		MenuX := MouseX + 20
@@ -5064,50 +5055,10 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 	Switch ini_TTCn
 	{
 		Case 1:
-		Gui, TT_C1: Show, x%MenuX% y%MenuY% NoActivate Hide
-		DetectHiddenWindows, On
-		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C1_Hwnd
-		DetectHiddenWindows, Off
-		
-		Loop % MonitorCoordinates.Count()
-			if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
-			{
-				Window1X := MonitorCoordinates[A_Index].Left
-				Window1H := MonitorCoordinates[A_Index].Height
-				Window1Y := MonitorCoordinates[A_Index].Top 
-				Window1W := MonitorCoordinates[A_Index].Width
-				Break
-			}
-		if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
-			MenuY -= Window2H
-		if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
-			MenuX -= Window2W
-		
 		GuiControl, Choose, % IdTT_C1_LB1, 1
 		Gui, TT_C1: Show, x%MenuX% y%MenuY% NoActivate	
 		
 		Case 2:
-		Gui, TT_C2: Show, x%MenuX% y%MenuY% NoActivate Hide
-		DetectHiddenWindows, On
-		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C2_Hwnd
-		DetectHiddenWindows, Off
-		;OutputDebug, % "Window2X" . A_Tab . Window2X . A_Tab . "Window2Y" . A_Tab . Window2Y . A_Tab . "Window2W" . A_Tab . Window2W . A_Tab . "Window2H" . A_Tab . Window2H
-		Loop, % MonitorCoordinates.Count()
-			if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
-			{
-				Window1X := MonitorCoordinates[A_Index].Left
-				Window1H := MonitorCoordinates[A_Index].Height
-				Window1Y := MonitorCoordinates[A_Index].Top 
-				Window1W := MonitorCoordinates[A_Index].Width
-				Break
-			}
-		;OutputDebug, % "Window1X" . A_Tab . Window1X . A_Tab . "Window1Y" . A_Tab . Window1Y . A_Tab . "Window1W" . A_Tab . Window1W . A_Tab . "Window1H" . A_Tab . Window1H
-		if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
-			MenuY -= Window2H
-		if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
-			MenuX -= Window2W
-		
-		;OutputDebug, % "MenuX:" . A_Tab . MenuX . A_Tab . "MenuY" . A_Tab . MenuY
 		GuiControl, Choose, % IdTT_C2_LB1, 1
 		GuiControlGet, PosOutputVar, Pos, % IdTT_C2_LB1
 		GuiControl, Move, % IdTT_C2_LB2, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
@@ -5115,24 +5066,6 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		Gui, TT_C2: Show, x%MenuX% y%MenuY% NoActivate AutoSize
 		
 		Case 3:	
-		Gui, TT_C3: Show, x%MenuX% y%MenuY% NoActivate Hide
-		DetectHiddenWindows, On
-		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C3_Hwnd
-		DetectHiddenWindows, Off
-		Loop, % MonitorCoordinates.Count()
-			if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
-			{
-				Window1X := MonitorCoordinates[A_Index].Left
-				Window1H := MonitorCoordinates[A_Index].Height
-				Window1Y := MonitorCoordinates[A_Index].Top 
-				Window1W := MonitorCoordinates[A_Index].Width
-				Break
-			}
-		if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
-			MenuY -= Window2H
-		if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
-			MenuX -= Window2W
-		
 		GuiControl, Choose, % IdTT_C3_LB1, 1
 		GuiControlGet, PosOutputVar, Pos, % IdTT_C3_LB1
 		GuiControl, Move, % IdTT_C3_LB2, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
@@ -11110,13 +11043,18 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 	;v_Options 			→ triggerstring options
 	;v_Triggerstring		→ stored v_InputString
 	;v_EndChar			→ stored value of A_EndChar
+	ih.Stop()
+	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
-	f_HTriggered := true
+	; f_HTriggered := true
 	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
 	F_SendIsOflag(ReplacementString, Oflag, "SendInput")
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	v_InputString := ""	
+	ih.VisibleText := true
+	ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeterminePartStrings(ReplacementString)
