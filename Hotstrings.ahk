@@ -43,7 +43,7 @@ global 	HADL 				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libra
 ,		v_InputString 			:= ""		;Main loop of application; this variable stores information about keys pressed by user which can differ in size from actual hotstring definition.
 ,		v_MouseX 				:= 0			;Main loop of application
 ,		v_MouseY 				:= 0			;Main loop of application
-,		v_TipsFlag 			:= false		;Main loop of application
+; ,		v_TipsFlag 			:= false		;Main loop of application
 
 ,		v_IndexLog 			:= 1			;for logging, if Hotstrings application is run with d parameter.
 
@@ -310,10 +310,10 @@ if (ini_TTCn = 4)	;static triggerstring / hotstring GUI
 if (ini_GuiReload) and (v_Param != "l")
 	F_GUIinit()
 
-ih := InputHook("L0 V")
-; ih := InputHook("L0 V", "{Space}")
+; ih := InputHook("L0 V")
+ih 			:= InputHook("L0 V I1", "{Space}")	;I1 is necessary to block SendInput commands output
 ih.OnChar 	:= Func("OneCharPressed")
-; ih.OnEnd		:= Func("EndCharPressed")
+ih.OnEnd		:= Func("EndCharPressed")
 ih.Start()
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -386,6 +386,7 @@ ih.Start()
 OneCharPressed(InputHook, Char)
 {	;pomysł jest taki: kończyć na zwykły znak EndChar ALE wywoływać funkcję OnEnd i kontynuować zapis do v_InputString skoro nie została wywołana żadna z funkcji Hotstring.
 	global	;assume-global mode of operation
+	OutputDebug, % A_ThisFunc . "`n"
 	if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn)) or (WinActive("ahk_id" TT_C4_Hwnd) and (ini_MHSEn))
 	{
 		ih.VisibleText := false
@@ -394,6 +395,7 @@ OneCharPressed(InputHook, Char)
 	}
 
 	v_InputString .= Char
+	OutputDebug, % "v_InputString:" . A_Space . v_InputString . "`n"
 	ToolTip, ,, , 4	;Basic triggerstring was triggered
 	ToolTip, ,, , 6	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -409,22 +411,44 @@ OneCharPressed(InputHook, Char)
 		else	;or destroy previously visible tips
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
-	if (Char and InStr(HotstringEndChars, Char))	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. If "out" is empty, InStr returns true.
-	{
-		v_TipsFlag := false
-		Loop, % a_Triggers.MaxIndex()
-		{
-			if (InStr(a_Triggers[A_Index], v_InputString) = 1) ;if in string a_Triggers is found v_InputString from the first position 
-			{
-				v_TipsFlag := true
-				Break
-			}
-		}
-		if !(v_TipsFlag)
-			v_InputString := ""
-	}		  
 }
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+EndCharPressed(InputHook)
+{	;The function is called as a new thread.
+	global	;assume-global mod	local	EndChar := "", v_TipsFlag := false
+	OutputDebug, % A_ThisFunc . "`n"
+	if (f_HTriggered) and (v_InputString = "")
+	{
+		f_HTriggered := false
+		OutputDebug, % "f_HTriggered:" . A_Space . f_HTriggered . "`n"
+		return 
+	}
+	else
+	{	
+		Switch InputHook.EndKey
+		{
+			Case "Space": EndChar := " "
+		}
+		InputHook.VisibleText := true
+		InputHook.Start()
+		if (EndChar and InStr(HotstringEndChars, EndChar))	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. If "out" is empty, InStr returns true.
+		{
+			v_TipsFlag := false
+			Loop, % a_Triggers.MaxIndex()
+			{
+				if (InStr(a_Triggers[A_Index], v_InputString) = 1) ;if in string a_Triggers is found v_InputString from the first position 
+				{
+					v_TipsFlag := true
+					Break
+				}
+			}
+			if !(v_TipsFlag)
+				v_InputString := ""
+		}		  
+		OutputDebug, % "tu jestem`n"
+		OneCharPressed(InputHook, EndChar)
+	}
+}
 
 
 
@@ -10992,12 +11016,12 @@ F_SendIsOflag(OtputString, Oflag, SendFunctionName)
 		Case "SendInput":
 		if (Oflag = false)
 		{
-			Input ;This line blocks temporarily Input command in the main loop. 
+			; Input ;This line blocks temporarily Input command in the main loop. 
 			SendInput, % OtputString . A_EndChar
 		}
 		else
 		{
-			Input ;This line blocks temporarily Input command in the main loop. 
+			; Input ;This line blocks temporarily Input command in the main loop. 
 			SendInput, % OtputString
 		}
 		Case "SendEvent":
@@ -11039,17 +11063,17 @@ F_SendIsOflag(OtputString, Oflag, SendFunctionName)
 F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 {
 	global	;assume-global mode
+	OutputDebug, % A_ThisFunc . "`n"
+	f_HTriggered := true
 	;v_TypedTriggerstring 	→ hotstring
 	;v_Options 			→ triggerstring options
 	;v_Triggerstring		→ stored v_InputString
 	;v_EndChar			→ stored value of A_EndChar
-	ih.Stop()
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
-	; f_HTriggered := true
 	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
-	F_SendIsOflag(ReplacementString, Oflag, "SendInput")
-	F_EventSigOrdHotstring()
+ 	F_SendIsOflag(ReplacementString, Oflag, "SendInput")
+ 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
 	v_InputString := ""	
@@ -11146,6 +11170,7 @@ F_HOF_CLI(ReplacementString, Oflag) ;Hotstring Output Function _ Clipboard
 	local oWord := "", ThisHotkey := A_ThisHotkey, vFirstLetter1 := "", vFirstLetter2 := "", vOutputVar := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false
 		, fFirstLetterCap := false, InputString := ""
 	
+	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	f_HTriggered := true
 	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
@@ -11153,6 +11178,9 @@ F_HOF_CLI(ReplacementString, Oflag) ;Hotstring Output Function _ Clipboard
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "CLI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	v_InputString := ""	
+	ih.VisibleText := true
+	ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_MCLI(TextOptions, Oflag)
