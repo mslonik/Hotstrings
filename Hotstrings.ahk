@@ -310,13 +310,7 @@ if (ini_TTCn = 4)	;static triggerstring / hotstring GUI
 if (ini_GuiReload) and (v_Param != "l")
 	F_GUIinit()
 
-; ih := InputHook("L0 V")
-ih 			:= InputHook("L0 V I1", "{Space}")	;I1 is necessary to block SendInput commands output
-ih.OnChar 	:= Func("OneCharPressed")
-; Thread, Priority, -1
-ih.OnEnd		:= Func("EndCharPressed")
-; Thread, Interrupt, 0	;Makes each newly launched thread immediately interruptible.
-ih.Start()
+F_InitiateInputHook()
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; The main application loop beginning.
@@ -385,73 +379,7 @@ ih.Start()
  ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; The end of the main loop of application.
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-OneCharPressed(InputHook, Char, params*)
-{	;pomysł jest taki: kończyć na zwykły znak EndChar ALE wywoływać funkcję OnEnd i kontynuować zapis do v_InputString skoro nie została wywołana żadna z funkcji Hotstring.
-	global	;assume-global mode of operation
-	Critical, On
-	OutputDebug, % A_ThisFunc . "`n"
-	if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn)) or (WinActive("ahk_id" TT_C4_Hwnd) and (ini_MHSEn))
-	{
-		ih.VisibleText := false
-		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
-		return
-	}
-	OutputDebug, % "params:" . A_Tab . params[1] . "`n"
-	if (!params[1])
-		v_InputString .= Char
-	OutputDebug, % "v_InputString:" . A_Space . v_InputString . "`n"
-	ToolTip, ,, , 4	;Basic triggerstring was triggered
-	ToolTip, ,, , 6	;Undid the last hotstring
-	if (ini_TTTtEn)
-	{
-		F_PrepareTriggerstringTipsTables2()	;old version: F_PrepareTriggerstringTipsTables()
-		if (a_Tips.Count())	;if tips are available display them
-		{
-			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
-			F_TMenuAHK_Hotkeys(ini_ATEn)	;this function must be called when TMenuAHK_C1_Hwnd variable is available and initialized
-			if (ini_TTTD > 0)
-				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
-		}
-		else	;or destroy previously visible tips
-			F_DestroyTriggerstringTips(ini_TTCn)
-	}
-	Critical, Off
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-EndCharPressed(InputHook)
-{	;The function is called as a new thread.
-	global	;assume-global mode	
-	local	EndChar := "", v_TipsFlag := false	
-	Critical, On
-	; OutputDebug, % A_ThisFunc . A_Tab . A_ThisHotkey . A_Tab . A_PriorHotkey . "`n"
-	Switch InputHook.EndKey
-	{
-		Case "Space": EndChar := " "
-	}
-	InputHook.VisibleText := true
-	InputHook.Start()
-	if (v_InputString and EndChar)	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. If "out" is empty, InStr returns true.
-	; if (v_InputString and EndChar and InStr(HotstringEndChars, EndChar))	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. If "out" is empty, InStr returns true.
-	{
-		; v_TipsFlag := false
-		v_InputString .= EndChar
-		Loop, % a_Triggers.MaxIndex()
-		{
-			if (InStr(a_Triggers[A_Index], v_InputString) = 1) ;if in string a_Triggers is found v_InputString from the first position 
-			{
-				; v_TipsFlag := true
-				OneCharPressed(InputHook, EndChar, true)
-				; OneCharPressed(InputHook, EndChar, v_TipsFlag)
-				Break
-			}
-		}
-		; if !(v_TipsFlag)
-			; v_InputString := ""
-	}		  
-	; else
-		; F_DestroyTriggerstringTips(ini_TTCn)
-	Critical, Off
-}
+
 
 
 
@@ -698,6 +626,100 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+OneCharPressed(InputHook, Char, params*)
+{	
+	global	;assume-global mode of operation
+	Critical, On
+	OutputDebug, % A_ThisFunc . "`n"
+	if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn)) or (WinActive("ahk_id" TT_C4_Hwnd) and (ini_MHSEn))
+	{
+		ih.VisibleText := false
+		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
+		return
+	}
+	OutputDebug, % "params:" . A_Tab . params[1] . "`n"
+	if (!params[1])
+		v_InputString .= Char
+	OutputDebug, % "v_InputString:" . A_Space . v_InputString . "`n"
+	ToolTip, ,, , 4	;Basic triggerstring was triggered
+	ToolTip, ,, , 6	;Undid the last hotstring
+	if (ini_TTTtEn)
+	{
+		F_PrepareTriggerstringTipsTables2()	;old version: F_PrepareTriggerstringTipsTables()
+		if (a_Tips.Count())	;if tips are available display them
+		{
+			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
+			F_TMenuAHK_Hotkeys(ini_ATEn)	;this function must be called when TMenuAHK_C1_Hwnd variable is available and initialized
+			if (ini_TTTD > 0)
+				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
+		}
+		else	;or destroy previously visible tips
+			F_DestroyTriggerstringTips(ini_TTCn)
+	}
+	Critical, Off
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+EndCharPressed(InputHook)
+{	;The function is called as a new thread.
+	global	;assume-global mode	
+	local	EndChar := ""
+	Critical, On
+	; OutputDebug, % A_ThisFunc . A_Tab . A_ThisHotkey . A_Tab . A_PriorHotkey . "`n"
+	Switch InputHook.EndKey
+	{
+		Case "Space": EndChar := " "
+	}
+	InputHook.VisibleText := true
+	InputHook.Start()
+	if (v_InputString and EndChar)	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. If "out" is empty, InStr returns true.
+	{
+		v_InputString .= EndChar
+		Loop, % a_Triggers.MaxIndex()
+		{
+			if (InStr(a_Triggers[A_Index], v_InputString) = 1) ;if in string a_Triggers is found v_InputString from the first position 
+			{
+				OneCharPressed(InputHook, EndChar, true)
+				Break
+			}
+		}
+	}		  
+	Critical, Off
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_InitiateInputHook()
+{
+	global	;assume-global mode of operation
+	local InputHookEndChars := "", f_Hit := false
+	Loop, Parse, HotstringEndChars
+	{
+		f_Hit := false
+		Switch A_LoopField
+		{
+			Case "}": 	
+				InputHookEndChars .= "{}}"
+				f_Hit := true
+			Case "{": 	
+				InputHookEndChars .= "{{}"
+				f_Hit := true
+			Case "`n":
+				InputHookEndChars .= "{Enter}"
+				f_Hit := true
+			Case "`t": 	
+				InputHookEndChars .= "{Tab}"
+				f_Hit := true
+			Case " ": 	
+				InputHookEndChars .= "{Space}"
+				f_Hit := true
+		}
+		if (!f_Hit)
+			InputHookEndChars .= A_LoopField
+	}
+	ih 			:= InputHook("L0 V I1", InputHookEndChars)	;I1 is necessary to block SendInput commands output
+	ih.OnChar 	:= Func("OneCharPressed")
+	ih.OnEnd		:= Func("EndCharPressed")
+	ih.Start()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GUIinit()
 {
 	global	;assume-global mode
