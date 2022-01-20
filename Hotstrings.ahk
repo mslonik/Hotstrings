@@ -313,7 +313,9 @@ if (ini_GuiReload) and (v_Param != "l")
 ; ih := InputHook("L0 V")
 ih 			:= InputHook("L0 V I1", "{Space}")	;I1 is necessary to block SendInput commands output
 ih.OnChar 	:= Func("OneCharPressed")
+; Thread, Priority, -1
 ih.OnEnd		:= Func("EndCharPressed")
+; Thread, Interrupt, 0	;Makes each newly launched thread immediately interruptible.
 ih.Start()
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -383,9 +385,10 @@ ih.Start()
  ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; The end of the main loop of application.
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-OneCharPressed(InputHook, Char)
+OneCharPressed(InputHook, Char, params*)
 {	;pomysł jest taki: kończyć na zwykły znak EndChar ALE wywoływać funkcję OnEnd i kontynuować zapis do v_InputString skoro nie została wywołana żadna z funkcji Hotstring.
 	global	;assume-global mode of operation
+	Critical, On
 	OutputDebug, % A_ThisFunc . "`n"
 	if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn)) or (WinActive("ahk_id" TT_C4_Hwnd) and (ini_MHSEn))
 	{
@@ -393,8 +396,9 @@ OneCharPressed(InputHook, Char)
 		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
 		return
 	}
-
-	v_InputString .= Char
+	OutputDebug, % "params:" . A_Tab . params[1] . "`n"
+	if (!params[1])
+		v_InputString .= Char
 	OutputDebug, % "v_InputString:" . A_Space . v_InputString . "`n"
 	ToolTip, ,, , 4	;Basic triggerstring was triggered
 	ToolTip, ,, , 6	;Undid the last hotstring
@@ -411,43 +415,42 @@ OneCharPressed(InputHook, Char)
 		else	;or destroy previously visible tips
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
+	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 EndCharPressed(InputHook)
 {	;The function is called as a new thread.
-	global	;assume-global mod	local	EndChar := "", v_TipsFlag := false
-	OutputDebug, % A_ThisFunc . "`n"
-	if (f_HTriggered) and (v_InputString = "")
+	global	;assume-global mode	
+	local	EndChar := "", v_TipsFlag := false	
+	Critical, On
+	; OutputDebug, % A_ThisFunc . A_Tab . A_ThisHotkey . A_Tab . A_PriorHotkey . "`n"
+	Switch InputHook.EndKey
 	{
-		f_HTriggered := false
-		OutputDebug, % "f_HTriggered:" . A_Space . f_HTriggered . "`n"
-		return 
+		Case "Space": EndChar := " "
 	}
-	else
-	{	
-		Switch InputHook.EndKey
+	InputHook.VisibleText := true
+	InputHook.Start()
+	if (v_InputString and EndChar)	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. If "out" is empty, InStr returns true.
+	; if (v_InputString and EndChar and InStr(HotstringEndChars, EndChar))	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. If "out" is empty, InStr returns true.
+	{
+		; v_TipsFlag := false
+		v_InputString .= EndChar
+		Loop, % a_Triggers.MaxIndex()
 		{
-			Case "Space": EndChar := " "
-		}
-		InputHook.VisibleText := true
-		InputHook.Start()
-		if (EndChar and InStr(HotstringEndChars, EndChar))	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. If "out" is empty, InStr returns true.
-		{
-			v_TipsFlag := false
-			Loop, % a_Triggers.MaxIndex()
+			if (InStr(a_Triggers[A_Index], v_InputString) = 1) ;if in string a_Triggers is found v_InputString from the first position 
 			{
-				if (InStr(a_Triggers[A_Index], v_InputString) = 1) ;if in string a_Triggers is found v_InputString from the first position 
-				{
-					v_TipsFlag := true
-					Break
-				}
+				; v_TipsFlag := true
+				OneCharPressed(InputHook, EndChar, true)
+				; OneCharPressed(InputHook, EndChar, v_TipsFlag)
+				Break
 			}
-			if !(v_TipsFlag)
-				v_InputString := ""
-		}		  
-		OutputDebug, % "tu jestem`n"
-		OneCharPressed(InputHook, EndChar)
-	}
+		}
+		; if !(v_TipsFlag)
+			; v_InputString := ""
+	}		  
+	; else
+		; F_DestroyTriggerstringTips(ini_TTCn)
+	Critical, Off
 }
 
 
@@ -11064,8 +11067,8 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 {
 	global	;assume-global mode
 	OutputDebug, % A_ThisFunc . "`n"
-	f_HTriggered := true
-	;v_TypedTriggerstring 	→ hotstring
+	; f_HTriggered := true
+ 	;v_TypedTriggerstring 	→ hotstring
 	;v_Options 			→ triggerstring options
 	;v_Triggerstring		→ stored v_InputString
 	;v_EndChar			→ stored value of A_EndChar
@@ -11144,7 +11147,7 @@ F_ClipboardPaste(string, Oflag)
 	if (Oflag = false)
 	{
 		Clipboard := string . A_EndChar
-		OutputDebug, % "string:" . A_Tab . string
+		; OutputDebug, % "string:" . A_Tab . string
 		ClipWait
 		Send, ^v
 		Sleep, %ini_CPDelay% ; this sleep is required surprisingly
@@ -11169,10 +11172,10 @@ F_HOF_CLI(ReplacementString, Oflag) ;Hotstring Output Function _ Clipboard
 	global	;assume-global mode
 	local oWord := "", ThisHotkey := A_ThisHotkey, vFirstLetter1 := "", vFirstLetter2 := "", vOutputVar := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false
 		, fFirstLetterCap := false, InputString := ""
-	
+	OutputDebug, % A_ThisFunc . "`n"
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
-	f_HTriggered := true
+	; f_HTriggered := true
 	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
 	F_ClipboardPaste(ReplacementString, Oflag)
 	F_EventSigOrdHotstring()
