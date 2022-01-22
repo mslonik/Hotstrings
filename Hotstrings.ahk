@@ -39,7 +39,6 @@ global 	HADL 				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libra
 , 		HADConfig  			:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\"	. "Config.ini"	;Hotstrings Application Data Config .ini
 ,		v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l like "silent mode"
 ,		a_Triggers 			:= []		;Main loop of application
-,		f_HTriggered 			:= false		;Main loop of application; this flag is set (1) if any of the hotstring functions is triggered.
 ,		v_InputString 			:= ""		;Main loop of application; this variable stores information about keys pressed by user which can differ in size from actual hotstring definition.
 ,		v_MouseX 				:= 0			;Main loop of application
 ,		v_MouseY 				:= 0			;Main loop of application
@@ -610,7 +609,7 @@ F_HMenuCli()
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_ClipboardPaste(ReplacementString, Ovar)
 	Gui, HMenuCli: Destroy
-	f_HTriggered := true
+	; f_HTriggered := true
 	if (ini_MHSEn)
 		SoundBeep, % ini_MHSF, % ini_MHSD
 	if (ini_THLog)
@@ -621,7 +620,7 @@ Esc::
 Gui, HMenuCli: Destroy
 Input ;This line blocks temporarily Input command in the main loop. 
 Send, % v_Triggerstring . v_EndChar
-f_HTriggered := true
+; f_HTriggered := true
 return
 #If
 
@@ -1666,7 +1665,7 @@ F_TMenu()	;there must be a separate function to handle "interrupt" coming from "
 		GuiControl,, % IdTT_C4_LB2, |
 		GuiControl,, % IdTT_C4_LB3, |
 	}
-	f_HTriggered := true
+	; f_HTriggered := true
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadConfiguration()
@@ -6040,7 +6039,7 @@ F_Undo()
 		}
 		Send, % v_EndChar
 		F_UndoSignalling()
-		f_HTriggered := true
+		; f_HTriggered := true
 	}
 	else
 	{
@@ -11002,37 +11001,46 @@ F_PrepareUndo(string)
 F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 {
 	global	;assume-global mode
+	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
-	f_HTriggered := true
 	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
 	F_SendIsOflag(ReplacementString, Oflag, "SendEvent")
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SE" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	v_InputString := ""	
+	ih.VisibleText := true
+	ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 {
 	global	;assume-global mode
+	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
-	f_HTriggered := true
 	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
 	F_SendIsOflag(ReplacementString, Oflag, "SendPlay")
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SP" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	v_InputString := ""	
+	ih.VisibleText := true
+	ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 {
 	global	;assume-global mode
+	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
-	f_HTriggered := true
 	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
 	F_SendIsOflag(ReplacementString, Oflag, "SendRaw")
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SR" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	v_InputString := ""	
+	ih.VisibleText := true
+	ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SendIsOflag(OtputString, Oflag, SendFunctionName)
@@ -11054,34 +11062,34 @@ F_SendIsOflag(OtputString, Oflag, SendFunctionName)
 		Case "SendEvent":
 		if (Oflag = false)
 		{
-			Input ;This line blocks temporarily Input command in the main loop. 
+			; Input ;This line blocks temporarily Input command in the main loop. 
 			SendEvent, % OtputString . A_EndChar
 		}
 		else
 		{
-			Input ;This line blocks temporarily Input command in the main loop. 
+			; Input ;This line blocks temporarily Input command in the main loop. 
 			SendEvent, % OtputString
 		}
 		Case "SendPlay":
 		if (Oflag = false)
 		{
-			Input ;This line blocks temporarily Input command in the main loop. 
+			; Input ;This line blocks temporarily Input command in the main loop. 
 			SendPlay, % OtputString . A_EndChar
 		}
 		else
 		{
-			Input ;This line blocks temporarily Input command in the main loop. 
+			; Input ;This line blocks temporarily Input command in the main loop. 
 			SendPlay, % OtputString
 		}
 		Case "SendRaw":
 		if (Oflag = false)
 		{
-			Input ;This line blocks temporarily Input command in the main loop. 
+			; Input ;This line blocks temporarily Input command in the main loop. 
 			SendRaw, % OtputString . A_EndChar
 		}
 		else
 		{
-			Input ;This line blocks temporarily Input command in the main loop. 
+			; Input ;This line blocks temporarily Input command in the main loop. 
 			SendRaw, % OtputString 
 		}
 	}
@@ -11090,7 +11098,7 @@ F_SendIsOflag(OtputString, Oflag, SendFunctionName)
 F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
 {
 	global	;assume-global mode
-	OutputDebug, % A_ThisFunc . "`n"
+	; OutputDebug, % A_ThisFunc . "`n"
 	; f_HTriggered := true
  	;v_TypedTriggerstring 	→ hotstring
 	;v_Options 			→ triggerstring options
@@ -11177,7 +11185,7 @@ F_ClipboardPaste(string, Oflag)
 		Sleep, %ini_CPDelay% ; this sleep is required surprisingly
 		v_InputString := ""
 		Clipboard := ClipboardBackup
-		return
+		; return
 	}
 	else
 	{
@@ -11187,7 +11195,7 @@ F_ClipboardPaste(string, Oflag)
 		Sleep, %ini_CPDelay% ; this sleep is required surprisingly
 		v_InputString := ""
 		Clipboard := ClipboardBackup
-		return
+		; return
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11291,7 +11299,7 @@ F_HOF_MCLI(TextOptions, Oflag)
 		WhichMenu := "CLI"
 	}
 	Ovar := Oflag
-	f_HTriggered := true
+	; f_HTriggered := true
 	F_DeterminePartStrings(TextOptions)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11399,7 +11407,7 @@ F_HOF_MSI(TextOptions, Oflag)
 		WhichMenu := "SI"
 	}
 	Ovar := Oflag
-	f_HTriggered := true
+	; f_HTriggered := true
 	F_DeterminePartStrings(TextOptions)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11434,7 +11442,7 @@ F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_
 		SendLevel, 1	;in order to backtrigger the chosen triggerstring 
 		SendInput, % OutputVarTemp
 		SendLevel, 0
-		f_HTriggered := true	;setting this flag prevenst from displaying next TTmenu which without is triggered by SendLevel 1
+		; f_HTriggered := true	;setting this flag prevenst from displaying next TTmenu which without is triggered by SendLevel 1
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11488,7 +11496,7 @@ F_MouseMenuCombined() ;Valid if static triggerstring / hotstring menus GUI is av
 			Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
 			Case "CLI":	F_ClipboardPaste(ReplacementString, Ovar)
 		}
-		f_HTriggered := true
+		; f_HTriggered := true
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
 		if (ini_THLog)
@@ -11512,7 +11520,7 @@ F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A
 		v_UndoHotstring := OutputVarTemp
 		ReplacementString := F_PrepareSend(OutputVarTemp, Ovar)
 		F_SendIsOflag(ReplacementString, Ovar, "SendInput")
-		f_HTriggered := true
+		; f_HTriggered := true
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
 		if (ini_THLog)
@@ -11599,7 +11607,7 @@ F_HMenuAHK()
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
 	Gui, HMenuAHK: Destroy
-	f_HTriggered := true
+	; f_HTriggered := true
 	if (ini_MHSEn)
 		SoundBeep, % ini_MHSF, % ini_MHSD	
 	if (ini_THLog)
@@ -11610,7 +11618,7 @@ Esc::
 Gui, HMenuAHK: Destroy
 Input ;This line blocks temporarily Input command in the main loop. 
 Send, % v_Triggerstring . v_EndChar
-f_HTriggered := true
+; f_HTriggered := true
 return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11702,7 +11710,7 @@ F_HMenuStatic()
 	}
 	
 	GuiControl,, % IdTT_C4_LB4, |
-	f_HTriggered := true
+	; f_HTriggered := true
 	if (ini_MHSEn)
 		SoundBeep, % ini_MHSF, % ini_MHSD	
 	if (ini_THLog)
@@ -11720,7 +11728,7 @@ if (v_Triggerstring != "")
 	Send, % v_Triggerstring . v_EndChar
 	v_Triggerstring := ""
 }
-f_HTriggered := true
+; f_HTriggered := true
 return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
