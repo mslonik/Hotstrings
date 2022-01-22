@@ -618,7 +618,7 @@ F_HMenuCli()
 
 Esc::
 Gui, HMenuCli: Destroy
-Input ;This line blocks temporarily Input command in the main loop. 
+; Input ;This line blocks temporarily Input command in the main loop. 
 Send, % v_Triggerstring . v_EndChar
 ; f_HTriggered := true
 return
@@ -626,17 +626,19 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 OneCharPressed(InputHook, Char, params*)
-{	
+{	;params: true or false
 	global	;assume-global mode of operation
 	Critical, On
-	OutputDebug, % A_ThisFunc . "`n"
+	; OutputDebug, % A_ThisFunc . "`n"
+	OutputDebug, % "Char:" . A_Tab . Char . "`n"
 	if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn)) or (WinActive("ahk_id" TT_C4_Hwnd) and (ini_MHSEn))
 	{
-		ih.VisibleText := false
 		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
+		OutputDebug, % "Char:" . A_Tab . Char . A_Tab . "SoundBeep" . A_Tab . "`n"
+		Critical, Off
 		return
 	}
-	OutputDebug, % "params:" . A_Tab . params[1] . "`n"
+	; OutputDebug, % "params:" . A_Tab . params[1] . "`n"
 	if (!params[1])
 		v_InputString .= Char
 	OutputDebug, % "v_InputString:" . A_Space . v_InputString . "`n"
@@ -664,12 +666,24 @@ EndCharPressed(InputHook)
 	local	EndChar := ""
 	Critical, On
 	; OutputDebug, % A_ThisFunc . A_Tab . A_ThisHotkey . A_Tab . A_PriorHotkey . "`n"
-	Switch InputHook.EndKey
+	Switch InputHook.EndKey	;tu jestem
 	{
-		Case "Space": EndChar := " "
+		Case "Space": 	EndChar := " "
+		Case "Tab":	EndChar := "`t"	;to be checked
+		Case "Enter":	EndChar := "`n"	;to be checked; curly brackets
 	}
-	InputHook.VisibleText := true
+	if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn)) or (WinActive("ahk_id" TT_C4_Hwnd) and (ini_MHSEn))
+	{
+		InputHook.Start()
+		InputHook.VisibleText := false
+		InputHook.KeyOpt(";", "-VSI")
+		OutputDebug, % "Char:" . A_Tab . InputHook.EndKey . A_Tab . "EndChar" . A_Tab . "`n"
+		; SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
+		return
+	}
 	InputHook.Start()
+	OutputDebug, % "Why am I here?"
+	InputHook.VisibleText := true
 	if (v_InputString and EndChar)	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. If "out" is empty, InStr returns true.
 	{
 		v_InputString .= EndChar
@@ -713,9 +727,11 @@ F_InitiateInputHook()
 		if (!f_Hit)
 			InputHookEndChars .= A_LoopField
 	}
-	ih 			:= InputHook("L0 V I1", InputHookEndChars)	;I1 is necessary to block SendInput commands output
+	ih 			:= InputHook("V I1")	;I1 is necessary to block SendInput commands output
+	; ih 			:= InputHook("L0 V I1")	;I1 is necessary to block SendInput commands output
+	; ih 			:= InputHook("L0 V I1", InputHookEndChars)	;I1 is necessary to block SendInput commands output
 	ih.OnChar 	:= Func("OneCharPressed")
-	ih.OnEnd		:= Func("EndCharPressed")
+	; ih.OnEnd		:= Func("EndCharPressed")
 	ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11049,50 +11065,29 @@ F_SendIsOflag(OtputString, Oflag, SendFunctionName)
 	Switch SendFunctionName
 	{
 		Case "SendInput":
-		if (Oflag = false)
-		{
-			; Input ;This line blocks temporarily Input command in the main loop. 
-			SendInput, % OtputString . A_EndChar
-		}
-		else
-		{
-			; Input ;This line blocks temporarily Input command in the main loop. 
-			SendInput, % OtputString
-		}
+			if (Oflag = false)
+				SendInput, % OtputString . A_EndChar
+			else
+				SendInput, % OtputString
 		Case "SendEvent":
-		if (Oflag = false)
-		{
-			; Input ;This line blocks temporarily Input command in the main loop. 
-			SendEvent, % OtputString . A_EndChar
-		}
-		else
-		{
-			; Input ;This line blocks temporarily Input command in the main loop. 
-			SendEvent, % OtputString
-		}
+			if (Oflag = false)
+				SendEvent, % OtputString . A_EndChar
+			else
+				SendEvent, % OtputString
 		Case "SendPlay":
-		if (Oflag = false)
-		{
-			; Input ;This line blocks temporarily Input command in the main loop. 
-			SendPlay, % OtputString . A_EndChar
-		}
-		else
-		{
-			; Input ;This line blocks temporarily Input command in the main loop. 
-			SendPlay, % OtputString
-		}
+			if (Oflag = false)
+				SendPlay, % OtputString . A_EndChar
+			else
+				SendPlay, % OtputString
 		Case "SendRaw":
-		if (Oflag = false)
-		{
-			; Input ;This line blocks temporarily Input command in the main loop. 
-			SendRaw, % OtputString . A_EndChar
-		}
-		else
-		{
-			; Input ;This line blocks temporarily Input command in the main loop. 
-			SendRaw, % OtputString 
-		}
+			if (Oflag = false)
+				SendRaw, % OtputString . A_EndChar
+			else
+				SendRaw, % OtputString 
 	}
+	v_InputString := ""	
+	ih.VisibleText := true
+	ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
@@ -11111,9 +11106,6 @@ F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
  	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	v_InputString := ""	
-	ih.VisibleText := true
-	ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeterminePartStrings(ReplacementString)
@@ -11213,9 +11205,6 @@ F_HOF_CLI(ReplacementString, Oflag) ;Hotstring Output Function _ Clipboard
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "CLI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	v_InputString := ""	
-	ih.VisibleText := true
-	ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_MCLI(TextOptions, Oflag)
@@ -11330,14 +11319,19 @@ F_HOF_MSI(TextOptions, Oflag)
 		,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
 		,TriggerChar := "", UserInput := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
+
+	ih.VisibleText := false
+	ih.KeyOpt(";", "-V")
+	; ih.KeyOpt(";", "IS")
+	F_DestroyTriggerstringTips(ini_TTCn)
 	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop 
 		SoundBeep, % ini_MHSF, % ini_MHSD
-	v_MenuMax				:= 0
+	v_MenuMax				:= 0	;global variable used in F_HMenuAHK
 	TextOptions 			:= F_ReplaceAHKconstants(TextOptions)
 	Loop, Parse, TextOptions, ¦	;determine amount of rows for Listbox
 		v_MenuMax := A_Index
 	
-	if (ini_TTCn != 4)
+	if (ini_TTCn != 4)	;if not static window, draw small simple GUI
 	{
 		Gui, HMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuAHKHwnd
 		Gui, HMenuAHK: Margin, 0, 0
@@ -11505,7 +11499,7 @@ F_MouseMenuCombined() ;Valid if static triggerstring / hotstring menus GUI is av
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
-{
+{	
 	global	;assume-global mode
 	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0
 	if (A_PriorKey = "LButton")
@@ -11545,9 +11539,9 @@ Down::
 F_HMenuAHK()
 {
 	global	;assume-global moee
-	local	v_PressedKey := "",		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
+	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
-	v_PressedKey := A_ThisHotkey
+	
 	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -11615,10 +11609,10 @@ F_HMenuAHK()
 }
 
 Esc::
-Gui, HMenuAHK: Destroy
-Input ;This line blocks temporarily Input command in the main loop. 
-Send, % v_Triggerstring . v_EndChar
-; f_HTriggered := true
+	Gui, HMenuAHK: Destroy
+	; Input ;This line blocks temporarily Input command in the main loop. 
+	Send, % v_Triggerstring . v_EndChar
+	; f_HTriggered := true
 return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11705,7 +11699,7 @@ F_HMenuStatic()
 		Case "SI":
 		F_SendIsOflag(ReplacementString, Ovar, "SendInput")
 		Case "CLI":
-		Input ;This line blocks temporarily Input command in the main loop.
+		; Input ;This line blocks temporarily Input command in the main loop.
 		F_ClipboardPaste(ReplacementString, Ovar)
 	}
 	
@@ -11720,7 +11714,7 @@ F_HMenuStatic()
 
 ~Esc::	;tilde in order to run function TT_C4GuiEscape
 GuiControl,, % IdTT_C4_LB4, |
-Input ;This line blocks temporarily Input command in the main loop. 
+; Input ;This line blocks temporarily Input command in the main loop. 
 ;OutputDebug, % "v_Triggerstring:" . A_Tab . v_Triggerstring . A_Tab . "v_EndChar:" . A_Tab . v_EndChar
 if (v_Triggerstring != "")
 {
