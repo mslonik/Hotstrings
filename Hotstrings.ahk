@@ -625,7 +625,7 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
-OneCharPressed(InputHook, Char, params*)
+OneCharPressed(InputHook, Char)
 {	;params: true or false
 	global	;assume-global mode of operation
 	Critical, On
@@ -639,15 +639,14 @@ OneCharPressed(InputHook, Char, params*)
 		return
 	}
 	; OutputDebug, % "params:" . A_Tab . params[1] . "`n"
-	if (!params[1])
-		v_InputString .= Char
+	v_InputString .= Char
 	OutputDebug, % "v_InputString:" . A_Space . v_InputString . "`n"
 	ToolTip, ,, , 4	;Basic triggerstring was triggered
 	ToolTip, ,, , 6	;Undid the last hotstring
 	if (ini_TTTtEn)
 	{
 		F_PrepareTriggerstringTipsTables2()	;old version: F_PrepareTriggerstringTipsTables()
-		if (a_Tips.Count())	;if tips are available display them
+		if (a_Tips.Count())	;if tips are available display then
 		{
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			F_TMenuAHK_Hotkeys(ini_ATEn)	;this function must be called when TMenuAHK_C1_Hwnd variable is available and initialized
@@ -660,78 +659,11 @@ OneCharPressed(InputHook, Char, params*)
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-EndCharPressed(InputHook)
-{	;The function is called as a new thread.
-	global	;assume-global mode	
-	local	EndChar := ""
-	Critical, On
-	; OutputDebug, % A_ThisFunc . A_Tab . A_ThisHotkey . A_Tab . A_PriorHotkey . "`n"
-	Switch InputHook.EndKey	;tu jestem
-	{
-		Case "Space": 	EndChar := " "
-		Case "Tab":	EndChar := "`t"	;to be checked
-		Case "Enter":	EndChar := "`n"	;to be checked; curly brackets
-	}
-	if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn)) or (WinActive("ahk_id" TT_C4_Hwnd) and (ini_MHSEn))
-	{
-		InputHook.Start()
-		InputHook.VisibleText := false
-		InputHook.KeyOpt(";", "-VSI")
-		OutputDebug, % "Char:" . A_Tab . InputHook.EndKey . A_Tab . "EndChar" . A_Tab . "`n"
-		; SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
-		return
-	}
-	InputHook.Start()
-	OutputDebug, % "Why am I here?"
-	InputHook.VisibleText := true
-	if (v_InputString and EndChar)	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. If "out" is empty, InStr returns true.
-	{
-		v_InputString .= EndChar
-		Loop, % a_Triggers.MaxIndex()
-		{
-			if (InStr(a_Triggers[A_Index], v_InputString) = 1) ;if in string a_Triggers is found v_InputString from the first position 
-			{
-				OneCharPressed(InputHook, EndChar, true)
-				Break
-			}
-		}
-	}		  
-	Critical, Off
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()
 {
 	global	;assume-global mode of operation
-	local InputHookEndChars := "", f_Hit := false
-	Loop, Parse, HotstringEndChars
-	{
-		f_Hit := false
-		Switch A_LoopField
-		{
-			Case "}": 	
-				InputHookEndChars .= "{}}"
-				f_Hit := true
-			Case "{": 	
-				InputHookEndChars .= "{{}"
-				f_Hit := true
-			Case "`n":
-				InputHookEndChars .= "{Enter}"
-				f_Hit := true
-			Case "`t": 	
-				InputHookEndChars .= "{Tab}"
-				f_Hit := true
-			Case " ": 	
-				InputHookEndChars .= "{Space}"
-				f_Hit := true
-		}
-		if (!f_Hit)
-			InputHookEndChars .= A_LoopField
-	}
 	ih 			:= InputHook("V I1")	;I1 is necessary to block SendInput commands output
-	; ih 			:= InputHook("L0 V I1")	;I1 is necessary to block SendInput commands output
-	; ih 			:= InputHook("L0 V I1", InputHookEndChars)	;I1 is necessary to block SendInput commands output
 	ih.OnChar 	:= Func("OneCharPressed")
-	; ih.OnEnd		:= Func("EndCharPressed")
 	ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11085,8 +11017,8 @@ F_SendIsOflag(OtputString, Oflag, SendFunctionName)
 			else
 				SendRaw, % OtputString 
 	}
-	v_InputString := ""	
-	ih.VisibleText := true
+	v_InputString 		:= ""	
+	ih.VisibleText 	:= true
 	ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
