@@ -1145,7 +1145,8 @@ F_InitiateTrayMenus(v_Param)
 			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Information"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." 
 				. A_Space . TransA["Would you like to download the icon file?"] . "`n`n" . TransA["If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used."]
 			IfMsgBox, Yes
-				URLDownloadToFile, https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/hotstrings.ico, % AppIcon
+				URLDownloadToFile, https://github.com/mslonik/Hotstrings-Tools/raw/main/Logo/hotstrings.ico, % AppIcon
+				;URLDownloadToFile, https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/hotstrings.ico, % AppIcon	;old
 			IfMsgBox, No
 				AppIcon := "*"
 		}
@@ -1163,7 +1164,8 @@ F_InitiateTrayMenus(v_Param)
 			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Information"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." 
 				. A_Space . TransA["Would you like to download the icon file?"] . "`n`n" . TransA["If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used."]
 			IfMsgBox, Yes
-				URLDownloadToFile, https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/hotstrings.ico, % AppIcon
+				URLDownloadToFile, https://github.com/mslonik/Hotstrings-Tools/raw/main/Logo/hotstrings.ico, % AppIcon
+				; URLDownloadToFile, https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/hotstrings.ico, % AppIcon	;old
 			IfMsgBox, No
 				AppIcon := "*"
 		}
