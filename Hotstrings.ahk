@@ -628,6 +628,8 @@ return
 OneCharPressed(InputHook, Char)
 {	;params: true or false
 	global	;assume-global mode of operation
+	local	f_FoundEndChar := false, f_FoundTip := false
+
 	Critical, On
 	; OutputDebug, % A_ThisFunc . "`n"
 	OutputDebug, % "Char:" . A_Tab . Char . "`n"
@@ -638,8 +640,14 @@ OneCharPressed(InputHook, Char)
 		Critical, Off
 		return
 	}
-	; OutputDebug, % "params:" . A_Tab . params[1] . "`n"
-	v_InputString .= Char
+	if (InStr(HotstringEndChars, Char))
+	{
+		v_InputString .= Char
+		f_FoundEndChar := true
+	}
+	else
+		v_InputString .= Char
+	; OutputDebug, % "A_ThisHotkey:" . A_Tab . A_ThisHotkey . A_Tab
 	OutputDebug, % "v_InputString:" . A_Space . v_InputString . "`n"
 	ToolTip, ,, , 4	;Basic triggerstring was triggered
 	ToolTip, ,, , 6	;Undid the last hotstring
@@ -656,6 +664,14 @@ OneCharPressed(InputHook, Char)
 		else	;or destroy previously visible tips
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
+	if (f_FoundEndChar)
+		{
+			Loop, % a_Tips.Count()
+				if (InStr(a_Tips[A_Index], v_InputString))
+					f_FoundTip := true
+			if (!f_FoundTip)		
+				v_InputString := ""
+		}
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11019,7 +11035,7 @@ F_SendIsOflag(OtputString, Oflag, SendFunctionName)
 	}
 	v_InputString 		:= ""	
 	ih.VisibleText 	:= true
-	ih.Start()
+	; ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
@@ -11253,8 +11269,6 @@ F_HOF_MSI(TextOptions, Oflag)
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
 
 	ih.VisibleText := false
-	ih.KeyOpt(";", "-V")
-	; ih.KeyOpt(";", "IS")
 	F_DestroyTriggerstringTips(ini_TTCn)
 	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop 
 		SoundBeep, % ini_MHSF, % ini_MHSD
@@ -11333,7 +11347,6 @@ F_HOF_MSI(TextOptions, Oflag)
 		WhichMenu := "SI"
 	}
 	Ovar := Oflag
-	; f_HTriggered := true
 	F_DeterminePartStrings(TextOptions)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11533,7 +11546,6 @@ F_HMenuAHK()
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
 	Gui, HMenuAHK: Destroy
-	; f_HTriggered := true
 	if (ini_MHSEn)
 		SoundBeep, % ini_MHSF, % ini_MHSD	
 	if (ini_THLog)
@@ -11542,9 +11554,10 @@ F_HMenuAHK()
 
 Esc::
 	Gui, HMenuAHK: Destroy
-	; Input ;This line blocks temporarily Input command in the main loop. 
-	Send, % v_Triggerstring . v_EndChar
-	; f_HTriggered := true
+	Send, % v_Triggerstring
+	; Send, % v_Triggerstring . v_EndChar
+	v_InputString 		:= ""	
+	ih.VisibleText 	:= true
 return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
