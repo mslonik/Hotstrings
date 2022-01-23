@@ -545,7 +545,7 @@ Enter::
 Up::
 Down::
 
-F_HMenu_CLI()
+F_KeyboardMenu_CLI()
 {
 	global	;assume-global moee
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",	ShiftTabIsFound := false, ReplacementString := ""
@@ -628,7 +628,7 @@ Esc::
 OneCharPressed(InputHook, Char)
 {	;params: true or false
 	global	;assume-global mode of operation
-	local	f_FoundEndChar := false, f_FoundTip := false
+	local	f_FoundEndChar := false, f_FoundTip := false, EndCharCounter := 0
 
 	Critical, On
 	; OutputDebug, % A_ThisFunc . "`n"
@@ -640,13 +640,17 @@ OneCharPressed(InputHook, Char)
 		Critical, Off
 		return
 	}
-	if (InStr(HotstringEndChars, Char))
+	v_InputString .= Char
+	Loop, Parse, v_InputString	;compromise: there will be no triggerstring tips for such triggerstrinngs like "..."
 	{
-		v_InputString .= Char
-		f_FoundEndChar := true
+		if ((A_Index = 1) and (InStr(HotstringEndChars, A_LoopField))) or ((A_Index = 2) and (InStr(HotstringEndChars, A_LoopField)))
+		{
+			EndCharCounter++
+			Continue
+		}
 	}
-	else
-		v_InputString .= Char
+	if (EndCharCounter = 2)
+		v_InputString := ""
 	; OutputDebug, % "A_ThisHotkey:" . A_Tab . A_ThisHotkey . A_Tab
 	OutputDebug, % "v_InputString:" . A_Space . v_InputString . "`n"
 	ToolTip, ,, , 4	;Basic triggerstring was triggered
@@ -664,14 +668,6 @@ OneCharPressed(InputHook, Char)
 		else	;or destroy previously visible tips
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
-	if (f_FoundEndChar)
-		{
-			Loop, % a_Tips.Count()
-				if (InStr(a_Tips[A_Index], v_InputString))
-					f_FoundTip := true
-			if (!f_FoundTip)		
-				v_InputString := ""
-		}
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5813,7 +5809,7 @@ F_DownloadPublicLibraries()
 			. "`n" . HADL
 			. "`n`n" . TransA["After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder into memory?"]
 	
-	IfMsgBox, Yes	;tu jestem
+	IfMsgBox, Yes
 	{
 		F_ValidateIniLibSections()
 		F_LoadHotstringsFromLibraries()
@@ -6001,9 +5997,8 @@ F_Undo()
 				Send, % A_LoopField
 			}
 		}
-		Send, % v_EndChar
+		; Send, % v_EndChar	;tu jestem
 		F_UndoSignalling()
-		; f_HTriggered := true
 	}
 	else
 	{
@@ -10972,9 +10967,6 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SE" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	v_InputString := ""	
-	ih.VisibleText := true
-	ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
@@ -10987,9 +10979,6 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SP" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	v_InputString := ""	
-	ih.VisibleText := true
-	ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
@@ -11002,9 +10991,6 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SR" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	v_InputString := ""	
-	ih.VisibleText := true
-	ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SendIsOflag(OtputString, Oflag, SendFunctionName)
@@ -11169,7 +11155,7 @@ F_HOF_MCLI(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clip
 			Gui, HMenuCli: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
 		else
 			Gui, HMenuCli: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
-		Gui, HMenuCli: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuCli" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenuCli"
+		Gui, HMenuCli: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuCli" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenu_CLI"
 		Loop, Parse, TextOptions, ¦
 			GuiControl,, % Id_LB_HMenuCli, % A_Index . ". " . A_LoopField . "|"
 		
@@ -11228,7 +11214,7 @@ F_HOF_MCLI(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clip
 	F_DeterminePartStrings(TextOptions)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_MouseMenuCli() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
+F_MouseMenu_CLI() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
 	local	OutputVarTemp := ""
@@ -11277,7 +11263,7 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 			Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
 		else
 			Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
-		Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenuAHK"
+		Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenu_SI"
 		Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
 			GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . "|"
 		
@@ -11431,7 +11417,7 @@ F_MouseMenuCombined() ;Valid if static triggerstring / hotstring menus GUI is av
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_MouseMenuAHK() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
+F_MouseMenu_SI() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {	
 	global	;assume-global mode
 	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0
@@ -11469,7 +11455,7 @@ Enter::
 Up::
 Down::
 
-F_HMenu_SI()
+F_KeyboardMenu_SI()
 {
 	global	;assume-global moee
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
