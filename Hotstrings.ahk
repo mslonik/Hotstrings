@@ -545,7 +545,7 @@ Enter::
 Up::
 Down::
 
-F_HMenuCli()
+F_HMenu_CLI()
 {
 	global	;assume-global moee
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",	ShiftTabIsFound := false, ReplacementString := ""
@@ -617,11 +617,11 @@ F_HMenuCli()
 }
 
 Esc::
-Gui, HMenuCli: Destroy
-; Input ;This line blocks temporarily Input command in the main loop. 
-Send, % v_Triggerstring . v_EndChar
-; f_HTriggered := true
-return
+	Gui, HMenuCli: Destroy
+	Send, % v_Triggerstring	; Send, % v_Triggerstring . v_EndChar
+	v_InputString 		:= ""	
+	ih.VisibleText 	:= true
+	return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
@@ -11037,7 +11037,7 @@ F_SendIsOflag(OtputString, Oflag, SendFunctionName)
 	ih.VisibleText 	:= true
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
+F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendInput
 {
 	global	;assume-global mode
 	; OutputDebug, % A_ThisFunc . "`n"
@@ -11127,7 +11127,7 @@ F_ClipboardPaste(string, Oflag)
 	ih.VisibleText 	:= true
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HOF_CLI(ReplacementString, Oflag) ;Hotstring Output Function _ Clipboard
+F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clipboard
 {
 	global	;assume-global mode
 	local oWord := "", ThisHotkey := A_ThisHotkey, vFirstLetter1 := "", vFirstLetter2 := "", vOutputVar := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false
@@ -11142,13 +11142,15 @@ F_HOF_CLI(ReplacementString, Oflag) ;Hotstring Output Function _ Clipboard
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "CLI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HOF_MCLI(TextOptions, Oflag)
+F_HOF_MCLI(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipboard
 {
 	global	;assume-global mode
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
 			,Window2X  := 0,	Window2Y  := 0,	Window2W  := 0,	Window2H  := 0
 			,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
-	
+
+	ih.VisibleText := false
+	F_DestroyTriggerstringTips(ini_TTCn)
 	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop
 		SoundBeep, % ini_MHSF, % ini_MHSD
 	v_MenuMax			 := 0
@@ -11223,7 +11225,6 @@ F_HOF_MCLI(TextOptions, Oflag)
 		WhichMenu := "CLI"
 	}
 	Ovar := Oflag
-	; f_HTriggered := true
 	F_DeterminePartStrings(TextOptions)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11246,7 +11247,7 @@ F_MouseMenuCli() ;The subroutine may consult the following built-in variables: A
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HOF_MSI(TextOptions, Oflag)	
+F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendInput
 {
 	global	;assume-global mode
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
@@ -11468,7 +11469,7 @@ Enter::
 Up::
 Down::
 
-F_HMenuAHK()
+F_HMenu_SI()
 {
 	global	;assume-global moee
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
@@ -11541,8 +11542,7 @@ F_HMenuAHK()
 
 Esc::
 	Gui, HMenuAHK: Destroy
-	Send, % v_Triggerstring
-	; Send, % v_Triggerstring . v_EndChar
+	Send, % v_Triggerstring	; Send, % v_Triggerstring . v_EndChar
 	v_InputString 		:= ""	
 	ih.VisibleText 	:= true
 return
