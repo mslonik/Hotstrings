@@ -2037,7 +2037,7 @@ F_EvTab3(OneTime*)
 		return
 	}
 	
-	OutputDebug, % "EvTab3:" . A_Tab . EvTab3 . A_Tab . "PreviousEvTab3" . A_Tab . PreviousEvTab3
+	OutputDebug, % "EvTab3:" . A_Tab . EvTab3 . A_Tab . "PreviousEvTab3" . A_Tab . PreviousEvTab3 . "`n"
 	F_EvUpdateTab()
 	if (EvTab3 != PreviousEvTab3)
 	{
@@ -3866,8 +3866,8 @@ F_GuiEvents_LoadValues()
 	GuiControl,, % IdEvBH_T7, 	% TransA["Timeout value [ms]"] . ":" . A_Space . ini_OHTD
 	Switch ini_OHTP
 	{
-		Case 1: 		GuiControl,, % IdEvBH_R6, 1
-		Case 2: 		GuiControl,, % IdEvBH_R5, 1
+		Case 1: 		GuiControl,, % IdEvBH_R5, 1
+		Case 2: 		GuiControl,, % IdEvBH_R6, 1
 	}
 	Switch ini_OHSEn
 	{
