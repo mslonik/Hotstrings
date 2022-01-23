@@ -495,10 +495,9 @@ return
 
 ;The following lines are hotkeys to handle all combinations which are not covered by the main function loop.
 ; ~Alt::	;if commented out, only for debugging reasons
-;Comment-out the following 3x lines (mouse buttons) in case of debugging the main loop of application.
 ~MButton::
 ~RButton::
-;~LButton::	;from now LButton click will not close TMenuAHK_C1; LButton is used to trigger F_MouseMenuTT by "g" in F_GuiTrigTipsMenuDefC1 ;if A_ThisFunc != F_MouseMenuTT, then close TMenuAHK_C1
+;~LButton::	;if commented out, only for debugging reasons ;from now LButton click will not close TMenuAHK_C1; LButton is used to trigger F_MouseMenuTT by "g" in F_GuiTrigTipsMenuDefC1 ;if A_ThisFunc != F_MouseMenuTT, then close TMenuAHK_C1
 ~LWin::
 ~RWin::
 ~Down::
@@ -626,13 +625,12 @@ Esc::
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 OneCharPressed(InputHook, Char)
-{	;params: true or false
+{	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
 	local	f_FoundEndChar := false, f_FoundTip := false, EndCharCounter := 0
 
 	Critical, On
-	; OutputDebug, % A_ThisFunc . "`n"
-	OutputDebug, % "Char:" . A_Tab . Char . "`n"
+	; OutputDebug, % "Char:" . A_Tab . Char . "`n"
 	if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn)) or (WinActive("ahk_id" TT_C4_Hwnd) and (ini_MHSEn))
 	{
 		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
@@ -640,19 +638,12 @@ OneCharPressed(InputHook, Char)
 		Critical, Off
 		return
 	}
+	;This is compromise: not all triggerstrings will have its tips, e.g. triggerstring with option ? (question mark) and those starting with EndChar: ".ahk", "..."
+	if (InStr(HotstringEndChars, Char))
+		f_FoundEndChar := true
 	v_InputString .= Char
-	Loop, Parse, v_InputString	;compromise: there will be no triggerstring tips for such triggerstrinngs like "..."
-	{
-		if ((A_Index = 1) and (InStr(HotstringEndChars, A_LoopField))) or ((A_Index = 2) and (InStr(HotstringEndChars, A_LoopField)))
-		{
-			EndCharCounter++
-			Continue
-		}
-	}
-	if (EndCharCounter = 2)
-		v_InputString := ""
-	; OutputDebug, % "A_ThisHotkey:" . A_Tab . A_ThisHotkey . A_Tab
-	OutputDebug, % "v_InputString:" . A_Space . v_InputString . "`n"
+	v_TriggerString := v_InputString	;this line is necessary to correctly process F_Undo
+	; OutputDebug, % "v_InputString:" . A_Space . v_InputString . "`n"
 	ToolTip, ,, , 4	;Basic triggerstring was triggered
 	ToolTip, ,, , 6	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -668,6 +659,14 @@ OneCharPressed(InputHook, Char)
 		else	;or destroy previously visible tips
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
+	if (f_FoundEndChar)	;check if sequence fits to any known a_Tips, helpful to process triggerstrings containing endchar, e.g. "à la"
+		{
+			Loop, % a_Tips.Count()
+				if (InStr(a_Tips[A_Index], v_InputString))
+					f_FoundTip := true
+			if (!f_FoundTip)		
+				v_InputString := ""
+		}	
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1506,14 +1505,20 @@ F_MenuLogEnDis()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TMenu()	;there must be a separate function to handle "interrupt" coming from "g" event
+F_TMenu()	;this is separate, dedicated function to handle "interrupt" coming from "g" event
 {
 	global	;assume-global mode
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0
 	v_MenuMax := a_Tips.Count()	
 	;OutputDebug, % "v_PressedKey:" . A_Tab . v_PressedKey
-	ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C4_LB1	;check if triggerstring tips listbox is empty.
+	Switch ini_TTCn	;tu jestem
+	{
+		Case 1:	ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C1_LB1	;check if triggerstring tips listbox is empty.
+		Case 2:	ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C2_LB1	;check if triggerstring tips listbox is empty.
+		Case 3:	ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C3_LB1	;check if triggerstring tips listbox is empty.
+		Case 4:	ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C4_LB1	;check if triggerstring tips listbox is empty.
+	}
 	if (!v_Temp1)	;if it is empty and one of the special shortcuts has been pressed, give it back (let it run)
 	{
 		Switch v_PressedKey
@@ -2032,7 +2037,7 @@ F_EvTab3(OneTime*)
 		return
 	}
 	
-	;OutputDebug, % "EvTab3:" . A_Tab . EvTab3 . A_Tab . "PreviousEvTab3" . A_Tab . PreviousEvTab3
+	OutputDebug, % "EvTab3:" . A_Tab . EvTab3 . A_Tab . "PreviousEvTab3" . A_Tab . PreviousEvTab3
 	F_EvUpdateTab()
 	if (EvTab3 != PreviousEvTab3)
 	{
@@ -5997,7 +6002,6 @@ F_Undo()
 				Send, % A_LoopField
 			}
 		}
-		; Send, % v_EndChar	;tu jestem
 		F_UndoSignalling()
 	}
 	else
@@ -11052,7 +11056,6 @@ F_DeterminePartStrings(ReplacementString)
 		v_EndChar  := SubStr(ThisHotkey, 0) ;extracts the last character; This form is important to run correctly F_Undo 
 	else
 		v_EndChar  := A_EndChar
-	v_Triggerstring := v_InputString				;This form is important to run correctly F_Undo 
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PrepareSend(ReplacementString, Oflag)
