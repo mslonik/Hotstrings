@@ -11035,7 +11035,6 @@ F_SendIsOflag(OtputString, Oflag, SendFunctionName)
 	}
 	v_InputString 		:= ""	
 	ih.VisibleText 	:= true
-	; ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SI(ReplacementString, Oflag)	;Hotstring Output Function _ SendInput
@@ -11117,26 +11116,15 @@ F_ClipboardPaste(string, Oflag)
 	global	;assume-global mode
 	local ClipboardBackup := ClipboardAll
 	if (Oflag = false)
-	{
 		Clipboard := string . A_EndChar
-		; OutputDebug, % "string:" . A_Tab . string
-		ClipWait
-		Send, ^v
-		Sleep, %ini_CPDelay% ; this sleep is required surprisingly
-		v_InputString := ""
-		Clipboard := ClipboardBackup
-		; return
-	}
 	else
-	{
 		Clipboard := string
-		ClipWait
-		Send, ^v
-		Sleep, %ini_CPDelay% ; this sleep is required surprisingly
-		v_InputString := ""
-		Clipboard := ClipboardBackup
-		; return
-	}
+	ClipWait
+	Send, ^v
+	Sleep, %ini_CPDelay% ; this sleep is required surprisingly
+	Clipboard := ClipboardBackup	
+	v_InputString 		:= ""	
+	ih.VisibleText 	:= true
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_CLI(ReplacementString, Oflag) ;Hotstring Output Function _ Clipboard
@@ -11147,7 +11135,6 @@ F_HOF_CLI(ReplacementString, Oflag) ;Hotstring Output Function _ Clipboard
 	OutputDebug, % A_ThisFunc . "`n"
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
-	; f_HTriggered := true
 	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
 	F_ClipboardPaste(ReplacementString, Oflag)
 	F_EventSigOrdHotstring()
