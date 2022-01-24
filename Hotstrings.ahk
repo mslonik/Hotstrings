@@ -16,9 +16,9 @@ SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
 FileEncoding, UTF-16			; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN
 ; Warning! UTF-16 is not recognized by Notepad++ editor (2021), which recognizes correctly UCS-2 (defined by the International Standard ISO/IEC 10646). 
 ; BMP = Basic Multilingual Plane.
-CoordMode, Caret,	Screen 
-CoordMode, ToolTip,	Screen
-CoordMode, Mouse,	Screen
+CoordMode, Caret,	Window		; Only Window makes sense for functions prepared in this script to handle position of on screen GUIs. 
+CoordMode, ToolTip,	Window		; Only Window makes sense for functions prepared in this script to handle position of on screen GUIs.
+CoordMode, Mouse,	Window		; Only Window makes sense for functions prepared in this script to handle position of on screen GUIs.
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
@@ -311,77 +311,6 @@ if (ini_GuiReload) and (v_Param != "l")
 
 F_InitiateInputHook()
 
-;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-; The main application loop beginning.
-;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-/* Loop,
-{
-	if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn)) or (WinActive("ahk_id" TT_C4_Hwnd) and (ini_MHSEn))
-	{
-		Loop,	
-		{
-			;OutputDebug, % "f_HTriggered:" . A_Tab . f_HTriggered
-			if (f_HTriggered)
-				Break
-			SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
-			Input, OneChar, L1, {Esc} ; L1 = Length 1	;future: replace Input with InputHook() to overcome overload of Input command.
-			;OutputDebug, % "OneChar:" . A_Tab . OneChar
-		}
-	}
-	Input, out, V L1, {Esc} ; V = Visible, L1 = Length 1
-	;OutputDebug, % "out" . ":" . A_Space . Ord(out) . A_Space . out
-	;OutputDebug, % "After:" . A_Space . v_InputString
-	if (f_HTriggered)	;f_HTriggered = 1, triggerstring was fired = hotstring was shown
-	{
-		v_InputString := ""
-		out := ""
-		F_DestroyTriggerstringTips(ini_TTCn)
-		f_HTriggered := false
-	}
-	else
-	{
-		v_InputString .= out
-		ToolTip, ,, , 4	;Basic triggerstring was triggered
-		ToolTip, ,, , 6	;Undid the last hotstring
-		if (ini_TTTtEn)
-		{
-			F_PrepareTriggerstringTipsTables2()	;old version: F_PrepareTriggerstringTipsTables()
-			if (a_Tips.Count())	;if tips are available display them
-			{
-				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
-				F_TMenuAHK_Hotkeys(ini_ATEn)	;this function must be called when TMenuAHK_C1_Hwnd variable is available and initialized
-				if (ini_TTTD > 0)
-					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
-			}
-			else	;or destroy previously visible tips
-				F_DestroyTriggerstringTips(ini_TTCn)
-		}
-	}
-	
-	if (out and InStr(HotstringEndChars, out))	;if input contains EndChars set v_TipsFlag, if not, reset v_InputString. If "out" is empty, InStr returns true.
-	{
-		v_TipsFlag := false
-		Loop, % a_Triggers.MaxIndex()
-		{
-			if (InStr(a_Triggers[A_Index], v_InputString) = 1) ;if in string a_Triggers is found v_InputString from the first position 
-			{
-				v_TipsFlag := true
-				Break
-			}
-		}
-		if !(v_TipsFlag)
-			v_InputString := ""
-	}		  
-	;OutputDebug, % "End of main loop." . A_Tab . A_Index
-}
- */
- ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-; The end of the main loop of application.
-;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-
-
-
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
 #InputLevel 2	;Thanks to this line triggerstring tips will have lower priority; backspacing done in function F_TMenu() will not affect this label.
 ~BackSpace:: 
@@ -634,7 +563,7 @@ OneCharPressed(InputHook, Char)
 	if (WinExist("ahk_id" HMenuAHKHwnd) and (ini_MHSEn)) or (WinActive("ahk_id" TT_C4_Hwnd) and (ini_MHSEn))
 	{
 		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
-		OutputDebug, % "Char:" . A_Tab . Char . A_Tab . "SoundBeep" . A_Tab . "`n"
+		; OutputDebug, % "Char:" . A_Tab . Char . A_Tab . "SoundBeep" . A_Tab . "`n"
 		Critical, Off
 		return
 	}
@@ -5065,15 +4994,54 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		MenuX := MouseX + 20
 		MenuY := MouseY + 20
 	}
-	;OutputDebug, % "MenuX:" . A_Tab . MenuX . A_Tab . "MenuY" . A_Tab . MenuY
+	OutputDebug, % "ini_TTTP:" . A_Tab . ini_TTTP . A_Tab . "A_CaretX:" . A_Tab . A_CaretX . A_Tab . "A_CaretY:" . A_Tab . A_CaretY . A_Tab . "MenuX:" . A_Tab . MenuX . A_Tab . "MenuY" . A_Tab . MenuY . "`n"
 	
 	Switch ini_TTCn
 	{
 		Case 1:
+		Gui, TT_C1: Show, x%MenuX% y%MenuY% NoActivate Hide
+		DetectHiddenWindows, On
+		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C1_Hwnd
+		DetectHiddenWindows, Off
+		
+		Loop % MonitorCoordinates.Count()
+			if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
+			{
+				Window1X := MonitorCoordinates[A_Index].Left
+				Window1H := MonitorCoordinates[A_Index].Height
+				Window1Y := MonitorCoordinates[A_Index].Top 
+				Window1W := MonitorCoordinates[A_Index].Width
+				Break
+			}
+		if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
+			MenuY -= Window2H
+		if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
+			MenuX -= Window2W
+		
 		GuiControl, Choose, % IdTT_C1_LB1, 1
 		Gui, TT_C1: Show, x%MenuX% y%MenuY% NoActivate	
 		
 		Case 2:
+		Gui, TT_C2: Show, x%MenuX% y%MenuY% NoActivate Hide
+		DetectHiddenWindows, On
+		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C2_Hwnd
+		DetectHiddenWindows, Off
+		;OutputDebug, % "Window2X" . A_Tab . Window2X . A_Tab . "Window2Y" . A_Tab . Window2Y . A_Tab . "Window2W" . A_Tab . Window2W . A_Tab . "Window2H" . A_Tab . Window2H
+		Loop, % MonitorCoordinates.Count()
+			if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
+			{
+				Window1X := MonitorCoordinates[A_Index].Left
+				Window1H := MonitorCoordinates[A_Index].Height
+				Window1Y := MonitorCoordinates[A_Index].Top 
+				Window1W := MonitorCoordinates[A_Index].Width
+				Break
+			}
+		;OutputDebug, % "Window1X" . A_Tab . Window1X . A_Tab . "Window1Y" . A_Tab . Window1Y . A_Tab . "Window1W" . A_Tab . Window1W . A_Tab . "Window1H" . A_Tab . Window1H
+		if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
+			MenuY -= Window2H
+		if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
+			MenuX -= Window2W
+
 		GuiControl, Choose, % IdTT_C2_LB1, 1
 		GuiControlGet, PosOutputVar, Pos, % IdTT_C2_LB1
 		GuiControl, Move, % IdTT_C2_LB2, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
@@ -5081,6 +5049,24 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		Gui, TT_C2: Show, x%MenuX% y%MenuY% NoActivate AutoSize
 		
 		Case 3:	
+		Gui, TT_C3: Show, x%MenuX% y%MenuY% NoActivate Hide
+		DetectHiddenWindows, On
+		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C3_Hwnd
+		DetectHiddenWindows, Off
+		Loop, % MonitorCoordinates.Count()
+			if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
+			{
+				Window1X := MonitorCoordinates[A_Index].Left
+				Window1H := MonitorCoordinates[A_Index].Height
+				Window1Y := MonitorCoordinates[A_Index].Top 
+				Window1W := MonitorCoordinates[A_Index].Width
+				Break
+			}
+		if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
+			MenuY -= Window2H
+		if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
+			MenuX -= Window2W
+		
 		GuiControl, Choose, % IdTT_C3_LB1, 1
 		GuiControlGet, PosOutputVar, Pos, % IdTT_C3_LB1
 		GuiControl, Move, % IdTT_C3_LB2, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
