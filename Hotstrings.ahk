@@ -1229,7 +1229,7 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestString)
 {
 	global	;assume-global mode
 	local  vOutput1 := 0, vOutput1X := 0, vOutput1Y := 0, vOutput1W := 0, vOutput1H := 0
-		, vOutput2 := 0, vOutput2X := 0, vOutput2Y := 0, vOutput2W := 0, vOutput2H := 0
+		, W_LB1 := 0, W_LB2 := 0, W_LB3 := 0, X_LB2 := 0, Y_LB2 := 0, X_LB3 := 0, Y_LB3 := 0
 		, OutputString := ""
 	
 	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
@@ -1244,18 +1244,25 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestString)
 		Gui, TT_C3: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceColCus, % ini_TTTyFaceFont
 	else
 		Gui, TT_C3: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
-	Gui, TT_C3: Add, Text, % "x0 y0 HwndIdTT_C3_T1", % OutputString
+	Gui, TT_C3: Add, Text, % "HwndIdTT_C3_T1 x0 y0", % OutputString
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_T1
-	Gui, TT_C3: Add, Listbox, % "x0 y0 HwndIdTT_C3_LB1" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutput1W + 4 . A_Space . "g" . "F_MouseMenuTT"
-	Gui, TT_C3: Add, Text, % "x0 y0 HwndIdTT_C3_T2", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
-	GuiControlGet, vOutput2, Pos, % IdTT_C3_T2
-	Gui, TT_C3: Add, Listbox, % "HwndIdTT_C3_LB2" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutput2W + 4 . A_Space . "g" . "F_MouseMenuTT"
-	Gui, TT_C3: Add, Listbox, % "HwndIdTT_C3_LB3" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutput1W + 4 . A_Space . "g" . "F_MouseMenuTT"
+	W_LB1 	:= vOutput1W
+	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB1 x0 y0" . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB1 + 4 . A_Space . "g" . "F_MouseMenuTT"
+	Gui, TT_C3: Add, Text, 		% "HwndIdTT_C3_T2 x0 y0", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
+	GuiControlGet, vOutput1, Pos, % IdTT_C3_T2
+	W_LB2 	:= vOutput1W
+	GuiControlGet, vOutput1, Pos, % IdTT_C3_LB1
+	X_LB2 	:= vOutput1X + vOutput1W, Y_LB2	:= vOutput1Y
+	Gui, TT_C3: Add, Listbox, % "HwndIdTT_C3_LB2" . A_Space . "x" . X_LB2 . A_Space . "y" . Y_LB2 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB2 + 4 . A_Space . "g" . "F_MouseMenuTT"
+	GuiControlGet, vOutput1, Pos, % IdTT_C3_LB2
+	X_LB3	:= vOutput1X + vOutput1W, Y_LB3	:= Y_LB2, W_LB3	:= W_LB1
+	Gui, TT_C3: Add, Listbox, % "HwndIdTT_C3_LB3" . A_Space . "x" . X_LB3 . A_Space . "y" . Y_LB3 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB3 + 4 . A_Space . "g" . "F_MouseMenuTT"
 	GuiControl, Hide, % IdTT_C3_T1
 	GuiControl, Hide, % IdTT_C3_T2
 	GuiControl, Font, % IdTT_C3_LB1		;fontcolor of listbox
 	GuiControl, Font, % IdTT_C3_LB2		;fontcolor of listbox
 	GuiControl, Font, % IdTT_C3_LB3		;fontcolor of listbox
+	Gui, TT_C3: Show, x100 y100 NoActivate AutoSize
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiTrigTipsMenuDefC2(AmountOfRows, LongestString)
@@ -4882,6 +4889,7 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 	, MaxValue := 0, WhichKey := 0, LongestString := "", Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0, Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 	, PosOutputVar := 0, PosOutputVarX := 0, PosOutputVarY := 0, PosOutputVarW := 0, PosOutputVarH := 0
 	, MenuX := 0, MenuY := 0, MouseX := 0, MouseY := 0
+	, NewX := 0, NewY := 0, NewW := 0, NewH := 0
 	
 	for key, value in a_Tips
 	{
@@ -5049,32 +5057,49 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		Gui, TT_C2: Show, x%MenuX% y%MenuY% NoActivate AutoSize
 		
 		Case 3:	
-		Gui, TT_C3: Show, x%MenuX% y%MenuY% NoActivate Hide
-		DetectHiddenWindows, On
-		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C3_Hwnd
-		DetectHiddenWindows, Off
-		Loop, % MonitorCoordinates.Count()
-			if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
-			{
-				Window1X := MonitorCoordinates[A_Index].Left
-				Window1H := MonitorCoordinates[A_Index].Height
-				Window1Y := MonitorCoordinates[A_Index].Top 
-				Window1W := MonitorCoordinates[A_Index].Width
-				Break
-			}
-		if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
-			MenuY -= Window2H
-		if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
-			MenuX -= Window2W
-		
-		GuiControl, Choose, % IdTT_C3_LB1, 1
-		GuiControlGet, PosOutputVar, Pos, % IdTT_C3_LB1
-		GuiControl, Move, % IdTT_C3_LB2, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
-		GuiControl, Choose, % IdTT_C3_LB2, 1
-		GuiControlGet, PosOutputVar, Pos, % IdTT_C3_LB2
-		GuiControl, Move, % IdTT_C3_LB3, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
-		GuiControl, Choose, % IdTT_C3_LB3, 1
-		Gui, TT_C3: Show, x%MenuX% y%MenuY% NoActivate AutoSize
+			;1. determine from which window triggerstring tips menu is called
+			WinGetPos, Window2X, Window2Y, Window2W, Window2H, A
+			;2. determine to which monitor belongs window from step 1.
+			Loop, % MonitorCoordinates.Count()
+				if ((Window2X >= MonitorCoordinates[A_Index].Left) and (Window2X <= MonitorCoordinates[A_Index].Right))
+				{
+					Window1X := MonitorCoordinates[A_Index].Left
+					Window1H := MonitorCoordinates[A_Index].Height
+					Window1Y := MonitorCoordinates[A_Index].Top 
+					Window1W := MonitorCoordinates[A_Index].Width
+					Break
+				}	;the coordinates Window1X, Window1Y, Window1W, Window1H now point to window from which triggerstring menu is called
+			;3. determine if triggerstring tips menu fits to this window
+			Gui, TT_C3: Show, x%MenuX% y%MenuY% NoActivate Hide
+ 			DetectHiddenWindows, On
+			WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C3_Hwnd
+			DetectHiddenWindows, Off
+			NewX := Window2X, NewY := Window2Y - Window2H, NewW := Window2W, NewH := Window2H
+			
+			Loop, % MonitorCoordinates.Count()
+				if ((NewX >= MonitorCoordinates[A_Index].Left) and (NewX <= MonitorCoordinates[A_Index].Right))
+				{
+					Window1X := MonitorCoordinates[A_Index].Left
+					Window1H := MonitorCoordinates[A_Index].Height
+					Window1Y := MonitorCoordinates[A_Index].Top 
+					Window1W := MonitorCoordinates[A_Index].Width
+					Break
+				}
+			if (NewY < Window1Y)
+				NewY += Window2H + 40
+				
+			if (NewX + NewW > Window1X + Window1W)
+				NewX := NewX - NewW
+			Gui, TT_C3: Show, x%NewX% y%NewY%
+
+			GuiControl, Choose, % IdTT_C3_LB1, 1
+			GuiControlGet, PosOutputVar, Pos, % IdTT_C3_LB1
+			GuiControl, Move, % IdTT_C3_LB2, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
+			GuiControl, Choose, % IdTT_C3_LB2, 1
+			GuiControlGet, PosOutputVar, Pos, % IdTT_C3_LB2
+			GuiControl, Move, % IdTT_C3_LB3, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
+			GuiControl, Choose, % IdTT_C3_LB3, 1
+			Gui, TT_C3: Show, x%MenuX% y%MenuY% NoActivate AutoSize
 		
 		Case 4:
 		GuiControl, Choose, % IdTT_C4_LB1, 1
