@@ -16,9 +16,9 @@ SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
 FileEncoding, UTF-16			; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN
 ; Warning! UTF-16 is not recognized by Notepad++ editor (2021), which recognizes correctly UCS-2 (defined by the International Standard ISO/IEC 10646). 
 ; BMP = Basic Multilingual Plane.
-CoordMode, Caret,	Window		; Only Window makes sense for functions prepared in this script to handle position of on screen GUIs. 
-CoordMode, ToolTip,	Window		; Only Window makes sense for functions prepared in this script to handle position of on screen GUIs.
-CoordMode, Mouse,	Window		; Only Window makes sense for functions prepared in this script to handle position of on screen GUIs.
+CoordMode, Caret,	Screen		; Only Window makes sense for functions prepared in this script to handle position of on screen GUIs. 
+CoordMode, ToolTip,	Screen		; Only Window makes sense for functions prepared in this script to handle position of on screen GUIs.
+CoordMode, Mouse,	Screen		; Only Window makes sense for functions prepared in this script to handle position of on screen GUIs.
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
@@ -553,6 +553,54 @@ Esc::
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_FlipTTMenu(WindowHandle, MenuX, MenuY, GuiName)
+{
+	Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+	,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+	,NewX := 0,	NewY := 0,	NewW := 0,	NewH := 0
+
+	;1. determine size of window from which triggerstring tips window is called	
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A		
+	;2. determine position and size of triggerstring window
+	Gui, % GuiName . ": Show", x%MenuX% y%MenuY% NoActivate Hide 	
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . WindowHandle
+	NewX := Window2X, NewY := Window2Y - Window2H, NewW := Window2W, NewH := Window2H	;bottom -> top
+	Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate Hide	;coordinates: screen
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . WindowHandle
+	;3. determine if triggerstring tips menu fits to this window
+	if (Window2Y < Window1Y)	;if triggerstring tips are above the window
+	{
+		NewY += Window2H + 60	;top -> bottom
+		Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate Hide 	;coordinates: screen
+		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . WindowHandle
+	}
+	if (Window2X + Window2W > Window1X + Window1W)	;if triggerstring tips are too far to the right
+		NewX -= Window2W + 40	;right -> left
+	DetectHiddenWindows, Off
+	Gui, TT_C3: Show, x%NewX% y%NewY% NoActivate 	
+}
+/* 			;1. determine size of window from which triggerstring tips window is called
+			WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+			;2. determine position and size of triggerstring window
+			Gui, TT_C3: Show, x%MenuX% y%MenuY% NoActivate Hide 	
+ 			DetectHiddenWindows, On
+			WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C3_Hwnd
+			NewX := Window2X, NewY := Window2Y - Window2H, NewW := Window2W, NewH := Window2H	;bottom -> top
+			Gui, TT_C3: Show, x%NewX% y%NewY% NoActivate Hide	;coordinates: screen
+			WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C3_Hwnd
+			;3. determine if triggerstring tips menu fits to this window
+			if (Window2Y < Window1Y)	;if triggerstring tips are above the window
+				NewY += Window2H + 60	;top -> bottom
+			Gui, TT_C3: Show, x%NewX% y%NewY% NoActivate Hide 	;coordinates: screen	
+			WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C3_Hwnd
+			if (Window2X + Window2W > Window1X + Window1W)	;if triggerstring tips are too far to the right
+				NewX -= Window2W + 40	;right -> left
+			DetectHiddenWindows, Off
+			Gui, TT_C3: Show, x%NewX% y%NewY% NoActivate 	
+ */
+
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 OneCharPressed(InputHook, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
@@ -1262,7 +1310,6 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestString)
 	GuiControl, Font, % IdTT_C3_LB1		;fontcolor of listbox
 	GuiControl, Font, % IdTT_C3_LB2		;fontcolor of listbox
 	GuiControl, Font, % IdTT_C3_LB3		;fontcolor of listbox
-	Gui, TT_C3: Show, x100 y100 NoActivate AutoSize
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiTrigTipsMenuDefC2(AmountOfRows, LongestString)
@@ -5056,50 +5103,36 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		GuiControl, Choose, % IdTT_C2_LB2, 1
 		Gui, TT_C2: Show, x%MenuX% y%MenuY% NoActivate AutoSize
 		
-		Case 3:	
-			;1. determine from which window triggerstring tips menu is called
-			WinGetPos, Window2X, Window2Y, Window2W, Window2H, A
-			;2. determine to which monitor belongs window from step 1.
-			Loop, % MonitorCoordinates.Count()
-				if ((Window2X >= MonitorCoordinates[A_Index].Left) and (Window2X <= MonitorCoordinates[A_Index].Right))
-				{
-					Window1X := MonitorCoordinates[A_Index].Left
-					Window1H := MonitorCoordinates[A_Index].Height
-					Window1Y := MonitorCoordinates[A_Index].Top 
-					Window1W := MonitorCoordinates[A_Index].Width
-					Break
-				}	;the coordinates Window1X, Window1Y, Window1W, Window1H now point to window from which triggerstring menu is called
-			;3. determine if triggerstring tips menu fits to this window
-			Gui, TT_C3: Show, x%MenuX% y%MenuY% NoActivate Hide
+		Case 3:
+			F_FlipTTMenu(TT_C3_Hwnd, MenuX, MenuY, "TT_C3")	
+
+/* 			;1. determine size of window from which triggerstring tips window is called
+			WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+			;2. determine position and size of triggerstring window
+			Gui, TT_C3: Show, x%MenuX% y%MenuY% NoActivate Hide 	
  			DetectHiddenWindows, On
 			WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C3_Hwnd
+			NewX := Window2X, NewY := Window2Y - Window2H, NewW := Window2W, NewH := Window2H	;bottom -> top
+			Gui, TT_C3: Show, x%NewX% y%NewY% NoActivate Hide	;coordinates: screen
+			WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C3_Hwnd
+			;3. determine if triggerstring tips menu fits to this window
+			if (Window2Y < Window1Y)	;if triggerstring tips are above the window
+				NewY += Window2H + 60	;top -> bottom
+			Gui, TT_C3: Show, x%NewX% y%NewY% NoActivate Hide 	;coordinates: screen	
+			WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C3_Hwnd
+			if (Window2X + Window2W > Window1X + Window1W)	;if triggerstring tips are too far to the right
+				NewX -= Window2W + 40	;right -> left
 			DetectHiddenWindows, Off
-			NewX := Window2X, NewY := Window2Y - Window2H, NewW := Window2W, NewH := Window2H
-			
-			Loop, % MonitorCoordinates.Count()
-				if ((NewX >= MonitorCoordinates[A_Index].Left) and (NewX <= MonitorCoordinates[A_Index].Right))
-				{
-					Window1X := MonitorCoordinates[A_Index].Left
-					Window1H := MonitorCoordinates[A_Index].Height
-					Window1Y := MonitorCoordinates[A_Index].Top 
-					Window1W := MonitorCoordinates[A_Index].Width
-					Break
-				}
-			if (NewY < Window1Y)
-				NewY += Window2H + 40
-				
-			if (NewX + NewW > Window1X + Window1W)
-				NewX := NewX - NewW
-			Gui, TT_C3: Show, x%NewX% y%NewY%
-
-			GuiControl, Choose, % IdTT_C3_LB1, 1
-			GuiControlGet, PosOutputVar, Pos, % IdTT_C3_LB1
-			GuiControl, Move, % IdTT_C3_LB2, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
-			GuiControl, Choose, % IdTT_C3_LB2, 1
-			GuiControlGet, PosOutputVar, Pos, % IdTT_C3_LB2
-			GuiControl, Move, % IdTT_C3_LB3, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
-			GuiControl, Choose, % IdTT_C3_LB3, 1
-			Gui, TT_C3: Show, x%MenuX% y%MenuY% NoActivate AutoSize
+			Gui, TT_C3: Show, x%NewX% y%NewY% NoActivate 	
+ */
+			; GuiControl, Choose, % IdTT_C3_LB1, 1
+			; GuiControlGet, PosOutputVar, Pos, % IdTT_C3_LB1
+			; GuiControl, Move, % IdTT_C3_LB2, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
+			; GuiControl, Choose, % IdTT_C3_LB2, 1
+			; GuiControlGet, PosOutputVar, Pos, % IdTT_C3_LB2
+			; GuiControl, Move, % IdTT_C3_LB3, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
+			; GuiControl, Choose, % IdTT_C3_LB3, 1
+			; Gui, TT_C3: Show, x%NewX% y%NewY% NoActivate AutoSize
 		
 		Case 4:
 		GuiControl, Choose, % IdTT_C4_LB1, 1
