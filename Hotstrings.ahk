@@ -553,6 +553,23 @@ Esc::
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_LongestTrigTipString(a_array)	
+{
+	key := 0, value := "", ThisValue := "", MaxValue := 0, WhichKey := 0, WhichValue := ""
+
+	for key, value in a_array
+	{
+		ThisValue := StrLen(value)
+		if (ThisValue > MaxValue)
+		{
+			MaxValue := ThisValue
+			WhichKey := key
+			WhichValue := value
+		}
+	}
+	return WhichValue
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_FlipTTMenu(WindowHandle, MenuX, MenuY, GuiName)
 {
 	Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
@@ -4913,28 +4930,17 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 {
 	global ;assume-global mode
 	local key := 0, value := "", ThisValue := 0
-	, MaxValue := 0, WhichKey := 0, LongestString := "", Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0, Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+	, Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0, Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 	, PosOutputVar := 0, PosOutputVarX := 0, PosOutputVarY := 0, PosOutputVarW := 0, PosOutputVarH := 0
 	, MenuX := 0, MenuY := 0, MouseX := 0, MouseY := 0
 	, NewX := 0, NewY := 0, NewW := 0, NewH := 0
-	
-	for key, value in a_Tips
-	{
-		ThisValue := StrLen(value)
-		if (ThisValue > MaxValue)
-		{
-			MaxValue := ThisValue
-			WhichKey := key
-			WhichValue := value
-		}
-	}
-	LongestString := WhichValue
 	
 	Switch ini_TTCn
 	{
 		Case 1: 
 		Gui, TT_C1: Destroy	;this line is necessary to display new menu each time this function is called.
-		F_GuiTrigTipsMenuDefC1(a_Tips.Count(), LongestString)	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
+		F_GuiTrigTipsMenuDefC1(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
+		; F_GuiTrigTipsMenuDefC1(a_Tips.Count(), LongestString)	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
 		ThisValue := ""	
 		for key, value in a_Tips
 			ThisValue .= value . "|"
@@ -4942,7 +4948,7 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		
 		Case 2: 
 		Gui, TT_C2: Destroy	;this line is necessary to display new menu each time this function is called.
-		F_GuiTrigTipsMenuDefC2(a_Tips.Count(), LongestString)
+		F_GuiTrigTipsMenuDefC2(a_Tips.Count(), F_LongestTrigTipString(a_Tips))
 		ThisValue := ""
 		for key, value in a_Tips
 			ThisValue .= value . "|"
@@ -4961,7 +4967,7 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		
 		Case 3: 
 		Gui, TT_C3: Destroy	;this line is necessary to display new menu each time this function is called.
-		F_GuiTrigTipsMenuDefC3(a_Tips.Count(), LongestString)
+		F_GuiTrigTipsMenuDefC3(a_Tips.Count(), F_LongestTrigTipString(a_Tips))
 		ThisValue := ""
 		for key, value in a_Tips
 			ThisValue .= value . "|"
