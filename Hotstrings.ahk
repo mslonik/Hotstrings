@@ -553,6 +553,28 @@ Esc::
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+GuiEventsGuiClose()	;GUI event (close)
+{
+	global	;assume-global mode of operation
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled	
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	
+	Gui, TDemo: 		Destroy
+	Gui, TTstyling: 	Destroy
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+GuiEventsGuiEscape()	;GUI event (close)	;this function is somehow blocked (dead code)
+{
+	global	;assume-global mode of operation
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled	
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	
+	Gui, TDemo: 		Destroy
+	Gui, TTstyling: 	Destroy
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_WhereDisplayTT_Menu(ini_TTTP)
 {
 	MenuX := 0, MenuY := 0, MouseX := 0, MouseY := 0
@@ -4236,15 +4258,9 @@ F_TTStylingTab3(OneTime*)
 		return
 	}
 	if (WinExist("ahk_id" TDemoHwnd))
-	{
 		Gui, TDemo: 		Destroy
-		;F_HMstyling_B5()	;Button: Test styling
-	}
 	if (WinExist("ahk_id" HDemoHwnd))
-	{
 		Gui, HDemo: 		Destroy
-		;F_TTstyling_B5()	;Button: Test styling
-	}
 	
 	Gui, TTstyling: Submit, NoHide
 	if (TTStylingTab3 != PreviousTab3)
