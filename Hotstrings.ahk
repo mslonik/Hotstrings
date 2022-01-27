@@ -571,7 +571,7 @@ F_FlipTTMenu(WindowHandle, MenuX, MenuY, GuiName)
 	;3. determine if triggerstring tips menu fits to this window
 	if (Window2Y < Window1Y)	;if triggerstring tips are above the window
 	{
-		NewY += Window2H + 60	;top -> bottom
+		NewY += Window2H + 40	;top -> bottom
 		Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate Hide 	;coordinates: screen
 		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . WindowHandle
 	}
@@ -580,26 +580,6 @@ F_FlipTTMenu(WindowHandle, MenuX, MenuY, GuiName)
 	DetectHiddenWindows, Off
 	Gui, TT_C3: Show, x%NewX% y%NewY% NoActivate 	
 }
-/* 			;1. determine size of window from which triggerstring tips window is called
-			WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-			;2. determine position and size of triggerstring window
-			Gui, TT_C3: Show, x%MenuX% y%MenuY% NoActivate Hide 	
- 			DetectHiddenWindows, On
-			WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C3_Hwnd
-			NewX := Window2X, NewY := Window2Y - Window2H, NewW := Window2W, NewH := Window2H	;bottom -> top
-			Gui, TT_C3: Show, x%NewX% y%NewY% NoActivate Hide	;coordinates: screen
-			WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C3_Hwnd
-			;3. determine if triggerstring tips menu fits to this window
-			if (Window2Y < Window1Y)	;if triggerstring tips are above the window
-				NewY += Window2H + 60	;top -> bottom
-			Gui, TT_C3: Show, x%NewX% y%NewY% NoActivate Hide 	;coordinates: screen	
-			WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C3_Hwnd
-			if (Window2X + Window2W > Window1X + Window1W)	;if triggerstring tips are too far to the right
-				NewX -= Window2W + 40	;right -> left
-			DetectHiddenWindows, Off
-			Gui, TT_C3: Show, x%NewX% y%NewY% NoActivate 	
- */
-
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 OneCharPressed(InputHook, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
@@ -1301,10 +1281,10 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestString)
 	W_LB2 	:= vOutput1W
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_LB1
 	X_LB2 	:= vOutput1X + vOutput1W, Y_LB2	:= vOutput1Y
-	Gui, TT_C3: Add, Listbox, % "HwndIdTT_C3_LB2" . A_Space . "x" . X_LB2 . A_Space . "y" . Y_LB2 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB2 + 4 . A_Space . "g" . "F_MouseMenuTT"
+	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB2" . A_Space . "x" . X_LB2 . A_Space . "y" . Y_LB2 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB2 + 4 . A_Space . "g" . "F_MouseMenuTT"
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_LB2
 	X_LB3	:= vOutput1X + vOutput1W, Y_LB3	:= Y_LB2, W_LB3	:= W_LB1
-	Gui, TT_C3: Add, Listbox, % "HwndIdTT_C3_LB3" . A_Space . "x" . X_LB3 . A_Space . "y" . Y_LB3 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB3 + 4 . A_Space . "g" . "F_MouseMenuTT"
+	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB3" . A_Space . "x" . X_LB3 . A_Space . "y" . Y_LB3 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB3 + 4 . A_Space . "g" . "F_MouseMenuTT"
 	GuiControl, Hide, % IdTT_C3_T1
 	GuiControl, Hide, % IdTT_C3_T2
 	GuiControl, Font, % IdTT_C3_LB1		;fontcolor of listbox
@@ -1341,7 +1321,7 @@ F_GuiTrigTipsMenuDefC2(AmountOfRows, LongestString)
 	GuiControl, Font, % IdTT_C2_LB2		;fontcolor of listbox
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)
+F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)	;tu jestem
 {
 	global	;assume-global mode
 	local vOutput := 0, vOutputX := 0, vOutputY := 0, vOutputW := 0, vOutputH := 0, OutputString := ""
@@ -5053,8 +5033,8 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 	
 	Switch ini_TTCn
 	{
-		Case 1:
-		Gui, TT_C1: Show, x%MenuX% y%MenuY% NoActivate Hide
+		Case 1:	F_FlipTTMenu(TT_C1_Hwnd, MenuX, MenuY, "TT_C1")	
+/* 		Gui, TT_C1: Show, x%MenuX% y%MenuY% NoActivate Hide
 		DetectHiddenWindows, On
 		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C1_Hwnd
 		DetectHiddenWindows, Off
@@ -5075,9 +5055,9 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		
 		GuiControl, Choose, % IdTT_C1_LB1, 1
 		Gui, TT_C1: Show, x%MenuX% y%MenuY% NoActivate	
-		
-		Case 2:
-		Gui, TT_C2: Show, x%MenuX% y%MenuY% NoActivate Hide
+ */		
+		Case 2:	F_FlipTTMenu(TT_C2_Hwnd, MenuX, MenuY, "TT_C2")	
+/* 		Gui, TT_C2: Show, x%MenuX% y%MenuY% NoActivate Hide
 		DetectHiddenWindows, On
 		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C2_Hwnd
 		DetectHiddenWindows, Off
@@ -5101,10 +5081,10 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		GuiControlGet, PosOutputVar, Pos, % IdTT_C2_LB1
 		GuiControl, Move, % IdTT_C2_LB2, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
 		GuiControl, Choose, % IdTT_C2_LB2, 1
-		Gui, TT_C2: Show, x%MenuX% y%MenuY% NoActivate AutoSize
+		Gui, TT_C2: Show, x%MenuX% y%MenuY% NoActivate AutoSize 
+		*/
 		
-		Case 3:
-			F_FlipTTMenu(TT_C3_Hwnd, MenuX, MenuY, "TT_C3")	
+		Case 3:	F_FlipTTMenu(TT_C3_Hwnd, MenuX, MenuY, "TT_C3")	
 
 /* 			;1. determine size of window from which triggerstring tips window is called
 			WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
