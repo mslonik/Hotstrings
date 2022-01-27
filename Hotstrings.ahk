@@ -736,7 +736,6 @@ F_GUIinit()
 		;OutputDebug, % "ini_GuiReload:" . A_Tab . ini_GuiReload . A_Tab . "ini_WhichGui:" . A_Tab . ini_WhichGui
 		ini_GuiReload := false
 		IniWrite, % ini_GuiReload,		% HADConfig, GraphicalUserInterface, GuiReload
-		F_SaveGUIPos("reset")		;save position of main window
 		
 		Switch ini_WhichGui
 		{
