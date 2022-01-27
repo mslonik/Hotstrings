@@ -1,4 +1,4 @@
-/* 
+﻿/* 
 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen		; Only Window makes sense for functions prepared in th
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.2"
+global AppVersion				:= "3.6.3"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -42,13 +42,9 @@ global 	HADL 				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libra
 ,		v_InputString 			:= ""		;Main loop of application; this variable stores information about keys pressed by user which can differ in size from actual hotstring definition.
 ,		v_MouseX 				:= 0			;Main loop of application
 ,		v_MouseY 				:= 0			;Main loop of application
-; ,		v_TipsFlag 			:= false		;Main loop of application
-
 ,		v_IndexLog 			:= 1			;for logging, if Hotstrings application is run with d parameter.
-
 ,		v_TypedTriggerstring 	:= ""		;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
 ,		v_UndoHotstring 		:= ""		;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
-
 ,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time; f_ stands for "flag"
 ,		TT_C1_Hwnd 			:= 0, TT_C2_Hwnd := 0, TT_C3_Hwnd := 0, HMenuCliHwnd := 0, HMenuAHKHwnd	:= 0, HS3GuiHwnd := 0, HS4GuiHwnd := 0, TT_C4_Hwnd := 0, TDemoHwnd := 0, HDemoHwnd := 0 ;This is a trick to initialize global variables in order to not get warning (#Warn) message
 ,		HotstringDelay			:= 0
@@ -423,10 +419,10 @@ return
 #if
 
 ;The following lines are hotkeys to handle all combinations which are not covered by the main function loop.
-; ~Alt::	;if commented out, only for debugging reasons
+~Alt::	;if commented out, only for debugging reasons
 ~MButton::
 ~RButton::
-;~LButton::	;if commented out, only for debugging reasons ;from now LButton click will not close TMenuAHK_C1; LButton is used to trigger F_MouseMenuTT by "g" in F_GuiTrigTipsMenuDefC1 ;if A_ThisFunc != F_MouseMenuTT, then close TMenuAHK_C1
+~LButton::	;if commented out, only for debugging reasons ;from now LButton click will not close TMenuAHK_C1; LButton is used to trigger F_MouseMenuTT by "g" in F_GuiTrigTipsMenuDefC1 ;if A_ThisFunc != F_MouseMenuTT, then close TMenuAHK_C1
 ~LWin::
 ~RWin::
 ~Down::
