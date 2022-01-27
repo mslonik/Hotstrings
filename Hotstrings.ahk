@@ -3695,45 +3695,63 @@ F_EvBH_R1R2()
 	Gui, GuiEvents: Submit, NoHide
 	Switch EvBH_R1R2
 	{
-		Case 1:
-		GuiControl, Enable, 	% IdEvBH_T3
-		GuiControl, Enable, 	% IdEvBH_T4
-		GuiControl, Enable, 	% IdEvBH_T5
-		GuiControl, Enable, 	% IdEvBH_R3
-		GuiControl, Enable, 	% IdEvBH_R4
-		GuiControl, Enable, 	% IdEvBH_T6
-		GuiControl, Enable, 	% IdEvBH_S1
-		GuiControl, Enable, 	% IdEvBH_T7
-		GuiControl, Enable, 	% IdEvBH_T8
-		GuiControl, Enable, 	% IdEvBH_T9
-		GuiControl, Enable, 	% IdEvBH_R5
-		GuiControl, Enable, 	% IdEvBH_R6
-		GuiControl, Enable, 	% IdEvBH_B2
-		Switch EvBH_R3R4
-		{
-			Case 1:
-			GuiControl, Enable,		% IdEvBH_T6
-			GuiControl, Enable,		% IdEvBH_S1
-			GuiControl, Enable,		% IdEvBH_T7
-			Case 2:
-			GuiControl, Disable,	% IdEvBH_T6
-			GuiControl, Disable,	% IdEvBH_S1
-			GuiControl, Disable,	% IdEvBH_T7
-		}
-		Case 2:
-		GuiControl, Disable, 	% IdEvBH_T3
-		GuiControl, Disable, 	% IdEvBH_T4
-		GuiControl, Disable, 	% IdEvBH_T5
-		GuiControl, Disable, 	% IdEvBH_R3
-		GuiControl, Disable, 	% IdEvBH_R4
-		GuiControl, Disable, 	% IdEvBH_T6
-		GuiControl, Disable, 	% IdEvBH_S1
-		GuiControl, Disable, 	% IdEvBH_T7
-		GuiControl, Disable, 	% IdEvBH_T8
-		GuiControl, Disable, 	% IdEvBH_T9
-		GuiControl, Disable, 	% IdEvBH_R5
-		GuiControl, Disable, 	% IdEvBH_R6
-		GuiControl, Disable, 	% IdEvBH_B2
+		Case 1:	;left dot
+			GuiControl, Enable, 	% IdEvBH_T3
+			GuiControl, Enable, 	% IdEvBH_T4
+			GuiControl, Enable, 	% IdEvBH_T5
+			GuiControl, Enable, 	% IdEvBH_R3
+			GuiControl, Enable, 	% IdEvBH_R4
+			GuiControl, Enable, 	% IdEvBH_T6
+			GuiControl, Enable, 	% IdEvBH_S1
+			GuiControl, Enable, 	% IdEvBH_T7
+			GuiControl, Enable, 	% IdEvBH_T8
+			GuiControl, Enable, 	% IdEvBH_T9
+			GuiControl, Enable, 	% IdEvBH_R5
+			GuiControl, Enable, 	% IdEvBH_R6
+			GuiControl, Enable, 	% IdEvBH_B2
+			Switch EvBH_R3R4
+			{
+				Case 1:
+				GuiControl, Enable,		% IdEvBH_T6
+				GuiControl, Enable,		% IdEvBH_S1
+				GuiControl, Enable,		% IdEvBH_T7
+				Case 2:
+				GuiControl, Disable,	% IdEvBH_T6
+				GuiControl, Disable,	% IdEvBH_S1
+				GuiControl, Disable,	% IdEvBH_T7
+			}
+			GuiControl, Enable,		% IdEvBH_T10
+			GuiControl, Enable,		% IdEvBH_R7
+			GuiControl, Enable,		% IdEvBH_R8
+			GuiControl, Enable,		% IdEvBH_T12
+			GuiControl, Enable,		% IdEvBH_S2
+			GuiControl, Enable,		% IdEvBH_T13
+			GuiControl, Enable,		% IdEvBH_S3
+			GuiControl, Enable,		% IdEvBH_T14
+
+		Case 2:	;right dot
+			GuiControl, Disable, 	% IdEvBH_T3
+			GuiControl, Disable, 	% IdEvBH_T4
+			GuiControl, Disable, 	% IdEvBH_T5
+			GuiControl, Disable, 	% IdEvBH_R3
+			GuiControl, Disable, 	% IdEvBH_R4
+			GuiControl, Disable, 	% IdEvBH_T6
+			GuiControl, Disable, 	% IdEvBH_S1
+			GuiControl, Disable, 	% IdEvBH_T7
+			GuiControl, Disable, 	% IdEvBH_T8
+			GuiControl, Disable, 	% IdEvBH_T9
+			GuiControl, Disable, 	% IdEvBH_R5
+			GuiControl, Disable, 	% IdEvBH_R6
+
+			GuiControl, Disable,	% IdEvBH_T10
+			GuiControl, Disable,	% IdEvBH_R7
+			GuiControl, Disable,	% IdEvBH_R8
+			GuiControl, Disable,	% IdEvBH_T12
+			GuiControl, Disable,	% IdEvBH_S2
+			GuiControl, Disable,	% IdEvBH_T13
+			GuiControl, Disable,	% IdEvBH_S3
+			GuiControl, Disable,	% IdEvBH_T14
+			GuiControl, Disable, 	% IdEvBH_B2
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
