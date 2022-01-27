@@ -553,6 +553,15 @@ Esc::
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_ConvertArrayToString(a_array)
+{
+	key := 0, value := "", ThisValue := ""
+
+	for key, value in a_array
+		ThisValue .= value . "|"
+	return ThisValue
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LongestTrigTipString(a_array)	
 {
 	key := 0, value := "", ThisValue := "", MaxValue := 0, WhichKey := 0, WhichValue := ""
@@ -4938,21 +4947,14 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 	Switch ini_TTCn
 	{
 		Case 1: 
-		Gui, TT_C1: Destroy	;this line is necessary to display new menu each time this function is called.
-		F_GuiTrigTipsMenuDefC1(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
-		; F_GuiTrigTipsMenuDefC1(a_Tips.Count(), LongestString)	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
-		ThisValue := ""	
-		for key, value in a_Tips
-			ThisValue .= value . "|"
-		GuiControl,, % IdTT_C1_LB1, % ThisValue
-		
+			Gui, TT_C1: Destroy	;this line is necessary to display new menu each time this function is called.
+			F_GuiTrigTipsMenuDefC1(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
+			GuiControl,, % IdTT_C1_LB1, % F_ConvertArrayToString(a_Tips)
+
 		Case 2: 
-		Gui, TT_C2: Destroy	;this line is necessary to display new menu each time this function is called.
-		F_GuiTrigTipsMenuDefC2(a_Tips.Count(), F_LongestTrigTipString(a_Tips))
-		ThisValue := ""
-		for key, value in a_Tips
-			ThisValue .= value . "|"
-		GuiControl,, % IdTT_C2_LB1, % ThisValue
+			Gui, TT_C2: Destroy	;this line is necessary to display new menu each time this function is called.
+			F_GuiTrigTipsMenuDefC2(a_Tips.Count(), F_LongestTrigTipString(a_Tips))
+			GuiControl,, % IdTT_C2_LB1, % F_ConvertArrayToString(a_Tips)
 		ThisValue := ""
 		for key, value in a_TipsOpt
 		{
@@ -4966,12 +4968,9 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		GuiControl,, % IdTT_C2_LB2, % ThisValue
 		
 		Case 3: 
-		Gui, TT_C3: Destroy	;this line is necessary to display new menu each time this function is called.
-		F_GuiTrigTipsMenuDefC3(a_Tips.Count(), F_LongestTrigTipString(a_Tips))
-		ThisValue := ""
-		for key, value in a_Tips
-			ThisValue .= value . "|"
-		GuiControl,, % IdTT_C3_LB1, % ThisValue
+			Gui, TT_C3: Destroy	;this line is necessary to display new menu each time this function is called.
+			F_GuiTrigTipsMenuDefC3(a_Tips.Count(), F_LongestTrigTipString(a_Tips))
+			GuiControl,, % IdTT_C3_LB1, % F_ConvertArrayToString(a_Tips)
 		ThisValue := ""
 		for key, value in a_TipsOpt
 		{
@@ -4983,20 +4982,20 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 				ThisValue .= "╳" . "|"	
 		}
 		GuiControl,, % IdTT_C3_LB2, % ThisValue
-		ThisValue := ""
-		for key, value in a_TipsHS
-			ThisValue .= value . "|"
-		GuiControl,, % IdTT_C3_LB3, % ThisValue
+		; ThisValue := ""
+		; for key, value in a_TipsHS
+			; ThisValue .= value . "|"
+		GuiControl,, % IdTT_C3_LB3, % F_ConvertArrayToString(a_TipsHS)
 		
 		Case 4:
 		GuiControl,, % IdTT_C4_LB1, |	;this line is necessary to display new menu each time this function is called.
 		GuiControl,, % IdTT_C4_LB2, |	;this line is necessary to display new menu each time this function is called.
 		GuiControl,, % IdTT_C4_LB3, |	;this line is necessary to display new menu each time this function is called.
 		PreviousWindowID := WinExist("A")
-		ThisValue := ""
-		for key, value in a_Tips
-			ThisValue .= value . "|"
-		GuiControl,, % IdTT_C4_LB1, % ThisValue
+		; ThisValue := ""
+		; for key, value in a_Tips
+			; ThisValue .= value . "|"
+		GuiControl,, % IdTT_C4_LB1, % F_ConvertArrayToString(a_Tips)
 		ThisValue := ""
 		for key, value in a_TipsOpt
 		{
@@ -5008,10 +5007,10 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 				ThisValue .= "╳" . "|"	
 		}
 		GuiControl,, % IdTT_C4_LB2, % ThisValue
-		ThisValue := ""
-		for key, value in a_TipsHS
-			ThisValue .= value . "|"
-		GuiControl,, % IdTT_C4_LB3, % ThisValue
+		; ThisValue := ""
+		; for key, value in a_TipsHS
+			; ThisValue .= value . "|"
+		GuiControl,, % IdTT_C4_LB3, % F_ConvertArrayToString(a_TipsHS)
 		
 	}
 	
