@@ -559,7 +559,7 @@ F_WhereDisplayTT_Menu(ini_TTTP)
 
 	Switch ini_TTTP
 	{
-		Case 1:
+		Case 1:	;caret The problem is that some windows, even those containing text editors, do not enable A_CaretX and A_CaretY. Then, as backup scenario, the triggerstring menu is dispplayed at cursor.
 			if (A_CaretX and A_CaretY)
 				{
 					MenuX := A_CaretX + 20
@@ -569,16 +569,16 @@ F_WhereDisplayTT_Menu(ini_TTTP)
 				{
 					MouseGetPos, MouseX, MouseY
 					MenuX := MouseX + 20
-					MenuY := MouseY + 20
+					MenuY := MouseY - 20
 				}
 
-		Case 2:
+		Case 2:	;cursor
 			MouseGetPos, MouseX, MouseY
 			MenuX := MouseX + 20
-			MenuY := MouseY + 20
+			MenuY := MouseY - 20
 	}
-	return [MenuX, MenuY]
 	; OutputDebug, % "ini_TTTP:" . A_Tab . ini_TTTP . A_Tab . "A_CaretX:" . A_Tab . A_CaretX . A_Tab . "A_CaretY:" . A_Tab . A_CaretY . A_Tab . "MenuX:" . A_Tab . MenuX . A_Tab . "MenuY" . A_Tab . MenuY . "`n"
+	return [MenuX, MenuY]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TrigTipsSecondColumn(a_array1, a_array2)
