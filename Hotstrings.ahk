@@ -553,6 +553,49 @@ Esc::
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_WhereDisplayTT_Menu(ini_TTTP)
+{
+	MenuX := 0, MenuY := 0, MouseX := 0, MouseY := 0
+
+	Switch ini_TTTP
+	{
+		Case 1:
+			if (A_CaretX and A_CaretY)
+				{
+					MenuX := A_CaretX + 20
+					MenuY := A_CaretY - 20
+				}
+				else
+				{
+					MouseGetPos, MouseX, MouseY
+					MenuX := MouseX + 20
+					MenuY := MouseY + 20
+				}
+
+		Case 2:
+			MouseGetPos, MouseX, MouseY
+			MenuX := MouseX + 20
+			MenuY := MouseY + 20
+	}
+	return [MenuX, MenuY]
+	; OutputDebug, % "ini_TTTP:" . A_Tab . ini_TTTP . A_Tab . "A_CaretX:" . A_Tab . A_CaretX . A_Tab . "A_CaretY:" . A_Tab . A_CaretY . A_Tab . "MenuX:" . A_Tab . MenuX . A_Tab . "MenuY" . A_Tab . MenuY . "`n"
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_TrigTipsSecondColumn(a_array1, a_array2)
+{
+	key := 0, value := "", ThisValue := ""
+	for key, value in a_array1
+	{
+		if (a_array2[key] = "En") and (InStr(value, "*"))
+			ThisValue .= "✓" . "|"	
+		if (a_array2[key] = "En") and (!InStr(value, "*"))						
+			ThisValue .= "↓" . "|"	
+		if (a_array2[key] = "Dis")
+			ThisValue .= "╳" . "|"	
+	}
+	return ThisValue
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ConvertArrayToString(a_array)
 {
 	key := 0, value := "", ThisValue := ""
@@ -4938,11 +4981,7 @@ F_TTstyling(OneTime*)
 F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 {
 	global ;assume-global mode
-	local key := 0, value := "", ThisValue := 0
-	, Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0, Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
-	, PosOutputVar := 0, PosOutputVarX := 0, PosOutputVarY := 0, PosOutputVarW := 0, PosOutputVarH := 0
-	, MenuX := 0, MenuY := 0, MouseX := 0, MouseY := 0
-	, NewX := 0, NewY := 0, NewW := 0, NewH := 0
+	local a_TTMenuPos := []
 	
 	Switch ini_TTCn
 	{
@@ -4950,99 +4989,34 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			Gui, TT_C1: Destroy	;this line is necessary to display new menu each time this function is called.
 			F_GuiTrigTipsMenuDefC1(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
 			GuiControl,, % IdTT_C1_LB1, % F_ConvertArrayToString(a_Tips)
+			a_TTMenuPos := F_WhereDisplayTT_Menu(ini_TTTP)
+			F_FlipTTMenu(TT_C1_Hwnd, a_TTMenuPos[1], a_TTMenuPos[2], "TT_C1")	
 
 		Case 2: 
 			Gui, TT_C2: Destroy	;this line is necessary to display new menu each time this function is called.
 			F_GuiTrigTipsMenuDefC2(a_Tips.Count(), F_LongestTrigTipString(a_Tips))
 			GuiControl,, % IdTT_C2_LB1, % F_ConvertArrayToString(a_Tips)
-		ThisValue := ""
-		for key, value in a_TipsOpt
-		{
-			if (a_TipsEnDis[key] = "En") and (InStr(value, "*"))
-				ThisValue .= "✓" . "|"	
-			if (a_TipsEnDis[key] = "En") and (!InStr(value, "*"))						
-				ThisValue .= "↓" . "|"	
-			if (a_TipsEnDis[key] = "Dis")
-				ThisValue .= "╳" . "|"	
-		}
-		GuiControl,, % IdTT_C2_LB2, % ThisValue
-		
+			GuiControl,, % IdTT_C2_LB2, % F_TrigTipsSecondColumn(a_TipsOpt, a_TipsEnDis)
+			a_TTMenuPos := F_WhereDisplayTT_Menu(ini_TTTP)
+			F_FlipTTMenu(TT_C2_Hwnd, a_TTMenuPos[1], a_TTMenuPos[2], "TT_C2")
+
 		Case 3: 
 			Gui, TT_C3: Destroy	;this line is necessary to display new menu each time this function is called.
 			F_GuiTrigTipsMenuDefC3(a_Tips.Count(), F_LongestTrigTipString(a_Tips))
 			GuiControl,, % IdTT_C3_LB1, % F_ConvertArrayToString(a_Tips)
-		ThisValue := ""
-		for key, value in a_TipsOpt
-		{
-			if (a_TipsEnDis[key] = "En") and (InStr(value, "*"))
-				ThisValue .= "✓" . "|"	
-			if (a_TipsEnDis[key] = "En") and (!InStr(value, "*"))						
-				ThisValue .= "↓" . "|"	
-			if (a_TipsEnDis[key] = "Dis")
-				ThisValue .= "╳" . "|"	
-		}
-		GuiControl,, % IdTT_C3_LB2, % ThisValue
-		; ThisValue := ""
-		; for key, value in a_TipsHS
-			; ThisValue .= value . "|"
-		GuiControl,, % IdTT_C3_LB3, % F_ConvertArrayToString(a_TipsHS)
+			GuiControl,, % IdTT_C3_LB2, % F_TrigTipsSecondColumn(a_TipsOpt, a_TipsEnDis)
+			GuiControl,, % IdTT_C3_LB3, % F_ConvertArrayToString(a_TipsHS)
+			a_TTMenuPos := F_WhereDisplayTT_Menu(ini_TTTP)
+			F_FlipTTMenu(TT_C3_Hwnd, a_TTMenuPos[1], a_TTMenuPos[2], "TT_C3")	
 		
 		Case 4:
-		GuiControl,, % IdTT_C4_LB1, |	;this line is necessary to display new menu each time this function is called.
-		GuiControl,, % IdTT_C4_LB2, |	;this line is necessary to display new menu each time this function is called.
-		GuiControl,, % IdTT_C4_LB3, |	;this line is necessary to display new menu each time this function is called.
-		PreviousWindowID := WinExist("A")
-		; ThisValue := ""
-		; for key, value in a_Tips
-			; ThisValue .= value . "|"
-		GuiControl,, % IdTT_C4_LB1, % F_ConvertArrayToString(a_Tips)
-		ThisValue := ""
-		for key, value in a_TipsOpt
-		{
-			if (a_TipsEnDis[key] = "En") and (InStr(value, "*"))
-				ThisValue .= "✓" . "|"	
-			if (a_TipsEnDis[key] = "En") and (!InStr(value, "*"))						
-				ThisValue .= "↓" . "|"	
-			if (a_TipsEnDis[key] = "Dis")
-				ThisValue .= "╳" . "|"	
-		}
-		GuiControl,, % IdTT_C4_LB2, % ThisValue
-		; ThisValue := ""
-		; for key, value in a_TipsHS
-			; ThisValue .= value . "|"
-		GuiControl,, % IdTT_C4_LB3, % F_ConvertArrayToString(a_TipsHS)
-		
-	}
-	
-	if (ini_TTTP = 1)	;Menu Hotstring Menu Position = 1 (caret)
-	{
-		if (A_CaretX and A_CaretY)
-		{
-			MenuX := A_CaretX + 20
-			MenuY := A_CaretY - 20
-		}
-		else
-		{
-			MouseGetPos, MouseX, MouseY
-			MenuX := MouseX + 20
-			MenuY := MouseY + 20
-		}
-	}
-	if (ini_TTTP = 2)	;Menu Hotstring Menu Position = 2 (mouse coursor)
-	{
-		MouseGetPos, MouseX, MouseY
-		MenuX := MouseX + 20
-		MenuY := MouseY + 20
-	}
-	OutputDebug, % "ini_TTTP:" . A_Tab . ini_TTTP . A_Tab . "A_CaretX:" . A_Tab . A_CaretX . A_Tab . "A_CaretY:" . A_Tab . A_CaretY . A_Tab . "MenuX:" . A_Tab . MenuX . A_Tab . "MenuY" . A_Tab . MenuY . "`n"
-	
-	Switch ini_TTCn
-	{
-		Case 1:	F_FlipTTMenu(TT_C1_Hwnd, MenuX, MenuY, "TT_C1")	
-		Case 2:	F_FlipTTMenu(TT_C2_Hwnd, MenuX, MenuY, "TT_C2")	
-		Case 3:	F_FlipTTMenu(TT_C3_Hwnd, MenuX, MenuY, "TT_C3")	
-		
-		Case 4:
+			GuiControl,, % IdTT_C4_LB1, |	;this line is necessary to display new menu each time this function is called.
+			GuiControl,, % IdTT_C4_LB2, |	;this line is necessary to display new menu each time this function is called.
+			GuiControl,, % IdTT_C4_LB3, |	;this line is necessary to display new menu each time this function is called.
+			PreviousWindowID := WinExist("A")
+			GuiControl,, % IdTT_C4_LB1, % F_ConvertArrayToString(a_Tips)
+			GuiControl,, % IdTT_C4_LB2, % F_TrigTipsSecondColumn(a_TipsOpt, a_TipsEnDis)
+			GuiControl,, % IdTT_C4_LB3, % F_ConvertArrayToString(a_TipsHS)
 			GuiControl, Choose, % IdTT_C4_LB1, 1
 			GuiControl, Choose, % IdTT_C4_LB2, 1
 			GuiControl, Choose, % IdTT_C4_LB3, 1
