@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -578,7 +578,7 @@ F_FlipTTMenu(WindowHandle, MenuX, MenuY, GuiName)
 	if (Window2X + Window2W > Window1X + Window1W)	;if triggerstring tips are too far to the right
 		NewX -= Window2W + 40	;right -> left
 	DetectHiddenWindows, Off
-	Gui, TT_C3: Show, x%NewX% y%NewY% NoActivate 	
+	Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate 	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 OneCharPressed(InputHook, Char)
@@ -5034,91 +5034,14 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 	Switch ini_TTCn
 	{
 		Case 1:	F_FlipTTMenu(TT_C1_Hwnd, MenuX, MenuY, "TT_C1")	
-/* 		Gui, TT_C1: Show, x%MenuX% y%MenuY% NoActivate Hide
-		DetectHiddenWindows, On
-		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C1_Hwnd
-		DetectHiddenWindows, Off
-		
-		Loop % MonitorCoordinates.Count()
-			if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
-			{
-				Window1X := MonitorCoordinates[A_Index].Left
-				Window1H := MonitorCoordinates[A_Index].Height
-				Window1Y := MonitorCoordinates[A_Index].Top 
-				Window1W := MonitorCoordinates[A_Index].Width
-				Break
-			}
-		if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
-			MenuY -= Window2H
-		if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
-			MenuX -= Window2W
-		
-		GuiControl, Choose, % IdTT_C1_LB1, 1
-		Gui, TT_C1: Show, x%MenuX% y%MenuY% NoActivate	
- */		
 		Case 2:	F_FlipTTMenu(TT_C2_Hwnd, MenuX, MenuY, "TT_C2")	
-/* 		Gui, TT_C2: Show, x%MenuX% y%MenuY% NoActivate Hide
-		DetectHiddenWindows, On
-		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C2_Hwnd
-		DetectHiddenWindows, Off
-		;OutputDebug, % "Window2X" . A_Tab . Window2X . A_Tab . "Window2Y" . A_Tab . Window2Y . A_Tab . "Window2W" . A_Tab . Window2W . A_Tab . "Window2H" . A_Tab . Window2H
-		Loop, % MonitorCoordinates.Count()
-			if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
-			{
-				Window1X := MonitorCoordinates[A_Index].Left
-				Window1H := MonitorCoordinates[A_Index].Height
-				Window1Y := MonitorCoordinates[A_Index].Top 
-				Window1W := MonitorCoordinates[A_Index].Width
-				Break
-			}
-		;OutputDebug, % "Window1X" . A_Tab . Window1X . A_Tab . "Window1Y" . A_Tab . Window1Y . A_Tab . "Window1W" . A_Tab . Window1W . A_Tab . "Window1H" . A_Tab . Window1H
-		if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
-			MenuY -= Window2H
-		if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
-			MenuX -= Window2W
-
-		GuiControl, Choose, % IdTT_C2_LB1, 1
-		GuiControlGet, PosOutputVar, Pos, % IdTT_C2_LB1
-		GuiControl, Move, % IdTT_C2_LB2, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
-		GuiControl, Choose, % IdTT_C2_LB2, 1
-		Gui, TT_C2: Show, x%MenuX% y%MenuY% NoActivate AutoSize 
-		*/
-		
 		Case 3:	F_FlipTTMenu(TT_C3_Hwnd, MenuX, MenuY, "TT_C3")	
-
-/* 			;1. determine size of window from which triggerstring tips window is called
-			WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-			;2. determine position and size of triggerstring window
-			Gui, TT_C3: Show, x%MenuX% y%MenuY% NoActivate Hide 	
- 			DetectHiddenWindows, On
-			WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C3_Hwnd
-			NewX := Window2X, NewY := Window2Y - Window2H, NewW := Window2W, NewH := Window2H	;bottom -> top
-			Gui, TT_C3: Show, x%NewX% y%NewY% NoActivate Hide	;coordinates: screen
-			WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C3_Hwnd
-			;3. determine if triggerstring tips menu fits to this window
-			if (Window2Y < Window1Y)	;if triggerstring tips are above the window
-				NewY += Window2H + 60	;top -> bottom
-			Gui, TT_C3: Show, x%NewX% y%NewY% NoActivate Hide 	;coordinates: screen	
-			WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . TT_C3_Hwnd
-			if (Window2X + Window2W > Window1X + Window1W)	;if triggerstring tips are too far to the right
-				NewX -= Window2W + 40	;right -> left
-			DetectHiddenWindows, Off
-			Gui, TT_C3: Show, x%NewX% y%NewY% NoActivate 	
- */
-			; GuiControl, Choose, % IdTT_C3_LB1, 1
-			; GuiControlGet, PosOutputVar, Pos, % IdTT_C3_LB1
-			; GuiControl, Move, % IdTT_C3_LB2, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
-			; GuiControl, Choose, % IdTT_C3_LB2, 1
-			; GuiControlGet, PosOutputVar, Pos, % IdTT_C3_LB2
-			; GuiControl, Move, % IdTT_C3_LB3, % "x" . PosOutputVarX + PosOutputVarW . A_Space . "y" . PosOutputVarY
-			; GuiControl, Choose, % IdTT_C3_LB3, 1
-			; Gui, TT_C3: Show, x%NewX% y%NewY% NoActivate AutoSize
 		
 		Case 4:
-		GuiControl, Choose, % IdTT_C4_LB1, 1
-		GuiControl, Choose, % IdTT_C4_LB2, 1
-		GuiControl, Choose, % IdTT_C4_LB3, 1
-		Gui, TT_C4: Show, NoActivate AutoSize
+			GuiControl, Choose, % IdTT_C4_LB1, 1
+			GuiControl, Choose, % IdTT_C4_LB2, 1
+			GuiControl, Choose, % IdTT_C4_LB3, 1
+			Gui, TT_C4: Show, NoActivate AutoSize
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
