@@ -1,8 +1,8 @@
-﻿/* 
-	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
-	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
-	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
-	License:     GNU GPL v.3
+/* 
+ 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
+ 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
+ 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
+ 	License:     GNU GPL v.3
 */
 ; -----------Beginning of auto-execute section of the script -------------------------------------------------
 ; After the script has been loaded, it begins executing at the top line, continuing until a Return, Exit, hotkey/hotstring label, or the physical end of the script is encountered (whichever comes first). 
@@ -263,7 +263,12 @@ Menu, 	HSMenu, 		Add, % TransA["Libraries"], 					:LibrariesSubmenu
 Menu, 	HSMenu, 		Add, % TransA["Clipboard Delay (F7)"], 			F_GuiHSdelay
 
 if (v_Param != "l")
-	Menu, 	AppSubmenu, 	Add,	% TransA["Reload"],					:SubmenuReload
+{
+	Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],	F_ReloadUniversal
+	Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],		F_ReloadUniversal
+	Menu, AppSubmenu, 		Add,		% TransA["Reload"],					:SubmenuReload
+}
+
 Menu,	AppSubmenu,	Add, % TransA["Suspend Hotkeys"],				F_TraySuspendHotkeys
 Menu,	AppSubmenu,	Add, % TransA["Pause"],						F_TrayPauseScript
 Menu,	AppSubmenu,	Add, % TransA["Exit"],						F_Exit
@@ -687,7 +692,7 @@ OneCharPressed(InputHook, Char)
 		f_FoundEndChar := true
 	v_InputString .= Char
 	v_TriggerString := v_InputString	;this line is necessary to correctly process F_Undo
-	; OutputDebug, % "v_InputString:" . A_Space . v_InputString . "`n"
+	OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Tab . "v_Triggerstring" . A_Tab . v_Triggerstring . "`n"
 	ToolTip, ,, , 4	;Basic triggerstring was triggered
 	ToolTip, ,, , 6	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -1165,7 +1170,10 @@ F_InitiateTrayMenus(v_Param)
 			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Information"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." 
 				. A_Space . TransA["Would you like to download the icon file?"] . "`n`n" . TransA["If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used."]
 			IfMsgBox, Yes
-				URLDownloadToFile, https://github.com/mslonik/Hotstrings-Tools/raw/main/Logo/hotstrings.ico, % AppIcon
+			{
+				OutputDebug, % "AppIcon:" . A_Tab . AppIcon
+				URLDownloadToFile, 	https://raw.githubusercontent.com/mslonik/Hotstrings-Tools/main/Logo/hotstrings.ico?token=GHSAT0AAAAAABQQIMB65AABYMNANSBT2Y2OYPUAESQ, % AppIcon
+			}
 				; URLDownloadToFile, https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/hotstrings.ico, % AppIcon	;old
 			IfMsgBox, No
 				AppIcon := "*"
@@ -8410,20 +8418,20 @@ F_ReloadUniversal()
 				Case % TransA["Reload in default mode"]:
 				Switch A_IsCompiled
 				{
-					Case % true:	Run, % A_ScriptFullPath 
-					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
+					Case % true:	Run, % A_ScriptFullPath . A_Space . "/r"
+					Case "":		Reload
 				}
 				Case % TransA["Reload in silent mode"]:
 				Switch A_IsCompiled
 				{
 					Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
-					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath . A_Space . "l"
+					Case "": 		Run, % A_AhkPath . A_Space . """" . A_ScriptFullPath . """" . A_Space . "l"	;double quotes ("") are necessary to escape " and to run script if its path contains space.
 				}
 				Default:	;when button was pressed "Download repository version" 
 				Switch A_IsCompiled
 				{
-					Case % true:	Run, % A_ScriptFullPath
-					Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath
+					Case % true:	Run, % A_ScriptFullPath . A_Space . "/r"
+					Case "": 		Reload
 				}
 			}
 		}
@@ -8434,8 +8442,8 @@ F_ReloadUniversal()
 	{
 		Switch A_IsCompiled
 		{
-			Case % true:	Run, % A_ScriptDir . "\" . A_ScriptName
-			Case "": 		Run, % A_AhkPath . A_Space . A_ScriptFullPath 
+			Case % true:	Run, % A_ScriptFullPath . A_Space . "/r"
+			Case "": 		Reload
 		}
 	}
 }
