@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -32,7 +32,7 @@ global AppVersion				:= "3.6.3"
 ;@Ahk2Exe-Set OriginalScriptlocation, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings
 ;@Ahk2Exe-SetCompanyName  http://mslonik.pl
 ;@Ahk2Exe-SetFileVersion %U_vAppVersion%
-FileInstall, hotstrings.ico, hotstrings.ico, 0
+FileInstall, hotstrings.ico, % AppIcon, 0
 FileInstall, LICENSE, LICENSE, 0
 ; - - - - - - - - - - - - - - - - - - - - - - - S E C T I O N    O F    G L O B A L     V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global 	HADL 				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries
@@ -228,26 +228,26 @@ Menu, SubmenuEndChars, Add, % TransA["Space"],						F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Tab"], 						F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 					F_ToggleEndChars
 F_ToggleEndChars()
-F_GuiEventsMenu		:= func("F_GuiEvents")
-Menu, Submenu1,		Add, % TransA["Signalling of events"],						% F_GuiEventsMenu
-F_GuiEventsMenu.Call(true)
-F_GuiStylingMenu		:= func("F_TTstyling")
-Menu, Submenu1,		Add, % TransA["Triggerstring tips and hotstring menu styling"],	% F_GuiStylingMenu
-F_GuiStylingMenu.Call(true)
-Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 		:ConfGUI
+Func_GuiEventsMenu		:= func("F_GuiEvents")
+Menu, Submenu1,		Add, % TransA["Signalling of events"],						% Func_GuiEventsMenu
+Func_GuiEventsMenu.Call(true)
+Func_GuiStylingMenu		:= func("F_TTstyling")
+Menu, Submenu1,		Add, % TransA["Triggerstring tips and hotstring menu styling"],	% Func_GuiStylingMenu
+Func_GuiStylingMenu.Call(true)
+Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 					:ConfGUI
 Menu, Submenu1,		Add
-Menu, Submenu1,  	   	Add, % TransA["Toggle trigger characters (↓ or EndChars)"], 				:SubmenuEndChars
+Menu, Submenu1,  	   	Add, % TransA["Toggle trigger characters (↓ or EndChars)"], 	:SubmenuEndChars
 Menu, Submenu1,  	   	Add
-Menu, Submenu1,	 	Add, % TransA["Restore default configuration"],	F_RestoreDefaultConfig
-Menu, Submenu1,		Add, % TransA["Open folder where Config.ini is located"],	F_OpenConfigIniLocation	
+Menu, Submenu1,	 	Add, % TransA["Restore default configuration"],				F_RestoreDefaultConfig
+Menu, Submenu1,		Add, % TransA["Open folder where Config.ini is located"],		F_OpenConfigIniLocation	
 Menu, Submenu1,		Add, % TransA["Open Config.ini in your default editor"],		F_OpenConfigIniInEditor
 
-Menu, HSMenu, 			Add, % TransA["Configuration"], 				:Submenu1
-Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 		F_Searching
+Menu, HSMenu, 			Add, % TransA["Configuration"], 							:Submenu1
+Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 					F_Searching
 
-Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 		F_RefreshListOfLibraries
+Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 					F_RefreshListOfLibraries
 F_RefreshListOfLibraries()
-Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	F_RefreshListOfLibraryTips
+Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 			F_RefreshListOfLibraryTips
 F_RefreshListOfLibraryTips()
 Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.
 Menu, LibrariesSubmenu,	Add, % TransA["Visit public libraries webpage"],	F_PublicLibraries
@@ -1151,15 +1151,15 @@ F_InitiateTrayMenus(v_Param)
 			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Information"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." 
 				. A_Space . TransA["Would you like to download the icon file?"] . "`n`n" . TransA["If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used."]
 			IfMsgBox, Yes
-				URLDownloadToFile, https://github.com/mslonik/Hotstrings-Tools/raw/main/Logo/hotstrings.ico, % AppIcon
-				;URLDownloadToFile, https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/hotstrings.ico, % AppIcon	;old
+				URLDownloadToFile, https://raw.githubusercontent.com/mslonik/Hotstrings/master/hotstrings.ico, % AppIcon	;2022-01-28
 			IfMsgBox, No
 				AppIcon := "*"
 		}
 		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
 		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"], F_GuiAbout
 		Menu, Tray, Default,	% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"]
-		Menu, Tray, Add										;separator line
+		Menu, Tray, Add, 		% TransA["Reload in default mode"], 	F_ReloadUniversal	;it is possible to reload, but then application will be run in default mode of operation (opposit to silent mode)
+		Menu, Tray, Add										;line separator 
 		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			F_TraySuspendHotkeys
 		Menu, Tray, Add,		% TransA["Pause application"],		F_TrayPauseScript
 		Menu  Tray, Add,		% TransA["Exit application"],			F_TrayExit		
@@ -1172,27 +1172,27 @@ F_InitiateTrayMenus(v_Param)
 			IfMsgBox, Yes
 			{
 				OutputDebug, % "AppIcon:" . A_Tab . AppIcon
-				URLDownloadToFile, 	https://raw.githubusercontent.com/mslonik/Hotstrings-Tools/main/Logo/hotstrings.ico?token=GHSAT0AAAAAABQQIMB65AABYMNANSBT2Y2OYPUAESQ, % AppIcon
+				URLDownloadToFile, 	https://raw.githubusercontent.com/mslonik/Hotstrings/master/hotstrings.ico, % AppIcon	;2022-01-28
 			}
-				; URLDownloadToFile, https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/hotstrings.ico, % AppIcon	;old
 			IfMsgBox, No
 				AppIcon := "*"
 		}
 		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
 		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Default mode"], F_GuiAbout
-		Menu, Tray, Add										;separator line
+		Menu, Tray, Add										;line separator 
 		Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 			F_GUIinit
 		Menu, Tray, Default, 	% TransA["Edit Hotstrings"]
-		Menu, Tray, Add										;separator line
-		Menu, Tray, Add,		% TransA["Help: Hotstrings application"],			F_GuiAboutLink1
-		Menu, Tray, Add,		% TransA["Help: AutoHotkey Hotstrings reference guide"], F_GuiAboutLink2
-		Menu, Tray, Add										;separator line
-		Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],	F_ReloadUniversal
-		Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],		F_ReloadUniversal
-		Menu, Tray, Add,		% TransA["Reload"],					:SubmenuReload
-		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			F_TraySuspendHotkeys
-		Menu, Tray, Add,		% TransA["Pause application"],		F_TrayPauseScript
-		Menu  Tray, Add,		% TransA["Exit application"],			F_TrayExit
+		Menu, Tray, Add										;line separator 
+		Menu, Tray, Add,		% TransA["Help: Hotstrings application"],				F_GuiAboutLink1
+		Menu, Tray, Add,		% TransA["Help: AutoHotkey Hotstrings reference guide"], 	F_GuiAboutLink2
+		Menu, Tray, Add										;line separator 
+		Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],			F_ReloadUniversal
+		Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],				F_ReloadUniversal
+		Menu, Tray, Add,		% TransA["Reload"],									:SubmenuReload
+		Menu, Tray, Add										;line separator 
+		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],							F_TraySuspendHotkeys
+		Menu, Tray, Add,		% TransA["Pause application"],						F_TrayPauseScript
+		Menu  Tray, Add,		% TransA["Exit application"],							F_TrayExit
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8400,7 +8400,7 @@ F_Compile()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ReloadUniversal()
+F_ReloadUniversal(params*)	;ItemName, ItemPos, MenuName
 {
 	global ;assume-global mode
 	
@@ -8440,11 +8440,22 @@ F_ReloadUniversal()
 	}
 	else
 	{
-		Switch A_IsCompiled
+		if (params[1] = TransA["Reload in silent mode"])
+			{
+				Switch A_IsCompiled
+				{
+					Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
+					Case "": 		Run, % A_AhkPath . A_Space . """" . A_ScriptFullPath . """" . A_Space . "l"	;double quotes ("") are necessary to escape " and to run script if its path contains space.
+				}
+			}
+		else
 		{
-			Case % true:	Run, % A_ScriptFullPath . A_Space . "/r"
-			Case "": 		Reload
-		}
+			Switch A_IsCompiled
+			{
+				Case % true:	Run, % A_ScriptFullPath . A_Space . "/r"
+				Case "": 		Reload
+			}
+		}	
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
