@@ -35,8 +35,7 @@ global AppVersion				:= "3.6.3"
 FileInstall, hotstrings.ico, % AppIcon, 0
 FileInstall, LICENSE, LICENSE, 0
 ; - - - - - - - - - - - - - - - - - - - - - - - S E C T I O N    O F    G L O B A L     V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-global 	HADL 				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries
-, 		HADConfig  			:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\"	. "Config.ini"	;Hotstrings Application Data Config .ini
+global	HADConfig  			:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\"	. "Config.ini"	;Hotstrings Application Data Config .ini
 ,		v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l like "silent mode"
 ,		a_Triggers 			:= []		;Main loop of application
 ,		v_InputString 			:= ""		;Main loop of application; this variable stores information about keys pressed by user which can differ in size from actual hotstring definition.
@@ -52,9 +51,10 @@ global 	HADL 				:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libra
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_DetermineMonitors()
 Critical, On
-F_LoadCreateTranslationTxt() ;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
-F_CheckCreateConfigIni() ;1. Try to load up configuration file. If those files do not exist, create them.
-F_CheckScriptEncoding()
+F_LoadCreateTranslationTxt() 	;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
+F_CheckCreateConfigIni() 	;1. Try to load up configuration file. If those files do not exist, create them.
+F_CheckScriptEncoding()		;checks if script is utf-8 compliant. it has plenty to do wiith github download etc.
+F_Load_ini_HAD()			;HAD = Hotstrings Application Data
 F_Load_ini_GuiReload()
 F_Load_ini_CheckRepo()
 F_Load_ini_DownloadRepo()
@@ -147,7 +147,6 @@ F_LoadHotstringsFromLibraries()	;→ F_LoadFile() -> F_CreateHotstring
 if (ini_TTTtEn)	;Triggerstring Tips Column Trigger
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 F_GuiSearch_CreateObject()	;When all tables are full, initialize GuiSearch
-;F_GuiSearch_DetermineConstraints()
 F_Searching("Reload")			;prepare content of Search tables
 TrayTip, % A_ScriptName, % TransA["Hotstrings have been loaded"], , 1 ;1 = Info icon
 SetTimer, HideTrayTip, -5000											;more general approach; for details see https://www.autohotkey.com/docs/commands/TrayTip.htm#Remarks										;more universal approach. For details see https://www.autohotkey.com/docs/commands/TrayTip.htm#Remarks
@@ -241,6 +240,11 @@ Menu, Submenu1,  	   	Add
 Menu, Submenu1,	 	Add, % TransA["Restore default configuration"],				F_RestoreDefaultConfig
 Menu, Submenu1,		Add, % TransA["Open folder where Config.ini is located"],		F_OpenConfigIniLocation	
 Menu, Submenu1,		Add, % TransA["Open Config.ini in your default editor"],		F_OpenConfigIniInEditor
+Menu, Submenu1,		Add	;line separator
+
+Menu, SubmenuPath,		Add, Libraries folder: restore default location,				F_PathLibrariesRestoreDefault
+Menu, SubmenuPath,		Add, Libraries folder: change location,						F_PathToLibraries
+Menu, Submenu1, 		Add, Path to application resources,						:SubmenuPath
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 							:Submenu1
 Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 					F_Searching
@@ -250,51 +254,48 @@ F_RefreshListOfLibraries()
 Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 			F_RefreshListOfLibraryTips
 F_RefreshListOfLibraryTips()
 Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.
-Menu, LibrariesSubmenu,	Add, % TransA["Visit public libraries webpage"],	F_PublicLibraries
-Menu, LibrariesSubmenu,	Add, % TransA["Open libraries folder in Explorer"], F_OpenLibrariesFolderInExplorer
-Menu, LibrariesSubmenu,	Add, % TransA["Download public libraries"],		F_DownloadPublicLibraries
+Menu, LibrariesSubmenu,	Add, % TransA["Visit public libraries webpage"],		F_PublicLibraries
+Menu, LibrariesSubmenu,	Add, % TransA["Open libraries folder in Explorer"], 	F_OpenLibrariesFolderInExplorer
+Menu, LibrariesSubmenu,	Add, % TransA["Download public libraries"],			F_DownloadPublicLibraries
 Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.
-Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],		F_ImportLibrary
-Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  			F_ExportLibraryStatic
-Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  			F_ExportLibraryDynamic
-Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],		:ExportSubmenu
+Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],			F_ImportLibrary
+Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  				F_ExportLibraryStatic
+Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  				F_ExportLibraryDynamic
+Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],			:ExportSubmenu
 
-Menu, 	HSMenu, 		Add, % TransA["Libraries"], 					:LibrariesSubmenu
-Menu, 	HSMenu, 		Add, % TransA["Clipboard Delay (F7)"], 			F_GuiHSdelay
+Menu, HSMenu, 			Add, % TransA["Libraries"], 						:LibrariesSubmenu
+Menu, HSMenu, 			Add, % TransA["Clipboard Delay (F7)"], 				F_GuiHSdelay
 
-if (v_Param != "l")
-{
-	Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],	F_ReloadUniversal
-	Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],		F_ReloadUniversal
-	Menu, AppSubmenu, 		Add,		% TransA["Reload"],					:SubmenuReload
-}
+Menu, SubmenuReload, 	Add,	% TransA["Reload in default mode"],			F_ReloadApplication
+Menu, SubmenuReload, 	Add,	% TransA["Reload in silent mode"],				F_ReloadApplication
+Menu, AppSubmenu, 		Add,	% TransA["Reload"],							:SubmenuReload
 
-Menu,	AppSubmenu,	Add, % TransA["Suspend Hotkeys"],				F_TraySuspendHotkeys
-Menu,	AppSubmenu,	Add, % TransA["Pause"],						F_TrayPauseScript
-Menu,	AppSubmenu,	Add, % TransA["Exit"],						F_Exit
-Menu,	AppSubmenu,	Add	;To add a menu separator line, omit all three parameters.
-Menu,	AutoStartSub,	Add, % TransA["Default mode"],				F_AddToAutostart
-Menu,	AutoStartSub,	Add,	% TransA["Silent mode"],					F_AddToAutostart
-Menu,	AppSubmenu, 	Add, % TransA["Add to Autostart"],				:AutoStartSub
+Menu, AppSubmenu,		Add, % TransA["Suspend Hotkeys"],					F_TraySuspendHotkeys
+Menu, AppSubmenu,		Add, % TransA["Pause"],							F_TrayPauseScript
+Menu, AppSubmenu,		Add, % TransA["Exit"],							F_Exit
+Menu, AppSubmenu,		Add	;To add a menu separator line, omit all three parameters.
+Menu, AutoStartSub,		Add, % TransA["Default mode"],					F_AddToAutostart
+Menu, AutoStartSub,		Add,	% TransA["Silent mode"],						F_AddToAutostart
+Menu, AppSubmenu, 		Add, % TransA["Add to Autostart"],					:AutoStartSub
 
 F_CompileSubmenu()
 
-Menu, AppSubmenu,		Add, % TransA["Version / Update"],				F_GuiVersionUpdate
+Menu, AppSubmenu,		Add, % TransA["Version / Update"],					F_GuiVersionUpdate
 Menu, AppSubmenu,		Add
-Menu, SubmenuLog,		Add,	% TransA["enable"],						F_MenuLogEnDis
-Menu, SubmenuLog,		Add, % TransA["disable"],					F_MenuLogEnDis
-Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],		:SubmenuLog	
+Menu, SubmenuLog,		Add,	% TransA["enable"],							F_MenuLogEnDis
+Menu, SubmenuLog,		Add, % TransA["disable"],						F_MenuLogEnDis
+Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],			:SubmenuLog	
 Menu, AppSubmenu,		add, % TransA["Open folder where log files are located"], F_OpenLogFolder
 
-Menu,	AboutHelpSub,	Add,	% TransA["Help: Hotstrings application"],	F_GuiAboutLink1
+Menu,	AboutHelpSub,	Add,	% TransA["Help: Hotstrings application"],		F_GuiAboutLink1
 Menu,	AboutHelpSub,	Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"], F_GuiAboutLink2
 Menu,	AboutHelpSub,	Add
-Menu,	AboutHelpSub,	Add,	% TransA["About this application..."],		F_GuiAbout
+Menu,	AboutHelpSub,	Add,	% TransA["About this application..."],			F_GuiAbout
 Menu,	AboutHelpSub,	Add
-Menu,	AboutHelpSub,	Add, % TransA["Show intro"],					F_GuiShowIntro
+Menu,	AboutHelpSub,	Add, % TransA["Show intro"],						F_GuiShowIntro
 
-Menu, 	HSMenu,		Add, % TransA["Application"],					:AppSubmenu
-Menu, 	HSMenu, 		Add, % TransA["About / Help"], 				:AboutHelpSub
+Menu, 	HSMenu,		Add, % TransA["Application"],						:AppSubmenu
+Menu, 	HSMenu, 		Add, % TransA["About / Help"], 					:AboutHelpSub
 Gui, 	HS3: Menu, HSMenu
 Gui, 	HS4: Menu, HSMenu
 
@@ -554,6 +555,73 @@ Esc::
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_PathLibrariesRestoreDefault()
+{
+	global	;assume-global mode
+	local	HADL_DefaultLocation := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
+	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], By default Library files (*.csv) are located in Users subfolder which is protected against other computer users. Would you like to move "Libraries" folder to this location?
+	IfMsgBox, Yes
+	{
+		if (ini_HADL = HADL_DefaultLocation)
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], Actually the "Libraries" folder is already located in default location, so it won't be moved.
+		else	
+		{
+			FileMoveDir, % ini_HADL, % HADL_DefaultLocation, 2				;2: Overwrite existing files
+			if (!ErrorLevel)
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], The "Libraries" folder was successfully moved to the new location. Now application must be restarted (into default mode) in order to apply new location of "Libraries" folder and reload them.
+			ini_HADL := HADL_DefaultLocation
+			IniWrite, % ini_HADL, % HADConfig, Configuration, HADL	;HADconfig = Hotstrings Application Data Config (.ini)
+			F_ReloadApplication()							;reload into default mode of operation
+		}
+	}
+	IfMsgBox, No
+		return
+	IfMsgBox, Cancel
+		return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_Load_ini_HAD()
+{
+	global	;assume-global mode
+	IniRead, ini_HADL, % HADConfig, Configuration, HADL, % A_Space	;Default parameter. The value to store in OutputVar (ini_HADL) if the requested key is not found. If omitted, it defaults to the word ERROR. To store a blank value (empty string), specify %A_Space%.
+
+	if (ini_HADL = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
+		IniWrite, % ini_HADL, % HADConfig, Configuration, HADL
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_PathToLibraries()
+{
+	global	;assume-global mode of operation
+	local	Old_HADL := ini_HADL
+
+	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], Would you like to change the current "Libraries" folder location? (If there exist files from source destination, they will be overwritten)`n`n Current "Libraries" location: `n %Old_HADL%	;Yes/No/Cancel + Icon Asterisk (info)
+	IfMsgBox, Yes
+	{
+		FileSelectFolder, ini_HADL, % "*" . Old_HADL, 3, Select folder where libraries (*.csv  files) will be stored.	;3 = (1) a button is provided that allows the user to create new folder + (2) provide an edit field that allows the user to type the name of a folder; * = select this folder
+		ini_HADL .= "\Libraries"
+		MsgBox, 35, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], Would you like to move Libraries files to the chosen destination? .	; Yes/No/Cancel + Icon Question
+		IfMsgBox, Yes
+		{
+			FileMoveDir, % Old_HADL, % ini_HADL, 2				;2: Overwrite existing files
+			if (!ErrorLevel)
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], The "Libraries" folder was successfully moved to the new location. Now application must be restarted (into default mode) in order to apply new location of "Libraries" folder and reload them.
+			IniWrite, % ini_HADL, % HADConfig, Configuration, HADL	;HADconfig = Hotstrings Application Data Config (.ini)
+			F_ReloadApplication()							;reload into default mode of operation
+		}
+		IfMsgBox, No
+			return
+		IfMsgBox, Cancel
+			return
+	}
+	IfMsgBox, No
+		return
+	IfMsgBox, Cancel
+		return
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 GuiEventsGuiClose()	;GUI event (close)
 {
 	global	;assume-global mode of operation
@@ -867,9 +935,9 @@ F_ALibOK()
 		return
 	}
 	v_NewLib .= ".csv"
-	IfNotExist, % HADL . "\" . v_NewLib
+	IfNotExist, % ini_HADL . "\" . v_NewLib
 	{
-		FileAppend,, % HADL . "\" . v_NewLib, UTF-8
+		FileAppend,, % ini_HADL . "\" . v_NewLib, UTF-8
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The library"] . A_Space . v_NewLib . A_Space . TransA["has been created."]
 		if (WinExist("ahk_id" HS3GuiHwnd))
 			Gui, HS3: -Disabled
@@ -919,7 +987,7 @@ VersionUpdateGuiClose()	;Gui event
 F_OpenLibrariesFolderInExplorer()
 {
 	global	;assume global-mode
-	Run, explore %HADL%
+	Run, explore %ini_HADL%
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PublicLibraries()
@@ -1158,7 +1226,7 @@ F_InitiateTrayMenus(v_Param)
 		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
 		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"], F_GuiAbout
 		Menu, Tray, Default,	% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"]
-		Menu, Tray, Add, 		% TransA["Reload in default mode"], 	F_ReloadUniversal	;it is possible to reload, but then application will be run in default mode of operation (opposit to silent mode)
+		Menu, Tray, Add, 		% TransA["Reload in default mode"], 	F_ReloadApplication	;it is possible to reload, but then application will be run in default mode of operation (opposit to silent mode)
 		Menu, Tray, Add										;line separator 
 		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			F_TraySuspendHotkeys
 		Menu, Tray, Add,		% TransA["Pause application"],		F_TrayPauseScript
@@ -1186,8 +1254,8 @@ F_InitiateTrayMenus(v_Param)
 		Menu, Tray, Add,		% TransA["Help: Hotstrings application"],				F_GuiAboutLink1
 		Menu, Tray, Add,		% TransA["Help: AutoHotkey Hotstrings reference guide"], 	F_GuiAboutLink2
 		Menu, Tray, Add										;line separator 
-		Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],			F_ReloadUniversal
-		Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],				F_ReloadUniversal
+		Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],			F_ReloadApplication
+		Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],				F_ReloadApplication
 		Menu, Tray, Add,		% TransA["Reload"],									:SubmenuReload
 		Menu, Tray, Add										;line separator 
 		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],							F_TraySuspendHotkeys
@@ -5216,7 +5284,7 @@ F_VerUpdDownload()
 			. "`n" . TransA["reloaded and fresh language file (English.txt) will be recreated."]
 			FileDelete, % A_ScriptDir . "\Languages\English.txt" 	;this file is deleted because often after update of Hotstrings.exe the language definitions are updated too.
 			Gui, VersionUpdate: Hide
-			F_ReloadUniversal()
+			F_ReloadApplication()
 		}
 		return
 	}
@@ -5234,7 +5302,7 @@ F_VerUpdDownload()
 			. "`n" . TransA["reloaded and fresh language file (English.txt) will be recreated."]
 			FileDelete, % A_ScriptDir . "\Languages\English.txt" 	;this file is deleted because often after update of Hotstrings.exe the language definitions are updated too.
 			Gui, VersionUpdate: Hide
-			F_ReloadUniversal()
+			F_ReloadApplication()
 			return
 		}
 	}
@@ -5757,24 +5825,24 @@ F_DownloadPublicLibraries()
 		{
 			temp := URLraw . value
 			GuiControl,, % LibProgress, % "+" . part
-			if (FileExist(HADL . "\" . value))
+			if (FileExist(ini_HADL . "\" . value))
 				ExistingLibraries .= value . "`n"
 			else
 			{
 				NewLibraries  .= value . "`n"
-				URLDownloadToFile, % temp, % HADL . "\" . value
+				URLDownloadToFile, % temp, % ini_HADL . "\" . value
 			}
 		}
 	}
 	Gui, DLG: Destroy
 	if (ExistingLibraries)
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The following file(s) haven't been downloaded as they are already present in the location"] . ":" 
-			. "`n" . HADL
+			. "`n" . ini_HADL
 			. "`n`n" . ExistingLibraries
 	
 	if (NewLibraries)
 		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Public library:"] . "`n`n" . NewLibraries . "`n" . TransA["has been downloaded to the location"] 
-			. "`n" . HADL
+			. "`n" . ini_HADL
 			. "`n`n" . TransA["After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder into memory?"]
 	
 	IfMsgBox, Yes
@@ -6611,7 +6679,7 @@ F_AddHotstring()
 	;4. Sort List View. ;future: gui parameter for sorting 
 	LV_ModifyCol(1, "Sort")
 	;5. Delete library file. 
-	FileDelete, % HADL . "\" . v_SelectHotstringLibrary
+	FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary
 	
 	;6. Save List View into the library file.
 	Loop, % LV_GetCount()
@@ -6624,7 +6692,7 @@ F_AddHotstring()
 		LV_GetText(txt6, A_Index, 6)
 		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
 	}
-	FileAppend, % txt, % HADL . "\" . v_SelectHotstringLibrary, UTF-8
+	FileAppend, % txt, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8
 	GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 	;7. Increment library counter.
 	if !(ModifiedFlag) 
@@ -6761,7 +6829,7 @@ F_Move()
 	
 	LV_Add("", v_Triggerstring, v_TriggOpt, v_OutFun, v_EnDis, v_Hotstring, v_Comment) ;add to ListView
 	LV_ModifyCol(1, "Sort")
-	FileDelete, % HADL . "\" . v_SelectHotstringLibrary	;delete the old destination file.
+	FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary	;delete the old destination file.
 	
 	Loop, % LV_GetCount() ;Saving the same destination filename but now containing moved (triggerstring, hotstring) definition.
 	{
@@ -6773,7 +6841,7 @@ F_Move()
 		LV_GetText(txt6, A_Index, 6)
 		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
 	}
-	FileAppend, % txt, % HADL . "\" . v_SelectHotstringLibrary, UTF-8
+	FileAppend, % txt, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8
 	
 	F_SelectLibrary() ;Remove the definition from source table / file.
 	Loop, % LV_GetCount()
@@ -6785,7 +6853,7 @@ F_Move()
 			break
 		}
 	}
-	FileDelete, % HADL . "\" . v_SourceLibrary	;delete the old source filename.
+	FileDelete, % ini_HADL . "\" . v_SourceLibrary	;delete the old source filename.
 	Loop, % LV_GetCount() ;Saving the same filename but now without deleted (triggerstring, hotstring) definition.
 	{
 		LV_GetText(txt1, A_Index, 2)
@@ -6796,7 +6864,7 @@ F_Move()
 		LV_GetText(txt6, A_Index, 6)
 		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
 	}
-	FileAppend, % txt, % HADL . "\" . v_SourceLibrary, UTF-8
+	FileAppend, % txt, % ini_HADL . "\" . v_SourceLibrary, UTF-8
 	F_Clear()
 	F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
 	F_Searching("ReloadAndView")
@@ -7391,7 +7459,7 @@ F_DeleteHotstring()
 	TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
 	
 	;1. Remove selected library file.
-	LibraryFullPathAndName := HADL . "\" . v_SelectHotstringLibrary
+	LibraryFullPathAndName := ini_HADL . "\" . v_SelectHotstringLibrary
 	FileDelete, % LibraryFullPathAndName
 	
 	;4. Disable selected hotstring.
@@ -7416,7 +7484,7 @@ F_DeleteHotstring()
 		LV_GetText(txt6, A_Index, 6)
 		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
 	}
-	FileAppend, % txt, % HADL . "\" . v_SelectHotstringLibrary, UTF-8
+	FileAppend, % txt, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8
 	
 	;5. Remove trigger hint. Remark: All trigger hints are deleted, so if triggerstring was duplicated, then all trigger hints are deleted!
 	Loop, % a_Triggers.MaxIndex()
@@ -8400,7 +8468,7 @@ F_Compile()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ReloadUniversal(params*)	;ItemName, ItemPos, MenuName
+F_ReloadApplication(params*)	;ItemName, ItemPos, MenuName
 {
 	global ;assume-global mode
 	
@@ -8530,6 +8598,7 @@ HK_Main=#^h
 HK_IntoEdit=~^c
 HK_UndoLH=~^F12
 THLog=0
+HADL=
 [TriggerstringTips_Styling]
 TriggerstringTipsBackgroundColor=white
 TriggerstringTipsBackgroundColorCustom=
@@ -9363,7 +9432,7 @@ F_LoadFile(nameoffile) ; -> F_CreateHotstring
 		if ((key == nameoffile) and (value))
 			FlagLoadTriggerTips := true
 	
-	FileRead, v_TheWholeFile, % HADL . "\" . nameoffile
+	FileRead, v_TheWholeFile, % ini_HADL . "\" . nameoffile
 	F_WhichGui()
 	if (A_DefaultGui = "HS3" or A_DefaultGui = "HS4")
 	{
@@ -10630,14 +10699,14 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	
 ;Check if Libraries subfolder exists. If not, create it and display warning.
 	;v_IsLibraryEmpty := true
-	if (!Instr(FileExist(HADL), "D"))				; if  there is no "Libraries" subfolder 
+	if (!Instr(FileExist(ini_HADL), "D"))				; if  there is no "Libraries" subfolder 
 	{
-		FileCreateDir, % HADL							; Future: check against errors
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exists!"] . "`n`n" . HADL . "`n`n" . TransA["folder is now created"] . "."
+		FileCreateDir, % ini_HADL							; Future: check against errors
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exists!"] . "`n`n" . ini_HADL . "`n`n" . TransA["folder is now created"] . "."
 	}
 	else 	;Check if Libraries subfolder is empty. If it does, display warning.
 	{
-		Loop, Files, % HADL . "\*.csv"
+		Loop, Files, % ini_HADL . "\*.csv"
 		{
 			v_IsLibraryEmpty := false
 			break
@@ -10645,17 +10714,17 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	}
 	if (v_IsLibraryEmpty)
 	{
-		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Libraries folder:"] . "`n`n" . HADL . A_Space . "`n`n"
+		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Libraries folder:"] . "`n`n" . ini_HADL . A_Space . "`n`n"
 			. TransA["is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?"]
 		IfMsgBox, Yes
 		{
-			FileAppend, , % HADL . "\" . "PriorityLibrary.csv", UTF-8
+			FileAppend, , % ini_HADL . "\" . "PriorityLibrary.csv", UTF-8
 			F_ValidateIniLibSections()
 		}
 	}
 	;if !(v_IsLibraryEmpty)
 	else	;Read names library files (*.csv) from Library subfolder into object o_Libraries
-		Loop, Files, % HADL . "\*.csv"
+		Loop, Files, % ini_HADL . "\*.csv"
 			o_Libraries.Push(A_LoopFileName)
 	
 ;Check if Config.ini contains in section [Libraries] file names which are actually in library subfolder. Synchronize [Libraries] section with content of subfolder.
@@ -10753,7 +10822,7 @@ F_LoadLibrariesToTables()
 		TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
 	
 	;Here content of libraries is loaded into set of tables
-	Loop, Files, % HADL . "\*.csv"
+	Loop, Files, % ini_HADL . "\*.csv"
 	{
 		Loop
 		{
@@ -11706,7 +11775,7 @@ F_ImportLibrary()
 	if (!v_LibraryName)
 		return
 	SplitPath, v_LibraryName, ,,, OutNameNoExt
-	v_OutputFile := % HADL . "\" . OutNameNoExt . ".csv"
+	v_OutputFile := % ini_HADL . "\" . OutNameNoExt . ".csv"
 	
 	if (FileExist(v_OutputFile))
 	{
@@ -11898,15 +11967,15 @@ SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
 FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN
 )"
 	
-	FileSelectFile, v_LibraryName, 3, % HADL . "\", % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
+	FileSelectFile, v_LibraryName, 3, % ini_HADL . "\", % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
 	if (!v_LibraryName)
 		return
 	
 	SplitPath, v_LibraryName, OutFileName, , , OutNameNoExt
-	v_LibrariesDir := % HADL . "\ExportedLibraries"
+	v_LibrariesDir := % ini_HADL . "\ExportedLibraries"
 	if !InStr(FileExist(v_LibrariesDir), "D")
 		FileCreateDir, %v_LibrariesDir%
-	v_OutputFile := % HADL . "\ExportedLibraries\" . OutNameNoExt . "." . "ahk"
+	v_OutputFile := % ini_HADL . "\ExportedLibraries\" . OutNameNoExt . "." . "ahk"
 	
 	if (FileExist(v_OutputFile))
 	{
@@ -12065,15 +12134,15 @@ SendMode Input  				; Recommended for new scripts due to its superior speed and 
 SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
 FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN
 )"
-	FileSelectFile, v_LibraryName, 3, % HADL, % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
+	FileSelectFile, v_LibraryName, 3, % ini_HADL, % TransA["Choose library file (.csv) for export"], CSV Files (*.csv)]
 	if (!v_LibraryName)
 		return
 	
 	SplitPath, v_LibraryName, OutFileName, , , OutNameNoExt
-	v_LibrariesDir := % HADL . "\ExportedLibraries"
+	v_LibrariesDir := % ini_HADL . "\ExportedLibraries"
 	if !InStr(FileExist(v_LibrariesDir),"D")
 		FileCreateDir, %v_LibrariesDir%
-	v_OutputFile := % HADL . "\ExportedLibraries\" . OutNameNoExt . "." . "ahk"
+	v_OutputFile := % ini_HADL . "\ExportedLibraries\" . OutNameNoExt . "." . "ahk"
 	
 	if (FileExist(v_OutputFile))
 	{
