@@ -42,7 +42,6 @@ global	HADConfig  			:= A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\"	. "C
 ,		v_MouseX 				:= 0			;Main loop of application
 ,		v_MouseY 				:= 0			;Main loop of application
 ,		v_IndexLog 			:= 1			;for logging, if Hotstrings application is run with d parameter.
-,		v_TypedTriggerstring 	:= ""		;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
 ,		v_UndoHotstring 		:= ""		;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
 ,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time; f_ stands for "flag"
 ,		TT_C1_Hwnd 			:= 0, TT_C2_Hwnd := 0, TT_C3_Hwnd := 0, HMenuCliHwnd := 0, HMenuAHKHwnd	:= 0, HS3GuiHwnd := 0, HS4GuiHwnd := 0, TT_C4_Hwnd := 0, TDemoHwnd := 0, HDemoHwnd := 0 ;This is a trick to initialize global variables in order to not get warning (#Warn) message
@@ -228,51 +227,51 @@ Menu, SubmenuEndChars, Add, % TransA["Tab"], 						F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 					F_ToggleEndChars
 F_ToggleEndChars()
 Func_GuiEventsMenu		:= func("F_GuiEvents")
-Menu, Submenu1,		Add, % TransA["Signalling of events"],						% Func_GuiEventsMenu
+Menu, Submenu1,		Add, % TransA["Signalling of events"],							% Func_GuiEventsMenu
 Func_GuiEventsMenu.Call(true)
 Func_GuiStylingMenu		:= func("F_TTstyling")
-Menu, Submenu1,		Add, % TransA["Triggerstring tips and hotstring menu styling"],	% Func_GuiStylingMenu
+Menu, Submenu1,		Add, % TransA["Triggerstring tips and hotstring menu styling"],		% Func_GuiStylingMenu
 Func_GuiStylingMenu.Call(true)
-Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 					:ConfGUI
+Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 						:ConfGUI
 Menu, Submenu1,		Add
-Menu, Submenu1,  	   	Add, % TransA["Toggle trigger characters (↓ or EndChars)"], 	:SubmenuEndChars
+Menu, Submenu1,  	   	Add, % TransA["Toggle trigger characters (↓ or EndChars)"], 		:SubmenuEndChars
 Menu, Submenu1,  	   	Add
-Menu, Submenu1,	 	Add, % TransA["Restore default configuration"],				F_RestoreDefaultConfig
-Menu, Submenu1,		Add, % TransA["Open folder where Config.ini is located"],		F_OpenConfigIniLocation	
-Menu, Submenu1,		Add, % TransA["Open Config.ini in your default editor"],		F_OpenConfigIniInEditor
+Menu, Submenu1,	 	Add, % TransA["Restore default configuration"],					F_RestoreDefaultConfig
+Menu, Submenu1,		Add, % TransA["Open folder where Config.ini is located"],			F_OpenConfigIniLocation	
+Menu, Submenu1,		Add, % TransA["Open Config.ini in your default editor"],			F_OpenConfigIniInEditor
 Menu, Submenu1,		Add	;line separator
 
-Menu, SubmenuPath,		Add, Libraries folder: restore default location,				F_PathLibrariesRestoreDefault
-Menu, SubmenuPath,		Add, Libraries folder: change location,						F_PathToLibraries
-Menu, Submenu1, 		Add, Path to application resources,						:SubmenuPath
+Menu, SubmenuPath,		Add, % TransA["Libraries folder: restore it to default location"], 	F_PathLibrariesRestoreDefault
+Menu, SubmenuPath,		Add, % TransA["Libraries folder: move it to new location"],			F_PathToLibraries
+Menu, Submenu1, 		Add, % TransA["Location of application specific data"],			:SubmenuPath
 
-Menu, HSMenu, 			Add, % TransA["Configuration"], 							:Submenu1
-Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 					F_Searching
+Menu, HSMenu, 			Add, % TransA["Configuration"], 								:Submenu1
+Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 						F_Searching
 
-Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 					F_RefreshListOfLibraries
+Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 						F_RefreshListOfLibraries
 F_RefreshListOfLibraries()
-Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 			F_RefreshListOfLibraryTips
+Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 				F_RefreshListOfLibraryTips
 F_RefreshListOfLibraryTips()
 Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.
-Menu, LibrariesSubmenu,	Add, % TransA["Visit public libraries webpage"],		F_PublicLibraries
-Menu, LibrariesSubmenu,	Add, % TransA["Open libraries folder in Explorer"], 	F_OpenLibrariesFolderInExplorer
-Menu, LibrariesSubmenu,	Add, % TransA["Download public libraries"],			F_DownloadPublicLibraries
+Menu, LibrariesSubmenu,	Add, % TransA["Visit public libraries webpage"],					F_PublicLibraries
+Menu, LibrariesSubmenu,	Add, % TransA["Open libraries folder in Explorer"], 				F_OpenLibrariesFolderInExplorer
+Menu, LibrariesSubmenu,	Add, % TransA["Download public libraries"],						F_DownloadPublicLibraries
 Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.
-Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],			F_ImportLibrary
-Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  				F_ExportLibraryStatic
-Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  				F_ExportLibraryDynamic
-Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],			:ExportSubmenu
+Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],						F_ImportLibrary
+Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  							F_ExportLibraryStatic
+Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  							F_ExportLibraryDynamic
+Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],						:ExportSubmenu
 
-Menu, HSMenu, 			Add, % TransA["Libraries"], 						:LibrariesSubmenu
-Menu, HSMenu, 			Add, % TransA["Clipboard Delay (F7)"], 				F_GuiHSdelay
+Menu, HSMenu, 			Add, % TransA["Libraries"], 									:LibrariesSubmenu
+Menu, HSMenu, 			Add, % TransA["Clipboard Delay (F7)"], 							F_GuiHSdelay
 
-Menu, SubmenuReload, 	Add,	% TransA["Reload in default mode"],			F_ReloadApplication
-Menu, SubmenuReload, 	Add,	% TransA["Reload in silent mode"],				F_ReloadApplication
-Menu, AppSubmenu, 		Add,	% TransA["Reload"],							:SubmenuReload
+Menu, SubmenuReload, 	Add,	% TransA["Reload in default mode"],						F_ReloadApplication
+Menu, SubmenuReload, 	Add,	% TransA["Reload in silent mode"],							F_ReloadApplication
+Menu, AppSubmenu, 		Add,	% TransA["Reload"],										:SubmenuReload
 
-Menu, AppSubmenu,		Add, % TransA["Suspend Hotkeys"],					F_TraySuspendHotkeys
-Menu, AppSubmenu,		Add, % TransA["Pause"],							F_TrayPauseScript
-Menu, AppSubmenu,		Add, % TransA["Exit"],							F_Exit
+Menu, AppSubmenu,		Add, % TransA["Suspend Hotkeys"],								F_TraySuspendHotkeys
+Menu, AppSubmenu,		Add, % TransA["Pause"],										F_TrayPauseScript
+Menu, AppSubmenu,		Add, % TransA["Exit"],										F_Exit
 Menu, AppSubmenu,		Add	;To add a menu separator line, omit all three parameters.
 Menu, AutoStartSub,		Add, % TransA["Default mode"],					F_AddToAutostart
 Menu, AutoStartSub,		Add,	% TransA["Silent mode"],						F_AddToAutostart
@@ -550,7 +549,7 @@ Esc::
 	Gui, HMenuCli: Destroy
 	Send, % v_Triggerstring	; Send, % v_Triggerstring . v_EndChar
 	v_InputString 		:= ""	
-	ih.VisibleText 	:= true
+	v_InputH.VisibleText 	:= true
 	return
 #If
 
@@ -559,19 +558,30 @@ F_PathLibrariesRestoreDefault()
 {
 	global	;assume-global mode
 	local	HADL_DefaultLocation := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
-	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], By default Library files (*.csv) are located in Users subfolder which is protected against other computer users. Would you like to move "Libraries" folder to this location?
+
+	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["By default library files (*.csv) are located in Users subfolder which is protected against other computer users."] 
+		. "`n`n" . TransA["Would you like to move ""Libraries"" folder to this location?"]
 	IfMsgBox, Yes
 	{
 		if (ini_HADL = HADL_DefaultLocation)
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], Actually the "Libraries" folder is already located in default location, so it won't be moved.
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Actually the ""Libraries"" folder is already located in default location, so it won't be moved."]
+				. "`n`n" . HADL_DefaultLocation
 		else	
 		{
 			FileMoveDir, % ini_HADL, % HADL_DefaultLocation, 2				;2: Overwrite existing files
 			if (!ErrorLevel)
-				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], The "Libraries" folder was successfully moved to the new location. Now application must be restarted (into default mode) in order to apply new location of "Libraries" folder and reload them.
-			ini_HADL := HADL_DefaultLocation
-			IniWrite, % ini_HADL, % HADConfig, Configuration, HADL	;HADconfig = Hotstrings Application Data Config (.ini)
-			F_ReloadApplication()							;reload into default mode of operation
+			{
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The ""Libraries"" folder was successfully moved to the new location."] 
+					. "`n`n" . TransA["Now application must be restarted (into default mode) in order to reload libary files from new location."]
+				ini_HADL := HADL_DefaultLocation
+				IniWrite, % ini_HADL, % HADConfig, Configuration, HADL	;HADconfig = Hotstrings Application Data Config (.ini)
+				F_ReloadApplication()							;reload into default mode of operation
+			}
+			else
+			{
+				MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Something went wrong with moving of ""Libraries"" folder. This operation is aborted."]
+				return
+			}
 		}
 	}
 	IfMsgBox, No
@@ -597,19 +607,30 @@ F_PathToLibraries()
 	global	;assume-global mode of operation
 	local	Old_HADL := ini_HADL
 
-	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], Would you like to change the current "Libraries" folder location? (If there exist files from source destination, they will be overwritten)`n`n Current "Libraries" location: `n %Old_HADL%	;Yes/No/Cancel + Icon Asterisk (info)
+	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Would you like to change the current ""Libraries"" folder location?"] 
+		. TransA["(If there exist files from source destination, they will be overwritten)"] . "`n`n" . TransA["Current ""Libraries"" location:"] 
+		. "`n" . Old_HADL	;Yes/No/Cancel + Icon Asterisk (info)
 	IfMsgBox, Yes
 	{
-		FileSelectFolder, ini_HADL, % "*" . Old_HADL, 3, Select folder where libraries (*.csv  files) will be stored.	;3 = (1) a button is provided that allows the user to create new folder + (2) provide an edit field that allows the user to type the name of a folder; * = select this folder
+		FileSelectFolder, ini_HADL, % "*" . Old_HADL, 3, % TransA["Select folder where libraries (*.csv  files) will be stored."]	;3 = (1) a button is provided that allows the user to create new folder + (2) provide an edit field that allows the user to type the name of a folder; * = select this folder
 		ini_HADL .= "\Libraries"
-		MsgBox, 35, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], Would you like to move Libraries files to the chosen destination? .	; Yes/No/Cancel + Icon Question
+		MsgBox, 35, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["Would you like to move ""Libraries"" folder and all *.csv files to the chosen destination?"] 
+			. "`n`n" . TransA ["Old location:"] . "`n" . Old_HADL . TransA["New location:"] . "`n" . ini_HADL	; Yes/No/Cancel + Icon Question
 		IfMsgBox, Yes
 		{
 			FileMoveDir, % Old_HADL, % ini_HADL, 2				;2: Overwrite existing files
 			if (!ErrorLevel)
-				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], The "Libraries" folder was successfully moved to the new location. Now application must be restarted (into default mode) in order to apply new location of "Libraries" folder and reload them.
-			IniWrite, % ini_HADL, % HADConfig, Configuration, HADL	;HADconfig = Hotstrings Application Data Config (.ini)
-			F_ReloadApplication()							;reload into default mode of operation
+			{
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The ""Libraries"" folder was successfully moved to the new location."] 
+					. "`n`n" . TransA["Now application must be restarted (into default mode) in order to reload libary files from new location."]
+				IniWrite, % ini_HADL, % HADConfig, Configuration, HADL	;HADconfig = Hotstrings Application Data Config (.ini)
+				F_ReloadApplication()							;reload into default mode of operation
+			}
+			else
+			{
+				MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Something went wrong with moving of ""Libraries"" folder. This operation is aborted."]
+				return
+			}
 		}
 		IfMsgBox, No
 			return
@@ -790,9 +811,9 @@ OneCharPressed(InputHook, Char)
 F_InitiateInputHook()
 {
 	global	;assume-global mode of operation
-	ih 			:= InputHook("V I1")	;I1 is necessary to block SendInput commands output
-	ih.OnChar 	:= Func("OneCharPressed")
-	ih.Start()
+	v_InputH 			:= InputHook("V I1")	;I1 is necessary to block SendInput commands output
+	v_InputH.OnChar 	:= Func("OneCharPressed")
+	v_InputH.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GUIinit()
@@ -8960,6 +8981,7 @@ About / Help 											= &About / Help
 About this application...								= About this application...
 According to your wish the new version of application was found on the server and downloaded. = According to your wish the new version of application was found on the server and downloaded.
 Active triggerstring tips								= Active triggerstring tips
+Actually the ""Libraries"" folder is already located in default location, so it won't be moved. = Actually the ""Libraries"" folder is already located in default location, so it won't be moved.
 Add comment (optional) 									= Add comment (optional)
 Add / Edit hotstring (F9) 								= Add / Edit hotstring (F9)
 Add library 											= Add library
@@ -8984,6 +9006,7 @@ Basic hotstring is triggered								= Basic hotstring is triggered
 black												= black
 blue													= blue
 Built with Autohotkey.exe version							= Built with Autohotkey.exe version
+By default library files (*.csv) are located in Users subfolder which is protected against other computer users. = By default library files (*.csv) are located in Users subfolder which is protected against other computer users.
 By length 											= By length
 Call Graphical User Interface								= Call Graphical User Interface
 Cancel 												= Cancel
@@ -9023,6 +9046,7 @@ Conversion of .csv library file into new .ahk file containing static (triggerstr
 Conversion of .csv library file into new .ahk file containing dynamic (triggerstring, hotstring) definitions = Conversion of .csv library file into new .ahk file containing dynamic (triggerstring, hotstring) definitions
 Converted												= Converted
 Copy clipboard content into ""Enter hotstring""				= Copy clipboard content into ""Enter hotstring""
+Current ""Libraries"" location:							= Current ""Libraries"" location:
 Current shortcut (hotkey):								= Current shortcut (hotkey):
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
 cursor												= cursor
@@ -9101,6 +9125,7 @@ HTML color RGB value, e.g. 00FF00							= HTML color RGB value, e.g. 00FF00
 I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)! = I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)!
 If not finite, define tooltip timeout						= If not finite, define tooltip timeout
 If sound is enabled, define it							= If sound is enabled, define it
+(If there exist files from source destination, they will be overwritten) = (If there exist files from source destination, they will be overwritten)
 If you answer ""Yes"" it will overwritten.					= If you answer ""Yes"" it will overwritten.
 If you answer ""Yes"" definition existing in another library will not be changed. = If you answer ""Yes"" definition existing in another library will not be changed.
 If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used. = If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used.
@@ -9123,6 +9148,8 @@ is empty. No (triggerstring, hotstring) definition will be loaded. Do you want t
 Introduction											= Introduction
 \Languages\`nMind that Config.ini Language variable is equal to 	= \Languages\`nMind that Config.ini Language variable is equal to
 Let's make your PC personal again... 						= Let's make your PC personal again...
+Libraries folder: move it to new location					= Libraries folder: move it to new location
+Libraries folder: restore it to default location				= Libraries folder: restore it to default location
 Libraries 											= &Libraries
 Libraries folder:										= Libraries folder:
 Library content (F2)									= Library content (F2)
@@ -9135,6 +9162,7 @@ Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|C
 Light (default)										= Light (default)
 lime													= lime
 Link file (.lnk) was created in AutoStart folder				= Link file (.lnk) was created in AutoStart folder
+Location of application specific data						= Location of application specific data
 Loading of (triggerstring, hotstring) definitions from the library file = Loading of (triggerstring, hotstring) definitions from the library file
 Loading file											= Loading file
 Loaded hotstrings: 										= Loaded hotstrings:
@@ -9152,9 +9180,13 @@ Menu position: cursor									= Menu position: cursor
 Minus - 												= Minus -
 Mode of operation										= Mode of operation
 Move (F8)												= Move (F8)
+)"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
+	TransConst .= "`n
+(Join`n `
 navy													= navy
 Next the default language file (English.txt) will be deleted,	= Next the default language file (English.txt) will be deleted,
 reloaded and fresh language file (English.txt) will be recreated. = reloaded and fresh language file (English.txt) will be recreated.
+New location:											= New location:
 New shortcut (hotkey)									= New shortcut (hotkey)
 No													= No
 no													= no
@@ -9162,12 +9194,11 @@ No Backspace (B0) 										= No Backspace (B0)
 No EndChar (O) 										= No EndChar (O)
 No libraries have been found!								= No libraries have been found!
 Not Case-Conforming (C1)									= Not Case-Conforming (C1)
+Now application must be restarted (into default mode) in order to reload libary files from new location. = Now application must be restarted (into default mode) in order to reload libary files from new location.
 Number of characters for tips 							= &Number of characters for tips
-)"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
-	TransConst .= "`n
-(Join`n `
 of													= of
 OK													= &OK
+Old location:											= Old location:
 olive												= olive
 On start-up the local version of application was compared with repository version and difference was discovered: = On start-up the local version of application was compared with repository version and difference was discovered:
 Open Config.ini in your default editor						= Open Config.ini in your default editor
@@ -9189,6 +9220,7 @@ Position of this window is saved in Config.ini.				= Position of this window is 
 Preview												= Preview
 Public library:										= Public library:
 purple												= purple
+question												= question
 Recognized encoding of the script file:						= Recognized encoding of the script file:
 red													= red
 Reload												= Reload
@@ -9212,6 +9244,7 @@ Search by: 											= Search by:
 Search Hotstrings 										= Search Hotstrings
 Search Hotstrings (F3)									= &Search Hotstrings (F3)
 Select a row in the list-view, please! 						= Select a row in the list-view, please!
+Select folder where libraries (*.csv  files) will be stored.	= Select folder where libraries (*.csv  files) will be stored.
 Select hotstring library									= Select hotstring library
 Selected Hotstring will be deleted. Do you want to proceed? 	= Selected Hotstring will be deleted. Do you want to proceed?
 Select hotstring output function 							= Select hotstring output function
@@ -9242,6 +9275,7 @@ Something went wrong with (triggerstring, hotstring) creation	= Something went w
 Something went wrong with hotstring deletion					= Something went wrong with hotstring deletion
 Something went wrong with hotstring EndChars					= Something went wrong with hotstring EndChars
 Something weng wrong with link file (.lnk) creation			= Something weng wrong with link file (.lnk) creation
+Something went wrong with moving of ""Libraries"" folder. This operation is aborted. = Something went wrong with moving of ""Libraries"" folder. This operation is aborted.
 Sound disable											= Sound disable
 Sound duration [ms]										= Sound duration [ms]
 Sound enable											= Sound enable
@@ -9256,6 +9290,9 @@ Static triggerstring / hotstring menus						= Static triggerstring / hotstring m
 Style of GUI											= Style of GUI
 Such file already exists									= Such file already exists
 Suspend Hotkeys										= Suspend Hotkeys
+)"
+	TransConst .= "`n
+(Join`n `
 Tab 													= Tab 
 teal													= teal
 Test styling											= Test styling
@@ -9270,10 +9307,12 @@ The file which you want to download from Internet, already exists on your local 
 The icon file											= The icon file
 The hostring 											= The hostring
 The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes. = The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes.
+The ""Libraries"" folder was successfully moved to the new location. = The ""Libraries"" folder was successfully moved to the new location.
 The library  											= The library 
 The file path is: 										= The file path is:
 The following file(s) haven't been downloaded as they are already present in the location = The following file(s) haven't been downloaded as they are already present in the location
 the following line is found:								= the following line is found:
+The ""Libraries"" folder was successfully moved to the new location. = The ""Libraries"" folder was successfully moved to the new location.
 There is no Libraries subfolder and no lbrary (*.csv) file exists! = There is no Libraries subfolder and no lbrary (*.csv) file exists!
 The parameter Language in section [GraphicalUserInterface] of Config.ini is missing. = The parameter Language in section [GraphicalUserInterface] of Config.ini is missing.
 The script											= The script
@@ -9326,17 +9365,20 @@ Welcome to Hotstrings application!							= Welcome to Hotstrings application!
 Windows key modifier									= Windows key modifier
 When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
 white												= white
+Would you like to change the current ""Libraries"" folder location? = Would you like to change the current ""Libraries"" folder location?
 Would you like to download the icon file?					= Would you like to download the icon file?
+Would you like to move ""Libraries"" folder and all *.csv files to the chosen destination? = Would you like to move ""Libraries"" folder and all *.csv files to the chosen destination?
 Would you like now to reload it in order to run the just downloaded version? = Would you like now to reload it in order to run the just downloaded version?
+Would you like to move ""Libraries"" folder to this location?	= Would you like to move ""Libraries"" folder to this location?
 yellow												= yellow
 Yes													= Yes
 yes													= yes
 You've changed at least one configuration parameter, but didn't yet apply it. = You've changed at least one configuration parameter, but didn't yet apply it.
 ↓ Click here to select hotstring library ↓					= ↓ Click here to select hotstring library ↓
+ShowInfoText											= In order to display graphical user interface (GUI) of the application just press shortcut: Win + Ctrl + H. `n`nSuggested steps after installation: `n`n1. Download some libraries (files containing (triggerstring, hotstring) definitions. You can do it from application menu:  → Libraries. `n`n2. After downloading of libraries restart application to apply the changes. Again, you can do it from application menu: Application → Restart. `n`n3. Application is preconfigured on the first start. Options available to be configured area available from GUI, application menu → Configuration. `n`n4. Application runs by default in default mode. If you don't wish to modify configuration, `nmay consider to run it in simplified mode: application menu → Application → Reload → Reload in silent mode.
 )"
 	TransConst .= "`n
 (Join`n `
-ShowInfoText											= In order to display graphical user interface (GUI) of the application just press shortcut: Win + Ctrl + H. `n`nSuggested steps after installation: `n`n1. Download some libraries (files containing (triggerstring, hotstring) definitions. You can do it from application menu:  → Libraries. `n`n2. After downloading of libraries restart application to apply the changes. Again, you can do it from application menu: Application → Restart. `n`n3. Application is preconfigured on the first start. Options available to be configured area available from GUI, application menu → Configuration. `n`n4. Application runs by default in default mode. If you don't wish to modify configuration, `nmay consider to run it in simplified mode: application menu → Application → Reload → Reload in silent mode.
 F_TI_ImmediateExecute									= * (asterisk): An EndChar (e.g. Space, ., or Enter) is not required to trigger the hotstring. For example:`n`n:*:j@::jsmith@somedomain.com`n`nThe example above would send its replacement the moment you type the @ character.
 F_TI_InsideWord										= ? (question mark): The hotstring will be triggered even when it is inside another word; `n`nthat is, when the character typed immediately before it is alphanumeric. `nFor example, if :?:al::airline is a hotstring, `ntyping ""practical "" would produce ""practicairline "".
 F_TI_NoBackSpace										= B0: Automatic backspacing is not done to erase the abbreviation you type. `n`nOne may send ← five times via {left 5}. For example, the following hotstring produces ""<em></em>"" and `nmoves the caret 5 places to the left (so that it's between the tags) `n`n::*b0:<em>::</em>{left 5}
@@ -10952,8 +10994,7 @@ F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t
 			For i, dim in (a := StrSplit(RegExReplace(DimSize, "i)[^xywh]")))
 				If !RegExMatch(DimSize, "i)" dim "\s*\K[\d.-]+", f%dim%)
 					f%dim% := 1
-			cInfo[ctrlID]     := { x:ix, fx:fx, y:iy, fy:fy, w:iw, fw:fw, h:vh, fh:fh, gw:A_GuiWidth, gh:A_GuiHeight, a:a , m:MMD}
-			; cInfo[ctrlID]     := { x:ix, fx:fx, y:iy, fy:fy, w:iw, fw:fw, h:ih, fh:fh, gw:A_GuiWidth, gh:A_GuiHeight, a:a , m:MMD}
+			cInfo[ctrlID]     := { x:ix, fx:fx, y:iy, fy:fy, w:iw, fw:fw, h:ih, fh:fh, gw:A_GuiWidth, gh:A_GuiHeight, a:a , m:MMD}
 		}
 		Else If ( cInfo[ctrlID].a.1) 
 		{
@@ -11067,7 +11108,7 @@ F_SendIsOflag(OtputString, Oflag, SendFunctionName)
 				SendRaw, % OtputString 
 	}
 	v_InputString 		:= ""	
-	ih.VisibleText 	:= true
+	v_InputH.VisibleText 	:= true
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendInput
@@ -11156,7 +11197,7 @@ F_ClipboardPaste(string, Oflag)
 	Sleep, %ini_CPDelay% ; this sleep is required surprisingly
 	Clipboard := ClipboardBackup	
 	v_InputString 		:= ""	
-	ih.VisibleText 	:= true
+	v_InputH.VisibleText 	:= true
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clipboard
@@ -11181,7 +11222,7 @@ F_HOF_MCLI(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clip
 			,Window2X  := 0,	Window2Y  := 0,	Window2W  := 0,	Window2H  := 0
 			,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
 
-	ih.VisibleText := false
+	v_InputH.VisibleText := false
 	F_DestroyTriggerstringTips(ini_TTCn)
 	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop
 		SoundBeep, % ini_MHSF, % ini_MHSD
@@ -11288,7 +11329,7 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 		,TriggerChar := "", UserInput := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
 
-	ih.VisibleText := false
+	v_InputH.VisibleText := false
 	F_DestroyTriggerstringTips(ini_TTCn)
 	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop 
 		SoundBeep, % ini_MHSF, % ini_MHSD
@@ -11576,7 +11617,7 @@ Esc::
 	Gui, HMenuAHK: Destroy
 	Send, % v_Triggerstring	; Send, % v_Triggerstring . v_EndChar
 	v_InputString 		:= ""	
-	ih.VisibleText 	:= true
+	v_InputH.VisibleText 	:= true
 return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
