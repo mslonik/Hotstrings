@@ -242,10 +242,12 @@ Menu, Submenu1,		Add	;line separator
 
 Menu, SubmenuPath,		Add, % TransA["Libraries folder: restore it to default location"], 	F_PathLibrariesRestoreDefault
 Menu, SubmenuPath,		Add, % TransA["Libraries folder: move it to new location"],			F_PathToLibraries
-Menu, SubmenuPath,		Add, Config.ini file: restore it to default location,				F_PathConfigIniRestoreDefault
-Menu, SubmenuPath,		Add, Config.ini file: move it to script / app location,			F_PathConfigIni
-Menu, SubmenuPath,		Add, Languages folder: restore it to default location,				F_PathLanguagesRestoreDefault
-Menu, SubmenuPath,		Add, Languages folder: move it to new location,					F_PathLanguages
+Menu, SubmenuPath,		Add
+Menu, SubmenuPath,		Add, % TransA["Config.ini file: restore it to default location"],	F_PathConfigIniRestoreDefault
+Menu, SubmenuPath,		Add, % TransA["Config.ini file: move it to script / app location"],	F_PathConfigIni
+Menu, SubmenuPath,		Add
+Menu, SubmenuPath,		Add, Application folder: restore it to default location,			F_PathRestoreDefaultAppFolder
+Menu, SubmenuPath,		Add, Application folder: move it to new location,					F_PathMoveAppFolder
 Menu, Submenu1, 		Add, % TransA["Location of application specific data"],			:SubmenuPath
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 								:Submenu1
@@ -557,12 +559,12 @@ Esc::
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
-F_PathLanguages()
+F_PathMoveAppFolder()
 {
 
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_PathLanguagesRestoreDefault()
+F_PathRestoreDefaultAppFolder()
 {
 
 }
@@ -586,7 +588,7 @@ F_PathConfigIni()
 		}
 		if (Old_HADConfig = HADConfig_AppData)
 		{
-			FileMove, % Old_HADConfig, *.*, Overwrite := true
+			FileMove, % HADConfig_AppData, *.*, Overwrite := true
 			ini_HADConfig := HADConfig_App
 			if (!ErrorLevel)
 			{
@@ -610,7 +612,44 @@ F_PathConfigIni()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PathConfigIniRestoreDefault()
 {
+	global	;assume-global mode of operation
+	local	  Old_HADConfig := ini_HADConfig	;HAD = Hotstrings Application Data
+			, HADConfig_AppData  	:= A_AppData   . "\" . SubStr(A_ScriptName, 1, -4)	;Hotstrings Application Data Config .ini
+			, HADConfig_App		:= A_ScriptDir . "\" . "Config.ini"
 
+	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Would you like to change Config.ini file location to default one (AppData)?"]
+		. TransA["(In default folder Config.ini is protected among others against changes implied by other users)."]
+		. "`n`n" . TransA["Current Config.ini file location:"]
+		. "`n" . Old_HADConfig	;Yes/No/Cancel + Icon Asterisk (info)
+	IfMsgBox, Yes
+	{		
+		if (Old_HADConfig = HADConfig_AppData)
+		{
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Nothing to do to me, Config.ini is already where you want it."]
+			return
+		}
+		if (Old_HADConfig = HADConfig_App)
+		{
+			FileMove, % HADConfig_App, % HADConfig_AppData . "\*.*", Overwrite := true
+			ini_HADConfig := HADConfig_AppData
+			if (!ErrorLevel)
+			{
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Config.ini file was successfully moved to the new location."]
+					. "`n`n" . TransA["Now application must be restarted (into default mode) in order to apply settings from new location."]
+				IniWrite, % ini_HADConfig, % ini_HADConfig, Configuration, HADConfig	;HADconfig = Hotstrings Application Data Config (.ini)
+				F_ReloadApplication()							;reload into default mode of operation
+			}
+			else
+			{
+				MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Something went wrong on time of moving Config.ini file. This operation is aborted."]
+				return
+			}
+		}
+	IfMsgBox, No
+		return
+	IfMsgBox, Cancel
+		return
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PathLibrariesRestoreDefault()
@@ -627,7 +666,7 @@ F_PathLibrariesRestoreDefault()
 				. "`n`n" . HADL_DefaultLocation
 		else	
 		{
-			FileMoveDir, % ini_HADL, % HADL_DefaultLocation, 2				;2: Overwrite existing files
+			FileMoveDir, % HADL_DefaultLocation, % HADL_DefaultLocation, 2				;2: Overwrite existing files
 			if (!ErrorLevel)
 			{
 				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The ""Libraries"" folder was successfully moved to the new location."] 
@@ -9123,6 +9162,8 @@ Compile												= Compile
 Composition of triggerstring tips							= Composition of triggerstring tips
 Compressed executable (upx.exe)							= Compressed executable (upx.exe)
 Compressed executable (mpress.exe)							= Compressed executable (mpress.exe)
+Config.ini file: move it to script / app location				= Config.ini file: move it to script / app location
+Config.ini file: restore it to default location				= Config.ini file: restore it to default location
 Config.ini file was successfully moved to the new location.		= Config.ini file was successfully moved to the new location.
 Config.ini wasn't found. The default Config.ini has now been created in location: = Config.ini wasn't found. The default Config.ini has now been created in location:
 Configuration 											= &Configuration
@@ -9223,6 +9264,7 @@ If you don't apply it, previous changes will be lost.			= If you don't apply it,
 Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
 Incorrect value. Select custom RGB hex value. Please try again.	= Incorrect value. Select custom RGB hex value. Please try again.
+(In default folder Config.ini is protected among others against changes implied by other users). = (In default folder Config.ini is protected among others against changes implied by other users).
 In order to display library content please at first select hotstring library = In order to display library content please at first select hotstring library
 In order to restore default configuration, the current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and upon start the Config.ini with default settings will be created. = In order to restore default configuration, the current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and upon start the Config.ini with default settings will be created.
 information											= information
@@ -9259,6 +9301,9 @@ Loading imported library. Please wait...					= Loading imported library. Please 
 Loaded												= Loaded
 Local version											= Local version
 Log triggered hotstrings									= Log triggered hotstrings
+)"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
+	TransConst .= "`n
+(Join`n `
 maroon												= maroon
 Max. no. of shown tips									= Max. no. of shown tips
 Menu hotstring is triggered								= Menu hotstring is triggered
@@ -9268,9 +9313,6 @@ Menu position: cursor									= Menu position: cursor
 Minus - 												= Minus -
 Mode of operation										= Mode of operation
 Move (F8)												= Move (F8)
-)"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
-	TransConst .= "`n
-(Join`n `
 navy													= navy
 Next the default language file (English.txt) will be deleted,	= Next the default language file (English.txt) will be deleted,
 reloaded and fresh language file (English.txt) will be recreated. = reloaded and fresh language file (English.txt) will be recreated.
@@ -9457,6 +9499,7 @@ Windows key modifier									= Windows key modifier
 When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
 white												= white
 Would you like to change the current ""Libraries"" folder location? = Would you like to change the current ""Libraries"" folder location?
+Would you like to change Config.ini file location to default one (AppData)? = Would you like to change Config.ini file location to default one (AppData)?
 Would you like to change Config.ini file location to folder where is ""Hotstrings"" script / app? = Would you like to change Config.ini file location to folder where is ""Hotstrings"" script / app?
 Would you like to download the icon file?					= Would you like to download the icon file?
 Would you like to move ""Libraries"" folder and all *.csv files to the new location? = Would you like to move ""Libraries"" folder and all *.csv files to the new location?
