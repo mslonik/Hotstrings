@@ -51,6 +51,7 @@ F_DetermineMonitors()
 Critical, On
 F_LoadCreateTranslationTxt() 	;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
 F_CheckCreateConfigIni() 	;1. Try to load up configuration file. If those files do not exist, create them.
+F_CheckIfRemoveOldDir()		;Checks content of Config.ini in order to remove old script directory.
 F_CheckScriptEncoding()		;checks if script is utf-8 compliant. it has plenty to do wiith github download etc.
 F_Load_ini_HAD()			;HAD = Hotstrings Application Data
 F_Load_ini_GuiReload()
@@ -147,7 +148,7 @@ if (ini_TTTtEn)	;Triggerstring Tips Column Trigger
 F_GuiSearch_CreateObject()	;When all tables are full, initialize GuiSearch
 F_Searching("Reload")			;prepare content of Search tables
 TrayTip, % A_ScriptName, % TransA["Hotstrings have been loaded"], , 1 ;1 = Info icon
-SetTimer, HideTrayTip, -5000											;more general approach; for details see https://www.autohotkey.com/docs/commands/TrayTip.htm#Remarks										;more universal approach. For details see https://www.autohotkey.com/docs/commands/TrayTip.htm#Remarks
+SetTimer, HideTrayTip, -5000				;more general approach; for details see https://www.autohotkey.com/docs/commands/TrayTip.htm#Remarks
 Critical, Off
 
 Loop, Files, %A_ScriptDir%\Languages\*.txt
@@ -163,18 +164,18 @@ Menu, ConfGUI,		Add, % TransA["Change language"], 					:SubmenuLanguage
 Menu, ConfGUI, 	Add	;To add a menu separator line, omit all three parameters.
 Menu, ConfGUI, 	Add, % TransA["Show Sandbox (F6)"], 				F_ToggleSandbox
 if (ini_Sandbox)
-	Menu, ConfGUI, Check, % TransA["Show Sandbox (F6)"]
+	Menu, ConfGUI, Check, 	% TransA["Show Sandbox (F6)"]
 else
-	Menu, ConfGUI, UnCheck, % TransA["Show Sandbox (F6)"]
+	Menu, ConfGUI, UnCheck, 	% TransA["Show Sandbox (F6)"]
 
-Menu, ConfGUI,		Add, % TransA["Show full GUI (F4)"],				F_ToggleRightColumn
+Menu, ConfGUI,		Add, 	% TransA["Show full GUI (F4)"],				F_ToggleRightColumn
 if (ini_WhichGui = "HS3")
-	Menu, ConfGUI, Check, % TransA["Show full GUI (F4)"]
+	Menu, ConfGUI, Check, 	% TransA["Show full GUI (F4)"]
 else
-	Menu, ConfGUI, UnCheck, % TransA["Show full GUI (F4)"]
+	Menu, ConfGUI, UnCheck, 	% TransA["Show full GUI (F4)"]
 
 Menu, ConfGUI, 	Add	;To add a menu separator line, omit all three parameters.
-Menu, ConfGUI,		Add, % TransA["Style of GUI"],								:StyleGUIsubm
+Menu, ConfGUI,		Add, 	% TransA["Style of GUI"],								:StyleGUIsubm
 
 F_CreateMenu_SizeOfMargin()
 
@@ -247,7 +248,7 @@ Menu, SubmenuPath,		Add, % TransA["Config.ini file: restore it to default locati
 Menu, SubmenuPath,		Add, % TransA["Config.ini file: move it to script / app location"],	F_PathConfigIni
 Menu, SubmenuPath,		Add
 Menu, SubmenuPath,		Add, Application folder: restore it to default location,			F_PathRestoreDefaultAppFolder
-Menu, SubmenuPath,		Add, Application folder: move it to new location,					F_PathMoveAppFolder
+Menu, SubmenuPath,		Add, % TransA["Application folder: move it to new location"],		F_PathMoveAppFolder
 Menu, Submenu1, 		Add, % TransA["Location of application specific data"],			:SubmenuPath
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 								:Submenu1
@@ -559,9 +560,84 @@ Esc::
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_CheckIfRemoveOldDir()
+{	;The problem is this function generates error if run "too quickly". I've tried a trick with Process and WaitClose, but it seems it's not enough to wait for old scrpt to finish.
+	global	;assume-global mode of operation
+	local	OldAppFolder := "", OldScriptPID := 0
+
+	IniRead, OldAppFolder, 	% ini_HADConfig, Configuration, OldScriptDir, % A_Space
+	; IniRead, OldScriptPID, 	% ini_HADConfig, Configuration, OldScriptPID, % A_Space
+	OutputDebug, % "OldAppFolder:" . A_Tab . OldAppFolder . "`n"
+	if (OldAppFolder != "")
+	{
+		FileRemoveDir, % OldAppFolder, 1	;Remove all files and subdirectories
+		if (ErrorLevel)
+		{
+			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Something went wrong with removal of old ""Hotstrings"" folder."]
+				. A_Space . TransA["Perhaps check if any other application (like File Manager) do not occupy folder to be removed."]
+				. "`n" . TransA["This operation is aborted."]
+			return
+		}
+		else
+		{
+			IniWrite, % A_Space, % ini_HADConfig, Configuration, OldScriptDir
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The old ""Hotstrings"" folder was successfully removed."]
+				. "`n`n" . OldAppFolder
+		}
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PathMoveAppFolder()
 {
+	global	;assume-global mode of operation
+	local	  OldScriptDir := A_ScriptDir, OldScriptPID := 0
+			, NewScriptDir := "" 
 
+	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Would you like to move ""Hotstrings"" script / application somewhere else?"]
+		. A_Space . TransA["(Together with accompanying files and subfolders)."]
+		. "`n`n" . TransA["Current script / application location:"]
+		. "`n" . OldScriptDir	;Yes/No/Cancel + Icon Asterisk (info)
+	IfMsgBox, Yes
+	{		
+		FileSelectFolder, NewScriptDir, % "*" . OldScriptDir, 3, % TransA["Select folder where ""Hotstrings"" folder will be moved."]	;3 = (1) a button is provided that allows the user to create new folder + (2) provide an edit field that allows the user to type the name of a folder; * = select this folder
+		NewScriptDir .= "\" . SubStr(A_ScriptName, 1, -4)
+		if (NewScriptDir = OldScriptDir)
+		{
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Nothing to do to me, Config.ini is already where you want it."]
+			return
+		}
+		MsgBox, 35, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["Are you sure you want to move ""Hotstrings"" folder and all its content to the new location?"]
+			. "`n`n" . TransA ["Old location:"] . "`n" . OldScriptDir . "`n`n" . TransA["New location:"] . "`n" . NewScriptDir	; Yes/No/Cancel + Icon Question
+		IfMsgBox, Yes
+		{
+			FileCopyDir, % OldScriptDir, % NewScriptDir, 1				;1: Overwrite existing files
+			if (!ErrorLevel)
+			{
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The ""Hotstrings"" folder was successfully moved to the new location:"]
+					. "`n`n" . NewScriptDir
+					. "`n`n" . TransA["Now application must be restarted (into default mode) in order to reload libary files from new location."]
+				IniWrite, % OldScriptDir, % ini_HADConfig, Configuration, OldScriptDir
+				; OldScriptPID := DllCall("GetCurrentProcessId")
+				; IniWrite, % OldScriptPID, % ini_HADConfig, Configuration, OldScriptPID
+				F_ReloadApplication("Run from new location", NewScriptDir)	;reload into default mode of operation
+				; OutputDebug, % "ExitApp" . A_Space . "A_ScriptDir:" . A_Tab . A_ScriptDir
+				ExitApp, 0
+			}
+			else
+			{
+				MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Something went wrong with moving of ""Hotstrings"" folder. This operation is aborted."]
+				return
+			}
+		}
+		IfMsgBox, No
+			return
+		IfMsgBox, Cancel
+			return
+	IfMsgBox, No
+		return
+	IfMsgBox, Cancel
+		return
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PathRestoreDefaultAppFolder()
@@ -572,7 +648,7 @@ F_PathRestoreDefaultAppFolder()
 F_PathConfigIni()
 {
 	global	;assume-global mode of operation
-	local	  Old_HADConfig := ini_HADConfig	;HAD = Hotstrings Application Data
+	local	  Old_HADConfig 		:= ini_HADConfig	;HAD = Hotstrings Application Data
 			, HADConfig_AppData  	:= A_AppData   . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Config.ini"	;Hotstrings Application Data Config .ini
 			, HADConfig_App		:= A_ScriptDir . "\" . "Config.ini"
 
@@ -1351,36 +1427,38 @@ F_InitiateTrayMenus(v_Param)
 		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			F_TraySuspendHotkeys
 		Menu, Tray, Add,		% TransA["Pause application"],		F_TrayPauseScript
 		Menu  Tray, Add,		% TransA["Exit application"],			F_TrayExit		
+
 		Case "":
-		Menu, Tray, NoStandard									; remove all the rest of standard tray menu
-		if (!FileExist(AppIcon))
-		{
-			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Information"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." 
-				. A_Space . TransA["Would you like to download the icon file?"] . "`n`n" . TransA["If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used."]
-			IfMsgBox, Yes
+			Menu, Tray, NoStandard									; remove all the rest of standard tray menu
+			OutputDebug, % "AppIcon:" . AppIcon . A_Tab . "A_ScriptDir:" . A_Tab . A_ScriptDir .  A_Tab . "A_WorkingDir:" . A_Tab . A_WorkingDir . "`n"
+			if (!FileExist(AppIcon))
 			{
-				OutputDebug, % "AppIcon:" . A_Tab . AppIcon
-				URLDownloadToFile, 	https://raw.githubusercontent.com/mslonik/Hotstrings/master/hotstrings.ico, % AppIcon	;2022-01-28
+				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Information"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." 
+					. A_Space . TransA["Would you like to download the icon file?"] . "`n`n" . TransA["If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used."]
+				IfMsgBox, Yes
+				{
+					OutputDebug, % "AppIcon:" . A_Tab . AppIcon
+					URLDownloadToFile, 	https://raw.githubusercontent.com/mslonik/Hotstrings/master/hotstrings.ico, % AppIcon	;2022-01-28
+				}
+				IfMsgBox, No
+					AppIcon := "*"
 			}
-			IfMsgBox, No
-				AppIcon := "*"
-		}
-		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
-		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Default mode"], F_GuiAbout
-		Menu, Tray, Add										;line separator 
-		Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 			F_GUIinit
-		Menu, Tray, Default, 	% TransA["Edit Hotstrings"]
-		Menu, Tray, Add										;line separator 
-		Menu, Tray, Add,		% TransA["Help: Hotstrings application"],				F_GuiAboutLink1
-		Menu, Tray, Add,		% TransA["Help: AutoHotkey Hotstrings reference guide"], 	F_GuiAboutLink2
-		Menu, Tray, Add										;line separator 
-		Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],			F_ReloadApplication
-		Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],				F_ReloadApplication
-		Menu, Tray, Add,		% TransA["Reload"],									:SubmenuReload
-		Menu, Tray, Add										;line separator 
-		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],							F_TraySuspendHotkeys
-		Menu, Tray, Add,		% TransA["Pause application"],						F_TrayPauseScript
-		Menu  Tray, Add,		% TransA["Exit application"],							F_TrayExit
+			Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
+			Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Default mode"], F_GuiAbout
+			Menu, Tray, Add										;line separator 
+			Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 			F_GUIinit
+			Menu, Tray, Default, 	% TransA["Edit Hotstrings"]
+			Menu, Tray, Add										;line separator 
+			Menu, Tray, Add,		% TransA["Help: Hotstrings application"],				F_GuiAboutLink1
+			Menu, Tray, Add,		% TransA["Help: AutoHotkey Hotstrings reference guide"], 	F_GuiAboutLink2
+			Menu, Tray, Add										;line separator 
+			Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],			F_ReloadApplication
+			Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],				F_ReloadApplication
+			Menu, Tray, Add,		% TransA["Reload"],									:SubmenuReload
+			Menu, Tray, Add										;line separator 
+			Menu, Tray, Add,		% TransA["Suspend Hotkeys"],							F_TraySuspendHotkeys
+			Menu, Tray, Add,		% TransA["Pause application"],						F_TrayPauseScript
+			Menu  Tray, Add,		% TransA["Exit application"],							F_TrayExit
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1603,7 +1681,7 @@ F_GuiTrigTipsMenuDefC2(AmountOfRows, LongestString)
 	GuiControl, Font, % IdTT_C2_LB2		;fontcolor of listbox
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)	;tu jestem
+F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)
 {
 	global	;assume-global mode
 	local vOutput := 0, vOutputX := 0, vOutputY := 0, vOutputW := 0, vOutputH := 0, OutputString := ""
@@ -1757,7 +1835,7 @@ F_TMenu()	;this is separate, dedicated function to handle "interrupt" coming fro
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0
 	v_MenuMax := a_Tips.Count()	
 	;OutputDebug, % "v_PressedKey:" . A_Tab . v_PressedKey
-	Switch ini_TTCn	;tu jestem
+	Switch ini_TTCn	
 	{
 		Case 1:	ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C1_LB1	;check if triggerstring tips listbox is empty.
 		Case 2:	ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C2_LB1	;check if triggerstring tips listbox is empty.
@@ -8590,6 +8668,16 @@ F_Compile()
 F_ReloadApplication(params*)	;ItemName, ItemPos, MenuName
 {
 	global ;assume-global mode
+
+ 	if (params[1] = "Run from new location")
+	 {
+		Switch A_IsCompiled
+		{
+			Case % true:	Run, % A_AhkPath . A_Space . """" . params[2] . """" . "\" . SubStr(A_ScriptName, 1, -4) . ".exe"
+			Case "": 		Run, % A_AhkPath . A_Space . """" . params[2] . """" . "\" . A_ScriptName	;double quotes ("") are necessary to escape " and to run script if its path contains space.
+		}
+		return
+	 }
 	
 	if (WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd))
 	{
@@ -8614,7 +8702,7 @@ F_ReloadApplication(params*)	;ItemName, ItemPos, MenuName
 					Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
 					Case "": 		Run, % A_AhkPath . A_Space . """" . A_ScriptFullPath . """" . A_Space . "l"	;double quotes ("") are necessary to escape " and to run script if its path contains space.
 				}
-				Default:	;when button was pressed "Download repository version" 
+				Default:	;when button was pressed "Download repository version" ;tu jestem
 				Switch A_IsCompiled
 				{
 					Case % true:	Run, % A_ScriptFullPath . A_Space . "/r"
@@ -8625,7 +8713,7 @@ F_ReloadApplication(params*)	;ItemName, ItemPos, MenuName
 		IfMsgBox, No
 			return
 	}
-	else
+	else	;source of event: SysTray
 	{
 		Switch params[1]
 		{
@@ -8635,14 +8723,12 @@ F_ReloadApplication(params*)	;ItemName, ItemPos, MenuName
 					Case % true:	Run, % A_ScriptFullPath . A_Space . "l"
 					Case "": 		Run, % A_AhkPath . A_Space . """" . A_ScriptFullPath . """" . A_Space . "l"	;double quotes ("") are necessary to escape " and to run script if its path contains space.
 				}
-			Case "Run from new location":
-			Default:	;params[1] = ""
+			Default:	;if params[1] = ""
 				Switch A_IsCompiled
 				{
 					Case % true:	Run, % A_ScriptFullPath . A_Space . "/r"
 					Case "": 		Reload
 				}
-
 		}
 	}
 }
@@ -9117,6 +9203,7 @@ Alphabetically 										= Alphabetically
 already exists in another library							= already exists in another library
 Apostrophe ' 											= Apostrophe '
 Application											= A&pplication
+Application folder: move it to new location					= Application folder: move it to new location
 Application help										= Application help
 Application language changed to: 							= Application language changed to:
 Application mode										= Application mode
@@ -9124,6 +9211,7 @@ Apply												= Apply
 aqua													= aqua
 Are you sure?											= Are you sure?
 Are you sure you want to exit this application now?			= Are you sure you want to exit this application now?
+Are you sure you want to move ""Hotstrings"" folder and all its content to the new location? = Are you sure you want to move ""Hotstrings"" folder and all its content to the new location?
 Are you sure you want to reload this application now?			= Are you sure you want to reload this application now?
 Background color										= Background color
 Backslash \ 											= Backslash \
@@ -9176,6 +9264,7 @@ Converted												= Converted
 Copy clipboard content into ""Enter hotstring""				= Copy clipboard content into ""Enter hotstring""
 Current Config.ini file location:							= Current Config.ini file location:
 Current ""Libraries"" location:							= Current ""Libraries"" location:
+Current script / application location:						= Current script / application location:
 Current shortcut (hotkey):								= Current shortcut (hotkey):
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
 cursor												= cursor
@@ -9345,6 +9434,7 @@ Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
 Pause												= Pause
 Pause application										= Pause application
+Perhaps check if any other application (like File Manager) do not occupy folder to be removed. = Perhaps check if any other application (like File Manager) do not occupy folder to be removed.
 Phrase to search for:									= Phrase to search for:
 pixels												= pixels
 Please wait, uploading .csv files... 						= Please wait, uploading .csv files...
@@ -9376,6 +9466,7 @@ Search by: 											= Search by:
 Search Hotstrings 										= Search Hotstrings
 Search Hotstrings (F3)									= &Search Hotstrings (F3)
 Select a row in the list-view, please! 						= Select a row in the list-view, please!
+Select folder where ""Hotstrings"" folder will be moved.		= Select folder where ""Hotstrings"" folder will be moved.
 Select folder where libraries (*.csv  files) will be moved.		= Select folder where libraries (*.csv  files) will be moved.
 Select hotstring library									= Select hotstring library
 Selected Hotstring will be deleted. Do you want to proceed? 	= Selected Hotstring will be deleted. Do you want to proceed?
@@ -9408,7 +9499,9 @@ Something went wrong with (triggerstring, hotstring) creation	= Something went w
 Something went wrong with hotstring deletion					= Something went wrong with hotstring deletion
 Something went wrong with hotstring EndChars					= Something went wrong with hotstring EndChars
 Something weng wrong with link file (.lnk) creation			= Something weng wrong with link file (.lnk) creation
+Something went wrong with moving of ""Hotstrings"" folder. This operation is aborted. = Something went wrong with moving of ""Hotstrings"" folder. This operation is aborted.
 Something went wrong with moving of ""Libraries"" folder. This operation is aborted. = Something went wrong with moving of ""Libraries"" folder. This operation is aborted.
+Something went wrong with removal of old ""Hotstrings"" folder.	= Something went wrong with removal of old ""Hotstrings"" folder.
 Sound disable											= Sound disable
 Sound duration [ms]										= Sound duration [ms]
 Sound enable											= Sound enable
@@ -9445,7 +9538,9 @@ The library  											= The library
 The file path is: 										= The file path is:
 The following file(s) haven't been downloaded as they are already present in the location = The following file(s) haven't been downloaded as they are already present in the location
 the following line is found:								= the following line is found:
+The ""Hotstrings"" folder was successfully moved to the new location: = The ""Hotstrings"" folder was successfully moved to the new location:
 The ""Libraries"" folder was successfully moved to the new location. = The ""Libraries"" folder was successfully moved to the new location.
+The old ""Hotstrings"" folder was successfully removed.		= The old ""Hotstrings"" folder was successfully removed.
 There is no Libraries subfolder and no lbrary (*.csv) file exists! = There is no Libraries subfolder and no lbrary (*.csv) file exists!
 The parameter Language in section [GraphicalUserInterface] of Config.ini is missing. = The parameter Language in section [GraphicalUserInterface] of Config.ini is missing.
 The script											= The script
@@ -9456,12 +9551,14 @@ There is no											= There is no
 There was no Languages subfolder, so one now is created.		= There was no Languages subfolder, so one now is created.
 This library:											= This library:
 This line do not comply to format required by this application.  = This line do not comply to format required by this application.
+This operation is aborted.								= This operation is aborted.
 The old version is already overwritten.						= The old version is already overwritten.
 This option is valid 									= In case you observe some hotstrings aren't pasted from clipboard increase this value. `nThis option is valid for CL and MCL hotstring output functions. 
 Timeout value [ms]										= Timeout value [ms]
 Tilde (~) key modifier									= Tilde (~) key modifier
 Tip: If you copy text from PDF file it's adviced to remove them. = Tip: If you copy text from PDF file it's adviced to remove them.
 Tips are shown after no. of characters						= Tips are shown after no. of characters
+(Together with accompanying files and subfolders).			= (Together with accompanying files and subfolders).
 Toggle trigger characters (↓ or EndChars)					= &Toggle trigger characters (↓ or EndChars)
 Tooltip disable										= Tooltip disable
 Tooltip enable											= Tooltip enable
@@ -9504,6 +9601,7 @@ Would you like to change Config.ini file location to folder where is ""Hotstring
 Would you like to download the icon file?					= Would you like to download the icon file?
 Would you like to move ""Libraries"" folder and all *.csv files to the new location? = Would you like to move ""Libraries"" folder and all *.csv files to the new location?
 Would you like now to reload it in order to run the just downloaded version? = Would you like now to reload it in order to run the just downloaded version?
+Would you like to move ""Hotstrings"" script / application somewhere else? = Would you like to move ""Hotstrings"" script / application somewhere else?
 Would you like to move ""Libraries"" folder to this location?	= Would you like to move ""Libraries"" folder to this location?
 yellow												= yellow
 Yes													= Yes
