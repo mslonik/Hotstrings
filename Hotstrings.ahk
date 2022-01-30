@@ -9365,6 +9365,9 @@ In order to aplly new style it's necesssary to reload the application. 		= In or
 is added in section  [GraphicalUserInterface] of Config.ini		= is added in section  [GraphicalUserInterface] of Config.ini
 is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv? = is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?
 Introduction											= Introduction
+)"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
+	TransConst .= "`n
+(Join`n `
 \Languages\`nMind that Config.ini Language variable is equal to 	= \Languages\`nMind that Config.ini Language variable is equal to
 Let's make your PC personal again... 						= Let's make your PC personal again...
 Libraries folder: move it to new location					= Libraries folder: move it to new location
@@ -9390,9 +9393,6 @@ Loading imported library. Please wait...					= Loading imported library. Please 
 Loaded												= Loaded
 Local version											= Local version
 Log triggered hotstrings									= Log triggered hotstrings
-)"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
-	TransConst .= "`n
-(Join`n `
 maroon												= maroon
 Max. no. of shown tips									= Max. no. of shown tips
 Menu hotstring is triggered								= Menu hotstring is triggered
