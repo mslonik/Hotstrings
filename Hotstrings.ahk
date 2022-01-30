@@ -633,11 +633,11 @@ F_PathMoveAppFolder()
 			return
 		IfMsgBox, Cancel
 			return
+	}
 	IfMsgBox, No
 		return
 	IfMsgBox, Cancel
 		return
-	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PathRestoreDefaultAppFolder()
@@ -679,11 +679,11 @@ F_PathConfigIni()
 				return
 			}
 		}
+	}
 	IfMsgBox, No
 		return
 	IfMsgBox, Cancel
 		return
-	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PathConfigIniRestoreDefault()
@@ -721,11 +721,11 @@ F_PathConfigIniRestoreDefault()
 				return
 			}
 		}
+	}
 	IfMsgBox, No
 		return
 	IfMsgBox, Cancel
 		return
-	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PathLibrariesRestoreDefault()
@@ -12568,7 +12568,6 @@ HideTrayTip()
         Menu Tray, Icon
     }
 }
-
 
 ; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
 TurnOff_OHE:
