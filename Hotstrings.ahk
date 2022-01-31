@@ -176,132 +176,132 @@ else
 	Menu, ConfGUI, UnCheck, 	% TransA["Show full GUI (F4)"]
 
 Menu, ConfGUI, 	Add	;To add a menu separator line, omit all three parameters.
-Menu, ConfGUI,		Add, 	% TransA["Style of GUI"],								:StyleGUIsubm
+Menu, ConfGUI,		Add, 	% TransA["Style of GUI"],										:StyleGUIsubm
 
 F_CreateMenu_SizeOfMargin()
 
 Menu, ConfGUI,		Add, 	% TransA["Size of margin:"] . A_Space . "x" . A_Space . TransA["pixels"],	:SizeOfMX
 Menu, ConfGUI,		Add, 	% TransA["Size of margin:"] . A_Space . "y" . A_Space . TransA["pixels"],	:SizeOfMY
 
-Menu, SizeOfFont,	Add,		8,									F_SizeOfFont
-Menu, SizeOfFont,	Add,		9,									F_SizeOfFont
-Menu, SizeOfFont,	Add,		10,									F_SizeOfFont
-Menu, SizeOfFont,	Add,		11,									F_SizeOfFont
-Menu, SizeOfFont,	Add,		12,									F_SizeOfFont
-Menu, SizeOfFont, 	Check,	% c_FontSize
-Menu, ConfGUI,		Add, 	% TransA["Size of font"],				:SizeOfFont
+Menu, SizeOfFont,	Add,		8,															F_SizeOfFont
+Menu, SizeOfFont,	Add,		9,															F_SizeOfFont
+Menu, SizeOfFont,	Add,		10,															F_SizeOfFont
+Menu, SizeOfFont,	Add,		11,															F_SizeOfFont
+Menu, SizeOfFont,	Add,		12,															F_SizeOfFont
+Menu, SizeOfFont, 	Check,	% c_FontSize						
+Menu, ConfGUI,		Add, 	% TransA["Size of font"],										:SizeOfFont
 
-Menu, FontTypeMenu,	Add,		Arial,								F_FontType
-Menu, FontTypeMenu,	Add,		Calibri,								F_FontType
-Menu, FontTypeMenu,	Add,		Consolas,								F_FontType
-Menu, FontTypeMenu,	Add,		Courier,								F_FontType
-Menu, FontTypeMenu, Add,		Verdana,								F_FontType
-Menu, FontTypeMenu, Check,	% c_FontType
-Menu, ConfGUI,		Add, 	% TransA["Font type"],					:FontTypeMenu
+Menu, FontTypeMenu,	Add,		Arial,														F_FontType
+Menu, FontTypeMenu,	Add,		Calibri,														F_FontType
+Menu, FontTypeMenu,	Add,		Consolas,														F_FontType
+Menu, FontTypeMenu,	Add,		Courier,														F_FontType
+Menu, FontTypeMenu, Add,		Verdana,														F_FontType
+Menu, FontTypeMenu, Check,	% c_FontType						
+Menu, ConfGUI,		Add, 	% TransA["Font type"],											:FontTypeMenu
 
-Menu, Submenu1Shortcuts, Add, % TransA["Call Graphical User Interface"],					F_GuiShortDef
-Menu, Submenu1Shortcuts, Add, % TransA["Copy clipboard content into ""Enter hotstring"""],	F_GuiShortDef
-Menu, Submenu1Shortcuts, Add, % TransA["Undo the last hotstring"],						F_GuiShortDef
-Menu, Submenu1, 		Add, % TransA["Shortcut (hotkey) definitions"],					:Submenu1Shortcuts
+Menu, Submenu1Shortcuts, Add, % TransA["Call Graphical User Interface"],							F_GuiShortDef
+Menu, Submenu1Shortcuts, Add, % TransA["Copy clipboard content into ""Enter hotstring"""],			F_GuiShortDef
+Menu, Submenu1Shortcuts, Add, % TransA["Undo the last hotstring"],								F_GuiShortDef
+Menu, Submenu1, 		Add, % TransA["Shortcut (hotkey) definitions"],							:Submenu1Shortcuts
 Menu, Submenu1, 		Add
 ;Warning: order of SubmenuEndChars have to be alphabetical. Keep an eye on it. This is because after change of language specific menu items are related with associative array which also keeps to alphabetical order.
-Menu, SubmenuEndChars, Add, % TransA["Apostrophe '"], 					F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Backslash \"], 					F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Closing Curly Bracket }"], 		F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Closing Round Bracket )"],			F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Closing Square Bracket ]"],		F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Colon :"], 						F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Comma ,"], 						F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Dot ."], 						F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Enter"],						F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Exclamation Mark !"], 			F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Minus -"], 						F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Opening Curly Bracket {"], 		F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Opening Round Bracket ("],			F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Opening Square Bracket ["],		F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Question Mark ?"], 				F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Quote """], 					F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Semicolon `;"], 					F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Slash /"], 						F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Space"],						F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Tab"], 						F_ToggleEndChars
-Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 					F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Apostrophe '"], 											F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Backslash \"], 											F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Curly Bracket }"], 								F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Round Bracket )"],									F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Closing Square Bracket ]"],								F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Colon :"], 												F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Comma ,"], 												F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Dot ."], 												F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Enter"],												F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Exclamation Mark !"], 									F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Minus -"], 												F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Curly Bracket {"], 								F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Round Bracket ("],									F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Opening Square Bracket ["],								F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Question Mark ?"], 										F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Quote """], 											F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Semicolon `;"], 											F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Slash /"], 												F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Space"],												F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Tab"], 												F_ToggleEndChars
+Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 											F_ToggleEndChars
 F_ToggleEndChars()
 Func_GuiEventsMenu		:= func("F_GuiEvents")
-Menu, Submenu1,		Add, % TransA["Signalling of events"],							% Func_GuiEventsMenu
-Func_GuiEventsMenu.Call(true)
-Func_GuiStylingMenu		:= func("F_TTstyling")
-Menu, Submenu1,		Add, % TransA["Triggerstring tips and hotstring menu styling"],		% Func_GuiStylingMenu
-Func_GuiStylingMenu.Call(true)
-Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 						:ConfGUI
-Menu, Submenu1,		Add
-Menu, Submenu1,  	   	Add, % TransA["Toggle trigger characters (↓ or EndChars)"], 		:SubmenuEndChars
-Menu, Submenu1,  	   	Add
-Menu, Submenu1,	 	Add, % TransA["Restore default configuration"],					F_RestoreDefaultConfig
-Menu, Submenu1,		Add, % TransA["Open folder where Config.ini is located"],			F_OpenConfigIniLocation	
-Menu, Submenu1,		Add, % TransA["Open Config.ini in your default editor"],			F_OpenConfigIniInEditor
-Menu, Submenu1,		Add	;line separator
+Menu, Submenu1,		Add, % TransA["Signalling of events"],									% Func_GuiEventsMenu
+Func_GuiEventsMenu.Call(true)		
+Func_GuiStylingMenu		:= func("F_TTstyling")		
+Menu, Submenu1,		Add, % TransA["Triggerstring tips and hotstring menu styling"],				% Func_GuiStylingMenu
+Func_GuiStylingMenu.Call(true)		
+Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 								:ConfGUI
+Menu, Submenu1,		Add		
+Menu, Submenu1,  	   	Add, % TransA["Toggle trigger characters (↓ or EndChars)"], 				:SubmenuEndChars
+Menu, Submenu1,  	   	Add		
+Menu, Submenu1,	 	Add, % TransA["Restore default configuration"],							F_RestoreDefaultConfig
+Menu, Submenu1,		Add, % TransA["Open folder where Config.ini is located"],					F_OpenConfigIniLocation	
+Menu, Submenu1,		Add, % TransA["Open Config.ini in your default editor"],					F_OpenConfigIniInEditor
+Menu, Submenu1,		Add	;line separator		
 
-Menu, SubmenuPath,		Add, % TransA["Libraries folder: restore it to default location"], 	F_PathLibrariesRestoreDefault
-Menu, SubmenuPath,		Add, % TransA["Libraries folder: move it to new location"],			F_PathToLibraries
+Menu, SubmenuPath,		Add, % TransA["Libraries folder: restore it to default location"], 			F_PathLibrariesRestoreDefault
+Menu, SubmenuPath,		Add, % TransA["Libraries folder: move it to new location"],					F_PathToLibraries
+Menu, SubmenuPath,		Add		
+Menu, SubmenuPath,		Add, % TransA["Config.ini file: restore it to default location"],			F_PathConfigIniRestoreDefault
+Menu, SubmenuPath,		Add, % TransA["Config.ini file: move it to script / app location"],			F_PathConfigIni
 Menu, SubmenuPath,		Add
-Menu, SubmenuPath,		Add, % TransA["Config.ini file: restore it to default location"],	F_PathConfigIniRestoreDefault
-Menu, SubmenuPath,		Add, % TransA["Config.ini file: move it to script / app location"],	F_PathConfigIni
-Menu, SubmenuPath,		Add
-Menu, SubmenuPath,		Add, Application folder: restore it to default location,			F_PathRestoreDefaultAppFolder
-Menu, SubmenuPath,		Add, % TransA["Application folder: move it to new location"],		F_PathMoveAppFolder
-Menu, Submenu1, 		Add, % TransA["Location of application specific data"],			:SubmenuPath
+Menu, SubmenuPath,		Add, % TransA["Script/application folder: restore it to default location"],	F_PathRestoreDefaultAppFolder
+Menu, SubmenuPath,		Add, % TransA["Script/application folder: move it to new location"],			F_PathMoveAppFolder
+Menu, Submenu1, 		Add, % TransA["Location of application specific data"],					:SubmenuPath
 
-Menu, HSMenu, 			Add, % TransA["Configuration"], 								:Submenu1
-Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 						F_Searching
+Menu, HSMenu, 			Add, % TransA["Configuration"], 										:Submenu1
+Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 								F_Searching
 
-Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 						F_RefreshListOfLibraries
-F_RefreshListOfLibraries()
-Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 				F_RefreshListOfLibraryTips
-F_RefreshListOfLibraryTips()
-Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.
-Menu, LibrariesSubmenu,	Add, % TransA["Visit public libraries webpage"],					F_PublicLibraries
-Menu, LibrariesSubmenu,	Add, % TransA["Open libraries folder in Explorer"], 				F_OpenLibrariesFolderInExplorer
-Menu, LibrariesSubmenu,	Add, % TransA["Download public libraries"],						F_DownloadPublicLibraries
-Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.
-Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],						F_ImportLibrary
-Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  							F_ExportLibraryStatic
-Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  							F_ExportLibraryDynamic
-Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],						:ExportSubmenu
+Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 								F_RefreshListOfLibraries
+F_RefreshListOfLibraries()		
+Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 						F_RefreshListOfLibraryTips
+F_RefreshListOfLibraryTips()		
+Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.		
+Menu, LibrariesSubmenu,	Add, % TransA["Visit public libraries webpage"],							F_PublicLibraries
+Menu, LibrariesSubmenu,	Add, % TransA["Open libraries folder in Explorer"], 						F_OpenLibrariesFolderInExplorer
+Menu, LibrariesSubmenu,	Add, % TransA["Download public libraries"],								F_DownloadPublicLibraries
+Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.		
+Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],								F_ImportLibrary
+Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  									F_ExportLibraryStatic
+Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  									F_ExportLibraryDynamic
+Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],								:ExportSubmenu
 
-Menu, HSMenu, 			Add, % TransA["Libraries"], 									:LibrariesSubmenu
-Menu, HSMenu, 			Add, % TransA["Clipboard Delay (F7)"], 							F_GuiHSdelay
+Menu, HSMenu, 			Add, % TransA["Libraries"], 											:LibrariesSubmenu
+Menu, HSMenu, 			Add, % TransA["Clipboard Delay (F7)"], 									F_GuiHSdelay
 
-Menu, SubmenuReload, 	Add,	% TransA["Reload in default mode"],						F_ReloadApplication
-Menu, SubmenuReload, 	Add,	% TransA["Reload in silent mode"],							F_ReloadApplication
-Menu, AppSubmenu, 		Add,	% TransA["Reload"],										:SubmenuReload
+Menu, SubmenuReload, 	Add,	% TransA["Reload in default mode"],								F_ReloadApplication
+Menu, SubmenuReload, 	Add,	% TransA["Reload in silent mode"],									F_ReloadApplication
+Menu, AppSubmenu, 		Add,	% TransA["Reload"],												:SubmenuReload
 
-Menu, AppSubmenu,		Add, % TransA["Suspend Hotkeys"],								F_TraySuspendHotkeys
-Menu, AppSubmenu,		Add, % TransA["Pause"],										F_TrayPauseScript
-Menu, AppSubmenu,		Add, % TransA["Exit"],										F_Exit
+Menu, AppSubmenu,		Add, % TransA["Suspend Hotkeys"],										F_TraySuspendHotkeys
+Menu, AppSubmenu,		Add, % TransA["Pause"],												F_TrayPauseScript
+Menu, AppSubmenu,		Add, % TransA["Exit"],												F_Exit
 Menu, AppSubmenu,		Add	;To add a menu separator line, omit all three parameters.
-Menu, AutoStartSub,		Add, % TransA["Default mode"],					F_AddToAutostart
-Menu, AutoStartSub,		Add,	% TransA["Silent mode"],						F_AddToAutostart
-Menu, AppSubmenu, 		Add, % TransA["Add to Autostart"],					:AutoStartSub
+Menu, AutoStartSub,		Add, % TransA["Default mode"],										F_AddToAutostart
+Menu, AutoStartSub,		Add,	% TransA["Silent mode"],											F_AddToAutostart
+Menu, AppSubmenu, 		Add, % TransA["Add to Autostart"],										:AutoStartSub
 
-F_CompileSubmenu()
+F_CompileSubmenu()					
 
-Menu, AppSubmenu,		Add, % TransA["Version / Update"],					F_GuiVersionUpdate
-Menu, AppSubmenu,		Add
-Menu, SubmenuLog,		Add,	% TransA["enable"],							F_MenuLogEnDis
-Menu, SubmenuLog,		Add, % TransA["disable"],						F_MenuLogEnDis
-Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],			:SubmenuLog	
-Menu, AppSubmenu,		add, % TransA["Open folder where log files are located"], F_OpenLogFolder
+Menu, AppSubmenu,		Add, % TransA["Version / Update"],										F_GuiVersionUpdate
+Menu, AppSubmenu,		Add					
+Menu, SubmenuLog,		Add,	% TransA["enable"],												F_MenuLogEnDis
+Menu, SubmenuLog,		Add, % TransA["disable"],											F_MenuLogEnDis
+Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],								:SubmenuLog	
+Menu, AppSubmenu,		add, % TransA["Open folder where log files are located"], 					F_OpenLogFolder
 
-Menu,	AboutHelpSub,	Add,	% TransA["Help: Hotstrings application"],		F_GuiAboutLink1
-Menu,	AboutHelpSub,	Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"], F_GuiAboutLink2
+Menu,	AboutHelpSub,	Add,	% TransA["Help: Hotstrings application"],							F_GuiAboutLink1
+Menu,	AboutHelpSub,	Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"], 				F_GuiAboutLink2
 Menu,	AboutHelpSub,	Add
-Menu,	AboutHelpSub,	Add,	% TransA["About this application..."],			F_GuiAbout
+Menu,	AboutHelpSub,	Add,	% TransA["About this application..."],								F_GuiAbout
 Menu,	AboutHelpSub,	Add
-Menu,	AboutHelpSub,	Add, % TransA["Show intro"],						F_GuiShowIntro
+Menu,	AboutHelpSub,	Add, % TransA["Show intro"],											F_GuiShowIntro
 
-Menu, 	HSMenu,		Add, % TransA["Application"],						:AppSubmenu
-Menu, 	HSMenu, 		Add, % TransA["About / Help"], 					:AboutHelpSub
+Menu, 	HSMenu,		Add, % TransA["Application"],											:AppSubmenu
+Menu, 	HSMenu, 		Add, % TransA["About / Help"], 										:AboutHelpSub
 Gui, 	HS3: Menu, HSMenu
 Gui, 	HS4: Menu, HSMenu
 
@@ -566,16 +566,17 @@ F_CheckIfMoveToProgramFiles()
 	global	;assume-global mode of operation
 	local	IsProgramFiles := "", Destination := "C:\Program Files\Hotstrings"
 
-	IniRead, % IsProgramFiles, % ini_HADConfig, Configuration, OldScriptDir, % A_Space
+	IniRead, IsProgramFiles, % ini_HADConfig, Configuration, OldScriptDir, % A_Space
 	if (A_IsAdmin) and (IsProgramFiles = Destination)
 	{
 		IniWrite, % A_Space, % ini_HADConfig, Configuration, OldScriptDir
+		OutputDebug, % "A_ScriptDir:" . A_Space . A_ScriptDir . "Destination:" . A_Space . Destination
 		FileMoveDir, % A_ScriptDir, % Destination, 2		;2 = overwrite
 		if (!ErrorLevel)
 		{
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "The ""Hotstrings"" folder was successfully moved to the new location."
 				. "`n`n" . "Now application must be restarted (into default mode) in order to exit administrator mode."
-			F_ReloadApplication()							;reload into default mode of operation
+			F_ReloadApplication("Run from new location", Destination)						;reload into default mode of operation
 		}
 		else
 		{
@@ -9264,7 +9265,8 @@ Alphabetically 										= Alphabetically
 already exists in another library							= already exists in another library
 Apostrophe ' 											= Apostrophe '
 Application											= A&pplication
-Application folder: move it to new location					= Application folder: move it to new location
+Script/application folder: move it to new location			= Script/application folder: move it to new location
+Script/application folder: restore it to default location		= Script/application folder: restore it to default location
 Application help										= Application help
 Application language changed to: 							= Application language changed to:
 Application mode										= Application mode
