@@ -642,7 +642,37 @@ F_PathMoveAppFolder()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PathRestoreDefaultAppFolder()
 {
+	global	;assume-global mode of operation
+	local	  OldScriptDir := A_ScriptDir
+			, NewScriptDir := "C:\Program Files\Hotstrings" 
 
+	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "Would you like to move ""Hotstrings"" script / application to default location?"
+		. A_Space . TransA["(Together with accompanying files and subfolders)."]
+		. "`n`n" . TransA["Current script / application location:"]
+		. "`n" . OldScriptDir	;Yes/No/Cancel + Icon Asterisk (info)
+		. "`n`n" . "New location (default):"
+		. "`n" . NewScriptDir
+	IfMsgBox, Yes
+	{		
+		if not (A_IsAdmin)
+		{
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "To move folder into ""Program Files"" folder you must allow admin privileges to ""Hotstrings"", which will restart to move its folder."
+			try	;in order to catch any error / warning of AutoHotkey
+			{
+				if (A_IsCompiled)
+					Run *RunAs "%A_ScriptFullPath%" /restart
+				else
+					Run *RunAs "%A_AhkPath%" /restart "%A_ScriptFullPath%"
+				ExitApp, 0
+			}
+		}
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "You've cancelled this process."
+		return
+	}
+	IfMsgBox, No
+		return
+	IfMsgBox, Cancel
+		return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PathConfigIni()
