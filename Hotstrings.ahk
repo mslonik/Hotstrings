@@ -51,6 +51,7 @@ F_DetermineMonitors()
 Critical, On
 F_LoadCreateTranslationTxt() 	;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
 F_CheckCreateConfigIni() 	;1. Try to load up configuration file. If those files do not exist, create them.
+F_CheckIfMoveToProgramFiles()	;Checks if move Hotstrings folder to Program Files folder and then restarts application.
 F_CheckIfRemoveOldDir()		;Checks content of Config.ini in order to remove old script directory.
 F_CheckScriptEncoding()		;checks if script is utf-8 compliant. it has plenty to do wiith github download etc.
 F_Load_ini_HAD()			;HAD = Hotstrings Application Data
@@ -560,6 +561,30 @@ Esc::
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_CheckIfMoveToProgramFiles()
+{
+	global	;assume-global mode of operation
+	local	IsProgramFiles := "", Destination := "C:\Program Files\Hotstrings"
+
+	IniRead, % IsProgramFiles, % ini_HADConfig, Configuration, OldScriptDir, % A_Space
+	if (A_IsAdmin) and (IsProgramFiles = Destination)
+	{
+		IniWrite, % A_Space, % ini_HADConfig, Configuration, OldScriptDir
+		FileMoveDir, % A_ScriptDir, % Destination, 2		;2 = overwrite
+		if (!ErrorLevel)
+		{
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "The ""Hotstrings"" folder was successfully moved to the new location."
+				. "`n`n" . "Now application must be restarted (into default mode) in order to exit administrator mode."
+			F_ReloadApplication()							;reload into default mode of operation
+		}
+		else
+		{
+			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Something went wrong with moving of ""Libraries"" folder. This operation is aborted."]
+			return
+		}
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_CheckIfRemoveOldDir()
 {	;The problem is this function generates error if run "too quickly". I've tried a trick with Process and WaitClose, but it seems it's not enough to wait for old scrpt to finish.
 	global	;assume-global mode of operation
@@ -660,9 +685,15 @@ F_PathRestoreDefaultAppFolder()
 			try	;in order to catch any error / warning of AutoHotkey
 			{
 				if (A_IsCompiled)
+				{
+					IniWrite, % NewScriptDir, % ini_HADConfig, Configuration, OldScriptDir
 					Run *RunAs "%A_ScriptFullPath%" /restart
+				}
 				else
+				{
+					IniWrite, % NewScriptDir, % ini_HADConfig, Configuration, OldScriptDir
 					Run *RunAs "%A_AhkPath%" /restart "%A_ScriptFullPath%"
+				}
 				ExitApp, 0
 			}
 		}
