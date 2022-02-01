@@ -37,11 +37,7 @@ FileInstall, LICENSE, LICENSE, 0
 ; - - - - - - - - - - - - - - - - - - - - - - - S E C T I O N    O F    G L O B A L     V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l like "silent mode"
 ,		a_Triggers 			:= []		;Main loop of application
-,		v_InputString 			:= ""		;Main loop of application; this variable stores information about keys pressed by user which can differ in size from actual hotstring definition.
-,		v_MouseX 				:= 0			;Main loop of application
-,		v_MouseY 				:= 0			;Main loop of application
 ,		v_IndexLog 			:= 1			;for logging, if Hotstrings application is run with d parameter.
-,		v_UndoHotstring 		:= ""		;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
 ,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time; f_ stands for "flag"
 ,		TT_C1_Hwnd 			:= 0, TT_C2_Hwnd := 0, TT_C3_Hwnd := 0, HMenuCliHwnd := 0, HMenuAHKHwnd	:= 0, HS3GuiHwnd := 0, HS4GuiHwnd := 0, TT_C4_Hwnd := 0, TDemoHwnd := 0, HDemoHwnd := 0 ;This is a trick to initialize global variables in order to not get warning (#Warn) message
 ,		HotstringDelay			:= 0
@@ -148,6 +144,7 @@ if (ini_TTTtEn)	;Triggerstring Tips Column Trigger
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 F_GuiSearch_CreateObject()	;When all tables are full, initialize GuiSearch
 F_Searching("Reload")			;prepare content of Search tables
+F_InitiateInputHook()
 TrayTip, % A_ScriptName, % TransA["Hotstrings have been loaded"], , 1 ;1 = Info icon
 SetTimer, HideTrayTip, -5000				;more general approach; for details see https://www.autohotkey.com/docs/commands/TrayTip.htm#Remarks
 Critical, Off
@@ -316,8 +313,6 @@ if (ini_TTCn = 4)	;static triggerstring / hotstring GUI
 	F_GuiTrigTipsMenuDefC4()
 if (ini_GuiReload) and (v_Param != "l")
 	F_GUIinit()
-
-F_InitiateInputHook()
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
 #InputLevel 2	;Thanks to this line triggerstring tips will have lower priority; backspacing done in function F_TMenu() will not affect this label.
@@ -998,7 +993,7 @@ F_FlipTTMenu(WindowHandle, MenuX, MenuY, GuiName)
 	Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate 	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-OneCharPressed(InputHook, Char)
+F_OneCharPressed(InputHook, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
 	local	f_FoundEndChar := false, f_FoundTip := false, EndCharCounter := 0
@@ -1047,8 +1042,9 @@ OneCharPressed(InputHook, Char)
 F_InitiateInputHook()
 {
 	global	;assume-global mode of operation
+	v_InputString := "", v_Triggerstring := "", v_UndoHotstring := ""	;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
 	v_InputH 			:= InputHook("V I1")	;I1 is necessary to block SendInput commands output
-	v_InputH.OnChar 	:= Func("OneCharPressed")
+	v_InputH.OnChar 	:= Func("F_OneCharPressed")
 	v_InputH.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11192,46 +11188,45 @@ F_LoadLibrariesToTables()
 F_CreateHotstring(txt, nameoffile) 
 { 
 	global	;assume-global mode
-	local Options := "", SendFun := "", EnDis := "", OnOff := "", TextInsert := "", Oflag := false
-	
-	v_TriggerString := ""
+	local Options := "", SendFun := "", EnDis := "", OnOff := "", TextInsert := "", Oflag := false, v_Triggerstring := ""
+
 	Loop, Parse, txt, ‖
 	{
 		Switch A_Index
 		{
 			Case 1:
-			Options := A_LoopField
-			Oflag := false
-			if (InStr(Options, "O", 0))
-				Oflag := true
-			else
+				Options := A_LoopField
 				Oflag := false
+				if (InStr(Options, "O", 0))
+					Oflag := true
+				else
+					Oflag := false
 			Case 2:
-			v_Triggerstring := A_LoopField
-			v_Triggerstring := StrReplace(v_Triggerstring, "``n", "`n") ;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
-			v_Triggerstring := StrReplace(v_Triggerstring, "``r", "`r")	;future: add more sequences like {Esc} etc.
-			v_Triggerstring := StrReplace(v_Triggerstring, "``t", "`t")
-			v_Triggerstring := StrReplace(v_Triggerstring, "``", "`")
-			v_Triggerstring := StrReplace(v_Triggerstring, "``b", "`b")
+				v_Triggerstring := A_LoopField
+				v_Triggerstring := StrReplace(v_Triggerstring, "``n", "`n") ;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
+				v_Triggerstring := StrReplace(v_Triggerstring, "``r", "`r")	;future: add more sequences like {Esc} etc.
+				v_Triggerstring := StrReplace(v_Triggerstring, "``t", "`t")
+				v_Triggerstring := StrReplace(v_Triggerstring, "``", "`")
+				v_Triggerstring := StrReplace(v_Triggerstring, "``b", "`b")
 			Case 3:
-			Switch A_LoopField
-			{
-				Case "SI": 	SendFun := "F_HOF_SI"
-				Case "CL": 	SendFun := "F_HOF_CLI"
-				Case "MCL": 	SendFun := "F_HOF_MCLI"
-				Case "MSI":	SendFun := "F_HOF_MSI"
-				Case "SR":	SendFun := "F_HOF_SR"
-				Case "SP":	SendFun := "F_HOF_SP"
-				Case "SE":	SendFun := "F_HOF_SE"
-			}
+				Switch A_LoopField
+				{
+					Case "SI": 	SendFun := "F_HOF_SI"
+					Case "CL": 	SendFun := "F_HOF_CLI"
+					Case "MCL": 	SendFun := "F_HOF_MCLI"
+					Case "MSI":	SendFun := "F_HOF_MSI"
+					Case "SR":	SendFun := "F_HOF_SR"
+					Case "SP":	SendFun := "F_HOF_SP"
+					Case "SE":	SendFun := "F_HOF_SE"
+				}
 			Case 4: 
-			Switch A_LoopField
-			{
-				Case "En":	OnOff := "On"
-				Case "Dis":	OnOff := "Off"	
-			}
+				Switch A_LoopField
+				{
+					Case "En":	OnOff := "On"
+					Case "Dis":	OnOff := "Off"	
+				}
 			Case 5:
-			TextInsert := A_LoopField
+				TextInsert := A_LoopField
 		}
 	}
 	
