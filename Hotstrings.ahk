@@ -6802,20 +6802,13 @@ F_AddHotstring()
 	}
 	Switch v_SelectFunction
 	{
-		Case "Clipboard (CL)": 			
-		SendFunHotstringCreate 	:= "F_HOF_CLI", SendFunFileFormat 		:= "CL"
-		Case "SendInput (SI)": 			
-		SendFunHotstringCreate 	:= "F_HOF_SI", SendFunFileFormat 		:= "SI"
-		Case "Menu & Clipboard (MCL)": 	
-		SendFunHotstringCreate 	:= "F_HOF_MCLI", SendFunFileFormat 	:= "MCL"
-		Case "Menu & SendInput (MSI)": 
-		SendFunHotstringCreate 	:= "F_HOF_MSI", SendFunFileFormat 		:= "MSI"
-		Case "SendRaw (SR)":
-		SendFunHotstringCreate 	:= "F_HOF_SR", SendFunFileFormat 		:= "SR"
-		Case "SendPlay (SP)":
-		SendFunHotstringCreate 	:= "F_HOF_SP", SendFunFileFormat 		:= "SP"
-		Case "SendEvent (SE)":
-		SendFunHotstringCreate 	:= "F_HOF_SE", SendFunFileFormat 		:= "SE"
+		Case "Clipboard (CL)":			SendFunHotstringCreate 	:= "F_HOF_CLI", 	SendFunFileFormat 	:= "CL"
+		Case "SendInput (SI)": 			SendFunHotstringCreate 	:= "F_HOF_SI", 	SendFunFileFormat 	:= "SI"
+		Case "Menu & Clipboard (MCL)": 	SendFunHotstringCreate 	:= "F_HOF_MCLI", 	SendFunFileFormat 	:= "MCL"
+		Case "Menu & SendInput (MSI)": 	SendFunHotstringCreate 	:= "F_HOF_MSI", 	SendFunFileFormat 	:= "MSI"
+		Case "SendRaw (SR)":			SendFunHotstringCreate 	:= "F_HOF_SR", 	SendFunFileFormat 	:= "SR"
+		Case "SendPlay (SP)":			SendFunHotstringCreate 	:= "F_HOF_SP", 	SendFunFileFormat 	:= "SP"
+		Case "SendEvent (SE)":			SendFunHotstringCreate 	:= "F_HOF_SE", 	SendFunFileFormat 	:= "SE"
 	}
 	
 	;2. Create or modify (triggerstring, hotstring) definition according to inputs. 
@@ -6839,12 +6832,13 @@ F_AddHotstring()
 				}				
 				else 
 				{
+					ModifiedFlag := true
 					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
 						, % TransA["The hotstring"] . A_Space . """" .  a_Triggerstring[key] . """" . A_Space .  TransA["exists in the currently selected library"] . ":" . A_Space . a_Library[key] . ".csv" . "." . "`n`n" 
 						. TransA["Do you want to proceed?"]
 						. "`n`n" . TransA["If you answer ""Yes"" it will overwritten."]
 					IfMsgBox, No
-						Break
+						return
 					IfMsgBox, Yes
 					{
 						if (InStr(OldOptions, "*") and !InStr(Options,"*"))
@@ -6881,7 +6875,7 @@ F_AddHotstring()
 								. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
 						}
 						a_TriggerOptions[key] := Options, a_OutputFunction[key] := SendFunFileFormat, a_Hotstring[key] := TextInsert, a_EnableDisable[key] := EnDis
-						, a_Comment[key] := v_Comment, ModifiedFlag := true
+						, a_Comment[key] := v_Comment
 						Loop, 
 						{
 							LV_GetText(Temp1, A_Index)
