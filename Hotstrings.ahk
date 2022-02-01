@@ -570,12 +570,12 @@ F_CheckIfMoveToProgramFiles()
 	if (A_IsAdmin) and (IsProgramFiles = Destination)
 	{
 		IniWrite, % A_Space, % ini_HADConfig, Configuration, OldScriptDir
-		OutputDebug, % "A_ScriptDir:" . A_Space . A_ScriptDir . "Destination:" . A_Space . Destination
+		; OutputDebug, % "A_ScriptDir:" . A_Space . A_ScriptDir . "Destination:" . A_Space . Destination
 		FileMoveDir, % A_ScriptDir, % Destination, 2		;2 = overwrite
 		if (!ErrorLevel)
 		{
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "The ""Hotstrings"" folder was successfully moved to the new location."
-				. "`n`n" . "Now application must be restarted (into default mode) in order to exit administrator mode."
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The ""Hotstrings"" folder was successfully moved to the new location."]
+				. "`n`n" . TransA["Now application must be restarted (into default mode) in order to exit administrator mode."]
 			F_ReloadApplication("Run from new location", Destination)						;reload into default mode of operation
 		}
 		else
@@ -672,17 +672,17 @@ F_PathRestoreDefaultAppFolder()
 	local	  OldScriptDir := A_ScriptDir
 			, NewScriptDir := "C:\Program Files\Hotstrings" 
 
-	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "Would you like to move ""Hotstrings"" script / application to default location?"
+	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Would you like to move ""Hotstrings"" script / application to default location?"]
 		. A_Space . TransA["(Together with accompanying files and subfolders)."]
 		. "`n`n" . TransA["Current script / application location:"]
 		. "`n" . OldScriptDir	;Yes/No/Cancel + Icon Asterisk (info)
-		. "`n`n" . "New location (default):"
+		. "`n`n" . TransA["New location (default):"]
 		. "`n" . NewScriptDir
 	IfMsgBox, Yes
 	{		
 		if not (A_IsAdmin)
 		{
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "To move folder into ""Program Files"" folder you must allow admin privileges to ""Hotstrings"", which will restart to move its folder."
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["To move folder into ""Program Files"" folder you must allow admin privileges to ""Hotstrings"", which will restart to move its folder."]
 			try	;in order to catch any error / warning of AutoHotkey
 			{
 				if (A_IsCompiled)
@@ -698,7 +698,7 @@ F_PathRestoreDefaultAppFolder()
 				ExitApp, 0
 			}
 		}
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "You've cancelled this process."
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["You've cancelled this process."]
 		return
 	}
 	IfMsgBox, No
@@ -6839,7 +6839,7 @@ F_AddHotstring()
 				else 
 				{
 					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-						, % TransA["The hostring"] . A_Space . """" .  a_Triggerstring[key] . """" . A_Space .  TransA["exists in the currently selected library"] . ":" . A_Space . a_Library[key] . ".csv" . "." . "`n`n" 
+						, % TransA["The hotstring"] . A_Space . """" .  a_Triggerstring[key] . """" . A_Space .  TransA["exists in the currently selected library"] . ":" . A_Space . a_Library[key] . ".csv" . "." . "`n`n" 
 						. TransA["Do you want to proceed?"]
 						. "`n`n" . TransA["If you answer ""Yes"" it will overwritten."]
 					IfMsgBox, No
@@ -6896,7 +6896,7 @@ F_AddHotstring()
 			else
 			{
 				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-					, % TransA["The hostring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["already exists in another library"] . ":" . A_Space . a_Library[key] . "." . "`n`n" 
+					, % TransA["The hotstring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["already exists in another library"] . ":" . A_Space . a_Library[key] . "." . "`n`n" 
 					. TransA["Do you want to proceed?"] . "`n`n" . TransA["If you answer ""No"" edition of the current definition will be interrupted."]
 					. "`n" . TransA["If you answer ""Yes"" definition existing in another library will not be changed."]
 				IfMsgBox, No
@@ -7075,7 +7075,7 @@ F_Move()
 		v_Temp2 := LV_GetText(v_Temp1, A_Index, 1)
 		if (v_Temp1 == v_TriggerString)
 		{
-			MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The hostring"] . ":" . "`n`n" . v_Triggerstring . "`n`n" . TransA["exists in a file and will now be replaced."] 
+			MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The hotstring"] . ":" . "`n`n" . v_Triggerstring . "`n`n" . TransA["exists in a file and will now be replaced."] 
 				. "`n" . v_SelectHotstringLibrary . "`n`n" . TransA["Do you want to proceed?"]
 			IfMsgBox, Yes
 			{
@@ -8738,7 +8738,7 @@ F_ReloadApplication(params*)	;ItemName, ItemPos, MenuName
 			Case % true:	Run, % A_AhkPath . A_Space . """" . params[2] . """" . "\" . SubStr(A_ScriptName, 1, -4) . ".exe"
 			Case "": 		Run, % A_AhkPath . A_Space . """" . params[2] . """" . "\" . A_ScriptName	;double quotes ("") are necessary to escape " and to run script if its path contains space.
 		}
-		return
+		ExitApp, 0
 	 }
 	
 	if (WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd))
@@ -8771,6 +8771,7 @@ F_ReloadApplication(params*)	;ItemName, ItemPos, MenuName
 					Case "": 		Reload
 				}
 			}
+			ExitApp, 0
 		}
 		IfMsgBox, No
 			return
@@ -8792,6 +8793,7 @@ F_ReloadApplication(params*)	;ItemName, ItemPos, MenuName
 					Case "": 		Reload
 				}
 		}
+		ExitApp, 0
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9247,7 +9249,7 @@ F_LoadCreateTranslationTxt(decision*)
 ; The right column contains text strings which are replaced instead of left column definitions. Exchange text strings in right columnt with localized translations of text strings. 
 ; You don't have to remove lines starting with semicolon. Those lines won't be read by Hotstrings application.
 )"
-	
+
 	TransConst .= "`n`n
 (Join`n `			
 About / Help 											= &About / Help
@@ -9469,6 +9471,7 @@ navy													= navy
 Next the default language file (English.txt) will be deleted,	= Next the default language file (English.txt) will be deleted,
 reloaded and fresh language file (English.txt) will be recreated. = reloaded and fresh language file (English.txt) will be recreated.
 New location:											= New location:
+New location (default):									= New location (default):
 New shortcut (hotkey)									= New shortcut (hotkey)
 No													= No
 no													= no
@@ -9478,6 +9481,7 @@ No libraries have been found!								= No libraries have been found!
 Not Case-Conforming (C1)									= Not Case-Conforming (C1)
 Nothing to do to me, Config.ini is already where you want it.	= Nothing to do to me, Config.ini is already where you want it.
 Now application must be restarted (into default mode) in order to apply settings from new location. = Now application must be restarted (into default mode) in order to apply settings from new location.
+Now application must be restarted (into default mode) in order to exit administrator mode. = Now application must be restarted (into default mode) in order to exit administrator mode.
 Now application must be restarted (into default mode) in order to reload libary files from new location. = Now application must be restarted (into default mode) in order to reload libary files from new location.
 Number of characters for tips 							= &Number of characters for tips
 of													= of
@@ -9583,6 +9587,7 @@ Suspend Hotkeys										= Suspend Hotkeys
 	TransConst .= "`n
 (Join`n `
 Tab 													= Tab 
+To move folder into ""Program Files"" folder you must allow admin privileges to ""Hotstrings"", which will restart to move its folder. = To move folder into ""Program Files"" folder you must allow admin privileges to ""Hotstrings"", which will restart to move its folder.
 teal													= teal
 Test styling											= Test styling
 The application										= The application
@@ -9593,8 +9598,9 @@ The executable file is prepared by Ahk2Exe and compressed by mpress.exe: = The e
 The executable file is prepared by Ahk2Exe and compressed by upx.exe: = The executable file is prepared by Ahk2Exe and compressed by upx.exe:
 The executable file is prepared by Ahk2Exe, but not compressed:	= The executable file is prepared by Ahk2Exe, but not compressed:
 The file which you want to download from Internet, already exists on your local harddisk. Are you sure you want to download it? = The file which you want to download from Internet, already exists on your local harddisk. Are you sure you want to download it? `n`n If you answer ""yes"", your local file will be overwritten. If you answer ""no"", download will be continued.
+The ""Hotstrings"" folder was successfully moved to the new location. = The ""Hotstrings"" folder was successfully moved to the new location.
 The icon file											= The icon file
-The hostring 											= The hostring
+The hotstring 											= The hotstring
 The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes. = The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes.
 The ""Libraries"" folder was successfully moved to the new location. = The ""Libraries"" folder was successfully moved to the new location.
 The library  											= The library 
@@ -9664,11 +9670,13 @@ Would you like to change Config.ini file location to folder where is ""Hotstring
 Would you like to download the icon file?					= Would you like to download the icon file?
 Would you like to move ""Libraries"" folder and all *.csv files to the new location? = Would you like to move ""Libraries"" folder and all *.csv files to the new location?
 Would you like now to reload it in order to run the just downloaded version? = Would you like now to reload it in order to run the just downloaded version?
+Would you like to move ""Hotstrings"" script / application to default location? = Would you like to move ""Hotstrings"" script / application to default location?
 Would you like to move ""Hotstrings"" script / application somewhere else? = Would you like to move ""Hotstrings"" script / application somewhere else?
 Would you like to move ""Libraries"" folder to this location?	= Would you like to move ""Libraries"" folder to this location?
 yellow												= yellow
 Yes													= Yes
 yes													= yes
+You've cancelled this process.							= You've cancelled this process.
 You've changed at least one configuration parameter, but didn't yet apply it. = You've changed at least one configuration parameter, but didn't yet apply it.
 ↓ Click here to select hotstring library ↓					= ↓ Click here to select hotstring library ↓
 ShowInfoText											= In order to display graphical user interface (GUI) of the application just press shortcut: Win + Ctrl + H. `n`nSuggested steps after installation: `n`n1. Download some libraries (files containing (triggerstring, hotstring) definitions. You can do it from application menu:  → Libraries. `n`n2. After downloading of libraries restart application to apply the changes. Again, you can do it from application menu: Application → Restart. `n`n3. Application is preconfigured on the first start. Options available to be configured area available from GUI, application menu → Configuration. `n`n4. Application runs by default in default mode. If you don't wish to modify configuration, `nmay consider to run it in simplified mode: application menu → Application → Reload → Reload in silent mode.
