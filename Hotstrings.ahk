@@ -1713,7 +1713,8 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestString)
 F_GuiTrigTipsMenuDefC2(AmountOfRows, LongestString)
 {
 	global	;assume-global mode
-	local vOutput := 0, vOutputX := 0, vOutputY := 0, vOutputW := 0, vOutputH := 0, OutputString := ""
+	local  vOutput := 0, vOutputX := 0, vOutputY := 0, vOutputW := 0, vOutputH := 0, OutputString := ""
+		, W_LB1 := 0, W_LB2 := 0, X_LB2 := 0, Y_LB2 := 0
 	
 	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
 		OutputString .= "w"		;the widest ordinary letter in alphabet
@@ -1727,12 +1728,16 @@ F_GuiTrigTipsMenuDefC2(AmountOfRows, LongestString)
 		Gui, TT_C2: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceColCus, % ini_TTTyFaceFont
 	else
 		Gui, TT_C2: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
-	Gui, TT_C2: Add, Text, % "x0 y0 HwndIdTT_C2_T1", % OutputString
+	Gui, TT_C2: Add, Text, % "HwndIdTT_C2_T1 x0 y0", % OutputString
 	GuiControlGet, vOutput, Pos, % IdTT_C2_T1
-	Gui, TT_C2: Add, Listbox, % "x0 y0 HwndIdTT_C2_LB1" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutputW + 4 . A_Space . "g" . "F_MouseMenuTT"	;thanks to "g" it will not be a separate thread even upon mouse click
-	Gui, TT_C2: Add, Text, % "x0 y0 HwndIdTT_C2_T2", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
+	W_LB1 	:= vOutputW
+	Gui, TT_C2: Add, Listbox, 	% "HwndIdTT_C2_LB1 x0 y0" . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB1 + 4 . A_Space . "g" . "F_MouseMenuTT"	;thanks to "g" it will not be a separate thread even upon mouse click
+	Gui, TT_C2: Add, Text, 		% "HwndIdTT_C2_T2 x0 y0", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
 	GuiControlGet, vOutput, Pos, % IdTT_C2_T2
-	Gui, TT_C2: Add, Listbox, % "HwndIdTT_C2_LB2" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutputW + 4 . A_Space . "g" . "F_MouseMenuTT"
+	W_LB2 	:= vOutputW
+	GuiControlGet, vOutput, Pos, % IdTT_C2_LB1
+	X_LB2 	:= vOutputX + vOutputW, Y_LB2	:= vOutputY
+	Gui, TT_C2: Add, Listbox, % "HwndIdTT_C2_LB2" . A_Space . "x" . X_LB2 . A_Space . "y" . Y_LB2 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB2 + 4 . A_Space . "g" . "F_MouseMenuTT"
 	GuiControl, Hide, % IdTT_C2_T1
 	GuiControl, Hide, % IdTT_C2_T2
 	GuiControl, Font, % IdTT_C2_LB1		;fontcolor of listbox
