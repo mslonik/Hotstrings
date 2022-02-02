@@ -6825,8 +6825,18 @@ F_AddHotstring()
 			if (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))
 			{
 				OldOptions 	:= a_TriggerOptions[key]
-				OldEnDis	:= a_EnableDisable[key]
-				if (f_CaseMatch and !InStr(OldOptions, "C1") and InStr(OldOptions, "C") and !InStr(Options, "C1") and InStr(Options, "C"))
+				OldEnDis		:= a_EnableDisable[key]
+				if (InStr(OldOptions, "C"))
+					f_OldOptionsC 	:= true
+				if (InStr(OldOptions, "C1"))
+					f_OldOptionsC1 := true
+				if (InStr(Options, "C"))
+					f_OptionsC 	:= true
+				if (InStr(Options, "C1"))
+					f_OptionsC1 	:= true
+				if (f_GeneralMatch and !f_CaseMatch)
+				if (f_CaseMatch and (OldOptions != Options))
+				; if (f_CaseMatch and !InStr(OldOptions, "C1") and InStr(OldOptions, "C") and !InStr(Options, "C1") and InStr(Options, "C"))
 				{
 					ModifiedFlag 			:= false
 				}				
@@ -7717,9 +7727,18 @@ F_DeleteHotstring()
 	FileDelete, % LibraryFullPathAndName
 	
 	;4. Disable selected hotstring.
-	LV_GetText(txt2, v_SelectedRow, 2)
+	LV_GetText(txt1, v_SelectedRow, 1)	;triggerstring
+	; String := StrReplace(String, "``n", "`n")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
+	; String := StrReplace(String, "``r", "`r")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
+	; String := StrReplace(String, "``b", "`b")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
+	; txt1 := StrReplace(txt1, "``t", "`t")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
+	; String := StrReplace(String, "``v", "`v")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
+	; String := StrReplace(String, "``a", "`a")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
+	; String := StrReplace(String, "``f", "`f")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
+	LV_GetText(txt2, v_SelectedRow, 2)	;options
+
 	Try
-		Hotstring(":" . txt2 . ":" . v_TriggerString, , "Off") 
+		Hotstring(":" . txt2 . ":" . txt1, , "Off") 
 	Catch
 		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" . v_TriggerString 
 		. A_Space . txt2 . "`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 
