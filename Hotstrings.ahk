@@ -6713,7 +6713,7 @@ F_AddHotstring()
 ;7. Increment library counter.
 {
 	global ;assume-global mode
-	local 	TextInsert := "", Options := "", ModifiedFlag := false
+	local 	TextInsert := "", Options := "", f_ChangeExistingDefinition := false
 			,OnOff := "", EnDis := ""
 			,SendFunHotstringCreate := "", SendFunFileFormat := ""
 			,OldOptions := "", OldEnDis := "", TurnOffOldOptions := ""
@@ -6721,7 +6721,7 @@ F_AddHotstring()
 			,v_TheWholeFile := "", v_TotalLines := 0
 			,ExternalIndex := 0
 			,name := "", key := 0, value := "", Counter := 0, key2 := 0, value2 := ""
-			,f_GeneralMatch := false, f_CaseMatch := false
+			,f_GeneralMatch := false, f_CaseMatch := false, f_OldOptionsC := false, f_OldOptionsC1 := false, f_OptionsC := false, f_OptionsC1 := false
 			,SelectedLibraryName := SubStr(v_SelectHotstringLibrary, 1, -4)
 	
 	;1. Read all inputs. 
@@ -6816,7 +6816,7 @@ F_AddHotstring()
 	GuiControl, -Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	for key, value in a_Triggerstring
 	{
-		f_GeneralMatch 	:= false, f_CaseMatch 		:= false
+		f_GeneralMatch := false, f_CaseMatch := false, f_OldOptionsC := false, f_OldOptionsC1 := false, f_OptionsC := false, f_OptionsC1 := false
 		if (a_Triggerstring[key] = v_Triggerstring)	;case insensitive string comparison!
 		{
 			f_GeneralMatch := true
@@ -6834,15 +6834,24 @@ F_AddHotstring()
 					f_OptionsC 	:= true
 				if (InStr(Options, "C1"))
 					f_OptionsC1 	:= true
+				if (f_GeneralMatch and !f_CaseMatch and f_OldOptionsC and !f_OptionsC)
+				{
+					MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"]
+						, % "New definition is similar to existing one: the same triggerstrings, but different ""case"" option, so it won't be added."
+						. A_Space . "The only way to add new definition with different casing is to set for it Case Sensitive (C) option."
+						. "Existing triggerstring:" . A_Tab . a_Triggerstring[key] . A_Tab . "options:" . A_Tab . a_TriggerOptions[key] . "`n`n"
+						. "New triggerstring:" . A_Tab . A_Tab. v_Triggerstring . A_Tab . "options" . A_Tab . Options
+					return
+				}
 				if (f_GeneralMatch and !f_CaseMatch)
 				if (f_CaseMatch and (OldOptions != Options))
 				; if (f_CaseMatch and !InStr(OldOptions, "C1") and InStr(OldOptions, "C") and !InStr(Options, "C1") and InStr(Options, "C"))
 				{
-					ModifiedFlag 			:= false
+					f_ChangeExistingDefinition := false
 				}				
 				else 
 				{
-					ModifiedFlag := true
+					f_ChangeExistingDefinition := true
 					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
 						, % TransA["The hotstring"] . A_Space . """" .  a_Triggerstring[key] . """" . A_Space .  TransA["exists in the currently selected library"] . ":" . A_Space . a_Library[key] . ".csv" . "." . "`n`n" 
 						. TransA["Do you want to proceed?"]
@@ -6910,7 +6919,7 @@ F_AddHotstring()
 		}
 	}
 	
-	if !(ModifiedFlag) 
+	if !(f_ChangeExistingDefinition) 
 	{
 	;OutputDebug, % "Options:" . A_Space . Options . A_Tab . "OldOptions:" . A_Space . OldOptions . A_Tab . "v_TriggerString:" . A_Space . v_TriggerString
 		if (InStr(Options, "O"))
@@ -6960,7 +6969,7 @@ F_AddHotstring()
 	FileAppend, % txt, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8
 	GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 	;7. Increment library counter.
-	if !(ModifiedFlag) 
+	if !(f_ChangeExistingDefinition) 
 	{
 		++v_LibHotstringCnt
 		++v_TotalHotstringCnt
