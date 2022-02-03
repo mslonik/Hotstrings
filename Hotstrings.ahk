@@ -926,6 +926,7 @@ F_WhereDisplayTT_Menu(ini_TTTP)
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TrigTipsSecondColumn(a_array1, a_array2)
 {
+	local
 	key := 0, value := "", ThisValue := ""
 	for key, value in a_array1
 	{
@@ -941,6 +942,7 @@ F_TrigTipsSecondColumn(a_array1, a_array2)
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ConvertArrayToString(a_array)
 {
+	local
 	key := 0, value := "", ThisValue := ""
 
 	for key, value in a_array
@@ -950,6 +952,7 @@ F_ConvertArrayToString(a_array)
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LongestTrigTipString(a_array)	
 {
+	local
 	key := 0, value := "", ThisValue := "", MaxValue := 0, WhichKey := 0, WhichValue := ""
 
 	for key, value in a_array
@@ -6712,22 +6715,239 @@ F_AddHotstring()
 ;6. Save List View into the library file.
 ;7. Increment library counter.
 {
-	global ;assume-global mode
-	local 	TextInsert := "", Options := "", f_ChangeExistingDefinition := false
+	global ;assume-global mode of operation
+	local 	TextInsert := "", NewOptions := "", f_ChangeExistingDef := false
 			,OnOff := "", EnDis := ""
 			,SendFunHotstringCreate := "", SendFunFileFormat := ""
 			,OldOptions := "", OldEnDis := "", TurnOffOldOptions := ""
-			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
 			,v_TheWholeFile := "", v_TotalLines := 0
 			,ExternalIndex := 0
 			,name := "", key := 0, value := "", Counter := 0, key2 := 0, value2 := ""
-			,f_GeneralMatch := false, f_CaseMatch := false, f_OldOptionsC := false, f_OldOptionsC1 := false, f_OptionsC := false, f_OptionsC1 := false
+			,f_T_GeneralMatch := false, f_T_CaseMatch := false, f_OldOptionsC := false, f_OldOptionsC1 := false, f_OptionsC := false, f_OptionsC1 := false, f_H_CaseMatch := false
 			,SelectedLibraryName := SubStr(v_SelectHotstringLibrary, 1, -4)
+			,Overwrite := ""
 	
 	;1. Read all inputs. 
+	F_ReadUserInputs(TextInsert, NewOptions, OnOff, EnDis, SendFunHotstringCreate, SendFunFileFormat)
+	
+	;2. Create or modify (triggerstring, hotstring) definition according to inputs. 
+	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
+	GuiControl, -Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
+	for key, value in a_Triggerstring
+	{
+		f_T_GeneralMatch := false, f_T_CaseMatch := false, f_OldOptionsC := false, f_OldOptionsC1 := false, f_OptionsC := false, f_OptionsC1 := false, f_H_CaseMatch := false
+		if (a_Triggerstring[key] = v_Triggerstring)	;case insensitive string comparison!
+		{
+			f_T_GeneralMatch := true
+			if (a_Triggerstring[key] == v_Triggerstring)
+				f_T_CaseMatch := true
+			OldOptions 	:= a_TriggerOptions[key]
+			OldEnDis		:= a_EnableDisable[key]
+			if (InStr(OldOptions, "C"))
+				f_OldOptionsC 	:= true
+			if (InStr(NewOptions, "C"))
+				f_OptionsC 	:= true
+			if (a_Hotstring[key] == v_EnterHotstring)	;case sensitive string comparison
+				f_H_CaseMatch := true
+
+			if (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))	;if matched within current library
+			{
+				if (f_T_CaseMatch and f_OldOptionsC and f_OptionsC) or (f_T_CaseMatch and !f_OldOptionsC and !f_OptionsC) or (f_T_CaseMatch and f_OldOptionsC and !f_OptionsC)
+				or (f_T_CaseMatch and !f_OldOptionsC and f_OptionsC)
+				or (f_T_GeneralMatch and !f_OldOptionsC and !f_OldOptionsC) or (f_T_GeneralMatch and !f_OldOptionsC and f_OldOptionsC) 
+				or (f_T_GeneralMatch and f_OldOptionsC and !f_OldOptionsC)
+				{
+					f_ChangeExistingDef := true
+					break
+				}
+				else	;add
+					break
+			}
+			else
+			{
+				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+					, % TransA["The hotstring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["already exists in another library"] . ":" . A_Space . a_Library[key] . "." . "`n`n" 
+					. TransA["Do you want to proceed?"] . "`n`n" . TransA["If you answer ""No"" edition of the current definition will be interrupted."]
+					. "`n" . TransA["If you answer ""Yes"" definition existing in another library will not be changed."]
+				IfMsgBox, No
+					return
+			}
+		}
+	}
+	; 3. Modify existing definition
+	if (f_ChangeExistingDef)	;modify existing definition
+	{
+		Overwrite := F_ChangeExistingDef(OldOptions, NewOptions, a_Triggerstring[key], a_Library[key], OldEnDis, SendFunHotstringCreate, TextInsert, OnOff)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
+		if (Overwrite = "Yes")
+		{
+			F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Comment)
+			F_ModifyLV(NewOptions, SendFunFileFormat, EnDis, TextInsert)
+			;7. Delete library file. 
+			FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary
+			;8. Save List View into the library file.
+			F_SaveLVintoLibFile()
+			return
+		}
+		if (Overwrite = "No")
+			return
+	}
+
+	; 4. Create new definition
+	;OutputDebug, % "NewOptions:" . A_Space . NewOptions . A_Tab . "OldOptions:" . A_Space . OldOptions . A_Tab . "v_TriggerString:" . A_Space . v_TriggerString
+	if (InStr(NewOptions, "O"))
+	{
+		Try
+			Hotstring(":" . NewOptions . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
+		Catch
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
+			. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," . A_Space . OnOff . ")"
+	}
+	else
+	{
+		Try
+			Hotstring(":" . NewOptions . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
+		Catch
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
+			. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
+	}
+	; 5. Update global arrays
+	F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
+	
+	;6. Update and sort List View. ;future: gui parameter for sorting 
+	LV_Add("",  v_Triggerstring, NewOptions, SendFunFileFormat, EnDis, TextInsert, v_Comment)
+	LV_ModifyCol(1, "Sort")
+
+	;7. Delete library file. 
+	FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary
+	
+	;8. Save List View into the library file.
+	F_SaveLVintoLibFile()
+
+	;9. Increment library counter.
+	++v_LibHotstringCnt
+	++v_TotalHotstringCnt
+	GuiControl, , % IdText13,  % v_LibHotstringCnt
+	GuiControl, , % IdText13b, % v_LibHotstringCnt
+	GuiControl, , % IdText12,  % v_TotalHotstringCnt
+	GuiControl, , % IdText12b, % v_TotalHotstringCnt
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring added to the file"] . A_Space . v_SelectHotstringLibrary . "!" 
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SaveLVintoLibFile()
+{
+	global	;assume-global mode of operation
+	local	txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
+
+	Loop, % LV_GetCount()
+	{
+		LV_GetText(txt1, A_Index, 2)
+		LV_GetText(txt2, A_Index, 1)
+		LV_GetText(txt3, A_Index, 3)
+		LV_GetText(txt4, A_Index, 4)
+		LV_GetText(txt5, A_Index, 5)
+		LV_GetText(txt6, A_Index, 6)
+		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
+	}
+	FileAppend, % txt, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8
+	GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
+{
+	global	;assume-global mode of operation
+	a_Triggers.Push(v_TriggerString) ;added to table of hotstring recognizer (a_Triggers)
+	F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)
+	a_Library.Push(SubStr(v_SelectHotstringLibrary, 1, -4))
+	a_Triggerstring.Push(v_TriggerString)
+	a_TriggerOptions.Push(NewOptions)
+	a_OutputFunction.Push(SendFunFileFormat)
+	a_EnableDisable.Push(EnDis)	;here was a bug: OnOff instead of EnDis
+	a_Hotstring.Push(TextInsert)
+	a_Comment.Push(v_Comment)
+}	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Comment)
+{
+	global	;assume-global mode of operation
+
+	a_Triggerstring[key] := v_TriggerString, a_TriggerOptions[key] := NewOptions, a_OutputFunction[key] := SendFunFileFormat, a_Hotstring[key] := TextInsert
+	, a_EnableDisable[key] := EnDis, a_Comment[key] := v_Comment
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ModifyLV(NewOptions, SendFunFileFormat, EnDis, TextInsert)
+{
+	global	;assume-global mode of operation
+	local	Temp1 := ""
+	
+	; Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
+	; Gui, ListView, % IdListView1
+	GuiControl, +Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
+	Loop, % LV_GetCount()
+	{
+		LV_GetText(Temp1, A_Index)
+		if (Temp1 = v_TriggerString)	;non-case sensitive comparison
+		{
+			LV_Modify(A_Index, "", v_TriggerString, NewOptions, SendFunFileFormat, EnDis, TextInsert, v_Comment)		
+			Break
+		}
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, OldEnDis, SendFunHotstringCreate, TextInsert, OnOff)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
+{	
+	global	;assume-global mode of operation
+	MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+		, % TransA["The triggerstring"] . A_Space . """" .  FoundTriggerstring . """" . A_Space .  TransA["exists in the currently selected library"] . ":" . A_Space . Library 
+		. ".csv" . "." . "`n`n" . TransA["Do you want to proceed?"]	. "`n`n" . "If you answer ""Yes"" it will overwritten with your current settings."
+	IfMsgBox, No
+		return "No"
+	IfMsgBox, Yes
+	{
+		if (InStr(OldOptions, "*") and !InStr(NewOptions,"*"))
+			OldOptions := StrReplace(OldOptions, "*", "*0")
+		if (InStr(OldOptions, "B0") and !InStr(NewOptions, "B0"))
+			OldOptions := StrReplace(OldOptions, "B0", "B")
+		if (InStr(OldOptions, "O") and !InStr(NewOptions, "O"))
+			OldOptions := StrReplace(OldOptions, "O", "O0")
+		if (InStr(OldOptions, "Z") and !InStr(NewOptions, "Z"))
+			OldOptions := StrReplace(OldOptions, "Z", "Z0")
+
+		if (OldEnDis = "En")
+			{
+				Try
+					Hotstring(":" . OldOptions . ":" . v_TriggerString, , "Off") ;Disables existing hotstring
+				Catch
+					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
+						. "v_TriggerString:" . A_Tab . v_TriggerString . "`n"
+						. "OldOptions:" . A_Tab . OldOptions . "`n`n" . TransA["Library name:"] . A_Space . Library
+			}
+			if (InStr(NewOptions, "O"))	;Add new hotstring which replaces the old one
+			{
+				Try
+					Hotstring(":" . NewOptions . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
+				Catch
+					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
+					. "Hotstring(:" . NewOptions . ":" . v_TriggerString . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," . A_Space . OnOff . ")"
+			}
+			else
+			{
+				Try
+					Hotstring(":" . NewOptions . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
+				Catch
+					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
+					. "Hotstring(:" . NewOptions . ":" . v_TriggerString . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
+			}
+		return "Yes"	
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, ByRef SendFunHotstringCreate, ByRef SendFunFileFormat)
+{
+	global ;assume-global mode of operation
+
 	Gui, % A_DefaultGui . ":" A_Space . "Submit", NoHide
 	Gui, % A_DefaultGui . ":" A_Space . "+OwnDialogs"
-	
+
 	if (Trim(v_TriggerString) = "")
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Enter triggerstring before hotstring is set"] . "."
@@ -6770,28 +6990,26 @@ F_AddHotstring()
 			TextInsert := v_EnterHotstring
 		}
 	}
-	
 	if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Choose existing hotstring library file before saving new (triggerstring, hotstring) definition!"]
 		return
 	}
-	
 	if (v_OptionImmediateExecute)
-		Options .= "*"
+		NewOptions .= "*"
 	Switch v_RadioCaseGroup
 	{
-		Case 2: Options .= "C"
-		Case 3: Options .= "C1"
+		Case 2: NewOptions .= "C"
+		Case 3: NewOptions .= "C1"
 	}
 	if (v_OptionNoBackspace)
-		Options .= "B0"
+		NewOptions .= "B0"
 	if (v_OptionInsideWord)
-		Options .= "?"
+		NewOptions .= "?"
 	if (v_OptionNoEndChar)
-		Options .= "O"
+		NewOptions .= "O"
 	if (v_OptionReset)
-		Options .= "Z"
+		NewOptions .= "Z"
 	if (v_OptionDisable)
 	{
 		OnOff := "Off", EnDis := "Dis"	
@@ -6810,175 +7028,6 @@ F_AddHotstring()
 		Case "SendPlay (SP)":			SendFunHotstringCreate 	:= "F_HOF_SP", 	SendFunFileFormat 	:= "SP"
 		Case "SendEvent (SE)":			SendFunHotstringCreate 	:= "F_HOF_SE", 	SendFunFileFormat 	:= "SE"
 	}
-	
-	;2. Create or modify (triggerstring, hotstring) definition according to inputs. 
-	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
-	GuiControl, -Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
-	for key, value in a_Triggerstring
-	{
-		f_GeneralMatch := false, f_CaseMatch := false, f_OldOptionsC := false, f_OldOptionsC1 := false, f_OptionsC := false, f_OptionsC1 := false
-		if (a_Triggerstring[key] = v_Triggerstring)	;case insensitive string comparison!
-		{
-			f_GeneralMatch := true
-			if (a_Triggerstring[key] == v_Triggerstring)
-				f_CaseMatch := true
-			if (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))
-			{
-				OldOptions 	:= a_TriggerOptions[key]
-				OldEnDis		:= a_EnableDisable[key]
-				if (InStr(OldOptions, "C"))
-					f_OldOptionsC 	:= true
-				if (InStr(OldOptions, "C1"))
-					f_OldOptionsC1 := true
-				if (InStr(Options, "C"))
-					f_OptionsC 	:= true
-				if (InStr(Options, "C1"))
-					f_OptionsC1 	:= true
-				if (f_GeneralMatch and !f_CaseMatch and f_OldOptionsC and !f_OptionsC)
-				{
-					MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"]
-						, % "New definition is similar to existing one: the same triggerstrings, but different ""case"" option, so it won't be added."
-						. A_Space . "The only way to add new definition with different casing is to set for it Case Sensitive (C) option."
-						. "Existing triggerstring:" . A_Tab . a_Triggerstring[key] . A_Tab . "options:" . A_Tab . a_TriggerOptions[key] . "`n`n"
-						. "New triggerstring:" . A_Tab . A_Tab. v_Triggerstring . A_Tab . "options" . A_Tab . Options
-					return
-				}
-				if (f_GeneralMatch and !f_CaseMatch)
-				if (f_CaseMatch and (OldOptions != Options))
-				; if (f_CaseMatch and !InStr(OldOptions, "C1") and InStr(OldOptions, "C") and !InStr(Options, "C1") and InStr(Options, "C"))
-				{
-					f_ChangeExistingDefinition := false
-				}				
-				else 
-				{
-					f_ChangeExistingDefinition := true
-					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-						, % TransA["The hotstring"] . A_Space . """" .  a_Triggerstring[key] . """" . A_Space .  TransA["exists in the currently selected library"] . ":" . A_Space . a_Library[key] . ".csv" . "." . "`n`n" 
-						. TransA["Do you want to proceed?"]
-						. "`n`n" . TransA["If you answer ""Yes"" it will overwritten."]
-					IfMsgBox, No
-						return
-					IfMsgBox, Yes
-					{
-						if (InStr(OldOptions, "*") and !InStr(Options,"*"))
-							OldOptions := StrReplace(OldOptions, "*", "*0")
-						if (InStr(OldOptions, "B0") and !InStr(Options, "B0"))
-							OldOptions := StrReplace(OldOptions, "B0", "B")
-						if (InStr(OldOptions, "O") and !InStr(Options, "O"))
-							OldOptions := StrReplace(OldOptions, "O", "O0")
-						if (InStr(OldOptions, "Z") and !InStr(Options, "Z"))
-							OldOptions := StrReplace(OldOptions, "Z", "Z0")
-						if (OldEnDis = "En")
-						{
-							Try
-								Hotstring(":" . OldOptions . ":" . v_TriggerString, , "Off") ;Disables existing hotstring
-							Catch
-								MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
-									. "v_TriggerString:" . A_Tab . v_TriggerString . "`n"
-									. "OldOptions:" . A_Tab . OldOptions . "`n`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary
-						}
-						if (InStr(Options, "O"))	;Add new hotstring which replaces the old one
-						{
-							Try
-								Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
-							Catch
-								MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-								. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," . A_Space . OnOff . ")"
-						}
-						else
-						{
-							Try
-								Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
-							Catch
-								MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-								. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
-						}
-						a_TriggerOptions[key] := Options, a_OutputFunction[key] := SendFunFileFormat, a_Hotstring[key] := TextInsert, a_EnableDisable[key] := EnDis
-						, a_Comment[key] := v_Comment
-						Loop, 
-						{
-							LV_GetText(Temp1, A_Index)
-							if (Temp1 == v_Triggerstring)
-							{
-								LV_Modify(A_Index, "", v_TriggerString, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)		
-								Break
-							}
-						}
-					}
-				}
-			}
-			else
-			{
-				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-					, % TransA["The hotstring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["already exists in another library"] . ":" . A_Space . a_Library[key] . "." . "`n`n" 
-					. TransA["Do you want to proceed?"] . "`n`n" . TransA["If you answer ""No"" edition of the current definition will be interrupted."]
-					. "`n" . TransA["If you answer ""Yes"" definition existing in another library will not be changed."]
-				IfMsgBox, No
-					return
-			}
-		}
-	}
-	
-	if !(f_ChangeExistingDefinition) 
-	{
-	;OutputDebug, % "Options:" . A_Space . Options . A_Tab . "OldOptions:" . A_Space . OldOptions . A_Tab . "v_TriggerString:" . A_Space . v_TriggerString
-		if (InStr(Options, "O"))
-		{
-			Try
-				Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," . A_Space . OnOff . ")"
-		}
-		else
-		{
-			Try
-				Hotstring(":" . Options . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
-		}
-		LV_Add("",  v_Triggerstring, Options, SendFunFileFormat, EnDis, TextInsert, v_Comment)
-		a_Triggers.Push(v_TriggerString) ;added to table of hotstring recognizer (a_Triggers)
-		F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)
-		a_Library.Push(SubStr(v_SelectHotstringLibrary, 1, -4))
-		a_Triggerstring.Push(v_Triggerstring)
-		a_TriggerOptions.Push(Options)
-		a_OutputFunction.Push(SendFunFileFormat)
-		a_EnableDisable.Push(EnDis)	;here was a bug: OnOff instead of EnDis
-		a_Hotstring.Push(TextInsert)
-		a_Comment.Push(v_Comment)
-	}
-	
-	;4. Sort List View. ;future: gui parameter for sorting 
-	LV_ModifyCol(1, "Sort")
-	;5. Delete library file. 
-	FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary
-	
-	;6. Save List View into the library file.
-	Loop, % LV_GetCount()
-	{
-		LV_GetText(txt1, A_Index, 2)
-		LV_GetText(txt2, A_Index, 1)
-		LV_GetText(txt3, A_Index, 3)
-		LV_GetText(txt4, A_Index, 4)
-		LV_GetText(txt5, A_Index, 5)
-		LV_GetText(txt6, A_Index, 6)
-		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
-	}
-	FileAppend, % txt, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8
-	GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
-	;7. Increment library counter.
-	if !(f_ChangeExistingDefinition) 
-	{
-		++v_LibHotstringCnt
-		++v_TotalHotstringCnt
-		GuiControl, , % IdText13,  % v_LibHotstringCnt
-		GuiControl, , % IdText13b, % v_LibHotstringCnt
-		GuiControl, , % IdText12,  % v_TotalHotstringCnt
-		GuiControl, , % IdText12b, % v_TotalHotstringCnt
-	}
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring added to the file"] . A_Space . v_SelectHotstringLibrary . "!" 
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Clear()
@@ -6992,9 +7041,6 @@ F_Clear()
 	GuiControl, HS3: Font, % IdRadioCaseCS
 	GuiControl, HS3: Font, % IdRadioCaseC1
 	GuiControl, HS3:, v_RadioCaseGroup, 1
-	;GuiControl, HS3:, % IdRadioCaseCC, 1
-	;GuiControl, HS3:, % IdRadioCaseCS, 0
-	;GuiControl, HS3:, % IdRadioCaseC1, 0
 	GuiControl, HS3: Font, % IdCheckBox3
 	GuiControl, HS3:, % IdCheckBox3, 0
 	GuiControl, HS3: Font, % IdCheckBox4
@@ -7032,9 +7078,6 @@ F_Clear()
 	GuiControl, HS4: Font, % IdRadioCaseCCb
 	GuiControl, HS4: Font, % IdRadioCaseCSb
 	GuiControl, HS4:, v_RadioCaseGroup, 1
-	;GuiControl, HS4:, % IdCheckBox1b, 0
-	;GuiControl, HS4:, % IdRadioCaseCCb, 1
-	;GuiControl, HS4:, % IdRadioCaseCSb, 0
 	GuiControl, HS4: Font, % IdRadioCaseC1b
 	GuiControl, HS4:, % IdRadioCaseC1b, 0
 	GuiControl, HS4: Font, % IdCheckBox3b
