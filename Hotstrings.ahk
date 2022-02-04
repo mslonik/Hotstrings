@@ -405,11 +405,11 @@ F_GuiHSdelay()
 return
 
 F8::	;new thread starts here
-F_WhichGui()
-if (A_DefaultGui = "HS4")
-	return
-if (A_DefaultGui = "HS3")
-	F_DeleteHotstring()
+	F_WhichGui()
+	if (A_DefaultGui = "HS4")
+		return
+	if (A_DefaultGui = "HS3")
+		F_DeleteHotstring()
 return
 
 F9::	;new thread starts here
@@ -426,7 +426,6 @@ return
 
 #if
 
-;The following lines are hotkeys to handle all combinations which are not covered by the main function loop.
 ~Alt::	;if commented out, only for debugging reasons
 ~MButton::
 ~RButton::
@@ -11534,9 +11533,12 @@ F_PrepareSend(ReplacementString, Oflag)
 		vRestOfLetters 	:= SubStr(v_Triggerstring, 2)		;it must be v_Triggerstring, because A_ThisHotkey do not preserve letter size!
 		if vFirstLetter1 is upper
 			fFirstLetterCap 	:= true
-		if (vRestOfLetters)	;if vRestOfLetters is not empty
-			if vRestOfLetters is upper
-				fRestOfLettersCap 	:= true
+		if (RegExMatch(v_Triggerstring, "^[[:punct:][:digit:][:upper:][:space:]]*$"))
+			fRestOfLettersCap 	:= true
+
+		; if (vRestOfLetters)	;if vRestOfLetters is not empty
+			; if vRestOfLetters is upper
+				; fRestOfLettersCap 	:= true
 		if (fFirstLetterCap and fRestOfLettersCap)
 		{
 			StringUpper, NewReplacementString, ReplacementString
@@ -11852,6 +11854,7 @@ F_LButtonHandling()	;the priority of gT_MenuTT is lower than this "interrupt"
 		}
 	}
 	Tooltip, ;switch off tooltips created when i Unicode symbol is clicked
+	v_InputString := ""	;to reset internal recognizer
 }
 #InputLevel 0	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
