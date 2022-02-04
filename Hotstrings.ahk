@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -413,8 +413,9 @@ if (A_DefaultGui = "HS3")
 return
 
 F9::	;new thread starts here
-F_WhichGui()
-F_AddHotstring()
+	F_WhichGui()
+	F_AddHotstring()
+	v_InputString := ""	;in order to reset internal recognizer and let triggerstring tips to appear
 return
 
 F11::	;for debugging purposes, internal shortcut
@@ -441,25 +442,25 @@ return
 ~Home::
 ~End::
 ~Esc::
-ToolTip,	;this line is necessary to close tooltips.
-Switch ini_TTCn
-{
-	Case 1: Gui, TT_C1: Destroy
-	Case 2: Gui, TT_C2: Destroy
-	Case 3: Gui, TT_C3: Destroy
-}
-ToolTip, ,, , 4
-ToolTip, ,, , 6
-;OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString
-v_InputString := ""
-;OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString
+	ToolTip,	;this line is necessary to close tooltips.
+	Switch ini_TTCn
+	{
+		Case 1: Gui, TT_C1: Destroy
+		Case 2: Gui, TT_C2: Destroy
+		Case 3: Gui, TT_C3: Destroy
+	}
+	ToolTip, ,, , 4
+	ToolTip, ,, , 6
+	;OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString
+	v_InputString := ""
+	;OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString
 return
 
 #if WinActive("ahk_id" HS3SearchHwnd)
 F8:: ;new thread starts here
-Gui, HS3Search: Default
-Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
-F_MoveList()
+	Gui, HS3Search: Default
+	Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+	F_MoveList()
 #if
 
 #if WinExist("ahk_id" HMenuCliHwnd)
@@ -6752,9 +6753,9 @@ F_AddHotstring()
 
 			if (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))	;if matched within current library
 			{
-				if (f_T_CaseMatch   and f_OldOptionsC and f_OptionsC)         or (f_T_CaseMatch and !f_OldOptionsC and !f_OptionsC) 
-                    or (f_T_CaseMatch   and f_OldOptionsC and !f_OptionsC)        or (f_T_CaseMatch and !f_OldOptionsC and f_OptionsC)
-				or (f_T_GeneralMatch and !f_OldOptionsC and !f_OldOptionsC) or (f_T_GeneralMatch and !f_OldOptionsC and f_OldOptionsC) 
+				if (f_T_CaseMatch   and f_OldOptionsC and f_OptionsC)         	or (f_T_CaseMatch and !f_OldOptionsC and !f_OptionsC) 
+                    or (f_T_CaseMatch   and f_OldOptionsC and !f_OptionsC)        	or (f_T_CaseMatch and !f_OldOptionsC and f_OptionsC)
+				or (f_T_GeneralMatch and !f_OldOptionsC and !f_OldOptionsC)		or (f_T_GeneralMatch and !f_OldOptionsC and f_OldOptionsC) 
 				or (f_T_GeneralMatch and f_OldOptionsC and !f_OldOptionsC)
 				{
 					f_ChangeExistingDef := true
@@ -6864,15 +6865,19 @@ F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 	a_EnableDisable.Push(EnDis)	;here was a bug: OnOff instead of EnDis
 	a_Hotstring.Push(TextInsert)
 	a_Comment.Push(v_Comment)
+	a_Combined.Push(v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert)
 }	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Comment)
 {
 	global	;assume-global mode of operation
+	local	index := 0, value := ""
 
 	a_Triggerstring[key] := v_TriggerString, a_TriggerOptions[key] := NewOptions, a_OutputFunction[key] := SendFunFileFormat, a_Hotstring[key] := TextInsert
 	, a_EnableDisable[key] := EnDis, a_Comment[key] := v_Comment
-     , a_Combined[key] := v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert
+	for index, value in a_Combined
+		if (InStr(value, v_TriggerString, true))	;case-sensitive comparison
+			a_Combined[key] := v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ModifyLV(NewOptions, SendFunFileFormat, EnDis, TextInsert)
