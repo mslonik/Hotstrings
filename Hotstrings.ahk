@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -6766,7 +6766,7 @@ F_AddHotstring()
 			else
 			{
 				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-					, % TransA["The hotstring"] . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["already exists in another library"] . ":" . A_Space . a_Library[key] . "." . "`n`n" 
+					, % "The triggerstring" . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["already exists in another library"] . ":" . A_Space . a_Library[key] . "." . "`n`n" 
 					. TransA["Do you want to proceed?"] . "`n`n" . TransA["If you answer ""No"" edition of the current definition will be interrupted."]
 					. "`n" . TransA["If you answer ""Yes"" definition existing in another library will not be changed."]
 				IfMsgBox, No
@@ -6777,7 +6777,7 @@ F_AddHotstring()
 	; 3. Modify existing definition
 	if (f_ChangeExistingDef)	;modify existing definition
 	{
-		Overwrite := F_ChangeExistingDef(OldOptions, NewOptions, a_Triggerstring[key], a_Library[key], OldEnDis, SendFunHotstringCreate, TextInsert, OnOff)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
+		Overwrite := F_ChangeExistingDef(OldOptions, NewOptions, a_Triggerstring[key], a_Library[key], SendFunHotstringCreate, TextInsert, OnOff)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
 		if (Overwrite = "Yes")
 		{
 			F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Comment)
@@ -6893,12 +6893,12 @@ F_ModifyLV(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, OldEnDis, SendFunHotstringCreate, TextInsert, OnOff)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
+F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFunHotstringCreate, TextInsert, OnOff)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
 {	
 	global	;assume-global mode of operation
 	MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
 		, % TransA["The triggerstring"] . A_Space . """" .  FoundTriggerstring . """" . A_Space .  TransA["exists in the currently selected library"] . ":" . A_Space . Library 
-		. ".csv" . "." . "`n`n" . TransA["Do you want to proceed?"]	. "`n`n" . "If you answer ""Yes"" it will overwritten with your current settings."
+		. ".csv" . "." . "`n`n" . TransA["Do you want to proceed?"]	. "`n`n" . TransA["If you answer ""Yes"" it will overwritten with chosen settings."]
 	IfMsgBox, No
 		return "No"
 	IfMsgBox, Yes
@@ -6912,31 +6912,31 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, OldEnDi
 		if (InStr(OldOptions, "Z") and !InStr(NewOptions, "Z"))
 			OldOptions := StrReplace(OldOptions, "Z", "Z0")
 
-		if (OldEnDis = "En")
+		if (InStr(NewOptions, "O"))	;Add new hotstring which replaces the old one
+		{
+			Try
+				Hotstring(":" . NewOptions . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
+			Catch
 			{
-				Try
-					Hotstring(":" . OldOptions . ":" . v_TriggerString, , "Off") ;Disables existing hotstring
-				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
-						. "v_TriggerString:" . A_Tab . v_TriggerString . "`n"
-						. "OldOptions:" . A_Tab . OldOptions . "`n`n" . TransA["Library name:"] . A_Space . Library
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
+					. "Hotstring(:" . NewOptions . ":" . v_TriggerString . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," 
+					. A_Space . OnOff . ")"
+				return "No"
 			}
-			if (InStr(NewOptions, "O"))	;Add new hotstring which replaces the old one
+		}
+		else
+		{
+			Try
+				Hotstring(":" . NewOptions . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
+			Catch
 			{
-				Try
-					Hotstring(":" . NewOptions . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
-				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-					. "Hotstring(:" . NewOptions . ":" . v_TriggerString . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," . A_Space . OnOff . ")"
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
+					. "Hotstring(:" . NewOptions . ":" . v_TriggerString . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," 
+					. A_Space . OnOff . ")"
+				return "No"
 			}
-			else
-			{
-				Try
-					Hotstring(":" . NewOptions . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
-				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-					. "Hotstring(:" . NewOptions . ":" . v_TriggerString . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
-			}
+		}
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["New settings are now applied."]
 		return "Yes"	
 	}
 }
@@ -9477,6 +9477,7 @@ If sound is enabled, define it							= If sound is enabled, define it
 (Any existing files in destination folder will be overwritten). 	= (Any existing files in destination folder will be overwritten).
 If you answer ""Yes"" it will overwritten.					= If you answer ""Yes"" it will overwritten.
 If you answer ""Yes"" definition existing in another library will not be changed. = If you answer ""Yes"" definition existing in another library will not be changed.
+If you answer ""Yes"" it will overwritten with chosen settings. = If you answer ""Yes"" it will overwritten with chosen settings.
 If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used. = If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used.
 If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file. = If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file.
 If you answer ""No"" edition of the current definition will be interrupted. = If you answer ""No"" edition of the current definition will be interrupted.
@@ -9538,6 +9539,7 @@ Next the default language file (English.txt) will be deleted,	= Next the default
 reloaded and fresh language file (English.txt) will be recreated. = reloaded and fresh language file (English.txt) will be recreated.
 New location:											= New location:
 New location (default):									= New location (default):
+New settings are now applied.							     = New settings are now applied.
 New shortcut (hotkey)									= New shortcut (hotkey)
 No													= No
 no													= no
@@ -9680,6 +9682,7 @@ There is no Libraries subfolder and no lbrary (*.csv) file exists! = There is no
 The parameter Language in section [GraphicalUserInterface] of Config.ini is missing. = The parameter Language in section [GraphicalUserInterface] of Config.ini is missing.
 The script											= The script
 The selected file is empty. Process of import will be interrupted. = The selected file is empty. Process of import will be interrupted.
+The triggerstring										= The triggerstring
 The (triggerstring, hotstring) definitions have been uploaded from library file = The (triggerstring, hotstring) definitions have been uploaded from library file
 The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory = The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory
 There is no											= There is no
