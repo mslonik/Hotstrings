@@ -6409,31 +6409,31 @@ F_PrepareTriggerstringTipsTables2()
 				Switch ini_TTCn
 				{
 					Case 1:	;only column 1: Triggerstring Tips
-					Loop, Parse, % a_Combined[A_Index], |
-						if (A_Index = 1)
-							a_Tips.Push(A_LoopField)
+					     Loop, Parse, % a_Combined[A_Index], |
+					     	if (A_Index = 1)
+					     		a_Tips.Push(A_LoopField)
 					Case 2:	;2 columns: Triggerstring Tips + Triggerstring Trigger
-					Loop, Parse, % a_Combined[A_Index], |	
-					{
-						if (A_Index = 1)
-							a_Tips.Push(A_LoopField)
-						if (A_Index = 2) 
-							a_TipsOpt.Push(A_LoopField)
-						if (A_Index = 3) 
-							a_TipsEnDis.Push(A_LoopField)
-					}
+					     Loop, Parse, % a_Combined[A_Index], |	
+					     {
+					     	if (A_Index = 1)
+					     		a_Tips.Push(A_LoopField)
+					     	if (A_Index = 2) 
+					     		a_TipsOpt.Push(A_LoopField)
+					     	if (A_Index = 3) 
+					     		a_TipsEnDis.Push(A_LoopField)
+					     }
 					Case 3, 4:	;3 columns: Triggerstring Tips + Triggerstring Trigger + Triggerstring Hotstring
-					Loop, Parse, % a_Combined[A_Index], |
-					{
-						if (A_Index = 1)
-							a_Tips.Push(A_LoopField)
-						if (A_Index = 2) 
-							a_TipsOpt.Push(A_LoopField)
-						if (A_Index = 3) 
-							a_TipsEnDis.Push(A_LoopField)
-						if (A_Index = 4)
-							a_TipsHS.Push(A_LoopField)
-					}
+					     Loop, Parse, % a_Combined[A_Index], |
+					     {
+					     	if (A_Index = 1)
+					     		a_Tips.Push(A_LoopField)
+					     	if (A_Index = 2) 
+					     		a_TipsOpt.Push(A_LoopField)
+					     	if (A_Index = 3) 
+					     		a_TipsEnDis.Push(A_LoopField)
+					     	if (A_Index = 4)
+					     		a_TipsHS.Push(A_LoopField)
+					     }
 				}
 				HitCnt++
 				if (HitCnt = ini_MNTT)	; MNTT = Maximum Number of Triggerstring Tips
@@ -6752,8 +6752,8 @@ F_AddHotstring()
 
 			if (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))	;if matched within current library
 			{
-				if (f_T_CaseMatch and f_OldOptionsC and f_OptionsC) or (f_T_CaseMatch and !f_OldOptionsC and !f_OptionsC) or (f_T_CaseMatch and f_OldOptionsC and !f_OptionsC)
-				or (f_T_CaseMatch and !f_OldOptionsC and f_OptionsC)
+				if (f_T_CaseMatch   and f_OldOptionsC and f_OptionsC)         or (f_T_CaseMatch and !f_OldOptionsC and !f_OptionsC) 
+                    or (f_T_CaseMatch   and f_OldOptionsC and !f_OptionsC)        or (f_T_CaseMatch and !f_OldOptionsC and f_OptionsC)
 				or (f_T_GeneralMatch and !f_OldOptionsC and !f_OldOptionsC) or (f_T_GeneralMatch and !f_OldOptionsC and f_OldOptionsC) 
 				or (f_T_GeneralMatch and f_OldOptionsC and !f_OldOptionsC)
 				{
@@ -6872,6 +6872,7 @@ F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Com
 
 	a_Triggerstring[key] := v_TriggerString, a_TriggerOptions[key] := NewOptions, a_OutputFunction[key] := SendFunFileFormat, a_Hotstring[key] := TextInsert
 	, a_EnableDisable[key] := EnDis, a_Comment[key] := v_Comment
+     , a_Combined[key] := v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ModifyLV(NewOptions, SendFunFileFormat, EnDis, TextInsert)
@@ -9842,6 +9843,7 @@ F_LoadFile(nameoffile) ; -> F_CreateHotstring
 		,v_Progress := 0
 		,IdLoadFile_T1 := 0, IdLoadFile_P1 := 0, IdLoadFile_T2 := 0, BegCom := false
 		,tmp1 := "", tmp2 := "", tmp3 := "", tmp4 := ""	;temporary variables applied to set-up a_Combined
+          ,ExternalIndex := 0
 	
 	for key, value in ini_ShowTipsLib
 		if ((key == nameoffile) and (value))
@@ -9911,27 +9913,28 @@ F_LoadFile(nameoffile) ; -> F_CreateHotstring
 			Continue
 		
 		F_CreateHotstring(A_LoopField, nameoffile)
+          ExternalIndex++     ;tu jestem
 		Loop, Parse, A_LoopField, ‖
 		{
 			Switch A_Index
 			{
 				Case 1:	
-				a_TriggerOptions.Push(A_LoopField)
-				tmp2 := A_LoopField
+				     a_TriggerOptions.Push(A_LoopField)
+				     tmp2 := A_LoopField
 				Case 2:	
-				a_Triggerstring.Push(A_LoopField)
-				if (FlagLoadTriggerTips)
-				{
-					a_Triggers.Push(A_LoopField) ; a_Triggers is used in main loop of application for generating tips
-					tmp1 := A_LoopField
-				}
+				     a_Triggerstring.Push(A_LoopField)
+				     if (FlagLoadTriggerTips)
+				     {
+				     	a_Triggers.Push(A_LoopField) ; a_Triggers is used in main loop of application for generating tips
+				     	tmp1 := A_LoopField
+				     }
 				Case 3:	a_OutputFunction.Push(A_LoopField)
 				Case 4:	
-				a_EnableDisable.Push(A_LoopField)
-				tmp3 := A_LoopField
+				     a_EnableDisable.Push(A_LoopField)
+				     tmp3 := A_LoopField
 				Case 5:	
-				a_Hotstring.Push(A_LoopField)
-				tmp4 := A_LoopField
+				     a_Hotstring.Push(A_LoopField)
+				     tmp4 := A_LoopField
 				Case 6:	a_Comment.Push(A_LoopField)
 			}
 		}
