@@ -39,7 +39,17 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		a_Triggers 			:= []		;Main loop of application
 ,		v_IndexLog 			:= 1			;for logging, if Hotstrings application is run with d parameter.
 ,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time; f_ stands for "flag"
-,		TT_C1_Hwnd 			:= 0, TT_C2_Hwnd := 0, TT_C3_Hwnd := 0, HMenuCliHwnd := 0, HMenuAHKHwnd	:= 0, HS3GuiHwnd := 0, HS4GuiHwnd := 0, TT_C4_Hwnd := 0, TDemoHwnd := 0, HDemoHwnd := 0 ;This is a trick to initialize global variables in order to not get warning (#Warn) message
+,		TT_C1_Hwnd 			:= 0 
+,		TT_C2_Hwnd 			:= 0 
+,		TT_C3_Hwnd 			:= 0 
+,		HMenuCliHwnd 			:= 0 
+,		HMenuAHKHwnd			:= 0 
+,		HS3GuiHwnd 			:= 0 
+,		HS3SearchHwnd			:= 0
+,		HS4GuiHwnd 			:= 0 
+,		TT_C4_Hwnd 			:= 0 
+,		TDemoHwnd 			:= 0 
+,		HDemoHwnd 			:= 0 ;This is a trick to initialize global variables in order to not get warning (#Warn) message
 ,		HotstringDelay			:= 0
 ,		WhichMenu := "",	v_EndChar := "" ;initialization of this variable is important in case user would like to hit "Esc" and GUI TT_C4 exists.
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -153,6 +163,7 @@ Loop, Files, %A_ScriptDir%\Languages\*.txt
 	Menu, SubmenuLanguage, Add, %A_LoopFileName%, F_ChangeLanguage
 F_ChangeLanguage()
 
+Menu, Tray, UseErrorLevel	;This line is necessary for both Menus to make future use of UseErrorLevel parameter.
 Menu, StyleGUIsubm, Add, % TransA["Light (default)"],	F_StyleOfGUI
 Menu, StyleGUIsubm, Add, % TransA["Dark"],			F_StyleOfGUI
 F_StyleOfGUI()
@@ -253,9 +264,9 @@ Menu, HSMenu, 			Add, % TransA["Configuration"], 										:Submenu1
 Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 								F_Searching
 
 Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 								F_RefreshListOfLibraries
-F_RefreshListOfLibraries()		
 Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 						F_RefreshListOfLibraryTips
-F_RefreshListOfLibraryTips()		
+F_RefreshListOfLibraries()		
+F_RefreshListOfLibraryTips()
 Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.		
 Menu, LibrariesSubmenu,	Add, % TransA["Visit public libraries webpage"],							F_PublicLibraries
 Menu, LibrariesSubmenu,	Add, % TransA["Open libraries folder in Explorer"], 						F_OpenLibrariesFolderInExplorer
@@ -265,6 +276,9 @@ Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],								F_Imp
 Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  									F_ExportLibraryStatic
 Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  									F_ExportLibraryDynamic
 Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],								:ExportSubmenu
+Menu, LibrariesSubmenu,	Add	;line separator
+Menu, LibrariesSubmenu,	Add,	% TransA["Add new library file"],									F_GuiAddLibrary
+Menu, LibrariesSubmenu,	Add, % TransA["Delete existing library file"],							F_DeleteLibrary
 
 Menu, HSMenu, 			Add, % TransA["Libraries"], 											:LibrariesSubmenu
 Menu, HSMenu, 			Add, % TransA["Clipboard Delay (F7)"], 									F_GuiHSdelay
@@ -556,6 +570,41 @@ Esc::
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_DeleteLibrary()
+{
+	global	;assume-global mode of operation
+	local	SelectedLibraryFile := "", temp := 0
+
+	FileSelectFile, SelectedLibraryFile, 1, % ini_HADL, % "Select library file to be deleted", *.csv	;1: File Must Exist
+	if (!ErrorLevel)
+	{
+		MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "The selected library file will be deleted. The definitions (triggerstring, hostring) from this library will be unloaded from memory." 
+		. "`n`n" . SelectedLibraryFile . "`n`n" . "Are you sure?"
+		IfMsgBox, No
+			return
+		IfMsgBox, Cancel
+			return
+		IfMsgBox, Yes
+			{
+				temp := InStr(SelectedLibraryFile, "\", , 0, 1)
+				temp := SubStr(SelectedLibraryFile, temp + 1)
+				F_UnloadHotstringsFromFile(temp)
+				FileDelete, % SelectedLibraryFile
+				if (ErrorLevel)
+					MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "Something went wrong on time of file removal."			
+				F_ValidateIniLibSections()
+				F_RefreshListOfLibraries()
+				F_RefreshListOfLibraryTips()
+				F_UpdateSelHotLibDDL()	
+				a_Triggers := []		;in order to refresh arrays of triggerstring tips
+				F_LoadHotstringsFromLibraries()	;in order to refresh arrays of triggerstring tips
+				F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)	;in order to refresh arrays of triggerstring tips
+			}
+	}
+	else
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "Something went wrong on time of library file selection or you've cancelled."
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_CheckIfMoveToProgramFiles()
 {
 	global	;assume-global mode of operation
@@ -7709,48 +7758,96 @@ F_RefreshListOfLibraryTips()
 	
 	if (ini_ShowTipsLib.Count())
 	{
-		for key, value in ini_ShowTipsLib
+		Menu, ToggleLibTrigTipsSubmenu, UseErrorLevel
+		Menu, ToggleLibTrigTipsSubmenu, Delete	;try to delete: if it's not yet created, will return ErrorLevel = 1
+		if (ErrorLevel)	;ErrorLevel = 1 = impossible to delete = do not exists yet
 		{
-			Menu, ToggleLibTrigTipsSubmenu, Add, %key%, F_ToggleTipsLibrary
-			if (value)
-				Menu, ToggleLibTrigTipsSubmenu, Check, %key%
-			else
-				Menu, ToggleLibTrigTipsSubmenu, UnCheck, %key%
+			for key, value in ini_ShowTipsLib
+			{
+				Menu, ToggleLibTrigTipsSubmenu, Add, %key%, F_ToggleTipsLibrary
+				if (value)
+					Menu, ToggleLibTrigTipsSubmenu, Check, %key%
+				else
+					Menu, ToggleLibTrigTipsSubmenu, UnCheck, %key%
+			}
+			Menu, % TransA["No libraries have been found!"], UseErrorLevel ;check if this menu exists
+			if (!ErrorLevel)
+				Menu, ToggleLibTrigTipsSubmenu, Delete, % TransA["No libraries have been found!"] ;if exists, delete it
+			Menu, 	LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	:ToggleLibTrigTipsSubmenu	
 		}
-		Menu, % TransA["No libraries have been found!"], UseErrorLevel, On ;check if this menu exists
-		if (!ErrorLevel)
-			Menu, ToggleLibTrigTipsSubmenu, Delete, % TransA["No libraries have been found!"] ;if exists, delete it
-		Menu, % TransA["No libraries have been found!"], UseErrorLevel, Off
+		else		;recreate menu and shift it to correct position
+		{
+			for key, value in ini_ShowTipsLib
+			{
+				Menu, ToggleLibTrigTipsSubmenu, Add, %key%, F_ToggleTipsLibrary
+				if (value)
+					Menu, ToggleLibTrigTipsSubmenu, Check, %key%
+				else
+					Menu, ToggleLibTrigTipsSubmenu, UnCheck, %key%
+			}
+			Menu, % TransA["No libraries have been found!"], UseErrorLevel ;check if this menu exists
+			if (!ErrorLevel)
+				Menu, ToggleLibTrigTipsSubmenu, Delete, % TransA["No libraries have been found!"] ;if exists, delete it
+			
+			Menu, 	LibrariesSubmenu, Delete, 2&	;delete separator line
+			Menu, 	LibrariesSubmenu, Insert, % TransA["Visit public libraries webpage"], % TransA["Enable/disable triggerstring tips"], :ToggleLibTrigTipsSubmenu	
+			Menu,	LibrariesSubmenu, Insert, % TransA["Visit public libraries webpage"]	;separator line
+		}
 	}
 	else
-		Menu, ToggleLibTrigTipsSubmenu, Add, % TransA["No libraries have been found!"], F_ToggleTipsLibrary
-	Menu, 	LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 	:ToggleLibTrigTipsSubmenu
+	{
+		Menu, ToggleLibTrigTipsSubmenu, 	Add, % TransA["No libraries have been found!"], 		F_ToggleTipsLibrary
+		Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable triggerstring tips"], 	:ToggleLibTrigTipsSubmenu
+	}
+	Menu, ToggleLibTrigTipsSubmenu, UseErrorLevel, OFF	;This setting is global, meaning it affects all menus, not just MenuName.
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_RefreshListOfLibraries()
 {
 	global	;assume-global
-	local key := 0, value := 0
+	local key := "", value := 0
 	
 	if (ini_LoadLib.Count())
-	{
-		for key, value in ini_LoadLib
+	{ 
+		Menu, EnDisLib, UseErrorLevel
+		Menu, EnDisLib, Delete	;try to delete: if it's not yet created, will return ErrorLevel = 1
+		if (ErrorLevel)	;ErrorLevel = 1 = impossible to delete = do not exists yet
 		{
-			Menu, EnDisLib, Add, %key%, F_EnDisLib
-			if (value)
-				Menu, EnDisLib, Check, %key%
-			else
-				Menu, EnDisLib, UnCheck, %key%	
+			for key, value in ini_LoadLib
+			{
+				Menu, EnDisLib, Add, %key%, F_EnDisLib
+				if (value)
+					Menu, EnDisLib, Check, %key%
+				else
+					Menu, EnDisLib, UnCheck, %key%	
+			}
+			Menu, % TransA["No libraries have been found!"], UseErrorLevel
+			if (!ErrorLevel)
+				Menu, EnDisLib, Delete, % TransA["No libraries have been found!"] ;if exists, delete it
+			Menu,	LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"],			:EnDisLib
 		}
-		Menu, % TransA["No libraries have been found!"], UseErrorLevel, On ;check if this menu exists
-		if (!ErrorLevel)
-			Menu, EnDisLib, Delete, % TransA["No libraries have been found!"] ;if exists, delete it
-		Menu, % TransA["No libraries have been found!"], UseErrorLevel, Off
+		else	;recreate menu and shift it to correct position
+		{
+			for key, value in ini_LoadLib
+			{
+				Menu, EnDisLib, Add, %key%, F_EnDisLib
+				if (value)
+					Menu, EnDisLib, Check, %key%
+				else
+					Menu, EnDisLib, UnCheck, %key%	
+			}
+			Menu, % TransA["No libraries have been found!"], UseErrorLevel
+			if (!ErrorLevel)
+				Menu, EnDisLib, Delete, % TransA["No libraries have been found!"] ;if exists, delete it
+			Menu,	LibrariesSubmenu,	Insert, % TransA["Enable/disable triggerstring tips"], % TransA["Enable/disable libraries"],	:EnDisLib
+		}
 	}
 	else
-		Menu, EnDisLib, Add, % TransA["No libraries have been found!"], F_EnDisLib
-	
-	Menu,	LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"],			:EnDisLib
+	{
+		Menu, EnDisLib, 		Add, % TransA["No libraries have been found!"], 	F_EnDisLib
+		Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"],		:EnDisLib
+	}
+	Menu, EnDisLib, UseErrorLevel, OFF	;This setting is global, meaning it affects all menus, not just MenuName.
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeleteHotstring()
@@ -9260,7 +9357,7 @@ F_EnDisLib()
 	}
 	else
 	{
-		F_UnloadFile(A_ThisMenuItem)
+		F_UnloadHotstringsFromFile(A_ThisMenuItem)
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory"]
 		. ":" . "`n`n" . A_ThisMenuItem
 	}
@@ -9269,7 +9366,7 @@ F_EnDisLib()
 	F_Clear()
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
-F_UnloadFile(nameoffile)	
+F_UnloadHotstringsFromFile(nameoffile)	
 {	
 	global ;assume-global mode
 	local	v_TheWholeFile := "",	Options := "",	TriggerString := ""
@@ -9332,6 +9429,7 @@ Actually the ""Libraries"" folder is already located in default location, so it 
 Add comment (optional) 									= Add comment (optional)
 Add / Edit hotstring (F9) 								= Add / Edit hotstring (F9)
 Add library 											= Add library
+Add new library file									= Add new library file
 Add to Autostart										= Add to Autostart
 After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder into memory? = After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder into memory?
 A library with that name already exists! 					= A library with that name already exists!
@@ -9339,8 +9437,6 @@ Alphabetically 										= Alphabetically
 already exists in another library							= already exists in another library
 Apostrophe ' 											= Apostrophe '
 Application											= A&pplication
-Script/application folder: move it to new location			= Script/application folder: move it to new location
-Script/application folder: restore it to default location		= Script/application folder: restore it to default location
 Application help										= Application help
 Application language changed to: 							= Application language changed to:
 Application mode										= Application mode
@@ -9409,6 +9505,7 @@ custom												= custom
 Dark													= Dark
 default 												= default
 Default mode											= Default mode
+Delete existing library file								= Delete existing library file
 Delete hotstring (F8) 									= Delete hotstring (F8)
 Deleting hotstring... 									= Deleting hotstring...
 Deleting hotstring. Please wait... 						= Deleting hotstring. Please wait...
@@ -9603,6 +9700,8 @@ Save position of application window	 					= &Save position of application window
 Save window position									= Save window position
 Saved												= Saved
 Saving of sorted content into .csv file (library)				= Saving of sorted content into .csv file (library)
+Script/application folder: move it to new location			= Script/application folder: move it to new location
+Script/application folder: restore it to default location		= Script/application folder: restore it to default location
 Search by: 											= Search by:
 Search Hotstrings 										= Search Hotstrings
 Search Hotstrings (F3)									= &Search Hotstrings (F3)
@@ -9612,6 +9711,7 @@ Select folder where libraries (*.csv  files) will be moved.		= Select folder whe
 Select hotstring library									= Select hotstring library
 Selected Hotstring will be deleted. Do you want to proceed? 	= Selected Hotstring will be deleted. Do you want to proceed?
 Select hotstring output function 							= Select hotstring output function
+Select library file to be deleted							= Select library file to be deleted
 Select the target library: 								= Select the target library:
 Select triggerstring option(s)							= Select triggerstring option(s)
 Semicolon ; 											= Semicolon ;
@@ -11120,7 +11220,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	
 	IniRead, TempLoadLib,	% ini_HADConfig, LoadLibraries
 	
-;Check if Libraries subfolder exists. If not, create it and display warning.
+	;Check if Libraries subfolder exists. If not, create it and display warning.
 	;v_IsLibraryEmpty := true
 	if (!Instr(FileExist(ini_HADL), "D"))				; if  there is no "Libraries" subfolder 
 	{
