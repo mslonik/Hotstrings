@@ -341,7 +341,7 @@ return
 ~^f::
 ~^s::
 ~F3::
-HS3SearchGuiEscape()
+	HS3SearchGuiEscape()
 return	;end of this thread
 #if
 
@@ -379,8 +379,8 @@ if (A_DefaultGui = "HS3")
 ^f::
 ^s::
 F3:: ;new thread starts here
-F_GuiSearch_DetermineConstraints()
-F_Searching()
+	F_GuiSearch_DetermineConstraints()
+	F_Searching("ReloadAndView")
 return
 
 F4::	;new thread starts here
@@ -535,7 +535,7 @@ F_KeyboardMenu_CLI()
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
 	v_UndoHotstring := v_Temp1
-	ReplacementString := F_PrepareSend(v_Temp1, Ovar)
+	ReplacementString := F_PrepareSend(v_Temp1)
 	if (ini_MHMP = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_ClipboardPaste(ReplacementString, Ovar)
@@ -7381,22 +7381,23 @@ F_Searching(ReloadListView*)
 	Switch ReloadListView[1]
 	{
 		Case "ReloadAndView":
-		WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
-		Gui, HS3Search: Default
-		GuiControl, % "Count" . a_Library.MaxIndex() . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
-		LV_Delete()
-		Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
-			LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
-		GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
-		Switch v_RadioGroup
-		{
-			Case 1: LV_ModifyCol(2, "Sort") ;by default: triggerstring
-			Case 2: LV_ModifyCol(6, "Sort")
-			Case 3: LV_ModifyCol(1, "Sort")
-		}
-		WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
-		Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
-		Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
+			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
+			Gui, HS3Search: Default
+			GuiControl, % "Count" . a_Library.MaxIndex() . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
+			LV_Delete()
+			Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
+				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+			GuiControl, , % IdSearchE1		;start with always blanked search edit field
+			GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
+			Switch v_RadioGroup
+			{
+				Case 1: LV_ModifyCol(2, "Sort") ;by default: triggerstring
+				Case 2: LV_ModifyCol(6, "Sort")
+				Case 3: LV_ModifyCol(1, "Sort")
+			}
+			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
+			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
+			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
 		
 		Case "Reload":
 		Gui, HS3Search: Default
@@ -11429,7 +11430,7 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 	global	;assume-global mode
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
-	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
+	ReplacementString := F_PrepareSend(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendEvent")
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
@@ -11441,7 +11442,7 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 	global	;assume-global mode
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
-	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
+	ReplacementString := F_PrepareSend(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendPlay")
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
@@ -11453,7 +11454,7 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 	global	;assume-global mode
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
-	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
+	ReplacementString := F_PrepareSend(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendRaw")
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
@@ -11501,7 +11502,7 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 	;v_EndChar			→ stored value of A_EndChar
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
-	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
+	ReplacementString := F_PrepareSend(ReplacementString)
  	F_SendIsOflag(ReplacementString, Oflag, "SendInput")
  	F_EventSigOrdHotstring()
 	if (ini_THLog)
@@ -11521,7 +11522,7 @@ F_DeterminePartStrings(ReplacementString)
 		v_EndChar  := A_EndChar
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_PrepareSend(ReplacementString, Oflag)
+F_PrepareSend(ReplacementString)
 {
 	global	;assume-global mode
 	local vFirstLetter1 := "", vFirstLetter2 := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, fFirstLetterCap := false
@@ -11536,13 +11537,9 @@ F_PrepareSend(ReplacementString, Oflag)
 		if (RegExMatch(v_Triggerstring, "^[[:punct:][:digit:][:upper:][:space:]]*$"))
 			fRestOfLettersCap 	:= true
 
-		; if (vRestOfLetters)	;if vRestOfLetters is not empty
-			; if vRestOfLetters is upper
-				; fRestOfLettersCap 	:= true
 		if (fFirstLetterCap and fRestOfLettersCap)
 		{
 			StringUpper, NewReplacementString, ReplacementString
-			;F_SendIsOflag(NewReplacementString, Oflag, SendFunctionName)
 			return NewReplacementString
 		}
 		if (fFirstLetterCap and !fRestOfLettersCap)
@@ -11550,20 +11547,13 @@ F_PrepareSend(ReplacementString, Oflag)
 			vFirstLetter2 := SubStr(ReplacementString, 1, 1)
 			StringUpper, vFirstLetter2, vFirstLetter2
 			NewReplacementString := vFirstLetter2 . SubStr(ReplacementString, 2)
-			;F_SendIsOflag(NewReplacementString, Oflag, SendFunctionName)
 			return NewReplacementString
 		}
 		if (!fFirstLetterCap)
-		{
-			;F_SendIsOflag(ReplacementString, Oflag, SendFunctionName)
 			return ReplacementString
-		}
 	}
 	if (InStr(v_Options, "C") or InStr(v_Options, "C1"))
-	{
-		;F_SendIsOflag(ReplacementString, Oflag, SendFunctionName)
 		return ReplacementString
-	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ClipboardPaste(string, Oflag)
@@ -11590,7 +11580,7 @@ F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clip
 	OutputDebug, % A_ThisFunc . "`n"
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
-	ReplacementString := F_PrepareSend(ReplacementString, Oflag)
+	ReplacementString := F_PrepareSend(ReplacementString)
 	F_ClipboardPaste(ReplacementString, Oflag)
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
@@ -11693,7 +11683,7 @@ F_MouseMenu_CLI() ;The subroutine may consult the following built-in variables: 
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
 		Gui, HMenuCli: Destroy
 		v_UndoHotstring 	 := OutputVarTemp
-		ReplacementString := F_PrepareSend(OutputVarTemp, Ovar)
+		ReplacementString := F_PrepareSend(OutputVarTemp)
 		F_ClipboardPaste(ReplacementString, Ovar)
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
@@ -11873,7 +11863,7 @@ F_MouseMenuCombined() ;Valid if static triggerstring / hotstring menus GUI is av
 		GuiControl,, % IdTT_C4_LB4, |
 		WinActivate, % "ahk_id" PreviousWindowID
 		v_UndoHotstring := OutputVarTemp
-		ReplacementString := F_PrepareSend(OutputVarTemp, Ovar)
+		ReplacementString := F_PrepareSend(OutputVarTemp)
 		Switch WhichMenu
 		{
 			Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
@@ -11901,7 +11891,7 @@ F_MouseMenu_SI() ;The subroutine may consult the following built-in variables: A
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
 		Gui, HMenuAHK: Destroy
 		v_UndoHotstring := OutputVarTemp
-		ReplacementString := F_PrepareSend(OutputVarTemp, Ovar)
+		ReplacementString := F_PrepareSend(OutputVarTemp)
 		F_SendIsOflag(ReplacementString, Ovar, "SendInput")
 		; f_HTriggered := true
 		if (ini_MHSEn)
@@ -11984,7 +11974,7 @@ F_KeyboardMenu_SI()
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
 	v_UndoHotstring := v_Temp1
-	ReplacementString := F_PrepareSend(v_Temp1, Ovar)
+	ReplacementString := F_PrepareSend(v_Temp1)
 	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
 	if (ini_MHMP = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
@@ -12078,7 +12068,7 @@ F_HMenuStatic()
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
 	v_UndoHotstring := v_Temp1
-	ReplacementString := F_PrepareSend(v_Temp1, Ovar)
+	ReplacementString := F_PrepareSend(v_Temp1)
 	
 	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
 	WinActivate, % "ahk_id" PreviousWindowID
