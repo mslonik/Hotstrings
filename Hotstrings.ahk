@@ -55,12 +55,12 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_DetermineMonitors()
 Critical, On
-F_LoadCreateTranslationTxt() 	;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
-F_CheckCreateConfigIni() 	;1. Try to load up configuration file. If those files do not exist, create them.
-F_CheckIfMoveToProgramFiles()	;Checks if move Hotstrings folder to Program Files folder and then restarts application.
-F_CheckIfRemoveOldDir()		;Checks content of Config.ini in order to remove old script directory.
-F_CheckScriptEncoding()		;checks if script is utf-8 compliant. it has plenty to do wiith github download etc.
-F_Load_ini_HAD()			;HAD = Hotstrings Application Data
+F_LoadCreateTranslationTxt() 			;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
+F_CheckCreateConfigIni() 			;1. Try to load up configuration file. If those files do not exist, create them.
+F_CheckIfMoveToProgramFiles()			;Checks if move Hotstrings folder to Program Files folder and then restarts application.
+F_CheckIfRemoveOldDir()				;Checks content of Config.ini in order to remove old script directory.
+F_CheckFileEncoding(A_ScriptFullPath)	;checks if script is utf-8 compliant. it has plenty to do wiith github download etc.
+F_Load_ini_HAD()					;HAD = Hotstrings Application Data
 F_Load_ini_GuiReload()
 F_Load_ini_CheckRepo()
 F_Load_ini_DownloadRepo()
@@ -5448,18 +5448,19 @@ TT_C4GuiEscape()
 		Gui, TT_C4: Hide
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_CheckScriptEncoding()
+F_CheckFileEncoding(FullFilePath)
 {	;https://www.autohotkey.com/boards/viewtopic.php?t=65049
 	local file := "", RetrievedEncoding := "", FilePos := 0
 
 	if (!A_IsCompiled)
 	{
-		file := FileOpen(A_ScriptFullPath, "r")
+		file := FileOpen(FullFilePath, "r")
 		RetrievedEncoding := file.Encoding
 		FilePos := file.Pos
 		if !(((RetrievedEncoding = "UTF-8") and (FilePos = 3)) or ((RetrievedEncoding = "UTF-16") and (FilePos = 2)))
 		{
-			MsgBox, 16, % A_ScriptName . ":" . A_Space . TransA["Error"], % TransA["Recognized encoding of the script file:"] 
+			MsgBox, 16, % A_ScriptName . ":" . A_Space . TransA["Error"], % TransA["Recognized encoding of the file:"] 
+				. "`n" . FullFilePath
 				. "`n`n" . RetrievedEncoding . A_Space . "no-BOM"
 				. "`n`n" . TransA["Required encoding: UTF-8 with BOM. Application will exit now."]
 			ExitApp, 3	;no-bom
@@ -9681,7 +9682,7 @@ Preview												= Preview
 Public library:										= Public library:
 purple												= purple
 question												= question
-Recognized encoding of the script file:						= Recognized encoding of the script file:
+Recognized encoding of the file:							= Recognized encoding of the file:
 red													= red
 Reload												= Reload
 Reload in default mode									= Reload in default mode
@@ -11347,6 +11348,7 @@ F_LoadLibrariesToTables()
 	;Here content of libraries is loaded into set of tables
 	Loop, Files, % ini_HADL . "\*.csv"
 	{
+		F_CheckFileEncoding(A_LoopFileName)	;additional check if library files encoding is equal to UTF-8 with BOM 
 		Loop
 		{
 			FileReadLine, varSearch, %A_LoopFileFullPath%, %A_Index%
