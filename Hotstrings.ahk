@@ -53,7 +53,7 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		HotstringDelay			:= 0
 ,		WhichMenu := "",	v_EndChar := "" ;initialization of this variable is important in case user would like to hit "Esc" and GUI TT_C4 exists.
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-F_DetermineMonitors()
+; F_DetermineMonitors()
 Critical, On
 F_LoadCreateTranslationTxt() 			;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
 F_CheckCreateConfigIni() 			;1. Try to load up configuration file. If those files do not exist, create them.
@@ -564,7 +564,7 @@ F_KeyboardMenu_CLI()
 Esc::
 	Gui, HMenuCli: Destroy
 	Send, % v_Triggerstring	; Send, % v_Triggerstring . v_EndChar
-	v_InputString 		:= ""	
+	v_InputString 			:= ""	
 	v_InputH.VisibleText 	:= true
 	return
 #If
@@ -580,7 +580,7 @@ F_ConvertEscapeSequences(string)	;now from file are read sequences like "`" . "t
 	string := StrReplace(string, "``a", "`a")
 	string := StrReplace(string, "``f", "`f")
 	return string
-}
+}	;future: https://www.autohotkey.com/boards/viewtopic.php?f=76&t=91953
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeleteLibrary()
 {
@@ -957,7 +957,7 @@ GuiEventsGuiEscape()	;GUI event (close)	;this function is somehow blocked (dead 
 	Gui, TTstyling: 	Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_WhereDisplayTT_Menu(ini_TTTP)
+F_WhereDisplayMenu(ini_TTTP)
 {
 	MenuX := 0, MenuY := 0, MouseX := 0, MouseY := 0
 
@@ -1029,11 +1029,11 @@ F_LongestTrigTipString(a_array)
 	return WhichValue
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_FlipTTMenu(WindowHandle, MenuX, MenuY, GuiName)
+F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 {
-	Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
-	,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
-	,NewX := 0,	NewY := 0,	NewW := 0,	NewH := 0
+	local 	Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,	Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,	NewX := 0,	NewY := 0,	NewW := 0,	NewH := 0
 
 	;1. determine size of window from which triggerstring tips window is called	
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A		
@@ -5425,16 +5425,16 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			Gui, TT_C1: Destroy	;this line is necessary to display new menu each time this function is called.
 			F_GuiTrigTipsMenuDefC1(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
 			GuiControl,, % IdTT_C1_LB1, % F_ConvertArrayToString(a_Tips)
-			a_TTMenuPos := F_WhereDisplayTT_Menu(ini_TTTP)
-			F_FlipTTMenu(TT_C1_Hwnd, a_TTMenuPos[1], a_TTMenuPos[2], "TT_C1")	
+			a_TTMenuPos := F_WhereDisplayMenu(ini_TTTP)
+			F_FlipMenu(TT_C1_Hwnd, a_TTMenuPos[1], a_TTMenuPos[2], "TT_C1")
 
 		Case 2: 
 			Gui, TT_C2: Destroy	;this line is necessary to display new menu each time this function is called.
 			F_GuiTrigTipsMenuDefC2(a_Tips.Count(), F_LongestTrigTipString(a_Tips))
 			GuiControl,, % IdTT_C2_LB1, % F_ConvertArrayToString(a_Tips)
 			GuiControl,, % IdTT_C2_LB2, % F_TrigTipsSecondColumn(a_TipsOpt, a_TipsEnDis)
-			a_TTMenuPos := F_WhereDisplayTT_Menu(ini_TTTP)
-			F_FlipTTMenu(TT_C2_Hwnd, a_TTMenuPos[1], a_TTMenuPos[2], "TT_C2")
+			a_TTMenuPos := F_WhereDisplayMenu(ini_TTTP)
+			F_FlipMenu(TT_C2_Hwnd, a_TTMenuPos[1], a_TTMenuPos[2], "TT_C2")
 
 		Case 3: 
 			Gui, TT_C3: Destroy	;this line is necessary to display new menu each time this function is called.
@@ -5442,8 +5442,8 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			GuiControl,, % IdTT_C3_LB1, % F_ConvertArrayToString(a_Tips)
 			GuiControl,, % IdTT_C3_LB2, % F_TrigTipsSecondColumn(a_TipsOpt, a_TipsEnDis)
 			GuiControl,, % IdTT_C3_LB3, % F_ConvertArrayToString(a_TipsHS)
-			a_TTMenuPos := F_WhereDisplayTT_Menu(ini_TTTP)
-			F_FlipTTMenu(TT_C3_Hwnd, a_TTMenuPos[1], a_TTMenuPos[2], "TT_C3")	
+			a_TTMenuPos := F_WhereDisplayMenu(ini_TTTP)
+			F_FlipMenu(TT_C3_Hwnd, a_TTMenuPos[1], a_TTMenuPos[2], "TT_C3")	
 		
 		Case 4:
 			GuiControl,, % IdTT_C4_LB1, |	;this line is necessary to display new menu each time this function is called.
@@ -6289,28 +6289,6 @@ F_ShowIntroCheckbox()
 F_ShowLongTooltip(string)
 {
 	ToolTip, % StrReplace(string, "``n", "`n")
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_DetermineMonitors()	; Multi monitor environment, initialization of monitor width and height parameters
-{
-	global	;assume-global mode
-	local	NoOfMonitors
-			,Temp := 0, TempLeft := 0, TempRight := 0, TempTop := 0, TempBottom := 0, TempWidth := 0, TempHeight := 0
-	
-	MonitorCoordinates := {}
-	
-	SysGet, NoOfMonitors, MonitorCount	
-	Loop, % NoOfMonitors
-	{
-		SysGet, Temp, Monitor, % A_Index
-		MonitorCoordinates[A_Index] 			:= {}
-		MonitorCoordinates[A_Index].Left 		:= TempLeft
-		MonitorCoordinates[A_Index].Right 		:= TempRight
-		MonitorCoordinates[A_Index].Top 		:= TempTop
-		MonitorCoordinates[A_Index].Bottom 	:= TempBottom
-		MonitorCoordinates[A_Index].Width 		:= TempRight - TempLeft
-		MonitorCoordinates[A_Index].Height 	:= TempBottom - TempTop
-	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Undo()
@@ -11688,9 +11666,7 @@ F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clip
 F_HOF_MCLI(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipboard
 {
 	global	;assume-global mode
-	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
-			,Window2X  := 0,	Window2Y  := 0,	Window2W  := 0,	Window2H  := 0
-			,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
+	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0,	a_MCLIMenuPos := []
 
 	v_InputH.VisibleText := false
 	F_DestroyTriggerstringTips(ini_TTCn)
@@ -11716,45 +11692,8 @@ F_HOF_MCLI(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clip
 		Loop, Parse, TextOptions, ¦
 			GuiControl,, % Id_LB_HMenuCli, % A_Index . ". " . A_LoopField . "|"
 		
-		if (ini_MHMP = 1)
-		{
-			if (A_CaretX and A_CaretY)
-			{
-				MenuX := A_CaretX + 20
-				MenuY := A_CaretY - 20
-			}
-			else
-			{
-				MouseGetPos, v_MouseX, v_MouseY
-				MenuX := v_MouseX + 20
-				MenuY := v_MouseY + 20
-			}
-		}
-		if (ini_MHMP = 2)
-		{
-			MouseGetPos, v_MouseX, v_MouseY
-			MenuX := v_MouseX + 20
-			MenuY := v_MouseY + 20
-		}
-		Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate Hide
-		DetectHiddenWindows, On
-		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . HMenuCliHwnd
-		DetectHiddenWindows, Off
-		
-		Loop % MonitorCoordinates.Count()
-			if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
-			{
-				Window1X := MonitorCoordinates[A_Index].Left
-				Window1H := MonitorCoordinates[A_Index].Height
-				Window1Y := MonitorCoordinates[A_Index].Top 
-				Window1W := MonitorCoordinates[A_Index].Width
-				Break
-			}
-		if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
-			MenuY -= Window2H
-		if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
-			MenuX -= Window2W
-		Gui, HMenuCli: Show, x%MenuX% y%MenuY% NoActivate
+		a_MCLIMenuPos := F_WhereDisplayMenu(ini_MHMP)
+		F_FlipMenu(HMenuCliHwnd, a_MCLIMenuPos[1], a_MCLIMenuPos[2], "HMenuCli")
 		GuiControl, Choose, % Id_LB_HMenuCli, 1
 	}
 	else	;(ini_MHMP = 4)
@@ -11793,10 +11732,7 @@ F_MouseMenu_CLI() ;The subroutine may consult the following built-in variables: 
 F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendInput
 {
 	global	;assume-global mode
-	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0
-		,Window2X  := 0,	Window2Y  := 0,	Window2W  := 0,	Window2H  := 0
-		,Window1X  := 0,	Window1Y  := 0,	Window1W  := 0,	Window1H  := 0
-		,TriggerChar := "", UserInput := ""
+	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0,	a_MCSIMenuPos := [],	TriggerChar := "", UserInput := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
 
 	v_InputH.VisibleText := false
@@ -11824,46 +11760,8 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 		Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
 			GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . "|"
 		
-		if (ini_MHMP = 1)
-		{
-			if (A_CaretX and A_CaretY)
-			{
-				MenuX := A_CaretX + 20
-				MenuY := A_CaretY - 20
-			}
-			else
-			{
-				MouseGetPos, v_MouseX, v_MouseY
-				MenuX := v_MouseX + 20
-				MenuY := v_MouseY + 20
-			}
-		}
-		if (ini_MHMP = 2) 
-		{
-			MouseGetPos, v_MouseX, v_MouseY
-			MenuX := v_MouseX + 20
-			MenuY := v_MouseY + 20
-		}
-		
-		Gui, HMenuAHK: Show, x%MenuX% y%MenuY% NoActivate Hide
-		DetectHiddenWindows, On
-		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . HMenuAHKHwnd
-		DetectHiddenWindows, Off
-		
-		Loop % MonitorCoordinates.Count()
-			if ((MenuX >= MonitorCoordinates[A_Index].Left) and (MenuX <= MonitorCoordinates[A_Index].Right))
-			{
-				Window1X := MonitorCoordinates[A_Index].Left
-				Window1H := MonitorCoordinates[A_Index].Height
-				Window1Y := MonitorCoordinates[A_Index].Top 
-				Window1W := MonitorCoordinates[A_Index].Width
-				Break
-			}
-		if (MenuY + Window2H > Window1Y + Window1H) ;bottom edge of a screen 
-			MenuY -= Window2H
-		if (MenuX + Window2W > Window1X + Window1W) ;right edge of a screen
-			MenuX -= Window2W
-		Gui, HMenuAHK: Show, x%MenuX% y%MenuY% NoActivate	
+		a_MCSIMenuPos := F_WhereDisplayMenu(ini_MHMP)
+		F_FlipMenu(HMenuAHKHwnd, a_MCSIMenuPos[1], a_MCSIMenuPos[2], "HMenuAHK")
 		GuiControl, Choose, % Id_LB_HMenuAHK, 1
 	}
 	else	;(ini_MHMP = 4)
