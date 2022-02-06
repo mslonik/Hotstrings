@@ -570,6 +570,18 @@ Esc::
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_ConvertEscapeSequences(string)	;now from file are read sequences like "`" . "t" which are 2x characters. now we have to convert this pair into single character "`t" = single Tab character
+{	;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
+	string := StrReplace(string, "``n", "`n") 
+	string := StrReplace(string, "``r", "`r")
+	string := StrReplace(string, "``b", "`b")
+	string := StrReplace(string, "``t", "`t")
+	string := StrReplace(string, "``v", "`v")
+	string := StrReplace(string, "``a", "`a")
+	string := StrReplace(string, "``f", "`f")
+	return string
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeleteLibrary()
 {
 	global	;assume-global mode of operation
@@ -1298,7 +1310,7 @@ F_OpenLibrariesFolderInExplorer()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PublicLibraries()
 {
-	Run, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings/Libraries
+	Run, https://github.com/mslonik/Hotstrings-Libraries
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PasteFromClipboard()
@@ -6726,7 +6738,7 @@ F_AddToAutostart()
 			FileCreateShortcut, % Target, % LinkFile_DM, % WorkingDir, % Args_DM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
 		Catch
 		{
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something weng wrong with link file (.lnk) creation"] . ":" 
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with link file (.lnk) creation"] . ":" 
 				. A_Space . ErrorLevel
 		}
 		F_WhichGui()
@@ -6738,7 +6750,7 @@ F_AddToAutostart()
 			FileCreateShortcut, % Target, % LinkFile_SM, % WorkingDir, % Args_SM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
 		Catch
 		{
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something weng wrong with link file (.lnk) creation"] . ":" 
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with link file (.lnk) creation"] . ":" 
 				. A_Space . ErrorLevel
 		}
 		F_WhichGui()
@@ -6976,7 +6988,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 		if (InStr(NewOptions, "O"))	;Add new hotstring which replaces the old one
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
+				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_TriggerString), func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
 			Catch
 			{
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
@@ -6988,7 +7000,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 		else
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
+				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_TriggerString), func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
 			Catch
 			{
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
@@ -9316,7 +9328,7 @@ F_ToggleTipsLibrary()
 F_EnDisLib() 
 {
 	global ;assume-global mode
-	local v_LibraryFlag := 0, name := "", key := 0, value := "", FoundAmongKeys := false
+	local v_LibraryFlag := 0, name := "", key := 0, value := "", FoundAmongKeys := false, TriggerString := ""
 	
 	Menu, EnDisLib, ToggleCheck, %A_ThisMenuItem%	;future: don't ready .ini file, instead use appropriate table
 	IniRead, v_LibraryFlag,	% ini_HADConfig, LoadLibraries, %A_ThisMenuitem%
@@ -9341,32 +9353,27 @@ F_EnDisLib()
 				if (InStr(Options, "Z0"))
 					Options := StrReplace(Options, "Z0", "Z")
 				TriggerString := a_Triggerstring[key]
-				TriggerString := StrReplace(TriggerString, "``n", "`n") ;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
-				TriggerString := StrReplace(TriggerString, "``r", "`r") ;future: add more sequences like {Esc} etc.
-				TriggerString := StrReplace(TriggerString, "``t", "`t")
-				TriggerString := StrReplace(TriggerString, "``", "`")
-				TriggerString := StrReplace(TriggerString, "``b", "`b")
 				if (a_EnableDisable[key] = "En")
 				{
 					Try
-						Hotstring(":" . Options . ":" . TriggerString, , "On") ;Disable existing hotstring
+						Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(TriggerString), , "On") ;Enable hotstring: only those which have been configured to be enabled
 					Catch
-						MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with disabling of existing hotstring"] 
-					. ":" . "`n`n" . "TriggerString:" . A_Space . TriggerString . "`n" . A_Space . "Options:" . A_Space . Options . "`n`n" . TransA["Library name:"] 
-					. A_Space . nameoffile 				
+						MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with enabling of existing hotstring"] 
+							. ":" . "`n`n" . "TriggerString:" . A_Space . TriggerString . "`n" . A_Space . "Options:" . A_Space . Options . "`n`n" . TransA["Library name:"] 
+							. A_Space . nameoffile 				
 				}
 			}
 		}
 		if (!FoundAmongKeys)
 			F_LoadFile(A_ThisMenuItem)
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The (triggerstring, hotstring) definitions have been uploaded from library file"] . ":"
-		. "`n`n" . A_ThisMenuItem
+			. "`n`n" . A_ThisMenuItem
 	}
 	else
 	{
 		F_UnloadHotstringsFromFile(A_ThisMenuItem)
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory"]
-		. ":" . "`n`n" . A_ThisMenuItem
+			. ":" . "`n`n" . A_ThisMenuItem
 	}
 	F_ValidateIniLibSections()
 	F_UpdateSelHotLibDDL()
@@ -9376,8 +9383,7 @@ F_EnDisLib()
 F_UnloadHotstringsFromFile(nameoffile)	
 {	
 	global ;assume-global mode
-	local	v_TheWholeFile := "",	Options := "",	TriggerString := ""
-			,key := 0,	value := "", FilenameWitoutExt := ""
+	local	v_TheWholeFile := "",	Options := "",	TriggerString := "", key := 0, value := "", FilenameWitoutExt := ""
 	
 	FilenameWitoutExt := SubStr(nameoffile, 1, -4)
 	for key, value in a_Library
@@ -9394,15 +9400,10 @@ F_UnloadHotstringsFromFile(nameoffile)
 			if (InStr(Options, "Z"))
 				Options := StrReplace(Options, "Z", "Z0")
 			TriggerString := a_Triggerstring[key]
-			TriggerString := StrReplace(TriggerString, "``n", "`n") ;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
-			TriggerString := StrReplace(TriggerString, "``r", "`r") ;future: add more sequences like {Esc} etc.
-			TriggerString := StrReplace(TriggerString, "``t", "`t")
-			TriggerString := StrReplace(TriggerString, "``", "`")
-			TriggerString := StrReplace(TriggerString, "``b", "`b")
 			if (a_EnableDisable[key] = "En")
 			{
 				Try
-					Hotstring(":" . Options . ":" . TriggerString, , "Off") ;Disable existing hotstring
+					Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(TriggerString), , "Off") ;Disable existing hotstring definitions: only those which have been configured to be off.
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with disabling of existing hotstring"] 
 					. ":" . "`n`n" . "TriggerString:" . A_Space . TriggerString . "`n" . A_Space . "Options:" . A_Space . Options . "`n`n" . TransA["Library name:"] 
@@ -9743,10 +9744,11 @@ Slash / 												= Slash /
 Something went wrong during hotstring setup					= Something went wrong during hotstring setup
 Something went wrong on time of moving Config.ini file. This operation is aborted. = Something went wrong on time of moving Config.ini file. This operation is aborted.
 Something went wrong with disabling of existing hotstring		= Something went wrong with disabling of existing hotstring
+Something went wrong with enabling of existing hotstring		= Something went wrong with enabling of existing hotstring
 Something went wrong with (triggerstring, hotstring) creation	= Something went wrong with (triggerstring, hotstring) creation
 Something went wrong with hotstring deletion					= Something went wrong with hotstring deletion
 Something went wrong with hotstring EndChars					= Something went wrong with hotstring EndChars
-Something weng wrong with link file (.lnk) creation			= Something weng wrong with link file (.lnk) creation
+Something went wrong with link file (.lnk) creation			= Something went wrong with link file (.lnk) creation
 Something went wrong with moving of ""Hotstrings"" folder. This operation is aborted. = Something went wrong with moving of ""Hotstrings"" folder. This operation is aborted.
 Something went wrong with moving of ""Libraries"" folder. This operation is aborted. = Something went wrong with moving of ""Libraries"" folder. This operation is aborted.
 Something went wrong with removal of old ""Hotstrings"" folder.	= Something went wrong with removal of old ""Hotstrings"" folder.
@@ -11377,7 +11379,7 @@ F_LoadLibrariesToTables()
 F_CreateHotstring(txt, nameoffile) 
 { 
 	global	;assume-global mode
-	local Options := "", SendFun := "", EnDis := "", OnOff := "", TextInsert := "", Oflag := false, v_Triggerstring := ""
+	local Options := "", SendFun := "", EnDis := "", OnOff := "", TextInsert := "", Oflag := false, Triggerstring := "", LenStr := 0
 
 	Loop, Parse, txt, ‖
 	{
@@ -11391,12 +11393,7 @@ F_CreateHotstring(txt, nameoffile)
 				else
 					Oflag := false
 			Case 2:
-				v_Triggerstring := A_LoopField
-				v_Triggerstring := StrReplace(v_Triggerstring, "``n", "`n") ;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
-				v_Triggerstring := StrReplace(v_Triggerstring, "``r", "`r")	;future: add more sequences like {Esc} etc.
-				v_Triggerstring := StrReplace(v_Triggerstring, "``t", "`t")
-				v_Triggerstring := StrReplace(v_Triggerstring, "``", "`")
-				v_Triggerstring := StrReplace(v_Triggerstring, "``b", "`b")
+				Triggerstring := F_ConvertEscapeSequences(A_LoopField)
 			Case 3:
 				Switch A_LoopField
 				{
@@ -11419,7 +11416,7 @@ F_CreateHotstring(txt, nameoffile)
 		}
 	}
 	
-	if ((!v_TriggerString) and (Options or SendFun or OnOff or TextInsert))
+	if ((!Triggerstring) and (Options or SendFun or OnOff or TextInsert))
 	{
 		MsgBox, 262420, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Error reading library file:"] . "`n`n" . nameoffile . "`n`n" . TransA["the following line is found:"] 
 					. "`n" . txt . "`n`n" . TransA["This line do not comply to format required by this application."] . "`n`n" 
@@ -11431,17 +11428,17 @@ F_CreateHotstring(txt, nameoffile)
 	}
 	if (OnOff = "")	;This is consequence of hard lesson: mismatch of "column name". This line hopefullly protects against this kind of event in the future.
 		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-			. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
+			. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
 			. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 	
-	if (v_TriggerString and (OnOff = "On"))
+	if (Triggerstring and (OnOff = "On"))
 	{
-		;OutputDebug, % "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
+		;OutputDebug, % "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
 		Try
-			Hotstring(":" . Options . ":" . v_TriggerString, func(SendFun).bind(TextInsert, Oflag), OnOff)
+			Hotstring(":" . Options . ":" . Triggerstring, func(SendFun).bind(TextInsert, Oflag), OnOff)
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-				. "Hotstring(:" . Options . ":" . v_Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
+				. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
 				. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 	}
 }
@@ -11513,13 +11510,6 @@ F_ReplaceAHKconstants(String)
 	String := StrReplace(String, "A_Now", 		A_Now)
 	String := StrReplace(String, "A_NowUTC", 	A_NowUTC)
 	String := StrReplace(String, "A_TickCount", 	A_TickCount)
-	String := StrReplace(String, "``n", "`n")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
-	String := StrReplace(String, "``r", "`r")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
-	String := StrReplace(String, "``b", "`b")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
-	String := StrReplace(String, "``t", "`t")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
-	String := StrReplace(String, "``v", "`v")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
-	String := StrReplace(String, "``a", "`a")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
-	String := StrReplace(String, "``f", "`f")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
 	return String
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
