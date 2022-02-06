@@ -60,7 +60,7 @@ F_CheckCreateConfigIni() 			;1. Try to load up configuration file. If those file
 F_CheckIfMoveToProgramFiles()			;Checks if move Hotstrings folder to Program Files folder and then restarts application.
 F_CheckIfRemoveOldDir()				;Checks content of Config.ini in order to remove old script directory.
 F_CheckFileEncoding(A_ScriptFullPath)	;checks if script is utf-8 compliant. it has plenty to do wiith github download etc.
-F_Load_ini_HAD()					;HAD = Hotstrings Application Data
+F_Load_ini_HADL()					;HADL = Hotstrings Application Data Libraries
 F_Load_ini_GuiReload()
 F_Load_ini_CheckRepo()
 F_Load_ini_DownloadRepo()
@@ -119,7 +119,8 @@ F_LoadHMStyling()
 F_LoadConfiguration()
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
 
-F_ValidateIniLibSections() 
+F_ValidateIniLibSections() ;create Libraries subfolder if it doesn't exist
+F_CreateLogFolder()
 
 F_InitiateTrayMenus(v_Param)
 
@@ -882,7 +883,7 @@ F_PathLibrariesRestoreDefault()
 		return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Load_ini_HAD()
+F_Load_ini_HADL()
 {
 	global	;assume-global mode
 	IniRead, ini_HADL, % ini_HADConfig, Configuration, HADL, % A_Space	;Default parameter. The value to store in OutputVar (ini_HADL) if the requested key is not found. If omitted, it defaults to the word ERROR. To store a blank value (empty string), specify %A_Space%.
@@ -1937,21 +1938,10 @@ F_MenuLogEnDis()
 	}
 	if (ini_THLog) ;If logging is enabled, prepare new folder and create file named as specified in the following pattern.
 	{	
-		if (!InStr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log"), "D"))
-		{
-			FileCreateDir, % A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log"
-			v_LogFileName := % A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log" . "\" . A_YYYY . A_MM . A_DD . "_" . "HotstringsLog" . ".txt"
-			FileAppend, % "-----------------------------------------------------------------------------------------------------------------------------" . "`n" 
-			. "hotstring counter" . "|" . "entered triggerstring" . "|" . "trigger" . "|" . "triggerstring options" . "|" . "hotstring" . "|" "`n", % v_LogFileName, UTF-8
-			v_LogCounter := 0
-		}
-		else
-		{
-			v_LogFileName := % A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log" . "\" . A_YYYY . A_MM . A_DD . "_" . "HotstringsLog" . ".txt"
-			FileAppend, % "-----------------------------------------------------------------------------------------------------------------------------" . "`n" 
-			. "hotstring counter" . "|" . "entered triggerstring" . "|" . "trigger" . "|" . "triggerstring options" . "|" . "hotstring" . "|" "`n", % v_LogFileName, UTF-8
-			v_LogCounter := 0
-		}
+		v_LogFileName := % HADLog . "\" . A_YYYY . A_MM . A_DD . "_" . "HotstringsLog" . ".txt"
+		FileAppend, % "-----------------------------------------------------------------------------------------------------------------------------" . "`n" 
+		. "hotstring counter" . "|" . "entered triggerstring" . "|" . "trigger" . "|" . "triggerstring options" . "|" . "hotstring" . "|" "`n", % v_LogFileName, UTF-8
+		v_LogCounter := 0
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11196,23 +11186,47 @@ F_GuiAbout()
 		Gui, MyAbout: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["About this application..."]
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
+F_CreateLogFolder()
+{
+	global ;assume-global mode of operation
+
+	HADLog := SubStr(ini_HADL, 1, -StrLen("Libraries")) . "Log"	;global variable
+	if (!InStr(FileExist(HADLog), "D"))	; if there is no Log subfolder
+	{
+		FileCreateDir, % HADLog	;future: check against errors
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % "There is no Log subfolder. It is now created in parallel with Libraries subfolder."
+			. "`n`n" . HADLog
+	}
+}
+; ------------------------------------------------------------------------------------------------------------------------------------
 F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 {
-	global ;assume-global mode
-	local v_IsLibraryEmpty := true, v_ConfigLibrary := ""
-	,o_Libraries := {}, v_LibFileName := "", key := 0, value := "", TempLoadLib := "", TempShowTipsLib := "", v_LibFlagTemp := ""
-	,FlagFound := false, PriorityFlag := false, ValueTemp := 0, SectionTemp := ""
-	
+	global ;assume-global mode of operation
+	local 		v_IsLibraryEmpty 	:= true
+			,	v_ConfigLibrary 	:= ""
+			,	o_Libraries 		:= {}
+			,	v_LibFileName 		:= ""
+			,	key 				:= 0
+			,	value 			:= ""
+			,	TempLoadLib 		:= ""
+			,	TempShowTipsLib 	:= ""
+			,	v_LibFlagTemp 		:= ""
+			,	FlagFound 		:= false
+			,	PriorityFlag 		:= false
+			, 	ValueTemp 		:= 0
+			,	SectionTemp 		:= ""
+			
 	ini_LoadLib := {}, ini_ShowTipsLib := {}	; this associative array is used to store information about Libraries\*.csv files to be loaded
 	
 	IniRead, TempLoadLib,	% ini_HADConfig, LoadLibraries
 	
 	;Check if Libraries subfolder exists. If not, create it and display warning.
 	;v_IsLibraryEmpty := true
-	if (!Instr(FileExist(ini_HADL), "D"))				; if  there is no "Libraries" subfolder 
+	if (!InStr(FileExist(ini_HADL), "D"))				; if  there is no "Libraries" subfolder 
 	{
 		FileCreateDir, % ini_HADL							; Future: check against errors
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exists!"] . "`n`n" . ini_HADL . "`n`n" . TransA["folder is now created"] . "."
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exists!"] 
+			. "`n`n" . ini_HADL . "`n`n" . TransA["folder is now created"] . "."
 	}
 	else 	;Check if Libraries subfolder is empty. If it does, display warning.
 	{
@@ -11317,13 +11331,14 @@ F_LoadLibrariesToTables()
 { 
 	global	;assume-global mode
 	local name := "", varSearch := "", tabSearch := ""
-	a_Library 				:= []
-	a_TriggerOptions 			:= []
-	a_Triggerstring 			:= []
-	a_OutputFunction 			:= []
-	a_EnableDisable 			:= []
-	a_Hotstring				:= []
-	a_Comment 				:= []
+
+		a_Library 				:= []
+	,	a_TriggerOptions 			:= []
+	,	a_Triggerstring 			:= []
+	,	a_OutputFunction 			:= []
+	,	a_EnableDisable 			:= []
+	,	a_Hotstring				:= []
+	,	a_Comment 				:= []
 	
 	; Prepare TrayTip message taking into account value of command line parameter.
 	if (v_Param == "l")
