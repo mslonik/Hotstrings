@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen		; Only Window makes sense for functions prepared in th
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.3"
+global AppVersion				:= "3.6.4"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -6924,8 +6924,6 @@ F_ModifyLV(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 	global	;assume-global mode of operation
 	local	Temp1 := ""
 	
-	; Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
-	; Gui, ListView, % IdListView1
 	GuiControl, +Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	Loop, % LV_GetCount()
 	{
