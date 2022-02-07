@@ -16,4 +16,4 @@ This project is present at [SourceForge](https://sourceforge.net/projects/hotstr
 
 Please [buy me a coffee or support me in any other meaningful way](https://www.patreon.com/user?u=18185391).
 
-At your service!
+At your service! Kind regards, mslonik (🐘)
