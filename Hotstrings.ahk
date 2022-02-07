@@ -398,7 +398,8 @@ if (A_DefaultGui = "HS3")
 ^s::
 F3:: ;new thread starts here
 	F_GuiSearch_DetermineConstraints()
-	F_Searching("ReloadAndView")
+	; F_Searching("ReloadAndView")
+	F_Searching()
 return
 
 F4::	;new thread starts here
@@ -6915,7 +6916,7 @@ F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Com
 	, a_EnableDisable[key] := EnDis, a_Comment[key] := v_Comment
 	for index, value in a_Combined
 		if (InStr(value, v_TriggerString, true))	;case-sensitive comparison
-			a_Combined[key] := v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert
+			a_Combined[index] := v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ModifyLV(NewOptions, SendFunFileFormat, EnDis, TextInsert)
@@ -7416,7 +7417,7 @@ F_Searching(ReloadListView*)
 	local	Window1X := 0, 	Window1Y := 0, 	Window1W := 0, 	Window1H := 0
 			,Window2X := 0, 	Window2Y := 0, 	Window2W := 0, 	Window2H := 0
 			,NewWinPosX := 0, 	NewWinPosY := 0
-			,WhichGui := ""
+			,WhichGui := "", PreviousGui := ""
 	Switch ReloadListView[1]
 	{
 		Case "ReloadAndView":
@@ -7448,17 +7449,20 @@ F_Searching(ReloadListView*)
 		
 		Case TransA["Search Hotstrings (F3)"]:
 		Case "": ;new thread starts here
-		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A	;Retrieves the position of the active window.
-		F_WhichGui()
-		;WhichGui := A_DefaultGui
-		Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
-		Switch A_DefaultGui
-		{
-			Case "HS3": 
-			Gui, HS3Search: Show, % "x" . Window1X . A_Space . "y" . Window1Y . A_Space . "w" . HS3_GuiWidth . A_Space . "h" . HS3_GuiHeight 
-			Case "HS4": 
-			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" . HS4_GuiWidth . A_Space . "H" . HS4_GuiHeight
-		}
+			WinGetPos, Window1X, Window1Y, Window1W, Window1H, A	;Retrieves the position of the active window.
+			F_WhichGui()
+			Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+			PreviousGui := A_DefaultGui
+			Gui, HS3Search: Default
+			LV_Delete()
+			Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
+				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+			F_SearchPhrase()
+			Switch PreviousGui
+			{
+				Case "HS3": Gui, HS3Search: Show, % "x" . Window1X . A_Space . "y" . Window1Y . A_Space . "w" . HS3_GuiWidth . A_Space . "h" . HS3_GuiHeight
+				Case "HS4": Gui, HS3Search: Show, % "x" . Window1X . A_Space . "y" . Window1Y . A_Space . "w" . HS4_GuiWidth . A_Space . "h" . HS4_GuiHeight
+			}
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
