@@ -56,7 +56,6 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		UTLH					:= 6	; UTLH = Undid The Last Hotstring
 
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-; F_DetermineMonitors()
 Critical, On
 F_LoadCreateTranslationTxt() 			;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
 F_CheckCreateConfigIni() 			;1. Try to load up configuration file. If those files do not exist, create them.
@@ -574,7 +573,19 @@ Esc::
 	return
 #If
 
+#If ActiveControlIsOfClass("Edit")	;https://www.autohotkey.com/docs/commands/_If.htm
+	^BS::Send ^+{Left}{Del}
+	^Del::Send ^+{Right}{Del}
+#If
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+ActiveControlIsOfClass(Class)	;https://www.autohotkey.com/docs/commands/_If.htm
+{
+    ControlGetFocus, FocusedControl, A
+    ControlGet, FocusedControlHwnd, Hwnd,, %FocusedControl%, A
+    WinGetClass, FocusedControlClass, ahk_id %FocusedControlHwnd%
+    return (FocusedControlClass=Class)
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ConvertEscapeSequences(string)	;now from file are read sequences like "`" . "t" which are 2x characters. now we have to convert this pair into single character "`t" = single Tab character
 {	;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
 	string := StrReplace(string, "``n", "`n") 
@@ -11591,6 +11602,7 @@ F_SendIsOflag(OtputString, Oflag, SendFunctionName)
 F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendInput
 {
 	global	;assume-global mode
+	Critical, On
 	; OutputDebug, % A_ThisFunc . "`n"
 	; f_HTriggered := true
  	;v_TypedTriggerstring 	→ hotstring
@@ -11604,6 +11616,7 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
  	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	Critical, Off	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeterminePartStrings(ReplacementString)
@@ -11672,6 +11685,7 @@ F_ClipboardPaste(string, Oflag)
 F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clipboard
 {
 	global	;assume-global mode
+	Critical, On
 	local oWord := "", ThisHotkey := A_ThisHotkey, vFirstLetter1 := "", vFirstLetter2 := "", vOutputVar := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false
 		, fFirstLetterCap := false, InputString := ""
 	OutputDebug, % A_ThisFunc . "`n"
@@ -11682,11 +11696,13 @@ F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clip
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "CLI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_MCLI(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipboard
 {
 	global	;assume-global mode
+	Critical, On
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0,	a_MCLIMenuPos := []
 
 	v_InputH.VisibleText := false
@@ -11729,6 +11745,7 @@ F_HOF_MCLI(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clip
 	}
 	Ovar := Oflag
 	F_DeterminePartStrings(TextOptions)
+	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenu_CLI() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
@@ -11753,6 +11770,7 @@ F_MouseMenu_CLI() ;The subroutine may consult the following built-in variables: 
 F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendInput
 {
 	global	;assume-global mode
+	Critical, On
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0,	a_MCSIMenuPos := [],	TriggerChar := "", UserInput := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
 
@@ -11798,6 +11816,7 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 	}
 	Ovar := Oflag
 	F_DeterminePartStrings(TextOptions)
+	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
