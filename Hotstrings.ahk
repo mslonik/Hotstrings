@@ -1338,8 +1338,11 @@ F_PasteFromClipboard()
 	global	;assume-global mode
 	local	ContentOfClipboard := ""
 	
+	if (ini_HK_IntoEdit != "~^c")
+		Send, ^c
 	Sleep, % ini_CPDelay
 	ContentOfClipboard := Clipboard
+
 	if (InStr(ContentOfClipboard, "`r`n") or InStr(ContentOfClipboard, "`n"))
 	{
 		MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Content of clipboard contain new line characters. Do you want to remove them?"] . "`n`n" 
@@ -6927,8 +6930,12 @@ F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Com
 	global	;assume-global mode of operation
 	local	index := 0, value := ""
 
-	a_Triggerstring[key] := v_TriggerString, a_TriggerOptions[key] := NewOptions, a_OutputFunction[key] := SendFunFileFormat, a_Hotstring[key] := TextInsert
-	, a_EnableDisable[key] := EnDis, a_Comment[key] := v_Comment
+	a_Triggerstring[key] 	:= v_TriggerString
+, 	a_TriggerOptions[key] 	:= NewOptions
+, 	a_OutputFunction[key] 	:= SendFunFileFormat
+, 	a_Hotstring[key] 		:= TextInsert
+, 	a_EnableDisable[key] 	:= EnDis
+, 	a_Comment[key] 		:= v_Comment
 	for index, value in a_Combined
 		if (InStr(value, v_TriggerString, true))	;case-sensitive comparison
 			a_Combined[index] := v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert
