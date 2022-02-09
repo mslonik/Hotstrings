@@ -134,8 +134,6 @@ F_GuiHS4_CreateObject()
 F_GuiHS4_DetermineConstraints()
 F_GuiHS4_Redraw()
 
-if (ini_ShowIntro)
-	F_GuiShowIntro()
 F_UpdateSelHotLibDDL()
 
 if (ini_HK_IntoEdit != "none")
@@ -319,11 +317,14 @@ Menu, 	HSMenu, 		Add, % TransA["About / Help"], 										:AboutHelpSub
 Gui, 	HS3: Menu, HSMenu
 Gui, 	HS4: Menu, HSMenu
 
-F_MenuLogEnDis()	
+F_MenuLogEnDis()	;Position in Menu about loging
 F_GuiAbout_CreateObjects()
 F_GuiVersionUpdate_CreateObjects()
 F_GuiAbout_DetermineConstraints()
 F_GuiVersionUpdate_DetermineConstraints()
+
+if (ini_ShowIntro)
+	F_GuiShowIntro()
 
 F_LoadGUIstatic()
 if (ini_TTCn = 4)	;static triggerstring / hotstring GUI 
@@ -904,8 +905,11 @@ F_Load_ini_HADL()
 	IniRead, ini_HADL, % ini_HADConfig, Configuration, HADL, % A_Space	;Default parameter. The value to store in OutputVar (ini_HADL) if the requested key is not found. If omitted, it defaults to the word ERROR. To store a blank value (empty string), specify %A_Space%.
 
 	if (ini_HADL = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-	{
-		ini_HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
+	{	;folder Libraries can be present only in 2 locations: by default in A_AppData or in A_ScriptDir
+		if (!InStr(FileExist(A_ScriptDir . "\" . "Libraries"), "D"))
+			ini_HADL := A_ScriptDir . "\" . "Libraries"
+		if (!InStr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"), "D"))	;if there is no folder...
+			ini_HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
 		IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
 	}
 }
@@ -8998,29 +9002,29 @@ F_LoadGUIPos()
 	
 	ini_HS3WindoPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
 	ini_ListViewPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
-	ini_WhichGui := ""
-	ini_Sandbox := true
-	
-	IniRead, ini_ReadTemp, 						% ini_HADConfig, GraphicalUserInterface, MainWindowPosX, 0
+	ini_WhichGui 		:= ""
+	ini_Sandbox 		:= true
+	;after loading values (empty by default) those parameters are further used in F_GUIinit()
+	IniRead, ini_ReadTemp, 					% ini_HADConfig, GraphicalUserInterface, MainWindowPosX, 	% A_Space	;empty by default
 	ini_HS3WindoPos["X"] := ini_ReadTemp
-	IniRead, ini_ReadTemp, 						% ini_HADConfig, GraphicalUserInterface, MainWindowPosY, 0
+	IniRead, ini_ReadTemp, 					% ini_HADConfig, GraphicalUserInterface, MainWindowPosY, 	% A_Space	;empty by default
 	ini_HS3WindoPos["Y"] := ini_ReadTemp
-	IniRead, ini_ReadTemp, 						% ini_HADConfig, GraphicalUserInterface, MainWindowPosW, 0
+	IniRead, ini_ReadTemp, 					% ini_HADConfig, GraphicalUserInterface, MainWindowPosW, 	% A_Space	;empty by default
 	ini_HS3WindoPos["W"] := ini_ReadTemp
-	IniRead, ini_ReadTemp, 						% ini_HADConfig, GraphicalUserInterface, MainWindowPosH, 0
+	IniRead, ini_ReadTemp, 					% ini_HADConfig, GraphicalUserInterface, MainWindowPosH, 	% A_Space	;empty by default
 	ini_HS3WindoPos["H"] := ini_ReadTemp
 	
-	IniRead, ini_ReadTemp,						% ini_HADConfig, GraphicalUserInterface, ListViewPosW, % A_Space
+	IniRead, ini_ReadTemp,					% ini_HADConfig, GraphicalUserInterface, ListViewPosW, 	% A_Space
 	ini_ListViewPos["W"] := ini_ReadTemp
-	IniRead, ini_ReadTemp,						% ini_HADConfig, GraphicalUserInterface, ListViewPosH, % A_Space
+	IniRead, ini_ReadTemp,					% ini_HADConfig, GraphicalUserInterface, ListViewPosH, 	% A_Space
 	ini_ListViewPos["H"] := ini_ReadTemp
 	
-	IniRead, ini_Sandbox, 						% ini_HADConfig, GraphicalUserInterface, Sandbox,				1
-	IniRead, ini_IsSandboxMoved,					% ini_HADConfig, GraphicalUserInterface, IsSandboxMoved 
-	IniRead, ini_WhichGui,						% ini_HADConfig, GraphicalUserInterface, WhichGui, %A_Space%
-	if !(ini_WhichGui)
+	IniRead, ini_Sandbox, 					% ini_HADConfig, GraphicalUserInterface, Sandbox,			1
+	IniRead, ini_IsSandboxMoved,				% ini_HADConfig, GraphicalUserInterface, IsSandboxMoved, 	0 
+	IniRead, ini_WhichGui,					% ini_HADConfig, GraphicalUserInterface, WhichGui, 		% A_Space
+	if (ini_WhichGui = "")
 		ini_WhichGui := "HS3"
-	IniRead, ini_HS3GuiMaximized,					% ini_HADConfig, GraphicalUserInterface, GuiMaximized, 0
+	IniRead, ini_HS3GuiMaximized,				% ini_HADConfig, GraphicalUserInterface, GuiMaximized, 	0
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_CheckCreateConfigIni(params*)
@@ -9158,6 +9162,8 @@ Underscore _=1
 			FileCreateDir, % A_AppData . "\" . SubStr(A_ScriptName, 1, -4)	;future: check against errors
 		}
 		FileAppend, %ConfigIni%, % HADConfig_AppData
+		if (FileExist(A_ScriptDir . "\Languages\English.txt"))	;if there is no Config.ini, then English.txt should be recreated.
+			FileDelete, % A_ScriptDir . "\Languages\English.txt"	;future: check against errors
 		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"] . "`n`n" . HADConfig_AppData
 		ini_HADConfig := HADConfig_AppData
 		return
