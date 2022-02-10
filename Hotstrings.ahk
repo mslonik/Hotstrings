@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -6344,6 +6344,7 @@ F_Undo()
 				v_UndoHotstring := StrReplace(v_UndoHotstring, "``t", "", HowManyBackSpaces2)
 				HowManyBackSpaces += HowManyBackSpaces2
 			}
+			v_UndoHotstring := F_ReplaceAHKconstants(v_UndoHotstring)
 			v_UndoHotstring := F_PrepareUndo(v_UndoHotstring)
 			v_UndoHotstring := RegExReplace(v_UndoHotstring, "{U+.*}", " ")
 			HowManyBackSpaces += StrLenUnicode(v_UndoHotstring)
