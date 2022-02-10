@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -56,6 +56,7 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		UTLH					:= 6	; UTLH = Undid The Last Hotstring
 
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+; F_DetermineMonitors()
 Critical, On
 F_LoadCreateTranslationTxt() 			;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
 F_CheckCreateConfigIni() 			;1. Try to load up configuration file. If those files do not exist, create them.
@@ -134,6 +135,8 @@ F_GuiHS4_CreateObject()
 F_GuiHS4_DetermineConstraints()
 F_GuiHS4_Redraw()
 
+if (ini_ShowIntro)
+	F_GuiShowIntro()
 F_UpdateSelHotLibDDL()
 
 if (ini_HK_IntoEdit != "none")
@@ -317,14 +320,11 @@ Menu, 	HSMenu, 		Add, % TransA["About / Help"], 										:AboutHelpSub
 Gui, 	HS3: Menu, HSMenu
 Gui, 	HS4: Menu, HSMenu
 
-F_MenuLogEnDis()	;Position in Menu about loging
+F_MenuLogEnDis()	
 F_GuiAbout_CreateObjects()
 F_GuiVersionUpdate_CreateObjects()
 F_GuiAbout_DetermineConstraints()
 F_GuiVersionUpdate_DetermineConstraints()
-
-if (ini_ShowIntro)
-	F_GuiShowIntro()
 
 F_LoadGUIstatic()
 if (ini_TTCn = 4)	;static triggerstring / hotstring GUI 
@@ -554,7 +554,9 @@ F_KeyboardMenu_CLI()
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
 	v_UndoHotstring := v_Temp1
-	ReplacementString := F_PrepareSend(v_Temp1)
+	ReplacementString := F_ReplaceAHKconstants(v_Temp1)
+	ReplacementString := F_FollowCaseConformity(ReplacementString)
+	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	if (ini_MHMP = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_ClipboardPaste(ReplacementString, Ovar)
@@ -574,19 +576,7 @@ Esc::
 	return
 #If
 
-#If ActiveControlIsOfClass("Edit")	;https://www.autohotkey.com/docs/commands/_If.htm
-	^BS::Send ^+{Left}{Del}
-	^Del::Send ^+{Right}{Del}
-#If
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
-ActiveControlIsOfClass(Class)	;https://www.autohotkey.com/docs/commands/_If.htm
-{
-    ControlGetFocus, FocusedControl, A
-    ControlGet, FocusedControlHwnd, Hwnd,, %FocusedControl%, A
-    WinGetClass, FocusedControlClass, ahk_id %FocusedControlHwnd%
-    return (FocusedControlClass=Class)
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ConvertEscapeSequences(string)	;now from file are read sequences like "`" . "t" which are 2x characters. now we have to convert this pair into single character "`t" = single Tab character
 {	;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
 	string := StrReplace(string, "``n", "`n") 
@@ -905,11 +895,8 @@ F_Load_ini_HADL()
 	IniRead, ini_HADL, % ini_HADConfig, Configuration, HADL, % A_Space	;Default parameter. The value to store in OutputVar (ini_HADL) if the requested key is not found. If omitted, it defaults to the word ERROR. To store a blank value (empty string), specify %A_Space%.
 
 	if (ini_HADL = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-	{	;folder Libraries can be present only in 2 locations: by default in A_AppData or in A_ScriptDir
-		if (!InStr(FileExist(A_ScriptDir . "\" . "Libraries"), "D"))
-			ini_HADL := A_ScriptDir . "\" . "Libraries"
-		if (!InStr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"), "D"))	;if there is no folder...
-			ini_HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
+	{
+		ini_HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
 		IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
 	}
 }
@@ -1338,11 +1325,8 @@ F_PasteFromClipboard()
 	global	;assume-global mode
 	local	ContentOfClipboard := ""
 	
-	if (ini_HK_IntoEdit != "~^c")
-		Send, ^c
 	Sleep, % ini_CPDelay
 	ContentOfClipboard := Clipboard
-
 	if (InStr(ContentOfClipboard, "`r`n") or InStr(ContentOfClipboard, "`n"))
 	{
 		MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Content of clipboard contain new line characters. Do you want to remove them?"] . "`n`n" 
@@ -6930,12 +6914,8 @@ F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Com
 	global	;assume-global mode of operation
 	local	index := 0, value := ""
 
-	a_Triggerstring[key] 	:= v_TriggerString
-, 	a_TriggerOptions[key] 	:= NewOptions
-, 	a_OutputFunction[key] 	:= SendFunFileFormat
-, 	a_Hotstring[key] 		:= TextInsert
-, 	a_EnableDisable[key] 	:= EnDis
-, 	a_Comment[key] 		:= v_Comment
+	a_Triggerstring[key] := v_TriggerString, a_TriggerOptions[key] := NewOptions, a_OutputFunction[key] := SendFunFileFormat, a_Hotstring[key] := TextInsert
+	, a_EnableDisable[key] := EnDis, a_Comment[key] := v_Comment
 	for index, value in a_Combined
 		if (InStr(value, v_TriggerString, true))	;case-sensitive comparison
 			a_Combined[index] := v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert
@@ -9009,29 +8989,29 @@ F_LoadGUIPos()
 	
 	ini_HS3WindoPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
 	ini_ListViewPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
-	ini_WhichGui 		:= ""
-	ini_Sandbox 		:= true
-	;after loading values (empty by default) those parameters are further used in F_GUIinit()
-	IniRead, ini_ReadTemp, 					% ini_HADConfig, GraphicalUserInterface, MainWindowPosX, 	% A_Space	;empty by default
+	ini_WhichGui := ""
+	ini_Sandbox := true
+	
+	IniRead, ini_ReadTemp, 						% ini_HADConfig, GraphicalUserInterface, MainWindowPosX, 0
 	ini_HS3WindoPos["X"] := ini_ReadTemp
-	IniRead, ini_ReadTemp, 					% ini_HADConfig, GraphicalUserInterface, MainWindowPosY, 	% A_Space	;empty by default
+	IniRead, ini_ReadTemp, 						% ini_HADConfig, GraphicalUserInterface, MainWindowPosY, 0
 	ini_HS3WindoPos["Y"] := ini_ReadTemp
-	IniRead, ini_ReadTemp, 					% ini_HADConfig, GraphicalUserInterface, MainWindowPosW, 	% A_Space	;empty by default
+	IniRead, ini_ReadTemp, 						% ini_HADConfig, GraphicalUserInterface, MainWindowPosW, 0
 	ini_HS3WindoPos["W"] := ini_ReadTemp
-	IniRead, ini_ReadTemp, 					% ini_HADConfig, GraphicalUserInterface, MainWindowPosH, 	% A_Space	;empty by default
+	IniRead, ini_ReadTemp, 						% ini_HADConfig, GraphicalUserInterface, MainWindowPosH, 0
 	ini_HS3WindoPos["H"] := ini_ReadTemp
 	
-	IniRead, ini_ReadTemp,					% ini_HADConfig, GraphicalUserInterface, ListViewPosW, 	% A_Space
+	IniRead, ini_ReadTemp,						% ini_HADConfig, GraphicalUserInterface, ListViewPosW, % A_Space
 	ini_ListViewPos["W"] := ini_ReadTemp
-	IniRead, ini_ReadTemp,					% ini_HADConfig, GraphicalUserInterface, ListViewPosH, 	% A_Space
+	IniRead, ini_ReadTemp,						% ini_HADConfig, GraphicalUserInterface, ListViewPosH, % A_Space
 	ini_ListViewPos["H"] := ini_ReadTemp
 	
-	IniRead, ini_Sandbox, 					% ini_HADConfig, GraphicalUserInterface, Sandbox,			1
-	IniRead, ini_IsSandboxMoved,				% ini_HADConfig, GraphicalUserInterface, IsSandboxMoved, 	0 
-	IniRead, ini_WhichGui,					% ini_HADConfig, GraphicalUserInterface, WhichGui, 		% A_Space
-	if (ini_WhichGui = "")
+	IniRead, ini_Sandbox, 						% ini_HADConfig, GraphicalUserInterface, Sandbox,				1
+	IniRead, ini_IsSandboxMoved,					% ini_HADConfig, GraphicalUserInterface, IsSandboxMoved 
+	IniRead, ini_WhichGui,						% ini_HADConfig, GraphicalUserInterface, WhichGui, %A_Space%
+	if !(ini_WhichGui)
 		ini_WhichGui := "HS3"
-	IniRead, ini_HS3GuiMaximized,				% ini_HADConfig, GraphicalUserInterface, GuiMaximized, 	0
+	IniRead, ini_HS3GuiMaximized,					% ini_HADConfig, GraphicalUserInterface, GuiMaximized, 0
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_CheckCreateConfigIni(params*)
@@ -9169,8 +9149,6 @@ Underscore _=1
 			FileCreateDir, % A_AppData . "\" . SubStr(A_ScriptName, 1, -4)	;future: check against errors
 		}
 		FileAppend, %ConfigIni%, % HADConfig_AppData
-		if (FileExist(A_ScriptDir . "\Languages\English.txt"))	;if there is no Config.ini, then English.txt should be recreated.
-			FileDelete, % A_ScriptDir . "\Languages\English.txt"	;future: check against errors
 		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"] . "`n`n" . HADConfig_AppData
 		ini_HADConfig := HADConfig_AppData
 		return
@@ -11551,7 +11529,9 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 	global	;assume-global mode
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
-	ReplacementString := F_PrepareSend(ReplacementString)
+	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
+	ReplacementString := F_FollowCaseConformity(ReplacementString)
+	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendEvent")
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
@@ -11563,7 +11543,9 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 	global	;assume-global mode
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
-	ReplacementString := F_PrepareSend(ReplacementString)
+	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
+	ReplacementString := F_FollowCaseConformity(ReplacementString)
+	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendPlay")
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
@@ -11575,7 +11557,9 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 	global	;assume-global mode
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
-	ReplacementString := F_PrepareSend(ReplacementString)
+	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
+	ReplacementString := F_FollowCaseConformity(ReplacementString)
+	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendRaw")
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
@@ -11615,7 +11599,6 @@ F_SendIsOflag(OtputString, Oflag, SendFunctionName)
 F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendInput
 {
 	global	;assume-global mode
-	Critical, On
 	; OutputDebug, % A_ThisFunc . "`n"
 	; f_HTriggered := true
  	;v_TypedTriggerstring 	→ hotstring
@@ -11624,12 +11607,13 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 	;v_EndChar			→ stored value of A_EndChar
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
-	ReplacementString := F_PrepareSend(ReplacementString)
+	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
+	ReplacementString := F_FollowCaseConformity(ReplacementString)
+	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
  	F_SendIsOflag(ReplacementString, Oflag, "SendInput")
  	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	Critical, Off	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeterminePartStrings(ReplacementString)
@@ -11645,12 +11629,11 @@ F_DeterminePartStrings(ReplacementString)
 		v_EndChar  := A_EndChar
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_PrepareSend(ReplacementString)
+F_FollowCaseConformity(ReplacementString)
 {
 	global	;assume-global mode
 	local vFirstLetter1 := "", vFirstLetter2 := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, fFirstLetterCap := false
 	
-	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 	if (!InStr(v_Options, "C"))	
 	{
 		vFirstLetter1 		:= SubStr(v_Triggerstring, 1, 1)	;it must be v_Triggerstring, because A_ThisHotkey do not preserve letter size!
@@ -11698,24 +11681,23 @@ F_ClipboardPaste(string, Oflag)
 F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clipboard
 {
 	global	;assume-global mode
-	Critical, On
 	local oWord := "", ThisHotkey := A_ThisHotkey, vFirstLetter1 := "", vFirstLetter2 := "", vOutputVar := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false
 		, fFirstLetterCap := false, InputString := ""
 	OutputDebug, % A_ThisFunc . "`n"
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
-	ReplacementString := F_PrepareSend(ReplacementString)
+	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
+	ReplacementString := F_FollowCaseConformity(ReplacementString)
+	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_ClipboardPaste(ReplacementString, Oflag)
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "CLI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_MCLI(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipboard
 {
 	global	;assume-global mode
-	Critical, On
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0,	a_MCLIMenuPos := []
 
 	v_InputH.VisibleText := false
@@ -11758,7 +11740,6 @@ F_HOF_MCLI(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clip
 	}
 	Ovar := Oflag
 	F_DeterminePartStrings(TextOptions)
-	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenu_CLI() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
@@ -11771,7 +11752,9 @@ F_MouseMenu_CLI() ;The subroutine may consult the following built-in variables: 
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
 		Gui, HMenuCli: Destroy
 		v_UndoHotstring 	 := OutputVarTemp
-		ReplacementString := F_PrepareSend(OutputVarTemp)
+		ReplacementString := F_ReplaceAHKconstants(ReplacementString)
+		ReplacementString := F_FollowCaseConformity(ReplacementString)
+		ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 		F_ClipboardPaste(ReplacementString, Ovar)
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
@@ -11783,7 +11766,6 @@ F_MouseMenu_CLI() ;The subroutine may consult the following built-in variables: 
 F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendInput
 {
 	global	;assume-global mode
-	Critical, On
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0,	a_MCSIMenuPos := [],	TriggerChar := "", UserInput := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
 
@@ -11829,7 +11811,6 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 	}
 	Ovar := Oflag
 	F_DeterminePartStrings(TextOptions)
-	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
@@ -11912,7 +11893,9 @@ F_MouseMenuCombined() ;Valid if static triggerstring / hotstring menus GUI is av
 		GuiControl,, % IdTT_C4_LB4, |
 		WinActivate, % "ahk_id" PreviousWindowID
 		v_UndoHotstring := OutputVarTemp
-		ReplacementString := F_PrepareSend(OutputVarTemp)
+		ReplacementString := F_ReplaceAHKconstants(ReplacementString)
+		ReplacementString := F_FollowCaseConformity(ReplacementString)
+		ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 		Switch WhichMenu
 		{
 			Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
@@ -11940,7 +11923,9 @@ F_MouseMenu_SI() ;The subroutine may consult the following built-in variables: A
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
 		Gui, HMenuAHK: Destroy
 		v_UndoHotstring := OutputVarTemp
-		ReplacementString := F_PrepareSend(OutputVarTemp)
+		ReplacementString := F_ReplaceAHKconstants(ReplacementString)
+		ReplacementString := F_FollowCaseConformity(ReplacementString)
+		ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 		F_SendIsOflag(ReplacementString, Ovar, "SendInput")
 		; f_HTriggered := true
 		if (ini_MHSEn)
@@ -12023,7 +12008,9 @@ F_KeyboardMenu_SI()
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
 	v_UndoHotstring := v_Temp1
-	ReplacementString := F_PrepareSend(v_Temp1)
+	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
+	ReplacementString := F_FollowCaseConformity(ReplacementString)
+	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
 	if (ini_MHMP = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
@@ -12117,8 +12104,9 @@ F_HMenuStatic()
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
 	v_UndoHotstring := v_Temp1
-	ReplacementString := F_PrepareSend(v_Temp1)
-	
+	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
+	ReplacementString := F_FollowCaseConformity(ReplacementString)
+	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
 	WinActivate, % "ahk_id" PreviousWindowID
 	Switch WhichMenu
