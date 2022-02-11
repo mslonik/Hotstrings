@@ -36,7 +36,6 @@ FileInstall, hotstrings.ico, % AppIcon, 0
 FileInstall, LICENSE, LICENSE, 0
 ; - - - - - - - - - - - - - - - - - - - - - - - S E C T I O N    O F    G L O B A L     V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l like "silent mode"
-; ,		a_Triggers 			:= []		;Main loop of application
 ,		v_IndexLog 			:= 1			;for logging, if Hotstrings application is run with d parameter.
 ,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time; f_ stands for "flag"
 ,		TT_C1_Hwnd 			:= 0 
@@ -628,11 +627,9 @@ F_DeleteLibrary()
 				F_RefreshListOfLibraries()
 				F_RefreshListOfLibraryTips()
 				F_UpdateSelHotLibDDL()	
-				; a_Triggers := []		;in order to refresh arrays of triggerstring tips
-				a_Combined := []
+				a_Combined := []				;in order to refresh arrays of triggerstring tips
 				F_LoadHotstringsFromLibraries()	;in order to refresh arrays of triggerstring tips
 				F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	;in order to refresh arrays of triggerstring tips
-				; F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)	;in order to refresh arrays of triggerstring tips
 			}
 	}
 	else
@@ -6199,7 +6196,6 @@ F_DownloadPublicLibraries()
 		F_ValidateIniLibSections()
 		F_LoadHotstringsFromLibraries()
 		F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
-		; F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 		F_RefreshListOfLibraries()
 		F_RefreshListOfLibraryTips()
 		F_UpdateSelHotLibDDL()
@@ -6920,8 +6916,6 @@ F_SaveLVintoLibFile()
 F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 {
 	global	;assume-global mode of operation
-	; a_Triggers.Push(v_TriggerString) ;added to table of hotstring recognizer (a_Triggers)
-	; F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 	a_Library.Push(SubStr(v_SelectHotstringLibrary, 1, -4))
 	a_Triggerstring.Push(v_TriggerString)
 	a_TriggerOptions.Push(NewOptions)
@@ -7944,11 +7938,6 @@ F_DeleteHotstring()
 		if (InStr(a_Combined[A_Index], v_TriggerString, true))	;case sensitive comparison on purpose
 			a_Combined.RemoveAt(A_Index)
 	}
-	; Loop, % a_Triggers.MaxIndex()
-	; {
-		; if (InStr(a_Triggers[A_Index], v_TriggerString, true))	;case sensitive comparison on purpose
-			; a_Triggers.RemoveAt(A_Index)
-	; }
 	TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
 	
 	;6. Decrement library counter.
@@ -9330,13 +9319,10 @@ F_ToggleTipsLibrary()
 	IniRead, v_LibraryFlag, % ini_HADConfig, ShowTipsLibraries, %A_ThisMenuitem%
 	v_LibraryFlag := !(v_LibraryFlag)
 	IniWrite, %v_LibraryFlag%, % ini_HADConfig, ShowTipsLibraries, %A_ThisMenuitem%
-	
 	F_ValidateIniLibSections()
-	; a_Triggers := []
 	a_Combined := []
 	F_LoadHotstringsFromLibraries()
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
-	; F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_EnDisLib() 
@@ -10054,10 +10040,7 @@ F_LoadFile(nameoffile) ; -> F_CreateHotstring
 				Case 2:	
 				     a_Triggerstring.Push(A_LoopField)
 				     if (FlagLoadTriggerTips)
-				     {
-				     	; a_Triggers.Push(A_LoopField) ; a_Triggers is used in main loop of application for generating tips
 				     	tmp1 := A_LoopField
-				     }
 				Case 3:	a_OutputFunction.Push(A_LoopField)
 				Case 4:	
 				     a_EnableDisable.Push(A_LoopField)
