@@ -36,7 +36,7 @@ FileInstall, hotstrings.ico, % AppIcon, 0
 FileInstall, LICENSE, LICENSE, 0
 ; - - - - - - - - - - - - - - - - - - - - - - - S E C T I O N    O F    G L O B A L     V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l like "silent mode"
-,		a_Triggers 			:= []		;Main loop of application
+; ,		a_Triggers 			:= []		;Main loop of application
 ,		v_IndexLog 			:= 1			;for logging, if Hotstrings application is run with d parameter.
 ,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time; f_ stands for "flag"
 ,		TT_C1_Hwnd 			:= 0 
@@ -51,7 +51,8 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		TDemoHwnd 			:= 0 
 ,		HDemoHwnd 			:= 0 ;This is a trick to initialize global variables in order to not get warning (#Warn) message
 ,		HotstringDelay			:= 0
-,		WhichMenu := "",	v_EndChar := "" ;initialization of this variable is important in case user would like to hit "Esc" and GUI TT_C4 exists.
+,		WhichMenu 			:= ""
+,		v_EndChar 			:= "" ;initialization of this variable is important in case user would like to hit "Esc" and GUI TT_C4 exists.
 ,		BTWT					:= 4	; BTWT = Basic Triggerstring Was Triggered
 ,		UTLH					:= 6	; UTLH = Undid The Last Hotstring
 
@@ -627,9 +628,11 @@ F_DeleteLibrary()
 				F_RefreshListOfLibraries()
 				F_RefreshListOfLibraryTips()
 				F_UpdateSelHotLibDDL()	
-				a_Triggers := []		;in order to refresh arrays of triggerstring tips
+				; a_Triggers := []		;in order to refresh arrays of triggerstring tips
+				a_Combined := []
 				F_LoadHotstringsFromLibraries()	;in order to refresh arrays of triggerstring tips
-				F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)	;in order to refresh arrays of triggerstring tips
+				F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	;in order to refresh arrays of triggerstring tips
+				; F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)	;in order to refresh arrays of triggerstring tips
 			}
 	}
 	else
@@ -6119,11 +6122,11 @@ F_GuiShortDef()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Sort_a_Triggers(ByRef a_Table, f_SortAlpha, f_SortByLength)
-{	;sort now a_Triggers() so it's not necessary each time when user gets triggerstring tips; it should speed-up process significantly
+{	;sort now so it's not necessary each time when user gets triggerstring tips; it should speed-up process significantly
 	global	;assume-global mode
 	local	key := "", value := "", s_SelectedTriggers := ""
 	
-	if (f_SortAlpha)	;polaczyc na moment sortowania a_Triggers z a_Options, a potem znowu podzielic
+	if (f_SortAlpha)
 	{
 		;a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
 		for key, value in a_Table	;table to string Conversion
@@ -6195,7 +6198,8 @@ F_DownloadPublicLibraries()
 	{
 		F_ValidateIniLibSections()
 		F_LoadHotstringsFromLibraries()
-		F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)
+		F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
+		; F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 		F_RefreshListOfLibraries()
 		F_RefreshListOfLibraryTips()
 		F_UpdateSelHotLibDDL()
@@ -6305,7 +6309,7 @@ F_ShowLongTooltip(string)
 	ToolTip, % StrReplace(string, "``n", "`n")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Undo()
+F_Undo()	;turning off of * option requires special conditions.
 {
 	global	;assume-global mode
 	local	TriggerOpt := "", HowManyBackSpaces := 0, HowManyBackSpaces2 := 0
@@ -6459,7 +6463,7 @@ F_PrepareTriggerstringTipsTables2()
 	;OutputDebug, % "Length of v_InputString:" . A_Space . StrLen(v_InputString) . A_Tab . "v_InputString:" . A_Space . v_InputString
 	if (StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{
-		a_Tips 		:= []	;collect within global array a_Tips subset from full set a_Triggers full set  
+		a_Tips 		:= []	;collect within global array a_Tips subset from full set a_Combined
 		, a_TipsOpt	:= []	;collect withing global array a_TipsOpt subset from full set a_TriggerOptions; next it will be used to show triggering character in F_ShowTriggerstringTips2()
 		, a_TipsEnDis	:= []
 		, a_TipsHS	:= []	;HS = Hotstrings
@@ -6916,8 +6920,8 @@ F_SaveLVintoLibFile()
 F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 {
 	global	;assume-global mode of operation
-	a_Triggers.Push(v_TriggerString) ;added to table of hotstring recognizer (a_Triggers)
-	F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)
+	; a_Triggers.Push(v_TriggerString) ;added to table of hotstring recognizer (a_Triggers)
+	; F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 	a_Library.Push(SubStr(v_SelectHotstringLibrary, 1, -4))
 	a_Triggerstring.Push(v_TriggerString)
 	a_TriggerOptions.Push(NewOptions)
@@ -6926,6 +6930,7 @@ F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 	a_Hotstring.Push(TextInsert)
 	a_Comment.Push(v_Comment)
 	a_Combined.Push(v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert)
+	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 }	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Comment)
@@ -7879,7 +7884,7 @@ F_DeleteHotstring()
 	local 	LibraryFullPathAndName := "" 
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
 			,v_SelectedRow := 0, v_Pointer := 0
-			,key := 0, val := ""
+			,key := 0, val := "", options := "", triggerstring := ""
 	
 	Gui, HS3: +OwnDialogs
 	
@@ -7899,18 +7904,20 @@ F_DeleteHotstring()
 	FileDelete, % LibraryFullPathAndName
 	
 	;4. Disable selected hotstring.
-	LV_GetText(txt1, v_SelectedRow, 1)	;triggerstring
-	; String := StrReplace(String, "``n", "`n")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
-	; String := StrReplace(String, "``r", "`r")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
-	; String := StrReplace(String, "``b", "`b")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
-	; txt1 := StrReplace(txt1, "``t", "`t")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
-	; String := StrReplace(String, "``v", "`v")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
-	; String := StrReplace(String, "``a", "`a")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
-	; String := StrReplace(String, "``f", "`f")	;https://www.autohotkey.com/docs/misc/EscapeChar.htm
-	LV_GetText(txt2, v_SelectedRow, 2)	;options
+	LV_GetText(triggerstring, v_SelectedRow, 1)	;triggerstring
+	LV_GetText(options, v_SelectedRow, 2)	;options
 
+	;In order to switch off, some options have to run in "reversed" state:
+	if (InStr(options, "*"))
+		options := StrReplace(options, "*", "*0")
+	if (InStr(options, "B0"))
+		options := StrReplace(options, "B0", "B")
+	if (InStr(options, "O"))
+		options := StrReplace(options, "O", "O0")
+	if (InStr(options, "Z"))
+		options := StrReplace(options, "Z", "Z0")
 	Try
-		Hotstring(":" . txt2 . ":" . txt1, , "Off") 
+		Hotstring(":" . options . ":" . triggerstring, , "Off") 
 	Catch
 		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" . v_TriggerString 
 		. A_Space . txt2 . "`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 
@@ -7932,11 +7939,16 @@ F_DeleteHotstring()
 	FileAppend, % txt, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8
 	
 	;5. Remove trigger hint. Remark: All trigger hints are deleted, so if triggerstring was duplicated, then all trigger hints are deleted!
-	Loop, % a_Triggers.MaxIndex()
+	Loop, % a_Combined.MaxIndex()
 	{
-		if (InStr(a_Triggers[A_Index], v_TriggerString, true))	;case sensitive comparison on purpose
-			a_Triggers.RemoveAt(A_Index)
+		if (InStr(a_Combined[A_Index], v_TriggerString, true))	;case sensitive comparison on purpose
+			a_Combined.RemoveAt(A_Index)
 	}
+	; Loop, % a_Triggers.MaxIndex()
+	; {
+		; if (InStr(a_Triggers[A_Index], v_TriggerString, true))	;case sensitive comparison on purpose
+			; a_Triggers.RemoveAt(A_Index)
+	; }
 	TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
 	
 	;6. Decrement library counter.
@@ -9320,9 +9332,11 @@ F_ToggleTipsLibrary()
 	IniWrite, %v_LibraryFlag%, % ini_HADConfig, ShowTipsLibraries, %A_ThisMenuitem%
 	
 	F_ValidateIniLibSections()
-	a_Triggers := []
+	; a_Triggers := []
+	a_Combined := []
 	F_LoadHotstringsFromLibraries()
-	F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)
+	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
+	; F_Sort_a_Triggers(a_Triggers, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_EnDisLib() 
@@ -9964,6 +9978,7 @@ F_LoadFile(nameoffile) ; -> F_CreateHotstring
 		if ((key == nameoffile) and (value))
 			FlagLoadTriggerTips := true
 	
+	F_CheckFileEncoding(ini_HADL . "\" . nameoffile)	;additional check if library files encoding is equal to UTF-8 with BOM 
 	FileRead, v_TheWholeFile, % ini_HADL . "\" . nameoffile
 	F_WhichGui()
 	if (A_DefaultGui = "HS3" or A_DefaultGui = "HS4")
@@ -10040,7 +10055,7 @@ F_LoadFile(nameoffile) ; -> F_CreateHotstring
 				     a_Triggerstring.Push(A_LoopField)
 				     if (FlagLoadTriggerTips)
 				     {
-				     	a_Triggers.Push(A_LoopField) ; a_Triggers is used in main loop of application for generating tips
+				     	; a_Triggers.Push(A_LoopField) ; a_Triggers is used in main loop of application for generating tips
 				     	tmp1 := A_LoopField
 				     }
 				Case 3:	a_OutputFunction.Push(A_LoopField)
@@ -11382,7 +11397,6 @@ F_LoadLibrariesToTables()
 	;Here content of libraries is loaded into set of tables
 	Loop, Files, % ini_HADL . "\*.csv"
 	{
-		F_CheckFileEncoding(A_LoopFileName)	;additional check if library files encoding is equal to UTF-8 with BOM 
 		Loop
 		{
 			FileReadLine, varSearch, %A_LoopFileFullPath%, %A_Index%
