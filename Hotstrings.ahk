@@ -346,7 +346,7 @@ else
 	F_PrepareTriggerstringTipsTables2()
 	if (a_Tips.Count())
 	{
-		F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
+		F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)	;tu jestem
 		if ((ini_TTTtEn) and (ini_TTTD > 0))
 			SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 	}
@@ -365,8 +365,8 @@ return	;end of this thread
 
 #if WinActive("ahk_id" HotstringDelay)
 ~F7::
-HSDelGuiClose()	;Gui event!
-HSDelGuiEscape()	;Gui event!
+	HSDelGuiClose()	;Gui event!
+	HSDelGuiEscape()	;Gui event!
 return
 #if
 
@@ -467,7 +467,7 @@ return
 		Case 2: Gui, TT_C2: Destroy
 		Case 3: Gui, TT_C3: Destroy
 	}
-	ToolTip, ,, , 4
+	ToolTip, ,, , 4		;tu jestem
 	ToolTip, ,, , % UTLH	;Undid the last hotstring
 	;OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString
 	v_InputString := ""
@@ -566,11 +566,13 @@ F_KeyboardMenu_CLI()
 		SoundBeep, % ini_MHSF, % ini_MHSD
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MCL" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	v_InputString 			:= ""	
+	v_InputH.VisibleText 	:= true
 }
 
 Esc::
 	Gui, HMenuCli: Destroy
-	Send, % v_Triggerstring	; Send, % v_Triggerstring . v_EndChar
+	Send, % v_Triggerstring	
 	v_InputString 			:= ""	
 	v_InputH.VisibleText 	:= true
 	return
@@ -1577,7 +1579,7 @@ F_InitiateTrayMenus(v_Param)
 
 		Case "":
 			Menu, Tray, NoStandard									; remove all the rest of standard tray menu
-			OutputDebug, % "AppIcon:" . AppIcon . A_Tab . "A_ScriptDir:" . A_Tab . A_ScriptDir .  A_Tab . "A_WorkingDir:" . A_Tab . A_WorkingDir . "`n"
+			; OutputDebug, % "AppIcon:" . AppIcon . A_Tab . "A_ScriptDir:" . A_Tab . A_ScriptDir .  A_Tab . "A_WorkingDir:" . A_Tab . A_WorkingDir . "`n"
 			if (!FileExist(AppIcon))
 			{
 				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Information"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." 
@@ -1857,7 +1859,7 @@ F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)
 	GuiControl, Font, % IdTT_C1_LB1		;fontcolor of listbox
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TMenuAHK_Hotkeys(BinParameter)
+F_TMenuAHK_Hotkeys(BinParameter)	;tu jestem
 {
 	global ;assume-global mode
 	if (BinParameter)
@@ -1887,10 +1889,10 @@ F_TMenuAHK_Hotkeys(BinParameter)
 			Hotkey, ^Enter,	F_TMenu, I1 On
 			Case 4:
 			Hotkey, IfWinExist, % "ahk_id" TT_C4_Hwnd	;in order to work the TT_C3_Hwnd variable must exist prior to definition of the following Hotkeys.
-			Hotkey, ^Tab, 	F_TMenu, I1 On
+			Hotkey, ^Tab, 		F_TMenu, I1 On
 			Hotkey, +^Tab, 	F_TMenu, I1 On
 			Hotkey, ^Up,		F_TMenu, I1 On
-			Hotkey, ^Down,	F_TMenu, I1 On
+			Hotkey, ^Down,		F_TMenu, I1 On
 			Hotkey, ^Enter,	F_TMenu, I1 On
 		}
 		Hotkey, IfWinExist
@@ -2094,7 +2096,6 @@ F_TMenu()	;this is separate, dedicated function to handle "interrupt" coming fro
 		GuiControl,, % IdTT_C4_LB2, |
 		GuiControl,, % IdTT_C4_LB3, |
 	}
-	; f_HTriggered := true
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadConfiguration()
@@ -11614,8 +11615,6 @@ F_SendIsOflag(OtputString, Oflag, SendFunctionName)
 			else
 				SendRaw, % OtputString 
 	}
-	v_InputString 		:= ""	
-	v_InputH.VisibleText 	:= true
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendInput
@@ -11697,8 +11696,6 @@ F_ClipboardPaste(string, Oflag)
 	Send, ^v
 	Sleep, %ini_CPDelay% ; this sleep is required surprisingly
 	Clipboard := ClipboardBackup	
-	v_InputString 		:= ""	
-	v_InputH.VisibleText 	:= true
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clipboard
@@ -11873,7 +11870,6 @@ F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_
 		SendLevel, 1	;in order to backtrigger the chosen triggerstring 
 		SendInput, % OutputVarTemp
 		SendLevel, 0
-		; f_HTriggered := true	;setting this flag prevenst from displaying next TTmenu which without is triggered by SendLevel 1
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11907,7 +11903,7 @@ F_LButtonHandling()	;the priority of gT_MenuTT is lower than this "interrupt"
 }
 #InputLevel 0	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_MouseMenuCombined() ;Valid if static triggerstring / hotstring menus GUI is available. "Combined" because it chooses between "SI" and "CLI".
+F_MouseMenuCombined() ;Valid if static triggerstring / hotstring menus GUI is available. "Combined" because it chooses between "SI" and "CLI". ;tu jestem
 {
 	global	;assume-global mode
 	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0
@@ -11930,7 +11926,6 @@ F_MouseMenuCombined() ;Valid if static triggerstring / hotstring menus GUI is av
 			Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
 			Case "CLI":	F_ClipboardPaste(ReplacementString, Ovar)
 		}
-		; f_HTriggered := true
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
 		if (ini_THLog)
@@ -12049,6 +12044,8 @@ F_KeyboardMenu_SI()
 		SoundBeep, % ini_MHSF, % ini_MHSD	
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	v_InputString 			:= ""	
+	v_InputH.VisibleText 	:= true
 }
 
 Esc::
@@ -12159,7 +12156,6 @@ F_HMenuStatic()
 
 ~Esc::	;tilde in order to run function TT_C4GuiEscape
 GuiControl,, % IdTT_C4_LB4, |
-; Input ;This line blocks temporarily Input command in the main loop. 
 ;OutputDebug, % "v_Triggerstring:" . A_Tab . v_Triggerstring . A_Tab . "v_EndChar:" . A_Tab . v_EndChar
 if (v_Triggerstring != "")
 {
