@@ -352,7 +352,7 @@ else
 	}
 }
 return
-#InputLevel 0
+#InputLevel 1	;change back to one, to keep the same value as in InputHook initialization
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #if WinActive("ahk_id" HS3SearchHwnd)
@@ -1088,7 +1088,7 @@ F_OneCharPressed(InputHook, Char)
 
 	Critical, On
 	; OutputDebug, % "Char:" . A_Tab . Char . "`n"
-	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))
+	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))	;Menu Hotstring Sound Enable
 	{
 		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
 		; OutputDebug, % "Char:" . A_Tab . Char . A_Tab . "SoundBeep" . A_Tab . "`n"
@@ -11609,31 +11609,31 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SR" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SendIsOflag(OtputString, Oflag, SendFunctionName)
+F_SendIsOflag(OutputString, Oflag, SendFunctionName)
 {
 	global	;assume-global mode
 	Switch SendFunctionName
 	{
 		Case "SendInput":
 			if (Oflag = false)
-				SendInput, % OtputString . A_EndChar
+				SendInput, % OutputString . A_EndChar
 			else
-				SendInput, % OtputString
+				SendInput, % OutputString
 		Case "SendEvent":
 			if (Oflag = false)
-				SendEvent, % OtputString . A_EndChar
+				SendEvent, % OutputString . A_EndChar
 			else
-				SendEvent, % OtputString
+				SendEvent, % OutputString
 		Case "SendPlay":
 			if (Oflag = false)
-				SendPlay, % OtputString . A_EndChar
+				SendPlay, % OutputString . A_EndChar
 			else
-				SendPlay, % OtputString
+				SendPlay, % OutputString
 		Case "SendRaw":
 			if (Oflag = false)
-				SendRaw, % OtputString . A_EndChar
+				SendRaw, % OutputString . A_EndChar
 			else
-				SendRaw, % OtputString 
+				SendRaw, % OutputString 
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11950,7 +11950,7 @@ F_LButtonHandling()	;the priority of gT_MenuTT is lower than this "interrupt"
 	; ToolTip, ;switch off tooltips created when Unicode symbol is clicked	2022-02-06: I'm not sure if this line is necessary
 	v_InputString := ""	;to reset internal recognizer
 }
-#InputLevel 0	
+#InputLevel 1	;change back to one, to keep the same value as in InputHook initialization
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid if static triggerstring / hotstring menus GUI is available. "Combined" because it chooses between "MSI" and "MCLI".
 {
