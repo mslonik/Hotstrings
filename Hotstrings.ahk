@@ -333,119 +333,114 @@ if (ini_GuiReload) and (v_Param != "l")
 	F_GUIinit()
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
-#InputLevel 2	;Thanks to this line triggerstring tips will have lower priority; backspacing done in function F_TMenu() will not affect this label.
-~BackSpace:: 
-if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
-{
-	if (ini_MHSEn)
-		SoundBeep, % ini_MHSF, % ini_MHSD
-}
-else
-{
-	v_InputString := SubStr(v_InputString, 1, -1)
-	F_PrepareTriggerstringTipsTables2()
-	if (a_Tips.Count())
-	{
-		F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)	;tu jestem
-		if ((ini_TTTtEn) and (ini_TTTD > 0))
-			SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-	}
-}
-return
-#InputLevel 1	;change back to one, to keep the same value as in InputHook initialization
+#InputLevel 0	;thanks to this trick event of left mouse click is ignored by "main level" of hotkeys.
+	~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected.
+		F_MouseTTMenu()	;the priority of gT_MenuTT is lower than this "interrupt"
+#InputLevel 1	;thanks to that InputHook willcatch anything what is below this line.
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+#InputLevel 0	;Controls which artificial keyboard and mouse events are ignored by hotkeys and hotstrings. Sets the level for any hotkeys or hotstrings beneath it.
+~BackSpace::	;new thread starts here 
+	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
+	{
+		if (ini_MHSEn)
+			SoundBeep, % ini_MHSF, % ini_MHSD
+	}
+	else
+	{
+		v_InputString := SubStr(v_InputString, 1, -1)	;whole string except last character
+		F_PrepareTriggerstringTipsTables2()
+		if (a_Tips.Count())
+		{
+			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)	;tu jestem
+			if ((ini_TTTtEn) and (ini_TTTD > 0))
+				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+		}
+	}
+return
+#InputLevel 1	;thanks to that InputHook willcatch anything what is below this line.
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinActive("ahk_id" HS3SearchHwnd)
-~^f::
-~^s::
-~F3::
-	HS3SearchGuiEscape()
-return	;end of this thread
+	~^f::
+	~^s::
+	~F3::
+		HS3SearchGuiEscape()
+	return	;end of this thread
 #if
 
 #if WinActive("ahk_id" HotstringDelay)
-~F7::
-	HSDelGuiClose()	;Gui event!
-	HSDelGuiEscape()	;Gui event!
-return
+	~F7::
+		HSDelGuiClose()	;Gui event!
+		HSDelGuiEscape()	;Gui event!
+	return
 #if
 
 #if WinActive("ahk_id" HS3GuiHwnd) or WinActive("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows are active at the moment. 
-
-F1::	;new thread starts here
-F_GuiAboutLink1()
-return
-
-F2:: ;new thread starts here
-F_WhichGui()
-if (A_DefaultGui = "HS4")
+	F1::	;new thread starts here
+		F_GuiAboutLink1()
 	return
-if (A_DefaultGui = "HS3")
-{
-	Gui, HS3: Submit, NoHide
-	if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
-	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to display library content please at first select hotstring library"] . "."
-		return
-	}
-	GuiControl, Focus, v_LibraryContent
-	if (LV_GetNext(0,"Focused") == 0)
-		LV_Modify(1, "+Select +Focus")
+
+	F2:: ;new thread starts here
+		F_WhichGui()
+		if (A_DefaultGui = "HS4")
+			return
+		if (A_DefaultGui = "HS3")
+		{
+			Gui, HS3: Submit, NoHide
+			if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
+			{
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to display library content please at first select hotstring library"] . "."
+				return
+			}
+			GuiControl, Focus, v_LibraryContent
+			if (LV_GetNext(0,"Focused") == 0)
+				LV_Modify(1, "+Select +Focus")
+			return
+		}
+
+	^f::
+	^s::
+	F3:: ;new thread starts here
+		F_GuiSearch_DetermineConstraints()
+		F_Searching()
 	return
-}
 
-^f::
-^s::
-F3:: ;new thread starts here
-	F_GuiSearch_DetermineConstraints()
-	; F_Searching("ReloadAndView")
-	F_Searching()
-return
+	F4::	;new thread starts here
+		F_WhichGui()
+		F_ToggleRightColumn()
+	return
 
-F4::	;new thread starts here
-F_WhichGui()
-F_ToggleRightColumn()
-return
+	F5::	;new thread starts here
+		F_WhichGui()
+		F_Clear()
+	return
 
-F5::	;new thread starts here
-F_WhichGui()
-F_Clear()
-return
+	F6::	;new thread starts here
+		F_WhichGui()
+		F_ToggleSandbox()
+	return
 
-F6::	;new thread starts here
-F_WhichGui()
-F_ToggleSandbox()
-return
+	F7:: ;new thread starts here
+		F_WhichGui()
+		Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+		F_GuiHSdelay()
+	return
 
-F7:: ;new thread starts here
-F_WhichGui()
-Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
-F_GuiHSdelay()
-return
+	F8::	;new thread starts here
+		F_WhichGui()
+		if (A_DefaultGui = "HS4")
+			return
+		if (A_DefaultGui = "HS3")
+			F_DeleteHotstring()
+	return
 
-F8::	;new thread starts here
-	F_WhichGui()
-	if (A_DefaultGui = "HS4")
-		return
-	if (A_DefaultGui = "HS3")
-		F_DeleteHotstring()
-return
-
-F9::	;new thread starts here
-	F_WhichGui()
-	F_AddHotstring()
-	v_InputString := ""	;in order to reset internal recognizer and let triggerstring tips to appear
-return
-
-F11::	;for debugging purposes, internal shortcut
-SetTimer, TurnOff_UHE, Off
-SetTimer, TurnOff_OHE, Off
-SetTimer, TurnOff_Ttt, Off
-return
-
+	F9::	;new thread starts here
+		F_WhichGui()
+		F_AddHotstring()
+		v_InputString := ""	;in order to reset internal recognizer and let triggerstring tips to appear
+	return
 #if
 
-~Alt::	;if commented out, only for debugging reasons
+~Alt::		;if commented out, only for debugging reasons
 ~MButton::
 ~RButton::
 ~LButton::	;if commented out, only for debugging reasons ;from now LButton click will not close TMenuAHK_C1; LButton is used to trigger F_MouseMenuTT by "g" in F_GuiTrigTipsMenuDefC1 ;if A_ThisFunc != F_MouseMenuTT, then close TMenuAHK_C1
@@ -467,35 +462,289 @@ return
 		Case 2: Gui, TT_C2: Destroy
 		Case 3: Gui, TT_C3: Destroy
 	}
-	ToolTip,,,, 4		;BTWT = Basic Triggerstring Was Triggered
+	ToolTip,,,, % BTWT	;BTWT = Basic Triggerstring Was Triggered
 	ToolTip,,,, % UTLH	;UTLH = Undid The Last Hotstring
 	;OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString
 	v_InputString := ""
 	;OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString
 return
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinActive("ahk_id" HS3SearchHwnd)
-F8:: ;new thread starts here
-	Gui, HS3Search: Default
-	Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
-	F_MoveList()
+	F8:: ;new thread starts here
+		Gui, HS3Search: Default
+		Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+		F_MoveList()
 #if
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinExist("ahk_id" HMenuCliHwnd)
-Tab::
-+Tab::
-1::
-2::
-3::
-4::
-5::
-6::
-7::
-Enter:: 
-Up::
-Down::
+#InputLevel 0	;InputHook will not catch anything what is below level 1.
+	Tab::
+	+Tab::
+	1::
+	2::
+	3::
+	4::
+	5::
+	6::
+	7::
+	Enter:: 
+	Up::
+	Down::
+		F_HMenuCLI_Keyboard()
 
-F_KeyboardMenu_CLI()
+	Esc::
+		Gui, HMenuCli: Destroy
+		Send, % v_Triggerstring	
+		v_InputString 			:= ""	
+,		v_InputH.VisibleText 	:= true
+	return
+#InputLevel 1	;InputHook will not catch anything what is below level 1.
+#If
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#if WinExist("ahk_id" HMenuAHKHwnd)
+#InputLevel 0	;InputHook will not catch anything what is below level 1.
+	Tab::
+	+Tab::
+	1::
+	2::
+	3::
+	4::
+	5::
+	6::
+	7::
+	Enter:: 
+	Up::
+	Down::
+		F_HMenuSI_Keyboard()
+
+	Esc::
+		Gui, HMenuAHK: Destroy
+		Send, % v_Triggerstring	; Send, % v_Triggerstring . v_EndChar
+		v_InputString 			:= ""	
+,		v_InputH.VisibleText 	:= true
+	return
+#InputLevel 1	;InputHook will not catch anything what is below level 1.
+#If
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#if WinActive("ahk_id" TT_C4_Hwnd)	;Static triggerstring tips (inside separate window)
+#InputLevel 0	;InputHook will not catch anything what is below level 1.
+	Tab::
+	+Tab::
+	1::
+	2::
+	3::
+	4::
+	5::
+	6::
+	7::
+	Enter:: 
+	Up::
+	Down::
+		F_TTMenuStatic_Keyboard()
+
+	~Esc::	;tilde in order to run function TT_C4GuiEscape
+		GuiControl,, % IdTT_C4_LB4, |
+		;OutputDebug, % "v_Triggerstring:" . A_Tab . v_Triggerstring . A_Tab . "v_EndChar:" . A_Tab . v_EndChar
+		if (v_Triggerstring != "")
+		{
+			WinActivate, % "ahk_id" PreviousWindowID
+			Send, % v_Triggerstring . v_EndChar
+			v_Triggerstring := ""
+		}
+	return
+#InputLevel 1	;InputHook will not catch anything what is below level 1.
+#If
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#If ActiveControlIsOfClass("Edit")	;https://www.autohotkey.com/docs/commands/_If.htm
+	^BS::Send ^+{Left}{Del}
+	^Del::Send ^+{Right}{Del}
+#If
+
+; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_TTMenuStatic_Keyboard()
+{
+	global	;assume-global moee
+	local	v_PressedKey := "",		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
+	v_PressedKey := A_ThisHotkey
+	OutputDebug, Here I am
+	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
+	{
+		IsCursorPressed := true
+		IntCnt--
+		ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB4
+		ShiftTabIsFound := true
+	}
+	if (InStr(v_PressedKey, "Down") or InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+	{
+		IsCursorPressed := true
+		IntCnt++
+		ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB4
+		ShiftTabIsFound := false
+	}
+	if ((v_MenuMax = 1) and IsCursorPressed)
+	{
+		IntCnt := 1
+		return
+	}
+	if (IsCursorPressed)
+	{
+		if (IntCnt > v_MenuMax)
+		{
+			IntCnt := v_MenuMax
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	
+		}
+		if (IntCnt < 1)
+		{
+			IntCnt := 1
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	
+		}
+		IsCursorPressed := false
+		return
+	}		
+	if (InStr(v_PressedKey, "Enter"))
+	{
+		v_PressedKey := IntCnt
+		IsCursorPressed := false
+		IntCnt := 1
+	}
+	if (v_PressedKey > v_MenuMax)
+	{
+		return
+	}
+	ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C4_LB4
+	Loop, Parse, v_Temp1, `n
+	{
+		if (InStr(A_LoopField, v_PressedKey . "."))
+			v_Temp1 := SubStr(A_LoopField, 4)
+	}
+	v_UndoHotstring := v_Temp1
+	ReplacementString := F_ReplaceAHKconstants(v_Temp1)
+	ReplacementString := F_FollowCaseConformity(ReplacementString)
+	ReplacementString := F_ConvertEscapeSequences(ReplacementString)     
+	
+	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
+	WinActivate, % "ahk_id" PreviousWindowID
+	Switch WhichMenu
+	{
+		Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
+		Case "CLI":	F_ClipboardPaste(ReplacementString, Ovar)
+	}
+	
+	GuiControl,, % IdTT_C4_LB4, |
+	; f_HTriggered := true
+	if (ini_MHSEn)
+		SoundBeep, % ini_MHSF, % ini_MHSD	
+	if (ini_THLog)
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	;OutputDebug, teraz tu
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HMenuSI_Keyboard()
+{
+	global	;assume-global moee
+	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
+	
+	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
+	{
+		IsCursorPressed := true
+		IntCnt--
+		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
+		ShiftTabIsFound := true
+	}
+	if (InStr(v_PressedKey, "Down") or InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+	{
+		IsCursorPressed := true
+		IntCnt++
+		ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
+		ShiftTabIsFound := false
+	}
+	if ((v_MenuMax = 1) and IsCursorPressed)
+	{
+		IntCnt := 1
+		return
+	}
+	if (IsCursorPressed)
+	{
+		if (IntCnt > v_MenuMax)
+		{
+			IntCnt := v_MenuMax
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	
+		}
+		if (IntCnt < 1)
+		{
+			IntCnt := 1
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	
+		}
+		IsCursorPressed := false
+		return
+	}		
+	if (InStr(v_PressedKey, "Enter"))
+	{
+		v_PressedKey := IntCnt
+		IsCursorPressed := false
+		IntCnt := 1
+	}
+	if (v_PressedKey > v_MenuMax)
+	{
+		return
+	}
+	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuAHK
+	Loop, Parse, v_Temp1, `n
+	{
+		if (InStr(A_LoopField, v_PressedKey . "."))
+			v_Temp1 := SubStr(A_LoopField, 4)
+	}
+	v_UndoHotstring := v_Temp1
+	ReplacementString := F_ReplaceAHKconstants(v_Temp1)
+	ReplacementString := F_FollowCaseConformity(ReplacementString)
+	ReplacementString := F_ConvertEscapeSequences(ReplacementString)     
+	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
+	if (ini_MHMP = 4)
+		WinActivate, % "ahk_id" PreviousWindowID
+	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
+	Gui, HMenuAHK: Destroy
+	if (ini_MHSEn)
+		SoundBeep, % ini_MHSF, % ini_MHSD	
+	if (ini_THLog)
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	v_InputString 			:= ""	
+	v_InputH.VisibleText 	:= true
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_MouseTTMenu()	;the priority of gT_MenuTT is lower than this "interrupt"
+{
+	global	;assume-global mode
+	local	OutputVar := 0, OutputVarWin := 0, OutputVarControl := "", OutputVarTemp := ""
+	;OutputDebug, % "LButton:" 
+	if (WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd))
+	{
+		MouseGetPos, , , OutputVarWin, OutputVarControl
+		Switch ini_TTCn
+		{
+			Case 1: WinGet, OutputVar, ID, % "ahk_id" TT_C1_Hwnd 
+			Case 2: WinGet, OutputVar, ID, % "ahk_id" TT_C2_Hwnd
+			Case 3: WinGet, OutputVar, ID, % "ahk_id" TT_C3_Hwnd
+		}
+		
+		if (OutputVarWin != OutputVar)
+			Switch ini_TTCn
+			{
+				Case 1: Gui, TT_C1: Destroy
+				Case 2: Gui, TT_C2: Destroy
+				Case 3: Gui, TT_C3: Destroy
+			}
+	}
+	; ToolTip, ;switch off tooltips created when Unicode symbol is clicked	2022-02-06: I'm not sure if this line is necessary
+	v_InputString := ""	;to reset internal recognizer
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HMenuCLI_Keyboard()
 {
 	global	;assume-global moee
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",	ShiftTabIsFound := false, ReplacementString := ""
@@ -569,20 +818,7 @@ F_KeyboardMenu_CLI()
 	v_InputString 			:= ""	
 	v_InputH.VisibleText 	:= true
 }
-
-Esc::
-	Gui, HMenuCli: Destroy
-	Send, % v_Triggerstring	
-	v_InputString 			:= ""	
-	v_InputH.VisibleText 	:= true
-	return
-#If
-
-#If ActiveControlIsOfClass("Edit")	;https://www.autohotkey.com/docs/commands/_If.htm
-	^BS::Send ^+{Left}{Del}
-	^Del::Send ^+{Right}{Del}
-#If
-; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ActiveControlIsOfClass(Class)	;https://www.autohotkey.com/docs/commands/_If.htm
 {
     ControlGetFocus, FocusedControl, A
@@ -11922,36 +12158,6 @@ F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#InputLevel 2	;thanks to this trick event of left mouse click is ignored by "main level" of hotkeys.
-~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected.
-F_LButtonHandling()	;the priority of gT_MenuTT is lower than this "interrupt"
-{
-	global	;assume-global mode
-	local	OutputVar := 0, OutputVarWin := 0, OutputVarControl := "", OutputVarTemp := ""
-	;OutputDebug, % "LButton:" 
-	if (WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd))
-	{
-		MouseGetPos, , , OutputVarWin, OutputVarControl
-		Switch ini_TTCn
-		{
-			Case 1: WinGet, OutputVar, ID, % "ahk_id" TT_C1_Hwnd 
-			Case 2: WinGet, OutputVar, ID, % "ahk_id" TT_C2_Hwnd
-			Case 3: WinGet, OutputVar, ID, % "ahk_id" TT_C3_Hwnd
-		}
-		
-		if (OutputVarWin != OutputVar)
-			Switch ini_TTCn
-		{
-			Case 1: Gui, TT_C1: Destroy
-			Case 2: Gui, TT_C2: Destroy
-			Case 3: Gui, TT_C3: Destroy
-		}
-	}
-	; ToolTip, ;switch off tooltips created when Unicode symbol is clicked	2022-02-06: I'm not sure if this line is necessary
-	v_InputString := ""	;to reset internal recognizer
-}
-#InputLevel 1	;change back to one, to keep the same value as in InputHook initialization
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid if static triggerstring / hotstring menus GUI is available. "Combined" because it chooses between "MSI" and "MCLI".
 {
 	global	;assume-global mode
@@ -11983,211 +12189,6 @@ F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid i
 		v_InputH.VisibleText 	:= true
 	}
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#if WinExist("ahk_id" HMenuAHKHwnd)	;Future: move this section of code to Hotkeys
-Tab::
-+Tab::
-1::
-2::
-3::
-4::
-5::
-6::
-7::
-Enter:: 
-Up::
-Down::
-
-F_KeyboardMenu_SI()
-{
-	global	;assume-global moee
-	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
-	
-	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
-	{
-		IsCursorPressed := true
-		IntCnt--
-		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
-		ShiftTabIsFound := true
-	}
-	if (InStr(v_PressedKey, "Down") or InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
-	{
-		IsCursorPressed := true
-		IntCnt++
-		ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
-		ShiftTabIsFound := false
-	}
-	if ((v_MenuMax = 1) and IsCursorPressed)
-	{
-		IntCnt := 1
-		return
-	}
-	if (IsCursorPressed)
-	{
-		if (IntCnt > v_MenuMax)
-		{
-			IntCnt := v_MenuMax
-			if (ini_MHSEn)
-				SoundBeep, % ini_MHSF, % ini_MHSD	
-		}
-		if (IntCnt < 1)
-		{
-			IntCnt := 1
-			if (ini_MHSEn)
-				SoundBeep, % ini_MHSF, % ini_MHSD	
-		}
-		IsCursorPressed := false
-		return
-	}		
-	if (InStr(v_PressedKey, "Enter"))
-	{
-		v_PressedKey := IntCnt
-		IsCursorPressed := false
-		IntCnt := 1
-	}
-	if (v_PressedKey > v_MenuMax)
-	{
-		return
-	}
-	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuAHK
-	Loop, Parse, v_Temp1, `n
-	{
-		if (InStr(A_LoopField, v_PressedKey . "."))
-			v_Temp1 := SubStr(A_LoopField, 4)
-	}
-	v_UndoHotstring := v_Temp1
-	ReplacementString := F_ReplaceAHKconstants(v_Temp1)
-	ReplacementString := F_FollowCaseConformity(ReplacementString)
-	ReplacementString := F_ConvertEscapeSequences(ReplacementString)     
-	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
-	if (ini_MHMP = 4)
-		WinActivate, % "ahk_id" PreviousWindowID
-	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
-	Gui, HMenuAHK: Destroy
-	if (ini_MHSEn)
-		SoundBeep, % ini_MHSF, % ini_MHSD	
-	if (ini_THLog)
-		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	v_InputString 			:= ""	
-	v_InputH.VisibleText 	:= true
-}
-
-Esc::
-	Gui, HMenuAHK: Destroy
-	Send, % v_Triggerstring	; Send, % v_Triggerstring . v_EndChar
-	v_InputString 			:= ""	
-	v_InputH.VisibleText 	:= true
-return
-#If
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#if WinActive("ahk_id" TT_C4_Hwnd)	;Future: move this section of code to Hotkeys
-Tab::
-+Tab::
-1::
-2::
-3::
-4::
-5::
-6::
-7::
-Enter:: 
-Up::
-Down::
-
-F_HMenuStatic()
-{
-	global	;assume-global moee
-	local	v_PressedKey := "",		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
-	v_PressedKey := A_ThisHotkey
-	OutputDebug, Here I am
-	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
-	{
-		IsCursorPressed := true
-		IntCnt--
-		ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB4
-		ShiftTabIsFound := true
-	}
-	if (InStr(v_PressedKey, "Down") or InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
-	{
-		IsCursorPressed := true
-		IntCnt++
-		ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB4
-		ShiftTabIsFound := false
-	}
-	if ((v_MenuMax = 1) and IsCursorPressed)
-	{
-		IntCnt := 1
-		return
-	}
-	if (IsCursorPressed)
-	{
-		if (IntCnt > v_MenuMax)
-		{
-			IntCnt := v_MenuMax
-			if (ini_MHSEn)
-				SoundBeep, % ini_MHSF, % ini_MHSD	
-		}
-		if (IntCnt < 1)
-		{
-			IntCnt := 1
-			if (ini_MHSEn)
-				SoundBeep, % ini_MHSF, % ini_MHSD	
-		}
-		IsCursorPressed := false
-		return
-	}		
-	if (InStr(v_PressedKey, "Enter"))
-	{
-		v_PressedKey := IntCnt
-		IsCursorPressed := false
-		IntCnt := 1
-	}
-	if (v_PressedKey > v_MenuMax)
-	{
-		return
-	}
-	ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C4_LB4
-	Loop, Parse, v_Temp1, `n
-	{
-		if (InStr(A_LoopField, v_PressedKey . "."))
-			v_Temp1 := SubStr(A_LoopField, 4)
-	}
-	v_UndoHotstring := v_Temp1
-	ReplacementString := F_ReplaceAHKconstants(v_Temp1)
-	ReplacementString := F_FollowCaseConformity(ReplacementString)
-	ReplacementString := F_ConvertEscapeSequences(ReplacementString)     
-	
-	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
-	WinActivate, % "ahk_id" PreviousWindowID
-	Switch WhichMenu
-	{
-		Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
-		Case "CLI":	F_ClipboardPaste(ReplacementString, Ovar)
-	}
-	
-	GuiControl,, % IdTT_C4_LB4, |
-	; f_HTriggered := true
-	if (ini_MHSEn)
-		SoundBeep, % ini_MHSF, % ini_MHSD	
-	if (ini_THLog)
-		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	;OutputDebug, teraz tu
-}
-
-~Esc::	;tilde in order to run function TT_C4GuiEscape
-GuiControl,, % IdTT_C4_LB4, |
-;OutputDebug, % "v_Triggerstring:" . A_Tab . v_Triggerstring . A_Tab . "v_EndChar:" . A_Tab . v_EndChar
-if (v_Triggerstring != "")
-{
-	WinActivate, % "ahk_id" PreviousWindowID
-	Send, % v_Triggerstring . v_EndChar
-	v_Triggerstring := ""
-}
-; f_HTriggered := true
-return
-#If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadEndChars() ;Load from Config.ini 
 {
