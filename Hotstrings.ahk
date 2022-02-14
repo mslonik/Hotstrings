@@ -333,10 +333,13 @@ if (ini_GuiReload) and (v_Param != "l")
 	F_GUIinit()
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
+#if (WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd))
 #InputLevel 0	;thanks to this trick event of left mouse click is ignored by "main level" of hotkeys.
 	~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected.
 		F_MouseTTMenu()	;the priority of gT_MenuTT is lower than this "interrupt"
-#InputLevel 1	;thanks to that InputHook willcatch anything what is below this line.
+		return
+#InputLevel 1	;thanks to that InputHook will catch anything what is below this line.
+#if
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #InputLevel 0	;Controls which artificial keyboard and mouse events are ignored by hotkeys and hotstrings. Sets the level for any hotkeys or hotstrings beneath it.
 ~BackSpace::	;new thread starts here 
@@ -356,7 +359,7 @@ if (ini_GuiReload) and (v_Param != "l")
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 		}
 	}
-return
+	return
 #InputLevel 1	;thanks to that InputHook willcatch anything what is below this line.
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinActive("ahk_id" HS3SearchHwnd)
@@ -364,20 +367,20 @@ return
 	~^s::
 	~F3::
 		HS3SearchGuiEscape()
-	return	;end of this thread
+		return	;end of this thread
 #if
 
 #if WinActive("ahk_id" HotstringDelay)
 	~F7::
 		HSDelGuiClose()	;Gui event!
 		HSDelGuiEscape()	;Gui event!
-	return
+		return
 #if
 
 #if WinActive("ahk_id" HS3GuiHwnd) or WinActive("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows are active at the moment. 
 	F1::	;new thread starts here
 		F_GuiAboutLink1()
-	return
+		return
 
 	F2:: ;new thread starts here
 		F_WhichGui()
@@ -402,28 +405,28 @@ return
 	F3:: ;new thread starts here
 		F_GuiSearch_DetermineConstraints()
 		F_Searching()
-	return
+		return
 
 	F4::	;new thread starts here
 		F_WhichGui()
 		F_ToggleRightColumn()
-	return
+		return
 
 	F5::	;new thread starts here
 		F_WhichGui()
 		F_Clear()
-	return
+		return
 
 	F6::	;new thread starts here
 		F_WhichGui()
 		F_ToggleSandbox()
-	return
+		return
 
 	F7:: ;new thread starts here
 		F_WhichGui()
 		Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 		F_GuiHSdelay()
-	return
+		return
 
 	F8::	;new thread starts here
 		F_WhichGui()
@@ -431,13 +434,13 @@ return
 			return
 		if (A_DefaultGui = "HS3")
 			F_DeleteHotstring()
-	return
+		return
 
 	F9::	;new thread starts here
 		F_WhichGui()
 		F_AddHotstring()
 		v_InputString := ""	;in order to reset internal recognizer and let triggerstring tips to appear
-	return
+		return
 #if
 
 ~Alt::		;if commented out, only for debugging reasons
@@ -467,13 +470,14 @@ return
 	;OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString
 	v_InputString := ""
 	;OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString
-return
+	return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinActive("ahk_id" HS3SearchHwnd)
 	F8:: ;new thread starts here
 		Gui, HS3Search: Default
 		Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 		F_MoveList()
+		return
 #if
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinExist("ahk_id" HMenuCliHwnd)
@@ -491,13 +495,14 @@ return
 	Up::
 	Down::
 		F_HMenuCLI_Keyboard()
+		return
 
 	Esc::
 		Gui, HMenuCli: Destroy
 		Send, % v_Triggerstring	
 		v_InputString 			:= ""	
 ,		v_InputH.VisibleText 	:= true
-	return
+		return
 #InputLevel 1	;InputHook will not catch anything what is below level 1.
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -516,7 +521,7 @@ return
 	Up::
 	Down::
 		F_HMenuSI_Keyboard()
-
+		return
 	Esc::
 		Gui, HMenuAHK: Destroy
 		Send, % v_Triggerstring	; Send, % v_Triggerstring . v_EndChar
@@ -541,7 +546,7 @@ return
 	Up::
 	Down::
 		F_TTMenuStatic_Keyboard()
-
+		return
 	~Esc::	;tilde in order to run function TT_C4GuiEscape
 		GuiControl,, % IdTT_C4_LB4, |
 		;OutputDebug, % "v_Triggerstring:" . A_Tab . v_Triggerstring . A_Tab . "v_EndChar:" . A_Tab . v_EndChar
@@ -551,12 +556,12 @@ return
 			Send, % v_Triggerstring . v_EndChar
 			v_Triggerstring := ""
 		}
-	return
+		return
 #InputLevel 1	;InputHook will not catch anything what is below level 1.
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If ActiveControlIsOfClass("Edit")	;https://www.autohotkey.com/docs/commands/_If.htm
-	^BS::Send ^+{Left}{Del}
+	^BS::Send ^+{Left}{Del}	;one liner so no need to put return
 	^Del::Send ^+{Right}{Del}
 #If
 
@@ -5660,18 +5665,18 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			}
 
 		Case 3: 
-			Gui, TT_C3: Destroy	;this line is necessary to display new menu each time this function is called.
+			Gui, TT_C3: Destroy	;this line is necessary to display new menu each time this function is called. tu jestem: this is stupid. No need to destroy, it's enough to hide it each time.
 			F_GuiTrigTipsMenuDefC3(a_Tips.Count(), F_LongestTrigTipString(a_Tips))
 			GuiControl,, % IdTT_C3_LB1, % F_ConvertArrayToString(a_Tips)
 			GuiControl,, % IdTT_C3_LB2, % F_TrigTipsSecondColumn(a_TipsOpt, a_TipsEnDis)
 			GuiControl,, % IdTT_C3_LB3, % F_ConvertArrayToString(a_TipsHS)
 			a_TTMenuPos := F_WhereDisplayMenu(ini_TTTP)
 			F_FlipMenu(TT_C3_Hwnd, a_TTMenuPos[1], a_TTMenuPos[2], "TT_C3")	
-			if (previous_ini_ATEn != ini_ATEn)
-			{
+			; if (previous_ini_ATEn != ini_ATEn)
+			; {
 				if (ini_TTCn)
 				{
-					Hotkey, IfWinExist, % "ahk_id" TT_C3_Hwnd	;in order to work the TT_C1_Hwnd variable must exist prior to definition of the following Hotkeys.
+					Hotkey, IfWinExist, % "ahk_id" TT_C3_Hwnd	;in order to work the TT_C3_Hwnd variable must exist prior to definition of the following Hotkeys.
 					Hotkey, ^Tab, 		F_TMenu, I1 On
 					Hotkey, +^Tab, 	F_TMenu, I1 On
 					Hotkey, ^Up,		F_TMenu, I1 On
@@ -5681,7 +5686,7 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 				}
 				else
 				{
-					Hotkey, IfWinExist, % "ahk_id" TT_C3_Hwnd	;in order to work the TT_C1_Hwnd variable must exist prior to definition of the following Hotkeys.
+					Hotkey, IfWinExist, % "ahk_id" TT_C3_Hwnd	;in order to work the TT_C3_Hwnd variable must exist prior to definition of the following Hotkeys.
 					Hotkey, ^Tab, 		F_TMenu, I1 Off
 					Hotkey, +^Tab, 	F_TMenu, I1 Off
 					Hotkey, ^Up,		F_TMenu, I1 Off
@@ -5689,8 +5694,8 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 					Hotkey, ^Enter,	F_TMenu, I1 Off
 					Hotkey, IfWinExist
 				}
-				previous_ini_ATEn := ini_ATEn
-			}	
+				; previous_ini_ATEn := ini_ATEn
+			; }	
 
 		Case 4:
 			GuiControl,, % IdTT_C4_LB1, |	;this line is necessary to display new menu each time this function is called.
