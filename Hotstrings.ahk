@@ -67,6 +67,7 @@ F_Load_ini_GuiReload()
 F_Load_ini_CheckRepo()
 F_Load_ini_DownloadRepo()
 F_LoadSignalingParams()
+
 if (ini_CheckRepo)
 	F_VerUpdCheckServ("OnStartUp")
 if (ini_DownloadRepo) and (F_VerUpdCheckServ("ReturnResult"))
@@ -156,6 +157,19 @@ if (ini_TTTtEn)	;Triggerstring Tips Column Trigger
 F_GuiSearch_CreateObject()	;When all tables are full, initialize GuiSearch
 F_Searching("Reload")			;prepare content of Search tables
 F_InitiateInputHook()
+
+if (ini_TTTtEn)
+{
+	F_PrepareTriggerstringTipsTables2()	;old version: F_PrepareTriggerstringTipsTables()
+	Switch ini_TTCn
+	{
+		Case 1:	F_GuiTrigTipsMenuDefC1(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)
+		Case 2:	F_GuiTrigTipsMenuDefC2(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)
+		Case 3:	F_GuiTrigTipsMenuDefC3(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)
+	}
+}
+Gui, TT_C3: Show
+
 TrayTip, % A_ScriptName, % TransA["Hotstrings have been loaded"], , 1 ;1 = Info icon
 SetTimer, HideTrayTip, -5000				;more general approach; for details see https://www.autohotkey.com/docs/commands/TrayTip.htm#Remarks
 Critical, Off
@@ -333,12 +347,24 @@ if (ini_GuiReload) and (v_Param != "l")
 	F_GUIinit()
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
-#if (WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd))
-#InputLevel 0	;thanks to this trick event of left mouse click is ignored by "main level" of hotkeys.
-	~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected.
-		F_MouseTTMenu()	;the priority of gT_MenuTT is lower than this "interrupt"
+; #if (WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd))
+; #InputLevel 0	;thanks to this trick event of left mouse click is ignored by "main level" of hotkeys.
+; 	~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected.
+; 		F_TTMenu_Mouse()	;the priority of gT_MenuTT is lower than this "interrupt"
+; 		return
+; #InputLevel 1	;thanks to that InputHook will catch anything what is below this line.
+; #if
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#if WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd)
+#InputLevel 0
+	^Tab::
+	+^Tab::
+	^Up::
+	^Down::
+	^Enter::
+		F_TTMenu_Keyboard()
 		return
-#InputLevel 1	;thanks to that InputHook will catch anything what is below this line.
+#InputLevel 1
 #if
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #InputLevel 0	;Controls which artificial keyboard and mouse events are ignored by hotkeys and hotstrings. Sets the level for any hotkeys or hotstrings beneath it.
@@ -443,10 +469,10 @@ if (ini_GuiReload) and (v_Param != "l")
 		return
 #if
 
-~Alt::		;if commented out, only for debugging reasons
+; ~Alt::		;if commented out, only for debugging reasons
 ~MButton::
 ~RButton::
-~LButton::	;if commented out, only for debugging reasons ;from now LButton click will not close TMenuAHK_C1; LButton is used to trigger F_MouseMenuTT by "g" in F_GuiTrigTipsMenuDefC1 ;if A_ThisFunc != F_MouseMenuTT, then close TMenuAHK_C1
+; ~LButton::	;if commented out, only for debugging reasons ;from now LButton click will not close TMenuAHK_C1; LButton is used to trigger F_MouseMenuTT by "g" in F_GuiTrigTipsMenuDefC1 ;if A_ThisFunc != F_MouseMenuTT, then close TMenuAHK_C1
 ~LWin::
 ~RWin::
 ~Down::
@@ -459,6 +485,7 @@ if (ini_GuiReload) and (v_Param != "l")
 ~End::
 ~Esc::
 	ToolTip,	;this line is necessary to close tooltips.
+	OutputDebug, % "Destroy..."
 	Switch ini_TTCn
 	{
 		Case 1: Gui, TT_C1: Destroy
@@ -722,7 +749,7 @@ F_HMenuSI_Keyboard()
 	v_InputH.VisibleText 	:= true
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_MouseTTMenu()	;the priority of gT_MenuTT is lower than this "interrupt"
+F_TTMenu_Mouse()	;the priority of gT_MenuTT is lower than this "interrupt"
 {
 	global	;assume-global mode
 	local	OutputVar := 0, OutputVarWin := 0, OutputVarControl := "", OutputVarTemp := ""
@@ -1303,11 +1330,13 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 	;1. determine size of window from which triggerstring tips window is called	
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A		
 	;2. determine position and size of triggerstring window
-	Gui, % GuiName . ": Show", x%MenuX% y%MenuY% NoActivate Hide 	
+	Gui, % GuiName . ": Show", x%MenuX% y%MenuY% NoActivate	
+	; Gui, % GuiName . ": Show", x%MenuX% y%MenuY% NoActivate Hide 	
 	DetectHiddenWindows, On
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . WindowHandle
 	NewX := Window2X, NewY := Window2Y - Window2H, NewW := Window2W, NewH := Window2H	;bottom -> top
-	Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate Hide	;coordinates: screen
+	Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate 	;coordinates: screen	;tu jestem
+	; Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate Hide	;coordinates: screen
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . WindowHandle
 	;3. determine if triggerstring tips menu fits to this window
 	if (Window2Y < Window1Y)	;if triggerstring tips are above the window
@@ -2136,7 +2165,7 @@ F_MenuLogEnDis()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TMenu()	;this is separate, dedicated function to handle "interrupt" coming from "g" event
+F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" coming from "g" event
 {
 	global	;assume-global mode
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
@@ -2257,9 +2286,9 @@ F_TMenu()	;this is separate, dedicated function to handle "interrupt" coming fro
 		Case 2: Gui, TT_C2: Destroy
 		Case 3: Gui, TT_C3: Destroy
 		Case 4: 
-		GuiControl,, % IdTT_C4_LB1, |
-		GuiControl,, % IdTT_C4_LB2, |
-		GuiControl,, % IdTT_C4_LB3, |
+			GuiControl,, % IdTT_C4_LB1, |
+			GuiControl,, % IdTT_C4_LB2, |
+			GuiControl,, % IdTT_C4_LB3, |
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3237,7 +3266,7 @@ F_EvAT_R1R2()
 {
 	global ;assume-global mode
 	Gui, GuiEvents: Submit, NoHide
-	; F_TMenuAHK_Hotkeys(EvAT_R1R2)
+	; F_TTMenu_KeyboardAHK_Hotkeys(EvAT_R1R2)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvTt_B1()	;Event Tooltip (is triggered) Button Tooltip test 
@@ -5596,106 +5625,43 @@ F_TTstyling(OneTime*)
 F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 {
 	global ;assume-global mode
-	local a_TTMenuPos := []
+	local a_TTMenuPos 		:= []
 	static previous_ini_ATEn := false
 	
 	Switch ini_TTCn
 	{
-		Case 1: 
-			Gui, TT_C1: Destroy	;this line is necessary to display new menu each time this function is called.
-			F_GuiTrigTipsMenuDefC1(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
+		Case 1:
+			GuiControl,, % IdTT_C1_LB1, ||	;make TT_C1_LB1 empty
+			; Gui, TT_C1: Destroy	;this line is necessary to display new menu each time this function is called.
+			; F_GuiTrigTipsMenuDefC1(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
 			GuiControl,, % IdTT_C1_LB1, % F_ConvertArrayToString(a_Tips)
 			a_TTMenuPos := F_WhereDisplayMenu(ini_TTTP)
 			F_FlipMenu(TT_C1_Hwnd, a_TTMenuPos[1], a_TTMenuPos[2], "TT_C1")
-			if (previous_ini_ATEn != ini_ATEn)
-			{
-				if (ini_ATEn)
-				{
-					Hotkey, IfWinExist, % "ahk_id" TT_C1_Hwnd	;in order to work the TT_C1_Hwnd variable must exist prior to definition of the following Hotkeys.
-					Hotkey, ^Tab, 		F_TMenu, I1 On
-					Hotkey, +^Tab, 	F_TMenu, I1 On
-					Hotkey, ^Up,		F_TMenu, I1 On
-					Hotkey, ^Down,		F_TMenu, I1 On
-					Hotkey, ^Enter,	F_TMenu, I1 On
-					Hotkey, IfWinExist
-				}
-				else
-				{
-					Hotkey, IfWinExist, % "ahk_id" TT_C1_Hwnd	;in order to work the TT_C1_Hwnd variable must exist prior to definition of the following Hotkeys.
-					Hotkey, ^Tab, 		F_TMenu, I1 Off
-					Hotkey, +^Tab, 	F_TMenu, I1 Off
-					Hotkey, ^Up,		F_TMenu, I1 Off
-					Hotkey, ^Down,		F_TMenu, I1 Off
-					Hotkey, ^Enter,	F_TMenu, I1 Off
-					Hotkey, IfWinExist
-				}
-				previous_ini_ATEn := ini_ATEn
-			}
+			Gui, TT_C1: Show, NoActivate AutoSize
 
-		Case 2: 
-			Gui, TT_C2: Destroy	;this line is necessary to display new menu each time this function is called.
-			F_GuiTrigTipsMenuDefC2(a_Tips.Count(), F_LongestTrigTipString(a_Tips))
+		Case 2:
+			GuiControl,, % IdTT_C2_LB1, ||	;make TT_C2_LB1 empty
+			GuiControl,, % IdTT_C2_LB2, ||	;make TT_C2_LB2 empty
+			; Gui, TT_C2: Destroy	;this line is necessary to display new menu each time this function is called.
+			; F_GuiTrigTipsMenuDefC2(a_Tips.Count(), F_LongestTrigTipString(a_Tips))
 			GuiControl,, % IdTT_C2_LB1, % F_ConvertArrayToString(a_Tips)
 			GuiControl,, % IdTT_C2_LB2, % F_TrigTipsSecondColumn(a_TipsOpt, a_TipsEnDis)
 			a_TTMenuPos := F_WhereDisplayMenu(ini_TTTP)
 			F_FlipMenu(TT_C2_Hwnd, a_TTMenuPos[1], a_TTMenuPos[2], "TT_C2")
-			if (previous_ini_ATEn != ini_ATEn)
-			{
-				if (ini_TTCn)
-				{
-					Hotkey, IfWinExist, % "ahk_id" TT_C2_Hwnd	;in order to work the TT_C1_Hwnd variable must exist prior to definition of the following Hotkeys.
-					Hotkey, ^Tab, 		F_TMenu, I1 On
-					Hotkey, +^Tab, 	F_TMenu, I1 On
-					Hotkey, ^Up,		F_TMenu, I1 On
-					Hotkey, ^Down,		F_TMenu, I1 On
-					Hotkey, ^Enter,	F_TMenu, I1 On
-					Hotkey, IfWinExist
-				}
-				else
-				{
-					Hotkey, IfWinExist, % "ahk_id" TT_C2_Hwnd	;in order to work the TT_C1_Hwnd variable must exist prior to definition of the following Hotkeys.
-					Hotkey, ^Tab, 		F_TMenu, I1 Off
-					Hotkey, +^Tab, 	F_TMenu, I1 Off
-					Hotkey, ^Up,		F_TMenu, I1 Off
-					Hotkey, ^Down,		F_TMenu, I1 Off
-					Hotkey, ^Enter,	F_TMenu, I1 Off
-					Hotkey, IfWinExist
-				}
-				previous_ini_ATEn := ini_ATEn
-			}
+			Gui, TT_C2: Show, NoActivate AutoSize
 
 		Case 3: 
-			Gui, TT_C3: Destroy	;this line is necessary to display new menu each time this function is called. tu jestem: this is stupid. No need to destroy, it's enough to hide it each time.
-			F_GuiTrigTipsMenuDefC3(a_Tips.Count(), F_LongestTrigTipString(a_Tips))
+			GuiControl,, % IdTT_C3_LB1, ||
+			GuiControl,, % IdTT_C3_LB2, ||
+			GuiControl,, % IdTT_C3_LB3, ||
+			; Gui, TT_C3: Destroy	;this line is necessary to display new menu each time this function is called. tu jestem: this is stupid. No need to destroy, it's enough to hide it each time.
+			; F_GuiTrigTipsMenuDefC3(a_Tips.Count(), F_LongestTrigTipString(a_Tips))
 			GuiControl,, % IdTT_C3_LB1, % F_ConvertArrayToString(a_Tips)
 			GuiControl,, % IdTT_C3_LB2, % F_TrigTipsSecondColumn(a_TipsOpt, a_TipsEnDis)
 			GuiControl,, % IdTT_C3_LB3, % F_ConvertArrayToString(a_TipsHS)
 			a_TTMenuPos := F_WhereDisplayMenu(ini_TTTP)
+			Gui, TT_C3: Show, NoActivate AutoSize	;tu jestem
 			F_FlipMenu(TT_C3_Hwnd, a_TTMenuPos[1], a_TTMenuPos[2], "TT_C3")	
-			; if (previous_ini_ATEn != ini_ATEn)
-			; {
-				if (ini_TTCn)
-				{
-					Hotkey, IfWinExist, % "ahk_id" TT_C3_Hwnd	;in order to work the TT_C3_Hwnd variable must exist prior to definition of the following Hotkeys.
-					Hotkey, ^Tab, 		F_TMenu, I1 On
-					Hotkey, +^Tab, 	F_TMenu, I1 On
-					Hotkey, ^Up,		F_TMenu, I1 On
-					Hotkey, ^Down,		F_TMenu, I1 On
-					Hotkey, ^Enter,	F_TMenu, I1 On
-					Hotkey, IfWinExist
-				}
-				else
-				{
-					Hotkey, IfWinExist, % "ahk_id" TT_C3_Hwnd	;in order to work the TT_C3_Hwnd variable must exist prior to definition of the following Hotkeys.
-					Hotkey, ^Tab, 		F_TMenu, I1 Off
-					Hotkey, +^Tab, 	F_TMenu, I1 Off
-					Hotkey, ^Up,		F_TMenu, I1 Off
-					Hotkey, ^Down,		F_TMenu, I1 Off
-					Hotkey, ^Enter,	F_TMenu, I1 Off
-					Hotkey, IfWinExist
-				}
-				; previous_ini_ATEn := ini_ATEn
-			; }	
 
 		Case 4:
 			GuiControl,, % IdTT_C4_LB1, |	;this line is necessary to display new menu each time this function is called.
@@ -5709,30 +5675,6 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			GuiControl, Choose, % IdTT_C4_LB2, 1
 			GuiControl, Choose, % IdTT_C4_LB3, 1
 			Gui, TT_C4: Show, NoActivate AutoSize
-			if (previous_ini_ATEn != ini_ATEn)
-			{
-				if (ini_TTCn)
-				{
-					Hotkey, IfWinExist, % "ahk_id" TT_C4_Hwnd	;in order to work the TT_C1_Hwnd variable must exist prior to definition of the following Hotkeys.
-					Hotkey, ^Tab, 		F_TMenu, I1 On
-					Hotkey, +^Tab, 	F_TMenu, I1 On
-					Hotkey, ^Up,		F_TMenu, I1 On
-					Hotkey, ^Down,		F_TMenu, I1 On
-					Hotkey, ^Enter,	F_TMenu, I1 On
-					Hotkey, IfWinExist
-				}
-				else
-				{
-					Hotkey, IfWinExist, % "ahk_id" TT_C4_Hwnd	;in order to work the TT_C1_Hwnd variable must exist prior to definition of the following Hotkeys.
-					Hotkey, ^Tab, 		F_TMenu, I1 Off
-					Hotkey, +^Tab, 	F_TMenu, I1 Off
-					Hotkey, ^Up,		F_TMenu, I1 Off
-					Hotkey, ^Down,		F_TMenu, I1 Off
-					Hotkey, ^Enter,	F_TMenu, I1 Off
-					Hotkey, IfWinExist
-				}
-				previous_ini_ATEn := ini_ATEn
-			}	
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6768,7 +6710,7 @@ F_PrepareTriggerstringTipsTables2()
 	{
 		Switch ini_TTCn	;this line is necessary to destroy GUI when backspacing goes to length 0 of inputstring
 		{
-			Case 1: Gui, TT_C1: Destroy
+			Case 1: Gui, TT_C1: Destroy	;tu jestem
 			Case 2: Gui, TT_C2: Destroy
 			Case 3: Gui, TT_C3: Destroy
 		}
@@ -12810,10 +12752,10 @@ ToolTip,,,, % UTLH	;Undid the last hotstring
 return
 
 TurnOff_Ttt:
-Switch ini_TTCn
-{
-	Case 1: Gui, TT_C1: Destroy
-	Case 2: Gui, TT_C2: Destroy
-	Case 3: Gui, TT_C3: Destroy
-}
-return
+	Switch ini_TTCn
+	{
+		Case 1: Gui, TT_C1: Destroy
+		Case 2: Gui, TT_C2: Destroy
+		Case 3: Gui, TT_C3: Destroy
+	}
+	return
