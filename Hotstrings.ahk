@@ -158,19 +158,6 @@ F_GuiSearch_CreateObject()	;When all tables are full, initialize GuiSearch
 F_Searching("Reload")			;prepare content of Search tables
 F_InitiateInputHook()
 
-F_GuiTrigTipsReferenceSizes()	;measure width and height of Triggerstring Tips letter; future: when styling changes, those parameters should be updated accordingly
-if (ini_TTTtEn)
-{
-	F_PrepareTriggerstringTipsTables2()	;old version: F_PrepareTriggerstringTipsTables()
-	Switch ini_TTCn
-	{
-		Case 1:	F_GuiTrigTipsMenuDefC1(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)
-		Case 2:	F_GuiTrigTipsMenuDefC2(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)
-		Case 3:	F_GuiTrigTipsMenuDefC3(ini_MNTT, 5)	;F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)
-	}
-}
-; Gui, TT_C3: Show
-
 TrayTip, % A_ScriptName, % TransA["Hotstrings have been loaded"], , 1 ;1 = Info icon
 SetTimer, HideTrayTip, -5000				;more general approach; for details see https://www.autohotkey.com/docs/commands/TrayTip.htm#Remarks
 Critical, Off
@@ -348,28 +335,25 @@ if (ini_GuiReload) and (v_Param != "l")
 	F_GUIinit()
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
-; #if (WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd))
-; #InputLevel 0	;thanks to this trick event of left mouse click is ignored by "main level" of hotkeys.
-; 	~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected.
-; 		F_TTMenu_Mouse()	;the priority of gT_MenuTT is lower than this "interrupt"
-; 		return
-; #InputLevel 1	;thanks to that InputHook will catch anything what is below this line.
-; #if
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd)
-#InputLevel 0
+; #InputLevel 0
 	^Tab::
 	+^Tab::
 	^Up::
 	^Down::
 	^Enter::
+		SendLevel, 2	;the send level of the event must be higher than the input level of the hotkey or hotstring.
 		F_TTMenu_Keyboard()
 		return
-#InputLevel 1
+; 	~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected.
+; 		F_TTMenu_Mouse()	;the priority of gT_MenuTT is lower than this "interrupt"
+; 		return
+; #InputLevel 1
 #if
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#InputLevel 0	;Controls which artificial keyboard and mouse events are ignored by hotkeys and hotstrings. Sets the level for any hotkeys or hotstrings beneath it.
+; #InputLevel 0	;Controls which artificial keyboard and mouse events are ignored by hotkeys and hotstrings. Sets the level for any hotkeys or hotstrings beneath it.
 ~BackSpace::	;new thread starts here 
+	SendLevel, 0	;in order to not catch what user pressed
 	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 	{
 		if (ini_MHSEn)
@@ -378,16 +362,19 @@ if (ini_GuiReload) and (v_Param != "l")
 	else
 	{
 		v_InputString := SubStr(v_InputString, 1, -1)	;whole string except last character
-		F_PrepareTriggerstringTipsTables2()
-		if (a_Tips.Count())
+		if (ini_TTTtEn)
 		{
-			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)	;tu jestem
-			if ((ini_TTTtEn) and (ini_TTTD > 0))
-				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+			F_PrepareTriggerstringTipsTables2()
+			if (a_Tips.Count())
+			{
+				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)	;tu jestem
+				if ((ini_TTTtEn) and (ini_TTTD > 0))
+					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+			}
 		}
 	}
 	return
-#InputLevel 1	;thanks to that InputHook willcatch anything what is below this line.
+; #InputLevel 1	;thanks to that InputHook will catch anything what is below this line.
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinActive("ahk_id" HS3SearchHwnd)
 	~^f::
@@ -509,7 +496,7 @@ if (ini_GuiReload) and (v_Param != "l")
 #if
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinExist("ahk_id" HMenuCliHwnd)
-#InputLevel 0	;InputHook will not catch anything what is below level 1.
+; #InputLevel 0	;InputHook will not catch anything what is below level 1.
 	Tab::
 	+Tab::
 	1::
@@ -522,20 +509,22 @@ if (ini_GuiReload) and (v_Param != "l")
 	Enter:: 
 	Up::
 	Down::
+		SendLevel, 0	;in order to not catch what user pressed
 		F_HMenuCLI_Keyboard()
 		return
 
 	Esc::
+		SendLevel, 0	;in order to not catch what user pressed
 		Gui, HMenuCli: Destroy
 		Send, % v_Triggerstring	
 		v_InputString 			:= ""	
 ,		v_InputH.VisibleText 	:= true
 		return
-#InputLevel 1	;InputHook will not catch anything what is below level 1.
+; #InputLevel 1	;InputHook will not catch anything what is below level 1.
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinExist("ahk_id" HMenuAHKHwnd)
-#InputLevel 0	;InputHook will not catch anything what is below level 1.
+; #InputLevel 0	;InputHook will not catch anything what is below level 1.
 	Tab::
 	+Tab::
 	1::
@@ -548,19 +537,21 @@ if (ini_GuiReload) and (v_Param != "l")
 	Enter:: 
 	Up::
 	Down::
+		SendLevel, 0	;in order to not catch what user pressed
 		F_HMenuSI_Keyboard()
 		return
 	Esc::
+		SendLevel, 0	;in order to not catch what user pressed
 		Gui, HMenuAHK: Destroy
 		Send, % v_Triggerstring	; Send, % v_Triggerstring . v_EndChar
 		v_InputString 			:= ""	
 ,		v_InputH.VisibleText 	:= true
 	return
-#InputLevel 1	;InputHook will not catch anything what is below level 1.
+; #InputLevel 1	;InputHook will not catch anything what is below level 1.
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinActive("ahk_id" TT_C4_Hwnd)	;Static triggerstring tips (inside separate window)
-#InputLevel 0	;InputHook will not catch anything what is below level 1.
+; #InputLevel 0	;InputHook will not catch anything what is below level 1.
 	Tab::
 	+Tab::
 	1::
@@ -573,9 +564,11 @@ if (ini_GuiReload) and (v_Param != "l")
 	Enter:: 
 	Up::
 	Down::
+		SendLevel, 0	;in order to not catch what user pressed
 		F_TTMenuStatic_Keyboard()
 		return
 	~Esc::	;tilde in order to run function TT_C4GuiEscape
+		SendLevel, 0	;in order to not catch what user pressed
 		GuiControl,, % IdTT_C4_LB4, |
 		;OutputDebug, % "v_Triggerstring:" . A_Tab . v_Triggerstring . A_Tab . "v_EndChar:" . A_Tab . v_EndChar
 		if (v_Triggerstring != "")
@@ -585,7 +578,7 @@ if (ini_GuiReload) and (v_Param != "l")
 			v_Triggerstring := ""
 		}
 		return
-#InputLevel 1	;InputHook will not catch anything what is below level 1.
+; #InputLevel 1	;InputHook will not catch anything what is below level 1.
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If ActiveControlIsOfClass("Edit")	;https://www.autohotkey.com/docs/commands/_If.htm
@@ -1327,17 +1320,14 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 	local 	Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
 		,	Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,	NewX := 0,	NewY := 0,	NewW := 0,	NewH := 0
-
 	;1. determine size of window from which triggerstring tips window is called	
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A		
 	;2. determine position and size of triggerstring window
-	Gui, % GuiName . ": Show", x%MenuX% y%MenuY% NoActivate	
-	; Gui, % GuiName . ": Show", x%MenuX% y%MenuY% NoActivate Hide 	
 	DetectHiddenWindows, On
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . WindowHandle
 	NewX := Window2X, NewY := Window2Y - Window2H, NewW := Window2W, NewH := Window2H	;bottom -> top
-	Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate 	;coordinates: screen	;tu jestem
-	; Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate Hide	;coordinates: screen
+	; Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate 	;coordinates: screen	;tu jestem
+	Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate Hide	;coordinates: screen
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . WindowHandle
 	;3. determine if triggerstring tips menu fits to this window
 	if (Window2Y < Window1Y)	;if triggerstring tips are above the window
@@ -1812,18 +1802,9 @@ F_DestroyTriggerstringTips(ini_TTCn)
 	global	;assume-global mode
 	Switch ini_TTCn
 	{
-		Case 1: ;Gui, TT_C1: Destroy
-			GuiControl,, % IdTT_C1_LB1, ||	;make TT_C1_LB1 empty
-			Gui, TT_C1: Show, Hide			;hide, but not destroy
-		Case 2: ;Gui, TT_C2: Destroy
-			GuiControl,, % IdTT_C2_LB1, ||	;make TT_C2_LB1 empty
-			GuiControl,, % IdTT_C2_LB2, ||	;make TT_C2_LB2 empty
-			Gui, TT_C2: Show, Hide			;hide, but not destroy
-		Case 3: ;Gui, TT_C3: Destroy
-			GuiControl,, % IdTT_C3_LB1, ||	;make TT_C1_LB1 empty
-			GuiControl,, % IdTT_C3_LB2, ||	;make TT_C1_LB1 empty
-			GuiControl,, % IdTT_C3_LB3, ||	;make TT_C1_LB1 empty
-			Gui, TT_C1: Show, Hide			;hide, but not destroy
+		Case 1: Gui, TT_C1: Destroy
+		Case 2: Gui, TT_C2: Destroy
+		Case 3: Gui, TT_C3: Destroy
 		Case 4:
 			GuiControl,, % IdTT_C4_LB1, |
 			GuiControl,, % IdTT_C4_LB2, |
@@ -2041,29 +2022,6 @@ F_TT_C4_B1()	;Button: save position of "static" triggerstring / hotstring window
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Position of this window is saved in Config.ini."]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiTrigTipsReferenceSizes()
-{
-	global	;assume-global mode of operation
-	WLpx := 0	;global variable, the Widest Letter in pixels
-,	RHpx	:= 0	;global variable, text Raw Height in pixels	
-	local	Output1 := 0, Output1X := 0, Output1Y := 0, Output1W := 0, Output1H := 0	
-	Gui, TTRef: New, +HwndTTRef_HWnd
-	Gui, TTRef: Margin, 0, 0
-	if (ini_TTBgrCol = "custom")
-		Gui, TTRef: Color,, % ini_TTBgrColCus	;background of listbox
-	else
-		Gui, TTRef: Color,, % ini_TTBgrCol	;background of listbox
-	if (ini_TTTyFaceCol = "custom")		
-		Gui, TTRef: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceColCus, % ini_TTTyFaceFont
-	else
-		Gui, TTRef: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
-	Gui, TTRef: Add, Text, % "HwndIdTTRef_T1 x0 y0", w	;the widest letter
-	GuiControlGet, Output1, Pos, % IdTTRef_T1
-	WLpx := Output1W + 4
-,	RHpx := Output1H
-	Gui, TTRef: Destroy	
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestString)
 {
 	global	;assume-global mode of operation
@@ -2202,7 +2160,7 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 {
 	global	;assume-global mode
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 0, v_MenuMax := 0
 	v_MenuMax := a_Tips.Count()	
 	;OutputDebug, % "v_PressedKey:" . A_Tab . v_PressedKey
 	Switch ini_TTCn	
@@ -2271,7 +2229,7 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 	{
 		v_PressedKey := IntCnt
 		IsCursorPressed := false
-		IntCnt := 1
+		IntCnt := 0
 	}
 	if ((v_MenuMax = 1) and IsCursorPressed)
 	{
@@ -2307,7 +2265,10 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 	Loop, Parse, v_Temp1, `n
 	{
 		if (A_Index = v_PressedKey)
+		{
 			v_Temp1 := SubStr(A_LoopField, InStr(A_LoopField, " ") + 1)
+			break
+		}	
 	}	
 	if (ini_TTCn = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
@@ -5658,38 +5619,33 @@ F_TTstyling(OneTime*)
 F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 {
 	global ;assume-global mode of operation
-	local a_TTMenuPos 		:= [], LongestValue := 0, CurrentValue := 0, key := 0, value := ""
-,			ControlPosition := 0, ControlPositionX := 0, ControlPositionY := 0, ControlPositionW := 0, ControlPositionH := 0
-,			ControlHeight := RHpx * a_Tips.Count()
+	local a_TTMenuPos 		:= []
 	static previous_ini_ATEn := false
 	
 	Switch ini_TTCn
 	{
 		Case 1:
-			GuiControl,, % IdTT_C1_LB1, ||	;make TT_C1_LB1 empty
-			Gui, TT_C1: Show, Hide			;hide, but not destroy
-			; Gui, TT_C1: Destroy	;this line is necessary to display new menu each time this function is called.
-			; F_GuiTrigTipsMenuDefC1(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
+			Gui, TT_C1: Destroy	;this line is necessary to display new menu each time this function is called.
+			F_GuiTrigTipsMenuDefC1(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
 			GuiControl,, % IdTT_C1_LB1, % F_ConvertArrayToString(a_Tips)
-			Gui, TT_C3: Show, NoActivate AutoSize	;tu jestem
 			a_TTMenuPos := F_WhereDisplayMenu(ini_TTTP)
 			F_FlipMenu(TT_C1_Hwnd, a_TTMenuPos[1], a_TTMenuPos[2], "TT_C1")
-			Gui, TT_C1: Show, NoActivate AutoSize
 
 		Case 2:
-			GuiControl,, % IdTT_C2_LB1, ||	;make TT_C2_LB1 empty
-			GuiControl,, % IdTT_C2_LB2, ||	;make TT_C2_LB2 empty
+			Gui, TT_C2: Destroy
+			F_GuiTrigTipsMenuDefC3(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.			; GuiControl,, % IdTT_C2_LB1, ||	;make TT_C2_LB1 empty
 			GuiControl,, % IdTT_C2_LB1, % F_ConvertArrayToString(a_Tips)
 			GuiControl,, % IdTT_C2_LB2, % F_TrigTipsSecondColumn(a_TipsOpt, a_TipsEnDis)
-			; Gui, TT_C2: Show, NoActivate AutoSize	;tu jestem
 			a_TTMenuPos := F_WhereDisplayMenu(ini_TTTP)
 			F_FlipMenu(TT_C2_Hwnd, a_TTMenuPos[1], a_TTMenuPos[2], "TT_C2")
-			Gui, TT_C2: Show, NoActivate AutoSize
 
 		Case 3: 
-			F_UpdateTT_C3()
+			Gui, TT_C3: Destroy
+			F_GuiTrigTipsMenuDefC3(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
+			GuiControl,, % IdTT_C3_LB1, % F_ConvertArrayToString(a_Tips)
+			GuiControl,, % IdTT_C3_LB2, % F_TrigTipsSecondColumn(a_TipsOpt, a_TipsEnDis)
+			GuiControl,, % IdTT_C3_LB3, % F_ConvertArrayToString(a_TipsHS)
 			a_TTMenuPos := F_WhereDisplayMenu(ini_TTTP)
-			Gui, TT_C3: Show, NoActivate AutoSize	;tu jestem
 			F_FlipMenu(TT_C3_Hwnd, a_TTMenuPos[1], a_TTMenuPos[2], "TT_C3")	
 
 		Case 4:
@@ -6718,7 +6674,8 @@ F_PrepareTriggerstringTipsTables2()
 	global	;assume-global mode
 	local	HitCnt := 0
 	;OutputDebug, % "Length of v_InputString:" . A_Space . StrLen(v_InputString) . A_Tab . "v_InputString:" . A_Space . v_InputString
-	if (StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn)	;TASAC = TipsAreShownAfterNoOfCharacters
+	if (StrLen(v_InputString) > ini_TASAC - 1)	;TASAC = TipsAreShownAfterNoOfCharacters
+	; if (StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{
 		a_Tips 		:= []	;collect within global array a_Tips subset from full set a_Combined
 		, a_TipsOpt	:= []	;collect withing global array a_TipsOpt subset from full set a_TriggerOptions; next it will be used to show triggering character in F_ShowTriggerstringTips2()
@@ -6763,11 +6720,11 @@ F_PrepareTriggerstringTipsTables2()
 			}
 		}
 	}
-	else
-	{
-		F_DestroyTriggerstringTips(ini_TTCn)
-		a_Tips := [], a_TipsOpt	:= [], a_TipsEnDis := [], a_TipsHS := []
-	}
+	; else
+	; {
+		; F_DestroyTriggerstringTips(ini_TTCn)
+		; a_Tips := [], a_TipsOpt	:= [], a_TipsEnDis := [], a_TipsHS := []
+	; }
 }	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadSignalingParams()
@@ -11773,22 +11730,22 @@ F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t
 F_ReplaceAHKconstants(String)
 {
 	String := StrReplace(String, "A_YYYY", 		A_YYYY)
-	String := StrReplace(String, "A_MMMM", 		A_MMMM)
-	String := StrReplace(String, "A_MMM", 		A_MMM)
-	String := StrReplace(String, "A_MM", 		A_MM)
-	String := StrReplace(String, "A_DDDD", 		A_DDDD)
-	String := StrReplace(String, "A_DDD", 		A_DDD)
-	String := StrReplace(String, "A_DD", 		A_DD)
-	String := StrReplace(String, "A_WDay", 		A_WDay)
-	String := StrReplace(String, "A_YDay", 		A_YDay)
-	String := StrReplace(String, "A_YWeek", 	A_YWeek)
-	String := StrReplace(String, "A_Hour",		A_Hour)
-	String := StrReplace(String, "A_Min", 		A_Min)
-	String := StrReplace(String, "A_Sec", 		A_Sec)
-	String := StrReplace(String, "A_MSec", 		A_MSec)
-	String := StrReplace(String, "A_Now", 		A_Now)
-	String := StrReplace(String, "A_NowUTC", 	A_NowUTC)
-	String := StrReplace(String, "A_TickCount", 	A_TickCount)
+,	String := StrReplace(String, "A_MMMM", 		A_MMMM)
+,	String := StrReplace(String, "A_MMM", 		A_MMM)
+,	String := StrReplace(String, "A_MM", 		A_MM)
+,	String := StrReplace(String, "A_DDDD", 		A_DDDD)
+,	String := StrReplace(String, "A_DDD", 		A_DDD)
+,	String := StrReplace(String, "A_DD", 		A_DD)
+,	String := StrReplace(String, "A_WDay", 		A_WDay)
+,	String := StrReplace(String, "A_YDay", 		A_YDay)
+,	String := StrReplace(String, "A_YWeek", 	A_YWeek)
+,	String := StrReplace(String, "A_Hour",		A_Hour)
+,	String := StrReplace(String, "A_Min", 		A_Min)
+,	String := StrReplace(String, "A_Sec", 		A_Sec)
+,	String := StrReplace(String, "A_MSec", 		A_MSec)
+,	String := StrReplace(String, "A_Now", 		A_Now)
+,	String := StrReplace(String, "A_NowUTC", 	A_NowUTC)
+,	String := StrReplace(String, "A_TickCount", 	A_TickCount)
 	return String
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11808,8 +11765,8 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
-	ReplacementString := F_FollowCaseConformity(ReplacementString)
-	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
+,	ReplacementString := F_FollowCaseConformity(ReplacementString)
+,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendEvent")
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
@@ -11822,8 +11779,8 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
-	ReplacementString := F_FollowCaseConformity(ReplacementString)
-	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
+,	ReplacementString := F_FollowCaseConformity(ReplacementString)
+,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendPlay")
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
@@ -11836,8 +11793,8 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
-	ReplacementString := F_FollowCaseConformity(ReplacementString)
-	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
+,	ReplacementString := F_FollowCaseConformity(ReplacementString)
+,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendRaw")
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
@@ -11876,6 +11833,7 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 {
 	global	;assume-global mode
 	Critical, On
+	SendLevel, 1	;the send level of the event must be higher than the input level of the hotkey or hotstring. For autotesting script which will catch output from this function.
 	; OutputDebug, % A_ThisFunc . "`n"
  	;v_TypedTriggerstring 	→ hotstring
 	;v_Options 			→ triggerstring options
@@ -11884,8 +11842,8 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
-	ReplacementString := F_FollowCaseConformity(ReplacementString)
-	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
+,	ReplacementString := F_FollowCaseConformity(ReplacementString)
+,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
  	F_SendIsOflag(ReplacementString, Oflag, "SendInput")
  	F_EventSigOrdHotstring()
 	if (ini_THLog)
