@@ -54,7 +54,6 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		v_EndChar 			:= "" ;initialization of this variable is important in case user would like to hit "Esc" and GUI TT_C4 exists.
 ,		BTWT					:= 4	; BTWT = Basic Triggerstring Was Triggered
 ,		UTLH					:= 6	; UTLH = Undid The Last Hotstring
-
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
 F_LoadCreateTranslationTxt() 			;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
@@ -336,22 +335,18 @@ if (ini_GuiReload) and (v_Param != "l")
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
 #if WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd)
-; #InputLevel 0
-	^Tab::
+	^Tab::	;new thread starts here
 	+^Tab::
 	^Up::
 	^Down::
 	^Enter::
-		SendLevel, 2	;the send level of the event must be higher than the input level of the hotkey or hotstring.
 		F_TTMenu_Keyboard()
 		return
-; 	~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected.
-; 		F_TTMenu_Mouse()	;the priority of gT_MenuTT is lower than this "interrupt"
-; 		return
-; #InputLevel 1
+	~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected → F_TTMenu_Mouse().
+		F_TTMenu_Mouse()	;the priority of gT_MenuTT is lower than this "interrupt"
+		return
 #if
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-; #InputLevel 0	;Controls which artificial keyboard and mouse events are ignored by hotkeys and hotstrings. Sets the level for any hotkeys or hotstrings beneath it.
 ~BackSpace::	;new thread starts here 
 	SendLevel, 0	;in order to not catch what user pressed
 	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
@@ -374,7 +369,6 @@ if (ini_GuiReload) and (v_Param != "l")
 		}
 	}
 	return
-; #InputLevel 1	;thanks to that InputHook will catch anything what is below this line.
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinActive("ahk_id" HS3SearchHwnd)
 	~^f::
@@ -457,10 +451,9 @@ if (ini_GuiReload) and (v_Param != "l")
 		return
 #if
 
-; ~Alt::		;if commented out, only for debugging reasons
+~Alt::		;if commented out, only for debugging reasons
 ~MButton::
 ~RButton::
-; ~LButton::	;if commented out, only for debugging reasons ;from now LButton click will not close TMenuAHK_C1; LButton is used to trigger F_MouseMenuTT by "g" in F_GuiTrigTipsMenuDefC1 ;if A_ThisFunc != F_MouseMenuTT, then close TMenuAHK_C1
 ~LWin::
 ~RWin::
 ~Down::
@@ -473,19 +466,25 @@ if (ini_GuiReload) and (v_Param != "l")
 ~End::
 ~Esc::
 	ToolTip,	;this line is necessary to close tooltips.
-	OutputDebug, % "Destroy..."
-	Switch ini_TTCn
-	{
-		Case 1: Gui, TT_C1: Destroy
-		Case 2: Gui, TT_C2: Destroy
-		Case 3: Gui, TT_C3: Destroy
-	}
+	; OutputDebug, % "Destroy..."
+	ToolTip,,,, % BTWT	;BTWT = Basic Triggerstring Was Triggered
+	ToolTip,,,, % UTLH	;UTLH = Undid The Last Hotstring
+	F_DestroyTriggerstringTips(ini_TTCn)
+	;OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString
+	v_InputString := ""
+	;OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString
+	return
+
+~LButton::	;as above, but without F_DestroyTriggerstringTips()
+	ToolTip,	;this line is necessary to close tooltips.
+	; OutputDebug, % "Destroy..."
 	ToolTip,,,, % BTWT	;BTWT = Basic Triggerstring Was Triggered
 	ToolTip,,,, % UTLH	;UTLH = Undid The Last Hotstring
 	;OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString
 	v_InputString := ""
 	;OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString
 	return
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinActive("ahk_id" HS3SearchHwnd)
 	F8:: ;new thread starts here
@@ -496,7 +495,6 @@ if (ini_GuiReload) and (v_Param != "l")
 #if
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinExist("ahk_id" HMenuCliHwnd)
-; #InputLevel 0	;InputHook will not catch anything what is below level 1.
 	Tab::
 	+Tab::
 	1::
@@ -520,11 +518,9 @@ if (ini_GuiReload) and (v_Param != "l")
 		v_InputString 			:= ""	
 ,		v_InputH.VisibleText 	:= true
 		return
-; #InputLevel 1	;InputHook will not catch anything what is below level 1.
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinExist("ahk_id" HMenuAHKHwnd)
-; #InputLevel 0	;InputHook will not catch anything what is below level 1.
 	Tab::
 	+Tab::
 	1::
@@ -547,11 +543,9 @@ if (ini_GuiReload) and (v_Param != "l")
 		v_InputString 			:= ""	
 ,		v_InputH.VisibleText 	:= true
 	return
-; #InputLevel 1	;InputHook will not catch anything what is below level 1.
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinActive("ahk_id" TT_C4_Hwnd)	;Static triggerstring tips (inside separate window)
-; #InputLevel 0	;InputHook will not catch anything what is below level 1.
 	Tab::
 	+Tab::
 	1::
@@ -578,7 +572,6 @@ if (ini_GuiReload) and (v_Param != "l")
 			v_Triggerstring := ""
 		}
 		return
-; #InputLevel 1	;InputHook will not catch anything what is below level 1.
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If ActiveControlIsOfClass("Edit")	;https://www.autohotkey.com/docs/commands/_If.htm
@@ -748,6 +741,8 @@ F_TTMenu_Mouse()	;the priority of gT_MenuTT is lower than this "interrupt"
 	global	;assume-global mode
 	local	OutputVar := 0, OutputVarWin := 0, OutputVarControl := "", OutputVarTemp := ""
 	;OutputDebug, % "LButton:" 
+	if (!ini_ATEn)
+		return
 	if (WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd))
 	{
 		MouseGetPos, , , OutputVarWin, OutputVarControl
@@ -932,7 +927,7 @@ F_CheckIfRemoveOldDir()
 
 	IniRead, OldAppFolder, 	% ini_HADConfig, Configuration, OldScriptDir, % A_Space
 	; IniRead, OldScriptPID, 	% ini_HADConfig, Configuration, OldScriptPID, % A_Space
-	OutputDebug, % "OldAppFolder:" . A_Tab . OldAppFolder . "`n"
+	; OutputDebug, % "OldAppFolder:" . A_Tab . OldAppFolder . "`n"
 	if (OldAppFolder != "")
 	{
 		FileRemoveDir, % OldAppFolder, 1	;Remove all files and subdirectories
@@ -1267,7 +1262,7 @@ F_WhereDisplayMenu(ini_TTTP)
 			MenuX := MouseX + 20
 			MenuY := MouseY - 20
 	}
-	; OutputDebug, % "ini_TTTP:" . A_Tab . ini_TTTP . A_Tab . "A_CaretX:" . A_Tab . A_CaretX . A_Tab . "A_CaretY:" . A_Tab . A_CaretY . A_Tab . "MenuX:" . A_Tab . MenuX . A_Tab . "MenuY" . A_Tab . MenuY . "`n"
+	OutputDebug, % "ini_TTTP:" . A_Tab . ini_TTTP . A_Tab . "A_CaretX:" . A_Tab . A_CaretX . A_Tab . "A_CaretY:" . A_Tab . A_CaretY . A_Tab . "MenuX:" . A_Tab . MenuX . A_Tab . "MenuY" . A_Tab . MenuY . "`n"
 	return [MenuX, MenuY]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1323,10 +1318,10 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 	;1. determine size of window from which triggerstring tips window is called	
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A		
 	;2. determine position and size of triggerstring window
+	Gui, % GuiName . ": Show", x%MenuX% y%MenuY% NoActivate Hide
 	DetectHiddenWindows, On
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . WindowHandle
 	NewX := Window2X, NewY := Window2Y - Window2H, NewW := Window2W, NewH := Window2H	;bottom -> top
-	; Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate 	;coordinates: screen	;tu jestem
 	Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate Hide	;coordinates: screen
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . WindowHandle
 	;3. determine if triggerstring tips menu fits to this window
@@ -2161,7 +2156,10 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 	global	;assume-global mode
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 0, v_MenuMax := 0
-	v_MenuMax := a_Tips.Count()	
+
+	if (!ini_ATEn)
+		return
+	v_MenuMax := a_Tips.Count()
 	;OutputDebug, % "v_PressedKey:" . A_Tab . v_PressedKey
 	Switch ini_TTCn	
 	{
@@ -2272,18 +2270,11 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 	}	
 	if (ini_TTCn = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
+	SendLevel, 1	;to backtrigger
 	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
 	SendInput, % v_Temp1
-	Switch ini_TTCn
-	{
-		Case 1: Gui, TT_C1: Destroy
-		Case 2: Gui, TT_C2: Destroy
-		Case 3: Gui, TT_C3: Destroy
-		Case 4: 
-			GuiControl,, % IdTT_C4_LB1, |
-			GuiControl,, % IdTT_C4_LB2, |
-			GuiControl,, % IdTT_C4_LB3, |
-	}
+	SendLevel, 0
+	F_DestroyTriggerstringTips(ini_TTCn)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadConfiguration()
@@ -6579,12 +6570,7 @@ F_Undo()	;turning off of * option requires special conditions.
 	}
 	else
 	{
-		Switch ini_TTCn
-		{
-			Case 1: Gui, TT_C1: Destroy
-			Case 2: Gui, TT_C2: Destroy
-			Case 3: Gui, TT_C3: Destroy
-		}
+		F_DestroyTriggerstringTips(ini_TTCn)
 		If InStr(ThisHotkey, "^z")
 			SendInput, ^z
 		else if InStr(ThisHotkey, "!BackSpace")
@@ -6675,7 +6661,6 @@ F_PrepareTriggerstringTipsTables2()
 	local	HitCnt := 0
 	;OutputDebug, % "Length of v_InputString:" . A_Space . StrLen(v_InputString) . A_Tab . "v_InputString:" . A_Space . v_InputString
 	if (StrLen(v_InputString) > ini_TASAC - 1)	;TASAC = TipsAreShownAfterNoOfCharacters
-	; if (StrLen(v_InputString) > ini_TASAC - 1) and (ini_TTTtEn)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{
 		a_Tips 		:= []	;collect within global array a_Tips subset from full set a_Combined
 		, a_TipsOpt	:= []	;collect withing global array a_TipsOpt subset from full set a_TriggerOptions; next it will be used to show triggering character in F_ShowTriggerstringTips2()
@@ -6720,11 +6705,6 @@ F_PrepareTriggerstringTipsTables2()
 			}
 		}
 	}
-	; else
-	; {
-		; F_DestroyTriggerstringTips(ini_TTCn)
-		; a_Tips := [], a_TipsOpt	:= [], a_TipsEnDis := [], a_TipsHS := []
-	; }
 }	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadSignalingParams()
@@ -11833,7 +11813,7 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 {
 	global	;assume-global mode
 	Critical, On
-	SendLevel, 1	;the send level of the event must be higher than the input level of the hotkey or hotstring. For autotesting script which will catch output from this function.
+	; SendLevel, 1	;the send level of the event must be higher than the input level of the hotkey or hotstring. Future: for autotesting script which will catch output from this function.
 	; OutputDebug, % A_ThisFunc . "`n"
  	;v_TypedTriggerstring 	→ hotstring
 	;v_Options 			→ triggerstring options
@@ -12084,8 +12064,10 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
-	local	OutputVarTemp := "",	ThisHotkey := A_ThisHotkey
+	local	OutputVarTemp := "",	ThisHotkey := A_PriorKey
 			, OutputVarTemp2 := "", ChoicePos := 0
+
+	OutputDebug, % "ThisHotkey:" . A_Tab . ThisHotkey . "`n"
 	MouseGetPos, , , , OutputVarTemp			;to store the name (ClassNN) of the control under the mouse cursor
 	SendMessage, 0x0188, 0, 0, % OutputVarTemp	;retrieve the position of the selected item
 	ChoicePos := (ErrorLevel<<32>>32) + 1		;Convert UInt to Int to have -1 if there is no item selected. Convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.
@@ -12740,7 +12722,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	Gui, Export: Destroy
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been exported"] . ":" . "`n`n" . v_OutputFile
 }
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HideTrayTip() 
 {
     TrayTip  ; Attempt to hide it the normal way.
@@ -12754,18 +12736,13 @@ HideTrayTip()
 
 ; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
 TurnOff_OHE:
-ToolTip,,,, % BTWT	;Basic triggerstring was triggered
-return
+	ToolTip,,,, % BTWT	;Basic triggerstring was triggered
+	return
 
 TurnOff_UHE:
-ToolTip,,,, % UTLH	;Undid the last hotstring
-return
+	ToolTip,,,, % UTLH	;Undid the last hotstring
+	return
 
 TurnOff_Ttt:
-	Switch ini_TTCn
-	{
-		Case 1: Gui, TT_C1: Destroy
-		Case 2: Gui, TT_C2: Destroy
-		Case 3: Gui, TT_C3: Destroy
-	}
+	F_DestroyTriggerstringTips(ini_TTCn)
 	return
