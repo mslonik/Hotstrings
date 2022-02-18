@@ -2988,88 +2988,88 @@ F_EvUpdateTab()
 	Switch EvTab3
 	{
 		Case % TransA["Basic hotstring is triggered"]:
-		Switch EvSM_R1R2
-		{
-			Case 1:	;enable
-			GuiControl, Disable, 	% IdEvBH_T1
-			GuiControl, Disable, 	% IdEvBH_T2
-			GuiControl, Disable, 	% IdEvBH_R1
-			GuiControl, Disable, 	% IdEvBH_R2
-			GuiControl, Disable, 	% IdEvBH_T3
-			GuiControl, Disable, 	% IdEvBH_T4
-			GuiControl, Disable, 	% IdEvBH_T5
-			GuiControl, Disable, 	% IdEvBH_R3
-			GuiControl, Disable, 	% IdEvBH_R4
-			GuiControl, Disable, 	% IdEvBH_T6
-			GuiControl, Disable, 	% IdEvBH_S1
-			GuiControl, Disable, 	% IdEvBH_T7
-			GuiControl, Disable, 	% IdEvBH_T8
-			GuiControl, Disable, 	% IdEvBH_T9
-			GuiControl, Disable, 	% IdEvBH_R5
-			GuiControl, Disable, 	% IdEvBH_R6
-			GuiControl, Disable, 	% IdEvMH_T1
-			GuiControl, Disable, 	% IdEvMH_T2
-			GuiControl, Disable, 	% IdEvMH_R1
-			GuiControl, Disable, 	% IdEvMH_R2
-			
-			Case 2:	;disable
-			GuiControl, Enable, 	% IdEvBH_T1
-			GuiControl, Enable, 	% IdEvBH_T2
-			GuiControl, Enable, 	% IdEvBH_R1
-			GuiControl, Enable, 	% IdEvBH_R2
-			GuiControl, Enable, 	% IdEvBH_T3
-			GuiControl, Enable, 	% IdEvBH_T4
-			GuiControl, Enable, 	% IdEvBH_T5
-			GuiControl, Enable, 	% IdEvBH_R3
-			GuiControl, Enable, 	% IdEvBH_R4
-			GuiControl, Enable, 	% IdEvBH_T6
-			GuiControl, Enable, 	% IdEvBH_S1
-			GuiControl, Enable, 	% IdEvBH_T7
-			GuiControl, Enable, 	% IdEvBH_T8
-			GuiControl, Enable, 	% IdEvBH_T9
-			GuiControl, Enable, 	% IdEvBH_R5
-			GuiControl, Enable, 	% IdEvBH_R6
-			F_EvBH_R1R2()
-			F_EvBH_R3R4()
-			F_EvBH_R7R8()
-			F_EvBH_S1()
-			F_EvBH_S2()
-			F_EvBH_S3()
-		}
+			Switch EvSM_R1R2
+			{
+				Case 1:	;enable
+				GuiControl, Disable, 	% IdEvBH_T1
+				GuiControl, Disable, 	% IdEvBH_T2
+				GuiControl, Disable, 	% IdEvBH_R1
+				GuiControl, Disable, 	% IdEvBH_R2
+				GuiControl, Disable, 	% IdEvBH_T3
+				GuiControl, Disable, 	% IdEvBH_T4
+				GuiControl, Disable, 	% IdEvBH_T5
+				GuiControl, Disable, 	% IdEvBH_R3
+				GuiControl, Disable, 	% IdEvBH_R4
+				GuiControl, Disable, 	% IdEvBH_T6
+				GuiControl, Disable, 	% IdEvBH_S1
+				GuiControl, Disable, 	% IdEvBH_T7
+				GuiControl, Disable, 	% IdEvBH_T8
+				GuiControl, Disable, 	% IdEvBH_T9
+				GuiControl, Disable, 	% IdEvBH_R5
+				GuiControl, Disable, 	% IdEvBH_R6
+				GuiControl, Disable, 	% IdEvMH_T1
+				GuiControl, Disable, 	% IdEvMH_T2
+				GuiControl, Disable, 	% IdEvMH_R1
+				GuiControl, Disable, 	% IdEvMH_R2
+
+				Case 2:	;disable
+				GuiControl, Enable, 	% IdEvBH_T1
+				GuiControl, Enable, 	% IdEvBH_T2
+				GuiControl, Enable, 	% IdEvBH_R1
+				GuiControl, Enable, 	% IdEvBH_R2
+				GuiControl, Enable, 	% IdEvBH_T3
+				GuiControl, Enable, 	% IdEvBH_T4
+				GuiControl, Enable, 	% IdEvBH_T5
+				GuiControl, Enable, 	% IdEvBH_R3
+				GuiControl, Enable, 	% IdEvBH_R4
+				GuiControl, Enable, 	% IdEvBH_T6
+				GuiControl, Enable, 	% IdEvBH_S1
+				GuiControl, Enable, 	% IdEvBH_T7
+				GuiControl, Enable, 	% IdEvBH_T8
+				GuiControl, Enable, 	% IdEvBH_T9
+				GuiControl, Enable, 	% IdEvBH_R5
+				GuiControl, Enable, 	% IdEvBH_R6
+				F_EvBH_R1R2()
+				F_EvBH_R3R4()
+				F_EvBH_R7R8()
+				F_EvBH_S1()
+				F_EvBH_S2()
+				F_EvBH_S3()
+			}
 		Case % TransA["Menu hotstring is triggered"]:
-		Switch EvSM_R1R2
-		{
-			Case 1:	;enable
-			GuiControl, Disable, 	% IdEvMH_T1
-			GuiControl, Disable, 	% IdEvMH_T2
-			GuiControl, Disable, 	% IdEvMH_R1
-			GuiControl, Disable, 	% IdEvMH_R2
-			
-			Case 2:	;disable
-			GuiControl, Enable, 	% IdEvMH_T1
-			GuiControl, Enable, 	% IdEvMH_T2
-			GuiControl, Enable, 	% IdEvMH_R1
-			GuiControl, Enable, 	% IdEvMH_R2
-			F_EvMH_R3R4()
-			F_EvMH_S1()
-			F_EvMH_S2()
-		}
+			Switch EvSM_R1R2
+			{
+				Case 1:	;enable
+				GuiControl, Disable, 	% IdEvMH_T1
+				GuiControl, Disable, 	% IdEvMH_T2
+				GuiControl, Disable, 	% IdEvMH_R1
+				GuiControl, Disable, 	% IdEvMH_R2
+
+				Case 2:	;disable
+				GuiControl, Enable, 	% IdEvMH_T1
+				GuiControl, Enable, 	% IdEvMH_T2
+				GuiControl, Enable, 	% IdEvMH_R1
+				GuiControl, Enable, 	% IdEvMH_R2
+				F_EvMH_R3R4()
+				F_EvMH_S1()
+				F_EvMH_S2()
+			}
 		Case % TransA["Undid the last hotstring"]:
-		F_EvUH_R1R2()
-		F_EvUH_R3R4()
-		F_EvUH_R7R8()
-		F_EvUH_S1()
-		F_EvUH_S2()
-		F_EvUH_S3()
+			F_EvUH_R1R2()
+			F_EvUH_R3R4()
+			F_EvUH_R7R8()
+			F_EvUH_S1()
+			F_EvUH_S2()
+			F_EvUH_S3()
 		Case % TransA["Triggerstring tips"]:
-		F_EvTt_R1R2()
-		F_EvTt_R3R4()
-		F_EvTt_S1()
-		F_EvTt_S2()
+			F_EvTt_R1R2()
+			F_EvTt_R3R4()
+			F_EvTt_S1()
+			F_EvTt_S2()
 		Case % TransA["Active triggerstring tips"]:
-		F_EvSM_R1R2()
+			F_EvSM_R1R2()
 		Case % TransA["Static triggerstring / hotstring menus"]:
-		F_EvAT_R1R2()
+			F_EvAT_R1R2()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4448,11 +4448,11 @@ F_EvBH_B3()	;Events Basic Hotstring (is triggered) Button Apply
 	}
 	ini_OHSF := EvBH_S2, ini_OHSD := EvBH_S3
 	IniWrite, % ini_OHTtEn, 	% ini_HADConfig, Event_BasicHotstring, 	OHTtEn
-	IniWrite, % ini_OHTD,	% ini_HADConfig, Event_BasicHotstring,		OHTD
-	IniWrite, % ini_OHTP,	% ini_HADConfig, Event_BasicHotstring,		OHTP
-	IniWrite, % ini_OHSEn, 	% ini_HADConfig, Event_BasicHotstring,		OHSEn
-	IniWrite, % ini_OHSF,	% ini_HADConfig, Event_BasicHotstring,		OHSF
-	IniWrite, % ini_OHSD,	% ini_HADConfig, Event_BasicHotstring,		OHSD
+	IniWrite, % ini_OHTD,	% ini_HADConfig, Event_BasicHotstring,	OHTD
+	IniWrite, % ini_OHTP,	% ini_HADConfig, Event_BasicHotstring,	OHTP
+	IniWrite, % ini_OHSEn, 	% ini_HADConfig, Event_BasicHotstring,	OHSEn
+	IniWrite, % ini_OHSF,	% ini_HADConfig, Event_BasicHotstring,	OHSF
+	IniWrite, % ini_OHSD,	% ini_HADConfig, Event_BasicHotstring,	OHSD
 	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
 }
@@ -4734,7 +4734,7 @@ F_GuiStyling_CreateObjects()
 	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	Listbox, 		HwndIdTTstyling_LB1 r5,					% TransA["Row"] . " 1|" . TransA["Row"] . " 2|" . TransA["Row"] . " 3|" . TransA["Row"] . " 4|" . TransA["Row"] . " 5"
 	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B5 gF_TTstyling_B5,		% TransA["Test styling"]
-	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B6 gF_TTstyling_B6,		% TransA["Apply"]
+	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B6 gF_TTstyling_B6 +Default,	% TransA["Apply"]
 	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B7 gF_TTstyling_B7,		% TransA["Close"]
 	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B8 gF_TTStyling_B8,		% TransA["Cancel"]
 	
@@ -4776,7 +4776,7 @@ F_GuiStyling_CreateObjects()
 	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, TTstyling: Add,	Listbox, 		HwndIdHMstyling_LB1 r5,					% TransA["Row"] . " 1|" . TransA["Row"] . " 2|" . TransA["Row"] . " 3|" . TransA["Row"] . " 4|" . TransA["Row"] . " 5"
 	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B5 gF_HMstyling_B5,		% TransA["Test styling"]
-	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B6 gF_HMstyling_B6,		% TransA["Apply"]
+	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B6 gF_HMstyling_B6 +Default,	% TransA["Apply"]
 	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B7 gF_HMstyling_B7,		% TransA["Close"]
 	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B8 gF_HMstyling_B8,		% TransA["Cancel"]
 }
@@ -4863,72 +4863,72 @@ F_TTStylingTab3(OneTime*)
 		Switch PreviousTab3
 		{
 			Case % TransA["Triggerstring tips styling"]:
-			if (TTS_DDL1 != PreviousTTS_DDL1) or (TTS_DDL2 != PreviousTTS_DDL2) or (TTS_DDL3 != PreviousTTS_DDL3) or (TTS_DDL4 != PreviousTTS_DDL4)
-			{
-				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
-				. TransA["If you don't apply it, previous changes will be lost."]
-				. "`n`n" . TransA["Do you wish to apply your changes?"]
-				IfMsgBox, Yes	;here MsgBox threadis over
-					F_TTstyling_B6()	;Apply button
-				IfMsgBox, No	;restore previous values to each GuiControl
+				if (TTS_DDL1 != PreviousTTS_DDL1) or (TTS_DDL2 != PreviousTTS_DDL2) or (TTS_DDL3 != PreviousTTS_DDL3) or (TTS_DDL4 != PreviousTTS_DDL4)
 				{
-					if (TTS_DDL1 != PreviousTTS_DDL1)
+					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
+						. TransA["If you don't apply it, previous changes will be lost."]
+						. "`n`n" . TransA["Do you wish to apply your changes?"]
+					IfMsgBox, Yes	;here MsgBox threadis over
+						F_TTstyling_B6()	;Apply button
+					IfMsgBox, No	;restore previous values to each GuiControl
 					{
-						GuiControl, ChooseString, % IdTTstyling_DDL1, % PreviousTTS_DDL1
-						if (PreviousTTS_DDL1 = "custom")
-							GuiControl,, % IdTTstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
+						if (TTS_DDL1 != PreviousTTS_DDL1)
+						{
+							GuiControl, ChooseString, % IdTTstyling_DDL1, % PreviousTTS_DDL1
+							if (PreviousTTS_DDL1 = "custom")
+								GuiControl,, % IdTTstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
+						}
+						if (TTS_DDL2 != PreviousTTS_DDL2)
+						{
+							GuiControl, ChooseString, % IdTTstyling_DDL2, % PreviousTTS_DDL2
+							if (PreviousTTS_DDL2 = "custom")
+								GuiControl,, % IdTTstyling_E2, % TransA["HTML color RGB value, e.g. 00FF00"] 
+						}
+						if (TTS_DDL3 != PreviousTTS_DDL3)
+							GuiControl, ChooseString, % IdTTstyling_DDL3, % PreviousTTS_DDL3
+						if (TTS_DDL4 != PreviousTTS_DDL4)
+							GuiControl, ChooseString, % IdTTstyling_DDL4, % PreviousTTS_DDL4
 					}
-					if (TTS_DDL2 != PreviousTTS_DDL2)
-					{
-						GuiControl, ChooseString, % IdTTstyling_DDL2, % PreviousTTS_DDL2
-						if (PreviousTTS_DDL2 = "custom")
-							GuiControl,, % IdTTstyling_E2, % TransA["HTML color RGB value, e.g. 00FF00"] 
-					}
-					if (TTS_DDL3 != PreviousTTS_DDL3)
-						GuiControl, ChooseString, % IdTTstyling_DDL3, % PreviousTTS_DDL3
-					if (TTS_DDL4 != PreviousTTS_DDL4)
-						GuiControl, ChooseString, % IdTTstyling_DDL4, % PreviousTTS_DDL4
 				}
-			}
-			else
-			{
-				F_GuiStyling_LoadValues()
-			}
-			PreviousTab3 := TTStylingTab3
+				else
+				{
+					F_GuiStyling_LoadValues()
+				}
+				PreviousTab3 := TTStylingTab3
 			
 			Case % TransA["Hotstring menu styling"]:
-			if (HMS_DDL1 != PreviousHMS_DDL1) or (HMS_DDL2 != PreviousHMS_DDL2) or (HMS_DDL3 != PreviousHMS_DDL3) or (HMS_DDL4 != PreviousHMS_DDL4)
-			{
-				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
-				. TransA["If you don't apply it, previous changes will be lost."]
-				. "`n`n" . TransA["Do you wish to apply your changes?"]
-				IfMsgBox, Yes	;here MsgBox threadis over
-					F_HMstyling_B6()	;Button Apply
-				IfMsgBox, No	;restore previous values to each GuiControl
+				if (HMS_DDL1 != PreviousHMS_DDL1) or (HMS_DDL2 != PreviousHMS_DDL2) or (HMS_DDL3 != PreviousHMS_DDL3) or (HMS_DDL4 != PreviousHMS_DDL4)
 				{
-					if (HMS_DDL1 != PreviousHMS_DDL1)
+					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
+					. TransA["If you don't apply it, previous changes will be lost."]
+					. "`n`n" . TransA["Do you wish to apply your changes?"]
+					IfMsgBox, Yes	;here MsgBox threadis over
+						F_HMstyling_B6()	;Button Apply
+					IfMsgBox, No	;restore previous values to each GuiControl
 					{
-						GuiControl, ChooseString, % IdHMstyling_DDL1, % PreviousHMS_DDL1
-						if (PreviousHMS_DDL1 = "custom")
-							GuiControl,, % IdHMstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
+						if (HMS_DDL1 != PreviousHMS_DDL1)
+						{
+							GuiControl, ChooseString, % IdHMstyling_DDL1, % PreviousHMS_DDL1
+							if (PreviousHMS_DDL1 = "custom")
+								GuiControl,, % IdHMstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
+						}
+						if (HMS_DDL2 != PreviousHMS_DDL2)
+						{
+							GuiControl, ChooseString, % IdHMstyling_DDL2, % PreviousHMS_DDL2
+							if (PreviousHMS_DDL2 = "custom")
+								GuiControl,, % IdHMstyling_E2, % TransA["HTML color RGB value, e.g. 00FF00"] 						
+						}
+						if (HMS_DDL3 != PreviousHMS_DDL3)
+							GuiControl, ChooseString, % IdHMstyling_DDL3, % PreviousHMS_DDL3
+						if (HMS_DDL4 != PreviousHMS_DDL4)
+							GuiControl, ChooseString, % IdHMstyling_DDL4, % PreviousHMS_DDL4
 					}
-					if (HMS_DDL2 != PreviousHMS_DDL2)
-					{
-						GuiControl, ChooseString, % IdHMstyling_DDL2, % PreviousHMS_DDL2
-						if (PreviousHMS_DDL2 = "custom")
-							GuiControl,, % IdHMstyling_E2, % TransA["HTML color RGB value, e.g. 00FF00"] 						
-					}
-					if (HMS_DDL3 != PreviousHMS_DDL3)
-						GuiControl, ChooseString, % IdHMstyling_DDL3, % PreviousHMS_DDL3
-					if (HMS_DDL4 != PreviousHMS_DDL4)
-						GuiControl, ChooseString, % IdHMstyling_DDL4, % PreviousHMS_DDL4
 				}
-			}
-			else
-			{
-				F_GuiStyling_LoadValues()
-			}
-			PreviousTab3 := TTStylingTab3
+				else
+				{
+					F_GuiStyling_LoadValues()
+				}
+				PreviousTab3 := TTStylingTab3
 		}
 	}
 }
@@ -5073,11 +5073,11 @@ F_TTstyling_B6()	;Apply button
 	}
 	
 	ini_TTBgrCol 		:= TTS_DDL1
-	ini_TTBgrColCus 	:= TTS_TTBgrColCus
-	ini_TTTyFaceCol 	:= TTS_DDL2
-	ini_TTTyFaceColCus 	:= TTS_TTTyFaceColCus
-	ini_TTTyFaceFont 	:= TTS_DDL3
-	ini_TTTySize 		:= TTS_DDL4
+,	ini_TTBgrColCus 	:= TTS_TTBgrColCus
+,	ini_TTTyFaceCol 	:= TTS_DDL2
+,	ini_TTTyFaceColCus 	:= TTS_TTTyFaceColCus
+,	ini_TTTyFaceFont 	:= TTS_DDL3
+,	ini_TTTySize 		:= TTS_DDL4
 	
 	IniWrite, % ini_TTBgrCol, 		% ini_HADConfig, TriggerstringTips_Styling, TriggerstringTipsBackgroundColor
 	IniWrite, % ini_TTBgrColCus, 		% ini_HADConfig, TriggerstringTips_Styling, TriggerstringTipsBackgroundColorCustom
@@ -5086,6 +5086,7 @@ F_TTstyling_B6()	;Apply button
 	IniWrite, % ini_TTTyFaceFont, 	% ini_HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceFont
 	IniWrite, % ini_TTTySize,		% ini_HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceSize
 	Gui, TDemo: 		Destroy	
+	F_TTStylingTab3(true)	;something was changed
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTstyling_B7()	;Close button
