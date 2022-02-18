@@ -1224,7 +1224,7 @@ GuiEventsGuiClose()	;GUI event (close)
 	if (WinExist("ahk_id" HS4GuiHwnd))
 		Gui, HS4: -Disabled	
 	Gui, TDemo: 		Destroy
-	Gui, TTstyling: 	Destroy
+	Gui, GuiEvents: 	Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 GuiEventsGuiEscape()	;GUI event (close)	;this function is somehow blocked (dead code)
@@ -1235,7 +1235,7 @@ GuiEventsGuiEscape()	;GUI event (close)	;this function is somehow blocked (dead 
 	if (WinExist("ahk_id" HS4GuiHwnd))
 		Gui, HS4: -Disabled	
 	Gui, TDemo: 		Destroy
-	Gui, TTstyling: 	Destroy
+	Gui, GuiEvents: 	Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_WhereDisplayMenu(ini_TTTP)
@@ -1386,8 +1386,8 @@ F_InitiateInputHook()
 {
 	global	;assume-global mode of operation
 	v_InputString := "", v_Triggerstring := "", v_UndoHotstring := ""	;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
-	v_InputH 			:= InputHook("V I1")	;I1 is necessary to block SendInput commands output
-	v_InputH.OnChar 	:= Func("F_OneCharPressed")
+,	v_InputH 			:= InputHook("V I1")	;I1 is necessary to block SendInput commands output
+,	v_InputH.OnChar 	:= Func("F_OneCharPressed")
 	v_InputH.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4931,6 +4931,26 @@ F_TTStylingTab3(OneTime*)
 			PreviousTab3 := TTStylingTab3
 		}
 	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+TTstylingGuiClose()
+{
+	global	;assume-global mode of operation
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled	
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	
+	Gui, TTstyling: 	Destroy
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+TTstylingGuiEscape()
+{
+	global	;assume-global mode of operation
+	if (WinExist("ahk_id" HS3GuiHwnd))
+		Gui, HS3: -Disabled	
+	if (WinExist("ahk_id" HS4GuiHwnd))
+		Gui, HS4: -Disabled	
+	Gui, TTstyling: 	Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HMstyling_B4()
