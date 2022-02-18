@@ -575,8 +575,14 @@ if (ini_GuiReload) and (v_Param != "l")
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If ActiveControlIsOfClass("Edit")	;https://www.autohotkey.com/docs/commands/_If.htm
-	^BS::Send ^+{Left}{Del}	;one liner so no need to put return
-	^Del::Send ^+{Right}{Del}
+	^BS::
+		Send ^+{Left}{Del}	;one liner so no need to put return
+		F_DestroyTriggerstringTips(ini_TTCn)
+		return
+	^Del::
+		Send ^+{Right}{Del}
+		F_DestroyTriggerstringTips(ini_TTCn)
+		return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
@@ -2486,7 +2492,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add, 	Slider, 	HwndIdEvMH_S2 vEvMH_S2 gF_EvMH_S2 Line1 Page50 Range50-2000 TickInterval50 ToolTipBottom Buddy1EvMH_S2 ;, % EvMH_S2
 	Gui, GuiEvents: Add, 	Text, 	HwndIdEvMH_T8, 					% TransA["Sound duration [ms]"] . ":" . A_Space . "2000"
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvMH_B1 gF_EvMH_B1,			% TransA["Sound test"]
-	Gui, GuiEvents: Add,	Button,	HwndIdEvMH_B2 gF_EvMH_B2,			% TransA["Apply"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvMH_B2 gF_EvMH_B2 +Default,		% TransA["Apply"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvMH_B3 gF_EvMH_B3,			% TransA["Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvMH_B4 gF_EvMH_B4,			% TransA["Cancel"]
 	
@@ -2541,7 +2547,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add, 	Text, 	HwndIdEvUH_T14, 					% TransA["Sound duration [ms]"] . ":" . A_Space . "2000"
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvUH_B1 gF_EvUH_B1,			% TransA["Tooltip test"]
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvUH_B2 gF_EvUH_B2,			% TransA["Sound test"]	
-	Gui, GuiEvents: Add,	Button,	HwndIdEvUH_B3 gF_EvUH_B3,			% TransA["Apply"]	
+	Gui, GuiEvents: Add,	Button,	HwndIdEvUH_B3 gF_EvUH_B3 +Default,		% TransA["Apply"]	
 	Gui, GuiEvents: Add,	Button,	HwndIdEvUH_B4 gF_EvUH_B4,			% TransA["Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvUH_B5 gF_EvUH_B5,			% TransA["Cancel"]
 	
@@ -2619,7 +2625,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	DropDownList, HwndIdEvTt_DDL2 vEvTt_DDL2 AltSubmit, % TransA["Triggerstring tips"] . "|" . TransA["Triggerstring tips"] . A_Space . "+" . A_Space 
 		. TransA["Triggers"] . "|" . TransA["Triggerstring tips"] . A_Space . "+" . A_Space . TransA["Triggers"] . A_Space . "+" . A_Space . TransA["Hotstrings"]
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvTt_B1 gF_EvTt_B1,			% TransA["Tooltip test"]	
-	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B2 gF_EvTt_B2,			% TransA["Apply"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B2 gF_EvTt_B2 +Default,		% TransA["Apply"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B3 gF_EvTt_B3,			% TransA["Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B4 gF_EvTt_B4,			% TransA["Cancel"]
 	
@@ -2637,7 +2643,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvAT_R1 vEvAT_R1R2 gF_EvAT_R1R2,	% TransA["enable"]
 	Gui, GuiEvents: Add,	Radio, 	HwndIdEvAT_R2 gF_EvAT_R1R2,			% TransA["disable"]	
 	Gui, GuiEvents: Add, 	Button, 	HwndIdEvAT_B1 gF_EvAT_B1,			% TransA["Tooltip test"]
-	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B2 gF_EvAT_B2,			% TransA["Apply"]
+	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B2 gF_EvAT_B2 +Default,		% TransA["Apply"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B3 gF_EvAT_B3,			% TransA["Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B4 gF_EvAT_B4,			% TransA["Cancel"]
 	
@@ -2688,7 +2694,6 @@ F_EvTab3(OneTime*)
 		Switch PreviousEvTab3
 		{
 			Case % TransA["Basic hotstring is triggered"]:
-				GuiControl, +Default, % IdEvBH_B3	;default button Apply
 				if (EvBH_R1R2 != PreviousEvBH_R1R2) or (EvBH_R3R4 != PreviousEvBH_R3R4) or (EvBH_R5R6 != PreviousEvBH_R5R6) or (EvBH_R7R8 != PreviousEvBH_R7R8) or (EvBH_S1 != PreviousEvBH_S1) or (EvBH_S2 != PreviousEvBH_S2) or (EvBH_S3 != PreviousEvBH_S3)
 				{
 					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
@@ -2748,7 +2753,6 @@ F_EvTab3(OneTime*)
 				PreviousEvTab3 := EvTab3
 			
 			Case % TransA["Menu hotstring is triggered"]:
-				GuiControl, +Default, % IdEvMH_B2	;default button Apply
 				if (EvMH_R1R2 != PreviousEvMH_R1R2) or (EvMH_R3R4 != PreviousEvMH_R3R4) or (EvMH_S1 != PreviousEvMH_S1) or (EvMH_S1 != PreviousEvMH_S2)
 				{
 					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
@@ -2790,7 +2794,6 @@ F_EvTab3(OneTime*)
 				PreviousEvTab3 := EvTab3
 			
 			Case % TransA["Undid the last hotstring"]:
-				GuiControl, +Default, % IdEvUH_B3	;default button Apply
 				if (EvUH_R1R2 != PreviousEvUH_R1R2) or (EvUH_R3R4 != PreviousEvUH_R3R4) or (EvUH_R5R6 != PreviousEvUH_R5R6) or (EvUH_R7R8 != PreviousEvUH_R7R8) or (EvUH_S1 != PreviousEvUH_S1) or (EvUH_S2 != PreviousEvUH_S2) or (EvUH_S3 != PreviousEvUH_S3)
 				{
 					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
@@ -2850,7 +2853,6 @@ F_EvTab3(OneTime*)
 				PreviousEvTab3 := EvTab3
 			
 			Case % TransA["Triggerstring tips"]:
-				GuiControl, +Default, % IdEvTt_B2	;default button Apply
 				if (EvTt_R1R2 != PreviousEvTt_R1R2) or (EvTt_R3R4 != PreviousEvTt_R3R4) or (EvTt_R5R6 != PreviousEvTt_R5R6) or (EvTt_C1 != PreviousEvTt_C1) or (EvTt_C2 != PreviousEvTt_C2) or (EvTt_S1 != PreviousEvTt_S1) or (EvTt_S2 != PreviousEvTt_S2) or (EvTt_DDL1 != PreviousEvTt_DDL1) or (EvTt_DDL2 != PreviousEvTt_DDL2)
 				{
 					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
@@ -2920,7 +2922,6 @@ F_EvTab3(OneTime*)
 				PreviousEvTab3 := EvTab3
 			
 			Case % TransA["Active triggerstring tips"]:
-				GuiControl, +Default, % IdEvAT_B2	;default button Apply
 				if (EvAT_R1R2 != PreviousEvAT_R1R2)
 				{
 					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
@@ -2950,7 +2951,6 @@ F_EvTab3(OneTime*)
 				PreviousEvTab3 := EvTab3
 			
 			Case % TransA["Static triggerstring / hotstring menus"]:
-				GuiControl, +Default, % IdEvSM_B2	;default button Apply
 				if (EvSM_R1R2 != PreviousEvSM_R1R2)
 				{
 					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
@@ -2988,6 +2988,7 @@ F_EvUpdateTab()
 	Switch EvTab3
 	{
 		Case % TransA["Basic hotstring is triggered"]:
+			GuiControl, +Default, % IdEvBH_B3	;default button Apply
 			Switch EvSM_R1R2
 			{
 				Case 1:	;enable
@@ -3037,6 +3038,7 @@ F_EvUpdateTab()
 				F_EvBH_S3()
 			}
 		Case % TransA["Menu hotstring is triggered"]:
+			GuiControl, +Default, % IdEvMH_B2	;default button Apply
 			Switch EvSM_R1R2
 			{
 				Case 1:	;enable
@@ -3055,6 +3057,7 @@ F_EvUpdateTab()
 				F_EvMH_S2()
 			}
 		Case % TransA["Undid the last hotstring"]:
+			GuiControl, +Default, % IdEvUH_B3	;default button Apply
 			F_EvUH_R1R2()
 			F_EvUH_R3R4()
 			F_EvUH_R7R8()
@@ -3062,13 +3065,16 @@ F_EvUpdateTab()
 			F_EvUH_S2()
 			F_EvUH_S3()
 		Case % TransA["Triggerstring tips"]:
+			GuiControl, +Default, % IdEvTt_B2	;default button Apply
 			F_EvTt_R1R2()
 			F_EvTt_R3R4()
 			F_EvTt_S1()
 			F_EvTt_S2()
 		Case % TransA["Active triggerstring tips"]:
+			GuiControl, +Default, % IdEvAT_B2	;default button Apply
 			F_EvSM_R1R2()
 		Case % TransA["Static triggerstring / hotstring menus"]:
+			GuiControl, +Default, % IdEvSM_B2	;default button Apply
 			F_EvAT_R1R2()
 	}
 }
@@ -8990,7 +8996,7 @@ F_CompileSubmenu()
 		Menu, AhkBitSubmenu,	Add, 64-bit,									F_Compile
 		Menu, AhkBitSubmenu,	Add,	32-bit,									F_Compile
 		Menu, CompileSubmenu, 	Add, % TransA["Standard executable (Ahk2Exe.exe)"], 	:AhkBitSubmenu
-		Menu,	AppSubmenu,	Add,	% TransA["Compile"],						:CompileSubmenu
+		Menu,	AppSubmenu,	Add,	% TransA["Convert to executable (.exe)"],		:CompileSubmenu
 	}
 	if (FileExist(v_TempOutStr . "upx.exe"))
 	{
@@ -9006,8 +9012,8 @@ F_CompileSubmenu()
 	}
 	if (!FileExist(A_AhkPath)) ;if AutoHotkey isn't installed
 	{
-		Menu, AppSubmenu,		Add,	% TransA["Compile"],						F_Compile
-		Menu, AppSubmenu, 		Disable,										% TransA["Compile"]
+		Menu, AppSubmenu,		Add,	% TransA["Convert to executable (.exe)"],		F_Compile
+		Menu, AppSubmenu, 		Disable,										% TransA["Convert to executable (.exe)"]
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9701,7 +9707,7 @@ Closing Round Bracket ) 									= Closing Round Bracket )
 Closing Square Bracket ] 								= Closing Square Bracket ]
 Colon : 												= Colon :
 Comma , 												= Comma ,
-Compile												= Compile
+Convert to executable (.exe)								= Convert to executable (.exe)
 Composition of triggerstring tips							= Composition of triggerstring tips
 Compressed executable (upx.exe)							= Compressed executable (upx.exe)
 Compressed executable (mpress.exe)							= Compressed executable (mpress.exe)
