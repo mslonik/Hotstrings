@@ -356,8 +356,10 @@ if (ini_GuiReload) and (v_Param != "l")
 	else
 	{
 		v_InputString := SubStr(v_InputString, 1, -1)	;whole string except last character
-		if (ini_TTTtEn)
+		OutputDebug, % "v_InputString:" . A_Tab . v_InputString . "`n"
+		if (ini_TTTtEn) and (v_InputString)
 		{
+			OutputDebug, Tu jestem`n
 			F_PrepareTriggerstringTipsTables2()
 			if (a_Tips.Count())
 			{
@@ -366,6 +368,8 @@ if (ini_GuiReload) and (v_Param != "l")
 					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 			}
 		}
+		if (!v_InputString)	;if v_InputString = "" = empty
+			F_DestroyTriggerstringTips(ini_TTCn)
 	}
 	return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1267,7 +1271,7 @@ F_WhereDisplayMenu(ini_TTTP)
 			MenuX := MouseX + 20
 			MenuY := MouseY - 20
 	}
-	OutputDebug, % "ini_TTTP:" . A_Tab . ini_TTTP . A_Tab . "A_CaretX:" . A_Tab . A_CaretX . A_Tab . "A_CaretY:" . A_Tab . A_CaretY . A_Tab . "MenuX:" . A_Tab . MenuX . A_Tab . "MenuY" . A_Tab . MenuY . "`n"
+	; OutputDebug, % "ini_TTTP:" . A_Tab . ini_TTTP . A_Tab . "A_CaretX:" . A_Tab . A_CaretX . A_Tab . "A_CaretY:" . A_Tab . A_CaretY . A_Tab . "MenuX:" . A_Tab . MenuX . A_Tab . "MenuY" . A_Tab . MenuY . "`n"
 	return [MenuX, MenuY]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1364,7 +1368,7 @@ F_OneCharPressed(InputHook, Char)
 	OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Tab . "v_Triggerstring:" . A_Space . v_Triggerstring . "`n"
 	ToolTip,,,, % BTWT	;Basic triggerstring was triggered
 	ToolTip,,,, % UTLH	;Undid the last hotstring
-	if (ini_TTTtEn)
+	if (ini_TTTtEn) and (v_InputString)
 	{
 		F_PrepareTriggerstringTipsTables2()	;old version: F_PrepareTriggerstringTipsTables()
 		if (a_Tips.Count())	;if tips are available display then
@@ -1376,12 +1380,13 @@ F_OneCharPressed(InputHook, Char)
 		else	;or destroy previously visible tips
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
+
 	if (f_FoundEndChar)	;check if sequence fits to any known a_Tips, helpful to process triggerstrings containing endchar, e.g. "à la"
 		{
 			Loop, % a_Tips.Count()
 				if (InStr(a_Tips[A_Index], v_InputString))
 					f_FoundTip := true
-			if (!f_FoundTip)		
+			if (!f_FoundTip)
 				v_InputString := ""
 		}	
 	Critical, Off
