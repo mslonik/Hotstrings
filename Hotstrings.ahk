@@ -150,9 +150,8 @@ Gui, 1: Default	;this line is necessary to not show too many Guis on time of loa
 v_LibHotstringCnt := 0	;dirty trick to show initially 0 instead of 0000
 GuiControl, , % IdText13,  % v_LibHotstringCnt
 GuiControl, , % IdText13b, % v_LibHotstringCnt
-F_LoadHotstringsFromLibraries()	;→ F_LoadFile() -> F_CreateHotstring
-if (ini_TTTtEn)	;Triggerstring Tips Column Trigger
-	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
+F_LoadHotstringsFromLibraries()	;→ F_LoadDefinitionsFromFile() -> F_CreateHotstring
+F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 F_GuiSearch_CreateObject()	;When all tables are full, initialize GuiSearch
 F_Searching("Reload")			;prepare content of Search tables
 F_InitiateInputHook()
@@ -267,8 +266,8 @@ Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 								F_Searching
 
 Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 								F_RefreshListOfLibraries
 Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 						F_RefreshListOfLibraryTips
-F_RefreshListOfLibraries()		
-F_RefreshListOfLibraryTips()
+F_RefreshListOfLibraries()	; this function calls F_RefreshListOfLibraryTips() as both options are interrelated
+; F_RefreshListOfLibraryTips()
 Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.		
 Menu, LibrariesSubmenu,	Add, % TransA["Visit public libraries webpage"],							F_PublicLibraries
 Menu, LibrariesSubmenu,	Add, % TransA["Open libraries folder in Explorer"], 						F_OpenLibrariesFolderInExplorer
@@ -889,8 +888,8 @@ F_DeleteLibrary()
 				if (ErrorLevel)
 					MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "Something went wrong on time of file removal."			
 				F_ValidateIniLibSections()
-				F_RefreshListOfLibraries()
-				F_RefreshListOfLibraryTips()
+				F_RefreshListOfLibraries()	; this function calls F_RefreshListOfLibraryTips() as both options are interrelated
+				; F_RefreshListOfLibraryTips()
 				F_UpdateSelHotLibDDL()	
 				a_Combined := []				;in order to refresh arrays of triggerstring tips
 				F_LoadHotstringsFromLibraries()	;in order to refresh arrays of triggerstring tips
@@ -1549,8 +1548,8 @@ F_ALibOK()
 		Gui, ALib: Destroy
 		
 		F_ValidateIniLibSections()
-		F_RefreshListOfLibraries()
-		F_RefreshListOfLibraryTips()
+		F_RefreshListOfLibraries()	; this function calls F_RefreshListOfLibraryTips() as both options are interrelated
+		; F_RefreshListOfLibraryTips()
 		F_UpdateSelHotLibDDL()
 	}
 	else
@@ -6431,8 +6430,8 @@ F_DownloadPublicLibraries()
 		F_ValidateIniLibSections()
 		F_LoadHotstringsFromLibraries()
 		F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
-		F_RefreshListOfLibraries()
-		F_RefreshListOfLibraryTips()
+		F_RefreshListOfLibraries()	; this function calls F_RefreshListOfLibraryTips() as both options are interrelated
+		; F_RefreshListOfLibraryTips()
 		F_UpdateSelHotLibDDL()
 		F_Searching("Reload")			;prepare content of Search tables
 	}
@@ -8000,7 +7999,7 @@ F_RefreshListOfLibraryTips()
 		{
 			for key, value in ini_ShowTipsLib
 			{
-				Menu, ToggleLibTrigTipsSubmenu, Add, %key%, F_ToggleTipsLibrary
+				Menu, ToggleLibTrigTipsSubmenu, Add, %key%, F_ToggleLibraryTips
 				if (ini_LoadLib[key])
 				{
 					if (value)
@@ -8020,7 +8019,7 @@ F_RefreshListOfLibraryTips()
 		{
 			for key, value in ini_ShowTipsLib
 			{
-				Menu, ToggleLibTrigTipsSubmenu, Add, %key%, F_ToggleTipsLibrary
+				Menu, ToggleLibTrigTipsSubmenu, Add, %key%, F_ToggleLibraryTips
 				if (ini_LoadLib[key])
 				{
 					if (value)
@@ -8042,7 +8041,7 @@ F_RefreshListOfLibraryTips()
 	}
 	else
 	{
-		Menu, ToggleLibTrigTipsSubmenu, 	Add, % TransA["No libraries have been found!"], 		F_ToggleTipsLibrary
+		Menu, ToggleLibTrigTipsSubmenu, 	Add, % TransA["No libraries have been found!"], 		F_ToggleLibraryTips
 		Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable triggerstring tips"], 	:ToggleLibTrigTipsSubmenu
 	}
 	Menu, ToggleLibTrigTipsSubmenu, UseErrorLevel, OFF	;This setting is global, meaning it affects all menus, not just MenuName.
@@ -8061,7 +8060,7 @@ F_RefreshListOfLibraries()
 		{
 			for key, value in ini_LoadLib
 			{
-				Menu, EnDisLib, Add, %key%, F_EnDisLib
+				Menu, EnDisLib, Add, %key%, F_ToggleLibrary
 				if (value)
 					Menu, EnDisLib, Check, %key%
 				else
@@ -8076,7 +8075,7 @@ F_RefreshListOfLibraries()
 		{
 			for key, value in ini_LoadLib
 			{
-				Menu, EnDisLib, Add, %key%, F_EnDisLib
+				Menu, EnDisLib, Add, %key%, F_ToggleLibrary
 				if (value)
 					Menu, EnDisLib, Check, %key%
 				else
@@ -8090,10 +8089,11 @@ F_RefreshListOfLibraries()
 	}
 	else
 	{
-		Menu, EnDisLib, 		Add, % TransA["No libraries have been found!"], 	F_EnDisLib
+		Menu, EnDisLib, 		Add, % TransA["No libraries have been found!"], 	F_ToggleLibrary
 		Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"],		:EnDisLib
 	}
 	Menu, EnDisLib, UseErrorLevel, OFF	;This setting is global, meaning it affects all menus, not just MenuName.
+	F_RefreshListOfLibraryTips()	;if library is enabled again, enable switching of library tip (another position in menu)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeleteHotstring()
@@ -9497,13 +9497,17 @@ F_LoadHotstringsFromLibraries()
 	for key, value in ini_LoadLib
 	{
 		if ((key != "PriorityLibrary.csv") and (value))
-			F_LoadFile(key)
+		{
+			F_LoadDefinitionsFromFile(key)
+			F_LoadTriggTipsFromFile(key)
+		}
 		if ((key == "PriorityLibrary.csv") and (value))
 			PriorityFlag := true
 	}
 	if (PriorityFlag)
 	{
-		F_LoadFile("PriorityLibrary.csv")
+		F_LoadDefinitionsFromFile("PriorityLibrary.csv")
+		F_LoadTriggTipsFromFile("PriorityLibrary.csv")
 		PriorityFlag := false
 	}
 }
@@ -9540,24 +9544,30 @@ F_UpdateSelHotLibDDL()
 	GuiControl, , % IdDDL2b, % "|" . FinalString	;To replace (overwrite) the list instead, include a pipe as the first character
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
-F_ToggleTipsLibrary()
+F_ToggleLibraryTips()
 {
 	global ;assume-global mode of operation
 	local v_LibraryFlag := 0 
 	
-	Menu, ToggleLibTrigTipsSubmenu, ToggleCheck, %A_ThisMenuitem%
-	IniRead, v_LibraryFlag, % ini_HADConfig, ShowTipsLibraries, %A_ThisMenuitem%
+	Menu, ToggleLibTrigTipsSubmenu, ToggleCheck, %A_ThisMenuItem%
+	IniRead, v_LibraryFlag, % ini_HADConfig, ShowTipsLibraries, %A_ThisMenuItem%
 	v_LibraryFlag := !(v_LibraryFlag)
-	IniWrite, %v_LibraryFlag%, % ini_HADConfig, ShowTipsLibraries, %A_ThisMenuitem%
+	IniWrite, %v_LibraryFlag%, % ini_HADConfig, ShowTipsLibraries, %A_ThisMenuItem%
 	F_ValidateIniLibSections()
 
-	if (v_LibraryFlag)	;tu jestem
-		F_LoadTriggTipsFromFile(A_ThisMenuitem)	;future: grey-out if d(t, o, h) isn't loaded: not enable loading in such case
+	if (v_LibraryFlag)
+	{
+		F_LoadTriggTipsFromFile(A_ThisMenuItem)	
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Triggerstring tips have been loaded from the following library file to memory:"]
+			. "`n`n" . A_ThisMenuItem
+	}
 	else
-		F_UnloadTriggTipsFromMemory(A_ThisMenuitem)	;tu jestem
+	{
+		F_UnloadTriggTipsFromMemory(A_ThisMenuItem)
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Triggerstring tips related to the following library file have been unloaded from memory:"]
+			. "`n`n" . A_ThisMenuItem
+	}
 
-	; a_Combined := []
-	; F_LoadHotstringsFromLibraries()
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -9567,7 +9577,7 @@ F_LoadTriggTipsFromFile(LibraryFilename)
 	local	key := 0,	value := "", TheWholeFile := ""	;LibraryFilename containts extenstion
 ,			BegCom := false, ExternalIndex := 0
 ,			tmp1 := "", tmp2 := "", tmp3 := "", tmp4 := ""
-,			FlagLoadTriggerTips
+,			LibraryName := SubStr(LibraryFilename, 1, -4)	;LibraryFilename without extension
 
 	FileRead, TheWholeFile, % ini_HADL . "\" . LibraryFilename
 	Loop, Parse, TheWholeFile, `n, `r%A_Space%%A_Tab%
@@ -9589,7 +9599,6 @@ F_LoadTriggTipsFromFile(LibraryFilename)
 		if (!A_LoopField)	;ignore empty lines
 			Continue
 		
-		; F_CreateHotstring(A_LoopField, nameoffile)
           ExternalIndex++
 		Loop, Parse, A_LoopField, ‖
 		{
@@ -9613,15 +9622,7 @@ F_LoadTriggTipsFromFile(LibraryFilename)
 		}
 		if (ini_TTTtEn)	;Triggerstring Tips Column Trigger
 			a_Combined.Push(tmp1 . "|" . tmp2 . "|" . tmp3 . "|" . tmp4)
-		a_Library.Push(LibraryFilename) ; used by function Search
-		; ++v_TotalHotstringCnt
-		; if (A_DefaultGui = "LoadFile")
-		; {
-		; 	v_Progress := Round((A_Index / v_TotalLines) * 100)
-		; 	GuiControl,, % IdLoadFile_T2, % TransA["Loaded"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
-		; 				. A_Space . "(" . v_Progress . A_Space . "%" . ")"
-		; 	GuiControl,, % IdLoadFile_P1, % v_Progress
-		; }
+		a_Library.Push(LibraryName) ; used by function Search
 	}	
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -9632,15 +9633,18 @@ F_UnloadTriggTipsFromMemory(LibraryFilename)
 	
 	for key, value in a_Library
 	{
-		if (value == LibraryName)
+		if (value = LibraryName)
 		{
-			a_Library.RemoveAt(key)
-			a_Triggerstring.RemoveAt(key)
-			a_TriggerOptions.RemoveAt(key)
-			a_EnableDisable.RemoveAt(key)
-			a_OutputFunction.RemoveAt(key)
-			a_Hotstring.RemoveAt(key)
-			a_Comment.RemoveAt(key)
+			while (a_Library[key] = LibraryName)
+				{
+					a_Library.RemoveAt(key)
+					a_Triggerstring.RemoveAt(key)
+					a_TriggerOptions.RemoveAt(key)
+					a_EnableDisable.RemoveAt(key)
+					a_OutputFunction.RemoveAt(key)
+					a_Hotstring.RemoveAt(key)
+					a_Comment.RemoveAt(key)
+				}
 		}
 	}
 	key := 0, value := ""	;recreate a_Combined
@@ -9649,20 +9653,20 @@ F_UnloadTriggTipsFromMemory(LibraryFilename)
 		a_Combined.Push(a_Triggerstring[key] . "|" . a_TriggerOptions[key] . "|" . a_EnableDisable[key] . "|" . a_Hotstring[key])
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
-F_EnDisLib()	;Load / Unload d(t, o, h) from memory (a_* tables)
+F_ToggleLibrary()	;load / unload d(t, o, h)
 {
 	global ;assume-global mode
-	local v_LibraryFlag := 0, name := "", key := 0, value := "", FoundAmongKeys := false, TriggerString := ""
+	local 	v_LibraryFlag := 0, name := SubStr(A_ThisMenuItem, 1, -4)	;without file extension
+,			key := 0, value := "", FoundAmongKeys := false, TriggerString := ""
 	
 	Menu, EnDisLib, ToggleCheck, %A_ThisMenuItem%	;future: don't ready .ini file, instead use appropriate table
 	IniRead, v_LibraryFlag,	% ini_HADConfig, LoadLibraries, %A_ThisMenuitem%
 	v_LibraryFlag := !(v_LibraryFlag)
 	Iniwrite, %v_LibraryFlag%,	% ini_HADConfig, LoadLibraries, %A_ThisMenuItem%
-	name := SubStr(A_ThisMenuItem, 1, -4)	;removing of file extension
 	
 	if (v_LibraryFlag)
 	{
-		for key, value in a_Library
+/* 		for key, value in a_Library
 		{
 			if (value = name)
 			{
@@ -9689,24 +9693,28 @@ F_EnDisLib()	;Load / Unload d(t, o, h) from memory (a_* tables)
 			}
 		}
 		if (!FoundAmongKeys)
-			F_LoadFile(A_ThisMenuItem)	; load definitions from library file (.csv) into memory and to tables: -> F_CreateHotstring
+ */			
+ 		F_LoadDefinitionsFromFile(A_ThisMenuItem)	; load definitions from library file (.csv) into memory and to tables: -> F_CreateHotstring
+		F_LoadTriggTipsFromFile(A_ThisMenuItem)
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The (triggerstring, hotstring) definitions have been uploaded from library file"] . ":"
 			. "`n`n" . A_ThisMenuItem
 	}
 	else
 	{
 		F_UnloadHotstringsFromFile(A_ThisMenuItem)
+		F_UnloadTriggTipsFromMemory(A_ThisMenuItem)
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory"]
 			. ":" . "`n`n" . A_ThisMenuItem
 	}
 	F_ValidateIniLibSections()	; Load from / to Config.ini from Libraries folder
 	F_UpdateSelHotLibDDL()
 	F_Clear()					;clear all fields of HS3 / HS4 GUI
+	F_RefreshListOfLibraryTips()
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_UnloadHotstringsFromFile(nameoffile)	
 {	
-	global ;assume-global mode
+	global ;assume-global mode of operation
 	local	v_TheWholeFile := "",	Options := "",	TriggerString := "", key := 0, value := "", FilenameWitoutExt := ""
 	
 	FilenameWitoutExt := SubStr(nameoffile, 1, -4)
@@ -10152,6 +10160,8 @@ Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
 Triggerstring sound duration [ms]							= Triggerstring sound duration [ms]
 Triggerstring sound frequency range						= Triggerstring sound frequency range
 Triggerstring tips 										= Triggerstring tips
+Triggerstring tips have been loaded from the following library file to memory: = Triggerstring tips have been loaded from the following library file to memory:
+Triggerstring tips related to the following library file have been unloaded from memory: = Triggerstring tips related to the following library file have been unloaded from memory:
 Triggerstring tips styling								= Triggerstring tips styling
 Triggerstring tips and hotstring menu styling				= Triggerstring tips and hotstring menu styling
 Triggerstring tooltip timeout in [ms]						= Triggerstring tooltip timeout in [ms]
@@ -10272,25 +10282,30 @@ F_ParseLanguageFile(argument)
 	}
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
-F_LoadFile(nameoffile) ; load definitions from library file (.csv) into memory and to tables: -> F_CreateHotstring
+F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library file (.csv) into memory and to tables: -> F_CreateHotstring
 {
 	global ;assume-global mode
-	local name := "", FlagLoadTriggerTips := false, key := "", value := "", v_TheWholeFile := "", v_TotalLines := 0
-							,HS3GuiWinX   := 0, 	HS3GuiWinY 	:= 0, 		HS3GuiWinW 	:= 0, 		HS3GuiWinH 	:= 0, 	LoadFileGuiWinW := 0, 	LoadFileGuiWinH := 0
-		,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY 	:= 0, 		v_OutVarTempW 	:= 0, 		v_OutVarTempH 	:= 0
-							,v_xNext 	    := 0, 	v_yNext 		:= 0, 		v_wNext 		:= 0, 		v_hNext 		:= 0
-		,v_Progress := 0
-		,IdLoadFile_T1 := 0, IdLoadFile_P1 := 0, IdLoadFile_T2 := 0, BegCom := false
-		,tmp1 := "", tmp2 := "", tmp3 := "", tmp4 := ""	;temporary variables applied to set-up a_Combined
-          ,ExternalIndex := 0
+	local 	name := SubStr(nameoffile, 1, -4) ;filename without extension
+; , 			FlagLoadTriggerTips := false, key := "", value := ""
+, 			TheWholeFile := ""
+			; , v_TotalLines := 0
+							; ,HS3GuiWinX   := 0, 	HS3GuiWinY 	:= 0, 		HS3GuiWinW 	:= 0, 		HS3GuiWinH 	:= 0, 	LoadFileGuiWinW := 0, 	LoadFileGuiWinH := 0
+		; ,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY 	:= 0, 		v_OutVarTempW 	:= 0, 		v_OutVarTempH 	:= 0
+							; ,v_xNext 	    := 0, 	v_yNext 		:= 0, 		v_wNext 		:= 0, 		v_hNext 		:= 0
+		; ,v_Progress := 0
+		; ,IdLoadFile_T1 := 0, IdLoadFile_P1 := 0, IdLoadFile_T2 := 0, 
+,			BegCom := false
+		; ,tmp1 := "", tmp2 := "", tmp3 := "", tmp4 := ""	;temporary variables applied to set-up a_Combined
+,			ExternalIndex := 0
 	
-	for key, value in ini_ShowTipsLib
+/* 	for key, value in ini_ShowTipsLib
 		if ((key == nameoffile) and (value))
 			FlagLoadTriggerTips := true
-	
+ */	
 	F_CheckFileEncoding(ini_HADL . "\" . nameoffile)	;additional check if library files encoding is equal to UTF-8 with BOM 
-	FileRead, v_TheWholeFile, % ini_HADL . "\" . nameoffile
-	F_WhichGui()
+	FileRead, TheWholeFile, % ini_HADL . "\" . nameoffile
+
+/* 	F_WhichGui()
 	if (A_DefaultGui = "HS3" or A_DefaultGui = "HS4")
 	{
 		Switch A_DefaultGui
@@ -10298,7 +10313,7 @@ F_LoadFile(nameoffile) ; load definitions from library file (.csv) into memory a
 			Case "HS3": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd
 			Case "HS4": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS4GuiHwnd 
 		}
-		Loop, Parse, v_TheWholeFile, `n, `r	;counter of total lines in the file
+		Loop, Parse, TheWholeFile, `n, `r	;counter of total lines in the file
 			if (A_LoopField)
 				v_TotalLines++
 		
@@ -10331,9 +10346,9 @@ F_LoadFile(nameoffile) ; load definitions from library file (.csv) into memory a
 		DetectHiddenWindows, Off
 		Gui, LoadFile: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - LoadFileGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - LoadFileGuiWinH) / 2 . A_Space . "AutoSize"
 	}
-	
-	name := SubStr(nameoffile, 1, -4) ;filename without extension
-	Loop, Parse, v_TheWholeFile, `n, `r%A_Space%%A_Tab%
+ */	
+
+	Loop, Parse, TheWholeFile, `n, `r%A_Space%%A_Tab%
 	{
 		if (SubStr(A_LoopField, 1, 2) = "/*")	;ignore comments
 		{
@@ -10358,38 +10373,35 @@ F_LoadFile(nameoffile) ; load definitions from library file (.csv) into memory a
 		{
 			Switch A_Index
 			{
-				Case 1:	
-				     a_TriggerOptions.Push(A_LoopField)
-				     tmp2 := A_LoopField
-				Case 2:	
-				     a_Triggerstring.Push(A_LoopField)
-				     if (FlagLoadTriggerTips)
-				     	tmp1 := A_LoopField
+				Case 1:	a_TriggerOptions.Push(A_LoopField)
+				     ; tmp2 := A_LoopField
+				Case 2:	a_Triggerstring.Push(A_LoopField)
+				     ; if (FlagLoadTriggerTips)
+				     	; tmp1 := A_LoopField
 				Case 3:	a_OutputFunction.Push(A_LoopField)
-				Case 4:	
-				     a_EnableDisable.Push(A_LoopField)
-				     tmp3 := A_LoopField
-				Case 5:	
-				     a_Hotstring.Push(A_LoopField)
-				     tmp4 := A_LoopField
+				Case 4:	a_EnableDisable.Push(A_LoopField)
+				     ; tmp3 := A_LoopField
+				Case 5:	a_Hotstring.Push(A_LoopField)
+				     ; tmp4 := A_LoopField
 				Case 6:	a_Comment.Push(A_LoopField)
 			}
 		}
-		if (ini_TTTtEn)	;Triggerstring Tips Column Trigger
-			a_Combined.Push(tmp1 . "|" . tmp2 . "|" . tmp3 . "|" . tmp4)
+		; if (ini_TTTtEn)	;Triggerstring Tips Column Trigger
+			; a_Combined.Push(tmp1 . "|" . tmp2 . "|" . tmp3 . "|" . tmp4)
 		a_Library.Push(name) ; function Search
 		++v_TotalHotstringCnt
-		if (A_DefaultGui = "LoadFile")
+/* 		if (A_DefaultGui = "LoadFile")
 		{
 			v_Progress := Round((A_Index / v_TotalLines) * 100)
 			GuiControl,, % IdLoadFile_T2, % TransA["Loaded"] . A_Space . A_Index . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"]
 						. A_Space . "(" . v_Progress . A_Space . "%" . ")"
 			GuiControl,, % IdLoadFile_P1, % v_Progress
-		}
+		} 
+*/
 	}	
 	GuiControl, , % IdText12,  % v_TotalHotstringCnt ; Text: Puts new contents into the control.
 	GuiControl, , % IdText12b, % v_TotalHotstringCnt ; Text: Puts new contents into the control.
-	Gui, LoadFile: Destroy
+	; Gui, LoadFile: Destroy
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_GuiHS4_CreateObject()
@@ -12483,10 +12495,10 @@ F_ImportLibrary()
 	else	
 	{
 		F_ValidateIniLibSections()
-		F_RefreshListOfLibraries()
-		F_RefreshListOfLibraryTips()
+		F_RefreshListOfLibraries()	; this function calls F_RefreshListOfLibraryTips() as both options are interrelated
 		F_UpdateSelHotLibDDL()
-		F_LoadFile(OutNameNoExt . ".csv")
+		F_LoadDefinitionsFromFile(OutNameNoExt . ".csv")
+		F_LoadTriggTipsFromFile(OutNameNoExt . ".csv")
 		F_Searching("Reload")
 	}
 }
