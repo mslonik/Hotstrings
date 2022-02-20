@@ -359,7 +359,6 @@ if (ini_GuiReload) and (v_Param != "l")
 		OutputDebug, % "v_InputString:" . A_Tab . v_InputString . "`n"
 		if (ini_TTTtEn) and (v_InputString)
 		{
-			OutputDebug, Tu jestem`n
 			F_PrepareTriggerstringTipsTables2()
 			if (a_Tips.Count())
 			{
@@ -9608,24 +9607,23 @@ F_LoadTriggTipsFromFile(LibraryFilename)
 		{
 			Switch A_Index
 			{
-				Case 1:	
-				     a_TriggerOptions.Push(A_LoopField)
-				     tmp2 := A_LoopField
-				Case 2:	
-				     a_Triggerstring.Push(A_LoopField)
-				     tmp1 := A_LoopField
-				Case 3:	a_OutputFunction.Push(A_LoopField)
-				Case 4:	
-				     a_EnableDisable.Push(A_LoopField)
-				     tmp3 := A_LoopField
-				Case 5:	
-				     a_Hotstring.Push(A_LoopField)
-				     tmp4 := A_LoopField
-				Case 6:	a_Comment.Push(A_LoopField)
+				Case 1:	tmp2 := A_LoopField
+				     ; a_TriggerOptions.Push(A_LoopField)
+				     
+				Case 2:	tmp1 := A_LoopField
+				     ; a_Triggerstring.Push(A_LoopField)
+				     
+				; Case 3:	a_OutputFunction.Push(A_LoopField)
+				Case 4:	tmp3 := A_LoopField
+				     ; a_EnableDisable.Push(A_LoopField)
+				     
+				Case 5:	tmp4 := A_LoopField
+				     ; a_Hotstring.Push(A_LoopField)
+				; Case 6:	a_Comment.Push(A_LoopField)
 			}
 		}
-		if (ini_TTTtEn)	;Triggerstring Tips Column Trigger
-			a_Combined.Push(tmp1 . "|" . tmp2 . "|" . tmp3 . "|" . tmp4)
+		; if (ini_TTTtEn)	;Triggerstring Tips Column Trigger
+		a_Combined.Push(tmp1 . "|" . tmp2 . "|" . tmp3 . "|" . tmp4)
 	}	
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -10313,15 +10311,10 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 			Switch A_Index
 			{
 				Case 1:	a_TriggerOptions.Push(A_LoopField)
-				     ; tmp2 := A_LoopField
 				Case 2:	a_Triggerstring.Push(A_LoopField)
-				     ; if (FlagLoadTriggerTips)
-				     	; tmp1 := A_LoopField
 				Case 3:	a_OutputFunction.Push(A_LoopField)
 				Case 4:	a_EnableDisable.Push(A_LoopField)
-				     ; tmp3 := A_LoopField
 				Case 5:	a_Hotstring.Push(A_LoopField)
-				     ; tmp4 := A_LoopField
 				Case 6:	a_Comment.Push(A_LoopField)
 			}
 		}
