@@ -16,9 +16,9 @@ SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
 FileEncoding, UTF-16			; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN
 ; Warning! UTF-16 is not recognized by Notepad++ editor (2021), which recognizes correctly UCS-2 (defined by the International Standard ISO/IEC 10646). 
 ; BMP = Basic Multilingual Plane.
-CoordMode, Caret,	Window		; Only Window makes sense for functions prepared in this script to handle position of on screen GUIs. 
-CoordMode, ToolTip,	Window		; Only Window makes sense for functions prepared in this script to handle position of on screen GUIs.
-CoordMode, Mouse,	Window		; Only Window makes sense for functions prepared in this script to handle position of on screen GUIs.
+CoordMode, Caret,	Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs. 
+CoordMode, ToolTip,	Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs.
+CoordMode, Mouse,	Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs.
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
