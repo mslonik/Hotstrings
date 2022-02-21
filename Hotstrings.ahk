@@ -346,34 +346,6 @@ if (ini_GuiReload) and (v_Param != "l")
 		return
 #if
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-/* ~BackSpace::	;new thread starts here 
-	; SendLevel, 0	;in order to not catch what user pressed
-	OutputDebug, % "Here is BS" . "`n"
-	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
-	{
-		if (ini_MHSEn)
-			SoundBeep, % ini_MHSF, % ini_MHSD
-	}
-	else
-	{
-		v_InputString := SubStr(v_InputString, 1, -1)	;whole string except last character
-		OutputDebug, % "v_InputString after BS:" . A_Tab . v_InputString . "`n"
-		if (ini_TTTtEn) and (v_InputString)
-		{
-			F_PrepareTriggerstringTipsTables2()
-			if (a_Tips.Count())
-			{
-				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
-				if ((ini_TTTtEn) and (ini_TTTD > 0))
-					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-			}
-		}
-		if (!v_InputString)	;if v_InputString = "" = empty
-			F_DestroyTriggerstringTips(ini_TTCn)
-	}
-	return 
-*/
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinActive("ahk_id" HS3SearchHwnd)
 	~^f::
 	~^s::
@@ -1407,8 +1379,7 @@ F_InitiateInputHook()
 F_BackspaceProcessing()
 {
 	global	;assume-global mode of operation
-	; Critical, On	;I'm not sure if this is necessary at all
-	; SendLevel, 0	;in order to not catch what user pressed
+	Critical, On	;I'm not sure if this is necessary at all
 	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 	{
 		if (ini_MHSEn)
@@ -1421,7 +1392,7 @@ F_BackspaceProcessing()
 	else
 	{
 		v_InputString := SubStr(v_InputString, 1, -1)	;whole string except last character
-		OutputDebug, % "v_InputString after BS:" . A_Tab . v_InputString . "`n"
+		OutputDebug, % "v_InputString after BS:" . A_Tab . v_InputString . "IsCritical:" . A_Tab . A_IsCritical . "`n"
 		if (ini_TTTtEn) and (v_InputString)
 		{
 			F_PrepareTriggerstringTipsTables2()
@@ -1435,7 +1406,7 @@ F_BackspaceProcessing()
 		if (!v_InputString)	;if v_InputString = "" = empty
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
-	; Critical, Off	;I'm not sure if this is necessary at all
+	Critical, Off	;I'm not sure if this is necessary at all
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GUIinit()
