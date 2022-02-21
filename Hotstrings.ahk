@@ -346,8 +346,9 @@ if (ini_GuiReload) and (v_Param != "l")
 		return
 #if
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-~BackSpace::	;new thread starts here 
-	SendLevel, 0	;in order to not catch what user pressed
+/* ~BackSpace::	;new thread starts here 
+	; SendLevel, 0	;in order to not catch what user pressed
+	OutputDebug, % "Here is BS" . "`n"
 	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 	{
 		if (ini_MHSEn)
@@ -356,7 +357,7 @@ if (ini_GuiReload) and (v_Param != "l")
 	else
 	{
 		v_InputString := SubStr(v_InputString, 1, -1)	;whole string except last character
-		OutputDebug, % "v_InputString:" . A_Tab . v_InputString . "`n"
+		OutputDebug, % "v_InputString after BS:" . A_Tab . v_InputString . "`n"
 		if (ini_TTTtEn) and (v_InputString)
 		{
 			F_PrepareTriggerstringTipsTables2()
@@ -370,7 +371,8 @@ if (ini_GuiReload) and (v_Param != "l")
 		if (!v_InputString)	;if v_InputString = "" = empty
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
-	return
+	return 
+*/
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinActive("ahk_id" HS3SearchHwnd)
 	~^f::
@@ -1397,7 +1399,43 @@ F_InitiateInputHook()
 	v_InputString := "", v_Triggerstring := "", v_UndoHotstring := ""	;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
 ,	v_InputH 			:= InputHook("V I1")	;I1 is necessary to block SendInput commands output
 ,	v_InputH.OnChar 	:= Func("F_OneCharPressed")
+,	v_InputH.OnKeyUp 	:= Func("F_BackspaceProcessing")
+	v_InputH.KeyOpt("{Backspace}", "N")
 	v_InputH.Start()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_BackspaceProcessing()
+{
+	global	;assume-global mode of operation
+	; Critical, On	;I'm not sure if this is necessary at all
+	; SendLevel, 0	;in order to not catch what user pressed
+	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
+	{
+		if (ini_MHSEn)
+		{
+			SoundBeep, % ini_MHSF, % ini_MHSD
+			; Critical, Off	;I'm not sure if this is necessary at all
+			return		
+		}
+	}
+	else
+	{
+		v_InputString := SubStr(v_InputString, 1, -1)	;whole string except last character
+		OutputDebug, % "v_InputString after BS:" . A_Tab . v_InputString . "`n"
+		if (ini_TTTtEn) and (v_InputString)
+		{
+			F_PrepareTriggerstringTipsTables2()
+			if (a_Tips.Count())
+			{
+				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
+				if ((ini_TTTtEn) and (ini_TTTD > 0))
+					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+			}
+		}
+		if (!v_InputString)	;if v_InputString = "" = empty
+			F_DestroyTriggerstringTips(ini_TTCn)
+	}
+	; Critical, Off	;I'm not sure if this is necessary at all
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GUIinit()
@@ -6548,7 +6586,7 @@ F_Undo()	;turning off of * option requires special conditions.
 	local	TriggerOpt := "", HowManyBackSpaces := 0, HowManyBackSpaces2 := 0
 			,ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey, OrigTriggerstring := ""
 	
-	if (ini_UHTtEn and v_Triggerstring and (ThisHotkey != PriorHotkey))
+	if (v_Triggerstring and (ThisHotkey != PriorHotkey))
 	{	
 		if (!(InStr(v_Options, "*")) and !(InStr(v_Options, "O")))
 			Send, {BackSpace}
@@ -6600,7 +6638,7 @@ F_Undo()	;turning off of * option requires special conditions.
 	else
 	{
 		F_DestroyTriggerstringTips(ini_TTCn)
-		If InStr(ThisHotkey, "^z")
+		if InStr(ThisHotkey, "^z")
 			SendInput, ^z
 		else if InStr(ThisHotkey, "!BackSpace")
 			SendInput, !{BackSpace}
@@ -10262,12 +10300,12 @@ F_ParseLanguageFile(argument)
 			if !(tick)
 			{
 				key := A_LoopField
-				tick := true
+,				tick := true
 			}
 			else
 			{
 				val := A_LoopField
-				tick := false
+,				tick := false
 			}			
 			TransA[key] := val
 		}
