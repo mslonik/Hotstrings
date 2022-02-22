@@ -1381,6 +1381,8 @@ F_InputHookOnEnd(ih)	;for debugging purposes
 {
 	global	;assume-global mode of operation
 	local 	KeyName := ""
+
+	KeyHistory
 	KeyName := ih.EndKey
 	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "OnEnd" . "|" . KeyName 
 		. "|" . "GetKeyName:" 	. "|" . GetKeyName(KeyName) 
