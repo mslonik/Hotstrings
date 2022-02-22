@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -1325,7 +1325,7 @@ F_OneCharPressed(InputHook, Char)
 	local	f_FoundEndChar := false, f_FoundTip := false, EndCharCounter := 0
 
 	Critical, On
-	; OutputDebug, % "Char:" . A_Tab . Char . "`n"
+	OutputDebug, % "Char:" . A_Tab . Char . "`n"
 	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))	;Menu Hotstring Sound Enable
 	{
 		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
@@ -1372,14 +1372,23 @@ F_InitiateInputHook()
 ,	v_InputH 			:= InputHook("V I1")	;I1 is necessary to block SendInput commands output
 ,	v_InputH.OnChar 	:= Func("F_OneCharPressed")
 ,	v_InputH.OnKeyUp 	:= Func("F_BackspaceProcessing")
-,	v_InputH.OnEnd	:= Func("F_InputHookOnEnd")
+,	v_InputH.OnEnd		:= Func("F_InputHookOnEnd")
 	v_InputH.KeyOpt("{Backspace}", "N")
 	v_InputH.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_InputHookOnEnd()
+F_InputHookOnEnd(ih)	;for debugging purposes
 {
-	MsgBox,, Input hook has unexpectedly finished its operation., Input hook has unexpectedly finished its operation.
+	global	;assume-global mode of operation
+	local 	KeyName := ""
+	KeyName := ih.EndKey
+	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "OnEnd" . "|" . KeyName 
+		. "|" . "GetKeyName:" 	. "|" . GetKeyName(KeyName) 
+		. "|" . "GetKeyVK:" 	. "|" . GetKeyVK(KeyName)
+		. "|" . "GetKeySC:" 	. "|" . GetKeySC(KeyName)
+		. "|" . "`n", % v_LogFileName
+	MsgBox,, Input hook has unexpectedly finished its operation, % "Input hook has unexpectedly finished its operation" . "`n`n" 
+		. "KeyName:" . KeyName
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_BackspaceProcessing()
