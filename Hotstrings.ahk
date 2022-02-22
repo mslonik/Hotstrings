@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -1372,14 +1372,20 @@ F_InitiateInputHook()
 ,	v_InputH 			:= InputHook("V I1")	;I1 is necessary to block SendInput commands output
 ,	v_InputH.OnChar 	:= Func("F_OneCharPressed")
 ,	v_InputH.OnKeyUp 	:= Func("F_BackspaceProcessing")
+,	v_InputH.OnEnd	:= Func("F_InputHookOnEnd")
 	v_InputH.KeyOpt("{Backspace}", "N")
 	v_InputH.Start()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_InputHookOnEnd()
+{
+	MsgBox,, Input hook has unexpectedly finished its operation., Input hook has unexpectedly finished its operation.
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_BackspaceProcessing()
 {
 	global	;assume-global mode of operation
-	Critical, On	;I'm not sure if this is necessary at all
+	;Critical, On	;I'm not sure if this is necessary at all
 	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 	{
 		if (ini_MHSEn)
@@ -1406,7 +1412,7 @@ F_BackspaceProcessing()
 		if (!v_InputString)	;if v_InputString = "" = empty
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
-	Critical, Off	;I'm not sure if this is necessary at all
+	;Critical, Off	;I'm not sure if this is necessary at all
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GUIinit()
