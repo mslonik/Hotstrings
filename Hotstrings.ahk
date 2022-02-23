@@ -1384,16 +1384,18 @@ F_InputHookOnEnd(ih)	;for debugging purposes
 
 	KeyHistory
 	KeyName := ih.EndKey
-	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "OnEnd" . "|" . KeyName 
-		. "|" . "GetKeyName:" 	. "|" . GetKeyName(KeyName) 
-		. "|" . "GetKeyVK:" 	. "|" . GetKeyVK(KeyName)
-		. "|" . "GetKeySC:" 	. "|" . GetKeySC(KeyName)
-		. "|" . "`n", % v_LogFileName
 	if (ini_THLog)	
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Input hook has unexpectedly finished its operation" . "`n`n" 
-			. "KeyName:" . KeyName . "`n"
-			. "More on that in log file:" . "`n"
-			. v_LogFileName
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "OnEnd" . "|" . KeyName 
+			. "|" . "GetKeyName:" 	. "|" . GetKeyName(KeyName) 
+			. "|" . "GetKeyVK:" 	. "|" . GetKeyVK(KeyName)
+			. "|" . "GetKeySC:" 	. "|" . GetKeySC(KeyName)
+			. "|" . "`n", % v_LogFileName
+	; MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Input hook has unexpectedly finished its operation" . "`n`n" 
+	; 	. "KeyName:" . KeyName . "`n"
+	; 	. "More on that in log file:" . "`n"
+	; 	. v_LogFileName
+	if (!KeyName)	;if KeyName = 0
+		ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_BackspaceProcessing()
