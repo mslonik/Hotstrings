@@ -490,7 +490,7 @@ if (ini_GuiReload) and (v_Param != "l")
 	Esc::
 		SendLevel, 0	;in order to not catch what user pressed
 		Gui, HMenuCli: Destroy
-		Send, % v_Triggerstring	
+		SendRaw, % v_Triggerstring	;SendRaw in order to correctly produce escape sequences from v_Triggerstring ({}^!+#)
 		v_InputString 			:= ""	
 ,		v_InputH.VisibleText 	:= true
 		return
@@ -515,8 +515,8 @@ if (ini_GuiReload) and (v_Param != "l")
 	Esc::
 		SendLevel, 0	;in order to not catch what user pressed
 		Gui, HMenuAHK: Destroy
-		Send, % v_Triggerstring	; Send, % v_Triggerstring . v_EndChar
-		v_InputString 			:= ""	
+		SendRaw, % v_Triggerstring	;SendRaw in order to correctly produce escape sequences from v_Triggerstring ({}^!+#)
+		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
 	return
 #If
@@ -1382,7 +1382,7 @@ F_InputHookOnEnd(ih)	;for debugging purposes
 	global	;assume-global mode of operation
 	local 	KeyName := ""
 
-	KeyHistory
+	; KeyHistory
 	KeyName := ih.EndKey
 	if (ini_THLog)	
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "OnEnd" . "|" . KeyName 
@@ -1394,8 +1394,8 @@ F_InputHookOnEnd(ih)	;for debugging purposes
 	; 	. "KeyName:" . KeyName . "`n"
 	; 	. "More on that in log file:" . "`n"
 	; 	. v_LogFileName
-	if (!KeyName)	;if KeyName = 0
-		ih.Start()
+	if (!KeyName)		;if KeyName = 0
+		ih.Start()	;restart after error
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_BackspaceProcessing()
