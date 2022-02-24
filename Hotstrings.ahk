@@ -47,6 +47,7 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		HS3GuiHwnd 			:= 0 
 ,		HS3SearchHwnd			:= 0
 ,		HS4GuiHwnd 			:= 0 
+,		MoveLibsHwnd			:= 0
 ,		TDemoHwnd 			:= 0 
 ,		HDemoHwnd 			:= 0 ;This is a trick to initialize global variables in order to not get warning (#Warn) message
 ,		HotstringDelay			:= 0
@@ -347,15 +348,19 @@ if (ini_GuiReload) and (v_Param != "l")
 #if
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinActive("ahk_id" HS3SearchHwnd)
-	~^f::
-	~^s::
-	~F3::
+	^f::
+	^s::
+	F3::
 		HS3SearchGuiEscape()
 		return	;end of this thread
+	F8:: ;new thread starts here
+		Gui, HS3Search: +Disabled
+		F_MoveList()
+		return
 #if
 
 #if WinActive("ahk_id" HotstringDelay)
-	~F7::
+	F7::
 		HSDelGuiClose()	;Gui event!
 		HSDelGuiEscape()	;Gui event!
 		return
@@ -427,6 +432,12 @@ if (ini_GuiReload) and (v_Param != "l")
 		return
 #if
 
+#if WinActive("ahk_id" MoveLibsHwnd)
+	F8:: 
+		F_Move()
+	return	
+#if
+
 ~Alt::		;if commented out, only for debugging reasons
 ~MButton::
 ~RButton::
@@ -460,15 +471,6 @@ if (ini_GuiReload) and (v_Param != "l")
 	v_InputString := ""
 	;OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString
 	return
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#if WinActive("ahk_id" HS3SearchHwnd)
-	F8:: ;new thread starts here
-		Gui, HS3Search: Default
-		Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
-		F_MoveList()
-		return
-#if
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinExist("ahk_id" HMenuCliHwnd)
 	Tab::
@@ -1756,7 +1758,11 @@ HS3SearchGuiEscape() ; Gui event!
 	global	;assume-global mode
 	;F_WhichGui()	;sets A_DefaultGui to one of the current windows
 	if (WinExist("ahk_id" HS3GuiHwnd))	;activates one of the main Windows
+	{
+		Gui, HS3Search:	+Disabled
 		Gui, HS3: -Disabled
+	}
+		; Gui, HS3: -Disabled
 	if (WinExist("ahk_id" HS4GuiHwnd))
 		Gui, HS4: -Disabled		
 	Gui, HS3Search: Hide
@@ -7433,40 +7439,51 @@ F_Clear()
 F_Move()
 {
 	global	;assume-global mode
-	local v_DestinationLibrary := 0, v_Temp1 := "", v_Temp2 := ""
+	local NoOnTheList := 0, v_Temp1 := "", SourceLibrary := v_SelectHotstringLibrary, DestinationLibrary := ""
 		,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
 	
-	Gui, MoveLibs: Submit, NoHide
-	v_DestinationLibrary := LV_GetNext()
-	if (!v_DestinationLibrary) 
+	Gui, HS3Search:	+Disabled
+	Gui, MoveLibs: 	Default
+	Gui, MoveLibs: 	Submit, NoHide
+	NoOnTheList := LV_GetNext()
+	LV_GetText(DestinationLibrary, NoOnTheList) ;row number DestinationLibrary into OutputVar = v_SelectHotstringLibrary
+	if (!DestinationLibrary) 
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
 		return
 	}
-	LV_GetText(v_SelectHotstringLibrary, v_DestinationLibrary) ;destination
-	Gui, MoveLibs: Destroy
-	Gui, HS3Search: Hide	
-	F_SelectLibrary()
+	Gui, HS3Search:	-Disabled
+	Gui, MoveLibs: 	Destroy
+	Gui, HS3Search: 	Hide	
+	GuiControl, ChooseString, % IdDDL2, % DestinationLibrary
+	Gui, HS3: 		Submit, NoHide	;this line is necessary to v_SelectHotstringLibrary <- DestinationLibrary
+	F_SelectLibrary()	;DestinationLibrary tu jestem
 	Loop, % LV_GetCount()
 	{
-		v_Temp2 := LV_GetText(v_Temp1, A_Index, 1)
 		if (v_Temp1 == v_TriggerString)
 		{
-			MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The hotstring"] . ":" . "`n`n" . v_Triggerstring . "`n`n" . TransA["exists in a file and will now be replaced."] 
-				. "`n" . v_SelectHotstringLibrary . "`n`n" . TransA["Do you want to proceed?"]
+			MsgBox, 308, % SubStr(v_Triggerstring, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The selected triggerstring already exists in destination library file:"]
+				. "`n`n" 	. v_Triggerstring
+				. "`n" 	. DestinationLibrary . "`n`n"
+				. TransA["Do you want to replace it with source definition?"]
 			IfMsgBox, Yes
 			{
 				LV_Delete(A_Index)
 				LV_Add("",  v_Triggerstring, v_TriggOpt, v_OutFun, v_EnDis, v_Hotstring, v_Comment)
 			}
 			IfMsgBox, No
+			{
+				Gui, HS3Search:	+Disabled
+				Gui, HS3:			-Disabled
+				Gui, HS3:			Default
 				return
+			}
 		}
 	}
 	
 	LV_Add("", v_Triggerstring, v_TriggOpt, v_OutFun, v_EnDis, v_Hotstring, v_Comment) ;add to ListView
 	LV_ModifyCol(1, "Sort")
-	FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary	;delete the old destination file.
+	FileDelete, % ini_HADL . "\" . DestinationLibrary	;delete the old destination file.
 	
 	Loop, % LV_GetCount() ;Saving the same destination filename but now containing moved (triggerstring, hotstring) definition.
 	{
@@ -7478,19 +7495,22 @@ F_Move()
 		LV_GetText(txt6, A_Index, 6)
 		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
 	}
-	FileAppend, % txt, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8
+	FileAppend, % txt, % ini_HADL . "\" . DestinationLibrary, UTF-8
 	
+	GuiControl, ChooseString, % IdDDL2, % SourceLibrary
+	Gui, HS3: 		Submit, NoHide	;this line is necessary to v_SelectHotstringLibrary <- SourceLibrary
 	F_SelectLibrary() ;Remove the definition from source table / file.
 	Loop, % LV_GetCount()
 	{
 		LV_GetText(v_Temp1, A_Index, 1)
-		if (v_Temp1 == v_TriggerString)
+		if (v_Temp1 == v_Triggerstring)
 		{
 			LV_Delete(A_Index)
 			break
 		}
 	}
-	FileDelete, % ini_HADL . "\" . v_SourceLibrary	;delete the old source filename.
+	FileDelete, % ini_HADL . "\" . SourceLibrary	;delete the old source filename.
+	txt := ""
 	Loop, % LV_GetCount() ;Saving the same filename but now without deleted (triggerstring, hotstring) definition.
 	{
 		LV_GetText(txt1, A_Index, 2)
@@ -7501,7 +7521,7 @@ F_Move()
 		LV_GetText(txt6, A_Index, 6)
 		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
 	}
-	FileAppend, % txt, % ini_HADL . "\" . v_SourceLibrary, UTF-8
+	FileAppend, % txt, % ini_HADL . "\" . SourceLibrary, UTF-8
 	F_Clear()
 	F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
 	F_Searching("ReloadAndView")
@@ -7728,6 +7748,7 @@ F_Searching(ReloadListView*)
 			F_WhichGui()
 			Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 			PreviousGui := A_DefaultGui
+			Gui, HS3Search: -Disabled	;tu jestem
 			Gui, HS3Search: Default
 			LV_Delete()
 			Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
@@ -8497,6 +8518,7 @@ F_SelectLibrary()
 	v_LibHotstringCnt := 0
 	GuiControl, , % IdText13,  % v_LibHotstringCnt
 	GuiControl, , % IdText13b, % v_LibHotstringCnt
+
 	name := SubStr(v_SelectHotstringLibrary, 1, -4)
 	for key, value in a_Library
 	{
@@ -9875,6 +9897,7 @@ Deleting hotstring. Please wait... 						= Deleting hotstring. Please wait...
 Disable 												= Disable
 disable												= disable
 DISABLED												= DISABLED
+Do you want to replace it with source definition?				= Do you want to replace it with source definition?
 Download if update is available on startup?					= Download if update is available on startup?
 Download public libraries								= Download public libraries
 Do you wish to apply your changes?							= Do you wish to apply your changes?
@@ -9903,7 +9926,6 @@ Error reading library file:								= Error reading library file:
 Exclamation Mark ! 										= Exclamation Mark !
 exists in the currently selected library					= exists in the currently selected library
 exists in the library									= exists in the library
-exists in a file and will now be replaced.					= exists in a file and will now be replaced.
 Exit													= Exit
 Exit application										= Exit application
 Export from .csv to .ahk 								= &Export from .csv to .ahk
@@ -10138,7 +10160,6 @@ The executable file is prepared by Ahk2Exe, but not compressed:	= The executable
 The file which you want to download from Internet, already exists on your local harddisk. Are you sure you want to download it? = The file which you want to download from Internet, already exists on your local harddisk. Are you sure you want to download it? `n`n If you answer ""yes"", your local file will be overwritten. If you answer ""no"", download will be continued.
 The ""Hotstrings"" folder was successfully moved to the new location. = The ""Hotstrings"" folder was successfully moved to the new location.
 The icon file											= The icon file
-The hotstring 											= The hotstring
 The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes. = The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes.
 The ""Libraries"" folder was successfully moved to the new location. = The ""Libraries"" folder was successfully moved to the new location.
 The library  											= The library 
@@ -10153,6 +10174,7 @@ There is no ""Log"" subfolder. It is now created in parallel with Libraries subf
 The parameter Language in section [GraphicalUserInterface] of Config.ini is missing. = The parameter Language in section [GraphicalUserInterface] of Config.ini is missing.
 The script											= The script
 The selected file is empty. Process of import will be interrupted. = The selected file is empty. Process of import will be interrupted.
+The selected triggerstring already exists in destination library file: = The selected triggerstring already exists in destination library file:
 The triggerstring										= The triggerstring
 The (triggerstring, hotstring) definitions have been uploaded from library file = The (triggerstring, hotstring) definitions have been uploaded from library file
 The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory = The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory
