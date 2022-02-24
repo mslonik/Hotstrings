@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -1332,6 +1332,8 @@ F_OneCharPressed(InputHook, Char)
 	{
 		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
 		; OutputDebug, % "Char:" . A_Tab . Char . A_Tab . "SoundBeep" . A_Tab . "`n"
+		InputHook.Stop()	;in order to reset InputHook buffer
+		InputHook.Start()
 		Critical, Off
 		return
 	}
@@ -1364,6 +1366,8 @@ F_OneCharPressed(InputHook, Char)
 			if (!f_FoundTip)
 				v_InputString := ""
 		}	
+	InputHook.Stop()	;in order to reset InputHook buffer
+	InputHook.Start()
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1382,11 +1386,8 @@ F_InitiateInputHook()
 F_InputHookOnEnd(ih)	;for debugging purposes
 {
 	global	;assume-global mode of operation
-	local 	KeyName := "", Reason := ""
-
-	; KeyHistory
-	KeyName := ih.EndKey
-	Reason	:= ih.EndReason
+	local 	KeyName 	:= ih.EndKey, Reason	:= ih.EndReason
+	
 	if (ini_THLog)	
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "OnEnd" . "|" . KeyName 
 			. "|" . "GetKeyName:" 	. "|" . GetKeyName(KeyName) 
@@ -1394,24 +1395,18 @@ F_InputHookOnEnd(ih)	;for debugging purposes
 			. "|" . "GetKeySC:" 	. "|" . GetKeySC(KeyName)
 			. "|" . "EndReason:"	. "|" . Reason
 			. "|" . "`n", % v_LogFileName
-	; MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Input hook has unexpectedly finished its operation" . "`n`n" 
-	; 	. "KeyName:" . KeyName . "`n"
-	; 	. "More on that in log file:" . "`n"
-	; 	. v_LogFileName
-	if (!KeyName)		;if KeyName = 0
-		ih.Start()	;restart after error
+	; if (!KeyName)		;if KeyName = 0
+		; ih.Start()	;restart after error
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_BackspaceProcessing()
 {
 	global	;assume-global mode of operation
-	;Critical, On	;I'm not sure if this is necessary at all
 	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 	{
 		if (ini_MHSEn)
 		{
 			SoundBeep, % ini_MHSF, % ini_MHSD
-			; Critical, Off	;I'm not sure if this is necessary at all
 			return		
 		}
 	}
@@ -1432,7 +1427,6 @@ F_BackspaceProcessing()
 		if (!v_InputString)	;if v_InputString = "" = empty
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
-	;Critical, Off	;I'm not sure if this is necessary at all
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GUIinit()
