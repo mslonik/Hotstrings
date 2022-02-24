@@ -1321,7 +1321,7 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 	Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate 	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_OneCharPressed(InputHook, Char)
+F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
 	local	f_FoundEndChar := false, f_FoundTip := false, EndCharCounter := 0
@@ -1332,8 +1332,8 @@ F_OneCharPressed(InputHook, Char)
 	{
 		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
 		; OutputDebug, % "Char:" . A_Tab . Char . A_Tab . "SoundBeep" . A_Tab . "`n"
-		InputHook.Stop()	;in order to reset InputHook buffer
-		InputHook.Start()
+		ih.Stop()	;in order to reset InputHook buffer
+		ih.Start()
 		Critical, Off
 		return
 	}
@@ -1366,16 +1366,17 @@ F_OneCharPressed(InputHook, Char)
 			if (!f_FoundTip)
 				v_InputString := ""
 		}	
-	InputHook.Stop()	;in order to reset InputHook buffer
-	InputHook.Start()
 	Critical, Off
+	; ih.Stop()	;in order to reset InputHook buffer
+	; ih.Start()
+
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()
 {
 	global	;assume-global mode of operation
 	v_InputString := "", v_Triggerstring := "", v_UndoHotstring := ""	;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
-,	v_InputH 			:= InputHook("V I1")	;I1 is necessary to block SendInput commands output
+,	v_InputH 			:= InputHook("V I1")	;I1 by default
 ,	v_InputH.OnChar 	:= Func("F_OneCharPressed")
 ,	v_InputH.OnKeyUp 	:= Func("F_BackspaceProcessing")
 ,	v_InputH.OnEnd		:= Func("F_InputHookOnEnd")
