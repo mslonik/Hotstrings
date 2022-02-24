@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -1380,15 +1380,17 @@ F_InitiateInputHook()
 F_InputHookOnEnd(ih)	;for debugging purposes
 {
 	global	;assume-global mode of operation
-	local 	KeyName := ""
+	local 	KeyName := "", Reason := ""
 
 	; KeyHistory
 	KeyName := ih.EndKey
+	Reason	:= ih.EndReason
 	if (ini_THLog)	
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "OnEnd" . "|" . KeyName 
 			. "|" . "GetKeyName:" 	. "|" . GetKeyName(KeyName) 
 			. "|" . "GetKeyVK:" 	. "|" . GetKeyVK(KeyName)
 			. "|" . "GetKeySC:" 	. "|" . GetKeySC(KeyName)
+			. "|" . "EndReason:"	. "|" . Reason
 			. "|" . "`n", % v_LogFileName
 	; MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Input hook has unexpectedly finished its operation" . "`n`n" 
 	; 	. "KeyName:" . KeyName . "`n"
