@@ -340,6 +340,7 @@ if (ini_GuiReload) and (v_Param != "l")
 	^Up::
 	^Down::
 	^Enter::
+		Critical, On
 		F_TTMenu_Keyboard()
 		return
 	~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected → F_TTMenu_Mouse().
@@ -1325,22 +1326,22 @@ F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
 	local	f_FoundEndChar := false, f_FoundTip := false, EndCharCounter := 0
-
 	Critical, On
-	OutputDebug, % "Char:" . A_Tab . Char . "`n"
+	
+
+	; OutputDebug, % "Char:" . A_Tab . Char . "`n"
 	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))	;Menu Hotstring Sound Enable
 	{
 		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
 		; OutputDebug, % "Char:" . A_Tab . Char . A_Tab . "SoundBeep" . A_Tab . "`n"
-		ih.Stop()	;in order to reset InputHook buffer
-		ih.Start()
-		Critical, Off
+		; Critical, Off
 		return
 	}
 	;This is compromise: not all triggerstrings will have its tips, e.g. triggerstring with option ? (question mark) and those starting with EndChar: ".ahk", "..."
 	if (InStr(HotstringEndChars, Char))
 		f_FoundEndChar := true
 	v_InputString .= Char
+	;OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n"	;tu jestem
 	v_TriggerString := v_InputString	;this line is necessary to correctly process F_Undo
 	OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Tab . "v_Triggerstring:" . A_Space . v_Triggerstring . "`n"
 	ToolTip,,,, % BTWT	;Basic triggerstring was triggered
@@ -1366,17 +1367,15 @@ F_OneCharPressed(ih, Char)
 			if (!f_FoundTip)
 				v_InputString := ""
 		}	
-	Critical, Off
-	; ih.Stop()	;in order to reset InputHook buffer
-	; ih.Start()
-
+	return	
+	; Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()
 {
 	global	;assume-global mode of operation
 	v_InputString := "", v_Triggerstring := "", v_UndoHotstring := ""	;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
-,	v_InputH 			:= InputHook("V I1")	;I1 by default
+,	v_InputH 			:= InputHook("V I1 L0")	;I1 by default	;tested: L1000, L10
 ,	v_InputH.OnChar 	:= Func("F_OneCharPressed")
 ,	v_InputH.OnKeyUp 	:= Func("F_BackspaceProcessing")
 ,	v_InputH.OnEnd		:= Func("F_InputHookOnEnd")
@@ -1396,13 +1395,14 @@ F_InputHookOnEnd(ih)	;for debugging purposes
 			. "|" . "GetKeySC:" 	. "|" . GetKeySC(KeyName)
 			. "|" . "EndReason:"	. "|" . Reason
 			. "|" . "`n", % v_LogFileName
-	; if (!KeyName)		;if KeyName = 0
-		; ih.Start()	;restart after error
+	if (Reason = "Max")
+		ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_BackspaceProcessing()
 {
 	global	;assume-global mode of operation
+	OutputDebug, % "F_BackspaceProcessing, beginning" . "`n"
 	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 	{
 		if (ini_MHSEn)
@@ -1428,6 +1428,7 @@ F_BackspaceProcessing()
 		if (!v_InputString)	;if v_InputString = "" = empty
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
+	OutputDebug, % "F_BackspaceProcessing, end" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GUIinit()
@@ -2269,8 +2270,8 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 	if InStr(v_PressedKey, "^Enter")
 	{
 		v_PressedKey := IntCnt
-		IsCursorPressed := false
-		IntCnt := 0
+,		IsCursorPressed := false
+,		IntCnt := 0
 	}
 	if ((v_MenuMax = 1) and IsCursorPressed)
 	{
@@ -2313,11 +2314,11 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 	}	
 	if (ini_TTCn = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
-	SendLevel, 1	;to backtrigger
-	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
+	F_DestroyTriggerstringTips(ini_TTCn)
+	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"	;tu jestem
+	SendLevel, 2	;to backtrigger
 	SendInput, % v_Temp1
 	SendLevel, 0
-	F_DestroyTriggerstringTips(ini_TTCn)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadConfiguration()
