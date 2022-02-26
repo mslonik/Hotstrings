@@ -525,7 +525,7 @@ if (ini_GuiReload) and (v_Param != "l")
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinActive("ahk_id" TT_C4_Hwnd)	;Static triggerstring tips (inside separate window)
-	Tab::
+	Tab::	;There must be "~" as this code will be run even if IdTT_C4_LB4 is empty
 	+Tab::
 	1::
 	2::
@@ -537,7 +537,23 @@ if (ini_GuiReload) and (v_Param != "l")
 	Enter:: 
 	Up::
 	Down::
-		SendLevel, 0	;in order to not catch what user pressed
+		F_TTMenuStatic_Keyboard(CheckPreviousWindowID := true)
+		return
+#if
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#if WinExist("ahk_id" TT_C4_Hwnd)	;Static triggerstring tips (inside separate window)
+	~Tab::	;There must be "~" as this code will be run even if IdTT_C4_LB4 is empty
+	~+Tab::
+	~1::
+	~2::
+	~3::
+	~4::
+	~5::
+	~6::
+	~7::
+	~Enter:: 
+	~Up::
+	~Down::
 		F_TTMenuStatic_Keyboard()
 		return
 	~Esc::	;tilde in order to run function TT_C4GuiEscape
@@ -565,13 +581,14 @@ if (ini_GuiReload) and (v_Param != "l")
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
-F_TTMenuStatic_Keyboard()
+F_TTMenuStatic_Keyboard(IsPreviousWindowIDvital*)
 {
 	global	;assume-global moee
-	local	v_PressedKey := "",		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
+	local	v_PressedKey := A_ThisHotkey,	v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", OutputVar := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
-	v_PressedKey := A_ThisHotkey
-	OutputDebug, Here I am
+	GuiControlGet, OutputVar, , % IdTT_C4_LB4	;Retrieves the contents of the control
+	if (!OutputVar)
+		return
 	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -624,13 +641,16 @@ F_TTMenuStatic_Keyboard()
 		if (InStr(A_LoopField, v_PressedKey . "."))
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
-	v_UndoHotstring := v_Temp1
-	ReplacementString := F_ReplaceAHKconstants(v_Temp1)
-	ReplacementString := F_FollowCaseConformity(ReplacementString)
-	ReplacementString := F_ConvertEscapeSequences(ReplacementString)     
+	v_UndoHotstring 	:= v_Temp1
+,	ReplacementString 	:= F_ReplaceAHKconstants(v_Temp1)
+,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString)
+,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)     
 	
-	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
-	WinActivate, % "ahk_id" PreviousWindowID
+	if (IsPreviousWindowIDvital[1])
+	{
+		WinActivate, % "ahk_id" PreviousWindowID
+		OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
+	}
 	Switch WhichMenu
 	{
 		Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
@@ -638,12 +658,13 @@ F_TTMenuStatic_Keyboard()
 	}
 	
 	GuiControl,, % IdTT_C4_LB4, |
-	; f_HTriggered := true
 	if (ini_MHSEn)
 		SoundBeep, % ini_MHSF, % ini_MHSD	
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	;OutputDebug, teraz tu
+	
+	v_InputH.VisibleText	:= true
+	v_InputString 			:= ""	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HMenuSI_Keyboard()
@@ -704,10 +725,10 @@ F_HMenuSI_Keyboard()
 		if (InStr(A_LoopField, v_PressedKey . "."))
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
-	v_UndoHotstring := v_Temp1
-	ReplacementString := F_ReplaceAHKconstants(v_Temp1)
-	ReplacementString := F_FollowCaseConformity(ReplacementString)
-	ReplacementString := F_ConvertEscapeSequences(ReplacementString)     
+	v_UndoHotstring 	:= v_Temp1
+	ReplacementString 	:= F_ReplaceAHKconstants(v_Temp1)
+	ReplacementString 	:= F_FollowCaseConformity(ReplacementString)
+	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)     
 	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
 	if (ini_MHMP = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
@@ -808,21 +829,20 @@ F_HMenuCLI_Keyboard()
 		if (A_Index = v_PressedKey)
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
-	v_UndoHotstring := v_Temp1
-	ReplacementString := F_ReplaceAHKconstants(v_Temp1)
-	ReplacementString := F_FollowCaseConformity(ReplacementString)
-	ReplacementString := F_ConvertEscapeSequences(ReplacementString)     
+	v_UndoHotstring 	:= v_Temp1
+,	ReplacementString 	:= F_ReplaceAHKconstants(v_Temp1)
+,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString)
+,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)     
 	if (ini_MHMP = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_ClipboardPaste(ReplacementString, Ovar)
 	Gui, HMenuCli: Destroy
-	; f_HTriggered := true
 	if (ini_MHSEn)
 		SoundBeep, % ini_MHSF, % ini_MHSD
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MCL" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
 	v_InputString 			:= ""	
-	v_InputH.VisibleText 	:= true
+,	v_InputH.VisibleText 	:= true
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ActiveControlIsOfClass(Class)	;https://www.autohotkey.com/docs/commands/_If.htm
@@ -1327,7 +1347,6 @@ F_OneCharPressed(ih, Char)
 	global	;assume-global mode of operation
 	local	f_FoundEndChar := false, f_FoundTip := false, EndCharCounter := 0
 	Critical, On
-	
 
 	; OutputDebug, % "Char:" . A_Tab . Char . "`n"
 	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))	;Menu Hotstring Sound Enable
@@ -5676,7 +5695,6 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 {
 	global ;assume-global mode of operation
 	local a_TTMenuPos 		:= []
-	static previous_ini_ATEn := false
 	
 	Switch ini_TTCn
 	{
@@ -5705,10 +5723,11 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			F_FlipMenu(TT_C3_Hwnd, a_TTMenuPos[1], a_TTMenuPos[2], "TT_C3")	
 
 		Case 4:
+			PreviousWindowID := WinExist("A")
+			OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID . "`n"
 			GuiControl,, % IdTT_C4_LB1, |	;this line is necessary to display new menu each time this function is called.
 			GuiControl,, % IdTT_C4_LB2, |	;this line is necessary to display new menu each time this function is called.
 			GuiControl,, % IdTT_C4_LB3, |	;this line is necessary to display new menu each time this function is called.
-			PreviousWindowID := WinExist("A")
 			GuiControl,, % IdTT_C4_LB1, % F_ConvertArrayToString(a_Tips)
 			GuiControl,, % IdTT_C4_LB2, % F_TrigTipsSecondColumn(a_TipsOpt, a_TipsEnDis)
 			GuiControl,, % IdTT_C4_LB3, % F_ConvertArrayToString(a_TipsHS)
@@ -12012,7 +12031,7 @@ F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clip
 	Critical, On
 	local oWord := "", ThisHotkey := A_ThisHotkey, vFirstLetter1 := "", vFirstLetter2 := "", vOutputVar := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false
 		, fFirstLetterCap := false, InputString := ""
-	OutputDebug, % A_ThisFunc . "`n"
+	; OutputDebug, % A_ThisFunc . "`n"
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
@@ -12120,7 +12139,7 @@ F_MouseMenu_SI() ; Handling of mouse events for F_HOF_MSI;The subroutine may con
 		if (ini_THLog)
 			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
 		v_InputString 			:= ""	
-		v_InputH.VisibleText 	:= true
+,		v_InputH.VisibleText 	:= true
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12131,12 +12150,12 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 	local	MenuX	 := 0,	MenuY  	:= 0,	v_MouseX  := 0,	v_MouseY	:= 0,	a_MCSIMenuPos := [],	TriggerChar := "", UserInput := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
 
-	v_InputH.VisibleText := false
+	v_InputH.VisibleText 	:= false
+,	v_MenuMax				:= 0	;global variable used in F_HMenuAHK
+,	TextOptions 			:= F_ReplaceAHKconstants(TextOptions)
 	F_DestroyTriggerstringTips(ini_TTCn)
 	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop 
 		SoundBeep, % ini_MHSF, % ini_MHSD
-	v_MenuMax				:= 0	;global variable used in F_HMenuAHK
-	TextOptions 			:= F_ReplaceAHKconstants(TextOptions)
 	Loop, Parse, TextOptions, ¦	;determine amount of rows for Listbox
 		v_MenuMax := A_Index
 	
@@ -12162,12 +12181,12 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 	}
 	else	;(ini_MHMP = 4)
 	{
-		PreviousWindowID := WinExist("A")
-		;OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID
+		; PreviousWindowID := WinExist("A")
+		; OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID . "`n"
 		Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
 			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . "|"
 		GuiControl, Choose, % IdTT_C4_LB4, 1
-		WinActivate, % "ahk_id" TT_C4_Hwnd
+		; WinActivate, % "ahk_id" TT_C4_Hwnd
 		Gui, TT_C4: Flash	;future: flashing (blinking) in a loop until user do not take action
 		WhichMenu := "SI"	;this setting will be used within F_MouseMenuCombined() to handle mouse event
 	}
