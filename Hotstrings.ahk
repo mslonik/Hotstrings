@@ -334,18 +334,18 @@ if (ini_GuiReload) and (v_Param != "l")
 	F_GUIinit()
 
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
-#if WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd)
+#if WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd) or WinExist("ahk_id" TT_C4_Hwnd)
 	^Tab::	;new thread starts here
 	+^Tab::
 	^Up::
 	^Down::
 	^Enter::
 		Critical, On
-		OutputDebug, % "WinExist(ahk_id TT_C1_Hwnd) or WinExist(ahk_id TT_C2_Hwnd) or WinExist(ahk_id TT_C3_Hwnd)" . "`n"
+		; OutputDebug, % "WinExist(ahk_id TT_C1_Hwnd) or WinExist(ahk_id TT_C2_Hwnd) or WinExist(ahk_id TT_C3_Hwnd)" . "`n"
 		F_TTMenu_Keyboard()
 		return
-	~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected → F_TTMenu_Mouse().
-		F_TTMenu_Mouse()	;the priority of gT_MenuTT is lower than this "interrupt"
+	~LButton::			;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected → F_TTMenu_Mouse().
+		F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_Mouse is lower than this "interrupt"
 		return
 #if
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -470,9 +470,9 @@ if (ini_GuiReload) and (v_Param != "l")
 	; OutputDebug, % "Destroy..."
 	ToolTip,,,, % BTWT	;BTWT = Basic Triggerstring Was Triggered
 	ToolTip,,,, % UTLH	;UTLH = Undid The Last Hotstring
-	;OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString
+	OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString . "`n"
 	v_InputString := ""
-	;OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString
+	;OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString . "`n"
 	return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #if WinExist("ahk_id" HMenuCliHwnd)
@@ -488,12 +488,10 @@ if (ini_GuiReload) and (v_Param != "l")
 	Enter:: 
 	Up::
 	Down::
-		SendLevel, 0	;in order to not catch what user pressed
 		F_HMenuCLI_Keyboard()
 		return
 
 	Esc::
-		SendLevel, 0	;in order to not catch what user pressed
 		Gui, HMenuCli: Destroy
 		SendRaw, % v_Triggerstring	;SendRaw in order to correctly produce escape sequences from v_Triggerstring ({}^!+#)
 		v_InputString 			:= ""	
@@ -514,12 +512,10 @@ if (ini_GuiReload) and (v_Param != "l")
 	Enter:: 
 	Up::
 	Down::
-		OutputDebug, % "WinExist" . "`n"
-		SendLevel, 0	;in order to not catch what user pressed
+		; OutputDebug, % "WinExist" . "`n"
 		F_HMenuSI_Keyboard()
 		return
 	Esc::
-		SendLevel, 0	;in order to not catch what user pressed
 		Gui, HMenuAHK: Destroy
 		SendRaw, % v_Triggerstring	;SendRaw in order to correctly produce escape sequences from v_Triggerstring ({}^!+#)
 		v_InputString 			:= ""
@@ -540,7 +536,7 @@ if (ini_GuiReload) and (v_Param != "l")
 	Enter:: 
 	Up::
 	Down::
-		OutputDebug, % "WinActive(ahk_id TT_C4_Hwnd)" . "`n"
+		; OutputDebug, % "WinActive(ahk_id TT_C4_Hwnd)" . "`n"
 		F_TTMenuStatic_Keyboard(CheckPreviousWindowID := true)
 		return
 #if
@@ -564,7 +560,6 @@ if (ini_GuiReload) and (v_Param != "l")
 		F_TTMenuStatic_Keyboard()
 		return
 	~Esc::	;tilde in order to run function TT_C4GuiEscape
-		SendLevel, 0	;in order to not catch what user pressed
 		GuiControl,, % IdTT_C4_LB4, |
 		;OutputDebug, % "v_Triggerstring:" . A_Tab . v_Triggerstring . A_Tab . "v_EndChar:" . A_Tab . v_EndChar
 		if (v_Triggerstring != "")
@@ -596,9 +591,12 @@ F_TTMenuStatic_Keyboard(IsPreviousWindowIDvital*)
 	local	v_PressedKey := A_ThisHotkey,	v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", OutputVar1 := "", OutputVar2 := ""
 ,			NoPosInList := 0, Temp2 := "", WhichLB := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
+
+	if (!ini_ATEn)
+		return
 	OutputDebug, % "F_TTMenuStatic_Keyboard" . A_Tab . "v_PressedKey:" . A_Tab . v_PressedKey . "`n"
-	GuiControlGet, OutputVar1, , % IdTT_C4_LB1	;Retrieves the contents of the control to check if static window contains any informationinformation
-	GuiControlGet, OutputVar2, , % IdTT_C4_LB4	;Retrieves the contents of the control to check if static window contains any informationinformation
+	GuiControlGet, OutputVar1, , % IdTT_C4_LB1	;Retrieves the contents of the control to check if static window contains any information: triggerstring tips
+	GuiControlGet, OutputVar2, , % IdTT_C4_LB4	;Retrieves the contents of the control to check if static window contains any information: hotstrings
 	OutputDebug, % "OutputVar1:" . A_Tab . OutputVar1 . A_Tab . "OutputVar2:" . A_Tab . OutputVar2 . "`n"
 	if (!OutputVar1) and (!OutputVar2)			;if no information, leave this functionfunction
 		return
@@ -726,12 +724,11 @@ F_TTMenuStatic_Keyboard(IsPreviousWindowIDvital*)
 			GuiControl,, % IdTT_C4_LB1, |
 			GuiControl,, % IdTT_C4_LB2, |
 			GuiControl,, % IdTT_C4_LB3, |
-			OutputDebug, % "v_InputStringOutput:" . A_Tab . v_InputString . A_Tab . "v_Temp1:"  . A_Tab . v_Temp1 . "`n"
-			; MouseGetPos
-			SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"	;tu jestem
-			SendInput, {Ctrl Down}{Ctrl Up}}
-			SendLevel, 2	;to backtrigger
-			SendInput, % v_Temp1
+			; OutputDebug, % "v_InputStringOutput:" . A_Tab . v_InputString . A_Tab . "v_Temp1:" . A_Tab . v_Temp1 . A_Tab . "A_IsCritical:" . A_Tab . A_IsCritical . "`n"
+			Hotstring("Reset")	;reset hotstring recognizer
+			SendLevel, 2			;to backtrigger it must be higher than the input level of the hotstrings
+			SendEvent, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
+			SendEvent, % v_Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
 			SendLevel, 0
 		Case "MHot":
 			Switch WhichMenu
@@ -825,11 +822,11 @@ F_HMenuSI_Keyboard()
 ,	v_InputH.VisibleText 	:= true
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TTMenu_Mouse()	;the priority of gT_MenuTT is lower than this "interrupt"
+F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_MouseMouse is lower than this "interrupt"
 {
 	global	;assume-global mode
 	local	OutputVar := 0, OutputVarWin := 0, OutputVarControl := "", OutputVarTemp := ""
-	;OutputDebug, % "LButton:" 
+	OutputDebug, % "LButton:" . A_Tab . "v_InputString:" . A_Tab . v_InputString . "`n"
 	if (!ini_ATEn)
 		return
 	if (WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd))
@@ -851,7 +848,6 @@ F_TTMenu_Mouse()	;the priority of gT_MenuTT is lower than this "interrupt"
 			}
 	}
 	; ToolTip, ;switch off tooltips created when Unicode symbol is clicked	2022-02-06: I'm not sure if this line is necessary
-	v_InputString := ""	;to reset internal recognizer
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HMenuCLI_Keyboard()
@@ -1444,9 +1440,9 @@ F_OneCharPressed(ih, Char)
 	if (InStr(HotstringEndChars, Char))
 		f_FoundEndChar := true
 	v_InputString .= Char
-	;OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n"	;tu jestem
+	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n"	;tu jestem
 	v_TriggerString := v_InputString	;this line is necessary to correctly process F_Undo
-	OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Tab . "v_Triggerstring:" . A_Space . v_Triggerstring . "`n"
+	; OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Tab . "v_Triggerstring:" . A_Space . v_Triggerstring . "`n"
 	ToolTip,,,, % BTWT	;Basic triggerstring was triggered
 	ToolTip,,,, % UTLH	;Undid the last hotstring
 	if (ini_TTTtEn) and (v_InputString)
@@ -1478,6 +1474,7 @@ F_InitiateInputHook()
 {
 	global	;assume-global mode of operation
 	v_InputString := "", v_Triggerstring := "", v_UndoHotstring := ""	;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
+; ,	v_InputH 			:= InputHook("V I1 L100")	;I1 by default	;tested: L1000, L10
 ,	v_InputH 			:= InputHook("V I1 L0")	;I1 by default	;tested: L1000, L10
 ,	v_InputH.OnChar 	:= Func("F_OneCharPressed")
 ,	v_InputH.OnKeyUp 	:= Func("F_BackspaceProcessing")
@@ -2118,11 +2115,11 @@ F_GuiTrigTipsMenuDefC4()
 		Gui, TT_C4: Font, 		% "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
 	Gui, TT_C4: Add, Text, 		% "x0 y0 HwndIdTT_C4_T1", Whatever
 	GuiControlGet, vOutput1, Pos, % IdTT_C4_T1
-	Gui, TT_C4: Add, Listbox, 	% "x0 y0 HwndIdTT_C4_LB1" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput1W + 4 . A_Space . "g" 	. "F_MouseMenuTT"
+	Gui, TT_C4: Add, Listbox, 	% "x0 y0 HwndIdTT_C4_LB1" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput1W + 4 . A_Space . "g" 	. "F_TTMenuStatic_Mouse"
 	Gui, TT_C4: Add, Text, 		% "x0 y0 HwndIdTT_C4_T2", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
 	GuiControlGet, vOutput2, Pos, % IdTT_C4_T2
-	Gui, TT_C4: Add, Listbox, 	% "HwndIdTT_C4_LB2" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput2W + 4 	. A_Space . "g" 		. "F_MouseMenuTT"
-	Gui, TT_C4: Add, Listbox, 	% "HwndIdTT_C4_LB3" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput1W * 2 + 4 	. A_Space . "g" 	. "F_MouseMenuTT"
+	Gui, TT_C4: Add, Listbox, 	% "HwndIdTT_C4_LB2" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput2W + 4 	. A_Space . "g" 		. "F_TTMenuStatic_Mouse"
+	Gui, TT_C4: Add, Listbox, 	% "HwndIdTT_C4_LB3" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput1W * 2 + 4 	. A_Space . "g" 	. "F_TTMenuStatic_Mouse"
 	Gui, TT_C4: Add, Button,  	% "x0 y0 HwndIdTT_C4_B1" . A_Space . "g" . "F_TT_C4_B1", % TransA["Save window position"]
 	GuiControl, Hide, % IdTT_C4_T1
 	GuiControl, Hide, % IdTT_C4_T2
@@ -2186,16 +2183,16 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestString)
 	Gui, TT_C3: Add, Text, 		% "HwndIdTT_C3_T1 x0 y0", % OutputString
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_T1
 	W_LB1 	:= vOutput1W
-	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB1 x0 y0" . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB1 + 4 . A_Space . "g" . "F_MouseMenuTT"
+	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB1 x0 y0" . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB1 + 4 . A_Space . "g" . "F_TTMenuStatic_Mouse"
 	Gui, TT_C3: Add, Text, 		% "HwndIdTT_C3_T2 x0 y0", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_T2
 	W_LB2 	:= vOutput1W
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_LB1
 	X_LB2 	:= vOutput1X + vOutput1W, Y_LB2	:= vOutput1Y
-	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB2" . A_Space . "x" . X_LB2 . A_Space . "y" . Y_LB2 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB2 + 4 . A_Space . "g" . "F_MouseMenuTT"
+	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB2" . A_Space . "x" . X_LB2 . A_Space . "y" . Y_LB2 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB2 + 4 . A_Space . "g" . "F_TTMenuStatic_Mouse"
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_LB2
 	X_LB3	:= vOutput1X + vOutput1W, Y_LB3	:= Y_LB2, W_LB3	:= W_LB1
-	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB3" . A_Space . "x" . X_LB3 . A_Space . "y" . Y_LB3 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB3 + 4 . A_Space . "g" . "F_MouseMenuTT"
+	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB3" . A_Space . "x" . X_LB3 . A_Space . "y" . Y_LB3 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB3 + 4 . A_Space . "g" . "F_TTMenuStatic_Mouse"
 	GuiControl, Hide, % IdTT_C3_T1
 	GuiControl, Hide, % IdTT_C3_T2
 	GuiControl, Font, % IdTT_C3_LB1		;fontcolor of listbox
@@ -2224,13 +2221,13 @@ F_GuiTrigTipsMenuDefC2(AmountOfRows, LongestString)
 	Gui, TT_C2: Add, Text, % "HwndIdTT_C2_T1 x0 y0", % OutputString
 	GuiControlGet, vOutput, Pos, % IdTT_C2_T1
 	W_LB1 	:= vOutputW
-	Gui, TT_C2: Add, Listbox, 	% "HwndIdTT_C2_LB1 x0 y0" . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB1 + 4 . A_Space . "g" . "F_MouseMenuTT"	;thanks to "g" it will not be a separate thread even upon mouse click
+	Gui, TT_C2: Add, Listbox, 	% "HwndIdTT_C2_LB1 x0 y0" . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB1 + 4 . A_Space . "g" . "F_TTMenuStatic_Mouse"	;thanks to "g" it will not be a separate thread even upon mouse click
 	Gui, TT_C2: Add, Text, 		% "HwndIdTT_C2_T2 x0 y0", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
 	GuiControlGet, vOutput, Pos, % IdTT_C2_T2
 	W_LB2 	:= vOutputW
 	GuiControlGet, vOutput, Pos, % IdTT_C2_LB1
 	X_LB2 	:= vOutputX + vOutputW, Y_LB2	:= vOutputY
-	Gui, TT_C2: Add, Listbox, % "HwndIdTT_C2_LB2" . A_Space . "x" . X_LB2 . A_Space . "y" . Y_LB2 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB2 + 4 . A_Space . "g" . "F_MouseMenuTT"
+	Gui, TT_C2: Add, Listbox, % "HwndIdTT_C2_LB2" . A_Space . "x" . X_LB2 . A_Space . "y" . Y_LB2 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB2 + 4 . A_Space . "g" . "F_TTMenuStatic_Mouse"
 	GuiControl, Hide, % IdTT_C2_T1
 	GuiControl, Hide, % IdTT_C2_T2
 	GuiControl, Font, % IdTT_C2_LB1		;fontcolor of listbox
@@ -2256,7 +2253,7 @@ F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)
 		Gui, TT_C1: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
 	Gui, TT_C1: Add, Text, % "x0 y0 HwndIdTT_C1_T1", % OutputString
 	GuiControlGet, vOutput, Pos, % IdTT_C1_T1
-	Gui, TT_C1: Add, Listbox, % "x0 y0 HwndIdTT_C1_LB1" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutputW + 4 . A_Space . "g" . "F_MouseMenuTT"	;thanks to "g" it will not be a separate thread even upon mouse click
+	Gui, TT_C1: Add, Listbox, % "x0 y0 HwndIdTT_C1_LB1" . A_Space . "r" . AmountOfRows . A_Space . "w" . vOutputW + 4 . A_Space . "g" . "F_TTMenuStatic_Mouse"	;thanks to "g" it will not be a separate thread even upon mouse click
 	GuiControl, Hide, % IdTT_C1_T1
 	GuiControl, Font, % IdTT_C1_LB1		;fontcolor of listbox
 }
@@ -2302,9 +2299,9 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 {
 	global	;assume-global mode
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 0, v_MenuMax := 0
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0
 
-	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_TTMenuStatic_Keyboard it was crucial for ControlSend to run correctly
+	; SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_TTMenuStatic_Keyboard it was crucial for ControlSend to run correctly
 	if (!ini_ATEn)
 		return
 	v_MenuMax := a_Tips.Count()
@@ -2336,18 +2333,19 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 		IntCnt--
 		Switch ini_TTCn
 		{
-			Case 1: ControlSend, , {Up}, % "ahk_id" IdTT_C1_LB1
+			Case 1: 
+				ControlSend, , {Up}, % "ahk_id" IdTT_C1_LB1
 			Case 2: 
-			ControlSend, , {Up}, % "ahk_id" IdTT_C2_LB1
-			ControlSend, , {Up}, % "ahk_id" IdTT_C2_LB2
+				ControlSend, , {Up}, % "ahk_id" IdTT_C2_LB1
+				ControlSend, , {Up}, % "ahk_id" IdTT_C2_LB2
 			Case 3: 
-			ControlSend, , {Up}, % "ahk_id" IdTT_C3_LB1
-			ControlSend, , {Up}, % "ahk_id" IdTT_C3_LB2
-			ControlSend, , {Up}, % "ahk_id" IdTT_C3_LB3
+				ControlSend, , {Up}, % "ahk_id" IdTT_C3_LB1
+				ControlSend, , {Up}, % "ahk_id" IdTT_C3_LB2
+				ControlSend, , {Up}, % "ahk_id" IdTT_C3_LB3
 			Case 4:
-			ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB1
-			ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB2
-			ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB3
+				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB1
+				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB2
+				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB3
 		}
 		ShiftTabIsFound := true
 	}
@@ -2357,25 +2355,26 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 		IntCnt++
 		Switch ini_TTCn
 		{
-			Case 1: ControlSend, , {Down}, % "ahk_id" IdTT_C1_LB1
+			Case 1: 
+				ControlSend, , {Down}, % "ahk_id" IdTT_C1_LB1
 			Case 2: 
-			ControlSend, , {Down}, % "ahk_id" IdTT_C2_LB1
-			ControlSend, , {Down}, % "ahk_id" IdTT_C2_LB2
+				ControlSend, , {Down}, % "ahk_id" IdTT_C2_LB1
+				ControlSend, , {Down}, % "ahk_id" IdTT_C2_LB2
 			Case 3: 
-			ControlSend, , {Down}, % "ahk_id" IdTT_C3_LB1
-			ControlSend, , {Down}, % "ahk_id" IdTT_C3_LB2
-			ControlSend, , {Down}, % "ahk_id" IdTT_C3_LB3
+				ControlSend, , {Down}, % "ahk_id" IdTT_C3_LB1
+				ControlSend, , {Down}, % "ahk_id" IdTT_C3_LB2
+				ControlSend, , {Down}, % "ahk_id" IdTT_C3_LB3
 			Case 4:
-			ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB1
-			ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB2
-			ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB3
+				ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB1
+				ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB2
+				ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB3
 		}
 	}
 	if InStr(v_PressedKey, "^Enter")
 	{
-		v_PressedKey := IntCnt
-,		IsCursorPressed := false
-,		IntCnt := 0
+		v_PressedKey 		:= IntCnt
+,		IsCursorPressed	:= false
+,		IntCnt 			:= 0
 	}
 	if ((v_MenuMax = 1) and IsCursorPressed)
 	{
@@ -2419,9 +2418,10 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 	if (ini_TTCn = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_DestroyTriggerstringTips(ini_TTCn)
-	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"	;tu jestem
-	SendLevel, 2	;to backtrigger
-	SendInput, % v_Temp1
+	Hotstring("Reset")
+	SendLevel, 2	;to backtrigger it must be higher than the input level of the hotstrings
+	SendEvent, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
+	SendEvent, % v_Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
 	SendLevel, 0
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12032,7 +12032,6 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 {
 	global	;assume-global mode
 	Critical, On
-	; SendLevel, 1	;the send level of the event must be higher than the input level of the hotkey or hotstring. Future: for autotesting script which will catch output from this function.
 	; OutputDebug, % A_ThisFunc . "`n"
  	;v_TypedTriggerstring 	→ hotstring
 	;v_Options 			→ triggerstring options
@@ -12280,13 +12279,14 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
+F_TTMenuStatic_Mouse() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
 	local	OutputVarTemp := "",	ThisHotkey := A_PriorKey
 			, OutputVarTemp2 := "", ChoicePos := 0
-
-	OutputDebug, % "ThisHotkey:" . A_Tab . ThisHotkey . "`n"
+	if (!ini_ATEn)
+		return
+	; OutputDebug, % "ThisHotkey:" . A_Tab . ThisHotkey . A_Tab . "v_InputString:" . A_Tab . v_InputString . "`n"
 	MouseGetPos, , , , OutputVarTemp			;to store the name (ClassNN) of the control under the mouse cursor
 	SendMessage, 0x0188, 0, 0, % OutputVarTemp	;retrieve the position of the selected item
 	ChoicePos := (ErrorLevel<<32>>32) + 1		;Convert UInt to Int to have -1 if there is no item selected. Convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.
@@ -12307,11 +12307,12 @@ F_MouseMenuTT() ;The subroutine may consult the following built-in variables: A_
 				GuiControlGet, OutputVarTemp, , % IdTT_C4_LB1 
 				WinActivate, % "ahk_id" PreviousWindowID
 		}
-		OutputDebug, % "ini_TTCn:" . A_Tab . ini_TTCn
+		; OutputDebug, % "ini_TTCn:" . A_Tab . ini_TTCn . "`n"
 		v_UndoHotstring := OutputVarTemp
-		SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
-		SendLevel, 1	;in order to backtrigger the chosen triggerstring 
-		SendInput, % OutputVarTemp
+		Hotstring("Reset")			;reset hotstring recognizer
+		SendLevel, 2				;to backtrigger it must be higher than the input level of the hotstrings
+		SendEvent, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
+		SendEvent, % OutputVarTemp	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
 		SendLevel, 0
 	}
 }
