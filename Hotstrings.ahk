@@ -51,7 +51,7 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		TDemoHwnd 			:= 0 
 ,		HDemoHwnd 			:= 0 ;This is a trick to initialize global variables in order to not get warning (#Warn) message
 ,		HotstringDelay			:= 0
-,		WhichMenu 			:= ""
+,		WhichMenu 			:= "" ;available values: CLI or MSI
 ,		v_EndChar 			:= "" ;initialization of this variable is important in case user would like to hit "Esc" and GUI TT_C4 exists.
 ,		BTWT					:= 4	; BTWT = Basic Triggerstring Was Triggered
 ,		UTLH					:= 6	; UTLH = Undid The Last Hotstring
@@ -341,6 +341,7 @@ if (ini_GuiReload) and (v_Param != "l")
 	^Down::
 	^Enter::
 		Critical, On
+		OutputDebug, % "WinExist(ahk_id TT_C1_Hwnd) or WinExist(ahk_id TT_C2_Hwnd) or WinExist(ahk_id TT_C3_Hwnd)" . "`n"
 		F_TTMenu_Keyboard()
 		return
 	~LButton::	;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected → F_TTMenu_Mouse().
@@ -453,6 +454,7 @@ if (ini_GuiReload) and (v_Param != "l")
 ~Home::
 ~End::
 ~Esc::
+	OutputDebug, % "Regular" . "`n"
 	ToolTip,	;this line is necessary to close tooltips.
 	; OutputDebug, % "Destroy..."
 	ToolTip,,,, % BTWT	;BTWT = Basic Triggerstring Was Triggered
@@ -512,6 +514,7 @@ if (ini_GuiReload) and (v_Param != "l")
 	Enter:: 
 	Up::
 	Down::
+		OutputDebug, % "WinExist" . "`n"
 		SendLevel, 0	;in order to not catch what user pressed
 		F_HMenuSI_Keyboard()
 		return
@@ -524,8 +527,8 @@ if (ini_GuiReload) and (v_Param != "l")
 	return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#if WinActive("ahk_id" TT_C4_Hwnd)	;Static triggerstring tips (inside separate window)
-	Tab::	;There must be "~" as this code will be run even if IdTT_C4_LB4 is empty
+#if WinActive("ahk_id" TT_C4_Hwnd)	;Static triggerstring tips (inside separate window). User case scenario: if user decided to switch into static window (makes it active)
+	Tab::	
 	+Tab::
 	1::
 	2::
@@ -537,6 +540,7 @@ if (ini_GuiReload) and (v_Param != "l")
 	Enter:: 
 	Up::
 	Down::
+		OutputDebug, % "WinActive(ahk_id TT_C4_Hwnd)" . "`n"
 		F_TTMenuStatic_Keyboard(CheckPreviousWindowID := true)
 		return
 #if
@@ -551,9 +555,12 @@ if (ini_GuiReload) and (v_Param != "l")
 	~5::
 	~6::
 	~7::
-	~Enter:: 
+	~Enter::
+	~^Enter:: 	;valid only for Triggerstring Menu
 	~Up::
+	~^Up::		;valid only for Triggerstring Menu
 	~Down::
+	~^Down::		;valid only for Triggerstring Menu
 		F_TTMenuStatic_Keyboard()
 		return
 	~Esc::	;tilde in order to run function TT_C4GuiEscape
@@ -563,9 +570,11 @@ if (ini_GuiReload) and (v_Param != "l")
 		if (v_Triggerstring != "")
 		{
 			WinActivate, % "ahk_id" PreviousWindowID
-			Send, % v_Triggerstring . v_EndChar
+			Send, % v_Triggerstring
 			v_Triggerstring := ""
 		}
+		v_InputH.VisibleText	:= true
+,		v_InputString 			:= ""	
 		return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -584,35 +593,82 @@ if (ini_GuiReload) and (v_Param != "l")
 F_TTMenuStatic_Keyboard(IsPreviousWindowIDvital*)
 {
 	global	;assume-global moee
-	local	v_PressedKey := A_ThisHotkey,	v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", OutputVar := ""
+	local	v_PressedKey := A_ThisHotkey,	v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", OutputVar1 := "", OutputVar2 := ""
+,			NoPosInList := 0, Temp2 := "", WhichLB := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
-	GuiControlGet, OutputVar, , % IdTT_C4_LB4	;Retrieves the contents of the control
-	if (!OutputVar)
+	OutputDebug, % "F_TTMenuStatic_Keyboard" . A_Tab . "v_PressedKey:" . A_Tab . v_PressedKey . "`n"
+	GuiControlGet, OutputVar1, , % IdTT_C4_LB1	;Retrieves the contents of the control to check if static window contains any informationinformation
+	GuiControlGet, OutputVar2, , % IdTT_C4_LB4	;Retrieves the contents of the control to check if static window contains any informationinformation
+	OutputDebug, % "OutputVar1:" . A_Tab . OutputVar1 . A_Tab . "OutputVar2:" . A_Tab . OutputVar2 . "`n"
+	if (!OutputVar1) and (!OutputVar2)			;if no information, leave this functionfunction
 		return
-	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
+	if (OutputVar1)
 	{
-		IsCursorPressed := true
-		IntCnt--
-		ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB4
-		ShiftTabIsFound := true
+		if (!InStr(v_PressedKey, "^"))
+			return
+		WhichLB := "MTrig"
+		ControlGet, Temp2, List, , , % "ahk_id" IdTT_C4_LB1
+		Loop, Parse, Temp2, `n
+			NoPosInList++
 	}
-	if (InStr(v_PressedKey, "Down") or InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+	if (OutputVar2)
 	{
-		IsCursorPressed := true
-		IntCnt++
-		ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB4
-		ShiftTabIsFound := false
+		if (InStr(v_PressedKey, "^"))
+			return
+		WhichLB := "MHot"
+		ControlGet, Temp2, List, , , % "ahk_id" IdTT_C4_LB4
+		Loop, Parse, Temp2, `n
+			NoPosInList++
+		SetKeyDelay, 100, 100	;values (100, 100) determined experimentally
 	}
-	if ((v_MenuMax = 1) and IsCursorPressed)
+	Switch WhichLB
+	{
+		Case "MTrig":
+			if (InStr(v_PressedKey, "^Up") or InStr(v_PressedKey, "+Tab"))
+			{
+				IsCursorPressed := true
+				IntCnt--
+				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB1
+				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB2
+				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB3
+				ShiftTabIsFound := true
+			}
+			if (InStr(v_PressedKey, "^Down") or InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+			{
+				IsCursorPressed := true
+				IntCnt++
+				ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB1
+				ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB2
+				ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB3
+				ShiftTabIsFound := false
+			}
+		Case "MHot":
+			if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
+			{
+				IsCursorPressed := true
+				IntCnt--
+				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB4
+				ShiftTabIsFound := true	
+			}
+			if (InStr(v_PressedKey, "Down") or InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+			{
+				IsCursorPressed := true
+				IntCnt++
+				ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB4
+				ShiftTabIsFound := false
+			}		
+	}
+
+	if ((NoPosInList = 1) and IsCursorPressed)
 	{
 		IntCnt := 1
 		return
 	}
 	if (IsCursorPressed)
 	{
-		if (IntCnt > v_MenuMax)
+		if (IntCnt > NoPosInList)
 		{
-			IntCnt := v_MenuMax
+			IntCnt := NoPosInList
 			if (ini_MHSEn)
 				SoundBeep, % ini_MHSF, % ini_MHSD	
 		}
@@ -625,46 +681,72 @@ F_TTMenuStatic_Keyboard(IsPreviousWindowIDvital*)
 		IsCursorPressed := false
 		return
 	}		
-	if (InStr(v_PressedKey, "Enter"))
+	if (InStr(v_PressedKey, "Enter")) or (InStr(v_PressedKey, "^Enter"))
 	{
 		v_PressedKey := IntCnt
 		IsCursorPressed := false
 		IntCnt := 1
 	}
-	if (v_PressedKey > v_MenuMax)
-	{
+	if (v_PressedKey > NoPosInList)
 		return
-	}
-	ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C4_LB4
-	Loop, Parse, v_Temp1, `n
+	Switch WhichLB
 	{
-		if (InStr(A_LoopField, v_PressedKey . "."))
-			v_Temp1 := SubStr(A_LoopField, 4)
+		Case "MTrig":
+			ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C4_LB1
+			Loop, Parse, v_Temp1, `n
+			{
+				if (A_Index = v_PressedKey)
+				{
+					v_Temp1 := SubStr(A_LoopField, InStr(A_LoopField, " ") + 1)
+					break
+				}
+			}
+		Case "MHot":
+			ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C4_LB4
+			Loop, Parse, v_Temp1, `n
+			{
+				if (InStr(A_LoopField, v_PressedKey . "."))
+					v_Temp1 := SubStr(A_LoopField, 4)
+			}
+			v_UndoHotstring 	:= v_Temp1
+,			ReplacementString 	:= F_ReplaceAHKconstants(v_Temp1)
+,			ReplacementString 	:= F_FollowCaseConformity(ReplacementString)
+,			ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)     
 	}
-	v_UndoHotstring 	:= v_Temp1
-,	ReplacementString 	:= F_ReplaceAHKconstants(v_Temp1)
-,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString)
-,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)     
-	
+
 	if (IsPreviousWindowIDvital[1])
 	{
 		WinActivate, % "ahk_id" PreviousWindowID
 		OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
 	}
-	Switch WhichMenu
+
+	Switch WhichLB
 	{
-		Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
-		Case "CLI":	F_ClipboardPaste(ReplacementString, Ovar)
+		Case "MTrig":
+			GuiControl,, % IdTT_C4_LB1, |
+			GuiControl,, % IdTT_C4_LB2, |
+			GuiControl,, % IdTT_C4_LB3, |
+			OutputDebug, % "v_InputStringOutput:" . A_Tab . v_InputString . A_Tab . "v_Temp1:"  . A_Tab . v_Temp1 . "`n"
+			; MouseGetPos
+			SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"	;tu jestem
+			SendInput, {Ctrl Down}{Ctrl Up}}
+			SendLevel, 2	;to backtrigger
+			SendInput, % v_Temp1
+			SendLevel, 0
+		Case "MHot":
+			Switch WhichMenu
+			{
+				Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
+				Case "CLI":	F_ClipboardPaste(ReplacementString, Ovar)
+			}
+			GuiControl,, % IdTT_C4_LB4, |
+			if (ini_MHSEn)
+				SoundBeep, % ini_MHSF, % ini_MHSD	
+			if (ini_THLog)
+				FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+			v_InputH.VisibleText	:= true
+,			v_InputString 			:= ""	
 	}
-	
-	GuiControl,, % IdTT_C4_LB4, |
-	if (ini_MHSEn)
-		SoundBeep, % ini_MHSF, % ini_MHSD	
-	if (ini_THLog)
-		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	
-	v_InputH.VisibleText	:= true
-	v_InputString 			:= ""	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HMenuSI_Keyboard()
@@ -673,6 +755,7 @@ F_HMenuSI_Keyboard()
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	
+	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_TTMenuStatic_Keyboard it was crucial for ControlSend to run correctly
 	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -739,7 +822,7 @@ F_HMenuSI_Keyboard()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
 	v_InputString 			:= ""	
-	v_InputH.VisibleText 	:= true
+,	v_InputH.VisibleText 	:= true
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTMenu_Mouse()	;the priority of gT_MenuTT is lower than this "interrupt"
@@ -776,6 +859,7 @@ F_HMenuCLI_Keyboard()
 	global	;assume-global moee
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",	ShiftTabIsFound := false, ReplacementString := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
+	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_TTMenuStatic_Keyboard it was crucial for ControlSend to run correctly
 	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -856,12 +940,12 @@ ActiveControlIsOfClass(Class)	;https://www.autohotkey.com/docs/commands/_If.htm
 F_ConvertEscapeSequences(string)	;now from file are read sequences like "`" . "t" which are 2x characters. now we have to convert this pair into single character "`t" = single Tab character
 {	;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
 	string := StrReplace(string, "``n", "`n") 
-	string := StrReplace(string, "``r", "`r")
-	string := StrReplace(string, "``b", "`b")
-	string := StrReplace(string, "``t", "`t")
-	string := StrReplace(string, "``v", "`v")
-	string := StrReplace(string, "``a", "`a")
-	string := StrReplace(string, "``f", "`f")
+,	string := StrReplace(string, "``r", "`r")
+,	string := StrReplace(string, "``b", "`b")
+,	string := StrReplace(string, "``t", "`t")
+,	string := StrReplace(string, "``v", "`v")
+,	string := StrReplace(string, "``a", "`a")
+,	string := StrReplace(string, "``f", "`f")
 	return string
 }	;future: https://www.autohotkey.com/boards/viewtopic.php?f=76&t=91953
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2034,11 +2118,11 @@ F_GuiTrigTipsMenuDefC4()
 		Gui, TT_C4: Font, 		% "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
 	Gui, TT_C4: Add, Text, 		% "x0 y0 HwndIdTT_C4_T1", Whatever
 	GuiControlGet, vOutput1, Pos, % IdTT_C4_T1
-	Gui, TT_C4: Add, Listbox, 	% "x0 y0 HwndIdTT_C4_LB1" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput1W + 4 . A_Space . "g" . "F_MouseMenuTT"
+	Gui, TT_C4: Add, Listbox, 	% "x0 y0 HwndIdTT_C4_LB1" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput1W + 4 . A_Space . "g" 	. "F_MouseMenuTT"
 	Gui, TT_C4: Add, Text, 		% "x0 y0 HwndIdTT_C4_T2", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
 	GuiControlGet, vOutput2, Pos, % IdTT_C4_T2
-	Gui, TT_C4: Add, Listbox, 	% "HwndIdTT_C4_LB2" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput2W + 4 	. A_Space . "g" . "F_MouseMenuTT"
-	Gui, TT_C4: Add, Listbox, 	% "HwndIdTT_C4_LB3" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput1W * 2 + 4 	. A_Space . "g" . "F_MouseMenuTT"
+	Gui, TT_C4: Add, Listbox, 	% "HwndIdTT_C4_LB2" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput2W + 4 	. A_Space . "g" 		. "F_MouseMenuTT"
+	Gui, TT_C4: Add, Listbox, 	% "HwndIdTT_C4_LB3" . A_Space . "r" . ini_MNTT . A_Space . "w" . vOutput1W * 2 + 4 	. A_Space . "g" 	. "F_MouseMenuTT"
 	Gui, TT_C4: Add, Button,  	% "x0 y0 HwndIdTT_C4_B1" . A_Space . "g" . "F_TT_C4_B1", % TransA["Save window position"]
 	GuiControl, Hide, % IdTT_C4_T1
 	GuiControl, Hide, % IdTT_C4_T2
@@ -2220,6 +2304,7 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 0, v_MenuMax := 0
 
+	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_TTMenuStatic_Keyboard it was crucial for ControlSend to run correctly
 	if (!ini_ATEn)
 		return
 	v_MenuMax := a_Tips.Count()
@@ -5724,10 +5809,10 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 
 		Case 4:
 			PreviousWindowID := WinExist("A")
-			OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID . "`n"
-			GuiControl,, % IdTT_C4_LB1, |	;this line is necessary to display new menu each time this function is called.
-			GuiControl,, % IdTT_C4_LB2, |	;this line is necessary to display new menu each time this function is called.
-			GuiControl,, % IdTT_C4_LB3, |	;this line is necessary to display new menu each time this function is called.
+			; OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID . "`n"
+			; GuiControl,, % IdTT_C4_LB1, |	;this line is necessary to display new menu each time this function is called.
+			; GuiControl,, % IdTT_C4_LB2, |	;this line is necessary to display new menu each time this function is called.
+			; GuiControl,, % IdTT_C4_LB3, |	;this line is necessary to display new menu each time this function is called.
 			GuiControl,, % IdTT_C4_LB1, % F_ConvertArrayToString(a_Tips)
 			GuiControl,, % IdTT_C4_LB2, % F_TrigTipsSecondColumn(a_TipsOpt, a_TipsEnDis)
 			GuiControl,, % IdTT_C4_LB3, % F_ConvertArrayToString(a_TipsHS)
@@ -6331,11 +6416,11 @@ F_ShortDefB1_SaveHotkey()
 	GuiControlGet, OldHotkey, , % IdShortDefT3
 	;OldHotkey := RegExReplace(OldHotkey, "(Ctrl)|(Shift)|(Win)|(\+)|( )")	;future: trick from forum after my question
 	OldHotkey := StrReplace(OldHotkey, "Shift", "+")
-	OldHotkey := StrReplace(OldHotkey, "Ctrl", "^")
-	OldHotkey := StrReplace(OldHotkey, "Alt", "!")
-	OldHotkey := StrReplace(OldHotkey, "Win", "#")
-	OldHotkey := StrReplace(OldHotkey, "+")
-	OldHotkey := StrReplace(OldHotkey, " ")
+,	OldHotkey := StrReplace(OldHotkey, "Ctrl", "^")
+,	OldHotkey := StrReplace(OldHotkey, "Alt", "!")
+,	OldHotkey := StrReplace(OldHotkey, "Win", "#")
+,	OldHotkey := StrReplace(OldHotkey, "+")
+,	OldHotkey := StrReplace(OldHotkey, " ")
 	Switch A_ThisMenuItem
 	{
 		Case % TransA["Call Graphical User Interface"]:
@@ -12078,7 +12163,7 @@ F_HOF_MCLI(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clip
 	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop
 		SoundBeep, % ini_MHSF, % ini_MHSD
 	v_MenuMax			 := 0
-	TextOptions 		 := F_ReplaceAHKconstants(TextOptions)
+,	TextOptions 		 := F_ReplaceAHKconstants(TextOptions)
 	Loop, Parse, TextOptions, ¦
 		v_MenuMax := A_Index
 	if (ini_TTCn != 4)
