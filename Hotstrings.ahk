@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -1440,7 +1440,7 @@ F_OneCharPressed(ih, Char)
 	if (InStr(HotstringEndChars, Char))
 		f_FoundEndChar := true
 	v_InputString .= Char
-	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n"	;tu jestem
+	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n
 	v_TriggerString := v_InputString	;this line is necessary to correctly process F_Undo
 	; OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Tab . "v_Triggerstring:" . A_Space . v_Triggerstring . "`n"
 	ToolTip,,,, % BTWT	;Basic triggerstring was triggered
@@ -2805,9 +2805,25 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B4 gF_EvSM_B4,			% TransA["Cancel"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_CloseGuiEventsSubWindow(WhatGuiToDestroy)
+{
+     global ;assume-global mode of operation
+	if (WinExist("ahk_id" HS3GuiHwnd))
+     {
+		Gui, HS3: -Disabled 
+          WinActivate, % "ahk_id" HS3GuiHwnd
+     }
+	if (WinExist("ahk_id" HS4GuiHwnd))
+     {
+		Gui, HS4: -Disabled	
+          WinActivate, % "ahk_id" HS4GuiHwnd
+     }
+	Gui, % WhatGuiToDestroy . ":" . A_Space . "Destroy"
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvTab3(OneTime*)
 {
-	global ;assume-global mode
+	global ;assume-global mode of operation
 	static PreviousEvTab3 := ""
 			, PreviousEvBH_R1R2 := "", PreviousEvBH_R3R4 := "", PreviousEvBH_R5R6 := "", PreviousEvBH_R7R8 := "", PreviousEvBH_S1 := "", PreviousEvBH_S2 := "", PreviousEvBH_S3 := ""
 			, PreviousEvMH_R1R2 := "", PreviousEvMH_R3R4 := "", PreviousEvMH_S1 := "", PreviousEvMH_S2 := ""
@@ -3225,11 +3241,7 @@ F_EvSM_B4()	;static menus, button Cancel
 {
 	global ;assume-global mode
 	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
-	if (WinExist("ahk_id" HS3GuiHwnd))
-		Gui, HS3: -Disabled	
-	if (WinExist("ahk_id" HS4GuiHwnd))
-		Gui, HS4: -Disabled	
-	Gui, GuiEvents: Destroy
+     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvSM_B2()	;static menus, button Apply
@@ -3278,11 +3290,7 @@ F_EvSM_B3()	;static menus, button Close
 	IniWrite, % ini_TTCn,	% ini_HADConfig, Event_TriggerstringTips,	TTCn
 	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
-	if (WinExist("ahk_id" HS3GuiHwnd))
-		Gui, HS3: -Disabled	
-	if (WinExist("ahk_id" HS4GuiHwnd))
-		Gui, HS4: -Disabled	
-	Gui, GuiEvents:	Destroy
+     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvSM_B1()	;static menus, button Preview	
@@ -3332,11 +3340,7 @@ F_EvAT_B4()	;Event Active Triggerstring Tips Button Cancel
 {
 	global ;assume-global mode
 	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
-	if (WinExist("ahk_id" HS3GuiHwnd))
-		Gui, HS3: -Disabled	
-	if (WinExist("ahk_id" HS4GuiHwnd))
-		Gui, HS4: -Disabled	
-	Gui, GuiEvents: Destroy
+     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvAT_B2()	;Event Active Triggerstring Tips Button Apply
@@ -3365,11 +3369,7 @@ F_EvAT_B3()	;Event Active Triggerstring Tips Button Close
 	IniWrite, % ini_ATEn, 	% ini_HADConfig, Event_ActiveTriggerstringTips, 	ATEn
 	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
-	if (WinExist("ahk_id" HS3GuiHwnd))
-		Gui, HS3: -Disabled	
-	if (WinExist("ahk_id" HS4GuiHwnd))
-		Gui, HS4: -Disabled	
-	Gui, GuiEvents: Destroy
+     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvAT_B1()	;Event Active Triggerstring Tips Button Tooltip test
@@ -3501,22 +3501,14 @@ F_EvTt_B3()	;Event Tooltip (is triggered) Button Close
 	IniWrite, % ini_TTCn,	% ini_HADConfig, Event_TriggerstringTips,	TTCn
 	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
-	if (WinExist("ahk_id" HS3GuiHwnd))
-		Gui, HS3: -Disabled	
-	if (WinExist("ahk_id" HS4GuiHwnd))
-		Gui, HS4: -Disabled	
-	Gui, GuiEvents: Destroy
+     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvTt_B4()	;Event Tooltip (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
-	if (WinExist("ahk_id" HS3GuiHwnd))
-		Gui, HS3: -Disabled	
-	if (WinExist("ahk_id" HS4GuiHwnd))
-		Gui, HS4: -Disabled	
-	Gui, GuiEvents: Destroy
+     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvTt_S2()
@@ -3736,22 +3728,14 @@ F_EvUH_B4()	;Event Undo Hotstring (is triggered) Button Close
 	IniWrite, % ini_UHSD,	% ini_HADConfig, Event_UndoHotstring,	UHSD
 	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
-	if (WinExist("ahk_id" HS3GuiHwnd))
-		Gui, HS3: -Disabled	
-	if (WinExist("ahk_id" HS4GuiHwnd))
-		Gui, HS4: -Disabled	
-	Gui, GuiEvents: Destroy
+     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvUH_B5()	;Event Undo Hotstring (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
-	if (WinExist("ahk_id" HS3GuiHwnd))
-		Gui, HS3: -Disabled	
-	if (WinExist("ahk_id" HS4GuiHwnd))
-		Gui, HS4: -Disabled	
-	Gui, GuiEvents: Destroy
+     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvUH_S3()
@@ -3865,11 +3849,7 @@ F_EvMH_B4()	;Menu Hotstring (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
-	if (WinExist("ahk_id" HS3GuiHwnd))
-		Gui, HS3: -Disabled	
-	if (WinExist("ahk_id" HS4GuiHwnd))
-		Gui, HS4: -Disabled	
-	Gui, GuiEvents: Destroy
+     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvMH_B2()	;Apply Button
@@ -3916,11 +3896,7 @@ F_EvMH_B3()	;Button Close
 	IniWrite, % ini_MHSD,	% ini_HADConfig, Event_MenuHotstring,		MHSD
 	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
-	if (WinExist("ahk_id" HS3GuiHwnd))
-		Gui, HS3: -Disabled	
-	if (WinExist("ahk_id" HS4GuiHwnd))
-		Gui, HS4: -Disabled	
-	Gui, GuiEvents: Destroy
+     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvMH_B1()	;Sound test
@@ -4563,11 +4539,7 @@ F_EvBH_B5()	;Events Basic Hotstring (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
-	if (WinExist("ahk_id" HS3GuiHwnd))
-		Gui, HS3: -Disabled
-	if (WinExist("ahk_id" HS4GuiHwnd))
-		Gui, HS4: -Disabled	
-	Gui, GuiEvents: Destroy
+     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvBH_B3()	;Events Basic Hotstring (is triggered) Button Apply
@@ -4638,11 +4610,7 @@ F_EvBH_B4(CloseGuiEvents)	;Events Basic Hotstring (is triggered) Button Close
 	IniWrite, % ini_OHSD,	% ini_HADConfig, Event_BasicHotstring,	OHSD
 	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
-	if (WinExist("ahk_id" HS3GuiHwnd))
-		Gui, HS3: -Disabled
-	if (WinExist("ahk_id" HS4GuiHwnd))
-		Gui, HS4: -Disabled	
-	Gui, GuiEvents: Destroy
+     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvBH_S3()
@@ -5167,26 +5135,15 @@ F_TTstyling_B1()	;Button: Restore default (Background color)
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTStyling_B8()	;Cancel button
 {
-	global ;assume-global mode
-	if (WinExist("ahk_id" HS3GuiHwnd))
-		Gui, HS3: -Disabled	
-	if (WinExist("ahk_id" HS4GuiHwnd))
-		Gui, HS4: -Disabled	
-	Gui, TDemo: 		Destroy
+	global ;assume-global mode of operation
+     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "TDemo")
 	Gui, TTstyling: 	Destroy
-	;F_LoadTTStyling()	;restore previous values
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HMstyling_B8()	;Cancel button
 {
 	global ;assume-global mode
-	if (WinExist("ahk_id" HS3GuiHwnd))
-		Gui, HS3: -Disabled
-	if (WinExist("ahk_id" HS4GuiHwnd))
-		Gui, HS4: -Disabled	
-	Gui, HDemo: 		Destroy
-	Gui, TTstyling: 	Destroy
-	;F_LoadHMStyling()	;restore previous values
+     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HDemo")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTstyling_B6()	;Apply button
@@ -5282,12 +5239,7 @@ F_TTstyling_B7()	;Close button
 	IniWrite, % ini_TTTyFaceColCus, 	% ini_HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceColorCustom
 	IniWrite, % ini_TTTyFaceFont, 	% ini_HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceFont
 	IniWrite, % ini_TTTySize,		% ini_HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceSize
-	if (WinExist("ahk_id" HS3GuiHwnd))
-		Gui, HS3: -Disabled
-	if (WinExist("ahk_id" HS4GuiHwnd))
-		Gui, HS4: -Disabled	
-	Gui, TDemo: 		Destroy
-	;F_RecreateGuiStatic()
+     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "TDemo")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HMstyling_B6()	;Button Apply
@@ -5382,12 +5334,7 @@ F_HMstyling_B7()	;Button Close
 	IniWrite, % ini_HMTyFaceColCus, 	% ini_HADConfig, HotstringMenu_Styling, HotstringMenuTypefaceColorCustom
 	IniWrite, % ini_HMTyFaceFont, 	% ini_HADConfig, HotstringMenu_Styling, HotstringMenuTypefaceFont
 	IniWrite, % ini_HMTySize,		% ini_HADConfig, HotstringMenu_Styling, HotstringMenuTypefaceSize
-	if (WinExist("ahk_id" HS3GuiHwnd))
-		Gui, HS3: -Disabled
-	if (WinExist("ahk_id" HS4GuiHwnd))
-		Gui, HS4: -Disabled	
-	Gui, HDemo: 		Destroy
-	;F_RecreateGuiStatic()
+     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HDemo")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTstyling_B5()	;Button Test styling
@@ -7559,7 +7506,7 @@ F_Move()
 	Gui, HS3Search: 	Hide	
 	GuiControl, ChooseString, % IdDDL2, % DestinationLibrary
 	Gui, HS3: 		Submit, NoHide	;this line is necessary to v_SelectHotstringLibrary <- DestinationLibrary
-	F_SelectLibrary()	;DestinationLibrary tu jestem
+	F_SelectLibrary()	;DestinationLibrary 
 	Loop, % LV_GetCount()
 	{
 		if (v_Temp1 == v_TriggerString)
@@ -7850,7 +7797,7 @@ F_Searching(ReloadListView*)
 			F_WhichGui()
 			Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 			PreviousGui := A_DefaultGui
-			Gui, HS3Search: -Disabled	;tu jestem
+			Gui, HS3Search: -Disabled
 			Gui, HS3Search: Default
 			LV_Delete()
 			Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
