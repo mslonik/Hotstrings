@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -752,7 +752,7 @@ F_HMenuSI_Keyboard()
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	
-	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_TTMenuStatic_Keyboard it was crucial for ControlSend to run correctly
+;	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_TTMenuStatic_Keyboard it was crucial for ControlSend to run correctly
 	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -855,7 +855,7 @@ F_HMenuCLI_Keyboard()
 	global	;assume-global moee
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",	ShiftTabIsFound := false, ReplacementString := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
-	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_TTMenuStatic_Keyboard it was crucial for ControlSend to run correctly
+;	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_TTMenuStatic_Keyboard it was crucial for ControlSend to run correctly
 	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -1248,15 +1248,71 @@ F_PathLibrariesRestoreDefault()
 F_Load_ini_HADL()
 {
 	global	;assume-global mode
-	IniRead, ini_HADL, % ini_HADConfig, Configuration, HADL, % A_Space	;Default parameter. The value to store in OutputVar (ini_HADL) if the requested key is not found. If omitted, it defaults to the word ERROR. To store a blank value (empty string), specify %A_Space%.
+	local	LibLocation_ScriptDir := false, LibLocation_AppData := false, IsLibraryFolderEmpty1 := true, IsLibraryFolderEmpty2 := true, LibCounter1 := 0, LibCounter2 := 0
 
+	IniRead, ini_HADL, % ini_HADConfig, Configuration, HADL, % A_Space	;Default parameter. The value to store in OutputVar (ini_HADL) if the requested key is not found. If omitted, it defaults to the word ERROR. To store a blank value (empty string), specify %A_Space%.
 	if (ini_HADL = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{	;folder Libraries can be present only in 2 locations: by default in A_AppData or in A_ScriptDir
-		if (!InStr(FileExist(A_ScriptDir . "\" . "Libraries"), "D"))
-			ini_HADL := A_ScriptDir . "\" . "Libraries"
-		if (!InStr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"), "D"))	;if there is no folder...
-			ini_HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
+		ini_HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
 		IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
+		return
+	}
+	if (InStr(FileExist(A_ScriptDir . "\" . "Libraries"), "D"))
+	{
+		ini_HADL := A_ScriptDir . "\" . "Libraries"
+		LibLocation_ScriptDir := true
+		Loop, Files, % ini_HADL . "\*.csv"
+		{
+			IsLibraryFolderEmpty1 := false
+			LibCounter1++
+		}
+	}
+	if (InStr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"), "D"))	;if there is no folder...
+	{
+		ini_HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
+		LibLocation_AppData := true
+		Loop, Files, % ini_HADL . "\*.csv"
+		{
+			IsLibraryFolderEmpty2 := false
+			LibCounter2++
+		}
+	}
+	if (IsLibraryFolderEmpty1) and (IsLibraryFolderEmpty2)
+	{
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Both optional locations for library folder are empty = do not contain any library files. The second one will be used." . "`n`n"]
+			. A_ScriptDir . "\" . "Libraries" . "`n"
+			. A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"
+		IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
+		return	
+	}
+	if (!IsLibraryFolderEmpty1) and (IsLibraryFolderEmpty2)
+	{
+		ini_HADL := A_ScriptDir . "\" . "Libraries"
+		IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
+		return	
+	}
+	if (IsLibraryFolderEmpty1) and (!IsLibraryFolderEmpty2)
+	{
+		ini_HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
+		IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
+		return	
+	}
+	if (!IsLibraryFolderEmpty1) and (!IsLibraryFolderEmpty2)
+	{
+		MsgBox,  % 64 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Both optional library folder locations contain *.csv files. Would you like to use the first one?"]
+			. "(If you answer ""No"", the second one will be used)." . "`n`n"
+			. A_ScriptDir . "\" . "Libraries" . "`n"
+			. A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"
+		IfMsgBox, Yes
+		{
+			ini_HADL := A_ScriptDir . "\" . "Libraries"
+			IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
+		}
+		IfMsgBox, No
+		{
+			ini_HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
+			IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
+		}
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9885,6 +9941,8 @@ Backslash \ 											= Backslash \
 Basic hotstring is triggered								= Basic hotstring is triggered
 black												= black
 blue													= blue
+Both optional locations for library folder are empty = do not contain any library files. The second one will be used. = Both optional locations for library folder are empty = do not contain any library files. The second one will be used.
+Both optional library folder locations contain *.csv files. Would you like to use the first one? = Both optional library folder locations contain *.csv files. Would you like to use the first one?
 Built with Autohotkey.exe version							= Built with Autohotkey.exe version
 By default library files (*.csv) are located in Users subfolder which is protected against other computer users. = By default library files (*.csv) are located in Users subfolder which is protected against other computer users.
 By length 											= By length
@@ -10018,6 +10076,7 @@ If you answer ""Yes"" it will overwritten with chosen settings. = If you answer 
 If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used. = If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used.
 If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file. = If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file.
 If you answer ""No"" edition of the current definition will be interrupted. = If you answer ""No"" edition of the current definition will be interrupted.
+(If you answer ""No"", the second one will be used).			= (If you answer ""No"", the second one will be used).
 If you don't apply it, previous changes will be lost.			= If you don't apply it, previous changes will be lost.
 Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
