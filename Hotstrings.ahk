@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -752,7 +752,7 @@ F_HMenuSI_Keyboard()
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	
-	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_TTMenuStatic_Keyboard it was crucial for ControlSend to run correctly
+;	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_TTMenuStatic_Keyboard it was crucial for ControlSend to run correctly
 	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -855,7 +855,7 @@ F_HMenuCLI_Keyboard()
 	global	;assume-global moee
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",	ShiftTabIsFound := false, ReplacementString := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
-	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_TTMenuStatic_Keyboard it was crucial for ControlSend to run correctly
+;	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_TTMenuStatic_Keyboard it was crucial for ControlSend to run correctly
 	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -1280,7 +1280,7 @@ F_Load_ini_HADL()
 	if (IsLibraryFolderEmpty1) and (IsLibraryFolderEmpty2)
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Both optional locations for library folder are empty = do not contain any library files. The second one will be used." . "`n`n"]
-			. A_ScriptDir . "\" . "Libraries"
+			. A_ScriptDir . "\" . "Libraries" . "`n"
 			. A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"
 		IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
 		return	
@@ -1299,9 +1299,9 @@ F_Load_ini_HADL()
 	}
 	if (!IsLibraryFolderEmpty1) and (!IsLibraryFolderEmpty2)
 	{
-		MsgBox, 64 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Both optional library folder locations contain *.csv files. Would you like to use the first one?"]
+		MsgBox,  % 64 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Both optional library folder locations contain *.csv files. Would you like to use the first one?"]
 			. "(If you answer ""No"", the second one will be used)." . "`n`n"
-			. A_ScriptDir . "\" . "Libraries"
+			. A_ScriptDir . "\" . "Libraries" . "`n"
 			. A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"
 		IfMsgBox, Yes
 		{
