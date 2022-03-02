@@ -1280,7 +1280,7 @@ F_Load_ini_HADL()
 	if (IsLibraryFolderEmpty1) and (IsLibraryFolderEmpty2)
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Both optional locations for library folder are empty = do not contain any library files. The second one will be used." . "`n`n"]
-			. A_ScriptDir . "\" . "Libraries"
+			. A_ScriptDir . "\" . "Libraries" . "`n"
 			. A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"
 		IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
 		return	
@@ -1299,9 +1299,9 @@ F_Load_ini_HADL()
 	}
 	if (!IsLibraryFolderEmpty1) and (!IsLibraryFolderEmpty2)
 	{
-		MsgBox, 64 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Both optional library folder locations contain *.csv files. Would you like to use the first one?"]
+		MsgBox,  % 64 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Both optional library folder locations contain *.csv files. Would you like to use the first one?"]
 			. "(If you answer ""No"", the second one will be used)." . "`n`n"
-			. A_ScriptDir . "\" . "Libraries"
+			. A_ScriptDir . "\" . "Libraries" . "`n"
 			. A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"
 		IfMsgBox, Yes
 		{
