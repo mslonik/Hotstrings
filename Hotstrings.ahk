@@ -238,10 +238,10 @@ Menu, SubmenuEndChars, Add, % TransA["Tab"], 												F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 											F_ToggleEndChars
 F_ToggleEndChars()
 Func_GuiEventsMenu		:= func("F_GuiEvents")
-Menu, Submenu1,		Add, % TransA["Signalling of events"],									% Func_GuiEventsMenu
+Menu, Submenu1,		Add, % TransA["Events: signaling"],									% Func_GuiEventsMenu
 Func_GuiEventsMenu.Call(true)		
 Func_GuiStylingMenu		:= func("F_TTstyling")		
-Menu, Submenu1,		Add, % TransA["Triggerstring tips and hotstring menu styling"],				% Func_GuiStylingMenu
+Menu, Submenu1,		Add, % TransA["Events: styling"],				% Func_GuiStylingMenu
 Func_GuiStylingMenu.Call(true)		
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 								:ConfGUI
 Menu, Submenu1,		Add		
@@ -562,14 +562,14 @@ if (ini_GuiReload) and (v_Param != "l")
 	~Esc::	;tilde in order to run function TT_C4GuiEscape
 		GuiControl,, % IdTT_C4_LB4, |
 		;OutputDebug, % "v_Triggerstring:" . A_Tab . v_Triggerstring . A_Tab . "v_EndChar:" . A_Tab . v_EndChar
-		if (v_Triggerstring != "")
-		{
-			WinActivate, % "ahk_id" PreviousWindowID
-			Send, % v_Triggerstring
-			v_Triggerstring := ""
-		}
-		v_InputH.VisibleText	:= true
-,		v_InputString 			:= ""	
+		; if (v_Triggerstring != "")
+		; {
+		; 	WinActivate, % "ahk_id" PreviousWindowID
+		; 	Send, % v_Triggerstring
+		; 	v_Triggerstring := ""
+		; }
+		; v_InputH.VisibleText	:= true
+		v_InputString 			:= ""	
 		return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4802,13 +4802,39 @@ F_GuiEvents_LoadValues()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_LoadATStyling()
+{
+	global ;assume-global mode
+	ini_ATBgrCol		:= "green"
+,	ini_ATTyFaceCol	:= "black"
+,	ini_ATTyFaceFont	:= "Calibri"
+,	ini_ATTySize		:= 10
+	
+	IniRead, ini_ATBgrCol, 			% ini_HADConfig, ActiveTriggerstring_Styling, ATBackgroundColor, green
+	if (!ini_ATBgrCol)
+		ini_ATBgrCol := "green"
+	if (ini_ATBgrCol = "custom")
+		IniRead, ini_ATBgrColCus,	% ini_HADConfig, ActiveTriggerstring_Styling, ATBackgroundColorCustom
+	IniRead, ini_ATTyFaceCol, 		% ini_HADConfig, ActiveTriggerstring_Styling, ATTypefaceColor, black
+	if (!ini_ATTyFaceCol)
+		ini_ATTyFaceCol := "black"
+	if (ini_ATTyFaceCol = "custom")
+		IniRead, ini_ATTyFaceColCus,	% ini_HADConfig, ActiveTriggerstring_Styling, ATTypefaceColorCustom
+	IniRead, ini_ATTyFaceFont, 		% ini_HADConfig, ActiveTriggerstring_Styling, ATTypefaceFont, Calibri
+	if (!ini_ATTyFaceFont)
+		ini_ATTyFaceFont := "Calibri"
+	IniRead, ini_ATTySize,	 		% ini_HADConfig, ActiveTriggerstring_Styling, ATTypefaceSize, 10
+	if (!ini_ATTySize)
+		ini_ATTySize := 10
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadHMStyling()
 {
 	global ;assume-global mode
 	ini_HMBgrCol		:= "white"
-	ini_HMTyFaceCol	:= "black"
-	ini_HMTyFaceFont	:= "Calibri"
-	ini_HMTySize		:= 10
+,	ini_HMTyFaceCol	:= "black"
+,	ini_HMTyFaceFont	:= "Calibri"
+,	ini_HMTySize		:= 10
 	
 	IniRead, ini_HMBgrCol, 			% ini_HADConfig, HotstringMenu_Styling, HotstringMenuBackgroundColor, white
 	if (!ini_HMBgrCol)
@@ -4832,9 +4858,9 @@ F_LoadTTStyling()
 {
 	global ;assume-global mode
 	ini_TTBgrCol		:= "white"
-	ini_TTTyFaceCol	:= "black"
-	ini_TTTyFaceFont	:= "Calibri"
-	ini_TTTySize		:= 10
+,	ini_TTTyFaceCol	:= "black"
+,	ini_TTTyFaceFont	:= "Calibri"
+,	ini_TTTySize		:= 10
 	
 	IniRead, ini_TTBgrCol, 			% ini_HADConfig, TriggerstringTips_Styling, TriggerstringTipsBackgroundColor, white
 	if (!ini_TTBgrCol)
@@ -4959,7 +4985,7 @@ F_GuiStyling_CreateObjects()
 	Gui, TTstyling: Add,	Text, 		HwndIdATstyling_T2, 					ⓘ
 	GuiControl, +g, % IdATstyling_T2, % T_SBackgroundColorInfo
 	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	Gui, TTstyling: Add,	DropDownList,	HwndIdATstyling_DDL1 vATS_DDL1 gF_ATstyling_DDL1,	% TransA["black"] . "|" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "||" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"] . "|" . TransA["custom"]
+	Gui, TTstyling: Add,	DropDownList,	HwndIdATstyling_DDL1 vATS_DDL1 gF_ATstyling_DDL1,	% TransA["black"] . "|" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "|" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "||" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"] . "|" . TransA["custom"]
 	Gui, TTstyling: Add,	Edit,		HwndIdATstyling_E1 Limit6,				% TransA["HTML color RGB value, e.g. 00FF00"]
 	Gui, TTstyling: Add,	Button,		HwndIdATstyling_B1 gF_ATstyling_B1,		% TransA["Restore default"]
 	Gui, TTstyling: Add,	Text, 		HwndIdATstyling_T3,						% TransA["Typeface color"] . ":"
@@ -5033,17 +5059,39 @@ F_ATstyling_B2()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ATstyling_DDL2()
 {
-
+	global ;assume-global mode
+	local OutputVarTemp := ""
+	GuiControlGet, OutputVarTemp,, % IdATstyling_DDL2
+	if (OutputVarTemp = "custom")
+		GuiControl, Enable, % IdATstyling_E2
+	else
+	{
+		GuiControl,, % IdATstyling_E2, % TransA["HTML color RGB value, e.g. 00FF00"] 
+		GuiControl, Disable, % IdATstyling_E2
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ATstyling_B1()
 {
-
+	global ;assume-global mode
+	ini_ATBgrCol := "green"
+	GuiControl, ChooseString, % IdATstyling_DDL1, % ini_ATBgrCol
+	GuiControl,, % IdATstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
+	GuiControl, Disable, % IdATstyling_E1
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ATstyling_DDL1()
 {
-
+	global ;assume-global mode
+	local OutputVarTemp := ""
+	GuiControlGet, OutputVarTemp,, % IdATstyling_DDL1
+	if (OutputVarTemp = "custom")
+		GuiControl, Enable, % IdATstyling_E1
+	else
+	{
+		GuiControl,, % IdATstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
+		GuiControl, Disable, % IdATstyling_E1
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HMstyling_DDL1()
@@ -5601,216 +5649,6 @@ F_GuiTTstyling_DetermineConstraints()
 	
 	v_xNext := c_xmarg
 	v_yNext := c_ymarg
-	GuiControl, Move, % IdHMstyling_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext += TheWidestText + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
-	GuiControl, Move, % IdHMstyling_DDL1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_DDL1
-	v_xNext += v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_E1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_E1
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	
-	v_xNext := c_xmarg
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B1
-	v_yNext += v_OutVarTempH + 2 * c_ymarg
-	GuiControl, Move, % IdHMstyling_T3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext += TheWidestText + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_T4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
-	GuiControl, Move, % IdHMstyling_DDL2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_DDL2
-	v_xNext += v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_E2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_E2
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	
-	v_xNext := c_xmarg
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B1
-	v_yNext += v_OutVarTempH + 2 * c_ymarg
-	GuiControl, Move, % IdHMstyling_T5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext += TheWidestText + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_T6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
-	GuiControl, Move, % IdHMstyling_DDL3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_DDL3
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	
-	GuiControlGet, v_OutputVarTemp, Pos, % IdTTstyling_B3
-	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 5 * c_xmarg
-	GuiControl, Move, % IdHMstyling_T9, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutputVarTemp, Pos, % IdHMstyling_T9
-	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_T10, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutputVarTemp, Pos, % IdHMstyling_B3
-	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 5 * c_xmarg
-	v_OutputVarTemp := v_yNext
-	v_yNext += HofText
-	GuiControl, Move, % IdHMstyling_LB1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	
-	v_xNext := c_xmarg
-	v_yNext := v_OutputVarTemp
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B1
-	v_yNext += v_OutVarTempH + 2 * c_ymarg
-	GuiControl, Move, % IdHMstyling_T7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext += TheWidestText + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_T8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
-	GuiControl, Move, % IdHMstyling_DDL4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_DDL4
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	
-	v_xNext := c_xmarg
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B1
-	v_yNext += v_OutVarTempH + 2 * c_ymarg
-	GuiControl, Move, % IdHMstyling_B5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B5
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_B6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B6
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_B7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B7
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_B8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	
-	GuiControl, Disable, % IdHMstyling_E1
-	GuiControl, Disable, % IdHMstyling_E2
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHMstyling_DetermineConstraints()
-{
-	global ;assume-global mode
-	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
-		,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
-		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
-		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
-		,v_OutVarTemp4 := 0, 	v_OutVarTemp4X := 0, 	v_OutVarTemp4Y := 0, 	v_OutVarTemp4W := 0, 	v_OutVarTemp4H := 0
-							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
-		,TheWidestText := 0
-	
-	GuiControlGet, v_OutVarTemp1, Pos, % IdHMstyling_T1
-	GuiControlGet, v_OutVarTemp2, Pos, % IdHMstyling_T3
-	GuiControlGet, v_OutVarTemp3, Pos, % IdHMstyling_T5
-	GuiControlGet, v_OutVarTemp4, Pos, % IdHMstyling_T7
-	TheWidestText := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W, v_OutVarTemp4W)
-	
-	v_xNext := c_xmarg
-	v_yNext := c_ymarg
-	GuiControl, Move, % IdHMstyling_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext += TheWidestText + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
-	GuiControl, Move, % IdHMstyling_DDL1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_DDL1
-	v_xNext += v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_E1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_E1
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	
-	v_xNext := c_xmarg
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B1
-	v_yNext += v_OutVarTempH + 2 * c_ymarg
-	GuiControl, Move, % IdHMstyling_T3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext += TheWidestText + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_T4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
-	GuiControl, Move, % IdHMstyling_DDL2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_DDL2
-	v_xNext += v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_E2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_E2
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	
-	v_xNext := c_xmarg
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B1
-	v_yNext += v_OutVarTempH + 2 * c_ymarg
-	GuiControl, Move, % IdHMstyling_T5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext += TheWidestText + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_T6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
-	GuiControl, Move, % IdHMstyling_DDL3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_DDL3
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	
-	GuiControlGet, v_OutputVarTemp, Pos, % IdTTstyling_B3
-	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 5 * c_xmarg
-	GuiControl, Move, % IdHMstyling_T9, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutputVarTemp, Pos, % IdHMstyling_T9
-	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_T10, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutputVarTemp, Pos, % IdHMstyling_B3
-	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 5 * c_xmarg
-	v_OutputVarTemp := v_yNext
-	v_yNext += HofText
-	GuiControl, Move, % IdHMstyling_LB1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	
-	v_xNext := c_xmarg
-	v_yNext := v_OutputVarTemp
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B1
-	v_yNext += v_OutVarTempH + 2 * c_ymarg
-	GuiControl, Move, % IdHMstyling_T7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext += TheWidestText + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_T8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg
-	v_yNext += HofText
-	GuiControl, Move, % IdHMstyling_DDL4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_DDL4
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	
-	v_xNext := c_xmarg
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B1
-	v_yNext += v_OutVarTempH + 2 * c_ymarg
-	GuiControl, Move, % IdHMstyling_B5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B5
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_B6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B6
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_B7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B7
-	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdHMstyling_B8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	
-	GuiControl, Disable, % IdHMstyling_E1
-	GuiControl, Disable, % IdHMstyling_E2
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiTTStyling_DetermineConstraints()
-{
-	global ;assume-global mode
-	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
-		,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
-		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
-		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
-		,v_OutVarTemp4 := 0, 	v_OutVarTemp4X := 0, 	v_OutVarTemp4Y := 0, 	v_OutVarTemp4W := 0, 	v_OutVarTemp4H := 0
-							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
-		,TheWidestText := 0
-	
-	GuiControlGet, v_OutVarTemp1, Pos, % IdTTstyling_T1
-	GuiControlGet, v_OutVarTemp2, Pos, % IdTTstyling_T3
-	GuiControlGet, v_OutVarTemp3, Pos, % IdTTstyling_T5
-	GuiControlGet, v_OutVarTemp4, Pos, % IdTTstyling_T7
-	TheWidestText := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W, v_OutVarTemp4W)
-	
-	v_xNext := c_xmarg
-	v_yNext := c_ymarg
 	GuiControl, Move, % IdTTstyling_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext += TheWidestText + 2 * c_xmarg
 	GuiControl, Move, % IdTTstyling_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
@@ -5893,8 +5731,218 @@ F_GuiTTStyling_DetermineConstraints()
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdTTstyling_B8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	
-	GuiControl, Disable, % IdTTstyling_E1	;future: add options to define other colors
+	GuiControl, Disable, % IdTTstyling_E1
 	GuiControl, Disable, % IdTTstyling_E2
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiHMstyling_DetermineConstraints()
+{
+	global ;assume-global mode
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
+		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
+		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
+		,v_OutVarTemp4 := 0, 	v_OutVarTemp4X := 0, 	v_OutVarTemp4Y := 0, 	v_OutVarTemp4W := 0, 	v_OutVarTemp4H := 0
+							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+		,TheWidestText := 0
+	
+	GuiControlGet, v_OutVarTemp1, Pos, % IdHMstyling_T1
+	GuiControlGet, v_OutVarTemp2, Pos, % IdHMstyling_T3
+	GuiControlGet, v_OutVarTemp3, Pos, % IdHMstyling_T5
+	GuiControlGet, v_OutVarTemp4, Pos, % IdHMstyling_T7
+	TheWidestText := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W, v_OutVarTemp4W)
+	
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdHMstyling_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdHMstyling_DDL1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_DDL1
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_E1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_E1
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdHMstyling_T3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_T4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdHMstyling_DDL2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_DDL2
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_E2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_E2
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdHMstyling_T5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_T6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdHMstyling_DDL3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_DDL3
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	GuiControlGet, v_OutputVarTemp, Pos, % IdHMstyling_B3
+	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 5 * c_xmarg
+	GuiControl, Move, % IdHMstyling_T9, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutputVarTemp, Pos, % IdHMstyling_T9
+	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_T10, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutputVarTemp, Pos, % IdHMstyling_B3
+	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 5 * c_xmarg
+	v_OutputVarTemp := v_yNext
+	v_yNext += HofText
+	GuiControl, Move, % IdHMstyling_LB1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	v_xNext := c_xmarg
+	v_yNext := v_OutputVarTemp
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdHMstyling_T7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_T8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdHMstyling_DDL4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_DDL4
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdHMstyling_B5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B5
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_B6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B6
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_B7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdHMstyling_B7
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdHMstyling_B8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	GuiControl, Disable, % IdHMstyling_E1
+	GuiControl, Disable, % IdHMstyling_E2
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiATStyling_DetermineConstraints()
+{
+	global ;assume-global mode
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
+		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
+		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
+		,v_OutVarTemp4 := 0, 	v_OutVarTemp4X := 0, 	v_OutVarTemp4Y := 0, 	v_OutVarTemp4W := 0, 	v_OutVarTemp4H := 0
+							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+		,TheWidestText := 0
+	
+	GuiControlGet, v_OutVarTemp1, Pos, % IdATstyling_T1
+	GuiControlGet, v_OutVarTemp2, Pos, % IdATstyling_T3
+	GuiControlGet, v_OutVarTemp3, Pos, % IdATstyling_T5
+	GuiControlGet, v_OutVarTemp4, Pos, % IdATstyling_T7
+	TheWidestText := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W, v_OutVarTemp4W)
+	
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % IdATstyling_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdATstyling_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdATstyling_DDL1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdATstyling_DDL1
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdATstyling_E1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdATstyling_E1
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdATstyling_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % IdATstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdATstyling_T3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdATstyling_T4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdATstyling_DDL2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdATstyling_DDL2
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdATstyling_E2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdATstyling_E2
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdATstyling_B2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % IdATstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdATstyling_T5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdATstyling_T6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdATstyling_DDL3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdATstyling_DDL3
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdATstyling_B3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	GuiControlGet, v_OutputVarTemp, Pos, % IdATstyling_B3
+	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 5 * c_xmarg
+	GuiControl, Move, % IdATstyling_T9, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutputVarTemp, Pos, % IdATstyling_T9
+	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdATstyling_T10, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutputVarTemp, Pos, % IdATstyling_B3
+	v_xNext := v_OutputVarTempX + v_OutputVarTempW + 5 * c_xmarg
+	v_OutputVarTemp := v_yNext
+	v_yNext += HofText
+	GuiControl, Move, % IdATstyling_LB1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	v_xNext := c_xmarg
+	v_yNext := v_OutputVarTemp
+	GuiControlGet, v_OutVarTemp, Pos, % IdATstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdATstyling_T7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % IdATstyling_T8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % IdATstyling_DDL4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdATstyling_DDL4
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdATstyling_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % IdATstyling_B1
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdATstyling_B5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdATstyling_B5
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdATstyling_B6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdATstyling_B6
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdATstyling_B7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % IdATstyling_B7
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdATstyling_B8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	GuiControl, Disable, % IdATstyling_E1	;future: add options to define other colors
+	GuiControl, Disable, % IdATstyling_E2
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiStyling_LoadValues()	
@@ -5945,6 +5993,7 @@ F_TTstyling(OneTime*)
 	F_GuiStyling_CreateObjects()
 	F_GuiTTStyling_DetermineConstraints()
 	F_GuiHMstyling_DetermineConstraints()
+	F_GuiATStyling_DetermineConstraints()
 	F_GuiStyling_LoadValues()
 	Gui, TTstyling: Submit		;this line is necessary to correctly initialize some global variables
 	F_TTStylingTab3(OneTime[1])			;OneTime is used now
@@ -5962,11 +6011,11 @@ F_TTstyling(OneTime*)
 		{
 			NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
 			NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
-			Gui, TTstyling: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Triggerstring tips and hotstring menu styling"]
+			Gui, TTstyling: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Events: styling"]
 		}
 		else
 		{
-			Gui, TTstyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Triggerstring tips and hotstring menu styling"]
+			Gui, TTstyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Events: styling"]
 		}
 		GuiControl, Hide, % IdTTstyling_LB1	
 		GuiControl, Hide, % IdHMstyling_LB1
@@ -9662,6 +9711,13 @@ HotstringMenuTypefaceColorCustom=
 HotstringMenuTypefaceColor=black
 HotstringMenuTypefaceFont=Calibri
 HotstringMenuTypefaceSize=10
+[ActiveTriggerstring_Styling]
+ATBackgroundColor=white
+ATBackgroundColorCustom=
+ATTypefaceColorCustom=
+ATTypefaceColor=black
+ATTypefaceFont=Calibri
+ATTypefaceSize=10
 [Event_ActiveTriggerstringTips]
 ATEn=0
 [Event_BasicHotstring]
@@ -10419,7 +10475,7 @@ Show full GUI (F4)										= Show full GUI (F4)
 Show intro											= Show intro
 Show Introduction window after application is restarted?		= Show Introduction window after application is restarted?
 Show Sandbox (F6)										= Show Sandbox (F6)
-Signalling of events									= Signalling of events
+Events: signaling									= Events: signaling
 Silent mode											= Silent mode
 silver												= silver
 Size of font											= Size of font
@@ -10515,7 +10571,7 @@ Triggerstring tips 										= Triggerstring tips
 Triggerstring tips have been loaded from the following library file to memory: = Triggerstring tips have been loaded from the following library file to memory:
 Triggerstring tips related to the following library file have been unloaded from memory: = Triggerstring tips related to the following library file have been unloaded from memory:
 Triggerstring tips styling								= Triggerstring tips styling
-Triggerstring tips and hotstring menu styling				= Triggerstring tips and hotstring menu styling
+Events: styling										= Events: styling
 Triggerstring tooltip timeout in [ms]						= Triggerstring tooltip timeout in [ms]
 Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
 Typeface color											= Typeface color
