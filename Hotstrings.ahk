@@ -6121,7 +6121,8 @@ F_CheckFileEncoding(FullFilePath)
 				. "`n" . FullFilePath
 				. "`n`n" . RetrievedEncoding . A_Space . "no-BOM"
 				. "`n`n" . TransA["Required encoding: UTF-8 with BOM. Application will exit now."]
-			ExitApp, 3	;no-bom
+			try	;if no try, some warnings are still catched; with try no more warnings
+				ExitApp, 3	;no-bom
 		}
 	}
 }
