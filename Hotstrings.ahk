@@ -726,8 +726,8 @@ F_TTMenuStatic_Keyboard(IsPreviousWindowIDvital*)
 			GuiControl,, % IdTT_C4_LB3, |
 			; OutputDebug, % "v_InputStringOutput:" . A_Tab . v_InputString . A_Tab . "v_Temp1:" . A_Tab . v_Temp1 . A_Tab . "A_IsCritical:" . A_Tab . A_IsCritical . "`n"
 			Hotstring("Reset")	;reset hotstring recognizer
-			SendLevel, 2			;to backtrigger it must be higher than the input level of the hotstrings
 			SendEvent, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
+			SendLevel, 2			;to backtrigger it must be higher than the input level of the hotstrings
 			SendEvent, % v_Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
 			SendLevel, 0
 		Case "MHot":
@@ -1066,7 +1066,8 @@ F_PathMoveAppFolder()
 				; IniWrite, % OldScriptPID, % ini_HADConfig, Configuration, OldScriptPID
 				F_ReloadApplication("Run from new location", NewScriptDir)	;reload into default mode of operation
 				; OutputDebug, % "ExitApp" . A_Space . "A_ScriptDir:" . A_Tab . A_ScriptDir
-				ExitApp, 0
+				try	;if no try, some warnings are still catched; with try no more warnings
+					ExitApp, 0
 			}
 			else
 			{
@@ -1114,7 +1115,8 @@ F_PathRestoreDefaultAppFolder()
 					IniWrite, % NewScriptDir, % ini_HADConfig, Configuration, OldScriptDir
 					Run *RunAs "%A_AhkPath%" /restart "%A_ScriptFullPath%"
 				}
-				ExitApp, 0
+				try	;if no try, some warnings are still catched; with try no more warnings
+					ExitApp, 0
 			}
 		}
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["You've cancelled this process."]
@@ -2475,8 +2477,8 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_DestroyTriggerstringTips(ini_TTCn)
 	Hotstring("Reset")
-	SendLevel, 2	;to backtrigger it must be higher than the input level of the hotstrings
 	SendEvent, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
+	SendLevel, 2	;to backtrigger it must be higher than the input level of the hotstrings
 	SendEvent, % v_Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
 	SendLevel, 0
 }
@@ -6243,7 +6245,8 @@ F_VerUpdDownload()
 			MsgBox, , Error, % "ErrorLevel" . A_Tab . ErrorLevel
 					. "`n`n" . "A_LastError" . A_Tab . A_LastError	;183 : Cannot create a file when that file already exists.
 					. "`n`n" . "Exception" . A_Tab . e
-			ExitApp, 4 ; File move unsuccessful.		
+			try	;if no try, some warnings are still catched; with try no more warnings		
+				ExitApp, 4 ; File move unsuccessful.		
 		}
 		try
 			URLDownloadToFile, % URLexe, % A_ScriptFullPath
@@ -9564,7 +9567,8 @@ F_ReloadApplication(params*)	;ItemName, ItemPos, MenuName
 			Case % true:	Run, % A_AhkPath . A_Space . """" . params[2] . """" . "\" . SubStr(A_ScriptName, 1, -4) . ".exe"
 			Case "": 		Run, % A_AhkPath . A_Space . """" . params[2] . """" . "\" . A_ScriptName	;double quotes ("") are necessary to escape " and to run script if its path contains space.
 		}
-		ExitApp, 0
+		try	;if no try, some warnings are still catched; with try no more warnings
+			ExitApp, 0
 	 }
 	
 	if (WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd))
@@ -9597,7 +9601,8 @@ F_ReloadApplication(params*)	;ItemName, ItemPos, MenuName
 					Case "": 		Reload
 				}
 			}
-			ExitApp, 0
+			try	;if no try, some warnings are still catched; with try no more warnings
+				ExitApp, 0
 		}
 		IfMsgBox, No
 			return
@@ -9619,7 +9624,8 @@ F_ReloadApplication(params*)	;ItemName, ItemPos, MenuName
 					Case "": 		Reload
 				}
 		}
-		ExitApp, 0
+		try	;if no try, some warnings are still catched; with try no more warnings
+			ExitApp, 0
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12119,7 +12125,8 @@ F_CreateHotstring(txt, nameoffile)
 					. "`n" . txt . "`n`n" . TransA["This line do not comply to format required by this application."] . "`n`n" 
 					. TransA["Continue reading the library file? If you answer ""No"" then application will exit!"]
 		IfMsgBox, No
-			ExitApp, 1	;error reading library file
+			try	;if no try, some warnings are still catched; with try no more warnings
+				ExitApp, 1	;error reading library file
 		IfMsgBox, Yes
 			return
 	}
@@ -12572,8 +12579,8 @@ F_TTMenuStatic_Mouse() ;The subroutine may consult the following built-in variab
 		; OutputDebug, % "ini_TTCn:" . A_Tab . ini_TTCn . "`n"
 		v_UndoHotstring := OutputVarTemp
 		Hotstring("Reset")			;reset hotstring recognizer
-		SendLevel, 2				;to backtrigger it must be higher than the input level of the hotstrings
 		SendEvent, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
+		SendLevel, 2				;to backtrigger it must be higher than the input level of the hotstrings
 		SendEvent, % OutputVarTemp	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
 		SendLevel, 0
 	}
