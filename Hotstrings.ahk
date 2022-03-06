@@ -594,13 +594,13 @@ F_TTMenuStatic_Keyboard(IsPreviousWindowIDvital*)
 ,			NoPosInList := 0, Temp2 := "", WhichLB := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 
-	if (!ini_ATEn)
-		return
 	OutputDebug, % "F_TTMenuStatic_Keyboard" . A_Tab . "v_PressedKey:" . A_Tab . v_PressedKey . "`n"
 	GuiControlGet, OutputVar1, , % IdTT_C4_LB1	;Retrieves the contents of the control to check if static window contains any information: triggerstring tips
 	GuiControlGet, OutputVar2, , % IdTT_C4_LB4	;Retrieves the contents of the control to check if static window contains any information: hotstrings
 	OutputDebug, % "OutputVar1:" . A_Tab . OutputVar1 . A_Tab . "OutputVar2:" . A_Tab . OutputVar2 . "`n"
 	if (!OutputVar1) and (!OutputVar2)			;if no information, leave this functionfunction
+		return
+	if (OutputVar1) and (!ini_ATEn)
 		return
 	if (OutputVar1)
 	{
