@@ -4950,17 +4950,85 @@ F_LoadTTStyling()
 		ini_TTTySize := 10
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiStyling_Section(TabId)
+{
+	global ;assume-global mode of operation
+
+	Gui, TTstyling: Add,	Text, 		% "HwndId" . TabId . "styling_T1",				% TransA["Background color"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, TTstyling: Add,	Text, 		% "HwndId" . TabId . "styling_T2",				ⓘ
+	T_SBackgroundColorInfo := func("F_ShowLongTooltip").bind(TransA["T_SBackgroundColorInfo"])
+	GuiControl, +g, 					% "Id" . TabId . "styling_T2", 				% T_SBackgroundColorInfo
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, TTstyling: Add,	DropDownList,	% "HwndId" . TabId . "styling_DDL1" . A_Space . "v" . TabId . "S_DDL1" . A_Space . "g" . "F_" . TabId . "styling_DDL1"
+,		% TransA["black"] . "|" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "||" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"] . "|" . TransA["custom"]
+	Gui, TTstyling: Add,	Edit,		% "HwndId" . TabId . "styling_E1" . A_Space . "Limit6"
+,	% TransA["HTML color RGB value, e.g. 00FF00"]
+	Gui, TTstyling: Add,	Button,		% "HwndId" . TabId . "styling_B1" . A_Space . "g" . "F_" . TabId . "styling_B1"
+,		% TransA["Restore default"]
+	Gui, TTstyling: Add,	Text, 		% "HwndId" . TabId . "styling_T3",				% TransA["Typeface color"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, TTstyling: Add,	Text,		% "HwndId" . TabId . "styling_T4",				ⓘ
+	T_STypefaceColor := func("F_ShowLongTooltip").bind(TransA["T_STypefaceColor"])
+	GuiControl +g, 					% "Id" . TabId . "styling_T4",				% T_STypefaceColor
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, TTstyling: Add,	DropDownList,	% "HwndId" . TabId . "styling_DDL2" . A_Space . "v" . TabId . "S_DDL2" . A_Space . "g" . "F_" . TabId . "styling_DDL2"
+,		% TransA["black"] . "||" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "|" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"] . "|" . TransA["custom"]
+	Gui, TTstyling: Add,	Edit,		% "HwndId" . TabId . "styling_E2" . A_Space . "Limit6"
+,		% TransA["HTML color RGB value, e.g. 00FF00"]
+	Gui, TTstyling: Add,	Button,		% "HwndId" . TabId . "styling_B2" . A_Space . "g" . "F_" . TabId . "styling_B2"
+,		% TransA["Restore default"]
+	Gui, TTstyling: Add,	Text, 		% "HwndId" . TabId . "styling_T5",				% TransA["Typeface font"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, TTstyling: Add,	Text, 		% "HwndId" . TabId . "styling_T6",				ⓘ
+	T_STypefaceFont := func("F_ShowLongTooltip").bind(TransA["T_STypefaceFont"])
+	GuiControl +g, 					% "Id" . TabId . "styling_T6", 				% T_STypefaceFont
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, TTstyling: Add,	DropDownList,	% "HwndId" . TabId . "styling_DDL3" . A_Space . "v" . TabId . "S_DDL3"
+,		Arial|Calibri||Comic Sans MS|Consolas|Courier|Fixedsys|Lucida Console|Microsoft Sans Serif|Script|System|Tahoma|Times New Roman|Verdana
+	Gui, TTstyling: Add,	Button,		% "HwndId" . TabId . "styling_B3" . A_Space . "g" . "F_" . TabId . "styling_B3"
+,		% TransA["Restore default"]
+	Gui, TTstyling: Add,	Text, 		% "HwndId" . TabId . "styling_T7",				% TransA["Typeface size"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, TTstyling: Add,	Text, 		% "HwndId" . TabId . "styling_T8",				ⓘ
+	T_STypefaceSize := func("F_ShowLongTooltip").bind(TransA["T_STypefaceSize"])
+	GuiControl +g, 		% "Id" . TabId . "styling_T8",							% T_STypefaceSize
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, TTstyling: Add,	DropDownList,	% "HwndId" . TabId . "styling_DDL4" . A_Space . "v" . TabId . "S_DDL4"
+,		7|8|9|10||11|12|13|14|15|16|17|18|19|20
+	Gui, TTstyling: Add,	Button,		% "HwndId" . TabId . "styling_B4" . A_Space . "g" . "F_" . TabId . "styling_B4"
+,		% TransA["Restore default"]
+	Gui, TTstyling: Add,	Text, 		% "HwndId" . TabId . "styling_T9",				% TransA["Preview"] . ":"
+	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui, TTstyling: Add,	Text, 		% "HwndId" . TabId . "styling_T10",			ⓘ
+	T_StylPreview := func("F_ShowLongTooltip").bind(TransA["T_StylPreview"])
+	GuiControl +g, 		% "Id" . TabId . "styling_T10", 							% T_StylPreview
+	Gui, TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, TTstyling: Add,	Listbox, 		% "HwndId" . TabId . "styling_LB1" . A_Space . "r5"
+,		% TransA["Row"] . " 1|" . TransA["Row"] . " 2|" . TransA["Row"] . " 3|" . TransA["Row"] . " 4|" . TransA["Row"] . " 5"
+	Gui, TTstyling: Add,	Button,		% "HwndId" . TabId . "styling_B5" . A_Space . "g" . "F_" . TabId . "styling_B5"
+,		% TransA["Test styling"]
+	Gui, TTstyling: Add,	Button,		% "HwndId" . TabId . "styling_B6" . A_Space . "g" . "F_" . TabId . "styling_B6" . A_Space . "+Default"
+,		% TransA["Apply"]
+	Gui, TTstyling: Add,	Button,		% "HwndId" . TabId . "styling_B7" . A_Space . "g" . "F_" . TabId . "styling_B7"
+,		% TransA["Close"]
+	Gui, TTstyling: Add,	Button,		% "HwndId" . TabId . "styling_B8" . A_Space  . "g" . "F_" . TabId . "Styling_B8"
+,		% TransA["Cancel"]
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiStyling_CreateObjects()
 {
-	global ;assume-global mode
+	global ;assume-global mode of operation
 	Gui, TTstyling: New, 	-Resize +HwndTTstylingHwnd +Owner +OwnDialogs -MaximizeBox -MinimizeBox	;+OwnDialogs: for tooltips.
 	Gui, TTstyling: Margin,	% c_xmarg, % c_ymarg
 	Gui,	TTstyling: Color,	% c_WindowColor, % c_ControlColor
 	Gui,	TTstyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, TTstyling: Add,	Tab3, vTTStylingTab3 gF_TTStylingTab3,					% TransA["Triggerstring tips styling"] . "||" . TransA["Hotstring menu styling"] . "|"
+	Gui, TTstyling: Add,	Tab3, vEventsStylingTab3 gF_EventsStylingTab3,					% TransA["Triggerstring tips styling"] . "||" . TransA["Hotstring menu styling"] . "|"
 		. TransA["Active triggerstring tips styling"] . "|"
 
 	Gui, TTstyling: Tab, 													% TransA["Triggerstring tips styling"]
+	F_GuiStyling_Section(TabId := "TT")
+/* 	Gui, TTstyling: Tab, 													% TransA["Triggerstring tips styling"]
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T1,						% TransA["Background color"] . ":"
 	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdTTstyling_T2, 					ⓘ
@@ -5006,8 +5074,10 @@ F_GuiStyling_CreateObjects()
 	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B6 gF_TTstyling_B6 +Default,	% TransA["Apply"]
 	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B7 gF_TTstyling_B7,		% TransA["Close"]
 	Gui, TTstyling: Add,	Button,		HwndIdTTstyling_B8 gF_TTStyling_B8,		% TransA["Cancel"]
-	
+ */	
 	Gui, TTstyling: Tab, 													% TransA["Hotstring menu styling"]
+	F_GuiStyling_Section(TabId :="HM")
+/* 	
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T1,						% TransA["Background color"] . ":"
 	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdHMstyling_T2, 					ⓘ
@@ -5048,8 +5118,10 @@ F_GuiStyling_CreateObjects()
 	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B6 gF_HMstyling_B6 +Default,	% TransA["Apply"]
 	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B7 gF_HMstyling_B7,		% TransA["Close"]
 	Gui, TTstyling: Add,	Button,		HwndIdHMstyling_B8 gF_HMstyling_B8,		% TransA["Cancel"]
-
+ */
 	Gui, TTstyling: Tab,													% TransA["Active triggerstring tips styling"]
+ 	F_GuiStyling_Section(TabId :="AT")
+/* 	
 	Gui, TTstyling: Add,	Text, 		HwndIdATstyling_T1,						% TransA["Background color"] . ":"
 	Gui, TTstyling: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, TTstyling: Add,	Text, 		HwndIdATstyling_T2, 					ⓘ
@@ -5090,7 +5162,8 @@ F_GuiStyling_CreateObjects()
 	Gui, TTstyling: Add,	Button,		HwndIdATstyling_B6 gF_ATstyling_B6 +Default,	% TransA["Apply"]
 	Gui, TTstyling: Add,	Button,		HwndIdATstyling_B7 gF_ATstyling_B7,		% TransA["Close"]
 	Gui, TTstyling: Add,	Button,		HwndIdATstyling_B8 gF_ATstyling_B8,		% TransA["Cancel"]
-}
+ */
+ }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ATstyling_B8()	;Cancel button
 {
@@ -5357,7 +5430,7 @@ F_TTstyling_DDL2()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TTStylingTab3(OneTime*)
+F_EventsStylingTab3(OneTime*)
 {
 	global ;assume-global mode
 	static PreviousTab3 := ""
@@ -5367,7 +5440,7 @@ F_TTStylingTab3(OneTime*)
 		, OneTimeTTS := true
 	if (OneTime[1] = true)
 	{
-		PreviousTab3 := TTStylingTab3
+		PreviousTab3 := EventsStylingTab3
 		, PreviousTTS_DDL1 := TTS_DDL1, PreviousTTS_DDL2 := TTS_DDL2, PreviousTTS_DDL3 := TTS_DDL3, PreviousTTS_DDL4 := TTS_DDL4
 		, PreviousHMS_DDL1 := HMS_DDL1, PreviousHMS_DDL2 := HMS_DDL2, PreviousHMS_DDL3 := HMS_DDL3, PreviousHMS_DDL4 := HMS_DDL4
 		, PreviousATS_DDL1 := ATS_DDL1, PreviousATS_DDL2 := ATS_DDL2, PreviousATS_DDL3 := ATS_DDL3, PreviousATS_DDL4 := ATS_DDL4
@@ -5382,7 +5455,7 @@ F_TTStylingTab3(OneTime*)
 		Gui, ATDemo: 		Destroy
 	
 	Gui, TTstyling: Submit, NoHide
-	if (TTStylingTab3 != PreviousTab3)
+	if (EventsStylingTab3 != PreviousTab3)
 	{
 		Switch PreviousTab3
 		{
@@ -5418,7 +5491,7 @@ F_TTStylingTab3(OneTime*)
 				{
 					F_GuiStyling_LoadValues()
 				}
-				PreviousTab3 := TTStylingTab3
+				PreviousTab3 := EventsStylingTab3
 			
 			Case % TransA["Hotstring menu styling"]:
 				if (HMS_DDL1 != PreviousHMS_DDL1) or (HMS_DDL2 != PreviousHMS_DDL2) or (HMS_DDL3 != PreviousHMS_DDL3) or (HMS_DDL4 != PreviousHMS_DDL4)
@@ -5452,7 +5525,7 @@ F_TTStylingTab3(OneTime*)
 				{
 					F_GuiStyling_LoadValues()
 				}
-				PreviousTab3 := TTStylingTab3
+				PreviousTab3 := EventsStylingTab3
 
 			Case % TransA["Active triggerstring tips styling"]:
 				if (ATS_DDL1 != PreviousATS_DDL1) or (ATS_DDL2 != PreviousATS_DDL2) or (ATS_DDL3 != PreviousATS_DDL3) or (ATS_DDL4 != PreviousATS_DDL4)
@@ -5633,7 +5706,7 @@ F_TTstyling_B6()	;Apply button
 	IniWrite, % ini_TTTyFaceFont, 	% ini_HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceFont
 	IniWrite, % ini_TTTySize,		% ini_HADConfig, TriggerstringTips_Styling, TriggerstringTipsTypefaceSize
 	Gui, TDemo: 		Destroy	
-	F_TTStylingTab3(true)	;something was changed
+	F_EventsStylingTab3(true)	;something was changed
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTstyling_B7()	;Close button
@@ -6254,7 +6327,7 @@ F_TTstyling(OneTime*)
 	F_GuiATStyling_DetermineConstraints()
 	F_GuiStyling_LoadValues()
 	Gui, TTstyling: Submit		;this line is necessary to correctly initialize some global variables
-	F_TTStylingTab3(OneTime[1])			;OneTime is used now
+	F_EventsStylingTab3(OneTime[1])			;OneTime is used now
 	
 	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
