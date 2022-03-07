@@ -5790,9 +5790,127 @@ EventsStylingGuiEscape()
 	Gui, EventsStyling: 	Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiEventsStyling_DetermineConstants(Which)
+{
+	global ;assume-global mode of operation
+	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
+		,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
+		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
+		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
+		,v_OutVarTemp4 := 0, 	v_OutVarTemp4X := 0, 	v_OutVarTemp4Y := 0, 	v_OutVarTemp4W := 0, 	v_OutVarTemp4H := 0
+							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+		,TheWidestText := 0, temp := "", temp2 := 0, temp3 := 0, temp4 := 0, temp5 := 0
+	;dynamic variable: https://www.autohotkey.com/docs/Language.htm#dynamic-variables
+	temp := "Id" . Which . "styling_T1"
+	temp3 := %temp%
+	temp4 := % temp
+	temp5 := "Id" . Which . "styling_T1"
+	temp2 := IdTTstyling_T1
+	GuiControlGet, v_OutVarTemp1, Pos, % temp
+	GuiControlGet, v_OutVarTemp1, Pos, temp
+	GuiControlGet, v_OutVarTemp1, Pos, %temp%
+	GuiControlGet, v_OutVarTemp1, Pos, % "Id" . Which . "styling_T1"
+	GuiControlGet, v_OutVarTemp1, Pos, "Id" . Which . "styling_T1"
+	GuiControlGet, v_OutVarTemp1, Pos, % "Id" . %Which% . "styling_T1"
+	GuiControlGet, v_OutVarTemp1, Pos, % "IdTTstyling_T1"
+	GuiControlGet, v_OutVarTemp1, Pos, % IdTTstyling_T1	;to działa
+
+	GuiControlGet, v_OutVarTemp2, Pos, % "Id" . Which . "styling_T3"
+	GuiControlGet, v_OutVarTemp3, Pos, % "Id" . Which . "styling_T5"
+	GuiControlGet, v_OutVarTemp4, Pos, % "Id" . Which . "styling_T7"
+	TheWidestText := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W, v_OutVarTemp4W)
+	
+	v_xNext := c_xmarg
+	v_yNext := c_ymarg
+	GuiControl, Move, % "Id" . Which . "styling_T1", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % "Id" . Which . "styling_T2", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % "Id" . Which . "styling_DDL1", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % "Id" . Which . "styling_DDL1"
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % "Id" . Which . "styling_E1", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % "Id" . Which . "styling_E1"
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % "Id" . Which . "styling_B1", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % "Id" . Which . "styling_B1"
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % "Id" . Which . "styling_T3", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % "Id" . Which . "styling_T4", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % "Id" . Which . "styling_DDL2", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % "Id" . Which . "styling_DDL2"
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % "Id" . Which . "styling_E2", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % "Id" . Which . "styling_E2"
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % "Id" . Which . "styling_B2", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % "Id" . Which . "styling_B1"
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % "Id" . Which . "styling_T5", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % "Id" . Which . "styling_T6", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % "Id" . Which . "styling_DDL3", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % "Id" . Which . "styling_DDL3"
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % "Id" . Which . "styling_B3", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	GuiControlGet, v_OutVarTemp, Pos, % "Id" . Which . "styling_B3"
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 5 * c_xmarg
+	GuiControl, Move, % "Id" . Which . "styling_T9", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % "Id" . Which . "styling_T9"
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % "Id" . Which . "styling_T10", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % "Id" . Which . "styling_B3"
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 5 * c_xmarg
+	v_OutputVarTemp := v_yNext
+	v_yNext += HofText
+	GuiControl, Move, % "Id" . Which . "styling_LB1", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	v_xNext := c_xmarg
+	v_yNext := v_OutVarTemp
+	GuiControlGet, v_OutVarTemp, Pos, % "Id" . Which . "styling_B1"
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % "Id" . Which . "styling_T7", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext += TheWidestText + 2 * c_xmarg
+	GuiControl, Move, % "Id" . Which . "styling_T8", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	v_xNext := c_xmarg
+	v_yNext += HofText
+	GuiControl, Move, % "Id" . Which . "styling_DDL4", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % "Id" . Which . "styling_DDL4"
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % "Id" . Which . "styling_B4", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	v_xNext := c_xmarg
+	GuiControlGet, v_OutVarTemp, Pos, % "Id" . Which . "styling_B1"
+	v_yNext += v_OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % "Id" . Which . "styling_B5", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % "Id" . Which . "styling_B5"
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % "Id" . Which . "styling_B6", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % "Id" . Which . "styling_B6"
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % "Id" . Which . "styling_B7", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	GuiControlGet, v_OutVarTemp, Pos, % "Id" . Which . "styling_B7"
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % "Id" . Which . "styling_B8", % "x+" . v_xNext . A_Space . "y+" . v_yNext
+	
+	GuiControl, Disable, % "Id" . Which . "styling_E1"
+	GuiControl, Disable, % "Id" . Which . "styling_E2"
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiTTstyling_DetermineConstraints()
 {
-	global ;assume-global mode
+	global ;assume-global mode of operation
 	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
 		,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
 		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
@@ -6164,9 +6282,12 @@ F_EventsStyling(OneTime*)
 	if (OneTime[3])	
 		Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	F_GuiEventsStyling_CreateObjects()
-	F_GuiTTStyling_DetermineConstraints()
-	F_GuiHMstyling_DetermineConstraints()
-	F_GuiATStyling_DetermineConstraints()
+	F_GuiEventsStyling_DetermineConstants("TT")
+	F_GuiEventsStyling_DetermineConstants("HM")
+	F_GuiEventsStyling_DetermineConstants("AT")
+	; F_GuiTTStyling_DetermineConstraints()
+	; F_GuiHMstyling_DetermineConstraints()
+	; F_GuiATStyling_DetermineConstraints()
 	F_GuiStyling_LoadValues()
 	Gui, EventsStyling: Submit		;this line is necessary to correctly initialize some global variables
 	F_EventsStylingTab3(OneTime[1])			;OneTime is used now
