@@ -5625,15 +5625,23 @@ F_GuiEventsStyling_CreateObjects()
 	Gui, EventsStyling: Margin,	% c_xmarg, % c_ymarg
 	Gui,	EventsStyling: Color,	% c_WindowColor, % c_ControlColor
 	Gui,	EventsStyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, EventsStyling: Add,	Tab3, vEventsStylingTab3 gF_EventsStylingTab3,			% TransA["Triggerstring tips styling"] . "||" . TransA["Hotstring menu styling"] . "|"
-		. TransA["Active triggerstring tips styling"] . "|"
+	Gui, EventsStyling: Add,	Tab3, vEventsStylingTab3 gF_EventsStylingTab3
+,		% TransA["Triggerstring tips styling"] . "||" 
+		. TransA["Hotstring menu styling"] . "|"
+		. TransA["Active triggerstring tips styling"] . "|" 
+		. TransA["Tooltip: ""Basic triggerstring is triggered"""] . "|"
+		. TransA["Tooltip: ""Undid the last hotstring"""] . "|"
 
-	Gui, EventsStyling: Tab, 												% TransA["Triggerstring tips styling"]
+	Gui, EventsStyling: Tab, 			% TransA["Triggerstring tips styling"]
 	F_GuiStyling_Section(TabId := "TT")
-	Gui, EventsStyling: Tab, 												% TransA["Hotstring menu styling"]
-	F_GuiStyling_Section(TabId :="HM")
-	Gui, EventsStyling: Tab,													% TransA["Active triggerstring tips styling"]
- 	F_GuiStyling_Section(TabId :="AT")
+	Gui, EventsStyling: Tab, 			% TransA["Hotstring menu styling"]
+	F_GuiStyling_Section(TabId := "HM")
+	Gui, EventsStyling: Tab,				% TransA["Active triggerstring tips styling"]
+ 	F_GuiStyling_Section(TabId := "AT")
+	Gui, EventsStyling: Tab,				% TransA["Tooltip: ""Basic triggerstring is triggered"""]
+ 	F_GuiStyling_Section(TabId := "BT")
+	Gui, EventsStyling: Tab,				% TransA["Tooltip: ""Undid the last hotstring"""]
+ 	F_GuiStyling_Section(TabId := "UH")
  }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EventsStylingTab3(OneTime*)
@@ -5986,11 +5994,13 @@ F_EventsStyling(OneTime*)
 	if (OneTime[3])	
 		Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	F_GuiEventsStyling_CreateObjects()
-	F_GuiEventsStyling_DetermineConstants("TT")
-	F_GuiEventsStyling_DetermineConstants("HM")
-	F_GuiEventsStyling_DetermineConstants("AT")
+	F_GuiEventsStyling_DetermineConstants("TT")	;TT = Triggerstring Tips
+	F_GuiEventsStyling_DetermineConstants("HM")	;HM = Hotsring Menu
+	F_GuiEventsStyling_DetermineConstants("AT")	;AT = Active Triggerstring
+	F_GuiEventsStyling_DetermineConstants("BT")	;BT = Tooltip: Basic Triggerstring
+	F_GuiEventsStyling_DetermineConstants("UH")	;UH = Tooltip: Unid the last hostring
 	F_GuiStyling_LoadValues()
-	Gui, EventsStyling: Submit		;this line is necessary to correctly initialize some global variables
+	Gui, EventsStyling: Submit				;this line is necessary to correctly initialize some global variables
 	F_EventsStylingTab3(OneTime[1])			;OneTime is used now
 	
 	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
@@ -10548,6 +10558,8 @@ Tip: If you copy text from PDF file it's adviced to remove them. = Tip: If you c
 Tips are shown after no. of characters						= Tips are shown after no. of characters
 (Together with accompanying files and subfolders).			= (Together with accompanying files and subfolders).
 Toggle trigger characters (↓ or EndChars)					= &Toggle trigger characters (↓ or EndChars)
+Tooltip: ""Basic triggerstring is triggered""				= Tooltip: ""Basic triggerstring is triggered""
+Tooltip: ""Undid the last hotstring""						= "Tooltip: ""Undid the last hotstring""
 Tooltip disable										= Tooltip disable
 Tooltip enable											= Tooltip enable
 Tooltip position										= Tooltip position
