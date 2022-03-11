@@ -5029,7 +5029,7 @@ F_GuiStyling_Section(TabId)
 	Gui, EventsStyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, EventsStyling: Add,	DropDownList,	% "HwndId" . TabId . "styling_DDL1" . A_Space . "v" . TabId . "S_DDL1" . A_Space . "g" . "F_EventsStyling_DDL1"
 ,		% TransA["black"] . "|" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "||" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"] . "|" . TransA["custom"]
-	Gui, EventsStyling: Add,	Edit,		% "HwndId" . TabId . "styling_E1" . A_Space . "v" . TabId . "S_E1" . A_Space . "Limit6"
+	Gui, EventsStyling: Add,	Edit,		% "HwndId" . TabId . "styling_E1" . A_Space . "Limit6"
 ,	% TransA["HTML color RGB value, e.g. 00FF00"]
 	Gui, EventsStyling: Add,	Button,		% "HwndId" . TabId . "styling_B1" . A_Space . "g" . "F_EventsStyling_B1"
 ,		% TransA["Restore default"]
@@ -5041,7 +5041,7 @@ F_GuiStyling_Section(TabId)
 	Gui, EventsStyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, EventsStyling: Add,	DropDownList,	% "HwndId" . TabId . "styling_DDL2" . A_Space . "v" . TabId . "S_DDL2" . A_Space . "g" . "F_EventsStyling_DDL2"
 ,		% TransA["black"] . "||" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "|" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"] . "|" . TransA["custom"]
-	Gui, EventsStyling: Add,	Edit,		% "HwndId" . TabId . "styling_E2" . A_Space . "v" . TabId . "S_E2" . A_Space . "Limit6"
+	Gui, EventsStyling: Add,	Edit,		% "HwndId" . TabId . "styling_E2" . A_Space . "Limit6"
 ,		% TransA["HTML color RGB value, e.g. 00FF00"]
 	Gui, EventsStyling: Add,	Button,		% "HwndId" . TabId . "styling_B2" . A_Space . "g" . "F_EventsStyling_B2"
 ,		% TransA["Restore default"]
@@ -5298,10 +5298,11 @@ F_EventsStyling_B5()	;button: Test styling
 ,			TTS_TTBgrColCus := "", TTS_TTTyFaceColCus := "" 
 ,			HMS_TTBgrColCus := "", HMS_TTTyFaceColCus := ""  	
 ,			ATS_TTBgrColCus := "", ATS_TTTyFaceColCus := "" 
+,			HTS_TTBgrColCus := "", HTS_TTTyFaceColCus := "" 
 ,			UHS_TTBgrColCus := "", UHS_TTTyFaceColCus := "" 
 , 			a_TTMenuPos 	 := [], TempText := ""
 
-	HwndIdHTDemo_LB1 := 0, HwndIdHTDemo_T1 := 0, IdHTDemo_LB1 := 0, IdHTDemo_T1 := 0
+	IdHTDemo_LB1 := 0, IdHTDemo_T1 := 0	;global variables
 
 	Gui, EventsStyling: Submit, NoHide
 	Switch EventsStylingTab3
@@ -5339,7 +5340,7 @@ F_EventsStyling_B5()	;button: Test styling
 				Gui, TDemo: Color,, % TTS_TTBgrColCus
 			else
 				Gui, TDemo: Color,, % TTS_DDL1
-			if (TTS_DDL1 = "custom")		
+			if (TTS_DDL2 = "custom")		
 				Gui, TDemo: Font, % "s" . TTS_DDL4 . A_Space . "c" . TTS_TTTyFaceColCus, % TTS_DDL3
 			else
 				Gui, TDemo: Font, % "s" . TTS_DDL4 . A_Space . "c" . TTS_DDL2, % TTS_DDL3
@@ -5419,7 +5420,7 @@ F_EventsStyling_B5()	;button: Test styling
 				Gui, ATDemo: Color,, % ATS_TTBgrColCus
 			else
 				Gui, ATDemo: Color,, % ATS_DDL1
-			if (ATS_DDL1 = "custom")		
+			if (ATS_DDL2 = "custom")		
 				Gui, ATDemo: Font, % "s" . ATS_DDL4 . A_Space . "c" . ATS_TTTyFaceColCus, % ATS_DDL3
 			else
 				Gui, ATDemo: Font, % "s" . ATS_DDL4 . A_Space . "c" . ATS_DDL2, % ATS_DDL3
@@ -5455,26 +5456,19 @@ F_EventsStyling_B5()	;button: Test styling
 			Gui, HTDemo: New, -Caption +ToolWindow +HwndHTDemoHwnd
 			Gui, HTDemo: Margin, 0, 0
 			if (HTS_DDL1 = "custom")
-				Gui, HTDemo: Color, % HTS_E1
+				Gui, HTDemo: Color,, % HTS_TTBgrColCus
 			else
-				Gui, HTDemo: Color, % HTS_DDL1
-			if (HTS_DDL1 = "custom")		
-				Gui, HTDemo: Font, % "s" . HTS_DDL4 . A_Space . "c" . HTS_E2, 	% HTS_DDL3
+				Gui, HTDemo: Color,, % HTS_DDL1
+			if (HTS_DDL2 = "custom")		
+				Gui, HTDemo: Font, % "s" . HTS_DDL4 . A_Space . "c" . HTS_TTTyFaceColCus, 	% HTS_DDL3
 			else
 				Gui, HTDemo: Font, % "s" . HTS_DDL4 . A_Space . "c" . HTS_DDL2, 	% HTS_DDL3
 
 			TempText := TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."]
-			Gui, HTDemo: Add, Text, 	  % HwndIdHTDemo_T1, % TempText
+			Gui, HTDemo: Add, Text, HwndIdHTDemo_T1, % TempText
 			GuiControlGet, OutputVarTemp, Pos, % IdHTDemo_T1
 			GuiControl, Hide, % IdHTDemo_T1
-			TempText := "Fikumiku"
-			Gui, HTDemo: Add, ListBox, % HwndIdHTDemo_LB1 . A_Space . "r1" . A_Space . "w" . OutputVarTempW, % TempText
-			; Gui, HTDemo: Add, ListBox, % HwndIdHTDemo_LB1 . A_Space . "r1" . A_Space . "w" . OutputVarTempW, % "|" . TempText
-			GuiControl, , % HwndIdHTDemo_LB1, % TempText
-			; Gui, HTDemo: Add, ListBox, % HwndIdHTDemo_LB1 . A_Space . "r1" . A_Space . "w" . OutputVarTempW, % TempText . "|"
-			; Gui, HTDemo: Add, ListBox, % HwndIdHTDemo_LB1 . A_Space . A_Space . "w" . OutputVarTempW, % TempText . "|"
-			; Gui, HTDemo: Add, ListBox, % HwndIdHTDemo_LB1 . A_Space . A_Space . "w" . OutputVarTempW, % TempText
-			; Gui, HTDemo: Add, ListBox, % HwndIdHTDemo_LB1 . A_Space . "r1" . A_Space . "w" . OutputVarTempW, % TempText
+			Gui, HTDemo: Add, ListBox, % "HwndIdHTDemo_LB1" . A_Space . "r1" . A_Space . "x" . OutputVarTempX . A_Space . "y" . OutputVarTempX . A_Space . "w" . OutputVarTempW, % TempText
 			a_TTMenuPos := F_WhereDisplayMenu(ini_TTTP)
 			F_FlipMenu(WindowHandle := HTDemoHwnd, MenuX := a_TTMenuPos[1], MenuY := a_TTMenuPos[2], GuiName := "HTDemo")	
 
