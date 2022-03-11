@@ -121,7 +121,7 @@ F_LoadFontType()
 F_LoadTTStyling()
 F_LoadHMStyling()
 F_LoadATStyling()
-F_LoadBTStyling()
+F_LoadHTStyling()
 F_LoadUHStyling()
 F_LoadConfiguration()
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
@@ -591,21 +591,15 @@ Critical, Off
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
-F_Tt_HWT()
+F_Tt_HWT()	;Tt_HWT = Tooltip_Hostring Was Triggered
 {
 	global	;assume-global mode of operation
 
 	Gui, Tt_HWT: New, -Caption +ToolWindow +HwndTT_HWTHwnd	;Tt_HWT = Tooltip_Hostring Was Triggered
 	Gui, Tt_HWT: Margin, 0, 0
-	if (BTS_DDL1 = "custom")
-		Gui, Tt_HWT: Color,, % BTS_TTBgrColCus
-	else
-		Gui, Tt_HWT: Color,, % BTS_DDL1
-	if (BTS_DDL1 = "custom")		
-		Gui, Tt_HWT: Font, % "s" . BTS_DDL4 . A_Space . "c" . BTS_TTTyFaceColCus, % BTS_DDL3
-	else
-		Gui, Tt_HWT: Font, % "s" . BTS_DDL4 . A_Space . "c" . BTS_DDL2, % BTS_DDL3
-	Gui, Tt_HWT: Add, Listbox, HwndIdBTDemo r1, % TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."]
+	Gui, Tt_HWT: Color, % ini_HTBgrCol
+	Gui, Tt_HWT: Font, % "s" . ini_HTTySize . A_Space . "c" . ini_HTTyFaceCol, % ini_HTTyFaceFont
+	Gui, Tt_HWT: Add, Listbox, HwndIdHT r1, % TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTMenuStatic_Keyboard(IsPreviousWindowIDvital*)
@@ -1406,7 +1400,7 @@ GuiEventsGuiEscape()	;GUI event (close)	;this function is somehow blocked (dead 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_WhereDisplayMenu(ini_TTTP)
 {
-	MenuX := 0, MenuY := 0, MouseX := 0, MouseY := 0
+	local MenuX := 0, MenuY := 0, MouseX := 0, MouseY := 0
 
 	Switch ini_TTTP
 	{
@@ -4919,30 +4913,30 @@ F_LoadATStyling()
 		ini_ATTySize := 10
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_LoadBTStyling()
+F_LoadHTStyling()
 {
-	global ;assume-global mode
-	ini_BTBgrCol		:= "yellow"
-,	ini_BTTyFaceCol	:= "black"
-,	ini_BTTyFaceFont	:= "Courier"
-,	ini_BTTySize		:= 10
+	global ;assume-global mode of operation
+	ini_HTBgrCol		:= "yellow"
+,	ini_HTTyFaceCol	:= "black"
+,	ini_HTTyFaceFont	:= "Courier"
+,	ini_HTTySize		:= 10
 	
-	IniRead, ini_BTBgrCol, 			% ini_HADConfig, EvStyle_BT, BTBackgroundColor, yellow
-	if (!ini_BTBgrCol)
-		ini_BTBgrCol := "yellow"
-	if (ini_BTBgrCol = "custom")
-		IniRead, ini_BTBgrColCus,	% ini_HADConfig, EvStyle_BT, BTBackgroundColorCustom
-	IniRead, ini_BTTyFaceCol, 		% ini_HADConfig, EvStyle_BT, BTTypefaceColor, black
-	if (!ini_BTTyFaceCol)
-		ini_BTTyFaceCol := "black"
-	if (ini_BTTyFaceCol = "custom")
-		IniRead, ini_BTTyFaceColCus,	% ini_HADConfig, EvStyle_BT, BTTypefaceColorCustom
-	IniRead, ini_BTTyFaceFont, 		% ini_HADConfig, EvStyle_BT, BTTypefaceFont, Courier
-	if (!ini_BTTyFaceFont)
-		ini_BTTyFaceFont := "Courier"
-	IniRead, ini_BTTySize,	 		% ini_HADConfig, EvStyle_BT, BTTypefaceSize, 10
-	if (!ini_BTTySize)
-		ini_BTTySize := 10
+	IniRead, ini_HTBgrCol, 			% ini_HADConfig, EvStyle_HT, HTBackgroundColor, yellow
+	if (!ini_HTBgrCol)
+		ini_HTBgrCol := "yellow"
+	if (ini_HTBgrCol = "custom")
+		IniRead, ini_HTBgrColCus,	% ini_HADConfig, EvStyle_HT, HTBackgroundColorCustom
+	IniRead, ini_HTTyFaceCol, 		% ini_HADConfig, EvStyle_HT, HTTypefaceColor, black
+	if (!ini_HTTyFaceCol)
+		ini_HTTyFaceCol := "black"
+	if (ini_HTTyFaceCol = "custom")
+		IniRead, ini_HTTyFaceColCus,	% ini_HADConfig, EvStyle_HT, HTTypefaceColorCustom
+	IniRead, ini_HTTyFaceFont, 		% ini_HADConfig, EvStyle_HT, HTTypefaceFont, Courier
+	if (!ini_HTTyFaceFont)
+		ini_HTTyFaceFont := "Courier"
+	IniRead, ini_HTTySize,	 		% ini_HADConfig, EvStyle_HT, HTTypefaceSize, 10
+	if (!ini_HTTySize)
+		ini_HTTySize := 10
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadUHStyling()
@@ -5035,7 +5029,7 @@ F_GuiStyling_Section(TabId)
 	Gui, EventsStyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, EventsStyling: Add,	DropDownList,	% "HwndId" . TabId . "styling_DDL1" . A_Space . "v" . TabId . "S_DDL1" . A_Space . "g" . "F_EventsStyling_DDL1"
 ,		% TransA["black"] . "|" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "||" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"] . "|" . TransA["custom"]
-	Gui, EventsStyling: Add,	Edit,		% "HwndId" . TabId . "styling_E1" . A_Space . "Limit6"
+	Gui, EventsStyling: Add,	Edit,		% "HwndId" . TabId . "styling_E1" . A_Space . "v" . TabId . "S_E1" . A_Space . "Limit6"
 ,	% TransA["HTML color RGB value, e.g. 00FF00"]
 	Gui, EventsStyling: Add,	Button,		% "HwndId" . TabId . "styling_B1" . A_Space . "g" . "F_EventsStyling_B1"
 ,		% TransA["Restore default"]
@@ -5047,7 +5041,7 @@ F_GuiStyling_Section(TabId)
 	Gui, EventsStyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, EventsStyling: Add,	DropDownList,	% "HwndId" . TabId . "styling_DDL2" . A_Space . "v" . TabId . "S_DDL2" . A_Space . "g" . "F_EventsStyling_DDL2"
 ,		% TransA["black"] . "||" . TransA["silver"] . "|" . TransA["gray"] . "|" . TransA["white"] . "|" . TransA["maroon"] . "|" . TransA["red"] . "|" . TransA["purple"] . "|" . TransA["fuchsia"] . "|" . TransA["green"] . "|" . TransA["lime"] . "|" . TransA["olive"] . "|" . TransA["yellow"] . "|" . TransA["navy"] . "|" . TransA["blue"] . "|" . TransA["teal"] . "|" . TransA["aqua"] . "|" . TransA["custom"]
-	Gui, EventsStyling: Add,	Edit,		% "HwndId" . TabId . "styling_E2" . A_Space . "Limit6"
+	Gui, EventsStyling: Add,	Edit,		% "HwndId" . TabId . "styling_E2" . A_Space . "v" . TabId . "S_E2" . A_Space . "Limit6"
 ,		% TransA["HTML color RGB value, e.g. 00FF00"]
 	Gui, EventsStyling: Add,	Button,		% "HwndId" . TabId . "styling_B2" . A_Space . "g" . "F_EventsStyling_B2"
 ,		% TransA["Restore default"]
@@ -5189,10 +5183,10 @@ F_EventsStyling_B1()	;button: Restore default, background color
 			GuiControl, Disable, % IdATstyling_E1
 		
 		Case % TransA["Tooltip: ""Hostring is triggered"""]:
-			ini_BTBgrCol := "yellow"
-			GuiControl, ChooseString, % IdBTstyling_DDL1, % ini_BTBgrCol
-			GuiControl,, % IdBTstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
-			GuiControl, Disable, % IdBTstyling_E1
+			ini_HTBgrCol := "yellow"
+			GuiControl, ChooseString, % IdHTstyling_DDL1, % ini_HTBgrCol
+			GuiControl,, % IdHTstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
+			GuiControl, Disable, % IdHTstyling_E1
 
 		Case % TransA["Tooltip: ""Undid the last hotstring"""]:
 			ini_UHBgrCol := "yellow"
@@ -5227,10 +5221,10 @@ F_EventsStyling_B2()	;button: Restore default, typeface color
 			GuiControl, Disable, % IdATstyling_E2
 
 		Case % TransA["Tooltip: ""Hostring is triggered"""]:
-			ini_BTTyFaceCol := "black"
-			GuiControl, ChooseString, % IdBTstyling_DDL2, % ini_BTTyFaceCol
-			GuiControl,, % IdBTstyling_E2, % TransA["HTML color RGB value, e.g. 00FF00"] 
-			GuiControl, Disable, % IdBTstyling_E2
+			ini_HTTyFaceCol := "black"
+			GuiControl, ChooseString, % IdHTstyling_DDL2, % ini_HTTyFaceCol
+			GuiControl,, % IdHTstyling_E2, % TransA["HTML color RGB value, e.g. 00FF00"] 
+			GuiControl, Disable, % IdHTstyling_E2
 
 		Case % TransA["Tooltip: ""Undid the last hotstring"""]:
 			ini_UHTyFaceCol := "black"
@@ -5259,8 +5253,8 @@ F_EventsStyling_B3()	;button: Restore default, typeface font
 			GuiControl, ChooseString, % IdATstyling_DDL3, % ini_ATTyFaceFont
 
 		Case % TransA["Tooltip: ""Hostring is triggered"""]:
-			ini_BTTyFaceFont := "Courier"
-			GuiControl, ChooseString, % IdBTstyling_DDL3, % ini_BTTyFaceFont
+			ini_HTTyFaceFont := "Courier"
+			GuiControl, ChooseString, % IdHTstyling_DDL3, % ini_HTTyFaceFont
 
 		Case % TransA["Tooltip: ""Undid the last hotstring"""]:	
 			ini_UHTyFaceFont := "Courier"
@@ -5287,8 +5281,8 @@ F_EventsStyling_B4()	;button: Restore default, font size
 			GuiControl, ChooseString, % IdATstyling_DDL4, % ini_ATTySize
 		
 		Case % TransA["Tooltip: ""Hostring is triggered"""]:
-			ini_BTTySize := 10
-			GuiControl, ChooseString, % IdBTstyling_DDL4, % ini_BTTySize
+			ini_HTTySize := 10
+			GuiControl, ChooseString, % IdHTstyling_DDL4, % ini_HTTySize
 		
 		Case % TransA["Tooltip: ""Undid the last hotstring"""]:
 			ini_UHTySize := 10
@@ -5304,9 +5298,10 @@ F_EventsStyling_B5()	;button: Test styling
 ,			TTS_TTBgrColCus := "", TTS_TTTyFaceColCus := "" 
 ,			HMS_TTBgrColCus := "", HMS_TTTyFaceColCus := ""  	
 ,			ATS_TTBgrColCus := "", ATS_TTTyFaceColCus := "" 
-,			BTS_TTBgrColCus := "", BTS_TTTyFaceColCus := "" 
 ,			UHS_TTBgrColCus := "", UHS_TTTyFaceColCus := "" 
-, 			a_TTMenuPos 	 := []
+, 			a_TTMenuPos 	 := [], TempText := ""
+
+	HwndIdHTDemo_LB1 := 0, HwndIdHTDemo_T1 := 0, IdHTDemo_LB1 := 0, IdHTDemo_T1 := 0
 
 	Gui, EventsStyling: Submit, NoHide
 	Switch EventsStylingTab3
@@ -5432,49 +5427,56 @@ F_EventsStyling_B5()	;button: Test styling
 			Gui, ATDemo: Show, % "x" . Window1X + OutputVarTempX . A_Space . "y" . Window1Y + OutputVarTempY . A_Space "NoActivate"	;future: prevent parent window from moving: https://autohotkey.com/board/topic/17759-window-system-menu-manipulator-library-v20/
 
 		Case % TransA["Tooltip: ""Hostring is triggered"""]:
-			if (BTS_DDL1 = "custom")
+			if (HTS_DDL1 = "custom")
 			{
-				GuiControlGet, OutputVarTemp,, % IdBTstyling_E1
+				GuiControlGet, OutputVarTemp,, % IdHTstyling_E1
 				if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
 				{
 					MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
-					Gui, BTDemo: Destroy
+					Gui, HTDemo: Destroy
 					return
 				}
 				else 
-					BTS_TTBgrColCus := OutputVarTemp
+					HTS_TTBgrColCus := OutputVarTemp
 			}
-			if (BTS_DDL2 = "custom")
+			if (HTS_DDL2 = "custom")
 			{
-				GuiControlGet, OutputVarTemp,, % IdBTstyling_E2
+				GuiControlGet, OutputVarTemp,, % IdHTstyling_E2
 				if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
 				{
 					MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
-					Gui, BTDemo: Destroy
+					Gui, HTDemo: Destroy
 					return
 				}
 				else 
-					BTS_TTTyFaceColCus := OutputVarTemp
+					HTS_TTTyFaceColCus := OutputVarTemp
 			}
+			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . EvStylingHwnd
+			Gui, HTDemo: New, -Caption +ToolWindow +HwndHTDemoHwnd
+			Gui, HTDemo: Margin, 0, 0
+			if (HTS_DDL1 = "custom")
+				Gui, HTDemo: Color, % HTS_E1
+			else
+				Gui, HTDemo: Color, % HTS_DDL1
+			if (HTS_DDL1 = "custom")		
+				Gui, HTDemo: Font, % "s" . HTS_DDL4 . A_Space . "c" . HTS_E2, 	% HTS_DDL3
+			else
+				Gui, HTDemo: Font, % "s" . HTS_DDL4 . A_Space . "c" . HTS_DDL2, 	% HTS_DDL3
 
+			TempText := TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."]
+			Gui, HTDemo: Add, Text, 	  % HwndIdHTDemo_T1, % TempText
+			GuiControlGet, OutputVarTemp, Pos, % IdHTDemo_T1
+			GuiControl, Hide, % IdHTDemo_T1
+			TempText := "Fikumiku"
+			Gui, HTDemo: Add, ListBox, % HwndIdHTDemo_LB1 . A_Space . "r1" . A_Space . "w" . OutputVarTempW, % TempText
+			; Gui, HTDemo: Add, ListBox, % HwndIdHTDemo_LB1 . A_Space . "r1" . A_Space . "w" . OutputVarTempW, % "|" . TempText
+			GuiControl, , % HwndIdHTDemo_LB1, % TempText
+			; Gui, HTDemo: Add, ListBox, % HwndIdHTDemo_LB1 . A_Space . "r1" . A_Space . "w" . OutputVarTempW, % TempText . "|"
+			; Gui, HTDemo: Add, ListBox, % HwndIdHTDemo_LB1 . A_Space . A_Space . "w" . OutputVarTempW, % TempText . "|"
+			; Gui, HTDemo: Add, ListBox, % HwndIdHTDemo_LB1 . A_Space . A_Space . "w" . OutputVarTempW, % TempText
+			; Gui, HTDemo: Add, ListBox, % HwndIdHTDemo_LB1 . A_Space . "r1" . A_Space . "w" . OutputVarTempW, % TempText
 			a_TTMenuPos := F_WhereDisplayMenu(ini_TTTP)
-			F_FlipMenu(WindowHandle := TT_HWTHwnd, MenuX := a_TTMenuPos[1], MenuY := a_TTMenuPos[2], GuiName := "Tt_HWT")	
-
-/* 			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . EvStylingHwnd
-			ControlGetPos, OutputVarTempX, OutputVarTempY, , , , ahk_id %IdBTstyling_LB1%
-			Gui, BTDemo: New, -Caption +ToolWindow +HwndBTDemoHwnd
-			Gui, BTDemo: Margin, 0, 0
-			if (BTS_DDL1 = "custom")
-				Gui, BTDemo: Color,, % BTS_TTBgrColCus
-			else
-				Gui, BTDemo: Color,, % BTS_DDL1
-			if (BTS_DDL1 = "custom")		
-				Gui, BTDemo: Font, % "s" . BTS_DDL4 . A_Space . "c" . BTS_TTTyFaceColCus, % BTS_DDL3
-			else
-				Gui, BTDemo: Font, % "s" . BTS_DDL4 . A_Space . "c" . BTS_DDL2, % BTS_DDL3
-			Gui, BTDemo: Add, Listbox, HwndIdBTDemo r5, % TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."]
-			Gui, BTDemo: Show, % "x" . Window1X + OutputVarTempX . A_Space . "y" . Window1Y + OutputVarTempY . A_Space "NoActivate"	;future: prevent parent window from moving: https://autohotkey.com/board/topic/17759-window-system-menu-manipulator-library-v20/ 
-			*/
+			F_FlipMenu(WindowHandle := HTDemoHwnd, MenuX := a_TTMenuPos[1], MenuY := a_TTMenuPos[2], GuiName := "HTDemo")	
 
 		Case % TransA["Tooltip: ""Undid the last hotstring"""]:
 	}
@@ -5773,7 +5775,7 @@ F_EventsStyling_B8()	;button: Cancel
 		Case % TransA["Triggerstring tips styling"]:					F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "TDemo")
 		Case % TransA["Hotstring menu styling"]:					F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HDemo")
 		Case % TransA["Active triggerstring tips styling"]:			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "ATDemo")
-		Case % TransA["Tooltip: ""Hostring is triggered"""]:	F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "BTDemo")
+		Case % TransA["Tooltip: ""Hostring is triggered"""]:			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HTDemo")
 		Case % TransA["Tooltip: ""Undid the last hotstring"""]:		F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "UHDemo")
 	}
 }
@@ -5800,7 +5802,7 @@ F_GuiEventsStyling_CreateObjects()
 	Gui, EventsStyling: Tab,				% TransA["Active triggerstring tips styling"]
  	F_GuiStyling_Section(TabId := "AT")
 	Gui, EventsStyling: Tab,				% TransA["Tooltip: ""Hostring is triggered"""]
- 	F_GuiStyling_Section(TabId := "BT")
+ 	F_GuiStyling_Section(TabId := "HT")
 	Gui, EventsStyling: Tab,				% TransA["Tooltip: ""Undid the last hotstring"""]
  	F_GuiStyling_Section(TabId := "UH")
  }
@@ -6094,6 +6096,16 @@ F_GuiEventsStyling_DetermineConstants(Which)
 	GuiControl, Disable, % %DynVarRef%
 	DynVarRef := "Id" . Which . "styling_E2"
 	GuiControl, Disable, % %DynVarRef%
+
+	if (Which = "HT") or (Which = "UH")
+	{
+		DynVarRef := "Id" . Which . "styling_T9"
+		GuiControl, Hide, % %DynVarRef%
+		DynVarRef := "Id" . Which . "styling_T10"
+		GuiControl, Hide, % %DynVarRef%
+		DynVarRef := "Id" . Which . "styling_LB1"
+		GuiControl, Hide, % %DynVarRef%
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiStyling_LoadValues()
@@ -6121,11 +6133,11 @@ F_GuiStyling_LoadValues()
 		GuiControl, Enable, % IdATstyling_E1
 	}
 
-	GuiControl, ChooseString, % IdBTstyling_DDL1, % ini_BTBgrCol
-	if (ini_BTBgrCol = "custom")
+	GuiControl, ChooseString, % IdHTstyling_DDL1, % ini_HTBgrCol
+	if (ini_HTBgrCol = "custom")
 	{
-		GuiControl,, % IdBTstyling_E1, % ini_BTBgrColCus
-		GuiControl, Enable, % IdBTstyling_E1
+		GuiControl,, % IdHTstyling_E1, % ini_HTBgrColCus
+		GuiControl, Enable, % IdHTstyling_E1
 	}
 	
 	GuiControl, ChooseString, % IdUHstyling_DDL1, % ini_UHBgrCol
@@ -6156,11 +6168,11 @@ F_GuiStyling_LoadValues()
 		GuiControl, Enable, % IdATstyling_E2
 	}
 
-	GuiControl, ChooseString, % IdBTstyling_DDL2, % ini_BTTyFaceCol
-	if (ini_BTTyFaceCol = "custom")
+	GuiControl, ChooseString, % IdHTstyling_DDL2, % ini_HTTyFaceCol
+	if (ini_HTTyFaceCol = "custom")
 	{
-		GuiControl,, % IdBTstyling_E2, % ini_BTTyFaceColCus
-		GuiControl, Enable, % IdBTstyling_E2
+		GuiControl,, % IdHTstyling_E2, % ini_HTTyFaceColCus
+		GuiControl, Enable, % IdHTstyling_E2
 	}
 
 	GuiControl, ChooseString, % IdUHstyling_DDL2, % ini_UHTyFaceCol
@@ -6173,13 +6185,13 @@ F_GuiStyling_LoadValues()
 	GuiControl, ChooseString, % IdTTstyling_DDL3, % ini_TTTyFaceFont
 	GuiControl, ChooseString, % IdHMstyling_DDL3, % ini_HMTyFaceFont
 	GuiControl, ChooseString, % IdATstyling_DDL3, % ini_ATTyFaceFont
-	GuiControl, ChooseString, % IdBTstyling_DDL3, % ini_BTTyFaceFont
+	GuiControl, ChooseString, % IdHTstyling_DDL3, % ini_HTTyFaceFont
 	GuiControl, ChooseString, % IdUHstyling_DDL3, % ini_UHTyFaceFont
 
 	GuiControl, ChooseString, % IdTTstyling_DDL4, % ini_TTTySize
 	GuiControl, ChooseString, % IdHMstyling_DDL4, % ini_HMTySize
 	GuiControl, ChooseString, % IdATstyling_DDL4, % ini_ATTySize
-	GuiControl, ChooseString, % IdBTstyling_DDL4, % ini_BTTySize
+	GuiControl, ChooseString, % IdHTstyling_DDL4, % ini_HTTySize
 	GuiControl, ChooseString, % IdUHstyling_DDL4, % ini_UHTySize
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6196,7 +6208,7 @@ F_EventsStyling(OneTime*)
 	F_GuiEventsStyling_DetermineConstants("TT")	;TT = Triggerstring Tips
 	F_GuiEventsStyling_DetermineConstants("HM")	;HM = Hotsring Menu
 	F_GuiEventsStyling_DetermineConstants("AT")	;AT = Active Triggerstring
-	F_GuiEventsStyling_DetermineConstants("BT")	;BT = Tooltip: Basic Triggerstring
+	F_GuiEventsStyling_DetermineConstants("HT")	;HT = Tooltip: Hostring is triggered
 	F_GuiEventsStyling_DetermineConstants("UH")	;UH = Tooltip: Unid the last hostring
 	F_GuiStyling_LoadValues()
 	Gui, EventsStyling: Submit				;this line is necessary to correctly initialize some global variables
@@ -9921,13 +9933,13 @@ ATTypefaceColorCustom=
 ATTypefaceColor=black
 ATTypefaceFont=Calibri
 ATTypefaceSize=10
-[EvStyle_BT]
-BTBackgroundColor=green
-BTBackgroundColorCustom=
-BTTypefaceColorCustom=
-BTTypefaceColor=black
-BTTypefaceFont=Calibri
-BTTypefaceSize=11
+[EvStyle_HT]
+HTBackgroundColor=green
+HTBackgroundColorCustom=
+HTTypefaceColorCustom=
+HTTypefaceColor=black
+HTTypefaceFont=Calibri
+HTTypefaceSize=11
 [EvStyle_UH]
 UHBackgroundColor=green
 UHBackgroundColorCustom=
