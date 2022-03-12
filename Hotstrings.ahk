@@ -568,13 +568,6 @@ Critical, Off
 	~Esc::	;tilde in order to run function TT_C4GuiEscape
 		GuiControl,, % IdTT_C4_LB4, |
 		;OutputDebug, % "v_Triggerstring:" . A_Tab . v_Triggerstring . A_Tab . "v_EndChar:" . A_Tab . v_EndChar
-		; if (v_Triggerstring != "")
-		; {
-		; 	WinActivate, % "ahk_id" PreviousWindowID
-		; 	Send, % v_Triggerstring
-		; 	v_Triggerstring := ""
-		; }
-		; v_InputH.VisibleText	:= true
 		v_InputString 			:= ""	
 		return
 #If
@@ -597,7 +590,7 @@ F_Tt_ULH()
 	local	TempText := TransA["Undid the last hotstring"]
 ,			OutputVarTemp := 0, OutputVarTempX := 0, OutputVarTempY := 0, OutputVarTempW := 0, OutputVarTempH := 0
 
-	Gui, Tt_ULH: New, -Caption +ToolWindow +HwndTt_ULHHwnd	;Tt_ULH = Tooltip_Undid the Last Hotstring
+	Gui, Tt_ULH: New, -Caption +ToolWindow HwndTt_ULHHwnd	+AlwaysOnTop ;Tt_ULH = Tooltip_Undid the Last Hotstring
 	Gui, Tt_ULH: Margin, 0, 0
 	Gui, Tt_ULH: Color,, % ini_UHBgrCol
 	Gui, Tt_ULH: Font, % "s" . ini_UHTySize . A_Space . "c" . ini_UHTyFaceCol, % ini_UHTyFaceFont
@@ -613,7 +606,7 @@ F_Tt_HWT()	;Tt_HWT = Tooltip_Hostring Was Triggered
 	local	TempText := TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."]
 ,			OutputVarTemp := 0, OutputVarTempX := 0, OutputVarTempY := 0, OutputVarTempW := 0, OutputVarTempH := 0
 
-	Gui, Tt_HWT: New, -Caption +ToolWindow +HwndTt_HWTHwnd	;Tt_HWT = Tooltip_Hostring Was Triggered
+	Gui, Tt_HWT: New, -Caption +ToolWindow HwndTt_HWTHwnd	+AlwaysOnTop ;Tt_HWT = Tooltip_Hostring Was Triggered
 	Gui, Tt_HWT: Margin, 0, 0
 	Gui, Tt_HWT: Color,, % ini_HTBgrCol
 	Gui, Tt_HWT: Font, % "s" . ini_HTTySize . A_Space . "c" . ini_HTTyFaceCol, % ini_HTTyFaceFont
@@ -6188,7 +6181,9 @@ F_EventsStyling(OneTime*)
 		Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	F_GuiEventsStyling_CreateObjects()
 	F_GuiEventsStyling_DetermineConstants("TT")	;TT = Triggerstring Tips
+	Gui, EventsStyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Events: styling"]
 	F_GuiEventsStyling_DetermineConstants("HM")	;HM = Hotsring Menu
+	Gui, EventsStyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Events: styling"]
 	F_GuiEventsStyling_DetermineConstants("AT")	;AT = Active Triggerstring
 	F_GuiEventsStyling_DetermineConstants("HT")	;HT = Tooltip: Hostring is triggered
 	F_GuiEventsStyling_DetermineConstants("UH")	;UH = Tooltip: Unid the last hostring
@@ -7239,6 +7234,11 @@ F_EventSigOrdHotstring()
 {
 	global	;assume-global mode of operation
 	local 	v_MouseX := 0, v_MouseY := 0
+
+	LastWindowBeforeTooTip := WinExist("A")
+	OutputDebug, % "LastWindowBeforeTooTip:" . A_Tab . LastWindowBeforeTooTip . "`n"
+	ControlGetFocus, WhichIsFocused, % "ahk_id" LastWindowBeforeTooTip
+	OutputDebug, % "ErrorLevel:" . A_Tab . ErrorLevel . A_Tab . "WhichIsFocused:" . A_Tab . WhichIsFocused . "`n"
 	if (ini_OHTtEn)	;Ordinary Hostring Tooltip Enable
 	{
 		if (ini_OHTP = 1)
@@ -12439,12 +12439,14 @@ F_PrepareUndo(string)
 F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 {
 	global	;assume-global mode
+	Critical, On
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 ,	ReplacementString := F_FollowCaseConformity(ReplacementString)
 ,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendEvent")
+	Critical, Off
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SE" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
@@ -12453,12 +12455,14 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 {
 	global	;assume-global mode
+	Critical, On
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 ,	ReplacementString := F_FollowCaseConformity(ReplacementString)
 ,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendPlay")
+	Critical, Off
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SP" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
@@ -12467,12 +12471,14 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 {
 	global	;assume-global mode
+	Critical, On
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
 ,	ReplacementString := F_FollowCaseConformity(ReplacementString)
 ,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendRaw")
+	Critical, Off
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SR" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
@@ -12521,10 +12527,10 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 ,	ReplacementString := F_FollowCaseConformity(ReplacementString)
 ,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
  	F_SendIsOflag(ReplacementString, Oflag, "SendInput")
+	Critical, Off	
  	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	Critical, Off	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeterminePartStrings(ReplacementString)
@@ -12600,10 +12606,10 @@ F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clip
 ,	ReplacementString := F_FollowCaseConformity(ReplacementString)
 ,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_ClipboardPaste(ReplacementString, Oflag)
+	Critical, Off
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "CLI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenu_CLI() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
@@ -13435,10 +13441,14 @@ HideTrayTip()
 ; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
 TurnOff_OHE:
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
+	ControlFocus, % WhichIsFocused, % "ahk_id" . A_Space . LastWindowBeforeTooTip
+	OutputDebug, % "WhichIsFocused:" . A_Tab . WhichIsFocused . A_Tab . "LastWindowBeforeTooTip:" . A_Tab . LastWindowBeforeTooTip . "`n"
 	return
 
 TurnOff_UHE:
+	; PreviousWindowID := WinExist("A")
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
+	; WinActivate, % "ahk_id" PreviousWindowID
 	return
 
 TurnOff_Ttt:
