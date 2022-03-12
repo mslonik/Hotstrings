@@ -54,8 +54,7 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		HotstringDelay			:= 0
 ,		WhichMenu 			:= "" ;available values: CLI or MSI
 ,		v_EndChar 			:= "" ;initialization of this variable is important in case user would like to hit "Esc" and GUI TT_C4 exists.
-,		BTWT					:= 4	; BTWT = Basic Triggerstring Was Triggered
-,		UTLH					:= 6	; UTLH = Undid The Last Hotstring
+,		UTLH					:= 6	; Tooltip _ Undid the Last Hotstring
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
 F_LoadCreateTranslationTxt() 			;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
@@ -329,9 +328,10 @@ F_GuiVersionUpdate_DetermineConstraints()
 
 if (ini_ShowIntro)
 	F_GuiShowIntro()
-
 if (ini_OHTtEn)	;Ordinary Hostring Tooltip Enable
 	F_Tt_HWT()	;prepare Gui → Tooltip (HWT = Hotstring Was Triggered)
+if (ini_UHTtEn)	;Undid Hotstring Tooltip Enable
+	F_Tt_ULH()	;prepare Gui → Tooltip (ULH = Undid the Last Hotstring)
 
 F_LoadGUIstatic()
 if (ini_TTCn = 4)	;static triggerstring / hotstring GUI 
@@ -463,8 +463,8 @@ Critical, Off
 	OutputDebug, % "Regular" . "`n"
 	ToolTip,	;this line is necessary to close tooltips.
 	; OutputDebug, % "Destroy..."
-	ToolTip,,,, % BTWT	;BTWT = Basic Triggerstring Was Triggered
-	ToolTip,,,, % UTLH	;UTLH = Undid The Last Hotstring
+	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
+	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
 	F_DestroyTriggerstringTips(ini_TTCn)
 	;OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString
 	v_InputString := ""
@@ -474,8 +474,8 @@ Critical, Off
 ~LButton::	;as above, but without F_DestroyTriggerstringTips()
 	ToolTip,	;this line is necessary to close tooltips.
 	; OutputDebug, % "Destroy..."
-	ToolTip,,,, % BTWT	;BTWT = Basic Triggerstring Was Triggered
-	ToolTip,,,, % UTLH	;UTLH = Undid The Last Hotstring
+	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
+	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
 	OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString . "`n"
 	v_InputString := ""
 	;OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString . "`n"
@@ -591,15 +591,36 @@ Critical, Off
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_Tt_ULH()
+{
+	global	;assume-global mode of operation
+	local	TempText := TransA["Undid the last hotstring"]
+,			OutputVarTemp := 0, OutputVarTempX := 0, OutputVarTempY := 0, OutputVarTempW := 0, OutputVarTempH := 0
+
+	Gui, Tt_ULH: New, -Caption +ToolWindow +HwndTt_ULHHwnd	;Tt_ULH = Tooltip_Undid the Last Hotstring
+	Gui, Tt_ULH: Margin, 0, 0
+	Gui, Tt_ULH: Color,, % ini_UHBgrCol
+	Gui, Tt_ULH: Font, % "s" . ini_UHTySize . A_Space . "c" . ini_UHTyFaceCol, % ini_UHTyFaceFont
+	Gui, Tt_ULH: Add, Text, 		HwndIdTt_ULH_T1, % TempText
+	GuiControlGet, OutputVarTemp, Pos, % IdTt_ULH_T1
+	GuiControl, Hide, % IdTt_ULH_T1
+	Gui, Tt_ULH: Add, Listbox, 	% "HwndIdTt_ULH_LB1" . A_Space . "r1" . A_Space . "x" . OutputVarTempX . A_Space . "y" . OutputVarTempX . A_Space . "w" . OutputVarTempW + 4, % TempText
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Tt_HWT()	;Tt_HWT = Tooltip_Hostring Was Triggered
 {
 	global	;assume-global mode of operation
+	local	TempText := TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."]
+,			OutputVarTemp := 0, OutputVarTempX := 0, OutputVarTempY := 0, OutputVarTempW := 0, OutputVarTempH := 0
 
-	Gui, Tt_HWT: New, -Caption +ToolWindow +HwndTT_HWTHwnd	;Tt_HWT = Tooltip_Hostring Was Triggered
+	Gui, Tt_HWT: New, -Caption +ToolWindow +HwndTt_HWTHwnd	;Tt_HWT = Tooltip_Hostring Was Triggered
 	Gui, Tt_HWT: Margin, 0, 0
-	Gui, Tt_HWT: Color, % ini_HTBgrCol
+	Gui, Tt_HWT: Color,, % ini_HTBgrCol
 	Gui, Tt_HWT: Font, % "s" . ini_HTTySize . A_Space . "c" . ini_HTTyFaceCol, % ini_HTTyFaceFont
-	Gui, Tt_HWT: Add, Listbox, HwndIdHT r1, % TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."]
+	Gui, Tt_HWT: Add, Text, 		HwndIdTt_HWT_T1, % TempText
+	GuiControlGet, OutputVarTemp, Pos, % IdTt_HWT_T1
+	GuiControl, Hide, % IdTt_HWT_T1
+	Gui, Tt_HWT: Add, Listbox, 	% "HwndIdTt_HWT_LB1" . A_Space . "r1" . A_Space . "x" . OutputVarTempX . A_Space . "y" . OutputVarTempX . A_Space . "w" . OutputVarTempW + 4, % TempText
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTMenuStatic_Keyboard(IsPreviousWindowIDvital*)
@@ -1518,8 +1539,8 @@ F_OneCharPressed(ih, Char)
 	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n
 	v_TriggerString := v_InputString	;this line is necessary to correctly process F_Undo
 	; OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Tab . "v_Triggerstring:" . A_Space . v_Triggerstring . "`n"
-	ToolTip,,,, % BTWT	;Basic triggerstring was triggered
-	ToolTip,,,, % UTLH	;Undid the last hotstring
+	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
+	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn) and (v_InputString)
 	{
 		F_PrepareTriggerstringTipsTables2()	;old version: F_PrepareTriggerstringTipsTables()
@@ -3371,7 +3392,7 @@ F_EvUpdateTab()
 F_EvSM_B4()	;static menus, button Cancel
 {
 	global ;assume-global mode
-	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
+	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
      F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3395,7 +3416,7 @@ F_EvSM_B2()	;static menus, button Apply
 		ini_TTCn := 2	; default value: Composition of triggerstring tips = Triggerstring tips + triggers
 	}
 	IniWrite, % ini_TTCn,	% ini_HADConfig, Event_TriggerstringTips,	TTCn
-	ToolTip,,,, % BTWT			;Basic triggerstring was triggered	
+	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered	
 	F_EvTab3(true)	;to memory that something was applied
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3419,7 +3440,7 @@ F_EvSM_B3()	;static menus, button Close
 		ini_TTCn := 2	; default value: Composition of triggerstring tips = Triggerstring tips + triggers
 	}
 	IniWrite, % ini_TTCn,	% ini_HADConfig, Event_TriggerstringTips,	TTCn
-	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
+	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
      F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
@@ -3470,7 +3491,7 @@ F_EvSM_R1R2()
 F_EvAT_B4()	;Event Active Triggerstring Tips Button Cancel
 {
 	global ;assume-global mode
-	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
+	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
      F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3484,7 +3505,7 @@ F_EvAT_B2()	;Event Active Triggerstring Tips Button Apply
 		Case 2:	ini_ATEn := false
 	}
 	IniWrite, % ini_ATEn, 	% ini_HADConfig, Event_ActiveTriggerstringTips, 	ATEn
-	ToolTip,,,, % BTWT		;Basic triggerstring was triggered
+	Gui, Tt_HWT: Hide		;Tooltip: Basic hotstring was triggered
 	F_EvTab3(true)			;to memory that something was applied
 	if (ini_TTCn = 4)		;static triggerstring / hotstring GUI 
 	{
@@ -3503,7 +3524,7 @@ F_EvAT_B3()	;Event Active Triggerstring Tips Button Close
 		Case 2:	ini_ATEn := false
 	}
 	IniWrite, % ini_ATEn, 	% ini_HADConfig, Event_ActiveTriggerstringTips, 	ATEn
-	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
+	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
      F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 	if (ini_TTCn = 4)		;static triggerstring / hotstring GUI 
@@ -3608,7 +3629,7 @@ F_EvTt_B2()	;Event Tooltip (is triggered) Button Apply
 	IniWrite, % ini_MNTT,	% ini_HADConfig, Event_TriggerstringTips,	MNTT
 	IniWrite, % ini_TASAC,	% ini_HADConfig, Event_TriggerstringTips,	TipsAreShownAfterNoOfCharacters
 	IniWrite, % ini_TTCn,	% ini_HADConfig, Event_TriggerstringTips,	TTCn
-	ToolTip,,,, % BTWT			;Basic triggerstring was triggered	
+	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered	
 	F_EvTab3(true)	;to memory that something was applied
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3640,7 +3661,7 @@ F_EvTt_B3()	;Event Tooltip (is triggered) Button Close
 	IniWrite, % ini_MNTT,	% ini_HADConfig, Event_TriggerstringTips,	MNTT
 	IniWrite, % ini_TASAC,	% ini_HADConfig, Event_TriggerstringTips,	TipsAreShownAfterNoOfCharacters
 	IniWrite, % ini_TTCn,	% ini_HADConfig, Event_TriggerstringTips,	TTCn
-	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
+	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
      F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
@@ -3648,7 +3669,7 @@ F_EvTt_B3()	;Event Tooltip (is triggered) Button Close
 F_EvTt_B4()	;Event Tooltip (is triggered) Button Cancel
 {
 	global ;assume-global mode
-	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
+	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
      F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3773,14 +3794,14 @@ F_EvUH_B1() ;Event Undo Hotstring (is triggered) Button Tooltip test
 		{
 			if (A_CaretX and A_CaretY)
 			{
-				ToolTip, % TransA["Undid the last hotstring"], % A_CaretX + 20, % A_CaretY - 20, % UTLH	;Undid the last hotstring
+				Gui, Tt_ULH: Show, % "x" . A_CaretX + 20 . A_Space . "y" . A_CaretY - 20
 				if (ini_UHTD > 0)
 					SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
 			}
 			else
 			{
 				MouseGetPos, v_MouseX, v_MouseY
-				ToolTip, % TransA["Undid the last hotstring"], % v_MouseX + 20, % v_MouseY - 20, % UTLH	;Undid the last hotstring
+				Gui, Tt_ULH: Show, % "x" . v_MouseX + 20 . A_Space . "y" . v_MouseY - 20
 				if (ini_UHTD > 0)
 					SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
 			}
@@ -3789,7 +3810,7 @@ F_EvUH_B1() ;Event Undo Hotstring (is triggered) Button Tooltip test
 	if (EvUH_R5R6 = 2)
 	{
 		MouseGetPos, v_MouseX, v_MouseY
-		ToolTip, % TransA["Undid the last hotstring"], % v_MouseX + 20, % v_MouseY - 20, % UTLH	;Undid the last hotstring
+		Gui, Tt_ULH: Show, % "x" . v_MouseX + 20 . A_Space . "y" . v_MouseY - 20
 		if (ini_UHTD > 0)
 			SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
 	}
@@ -3832,7 +3853,7 @@ F_EvUH_B3()	;Event Undo Hotstring (is triggered) Button Apply
 	IniWrite, % ini_UHSEn, 	% ini_HADConfig, Event_UndoHotstring,	UHSEn
 	IniWrite, % ini_UHSF,	% ini_HADConfig, Event_UndoHotstring,	UHSF
 	IniWrite, % ini_UHSD,	% ini_HADConfig, Event_UndoHotstring,	UHSD
-	ToolTip,,,, % BTWT			;Basic triggerstring was triggered	
+	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered	
 	F_EvTab3(true)	;to memory that something was applied
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3867,7 +3888,7 @@ F_EvUH_B4()	;Event Undo Hotstring (is triggered) Button Close
 	IniWrite, % ini_UHSEn, 	% ini_HADConfig, Event_UndoHotstring,	UHSEn
 	IniWrite, % ini_UHSF,	% ini_HADConfig, Event_UndoHotstring,	UHSF
 	IniWrite, % ini_UHSD,	% ini_HADConfig, Event_UndoHotstring,	UHSD
-	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
+	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
      F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
@@ -3875,7 +3896,7 @@ F_EvUH_B4()	;Event Undo Hotstring (is triggered) Button Close
 F_EvUH_B5()	;Event Undo Hotstring (is triggered) Button Cancel
 {
 	global ;assume-global mode
-	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
+	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
      F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3989,7 +4010,7 @@ F_EvUH_R1R2()
 F_EvMH_B4()	;Menu Hotstring (is triggered) Button Cancel
 {
 	global ;assume-global mode
-	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
+	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
      F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4012,7 +4033,7 @@ F_EvMH_B2()	;Apply Button
 	IniWrite, % ini_MHSEn, 	% ini_HADConfig, Event_MenuHotstring,		MHSEn
 	IniWrite, % ini_MHSF,	% ini_HADConfig, Event_MenuHotstring,		MHSF
 	IniWrite, % ini_MHSD,	% ini_HADConfig, Event_MenuHotstring,		MHSD
-	ToolTip,,,, % BTWT			;Basic triggerstring was triggered	
+	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered	
 	F_EvTab3(true)	;to memory that something was applied
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4035,7 +4056,7 @@ F_EvMH_B3()	;Button Close
 	IniWrite, % ini_MHSEn, 	% ini_HADConfig, Event_MenuHotstring,		MHSEn
 	IniWrite, % ini_MHSF,	% ini_HADConfig, Event_MenuHotstring,		MHSF
 	IniWrite, % ini_MHSD,	% ini_HADConfig, Event_MenuHotstring,		MHSD
-	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
+	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
      F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
@@ -4648,14 +4669,14 @@ F_EvBH_B1() ;Events Basic Hotstring (is triggered) Button Tooltip test
 		{
 			if (A_CaretX and A_CaretY)
 			{
-				ToolTip, % TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."], % A_CaretX + 20, % A_CaretY - 20, % BTWT	;Basic triggerstring was triggered
+				Gui, Tt_HWT: Show, % "x" . A_CaretX + 20 . A_Space . "y" . A_CaretY - 20	;Tooltip _ Hotstring Was Triggered
 				if (EvBH_R3R4 > 0)
 					SetTimer, TurnOff_OHE, % "-" . EvBH_S1, 40 ;Priority = 40 to avoid conflicts with other threads 
 			}
 			else
 			{
 				MouseGetPos, v_MouseX, v_MouseY
-				ToolTip, % TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."], % v_MouseX + 20, % v_MouseY - 20, % BTWT	;Basic triggerstring was triggered
+				Gui, Tt_HWT: Show, % "x" v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 	;Tooltip _ Hotstring Was Triggered
 				if (EvBH_R3R4 > 0)
 					SetTimer, TurnOff_OHE, % "-" . EvBH_S1, 40 ;Priority = 40 to avoid conflicts with other threads 
 			}
@@ -4663,7 +4684,7 @@ F_EvBH_B1() ;Events Basic Hotstring (is triggered) Button Tooltip test
 		if (EvBH_R5R6 = 2)
 		{
 			MouseGetPos, v_MouseX, v_MouseY
-			ToolTip, % TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."], % v_MouseX + 20, % v_MouseY - 20, % BTWT	;Basic triggerstring was triggered
+			Gui, Tt_HWT: Show, % "x" v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 	;Tooltip _ Hotstring Was Triggered
 			if (EvBH_R3R4 > 0)
 				SetTimer, TurnOff_OHE, % "-" . EvBH_S1, 40 ;Priority = 40 to avoid conflicts with other threads 
 		}
@@ -4679,7 +4700,7 @@ F_EvBH_B2()	;Events Basic Hotstring (is triggered) Button Sound test
 F_EvBH_B5()	;Events Basic Hotstring (is triggered) Button Cancel
 {
 	global ;assume-global mode
-	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
+	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
      F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4714,7 +4735,7 @@ F_EvBH_B3()	;Events Basic Hotstring (is triggered) Button Apply
 	IniWrite, % ini_OHSEn, 	% ini_HADConfig, Event_BasicHotstring,	OHSEn
 	IniWrite, % ini_OHSF,	% ini_HADConfig, Event_BasicHotstring,	OHSF
 	IniWrite, % ini_OHSD,	% ini_HADConfig, Event_BasicHotstring,	OHSD
-	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
+	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4749,7 +4770,7 @@ F_EvBH_B4(CloseGuiEvents)	;Events Basic Hotstring (is triggered) Button Close
 	IniWrite, % ini_OHSEn, 	% ini_HADConfig, Event_BasicHotstring,	OHSEn
 	IniWrite, % ini_OHSF,	% ini_HADConfig, Event_BasicHotstring,	OHSF
 	IniWrite, % ini_OHSD,	% ini_HADConfig, Event_BasicHotstring,	OHSD
-	ToolTip,,,, % BTWT			;Basic triggerstring was triggered
+	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
      F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
 }
@@ -5306,7 +5327,8 @@ F_EventsStyling_B5()	;button: Test styling
 ,			ATS_TTBgrColCus := "", ATS_TTTyFaceColCus := "" 
 ,			HTS_TTBgrColCus := "", HTS_TTTyFaceColCus := "" 
 ,			UHS_TTBgrColCus := "", UHS_TTTyFaceColCus := "" 
-, 			a_TTMenuPos 	 := [], TempText := ""
+, 			a_TTMenuPos 	 := []
+,			TempText := TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."]
 
 	IdHTDemo_LB1 := 0, IdHTDemo_T1 := 0	;global variables
 
@@ -5470,7 +5492,6 @@ F_EventsStyling_B5()	;button: Test styling
 			else
 				Gui, HTDemo: Font, % "s" . HTS_DDL4 . A_Space . "c" . HTS_DDL2, 			% HTS_DDL3
 
-			TempText := TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."]
 			Gui, HTDemo: Add, Text, HwndIdHTDemo_T1, % TempText
 			GuiControlGet, OutputVarTemp, Pos, % IdHTDemo_T1
 			GuiControl, Hide, % IdHTDemo_T1
@@ -7177,19 +7198,19 @@ F_UndoSignalling()
 	global	;assume-global mode
 	if (ini_UHTtEn)
 	{
-		ToolTip,,,, % BTWT	;Basic triggerstring was triggered	;Basic triggerstring was triggered
+		Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered	;Tooltip: Basic hotstring was triggered
 		if (ini_UHTP = 1)	;Undo Hotstring Tooltip Position
 		{
 			if (A_CaretX and A_CaretY)
 			{
-				ToolTip, % TransA["Undid the last hotstring"], % A_CaretX + 20, % A_CaretY - 20, % UTLH	;Undid the last hotstring
+				Gui, Tt_ULH: Show, % "x" . A_CaretX + 20 . A_Space . "y" . A_CaretY - 20	;Undid the last hotstring
 				if (ini_UHTD > 0)
 					SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
 			}
 			else
 			{
 				MouseGetPos, v_MouseX, v_MouseY
-				ToolTip, % TransA["Undid the last hotstring"], % v_MouseX + 20, % v_MouseY - 20, % UTLH	;Undid the last hotstring
+				Gui, Tt_ULH: Show, % "x" . v_MouseX + 20 . A_Space . "y" . v_MouseY - 20	;Undid the last hotstring
 				if (ini_UHTD > 0)
 					SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
 			}
@@ -7197,7 +7218,7 @@ F_UndoSignalling()
 		if (ini_UHTP = 2)
 		{
 			MouseGetPos, v_MouseX, v_MouseY
-			ToolTip, % TransA["Undid the last hotstring"], % v_MouseX + 20, % v_MouseY - 20, % UTLH	;Undid the last hotstring
+			Gui, Tt_ULH: Show, % "x" . v_MouseX + 20 . A_Space . "y" . v_MouseY - 20	;Undid the last hotstring
 			if (ini_UHTD > 0)
 				SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
 		}
@@ -7216,7 +7237,7 @@ StrLenUnicode(data) ;https://www.autohotkey.com/boards/viewtopic.php?t=22036
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EventSigOrdHotstring()
 {
-	global	;assume-global mode
+	global	;assume-global mode of operation
 	local 	v_MouseX := 0, v_MouseY := 0
 	if (ini_OHTtEn)	;Ordinary Hostring Tooltip Enable
 	{
@@ -7224,14 +7245,14 @@ F_EventSigOrdHotstring()
 		{
 			if (A_CaretX and A_CaretY)
 			{
-				ToolTip, % TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."], % A_CaretX + 20, % A_CaretY - 20, % BTWT	;Basic triggerstring was triggered
+				Gui, Tt_HWT: Show, % "x" . A_CaretX + 20 . A_Space . "y" . A_CaretY - 20	;Tooltip _ Hotstring Was Triggered
 				if (ini_OHTD > 0)
 					SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
 			}
 			else
 			{
 				MouseGetPos, v_MouseX, v_MouseY
-				ToolTip, % TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."], % v_MouseX + 20, % v_MouseY - 20, % BTWT	;Basic triggerstring was triggered
+				Gui, Tt_HWT: Show, % "x" v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 	;Tooltip _ Hotstring Was Triggered
 				if (ini_OHTD > 0)
 					SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
 			}
@@ -7239,7 +7260,7 @@ F_EventSigOrdHotstring()
 		if (ini_OHTP = 2)
 		{
 			MouseGetPos, v_MouseX, v_MouseY
-			ToolTip, % TransA["Hotstring was triggered!"] . A_Space . "[" . F_ParseHotkey(ini_HK_UndoLH) . "]" . A_Space . TransA["to undo."], % v_MouseX + 20, % v_MouseY - 20, % BTWT	;Basic triggerstring was triggered
+			Gui, Tt_HWT: Show, % "x" v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 	;Tooltip _ Hotstring Was Triggered
 			if (ini_OHTD > 0)
 				SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
 		}
@@ -7251,7 +7272,7 @@ F_EventSigOrdHotstring()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PrepareTriggerstringTipsTables2()
 {
-	global	;assume-global mode
+	global	;assume-global mode of operation
 	local	HitCnt := 0
 	;OutputDebug, % "Length of v_InputString:" . A_Space . StrLen(v_InputString) . A_Tab . "v_InputString:" . A_Space . v_InputString
 	if (StrLen(v_InputString) > ini_TASAC - 1)	;TASAC = TipsAreShownAfterNoOfCharacters
@@ -10747,7 +10768,7 @@ Tip: If you copy text from PDF file it's adviced to remove them. = Tip: If you c
 Tips are shown after no. of characters						= Tips are shown after no. of characters
 (Together with accompanying files and subfolders).			= (Together with accompanying files and subfolders).
 Toggle trigger characters (↓ or EndChars)					= &Toggle trigger characters (↓ or EndChars)
-Tooltip: ""Hostring is triggered""				= Tooltip: ""Hostring is triggered""
+Tooltip: ""Hotstring was triggered""						= Tooltip: ""Hotstring was triggered""
 Tooltip: ""Undid the last hotstring""						= Tooltip: ""Undid the last hotstring""
 Tooltip disable										= Tooltip disable
 Tooltip enable											= Tooltip enable
@@ -13413,11 +13434,11 @@ HideTrayTip()
 
 ; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
 TurnOff_OHE:
-	ToolTip,,,, % BTWT	;Basic triggerstring was triggered
+	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	return
 
 TurnOff_UHE:
-	ToolTip,,,, % UTLH	;Undid the last hotstring
+	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	return
 
 TurnOff_Ttt:
