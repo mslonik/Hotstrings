@@ -5637,145 +5637,105 @@ F_EventsStyling_B6(Parameter*)	;button: Apply
 	F_EventsStylingTab3(true)	;something was changed
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EventsStyling_Close(WhichTab)
+{
+	global ;assume-global mode of operation
+	local 	DynVarRef1 := "", DynVarRef2 := ""		;dynamic variable: https://www.autohotkey.com/docs/Language.htm#dynamic-variables
+,			OutputVarTemp := ""
+,			TTS_TTBgrColCus := "", TTS_TTTyFaceColCus := "" 
+,			HMS_TTBgrColCus := "", HMS_TTTyFaceColCus := ""  
+,			ATS_TTBgrColCus := "", ATS_TTTyFaceColCus := ""  
+,			HTS_TTBgrColCus := "", HTS_TTTyFaceColCus := ""  
+,			UHS_TTBgrColCus := "", UHS_TTTyFaceColCus := ""  
+
+	DynVarRef1 := WhichTab . "S_DDL1"
+	if (%DynVarRef1% = "custom")
+	{
+		DynVarRef1 := "Id" . WhichTab . "styling_E1"
+		GuiControlGet, OutputVarTemp, , % %DynVarRef1%
+		if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
+		{
+			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
+			Gui, % WhichTab . "Demo: Destroy"
+			return
+		}
+		else
+		{
+			DynVarRef1 	:= WhichTab . "S_TTBgrColCus"
+,			%DynVarRef1% 	:= OutputVarTemp
+		}
+	}
+
+	DynVarRef1 := WhichTab . "S_DDL2"
+	if (%DynVarRef1% = "custom")
+	{
+		DynVarRef1 := "Id" . WhichTab . "styling_E2"
+		GuiControlGet, OutputVarTemp, , % %DynVarRef1%
+		if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
+		{
+			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
+			Gui, % WhichTab . "Demo: Destroy"
+			return
+		}
+		else
+		{
+			DynVarRef1 	:= WhichTab . "S_TTTyFaceColCus"
+,			%DynVarRef1% 	:= OutputVarTemp
+		}
+	}
+
+	DynVarRef1 	:= "ini_" . WhichTab . "BgrCol"
+,	DynVarRef2 	:= WhichTab . "S_DDL1"
+,	%DynVarRef1%	:= %DynVarRef2%
+
+,	DynVarRef1	:= "ini_" . WhichTab . "BgrColCus"
+,	DynVarRef2	:= WhichTab . "S_TTBgrColCus"
+,	%DynVarRef1%	:= %DynVarRef2%
+
+,	DynVarRef1	:= "ini_" . WhichTab . "TyFaceCol"
+,	DynVarRef2	:= WhichTab . "S_DDL2"
+,	%DynVarRef1%	:= %DynVarRef2%
+
+,	DynVarRef1	:= "ini_" . WhichTab . "TyFaceColCus"
+,	DynVarRef2	:= WhichTab . "S_TTTyFaceColCus"
+,	%DynVarRef1%	:= %DynVarRef2%
+
+,	DynVarRef1	:= "ini_" . WhichTab . "TyFaceFont"
+,	DynVarRef2	:= WhichTab . "S_DDL3"
+,	%DynVarRef1%	:= %DynVarRef2%
+
+,	DynVarRef1	:= "ini_" . WhichTab . "TySize"
+,	DynVarRef2	:= WhichTab . "S_DDL4"
+,	%DynVarRef1%	:= %DynVarRef2%
+
+	DynVarRef1 	:= "ini_" . WhichTab . "BgrCol"
+	IniWrite, % %DynVarRef1%, % ini_HADConfig, % "EvStyle_" . WhichTab, % WhichTab . "BackgroundColor"
+	DynVarRef1 	:= "ini_" . WhichTab . "BgrColCus"
+	IniWrite, % %DynVarRef1%, % ini_HADConfig, % "EvStyle_" . WhichTab, % WhichTab . "BackgroundColorCustom"
+	DynVarRef1 	:= "ini_" . WhichTab . "TyFaceCol"
+	IniWrite, % %DynVarRef1%, % ini_HADConfig, % "EvStyle_" . WhichTab, % WhichTab . "TypefaceColor"
+	DynVarRef1 	:= "ini_" . WhichTab . "TyFaceColCus"
+	IniWrite, % %DynVarRef1%, % ini_HADConfig, % "EvStyle_" . WhichTab, % WhichTab . "TypefaceColorCustom"
+	DynVarRef1 	:= "ini_" . WhichTab . "TyFaceFont"
+	IniWrite, % %DynVarRef1%, % ini_HADConfig, % "EvStyle_" . WhichTab, % WhichTab . "TypefaceFont"
+	DynVarRef1 	:= "ini_" . WhichTab . "TySize"
+	IniWrite, % %DynVarRef1%, % ini_HADConfig, % "EvStyle_" . WhichTab, % WhichTab . "TypefaceSize"
+	F_CloseGuiEventsSubWindow(WhatGuiToDestroy := WhichTab . "Demo")
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EventsStyling_B7()	;button: Close
 {
 	global ;assume-global mode of operation
-	local 	TTS_TTBgrColCus := "", TTS_TTTyFaceColCus := "" 
-,			HMS_TTBgrColCus := "", HMS_TTTyFaceColCus := ""  
-,			ATS_TTBgrColCus := "", ATS_TTTyFaceColCus := ""  
 
+	Gui, EventsStyling: 	Submit
 	Switch EventsStylingTab3
 	{
-		Case % TransA["Triggerstring tips styling"]:
-			Gui, EventsStyling: 	Submit
-
-			if (TTS_DDL1 = "custom")
-			{
-				GuiControlGet, OutputVarTemp,, % IdTTstyling_E1
-				if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
-				{
-					MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
-					Gui, TTDemo: Destroy
-					return
-				}
-				else
-					TTS_TTBgrColCus := OutputVarTemp
-			}
-
-			if (TTS_DDL2 = "custom")
-			{
-				GuiControlGet, OutputVarTemp,, % IdTTstyling_E2
-				if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
-				{
-					MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
-					Gui, TTDemo: Destroy
-					return
-				}
-				else
-					TTS_TTTyFaceColCus := OutputVarTemp
-			}
-
-			ini_TTBgrCol 		:= TTS_DDL1
-, 			ini_TTBgrColCus 	:= TTS_TTBgrColCus
-, 			ini_TTTyFaceCol 	:= TTS_DDL2
-, 			ini_TTTyFaceColCus 	:= TTS_TTTyFaceColCus
-, 			ini_TTTyFaceFont 	:= TTS_DDL3
-, 			ini_TTTySize 		:= TTS_DDL4
-
-			IniWrite, % ini_TTBgrCol, 		% ini_HADConfig, EvStyle_TT, TTBackgroundColor
-			IniWrite, % ini_TTBgrColCus, 		% ini_HADConfig, EvStyle_TT, TTBackgroundColorCustom
-			IniWrite, % ini_TTTyFaceCol, 		% ini_HADConfig, EvStyle_TT, TTTypefaceColor
-			IniWrite, % ini_TTTyFaceColCus, 	% ini_HADConfig, EvStyle_TT, TTTypefaceColorCustom
-			IniWrite, % ini_TTTyFaceFont, 	% ini_HADConfig, EvStyle_TT, TTTypefaceFont
-			IniWrite, % ini_TTTySize,		% ini_HADConfig, EvStyle_TT, TTTypefaceSize
-			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "TTDemo")
-
-		Case % TransA["Hotstring menu styling"]:
-			Gui, EventsStyling: 	Submit
-			if (HMS_DDL1 = "custom")
-			{
-				GuiControlGet, OutputVarTemp,, % IdHMstyling_E1
-				if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
-				{
-					MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
-					Gui, HMDemo: Destroy
-					return
-				}
-				else
-					HMS_TTBgrColCus := OutputVarTemp
-			}
-
-			if (HMS_DDL2 = "custom")
-			{
-				GuiControlGet, OutputVarTemp,, % IdHMstyling_E2
-				if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
-				{
-					MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
-					Gui, HMDemo: Destroy
-					return
-				}
-				else
-					HMS_TTTyFaceColCus := OutputVarTemp
-			}
-
-			ini_HMBgrCol 		:= HMS_DDL1
-, 			ini_HMBgrColCus 	:= HMS_TTBgrColCus
-, 			ini_HMTyFaceCol 	:= HMS_DDL2
-, 			ini_HMTyFaceColCus 	:= HMS_TTTyFaceColCus
-, 			ini_HMTyFaceFont	:= HMS_DDL3
-, 			ini_HMTySize		:= HMS_DDL4
-
-			IniWrite, % ini_HMBgrCol, 		% ini_HADConfig, EvStyle_HM, HMBackgroundColor
-			IniWrite, % ini_HMBgrColCus, 		% ini_HADConfig, EvStyle_HM, HMBackgroundColorCustom
-			IniWrite, % ini_HMTyFaceCol, 		% ini_HADConfig, EvStyle_HM, HMTypefaceColor
-			IniWrite, % ini_HMTyFaceColCus, 	% ini_HADConfig, EvStyle_HM, HMTypefaceColorCustom
-			IniWrite, % ini_HMTyFaceFont, 	% ini_HADConfig, EvStyle_HM, HMTypefaceFont
-			IniWrite, % ini_HMTySize,		% ini_HADConfig, EvStyle_HM, HMTypefaceSize
-     		F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HMDemo")
-
-		Case % TransA["Active triggerstring tips styling"]:
-			Gui, EventsStyling: 	Submit
-			if (ATS_DDL1 = "custom")
-			{
-				GuiControlGet, OutputVarTemp,, % IdATstyling_E1
-				if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
-				{
-					MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
-					Gui, ATDemo: Destroy
-					return
-				}
-				else
-					ATS_TTBgrColCus := OutputVarTemp
-			}
-
-			if (ATS_DDL2 = "custom")
-			{
-				GuiControlGet, OutputVarTemp,, % IdATstyling_E2
-				if (!RegExMatch(OutputVarTemp, "^[[:xdigit:]]{6}"))
-				{
-					MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["Incorrect value. Select custom RGB hex value. Please try again."] . A_Space . "`n" 
-					Gui, ATDemo: Destroy
-					return
-				}
-				else
-					HMS_ATTyFaceColCus := OutputVarTemp
-			}
-
-			ini_ATBgrCol 			:= ATS_DDL1
-, 			ini_ATBgrColCus 		:= ATS_TTBgrColCus
-, 			ini_ATTyFaceCol 		:= ATS_DDL2
-, 			ini_ATTyFaceColCus 		:= ATS_TTTyFaceColCus
-, 			ini_ATTyFaceFont		:= ATS_DDL3
-, 			ini_ATTySize			:= ATS_DDL4
-
-			IniWrite, % ini_ATBgrCol, 		% ini_HADConfig, EvStyle_AT, ATBackgroundColor
-			IniWrite, % ini_ATBgrColCus, 		% ini_HADConfig, EvStyle_AT, ATBackgroundColorCustom
-			IniWrite, % ini_ATTyFaceCol, 		% ini_HADConfig, EvStyle_AT, ATTypefaceColor
-			IniWrite, % ini_ATTyFaceColCus, 	% ini_HADConfig, EvStyle_AT, ATTypefaceColorCustom
-			IniWrite, % ini_ATTyFaceFont, 	% ini_HADConfig, EvStyle_AT, ATTypefaceFont
-			IniWrite, % ini_ATTySize,		% ini_HADConfig, EvStyle_AT, ATTypefaceSize
-     		F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "ATDemo")
-	}
+		Case % TransA["Triggerstring tips styling"]:				F_EventsStyling_Close("TT")
+		Case % TransA["Hotstring menu styling"]:				F_EventsStyling_Close("HM")
+		Case % TransA["Active triggerstring tips styling"]:		F_EventsStyling_Close("AT")
+		Case % TransA["Tooltip: ""Hostring is triggered"""]:		F_EventsStyling_Close("HT")
+		Case % TransA["Tooltip: ""Undid the last hotstring"""]:	F_EventsStyling_Close("UH")
+ 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EventsStyling_B8()	;button: Cancel
@@ -5783,11 +5743,11 @@ F_EventsStyling_B8()	;button: Cancel
 	global ;assume-global mode of operation
 	Switch EventsStylingTab3
 	{
-		Case % TransA["Triggerstring tips styling"]:					F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "TTDemo")
-		Case % TransA["Hotstring menu styling"]:					F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HMDemo")
-		Case % TransA["Active triggerstring tips styling"]:			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "ATDemo")
-		Case % TransA["Tooltip: ""Hostring is triggered"""]:			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HTDemo")
-		Case % TransA["Tooltip: ""Undid the last hotstring"""]:		F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "UHDemo")
+		Case % TransA["Triggerstring tips styling"]:				F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "TTDemo")
+		Case % TransA["Hotstring menu styling"]:				F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HMDemo")
+		Case % TransA["Active triggerstring tips styling"]:		F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "ATDemo")
+		Case % TransA["Tooltip: ""Hostring is triggered"""]:		F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HTDemo")
+		Case % TransA["Tooltip: ""Undid the last hotstring"""]:	F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "UHDemo")
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
