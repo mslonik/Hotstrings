@@ -1563,8 +1563,7 @@ F_InitiateInputHook()
 {
 	global	;assume-global mode of operation
 	v_InputString := "", v_Triggerstring := "", v_UndoHotstring := ""	;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
-; ,	v_InputH 			:= InputHook("V I1 L100")	;I1 by default	;tested: L1000, L10
-,	v_InputH 			:= InputHook("V I1 L0")	;I1 by default	;tested: L1000, L10
+,	v_InputH 			:= InputHook("V I1 L0")	;I1 by default
 ,	v_InputH.OnChar 	:= Func("F_OneCharPressed")
 ,	v_InputH.OnKeyUp 	:= Func("F_BackspaceProcessing")
 ,	v_InputH.OnEnd		:= Func("F_InputHookOnEnd")
@@ -5778,27 +5777,27 @@ F_GuiEventsStyling_CreateObjects()
  	F_GuiStyling_Section(TabId := "UH")
  }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EventsStylingTab3_Update(WhichItem)
+F_EventsStylingTab3_Update(WhichItem, OneTime*)
 {
 	global ;assume-global mode of operation
 	local 	DynVarRef1 := "", DynVarRef2 := "", DynVarRef3 := "", DynVarRef4 := "", DynVarRef5 := "", DynVarRef6 := "", DynVarRef7 := "", DynVarRef8 := ""		;dynamic variable: https://www.autohotkey.com/docs/Language.htm#dynamic-variables
-	static PreviousTab3 := ""
-		, PreviousTTS_DDL1 := "", PreviousTTS_DDL2 := "", PreviousTTS_DDL3 := "", PreviousTTS_DDL4 := ""
+	static PreviousTTS_DDL1 := "", PreviousTTS_DDL2 := "", PreviousTTS_DDL3 := "", PreviousTTS_DDL4 := ""
 		, PreviousHMS_DDL1 := "", PreviousHMS_DDL2 := "", PreviousHMS_DDL3 := "", PreviousHMS_DDL4 := ""
 		, PreviousATS_DDL1 := "", PreviousATS_DDL2 := "", PreviousATS_DDL3 := "", PreviousATS_DDL4 := ""
 		, PreviousHTS_DDL1 := "", PreviousHTS_DDL2 := "", PreviousHTS_DDL3 := "", PreviousHTS_DDL4 := ""
 		, PreviousUHS_DDL1 := "", PreviousUHS_DDL2 := "", PreviousUHS_DDL3 := "", PreviousUHS_DDL4 := ""
-		, OneTimeTTS := true
+		; , PreviousTab3 := ""
+		; , OneTimeTTS := true
 
 	if (OneTime[1] = true)
 	{
-		PreviousTab3 := EventsStylingTab3
-		, PreviousTTS_DDL1 := TTS_DDL1, PreviousTTS_DDL2 := TTS_DDL2, PreviousTTS_DDL3 := TTS_DDL3, PreviousTTS_DDL4 := TTS_DDL4
+		;PreviousTab3 := EventsStylingTab3
+		  PreviousTTS_DDL1 := TTS_DDL1, PreviousTTS_DDL2 := TTS_DDL2, PreviousTTS_DDL3 := TTS_DDL3, PreviousTTS_DDL4 := TTS_DDL4
 		, PreviousHMS_DDL1 := HMS_DDL1, PreviousHMS_DDL2 := HMS_DDL2, PreviousHMS_DDL3 := HMS_DDL3, PreviousHMS_DDL4 := HMS_DDL4
 		, PreviousATS_DDL1 := ATS_DDL1, PreviousATS_DDL2 := ATS_DDL2, PreviousATS_DDL3 := ATS_DDL3, PreviousATS_DDL4 := ATS_DDL4
 		, PreviousHTS_DDL1 := HTS_DDL1, PreviousHTS_DDL2 := HTS_DDL2, PreviousHTS_DDL3 := HTS_DDL3, PreviousHTS_DDL4 := HTS_DDL4
 		, PreviousUHS_DDL1 := UHS_DDL1, PreviousUHS_DDL2 := UHS_DDL2, PreviousUHS_DDL3 := UHS_DDL3, PreviousUHS_DDL4 := UHS_DDL4
-		, OneTimeTTS := false
+		; , OneTimeTTS := false
 		return
 	}
 
@@ -5811,70 +5810,60 @@ F_EventsStylingTab3_Update(WhichItem)
 ,	DynVarRef7 := WhichItem . "S_DDL4"
 ,	DynVarRef8 := "Previous"	. WhichItem . "S_DDL4"
 
-				if (%DynVarRef1% != %DynVarRef2%) or (%DynVarRef3% != %DynVarRef4%) or (%DynVarRef5% != %DynVarRef6%) or %DynVarRef7% != %DynVarRef8%)
+	if (%DynVarRef1% != %DynVarRef2%) or (%DynVarRef3% != %DynVarRef4%) or (%DynVarRef5% != %DynVarRef6%) or (%DynVarRef7% != %DynVarRef8%)
+	{
+		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
+			. TransA["If you don't apply it, previous changes will be lost."]
+			. "`n`n" . TransA["Do you wish to apply your changes?"]
+		IfMsgBox, Yes	;here MsgBox threadis over
+			F_EventsStyling_B6(TransA["Triggerstring tips styling"])	;button: Apply 
+		IfMsgBox, No	;restore previous values to each GuiControl
+		{
+			if (%DynVarRef1% != %DynVarRef2%)	;if (TTS_DDL1 != PreviousTTS_DDL1)
+			{
+				GuiControl, ChooseString, % %DynVarRef1%, % %DynVarRef2%
+				if (%DynVarRef2% = "custom")
 				{
-					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
-						. TransA["If you don't apply it, previous changes will be lost."]
-						. "`n`n" . TransA["Do you wish to apply your changes?"]
-					IfMsgBox, Yes	;here MsgBox threadis over
-						F_EventsStyling_B6(TransA["Triggerstring tips styling"])	;button: Apply 
-					IfMsgBox, No	;restore previous values to each GuiControl
-					{
-						if (%DynVarRef1% != %DynVarRef2%)	;if (TTS_DDL1 != PreviousTTS_DDL1)
-						{
-							GuiControl, ChooseString, % %DynVarRef1%, % %DynVarRef2%
-							if (%DynVarRef2% = "custom")
-							{
-								DynVarRef1 := "Id" . WhichItem . "styling_E1"
-								GuiControl,, % %DynVarRef1%, % TransA["HTML color RGB value, e.g. 00FF00"] 
-							}
-						}
-						if (%DynVarRef3% != %DynVarRef4%)	;if (TTS_DDL2 != PreviousTTS_DDL2)
-						{
-							GuiControl, ChooseString, % %DynVarRef3%, % %DynVarRef4%
-							if (%DynVarRef4% = "custom")
-							{
-								DynVarRef3 := "Id" . WhichItem . "styling_E2"
-								GuiControl,, % %DynVarRef3%, % TransA["HTML color RGB value, e.g. 00FF00"] 
-							}
-						}
-						if (%DynVarRef5% != %DynVarRef6%) ;if (TTS_DDL3 != PreviousTTS_DDL3)
-						{
-							DynVarRef5 := "Id" . WhichItem . "styling_DDL3"
-							GuiControl, ChooseString, % %DynVarRef5%, % %DynVarRef6%
-						}
-						if (%DynVarRef7% != %DynVarRef8%) ;if (TTS_DDL4 != PreviousTTS_DDL4)
-						{
-							DynVarRef7 := "Id" . WhichItem . "styling_DDL4" 
-							GuiControl, ChooseString, % %DynVarRef7%, % %DynVarRef8%	;GuiControl, ChooseString, % IdTTstyling_DDL4, % PreviousTTS_DDL4
-						}
-					}
+					DynVarRef1 := "Id" . WhichItem . "styling_E1"
+					GuiControl,, % %DynVarRef1%, % TransA["HTML color RGB value, e.g. 00FF00"] 
 				}
-				else
+			}
+			if (%DynVarRef3% != %DynVarRef4%)	;if (TTS_DDL2 != PreviousTTS_DDL2)
+			{
+				GuiControl, ChooseString, % %DynVarRef3%, % %DynVarRef4%
+				if (%DynVarRef4% = "custom")
 				{
-					F_GuiStyling_LoadValues()
+					DynVarRef3 := "Id" . WhichItem . "styling_E2"
+					GuiControl,, % %DynVarRef3%, % TransA["HTML color RGB value, e.g. 00FF00"] 
 				}
+			}
+			if (%DynVarRef5% != %DynVarRef6%) ;if (TTS_DDL3 != PreviousTTS_DDL3)
+			{
+				DynVarRef5 := "Id" . WhichItem . "styling_DDL3"
+				GuiControl, ChooseString, % %DynVarRef5%, % %DynVarRef6%
+			}
+			if (%DynVarRef7% != %DynVarRef8%) ;if (TTS_DDL4 != PreviousTTS_DDL4)
+			{
+				DynVarRef7 := "Id" . WhichItem . "styling_DDL4" 
+				GuiControl, ChooseString, % %DynVarRef7%, % %DynVarRef8%	;GuiControl, ChooseString, % IdTTstyling_DDL4, % PreviousTTS_DDL4
+			}
+		}
+	}
+	else
+	{
+		F_GuiStyling_LoadValues()
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EventsStylingTab3(OneTime*)
 {
 	global ;assume-global mode
-	static PreviousTab3 := ""
-		, PreviousTTS_DDL1 := "", PreviousTTS_DDL2 := "", PreviousTTS_DDL3 := "", PreviousTTS_DDL4 := ""
-		, PreviousHMS_DDL1 := "", PreviousHMS_DDL2 := "", PreviousHMS_DDL3 := "", PreviousHMS_DDL4 := ""
-		, PreviousATS_DDL1 := "", PreviousATS_DDL2 := "", PreviousATS_DDL3 := "", PreviousATS_DDL4 := ""
-		, PreviousHTS_DDL1 := "", PreviousHTS_DDL2 := "", PreviousHTS_DDL3 := "", PreviousHTS_DDL4 := ""
-		, PreviousUHS_DDL1 := "", PreviousUHS_DDL2 := "", PreviousUHS_DDL3 := "", PreviousUHS_DDL4 := ""
-		, OneTimeTTS := true
+	static PreviousTab3 := "", OneTimeTTS := true
 	if (OneTime[1] = true)
 	{
 		PreviousTab3 := EventsStylingTab3
-		, PreviousTTS_DDL1 := TTS_DDL1, PreviousTTS_DDL2 := TTS_DDL2, PreviousTTS_DDL3 := TTS_DDL3, PreviousTTS_DDL4 := TTS_DDL4
-		, PreviousHMS_DDL1 := HMS_DDL1, PreviousHMS_DDL2 := HMS_DDL2, PreviousHMS_DDL3 := HMS_DDL3, PreviousHMS_DDL4 := HMS_DDL4
-		, PreviousATS_DDL1 := ATS_DDL1, PreviousATS_DDL2 := ATS_DDL2, PreviousATS_DDL3 := ATS_DDL3, PreviousATS_DDL4 := ATS_DDL4
-		, PreviousHTS_DDL1 := HTS_DDL1, PreviousHTS_DDL2 := HTS_DDL2, PreviousHTS_DDL3 := HTS_DDL3, PreviousHTS_DDL4 := HTS_DDL4
-		, PreviousUHS_DDL1 := UHS_DDL1, PreviousUHS_DDL2 := UHS_DDL2, PreviousUHS_DDL3 := UHS_DDL3, PreviousUHS_DDL4 := UHS_DDL4
-		, OneTimeTTS := false
+		F_EventsStylingTab3_Update("TT", true)
+		OneTimeTTS := false
 		return
 	}
 	if (WinExist("ahk_id" TDemoHwnd))
@@ -5893,144 +5882,13 @@ F_EventsStylingTab3(OneTime*)
 	{
 		Switch PreviousTab3
 		{
-			Case % TransA["Triggerstring tips styling"]:
-				if (TTS_DDL1 != PreviousTTS_DDL1) or (TTS_DDL2 != PreviousTTS_DDL2) or (TTS_DDL3 != PreviousTTS_DDL3) or (TTS_DDL4 != PreviousTTS_DDL4)
-				{
-					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
-						. TransA["If you don't apply it, previous changes will be lost."]
-						. "`n`n" . TransA["Do you wish to apply your changes?"]
-					IfMsgBox, Yes	;here MsgBox threadis over
-						F_EventsStyling_B6(TransA["Triggerstring tips styling"])	;button: Apply 
-					IfMsgBox, No	;restore previous values to each GuiControl
-					{
-						if (TTS_DDL1 != PreviousTTS_DDL1)
-						{
-							GuiControl, ChooseString, % IdTTstyling_DDL1, % PreviousTTS_DDL1
-							if (PreviousTTS_DDL1 = "custom")
-								GuiControl,, % IdTTstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
-						}
-						if (TTS_DDL2 != PreviousTTS_DDL2)
-						{
-							GuiControl, ChooseString, % IdTTstyling_DDL2, % PreviousTTS_DDL2
-							if (PreviousTTS_DDL2 = "custom")
-								GuiControl,, % IdTTstyling_E2, % TransA["HTML color RGB value, e.g. 00FF00"] 
-						}
-						if (TTS_DDL3 != PreviousTTS_DDL3)
-							GuiControl, ChooseString, % IdTTstyling_DDL3, % PreviousTTS_DDL3
-						if (TTS_DDL4 != PreviousTTS_DDL4)
-							GuiControl, ChooseString, % IdTTstyling_DDL4, % PreviousTTS_DDL4
-					}
-				}
-				else
-				{
-					F_GuiStyling_LoadValues()
-				}
-				PreviousTab3 := EventsStylingTab3
-			
-			Case % TransA["Hotstring menu styling"]:
-				if (HMS_DDL1 != PreviousHMS_DDL1) or (HMS_DDL2 != PreviousHMS_DDL2) or (HMS_DDL3 != PreviousHMS_DDL3) or (HMS_DDL4 != PreviousHMS_DDL4)
-				{
-					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
-					. TransA["If you don't apply it, previous changes will be lost."]
-					. "`n`n" . TransA["Do you wish to apply your changes?"]
-					IfMsgBox, Yes	;here MsgBox threadis over
-						F_EventsStyling_B6(TransA["Hotstring menu styling"])	;button: Apply 
-					IfMsgBox, No	;restore previous values to each GuiControl
-					{
-						if (HMS_DDL1 != PreviousHMS_DDL1)
-						{
-							GuiControl, ChooseString, % IdHMstyling_DDL1, % PreviousHMS_DDL1
-							if (PreviousHMS_DDL1 = "custom")
-								GuiControl,, % IdHMstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
-						}
-						if (HMS_DDL2 != PreviousHMS_DDL2)
-						{
-							GuiControl, ChooseString, % IdHMstyling_DDL2, % PreviousHMS_DDL2
-							if (PreviousHMS_DDL2 = "custom")
-								GuiControl,, % IdHMstyling_E2, % TransA["HTML color RGB value, e.g. 00FF00"] 						
-						}
-						if (HMS_DDL3 != PreviousHMS_DDL3)
-							GuiControl, ChooseString, % IdHMstyling_DDL3, % PreviousHMS_DDL3
-						if (HMS_DDL4 != PreviousHMS_DDL4)
-							GuiControl, ChooseString, % IdHMstyling_DDL4, % PreviousHMS_DDL4
-					}
-				}
-				else
-				{
-					F_GuiStyling_LoadValues()
-				}
-				PreviousTab3 := EventsStylingTab3
-
-			Case % TransA["Active triggerstring tips styling"]:
-				if (ATS_DDL1 != PreviousATS_DDL1) or (ATS_DDL2 != PreviousATS_DDL2) or (ATS_DDL3 != PreviousATS_DDL3) or (ATS_DDL4 != PreviousATS_DDL4)
-				{
-					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
-						. TransA["If you don't apply it, previous changes will be lost."]
-						. "`n`n" . TransA["Do you wish to apply your changes?"]
-					IfMsgBox, Yes	;here MsgBox thread is over
-						F_EventsStyling_B6(TransA["Active triggerstring tips styling"])	;button: Apply 
-					IfMsgBox, No	;restore previous values to each GuiControl
-					{
-						if (ATTS_DDL1 != PreviousATS_DDL1)
-						{
-							GuiControl, ChooseString, % IdATstyling_DDL1, % PreviousATS_DDL1
-							if (PreviousATS_DDL1 = "custom")
-								GuiControl,, % IdATstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
-						}
-						if (ATS_DDL2 != PreviousATS_DDL2)
-						{
-							GuiControl, ChooseString, % IdATstyling_DDL2, % PreviousATS_DDL2
-							if (PreviousATS_DDL2 = "custom")
-								GuiControl,, % IdATstyling_E2, % TransA["HTML color RGB value, e.g. 00FF00"] 
-						}
-						if (ATS_DDL3 != PreviousATS_DDL3)
-							GuiControl, ChooseString, % IdATstyling_DDL3, % PreviousATS_DDL3
-						if (ATS_DDL4 != PreviousATS_DDL4)
-							GuiControl, ChooseString, % IdATstyling_DDL4, % PreviousATS_DDL4
-					}
-				}
-				else
-				{
-					F_GuiStyling_LoadValues()
-				}
-				PreviousTab3 := EventsStylingTab3
-
-			Case % TransA["Tooltip: ""Hotstring was triggered"""]:
-				if (HTS_DDL1 != PreviousHTS_DDL1) or (HTS_DDL2 != PreviousHTS_DDL2) or (HTS_DDL3 != PreviousHTS_DDL3) or (HTS_DDL4 != PreviousHTS_DDL4)
-				{
-					MsgBox, 68, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["You've changed at least one configuration parameter, but didn't yet apply it."] 
-						. TransA["If you don't apply it, previous changes will be lost."]
-						. "`n`n" . TransA["Do you wish to apply your changes?"]
-					IfMsgBox, Yes	;here MsgBox thread is over
-						F_EventsStyling_B6(TransA["Tooltip: ""Hotstring was triggered"""])	;button: Apply 
-					IfMsgBox, No	;restore previous values to each GuiControl
-					{
-						if (HTS_DDL1 != PreviousHTS_DDL1)
-						{
-							GuiControl, ChooseString, % IdHTstyling_DDL1, % PreviousHTS_DDL1
-							if (PreviousHTS_DDL1 = "custom")
-								GuiControl,, % IdHTstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
-						}
-						if (HTS_DDL2 != PreviousHTS_DDL2)
-						{
-							GuiControl, ChooseString, % IdHTstyling_DDL2, % PreviousHTS_DDL2
-							if (PreviousHTS_DDL2 = "custom")
-								GuiControl,, % IdHTstyling_E2, % TransA["HTML color RGB value, e.g. 00FF00"] 
-						}
-						if (HTS_DDL3 != PreviousHTS_DDL3)
-							GuiControl, ChooseString, % IdHTstyling_DDL3, % PreviousHTS_DDL3
-						if (HTS_DDL4 != PreviousHTS_DDL4)
-							GuiControl, ChooseString, % IdHTstyling_DDL4, % PreviousHTS_DDL4
-					}
-				}
-				else
-				{
-					F_GuiStyling_LoadValues()
-				}
-				PreviousTab3 := EventsStylingTab3
-
-			Case % TransA["Tooltip: ""Undid the last hotstring"""]:
+			Case % TransA["Triggerstring tips styling"]:				F_EventsStylingTab3_Update("TT")
+			Case % TransA["Hotstring menu styling"]:				F_EventsStylingTab3_Update("HM")
+			Case % TransA["Active triggerstring tips styling"]:		F_EventsStylingTab3_Update("AT")
+			Case % TransA["Tooltip: ""Hotstring was triggered"""]:		F_EventsStylingTab3_Update("HT")
+			Case % TransA["Tooltip: ""Undid the last hotstring"""]:	F_EventsStylingTab3_Update("UH")
 		}
+		PreviousTab3 := EventsStylingTab3
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7341,10 +7199,10 @@ F_EventSigOrdHotstring()
 	global	;assume-global mode of operation
 	local 	v_MouseX := 0, v_MouseY := 0
 
-	LastWindowBeforeTooTip := WinExist("A")
-	OutputDebug, % "LastWindowBeforeTooTip:" . A_Tab . LastWindowBeforeTooTip . "`n"
-	ControlGetFocus, WhichIsFocused, % "ahk_id" LastWindowBeforeTooTip
-	OutputDebug, % "ErrorLevel:" . A_Tab . ErrorLevel . A_Tab . "WhichIsFocused:" . A_Tab . WhichIsFocused . "`n"
+	; LastWindowBeforeTooTip := WinExist("A")
+	; OutputDebug, % "LastWindowBeforeTooTip:" . A_Tab . LastWindowBeforeTooTip . "`n"
+	; ControlGetFocus, WhichIsFocused, % "ahk_id" LastWindowBeforeTooTip
+	; OutputDebug, % "ErrorLevel:" . A_Tab . ErrorLevel . A_Tab . "WhichIsFocused:" . A_Tab . WhichIsFocused . "`n"
 	if (ini_OHTtEn)	;Ordinary Hostring Tooltip Enable
 	{
 		if (ini_OHTP = 1)
@@ -9088,7 +8946,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
 	
 	HS3_GuiWidth  := A_GuiWidth	;used by F_SaveGUIPos()
-	HS3_GuiHeight := A_GuiHeight	;used by F_SaveGUIPos()
+,	HS3_GuiHeight := A_GuiHeight	;used by F_SaveGUIPos()
 	if (f_MainGUIresizing)
 		return
 	if (A_EventInfo = 1) ; The window has been minimized.
@@ -12552,10 +12410,10 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 ,	ReplacementString := F_FollowCaseConformity(ReplacementString)
 ,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendEvent")
-	Critical, Off
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SE" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
@@ -12568,10 +12426,10 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 ,	ReplacementString := F_FollowCaseConformity(ReplacementString)
 ,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendPlay")
-	Critical, Off
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SP" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
@@ -12584,10 +12442,10 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 ,	ReplacementString := F_FollowCaseConformity(ReplacementString)
 ,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendRaw")
-	Critical, Off
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SR" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SendIsOflag(OutputString, Oflag, SendFunctionName)
@@ -12596,6 +12454,7 @@ F_SendIsOflag(OutputString, Oflag, SendFunctionName)
 	Switch SendFunctionName
 	{
 		Case "SendInput":
+			OutputDebug, % "SendInput:"
 			if (Oflag = false)
 				SendInput, % OutputString . A_EndChar
 			else
@@ -12633,10 +12492,10 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 ,	ReplacementString := F_FollowCaseConformity(ReplacementString)
 ,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
  	F_SendIsOflag(ReplacementString, Oflag, "SendInput")
-	Critical, Off	
  	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	Critical, Off	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeterminePartStrings(ReplacementString)
@@ -12712,10 +12571,10 @@ F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clip
 ,	ReplacementString := F_FollowCaseConformity(ReplacementString)
 ,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_ClipboardPaste(ReplacementString, Oflag)
-	Critical, Off
 	F_EventSigOrdHotstring()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "CLI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenu_CLI() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
@@ -13547,8 +13406,8 @@ HideTrayTip()
 ; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
 TurnOff_OHE:
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
-	ControlFocus, % WhichIsFocused, % "ahk_id" . A_Space . LastWindowBeforeTooTip
-	OutputDebug, % "WhichIsFocused:" . A_Tab . WhichIsFocused . A_Tab . "LastWindowBeforeTooTip:" . A_Tab . LastWindowBeforeTooTip . "`n"
+	; ControlFocus, % WhichIsFocused, % "ahk_id" . A_Space . LastWindowBeforeTooTip
+	; OutputDebug, % "WhichIsFocused:" . A_Tab . WhichIsFocused . A_Tab . "LastWindowBeforeTooTip:" . A_Tab . LastWindowBeforeTooTip . "`n"
 	return
 
 TurnOff_UHE:
