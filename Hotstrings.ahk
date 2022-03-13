@@ -54,7 +54,6 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		HotstringDelay			:= 0
 ,		WhichMenu 			:= "" ;available values: CLI or MSI
 ,		v_EndChar 			:= "" ;initialization of this variable is important in case user would like to hit "Esc" and GUI TT_C4 exists.
-,		UTLH					:= 6	; Tooltip _ Undid the Last Hotstring
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
 F_LoadCreateTranslationTxt() 			;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
@@ -6181,6 +6180,7 @@ F_EventsStyling(OneTime*)
 		GuiControl, Hide, % IdUHstyling_LB1
 		Gui, TTDemo: Hide
 		Gui, HMDemo: Hide
+		Gui, ATDemo: Hide
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7162,14 +7162,14 @@ F_UndoSignalling()
 		{
 			if (A_CaretX and A_CaretY)
 			{
-				Gui, Tt_ULH: Show, % "x" . A_CaretX + 20 . A_Space . "y" . A_CaretY - 20	;Undid the last hotstring
+				Gui, Tt_ULH: Show, % "x" . A_CaretX + 20 . A_Space . "y" . A_CaretY - 20 . A_Space . "NoActivate"	;Undid the last hotstring
 				if (ini_UHTD > 0)
 					SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
 			}
 			else
 			{
 				MouseGetPos, v_MouseX, v_MouseY
-				Gui, Tt_ULH: Show, % "x" . v_MouseX + 20 . A_Space . "y" . v_MouseY - 20	;Undid the last hotstring
+				Gui, Tt_ULH: Show, % "x" . v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 . A_Space . "NoActivate"	;Undid the last hotstring
 				if (ini_UHTD > 0)
 					SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
 			}
@@ -7177,7 +7177,7 @@ F_UndoSignalling()
 		if (ini_UHTP = 2)
 		{
 			MouseGetPos, v_MouseX, v_MouseY
-			Gui, Tt_ULH: Show, % "x" . v_MouseX + 20 . A_Space . "y" . v_MouseY - 20	;Undid the last hotstring
+			Gui, Tt_ULH: Show, % "x" . v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 . A_Space . "NoActivate"	;Undid the last hotstring
 			if (ini_UHTD > 0)
 				SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
 		}
@@ -7209,14 +7209,14 @@ F_EventSigOrdHotstring()
 		{
 			if (A_CaretX and A_CaretY)
 			{
-				Gui, Tt_HWT: Show, % "x" . A_CaretX + 20 . A_Space . "y" . A_CaretY - 20	;Tooltip _ Hotstring Was Triggered
+				Gui, Tt_HWT: Show, % "x" . A_CaretX + 20 . A_Space . "y" . A_CaretY - 20 . A_Space . "NoActivate"	;Tooltip _ Hotstring Was Triggered
 				if (ini_OHTD > 0)
 					SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
 			}
 			else
 			{
 				MouseGetPos, v_MouseX, v_MouseY
-				Gui, Tt_HWT: Show, % "x" v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 	;Tooltip _ Hotstring Was Triggered
+				Gui, Tt_HWT: Show, % "x" v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 . A_Space . "NoActivate" 	;Tooltip _ Hotstring Was Triggered
 				if (ini_OHTD > 0)
 					SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
 			}
@@ -7224,7 +7224,7 @@ F_EventSigOrdHotstring()
 		if (ini_OHTP = 2)
 		{
 			MouseGetPos, v_MouseX, v_MouseY
-			Gui, Tt_HWT: Show, % "x" v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 	;Tooltip _ Hotstring Was Triggered
+			Gui, Tt_HWT: Show, % "x" v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 . A_Space . "NoActivate" 	;Tooltip _ Hotstring Was Triggered
 			if (ini_OHTD > 0)
 				SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
 		}
@@ -12450,13 +12450,18 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SendIsOflag(OutputString, Oflag, SendFunctionName)
 {
-	global	;assume-global mode
+	global	;assume-global mode of operation
+
+	SetKeyDelay, -1, -1	;Delay = -1, PressDuration = -1, -1: no delay at all; this can be necessary if SendInput is reduced to SendEvent (in case low level input hook is active in another script)
 	Switch SendFunctionName
 	{
 		Case "SendInput":
-			OutputDebug, % "SendInput:"
+			; OutputDebug, % "SendInput:" . OutputString . "`n"
 			if (Oflag = false)
+			{
 				SendInput, % OutputString . A_EndChar
+				OutputDebug, % "Finished SendInput" . "`n"
+			}
 			else
 				SendInput, % OutputString
 		Case "SendEvent":
