@@ -5202,7 +5202,7 @@ F_EventsStyling_B1()	;button: Restore default, background color
 			GuiControl,, % IdATstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
 			GuiControl, Disable, % IdATstyling_E1
 		
-		Case % TransA["Tooltip: ""Hostring is triggered"""]:
+		Case % TransA["Tooltip: ""Hotstring was triggered"""]:
 			ini_HTBgrCol := "yellow"
 			GuiControl, ChooseString, % IdHTstyling_DDL1, % ini_HTBgrCol
 			GuiControl,, % IdHTstyling_E1, % TransA["HTML color RGB value, e.g. 00FF00"] 
@@ -5240,7 +5240,7 @@ F_EventsStyling_B2()	;button: Restore default, typeface color
 			GuiControl,, % IdATstyling_E2, % TransA["HTML color RGB value, e.g. 00FF00"] 
 			GuiControl, Disable, % IdATstyling_E2
 
-		Case % TransA["Tooltip: ""Hostring is triggered"""]:
+		Case % TransA["Tooltip: ""Hotstring was triggered"""]:
 			ini_HTTyFaceCol := "black"
 			GuiControl, ChooseString, % IdHTstyling_DDL2, % ini_HTTyFaceCol
 			GuiControl,, % IdHTstyling_E2, % TransA["HTML color RGB value, e.g. 00FF00"] 
@@ -5272,7 +5272,7 @@ F_EventsStyling_B3()	;button: Restore default, typeface font
 			ini_ATTyFaceFont := "Calibri"
 			GuiControl, ChooseString, % IdATstyling_DDL3, % ini_ATTyFaceFont
 
-		Case % TransA["Tooltip: ""Hostring is triggered"""]:
+		Case % TransA["Tooltip: ""Hotstring was triggered"""]:
 			ini_HTTyFaceFont := "Courier"
 			GuiControl, ChooseString, % IdHTstyling_DDL3, % ini_HTTyFaceFont
 
@@ -5300,7 +5300,7 @@ F_EventsStyling_B4()	;button: Restore default, font size
 			ini_ATTySize := 10
 			GuiControl, ChooseString, % IdATstyling_DDL4, % ini_ATTySize
 		
-		Case % TransA["Tooltip: ""Hostring is triggered"""]:
+		Case % TransA["Tooltip: ""Hotstring was triggered"""]:
 			ini_HTTySize := 10
 			GuiControl, ChooseString, % IdHTstyling_DDL4, % ini_HTTySize
 		
@@ -5448,7 +5448,7 @@ F_EventsStyling_B5()	;button: Test styling
 			Gui, ATDemo: Add, Listbox, HwndIdATDemo r5, % TransA["Row"] . " 1|" . TransA["Row"] . " 2|" . TransA["Row"] . " 3|" . TransA["Row"] . " 4|" . TransA["Row"] . " 5"
 			Gui, ATDemo: Show, % "x" . Window1X + OutputVarTempX . A_Space . "y" . Window1Y + OutputVarTempY . A_Space "NoActivate"	;future: prevent parent window from moving: https://autohotkey.com/board/topic/17759-window-system-menu-manipulator-library-v20/
 
-		Case % TransA["Tooltip: ""Hostring is triggered"""]:
+		Case % TransA["Tooltip: ""Hotstring was triggered"""]:
 			if (HTS_DDL1 = "custom")
 			{
 				GuiControlGet, OutputVarTemp,, % IdHTstyling_E1
@@ -5645,7 +5645,7 @@ F_EventsStyling_B6(Parameter*)	;button: Apply
 		Case % TransA["Triggerstring tips styling"]:				F_EventsStyling_Apply("TT")
 		Case % TransA["Hotstring menu styling"]:				F_EventsStyling_Apply("HM")
 		Case % TransA["Active triggerstring tips styling"]:		F_EventsStyling_Apply("AT")
-		Case % TransA["Tooltip: ""Hostring is triggered"""]:		F_EventsStyling_Apply("HT")
+		Case % TransA["Tooltip: ""Hotstring was triggered"""]:		F_EventsStyling_Apply("HT")
 		Case % TransA["Tooltip: ""Undid the last hotstring"""]:	F_EventsStyling_Apply("UH")
 	}
 	F_EventsStylingTab3(true)	;something was changed
@@ -5747,7 +5747,7 @@ F_EventsStyling_B7()	;button: Close
 		Case % TransA["Triggerstring tips styling"]:				F_EventsStyling_Close("TT")
 		Case % TransA["Hotstring menu styling"]:				F_EventsStyling_Close("HM")
 		Case % TransA["Active triggerstring tips styling"]:		F_EventsStyling_Close("AT")
-		Case % TransA["Tooltip: ""Hostring is triggered"""]:		F_EventsStyling_Close("HT")
+		Case % TransA["Tooltip: ""Hotstring was triggered"""]:		F_EventsStyling_Close("HT")
 		Case % TransA["Tooltip: ""Undid the last hotstring"""]:	F_EventsStyling_Close("UH")
  	}
 }
@@ -5760,7 +5760,7 @@ F_EventsStyling_B8()	;button: Cancel
 		Case % TransA["Triggerstring tips styling"]:				F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "TTDemo")
 		Case % TransA["Hotstring menu styling"]:				F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HMDemo")
 		Case % TransA["Active triggerstring tips styling"]:		F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "ATDemo")
-		Case % TransA["Tooltip: ""Hostring is triggered"""]:		F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HTDemo")
+		Case % TransA["Tooltip: ""Hotstring was triggered"""]:		F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HTDemo")
 		Case % TransA["Tooltip: ""Undid the last hotstring"""]:	F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "UHDemo")
 	}
 }
@@ -5777,7 +5777,7 @@ F_GuiEventsStyling_CreateObjects()
 ,		% TransA["Triggerstring tips styling"] . "||" 
 		. TransA["Hotstring menu styling"] . "|"
 		. TransA["Active triggerstring tips styling"] . "|" 
-		. TransA["Tooltip: ""Hostring is triggered"""] . "|"
+		. TransA["Tooltip: ""Hotstring was triggered"""] . "|"
 		. TransA["Tooltip: ""Undid the last hotstring"""] . "|"
 
 	Gui, EventsStyling: Tab, 			% TransA["Triggerstring tips styling"]
@@ -5786,7 +5786,7 @@ F_GuiEventsStyling_CreateObjects()
 	F_GuiStyling_Section(TabId := "HM")
 	Gui, EventsStyling: Tab,				% TransA["Active triggerstring tips styling"]
  	F_GuiStyling_Section(TabId := "AT")
-	Gui, EventsStyling: Tab,				% TransA["Tooltip: ""Hostring is triggered"""]
+	Gui, EventsStyling: Tab,				% TransA["Tooltip: ""Hotstring was triggered"""]
  	F_GuiStyling_Section(TabId := "HT")
 	Gui, EventsStyling: Tab,				% TransA["Tooltip: ""Undid the last hotstring"""]
  	F_GuiStyling_Section(TabId := "UH")
@@ -6181,9 +6181,9 @@ F_EventsStyling(OneTime*)
 		Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	F_GuiEventsStyling_CreateObjects()
 	F_GuiEventsStyling_DetermineConstants("TT")	;TT = Triggerstring Tips
-	Gui, EventsStyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Events: styling"]
+	; Gui, EventsStyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Events: styling"]
 	F_GuiEventsStyling_DetermineConstants("HM")	;HM = Hotsring Menu
-	Gui, EventsStyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Events: styling"]
+	; Gui, EventsStyling: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Events: styling"]
 	F_GuiEventsStyling_DetermineConstants("AT")	;AT = Active Triggerstring
 	F_GuiEventsStyling_DetermineConstants("HT")	;HT = Tooltip: Hostring is triggered
 	F_GuiEventsStyling_DetermineConstants("UH")	;UH = Tooltip: Unid the last hostring
