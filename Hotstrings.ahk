@@ -6514,41 +6514,47 @@ F_GuiShortDef_DetermineConstraints()
 	
 ; Determine constraints, according to mock-up
 	v_xNext := c_xmarg
-	v_yNext := c_ymarg
+,	v_yNext := c_ymarg
 	GuiControl, Move, % IdShortDefT1, % "x" . v_xNext . "y" . v_yNext		;Call Graphical User Interface
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefT1
 	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
 	GuiControl, Move, % IdShortDefT4, % "x" . v_xNext . "y" . v_yNext		;ⓘ
 	v_xNext := c_xmarg
-	v_yNext += 2 * HofText
+,	v_yNext += 2 * HofText
 	GuiControl, Move, % IdShortDefT2, % "x" . v_xNext . "y" . v_yNext		;Current shortcut (hotkey):
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefT2
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdShortDefT3, % "x" . v_xNext . "y" . v_yNext		;% ShortcutLong
 	v_xNext := c_xmarg
-	v_yNext += 2 * HofText
+,	v_yNext += 2 * HofText
 	GuiControl, Move, % IdShortDefT5, % "x" . v_xNext . "y" . v_yNext		;New shortcut (hotkey)
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefT5
 	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
 	GuiControl, Move, % IdShortDefT6, % "x" . v_xNext . "y" . v_yNext		;ⓘ
 	v_xNext := c_xmarg
-	v_yNext += 2 * HofText
+,	v_yNext += 2 * HofText
 	GuiControl, Move, % IdShortDefCB1, % "x" . v_xNext . "y" . v_yNext		;Windows key modifier
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefCB1						
 	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
 	GuiControl, Move, % IdShortDefH1, % "x" . v_xNext . "y" . v_yNext		;HotkeyVar
 	v_xNext := c_xmarg
-	v_yNext := v_OutVarTempY + v_OutVarTempH
+,	v_yNext := v_OutVarTempY + v_OutVarTempH
 	GuiControl, Move, % IdShortDefCB2, % "x" . v_xNext . "y" . v_yNext		;Tilde (~) key modifier
 	GuiControlGet, v_OutVarTemp1, Pos, % IdShortDefH1						;reserve more space for text string
 	v_wNext := v_OutVarTemp1W
 	GuiControl, Move, % IdShortDefT3, % "w" . v_wNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefCB2
 	v_xNext := v_OutVarTempX + v_OutVarTempW 
-	v_yNext := v_OutVarTempY 
+,	v_yNext := v_OutVarTempY 
 	GuiControl, Move, % IdShortDefT7, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := c_xmarg
-	v_yNext := v_OutVarTempY + v_OutVarTempH + HofText
+,	v_yNext := v_OutVarTempY + v_OutVarTempH + HofText
+
+	GuiControl, Move, % IdShortDefCB3, % "x" . v_xNext . "y" . v_yNext	;ScrollLock
+	v_yNext += HofText
+	GuiControl, Move, % IdShortDefCB4, % "x" . v_xNext . "y" . v_yNext	;CapsLock
+	v_yNext += 2 * HofText
+
 	GuiControl, Move, % IdShortDefB1, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefB1
 	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
@@ -6607,6 +6613,7 @@ F_GuiShortDef_CreateObjects()
 {
 	global	;assume-global mode
 	local	IfWinModifier := false, IfTildeModifier := false, Mini := false, HotkeyVar := ""
+,			IfScrollLock := false, IfCapsLock := false	
 	
 	;1. Prepare Gui
 	Gui, ShortDef: New, 	-Resize +HwndShortDefHwnd +Owner -MaximizeBox -MinimizeBox
@@ -6702,6 +6709,8 @@ F_GuiShortDef_CreateObjects()
 	Gui, ShortDef: Add,		Checkbox,	x0 y0 HwndIdShortDefCB1 Checked%IfWinModifier%,					% TransA["Windows key modifier"]
 	Gui, ShortDef: Add,		Hotkey,	x0 y0 HwndIdShortDefH1,										% HotkeyVar
 	Gui, ShortDef: Add,		Checkbox, x0 y0 HwndIdShortDefCB2 Checked%IfTildeModifier%,					% TransA["Tilde (~) key modifier"]
+	Gui, ShortDef: Add,		Checkbox, x0 y0 HwndIdShortDefCB3 Checked%IfScrollLock%,					Scroll Lock
+	Gui, ShortDef:	Add,		Checkbox,	x0 y0 HwndIdShortDefCB4 Checked%IfCapsLock%,						Caps Lock
 	Gui, ShortDef: Font, 	% "s" . c_FontSize + 2 . A_Space . "cBlue",								% c_FontType
 	Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT7,										ⓘ
 	Gui,	ShortDef: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
@@ -6718,11 +6727,11 @@ F_ShortDefB2_RestoreHotkey()
 	
 	GuiControlGet, OldHotkey, , % IdShortDefT3
 	OldHotkey := StrReplace(OldHotkey, "Shift", "+")
-	OldHotkey := StrReplace(OldHotkey, "Ctrl", "^")
-	OldHotkey := StrReplace(OldHotkey, "Alt", "!")
-	OldHotkey := StrReplace(OldHotkey, "Win", "#")
-	OldHotkey := StrReplace(OldHotkey, "+")
-	OldHotkey := StrReplace(OldHotkey, " ")
+,	OldHotkey := StrReplace(OldHotkey, "Ctrl", "^")
+,	OldHotkey := StrReplace(OldHotkey, "Alt", "!")
+,	OldHotkey := StrReplace(OldHotkey, "Win", "#")
+,	OldHotkey := StrReplace(OldHotkey, "+")
+,	OldHotkey := StrReplace(OldHotkey, " ")
 	Switch A_ThisMenuItem
 	{
 		Case % TransA["Call Graphical User Interface"]:
@@ -7199,10 +7208,6 @@ F_EventSigOrdHotstring()
 	global	;assume-global mode of operation
 	local 	v_MouseX := 0, v_MouseY := 0
 
-	; LastWindowBeforeTooTip := WinExist("A")
-	; OutputDebug, % "LastWindowBeforeTooTip:" . A_Tab . LastWindowBeforeTooTip . "`n"
-	; ControlGetFocus, WhichIsFocused, % "ahk_id" LastWindowBeforeTooTip
-	; OutputDebug, % "ErrorLevel:" . A_Tab . ErrorLevel . A_Tab . "WhichIsFocused:" . A_Tab . WhichIsFocused . "`n"
 	if (ini_OHTtEn)	;Ordinary Hostring Tooltip Enable
 	{
 		if (ini_OHTP = 1)
@@ -12487,10 +12492,6 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 	global	;assume-global mode
 	Critical, On
 	; OutputDebug, % A_ThisFunc . "`n"
- 	;v_TypedTriggerstring 	→ hotstring
-	;v_Options 			→ triggerstring options
-	;v_Triggerstring		→ stored v_InputString
-	;v_EndChar			→ stored value of A_EndChar
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
