@@ -213,6 +213,7 @@ Menu, ConfGUI,		Add, 	% TransA["Font type"],											:FontTypeMenu
 Menu, Submenu1Shortcuts, Add, % TransA["Call Graphical User Interface"],							F_GuiShortDef
 Menu, Submenu1Shortcuts, Add, % TransA["Copy clipboard content into ""Enter hotstring"""],			F_GuiShortDef
 Menu, Submenu1Shortcuts, Add, % TransA["Undo the last hotstring"],								F_GuiShortDef
+Menu, Submenu1Shortcuts, Add, % TransA["Toggle triggerstring tips"],								F_GuiShortDef
 Menu, Submenu1, 		Add, % TransA["Shortcut (hotkey) definitions"],							:Submenu1Shortcuts
 Menu, Submenu1, 		Add
 ;Warning: order of SubmenuEndChars have to be alphabetical. Keep an eye on it. This is because after change of language specific menu items are related with associative array which also keeps to alphabetical order.
@@ -583,6 +584,11 @@ Critical, Off
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_ToggleTt()
+{
+
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Tt_ULH()
 {
 	global	;assume-global mode of operation
@@ -2582,21 +2588,21 @@ F_LoadConfiguration()
 	IniRead, ini_HotstringUndo,				% ini_HADConfig, Configuration, HotstringUndo,			% A_Space
 	if (ini_HotstringUndo = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
-		ini_HotstringUndo := true
+		ini_HotstringUndo 		:= true
 		Iniwrite, % ini_HotstringUndo, % ini_HADConfig, Configuration, HotstringUndo
 	}
-	ini_ShowIntro			:= true
+	ini_ShowIntro				:= true
 	IniRead, ini_ShowIntro,					% ini_HADConfig, Configuration, ShowIntro,				% A_Space	;GUI with introduction to Hotstrings application.
 	if (ini_ShowIntro = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
-		ini_ShowIntro := true
+		ini_ShowIntro 			:= true
 		Iniwrite, % ini_ShowIntro, % ini_HADConfig, Configuration, ShowIntro
 	}
 	ini_HK_Main				:= "#^h"
 	IniRead, ini_HK_Main,					% ini_HADConfig, Configuration, HK_Main,				% A_Space
 	if (ini_HK_Main = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
-		ini_HK_Main := "#^h"
+		ini_HK_Main 			:= "#^h"
 		IniWrite, % ini_HK_Main, % ini_HADConfig, Configuration, HK_Main
 	}
 	if (ini_HK_Main != "none")
@@ -2607,24 +2613,35 @@ F_LoadConfiguration()
 	}
 	
 	ini_HK_IntoEdit			:= "~^c"
-	IniRead, ini_HK_IntoEdit,				% ini_HADConfig, Configuration, HK_IntoEdit,			% A_Space
+	IniRead, ini_HK_IntoEdit,				% ini_HADConfig, Configuration, HK_IntoEdit,		% A_Space
 	if (ini_HK_IntoEdit = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
 		ini_HK_IntoEdit := "~^c"
 		IniWrite, % ini_HK_IntoEdit, % ini_HADConfig, Configuration, HK_IntoEdit
 	}
 	
-	ini_HK_UndoLH			:= "~^F12"
-	IniRead, ini_HK_UndoLH,					% ini_HADConfig, Configuration, HK_UndoLH,				% A_Space
+	ini_HK_UndoLH				:= "~^F12"
+	IniRead, ini_HK_UndoLH,					% ini_HADConfig, Configuration, HK_UndoLH,		% A_Space
 	if (ini_HK_UndoLH = "")		;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
-		ini_HK_UndoLH := "^F12"
+		ini_HK_UndoLH 			:= "^F12"
 		IniWrite, % ini_HK_UndoLH, % ini_HADConfig, Configuration, HK_UndoLH
 	}
 	if (ini_HK_UndoLH != "none")
 		Hotkey, % ini_HK_UndoLH, F_Undo, On
-	ini_THLog				:= false
-	IniRead, ini_THLog,						% ini_HADConfig, Configuration, THLog,					% A_Space
+
+	ini_HK_ToggleTt			:= "~CapsLock"	;HK = HotKey, ToggleTt = Toggle Triggerstring tips
+	IniRead, ini_HK_ToggleTt,				% ini_HADConfig, Configuration, HK_ToggleTt,		% A_Space
+	if (ini_HK_ToggleTt = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_HK_ToggleTt 		:= "~CapsLock"
+		IniWrite, % ini_HK_ToggleTt, % ini_HADConfig, Configuration, HK_ToggleTt
+	}
+	if (ini_HK_ToggleTt != "none")
+		Hotkey, % ini_HK_ToggleTt, F_ToggleTt, On
+
+	ini_THLog					:= false
+	IniRead, ini_THLog,						% ini_HADConfig, Configuration, THLog,			% A_Space
 	if (ini_THLog = "")			;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
 		ini_THLog := false
@@ -6624,80 +6641,96 @@ F_GuiShortDef_CreateObjects()
 	Gui,	ShortDef: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	Switch A_ThisMenuItem
 	{
-		Case % TransA["Call Graphical User Interface"]:
-		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,										% TransA["Call Graphical User Interface"]
-		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:	
-		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,										% TransA["Copy clipboard content into ""Enter hotstring"""]
-		Case % TransA["Undo the last hotstring"]:
-		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,										% TransA["Undo the last hotstring"]
+		Case % TransA["Call Graphical User Interface"]:					Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,	% TransA["Call Graphical User Interface"]
+		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,	% TransA["Copy clipboard content into ""Enter hotstring"""]
+		Case % TransA["Undo the last hotstring"]:						Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,	% TransA["Undo the last hotstring"]
+		Case % TransA["Toggle triggerstring tips"]:						Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT1,	% TransA["Toggle triggerstring tips"]
 	}
-	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT2,											% TransA["Current shortcut (hotkey):"]
+	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT2,				% TransA["Current shortcut (hotkey):"]
 	
 	Switch A_ThisMenuItem
 	{
-		Case % TransA["Call Graphical User Interface"]:
-		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 										% F_ParseHotkey(ini_HK_Main, "space")
-		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:	
-		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 										% F_ParseHotkey(ini_HK_IntoEdit, "space")
-		Case % TransA["Undo the last hotstring"]:
-		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 										% F_ParseHotkey(ini_HK_UndoLH, "space")
+		Case % TransA["Call Graphical User Interface"]:					Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_Main, "space")
+		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_IntoEdit, "space")
+		Case % TransA["Undo the last hotstring"]:						Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_UndoLH, "space")
+		Case % TransA["Toggle triggerstring tips"]:						Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT3,	% F_ParseHotkey(ini_HK_ToggleTt, "space")
 	}
-	Gui, ShortDef: Font, 	% "s" . c_FontSize + 2 . A_Space . "cBlue",								% c_FontType
-	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT4,										ⓘ
-	Gui,	ShortDef: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	Gui, ShortDef: Font, 	% "s" . c_FontSize + 2 . A_Space . "cBlue",		% c_FontType
+	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT4,				ⓘ
+	Gui,	ShortDef: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 	% c_FontType
 	Switch A_ThisMenuItem
 	{
-		Case % TransA["Call Graphical User Interface"]:
-		F_HK_CallGUIInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_CallGUIInfo"])
-		GuiControl +g, % IdShortDefT4, % F_HK_CallGUIInfo
-		if (InStr(ini_HK_Main, "#"))
-		{
-			IfWinModifier := true
-			HotkeyVar := StrReplace(ini_HK_Main, "#")
-		}
-		else
-			HotkeyVar := ini_HK_Main
-		if (InStr(ini_HK_Main, "~"))
-		{
-			IfTildeModifier := true
-			HotkeyVar := StrReplace(ini_HK_Main, "~")
-		}
-		else
-			HotkeyVar := ini_HK_Main
+		Case % TransA["Call Graphical User Interface"]:					
+			F_HK_CallGUIInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_CallGUIInfo"])
+			GuiControl +g, % IdShortDefT4, % F_HK_CallGUIInfo
+			if (InStr(ini_HK_Main, "#"))
+			{
+				IfWinModifier 		:= true
+,				HotkeyVar 		:= StrReplace(ini_HK_Main, "#")
+			}
+			else
+				HotkeyVar := ini_HK_Main
+			if (InStr(ini_HK_Main, "~"))
+			{
+				IfTildeModifier 	:= true
+,				HotkeyVar 		:= StrReplace(ini_HK_Main, "~")
+			}
+			else
+				HotkeyVar 		:= ini_HK_Main
+
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
-		F_HK_ClipCopyInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_ClipCopyInfo"])
-		GuiControl +g, % IdShortDefT4, % F_HK_ClipCopyInfo
-		if (InStr(ini_HK_IntoEdit, "#"))
-		{
-			IfWinModifier := true
-			HotkeyVar := StrReplace(ini_HK_IntoEdit, "#")
-		}
-		else
-			HotkeyVar := ini_HK_IntoEdit
-		if (InStr(ini_HK_IntoEdit, "~"))
-		{
-			IfTildeModifier := true
-			HotkeyVar := StrReplace(ini_HK_IntoEdit, "~")
-		}
-		else
-			HotkeyVar := ini_HK_IntoEdit
+			F_HK_ClipCopyInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_ClipCopyInfo"])
+			GuiControl +g, % IdShortDefT4, % F_HK_ClipCopyInfo
+			if (InStr(ini_HK_IntoEdit, "#"))
+			{
+				IfWinModifier 		:= true
+,				HotkeyVar 		:= StrReplace(ini_HK_IntoEdit, "#")
+			}
+			else
+				HotkeyVar 		:= ini_HK_IntoEdit
+			if (InStr(ini_HK_IntoEdit, "~"))
+			{
+				IfTildeModifier 	:= true
+,				HotkeyVar 		:= StrReplace(ini_HK_IntoEdit, "~")
+			}
+			else
+				HotkeyVar 		:= ini_HK_IntoEdit
+
 		Case % TransA["Undo the last hotstring"]:
-		F_HK_UndoInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_UndoInfo"])
-		GuiControl +g, % IdShortDefT4, % F_HK_UndoInfo
-		if (InStr(ini_HK_UndoLH, "#"))
-		{
-			IfWinModifier := true
-			HotkeyVar := StrReplace(ini_HK_UndoLH, "#")
-		}
-		else
-			HotkeyVar := ini_HK_UndoLH
-		if (InStr(ini_HK_UndoLH, "~"))
-		{
-			IfTildeModifier := true
-			HotkeyVar := StrReplace(ini_HK_UndoLH, "~")
-		}
-		else
-			HotkeyVar := ini_HK_UndoLH
+			F_HK_UndoInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_UndoInfo"])
+			GuiControl +g, % IdShortDefT4, % F_HK_UndoInfo
+			if (InStr(ini_HK_UndoLH, "#"))
+			{
+				IfWinModifier 		:= true
+,				HotkeyVar 		:= StrReplace(ini_HK_UndoLH, "#")
+			}
+			else
+				HotkeyVar 		:= ini_HK_UndoLH
+			if (InStr(ini_HK_UndoLH, "~"))
+			{
+				IfTildeModifier 	:= true
+,				HotkeyVar 		:= StrReplace(ini_HK_UndoLH, "~")
+			}
+			else
+				HotkeyVar 		:= ini_HK_UndoLH
+		
+		Case % TransA["Toggle triggerstring tips"]:
+			F_HK_UndoInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_ToggleTtInfo"])
+			GuiControl +g, % IdShortDefT4, % F_HK_UndoInfo
+			if (InStr(ini_HK_ToggleTt, "#"))
+			{
+				IfWinModifier 		:= true
+,				HotkeyVar 		:= StrReplace(ini_HK_ToggleTt, "#")
+			}
+			else
+				HotkeyVar 		:= ini_HK_ToggleTt
+			if (InStr(ini_HK_ToggleTt, "~"))
+			{
+				IfTildeModifier 	:= true
+,				HotkeyVar 		:= StrReplace(ini_HK_ToggleTt, "~")
+			}
+			else
+				HotkeyVar 		:= ini_HK_ToggleTt
 	}
 	
 	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT5,										% TransA["New shortcut (hotkey)"] . ":"
@@ -9863,6 +9896,7 @@ DownloadRepo=0
 HK_Main=#^h
 HK_IntoEdit=~^c
 HK_UndoLH=~^F12
+HK_ToggleTt=~CapsLock
 THLog=0
 HADConfig=
 HADL=
@@ -10737,6 +10771,7 @@ Tip: If you copy text from PDF file it's adviced to remove them. = Tip: If you c
 Tips are shown after no. of characters						= Tips are shown after no. of characters
 (Together with accompanying files and subfolders).			= (Together with accompanying files and subfolders).
 Toggle trigger characters (↓ or EndChars)					= &Toggle trigger characters (↓ or EndChars)
+Toggle triggerstring tips								= Toggle triggerstring tips
 Tooltip: ""Hotstring was triggered""						= Tooltip: ""Hotstring was triggered""
 Tooltip: ""Undid the last hotstring""						= Tooltip: ""Undid the last hotstring""
 Tooltip disable										= Tooltip disable
@@ -10816,6 +10851,7 @@ F_HK_GeneralInfo										= You can enter any hotkey as combination of Shift, Ct
 F_HK_ClipCopyInfo										= Remark: this hotkey is operating system wide, so before changing it be sure it's not in conflict with any other system wide hotkey. `n`nWhen Hotstrings window exists (it could be minimized) pressing this hotkey copies content of clipboard to ""Enter hotstring"" field. `nThanks to that you can prepare new definition much quicker.
 F_HK_UndoInfo											= Remark: this hotkey is operating system wide, so before changing it be sure it's not in conflict with any other system wide hotkey.`n`n When pressed, it undo the very last hotstring. Please note that result of undo depends on cursor position.
 F_HK_TildeModInfo										= When the hotkey fires, its key's native function will not be blocked (hidden from the system). 
+F_HK_ToggleTtInfo										= Toggle visibility of all triggerstring tips. Advice: use ScrollLock or CapsLock for that purpose.
 T_SBackgroundColorInfo									= Select from drop down list predefined color (one of 16 HTML colors) `nor select Custom one and then provide RGB value in HEX format (e.g. FF0000 for red). `nThe selected color will be displayed as background for on-screen menu.
 T_STypefaceColor										= Select from drop down list predefined color (one of 16 HTML colors) `nor select Custom one and then provide RGB value in HEX format (e.g. FF0000 for red). `nThe selected color will be displayed as font color for on-screen menu.
 T_STypefaceFont										= Select from drop down list predefined font type. `nThe selected font type will be used in on screen menu.
