@@ -586,7 +586,27 @@ Critical, Off
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 F_ToggleTt()
 {
+	global	;assume-global mode of operation
 
+	if (InStr(ini_HK_ToggleTt, "CapsLock"))
+	{
+		ini_TTTtEn := GetKeyState("CapsLock", "T")
+		if (ini_TTTtEn)
+			SetCapsLockState, On
+		else	
+			SetCapsLockState, Off
+		return
+	}
+	if (InStr(ini_HK_ToggleTt, "ScrollLock"))
+	{
+		ini_TTTtEn := GetKeyState("ScrollLock", "T")
+		if (ini_TTTtEn)
+			SetCapsLockState, On
+		else	
+			SetCapsLockState, Off
+		return
+	}
+	ini_TTTtEn := !ini_TTTtEn
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Tt_ULH()
@@ -2630,11 +2650,11 @@ F_LoadConfiguration()
 	if (ini_HK_UndoLH != "none")
 		Hotkey, % ini_HK_UndoLH, F_Undo, On
 
-	ini_HK_ToggleTt			:= "~CapsLock"	;HK = HotKey, ToggleTt = Toggle Triggerstring tips
+	ini_HK_ToggleTt			:= "none"	;HK = HotKey, ToggleTt = Toggle Triggerstring tips
 	IniRead, ini_HK_ToggleTt,				% ini_HADConfig, Configuration, HK_ToggleTt,		% A_Space
 	if (ini_HK_ToggleTt = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
-		ini_HK_ToggleTt 		:= "~CapsLock"
+		ini_HK_ToggleTt 		:= "none"
 		IniWrite, % ini_HK_ToggleTt, % ini_HADConfig, Configuration, HK_ToggleTt
 	}
 	if (ini_HK_ToggleTt != "none")
@@ -6589,34 +6609,36 @@ F_ParseHotkey(ini_HK_Main, space*)
 			Switch A_LoopField
 			{
 				Case "~":
-				Mini := true
-				if (space[1])
-					ShortcutLong .= "~"
-				else
-					Continue
+					Mini := true
+					if (space[1])
+						ShortcutLong .= "~"
+					else
+						Continue
 				Case "^":	
-				Mini := true
-				ShortcutLong .= "Ctrl"
+					Mini := true
+,					ShortcutLong .= "Ctrl"
 				Case "!":	
-				Mini := true
-				ShortcutLong .= "Alt"	
+					Mini := true
+,					ShortcutLong .= "Alt"	
 				Case "+":	
-				Mini := true
-				ShortcutLong .= "Shift"
+					Mini := true
+,					ShortcutLong .= "Shift"
 				Case "#":
-				Mini := true
-				ShortcutLong .= "Win"
+					Mini := true
+,					ShortcutLong .= "Win"
 				Default:
-				StringUpper, HotkeyVar, A_LoopField 
-				ShortcutLong .= HotkeyVar
+					StringUpper, HotkeyVar, A_LoopField 
+					ShortcutLong .= HotkeyVar
 			}
 			if (Mini)
 			{
 				if (space[1])
+				{
 					if (ShortcutLong = "~")
 						Continue
-				else
-					ShortcutLong .= " + "
+					else
+						ShortcutLong .= " + "
+				}
 				else
 					ShortcutLong .= "+"
 			}
@@ -6630,7 +6652,7 @@ F_GuiShortDef_CreateObjects()
 {
 	global	;assume-global mode
 	local	IfWinModifier := false, IfTildeModifier := false, Mini := false, HotkeyVar := ""
-,			IfScrollLock := false, IfCapsLock := false	
+,			IfScrollLock := false, IfCapsLock := false
 	
 	;1. Prepare Gui
 	Gui, ShortDef: New, 	-Resize +HwndShortDefHwnd +Owner -MaximizeBox -MinimizeBox
@@ -6660,7 +6682,7 @@ F_GuiShortDef_CreateObjects()
 	Gui,	ShortDef: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 	% c_FontType
 	Switch A_ThisMenuItem
 	{
-		Case % TransA["Call Graphical User Interface"]:					
+		Case % TransA["Call Graphical User Interface"]:					;tu jestem: przerobić na dynamiczne
 			F_HK_CallGUIInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_CallGUIInfo"])
 			GuiControl +g, % IdShortDefT4, % F_HK_CallGUIInfo
 			if (InStr(ini_HK_Main, "#"))
@@ -6677,6 +6699,16 @@ F_GuiShortDef_CreateObjects()
 			}
 			else
 				HotkeyVar 		:= ini_HK_Main
+			if (InStr(ini_HK_Main, "CapsLock"))
+			{
+				IfCapsLock 		:= true
+,				HotkeyVar			:= "CapsLock"				
+			}
+			if (InStr(ini_HK_Main, "ScrollLock"))
+			{
+				IfScrollLock		:= true
+,				HotkeyVar			:= "ScrollLock"				
+			}
 
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
 			F_HK_ClipCopyInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_ClipCopyInfo"])
@@ -6812,57 +6844,44 @@ F_ShortDefB2_RestoreHotkey()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_InterpretNewDynHK(WhichHK, WindowKey, TildeKey)
+{
+	global	;assume-global mode of operation
+	local	DynVarRef1 := "", DynVarRef2 := ""
+
+	DynVarRef1 := "ini_HK_" . WhichHK
+,	DynVarRef2 := "HK_" . WhichHK
+	GuiControlGet, %DynVarRef1%, , % IdShortDefH1
+	if (WindowKey)
+		%DynVarRef1% := "#" . %DynVarRef1%
+	if (TildeKey)
+		%DynVarRef1% := "~" . %DynVarRef1%
+	if (%DynVarRef1% = )		IdShortDefCB3
+	if (%DynVarRef1% != "")
+		IniWrite, % %DynVarRef1%, % ini_HADConfig, Configuration, %DynVarRef2%
+	else
+	{
+		%DynVarRef1% := "none"
+		IniWrite, % %DynVarRef1%, % ini_HADConfig, Configuration, %DynVarRef2%
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ShortDefB1_SaveHotkey()	
 {
-	global	;assume-global mode
+	global	;assume-global mode of operation
 	local	OldHotkey := "", WindowKey := false, TildeKey := false
 	
 	GuiControlGet, WindowKey, , 	% IdShortDefCB1
 	GuiControlGet, TildeKey, , 	% IdShortDefCB2
 	Switch A_ThisMenuItem
 	{
-		Case % TransA["Call Graphical User Interface"]:
-		GuiControlGet, ini_HK_Main, , % IdShortDefH1
-		if (WindowKey)
-			ini_HK_Main := "#" . ini_HK_Main
-		if (TildeKey)
-			ini_HK_Main := "~" . ini_HK_Main
-		if (ini_HK_Main != "")
-			IniWrite, % ini_HK_Main, % ini_HADConfig, Configuration, HK_Main
-		else
-		{
-			ini_HK_Main := "none"
-			IniWrite, % ini_HK_Main, % ini_HADConfig, Configuration, HK_Main
-		}
-		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
-		GuiControlGet, ini_HK_IntoEdit, , % IdShortDefH1
-		if (WindowKey)
-			ini_HK_IntoEdit := "#" . ini_HK_IntoEdit
-		if (TildeKey)
-			ini_HK_IntoEdit := "~" . ini_HK_IntoEdit
-		if (ini_HK_IntoEdit != "")
-			IniWrite, % ini_HK_IntoEdit, % ini_HADConfig, Configuration, HK_IntoEdit
-		else
-		{
-			ini_HK_IntoEdit := "none"
-			Iniwrite, % ini_HK_IntoEdit, % ini_HADConfig, Configuration, HK_IntoEdit
-		}
-		Case % TransA["Undo the last hotstring"]:
-		GuiControlGet, ini_HK_UndoLH, , % IdShortDefH1
-		if (WindowKey)
-			ini_HK_UndoLH := "#" . ini_HK_UndoLH
-		if (TildeKey)
-			ini_HK_UndoLH := "~" . ini_HK_UndoLH
-		if (ini_HK_UndoLH != "")
-			IniWrite, % ini_HK_UndoLH, % ini_HADConfig, Configuration, HK_UndoLH
-		else
-		{
-			ini_HK_UndoLH := "none"
-			IniWrite, % ini_HK_UndoLH, % ini_HADConfig, Configuration, HK_UndoLH
-		}
+		Case % TransA["Call Graphical User Interface"]:					F_InterpretNewDynHK(WhichHK := "Main", 		WindowKey, TildeKey)
+		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:	F_InterpretNewDynHK(WhichHK := "IntoEdit", 	WindowKey, TildeKey)
+		Case % TransA["Undo the last hotstring"]:						F_InterpretNewDynHK(WhichHK := "UndoLH", 	WindowKey, TildeKey)
+		Case % TransA["Toggle triggerstring tips"]:						F_InterpretNewDynHK(WhichHK := "ToggleTt", 	WindowKey, TildeKey)
 	}
 	GuiControlGet, OldHotkey, , % IdShortDefT3
-	;OldHotkey := RegExReplace(OldHotkey, "(Ctrl)|(Shift)|(Win)|(\+)|( )")	;future: trick from forum after my question
+	;OldHotkey := RegExReplace(OldHotkey, "(Ctrl)|(Shift)|(Win)|(\+)|( )")	;future: trick from AutoHotkey forum after my question
 	OldHotkey := StrReplace(OldHotkey, "Shift", "+")
 ,	OldHotkey := StrReplace(OldHotkey, "Ctrl", "^")
 ,	OldHotkey := StrReplace(OldHotkey, "Alt", "!")
@@ -6872,43 +6891,51 @@ F_ShortDefB1_SaveHotkey()
 	Switch A_ThisMenuItem
 	{
 		Case % TransA["Call Graphical User Interface"]:
-		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
-		Hotkey, % OldHotkey, F_GUIInit, Off
-		if (ini_HK_Main != "none")
-		{
-			Hotkey, If, v_Param != "l" 
-			Hotkey, % ini_HK_Main, F_GUIInit, On
-		}
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
+			Hotkey, % OldHotkey, F_GUIInit, Off
+			if (ini_HK_Main != "none")
+			{
+				Hotkey, If, v_Param != "l" 
+				Hotkey, % ini_HK_Main, F_GUIInit, On
+			}
+
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
-		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit, "space")
-		Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
-		Hotkey, % OldHotkey, F_PasteFromClipboard, Off
-		Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
-		Hotkey, % OldHotkey, F_PasteFromClipboard, Off
-		Hotkey, IfWinExist
-		if (ini_HK_IntoEdit != "none")
-		{
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit, "space")
 			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
-			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
 			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
-			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
 			Hotkey, IfWinExist
-		}
+			if (ini_HK_IntoEdit != "none")
+			{
+				Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+				Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+				Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+				Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
+				Hotkey, IfWinExist
+			}
+
 		Case % TransA["Undo the last hotstring"]:
-		MsgBox,, Debug, % ini_HK_UndoLH
-		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH, "space")
-		if (ini_HotstringUndo)
-		{
-			Hotkey, % OldHotkey, 	F_Undo, Off
-			if (ini_HK_UndoLH != "none")
-				Hotkey, % ini_HK_UndoLH, F_Undo, On
-		}
-		else
-		{
-			Hotkey, % OldHotkey, 	F_Undo, Off
-			if (ini_HK_UndoLH != "none")
-				Hotkey, % ini_HK_UndoLH, F_Undo, Off
-		}
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH, "space")
+			if (ini_HotstringUndo)
+			{
+				Hotkey, % OldHotkey, 	F_Undo, Off
+				if (ini_HK_UndoLH != "none")
+					Hotkey, % ini_HK_UndoLH, F_Undo, On
+			}
+			else
+			{
+				Hotkey, % OldHotkey, 	F_Undo, Off
+				if (ini_HK_UndoLH != "none")
+					Hotkey, % ini_HK_UndoLH, F_Undo, Off
+			}
+
+		Case % TransA["Toggle triggerstring tips"]:
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_ToggleTt, "space")
+			if (OldHotkey != "none")
+				Hotkey, % OldHotkey, F_ToggleTt, Off
+			if (ini_HK_ToggleTt != "none")
+				Hotkey, % ini_HK_Main, F_ToggleTt, On
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9896,7 +9923,7 @@ DownloadRepo=0
 HK_Main=#^h
 HK_IntoEdit=~^c
 HK_UndoLH=~^F12
-HK_ToggleTt=~CapsLock
+HK_ToggleTt=none
 THLog=0
 HADConfig=
 HADL=
