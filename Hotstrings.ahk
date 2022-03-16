@@ -13475,14 +13475,10 @@ HideTrayTip()
 ; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
 TurnOff_OHE:
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
-	; ControlFocus, % WhichIsFocused, % "ahk_id" . A_Space . LastWindowBeforeTooTip
-	; OutputDebug, % "WhichIsFocused:" . A_Tab . WhichIsFocused . A_Tab . "LastWindowBeforeTooTip:" . A_Tab . LastWindowBeforeTooTip . "`n"
 	return
 
 TurnOff_UHE:
-	; PreviousWindowID := WinExist("A")
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
-	; WinActivate, % "ahk_id" PreviousWindowID
 	return
 
 TurnOff_Ttt:
