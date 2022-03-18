@@ -588,25 +588,29 @@ F_ToggleTt()
 {
 	global	;assume-global mode of operation
 
-	if (InStr(ini_HK_ToggleTt, "CapsLock"))
+	ini_TTTtEn := !ini_TTTtEn
+	if (ini_HK_ToggleTt = "CapsLock")	;without tilde, works as ordinary toggle key, but no LED light signalling (unfortunately)
 	{
-		ini_TTTtEn := GetKeyState("CapsLock", "T")
+		SetCapsLockState, AlwaysOff
+	}
+	if (InStr(ini_HK_ToggleTt, "CapsLock")) and (InStr(ini_HK_ToggleTt, "~"))
+	{
 		if (ini_TTTtEn)
 			SetCapsLockState, On
 		else	
 			SetCapsLockState, Off
 		return
 	}
+
 	if (InStr(ini_HK_ToggleTt, "ScrollLock"))
 	{
-		ini_TTTtEn := GetKeyState("ScrollLock", "T")
+		; ini_TTTtEn := GetKeyState("ScrollLock", "T")
 		if (ini_TTTtEn)
 			SetCapsLockState, On
 		else	
 			SetCapsLockState, Off
 		return
 	}
-	ini_TTTtEn := !ini_TTTtEn
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Tt_ULH()
@@ -6588,9 +6592,14 @@ F_GuiShortDef_DetermineConstraints()
 ,	v_yNext := v_OutVarTempY + v_OutVarTempH + HofText
 
 	GuiControl, Move, % IdShortDefCB3, % "x" . v_xNext . "y" . v_yNext	;ScrollLock
-	v_yNext += HofText
+	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefCB3
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdShortDefCB4, % "x" . v_xNext . "y" . v_yNext	;CapsLock
-	v_yNext += 2 * HofText
+	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefCB4
+	v_xNext += v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdShortDefCB5, % "x" . v_xNext . "y" . v_yNext	;NumLock
+	v_xNext := c_xmarg
+,	v_yNext += 2 * HofText
 
 	GuiControl, Move, % IdShortDefB1, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefB1
@@ -6598,12 +6607,12 @@ F_GuiShortDef_DetermineConstraints()
 	GuiControl, Move, % IdShortDefB2, % "x" . v_xNext . "y" . v_yNext
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ParseHotkey(ini_HK_Main, space*)
+F_ParseHotkey(WhichItem, space*)
 {
 	local Mini := false, ShortcutLong := "", HotkeyVar := ""
 	
-	if (ini_HK_Main != "none")
-		Loop, Parse, ini_HK_Main
+	if (WhichItem != "none")
+		Loop, Parse, WhichItem
 		{
 			Mini := false
 			Switch A_LoopField
@@ -6648,11 +6657,56 @@ F_ParseHotkey(ini_HK_Main, space*)
 	return ShortcutLong
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiShortDef_WhichModifier(WhichItem)
+{
+	global	;assume-global mode of operation
+	local	IfWinModifier := false, IfTildeModifier := false, HotkeyVar := ""
+,			IfScrollLock := false, IfCapsLock := false
+,			DynVarRef1 := "", DynVarRef2 := "", a_ReturnVector := []
+
+	DynVarRef1 := "ini_HK_" . WhichItem
+	if (%DynVarRef1% != "")
+	{
+		if (InStr(%DynVarRef1%, "#"))
+		{
+			IfWinModifier 		:= true
+,			HotkeyVar 		:= StrReplace(%DynVarRef1%, "#")
+		}
+		else
+			HotkeyVar 		:= %DynVarRef1%
+		if (InStr(%DynVarRef1%, "~"))
+		{
+			IfTildeModifier 	:= true
+,			HotkeyVar 		:= StrReplace(%DynVarRef1%, "~")
+		}
+		else
+			HotkeyVar 		:= %DynVarRef1%
+		if (InStr(%DynVarRef1%, "CapsLock"))
+		{
+			IfCapsLock 		:= true
+,			HotkeyVar			:= "none"				
+		}
+		if (InStr(%DynVarRef1%, "ScrollLock"))
+		{
+			IfScrollLock		:= true
+,			HotkeyVar			:= "none"				
+		}
+	}
+	a_ReturnVector[1] := IfWinModifier
+,	a_ReturnVector[2] := IfTildeModifier
+, 	a_ReturnVector[3] := IfCapsLock 
+,	a_ReturnVector[4] := IfScrollLock
+,	a_ReturnVector[5] := IfNumLock
+,	a_ReturnVector[6] := HotkeyVar
+	return a_ReturnVector
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiShortDef_CreateObjects()
 {
-	global	;assume-global mode
+	global	;assume-global mode of operation
 	local	IfWinModifier := false, IfTildeModifier := false, Mini := false, HotkeyVar := ""
-,			IfScrollLock := false, IfCapsLock := false
+,			IfScrollLock := false, IfCapsLock := false, IfNumLock := false
+,			a_WhichKeys := []	;a_WhichKeys[1] := IfWinModifier, a_WhichKeys[2] := IfTildeModifer, a_WhichKeys[3] := IfCapsLock, a_WhichKeys[4] := IfScrollLock, a_WhichKeys[5] := HotkeyVar
 	
 	;1. Prepare Gui
 	Gui, ShortDef: New, 	-Resize +HwndShortDefHwnd +Owner -MaximizeBox -MinimizeBox
@@ -6685,85 +6739,29 @@ F_GuiShortDef_CreateObjects()
 		Case % TransA["Call Graphical User Interface"]:					;tu jestem: przerobić na dynamiczne
 			F_HK_CallGUIInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_CallGUIInfo"])
 			GuiControl +g, % IdShortDefT4, % F_HK_CallGUIInfo
-			if (InStr(ini_HK_Main, "#"))
-			{
-				IfWinModifier 		:= true
-,				HotkeyVar 		:= StrReplace(ini_HK_Main, "#")
-			}
-			else
-				HotkeyVar := ini_HK_Main
-			if (InStr(ini_HK_Main, "~"))
-			{
-				IfTildeModifier 	:= true
-,				HotkeyVar 		:= StrReplace(ini_HK_Main, "~")
-			}
-			else
-				HotkeyVar 		:= ini_HK_Main
-			if (InStr(ini_HK_Main, "CapsLock"))
-			{
-				IfCapsLock 		:= true
-,				HotkeyVar			:= "CapsLock"				
-			}
-			if (InStr(ini_HK_Main, "ScrollLock"))
-			{
-				IfScrollLock		:= true
-,				HotkeyVar			:= "ScrollLock"				
-			}
+			a_WhichKeys := F_GuiShortDef_WhichModifier("Main")
 
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
 			F_HK_ClipCopyInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_ClipCopyInfo"])
 			GuiControl +g, % IdShortDefT4, % F_HK_ClipCopyInfo
-			if (InStr(ini_HK_IntoEdit, "#"))
-			{
-				IfWinModifier 		:= true
-,				HotkeyVar 		:= StrReplace(ini_HK_IntoEdit, "#")
-			}
-			else
-				HotkeyVar 		:= ini_HK_IntoEdit
-			if (InStr(ini_HK_IntoEdit, "~"))
-			{
-				IfTildeModifier 	:= true
-,				HotkeyVar 		:= StrReplace(ini_HK_IntoEdit, "~")
-			}
-			else
-				HotkeyVar 		:= ini_HK_IntoEdit
+			a_WhichKeys := F_GuiShortDef_WhichModifier("IntoEdit")
 
 		Case % TransA["Undo the last hotstring"]:
 			F_HK_UndoInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_UndoInfo"])
 			GuiControl +g, % IdShortDefT4, % F_HK_UndoInfo
-			if (InStr(ini_HK_UndoLH, "#"))
-			{
-				IfWinModifier 		:= true
-,				HotkeyVar 		:= StrReplace(ini_HK_UndoLH, "#")
-			}
-			else
-				HotkeyVar 		:= ini_HK_UndoLH
-			if (InStr(ini_HK_UndoLH, "~"))
-			{
-				IfTildeModifier 	:= true
-,				HotkeyVar 		:= StrReplace(ini_HK_UndoLH, "~")
-			}
-			else
-				HotkeyVar 		:= ini_HK_UndoLH
+			a_WhichKeys := F_GuiShortDef_WhichModifier("UndoInfo")
 		
 		Case % TransA["Toggle triggerstring tips"]:
 			F_HK_UndoInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_ToggleTtInfo"])
 			GuiControl +g, % IdShortDefT4, % F_HK_UndoInfo
-			if (InStr(ini_HK_ToggleTt, "#"))
-			{
-				IfWinModifier 		:= true
-,				HotkeyVar 		:= StrReplace(ini_HK_ToggleTt, "#")
-			}
-			else
-				HotkeyVar 		:= ini_HK_ToggleTt
-			if (InStr(ini_HK_ToggleTt, "~"))
-			{
-				IfTildeModifier 	:= true
-,				HotkeyVar 		:= StrReplace(ini_HK_ToggleTt, "~")
-			}
-			else
-				HotkeyVar 		:= ini_HK_ToggleTt
+			a_WhichKeys := F_GuiShortDef_WhichModifier("ToggleTt")
 	}
+	IfWinModifier 	:= a_WhichKeys[1]
+, 	IfTildeModifer := a_WhichKeys[2]
+, 	IfCapsLock 	:= a_WhichKeys[3]
+, 	IfScrollLock 	:= a_WhichKeys[4]
+,	IfNumLock		:= a_WhichKeys[5]
+, 	HotkeyVar 	:= a_WhichKeys[6]
 	
 	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT5,										% TransA["New shortcut (hotkey)"] . ":"
 	Gui, ShortDef: Font, 	% "s" . c_FontSize + 2 . A_Space . "cBlue",								% c_FontType
@@ -6776,6 +6774,7 @@ F_GuiShortDef_CreateObjects()
 	Gui, ShortDef: Add,		Checkbox, x0 y0 HwndIdShortDefCB2 Checked%IfTildeModifier%,					% TransA["Tilde (~) key modifier"]
 	Gui, ShortDef: Add,		Checkbox, x0 y0 HwndIdShortDefCB3 Checked%IfScrollLock%,					Scroll Lock
 	Gui, ShortDef:	Add,		Checkbox,	x0 y0 HwndIdShortDefCB4 Checked%IfCapsLock%,						Caps Lock
+	Gui, ShortDef:	Add,		Checkbox,	x0 y0 HwndIdShortDefCB5 Checked%IfNumLock%,						Num Lock
 	Gui, ShortDef: Font, 	% "s" . c_FontSize + 2 . A_Space . "cBlue",								% c_FontType
 	Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT7,										ⓘ
 	Gui,	ShortDef: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
@@ -6785,7 +6784,7 @@ F_GuiShortDef_CreateObjects()
 	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB2 gF_ShortDefB2_RestoreHotkey,				% TransA["Restore default hotkey"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ShortDefB2_RestoreHotkey()
+F_ShortDefB2_RestoreHotkey()	;tu jestem
 {
 	global	;assume-global mode
 	local	OldHotkey := "", WindowKey := false
@@ -6844,19 +6843,56 @@ F_ShortDefB2_RestoreHotkey()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_InterpretNewDynHK(WhichHK, WindowKey, TildeKey)
+F_InterpretNewDynHK(WhichHK)
 {
 	global	;assume-global mode of operation
-	local	DynVarRef1 := "", DynVarRef2 := ""
+	local	DynVarRef1 := "", DynVarRef2 := "", WindowKey := false, TildeKey := false, vCapsLock := false , vScrollLock := false, vNumLock := false, WhichHotkey := ""
 
 	DynVarRef1 := "ini_HK_" . WhichHK
 ,	DynVarRef2 := "HK_" . WhichHK
-	GuiControlGet, %DynVarRef1%, , % IdShortDefH1
-	if (WindowKey)
-		%DynVarRef1% := "#" . %DynVarRef1%
-	if (TildeKey)
-		%DynVarRef1% := "~" . %DynVarRef1%
-	if (%DynVarRef1% = )		IdShortDefCB3
+	GuiControlGet, WindowKey, , 	% IdShortDefCB1
+	GuiControlGet, TildeKey, , 	% IdShortDefCB2
+	GuiControlGet, vScrollLock, ,	% IdShortDefCB3	;ScrollLock
+	GuiControlGet, vCapsLock, , 	% IdShortDefCB4	;CapsLock
+	GuiControlGet, vNumLock, , 	% IdShortDefCB5	;NumLock
+	GuiControlGet, WhichHotkey, , % IdShortDefH1		;hotkey edit field
+
+	if (WhichHotkey and vCapsLock) or (WhichHotkey and vScrollLock) of (WhichHotkey and vNumLock)
+		MsgBox,  , Something went wrong 1
+	if (WhichHotkey)
+	{
+		%DynVarRef1% := WhichHotkey
+		if (WindowKey)
+			%DynVarRef1% := "#" . %DynVarRef1%
+		if (TildeKey)
+			%DynVarRef1% := "~" . %DynVarRef1%
+	}
+	if (vCapsLock and vScrollLock) or (vCapsLock and vNumLock) or (vScrollLock and vNumLock) or (vCapsLock and vScrollLock and vNumLock) ;impossible to have both settings at the same time
+		MsgBox,  , Something went wrong 2
+	if (vCapsLock or vScrollLock or vNumLock)
+	{
+		if (vScrollLock)
+		{
+			%DynVarRef1% := "ScrollLock"
+			GuiControl,, % IdShortDefH1, "none"
+		}
+		if (vCapsLock)
+		{
+			%DynVarRef1% := "CapsLock"
+			GuiControl,, % IdShortDefH1, "none"
+		}
+		if (vNumLock)
+		{
+			%DynVarRef1% := "NumLock"
+			GuiControl,, % IdShortDefH1, "none"
+		}
+		if (WindowKey)
+			%DynVarRef1% := "#" . %DynVarRef1%
+		if (TildeKey)
+			%DynVarRef1% := "~" . %DynVarRef1%
+	}
+	if (!WhichHotkey) and (!vCapsLock) and (!vScrollLock) and (!vNumLock)
+		%DynVarRef1% := "none"
 	if (%DynVarRef1% != "")
 		IniWrite, % %DynVarRef1%, % ini_HADConfig, Configuration, %DynVarRef2%
 	else
@@ -6871,14 +6907,12 @@ F_ShortDefB1_SaveHotkey()
 	global	;assume-global mode of operation
 	local	OldHotkey := "", WindowKey := false, TildeKey := false
 	
-	GuiControlGet, WindowKey, , 	% IdShortDefCB1
-	GuiControlGet, TildeKey, , 	% IdShortDefCB2
 	Switch A_ThisMenuItem
 	{
-		Case % TransA["Call Graphical User Interface"]:					F_InterpretNewDynHK(WhichHK := "Main", 		WindowKey, TildeKey)
-		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:	F_InterpretNewDynHK(WhichHK := "IntoEdit", 	WindowKey, TildeKey)
-		Case % TransA["Undo the last hotstring"]:						F_InterpretNewDynHK(WhichHK := "UndoLH", 	WindowKey, TildeKey)
-		Case % TransA["Toggle triggerstring tips"]:						F_InterpretNewDynHK(WhichHK := "ToggleTt", 	WindowKey, TildeKey)
+		Case % TransA["Call Graphical User Interface"]:					F_InterpretNewDynHK(WhichHK := "Main")
+		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:	F_InterpretNewDynHK(WhichHK := "IntoEdit")
+		Case % TransA["Undo the last hotstring"]:						F_InterpretNewDynHK(WhichHK := "UndoLH")
+		Case % TransA["Toggle triggerstring tips"]:						F_InterpretNewDynHK(WhichHK := "ToggleTt")
 	}
 	GuiControlGet, OldHotkey, , % IdShortDefT3
 	;OldHotkey := RegExReplace(OldHotkey, "(Ctrl)|(Shift)|(Win)|(\+)|( )")	;future: trick from AutoHotkey forum after my question
@@ -9005,7 +9039,7 @@ F_GuiMain_Resize5()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 {	;This function toggles flag ini_IsSandboxMoved
-	global ;assume-global mode
+	global ;assume-global mode of operation
 	local v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 		,ListViewWidth := 0
 		,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
