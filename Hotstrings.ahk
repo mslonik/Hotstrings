@@ -590,9 +590,7 @@ F_ToggleTt()
 
 	ini_TTTtEn := !ini_TTTtEn
 	if (ini_HK_ToggleTt = "CapsLock")	;without tilde, works as ordinary toggle key, but no LED light signalling (unfortunately)
-	{
 		SetCapsLockState, AlwaysOff
-	}
 	if (InStr(ini_HK_ToggleTt, "CapsLock")) and (InStr(ini_HK_ToggleTt, "~"))
 	{
 		if (ini_TTTtEn)
@@ -602,13 +600,25 @@ F_ToggleTt()
 		return
 	}
 
-	if (InStr(ini_HK_ToggleTt, "ScrollLock"))
+	if (ini_HK_ToggleTt = "ScrollLock")
+		SetScrollLockState, AlwaysOff
+	if InStr(ini_HK_ToggleTt, "ScrollLock") and InStr(ini_HK_ToggleTt, "~")
 	{
-		; ini_TTTtEn := GetKeyState("ScrollLock", "T")
 		if (ini_TTTtEn)
-			SetCapsLockState, On
+			SetScrollLockState, On
 		else	
-			SetCapsLockState, Off
+			SetScrollLockState, Off
+		return
+	}
+
+	if (ini_HK_ToggleTt = "NumLock")
+		SetNumLockState, AlwaysOff
+	if InStr(ini_HK_ToggleTt, "NumLock") and InStr(ini_HK_ToggleTt, "~")
+	{
+		if (ini_TTTtEn)
+			SetNumLockState, On
+		else
+			SetNumLockState, Off
 		return
 	}
 }
@@ -6661,8 +6671,8 @@ F_GuiShortDef_WhichModifier(WhichItem)
 {
 	global	;assume-global mode of operation
 	local	IfWinModifier := false, IfTildeModifier := false, HotkeyVar := ""
-,			IfScrollLock := false, IfCapsLock := false
-,			DynVarRef1 := "", DynVarRef2 := "", a_ReturnVector := []
+,			IfScrollLock := false, IfCapsLock := false, IfNumLock := false
+,			DynVarRef1 := "", a_ReturnVector := []
 
 	DynVarRef1 := "ini_HK_" . WhichItem
 	if (%DynVarRef1% != "")
@@ -6690,6 +6700,11 @@ F_GuiShortDef_WhichModifier(WhichItem)
 		{
 			IfScrollLock		:= true
 ,			HotkeyVar			:= "none"				
+		}
+		if (InStr(%DynVarRef1%, "NumLock"))
+		{
+			IfNumLock			:= true
+,			HotkeyVar			:= "none"			
 		}
 	}
 	a_ReturnVector[1] := IfWinModifier
@@ -6726,17 +6741,17 @@ F_GuiShortDef_CreateObjects()
 	
 	Switch A_ThisMenuItem
 	{
-		Case % TransA["Call Graphical User Interface"]:					Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_Main, "space")
-		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_IntoEdit, "space")
-		Case % TransA["Undo the last hotstring"]:						Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_UndoLH, "space")
-		Case % TransA["Toggle triggerstring tips"]:						Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT3,	% F_ParseHotkey(ini_HK_ToggleTt, "space")
+		Case % TransA["Call Graphical User Interface"]:					Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_Main, 		"space")
+		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_IntoEdit, 	"space")
+		Case % TransA["Undo the last hotstring"]:						Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_UndoLH, 	"space")
+		Case % TransA["Toggle triggerstring tips"]:						Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT3,	% F_ParseHotkey(ini_HK_ToggleTt, 	"space")
 	}
 	Gui, ShortDef: Font, 	% "s" . c_FontSize + 2 . A_Space . "cBlue",		% c_FontType
 	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT4,				ⓘ
 	Gui,	ShortDef: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 	% c_FontType
 	Switch A_ThisMenuItem
 	{
-		Case % TransA["Call Graphical User Interface"]:					;tu jestem: przerobić na dynamiczne
+		Case % TransA["Call Graphical User Interface"]:
 			F_HK_CallGUIInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_CallGUIInfo"])
 			GuiControl +g, % IdShortDefT4, % F_HK_CallGUIInfo
 			a_WhichKeys := F_GuiShortDef_WhichModifier("Main")
@@ -6799,47 +6814,68 @@ F_ShortDefB2_RestoreHotkey()	;tu jestem
 	Switch A_ThisMenuItem
 	{
 		Case % TransA["Call Graphical User Interface"]:
-		if (OldHotkey != "none")	
-			Hotkey, % OldHotkey, F_GUIInit, Off
-		ini_HK_Main := "#^h"
-		Hotkey, If, v_Param != "l" 
-		Hotkey, % ini_HK_Main, F_GUIInit, On
-		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
-		IniWrite, % ini_HK_Main, % ini_HADConfig, Configuration, HK_Main
+			if (OldHotkey != "none")	
+				Hotkey, % OldHotkey, F_GUIInit, Off
+			ini_HK_Main := "#^h"
+			GuiControl,, % IdShortDefCB3, 0
+			GuiControl,, % IdShortDefCB4, 0
+			GuiControl,, % IdShortDefCB5, 0
+			Hotkey, If, v_Param != "l" 
+			Hotkey, % ini_HK_Main, F_GUIInit, On
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
+			IniWrite, % ini_HK_Main, % ini_HADConfig, Configuration, HK_Main
+
 		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
-		if (OldHotkey != "none")
-		{
+			if (OldHotkey != "none")
+			{
+				Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+				Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+				Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+				Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+				Hotkey, IfWinExist
+			}
+			ini_HK_IntoEdit := "~^c"
+			GuiControl,, % IdShortDefCB3, 0
+			GuiControl,, % IdShortDefCB4, 0
+			GuiControl,, % IdShortDefCB5, 0
 			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
-			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
 			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
-			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
 			Hotkey, IfWinExist
-		}
-		ini_HK_IntoEdit := "~^c"
-		Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
-		Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
-		Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
-		Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
-		Hotkey, IfWinExist
-		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit, "space")
-		IniWrite, % ini_HK_IntoEdit, % ini_HADConfig, Configuration, HK_IntoEdit
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit, "space")
+			IniWrite, % ini_HK_IntoEdit, % ini_HADConfig, Configuration, HK_IntoEdit
+
 		Case % TransA["Undo the last hotstring"]:
-		if (ini_HotstringUndo)
-		{
-			if (OldHotkey != "none")
-				Hotkey, % OldHotkey, 	F_Undo, Off
-			ini_HK_UndoLH := "~^F12"
-			Hotkey, % ini_HK_UndoLH, F_Undo, On
-		}
-		else
-		{
-			if (OldHotkey != "none")
-				Hotkey, % OldHotkey, 	F_Undo, Off
-			ini_HK_UndoLH := "~^F12"
-			Hotkey, % ini_HK_UndoLH, F_Undo, Off
-		}
-		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH, "space")
-		IniWrite, % ini_HK_UndoLH, % ini_HADConfig, Configuration, HK_UndoLH
+			if (ini_HotstringUndo)
+			{
+				if (OldHotkey != "none")
+					Hotkey, % OldHotkey, 	F_Undo, Off
+				ini_HK_UndoLH := "~^F12"
+				Hotkey, % ini_HK_UndoLH, F_Undo, On
+			}
+			else
+			{
+				if (OldHotkey != "none")
+					Hotkey, % OldHotkey, 	F_Undo, Off
+				ini_HK_UndoLH := "~^F12"
+				Hotkey, % ini_HK_UndoLH, F_Undo, Off
+			}
+			GuiControl,, % IdShortDefCB3, 0
+			GuiControl,, % IdShortDefCB4, 0
+			GuiControl,, % IdShortDefCB5, 0
+			GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH, "space")
+			IniWrite, % ini_HK_UndoLH, % ini_HADConfig, Configuration, HK_UndoLH
+
+		Case % TransA["Toggle triggerstring tips"]:
+			if (OldHotkey != "none")	
+				Hotkey, % OldHotkey, F_ToggleTt, Off
+			ini_HK_ToggleTt := "none"
+			GuiControl,, % IdShortDefT3, % F_ParseHotkey(ini_HK_ToggleTt, "space")
+			GuiControl,, % IdShortDefCB3, 0
+			GuiControl,, % IdShortDefCB4, 0
+			GuiControl,, % IdShortDefCB5, 0
+			IniWrite, % ini_HK_ToggleTt, % ini_HADConfig, Configuration, HK_ToggleTt
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6858,7 +6894,8 @@ F_InterpretNewDynHK(WhichHK)
 	GuiControlGet, WhichHotkey, , % IdShortDefH1		;hotkey edit field
 
 	if (WhichHotkey and vCapsLock) or (WhichHotkey and vScrollLock) of (WhichHotkey and vNumLock)
-		MsgBox,  , Something went wrong 1
+		MsgBox, 48, % SubStr(v_Triggerstring, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Sorry, it's not allowed to use ordinary hotkey combined with Caps Lock or Scroll Lock or Num Lock."]
+			. "`n"  . TransA["Please try again."]
 	if (WhichHotkey)
 	{
 		%DynVarRef1% := WhichHotkey
@@ -6868,7 +6905,8 @@ F_InterpretNewDynHK(WhichHK)
 			%DynVarRef1% := "~" . %DynVarRef1%
 	}
 	if (vCapsLock and vScrollLock) or (vCapsLock and vNumLock) or (vScrollLock and vNumLock) or (vCapsLock and vScrollLock and vNumLock) ;impossible to have both settings at the same time
-		MsgBox,  , Something went wrong 2
+		MsgBox, 48, % SubStr(v_Triggerstring, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Sorry, it's not allowed to use combination of Caps Lock, Scroll Lock and Num Lock for the same purpose."]
+			. "`n"  . TransA["Please try again."]
 	if (vCapsLock or vScrollLock or vNumLock)
 	{
 		if (vScrollLock)
@@ -10701,6 +10739,7 @@ Pause application										= Pause application
 Perhaps check if any other application (like File Manager) do not occupy folder to be removed. = Perhaps check if any other application (like File Manager) do not occupy folder to be removed.
 Phrase to search for:									= Phrase to search for:
 pixels												= pixels
+Please try again.										= Please try again.
 Please wait, uploading .csv files... 						= Please wait, uploading .csv files...
 Position of this window is saved in Config.ini.				= Position of this window is saved in Config.ini.	
 Preview												= &Preview
@@ -10776,6 +10815,8 @@ Sound enable											= Sound enable
 Sound frequency										= Sound frequency
 Sound test											= Sound test
 Sorting order											= Sorting order
+Sorry, it's not allowed to use combination of Caps Lock, Scroll Lock and Num Lock for the same purpose. = Sorry, it's not allowed to use combination of Caps Lock, Scroll Lock and Num Lock for the same purpose.
+Sorry, it's not allowed to use ordinary hotkey combined with Caps Lock or Scroll Lock or Num Lock. = Sorry, it's not allowed to use ordinary hotkey combined with Caps Lock or Scroll Lock or Num Lock.
 Space												= Space
 Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
 Standard executable (Ahk2Exe.exe)							= Standard executable (Ahk2Exe.exe)
