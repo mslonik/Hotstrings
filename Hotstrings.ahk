@@ -8813,7 +8813,7 @@ F_DeleteHotstring()
 	local 	LibraryFullPathAndName := "" 
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
 			,v_SelectedRow := 0, v_Pointer := 0
-			,key := 0, val := "", options := "", triggerstring := ""
+			,key := 0, val := "", options := "", triggerstring := "", EnDis := ""
 	
 	Gui, HS3: +OwnDialogs
 	
@@ -8833,23 +8833,29 @@ F_DeleteHotstring()
 	FileDelete, % LibraryFullPathAndName
 	
 	;4. Disable selected hotstring.
-	LV_GetText(triggerstring, v_SelectedRow, 1)	;triggerstring
-	LV_GetText(options, v_SelectedRow, 2)	;options
+	LV_GetText(triggerstring, 	v_SelectedRow, 1)	;triggerstring
+	LV_GetText(options, 		v_SelectedRow, 2)	;options
+	LV_GetText(EnDis,			v_SelectedRow, 3)	;enabled or disabled definition
 
 	;In order to switch off, some options have to run in "reversed" state:
-	if (InStr(options, "*"))
-		options := StrReplace(options, "*", "*0")
-	if (InStr(options, "B0"))
-		options := StrReplace(options, "B0", "B")
-	if (InStr(options, "O"))
-		options := StrReplace(options, "O", "O0")
-	if (InStr(options, "Z"))
-		options := StrReplace(options, "Z", "Z0")
-	Try
-		Hotstring(":" . options . ":" . triggerstring, , "Off") 
-	Catch
-		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" . v_TriggerString 
-		. A_Space . txt2 . "`n" . TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 
+	if (EnDis = "En")	;only if definition is enabled, at first try to disable it (if it is disabled, just delete it)
+	{
+		if (InStr(options, "*"))
+			options := StrReplace(options, "*", "*0")
+		if (InStr(options, "B0"))
+			options := StrReplace(options, "B0", "B")
+		if (InStr(options, "O"))
+			options := StrReplace(options, "O", "O0")
+		if (InStr(options, "Z"))
+			options := StrReplace(options, "Z", "Z0")
+		Try
+			Hotstring(":" . options . ":" . triggerstring, , "Off") 
+		Catch
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % "Function:" . A_ThisFunc . "`n`n" 
+			. TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
+			. "triggerstring:" . A_Space . v_TriggerString . A_Tab . "options:" . A_Space . options . "`n" 
+			. TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 
+	}
 	
 	;3. Remove selected row from List View.
 	LV_Delete(v_SelectedRow)
