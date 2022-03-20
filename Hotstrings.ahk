@@ -460,7 +460,7 @@ Critical, Off
 ~Home::
 ~End::
 ~Esc::
-	OutputDebug, % "Regular" . "`n"
+	OutputDebug, % "Regular:" . "`n"
 	ToolTip,	;this line is necessary to close tooltips.
 	; OutputDebug, % "Destroy..."
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
@@ -494,14 +494,17 @@ Critical, Off
 	Enter:: 
 	Up::
 	Down::
+		v_InputH.VisibleText 	:= true
+,		v_InputString 			:= ""			
+		; OutputDebug, % "WinExist(""ahk_id"" HMenuCliHwnd):" . A_Space . A_ThisHotkey . "`n"
 		F_HMenuCLI_Keyboard()
 		return
 
 	Esc::
 		Gui, HMenuCli: Destroy
 		SendRaw, % v_Triggerstring	;SendRaw in order to correctly produce escape sequences from v_Triggerstring ({}^!+#)
-		v_InputString 			:= ""	
-,		v_InputH.VisibleText 	:= true
+		v_InputH.VisibleText 	:= true
+,		v_InputString 			:= ""	
 		return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -518,7 +521,9 @@ Critical, Off
 	Enter:: 
 	Up::
 	Down::
-		; OutputDebug, % "WinExist" . "`n"
+		v_InputH.VisibleText 	:= true
+,		v_InputString 			:= ""			
+		; OutputDebug, % "WinExist(""ahk_id"" HMenuAHKHwnd)" . A_Space . A_ThisHotkey . "`n"
 		F_HMenuSI_Keyboard()
 		return
 	Esc::
@@ -888,8 +893,6 @@ F_HMenuSI_Keyboard()
 		SoundBeep, % ini_MHSF, % ini_MHSD	
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	v_InputString 			:= ""	
-,	v_InputH.VisibleText 	:= true
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_MouseMouse is lower than this "interrupt"
@@ -991,8 +994,7 @@ F_HMenuCLI_Keyboard()
 		SoundBeep, % ini_MHSF, % ini_MHSD
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MCL" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	v_InputString 			:= ""	
-,	v_InputH.VisibleText 	:= true
+	OutputDebug, % "VisibleText:" . A_Space . true . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ActiveControlIsOfClass(Class)	;https://www.autohotkey.com/docs/commands/_If.htm
@@ -1556,12 +1558,13 @@ F_OneCharPressed(ih, Char)
 	local	f_FoundEndChar := false, f_FoundTip := false, EndCharCounter := 0
 	Critical, On
 
-	; OutputDebug, % "Char:" . A_Tab . Char . "`n"
+	OutputDebug, % "Char:" . A_Tab . Char . "`n"
 	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))	;Menu Hotstring Sound Enable
 	{
-		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
+		; SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
+		OutputDebug, % "Branch Char:" . A_Tab . Char . "`n"
 		; OutputDebug, % "Char:" . A_Tab . Char . A_Tab . "SoundBeep" . A_Tab . "`n"
-		; Critical, Off
+		Critical, Off
 		return
 	}
 	;This is compromise: not all triggerstrings will have its tips, e.g. triggerstring with option ? (question mark) and those starting with EndChar: ".ahk", "..."
@@ -6799,7 +6802,7 @@ F_GuiShortDef_CreateObjects()
 	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB2 gF_ShortDefB2_RestoreHotkey,				% TransA["Restore default hotkey"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ShortDefB2_RestoreHotkey()	;tu jestem
+F_ShortDefB2_RestoreHotkey()
 {
 	global	;assume-global mode
 	local	OldHotkey := "", WindowKey := false
