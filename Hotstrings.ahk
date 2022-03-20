@@ -994,7 +994,7 @@ F_HMenuCLI_Keyboard()
 		SoundBeep, % ini_MHSF, % ini_MHSD
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . ":" . "|" . ++v_LogCounter . "|" . "MCL" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-	OutputDebug, % "VisibleText:" . A_Space . true . "`n"
+	OutputDebug, % "End of F_HMenuCLI_Keyboard:" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ActiveControlIsOfClass(Class)	;https://www.autohotkey.com/docs/commands/_If.htm
@@ -1561,10 +1561,10 @@ F_OneCharPressed(ih, Char)
 	OutputDebug, % "Char:" . A_Tab . Char . "`n"
 	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))	;Menu Hotstring Sound Enable
 	{
-		; SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
+		if (!v_InputH.VisibleText)
+			SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
 		OutputDebug, % "Branch Char:" . A_Tab . Char . "`n"
-		; OutputDebug, % "Char:" . A_Tab . Char . A_Tab . "SoundBeep" . A_Tab . "`n"
-		Critical, Off
+		; Critical, Off
 		return
 	}
 	;This is compromise: not all triggerstrings will have its tips, e.g. triggerstring with option ? (question mark) and those starting with EndChar: ".ahk", "..."
@@ -1572,7 +1572,7 @@ F_OneCharPressed(ih, Char)
 		f_FoundEndChar := true
 	v_InputString .= Char
 	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n
-	v_TriggerString := v_InputString	;this line is necessary to correctly process F_Undo
+,	v_TriggerString := v_InputString	;this line is necessary to correctly process F_Undo
 	; OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Tab . "v_Triggerstring:" . A_Space . v_Triggerstring . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
