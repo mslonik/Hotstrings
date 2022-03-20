@@ -1558,12 +1558,12 @@ F_OneCharPressed(ih, Char)
 	local	f_FoundEndChar := false, f_FoundTip := false, EndCharCounter := 0
 	Critical, On
 
-	OutputDebug, % "Char:" . A_Tab . Char . "`n"
+	; OutputDebug, % "Char:" . A_Tab . Char . "`n"
 	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))	;Menu Hotstring Sound Enable
 	{
 		if (!v_InputH.VisibleText)
 			SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
-		OutputDebug, % "Branch Char:" . A_Tab . Char . "`n"
+		; OutputDebug, % "Branch Char:" . A_Tab . Char . "`n"
 		; Critical, Off
 		return
 	}
@@ -7698,8 +7698,22 @@ F_AddHotstring()
 			,name := "", key := 0, value := "", Counter := 0, key2 := 0, value2 := ""
 			,f_T_GeneralMatch := false, f_T_CaseMatch := false, f_OldOptionsC := false, f_OldOptionsC1 := false, f_OptionsC := false, f_OptionsC1 := false, f_H_CaseMatch := false
 			,SelectedLibraryName := SubStr(v_SelectHotstringLibrary, 1, -4)
-			,Overwrite := ""
-	
+			,Overwrite := "", WinHWND := ""
+
+	;Disable all GuiControls for time of adding / editing of d(t, o, h)	
+	WinGet, WinHWND, ID, % "ahk_id" HS3GuiHwnd
+	if (WinHWND)
+	{
+		WinHWND := "HS3"
+		F_GuiMain_EnDis(EnDis := "Disable")	;EnDis = "Disable" or "Enable"
+	}
+	WinGet, WinHWND, ID, % "ahk_id" HS4GuiHwnd
+	if (WinHWND)
+	{
+		WinHWND := "HS4"
+		F_GuiHS4_EnDis(EnDis := "Disable")
+	}
+
 	;1. Read all inputs. 
 	F_ReadUserInputs(TextInsert, NewOptions, OnOff, EnDis, SendFunHotstringCreate, SendFunFileFormat)
 	
@@ -7759,6 +7773,11 @@ F_AddHotstring()
 			FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary
 			;8. Save List View into the library file.
 			F_SaveLVintoLibFile()
+			Switch WinHWND	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
+			{
+				Case "HS3":	F_GuiMain_EnDis(EnDis := "Enable")	;EnDis = "Disable" or "Enable"
+				Case "HS4": 	F_GuiHS4_EnDis(EnDis := "Enable")
+			}
 			return
 		}
 		if (Overwrite = "No")
@@ -7804,6 +7823,12 @@ F_AddHotstring()
 	GuiControl, , % IdText12,  % v_TotalHotstringCnt
 	GuiControl, , % IdText12b, % v_TotalHotstringCnt
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring added to the file"] . A_Space . v_SelectHotstringLibrary . "!" 
+
+	Switch WinHWND	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
+	{
+		Case "HS3":	F_GuiMain_EnDis(EnDis := "Enable")	;EnDis = "Disable" or "Enable"
+		Case "HS4": 	F_GuiHS4_EnDis(EnDis := "Enable")
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SaveLVintoLibFile()
@@ -8987,17 +9012,17 @@ F_GuiMain_Resize2()
 		,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
 	
 	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
-	v_hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + c_HofSandbox + c_ymarg)
+,	v_hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + c_HofSandbox + c_ymarg)
 	GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext . "h" . v_hNext
 	v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton
-	v_yNext := A_GuiHeight - (c_ymarg + HofText + c_HofSandbox)
+,	v_yNext := A_GuiHeight - (c_ymarg + HofText + c_HofSandbox)
 	GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp1, Pos, % IdText10
 	v_xNext := v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg
 	GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
-	v_yNext += HofText
-	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
+,	v_yNext += HofText
+,	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
 	GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 	v_hNext := A_GuiHeight - 2 * c_ymarg 
 	GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
@@ -9027,18 +9052,18 @@ F_GuiMain_Resize1()
 			,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
 	
 	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
-	v_hNext := A_GuiHeight - (2 * c_ymarg + HofText)
+,	v_hNext := A_GuiHeight - (2 * c_ymarg + HofText)
 	GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext . "h" . v_hNext  ;increase
 	v_xNext := c_xmarg
-	v_yNext := LeftColumnH + c_ymarg
+,	v_yNext := LeftColumnH + c_ymarg
 	GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp1, Pos, % IdText10
 	v_xNext := v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg
-	v_yNext := LeftColumnH + c_ymarg
+,	v_yNext := LeftColumnH + c_ymarg
 	GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := c_xmarg
-	v_yNext := LeftColumnH + c_ymarg + HofText 
-	v_wNext := LeftColumnW - 2 * c_xmarg
+,	v_yNext := LeftColumnH + c_ymarg + HofText 
+,	v_wNext := LeftColumnW - 2 * c_xmarg
 	GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 	v_hNext := A_GuiHeight - (2 * c_ymarg)
 	GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
@@ -9055,14 +9080,14 @@ F_GuiMain_Resize3()
 	v_hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + c_HofSandbox + c_ymarg)
 	GuiControl, MoveDraw, % IdListView1, % "h" . v_hNext ;decrease
 	v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton
-	v_yNext := A_GuiHeight - (c_ymarg + HofText + c_HofSandbox)
+,	v_yNext := A_GuiHeight - (c_ymarg + HofText + c_HofSandbox)
 	GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp1, Pos, % IdText10
 	v_xNext := v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg
 	GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
-	v_yNext += HofText
-	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
+,	v_yNext += HofText
+,	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
 	GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 	v_hNext := A_GuiHeight - 2 * c_ymarg 
 	GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
@@ -9076,7 +9101,7 @@ F_GuiMain_Resize5()
 	local	v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
 	
 	v_hNext := A_GuiHeight - (HofText + 2 * c_ymarg)
-	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
+,	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
 	GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext . "h" . v_hNext
 	v_hNext := A_GuiHeight - (2 * c_ymarg)
 	GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext
@@ -9960,9 +9985,9 @@ F_LoadGUIPos()
 	local ini_ReadTemp := 0
 	
 	ini_HS3WindoPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
-	ini_ListViewPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
-	ini_WhichGui 		:= ""
-	ini_Sandbox 		:= true
+,	ini_ListViewPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
+,	ini_WhichGui 		:= ""
+,	ini_Sandbox 		:= true
 	;after loading values (empty by default) those parameters are further used in F_GUIinit()
 	IniRead, ini_ReadTemp, 					% ini_HADConfig, GraphicalUserInterface, MainWindowPosX, 	% A_Space	;empty by default
 	ini_HS3WindoPos["X"] := ini_ReadTemp
@@ -11073,9 +11098,66 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 	GuiControl, , % IdText12b, % v_TotalHotstringCnt ; Text: Puts new contents into the control.
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
+F_GuiHS4_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
+{
+	global ;assume-global mode of operation
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdText1b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo1b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit1b
+	GuiControl, % "HS4:" . A_Space . EnDis, % IdGroupBox1b
+	GuiControl, % "HS4:" . A_Space . EnDis, % IdCheckBox1b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo2b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdRadioCaseCCb
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdRadioCaseCSb
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdRadioCaseC1b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo3b
+	GuiControl, % "HS4:" . A_Space . EnDis, % IdCheckBox3b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo4b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo5b
+	GuiControl, % "HS4:" . A_Space . EnDis, % IdCheckBox4b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo6b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo7b
+	GuiControl, % "HS4:" . A_Space . EnDis, % IdCheckBox5b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo8b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdCheckBox8b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo10b
+	GuiControl, % "HS4:" . A_Space . EnDis, % IdCheckBox6b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo11b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdText3b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo12b
+	GuiControl, % "HS4:" . A_Space . EnDis, % IdDDL1b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdText4b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo13b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit2b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit3b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit4b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit5b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit6b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit7b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit8b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdText5b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo14b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit9b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdText6b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo15b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdButton1b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdDDL2b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdButton2b
+	GuiControl, % "HS4:" . A_Space . EnDis, % IdButton3b
+	GuiControl, % "HS4:" . A_Space . EnDis, % IdButton4b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdButton5b
+	GuiControl, % "HS4:" . A_Space . EnDis, % IdText10b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo17b
+	GuiControl, % "HS4:" . A_Space . EnDis, % IdEdit10b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdText11b
+	GuiControl, % "HS4:" . A_Space . EnDis,	% IdText13b
+	GuiControl, % "HS4:" . A_Space . EnDis, % IdText2b
+	GuiControl, % "HS4:" . A_Space . EnDis, % IdText12b
+}
+; ------------------------------------------------------------------------------------------------------------------------------------
 F_GuiHS4_CreateObject()
 {
-	global ;assume-global mode
+	global ;assume-global mode of operation
 	local x0 := 0, y0 := 0
 	
 	v_TotalHotstringCnt 		:= 0000
@@ -11220,16 +11302,77 @@ F_GuiHS4_CreateObject()
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
+F_GuiMain_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
+{
+	global ;assume-global mode of operation
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdText1
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdTextInfo1
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit1
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdGroupBox1
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdCheckBox1
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdTextInfo2
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdRadioCaseCC
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdRadioCaseCS
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdRadioCaseC1
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdTextInfo3
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdTextInfo5
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdTextInfo7
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdCheckBox3
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdCheckBox4
+	GuiControl, % "HS3:" . A_Space . EnDis,	% IdCheckBox5
+	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo4
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdTextInfo6
+	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo8
+	GuiControl, % "HS3:" . A_Space . EnDis,	% IdCheckBox8
+	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo10
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdCheckBox6
+	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo11
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdText3
+	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo12
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdDDL1
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdText4
+	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo13
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit2
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit3
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit4
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit5
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit6
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit7
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit8
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdText5
+	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo14
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit9
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdText6
+	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo15
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdButton1
+	GuiControl, % "HS3:" . A_Space . EnDis,	% IdDDL2
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdButton2
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdButton3
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdButton4
+	GuiControl, % "HS3:" . A_Space . EnDis,	% IdButton5
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdText7
+	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo16
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdText2
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdText12
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdText9
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdListView1
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdText10
+	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo17
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit10
+	GuiControl, % "HS3:" . A_Space . EnDis,	% IdText11
+	GuiControl, % "HS3:" . A_Space . EnDis, % IdText13
+}
+; ------------------------------------------------------------------------------------------------------------------------------------
 F_GuiMain_CreateObject()
 {
-	global ;assume-global mode
+	global ;assume-global mode of operation
 	local x0 := 0, y0 := 0
 	;v_OptionImmediateExecute := 0, v_OptionCaseSensitive := 0, v_OptionNoBackspace := 0, v_OptionInsideWord := 0, v_OptionNoEndChar := 0, v_OptionDisable := 0
 	
 	v_TotalHotstringCnt 		:= 0000
-	v_LibHotstringCnt			:= 0000 ;no of (triggerstring, hotstring) definitions in single library
-	HS3_GuiWidth  				:= 0
-	HS3_GuiHeight 				:= 0
+,	v_LibHotstringCnt			:= 0000 ;no of (triggerstring, hotstring) definitions in single library
+,	HS3_GuiWidth  				:= 0
+,	HS3_GuiHeight 				:= 0
 	
 ;1. Definition of HS3 GUI.
 ;-DPIScale doesn't work in Microsoft Windows 10
@@ -11268,8 +11411,8 @@ F_GuiMain_CreateObject()
 	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo5,									ⓘ
 	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo7,									ⓘ
 	F_TI_CaseConforming 	:= func("F_ShowLongTooltip").bind(TransA["F_TI_CaseConforming"])
-	F_TI_CaseSensitive		:= func("F_ShowLongTooltip").bind(TransA["F_TI_CaseSensitive"])
-	F_TI_NotCaseConforming	:= func("F_ShowLongTooltip").bind(TransA["F_TI_NotCaseConforming"])
+,	F_TI_CaseSensitive		:= func("F_ShowLongTooltip").bind(TransA["F_TI_CaseSensitive"])
+,	F_TI_NotCaseConforming	:= func("F_ShowLongTooltip").bind(TransA["F_TI_NotCaseConforming"])
 	GuiControl +g, % IdTextInfo3, % F_TI_CaseConforming
 	GuiControl +g, % IdTextInfo5, % F_TI_CaseSensitive
 	GuiControl +g, % IdTextInfo7, % F_TI_NotCaseConforming
@@ -11382,14 +11525,14 @@ F_GuiMain_CreateObject()
 	TI_Sandbox		:= func("F_ShowLongTooltip").bind(TransA["TI_Sandbox"])
 	GuiControl +g, % IdTextInfo17, % TI_Sandbox
 	
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
-	Gui, 		HS3:Add, 		Edit, 		x0 y0 HwndIdEdit10 vv_Sandbox r3 						; r3 = 3x rows of text
-	Gui,			HS3:Add,		Text,		x0 y0 HwndIdText11, % TransA["This library:"] . A_Space
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
-	Gui, 		HS3:Add, 		Text, 		x0 y0 HwndIdText13,  %  v_LibHotstringCnt ;value of Hotstrings counter in the current library
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit10 vv_Sandbox r3 						; r3 = 3x rows of text
+	Gui,			HS3: Add,		Text,		x0 y0 HwndIdText11, % TransA["This library:"] . A_Space
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText13,  %  v_LibHotstringCnt ;value of Hotstrings counter in the current library
 	
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_GuiMain_DefineConstants()
