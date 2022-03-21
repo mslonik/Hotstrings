@@ -55,6 +55,7 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		HotstringDelay			:= 0
 ,		WhichMenu 			:= "" ;available values: CLI or MSI
 ,		v_EndChar 			:= "" ;initialization of this variable is important in case user would like to hit "Esc" and GUI TT_C4 exists.
+,		AppStartTime			:= "" ;When application got started, this parameter is used for performance statistics
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
 F_LoadCreateTranslationTxt() 			;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
@@ -339,6 +340,8 @@ if (ini_TTCn = 4)	;static triggerstring / hotstring GUI
 	F_GuiTrigTipsMenuDefC4()
 if (ini_GuiReload) and (v_Param != "l")
 	F_GUIinit()
+
+AppStartTime := A_Hour . ":" . A_Min . ":" . A_Sec
 Critical, Off
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
 #if WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd) or WinExist("ahk_id" TT_C4_Hwnd)
@@ -1613,14 +1616,14 @@ F_OneCharPressed(ih, Char)
 	}
 
 	if (f_FoundEndChar)	;check if sequence fits to any known a_Tips, helpful to process triggerstrings containing endchar, e.g. "à la"
-		{
-			Loop, % a_Tips.Count()
-				if (InStr(a_Tips[A_Index], v_InputString))
-					f_FoundTip := true
-			if (!f_FoundTip)
-				v_InputString := ""
-		}	
-	return	
+		; {
+		; 	Loop, % a_Tips.Count()
+		; 		if (InStr(a_Tips[A_Index], v_InputString))
+		; 			f_FoundTip := true
+		; 	if (!f_FoundTip)
+		; 		v_InputString := ""
+		; }	
+		return	
 	; Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11182,58 +11185,76 @@ F_CalculateGain(Triggerstring, Hotstring, options)
 F_GuiHS4_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 {
 	global ;assume-global mode of operation
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdText1b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo1b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit1b
-	GuiControl, % "HS4:" . A_Space . EnDis, % IdGroupBox1b
-	GuiControl, % "HS4:" . A_Space . EnDis, % IdCheckBox1b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo2b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdRadioCaseCCb
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdRadioCaseCSb
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdRadioCaseC1b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo3b
-	GuiControl, % "HS4:" . A_Space . EnDis, % IdCheckBox3b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo4b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo5b
-	GuiControl, % "HS4:" . A_Space . EnDis, % IdCheckBox4b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo6b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo7b
-	GuiControl, % "HS4:" . A_Space . EnDis, % IdCheckBox5b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo8b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdCheckBox8b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo10b
-	GuiControl, % "HS4:" . A_Space . EnDis, % IdCheckBox6b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo11b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdText3b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo12b
-	GuiControl, % "HS4:" . A_Space . EnDis, % IdDDL1b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdText4b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo13b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit2b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit3b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit4b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit5b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit6b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit7b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit8b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdText5b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo14b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdEdit9b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdText6b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo15b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdButton1b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdDDL2b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdButton2b
-	GuiControl, % "HS4:" . A_Space . EnDis, % IdButton3b
-	GuiControl, % "HS4:" . A_Space . EnDis, % IdButton4b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdButton5b
-	GuiControl, % "HS4:" . A_Space . EnDis, % IdText10b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdTextInfo17b
-	GuiControl, % "HS4:" . A_Space . EnDis, % IdEdit10b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdText11b
-	GuiControl, % "HS4:" . A_Space . EnDis,	% IdText13b
-	GuiControl, % "HS4:" . A_Space . EnDis, % IdText2b
-	GuiControl, % "HS4:" . A_Space . EnDis, % IdText12b
+	static	PS_IdEdit3b := false, PS_IdEdit4b := false, PS_IdEdit5b := false, PS_IdEdit6b := false, PS_IdEdit7b := false, PS_IdEdit8b := false
+
+	GuiControl, % EnDis, % IdText1b
+	GuiControl, % EnDis, % IdTextInfo1b
+	GuiControl, % EnDis, % IdEdit1b
+	GuiControl, % EnDis, % IdGroupBox1b
+	GuiControl, % EnDis, % IdCheckBox1b
+	GuiControl, % EnDis, % IdTextInfo2b
+	GuiControl, % EnDis, % IdRadioCaseCCb
+	GuiControl, % EnDis, % IdRadioCaseCSb
+	GuiControl, % EnDis, % IdRadioCaseC1b
+	GuiControl, % EnDis, % IdTextInfo3b
+	GuiControl, % EnDis, % IdCheckBox3b
+	GuiControl, % EnDis, % IdTextInfo4b
+	GuiControl, % EnDis, % IdTextInfo5b
+	GuiControl, % EnDis, % IdCheckBox4b
+	GuiControl, % EnDis, % IdTextInfo6b
+	GuiControl, % EnDis, % IdTextInfo7b
+	GuiControl, % EnDis, % IdCheckBox5b
+	GuiControl, % EnDis, % IdTextInfo8b
+	GuiControl, % EnDis, % IdCheckBox8b
+	GuiControl, % EnDis, % IdTextInfo10b
+	GuiControl, % EnDis, % IdCheckBox6b
+	GuiControl, % EnDis, % IdTextInfo11b
+	GuiControl, % EnDis, % IdText3b
+	GuiControl, % EnDis, % IdTextInfo12b
+	GuiControl, % EnDis, % IdDDL1b
+	GuiControl, % EnDis, % IdText4b
+	GuiControl, % EnDis, % IdTextInfo13b
+	GuiControl, % EnDis, % IdEdit2b
+	if (EnDis = "Disable")
+	{
+		GuiControlGet, PS_IdEdit3b, Enabled, % IdEdit3b
+		GuiControlGet, PS_IdEdit4b, Enabled, % IdEdit4b
+		GuiControlGet, PS_IdEdit5b, Enabled, % IdEdit5b
+		GuiControlGet, PS_IdEdit6b, Enabled, % IdEdit6b
+		GuiControlGet, PS_IdEdit7b, Enabled, % IdEdit7b
+		GuiControlGet, PS_IdEdit8b, Enabled, % IdEdit8b
+	}
+	if (EnDis = "Enable") and (PS_IdEdit3b)	
+		GuiControl, % EnDis, % IdEdit3b
+	if (EnDis = "Enable") and (PS_IdEdit4b)	
+		GuiControl, % EnDis, % IdEdit4b
+	if (EnDis = "Enable") and (PS_IdEdit5b)
+		GuiControl, % EnDis, % IdEdit5b
+	if (EnDis = "Enable") and (PS_IdEdit6b)	
+		GuiControl, % EnDis, % IdEdit6b
+	if (EnDis = "Enable") and (PS_IdEdit7b)	
+		GuiControl, % EnDis, % IdEdit7b
+	if (EnDis = "Enable") and (PS_IdEdit8b)	
+		GuiControl, % EnDis, % IdEdit8b
+
+	GuiControl, % EnDis, % IdText5b
+	GuiControl, % EnDis, % IdTextInfo14b
+	GuiControl, % EnDis, % IdEdit9b
+	GuiControl, % EnDis, % IdText6b
+	GuiControl, % EnDis, % IdTextInfo15b
+	GuiControl, % EnDis, % IdButton1b
+	GuiControl, % EnDis, % IdDDL2b
+	GuiControl, % EnDis, % IdButton2b
+	GuiControl, % EnDis, % IdButton3b
+	GuiControl, % EnDis, % IdButton4b
+	GuiControl, % EnDis, % IdButton5b
+	GuiControl, % EnDis, % IdText10b
+	GuiControl, % EnDis, % IdTextInfo17b
+	GuiControl, % EnDis, % IdEdit10b
+	GuiControl, % EnDis, % IdText11b
+	GuiControl, % EnDis, % IdText13b
+	GuiControl, % EnDis, % IdText2b
+	GuiControl, % EnDis, % IdText12b
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_GuiHS4_CreateObject()
@@ -11386,62 +11407,79 @@ F_GuiHS4_CreateObject()
 F_GuiMain_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 {
 	global ;assume-global mode of operation
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdText1
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdTextInfo1
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit1
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdGroupBox1
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdCheckBox1
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdTextInfo2
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdRadioCaseCC
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdRadioCaseCS
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdRadioCaseC1
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdTextInfo3
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdTextInfo5
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdTextInfo7
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdCheckBox3
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdCheckBox4
-	GuiControl, % "HS3:" . A_Space . EnDis,	% IdCheckBox5
-	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo4
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdTextInfo6
-	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo8
-	GuiControl, % "HS3:" . A_Space . EnDis,	% IdCheckBox8
-	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo10
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdCheckBox6
-	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo11
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdText3
-	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo12
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdDDL1
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdText4
-	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo13
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit2
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit3
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit4
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit5
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit6
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit7
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit8
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdText5
-	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo14
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit9
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdText6
-	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo15
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdButton1
-	GuiControl, % "HS3:" . A_Space . EnDis,	% IdDDL2
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdButton2
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdButton3
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdButton4
-	GuiControl, % "HS3:" . A_Space . EnDis,	% IdButton5
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdText7
-	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo16
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdText2
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdText12
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdText9
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdListView1
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdText10
-	GuiControl, % "HS3:" . A_Space . EnDis,	% IdTextInfo17
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdEdit10
-	GuiControl, % "HS3:" . A_Space . EnDis,	% IdText11
-	GuiControl, % "HS3:" . A_Space . EnDis, % IdText13
+	static	PS_IdEdit3 := false, PS_IdEdit4 := false, PS_IdEdit5 := false, PS_IdEdit6 := false, PS_IdEdit7 := false, PS_IdEdit8 := false
+
+	GuiControl, %  EnDis, % IdText1
+	GuiControl, %  EnDis, % IdTextInfo1
+	GuiControl, %  EnDis, % IdEdit1
+	GuiControl, %  EnDis, % IdGroupBox1
+	GuiControl, %  EnDis, % IdCheckBox1
+	GuiControl, %  EnDis, % IdTextInfo2
+	GuiControl, %  EnDis, % IdRadioCaseCC
+	GuiControl, %  EnDis, % IdRadioCaseCS
+	GuiControl, %  EnDis, % IdRadioCaseC1
+	GuiControl, %  EnDis, % IdTextInfo3
+	GuiControl, %  EnDis, % IdTextInfo5
+	GuiControl, %  EnDis, % IdTextInfo7
+	GuiControl, %  EnDis, % IdCheckBox3
+	GuiControl, %  EnDis, % IdCheckBox4
+	GuiControl, %  EnDis, % IdCheckBox5
+	GuiControl, %  EnDis, % IdTextInfo4
+	GuiControl, %  EnDis, % IdTextInfo6
+	GuiControl, %  EnDis, % IdTextInfo8
+	GuiControl, %  EnDis, % IdCheckBox8
+	GuiControl, %  EnDis, % IdTextInfo10
+	GuiControl, %  EnDis, % IdCheckBox6
+	GuiControl, %  EnDis, % IdTextInfo11
+	GuiControl, %  EnDis, % IdText3
+	GuiControl, %  EnDis, % IdTextInfo12
+	GuiControl, %  EnDis, % IdDDL1
+	GuiControl, %  EnDis, % IdText4
+	GuiControl, %  EnDis, % IdTextInfo13
+	GuiControl, %  EnDis, % IdEdit2
+	if (EnDis = "Disable")
+	{
+		GuiControlGet, PS_IdEdit3, Enabled, % IdEdit3
+		GuiControlGet, PS_IdEdit4, Enabled, % IdEdit4
+		GuiControlGet, PS_IdEdit5, Enabled, % IdEdit5
+		GuiControlGet, PS_IdEdit6, Enabled, % IdEdit6
+		GuiControlGet, PS_IdEdit7, Enabled, % IdEdit7
+		GuiControlGet, PS_IdEdit8, Enabled, % IdEdit8
+	}
+	if (EnDis = "Enable") and (PS_IdEdit3)	
+		GuiControl, % EnDis, % IdEdit3
+	if (EnDis = "Enable") and (PS_IdEdit4)	
+		GuiControl, % EnDis, % IdEdit4
+	if (EnDis = "Enable") and (PS_IdEdit5)
+		GuiControl, % EnDis, % IdEdit5
+	if (EnDis = "Enable") and (PS_IdEdit6)	
+		GuiControl, % EnDis, % IdEdit6
+	if (EnDis = "Enable") and (PS_IdEdit7)	
+		GuiControl, % EnDis, % IdEdit7
+	if (EnDis = "Enable") and (PS_IdEdit8)	
+		GuiControl, % EnDis, % IdEdit8
+	GuiControl, % EnDis, % IdText5
+	GuiControl, % EnDis, % IdTextInfo14
+	GuiControl, % EnDis, % IdEdit9
+	GuiControl, % EnDis, % IdText6
+	GuiControl, % EnDis, % IdTextInfo15
+	GuiControl, % EnDis, % IdButton1
+	GuiControl, % EnDis, % IdDDL2
+	GuiControl, % EnDis, % IdButton2
+	GuiControl, % EnDis, % IdButton3
+	GuiControl, % EnDis, % IdButton4
+	GuiControl, % EnDis, % IdButton5
+	GuiControl, % EnDis, % IdText7
+	GuiControl, % EnDis, % IdTextInfo16
+	GuiControl, % EnDis, % IdText2
+	GuiControl, % EnDis, % IdText12
+	GuiControl, % EnDis, % IdText9
+	GuiControl, % EnDis, % IdListView1
+	GuiControl, % EnDis, % IdText10
+	GuiControl, % EnDis, % IdTextInfo17
+	GuiControl, % EnDis, % IdEdit10
+	GuiControl, % EnDis, % IdText11
+	GuiControl, % EnDis, % IdText13
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_GuiMain_CreateObject()
@@ -12829,6 +12867,8 @@ F_SendIsOflag(OutputString, Oflag, SendFunctionName)
 	global	;assume-global mode of operation
 
 	SetKeyDelay, -1, -1	;Delay = -1, PressDuration = -1, -1: no delay at all; this can be necessary if SendInput is reduced to SendEvent (in case low level input hook is active in another script)
+	; OutputDebug, % "A_SendLevel:" . A_Tab . A_SendLevel . "`n"
+	SendLevel, 2
 	Switch SendFunctionName
 	{
 		Case "SendInput":
@@ -12836,7 +12876,7 @@ F_SendIsOflag(OutputString, Oflag, SendFunctionName)
 			if (Oflag = false)
 			{
 				SendInput, % OutputString . A_EndChar
-				OutputDebug, % "Finished SendInput" . "`n"
+				; OutputDebug, % "Finished SendInput" . "`n"
 			}
 			else
 				SendInput, % OutputString
@@ -12861,7 +12901,6 @@ F_SendIsOflag(OutputString, Oflag, SendFunctionName)
 F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendInput
 {
 	global	;assume-global mode of operation
-	local	key := 0, value := ""
 
 	Critical, On
 	; OutputDebug, % A_ThisFunc . "`n"
@@ -12872,25 +12911,28 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 ,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
  	F_SendIsOflag(ReplacementString, Oflag, "SendInput")
  	F_EventSigOrdHotstring()
+	++v_LogCounter
+	v_CntCumGain += F_DetermineGain(v_Triggerstring)
 	if (ini_THLog)
 	{
-		if (!ini_Gain)
-			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-		else
-		{
-			for key, value in a_Triggerstring
-				if (a_Triggerstring[key] == v_Triggerstring)
-					break
-			v_CntCumGain += a_Gain[key]
-			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . a_Gain[key] . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-		}
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . a_Gain[key] . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	}
 	Critical, Off	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_DetermineGain(v_Triggerstring)
+{
+	global	;assume-global mode of operation
+	local	key := 0, value := ""
+	for key, value in a_Triggerstring
+	if (a_Triggerstring[key] == v_Triggerstring)
+		break
+	return, a_Gain[key]
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeterminePartStrings(ReplacementString)
 {
-	global	;assume-global mode
+	global	;assume-global mode of operation
 	local	ThisHotkey := A_ThisHotkey	;This value will change if the current thread is interrupted by another hotkey, so be sure to copy it into another variable immediately if you need the original value for later use in a subroutine.
 	
 	v_Options 	 := SubStr(ThisHotkey, 1, InStr(ThisHotkey, ":", false, 1, 2))
