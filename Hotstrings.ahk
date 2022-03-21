@@ -308,7 +308,9 @@ Menu, AppSubmenu,		Add
 Menu, SubmenuLog,		Add,	% TransA["enable"],												F_MenuLogEnDis
 Menu, SubmenuLog,		Add, % TransA["disable"],											F_MenuLogEnDis
 Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],								:SubmenuLog	
-Menu, AppSubmenu,		add, % TransA["Open folder where log files are located"], 					F_OpenLogFolder
+Menu, AppSubmenu,		Add, % TransA["Open folder where log files are located"], 					F_OpenLogFolder
+Menu, AppSubmenu,		Add
+Menu, AppSubmenu,		Add, % "Application statistics",										F_AppStats
 
 Menu,	AboutHelpSub,	Add,	% TransA["Help: Hotstrings application"],							F_GuiAboutLink1
 Menu,	AboutHelpSub,	Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"], 				F_GuiAboutLink2
@@ -552,7 +554,7 @@ Critical, Off
 	Up::
 	Down::
 		; OutputDebug, % "WinActive(ahk_id TT_C4_Hwnd)" . "`n"
-		F_TTMenuStatic_Keyboard(CheckPreviousWindowID := true)
+		F_StaticMenu_Keyboard(CheckPreviousWindowID := true)
 		return
 #if
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -572,7 +574,7 @@ Critical, Off
 	~^Up::		;valid only for Triggerstring Menu
 	~Down::
 	~^Down::		;valid only for Triggerstring Menu
-		F_TTMenuStatic_Keyboard()
+		F_StaticMenu_Keyboard()
 		return
 	~Esc::	;tilde in order to run function TT_C4GuiEscape
 		GuiControl,, % IdTT_C4_LB4, |
@@ -593,6 +595,19 @@ Critical, Off
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_AppStats()
+{
+	global	;assume-global mode of operation
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "Application statistics" . ":" . "`n`n"
+		. "Start-up time" . A_Tab . A_Tab . A_Tab . AppStartTime . "`n"
+		. "Current time"  . A_Tab . A_Tab . A_Tab . A_Hour . ":" . A_Min . ":" . A_Sec . "`n"
+		. "`n`n"
+		. "Number of loaded d(t, o, h)" . A_Tab . A_Tab . v_TotalHotstringCnt . "`n"
+		. "Number of fired hotstrings"  . A_Tab . A_Tab . v_LogCounter . "`n" 
+		. "Cumulative gain" . A_Tab . A_Tab . A_Tab . v_CntCumGain . "`n"
+		. "Logging of d(t, o, h)" . A_Tab . A_Tab . (ini_THLog ? "yes" : "no")
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ToggleTt()
 {
 	global	;assume-global mode of operation
@@ -664,14 +679,14 @@ F_Tt_HWT()	;Tt_HWT = Tooltip_Hostring Was Triggered
 	Gui, Tt_HWT: Add, Listbox, 	% "HwndIdTt_HWT_LB1" . A_Space . "r1" . A_Space . "x" . OutputVarTempX . A_Space . "y" . OutputVarTempX . A_Space . "w" . OutputVarTempW + 4, % TempText
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TTMenuStatic_Keyboard(IsPreviousWindowIDvital*)
+F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 {
 	global	;assume-global mode of operation
 	local	v_PressedKey := A_ThisHotkey,	v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", OutputVar1 := "", OutputVar2 := ""
 ,			NoPosInList := 0, Temp2 := "", WhichLB := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 
-	OutputDebug, % "F_TTMenuStatic_Keyboard" . A_Tab . "v_PressedKey:" . A_Tab . v_PressedKey . "`n"
+	OutputDebug, % "F_StaticMenu_Keyboard" . A_Tab . "v_PressedKey:" . A_Tab . v_PressedKey . "`n"
 	GuiControlGet, OutputVar1, , % IdTT_C4_LB1	;Retrieves the contents of the control to check if static window contains any information: triggerstring tips
 	GuiControlGet, OutputVar2, , % IdTT_C4_LB4	;Retrieves the contents of the control to check if static window contains any information: hotstrings
 	OutputDebug, % "OutputVar1:" . A_Tab . OutputVar1 . A_Tab . "OutputVar2:" . A_Tab . OutputVar2 . "`n"
@@ -761,8 +776,8 @@ F_TTMenuStatic_Keyboard(IsPreviousWindowIDvital*)
 	if (InStr(v_PressedKey, "Enter")) or (InStr(v_PressedKey, "^Enter"))
 	{
 		v_PressedKey := IntCnt
-		IsCursorPressed := false
-		IntCnt := 1
+,		IsCursorPressed := false
+,		IntCnt := 1
 	}
 	if (v_PressedKey > NoPosInList)
 		return
@@ -818,8 +833,18 @@ F_TTMenuStatic_Keyboard(IsPreviousWindowIDvital*)
 			GuiControl,, % IdTT_C4_LB4, |
 			if (ini_MHSEn)
 				SoundBeep, % ini_MHSF, % ini_MHSD	
+
+			++v_LogCounter	;tu jestem
+			temp := F_DetermineGain(a_Triggerstring, v_Triggerstring, v_PressedKey)
+			v_CntCumGain += temp
 			if (ini_THLog)
-				FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+			{
+				Switch WhichMenu
+				{
+					Case "SI":	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+					Case "CLI":	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCLI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+				}
+			}
 			v_InputH.VisibleText	:= true
 ,			v_InputString 			:= ""	
 	}
@@ -828,10 +853,10 @@ F_TTMenuStatic_Keyboard(IsPreviousWindowIDvital*)
 F_HMenuSI_Keyboard()
 {
 	global	;assume-global moee
-	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", key := 0, value := ""
+	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", temp := 0
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	
-;	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_TTMenuStatic_Keyboard it was crucial for ControlSend to run correctly
+;	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_StaticMenu_Keyboard it was crucial for ControlSend to run correctly
 	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -895,19 +920,11 @@ F_HMenuSI_Keyboard()
 	Gui, HMenuAHK: Destroy
 	if (ini_MHSEn)
 		SoundBeep, % ini_MHSF, % ini_MHSD	
+	++v_LogCounter
+	temp := F_DetermineGain(a_Triggerstring, v_Triggerstring, v_PressedKey)
+	v_CntCumGain += temp
 	if (ini_THLog)
-	{
-		if (!ini_Gain)
-			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . "`n", % v_LogFileName
-		else
-		{
-			for key, value in a_Triggerstring
-				if (a_Triggerstring[key] == v_Triggerstring)
-					break
-			v_CntCumGain += a_Gain[key][v_PressedKey]
-			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . a_Gain[key][v_PressedKey] . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-		}
-	}
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_MouseMouse is lower than this "interrupt"
@@ -940,10 +957,10 @@ F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_MouseMouse is lower than this
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HMenuCLI_Keyboard()
 {
-	global	;assume-global moee
-	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",	ShiftTabIsFound := false, ReplacementString := ""
+	global	;assume-global mode of operation
+	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",	ShiftTabIsFound := false, ReplacementString := "", temp := 0
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
-;	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_TTMenuStatic_Keyboard it was crucial for ControlSend to run correctly
+;	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_StaticMenu_Keyboard it was crucial for ControlSend to run correctly
 	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -1007,19 +1024,11 @@ F_HMenuCLI_Keyboard()
 	Gui, HMenuCli: Destroy
 	if (ini_MHSEn)
 		SoundBeep, % ini_MHSF, % ini_MHSD
+	++v_LogCounter
+	temp := F_DetermineGain(a_Triggerstring, v_Triggerstring, v_PressedKey)
+	v_CntCumGain += temp
 	if (ini_THLog)
-	{
-		if (!ini_Gain)
-			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MCL" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . "`n", % v_LogFileName
-		else
-		{
-			for key, value in a_Triggerstring
-				if (a_Triggerstring[key] == v_Triggerstring)
-					break
-			v_CntCumGain += a_Gain[key][v_PressedKey]
-			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MCL" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . a_Gain[key][v_PressedKey] . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-		}
-	}
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCL" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	; OutputDebug, % "End of F_HMenuCLI_Keyboard:" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2502,11 +2511,7 @@ F_MenuLogEnDis()
 	{	
 		v_LogFileName := % HADLog . "\" . A_YYYY . A_MM . A_DD . "_" . "HotstringsLog" . ".txt"
 		v_LogCounter := 0
-		if (!ini_Gain)
-			FileAppend, % "-----------------------------------------------------------------------------------------------------------------------------" . "`n" 
-			. "hh:mm:ss" . "|" . "hotstring counter" . "|" . "entered triggerstring" . "|" . "trigger" . "|" . "triggerstring options" . "|" . "hotstring" . "|" . "`n", % v_LogFileName, UTF-8
-		else
-			FileAppend, % "-----------------------------------------------------------------------------------------------------------------------------" . "`n" 
+		FileAppend, % "-----------------------------------------------------------------------------------------------------------------------------" . "`n" 
 			. "hh:mm:ss" . "|" . "hotstring counter" . "|" . "entered triggerstring" . "|" . "trigger" . "|" . "triggerstring options" . "|" . "hotstring" . "|" . "gain" . "|" . "cumulative gain" . "|" . "`n", % v_LogFileName, UTF-8
 	}
 }
@@ -2517,7 +2522,7 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0
 
-	; SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_TTMenuStatic_Keyboard it was crucial for ControlSend to run correctly
+	; SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_StaticMenu_Keyboard it was crucial for ControlSend to run correctly
 	if (!ini_ATEn)
 		return
 	v_MenuMax := a_Tips.Count()
@@ -2713,14 +2718,6 @@ F_LoadConfiguration()
 	{
 		ini_THLog 			:= false
 		IniWrite, % ini_THLog, % ini_HADConfig, Configuration, THLog
-	}
-
-	ini_Gain					:= true
-	IniRead, ini_Gain, 						% ini_HADConfig, Configuration, Gain, 			% A_Space
-	if (ini_Gain = "")			;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-	{
-		ini_Gain 				:= true
-		IniWrite, % ini_Gain, % ini_HADConfig, Configuration, Gain
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7794,7 +7791,14 @@ F_AddHotstring()
 					. TransA["Do you want to proceed?"] . "`n`n" . TransA["If you answer ""No"" edition of the current definition will be interrupted."]
 					. "`n" . TransA["If you answer ""Yes"" definition existing in another library will not be changed."]
 				IfMsgBox, No
+				{
+					Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
+					{
+						Case "HS3":	F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
+						Case "HS4": 	F_GuiHS4_EnDis("Enable")
+					}
 					return
+				}
 			}
 		}
 	}
@@ -7860,7 +7864,6 @@ F_AddHotstring()
 	GuiControl, , % IdText12,  % v_TotalHotstringCnt
 	GuiControl, , % IdText12b, % v_TotalHotstringCnt
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring added to the file"] . A_Space . v_SelectHotstringLibrary . "!" 
-
 	Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
 	{
 		Case "HS3":	F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
@@ -10073,7 +10076,6 @@ HK_ToggleTt=none
 THLog=0
 HADConfig=
 HADL=
-Gain=1
 [EvStyle_TT]
 TTBackgroundColor=white
 TTBackgroundColorCustom=
@@ -11145,8 +11147,7 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 				Case 6:	a_Comment.Push(A_LoopField)
 			}
 		}
-		if (ini_Gain)
-			a_Gain.Push(F_CalculateGain(Triggerstring, Hotstring, options))
+		a_Gain.Push(F_CalculateGain(Triggerstring, Hotstring, options))
 		++v_TotalHotstringCnt
 		a_Library.Push(name) ; function Search
 	}	
@@ -12816,7 +12817,8 @@ F_PrepareUndo(string)
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 {
-	global	;assume-global mode
+	global	;assume-global mode of operation
+	local	temp := 0
 	Critical, On
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
@@ -12825,14 +12827,18 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 ,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendEvent")
 	F_EventSigOrdHotstring()
+	++v_LogCounter
+	temp := F_DetermineGain(a_Triggerstring, v_Triggerstring)
+	v_CntCumGain += temp
 	if (ini_THLog)
-		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec  . "|" . ++v_LogCounter . "|" . "SE" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SE" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 {
-	global	;assume-global mode
+	global	;assume-global mode of operation
+	local	temp := 0
 	Critical, On
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
@@ -12841,14 +12847,18 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 ,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendPlay")
 	F_EventSigOrdHotstring()
+	++v_LogCounter
+	temp := F_DetermineGain(a_Triggerstring, v_Triggerstring)
+	v_CntCumGain += temp
 	if (ini_THLog)
-		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SP" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SP" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 {
-	global	;assume-global mode
+	global	;assume-global mode of operation
+	local	temp := 0
 	Critical, On
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
@@ -12857,8 +12867,11 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 ,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_SendIsOflag(ReplacementString, Oflag, "SendRaw")
 	F_EventSigOrdHotstring()
+	++v_LogCounter
+	temp := F_DetermineGain(a_Triggerstring, v_Triggerstring)
+	v_CntCumGain += temp
 	if (ini_THLog)
-		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SR" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SR" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12868,7 +12881,7 @@ F_SendIsOflag(OutputString, Oflag, SendFunctionName)
 
 	SetKeyDelay, -1, -1	;Delay = -1, PressDuration = -1, -1: no delay at all; this can be necessary if SendInput is reduced to SendEvent (in case low level input hook is active in another script)
 	; OutputDebug, % "A_SendLevel:" . A_Tab . A_SendLevel . "`n"
-	SendLevel, 2
+	SendLevel, 1	;1 > 0 (default used by other AutoHotkey scripts running concurrently) but < 2 (backtrigger of this script)
 	Switch SendFunctionName
 	{
 		Case "SendInput":
@@ -12901,6 +12914,7 @@ F_SendIsOflag(OutputString, Oflag, SendFunctionName)
 F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendInput
 {
 	global	;assume-global mode of operation
+	local	temp := 0
 
 	Critical, On
 	; OutputDebug, % A_ThisFunc . "`n"
@@ -12912,22 +12926,29 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
  	F_SendIsOflag(ReplacementString, Oflag, "SendInput")
  	F_EventSigOrdHotstring()
 	++v_LogCounter
-	v_CntCumGain += F_DetermineGain(v_Triggerstring)
+	temp := F_DetermineGain(a_Triggerstring, v_Triggerstring)
+	v_CntCumGain += temp
 	if (ini_THLog)
-	{
-		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . a_Gain[key] . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-	}
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	Critical, Off	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_DetermineGain(v_Triggerstring)
+F_DetermineGain(a_Triggerstring, v_Triggerstring, Parameter*)
 {
 	global	;assume-global mode of operation
 	local	key := 0, value := ""
-	for key, value in a_Triggerstring
-	if (a_Triggerstring[key] == v_Triggerstring)
-		break
-	return, a_Gain[key]
+	if (!Parameter[1])
+	{
+		for key, value in a_Triggerstring
+			if (a_Triggerstring[key] == v_Triggerstring)
+				return, a_Gain[key]
+	}
+	else
+	{
+		for key, value in a_Triggerstring
+			if (a_Triggerstring[key] == v_Triggerstring)
+				return, a_Gain[key][Parameter[1]]
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeterminePartStrings(ReplacementString)
@@ -12994,7 +13015,7 @@ F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clip
 {
 	global	;assume-global mode
 	Critical, On
-	local oWord := "", ThisHotkey := A_ThisHotkey, vFirstLetter1 := "", vFirstLetter2 := "", vOutputVar := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, key := 0, value := ""
+	local oWord := "", ThisHotkey := A_ThisHotkey, vFirstLetter1 := "", vFirstLetter2 := "", vOutputVar := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, temp := 0
 		, fFirstLetterCap := false, InputString := ""
 	; OutputDebug, % A_ThisFunc . "`n"
 	F_DestroyTriggerstringTips(ini_TTCn)
@@ -13004,26 +13025,18 @@ F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clip
 ,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
 	F_ClipboardPaste(ReplacementString, Oflag)
 	F_EventSigOrdHotstring()
+	++v_LogCounter
+	temp := F_DetermineGain(a_Triggerstring, v_Triggerstring)
+	v_CntCumGain += temp
 	if (ini_THLog)
-	{
-		if (!ini_Gain)
-			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "CLI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
-		else
-		{
-			for key, value in a_Triggerstring
-				if (a_Triggerstring[key] == v_Triggerstring)
-					break
-			v_CntCumGain += a_Gain[key]
-			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "CLI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . a_Gain[key] . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-		}
-	}
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "CLI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenu_MCLI() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
-	local	OutputVarTemp := "", key := 0, value := "", ChoicePos := 0
+	local	OutputVarTemp := "", temp := 0, ChoicePos := 0
 	if (A_PriorKey = "LButton")
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuCli
@@ -13037,19 +13050,11 @@ F_MouseMenu_MCLI() ;The subroutine may consult the following built-in variables:
 		F_ClipboardPaste(ReplacementString, Ovar)
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
+		++v_LogCounter
+		temp := F_DetermineGain(a_Triggerstring, v_Triggerstring, ChoicePos)
+		v_CntCumGain += temp
 		if (ini_THLog)
-		{
-			if (!ini_Gain)
-				FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MCLI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . OutputVarTemp . "|" . "`n", % v_LogFileName
-			else
-			{
-				for key, value in a_Triggerstring
-					if (a_Triggerstring[key] == v_Triggerstring)
-						break
-				v_CntCumGain += a_Gain[key][ChoicePos]
-				FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MCLI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . OutputVarTemp . "|" . a_Gain[key][ChoicePos] . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-			}
-		}
+			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCLI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 		v_InputString 			:= ""	
 ,		v_InputH.VisibleText 	:= true
 	}
@@ -13106,8 +13111,8 @@ F_HOF_MCLI(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clip
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenu_MSI() ; Handling of mouse events for F_HOF_MSI;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {	
-	global	;assume-global mode
-	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0, key := 0, value := ""
+	global	;assume-global mode of operation
+	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0, temp := 0
 	if (A_PriorKey = "LButton")
 	{
 		MouseGetPos, , , , OutputVarControl			;to store the name (ClassNN) of the control under the mouse cursor
@@ -13124,19 +13129,11 @@ F_MouseMenu_MSI() ; Handling of mouse events for F_HOF_MSI;The subroutine may co
 		F_SendIsOflag(OutputVarTemp, Ovar, "SendInput")
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
+		++v_LogCounter
+		temp := F_DetermineGain(a_Triggerstring, v_Triggerstring, ChoicePos)
+		v_CntCumGain += temp
 		if (ini_THLog)
-		{
-			if (!ini_Gain)
-				FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . OutputVarTemp . "|" . "`n", % v_LogFileName
-			else
-			{
-				for key, value in a_Triggerstring
-					if (a_Triggerstring[key] == v_Triggerstring)
-						break
-				v_CntCumGain += a_Gain[key][ChoicePos]
-				FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . OutputVarTemp . "|" . a_Gain[key][ChoicePos] . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-			}
-		}
+			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 		v_InputString 			:= ""	
 ,		v_InputH.VisibleText 	:= true
 	}
@@ -13232,8 +13229,8 @@ F_TTMenuStatic_Mouse() ;The subroutine may consult the following built-in variab
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid if static triggerstring / hotstring menus GUI is available. "Combined" because it chooses between "MSI" and "MCLI".
 {
-	global	;assume-global mode
-	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0
+	global	;assume-global mode of operation
+	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0, temp := 0
 	if (A_PriorKey = "LButton")
 	{
 		MouseGetPos, , , , OutputVarControl			;to store the name (ClassNN) of the control under the mouse cursor
@@ -13255,10 +13252,13 @@ F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid i
 		}
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
+		++v_LogCounter
+		temp := F_DetermineGain(a_Triggerstring, v_Triggerstring, ChoicePos)
+		v_CntCumGain += temp
 		if (ini_THLog)
-			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . "`n", % v_LogFileName
+			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MSI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName			
 		v_InputString 			:= ""	
-		v_InputH.VisibleText 	:= true
+,		v_InputH.VisibleText 	:= true
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
