@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -311,7 +311,7 @@ Menu, SubmenuLog,		Add, % TransA["disable"],											F_MenuLogEnDis
 Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],								:SubmenuLog	
 Menu, AppSubmenu,		Add, % TransA["Open folder where log files are located"], 					F_OpenLogFolder
 Menu, AppSubmenu,		Add
-Menu, AppSubmenu,		Add, % "Application statistics",										F_AppStats
+Menu, AppSubmenu,		Add, % TransA["Application statistics"],								F_AppStats
 
 Menu,	AboutHelpSub,	Add,	% TransA["Help: Hotstrings application"],							F_GuiAboutLink1
 Menu,	AboutHelpSub,	Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"], 				F_GuiAboutLink2
@@ -344,7 +344,7 @@ if (ini_TTCn = 4)	;static triggerstring / hotstring GUI
 if (ini_GuiReload) and (v_Param != "l")
 	F_GUIinit()
 
-AppStartTime := A_Hour . ":" . A_Min . ":" . A_Sec
+AppStartTime := A_YYYY . "-" . A_MM . "-" . A_DD . A_Space . A_Hour . ":" . A_Min . ":" . A_Sec
 Critical, Off
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
 #if WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd) or WinExist("ahk_id" TT_C4_Hwnd)
@@ -599,53 +599,21 @@ Critical, Off
 F_AppStats()
 {
 	global	;assume-global mode of operation
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "Application statistics" . ":" . "`n`n"
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Application statistics"] . ":" . "`n`n"
 		. "Start-up time" . A_Tab . A_Tab . A_Tab . AppStartTime . "`n"
-		. "Current time"  . A_Tab . A_Tab . A_Tab . A_Hour . ":" . A_Min . ":" . A_Sec . "`n"
+		. "Current time"  . A_Tab . A_Tab . A_Tab . A_YYYY . "-" . A_MM . "-" . A_DD . A_Space . A_Hour . ":" . A_Min . ":" . A_Sec . "`n"
 		. "`n`n"
 		. "Number of loaded d(t, o, h)" . A_Tab . A_Tab . v_TotalHotstringCnt . "`n"
 		. "Number of fired hotstrings"  . A_Tab . A_Tab . v_LogCounter . "`n" 
-		. "Cumulative gain" . A_Tab . A_Tab . A_Tab . v_CntCumGain . "`n"
+		. "Cumulative gain [characters]" . A_Tab . A_Tab . A_Tab . v_CntCumGain . "`n"
 		. "Logging of d(t, o, h)" . A_Tab . A_Tab . (ini_THLog ? "yes" : "no")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ToggleTt()
 {
 	global	;assume-global mode of operation
-
 	ini_TTTtEn := !ini_TTTtEn
-	if (ini_HK_ToggleTt = "CapsLock")	;without tilde, works as ordinary toggle key, but no LED light signalling (unfortunately)
-		SetCapsLockState, AlwaysOff
-	if (InStr(ini_HK_ToggleTt, "CapsLock")) and (InStr(ini_HK_ToggleTt, "~"))
-	{
-		if (ini_TTTtEn)
-			SetCapsLockState, On
-		else	
-			SetCapsLockState, Off
-		return
-	}
-
-	if (ini_HK_ToggleTt = "ScrollLock")
-		SetScrollLockState, AlwaysOff
-	if InStr(ini_HK_ToggleTt, "ScrollLock") and InStr(ini_HK_ToggleTt, "~")
-	{
-		if (ini_TTTtEn)
-			SetScrollLockState, On
-		else	
-			SetScrollLockState, Off
-		return
-	}
-
-	if (ini_HK_ToggleTt = "NumLock")
-		SetNumLockState, AlwaysOff
-	if InStr(ini_HK_ToggleTt, "NumLock") and InStr(ini_HK_ToggleTt, "~")
-	{
-		if (ini_TTTtEn)
-			SetNumLockState, On
-		else
-			SetNumLockState, Off
-		return
-	}
+	F_UpdateStateOfLockKeys(ini_HK_ToggleTt, ini_TTTtEn)	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Tt_ULH()
@@ -2173,6 +2141,7 @@ F_InitiateTrayMenus(v_Param)
 			Menu, Tray, Add,		% TransA["Suspend Hotkeys"],							F_TraySuspendHotkeys
 			Menu, Tray, Add,		% TransA["Pause application"],						F_TrayPauseScript
 			Menu  Tray, Add,		% TransA["Exit application"],							F_TrayExit
+			Menu, Tray, Add, 		% TransA["Application statistics"],					F_AppStats
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6525,7 +6494,7 @@ F_VerUpdDownload()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_VerUpdCheckServ(param*)	
+F_VerUpdCheckServ(param*)
 {
 	global	;assume-global mode
 	local	whr := "", URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk", ToBeFiltered := "", ServerVer := "", StartingPos := 0
@@ -6809,12 +6778,12 @@ F_GuiShortDef_CreateObjects()
 			GuiControl +g, % IdShortDefT4, % F_HK_UndoInfo
 			a_WhichKeys := F_GuiShortDef_WhichModifier("ToggleTt")
 	}
-	IfWinModifier 	:= a_WhichKeys[1]
-, 	IfTildeModifer := a_WhichKeys[2]
-, 	IfCapsLock 	:= a_WhichKeys[3]
-, 	IfScrollLock 	:= a_WhichKeys[4]
-,	IfNumLock		:= a_WhichKeys[5]
-, 	HotkeyVar 	:= a_WhichKeys[6]
+	IfWinModifier 	 := a_WhichKeys[1]
+, 	IfTildeModifier := a_WhichKeys[2]
+, 	IfCapsLock 	 := a_WhichKeys[3]
+, 	IfScrollLock 	 := a_WhichKeys[4]
+,	IfNumLock		 := a_WhichKeys[5]
+, 	HotkeyVar 	 := a_WhichKeys[6]
 	
 	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT5,										% TransA["New shortcut (hotkey)"] . ":"
 	Gui, ShortDef: Font, 	% "s" . c_FontSize + 2 . A_Space . "cBlue",								% c_FontType
@@ -6910,6 +6879,8 @@ F_ShortDefB2_RestoreHotkey()
 				Hotkey, % OldHotkey, F_ToggleTt, Off
 			ini_HK_ToggleTt := "none"
 			GuiControl,, % IdShortDefT3, % F_ParseHotkey(ini_HK_ToggleTt, "space")
+			GuiControl,, % IdShortDefCB1, 0
+			GuiControl,, % IdShortDefCB2, 0
 			GuiControl,, % IdShortDefCB3, 0
 			GuiControl,, % IdShortDefCB4, 0
 			GuiControl,, % IdShortDefCB5, 0
@@ -7045,13 +7016,46 @@ F_ShortDefB1_SaveHotkey()
 			if (OldHotkey != "none")
 				Hotkey, % OldHotkey, F_ToggleTt, Off
 			if (ini_HK_ToggleTt != "none")
-				Hotkey, % ini_HK_Main, F_ToggleTt, On
+			{
+				Hotkey, % ini_HK_ToggleTt, F_ToggleTt, On
+				F_UpdateStateOfLockKeys(ini_HK_ToggleTt, ini_TTTtEn)
+				Switch ini_HK_ToggleTt
+				{
+					Case "ScrollLock":	SetScrollLockState, AlwaysOff
+					Case "CapsLock":	SetCapsLockState, 	AlwaysOff
+					Case "NumLock":	SetNumLockState, 	AlwaysOff
+				}
+			}
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_UpdateStateOfLockKeys(ini_HK_ToggleTt, ini_TTTtEn)
+{
+	Switch ini_HK_ToggleTt
+	{
+		Case "~ScrollLock":
+			if (ini_TTTtEn)
+				SetScrollLockState, On
+			else	
+				SetScrollLockState, Off
+
+		Case "~CapsLock":
+			if (ini_TTTtEn)
+				SetCapsLockState, On
+			else	
+				SetCapsLockState, Off
+
+		Case "~NumLock":
+			if (ini_TTTtEn)
+				SetNumLockState, On
+			else	
+				SetNumLockState, Off
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiShortDef()
 {
-	global	;assume-global mode
+	global	;assume-global mode of operation
 	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
@@ -10579,6 +10583,7 @@ Application											= A&pplication
 Application help										= Application help
 Application language changed to: 							= Application language changed to:
 Application mode										= Application mode
+Application statistics									= Application statistics
 Apply												= &Apply
 aqua													= aqua
 Are you sure?											= Are you sure?
@@ -12881,7 +12886,6 @@ F_SendIsOflag(OutputString, Oflag, SendFunctionName)
 
 	SetKeyDelay, -1, -1	;Delay = -1, PressDuration = -1, -1: no delay at all; this can be necessary if SendInput is reduced to SendEvent (in case low level input hook is active in another script)
 	; OutputDebug, % "A_SendLevel:" . A_Tab . A_SendLevel . "`n"
-	SendLevel, 1	;1 > 0 (default used by other AutoHotkey scripts running concurrently) but < 2 (backtrigger of this script)
 	Switch SendFunctionName
 	{
 		Case "SendInput":
