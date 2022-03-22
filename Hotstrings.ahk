@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -37,6 +37,7 @@ FileInstall, LICENSE, LICENSE, 0
 ; - - - - - - - - - - - - - - - - - - - - - - - S E C T I O N    O F    G L O B A L     V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l like "silent mode"
 ,		v_IndexLog 			:= 1			;for logging, if Hotstrings application is run with d parameter.
+,		v_LogCounter := 0
 ,		v_CntCumGain			:= 0			;for logging, Counter Cumulative Gain
 ,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time; f_ stands for "flag"
 ,		TT_C1_Hwnd 			:= 0 
@@ -1625,13 +1626,13 @@ F_OneCharPressed(ih, Char)
 	}
 
 	if (f_FoundEndChar)	;check if sequence fits to any known a_Tips, helpful to process triggerstrings containing endchar, e.g. "à la"
-		; {
-		; 	Loop, % a_Tips.Count()
-		; 		if (InStr(a_Tips[A_Index], v_InputString))
-		; 			f_FoundTip := true
-		; 	if (!f_FoundTip)
-		; 		v_InputString := ""
-		; }	
+		 {
+		 	Loop, % a_Tips.Count()
+		 		if (InStr(a_Tips[A_Index], v_InputString))
+		 			f_FoundTip := true
+		 	if (!f_FoundTip)
+		 		v_InputString := ""
+		 }	
 		return	
 	; Critical, Off
 }
@@ -2510,7 +2511,6 @@ F_MenuLogEnDis()
 	if (ini_THLog) ;If logging is enabled, prepare new folder and create file named as specified in the following pattern.
 	{	
 		v_LogFileName := % HADLog . "\" . A_YYYY . A_MM . A_DD . "_" . "HotstringsLog" . ".txt"
-		v_LogCounter := 0
 		FileAppend, % "-----------------------------------------------------------------------------------------------------------------------------" . "`n" 
 			. "hh:mm:ss" . "|" . "hotstring counter" . "|" . "entered triggerstring" . "|" . "trigger" . "|" . "triggerstring options" . "|" . "hotstring" . "|" . "gain" . "|" . "cumulative gain" . "|" . "`n", % v_LogFileName, UTF-8
 	}
@@ -6931,7 +6931,7 @@ F_InterpretNewDynHK(WhichHK)
 	GuiControlGet, vNumLock, , 	% IdShortDefCB5	;NumLock
 	GuiControlGet, WhichHotkey, , % IdShortDefH1		;hotkey edit field
 
-	if (WhichHotkey and vCapsLock) or (WhichHotkey and vScrollLock) of (WhichHotkey and vNumLock)
+	if (WhichHotkey and vCapsLock) or (WhichHotkey and vScrollLock) or (WhichHotkey and vNumLock)
 		MsgBox, 48, % SubStr(v_Triggerstring, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Sorry, it's not allowed to use ordinary hotkey combined with Caps Lock or Scroll Lock or Num Lock."]
 			. "`n"  . TransA["Please try again."]
 	if (WhichHotkey)
