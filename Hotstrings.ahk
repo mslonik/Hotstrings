@@ -2141,6 +2141,7 @@ F_InitiateTrayMenus(v_Param)
 			Menu, Tray, Add,		% TransA["Suspend Hotkeys"],							F_TraySuspendHotkeys
 			Menu, Tray, Add,		% TransA["Pause application"],						F_TrayPauseScript
 			Menu  Tray, Add,		% TransA["Exit application"],							F_TrayExit
+			Menu  Tray, Add										;line separator 
 			Menu, Tray, Add, 		% TransA["Application statistics"],					F_AppStats
 	}
 }
