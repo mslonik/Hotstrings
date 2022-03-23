@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -600,13 +600,13 @@ F_AppStats()
 {
 	global	;assume-global mode of operation
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Application statistics"] . ":" . "`n`n"
-		. "Start-up time" . A_Tab . A_Tab . A_Tab . AppStartTime . "`n"
-		. "Current time"  . A_Tab . A_Tab . A_Tab . A_YYYY . "-" . A_MM . "-" . A_DD . A_Space . A_Hour . ":" . A_Min . ":" . A_Sec . "`n"
+		. TransA["Start-up time"] . A_Tab . A_Tab . A_Tab . AppStartTime . "`n"
+		. TransA["Current time"]  . A_Tab . A_Tab . A_Tab . A_YYYY . "-" . A_MM . "-" . A_DD . A_Space . A_Hour . ":" . A_Min . ":" . A_Sec . "`n"
 		. "`n`n"
-		. "Number of loaded d(t, o, h)" . A_Tab . A_Tab . v_TotalHotstringCnt . "`n"
-		. "Number of fired hotstrings"  . A_Tab . A_Tab . v_LogCounter . "`n" 
-		. "Cumulative gain [characters]" . A_Tab . A_Tab . A_Tab . v_CntCumGain . "`n"
-		. "Logging of d(t, o, h)" . A_Tab . A_Tab . (ini_THLog ? "yes" : "no")
+		. TransA["Number of loaded d(t, o, h)"] . A_Tab . A_Tab . v_TotalHotstringCnt . "`n"
+		. TransA["Number of fired hotstrings"]  . A_Tab . A_Tab . v_LogCounter . "`n" 
+		. TransA["Cumulative gain [characters]"] . A_Tab . A_Tab . v_CntCumGain . "`n"
+		. TransA["Logging of d(t, o, h)"] . A_Tab . A_Tab . (ini_THLog ? TransA["yes"] : TransA["no"])
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ToggleTt()
@@ -652,7 +652,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 {
 	global	;assume-global mode of operation
 	local	v_PressedKey := A_ThisHotkey,	v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", OutputVar1 := "", OutputVar2 := ""
-,			NoPosInList := 0, Temp2 := "", WhichLB := ""
+,			NoPosInList := 0, Temp2 := "", WhichLB := "", temp := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 
 	OutputDebug, % "F_StaticMenu_Keyboard" . A_Tab . "v_PressedKey:" . A_Tab . v_PressedKey . "`n"
@@ -2137,12 +2137,12 @@ F_InitiateTrayMenus(v_Param)
 			Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],			F_ReloadApplication
 			Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],				F_ReloadApplication
 			Menu, Tray, Add,		% TransA["Reload"],									:SubmenuReload
+			Menu  Tray, Add										;line separator 
+			Menu, Tray, Add, 		% TransA["Application statistics"],					F_AppStats
 			Menu, Tray, Add										;line separator 
 			Menu, Tray, Add,		% TransA["Suspend Hotkeys"],							F_TraySuspendHotkeys
 			Menu, Tray, Add,		% TransA["Pause application"],						F_TrayPauseScript
 			Menu  Tray, Add,		% TransA["Exit application"],							F_TrayExit
-			Menu  Tray, Add										;line separator 
-			Menu, Tray, Add, 		% TransA["Application statistics"],					F_AppStats
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7830,7 +7830,9 @@ F_AddHotstring()
 		{
 			Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
 			{
-				Case "HS3":	F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
+				Case "HS3":	
+                         GuiControl, +Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
+                         F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
 				Case "HS4": 	F_GuiHS4_EnDis("Enable")
 			}
 			return
@@ -10650,11 +10652,13 @@ Conversion of .csv library file into new .ahk file containing static (triggerstr
 Conversion of .csv library file into new .ahk file containing dynamic (triggerstring, hotstring) definitions = Conversion of .csv library file into new .ahk file containing dynamic (triggerstring, hotstring) definitions
 Converted												= Converted
 Copy clipboard content into ""Enter hotstring""				= Copy clipboard content into ""Enter hotstring""
+Cumulative gain [characters]								= Cumulative gain [characters]
 Current Config.ini file location:							= Current Config.ini file location:
+(Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
 Current ""Libraries"" location:							= Current ""Libraries"" location:
 Current script / application location:						= Current script / application location:
 Current shortcut (hotkey):								= Current shortcut (hotkey):
-(Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
+Current time											= Current time
 cursor												= cursor
 custom												= custom
 Dark													= Dark
@@ -10783,6 +10787,7 @@ Loading hotstrings from libraries... 						= Loading hotstrings from libraries..
 Loading imported library. Please wait...					= Loading imported library. Please wait...
 Loaded												= Loaded
 Local version											= Local version
+Logging of d(t, o, h)									= Logging of d(t, o, h)
 Log triggered hotstrings									= Log triggered hotstrings
 maroon												= maroon
 Max. no. of shown tips									= Max. no. of shown tips
@@ -10811,6 +10816,8 @@ Now application must be restarted (into default mode) in order to apply settings
 Now application must be restarted (into default mode) in order to exit administrator mode. = Now application must be restarted (into default mode) in order to exit administrator mode.
 Now application must be restarted (into default mode) in order to reload libary files from new location. = Now application must be restarted (into default mode) in order to reload libary files from new location.
 Number of characters for tips 							= &Number of characters for tips
+Number of fired hotstrings								= Number of fired hotstrings
+Number of loaded d(t, o, h)								= Number of loaded d(t, o, h)
 of													= of
 OK													= &OK
 Old location:											= Old location:
@@ -10913,6 +10920,7 @@ Sorry, it's not allowed to use ordinary hotkey combined with Caps Lock or Scroll
 Space												= Space
 Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
 Standard executable (Ahk2Exe.exe)							= Standard executable (Ahk2Exe.exe)
+Start-up time											= Start-up time
 Static hotstrings 										= &Static hotstrings
 Static triggerstring / hotstring menus						= Static triggerstring / hotstring menus
 Style of GUI											= Style of GUI
@@ -11171,7 +11179,7 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_CalculateGain(Triggerstring, Hotstring, options)
 {
-	Gain := 0, CntUpper := 0, a_MultiGain := []
+	Gain := 0, CntUpper := 0, a_MultiGain := [], temp := "", LenHots := 0, LenTrig := 0, LenTotal := 0, CntSuppl := 0
 	if (options = "multi")	;multi definition of hotstring(s)
 	{
 		Loop, Parse, % Hotstring, "¦"
@@ -11188,12 +11196,48 @@ F_CalculateGain(Triggerstring, Hotstring, options)
 	}
 	else
 	{
-		Loop, Parse, % Hotstring
+		
+		if (InStr(Hotstring, "{Enter}", false))
+			Hotstring := StrReplace(Hotstring, "{Enter}", "", CntSuppl)
+		if (InStr(v_UndoHotstring, "``r``n"))
 		{
+			v_UndoHotstring := StrReplace(v_UndoHotstring, "``r``n", "", HowManyBackSpaces2)
+			HowManyBackSpaces += HowManyBackSpaces2 + 1
+		}
+		if (InStr(v_UndoHotstring, "``r"))
+		{
+			v_UndoHotstring := StrReplace(v_UndoHotstring, "``r", "", HowManyBackSpaces2)
+			HowManyBackSpaces += HowManyBackSpaces2
+		}
+		if (InStr(v_UndoHotstring, "``n"))
+		{
+			v_UndoHotstring := StrReplace(v_UndoHotstring, "``n", "", HowManyBackSpaces2)
+			HowManyBackSpaces += HowManyBackSpaces2
+		}
+		if (InStr(v_UndoHotstring, "``b"))
+		{
+			v_UndoHotstring := StrReplace(v_UndoHotstring, "``b", "", HowManyBackSpaces2)
+			HowManyBackSpaces += HowManyBackSpaces2
+		}
+		if (InStr(v_UndoHotstring, "``t"))
+		{
+			v_UndoHotstring := StrReplace(v_UndoHotstring, "``t", "", HowManyBackSpaces2)
+			HowManyBackSpaces += HowManyBackSpaces2
+		}
+		Hotstring	:= F_ReplaceAHKconstants(Hotstring)
+          Hotstring := F_PrepareUndo(Hotstring)
+	     Hotstring	:= RegExReplace(Hotstring, "{U+.*}", " ")
+
+		Loop, Parse, % Hotstring
+		{    
 			if A_LoopField is upper
 				CntUpper++
 		}
-	return, StrLen(Hotstring) - StrLen(Triggerstring) + CntUpper
+          LenHots := StrLen(Hotstring)
+          LenTrig := StrLen(Triggerstring)
+	     LenTotal := LenHots - LenTrig + CntUpper
+          return, LenTotal
+	     ; return, StrLen(Hotstring) - StrLen(Triggerstring) + CntUpper
 	}
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
