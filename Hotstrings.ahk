@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -7821,13 +7821,20 @@ F_AddHotstring()
 			F_SaveLVintoLibFile()
 			Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
 			{
-				Case "HS3":	F_GuiMain_EnDis("Enable")	
+				Case "HS3":	F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
 				Case "HS4": 	F_GuiHS4_EnDis("Enable")
 			}
 			return
 		}
 		if (Overwrite = "No")
+		{
+			Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
+			{
+				Case "HS3":	F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
+				Case "HS4": 	F_GuiHS4_EnDis("Enable")
+			}
 			return
+		}	
 	}
 
 	; 4. Create new definition
@@ -7949,7 +7956,8 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 		, % TransA["The triggerstring"] . A_Space . """" .  FoundTriggerstring . """" . A_Space .  TransA["exists in the currently selected library"] . ":" . A_Space . Library 
 		. ".csv" . "." . "`n`n" . TransA["Do you want to proceed?"]	. "`n`n" . TransA["If you answer ""Yes"" it will overwritten with chosen settings."]
 	IfMsgBox, No
-		return "No"
+		return, "No"
+
 	IfMsgBox, Yes
 	{
 		if (OnOff = "On")
@@ -7989,7 +7997,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			}
 		}
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["New settings are now applied."]
-		return "Yes"	
+		return, "Yes"	
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
