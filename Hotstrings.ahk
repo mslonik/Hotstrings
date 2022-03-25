@@ -174,20 +174,20 @@ Menu, StyleGUIsubm, Add, % TransA["Light (default)"],	F_StyleOfGUI
 Menu, StyleGUIsubm, Add, % TransA["Dark"],			F_StyleOfGUI
 F_StyleOfGUI()
 
-Menu, ConfGUI,		Add, % TransA["Save position of application window"], 	F_SaveGUIPos
-Menu, ConfGUI,		Add, % TransA["Change language"], 					:SubmenuLanguage
+Menu, ConfGUI,		Add, % TransA["Save position of application window"], 							F_SaveGUIPos
+Menu, ConfGUI,		Add, % TransA["Change language"], 											:SubmenuLanguage
 Menu, ConfGUI, 	Add	;To add a menu separator line, omit all three parameters.
-Menu, ConfGUI, 	Add, % TransA["Show Sandbox (F6)"], 				F_ToggleSandbox
+Menu, ConfGUI, 	Add, % TransA["Show Sandbox"] . "`tF6", 									F_ToggleSandbox
 if (ini_Sandbox)
-	Menu, ConfGUI, Check, 	% TransA["Show Sandbox (F6)"]
+	Menu, ConfGUI, Check, 	% TransA["Show Sandbox"] . "`tF6"
 else
-	Menu, ConfGUI, UnCheck, 	% TransA["Show Sandbox (F6)"]
+	Menu, ConfGUI, UnCheck, 	% TransA["Show Sandbox"] . "`tF6"
 
-Menu, ConfGUI,		Add, 	% TransA["Show full GUI (F4)"],				F_ToggleRightColumn
+Menu, ConfGUI,		Add, 	% TransA["Toggle main GUI"] . "`tF4",								F_ToggleRightColumn
 if (ini_WhichGui = "HS3")
-	Menu, ConfGUI, Check, 	% TransA["Show full GUI (F4)"]
+	Menu, ConfGUI, Check, 	% TransA["Toggle main GUI"] . "`tF4"
 else
-	Menu, ConfGUI, UnCheck, 	% TransA["Show full GUI (F4)"]
+	Menu, ConfGUI, UnCheck, 	% TransA["Toggle main GUI"] . "`tF4"
 
 Menu, ConfGUI, 	Add	;To add a menu separator line, omit all three parameters.
 Menu, ConfGUI,		Add, 	% TransA["Style of GUI"],										:StyleGUIsubm
@@ -213,10 +213,10 @@ Menu, FontTypeMenu, Add,		Verdana,														F_FontType
 Menu, FontTypeMenu, Check,	% c_FontType						
 Menu, ConfGUI,		Add, 	% TransA["Font type"],											:FontTypeMenu
 
-Menu, Submenu1Shortcuts, Add, % TransA["Call Graphical User Interface"],							F_GuiShortDef
-Menu, Submenu1Shortcuts, Add, % TransA["Copy clipboard content into ""Enter hotstring"""],			F_GuiShortDef
-Menu, Submenu1Shortcuts, Add, % TransA["Undo the last hotstring"],								F_GuiShortDef
-Menu, Submenu1Shortcuts, Add, % TransA["Toggle triggerstring tips"],								F_GuiShortDef
+Menu, Submenu1Shortcuts, Add, % TransA["Call Graphical User Interface"] 				. "`t" . F_ParseHotkey(ini_HK_Main),		F_GuiShortDef
+Menu, Submenu1Shortcuts, Add, % TransA["Copy clipboard content into ""Enter hotstring"""] . "`t" . F_ParseHotkey(ini_HK_IntoEdit), 	F_GuiShortDef
+Menu, Submenu1Shortcuts, Add, % TransA["Undo the last hotstring"] 					. "`t" . F_ParseHotkey(ini_HK_Main),		F_GuiShortDef
+Menu, Submenu1Shortcuts, Add, % TransA["Toggle triggerstring tips"] 					. "`t" . F_ParseHotkey(ini_HK_ToggleTt),	F_GuiShortDef
 Menu, Submenu1, 		Add, % TransA["Shortcut (hotkey) definitions"],							:Submenu1Shortcuts
 Menu, Submenu1, 		Add
 ;Warning: order of SubmenuEndChars have to be alphabetical. Keep an eye on it. This is because after change of language specific menu items are related with associative array which also keeps to alphabetical order.
@@ -294,7 +294,7 @@ Menu, SubmenuReload, 	Add,	% TransA["Reload in default mode"],								F_ReloadAp
 Menu, SubmenuReload, 	Add,	% TransA["Reload in silent mode"],									F_ReloadApplication
 Menu, AppSubmenu, 		Add,	% TransA["Reload"],												:SubmenuReload
 
-Menu, AppSubmenu,		Add, % TransA["Suspend Hotkeys"],										F_TraySuspendHotkeys
+Menu, AppSubmenu,		Add, % TransA["Suspend Hotkeys"] . "`tF10",								F_TraySuspendHotkeys
 Menu, AppSubmenu,		Add, % TransA["Pause"],												F_TrayPauseScript
 Menu, AppSubmenu,		Add, % TransA["Exit"],												F_Exit
 Menu, AppSubmenu,		Add	;To add a menu separator line, omit all three parameters.
@@ -313,8 +313,8 @@ Menu, AppSubmenu,		Add, % TransA["Open folder where log files are located"], 			
 Menu, AppSubmenu,		Add
 Menu, AppSubmenu,		Add, % TransA["Application statistics"],								F_AppStats
 
-Menu,	AboutHelpSub,	Add,	% TransA["Help: Hotstrings application"],							F_GuiAboutLink1
-Menu,	AboutHelpSub,	Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"], 				F_GuiAboutLink2
+Menu,	AboutHelpSub,	Add,	% TransA["Help: Hotstrings application"] . "`tF1",					F_GuiAboutLink1
+Menu,	AboutHelpSub,	Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"] . "`tCtrl+F1",	F_GuiAboutLink2
 Menu,	AboutHelpSub,	Add
 Menu,	AboutHelpSub,	Add,	% TransA["About this application..."],								F_GuiAbout
 Menu,	AboutHelpSub,	Add
@@ -344,7 +344,7 @@ if (ini_TTCn = 4)	;static triggerstring / hotstring GUI
 if (ini_GuiReload) and (v_Param != "l")
 	F_GUIinit()
 
-AppStartTime := A_YYYY . "-" . A_MM . "-" . A_DD . A_Space . A_Hour . ":" . A_Min . ":" . A_Sec
+AppStartTime := A_Now	;Date and time math can be performed with EnvAdd and EnvSub. Also, FormatTime can format the date and/or time according to your locale or preferences.
 Critical, Off
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
 #if WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd) or WinExist("ahk_id" TT_C4_Hwnd)
@@ -384,6 +384,10 @@ Critical, Off
 #if WinActive("ahk_id" HS3GuiHwnd) or WinActive("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows are active at the moment. 
 	F1::	;new thread starts here
 		F_GuiAboutLink1()
+		return
+
+	^F1:: ;new thread starts here
+		F_GuiAboutLink2()
 		return
 
 	F2:: ;new thread starts here
@@ -444,6 +448,10 @@ Critical, Off
 		F_WhichGui()
 		F_AddHotstring()
 		v_InputString := ""	;in order to reset internal recognizer and let triggerstring tips to appear
+		return
+	
+	F10:: ;new thread starts here
+		F_TraySuspendHotkeys()
 		return
 #if
 
@@ -599,13 +607,17 @@ Critical, Off
 F_AppStats()
 {
 	global	;assume-global mode of operation
+	local	TimeNow := A_Now, HowManyHours := TimeNow, HowManyMinutes := TimeNow
+	EnvSub, HowManyHours, 	% AppStartTime, Hours
+	EnvSub, HowManyMinutes, 	% AppStartTime, Minutes
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Application statistics"] . ":" . "`n`n"
-		. TransA["Start-up time"] . A_Tab . A_Tab . A_Tab . AppStartTime . "`n"
-		. TransA["Current time"]  . A_Tab . A_Tab . A_Tab . A_YYYY . "-" . A_MM . "-" . A_DD . A_Space . A_Hour . ":" . A_Min . ":" . A_Sec . "`n"
+		. TransA["Start-up time"] . A_Tab . A_Tab . A_Tab . SubStr(AppStartTime, 1, 4) . "-" . SubStr(AppStartTime, 5, 2) . "-" . SubStr(AppStartTime, 7, 2) . A_Space . SubStr(AppStartTime, 9, 2) . ":" . SubStr(AppStartTime, 11, 2) . "`n"
+		. TransA["Current time"]  . A_Tab . A_Tab . A_Tab . SubStr(TimeNow, 1, 4) . "-" . SubStr(TimeNow, 5, 2) . "-" . SubStr(TimeNow, 7, 2) . A_Space . SubStr(TimeNow, 9, 2) . ":" . SubStr(TimeNow, 11, 2) . "`n"
+		. TransA["Application has been running since"] . A_Tab . HowManyHours . A_Space . "[h]" . A_Space . TransA["or"] . A_Space . HowManyMinutes . A_Space . "[min.]"
 		. "`n`n"
 		. TransA["Number of loaded d(t, o, h)"] . A_Tab . A_Tab . v_TotalHotstringCnt . "`n"
 		. TransA["Number of fired hotstrings"]  . A_Tab . A_Tab . v_LogCounter . "`n" 
-		. TransA["Cumulative gain [characters]"] . A_Tab . A_Tab . v_CntCumGain . "`n"
+		. TransA["Cumulative gain [characters]"] . A_Tab . v_CntCumGain . "`n"
 		. TransA["Logging of d(t, o, h)"] . A_Tab . A_Tab . (ini_THLog ? TransA["yes"] : TransA["no"])
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1945,13 +1957,13 @@ F_TraySuspendHotkeys()
 	Suspend, Toggle
 	if (A_IsSuspended)
 	{
-		Menu, Tray, 		Check, 	% TransA["Suspend Hotkeys"]
-		Menu, AppSubmenu, 	Check, 	% TransA["Suspend Hotkeys"]
+		Menu, Tray, 		Check, 	% TransA["Suspend Hotkeys"] . "`tF10"
+		Menu, AppSubmenu, 	Check, 	% TransA["Suspend Hotkeys"] . "`tF10"
 	}
 	else
 	{
-		Menu, Tray, 		UnCheck, 	% TransA["Suspend Hotkeys"]
-		Menu, AppSubmenu,	UnCheck, 	% TransA["Suspend Hotkeys"]
+		Menu, Tray, 		UnCheck, 	% TransA["Suspend Hotkeys"] . "`tF10"
+		Menu, AppSubmenu,	UnCheck, 	% TransA["Suspend Hotkeys"] . "`tF10"
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2106,7 +2118,7 @@ F_InitiateTrayMenus(v_Param)
 		Menu, Tray, Default,	% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"]
 		Menu, Tray, Add, 		% TransA["Reload in default mode"], 	F_ReloadApplication	;it is possible to reload, but then application will be run in default mode of operation (opposit to silent mode)
 		Menu, Tray, Add										;line separator 
-		Menu, Tray, Add,		% TransA["Suspend Hotkeys"],			F_TraySuspendHotkeys
+		Menu, Tray, Add,		% TransA["Suspend Hotkeys"] . "`tF10",	F_TraySuspendHotkeys
 		Menu, Tray, Add,		% TransA["Pause application"],		F_TrayPauseScript
 		Menu  Tray, Add,		% TransA["Exit application"],			F_TrayExit		
 
@@ -2126,23 +2138,23 @@ F_InitiateTrayMenus(v_Param)
 					AppIcon := "*"
 			}
 			Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
-			Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Default mode"], F_GuiAbout
-			Menu, Tray, Add										;line separator 
-			Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 			F_GUIinit
+			Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Default mode"], 	F_GuiAbout
+			Menu, Tray, Add																	;line separator 
+			Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 										F_GUIinit
 			Menu, Tray, Default, 	% TransA["Edit Hotstrings"]
-			Menu, Tray, Add										;line separator 
-			Menu, Tray, Add,		% TransA["Help: Hotstrings application"],				F_GuiAboutLink1
-			Menu, Tray, Add,		% TransA["Help: AutoHotkey Hotstrings reference guide"], 	F_GuiAboutLink2
-			Menu, Tray, Add										;line separator 
-			Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],			F_ReloadApplication
-			Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],				F_ReloadApplication
-			Menu, Tray, Add,		% TransA["Reload"],									:SubmenuReload
-			Menu  Tray, Add										;line separator 
-			Menu, Tray, Add, 		% TransA["Application statistics"],					F_AppStats
-			Menu, Tray, Add										;line separator 
-			Menu, Tray, Add,		% TransA["Suspend Hotkeys"],							F_TraySuspendHotkeys
-			Menu, Tray, Add,		% TransA["Pause application"],						F_TrayPauseScript
-			Menu  Tray, Add,		% TransA["Exit application"],							F_TrayExit
+			Menu, Tray, Add																	;line separator 
+			Menu, Tray, Add,		% TransA["Help: Hotstrings application"] . "`tF1",					F_GuiAboutLink1
+			Menu, Tray, Add,		% TransA["Help: AutoHotkey Hotstrings reference guide"] . "`tCtrl+F1", 	F_GuiAboutLink2
+			Menu, Tray, Add																	;line separator 
+			Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],						F_ReloadApplication
+			Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],							F_ReloadApplication
+			Menu, Tray, Add,		% TransA["Reload"],												:SubmenuReload
+			Menu  Tray, Add																	;line separator 
+			Menu, Tray, Add, 		% TransA["Application statistics"],								F_AppStats
+			Menu, Tray, Add																	;line separator 
+			Menu, Tray, Add,		% TransA["Suspend Hotkeys"] . "`tF10",								F_TraySuspendHotkeys
+			Menu, Tray, Add,		% TransA["Pause application"],									F_TrayPauseScript
+			Menu  Tray, Add,		% TransA["Exit application"],										F_TrayExit
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9031,9 +9043,9 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 		ini_WhichGui := "HS3"
 	}
 	if (ini_WhichGui = "HS3")
-		Menu, ConfGUI, Check, 	% TransA["Show full GUI (F4)"]
+		Menu, ConfGUI, Check, 	% TransA["Toggle main GUI"] . "`tF4"
 	else
-		Menu, ConfGUI, UnCheck, % TransA["Show full GUI (F4)"]
+		Menu, ConfGUI, UnCheck, % TransA["Toggle main GUI"] . "`tF4"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS4GuiSize() ;Gui event
@@ -10029,7 +10041,7 @@ F_ToggleSandbox()
 {
 	global ;assume-global mode
 	
-	Menu, ConfGUI, ToggleCheck, % TransA["Show Sandbox (F6)"]
+	Menu, ConfGUI, ToggleCheck, % TransA["Show Sandbox"] . "`tF6"
 	ini_Sandbox := !(ini_Sandbox)
 	Iniwrite, %ini_Sandbox%, % ini_HADConfig, GraphicalUserInterface, Sandbox
 	
@@ -10591,6 +10603,7 @@ Alphabetically 										= Alphabetically
 already exists in another library							= already exists in another library
 Apostrophe ' 											= Apostrophe '
 Application											= A&pplication
+Application has been running since							= Application has been running since
 Application help										= Application help
 Application language changed to: 							= Application language changed to:
 Application mode										= Application mode
@@ -10831,6 +10844,7 @@ Open libraries folder in Explorer							= Open libraries folder in Explorer
 Opening Curly Bracket { 									= Opening Curly Bracket {
 Opening Round Bracket ( 									= Opening Round Bracket (
 Opening Square Bracket [ 								= Opening Square Bracket [
+or													= or
 question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
@@ -10888,11 +10902,10 @@ Set parameters of menu sound								= Set parameters of menu sound
 Set parameters of triggerstring sound						= Set parameters of triggerstring sound
 Shortcut (hotkey) definition								= Shortcut (hotkey) definition
 Shortcut (hotkey) definitions								= Shortcut (hotkey) definitions
-Show full GUI (F4)										= Show full GUI (F4)
 Show intro											= Show intro
 Show Introduction window after application is restarted?		= Show Introduction window after application is restarted?
-Show Sandbox (F6)										= Show Sandbox (F6)
-Events: signaling									= Events: signaling
+Show Sandbox											= Show Sandbox
+Events: signaling										= Events: signaling
 Silent mode											= Silent mode
 silver												= silver
 Size of font											= Size of font
@@ -10933,6 +10946,7 @@ Tab 													= Tab
 To move folder into ""Program Files"" folder you must allow admin privileges to ""Hotstrings"", which will restart to move its folder. = To move folder into ""Program Files"" folder you must allow admin privileges to ""Hotstrings"", which will restart to move its folder.
 teal													= teal
 Test styling											= Test styling
+Toggle main GUI										= Toggle main GUI
 The application										= The application
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
 The default											= The default
