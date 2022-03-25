@@ -2481,7 +2481,7 @@ F_MenuLogEnDis()
 	if (ini_THLog) ;If logging is enabled, prepare new folder and create file named as specified in the following pattern.
 	{	
 		v_LogFileName := % HADLog . "\" . A_YYYY . A_MM . A_DD . "_" . "HotstringsLog" . ".txt"
-		FileAppend, % "-----------------------------------------------------------------------------------------------------------------------------" . "`n" 
+		FileAppend, % "--------------------------------------------------------------------------------------------------------------" . "`n" ; amount of "-" characters as for mono typeface (Courier)
 			. "hh:mm:ss" . "|" . "hotstring counter" . "|" . "entered triggerstring" . "|" . "trigger" . "|" . "triggerstring options" . "|" . "hotstring" . "|" . "gain" . "|" . "cumulative gain" . "|" . "`n", % v_LogFileName, UTF-8
 	}
 }
@@ -11179,85 +11179,266 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_CalculateGain(Triggerstring, Hotstring, options)
 {
-	Gain := 0, CntUpper := 0, a_MultiGain := [], temp := "", LenHots := 0, LenTrig := 0, LenTotal := 0, CntSuppl := 0, HowManyReplaced := 0
+	Gain := 0, CntUpper := 0, a_MultiGain := [], temp := "", LenHots := 0, LenTrig := 0, CntSuppl := 0, HowManyReplaced := 0
 	if (options = "multi")	;multi definition of hotstring(s)
 	{
 		Loop, Parse, % Hotstring, "¦"
 		{
-			Loop, Parse, % A_LoopField
+			temp := A_LoopField
+			LenHots 	:= 	F_CountSpecialChar("{Enter}", 	temp)
+					+ 	F_CountSpecialChar("{Left}", 		temp)
+					+ 	F_CountSpecialChar("{Right}", 	temp)
+					+ 	F_CountSpecialChar("{Up}", 		temp)
+					+	F_CountSpecialChar("{Down}", 		temp)
+					+	F_CountSpecialChar("{Backspace}", 	temp)
+					+	F_CountSpecialChar("{Shift}", 	temp)
+					+	F_CountSpecialChar("{Ctrl}", 		temp)
+					+	F_CountSpecialChar("{Alt}", 		temp)
+					+	F_CountSpecialChar("{LWin}", 		temp)
+					+	F_CountSpecialChar("{RWin}", 		temp)
+					+	F_CountSpecialChar("{+}", 		temp)
+					+	F_CountSpecialChar("{!}", 		temp)
+					+	F_CountSpecialChar("{{}", 		temp)
+					+	F_CountSpecialChar("{}}", 		temp)
+					+	F_CountSpecialChar("{Space}", 	temp)
+					+	F_CountSpecialChar("{Tab}", 		temp)
+					+	F_CountSpecialChar("{Home}", 		temp)
+					+	F_CountSpecialChar("{End}", 		temp)
+					+	F_CountSpecialChar("{PgUp}", 		temp)
+					+	F_CountSpecialChar("{PgDn}", 		temp)
+					+	F_CountAHKconstants(temp)
+					+	F_CountUnicodeChars(temp)
+			Loop, Parse, % temp
 			{
-				if A_LoopField is upper
+				if temp is upper
 					CntUpper++
 			}
-			a_MultiGain[A_Index] := StrLen(A_LoopField) - StrLen(Triggerstring) + CntUpper
-			CntUpper := 0
+			LenHots += StrLen(temp) + CntUpper
+,			LenTrig += F_CountTrigConstants(Triggerstring) + StrLen(Triggerstring)
+,			a_MultiGain[A_Index] := LenHots - LenTrig
+,			CntUpper := 0, LenHots := 0
 		}
 		return, a_MultiGain
 	}
 	else
 	{
-		LenHots += F_CountSpecialChar("{Enter}", 		Hotstring)
-,		LenHots += F_CountSpecialChar("{Left}", 		Hotstring)
-,		LenHots += F_CountSpecialChar("{Right}", 		Hotstring)
-,		LenHots += F_CountSpecialChar("{Up}", 			Hotstring)
-,		LenHots += F_CountSpecialChar("{Down}", 		Hotstring)
-,		LenHots += F_CountSpecialChar("{Backspace}", 	Hotstring)
-,		LenHots += F_CountSpecialChar("{Shift}", 		Hotstring)
-,		LenHots += F_CountSpecialChar("{Ctrl}", 		Hotstring)
-,		LenHots += F_CountSpecialChar("{Alt}", 			Hotstring)
-,		LenHots += F_CountSpecialChar("{LWin}", 		Hotstring)
-,		LenHots += F_CountSpecialChar("{RWin}", 		Hotstring)
-,		LenHots += F_CountSpecialChar("{+}", 			Hotstring)
-,		LenHots += F_CountSpecialChar("{!}", 			Hotstring)
-,		LenHots += F_CountSpecialChar("{{}", 			Hotstring)
-,		LenHots += F_CountSpecialChar("{}}", 			Hotstring)
-,		LenHots += F_CountSpecialChar("{Space}", 		Hotstring)
-,		LenHots += F_CountSpecialChar("{Tab}", 			Hotstring)
-,		LenHots += F_CountSpecialChar("{Home}", 		Hotstring)
-,		LenHots += F_CountSpecialChar("{End}", 			Hotstring)
-,		LenHots += F_CountSpecialChar("{PgUp}", 		Hotstring)
-,		LenHots += F_CountSpecialChar("{PgDn}", 		Hotstring)
-
-		if (InStr(Hotstring, "``r``n"))
-		{
-			Hotstring := StrReplace(Hotstring, "``r``n", "", HowManyReplaced)
-			LenHots += HowManyReplaced
-		}
-		; if (InStr(v_UndoHotstring, "``r"))
-		; {
-		; 	v_UndoHotstring := StrReplace(v_UndoHotstring, "``r", "", HowManyBackSpaces2)
-		; 	HowManyBackSpaces += HowManyBackSpaces2
-		; }
-		; if (InStr(v_UndoHotstring, "``n"))
-		; {
-		; 	v_UndoHotstring := StrReplace(v_UndoHotstring, "``n", "", HowManyBackSpaces2)
-		; 	HowManyBackSpaces += HowManyBackSpaces2
-		; }
-		; if (InStr(v_UndoHotstring, "``b"))
-		; {
-		; 	v_UndoHotstring := StrReplace(v_UndoHotstring, "``b", "", HowManyBackSpaces2)
-		; 	HowManyBackSpaces += HowManyBackSpaces2
-		; }
-		; if (InStr(v_UndoHotstring, "``t"))
-		; {
-		; 	v_UndoHotstring := StrReplace(v_UndoHotstring, "``t", "", HowManyBackSpaces2)
-		; 	HowManyBackSpaces += HowManyBackSpaces2
-		; }
-		Hotstring	:= F_ReplaceAHKconstants(Hotstring)
-          Hotstring := F_PrepareUndo(Hotstring)
-	     Hotstring	:= RegExReplace(Hotstring, "{U+.*}", " ")
-
+		LenHots 	:= 	F_CountSpecialChar("{Enter}", 	Hotstring)
+				+ 	F_CountSpecialChar("{Left}", 		Hotstring)
+				+ 	F_CountSpecialChar("{Right}", 	Hotstring)
+				+ 	F_CountSpecialChar("{Up}", 		Hotstring)
+				+	F_CountSpecialChar("{Down}", 		Hotstring)
+				+	F_CountSpecialChar("{Backspace}", 	Hotstring)
+				+	F_CountSpecialChar("{Shift}", 	Hotstring)
+				+	F_CountSpecialChar("{Ctrl}", 		Hotstring)
+				+	F_CountSpecialChar("{Alt}", 		Hotstring)
+				+	F_CountSpecialChar("{LWin}", 		Hotstring)
+				+	F_CountSpecialChar("{RWin}", 		Hotstring)
+				+	F_CountSpecialChar("{+}", 		Hotstring)
+				+	F_CountSpecialChar("{!}", 		Hotstring)
+				+	F_CountSpecialChar("{{}", 		Hotstring)
+				+	F_CountSpecialChar("{}}", 		Hotstring)
+				+	F_CountSpecialChar("{Space}", 	Hotstring)
+				+	F_CountSpecialChar("{Tab}", 		Hotstring)
+				+	F_CountSpecialChar("{Home}", 		Hotstring)
+				+	F_CountSpecialChar("{End}", 		Hotstring)
+				+	F_CountSpecialChar("{PgUp}", 		Hotstring)
+				+	F_CountSpecialChar("{PgDn}", 		Hotstring)
+				+	F_CountAHKconstants(Hotstring)
+				+	F_CountUnicodeChars(Hotstring)
 		Loop, Parse, % Hotstring
 		{    
 			if A_LoopField is upper
 				CntUpper++
 		}
-          LenHots := StrLen(Hotstring)
-          LenTrig := StrLen(Triggerstring)
-	     LenTotal := LenHots - LenTrig + CntUpper
-          return, LenTotal
-	     ; return, StrLen(Hotstring) - StrLen(Triggerstring) + CntUpper
+		LenHots += StrLen(Hotstring) + CntUpper
+,		LenTrig += F_CountTrigConstants(Triggerstring) + StrLen(Triggerstring)
+          return, LenHots - LenTrig
 	}
+}
+; ------------------------------------------------------------------------------------------------------------------------------------
+F_CountUnicodeChars(ByRef String)
+{
+	HowManyCharacters := 0, Result := 0
+	if (RegExMatch(String, "i)\{U\+[[:xdigit:]]{4,6}}") = 0)
+		return, 0
+	else
+	{
+		String := RegExReplace(String, "i)\{U\+[[:xdigit:]]{4,6}}", Replacement := "", HowManyCharacters := "")
+		return, HowManyCharacters
+	}
+}
+; ------------------------------------------------------------------------------------------------------------------------------------
+F_CountTrigConstants(ByRef String)
+{
+	HowManyCharacters := 0, Result := 0
+	if (InStr(String, "``n"))
+	{
+		String := StrReplace(String, "``n", "", HowManyCharacters)
+,		Result += HowManyCharacters			
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "``t"))
+	{
+		String := StrReplace(String, "``t", "", HowManyCharacters)
+,		Result += HowManyCharacters			
+,		HowManyCharacters := 0
+	}
+	return, Result
+}
+; ------------------------------------------------------------------------------------------------------------------------------------
+F_CountAHKconstants(ByRef String)
+{
+	HowManyCharacters := 0, Result := 0
+
+	if (InStr(String, "``r``n"))
+	{
+		String := StrReplace(String, "``r``n", "", HowManyCharacters)
+,		Result += HowManyCharacters
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "``r"))
+	{
+		String := StrReplace(String, "``r", "", HowManyCharacters)
+,		Result += HowManyCharacters			
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "``n"))
+	{
+		String := StrReplace(String, "``n", "", HowManyCharacters)
+,		Result += HowManyCharacters			
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "``b"))
+	{
+		String := StrReplace(String, "``b", "", HowManyCharacters)
+,		Result += HowManyCharacters			
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "``t"))
+	{
+		String := StrReplace(String, "``t", "", HowManyCharacters)
+,		Result += HowManyCharacters			
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "A_YYYY"))
+	{
+		String := StrReplace(String, "A_YYYY", "")
+,		HowManyCharacters := StrLen(A_YYYY)
+,		Result += HowManyCharacters
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "A_MMMM"))
+	{
+		String := StrReplace(String, "A_MMMM", "")
+,		HowManyCharacters := StrLen(A_MMMM)
+,		Result += HowManyCharacters
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "A_MMM"))
+	{
+		String := StrReplace(String, "A_MMM", "")
+,		HowManyCharacters := StrLen(A_MMM)		
+,		Result += HowManyCharacters
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "A_MM"))
+	{
+		String := StrReplace(String, "A_MM", "")
+,		HowManyCharacters := StrLen(A_MM)		
+,		Result += HowManyCharacters
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "A_DDDD"))
+	{
+		String := StrReplace(String, "A_DDDD", "")
+,		HowManyCharacters := StrLen(A_DDDD)		
+,		Result += HowManyCharacters
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "A_DDD"))
+	{
+		String := StrReplace(String, "A_DDD", "")
+,		HowManyCharacters := StrLen(A_DDD)		
+,		Result += HowManyCharacters
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "A_DD"))
+	{
+		String := StrReplace(String, "A_DD", "")
+,		HowManyCharacters := StrLen(A_DD)		
+,		Result += HowManyCharacters
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "A_WDay"))
+	{
+		String := StrReplace(String, "A_WDay", "")
+,		HowManyCharacters := StrLen(A_WDay)		
+,		Result += HowManyCharacters
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "A_YDay"))
+	{
+		String := StrReplace(String, "A_YDay", "")
+,		HowManyCharacters := StrLen(A_YDay)		
+,		Result += HowManyCharacters
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "A_YWeek"))
+	{
+		String := StrReplace(String, "A_YWeek", "")
+,		HowManyCharacters := StrLen(A_YWeek)		
+,		Result += HowManyCharacters
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "A_Hour"))
+	{
+		String := StrReplace(String, "A_Hour", "")
+,		HowManyCharacters := StrLen(A_Hour)		
+,		Result += HowManyCharacters
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "A_Min"))
+	{
+		String := StrReplace(String, "A_Min", "")
+,		HowManyCharacters := StrLen(A_Min)		
+,		Result += HowManyCharacters
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "A_Sec"))
+	{
+		String := StrReplace(String, "A_Sec", "")
+,		HowManyCharacters := StrLen(A_Sec)		
+,		Result += HowManyCharacters
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "A_MSec"))
+	{
+		String := StrReplace(String, "A_MSec", "")
+,		HowManyCharacters := StrLen(A_MSec)		
+,		Result += HowManyCharacters
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "A_Now"))
+	{
+		String := StrReplace(String, "A_Now", "")
+,		HowManyCharacters := StrLen(A_Now)		
+,		Result += HowManyCharacters
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "A_NowUTC"))
+	{
+		String := StrReplace(String, "A_NowUTC", "")
+,		HowManyCharacters := StrLen(A_NowUTC)		
+,		Result += HowManyCharacters
+,		HowManyCharacters := 0
+	}
+	if (InStr(String, "A_TickCount"))
+	{
+		String := StrReplace(String, "A_TickCount", "")
+,		HowManyCharacters := StrLen(A_TickCount)		
+,		Result += HowManyCharacters
+	}
+	return, Result
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_CountSpecialChar(ToFilter, ByRef Haystack)
