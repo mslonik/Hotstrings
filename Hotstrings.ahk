@@ -11179,7 +11179,7 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_CalculateGain(Triggerstring, Hotstring, options)
 {
-	Gain := 0, CntUpper := 0, a_MultiGain := [], temp := "", LenHots := 0, LenTrig := 0, LenTotal := 0, CntSuppl := 0
+	Gain := 0, CntUpper := 0, a_MultiGain := [], temp := "", LenHots := 0, LenTrig := 0, LenTotal := 0, CntSuppl := 0, HowManyReplaced := 0
 	if (options = "multi")	;multi definition of hotstring(s)
 	{
 		Loop, Parse, % Hotstring, "¦"
@@ -11196,34 +11196,53 @@ F_CalculateGain(Triggerstring, Hotstring, options)
 	}
 	else
 	{
-		
-		if (InStr(Hotstring, "{Enter}", false))
-			Hotstring := StrReplace(Hotstring, "{Enter}", "", CntSuppl)
-		if (InStr(v_UndoHotstring, "``r``n"))
+		LenHots += F_CountSpecialChar("{Enter}", 		Hotstring)
+,		LenHots += F_CountSpecialChar("{Left}", 		Hotstring)
+,		LenHots += F_CountSpecialChar("{Right}", 		Hotstring)
+,		LenHots += F_CountSpecialChar("{Up}", 			Hotstring)
+,		LenHots += F_CountSpecialChar("{Down}", 		Hotstring)
+,		LenHots += F_CountSpecialChar("{Backspace}", 	Hotstring)
+,		LenHots += F_CountSpecialChar("{Shift}", 		Hotstring)
+,		LenHots += F_CountSpecialChar("{Ctrl}", 		Hotstring)
+,		LenHots += F_CountSpecialChar("{Alt}", 			Hotstring)
+,		LenHots += F_CountSpecialChar("{LWin}", 		Hotstring)
+,		LenHots += F_CountSpecialChar("{RWin}", 		Hotstring)
+,		LenHots += F_CountSpecialChar("{+}", 			Hotstring)
+,		LenHots += F_CountSpecialChar("{!}", 			Hotstring)
+,		LenHots += F_CountSpecialChar("{{}", 			Hotstring)
+,		LenHots += F_CountSpecialChar("{}}", 			Hotstring)
+,		LenHots += F_CountSpecialChar("{Space}", 		Hotstring)
+,		LenHots += F_CountSpecialChar("{Tab}", 			Hotstring)
+,		LenHots += F_CountSpecialChar("{Home}", 		Hotstring)
+,		LenHots += F_CountSpecialChar("{End}", 			Hotstring)
+,		LenHots += F_CountSpecialChar("{PgUp}", 		Hotstring)
+,		LenHots += F_CountSpecialChar("{PgDn}", 		Hotstring)
+
+		if (InStr(Hotstring, "``r``n"))
 		{
-			v_UndoHotstring := StrReplace(v_UndoHotstring, "``r``n", "", HowManyBackSpaces2)
-			HowManyBackSpaces += HowManyBackSpaces2 + 1
+			Hotstring := StrReplace(Hotstring, "``r``n", "", HowManyReplaced)
+			LenHots += HowManyReplaced
 		}
-		if (InStr(v_UndoHotstring, "``r"))
-		{
-			v_UndoHotstring := StrReplace(v_UndoHotstring, "``r", "", HowManyBackSpaces2)
-			HowManyBackSpaces += HowManyBackSpaces2
-		}
-		if (InStr(v_UndoHotstring, "``n"))
-		{
-			v_UndoHotstring := StrReplace(v_UndoHotstring, "``n", "", HowManyBackSpaces2)
-			HowManyBackSpaces += HowManyBackSpaces2
-		}
-		if (InStr(v_UndoHotstring, "``b"))
-		{
-			v_UndoHotstring := StrReplace(v_UndoHotstring, "``b", "", HowManyBackSpaces2)
-			HowManyBackSpaces += HowManyBackSpaces2
-		}
-		if (InStr(v_UndoHotstring, "``t"))
-		{
-			v_UndoHotstring := StrReplace(v_UndoHotstring, "``t", "", HowManyBackSpaces2)
-			HowManyBackSpaces += HowManyBackSpaces2
-		}
+		; if (InStr(v_UndoHotstring, "``r"))
+		; {
+		; 	v_UndoHotstring := StrReplace(v_UndoHotstring, "``r", "", HowManyBackSpaces2)
+		; 	HowManyBackSpaces += HowManyBackSpaces2
+		; }
+		; if (InStr(v_UndoHotstring, "``n"))
+		; {
+		; 	v_UndoHotstring := StrReplace(v_UndoHotstring, "``n", "", HowManyBackSpaces2)
+		; 	HowManyBackSpaces += HowManyBackSpaces2
+		; }
+		; if (InStr(v_UndoHotstring, "``b"))
+		; {
+		; 	v_UndoHotstring := StrReplace(v_UndoHotstring, "``b", "", HowManyBackSpaces2)
+		; 	HowManyBackSpaces += HowManyBackSpaces2
+		; }
+		; if (InStr(v_UndoHotstring, "``t"))
+		; {
+		; 	v_UndoHotstring := StrReplace(v_UndoHotstring, "``t", "", HowManyBackSpaces2)
+		; 	HowManyBackSpaces += HowManyBackSpaces2
+		; }
 		Hotstring	:= F_ReplaceAHKconstants(Hotstring)
           Hotstring := F_PrepareUndo(Hotstring)
 	     Hotstring	:= RegExReplace(Hotstring, "{U+.*}", " ")
@@ -11239,6 +11258,34 @@ F_CalculateGain(Triggerstring, Hotstring, options)
           return, LenTotal
 	     ; return, StrLen(Hotstring) - StrLen(Triggerstring) + CntUpper
 	}
+}
+; ------------------------------------------------------------------------------------------------------------------------------------
+F_CountSpecialChar(ToFilter, ByRef Haystack)
+{
+	if (!InStr(Haystack, ToFilter, false))
+		return, 0
+	NRegLen		:= StrLen(ToFilter)
+, 	FoundPos		:= 0
+, 	ToFilterCnt	:= 0
+, 	OutputVar   	:= ""
+, 	PValue		:= ""
+,	NeedleRegEx1	:= "\" . SubStr(ToFilter, 1, -1) . "[[:blank:]]+\K\d+"
+,	NeedleRegEx2	:= "\" . SubStr(ToFilter, 1, -1) . "[[:blank:]]+\d+}"
+
+	Haystack := StrReplace(Haystack, ToFilter, "", ToFilterCnt)
+	Loop,
+	{
+		FoundPos := RegExMatch(Haystack, "Oi)" NeedleRegEx1, OutputVar)
+		if (FoundPos != 0)
+		{
+			ToFilterCnt	+= OutputVar.Value()
+			RegExMatch(Haystack, "i)" NeedleRegEx2, OutputVar)
+			Haystack := StrReplace(Haystack, OutputVar, "")
+		}
+		else
+			break
+	}
+	return, ToFilterCnt
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_GuiHS4_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
