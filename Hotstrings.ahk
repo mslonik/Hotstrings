@@ -9308,10 +9308,24 @@ F_SelectLibrary()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 {
-	global ;assume-global mode
+	Critical, On
+	OutputDebug, % "A_ThisFunc:" . A_Space . A_ThisFunc . A_Tab . "A_GuiEvent:" . A_Space . A_GuiEvent . A_Tab . "A_GuiControl:" . A_Space . A_GuiControl . A_Tab . "A_EventInfo:" . A_Space . A_EventInfo . A_Tab . "ErrorLevel:" . A_Space . ErrorLevel . "`n"
+	Switch A_GuiEvent
+	{
+		Default:
+			Critical, Off
+			return
+		Case "Normal":		LV1_CopyContentToHS3()
+	}
+	Critical, Off
+}	
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+LV1_CopyContentToHS3()
+{
+	global ;assume-global mode of operation
 	local Options := "", Fun := "", EnDis := "", TextInsert := "", OTextMenu := "", Comment := ""
 		,v_SelectedRow := 0
-	
+
 	if !(v_SelectedRow := LV_GetNext())
 		return
 	
