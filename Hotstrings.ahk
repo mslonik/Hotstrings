@@ -1022,7 +1022,7 @@ ActiveControlIsOfClass(Class)	;https://www.autohotkey.com/docs/commands/_If.htm
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ConvertEscapeSequences(string)	;now from file are read sequences like "`" . "t" which are 2x characters. now we have to convert this pair into single character "`t" = single Tab character
-{	;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc.
+{	;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc. https://www.autohotkey.com/docs/misc/EscapeChar.htm
 	string := StrReplace(string, "``n", "`n") 
 ,	string := StrReplace(string, "``r", "`r")
 ,	string := StrReplace(string, "``b", "`b")
@@ -7749,11 +7749,13 @@ F_AddHotstring()
 			,ExternalIndex := 0
 			,name := "", key := 0, value := "", Counter := 0, key2 := 0, value2 := ""
 			,f_T_GeneralMatch := false, f_T_CaseMatch := false, f_OldOptionsC := false, f_OldOptionsC1 := false, f_OptionsC := false, f_OptionsC1 := false, f_H_CaseMatch := false
-			,SelectedLibraryName := SubStr(v_SelectHotstringLibrary, 1, -4)
+			,SelectedLibraryName := ""
 			,Overwrite := "", WinHWND := "", WhichGuiEnable := ""
 
 	;1. Read all inputs. 
-	F_ReadUserInputs(TextInsert, NewOptions, OnOff, EnDis, SendFunHotstringCreate, SendFunFileFormat)
+	if (F_ReadUserInputs(TextInsert, NewOptions, OnOff, EnDis, SendFunHotstringCreate, SendFunFileFormat))
+		return
+	SelectedLibraryName := SubStr(v_SelectHotstringLibrary, 1, -4)	
 	;Disable all GuiControls for time of adding / editing of d(t, o, h)	
 	WinGet, WinHWND, ID, % "ahk_id" HS3GuiHwnd
 	if (WinHWND)
@@ -7811,7 +7813,9 @@ F_AddHotstring()
 				{
 					Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
 					{
-						Case "HS3":	F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
+						Case "HS3":	
+							GuiControl, +Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
+							F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
 						Case "HS4": 	F_GuiHS4_EnDis("Enable")
 					}
 					return
@@ -8024,8 +8028,8 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, B
 
 	if (Trim(v_TriggerString) = "")
 	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Enter triggerstring before hotstring is set"] . "."
-		return
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Triggerstring cannot be empty  if you wish to add new hotstring"] . "."
+		return, 1
 	}
 	if InStr(v_SelectFunction, "Menu")
 	{
@@ -8033,7 +8037,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, B
 		{
 			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Replacement text is blank. Do you want to proceed?"]
 			IfMsgBox, No
-				return
+				return, 1
 		}
 		if (Trim(v_EnterHotstring) != "")
 			TextInsert := % TextInsert . "¦" . v_EnterHotstring
@@ -8057,7 +8061,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, B
 		{
 			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Replacement text is blank. Do you want to proceed?"] 
 			IfMsgBox, No
-				return
+				return, 1
 		}
 		else
 		{
@@ -8067,7 +8071,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, B
 	if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Choose existing hotstring library file before saving new (triggerstring, hotstring) definition!"]
-		return
+		return, 1
 	}
 	if (v_OptionImmediateExecute)
 		NewOptions .= "*"
@@ -8102,6 +8106,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, B
 		Case "SendPlay (SP)":			SendFunHotstringCreate 	:= "F_HOF_SP", 	SendFunFileFormat 	:= "SP"
 		Case "SendEvent (SE)":			SendFunHotstringCreate 	:= "F_HOF_SE", 	SendFunFileFormat 	:= "SE"
 	}
+	return, 0
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Clear()
@@ -10706,7 +10711,7 @@ Enter 												= Enter
 Enter a name for the new library 							= Enter a name for the new library
 Enter hotstring 										= Enter hotstring
 Enter triggerstring										= Enter triggerstring
-Enter triggerstring before hotstring is set					= Enter triggerstring before hotstring is set
+Triggerstring cannot be empty  if you wish to add new hotstring					= Triggerstring cannot be empty  if you wish to add new hotstring
 Error												= Error
 ErrorLevel was triggered by NewInput error. 					= ErrorLevel was triggered by NewInput error.
 Error reading library file:								= Error reading library file:
@@ -11185,7 +11190,7 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 		}
 		a_Gain.Push(F_CalculateGain(Triggerstring, Hotstring, options))
 		++v_TotalHotstringCnt
-		a_Library.Push(name) ; function Search
+		a_Library.Push(name) ;for function Search
 	}	
 	GuiControl, , % IdText12,  % v_TotalHotstringCnt ; Text: Puts new contents into the control.
 	GuiControl, , % IdText12b, % v_TotalHotstringCnt ; Text: Puts new contents into the control.
@@ -12953,14 +12958,14 @@ F_LoadLibrariesToTables()
 			if (ErrorLevel)
 				break
 			name 	:= SubStr(A_LoopFileName, 1, -4)
-			tabSearch := StrSplit(varSearch, "‖")
-			a_Library.Push(name)
-			a_TriggerOptions.Push(tabSearch[1])
-			a_Triggerstring.Push(tabSearch[2])
-			a_OutputFunction.Push(tabSearch[3])
-			a_EnableDisable.Push(tabSearch[4])
-			a_Hotstring.Push(tabSearch[5])
-			a_Comment.Push(tabSearch[6])
+,			tabSearch := StrSplit(varSearch, "‖")
+,			a_Library			.Push(name)
+,			a_TriggerOptions	.Push(tabSearch[1])
+,			a_Triggerstring	.Push(tabSearch[2])
+,			a_OutputFunction	.Push(tabSearch[3])
+,			a_EnableDisable	.Push(tabSearch[4])
+,			a_Hotstring		.Push(tabSearch[5])
+,			a_Comment			.Push(tabSearch[6])
 		}
 	}
 	TrayTip, %A_ScriptName%, % TransA["Hotstrings have been loaded"], 1
@@ -12976,8 +12981,8 @@ F_CreateHotstring(txt, nameoffile)
 		Switch A_Index
 		{
 			Case 1:
-				Options := A_LoopField
-				Oflag := false
+				Options 	:= A_LoopField
+,				Oflag 	:= false
 				if (InStr(Options, "O", 0))
 					Oflag := true
 				else
@@ -13225,8 +13230,8 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
  	F_SendIsOflag(ReplacementString, Oflag, "SendInput")
  	F_EventSigOrdHotstring()
 	++v_LogCounter
-	temp := F_DetermineGain(a_Triggerstring, v_Triggerstring)
-	v_CntCumGain += temp
+,	temp := F_DetermineGain(a_Triggerstring, v_Triggerstring)
+,	v_CntCumGain += temp
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	Critical, Off	
