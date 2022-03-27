@@ -1030,6 +1030,7 @@ F_ConvertEscapeSequences(string)	;now from file are read sequences like "`" . "t
 ,	string := StrReplace(string, "``v", "`v")
 ,	string := StrReplace(string, "``a", "`a")
 ,	string := StrReplace(string, "``f", "`f")
+,	string := RegExReplace(string, "[[:blank:]].*\K``$", "")	;hottring finished with back-tick (`) prededing by blanks 
 	return string
 }	;future: https://www.autohotkey.com/boards/viewtopic.php?f=76&t=91953
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7287,7 +7288,7 @@ F_Undo()	;turning off of * option requires special conditions.
 {
 	global	;assume-global mode
 	local	TriggerOpt := "", HowManyBackSpaces := 0, HowManyBackSpaces2 := 0
-			,ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey, OrigTriggerstring := ""
+			,ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey, OrigTriggerstring := "", HowManySpecials := 0
 	
 	if (v_Triggerstring and (ThisHotkey != PriorHotkey))
 	{	
@@ -7295,8 +7296,29 @@ F_Undo()	;turning off of * option requires special conditions.
 			Send, {BackSpace}
 		if (v_UndoHotstring)
 		{
-			if (InStr(v_UndoHotstring, "{Enter}", false))
-				v_UndoHotstring := StrReplace(v_UndoHotstring, "{Enter}", "", HowManyBackSpaces)
+			HowManySpecials := F_CountSpecialChar("{left}", v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
+			if (HowManySpecials)
+			{
+				Send, % "{right" . A_Space . HowManySpecials . "}"
+				HowManySpecials := 0
+			}
+
+			HowManySpecials := F_CountSpecialChar("{right}", v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
+			if (HowManySpecials)
+			{
+				Send, % "{left" . A_Space . HowManySpecials . "}"
+				HowManySpecials := 0
+			}
+
+			HowManyBackSpaces += F_CountSpecialChar("{enter}", 	v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
+			 			   +  F_CountSpecialChar("{tab}", 		v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
+						   +  F_CountSpecialChar("{space}", 	v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
+,							 F_CountSpecialChar("{Shift}", 	v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
+,							 F_CountSpecialChar("{Ctrl}", 	v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
+,							 F_CountSpecialChar("{Alt}", 		v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
+,							 F_CountSpecialChar("{LWin}", 	v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
+,							 F_CountSpecialChar("{RWin}", 	v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
+
 			if (InStr(v_UndoHotstring, "``r``n"))
 			{
 				v_UndoHotstring := StrReplace(v_UndoHotstring, "``r``n", "", HowManyBackSpaces2)
@@ -7335,7 +7357,7 @@ F_Undo()	;turning off of * option requires special conditions.
 				Default:
 				Send, % A_LoopField
 			}
-		}
+		}ex22/
 		F_UndoSignalling()
 	}
 	else
@@ -11474,9 +11496,10 @@ F_CountAHKconstants(ByRef String)
 	return, Result
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
-F_CountSpecialChar(ToFilter, ByRef Haystack)
+F_CountSpecialChar(ToFilter, ByRef Haystack)	;counts special characters and filters them out of Haystack
 {
-	if (!InStr(Haystack, ToFilter, false))
+	NeedleRegEx2	:= "\" . SubStr(ToFilter, 1, -1) . "[[:blank:]]+\d+}"
+	if (!InStr(Haystack, ToFilter, false)) and (!RegExMatch(Haystack, "i)" NeedleRegEx2, OutputVar))
 		return, 0
 	NRegLen		:= StrLen(ToFilter)
 , 	FoundPos		:= 0
@@ -11484,7 +11507,6 @@ F_CountSpecialChar(ToFilter, ByRef Haystack)
 , 	OutputVar   	:= ""
 , 	PValue		:= ""
 ,	NeedleRegEx1	:= "\" . SubStr(ToFilter, 1, -1) . "[[:blank:]]+\K\d+"
-,	NeedleRegEx2	:= "\" . SubStr(ToFilter, 1, -1) . "[[:blank:]]+\d+}"
 
 	Haystack := StrReplace(Haystack, ToFilter, "", ToFilterCnt)
 	Loop,
@@ -13129,8 +13151,6 @@ F_PrepareUndo(string)
 	string := RegExReplace(string, "Ui)({Backspace.*})|({BS.*})")
 	if (InStr(string, "{!}")) or (InStr(string, "{^}")) or (InStr(string, "{+}")) or (InStr(string, "{#}")) or (InStr(string, "{{}")) or (InStr(string, "{}}"))
 		string := RegExReplace(string, "U)({)|(})")
-	if (InStr(string, "Shift", false))
-		string := RegExReplace(string, "i){Shift.*?}")
 	return string
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
