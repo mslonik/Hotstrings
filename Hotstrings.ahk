@@ -37,7 +37,7 @@ FileInstall, LICENSE, LICENSE, 0
 ; - - - - - - - - - - - - - - - - - - - - - - - S E C T I O N    O F    G L O B A L     V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l like "silent mode"
 ,		v_IndexLog 			:= 1			;for logging, if Hotstrings application is run with d parameter.
-,		v_LogCounter := 0
+,		v_LogCounter 			:= 0
 ,		v_CntCumGain			:= 0			;for logging, Counter Cumulative Gain
 ,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time; f_ stands for "flag"
 ,		TT_C1_Hwnd 			:= 0 
@@ -700,7 +700,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 			if (InStr(v_PressedKey, "^Up") or InStr(v_PressedKey, "+Tab"))
 			{
 				IsCursorPressed := true
-				IntCnt--
+,				IntCnt--
 				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB1
 				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB2
 				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB3
@@ -709,7 +709,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 			if (InStr(v_PressedKey, "^Down") or InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
 			{
 				IsCursorPressed := true
-				IntCnt++
+,				IntCnt++
 				ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB1
 				ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB2
 				ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB3
@@ -719,14 +719,14 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 			if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 			{
 				IsCursorPressed := true
-				IntCnt--
+,				IntCnt--
 				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB4
 				ShiftTabIsFound := true	
 			}
 			if (InStr(v_PressedKey, "Down") or InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
 			{
 				IsCursorPressed := true
-				IntCnt++
+,				IntCnt++
 				ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB4
 				ShiftTabIsFound := false
 			}		
@@ -815,9 +815,9 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 			if (ini_MHSEn)
 				SoundBeep, % ini_MHSF, % ini_MHSD	
 
-			++v_LogCounter	;tu jestem
-			temp := F_DetermineGain(a_Triggerstring, v_Triggerstring, v_PressedKey)
-			v_CntCumGain += temp
+,			++v_LogCounter
+,			temp := F_DetermineGain(a_Triggerstring, v_Triggerstring, v_PressedKey)
+,			v_CntCumGain += temp
 			if (ini_THLog)
 			{
 				Switch WhichMenu
@@ -7365,7 +7365,7 @@ F_Undo()	;turning off of * option requires special conditions.
 			v_UndoHotstring 	:= F_ReplaceAHKconstants(v_UndoHotstring)
 ,			v_UndoHotstring 	:= F_PrepareUndo(v_UndoHotstring)
 ,			v_UndoHotstring 	:= RegExReplace(v_UndoHotstring, "{U+.*}", " ")
-,			HowManyBackSpaces 	+= StrLenUnicode(v_UndoHotstring)
+			HowManyBackSpaces 	+= StrLenUnicode(v_UndoHotstring)
 			Send, % "{BackSpace " . HowManyBackSpaces . "}"
 			Loop, Parse, v_Triggerstring
 				Switch A_LoopField
@@ -7963,14 +7963,15 @@ F_SaveLVintoLibFile()
 F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 {
 	global	;assume-global mode of operation
-	a_Library.Push(SubStr(v_SelectHotstringLibrary, 1, -4))
-	a_Triggerstring.Push(v_TriggerString)
-	a_TriggerOptions.Push(NewOptions)
-	a_OutputFunction.Push(SendFunFileFormat)
-	a_EnableDisable.Push(EnDis)	;here was a bug: OnOff instead of EnDis
-	a_Hotstring.Push(TextInsert)
-	a_Comment.Push(v_Comment)
-	a_Combined.Push(v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert)
+	a_Library			.Push(SubStr(v_SelectHotstringLibrary, 1, -4))
+	a_Triggerstring	.Push(v_TriggerString)
+	a_TriggerOptions	.Push(NewOptions)
+	a_OutputFunction	.Push(SendFunFileFormat)
+	a_EnableDisable	.Push(EnDis)	;here was a bug: OnOff instead of EnDis
+	a_Hotstring		.Push(TextInsert)
+	a_Comment			.Push(v_Comment)
+	a_Combined		.Push(v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert)
+	a_Gain			.Push(F_CalculateGain(v_TriggerString, TextInsert, NewOptions))
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 }	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9349,7 +9350,7 @@ F_SelectLibrary()
 F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 {
 	Critical, On
-	OutputDebug, % "A_ThisFunc:" . A_Space . A_ThisFunc . A_Tab . "A_GuiEvent:" . A_Space . A_GuiEvent . A_Tab . "A_GuiControl:" . A_Space . A_GuiControl . A_Tab . "A_EventInfo:" . A_Space . A_EventInfo . A_Tab . "ErrorLevel:" . A_Space . ErrorLevel . "`n"
+	; OutputDebug, % "A_ThisFunc:" . A_Space . A_ThisFunc . A_Tab . "A_GuiEvent:" . A_Space . A_GuiEvent . A_Tab . "A_GuiControl:" . A_Space . A_GuiControl . A_Tab . "A_EventInfo:" . A_Space . A_EventInfo . A_Tab . "ErrorLevel:" . A_Space . ErrorLevel . "`n"
 	Switch A_GuiEvent
 	{
 		Default:
@@ -11289,7 +11290,7 @@ F_CalculateGain(Triggerstring, Hotstring, options)
 				if temp is upper
 					CntUpper++
 			}
-			LenHots += StrLen(temp) + CntUpper
+			LenHots += StrLenUnicode(temp) + CntUpper
 ,			LenTrig += F_CountTrigConstants(Triggerstring) + StrLen(Triggerstring)
 ,			a_MultiGain[A_Index] := LenHots - LenTrig
 ,			CntUpper := 0, LenHots := 0
@@ -11326,8 +11327,8 @@ F_CalculateGain(Triggerstring, Hotstring, options)
 			if A_LoopField is upper
 				CntUpper++
 		}
-		LenHots += StrLen(Hotstring) + CntUpper
-,		LenTrig += F_CountTrigConstants(Triggerstring) + StrLen(Triggerstring)
+		LenHots += StrLenUnicode(Hotstring) + CntUpper
+		LenTrig += F_CountTrigConstants(Triggerstring) + StrLen(Triggerstring)
           return, LenHots - LenTrig
 	}
 }
@@ -13278,8 +13279,8 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
  	F_SendIsOflag(ReplacementString, Oflag, "SendInput")
  	F_EventSigOrdHotstring()
 	++v_LogCounter
-,	temp := F_DetermineGain(a_Triggerstring, v_Triggerstring)
-,	v_CntCumGain += temp
+	temp := F_DetermineGain(a_Triggerstring, v_Triggerstring)
+	v_CntCumGain += temp
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SI" . "|" . v_Triggerstring . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	Critical, Off	
