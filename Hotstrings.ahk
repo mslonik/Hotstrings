@@ -7298,26 +7298,34 @@ F_Undo()	;turning off of * option requires special conditions.
 		{
 			HowManySpecials := F_CountSpecialChar("{left}", v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
 			if (HowManySpecials)
-			{
 				Send, % "{right" . A_Space . HowManySpecials . "}"
-				HowManySpecials := 0
-			}
 
 			HowManySpecials := F_CountSpecialChar("{right}", v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
 			if (HowManySpecials)
-			{
 				Send, % "{left" . A_Space . HowManySpecials . "}"
-				HowManySpecials := 0
-			}
 
 			HowManyBackSpaces += F_CountSpecialChar("{enter}", 	v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
 			 			   +  F_CountSpecialChar("{tab}", 		v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
 						   +  F_CountSpecialChar("{space}", 	v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
-,							 F_CountSpecialChar("{Shift}", 	v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
+
+							 F_CountSpecialChar("{Shift}", 	v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
 ,							 F_CountSpecialChar("{Ctrl}", 	v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
 ,							 F_CountSpecialChar("{Alt}", 		v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
 ,							 F_CountSpecialChar("{LWin}", 	v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
 ,							 F_CountSpecialChar("{RWin}", 	v_UndoHotstring)	;counts special characters and filters them out of v_UndoHotstring
+
+			if (F_CountSpecialChar("{Up}", 	v_UndoHotstring))
+			or (F_CountSpecialChar("{Down}", 	v_UndoHotstring))
+			or (F_CountSpecialChar("{Home}", 	v_UndoHotstring))
+			or (F_CountSpecialChar("{End}", 	v_UndoHotstring))
+			or (F_CountSpecialChar("{PgUp}", 	v_UndoHotstring))
+			or (F_CountSpecialChar("{PgDown}", v_UndoHotstring))
+			{
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Your hotstring definition contain one of the following characters:"] . "`n`n"
+					. TransA["{Up} or {Down} or {Home} or {End} or {PgUp} or {PgDown}"] . "`n`n"
+					. TransA["Last hotstring undo function is currently unsuported for those characters, sorry."]
+				return
+			}
 
 			if (InStr(v_UndoHotstring, "``r``n"))
 			{
@@ -7337,8 +7345,18 @@ F_Undo()	;turning off of * option requires special conditions.
 			if (InStr(v_UndoHotstring, "``b"))
 			{
 				v_UndoHotstring := StrReplace(v_UndoHotstring, "``b", "", HowManyBackSpaces2)
-				HowManyBackSpaces += HowManyBackSpaces2
+				HowManyBackSpaces -= HowManyBackSpaces2
 			}
+
+			if (InStr(v_UndoHotstring, "``v"))
+				v_UndoHotstring := StrReplace(v_UndoHotstring, "``v", "")
+
+			if (InStr(v_UndoHotstring, "``a"))
+				v_UndoHotstring := StrReplace(v_UndoHotstring, "``a", "")
+			
+			if (InStr(v_UndoHotstring, "``f"))
+				v_UndoHotstring := StrReplace(v_UndoHotstring, "``f", "")
+
 			if (InStr(v_UndoHotstring, "``t"))
 			{
 				v_UndoHotstring := StrReplace(v_UndoHotstring, "``t", "", HowManyBackSpaces2)
@@ -7357,7 +7375,7 @@ F_Undo()	;turning off of * option requires special conditions.
 				Default:
 				Send, % A_LoopField
 			}
-		}ex22/
+		}
 		F_UndoSignalling()
 	}
 	else
@@ -10818,6 +10836,7 @@ Introduction											= Introduction
 	TransConst .= "`n
 (Join`n `
 \Languages\`nMind that Config.ini Language variable is equal to 	= \Languages\`nMind that Config.ini Language variable is equal to
+Last hotstring undo function is currently unsuported for those characters, sorry. = Last hotstring undo function is currently unsuported for those characters, sorry.
 Let's make your PC personal again... 						= Let's make your PC personal again...
 Libraries folder: move it to new location					= Libraries folder: move it to new location
 Libraries folder: restore it to default location				= Libraries folder: restore it to default location
@@ -11083,7 +11102,9 @@ Yes													= Yes
 yes													= yes
 You've cancelled this process.							= You've cancelled this process.
 You've changed at least one configuration parameter, but didn't yet apply it. = You've changed at least one configuration parameter, but didn't yet apply it.
+Your hotstring definition contain one of the following characters: = Your hotstring definition contain one of the following characters:
 ↓ Click here to select hotstring library ↓					= ↓ Click here to select hotstring library ↓
+{Up} or {Down} or {Home} or {End} or {PgUp} or {PgDown}		= {Up} or {Down} or {Home} or {End} or {PgUp} or {PgDown}
 ShowInfoText											= In order to display graphical user interface (GUI) of the application just press shortcut: Win + Ctrl + H. `n`nSuggested steps after installation: `n`n1. Download some libraries (files containing (triggerstring, hotstring) definitions. You can do it from application menu:  → Libraries. `n`n2. After downloading of libraries restart application to apply the changes. Again, you can do it from application menu: Application → Restart. `n`n3. Application is preconfigured on the first start. Options available to be configured area available from GUI, application menu → Configuration. `n`n4. Application runs by default in default mode. If you don't wish to modify configuration, `nmay consider to run it in simplified mode: application menu → Application → Reload → Reload in silent mode.
 )"
 	TransConst .= "`n
@@ -11498,30 +11519,23 @@ F_CountAHKconstants(ByRef String)
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_CountSpecialChar(ToFilter, ByRef Haystack)	;counts special characters and filters them out of Haystack
 {
-	NeedleRegEx2	:= "\" . SubStr(ToFilter, 1, -1) . "[[:blank:]]+\d+}"
-	if (!InStr(Haystack, ToFilter, false)) and (!RegExMatch(Haystack, "i)" NeedleRegEx2, OutputVar))
-		return, 0
-	NRegLen		:= StrLen(ToFilter)
-, 	FoundPos		:= 0
+	temp			:= SubStr(ToFilter, 1, -1)
+,	NeedleRegEx1	:= temp . "}" . "|" . temp . "[[:blank:]]+\d+}" . "|" . temp . "[[:blank:]]+down}" . "|" . temp . "[[:blank:]]+up}"
+,	NeedleRegEx2	:= temp . "}" . "|" . temp . "[[:blank:]]+down}" . "|" . temp . "[[:blank:]]+up}"
+,	RERCount		:= 0
 , 	ToFilterCnt	:= 0
-, 	OutputVar   	:= ""
-, 	PValue		:= ""
-,	NeedleRegEx1	:= "\" . SubStr(ToFilter, 1, -1) . "[[:blank:]]+\K\d+"
+, 	OutputVar   	:= 0
 
-	Haystack := StrReplace(Haystack, ToFilter, "", ToFilterCnt)
-	Loop,
+	if (!InStr(Haystack, ToFilter, false)) and (!RegExMatch(Haystack, "i)" . NeedleRegEx1))
+		return, 0
+
+	if (RegExMatch(Haystack, "i)" . temp . "[[:blank:]]+\K\d+", OutputVar))	;filter out such sequences as {Shift 5}
 	{
-		FoundPos := RegExMatch(Haystack, "Oi)" NeedleRegEx1, OutputVar)
-		if (FoundPos != 0)
-		{
-			ToFilterCnt	+= OutputVar.Value()
-			RegExMatch(Haystack, "i)" NeedleRegEx2, OutputVar)
-			Haystack := StrReplace(Haystack, OutputVar, "")
-		}
-		else
-			break
+		ToFilterCnt += OutputVar
+,		Haystack := RegExReplace(Haystack, "i)" . temp . "[[:blank:]]+\d+}", "")
 	}
-	return, ToFilterCnt
+	Haystack := RegExReplace(Haystack, "i)" . NeedleRegEx2, "", RERCount)		;filter out such sequences as "{Sift up}"
+	return, ToFilterCnt += RERCount
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_GuiHS4_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
