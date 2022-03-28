@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -213,10 +213,10 @@ Menu, FontTypeMenu, Add,		Verdana,														F_FontType
 Menu, FontTypeMenu, Check,	% c_FontType						
 Menu, ConfGUI,		Add, 	% TransA["Font type"],											:FontTypeMenu
 
-Menu, Submenu1Shortcuts, Add, % TransA["Call Graphical User Interface"] 				. "`t" . F_ParseHotkey(ini_HK_Main),		F_GuiShortDef
-Menu, Submenu1Shortcuts, Add, % TransA["Copy clipboard content into ""Enter hotstring"""] . "`t" . F_ParseHotkey(ini_HK_IntoEdit), 	F_GuiShortDef
-Menu, Submenu1Shortcuts, Add, % TransA["Undo the last hotstring"] 					. "`t" . F_ParseHotkey(ini_HK_Main),		F_GuiShortDef
-Menu, Submenu1Shortcuts, Add, % TransA["Toggle triggerstring tips"] 					. "`t" . F_ParseHotkey(ini_HK_ToggleTt),	F_GuiShortDef
+Menu, Submenu1Shortcuts, Add, % TransA["Call Graphical User Interface"] 				. "`t" . F_ParseHotkey(ini_HK_Main, 	"space"),	F_GuiShortDef
+Menu, Submenu1Shortcuts, Add, % TransA["Copy clipboard content into ""Enter hotstring"""] . "`t" . F_ParseHotkey(ini_HK_IntoEdit, "space"),	F_GuiShortDef
+Menu, Submenu1Shortcuts, Add, % TransA["Undo the last hotstring"] 					. "`t" . F_ParseHotkey(ini_HK_UndoLH, 	"space"),	F_GuiShortDef
+Menu, Submenu1Shortcuts, Add, % TransA["Toggle triggerstring tips"] 					. "`t" . F_ParseHotkey(ini_HK_ToggleTt, "space"),	F_GuiShortDef
 Menu, Submenu1, 		Add, % TransA["Shortcut (hotkey) definitions"],							:Submenu1Shortcuts
 Menu, Submenu1, 		Add
 ;Warning: order of SubmenuEndChars have to be alphabetical. Keep an eye on it. This is because after change of language specific menu items are related with associative array which also keeps to alphabetical order.
@@ -6643,6 +6643,7 @@ F_ParseHotkey(WhichItem, space*)
 	local Mini := false, ShortcutLong := "", HotkeyVar := ""
 	
 	if (WhichItem != "none")
+	{
 		Loop, Parse, WhichItem
 		{
 			Mini := false
@@ -6677,12 +6678,19 @@ F_ParseHotkey(WhichItem, space*)
 					if (ShortcutLong = "~")
 						Continue
 					else
-						ShortcutLong .= " + "
+						ShortcutLong .= "+"
+						; ShortcutLong .= " + "
 				}
 				else
 					ShortcutLong .= "+"
 			}
 		}
+		StringCaseSense, On
+		ShortcutLong := StrReplace(ShortcutLong, "SCROLLLOCK", "ScrollLock")
+		ShortcutLong := StrReplace(ShortcutLong, "CAPSLOCK", 	"CapsLock")
+		ShortcutLong := StrReplace(ShortcutLong, "NUMLOCK", 	"NumLock")
+		StringCaseSense, Off
+	}
 	else
 		ShortcutLong := "None"
 	return ShortcutLong
