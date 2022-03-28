@@ -7840,7 +7840,7 @@ F_AddHotstring()
 			if (a_Triggerstring[key] == v_Triggerstring)
 				f_T_CaseMatch := true
 			OldOptions 	:= a_TriggerOptions[key]
-			OldEnDis		:= a_EnableDisable[key]
+,			OldEnDis		:= a_EnableDisable[key]
 			if (InStr(OldOptions, "C"))
 				f_OldOptionsC 	:= true
 			if (InStr(NewOptions, "C"))
@@ -8004,6 +8004,7 @@ F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Com
 , 	a_Hotstring[key] 		:= TextInsert
 , 	a_EnableDisable[key] 	:= EnDis
 , 	a_Comment[key] 		:= v_Comment
+,	a_Gain[key]			:= F_CalculateGain(v_TriggerString, TextInsert, NewOptions)
 	for index, value in a_Combined
 		if (InStr(value, v_TriggerString, true))	;case-sensitive comparison
 			a_Combined[index] := v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert
