@@ -11676,6 +11676,7 @@ F_GuiHS4_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, % EnDis, % IdButton3b
 	GuiControl, % EnDis, % IdButton4b
 	GuiControl, % EnDis, % IdButton5b
+	GuiControl, % EnDis, % IdButton6B
 	GuiControl, % EnDis, % IdText10b
 	GuiControl, % EnDis, % IdTextInfo17b
 	GuiControl, % EnDis, % IdEdit10b
@@ -11905,6 +11906,7 @@ F_GuiMain_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, % EnDis, % IdButton3
 	GuiControl, % EnDis, % IdButton4
 	GuiControl, % EnDis, % IdButton5
+	GuiControl, % EnDis, % IdButton6
 	GuiControl, % EnDis, % IdText7
 	GuiControl, % EnDis, % IdTextInfo16
 	GuiControl, % EnDis, % IdText2
@@ -12035,7 +12037,7 @@ F_GuiMain_CreateObject()
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit9 vv_Comment Limit64 
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit9 vv_Comment Limit96 
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText6,						 				% TransA["Select hotstring library"]
@@ -13242,12 +13244,15 @@ F_AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t
 F_ReplaceAHKconstants(String)
 {
 	String := StrReplace(String, "A_YYYY", 		A_YYYY)
+,	String := StrReplace(String, "A_Year", 		A_Year)
 ,	String := StrReplace(String, "A_MMMM", 		A_MMMM)
 ,	String := StrReplace(String, "A_MMM", 		A_MMM)
 ,	String := StrReplace(String, "A_MM", 		A_MM)
+,	String := StrReplace(String, "A_Mon", 		A_Mon)
 ,	String := StrReplace(String, "A_DDDD", 		A_DDDD)
 ,	String := StrReplace(String, "A_DDD", 		A_DDD)
 ,	String := StrReplace(String, "A_DD", 		A_DD)
+,	String := StrReplace(String, "A_MDay", 		A_MDay)
 ,	String := StrReplace(String, "A_WDay", 		A_WDay)
 ,	String := StrReplace(String, "A_YDay", 		A_YDay)
 ,	String := StrReplace(String, "A_YWeek", 	A_YWeek)
