@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -6737,7 +6737,7 @@ F_GuiShortDef_WhichModifier(WhichItem)
 	return a_ReturnVector
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiShortDef_CreateObjects()
+F_GuiShortDef_CreateObjects(ItemName)
 {
 	global	;assume-global mode of operation
 	local	IfWinModifier := false, IfTildeModifier := false, Mini := false, HotkeyVar := ""
@@ -6751,47 +6751,56 @@ F_GuiShortDef_CreateObjects()
 	
 	;2. Prepare all text objects according to mock-up.
 	Gui,	ShortDef: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Switch A_ThisMenuItem
-	{
-		Case % TransA["Call Graphical User Interface"]:					Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,	% TransA["Call Graphical User Interface"]
-		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,	% TransA["Copy clipboard content into ""Enter hotstring"""]
-		Case % TransA["Undo the last hotstring"]:						Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,	% TransA["Undo the last hotstring"]
-		Case % TransA["Toggle triggerstring tips"]:						Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT1,	% TransA["Toggle triggerstring tips"]
-	}
+	
+	if (InStr(ItemName, TransA["Call Graphical User Interface"]))
+		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,	% TransA["Call Graphical User Interface"]
+	if (InStr(ItemName, TransA["Copy clipboard content into ""Enter hotstring"""]))
+		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,	% TransA["Copy clipboard content into ""Enter hotstring"""]
+	if (InStr(ItemName, TransA["Undo the last hotstring"]))
+		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT1,	% TransA["Undo the last hotstring"]
+	if (InStr(ItemName, TransA["Toggle triggerstring tips"]))
+		Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT1,	% TransA["Toggle triggerstring tips"]
+	
 	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT2,				% TransA["Current shortcut (hotkey):"]
 	
-	Switch A_ThisMenuItem
-	{
-		Case % TransA["Call Graphical User Interface"]:					Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_Main, 		"space")
-		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_IntoEdit, 	"space")
-		Case % TransA["Undo the last hotstring"]:						Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_UndoLH, 	"space")
-		Case % TransA["Toggle triggerstring tips"]:						Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT3,	% F_ParseHotkey(ini_HK_ToggleTt, 	"space")
-	}
+	if (InStr(ItemName, TransA["Call Graphical User Interface"]))
+		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_Main, 		"space")
+	if (InStr(ItemName, TransA["Copy clipboard content into ""Enter hotstring"""]))
+		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_IntoEdit, 	"space")
+	if (InStr(ItemName, TransA["Undo the last hotstring"]))
+		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_UndoLH, 	"space")
+	if (InStr(ItemName, TransA["Toggle triggerstring tips"]))
+		Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT3,	% F_ParseHotkey(ini_HK_ToggleTt, 	"space")
+
 	Gui, ShortDef: Font, 	% "s" . c_FontSize + 2 . A_Space . "cBlue",		% c_FontType
 	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT4,				ⓘ
 	Gui,	ShortDef: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 	% c_FontType
-	Switch A_ThisMenuItem
+	
+	if (InStr(ItemName, TransA["Call Graphical User Interface"]))
 	{
-		Case % TransA["Call Graphical User Interface"]:
-			F_HK_CallGUIInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_CallGUIInfo"])
-			GuiControl +g, % IdShortDefT4, % F_HK_CallGUIInfo
-			a_WhichKeys := F_GuiShortDef_WhichModifier("Main")
-
-		Case % TransA["Copy clipboard content into ""Enter hotstring"""]:
-			F_HK_ClipCopyInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_ClipCopyInfo"])
-			GuiControl +g, % IdShortDefT4, % F_HK_ClipCopyInfo
-			a_WhichKeys := F_GuiShortDef_WhichModifier("IntoEdit")
-
-		Case % TransA["Undo the last hotstring"]:
-			F_HK_UndoInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_UndoInfo"])
-			GuiControl +g, % IdShortDefT4, % F_HK_UndoInfo
-			a_WhichKeys := F_GuiShortDef_WhichModifier("UndoInfo")
-		
-		Case % TransA["Toggle triggerstring tips"]:
-			F_HK_UndoInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_ToggleTtInfo"])
-			GuiControl +g, % IdShortDefT4, % F_HK_UndoInfo
-			a_WhichKeys := F_GuiShortDef_WhichModifier("ToggleTt")
+		F_HK_CallGUIInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_CallGUIInfo"])
+		GuiControl +g, % IdShortDefT4, % F_HK_CallGUIInfo
+		a_WhichKeys := F_GuiShortDef_WhichModifier("Main")
 	}
+	if (InStr(ItemName, TransA["Copy clipboard content into ""Enter hotstring"""]))
+	{
+		F_HK_ClipCopyInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_ClipCopyInfo"])
+		GuiControl +g, % IdShortDefT4, % F_HK_ClipCopyInfo
+		a_WhichKeys := F_GuiShortDef_WhichModifier("IntoEdit")
+	}
+	if (InStr(ItemName, TransA["Undo the last hotstring"]))
+	{
+		F_HK_UndoInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_UndoInfo"])
+		GuiControl +g, % IdShortDefT4, % F_HK_UndoInfo
+		a_WhichKeys := F_GuiShortDef_WhichModifier("UndoInfo")
+	}
+	if (InStr(ItemName, TransA["Toggle triggerstring tips"]))
+	{
+		F_HK_UndoInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_ToggleTtInfo"])
+		GuiControl +g, % IdShortDefT4, % F_HK_UndoInfo
+		a_WhichKeys := F_GuiShortDef_WhichModifier("ToggleTt")	
+	}
+	
 	IfWinModifier 	 := a_WhichKeys[1]
 , 	IfTildeModifier := a_WhichKeys[2]
 , 	IfCapsLock 	 := a_WhichKeys[3]
@@ -7067,14 +7076,15 @@ F_UpdateStateOfLockKeys(ini_HK_ToggleTt, ini_TTTtEn)
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiShortDef()
+F_GuiShortDef(ItemName)
 {
 	global	;assume-global mode of operation
 	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
 	
-	F_GuiShortDef_CreateObjects()
+	OutputDebug, % "ItemName:" . A_Space . ItemName
+	F_GuiShortDef_CreateObjects(ItemName)
 	F_GuiShortDef_DetermineConstraints()
 	
 	Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
