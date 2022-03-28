@@ -12756,6 +12756,8 @@ F_GuiAbout_CreateObjects()
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT4,									% TransA["default"]
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT5,									% TransA["Application mode"] . ":"
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT6,									ahk
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT7,									% "AutoHotkey version" . ":"
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT8,									% A_AhkVersion
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiAbout_DetermineConstraints()
@@ -12766,6 +12768,7 @@ F_GuiAbout_DetermineConstraints()
 		,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
 		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
 		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
+		,v_OutVarTemp4 := 0, 	v_OutVarTemp4X := 0, 	v_OutVarTemp4Y := 0, 	v_OutVarTemp4W := 0, 	v_OutVarTemp4H := 0
 							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
 		,HwndIdLongest := 0, 	IdLongest := 0, MaxText := 0
 	
@@ -12798,7 +12801,8 @@ F_GuiAbout_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp1, Pos, % IdAboutT1
 	GuiControlGet, v_OutVarTemp2, Pos, % IdAboutT3
 	GuiControlGet, v_OutVarTemp3, Pos, % IdAboutT5
-	MaxText := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W)
+	GuiControlGet, v_OutVarTemp4, Pos, % IdAboutT7
+	MaxText := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W, v_OutVarTemp4W)
 	GuiControlGet, v_OutVarTemp, Pos, % IdLine2
 	v_xNext := c_xmarg, v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg
 	GuiControl, Move, % IdAboutT1, % "x" . v_xNext . A_Space . "y" . v_yNext
@@ -12820,13 +12824,17 @@ F_GuiAbout_DetermineConstraints()
 	else
 		GuiControl, , % IdAboutT6, ahk
 	GuiControl, Move, % IdAboutT6, % "x" . v_xNext . A_Space . "y" . v_yNext
+	v_xNext := c_xmarg, v_yNext += HofText
+	GuiControl, Move, % IdAboutT7, % "x" . v_xNext . A_Space . "y" . v_yNext
+	v_xNext := MaxText + 3 * c_xmarg
+	GuiControl, Move, % IdAboutT8, % "x" . v_xNext . A_Space . "y" . v_yNext
 	
 	GuiControlGet, v_OutVarTemp1, Pos, % IdLongest ; weight of the longest text
 	GuiControlGet, v_OutVarTemp2, Pos, % IdAboutOkButton 
 	v_wNext := v_OutVarTemp2W + 2 * c_xmarg
 	v_xNext := (v_OutVarTemp1W // 2) - (v_wNext // 2)
 	GuiControlGet, v_OutVarTemp, Pos, % IdLine2
-	v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg + 3 * HofText
+	v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg + 4 * HofText
 	GuiControl, Move, % IdAboutOkButton, % "x" . v_xNext . "y" . A_Space . v_yNext . "w" . v_wNext
 	
 	v_xNext := v_OutVarTemp1X + v_OutVarTemp1W - 96 ;96 = chosen size of icon
