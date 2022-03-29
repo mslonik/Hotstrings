@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -491,7 +491,7 @@ Critical, Off
 	; OutputDebug, % "Destroy..."
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
-	OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString . "`n"
+	; OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString . "`n"
 	v_InputString := ""
 	;OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString . "`n"
 	return
@@ -1427,7 +1427,7 @@ F_Load_ini_HADL()
 	}
 	if (!IsLibraryFolderEmpty1) and (!IsLibraryFolderEmpty2)
 	{
-		MsgBox,  % 64 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Both optional library folder locations contain *.csv files. Would you like to use the first one?"]
+		MsgBox,  % 64 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Both optional library folder locations contain *.csv files. Would you like to use the first one?"] . A_Space
 			. "(If you answer ""No"", the second one will be used)." . "`n`n"
 			. A_ScriptDir . "\" . "Libraries" . "`n"
 			. A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"
@@ -2729,8 +2729,12 @@ F_LoadConfiguration()
 		ini_HK_ToggleTt 		:= "none"
 		IniWrite, % ini_HK_ToggleTt, % ini_HADConfig, Configuration, HK_ToggleTt
 	}
+     
 	if (ini_HK_ToggleTt != "none")
+     {
 		Hotkey, % ini_HK_ToggleTt, F_ToggleTt, On
+          F_UpdateStateOfLockKeys(ini_HK_ToggleTt, ini_TTTtEn)
+     }
 
 	ini_THLog					:= false
 	IniRead, ini_THLog,						% ini_HADConfig, Configuration, THLog,			% A_Space
