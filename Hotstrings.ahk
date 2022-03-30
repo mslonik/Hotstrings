@@ -9027,7 +9027,11 @@ F_DeleteHotstring()
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
 		return
 	}
-	MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Selected Hotstring will be deleted. Do you want to proceed?"]
+	LV_GetText(triggerstring, 	v_SelectedRow, 1)	;triggerstring
+	LV_GetText(options, 		v_SelectedRow, 2)	;options
+	LV_GetText(EnDis,			v_SelectedRow, 4)	;enabled or disabled definition
+	MsgBox, % 256 + 64 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Selected Hotstring will be deleted. Do you want to proceed?"] . "`n`n"
+		. triggerstring . A_Tab . options . A_Tab . EnDis
 	IfMsgBox, No
 		return
 	TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
@@ -9037,9 +9041,6 @@ F_DeleteHotstring()
 	FileDelete, % LibraryFullPathAndName
 	
 	;4. Disable selected hotstring.
-	LV_GetText(triggerstring, 	v_SelectedRow, 1)	;triggerstring
-	LV_GetText(options, 		v_SelectedRow, 2)	;options
-	LV_GetText(EnDis,			v_SelectedRow, 3)	;enabled or disabled definition
 
 	;In order to switch off, some options have to run in "reversed" state:
 	if (EnDis = "En")	;only if definition is enabled, at first try to disable it (if it is disabled, just delete it)
@@ -9102,13 +9103,14 @@ F_DeleteHotstring()
 		}
 	v_Pointer += v_SelectedRow - 1
 	
-	a_Library.RemoveAt(v_Pointer)
-	a_Triggerstring.RemoveAt(v_Pointer)
-	a_TriggerOptions.RemoveAt(v_Pointer)
-	a_OutputFunction.RemoveAt(v_Pointer)
-	a_EnableDisable.RemoveAt(v_Pointer)
-	a_Hotstring.RemoveAt(v_Pointer)
-	a_Comment.RemoveAt(v_Pointer)
+	a_Library			.RemoveAt(v_Pointer)
+	a_Triggerstring	.RemoveAt(v_Pointer)
+	a_TriggerOptions	.RemoveAt(v_Pointer)
+	a_OutputFunction	.RemoveAt(v_Pointer)
+	a_EnableDisable	.RemoveAt(v_Pointer)
+	a_Hotstring		.RemoveAt(v_Pointer)
+	a_Comment			.RemoveAt(v_Pointer)
+	a_Gain			.RemoveAt(v_Pointer)
 	
 	;7. Update table for searching
 	F_Searching("Reload")
