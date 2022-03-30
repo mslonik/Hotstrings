@@ -496,7 +496,7 @@ Critical, Off
 	;OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString . "`n"
 	return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#if WinExist("ahk_id" HMenuCliHwnd)
+#if WinExist("ahk_id" HMenuCliHwnd)	;MCLI
 	Tab::
 	+Tab::
 	1::
@@ -523,7 +523,7 @@ Critical, Off
 		return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#if WinExist("ahk_id" HMenuAHKHwnd)
+#if WinExist("ahk_id" HMenuAHKHwnd)	;MSI
 	Tab::
 	+Tab::
 	1::
@@ -10563,21 +10563,11 @@ F_LoadTriggTipsFromFile(LibraryFilename)
 			Switch A_Index
 			{
 				Case 1:	tmp2 := A_LoopField
-				     ; a_TriggerOptions.Push(A_LoopField)
-				     
 				Case 2:	tmp1 := A_LoopField
-				     ; a_Triggerstring.Push(A_LoopField)
-				     
-				; Case 3:	a_OutputFunction.Push(A_LoopField)
 				Case 4:	tmp3 := A_LoopField
-				     ; a_EnableDisable.Push(A_LoopField)
-				     
 				Case 5:	tmp4 := A_LoopField
-				     ; a_Hotstring.Push(A_LoopField)
-				; Case 6:	a_Comment.Push(A_LoopField)
 			}
 		}
-		; if (ini_TTTtEn)	;Triggerstring Tips Column Trigger
 		a_Combined.Push(tmp1 . "|" . tmp2 . "|" . tmp3 . "|" . tmp4)
 	}	
 }
@@ -10593,13 +10583,13 @@ F_UnloadTriggTipsFromMemory(LibraryFilename)
 		{
 			while (a_Library[key] = LibraryName)
 				{
-					a_Library.RemoveAt(key)
-					a_Triggerstring.RemoveAt(key)
-					a_TriggerOptions.RemoveAt(key)
-					a_EnableDisable.RemoveAt(key)
-					a_OutputFunction.RemoveAt(key)
-					a_Hotstring.RemoveAt(key)
-					a_Comment.RemoveAt(key)
+					a_Library			.RemoveAt(key)
+					a_Triggerstring	.RemoveAt(key)
+					a_TriggerOptions	.RemoveAt(key)
+					a_EnableDisable	.RemoveAt(key)
+					a_OutputFunction	.RemoveAt(key)
+					a_Hotstring		.RemoveAt(key)
+					a_Comment			.RemoveAt(key)
 				}
 		}
 	}
@@ -11302,8 +11292,8 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 					options := A_LoopField
 					a_TriggerOptions.Push(A_LoopField)
 				Case 2:	
-					Triggerstring := A_LoopField
-					a_Triggerstring.Push(A_LoopField)
+					Triggerstring := F_ConvertEscapeSequences(A_LoopField)
+					a_Triggerstring.Push(Triggerstring)
 				Case 3:	a_OutputFunction.Push(A_LoopField)
 				Case 4:	a_EnableDisable.Push(A_LoopField)
 				Case 5:	
@@ -11363,7 +11353,7 @@ F_CalculateGain(Triggerstring, Hotstring, options)
 			LenHots += StrLenUnicode(temp) + CntUpper
 ,			LenTrig += F_CountTrigConstants(Triggerstring) + StrLen(Triggerstring)
 ,			a_MultiGain[A_Index] := LenHots - LenTrig
-,			CntUpper := 0, LenHots := 0
+,			CntUpper := 0, LenHots := 0, LenTrig := 0
 		}
 		return, a_MultiGain
 	}
@@ -11398,7 +11388,13 @@ F_CalculateGain(Triggerstring, Hotstring, options)
 				CntUpper++
 		}
 		LenHots += StrLenUnicode(Hotstring) + CntUpper
-		LenTrig += F_CountTrigConstants(Triggerstring) + StrLen(Triggerstring)
+,		CntUpper := 0		
+		Loop, Parse, % Triggerstring
+		{    
+			if A_LoopField is upper
+				CntUpper++
+		}
+		LenTrig += F_CountTrigConstants(Triggerstring) + StrLen(Triggerstring) + CntUpper
           return, LenHots - LenTrig
 	}
 }
@@ -13285,6 +13281,7 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 	global	;assume-global mode of operation
 	local	temp := 0
 	Critical, On
+	v_Triggerstring := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", ,2) + 1)	;The most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
@@ -13305,6 +13302,7 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 	global	;assume-global mode of operation
 	local	temp := 0
 	Critical, On
+	v_Triggerstring := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", ,2) + 1)	;The most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
@@ -13325,6 +13323,7 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 	global	;assume-global mode of operation
 	local	temp := 0
 	Critical, On
+	v_Triggerstring := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", ,2) + 1)	;The most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
@@ -13382,6 +13381,7 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 
 	Critical, On
 	; OutputDebug, % A_ThisFunc . "`n"
+	v_Triggerstring := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", ,2) + 1)	;The most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
@@ -13400,16 +13400,16 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 F_DetermineGain(a_Triggerstring, v_Triggerstring, Parameter*)
 {
 	global	;assume-global mode of operation
-	local	key := 0, value := ""
+	local	key := 0
 	if (!Parameter[1])
 	{
-		for key, value in a_Triggerstring
+		for key in a_Triggerstring
 			if (a_Triggerstring[key] == v_Triggerstring)
 				return, a_Gain[key]
 	}
 	else
 	{
-		for key, value in a_Triggerstring
+		for key in a_Triggerstring
 			if (a_Triggerstring[key] == v_Triggerstring)
 				return, a_Gain[key][Parameter[1]]
 	}
@@ -13482,6 +13482,7 @@ F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clip
 	local oWord := "", ThisHotkey := A_ThisHotkey, vFirstLetter1 := "", vFirstLetter2 := "", vOutputVar := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, temp := 0
 		, fFirstLetterCap := false, InputString := ""
 	; OutputDebug, % A_ThisFunc . "`n"
+	v_Triggerstring := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", ,2) + 1)	;The most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
