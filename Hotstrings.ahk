@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -7852,7 +7852,7 @@ F_AddHotstring()
 			,Overwrite := "", WinHWND := "", WhichGuiEnable := ""
 
 	;1. Read all inputs. 
-	if (F_ReadUserInputs(TextInsert, NewOptions, OnOff, EnDis, SendFunHotstringCreate, SendFunFileFormat))
+	if (F_ReadUserInputs(TextInsert, NewOptions, OnOff, EnDis, SendFunHotstringCreate, SendFunFileFormat))	;return true (1) in case of any problem. 
 		return
 	SelectedLibraryName := SubStr(v_SelectHotstringLibrary, 1, -4)	
 	;Disable all GuiControls for time of adding / editing of d(t, o, h)	
@@ -11887,17 +11887,17 @@ F_GuiMain_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 		GuiControlGet, PS_IdEdit7, Enabled, % IdEdit7
 		GuiControlGet, PS_IdEdit8, Enabled, % IdEdit8
 	}
-	if (EnDis = "Enable") and (PS_IdEdit3)	
+	if (PS_IdEdit3)	
 		GuiControl, % EnDis, % IdEdit3
-	if (EnDis = "Enable") and (PS_IdEdit4)	
+	if (PS_IdEdit4)	
 		GuiControl, % EnDis, % IdEdit4
-	if (EnDis = "Enable") and (PS_IdEdit5)
+	if (PS_IdEdit5)
 		GuiControl, % EnDis, % IdEdit5
-	if (EnDis = "Enable") and (PS_IdEdit6)	
+	if (PS_IdEdit6)	
 		GuiControl, % EnDis, % IdEdit6
-	if (EnDis = "Enable") and (PS_IdEdit7)	
+	if (PS_IdEdit7)	
 		GuiControl, % EnDis, % IdEdit7
-	if (EnDis = "Enable") and (PS_IdEdit8)	
+	if (PS_IdEdit8)	
 		GuiControl, % EnDis, % IdEdit8
 	GuiControl, % EnDis, % IdText5
 	GuiControl, % EnDis, % IdTextInfo14
