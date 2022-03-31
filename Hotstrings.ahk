@@ -483,7 +483,7 @@ Critical, Off
 ~Home::
 ~End::
 ~Esc::
-	OutputDebug, % "Regular:" . "`n"
+	; OutputDebug, % "Regular:" . "`n"
 	ToolTip,	;this line is necessary to close tooltips.
 	; OutputDebug, % "Destroy..."
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
@@ -1662,7 +1662,7 @@ F_OneCharPressed(ih, Char)
 	; Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_InitiateInputHook()
+F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
 {
 	global	;assume-global mode of operation
 	v_InputString := "", v_Triggerstring := "", v_UndoHotstring := ""	;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
@@ -1693,7 +1693,7 @@ F_InputHookOnEnd(ih)	;for debugging purposes
 F_BackspaceProcessing()
 {
 	global	;assume-global mode of operation
-	OutputDebug, % "F_BackspaceProcessing, beginning" . "`n"
+	; OutputDebug, % "F_BackspaceProcessing, beginning" . "`n"
 	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 	{
 		if (ini_MHSEn)
@@ -1705,7 +1705,7 @@ F_BackspaceProcessing()
 	else
 	{
 		v_InputString := SubStr(v_InputString, 1, -1)	;whole string except last character
-		OutputDebug, % "v_InputString after BS:" . A_Tab . v_InputString . "IsCritical:" . A_Tab . A_IsCritical . "`n"
+		; OutputDebug, % "v_InputString after BS:" . A_Tab . v_InputString . "IsCritical:" . A_Tab . A_IsCritical . "`n"
 		if (ini_TTTtEn) and (v_InputString)
 		{
 			F_PrepareTriggerstringTipsTables2()
@@ -1719,7 +1719,7 @@ F_BackspaceProcessing()
 		if (!v_InputString)	;if v_InputString = "" = empty
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
-	OutputDebug, % "F_BackspaceProcessing, end" . "`n"
+	; OutputDebug, % "F_BackspaceProcessing, end" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GUIinit()
@@ -2789,7 +2789,6 @@ F_GuiEvents(OneTime*)
 		if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 			WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 		Gui, GuiEvents: Show, Hide
-		; Gui, GuiEvents: Show, Hide Center AutoSize
 		
 		DetectHiddenWindows, On
 		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . GuiEventsHwnd
@@ -3069,7 +3068,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B4 gF_EvSM_B4,			% TransA["Cancel"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_CloseGuiEventsSubWindow(WhatGuiToDestroy)
+F_CloseSubGui(WhatGuiToDestroy)
 {
      global ;assume-global mode of operation
 	if (WinExist("ahk_id" HS3GuiHwnd))
@@ -3505,7 +3504,7 @@ F_EvSM_B4()	;static menus, button Cancel
 {
 	global ;assume-global mode
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
+     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvSM_B2()	;static menus, button Apply
@@ -3554,7 +3553,7 @@ F_EvSM_B3()	;static menus, button Close
 	IniWrite, % ini_TTCn,	% ini_HADConfig, Event_TriggerstringTips,	TTCn
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
-     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
+     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvSM_B1()	;static menus, button Preview	
@@ -3604,7 +3603,7 @@ F_EvAT_B4()	;Event Active Triggerstring Tips Button Cancel
 {
 	global ;assume-global mode
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
+     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvAT_B2()	;Event Active Triggerstring Tips Button Apply
@@ -3638,7 +3637,7 @@ F_EvAT_B3()	;Event Active Triggerstring Tips Button Close
 	IniWrite, % ini_ATEn, 	% ini_HADConfig, Event_ActiveTriggerstringTips, 	ATEn
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
-     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
+     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
 	if (ini_TTCn = 4)		;static triggerstring / hotstring GUI 
 	{
 		Gui, TT_C4: Destroy
@@ -3775,14 +3774,14 @@ F_EvTt_B3()	;Event Tooltip (is triggered) Button Close
 	IniWrite, % ini_TTCn,	% ini_HADConfig, Event_TriggerstringTips,	TTCn
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
-     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
+     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvTt_B4()	;Event Tooltip (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
+     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvTt_S2()
@@ -4002,14 +4001,14 @@ F_EvUH_B4()	;Event Undo Hotstring (is triggered) Button Close
 	IniWrite, % ini_UHSD,	% ini_HADConfig, Event_UndoHotstring,	UHSD
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
-     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
+     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvUH_B5()	;Event Undo Hotstring (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
+     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvUH_S3()
@@ -4123,7 +4122,7 @@ F_EvMH_B4()	;Menu Hotstring (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
+     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvMH_B2()	;Apply Button
@@ -4170,7 +4169,7 @@ F_EvMH_B3()	;Button Close
 	IniWrite, % ini_MHSD,	% ini_HADConfig, Event_MenuHotstring,		MHSD
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
-     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
+     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvMH_B1()	;Sound test
@@ -4813,7 +4812,7 @@ F_EvBH_B5()	;Events Basic Hotstring (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
+     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvBH_B3()	;Events Basic Hotstring (is triggered) Button Apply
@@ -4884,7 +4883,7 @@ F_EvBH_B4(CloseGuiEvents)	;Events Basic Hotstring (is triggered) Button Close
 	IniWrite, % ini_OHSD,	% ini_HADConfig, Event_BasicHotstring,	OHSD
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
-     F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "GuiEvents")
+     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvBH_S3()
@@ -5839,7 +5838,7 @@ F_EventsStyling_Close(WhichTab)
 	IniWrite, % %DynVarRef1%, % ini_HADConfig, % "EvStyle_" . WhichTab, % WhichTab . "TypefaceFont"
 	DynVarRef1 	:= "ini_" . WhichTab . "TySize"
 	IniWrite, % %DynVarRef1%, % ini_HADConfig, % "EvStyle_" . WhichTab, % WhichTab . "TypefaceSize"
-	F_CloseGuiEventsSubWindow(WhatGuiToDestroy := WhichTab . "Demo")
+	F_CloseSubGui(WhatGuiToDestroy := WhichTab . "Demo")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EventsStyling_B7()	;button: Close
@@ -5863,20 +5862,20 @@ F_EventsStyling_B8()	;button: Cancel
 	Switch EventsStylingTab3
 	{
 		Case % TransA["Triggerstring tips styling"]:				
-			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "TTDemo")
-			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "EventsStyling")
+			F_CloseSubGui(WhatGuiToDestroy := "TTDemo")
+			F_CloseSubGui(WhatGuiToDestroy := "EventsStyling")
 		Case % TransA["Hotstring menu styling"]:				
-			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HMDemo")
-			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "EventsStyling")
+			F_CloseSubGui(WhatGuiToDestroy := "HMDemo")
+			F_CloseSubGui(WhatGuiToDestroy := "EventsStyling")
 		Case % TransA["Active triggerstring tips styling"]:		
-			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "ATDemo")
-			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "EventsStyling")
+			F_CloseSubGui(WhatGuiToDestroy := "ATDemo")
+			F_CloseSubGui(WhatGuiToDestroy := "EventsStyling")
 		Case % TransA["Tooltip: ""Hotstring was triggered"""]:		
-			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HTDemo")
-			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "EventsStyling")
+			F_CloseSubGui(WhatGuiToDestroy := "HTDemo")
+			F_CloseSubGui(WhatGuiToDestroy := "EventsStyling")
 		Case % TransA["Tooltip: ""Undid the last hotstring"""]:	
-			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "UHDemo")
-			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "EventsStyling")
+			F_CloseSubGui(WhatGuiToDestroy := "UHDemo")
+			F_CloseSubGui(WhatGuiToDestroy := "EventsStyling")
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6288,7 +6287,6 @@ F_EventsStyling(OneTime*)
 	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	Gui, EventsStyling: Show, Hide
-	; Gui, EventsStyling: Show, Hide Center AutoSize
 	
 	if (OneTime[3])
 	{
@@ -6422,7 +6420,7 @@ F_GuiVersionUpdate()
 	
 	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-	Gui, VersionUpdate: Show, Hide Center AutoSize
+	Gui, VersionUpdate: Show, Hide
 	
 	DetectHiddenWindows, On
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . VersionUpdateHwnd
@@ -7158,7 +7156,7 @@ F_GuiShortDef(ItemName)
 	Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-	Gui, ShortDef: Show, Hide Center AutoSize
+	Gui, ShortDef: Show, Hide
 	
 	DetectHiddenWindows, On
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . ShortDefHwnd
@@ -8918,7 +8916,7 @@ F_GuiHSdelay()
 	GuiControl, Move, % IdHD_T1, % "x" v_xNext
 	
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-	Gui, HSDel: Show, Hide AutoSize 
+	Gui, HSDel: Show, Hide
 	DetectHiddenWindows, On
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . HotstringDelay
 	DetectHiddenWindows, Off
@@ -8997,7 +8995,7 @@ F_GuiAddLibrary()
 	GuiControl, ALib: Move, % IdButt2, % "x" xButt2  . A_Space . "y" v_OutVarTemp1Y . A_Space . "w" v_WidthButt2
 	
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-	Gui, ALib: Show, Hide AutoSize
+	Gui, ALib: Show, Hide
 	DetectHiddenWindows, On
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . AddLibrary
 	DetectHiddenWindows, Off
@@ -13046,7 +13044,7 @@ F_GuiAbout()
 	
 	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-	Gui, MyAbout: Show, Hide Center AutoSize
+	Gui, MyAbout: Show, Hide
 	
 	DetectHiddenWindows, On
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . MyAboutGuiHwnd
