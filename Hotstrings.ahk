@@ -246,7 +246,7 @@ Func_GuiEventsMenu		:= func("F_GuiEvents")
 Menu, Submenu1,		Add, % TransA["Events: signaling"],									% Func_GuiEventsMenu
 Func_GuiEventsMenu.Call(true)		
 Func_GuiStylingMenu		:= func("F_EventsStyling")		
-Menu, Submenu1,		Add, % TransA["Events: styling"],				% Func_GuiStylingMenu
+Menu, Submenu1,		Add, % TransA["Events: styling"],										% Func_GuiStylingMenu
 Func_GuiStylingMenu.Call(true)		
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 								:ConfGUI
 Menu, Submenu1,		Add		
@@ -2788,7 +2788,8 @@ F_GuiEvents(OneTime*)
 	{
 		if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 			WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-		Gui, GuiEvents: Show, Hide Center AutoSize
+		Gui, GuiEvents: Show, Hide
+		; Gui, GuiEvents: Show, Hide Center AutoSize
 		
 		DetectHiddenWindows, On
 		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . GuiEventsHwnd
@@ -2796,11 +2797,11 @@ F_GuiEvents(OneTime*)
 		if (Window1W)
 		{
 			NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
-			NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
-			Gui, GuiEvents: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . "Events configuration"
+,			NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+			Gui, GuiEvents: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Events: styling"]
 		}
 		else
-			Gui, GuiEvents: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . "Events configuration"
+			Gui, GuiEvents: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Events: styling"]
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2827,7 +2828,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvBH_R1 vEvBH_R1R2 gF_EvBH_R1R2,	% TransA["yes"]
 	Gui, GuiEvents: Add,	Radio, 	HwndIdEvBH_R2 gF_EvBH_R1R2,			% TransA["no"]
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvBH_T15 0x7					; horizontal line → black
-	Gui,GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T3,						% TransA["Tooltip timeout"] . ":"
 	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvBH_T4,						ⓘ
@@ -5861,11 +5862,21 @@ F_EventsStyling_B8()	;button: Cancel
 	global ;assume-global mode of operation
 	Switch EventsStylingTab3
 	{
-		Case % TransA["Triggerstring tips styling"]:				F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "TTDemo")
-		Case % TransA["Hotstring menu styling"]:				F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HMDemo")
-		Case % TransA["Active triggerstring tips styling"]:		F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "ATDemo")
-		Case % TransA["Tooltip: ""Hotstring was triggered"""]:		F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HTDemo")
-		Case % TransA["Tooltip: ""Undid the last hotstring"""]:	F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "UHDemo")
+		Case % TransA["Triggerstring tips styling"]:				
+			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "TTDemo")
+			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "EventsStyling")
+		Case % TransA["Hotstring menu styling"]:				
+			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HMDemo")
+			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "EventsStyling")
+		Case % TransA["Active triggerstring tips styling"]:		
+			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "ATDemo")
+			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "EventsStyling")
+		Case % TransA["Tooltip: ""Hotstring was triggered"""]:		
+			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "HTDemo")
+			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "EventsStyling")
+		Case % TransA["Tooltip: ""Undid the last hotstring"""]:	
+			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "UHDemo")
+			F_CloseGuiEventsSubWindow(WhatGuiToDestroy := "EventsStyling")
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6276,7 +6287,8 @@ F_EventsStyling(OneTime*)
 	
 	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-	Gui, EventsStyling: Show, Hide Center AutoSize
+	Gui, EventsStyling: Show, Hide
+	; Gui, EventsStyling: Show, Hide Center AutoSize
 	
 	if (OneTime[3])
 	{
