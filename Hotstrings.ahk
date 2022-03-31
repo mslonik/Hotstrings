@@ -354,11 +354,19 @@ Critical, Off
 	^Down::
 	^Enter::
 		Critical, On
+		SetTimer, TurnOff_Ttt, Off
 		; OutputDebug, % "WinExist(ahk_id TT_C1_Hwnd) or WinExist(ahk_id TT_C2_Hwnd) or WinExist(ahk_id TT_C3_Hwnd)" . "`n"
 		F_TTMenu_Keyboard()
 		return
 	~LButton::			;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected → F_TTMenu_Mouse().
 		F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_Mouse is lower than this "interrupt"
+		return
+	LWin::
+	RWin::	
+	~Control::	;pressing of any modifier stops timer (triggerstring tips menu will not dissapear if time is for Triggerstring tips is limited)
+	~Alt::
+	~Shift::
+		SetTimer, TurnOff_Ttt, Off
 		return
 #if
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -875,7 +883,6 @@ F_HMenuSI_Keyboard()
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", temp := 0
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	
-;	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_StaticMenu_Keyboard it was crucial for ControlSend to run correctly
 	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -948,7 +955,7 @@ F_HMenuSI_Keyboard()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_MouseMouse is lower than this "interrupt"
 {
-	global	;assume-global mode
+	global	;assume-global mode of operation
 	local	OutputVar := 0, OutputVarWin := 0, OutputVarControl := "", OutputVarTemp := ""
 	OutputDebug, % "LButton:" . A_Tab . "v_InputString:" . A_Tab . v_InputString . "`n"
 	if (!ini_ATEn)
@@ -1587,17 +1594,17 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 	;1. determine size of window on top of which triggerstring tips GUI will be displayed
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A		
 	;2. determine position and size of triggerstring window
-	Gui, % GuiName . ": Show", x%MenuX% y%MenuY% NoActivate Hide
+	Gui, % GuiName . ": Show", x%MenuX% y%MenuY% Hide
 	DetectHiddenWindows, On
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . WindowHandle
 	NewX := Window2X, NewY := Window2Y - Window2H, NewW := Window2W, NewH := Window2H	;bottom -> top
-	Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate Hide	;coordinates: screen
+	Gui, % GuiName . ": Show", x%NewX% y%NewY% Hide	;coordinates: screen
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . WindowHandle
 	;3. determine if triggerstring tips menu fits to this window
 	if (Window2Y < Window1Y)	;if triggerstring tips are above the window
 	{
 		NewY += Window2H + 40	;top -> bottom
-		Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate Hide 	;coordinates: screen
+		Gui, % GuiName . ": Show", x%NewX% y%NewY% Hide 	;coordinates: screen
 		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . WindowHandle
 	}
 	if (Window2X + Window2W > Window1X + Window1W)	;if triggerstring tips are too far to the right
@@ -2540,7 +2547,7 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 {
 	global	;assume-global mode
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, v_MenuMax := 0
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 0, v_MenuMax := 0
 
 	; SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_StaticMenu_Keyboard it was crucial for ControlSend to run correctly
 	if (!ini_ATEn)
@@ -8207,12 +8214,107 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, B
 		Case "SendPlay (SP)":			SendFunHotstringCreate 	:= "F_HOF_SP", 	SendFunFileFormat 	:= "SP"
 		Case "SendEvent (SE)":			SendFunHotstringCreate 	:= "F_HOF_SE", 	SendFunFileFormat 	:= "SE"
 	}
+
+	if (SendFunHotstringCreate = "F_HOF_SI") or (SendFunHotstringCreate = "F_HOF_MSI") or (SendFunHotstringCreate = "F_HOF_SE")
+		{	; provide warning to user if definition contains one of the escaped characters: {}^!+#
+			WhichEscape := "{"
+			if (InStr(TextInsert, WhichEscape))
+				{
+					if (RegExMatch(TextInsert, "[^{]\" . WhichEscape . "|\" . WhichEscape . "[^}]|[^}]\" . WhichEscape . "$"))
+						return, F_MessageAboutEscapedCharacter(WhichEscape)
+				}
+			WhichEscape := "}"
+			if (InStr(TextInsert, WhichEscape))
+				{
+					if (RegExMatch(TextInsert, "[^{]\" . WhichEscape . "|\" . WhichEscape . "[^}]|[^}]\" . WhichEscape . "$"))
+						return, F_MessageAboutEscapedCharacter(WhichEscape)
+				}
+			WhichEscape := "^"
+			if (InStr(TextInsert, WhichEscape))
+				{
+					if (RegExMatch(TextInsert, "[^{]\" . WhichEscape . "|\" . WhichEscape . "[^}]|[^}]\" . WhichEscape . "$"))
+						return, F_MessageAboutEscapedCharacter(WhichEscape)
+				}
+			WhichEscape := "!"
+			if (InStr(TextInsert, WhichEscape))
+				{
+					if (RegExMatch(TextInsert, "[^{]\" . WhichEscape . "|\" . WhichEscape . "[^}]|[^}]\" . WhichEscape . "$"))
+						return, F_MessageAboutEscapedCharacter(WhichEscape)
+				}
+			WhichEscape := "+"
+			if (InStr(TextInsert, WhichEscape))
+				{
+					if (RegExMatch(TextInsert, "[^{]\" . WhichEscape . "|\" . WhichEscape . "[^}]|[^}]\" . WhichEscape . "$"))
+						return, F_MessageAboutEscapedCharacter(WhichEscape)
+				}
+			WhichEscape := "#"
+			if (InStr(TextInsert, WhichEscape))
+				{
+					if (RegExMatch(TextInsert, "[^{]\" . WhichEscape . "|\" . WhichEscape . "[^}]|[^}]\" . WhichEscape . "$"))
+						return, F_MessageAboutEscapedCharacter(WhichEscape)
+				}
+		}
+		if (SendFunHotstringCreate = "F_HOF_SP")
+		{
+			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["""SP"" or SendPlay may have no effect at all if UAC is enabled, even if the script is running as an administrator. For more information, refer to the AutoHotkey FAQ (help)."]
+			WhichEscape := "{"
+			if (InStr(TextInsert, WhichEscape))
+				{
+					if (RegExMatch(TextInsert, "[^{]\" . WhichEscape . "|\" . WhichEscape . "[^}]|[^}]\" . WhichEscape . "$"))
+						return, F_MessageAboutEscapedCharacter(WhichEscape)
+				}
+			WhichEscape := "}"
+			if (InStr(TextInsert, WhichEscape))
+				{
+					if (RegExMatch(TextInsert, "[^{]\" . WhichEscape . "|\" . WhichEscape . "[^}]|[^}]\" . WhichEscape . "$"))
+						return, F_MessageAboutEscapedCharacter(WhichEscape)
+				}
+			WhichEscape := "^"
+			if (InStr(TextInsert, WhichEscape))
+				{
+					if (RegExMatch(TextInsert, "[^{]\" . WhichEscape . "|\" . WhichEscape . "[^}]|[^}]\" . WhichEscape . "$"))
+						return, F_MessageAboutEscapedCharacter(WhichEscape)
+				}
+			WhichEscape := "!"
+			if (InStr(TextInsert, WhichEscape))
+				{
+					if (RegExMatch(TextInsert, "[^{]\" . WhichEscape . "|\" . WhichEscape . "[^}]|[^}]\" . WhichEscape . "$"))
+						return, F_MessageAboutEscapedCharacter(WhichEscape)
+				}
+			WhichEscape := "+"
+			if (InStr(TextInsert, WhichEscape))
+				{
+					if (RegExMatch(TextInsert, "[^{]\" . WhichEscape . "|\" . WhichEscape . "[^}]|[^}]\" . WhichEscape . "$"))
+						return, F_MessageAboutEscapedCharacter(WhichEscape)
+				}
+			WhichEscape := "#"
+			if (InStr(TextInsert, WhichEscape))
+				{
+					if (RegExMatch(TextInsert, "[^{]\" . WhichEscape . "|\" . WhichEscape . "[^}]|[^}]\" . WhichEscape . "$"))
+						return, F_MessageAboutEscapedCharacter(WhichEscape)
+				}
+		}
+
 	return, 0
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_MessageAboutEscapedCharacter(WhichEscape)
+{
+	global	;assume-global mode of operation
+	MsgBox, % 4 + 32 + 256, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["If you apply ""SI"" or ""MSI"" or ""SE"" output function then some characters like"]
+			. A_Space . WhichEscape . A_Space . TransA["have to be escaped in the following form:"] . A_Space . "{" . WhichEscape . "}" . "." . "`n`n"
+			. TransA["Do you want to proceed?"] . "`n`n"
+			. TransA["If you answer ""Yes"", then new definition will be created, but seleced special character will not be visible."] . "`n`n"
+			. TransA["If you answer ""No"", then you will get a chance to fix your new created definition."]
+		IfMsgBox, No
+			return, 1
+		IfMsgBox, Yes
+			return, 0
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Clear()
 {
-	global	;assume-global mode
+	global	;assume-global mode of operation
 	Gui,		  HS3: Font, % "c" . c_FontColor
 	GuiControl, HS3:, % IdEdit1,  				;v_TriggerString
 	GuiControl, HS3: Font, % IdCheckBox1
@@ -10848,6 +10950,7 @@ gray													= gray
 green												= green
 has been created. 										= has been created.
 has been downloaded to the location						= has been downloaded to the location
+have to be escaped in the following form:					= have to be escaped in the following form:
 Help: AutoHotkey Hotstrings reference guide					= Help: AutoHotkey Hotstrings reference guide
 Help: Hotstrings application								= Help: Hotstrings application
 Hotstring 											= Hotstring
@@ -10861,6 +10964,9 @@ Hotstring paste from Clipboard delay 						= Hotstring paste from Clipboard dela
 Hotstrings											= Hotstrings
 Hotstrings have been loaded 								= Hotstrings have been loaded
 HTML color RGB value, e.g. 00FF00							= HTML color RGB value, e.g. 00FF00
+)"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
+	TransConst .= "`n
+(Join`n `
 I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)! = I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)!
 If not finite, define tooltip timeout						= If not finite, define tooltip timeout
 If sound is enabled, define it							= If sound is enabled, define it
@@ -10870,8 +10976,11 @@ If you answer ""Yes"" definition existing in another library will not be changed
 If you answer ""Yes"" it will overwritten with chosen settings. = If you answer ""Yes"" it will overwritten with chosen settings.
 If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used. = If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used.
 If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file. = If you answer ""Yes"", the existing file will be deleted. This is recommended choice. If you answer ""No"", new content will be added to existing file.
+If you answer ""Yes"", then new definition will be created, but seleced special character will not be visible. = If you answer ""Yes"", then new definition will be created, but seleced special character will not be visible.
 If you answer ""No"" edition of the current definition will be interrupted. = If you answer ""No"" edition of the current definition will be interrupted.
 (If you answer ""No"", the second one will be used).			= (If you answer ""No"", the second one will be used).
+If you answer ""No"", then you will get a chance to fix your new created definition. = If you answer ""No"", then you will get a chance to fix your new created definition.
+If you apply ""SI"" or ""MSI"" or ""SE"" output function then some characters like = If you apply ""SI"" or ""MSI"" or ""SE"" output function then some characters like
 If you don't apply it, previous changes will be lost.			= If you don't apply it, previous changes will be lost.
 Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
@@ -10888,9 +10997,6 @@ In order to aplly new style it's necesssary to reload the application. 		= In or
 is added in section  [GraphicalUserInterface] of Config.ini		= is added in section  [GraphicalUserInterface] of Config.ini
 is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv? = is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?
 Introduction											= Introduction
-)"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
-	TransConst .= "`n
-(Join`n `
 \Languages\`nMind that Config.ini Language variable is equal to 	= \Languages\`nMind that Config.ini Language variable is equal to
 Last hotstring undo function is currently unsuported for those characters, sorry. = Last hotstring undo function is currently unsuported for those characters, sorry.
 Let's make your PC personal again... 						= Let's make your PC personal again...
@@ -10989,6 +11095,9 @@ Restore default										= Restore default
 Restore default hotkey									= Restore default hotkey
 Restore default configuration								= Restore default configuration
 Row													= Row
+)"
+	TransConst .= "`n
+(Join`n `
 Sandbox (F6)											= Sandbox (F6)
 Save hotkey											= Save hotkey
 Save position of application window	 					= &Save position of application window
@@ -11048,6 +11157,7 @@ Sound test											= Sound test
 Sorting order											= Sorting order
 Sorry, it's not allowed to use combination of Caps Lock, Scroll Lock and Num Lock for the same purpose. = Sorry, it's not allowed to use combination of Caps Lock, Scroll Lock and Num Lock for the same purpose.
 Sorry, it's not allowed to use ordinary hotkey combined with Caps Lock or Scroll Lock or Num Lock. = Sorry, it's not allowed to use ordinary hotkey combined with Caps Lock or Scroll Lock or Num Lock.
+""SP"" or SendPlay may have no effect at all if UAC is enabled, even if the script is running as an administrator. For more information, refer to the AutoHotkey FAQ (help). = ""SP"" or SendPlay may have no effect at all if UAC is enabled, even if the script is running as an administrator. For more information, refer to the AutoHotkey FAQ (help).
 Space												= Space
 Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
 Standard executable (Ahk2Exe.exe)							= Standard executable (Ahk2Exe.exe)
@@ -11057,9 +11167,6 @@ Static triggerstring / hotstring menus						= Static triggerstring / hotstring m
 Style of GUI											= Style of GUI
 Such file already exists									= Such file already exists
 Suspend Hotkeys										= Suspend Hotkeys
-)"
-	TransConst .= "`n
-(Join`n `
 Tab 													= Tab 
 To move folder into ""Program Files"" folder you must allow admin privileges to ""Hotstrings"", which will restart to move its folder. = To move folder into ""Program Files"" folder you must allow admin privileges to ""Hotstrings"", which will restart to move its folder.
 teal													= teal
@@ -11158,6 +11265,9 @@ Would you like now to reload it in order to run the just downloaded version? = W
 Would you like to move ""Hotstrings"" script / application to default location? = Would you like to move ""Hotstrings"" script / application to default location?
 Would you like to move ""Hotstrings"" script / application somewhere else? = Would you like to move ""Hotstrings"" script / application somewhere else?
 Would you like to move ""Libraries"" folder to this location?	= Would you like to move ""Libraries"" folder to this location?
+)"
+	TransConst .= "`n
+(Join`n `
 yellow												= yellow
 Yes													= Yes
 yes													= yes
@@ -11167,9 +11277,6 @@ Your hotstring definition contain one of the following characters: = Your hotstr
 ↓ Click here to select hotstring library ↓					= ↓ Click here to select hotstring library ↓
 {Up} or {Down} or {Home} or {End} or {PgUp} or {PgDown}		= {Up} or {Down} or {Home} or {End} or {PgUp} or {PgDown}
 ShowInfoText											= In order to display graphical user interface (GUI) of the application just press shortcut: Win + Ctrl + H. `n`nSuggested steps after installation: `n`n1. Download some libraries (files containing (triggerstring, hotstring) definitions. You can do it from application menu:  → Libraries. `n`n2. After downloading of libraries restart application to apply the changes. Again, you can do it from application menu: Application → Restart. `n`n3. Application is preconfigured on the first start. Options available to be configured area available from GUI, application menu → Configuration. `n`n4. Application runs by default in default mode. If you don't wish to modify configuration, `nmay consider to run it in simplified mode: application menu → Application → Reload → Reload in silent mode.
-)"
-	TransConst .= "`n
-(Join`n `
 F_TI_ImmediateExecute									= * (asterisk): An EndChar (e.g. Space, ., or Enter) is not required to trigger the hotstring. For example:`n`n:*:j@::jsmith@somedomain.com`n`nThe example above would send its replacement the moment you type the @ character.
 F_TI_InsideWord										= ? (question mark): The hotstring will be triggered even when it is inside another word; `n`nthat is, when the character typed immediately before it is alphanumeric. `nFor example, if :?:al::airline is a hotstring, `ntyping ""practical "" would produce ""practicairline "".
 F_TI_NoBackSpace										= B0: Automatic backspacing is not done to erase the abbreviation you type. `n`nOne may send ← five times via {left 5}. For example, the following hotstring produces ""<em></em>"" and `nmoves the caret 5 places to the left (so that it's between the tags) `n`n::*b0:<em>::</em>{left 5}
@@ -13363,7 +13470,10 @@ F_SendIsOflag(OutputString, Oflag, SendFunctionName)
 				SendEvent, % OutputString
 		Case "SendPlay":
 			if (Oflag = false)
+			{
 				SendPlay, % OutputString . A_EndChar
+				OutputDebug, % "SendPlay:" . A_Space . OutputString . "`n"
+			}
 			else
 				SendPlay, % OutputString
 		Case "SendRaw":
