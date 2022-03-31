@@ -1633,7 +1633,7 @@ F_OneCharPressed(ih, Char)
 		f_FoundEndChar := true
 	v_InputString .= Char
 	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n
-,	v_TriggerString := v_InputString	;this line is necessary to correctly process F_Undo
+; ,	v_TriggerString := v_InputString	;this line is necessary to correctly process F_Undo
 	; OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Tab . "v_Triggerstring:" . A_Space . v_Triggerstring . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
@@ -7436,11 +7436,10 @@ F_Undo()	;turning off of * option requires special conditions.
 			Loop, Parse, v_Triggerstring
 				Switch A_LoopField
 			{
-				Case "^", "+", "!", "#", "{", "}":
-				SendRaw, % A_LoopField
-				Default:
-				Send, % A_LoopField
+				Case "^", "+", "!", "#", "{", "}":	SendRaw, 	% A_LoopField
+				Default:						Send, 	% A_LoopField
 			}
+			Send, % v_EndChar
 		}
 		F_UndoSignalling()
 	}
@@ -13472,7 +13471,7 @@ F_SendIsOflag(OutputString, Oflag, SendFunctionName)
 			if (Oflag = false)
 			{
 				SendPlay, % OutputString . A_EndChar
-				OutputDebug, % "SendPlay:" . A_Space . OutputString . "`n"
+				; OutputDebug, % "SendPlay:" . A_Space . OutputString . "`n"
 			}
 			else
 				SendPlay, % OutputString
