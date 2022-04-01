@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen		; Only Screen makes sense for functions prepared in th
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.5"
+global AppVersion				:= "3.6.6"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -1578,9 +1578,9 @@ F_LongestTrigTipString(a_array)
 		ThisValue := StrLen(value)
 		if (ThisValue > MaxValue)
 		{
-			MaxValue := ThisValue
-			WhichKey := key
-			WhichValue := value
+			MaxValue 		:= ThisValue
+,			WhichKey		:= key
+,			WhichValue 	:= value
 		}
 	}
 	return WhichValue
