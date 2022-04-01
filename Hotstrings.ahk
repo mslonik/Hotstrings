@@ -6347,6 +6347,10 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 
 		Case 4:
 			PreviousWindowID := WinExist("A")
+			; OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID . "`n"
+			; GuiControl,, % IdTT_C4_LB1, |	;this line is necessary to display new menu each time this function is called.
+			; GuiControl,, % IdTT_C4_LB2, |	;this line is necessary to display new menu each time this function is called.
+			; GuiControl,, % IdTT_C4_LB3, |	;this line is necessary to display new menu each time this function is called.
 			GuiControl,, % IdTT_C4_LB1, % F_ConvertArrayToString(a_Tips)
 			GuiControl,, % IdTT_C4_LB2, % F_TrigTipsSecondColumn(a_TipsOpt, a_TipsEnDis)
 			GuiControl,, % IdTT_C4_LB3, % F_ConvertArrayToString(a_TipsHS)
