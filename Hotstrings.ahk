@@ -883,6 +883,8 @@ F_HMenuSI_Keyboard()
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", temp := 0
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	
+	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_TTMenuStatic_Keyboard it was crucial for ControlSend to run correctly
+
 	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -986,6 +988,7 @@ F_HMenuCLI_Keyboard()
 	global	;assume-global mode of operation
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",	ShiftTabIsFound := false, ReplacementString := "", temp := 0
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
+
 ;	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_StaticMenu_Keyboard it was crucial for ControlSend to run correctly
 	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
 	{
@@ -1383,11 +1386,11 @@ F_PathLibrariesRestoreDefault()
 F_Load_ini_HADL()
 {
 	global	;assume-global mode
-	local	LibLocation_ScriptDir := false, LibLocation_AppData := false, IsLibraryFolderEmpty1 := true, IsLibraryFolderEmpty2 := true, LibCounter1 := 0, LibCounter2 := 0
-
 	IniRead, ini_HADL, % ini_HADConfig, Configuration, HADL, % A_Space	;Default parameter. The value to store in OutputVar (ini_HADL) if the requested key is not found. If omitted, it defaults to the word ERROR. To store a blank value (empty string), specify %A_Space%.
+
 	if (ini_HADL = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{	;folder Libraries can be present only in 2 locations: by default in A_AppData or in A_ScriptDir
+
 		ini_HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
 		IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
 		return
@@ -1440,14 +1443,11 @@ F_Load_ini_HADL()
 			. A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"
 		IfMsgBox, Yes
 		{
+
 			ini_HADL := A_ScriptDir . "\" . "Libraries"
-			IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
-		}
-		IfMsgBox, No
-		{
+		if (!InStr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"), "D"))	;if there is no folder...
 			ini_HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
-			IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
-		}
+		IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10848,8 +10848,6 @@ Backslash \ 											= Backslash \
 Basic hotstring is triggered								= Basic hotstring is triggered
 black												= black
 blue													= blue
-Both optional locations for library folder are empty = do not contain any library files. The second one will be used. = Both optional locations for library folder are empty = do not contain any library files. The second one will be used.
-Both optional library folder locations contain *.csv files. Would you like to use the first one? = Both optional library folder locations contain *.csv files. Would you like to use the first one?
 Built with Autohotkey.exe version							= Built with Autohotkey.exe version
 By default library files (*.csv) are located in Users subfolder which is protected against other computer users. = By default library files (*.csv) are located in Users subfolder which is protected against other computer users.
 By length 											= By length
