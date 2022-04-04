@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -1594,18 +1594,23 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 	;1. determine size of window on top of which triggerstring tips GUI will be displayed
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A		
 	;2. determine position and size of triggerstring window
-	Gui, % GuiName . ": Show", x%MenuX% y%MenuY% Hide
+	Gui, % GuiName . ": Show", Hide x%MenuX% y%MenuY%
 	DetectHiddenWindows, On
-	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . WindowHandle
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . A_Space . WindowHandle
 	NewX := Window2X, NewY := Window2Y - Window2H, NewW := Window2W, NewH := Window2H	;bottom -> top
-	Gui, % GuiName . ": Show", x%NewX% y%NewY% Hide	;coordinates: screen
-	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . WindowHandle
+	if (NewX = "") or (NewY = "")
+		{
+			OutputDebug, % "A_ThisFunc:" . A_Space . A_ThisFunc . A_Tab . "return" . "`n"
+			return
+		}
+	Gui, % GuiName . ": Show", Hide x%NewX%  y%NewY%	;coordinates: screen
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . A_Space . WindowHandle
 	;3. determine if triggerstring tips menu fits to this window
 	if (Window2Y < Window1Y)	;if triggerstring tips are above the window
 	{
 		NewY += Window2H + 40	;top -> bottom
-		Gui, % GuiName . ": Show", x%NewX% y%NewY% Hide 	;coordinates: screen
-		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . WindowHandle
+		Gui, % GuiName . ": Show", Hide x%NewX% y%NewY% 	;coordinates: screen
+		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . A_Space . WindowHandle
 	}
 	if (Window2X + Window2W > Window1X + Window1W)	;if triggerstring tips are too far to the right
 		NewX -= Window2W + 40	;right -> left
