@@ -148,7 +148,7 @@ if (ini_HK_IntoEdit != "none")
 	Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
 	Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
 	Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
-	Hotkey, IfWinExist
+	Hotkey, IfWinExist			;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 }
 
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
@@ -2714,6 +2714,7 @@ F_LoadConfiguration()
 		#If v_Param != "l"
 		Hotkey, If, v_Param != "l" 
 		Hotkey, % ini_HK_Main, F_GUIInit, On
+		Hotkey, If			;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 	}
 	
 	ini_HK_IntoEdit			:= "~#c"
@@ -6703,6 +6704,9 @@ F_GuiShortDef_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefB1
 	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
 	GuiControl, Move, % IdShortDefB2, % "x" . v_xNext . "y" . v_yNext
+	v_xNext := c_xmarg
+,	v_yNext += HofButton + HofText
+	GuiControl, Move, % IdShortDefT8, % "x" . v_xNext . "y" . v_yNext
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ParseHotkey(WhichItem, space*)
@@ -6900,20 +6904,21 @@ F_GuiShortDef_CreateObjects(ItemName)
 	Gui,	ShortDef: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	F_HK_TildeModInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_TildeModInfo"])
 	GuiControl +g, % IdShortDefT7, % F_HK_TildeModInfo
-	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB1 gF_ShortDefB1_SaveHotkey,					% TransA["Save hotkey"]
-	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB2 gF_ShortDefB2_RestoreHotkey,				% TransA["Restore default hotkey"]
+	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB1 gF_ShortDefB1_SaveHotkey,					% TransA["Apply new hotkey"]
+	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB2 gF_ShortDefB2_RestoreHotkey,				% TransA["Apply default hotkey"]
+	Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortdefT8,										% TransA["Press Esc when you've finished"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ShortDefB2_RestoreHotkey()
 {
-	global	;assume-global mode
+	global	;assume-global mode of operation
 	local	OldHotkey := "", WindowKey := false
 	
 	GuiControlGet, OldHotkey, , % IdShortDefT3
-	OldHotkey := StrReplace(OldHotkey, "Shift", "+")
-,	OldHotkey := StrReplace(OldHotkey, "Ctrl", "^")
-,	OldHotkey := StrReplace(OldHotkey, "Alt", "!")
-,	OldHotkey := StrReplace(OldHotkey, "Win", "#")
+	OldHotkey := StrReplace(OldHotkey, "Shift", 	"+")
+,	OldHotkey := StrReplace(OldHotkey, "Ctrl", 	"^")
+,	OldHotkey := StrReplace(OldHotkey, "Alt", 	"!")
+,	OldHotkey := StrReplace(OldHotkey, "Win", 	"#")
 ,	OldHotkey := StrReplace(OldHotkey, "+")
 ,	OldHotkey := StrReplace(OldHotkey, " ")
 
@@ -6927,6 +6932,7 @@ F_ShortDefB2_RestoreHotkey()
 		GuiControl,, % IdShortDefCB5, 0
 		Hotkey, If, v_Param != "l" 
 		Hotkey, % ini_HK_Main, F_GUIInit, On
+		Hotkey, If						;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
 		IniWrite, % ini_HK_Main, % ini_HADConfig, Configuration, HK_Main
 		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Call Graphical User Interface"] . "`t" . F_ParseHotkey(ini_HK_Main, 	"space")
@@ -6940,7 +6946,7 @@ F_ShortDefB2_RestoreHotkey()
 			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
 			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
 			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
-			Hotkey, IfWinExist
+			Hotkey, IfWinExist				;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 		}
 		ini_HK_IntoEdit := "~#c"
 		GuiControl,, % IdShortDefCB3, 0
@@ -6950,7 +6956,7 @@ F_ShortDefB2_RestoreHotkey()
 		Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
 		Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
 		Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
-		Hotkey, IfWinExist
+		Hotkey, IfWinExist					;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit, "space")
 		IniWrite, % ini_HK_IntoEdit, % ini_HADConfig, Configuration, HK_IntoEdit
 		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Copy clipboard content into ""Enter hotstring"""] . "`t" . F_ParseHotkey(ini_HK_IntoEdit, "space")
@@ -6960,23 +6966,25 @@ F_ShortDefB2_RestoreHotkey()
 	{
 		if (ini_HotstringUndo)
 		{
+			; OutputDebug, % "OldHotkey:" . A_Space . OldHotkey . "`n"
 			if (OldHotkey != "none")
-				Hotkey, % OldHotkey, 	F_Undo, UseErrorLevel Off
+				Hotkey, % OldHotkey, 	F_Undo, Off
 			ini_HK_UndoLH := "~#z"
-			Hotkey, % ini_HK_UndoLH, F_Undo, UseErrorLevel On
+			Hotkey, % ini_HK_UndoLH, F_Undo, On
 		}
 		else
 		{
 			if (OldHotkey != "none")
-				Hotkey, % OldHotkey, 	F_Undo, UseErrorLevel Off
+				Hotkey, % OldHotkey, 	F_Undo, Off
 			ini_HK_UndoLH := "~#z"
-			Hotkey, % ini_HK_UndoLH, F_Undo, UseErrorLevel Off
+			Hotkey, % ini_HK_UndoLH, F_Undo, Off
 		}
 		GuiControl,, % IdShortDefCB3, 0
 		GuiControl,, % IdShortDefCB4, 0
 		GuiControl,, % IdShortDefCB5, 0
 		GuiControl,, % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH, "space")
 		IniWrite, % ini_HK_UndoLH, % ini_HADConfig, Configuration, HK_UndoLH
+		; OutputDebug, % "A_ThisMenuItem:" . A_Space . A_ThisMenuItem . "ini_HK_UndoLH:" . A_Space . ini_HK_UndoLH . "`n"
 		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Undo the last hotstring"] . "`t" . F_ParseHotkey(ini_HK_UndoLH, 	"space")
 	}
 
@@ -7011,8 +7019,8 @@ F_InterpretNewDynHK(WhichHK)
 	GuiControlGet, WhichHotkey, , % IdShortDefH1		;hotkey edit field
 
 	if (WhichHotkey and vCapsLock) or (WhichHotkey and vScrollLock) or (WhichHotkey and vNumLock)
-		MsgBox, 48, % SubStr(v_Triggerstring, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Sorry, it's not allowed to use ordinary hotkey combined with Caps Lock or Scroll Lock or Num Lock."]
-			. "`n"  . TransA["Please try again."]
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Sorry, it's not allowed to use ordinary hotkey combined with Caps Lock or Scroll Lock or Num Lock."]
+			. "`n`n"  . TransA["Please try again."]
 	if (WhichHotkey)
 	{
 		%DynVarRef1% := WhichHotkey
@@ -7022,8 +7030,8 @@ F_InterpretNewDynHK(WhichHK)
 			%DynVarRef1% := "~" . %DynVarRef1%
 	}
 	if (vCapsLock and vScrollLock) or (vCapsLock and vNumLock) or (vScrollLock and vNumLock) or (vCapsLock and vScrollLock and vNumLock) ;impossible to have both settings at the same time
-		MsgBox, 48, % SubStr(v_Triggerstring, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Sorry, it's not allowed to use combination of Caps Lock, Scroll Lock and Num Lock for the same purpose."]
-			. "`n"  . TransA["Please try again."]
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Sorry, it's not allowed to use combination of Caps Lock, Scroll Lock and Num Lock for the same purpose."]
+			. "`n`n"  . TransA["Please try again."]
 	if (vCapsLock or vScrollLock or vNumLock)
 	{
 		if (vScrollLock)
@@ -7057,7 +7065,7 @@ F_InterpretNewDynHK(WhichHK)
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ShortDefB1_SaveHotkey()	
+F_ShortDefB1_SaveHotkey()
 {
 	global	;assume-global mode of operation
 	local	OldHotkey := "", WindowKey := false, TildeKey := false
@@ -7071,45 +7079,40 @@ F_ShortDefB1_SaveHotkey()
 	if (InStr(A_ThisMenuitem, TransA["Toggle triggerstring tips"]))
 		F_InterpretNewDynHK(WhichHK := "ToggleTt")
 
-	GuiControlGet, OldHotkey, , % IdShortDefT3
-	;OldHotkey := RegExReplace(OldHotkey, "(Ctrl)|(Shift)|(Win)|(\+)|( )")	;future: trick from AutoHotkey forum after my question
-	OldHotkey := StrReplace(OldHotkey, "Shift", "+")
-,	OldHotkey := StrReplace(OldHotkey, "Ctrl", "^")
-,	OldHotkey := StrReplace(OldHotkey, "Alt", "!")
-,	OldHotkey := StrReplace(OldHotkey, "Win", "#")
+	GuiControlGet, OldHotkey, , % IdShortDefT3	;OldHotkey := RegExReplace(OldHotkey, "(Ctrl)|(Shift)|(Win)|(\+)|( )")	;future: trick from AutoHotkey forum after my question
+	OldHotkey := StrReplace(OldHotkey, "Shift", 	"+")
+,	OldHotkey := StrReplace(OldHotkey, "Ctrl", 	"^")
+,	OldHotkey := StrReplace(OldHotkey, "Alt", 	"!")
+,	OldHotkey := StrReplace(OldHotkey, "Win", 	"#")
 ,	OldHotkey := StrReplace(OldHotkey, "+")
 ,	OldHotkey := StrReplace(OldHotkey, " ")
 
 	if (InStr(A_ThisMenuItem, TransA["Call Graphical User Interface"]))
 	{
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
-		Hotkey, % OldHotkey, F_GUIInit, Off
 		if (ini_HK_Main != "none")
 		{
 			Hotkey, If, v_Param != "l" 
+			Hotkey, % OldHotkey, F_GUIInit, Off
 			Hotkey, % ini_HK_Main, F_GUIInit, On
+			Hotkey, If				;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 		}
-		; IniWrite, % ini_HK_Main, % ini_HADConfig, Configuration, HK_Main
 		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Call Graphical User Interface"] . "`t" . F_ParseHotkey(ini_HK_Main, 	"space")
 	}
 
 	if (InStr(A_ThisMenuitem, TransA["Copy clipboard content into ""Enter hotstring"""]))
 	{
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_IntoEdit, "space")
-		Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
-		Hotkey, % OldHotkey, F_PasteFromClipboard, Off
-		Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
-		Hotkey, % OldHotkey, F_PasteFromClipboard, Off
-		Hotkey, IfWinExist
 		if (ini_HK_IntoEdit != "none")
 		{
 			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
 			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
 			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
 			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
-			Hotkey, IfWinExist
+			Hotkey, IfWinExist			;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 		}
-		; IniWrite, % ini_HK_IntoEdit, % ini_HADConfig, Configuration, HK_IntoEdit
 		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Copy clipboard content into ""Enter hotstring"""] . "`t" . F_ParseHotkey(ini_HK_IntoEdit, "space")
 	}
 
@@ -7120,18 +7123,18 @@ F_ShortDefB1_SaveHotkey()
 		{
 			if (ini_HK_UndoLH != "none")
 			{
-				; Hotkey, % OldHotkey, 		, Off
-				Hotkey, % OldHotkey, 	F_Undo, UseErrorLevel Off
-				Hotkey, % ini_HK_UndoLH, F_Undo, UseErrorLevel On
+				; OutputDebug, % "OldHotkey:" . A_Space . OldHotkey . "`n"
+				Hotkey, % OldHotkey, 	F_Undo, Off
+				Hotkey, % ini_HK_UndoLH, F_Undo, On
 			}
 		}
 		else
 		{
+			; OutputDebug, % "OldHotkey:" . A_Space . OldHotkey . "`n"
 			Hotkey, % OldHotkey, 	F_Undo, UseErrorLevel Off
 			if (ini_HK_UndoLH != "none")
 				Hotkey, % ini_HK_UndoLH, F_Undo, UseErrorLevel Off
 		}
-		; IniWrite, % ini_HK_UndoLH, % ini_HADConfig, Configuration, HK_UndoLH
 		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Undo the last hotstring"] . "`t" . F_ParseHotkey(ini_HK_UndoLH, 	"space")
 	}
 
@@ -7151,7 +7154,6 @@ F_ShortDefB1_SaveHotkey()
 				Case "NumLock":	SetNumLockState, 	AlwaysOff
 			}
 		}
-		; IniWrite, % ini_HK_ToggleTt, % ini_HADConfig, Configuration, HK_ToggleTt
 		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Toggle triggerstring tips"] . "`t" . F_ParseHotkey(ini_HK_ToggleTt, "space")
 	}
 }
@@ -7187,7 +7189,7 @@ F_GuiShortDef(ItemName)
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
 	
-	OutputDebug, % "ItemName:" . A_Space . ItemName
+	OutputDebug, % "ItemName:" . A_Space . ItemName . "`n"
 	F_GuiShortDef_CreateObjects(ItemName)
 	F_GuiShortDef_DetermineConstraints()
 	
@@ -8465,7 +8467,7 @@ F_Move()
 	{
 		if (v_Temp1 == v_TriggerString)
 		{
-			MsgBox, 308, % SubStr(v_Triggerstring, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The selected triggerstring already exists in destination library file:"]
+			MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The selected triggerstring already exists in destination library file:"]
 				. "`n`n" 	. v_Triggerstring
 				. "`n" 	. DestinationLibrary . "`n`n"
 				. TransA["Do you want to replace it with source definition?"]
@@ -11126,6 +11128,7 @@ Please try again.										= Please try again.
 Please wait, uploading .csv files... 						= Please wait, uploading .csv files...
 Position of this window is saved in Config.ini.				= Position of this window is saved in Config.ini.	
 Preview												= &Preview
+Press Esc when you've finished							= Press Esc when you've finished
 Public library:										= Public library:
 purple												= purple
 question												= question
@@ -11139,14 +11142,14 @@ Repository version										= Repository version
 Required encoding: UTF-8 with BOM. Application will exit now.	= Required encoding: UTF-8 with BOM. Application will exit now.
 Reset Recognizer (Z)									= Reset Recognizer (Z)
 Restore default										= Restore default
-Restore default hotkey									= Restore default hotkey
+Apply default hotkey									= Apply default hotkey
 Restore default configuration								= Restore default configuration
 Row													= Row
 )"
 	TransConst .= "`n
 (Join`n `
 Sandbox (F6)											= Sandbox (F6)
-Save hotkey											= Save hotkey
+Apply new hotkey											= Apply new hotkey
 Save position of application window	 					= &Save position of application window
 Save window position									= Save window position
 Saved												= Saved
