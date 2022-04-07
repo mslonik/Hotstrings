@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -7484,12 +7484,13 @@ F_Undo()	;turning off of * option requires special conditions.
 			HowManyBackSpaces 	+= StrLenUnicode(v_UndoHotstring)
 			Send, % "{BackSpace " . HowManyBackSpaces . "}"
 			Loop, Parse, v_Triggerstring
-				Switch A_LoopField
+			Switch A_LoopField
 			{
 				Case "^", "+", "!", "#", "{", "}":	SendRaw, 	% A_LoopField
 				Default:						Send, 	% A_LoopField
 			}
-			Send, % v_EndChar
+			if (!InStr(v_Options, "*"))
+				Send, % v_EndChar
 		}
 		F_UndoSignalling()
 	}
