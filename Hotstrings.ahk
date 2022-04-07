@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -525,7 +525,7 @@ Critical, Off
 
 	Esc::
 		Gui, HMenuCli: Destroy
-		SendRaw, % v_Triggerstring	;SendRaw in order to correctly produce escape sequences from v_Triggerstring ({}^!+#)
+		SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_Triggerstring ({}^!+#)
 		v_InputH.VisibleText 	:= true
 ,		v_InputString 			:= ""	
 		return
@@ -551,7 +551,7 @@ Critical, Off
 		return
 	Esc::
 		Gui, HMenuAHK: Destroy
-		SendRaw, % v_Triggerstring	;SendRaw in order to correctly produce escape sequences from v_Triggerstring ({}^!+#)
+		SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_Triggerstring ({}^!+#)
 		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
 	return
