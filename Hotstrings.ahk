@@ -936,9 +936,9 @@ F_HMenuSI_Keyboard()
 			v_Temp1 := SubStr(A_LoopField, 4)
 	}
 	v_UndoHotstring 	:= v_Temp1
-,	v_Temp1 	:= F_ReplaceAHKconstants(v_Temp1)
-,	v_Temp1 	:= F_FollowCaseConformity(v_Temp1)
-,	v_Temp1 	:= F_ConvertEscapeSequences(v_Temp1)     
+	v_Temp1 	:= F_ReplaceAHKconstants(v_Temp1)
+	v_Temp1 	:= F_FollowCaseConformity(v_Temp1)
+	v_Temp1 	:= F_ConvertEscapeSequences(v_Temp1)     
 	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
 	if (ini_MHMP = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
@@ -1638,7 +1638,7 @@ F_OneCharPressed(ih, Char)
 		f_FoundEndChar := true
 	v_InputString .= Char
 	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n
-; ,	v_TriggerString := v_InputString	;this line is necessary to correctly process F_Undo
+	v_TriggerString := v_InputString	;this line is necessary to correctly process F_Undo
 	; OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Tab . "v_Triggerstring:" . A_Space . v_Triggerstring . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
