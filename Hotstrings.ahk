@@ -876,8 +876,9 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 					Case "CLI":	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCLI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 				}
 			}
-			v_InputH.VisibleText	:= true
-,			v_InputString 			:= ""	
+			v_UndoTriggerstring 	:= v_InputString
+,			v_InputString 			:= ""
+,			v_InputH.VisibleText	:= true
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -956,6 +957,8 @@ F_HMenuSI_Keyboard()
 	v_CntCumGain += temp
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+	v_UndoTriggerstring := v_InputString
+,	v_InputString 		:= ""
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_MouseMouse is lower than this "interrupt"
@@ -1061,6 +1064,8 @@ F_HMenuCLI_Keyboard()
 	v_CntCumGain += temp
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+	v_UndoTriggerstring := v_InputString
+,	v_InputString 		:= ""
 	; OutputDebug, % "End of F_HMenuCLI_Keyboard:" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7412,7 +7417,8 @@ F_Undo()	;turning off of * option requires special conditions.
 	local	TriggerOpt := "", HowManyBackSpaces := 0, HowManyBackSpaces2 := 0
 			,ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey, OrigTriggerstring := "", HowManySpecials := 0
 	
-	if (v_UndoTriggerstring and (ThisHotkey != PriorHotkey))
+	if (v_UndoTriggerstring)
+	; if (v_UndoTriggerstring and (ThisHotkey != PriorHotkey))
 	{	
 		if (!(InStr(v_Options, "*")) and !(InStr(v_Options, "O")))
 			Send, {BackSpace}
@@ -7501,14 +7507,14 @@ F_Undo()	;turning off of * option requires special conditions.
 		v_UndoTriggerstring := ""
 		F_UndoSignalling()
 	}
-	else
-	{
-		F_DestroyTriggerstringTips(ini_TTCn)
-		if InStr(ThisHotkey, "^z")
-			SendInput, ^z
-		else if InStr(ThisHotkey, "!BackSpace")
-			SendInput, !{BackSpace}
-	}
+	; else
+	; {
+	; 	F_DestroyTriggerstringTips(ini_TTCn)
+	; 	if InStr(ThisHotkey, "^z")
+	; 		SendInput, ^z
+	; 	else if InStr(ThisHotkey, "!BackSpace")
+	; 		SendInput, !{BackSpace}
+	; }
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_UndoSignalling()
@@ -13460,6 +13466,8 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 	v_CntCumGain += temp
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SE" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+	v_UndoTriggerstring := v_InputString
+,	v_InputString 		:= ""
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -13482,6 +13490,8 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 	v_CntCumGain += temp
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SP" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+	v_UndoTriggerstring := v_InputString
+,	v_InputString 		:= ""
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -13504,6 +13514,8 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 	v_CntCumGain += temp
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SR" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+	v_UndoTriggerstring := v_InputString
+,	v_InputString 		:= ""
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -13701,6 +13713,8 @@ F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clip
 	v_CntCumGain += temp
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "CLI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+	v_UndoTriggerstring := v_InputString
+,	v_InputString 		:= ""
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -13727,7 +13741,8 @@ F_MouseMenu_MCLI() ;The subroutine may consult the following built-in variables:
 		v_CntCumGain += temp
 		if (ini_THLog)
 			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCLI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-		v_InputString 			:= ""	
+		v_UndoTriggerstring 	:= v_InputString
+,		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
 	}
 }
@@ -13807,7 +13822,8 @@ F_MouseMenu_MSI() ; Handling of mouse events for F_HOF_MSI;The subroutine may co
 		v_CntCumGain += temp
 		if (ini_THLog)
 			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MSI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-		v_InputString 			:= ""	
+		v_UndoTriggerstring 	:= v_InputString
+,		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
 	}
 }
@@ -13931,7 +13947,8 @@ F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid i
 		v_CntCumGain += temp
 		if (ini_THLog)
 			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MSI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName			
-		v_InputString 			:= ""	
+		v_UndoTriggerstring 	:= v_InputString
+,		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
 	}
 }
