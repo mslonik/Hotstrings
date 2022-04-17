@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen		; Only Screen makes sense for functions prepared in th
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.6"
+global AppVersion				:= "3.6.7"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -500,7 +500,8 @@ Critical, Off
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
 	; OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString . "`n"
-	v_InputString := ""
+	if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
+		v_InputString := ""
 	;OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString . "`n"
 	return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1646,7 +1647,10 @@ F_OneCharPressed(ih, Char)
 	if (v_InputString = "")
 		v_TrigTipsInput := ""
 	if (InStr(HotstringEndChars, Char))
-		v_TrigTipsInput .= Char	;this local (static) variable is applied to handle display of Triggerstring Tips menu
+	{
+		v_TrigTipsInput 	.= Char	;this local (static) variable is applied to handle display of Triggerstring Tips menu
+		f_FoundEndChar		:= true
+	}
 	else	;if EndChar is found, it is not added to the v_InputString, but it is added to TrigTipsInput variable
 	{
 		v_InputString 		.= Char	;the global variable v_InputString is used to determine Gain parameters and to handle F_Undo functions
@@ -1668,6 +1672,14 @@ F_OneCharPressed(ih, Char)
 		}
 		else	;or destroy previously visible tips
 			F_DestroyTriggerstringTips(ini_TTCn)	;tu jestem: wyzerowac zmienne lancuchowe
+	}
+	if (f_FoundEndChar)
+	{
+		Loop, % a_Tips.Count()
+			if (InStr(a_Tips[A_Index], v_InputString))
+				f_FoundTip := true
+		if (!f_FoundTip)		
+			v_InputString := ""
 	}
 	return	
 	; Critical, Off
