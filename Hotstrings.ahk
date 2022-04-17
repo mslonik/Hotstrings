@@ -1060,7 +1060,6 @@ F_HMenuCLI_Keyboard()
 		SoundBeep, % ini_MHSF, % ini_MHSD
 	++v_LogCounter
 	temp := F_DetermineGain2(v_InputString, v_Temp1)
-	; temp := F_DetermineGain(a_Triggerstring, v_InputString, v_PressedKey)
 	v_CntCumGain += temp
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
@@ -1650,7 +1649,6 @@ F_OneCharPressed(ih, Char)
 	else
 		v_InputString .= Char
 	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n
-	; v_TriggerString := v_InputString	;this line is necessary to correctly process F_Undo and F_FollowCaseConformity
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn) and (v_InputString)
@@ -7975,7 +7973,7 @@ F_AddHotstring()
 			else
 			{
 				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-					, % "The triggerstring" . A_Space . """" .  v_TriggerString . """" . A_Space .  TransA["already exists in another library"] . ":" . A_Space . a_Library[key] . "." . "`n`n" 
+					, % "The triggerstring" . A_Space . """" .  v_Triggerstring . """" . A_Space .  TransA["already exists in another library"] . ":" . A_Space . a_Library[key] . "." . "`n`n" 
 					. TransA["Do you want to proceed?"] . "`n`n" . TransA["If you answer ""No"" edition of the current definition will be interrupted."]
 					. "`n" . TransA["If you answer ""Yes"" definition existing in another library will not be changed."]
 				IfMsgBox, No
@@ -8025,11 +8023,11 @@ F_AddHotstring()
 	}
 
 	; 4. Create new definition
-	;OutputDebug, % "NewOptions:" . A_Space . NewOptions . A_Tab . "OldOptions:" . A_Space . OldOptions . A_Tab . "v_TriggerString:" . A_Space . v_TriggerString
+	;OutputDebug, % "NewOptions:" . A_Space . NewOptions . A_Tab . "OldOptions:" . A_Space . OldOptions . A_Tab . "v_Triggerstring:" . A_Space . v_Triggerstring
 	if (InStr(NewOptions, "O"))
 	{
 		Try
-			Hotstring(":" . NewOptions . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
+			Hotstring(":" . NewOptions . ":" . v_Triggerstring, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
 			. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," . A_Space . OnOff . ")"
@@ -8037,7 +8035,7 @@ F_AddHotstring()
 	else
 	{
 		Try
-			Hotstring(":" . NewOptions . ":" . v_TriggerString, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
+			Hotstring(":" . NewOptions . ":" . v_Triggerstring, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
 			. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
@@ -8093,14 +8091,14 @@ F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 {
 	global	;assume-global mode of operation
 	a_Library			.Push(SubStr(v_SelectHotstringLibrary, 1, -4))
-	a_Triggerstring	.Push(v_TriggerString)
+	a_Triggerstring	.Push(v_Triggerstring)
 	a_TriggerOptions	.Push(NewOptions)
 	a_OutputFunction	.Push(SendFunFileFormat)
 	a_EnableDisable	.Push(EnDis)	;here was a bug: OnOff instead of EnDis
 	a_Hotstring		.Push(TextInsert)
 	a_Comment			.Push(v_Comment)
 	a_Combined		.Push(v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert)
-	; a_Gain			.Push(F_CalculateGain(v_TriggerString, TextInsert, NewOptions))
+	; a_Gain			.Push(F_CalculateGain(v_Triggerstring, TextInsert, NewOptions))
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 }	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8109,15 +8107,15 @@ F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Com
 	global	;assume-global mode of operation
 	local	index := 0, value := ""
 
-	a_Triggerstring[key] 	:= v_TriggerString
+	a_Triggerstring[key] 	:= v_Triggerstring
 , 	a_TriggerOptions[key] 	:= NewOptions
 , 	a_OutputFunction[key] 	:= SendFunFileFormat
 , 	a_Hotstring[key] 		:= TextInsert
 , 	a_EnableDisable[key] 	:= EnDis
 , 	a_Comment[key] 		:= v_Comment
-; ,	a_Gain[key]			:= F_CalculateGain(v_TriggerString, TextInsert, NewOptions)
+; ,	a_Gain[key]			:= F_CalculateGain(v_Triggerstring, TextInsert, NewOptions)
 	for index, value in a_Combined
-		if (InStr(value, v_TriggerString, true))	;case-sensitive comparison
+		if (InStr(value, v_Triggerstring, true))	;case-sensitive comparison
 			a_Combined[index] := v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8130,9 +8128,9 @@ F_ModifyLV(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 	Loop, % LV_GetCount()
 	{
 		LV_GetText(Temp1, A_Index)
-		if (Temp1 = v_TriggerString)	;non-case sensitive comparison
+		if (Temp1 = v_Triggerstring)	;non-case sensitive comparison
 		{
-			LV_Modify(A_Index, "", v_TriggerString, NewOptions, SendFunFileFormat, EnDis, TextInsert, v_Comment)		
+			LV_Modify(A_Index, "", v_Triggerstring, NewOptions, SendFunFileFormat, EnDis, TextInsert, v_Comment)		
 			Break
 		}
 	}
@@ -8163,11 +8161,11 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			if (InStr(NewOptions, "O"))	;Add new hotstring which replaces the old one
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_TriggerString), func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
+					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
 				Catch
 				{
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . "`n" . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . v_TriggerString . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," 
+						. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," 
 						. A_Space . OnOff . ")"
 					return "No"
 				}
@@ -8175,11 +8173,11 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			else
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_TriggerString), func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
+					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
 				Catch
 				{
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . v_TriggerString . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," 
+						. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," 
 						. A_Space . OnOff . ")"
 					return "No"
 				}
@@ -8197,7 +8195,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, B
 	Gui, % A_DefaultGui . ":" A_Space . "Submit", NoHide
 	Gui, % A_DefaultGui . ":" A_Space . "+OwnDialogs"
 
-	if (Trim(v_TriggerString) = "")
+	if (Trim(v_Triggerstring) = "")
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Triggerstring cannot be empty  if you wish to add new hotstring"] . "."
 		return, 1
@@ -8379,7 +8377,7 @@ F_Clear()
 {
 	global	;assume-global mode of operation
 	Gui,		  HS3: Font, % "c" . c_FontColor
-	GuiControl, HS3:, % IdEdit1,  				;v_TriggerString
+	GuiControl, HS3:, % IdEdit1,  				;v_Triggerstring
 	GuiControl, HS3: Font, % IdCheckBox1
 	GuiControl, HS3:, % IdCheckBox1, 0
 	GuiControl, HS3: Font, % IdRadioCaseCC
@@ -8418,7 +8416,7 @@ F_Clear()
 		LV_Delete()
 	
 	Gui,		  HS4: Font, % "c" . c_FontColor
-	GuiControl, HS4:, % IdEdit1b,  				;v_TriggerString
+	GuiControl, HS4:, % IdEdit1b,  				;v_Triggerstring
 	GuiControl, HS4: Font, % IdCheckBox1b
 	GuiControl, HS4: Font, % IdRadioCaseCCb
 	GuiControl, HS4: Font, % IdRadioCaseCSb
@@ -8479,7 +8477,7 @@ F_Move()
 	F_SelectLibrary()	;DestinationLibrary 
 	Loop, % LV_GetCount()
 	{
-		if (v_Temp1 == v_TriggerString)
+		if (v_Temp1 == v_Triggerstring)
 		{
 			MsgBox, 308, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The selected triggerstring already exists in destination library file:"]
 				. "`n`n" 	. v_Triggerstring
@@ -8642,7 +8640,7 @@ F_MoveList()
 F_HSLV2() ;load content of chosen row from Search Gui into HS3 Gui
 {
 	global	;assume-global mode
-	local v_SelectedRow2 := 0, v_Library := "", v_TriggerString := "", v_SearchedTriggerString := ""
+	local v_SelectedRow2 := 0, v_Library := "", v_Triggerstring := "", v_SearchedTriggerString := ""
 	static v_PreviousSelectedRow2 := 0
 ;The following lines protect from refreshing of ListView if user chooses the same row couple of times.
 	v_PreviousSelectedRow2 := v_SelectedRow2
@@ -8653,18 +8651,18 @@ F_HSLV2() ;load content of chosen row from Search Gui into HS3 Gui
 		return
 	
 	LV_GetText(v_Library, 		v_SelectedRow2, 1)
-	LV_GetText(v_TriggerString, 	v_SelectedRow2, 2)
+	LV_GetText(v_Triggerstring, 	v_SelectedRow2, 2)
 	
 	v_SelectHotstringLibrary := % v_Library . ".csv"
 	
 	GuiControl, Choose, % IdDDL2, % v_SelectHotstringLibrary
 	F_SelectLibrary()
 	
-	v_SearchedTriggerString := v_TriggerString
+	v_SearchedTriggerString := v_Triggerstring
 	Loop
 	{
-		LV_GetText(v_TriggerString, A_Index, 1)
-		if (v_TriggerString == v_SearchedTriggerString)
+		LV_GetText(v_Triggerstring, A_Index, 1)
+		if (v_Triggerstring == v_SearchedTriggerString)
 		{
 			LV_Modify(A_Index, "Vis +Select +Focus")
 			break
@@ -9223,7 +9221,7 @@ F_DeleteHotstring()
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % "Function:" . A_ThisFunc . "`n`n" 
 			. TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
-			. "triggerstring:" . A_Space . v_TriggerString . A_Tab . "options:" . A_Space . options . "`n" 
+			. "triggerstring:" . A_Space . v_Triggerstring . A_Tab . "options:" . A_Space . options . "`n" 
 			. TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 
 	}
 	
@@ -9246,7 +9244,7 @@ F_DeleteHotstring()
 	;5. Remove trigger hint. Remark: All trigger hints are deleted, so if triggerstring was duplicated, then all trigger hints are deleted!
 	Loop, % a_Combined.MaxIndex()
 	{
-		if (InStr(a_Combined[A_Index], v_TriggerString, true))	;case sensitive comparison on purpose
+		if (InStr(a_Combined[A_Index], v_Triggerstring, true))	;case sensitive comparison on purpose
 			a_Combined.RemoveAt(A_Index)
 	}
 	TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
@@ -9293,7 +9291,7 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 		Gui, HS3: Submit, NoHide
 		Gui, HS4: Default
 		F_UpdateSelHotLibDDL()
-		GuiControl,, % IdEdit1b, % v_TriggerString
+		GuiControl,, % IdEdit1b, % v_Triggerstring
 		GuiControl,, % IdEdit2b, % v_EnterHotstring
 		GuiControl, ChooseString, % IdDDL2b, % v_SelectHotstringLibrary
 		Gui, HS3: Show, Hide
@@ -9306,7 +9304,7 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 		Gui, HS4: Submit, NoHide
 		Gui, HS3: Default
 		F_UpdateSelHotLibDDL()
-		GuiControl,, % IdEdit1, % v_TriggerString
+		GuiControl,, % IdEdit1, % v_Triggerstring
 		GuiControl,, % IdEdit2, % v_EnterHotstring
 		GuiControl, ChooseString, % IdDDL2, % v_SelectHotstringLibrary
 		Gui, HS4: Show, Hide
@@ -9597,9 +9595,9 @@ LV1_CopyContentToHS3()
 	if !(v_SelectedRow := LV_GetNext())
 		return
 	
-	LV_GetText(v_TriggerString, 	v_SelectedRow, 1)
-	GuiControl, HS3:, % IdEdit1, % v_TriggerString
-	GuiControl, HS4:, % IdEdit1, % v_TriggerString
+	LV_GetText(v_Triggerstring, 	v_SelectedRow, 1)
+	GuiControl, HS3:, % IdEdit1, % v_Triggerstring
+	GuiControl, HS4:, % IdEdit1, % v_Triggerstring
 	LV_GetText(Options, 		v_SelectedRow, 2)
 	if (InStr(Options, "*"))
 	{
@@ -11485,7 +11483,7 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 	GuiControl, , % IdText12b, % v_TotalHotstringCnt ; Text: Puts new contents into the control.
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
-F_CalculateGain(Triggerstring, Hotstring, options)
+/* F_CalculateGain(Triggerstring, Hotstring, options)
 {
 	Gain := 0, CntUpper := 0, a_MultiGain := [], temp := "", LenHots := 0, LenTrig := 0, CntSuppl := 0, HowManyReplaced := 0
 	if (options = "multi")	;multi definition of hotstring(s)
@@ -11569,7 +11567,8 @@ F_CalculateGain(Triggerstring, Hotstring, options)
           return, LenHots - LenTrig
 	}
 }
-; ------------------------------------------------------------------------------------------------------------------------------------
+ */
+ ; ------------------------------------------------------------------------------------------------------------------------------------
 F_CountUnicodeChars(ByRef String)
 {
 	HowManyCharacters := 0, Result := 0
@@ -13452,7 +13451,6 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 	global	;assume-global mode of operation
 	local	temp := 0
 	Critical, On
-	; v_Triggerstring := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", ,2) + 1)	;A_ThisHotkey: The most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
@@ -13462,7 +13460,6 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 	F_EventSigOrdHotstring()
 	++v_LogCounter
 	temp := F_DetermineGain2(v_InputString, ReplacementString)
-	; temp := F_DetermineGain(a_Triggerstring, v_Triggerstring)
 	v_CntCumGain += temp
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SE" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
@@ -13476,7 +13473,6 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 	global	;assume-global mode of operation
 	local	temp := 0
 	Critical, On
-	; v_Triggerstring := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", ,2) + 1)	;The most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
@@ -13510,7 +13506,6 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 	F_EventSigOrdHotstring()
 	++v_LogCounter
 	temp := F_DetermineGain2(v_InputString, ReplacementString)
-	; temp := F_DetermineGain(a_Triggerstring, v_Triggerstring)
 	v_CntCumGain += temp
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SR" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
@@ -13564,7 +13559,6 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 
 	Critical, On
 	; OutputDebug, % A_ThisFunc . "`n"
-	; v_Triggerstring := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", ,2) + 1)	;A_ThisHotkey: The most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
@@ -13574,7 +13568,6 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
  	F_EventSigOrdHotstring()
 	++v_LogCounter
 	temp := F_DetermineGain2(v_InputString, ReplacementString)
-	; temp := F_DetermineGain(a_Triggerstring, v_InputString)
 	v_CntCumGain += temp
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
@@ -13592,7 +13585,31 @@ F_DetermineGain2(Triggerstring, Hotstring)
 			CntUpper++
 	}
 	LenTrig += StrLen(Triggerstring) + CntUpper
-,	CntUpper := 0		
+,	CntUpper := 0
+	LenHots 	:= 	F_CountSpecialChar("{Enter}", 	Hotstring)
+			+ 	F_CountSpecialChar("{Left}", 		Hotstring)
+			+ 	F_CountSpecialChar("{Right}", 	Hotstring)
+			+ 	F_CountSpecialChar("{Up}", 		Hotstring)
+			+	F_CountSpecialChar("{Down}", 		Hotstring)
+			+	F_CountSpecialChar("{Backspace}", 	Hotstring)
+			+	F_CountSpecialChar("{Shift}", 	Hotstring)
+			+	F_CountSpecialChar("{Ctrl}", 		Hotstring)
+			+	F_CountSpecialChar("{Alt}", 		Hotstring)
+			+	F_CountSpecialChar("{LWin}", 		Hotstring)
+			+	F_CountSpecialChar("{RWin}", 		Hotstring)
+			+	F_CountSpecialChar("{+}", 		Hotstring)
+			+	F_CountSpecialChar("{!}", 		Hotstring)
+			+	F_CountSpecialChar("{{}", 		Hotstring)
+			+	F_CountSpecialChar("{}}", 		Hotstring)
+			+	F_CountSpecialChar("{Space}", 	Hotstring)
+			+	F_CountSpecialChar("{Tab}", 		Hotstring)
+			+	F_CountSpecialChar("{Home}", 		Hotstring)
+			+	F_CountSpecialChar("{End}", 		Hotstring)
+			+	F_CountSpecialChar("{PgUp}", 		Hotstring)
+			+	F_CountSpecialChar("{PgDn}", 		Hotstring)
+			+	F_CountAHKconstants(Hotstring)
+			+	F_CountUnicodeChars(Hotstring)
+
 	Loop, Parse, % Hotstring
 	{    
 		if A_LoopField is upper
@@ -13600,36 +13617,6 @@ F_DetermineGain2(Triggerstring, Hotstring)
 	}
 	LenHots += StrLen(Hotstring) + CntUpper
      return, LenHots - LenTrig
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_DetermineGain(a_Triggerstring, v_Triggerstring, Parameter*)
-{
-	global	;assume-global mode of operation
-	local	key := 0, CntUpper := 0
-	if (!Parameter[1])
-	{
-		for key in a_Triggerstring
-			if (a_Triggerstring[key] == v_Triggerstring)	;case sensitive match. It doesn't take into acccount specific situation when user entered in triggerstring eg the first capital letter.
-				return, a_Gain[key]
-		Loop, Parse, % v_Triggerstring	;if there is no match in a_Triggerstring, calculate Gain now
-		{    
-			if A_LoopField is upper
-				CntUpper++
-		}
-		return, StrLen(v_Triggerstring) + CntUpper		
-	}
-	else
-	{
-		for key in a_Triggerstring
-			if (a_Triggerstring[key] == v_Triggerstring)	;case sensitive match. It doesn't take into acccount specific situation when user entered in triggerstring eg the first capital letter.
-				return, a_Gain[key][Parameter[1]]
-		Loop, Parse, % v_Triggerstring	;if there is no match in a_Triggerstring, calculate Gain now
-		{    
-			if A_LoopField is upper
-				CntUpper++
-		}
-		return, StrLen(v_Triggerstring) + CntUpper		
-	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeterminePartStrings(ReplacementString)
@@ -13652,8 +13639,8 @@ F_FollowCaseConformity(ReplacementString)
 	
 	if (!InStr(v_Options, "C"))
 	{
-		vFirstLetter1 		:= SubStr(v_InputString, 1, 1)	;it must be v_Triggerstring, because A_ThisHotkey do not preserve letter size!
-		vRestOfLetters 	:= SubStr(v_InputString, 2)		;it must be v_Triggerstring, because A_ThisHotkey do not preserve letter size!
+		vFirstLetter1 		:= SubStr(v_InputString, 1, 1)	;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
+		vRestOfLetters 	:= SubStr(v_InputString, 2)		;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
 		if vFirstLetter1 is upper
 			fFirstLetterCap 	:= true
 		if (RegExMatch(v_InputString, "^[[:punct:][:digit:][:upper:][:space:]]*$"))
@@ -13699,7 +13686,6 @@ F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clip
 	local oWord := "", ThisHotkey := A_ThisHotkey, vFirstLetter1 := "", vFirstLetter2 := "", vOutputVar := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, temp := 0
 		, fFirstLetterCap := false, InputString := ""
 	; OutputDebug, % A_ThisFunc . "`n"
-	; v_Triggerstring := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", ,2) + 1)	;The most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
@@ -13709,7 +13695,6 @@ F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clip
 	F_EventSigOrdHotstring()
 	++v_LogCounter
 	temp := F_DetermineGain2(v_InputString, ReplacementString)
-	; temp := F_DetermineGain(a_Triggerstring, v_Triggerstring)
 	v_CntCumGain += temp
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "CLI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
@@ -13737,7 +13722,6 @@ F_MouseMenu_MCLI() ;The subroutine may consult the following built-in variables:
 			SoundBeep, % ini_MHSF, % ini_MHSD
 		++v_LogCounter
 		temp := F_DetermineGain2(v_InputString, ReplacementString)
-		; temp := F_DetermineGain(a_Triggerstring, v_Triggerstring, ChoicePos)
 		v_CntCumGain += temp
 		if (ini_THLog)
 			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCLI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
@@ -13817,7 +13801,6 @@ F_MouseMenu_MSI() ; Handling of mouse events for F_HOF_MSI;The subroutine may co
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
 		++v_LogCounter
-		; temp := F_DetermineGain(a_Triggerstring, v_Triggerstring, ChoicePos)
 		temp := F_DetermineGain2(v_InputString, OutputVarTemp)
 		v_CntCumGain += temp
 		if (ini_THLog)
@@ -13942,7 +13925,6 @@ F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid i
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
 		++v_LogCounter
-		; temp := F_DetermineGain(a_Triggerstring, v_Triggerstring, ChoicePos)
 		temp := F_DetermineGain2(v_InputString, ReplacementString)
 		v_CntCumGain += temp
 		if (ini_THLog)
