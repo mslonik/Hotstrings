@@ -1632,9 +1632,8 @@ F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
 	local	f_FoundEndChar := false, f_FoundTip := false, EndCharCounter := 0
-	Critical, On
 
-	; OutputDebug, % "Char:" . A_Tab . Char . "`n"
+	Critical, On
 	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))	;Menu Hotstring Sound Enable
 	{
 		if (!v_InputH.VisibleText)
@@ -1644,16 +1643,23 @@ F_OneCharPressed(ih, Char)
 		return
 	}
 	;This is compromise: not all triggerstrings will have its tips, e.g. triggerstring with option ? (question mark) and those starting with EndChar: ".ahk", "..."
+	if (v_InputString = "")
+		v_TrigTipsInput := ""
 	if (InStr(HotstringEndChars, Char))
-		f_FoundEndChar := true
-	else
-		v_InputString .= Char
+		v_TrigTipsInput .= Char	;this local (static) variable is applied to handle display of Triggerstring Tips menu
+	else	;if EndChar is found, it is not added to the v_InputString, but it is added to TrigTipsInput variable
+	{
+		v_InputString 		.= Char	;the global variable v_InputString is used to determine Gain parameters and to handle F_Undo functions
+,		v_TrigTipsInput 	.= Char
+	}
 	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n
+	OutputDebug, % "v_TrigTipsInput:" . A_Space . v_TrigTipsInput . A_Space . "v_InputString:" . A_Space . v_TrigTipsInput . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
-	if (ini_TTTtEn) and (v_InputString)
+	if (ini_TTTtEn) and (v_TrigTipsInput)
+	; if (ini_TTTtEn) and (v_InputString)
 	{
-		F_PrepareTriggerstringTipsTables2()	;old version: F_PrepareTriggerstringTipsTables()
+		F_PrepareTriggerstringTipsTables2(v_TrigTipsInput)	;old version: F_PrepareTriggerstringTipsTables()
 		if (a_Tips.Count())	;if tips are available display then
 		{
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
@@ -1661,25 +1667,16 @@ F_OneCharPressed(ih, Char)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
 		}
 		else	;or destroy previously visible tips
-			F_DestroyTriggerstringTips(ini_TTCn)
+			F_DestroyTriggerstringTips(ini_TTCn)	;tu jestem: wyzerowac zmienne lancuchowe
 	}
-
-	if (f_FoundEndChar)	;check if sequence fits to any known a_Tips, helpful to process triggerstrings containing endchar, e.g. "à la"
-		 {
-		 	Loop, % a_Tips.Count()
-		 		if (InStr(a_Tips[A_Index], v_InputString))
-		 			f_FoundTip := true
-		 	; if (!f_FoundTip)
-		 		; v_InputString := ""
-		 }	
-		return	
+	return	
 	; Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
 {
 	global	;assume-global mode of operation
-	v_InputString := "", v_UndoHotstring := ""	;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
+	v_InputString := "", v_TrigTipsInput := "", v_UndoHotstring := "", v_UndoTriggerstring := ""	;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
 ,	v_InputH 			:= InputHook("V I1 L0")	;I1 by default
 ,	v_InputH.OnChar 	:= Func("F_OneCharPressed")
 ,	v_InputH.OnKeyUp 	:= Func("F_BackspaceProcessing")
@@ -1718,11 +1715,11 @@ F_BackspaceProcessing()
 	}
 	else
 	{
-		v_InputString := SubStr(v_InputString, 1, -1)	;whole string except last character
+		v_TrigTipsInput := SubStr(v_TrigTipsInput, 1, -1)	;whole string except last character
 		; OutputDebug, % "v_InputString after BS:" . A_Tab . v_InputString . "IsCritical:" . A_Tab . A_IsCritical . "`n"
-		if (ini_TTTtEn) and (v_InputString)
+		if (ini_TTTtEn) and (v_TrigTipsInput)
 		{
-			F_PrepareTriggerstringTipsTables2()
+			F_PrepareTriggerstringTipsTables2(v_TrigTipsInput)
 			if (a_Tips.Count())
 			{
 				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
@@ -1730,7 +1727,7 @@ F_BackspaceProcessing()
 					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 			}
 		}
-		if (!v_InputString)	;if v_InputString = "" = empty
+		if (!v_TrigTipsInput)	;if v_InputString = "" = empty
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
 	; OutputDebug, % "F_BackspaceProcessing, end" . "`n"
@@ -7593,12 +7590,12 @@ F_EventSigOrdHotstring()
 		SoundBeep, % ini_OHSF, % ini_OHSD
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_PrepareTriggerstringTipsTables2()
+F_PrepareTriggerstringTipsTables2(string)
 {
 	global	;assume-global mode of operation
 	local	HitCnt := 0
 	;OutputDebug, % "Length of v_InputString:" . A_Space . StrLen(v_InputString) . A_Tab . "v_InputString:" . A_Space . v_InputString
-	if (StrLen(v_InputString) > ini_TASAC - 1)	;TASAC = TipsAreShownAfterNoOfCharacters
+	if (StrLen(string) > ini_TASAC - 1)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{
 		a_Tips 		:= []	;collect within global array a_Tips subset from full set a_Combined
 		, a_TipsOpt	:= []	;collect withing global array a_TipsOpt subset from full set a_TriggerOptions; next it will be used to show triggering character in F_ShowTriggerstringTips2()
@@ -7606,7 +7603,7 @@ F_PrepareTriggerstringTipsTables2()
 		, a_TipsHS	:= []	;HS = Hotstrings
 		Loop, % a_Combined.MaxIndex()
 		{
-			if (InStr(a_Combined[A_Index], v_InputString) = 1)
+			if (InStr(a_Combined[A_Index], string) = 1)
 			{
 				Switch ini_TTCn
 				{
