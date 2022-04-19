@@ -1632,11 +1632,13 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
-	local	f_FoundEndChar := false, EndCharCounter := 0
-	static	f_FoundTip := true
+	static	f_FoundTip := true, f_FoundEndChar := false
 
-	if (!f_FoundTip)
+	if (f_FoundEndChar) or (!f_FoundTip)
+	{
 		v_InputString := ""
+,		f_FoundEndChar := false
+	}
 
 	Critical, On
 	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))	;Menu Hotstring Sound Enable
@@ -8158,13 +8160,13 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 		if (OnOff = "On")
 		{
 			if (InStr(OldOptions, "*") and !InStr(NewOptions,"*"))
-				OldOptions := StrReplace(OldOptions, "*", "*0")
+				NewOptions := StrReplace(OldOptions, "*", "*0")
 			if (InStr(OldOptions, "B0") and !InStr(NewOptions, "B0"))
-				OldOptions := StrReplace(OldOptions, "B0", "B")
+				NewOptions := StrReplace(OldOptions, "B0", "B")
 			if (InStr(OldOptions, "O") and !InStr(NewOptions, "O"))
-				OldOptions := StrReplace(OldOptions, "O", "O0")
+				NewOptions := StrReplace(OldOptions, "O", "O0")
 			if (InStr(OldOptions, "Z") and !InStr(NewOptions, "Z"))
-				OldOptions := StrReplace(OldOptions, "Z", "Z0")
+				NewOptions := StrReplace(OldOptions, "Z", "Z0")
 
 			if (InStr(NewOptions, "O"))	;Add new hotstring which replaces the old one
 			{
@@ -11483,99 +11485,12 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 				Case 6:	a_Comment.Push(A_LoopField)
 			}
 		}
-		; a_Gain.Push(F_CalculateGain(Triggerstring, Hotstring, options))
 		++v_TotalHotstringCnt
 		a_Library.Push(name) ;for function Search
 	}	
 	GuiControl, , % IdText12,  % v_TotalHotstringCnt ; Text: Puts new contents into the control.
 	GuiControl, , % IdText12b, % v_TotalHotstringCnt ; Text: Puts new contents into the control.
 }
-; ------------------------------------------------------------------------------------------------------------------------------------
-/* F_CalculateGain(Triggerstring, Hotstring, options)
-{
-	Gain := 0, CntUpper := 0, a_MultiGain := [], temp := "", LenHots := 0, LenTrig := 0, CntSuppl := 0, HowManyReplaced := 0
-	if (options = "multi")	;multi definition of hotstring(s)
-	{
-		Loop, Parse, % Hotstring, "¦"
-		{
-			temp := A_LoopField
-			LenHots 	:= 	F_CountSpecialChar("{Enter}", 	temp)
-					+ 	F_CountSpecialChar("{Left}", 		temp)
-					+ 	F_CountSpecialChar("{Right}", 	temp)
-					+ 	F_CountSpecialChar("{Up}", 		temp)
-					+	F_CountSpecialChar("{Down}", 		temp)
-					+	F_CountSpecialChar("{Backspace}", 	temp)
-					+	F_CountSpecialChar("{Shift}", 	temp)
-					+	F_CountSpecialChar("{Ctrl}", 		temp)
-					+	F_CountSpecialChar("{Alt}", 		temp)
-					+	F_CountSpecialChar("{LWin}", 		temp)
-					+	F_CountSpecialChar("{RWin}", 		temp)
-					+	F_CountSpecialChar("{+}", 		temp)
-					+	F_CountSpecialChar("{!}", 		temp)
-					+	F_CountSpecialChar("{{}", 		temp)
-					+	F_CountSpecialChar("{}}", 		temp)
-					+	F_CountSpecialChar("{Space}", 	temp)
-					+	F_CountSpecialChar("{Tab}", 		temp)
-					+	F_CountSpecialChar("{Home}", 		temp)
-					+	F_CountSpecialChar("{End}", 		temp)
-					+	F_CountSpecialChar("{PgUp}", 		temp)
-					+	F_CountSpecialChar("{PgDn}", 		temp)
-					+	F_CountAHKconstants(temp)
-					+	F_CountUnicodeChars(temp)
-			Loop, Parse, % temp
-			{
-				if temp is upper
-					CntUpper++
-			}
-			LenHots += StrLenUnicode(temp) + CntUpper
-,			LenTrig += F_CountTrigConstants(Triggerstring) + StrLen(Triggerstring)
-,			a_MultiGain[A_Index] := LenHots - LenTrig
-,			CntUpper := 0, LenHots := 0, LenTrig := 0
-		}
-		return, a_MultiGain
-	}
-	else
-	{
-		LenHots 	:= 	F_CountSpecialChar("{Enter}", 	Hotstring)
-				+ 	F_CountSpecialChar("{Left}", 		Hotstring)
-				+ 	F_CountSpecialChar("{Right}", 	Hotstring)
-				+ 	F_CountSpecialChar("{Up}", 		Hotstring)
-				+	F_CountSpecialChar("{Down}", 		Hotstring)
-				+	F_CountSpecialChar("{Backspace}", 	Hotstring)
-				+	F_CountSpecialChar("{Shift}", 	Hotstring)
-				+	F_CountSpecialChar("{Ctrl}", 		Hotstring)
-				+	F_CountSpecialChar("{Alt}", 		Hotstring)
-				+	F_CountSpecialChar("{LWin}", 		Hotstring)
-				+	F_CountSpecialChar("{RWin}", 		Hotstring)
-				+	F_CountSpecialChar("{+}", 		Hotstring)
-				+	F_CountSpecialChar("{!}", 		Hotstring)
-				+	F_CountSpecialChar("{{}", 		Hotstring)
-				+	F_CountSpecialChar("{}}", 		Hotstring)
-				+	F_CountSpecialChar("{Space}", 	Hotstring)
-				+	F_CountSpecialChar("{Tab}", 		Hotstring)
-				+	F_CountSpecialChar("{Home}", 		Hotstring)
-				+	F_CountSpecialChar("{End}", 		Hotstring)
-				+	F_CountSpecialChar("{PgUp}", 		Hotstring)
-				+	F_CountSpecialChar("{PgDn}", 		Hotstring)
-				+	F_CountAHKconstants(Hotstring)
-				+	F_CountUnicodeChars(Hotstring)
-		Loop, Parse, % Hotstring
-		{    
-			if A_LoopField is upper
-				CntUpper++
-		}
-		LenHots += StrLenUnicode(Hotstring) + CntUpper
-,		CntUpper := 0		
-		Loop, Parse, % Triggerstring
-		{    
-			if A_LoopField is upper
-				CntUpper++
-		}
-		LenTrig += F_CountTrigConstants(Triggerstring) + StrLen(Triggerstring) + CntUpper
-          return, LenHots - LenTrig
-	}
-}
- */
  ; ------------------------------------------------------------------------------------------------------------------------------------
 F_CountUnicodeChars(ByRef String)
 {
