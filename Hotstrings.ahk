@@ -865,10 +865,11 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 			if (ini_MHSEn)
 				SoundBeep, % ini_MHSF, % ini_MHSD	
 
-,			++v_LogCounter
+			++v_LogCounter
+			if (InStr(A_ThisHotkey, "?"))
+				v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 			temp := F_DetermineGain2(v_InputString, ReplacementString)
-; ,			temp := F_DetermineGain(a_Triggerstring, v_InputString, v_PressedKey)
-,			v_CntCumGain += temp
+			v_CntCumGain += temp
 			if (ini_THLog)
 			{
 				Switch WhichMenu
@@ -953,8 +954,9 @@ F_HMenuSI_Keyboard()
 	if (ini_MHSEn)
 		SoundBeep, % ini_MHSF, % ini_MHSD	
 	++v_LogCounter
+	if (InStr(A_ThisHotkey, "?"))
+		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 	temp := F_DetermineGain2(v_InputString, v_Temp1)
-	; temp := F_DetermineGain(a_Triggerstring, v_InputString, v_PressedKey)
 	v_CntCumGain += temp
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
@@ -1060,6 +1062,8 @@ F_HMenuCLI_Keyboard()
 	if (ini_MHSEn)
 		SoundBeep, % ini_MHSF, % ini_MHSD
 	++v_LogCounter
+	if (InStr(A_ThisHotkey, "?"))
+		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 	temp := F_DetermineGain2(v_InputString, v_Temp1)
 	v_CntCumGain += temp
 	if (ini_THLog)
@@ -13374,6 +13378,8 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 	global	;assume-global mode of operation
 	local	temp := 0
 	Critical, On
+	if (InStr(A_ThisHotkey, "?"))
+		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
@@ -13396,6 +13402,8 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 	global	;assume-global mode of operation
 	local	temp := 0
 	Critical, On
+	if (InStr(A_ThisHotkey, "?"))
+		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
@@ -13405,7 +13413,6 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 	F_EventSigOrdHotstring()
 	++v_LogCounter
 	temp := F_DetermineGain2(v_InputString, ReplacementString)
-	; temp := F_DetermineGain(a_Triggerstring, v_Triggerstring)
 	v_CntCumGain += temp
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SP" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
@@ -13419,7 +13426,8 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 	global	;assume-global mode of operation
 	local	temp := 0
 	Critical, On
-	; v_Triggerstring := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", ,2) + 1)	;The most recently executed non-auto-replace hotstring (blank if none).
+	if (InStr(A_ThisHotkey, "?"))
+		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
@@ -13482,6 +13490,8 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 
 	Critical, On
 	; OutputDebug, % A_ThisFunc . "`n"
+	if (InStr(A_ThisHotkey, "?"))
+		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
@@ -13605,9 +13615,10 @@ F_ClipboardPaste(string, Oflag)
 F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clipboard
 {
 	global	;assume-global mode
+	local	temp := ""
 	Critical, On
-	local oWord := "", ThisHotkey := A_ThisHotkey, vFirstLetter1 := "", vFirstLetter2 := "", vOutputVar := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, temp := 0
-		, fFirstLetterCap := false, InputString := ""
+	if (InStr(A_ThisHotkey, "?"))
+		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 	; OutputDebug, % A_ThisFunc . "`n"
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
@@ -13644,6 +13655,8 @@ F_MouseMenu_MCLI() ;The subroutine may consult the following built-in variables:
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
 		++v_LogCounter
+		if (InStr(A_ThisHotkey, "?"))
+			v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 		temp := F_DetermineGain2(v_InputString, ReplacementString)
 		v_CntCumGain += temp
 		if (ini_THLog)
@@ -13724,6 +13737,8 @@ F_MouseMenu_MSI() ; Handling of mouse events for F_HOF_MSI;The subroutine may co
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
 		++v_LogCounter
+		if (InStr(A_ThisHotkey, "?"))
+			v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 		temp := F_DetermineGain2(v_InputString, OutputVarTemp)
 		v_CntCumGain += temp
 		if (ini_THLog)
@@ -13848,6 +13863,8 @@ F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid i
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
 		++v_LogCounter
+		if (InStr(A_ThisHotkey, "?"))
+			v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 		temp := F_DetermineGain2(v_InputString, ReplacementString)
 		v_CntCumGain += temp
 		if (ini_THLog)
