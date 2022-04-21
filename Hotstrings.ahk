@@ -7929,7 +7929,7 @@ F_AddHotstring()
 			,v_TheWholeFile := "", v_TotalLines := 0
 			,ExternalIndex := 0
 			,name := "", key := 0, value := "", Counter := 0, key2 := 0, value2 := ""
-			,f_T_GeneralMatch := false, f_T_CaseMatch := false, f_OldOptionsC := false, f_OldOptionsC1 := false, f_OptionsC := false, f_OptionsC1 := false, f_H_CaseMatch := false
+			,f_T_GeneralMatch := false, f_T_CaseMatch := false, f_OldOptionsC := false, f_OldOptionsC1 := false, f_OptionsC := false, f_OptionsC1 := false
 			,SelectedLibraryName := ""
 			,Overwrite := "", WinHWND := "", WhichGuiEnable := ""
 
@@ -7956,7 +7956,7 @@ F_AddHotstring()
 	GuiControl, -Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	for key, value in a_Triggerstring
 	{
-		f_T_GeneralMatch := false, f_T_CaseMatch := false, f_OldOptionsC := false, f_OldOptionsC1 := false, f_OptionsC := false, f_OptionsC1 := false, f_H_CaseMatch := false
+		f_T_GeneralMatch := false, f_T_CaseMatch := false, f_OldOptionsC := false, f_OldOptionsC1 := false, f_OptionsC := false, f_OptionsC1 := false
 		if (a_Triggerstring[key] = v_Triggerstring)	;case insensitive string comparison!
 		{
 			f_T_GeneralMatch := true
@@ -7968,8 +7968,6 @@ F_AddHotstring()
 				f_OldOptionsC 	:= true
 			if (InStr(NewOptions, "C"))
 				f_OptionsC 	:= true
-			if (a_Hotstring[key] == v_EnterHotstring)	;case sensitive string comparison
-				f_H_CaseMatch := true
 
 			if (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))	;if matched within current library
 			{
@@ -8119,7 +8117,7 @@ F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Comment)
 {
 	global	;assume-global mode of operation
-	local	index := 0, value := ""
+	local	index := 0, value := "", vpos := "", vstr := "", vlen := 0
 
 	a_Triggerstring[key] 	:= v_Triggerstring
 , 	a_TriggerOptions[key] 	:= NewOptions
@@ -8129,8 +8127,13 @@ F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Com
 , 	a_Comment[key] 		:= v_Comment
 ; ,	a_Gain[key]			:= F_CalculateGain(v_Triggerstring, TextInsert, NewOptions)
 	for index, value in a_Combined
-		if (InStr(value, v_Triggerstring, true))	;case-sensitive comparison
+	{
+		vpos := InStr(value, "|") - 1			;how many characters extract from the beginning of the string
+,		vlen := StrLen(value)				;if StartingPos tries to go beyond the left end of the string, the extraction starts at the first character; it means if is negative and goes beyond negative value of length
+,		vstr := SubStr(value, -vlen, vpos)		;substring from the beginning of the string
+		if (vstr == v_Triggerstring)			;case sensitive comparison
 			a_Combined[index] := v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ModifyLV(NewOptions, SendFunFileFormat, EnDis, TextInsert)
@@ -8161,40 +8164,36 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 
 	IfMsgBox, Yes
 	{
-		if (OnOff = "On")
+		if (InStr(OldOptions, "*") and !InStr(NewOptions,"*"))
+			NewOptions := StrReplace(OldOptions, "*", "*0")
+		if (InStr(OldOptions, "B0") and !InStr(NewOptions, "B0"))
+			NewOptions := StrReplace(OldOptions, "B0", "B")
+		if (InStr(OldOptions, "O") and !InStr(NewOptions, "O"))
+			NewOptions := StrReplace(OldOptions, "O", "O0")
+		if (InStr(OldOptions, "Z") and !InStr(NewOptions, "Z"))
+			NewOptions := StrReplace(OldOptions, "Z", "Z0")
+		if (InStr(NewOptions, "O"))	;Add new hotstring which replaces the old one
 		{
-			if (InStr(OldOptions, "*") and !InStr(NewOptions,"*"))
-				NewOptions := StrReplace(OldOptions, "*", "*0")
-			if (InStr(OldOptions, "B0") and !InStr(NewOptions, "B0"))
-				NewOptions := StrReplace(OldOptions, "B0", "B")
-			if (InStr(OldOptions, "O") and !InStr(NewOptions, "O"))
-				NewOptions := StrReplace(OldOptions, "O", "O0")
-			if (InStr(OldOptions, "Z") and !InStr(NewOptions, "Z"))
-				NewOptions := StrReplace(OldOptions, "Z", "Z0")
-
-			if (InStr(NewOptions, "O"))	;Add new hotstring which replaces the old one
+			Try
+				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
+			Catch
 			{
-				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
-				Catch
-				{
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . "`n" . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," 
-						. A_Space . OnOff . ")"
-					return "No"
-				}
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . "`n" . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
+					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," 
+					. A_Space . OnOff . ")"
+				return "No"
 			}
-			else
+		}
+		else
+		{
+			Try
+				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
+			Catch
 			{
-				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
-				Catch
-				{
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," 
-						. A_Space . OnOff . ")"
-					return "No"
-				}
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
+					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," 
+					. A_Space . OnOff . ")"
+				return "No"
 			}
 		}
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["New settings are now applied."]
@@ -9256,7 +9255,7 @@ F_DeleteHotstring()
 	FileAppend, % txt, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8
 	
 	;5. Remove trigger hint. Remark: All trigger hints are deleted, so if triggerstring was duplicated, then all trigger hints are deleted!
-	Loop, % a_Combined.MaxIndex()
+	Loop, % a_Combined.MaxIndex()	;tu jestem
 	{
 		if (InStr(a_Combined[A_Index], v_Triggerstring, true))	;case sensitive comparison on purpose
 			a_Combined.RemoveAt(A_Index)
