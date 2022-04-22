@@ -1638,7 +1638,8 @@ F_OneCharPressed(ih, Char)
 	global	;assume-global mode of operation
 	static	f_FoundTip := true, f_FoundEndChar := false
 
-	if (f_FoundEndChar) or (!f_FoundTip)
+	if (f_FoundEndChar) and (!f_FoundTip)
+	; if (f_FoundEndChar) or (!f_FoundTip)
 	{
 		v_InputString := ""
 ,		f_FoundEndChar := false
@@ -9202,7 +9203,7 @@ F_DeleteHotstring()
 	LV_GetText(EnDis,			v_SelectedRow, 4)	;enabled or disabled definition
 	LV_GetText(hotstring, 		v_SelectedRow, 5)
 	MsgBox, % 256 + 64 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Selected definition d(t, o, h) will be deleted. Do you want to proceed?"] . "`n`n"
-		TransA["triggerstring"] . ":" . A_Space . triggerstring . A_Tab . TransA["options"] . ":" . A_Space . options . A_Tab . TransA["hotstring"] . ":" . A_Space . hotstring
+		. TransA["triggerstring"] . ":" . A_Space . triggerstring . A_Tab . TransA["options"] . ":" . A_Space . options . A_Tab . TransA["hotstring"] . ":" . A_Space . hotstring
 	IfMsgBox, No
 		return
 	TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
@@ -11468,7 +11469,7 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 					options := A_LoopField
 					a_TriggerOptions.Push(A_LoopField)
 				Case 2:	
-					Triggerstring := F_ConvertEscapeSequences(A_LoopField)
+					Triggerstring := A_LoopField
 					a_Triggerstring.Push(Triggerstring)
 				Case 3:	a_OutputFunction.Push(A_LoopField)
 				Case 4:	a_EnableDisable.Push(A_LoopField)
