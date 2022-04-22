@@ -1678,7 +1678,7 @@ F_OneCharPressed(ih, Char)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
 		}
 		else	;or destroy previously visible tips
-			F_DestroyTriggerstringTips(ini_TTCn)	;tu jestem: wyzerowac zmienne lancuchowe
+			F_DestroyTriggerstringTips(ini_TTCn)
 	}
 	if (f_FoundEndChar) and (v_InputString)
 	{
@@ -8019,6 +8019,7 @@ F_AddHotstring()
 				Case "HS3":	F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
 				Case "HS4": 	F_GuiHS4_EnDis("Enable")
 			}
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["New settings are now applied."]
 			return
 		}
 		if (Overwrite = "No")
@@ -8117,7 +8118,7 @@ F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Comment)
 {
 	global	;assume-global mode of operation
-	local	index := 0, value := "", vpos := "", vstr := "", vlen := 0
+	local	index := 0
 
 	a_Triggerstring[key] 	:= v_Triggerstring
 , 	a_TriggerOptions[key] 	:= NewOptions
@@ -8125,15 +8126,9 @@ F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Com
 , 	a_Hotstring[key] 		:= TextInsert
 , 	a_EnableDisable[key] 	:= EnDis
 , 	a_Comment[key] 		:= v_Comment
-; ,	a_Gain[key]			:= F_CalculateGain(v_Triggerstring, TextInsert, NewOptions)
-	for index, value in a_Combined
-	{
-		vpos := InStr(value, "|") - 1			;how many characters extract from the beginning of the string
-,		vlen := StrLen(value)				;if StartingPos tries to go beyond the left end of the string, the extraction starts at the first character; it means if is negative and goes beyond negative value of length
-,		vstr := SubStr(value, -vlen, vpos)		;substring from the beginning of the string
-		if (vstr == v_Triggerstring)			;case sensitive comparison
-			a_Combined[index] := v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert
-	}
+	for index in a_Combined	;recreate array a_Combined
+		a_Combined[index] := a_Triggerstring[index] . "|" . a_TriggerOptions[index] . "|" . a_EnableDisable[index] . "|" . a_Hotstring[index]
+	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ModifyLV(NewOptions, SendFunFileFormat, EnDis, TextInsert)
@@ -8196,7 +8191,6 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 				return "No"
 			}
 		}
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["New settings are now applied."]
 		return, "Yes"	
 	}
 }
@@ -9192,8 +9186,8 @@ F_DeleteHotstring()
 	global ;assume-global mode
 	local 	LibraryFullPathAndName := "" 
 			,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
-			,v_SelectedRow := 0, v_Pointer := 0
-			,key := 0, val := "", options := "", triggerstring := "", EnDis := ""
+			,v_SelectedRow := 0, v_Pointer := 0, index := 0
+			,key := 0, val := "", options := "", triggerstring := "", EnDis := "", hotstring := ""
 	
 	Gui, HS3: +OwnDialogs
 	
@@ -9206,8 +9200,9 @@ F_DeleteHotstring()
 	LV_GetText(triggerstring, 	v_SelectedRow, 1)	;triggerstring
 	LV_GetText(options, 		v_SelectedRow, 2)	;options
 	LV_GetText(EnDis,			v_SelectedRow, 4)	;enabled or disabled definition
-	MsgBox, % 256 + 64 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Selected Hotstring will be deleted. Do you want to proceed?"] . "`n`n"
-		. triggerstring . A_Tab . options . A_Tab . EnDis
+	LV_GetText(hotstring, 		v_SelectedRow, 5)
+	MsgBox, % 256 + 64 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Selected definition d(t, o, h) will be deleted. Do you want to proceed?"] . "`n`n"
+		TransA["triggerstring"] . ":" . A_Space . triggerstring . A_Tab . TransA["options"] . ":" . A_Space . options . A_Tab . TransA["hotstring"] . ":" . A_Space . hotstring
 	IfMsgBox, No
 		return
 	TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
@@ -9216,7 +9211,7 @@ F_DeleteHotstring()
 	LibraryFullPathAndName := ini_HADL . "\" . v_SelectHotstringLibrary
 	FileDelete, % LibraryFullPathAndName
 	
-	;4. Disable selected hotstring.
+	;2. Disable selected hotstring.
 
 	;In order to switch off, some options have to run in "reversed" state:
 	if (EnDis = "En")	;only if definition is enabled, at first try to disable it (if it is disabled, just delete it)
@@ -9253,16 +9248,9 @@ F_DeleteHotstring()
 		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
 	}
 	FileAppend, % txt, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8
-	
-	;5. Remove trigger hint. Remark: All trigger hints are deleted, so if triggerstring was duplicated, then all trigger hints are deleted!
-	Loop, % a_Combined.MaxIndex()	;tu jestem
-	{
-		if (InStr(a_Combined[A_Index], v_Triggerstring, true))	;case sensitive comparison on purpose
-			a_Combined.RemoveAt(A_Index)
-	}
 	TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
 	
-	;6. Decrement library counter.
+	;5. Decrement library counter.
 	--v_LibHotstringCnt
 	--v_TotalHotstringCnt
 	GuiControl, , % IdText13,  % v_LibHotstringCnt
@@ -9270,7 +9258,7 @@ F_DeleteHotstring()
 	GuiControl, , % IdText12,  % v_TotalHotstringCnt
 	GuiControl, , % IdText12b, % v_TotalHotstringCnt
 	
-	;Remove from "Search" tables. Unfortunately index (v_SelectedRow) is sufficient only for one table, and in Searching there is "super table" containing all definitions from all available tables.
+	;6. Remove from "Search" tables. Unfortunately index (v_SelectedRow) is sufficient only for one table, and in Searching there is "super table" containing all definitions from all available tables.
 	for key, val in a_Library
 		if (val = SubStr(v_SelectHotstringLibrary, 1, -4))
 		{
@@ -9286,9 +9274,13 @@ F_DeleteHotstring()
 	a_EnableDisable	.RemoveAt(v_Pointer)
 	a_Hotstring		.RemoveAt(v_Pointer)
 	a_Comment			.RemoveAt(v_Pointer)
-	; a_Gain			.RemoveAt(v_Pointer)
-	
-	;7. Update table for searching
+
+	;7. Remove trigger hint. 
+	for index in a_Combined	;recreate array a_Combined
+		a_Combined[index] := a_Triggerstring[index] . "|" . a_TriggerOptions[index] . "|" . a_EnableDisable[index] . "|" . a_Hotstring[index]
+	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	
+
+	;8. Update table for searching
 	F_Searching("Reload")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10990,6 +10982,7 @@ Dynamic hotstrings 										= &Dynamic hotstrings
 Edit Hotstrings 										= Edit Hotstrings
 Enable												= Enable
 enable												= enable
+En/Dis												= En/Dis
 Enable/disable libraries									= Enable/disable &libraries
 Enable/disable triggerstring tips 							= Enable/disable triggerstring tips	
 Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 4th edition of this application, 2021 by Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
@@ -11140,6 +11133,7 @@ Open libraries folder in Explorer							= Open libraries folder in Explorer
 Opening Curly Bracket { 									= Opening Curly Bracket {
 Opening Round Bracket ( 									= Opening Round Bracket (
 Opening Square Bracket [ 								= Opening Square Bracket [
+options												= options	
 or													= or
 question												= question
 Question Mark ? 										= Question Mark ?
@@ -11188,7 +11182,7 @@ Select a row in the list-view, please! 						= Select a row in the list-view, pl
 Select folder where ""Hotstrings"" folder will be moved.		= Select folder where ""Hotstrings"" folder will be moved.
 Select folder where libraries (*.csv  files) will be moved.		= Select folder where libraries (*.csv  files) will be moved.
 Select hotstring library									= Select hotstring library
-Selected Hotstring will be deleted. Do you want to proceed? 	= Selected Hotstring will be deleted. Do you want to proceed?
+Selected definition d(t, o, h) will be deleted. Do you want to proceed? 	= Selected definition d(t, o, h) will be deleted. Do you want to proceed?
 Select hotstring output function 							= Select hotstring output function
 Select library file to be deleted							= Select library file to be deleted
 Select the target library: 								= Select the target library:
