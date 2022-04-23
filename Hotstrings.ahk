@@ -820,7 +820,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 			{
 				if (A_Index = v_PressedKey)
 				{
-					v_Temp1 := SubStr(A_LoopField, InStr(A_LoopField, " ") + 1)
+					v_Temp1 := A_LoopField
 					break
 				}
 			}
@@ -855,6 +855,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 			SendLevel, 2			;to backtrigger it must be higher than the input level of the hotstrings
 			SendEvent, % v_Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
 			SendLevel, 0
+			v_InputString := 0
 		Case "MHot":
 			Switch WhichMenu
 			{
@@ -968,7 +969,7 @@ F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_MouseMouse is lower than this
 {
 	global	;assume-global mode of operation
 	local	OutputVar := 0, OutputVarWin := 0, OutputVarControl := "", OutputVarTemp := ""
-	OutputDebug, % "LButton:" . A_Tab . "v_InputString:" . A_Tab . v_InputString . "`n"
+	; OutputDebug, % "LButton:" . A_Tab . "v_InputString:" . A_Tab . v_InputString . "`n"
 	if (!ini_ATEn)
 		return
 	if (WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd))
@@ -1636,16 +1637,18 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
-	static	f_FoundTip := true, f_FoundEndChar := false
-
-	if (f_FoundEndChar) and (!f_FoundTip)
-	; if (f_FoundEndChar) or (!f_FoundTip)
-	{
-		v_InputString := ""
-,		f_FoundEndChar := false
-	}
+	static	f_FoundTip := false, f_FoundEndChar := false
 
 	Critical, On
+	if (f_FoundEndChar) and (!f_FoundTip)		;now works undo for triggerstrings containing endchars
+		v_InputString 	:= ""
+
+	if (v_InputString = "")
+	{
+		f_FoundEndChar := false
+,		f_FoundTip	:= false		
+	}
+
 	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))	;Menu Hotstring Sound Enable
 	{
 		if (!v_InputH.VisibleText)
@@ -1657,7 +1660,7 @@ F_OneCharPressed(ih, Char)
 	if (InStr(HotstringEndChars, Char))
 	{
 		if (v_InputString)	;if v_InputString is empty, do not concatenate EndChar to it.	
-			v_InputString .= Char	;the global variable v_InputString is used to determine Gain parameters and to handle F_Undo functions
+			v_InputString .= Char	;the global variable v_InputString is used to display triggerstring tips
 		f_FoundEndChar		:= true
 	}
 	else	;if EndChar is found, it is not added to the v_InputString, but it is added to TrigTipsInput variable
@@ -1681,14 +1684,19 @@ F_OneCharPressed(ih, Char)
 		else	;or destroy previously visible tips
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
+	; OutputDebug, % "f_FoundEndChar przed:" . A_Space . f_FoundEndChar . A_Tab . "f_FoundTip:" . A_Space . f_FoundTip . "`n"
 	if (f_FoundEndChar) and (v_InputString)
 	{
 		Loop, % a_Tips.Count()
 			if (InStr(a_Tips[A_Index], v_InputString))
+			{
 				f_FoundTip := true
+				break
+			}
 			else
 				f_FoundTip := false	
 	}
+	; OutputDebug, % "f_FoundEndChar po:" . A_Space . f_FoundEndChar . A_Tab . "f_FoundTip:" . A_Space . f_FoundTip . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
@@ -2578,7 +2586,6 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 0, v_MenuMax := 0
 
-	; SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_StaticMenu_Keyboard it was crucial for ControlSend to run correctly
 	if (!ini_ATEn)
 		return
 	v_MenuMax := a_Tips.Count()
@@ -2684,14 +2691,16 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 		Case 3: ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C3_LB1
 		Case 4: ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C4_LB1
 	}
+	; OutputDebug, % "v_Temp1:" . A_Space . v_Temp1 . A_Tab . "v_PressedKey:" . A_Space . v_PressedKey . "`n"
 	Loop, Parse, v_Temp1, `n
 	{
 		if (A_Index = v_PressedKey)
 		{
-			v_Temp1 := SubStr(A_LoopField, InStr(A_LoopField, " ") + 1)
+			v_Temp1 := A_LoopField
 			break
 		}	
-	}	
+	}
+	; OutputDebug, % "v_Temp1:" . A_Space . v_Temp1 . A_Tab . "v_InputString:" . A_Space . v_InputString . "`n"
 	if (ini_TTCn = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_DestroyTriggerstringTips(ini_TTCn)
@@ -2700,6 +2709,7 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 	SendLevel, 2	;to backtrigger it must be higher than the input level of the hotstrings
 	SendEvent, % v_Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
 	SendLevel, 0
+	v_InputString := ""
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadConfiguration()
@@ -13806,6 +13816,7 @@ F_TTMenuStatic_Mouse() ;The subroutine may consult the following built-in variab
 	ChoicePos := (ErrorLevel<<32>>32) + 1		;Convert UInt to Int to have -1 if there is no item selected. Convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.
 	if (InStr(ThisHotkey, "LButton"))
 	{
+		Critical, On
 		Switch ini_TTCn
 		{
 			Case 1: 
@@ -13822,12 +13833,13 @@ F_TTMenuStatic_Mouse() ;The subroutine may consult the following built-in variab
 				WinActivate, % "ahk_id" PreviousWindowID
 		}
 		; OutputDebug, % "ini_TTCn:" . A_Tab . ini_TTCn . "`n"
-		v_UndoHotstring := OutputVarTemp
 		Hotstring("Reset")			;reset hotstring recognizer
 		SendEvent, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
 		SendLevel, 2				;to backtrigger it must be higher than the input level of the hotstrings
 		SendEvent, % OutputVarTemp	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
 		SendLevel, 0
+		v_InputString := ""
+		Critical, Off
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
