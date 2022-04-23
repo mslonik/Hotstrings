@@ -8476,7 +8476,9 @@ F_Move()
 	global	;assume-global mode
 	local NoOnTheList := 0, v_Temp1 := "", SourceLibrary := v_SelectHotstringLibrary, DestinationLibrary := ""
 		,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
-	
+		,v_Triggerstring := "", v_TriggOpt := "", v_OutFun := "", v_EnDis := "", v_Hotstring := "", v_Comment := ""
+		,WhichRow := 0
+
 	Gui, HS3Search:	+Disabled
 	Gui, MoveLibs: 	Default
 	Gui, MoveLibs: 	Submit, NoHide
@@ -8489,6 +8491,16 @@ F_Move()
 	}
 	Gui, HS3Search:	-Disabled
 	Gui, MoveLibs: 	Destroy
+
+	Gui, HS3Search:	Default
+	WhichRow := LV_GetNext(, "Focused")
+	LV_GetText(v_Triggerstring, 	WhichRow, 2)
+	LV_GetText(v_TriggOpt, 		WhichRow, 3)
+	LV_GetText(v_OutFun, 		WhichRow, 4)
+	LV_GetText(v_EnDis, 		WhichRow, 5)
+	LV_GetText(v_Hotstring, 		WhichRow, 6)
+	LV_GetText(v_Comment, 		WhichRow, 7)
+
 	Gui, HS3Search: 	Hide	
 	GuiControl, ChooseString, % IdDDL2, % DestinationLibrary
 	Gui, HS3: 		Submit, NoHide	;this line is necessary to v_SelectHotstringLibrary <- DestinationLibrary
