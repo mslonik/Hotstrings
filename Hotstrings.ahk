@@ -6613,7 +6613,7 @@ F_VerUpdDownload()
 F_VerUpdCheckServ(param*)
 {
 	global	;assume-global mode
-	local	whr := "", URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Hotstrings.ahk", ToBeFiltered := "", ServerVer := "", StartingPos := 0
+	local	whr := "", URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings.ahk", ToBeFiltered := "", ServerVer := "", StartingPos := 0
 			, ServerVer1 := 0, ServerVer2 := 0, ServerVer3 := 0, AppVersion1 := 0, AppVersion2 := 0, AppVersion3 := 0,	
 	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 	whr.Open("GET", URLscript, true)
@@ -8084,12 +8084,12 @@ F_AddHotstring()
 	GuiControl, , % IdText13b, % v_LibHotstringCnt
 	GuiControl, , % IdText12,  % v_TotalHotstringCnt
 	GuiControl, , % IdText12b, % v_TotalHotstringCnt
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring added to the file"] . A_Space . v_SelectHotstringLibrary . "!" 
 	Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
 	{
 		Case "HS3":	F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
 		Case "HS4": 	F_GuiHS4_EnDis("Enable")
 	}
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring added to the file"] . A_Space . v_SelectHotstringLibrary . "!", 10 ;this line should be the very last and user confirmation shouldn't be required (10 s, last parameter)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SaveLVintoLibFile()
