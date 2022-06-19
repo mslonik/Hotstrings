@@ -22,7 +22,7 @@ CoordMode, Mouse,	Screen		; Only Screen makes sense for functions prepared in th
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.7"
+global AppVersion				:= "3.6.8"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -8230,20 +8230,40 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, B
 				return, 1
 		}
 		if (Trim(v_EnterHotstring) != "")
-			TextInsert := % TextInsert . "¦" . v_EnterHotstring
+		{
+			v_EnterHotstring := StrReplace(v_EnterHotstring, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
+			TextInsert .=  v_EnterHotstring
+		}
 		if (Trim(v_EnterHotstring1) != "")
-			TextInsert := % TextInsert . "¦" . v_EnterHotstring1
+		{
+			v_EnterHotstring1 := StrReplace(v_EnterHotstring1, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
+			TextInsert .= "¦" . v_EnterHotstring1
+		}
 		if (Trim(v_EnterHotstring2) != "")
-			TextInsert := % TextInsert . "¦" . v_EnterHotstring2
+		{
+			v_EnterHotstring2 := StrReplace(v_EnterHotstring2, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
+			TextInsert := "¦" . v_EnterHotstring2
+		}
 		if (Trim(v_EnterHotstring3) != "")
-			TextInsert := % TextInsert . "¦" . v_EnterHotstring3
+		{
+			v_EnterHotstring3 := StrReplace(v_EnterHotstring3, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
+			TextInsert := "¦" . v_EnterHotstring3
+		}
 		if (Trim(v_EnterHotstring4) != "")
-			TextInsert := % TextInsert . "¦" . v_EnterHotstring4
+		{
+			v_EnterHotstring4 := StrReplace(v_EnterHotstring4, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
+			TextInsert := "¦" . v_EnterHotstring4
+		}
 		if (Trim(v_EnterHotstring5) != "")
-			TextInsert := % TextInsert . "¦" . v_EnterHotstring5
+		{
+			v_EnterHotstring5 := StrReplace(v_EnterHotstring5, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
+			TextInsert := "¦" . v_EnterHotstring5
+		}
 		if (Trim(v_EnterHotstring6) != "")
-			TextInsert := % TextInsert . "¦" . v_EnterHotstring6
-		TextInsert := SubStr(TextInsert, 2, StrLen(TextInsert) - 1)
+		{
+			v_EnterHotstring6 := StrReplace(v_EnterHotstring6, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
+			TextInsert := "¦" . v_EnterHotstring6
+		}
 	}
 	else
 	{
@@ -8255,6 +8275,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, B
 		}
 		else
 		{
+			v_EnterHotstring := StrReplace(v_EnterHotstring, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
 			TextInsert := v_EnterHotstring
 		}
 	}
@@ -8376,7 +8397,6 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, B
 						return, F_MessageAboutEscapedCharacter(WhichEscape)
 				}
 		}
-
 	return, 0
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11459,7 +11479,6 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 	local 	name := SubStr(nameoffile, 1, -4) ;filename without extension
 , 			TheWholeFile := ""
 ,			BegCom := false
-,			ExternalIndex := 0
 ,			Triggerstring := "", Hotstring := "", options := ""
 	
 	F_CheckFileEncoding(ini_HADL . "\" . nameoffile)	;additional check if library files encoding is equal to UTF-8 with BOM 
@@ -11485,7 +11504,6 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 			Continue
 		
 		F_CreateHotstring(A_LoopField, nameoffile)
-          ExternalIndex++
 		Loop, Parse, A_LoopField, ‖
 		{
 			Switch A_Index
@@ -12138,13 +12156,13 @@ F_GuiMain_CreateObject()
 	GuiControl +g, % IdTextInfo13, % TI_EnterHotstring
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit2 vv_EnterHotstring
-	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit3 vv_EnterHotstring1  Disabled
-	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit4 vv_EnterHotstring2  Disabled
-	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit5 vv_EnterHotstring3  Disabled
-	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit6 vv_EnterHotstring4  Disabled
-	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit7 vv_EnterHotstring5  Disabled
-	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit8 vv_EnterHotstring6  Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit2 vv_EnterHotstring r2
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit3 vv_EnterHotstring1  r2 Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit4 vv_EnterHotstring2  r2 Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit5 vv_EnterHotstring3  r2 Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit6 vv_EnterHotstring4  r2 Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit7 vv_EnterHotstring5  r2 Disabled
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit8 vv_EnterHotstring6  r2 Disabled
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText5,				 						% TransA["Add comment (optional)"]
@@ -13293,7 +13311,7 @@ F_CreateHotstring(txt, nameoffile)
 		IfMsgBox, Yes
 			return
 	}
-	if (OnOff = "")	;This is consequence of hard lesson: mismatch of "column name". This line hopefullly protects against this kind of event in the future.
+	if (OnOff = "")	;This is consequence of hard lesson: mismatch of "column name". This line hopefully protects against this kind of event in the future.
 		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . "`n`n" . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 			. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")" . "`n"
 			. TransA["OnOff parameter is missing."]
