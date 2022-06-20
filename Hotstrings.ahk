@@ -8190,11 +8190,11 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 				return "No"
 			}
 		}
-		else	
+		else
 		{
 			Try
 			{
-				Hotstring(":" . OldOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func(SendFunHotstringCreate).bind(TextInsert, false), "Off")	;help -> Hotstring(): However, since hotstrings with C or ? are considered distinct from other hotstrings, it is not possible to add or remove these options. Instead, turn off the existing hotstring and create a new one.
+				Hotstring(":" . OldOptions . ":" . v_Triggerstring, , "Off")	;help -> Hotstring(): However, since hotstrings with C or ? are considered distinct from other hotstrings, it is not possible to add or remove these options. Instead, turn off the existing hotstring and create a new one.
 				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
 			}
 			Catch
@@ -8474,23 +8474,23 @@ F_Clear()
 	GuiControl, HS4:, % IdCheckBox6b, 0
 	GuiControl, HS4: Font, % IdCheckBox8b
 	GuiControl, HS4:, % IdCheckBox8b, 0
-	GuiControl, HS4: Choose, % IdDDL1b, SendInput (SI) ;v_SelectFunction 
-	GuiControl, HS4: , % IdEdit2b,  				;v_EnterHotstring
+	GuiControl, HS4: Choose, % IdDDL1b, SendInput (SI) 	;v_SelectFunction 
+	GuiControl, HS4: , % IdEdit2b,  					;v_EnterHotstring
 	GuiControl, HS4: , % IdEdit3b, 					;v_EnterHotstring1
-	GuiControl, HS4: Disable, % IdEdit3b 			;v_EnterHotstring1
+	GuiControl, HS4: Disable, % IdEdit3b 				;v_EnterHotstring1
 	GuiControl, HS4: , % IdEdit4b, 					;v_EnterHotstring2
-	GuiControl, HS4: Disable, % IdEdit4b 			;v_EnterHotstring2
+	GuiControl, HS4: Disable, % IdEdit4b 				;v_EnterHotstring2
 	GuiControl, HS4: , % IdEdit5b, 					;v_EnterHotstring3
-	GuiControl, HS4: Disable, % IdEdit5b 			;v_EnterHotstring3
+	GuiControl, HS4: Disable, % IdEdit5b 				;v_EnterHotstring3
 	GuiControl, HS4: , % IdEdit6b, 					;v_EnterHotstring4
-	GuiControl, HS4: Disable, % IdEdit6b 			;v_EnterHotstring4
+	GuiControl, HS4: Disable, % IdEdit6b 				;v_EnterHotstring4
 	GuiControl, HS4: , % IdEdit7b, 					;v_EnterHotstring5
-	GuiControl, HS4: Disable, % IdEdit7b 			;v_EnterHotstring5
+	GuiControl, HS4: Disable, % IdEdit7b 				;v_EnterHotstring5
 	GuiControl, HS4: , % IdEdit8b, 					;v_EnterHotstring6
-	GuiControl, HS4: Disable, % IdEdit8b 			;v_EnterHotstring6
-	GuiControl, HS4: , % IdEdit9b,  				;Comment
+	GuiControl, HS4: Disable, % IdEdit8b 				;v_EnterHotstring6
+	GuiControl, HS4: , % IdEdit9b,  					;Comment
 	GuiControl, HS4: Disable, % IdButton4b
-	GuiControl, HS4: , % IdEdit10b,  				;Sandbox
+	GuiControl, HS4: , % IdEdit10b,  					;Sandbox
 	GuiControl, HS4: ChooseString, % IdDDL2b, % TransA["↓ Click here to select hotstring library ↓"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12156,7 +12156,7 @@ F_GuiMain_CreateObject()
 	GuiControl +g, % IdTextInfo13, % TI_EnterHotstring
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit2 vv_EnterHotstring r2
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit2 vv_EnterHotstring   r2								;r2 important to create multi-line edit field and enable entering long text.
 	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit3 vv_EnterHotstring1  r2 Disabled
 	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit4 vv_EnterHotstring2  r2 Disabled
 	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit5 vv_EnterHotstring3  r2 Disabled
@@ -13528,7 +13528,7 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 	Critical, On
 	; OutputDebug, % A_ThisFunc . "`n"
 	if (InStr(A_ThisHotkey, "?"))
-		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
+		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
@@ -13595,7 +13595,7 @@ F_DeterminePartStrings(ReplacementString)
 	local	ThisHotkey := A_ThisHotkey	;This value will change if the current thread is interrupted by another hotkey, so be sure to copy it into another variable immediately if you need the original value for later use in a subroutine.
 	
 	v_Options 	 := SubStr(ThisHotkey, 1, InStr(ThisHotkey, ":", false, 1, 2))
-,	v_UndoHotstring := ReplacementString
+	v_UndoHotstring := ReplacementString
 	if (InStr(v_Options, "*"))
 		v_EndChar  := SubStr(ThisHotkey, 0) ;extracts the last character; This form is important to run correctly F_Undo 
 	else
@@ -13605,9 +13605,18 @@ F_DeterminePartStrings(ReplacementString)
 F_FollowCaseConformity(ReplacementString)
 {
 	global	;assume-global mode
-	local vFirstLetter1 := "", vFirstLetter2 := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, fFirstLetterCap := false
+	local vFirstLetter1 := "", vFirstLetter2 := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, fFirstLetterCap := false, Options := "", key := "", value := "", ThisHotkey := ""
 	
-	if (!InStr(v_Options, "C"))
+	ThisHotkey := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", false, 1, 2) + 1)
+	for key, value in a_Triggerstring
+		if (value = ThisHotkey)
+		{
+			Options := a_TriggerOptions[key]
+			Break
+		}
+
+	if (!InStr(Options, "C")) and (!InStr(Options, "C1"))
+	; if (!InStr(v_Options, "C")) and (!InStr(v_Options, "C1"))
 	{
 		vFirstLetter1 		:= SubStr(v_InputString, 1, 1)	;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
 		vRestOfLetters 	:= SubStr(v_InputString, 2)		;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
@@ -13631,7 +13640,8 @@ F_FollowCaseConformity(ReplacementString)
 		if (!fFirstLetterCap)
 			return ReplacementString
 	}
-	if (InStr(v_Options, "C") or InStr(v_Options, "C1"))
+	if (InStr(Options, "C") or InStr(Options, "C1"))
+	; if (InStr(v_Options, "C") or InStr(v_Options, "C1"))
 		return ReplacementString
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
