@@ -8169,7 +8169,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 		return, "No"
 
 	IfMsgBox, Yes
-	{
+	{	;the "C" and "C1" options are handled directly in functions F_HOF_SI... by function F_FollowCaseConformity
 		if (InStr(OldOptions, "*") and !InStr(NewOptions,"*"))
 			NewOptions := StrReplace(OldOptions, "*", "*0")
 		if (InStr(OldOptions, "B0") and !InStr(NewOptions, "B0"))
@@ -8190,53 +8190,20 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 				return "No"
 			}
 		}
-		else	;NewOptions != "O"
+		else	
 		{
-			; OldOptions := StrReplace(OldOptions, "C", "C0") ; OldOptions := StrReplace(OldOptions, "C1", "C0")
-			; OldOptions := "" ; OldOptions := ""
-			; if (InStr(OldOptions, "C")) and !InStr(OldOptions, "C1")
-				; OldOptions := StrReplace(OldOptions, "C", "C0")
-			; if (InStr(OldOptions, "C1"))
-				; OldOptions := StrReplace(OldOptions, "C1", "C0")
-			; if !InStr(OldOptions, "C1")
-				; OldOptions .= "C0"
-			; Try
-			; {
-				Hotstring(":C0:" . F_ConvertEscapeSequences(v_Triggerstring), TextInsert, "Off")	;
-				; Hotstring(":C0:cr", func(SendFunHotstringCreate).bind(TextInsert, false), "Off")	;nie dziala
-				; Hotstring(":C0:cr", "fikumiku", "Off")	;dziala
-				; Hotstring(":" . OldOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func(SendFunHotstringCreate).bind(TextInsert, false), "Off")	;help -> Hotstring(): However, since hotstrings with C or ? are considered distinct from other hotstrings, it is not possible to add or remove these options. Instead, turn off the existing hotstring and create a new one.
-				; Hotstring(":" . options . ":" . triggerstring, , "Off")
-				OutputDebug, % "OldOptions:" . A_Space . OldOptions . A_Space . "v_Triggerstring:" . A_Space . v_Triggerstring . A_Space . "TextInsert:" . A_Space . TextInsert . "`n"
-			; }
-			; Catch
-			; {
-				; MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-					; . "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," 
-					; . A_Space . OnOff . ")"
-				; return "No"
-			; }
 			Try
-			; {
-				Hotstring(":C1:" . F_ConvertEscapeSequences(v_Triggerstring), , OnOff)	;
-				; Hotstring(":C1:cr", , "On")	;dziala
-				; Hotstring(":C1:cr", TextInsert, "On")	;dziala
-				; Hotstring(":C1:cr", func(SendFunHotstringCreate).bind(TextInsert, false), "On")	;nie dziala
-				; Hotstring(":C1:cr", "fikumiku", "On")	;dziala
-				; Hotstring(":" . NewOptions . ":" . v_Triggerstring, , "On")	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
-				; Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), , OnOff)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
-				; Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
-				; Hotstring(":" . "C1"  . ":" . F_ConvertEscapeSequences(v_Triggerstring), func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
-				; OutputDebug, % "NewOptions:" . A_Space . NewOptions . A_Space . "v_Triggerstring:" . A_Space . v_Triggerstring . A_Space . "OnOff:" . A_Space . OnOff .  "`n"
-			; }
+			{
+				Hotstring(":" . OldOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func(SendFunHotstringCreate).bind(TextInsert, false), "Off")	;help -> Hotstring(): However, since hotstrings with C or ? are considered distinct from other hotstrings, it is not possible to add or remove these options. Instead, turn off the existing hotstring and create a new one.
+				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
+			}
 			Catch
 			{
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
 					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," 
 					. A_Space . OnOff . ")"
 				return "No"
-			} 
-
+			}			
 		}
 		return, "Yes"	
 	}
@@ -8275,27 +8242,27 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, B
 		if (Trim(v_EnterHotstring2) != "")
 		{
 			v_EnterHotstring2 := StrReplace(v_EnterHotstring2, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
-			TextInsert := "¦" . v_EnterHotstring2
+			TextInsert .= "¦" . v_EnterHotstring2
 		}
 		if (Trim(v_EnterHotstring3) != "")
 		{
 			v_EnterHotstring3 := StrReplace(v_EnterHotstring3, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
-			TextInsert := "¦" . v_EnterHotstring3
+			TextInsert .= "¦" . v_EnterHotstring3
 		}
 		if (Trim(v_EnterHotstring4) != "")
 		{
 			v_EnterHotstring4 := StrReplace(v_EnterHotstring4, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
-			TextInsert := "¦" . v_EnterHotstring4
+			TextInsert .= "¦" . v_EnterHotstring4
 		}
 		if (Trim(v_EnterHotstring5) != "")
 		{
 			v_EnterHotstring5 := StrReplace(v_EnterHotstring5, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
-			TextInsert := "¦" . v_EnterHotstring5
+			TextInsert .= "¦" . v_EnterHotstring5
 		}
 		if (Trim(v_EnterHotstring6) != "")
 		{
 			v_EnterHotstring6 := StrReplace(v_EnterHotstring6, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
-			TextInsert := "¦" . v_EnterHotstring6
+			TextInsert .= "¦" . v_EnterHotstring6
 		}
 	}
 	else
