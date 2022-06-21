@@ -616,6 +616,55 @@ Critical, Off
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_GuiShowLibHeader()	;button: Show header
+{
+	global	;assume-global mode of operation
+	local	SelectedLibraryName := "", TheWholeFile := "", LibraryHeader := "", BegCom := false
+
+	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control.
+	FileRead, TheWholeFile, % ini_HADL . "\" . SelectedLibraryName
+
+	Loop, Parse, TheWholeFile, `n, `r%A_Space%%A_Tab%
+	{
+		if (SubStr(A_LoopField, 1, 1) = ";")	;catch the comments
+		{
+			if (LibraryHeader)
+				LibraryHeader .= "`n" . SubStr(A_LoopField, 2)
+			else
+				LibraryHeader .=  SubStr(A_LoopField, 2)
+			Continue
+		}
+		if (SubStr(A_LoopField, 1, 2) = "/*")	;catch beginning of the first comment in the file = beginning of header
+		{
+			BegCom := true
+			LibraryHeader .= SubStr(A_LoopField, 3)
+			Continue
+		}
+		if (BegCom) and (SubStr(A_LoopField, -1) = "*/") ;catch the end of the last comment in the file = end of of header
+		{
+			BegCom := false
+			if (SubStr(A_LoopField, 1, -2))
+				LibraryHeader .= SubStr(A_LoopField, 1, -2)
+			else
+				LibraryHeader := SubStr(LibraryHeader, 1, -1)
+			Continue
+		}
+		if (BegCom)
+		{
+			LibraryHeader .= A_LoopField . "`n"
+			Continue
+		}
+		if (!A_LoopField)	;ignore empty lines
+			Continue
+		if (!BegCom) and (!(SubStr(A_LoopField, 1, 1) = ";"))
+			Break
+	}
+	if (LibraryHeader)
+		MsgBox,64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Header of library"] . A_Space . SelectedLibraryName . ":" . "`n`n"  LibraryHeader
+	else
+		MsgBox,64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Header of library"] . A_Space . SelectedLibraryName . A_Space . TransA["is empty at the moment."]
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DelLibByButton()
 {
 	global	;assume-global mode of operation
@@ -11064,6 +11113,7 @@ green												= green
 has been created. 										= has been created.
 has been downloaded to the location						= has been downloaded to the location
 have to be escaped in the following form:					= have to be escaped in the following form:
+Header of library										= Header of library
 Help: AutoHotkey Hotstrings reference guide					= Help: AutoHotkey Hotstrings reference guide
 Help: Hotstrings application								= Help: Hotstrings application
 Hotstring 											= Hotstring
@@ -11108,6 +11158,7 @@ In order to aplly new font type it's necesssary to reload the application. 	= In
 In order to aplly new size of margin it's necesssary to reload the application. = In order to aplly new size of margin it's necesssary to reload the application.
 In order to aplly new style it's necesssary to reload the application. 		= In order to aplly new style it's necesssary to reload the application.
 is added in section  [GraphicalUserInterface] of Config.ini		= is added in section  [GraphicalUserInterface] of Config.ini
+is empty at the moment.									= is empty at the moment.
 is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv? = is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?
 Introduction											= Introduction
 \Languages\`nMind that Config.ini Language variable is equal to 	= \Languages\`nMind that Config.ini Language variable is equal to
@@ -11242,6 +11293,7 @@ Set parameters of menu sound								= Set parameters of menu sound
 Set parameters of triggerstring sound						= Set parameters of triggerstring sound
 Shortcut (hotkey) definition								= Shortcut (hotkey) definition
 Shortcut (hotkey) definitions								= Shortcut (hotkey) definitions
+Show header											= Show header
 Show intro											= Show intro
 Show Introduction window after application is restarted?		= Show Introduction window after application is restarted?
 Show Sandbox											= Show Sandbox
@@ -12184,6 +12236,7 @@ F_GuiMain_CreateObject()
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
+	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton7 gF_GuiShowLibHeader,					% TransA["Show header"]
 	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton1 gF_GuiAddLibrary, 						% TransA["Add library"]
 	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton6 gF_DelLibByButton, 						% TransA["Del library"]
 	Gui,			HS3: Add,			DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SelectLibrary Sort
@@ -12892,8 +12945,12 @@ F_GuiMain_DetermineConstraints()
 
 	GuiControlGet, v_OutVarTemp1, Pos, % IdButton1	;Add library button
 	GuiControlGet, v_OutVarTemp2, Pos, % IdButton6	;Del library button
-	v_xNext := v_OutVarTemp1X - (c_xmarg + v_OutVarTemp2W) ; ,	v_wNext := v_OutVarTemp2W	
+	v_xNext := v_OutVarTemp1X - (c_xmarg + v_OutVarTemp2W)
 	GuiControl, Move, % IdButton6, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext ;Del library button
+	GuiControlGet, v_OutVarTemp1, Pos, % IdButton6	
+	GuiControlGet, v_OutVarTemp2, Pos, % IdButton7	;Show header button
+	v_xNext := v_OutVarTemp1X - (v_OutVarTemp2W)
+	GuiControl, Move, % IdButton7, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext ;Del library button
 
 	v_yNext += HofButton
 ,	v_xNext := c_xmarg
@@ -13138,8 +13195,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 			F_ValidateIniLibSections()
 		}
 	}
-	;if !(v_IsLibraryEmpty)
-	else	;Read names library files (*.csv) from Library subfolder into object o_Libraries
+	else	;if !(v_IsLibraryEmpty) ;Read names library files (*.csv) from Library subfolder into object o_Libraries
 		Loop, Files, % ini_HADL . "\*.csv"
 			o_Libraries.Push(A_LoopFileName)
 	
