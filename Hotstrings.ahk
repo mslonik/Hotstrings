@@ -616,12 +616,23 @@ Critical, Off
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
-F_GuiShowLibHeader()	;button: Show header
+F_EditLibHeader()	;button:
+{
+	global	;assume-global mode of operation
+	
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ShowLibHeader()	;button: Show header
 {
 	global	;assume-global mode of operation
 	local	SelectedLibraryName := "", TheWholeFile := "", LibraryHeader := "", BegCom := false
 
 	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control.
+	if (!SelectedLibraryName)	;if SelectedLibraryName is empty
+	{
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to display library header please at first select library name from drop down list."]
+		return
+	}
 	FileRead, TheWholeFile, % ini_HADL . "\" . SelectedLibraryName
 
 	Loop, Parse, TheWholeFile, `n, `r%A_Space%%A_Tab%
@@ -11157,6 +11168,7 @@ In order to aplly new font style it's necesssary to reload the application. 	= I
 In order to aplly new font type it's necesssary to reload the application. 	= In order to aplly new font type it's necesssary to reload the application.
 In order to aplly new size of margin it's necesssary to reload the application. = In order to aplly new size of margin it's necesssary to reload the application.
 In order to aplly new style it's necesssary to reload the application. 		= In order to aplly new style it's necesssary to reload the application.
+In order to display library header please at first select library name from drop down list. = In order to display library header please at first select library name from drop down list.
 is added in section  [GraphicalUserInterface] of Config.ini		= is added in section  [GraphicalUserInterface] of Config.ini
 is empty at the moment.									= is empty at the moment.
 is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv? = is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?
@@ -12236,7 +12248,7 @@ F_GuiMain_CreateObject()
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton7 gF_GuiShowLibHeader,					% TransA["Show header"]
+	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton7 gF_ShowLibHeader,					% TransA["Show header"]
 	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton1 gF_GuiAddLibrary, 						% TransA["Add library"]
 	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton6 gF_DelLibByButton, 						% TransA["Del library"]
 	Gui,			HS3: Add,			DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SelectLibrary Sort
