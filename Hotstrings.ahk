@@ -616,16 +616,42 @@ Critical, Off
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
-F_EditLibHeader()	;button:
+F_EditLibHeader()	;button: Edit header
 {
 	global	;assume-global mode of operation
-	
+	local	SelectedLibraryName := "", TheWholeFile := "", LibraryHeader := "", Xpos := 0, Ypos := 0, Wwidth := 0, Height := 0
+	,		WidthOfClient := 0, MaxPrimaryMon := 0
+
+	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control.
+	if (!SelectedLibraryName)	;if SelectedLibraryName is empty
+	{
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to edit library header please at first select library name from drop down list."]
+		return
+	}
+	FileRead, TheWholeFile, % ini_HADL . "\" . SelectedLibraryName
+	LibraryHeader := F_ExtractHeader(TheWholeFile)
+
+	WinGetPos, Xpos, Ypos, Wwidth, , % "ahk_id" . A_Space . HS3GuiHwnd
+	Gui, 	LibHeader: New, 	+Resize +HwndLibHeaderGuiHwnd +Owner,			% A_ScriptName . ":" . A_Space . TransA["Edit library header"]
+	Gui,		LibHeader: Add,	Edit,  HwndIdLHG_Edit1 r10 w500
+
+	SysGet, WidthOfClient, 16
+	SysGet, MaxPrimaryMon, 61
+
+	GuiControl, , % IdLHG_Edit1, % LibraryHeader
+	; Gui, 	LibHeader: Show, % "w" . 600
+	; Gui, 	LibHeader: Show, % "w" . 1435
+	Gui,		LibHeader: -DPIScale
+	Gui, 	LibHeader: Show, % "x" . Xpos . A_Space . "y" . Ypos . A_Space . "w" . Wwidth - (MaxPrimaryMon - WidthOfClient)
+	; Gui, 	LibHeader: Show, % "x" . Xpos . A_Space . "y" . Ypos . A_Space . "w" . Wwidth - 22
+	; Gui, 	LibHeader: Show, % "x" . Xpos . A_Space . "y" . Ypos . A_Space . "w" . Wwidth * (96/A_ScreenDPI)
+	; Gui, 	LibHeader: Show, % "w" . 1435 . A_Space . "x" . Xpos . A_Space . "y" . Ypos . A_Space
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ShowLibHeader()	;button: Show header
 {
 	global	;assume-global mode of operation
-	local	SelectedLibraryName := "", TheWholeFile := "", LibraryHeader := "", BegCom := false
+	local	SelectedLibraryName := "", TheWholeFile := "", LibraryHeader := ""
 
 	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control.
 	if (!SelectedLibraryName)	;if SelectedLibraryName is empty
@@ -634,7 +660,16 @@ F_ShowLibHeader()	;button: Show header
 		return
 	}
 	FileRead, TheWholeFile, % ini_HADL . "\" . SelectedLibraryName
-
+	LibraryHeader := F_ExtractHeader(TheWholeFile)
+	if (LibraryHeader)
+		MsgBox,64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Header of library"] . A_Space . SelectedLibraryName . ":" . "`n`n"  LibraryHeader
+	else
+		MsgBox,64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Header of library"] . A_Space . SelectedLibraryName . A_Space . TransA["is empty at the moment."]
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ExtractHeader(TheWholeFile)
+{
+	local LibraryHeader := "", BegCom := false
 	Loop, Parse, TheWholeFile, `n, `r%A_Space%%A_Tab%
 	{
 		if (SubStr(A_LoopField, 1, 1) = ";")	;catch the comments
@@ -670,10 +705,7 @@ F_ShowLibHeader()	;button: Show header
 		if (!BegCom) and (!(SubStr(A_LoopField, 1, 1) = ";"))
 			Break
 	}
-	if (LibraryHeader)
-		MsgBox,64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Header of library"] . A_Space . SelectedLibraryName . ":" . "`n`n"  LibraryHeader
-	else
-		MsgBox,64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Header of library"] . A_Space . SelectedLibraryName . A_Space . TransA["is empty at the moment."]
+	return LibraryHeader
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DelLibByButton()
@@ -11085,6 +11117,8 @@ doesn't exist in application folder						= doesn't exist in application folder
 Download repository version								= Download repository version
 Downloading public library files							= Downloading public library files
 Dynamic hotstrings 										= &Dynamic hotstrings
+Edit header											= Edit header
+Edit library header										= Edit library header
 Edit Hotstrings 										= Edit Hotstrings
 Enable												= Enable
 enable												= enable
@@ -11168,6 +11202,7 @@ In order to aplly new font style it's necesssary to reload the application. 	= I
 In order to aplly new font type it's necesssary to reload the application. 	= In order to aplly new font type it's necesssary to reload the application.
 In order to aplly new size of margin it's necesssary to reload the application. = In order to aplly new size of margin it's necesssary to reload the application.
 In order to aplly new style it's necesssary to reload the application. 		= In order to aplly new style it's necesssary to reload the application.
+In order to edit library header please at first select library name from drop down list. = In order to edit library header please at first select library name from drop down list.
 In order to display library header please at first select library name from drop down list. = In order to display library header please at first select library name from drop down list.
 is added in section  [GraphicalUserInterface] of Config.ini		= is added in section  [GraphicalUserInterface] of Config.ini
 is empty at the moment.									= is empty at the moment.
@@ -12248,7 +12283,7 @@ F_GuiMain_CreateObject()
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton7 gF_ShowLibHeader,					% TransA["Show header"]
+	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton7 gF_EditLibHeader,						% TransA["Edit header"]
 	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton1 gF_GuiAddLibrary, 						% TransA["Add library"]
 	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton6 gF_DelLibByButton, 						% TransA["Del library"]
 	Gui,			HS3: Add,			DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SelectLibrary Sort
