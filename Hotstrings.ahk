@@ -621,6 +621,11 @@ F_EditLibHeader()	;button: Edit header
 	global	;assume-global mode of operation
 	local	SelectedLibraryName := "", TheWholeFile := "", LibraryHeader := "", Xpos := 0, Ypos := 0, Wwidth := 0, Height := 0
 	,		WidthOfClient := 0, MaxPrimaryMon := 0
+	, 		SM_CXFULLSCREEN 	:= 16 ;Width of the client area for a full-screen window on the primary display monitor, in pixels.
+	,		SM_CXMAXIMIZED 	:= 61 ;Default dimensions, in pixels, of a maximized top-level window on the primary display monitor.
+	,		ControlPos1		:= 0, ControlPos1X := 0, ControlPos1Y := 0, ControlPos1W := 0, ControlPos1H := 0
+	,		ControlPos2		:= 0, ControlPos2X := 0, ControlPos2Y := 0, ControlPos2W := 0, ControlPos2H := 0
+	,		MaxButtonWidth		:= 0
 
 	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control.
 	if (!SelectedLibraryName)	;if SelectedLibraryName is empty
@@ -631,21 +636,38 @@ F_EditLibHeader()	;button: Edit header
 	FileRead, TheWholeFile, % ini_HADL . "\" . SelectedLibraryName
 	LibraryHeader := F_ExtractHeader(TheWholeFile)
 
-	WinGetPos, Xpos, Ypos, Wwidth, , % "ahk_id" . A_Space . HS3GuiHwnd
-	Gui, 	LibHeader: New, 	+Resize +HwndLibHeaderGuiHwnd +Owner,			% A_ScriptName . ":" . A_Space . TransA["Edit library header"]
-	Gui,		LibHeader: Add,	Edit,  HwndIdLHG_Edit1 r10 w500
-
-	SysGet, WidthOfClient, 16
-	SysGet, MaxPrimaryMon, 61
-
+	SysGet, WidthOfClient, % SM_CXFULLSCREEN	;Width of the client area for a full-screen window on the primary display monitor, in pixels.
+	SysGet, MaxPrimaryMon, % SM_CXMAXIMIZED		;Default dimensions, in pixels, of a maximized top-level window on the primary display monitor.
+	WinGetPos, Xpos, Ypos, Wwidth, , A
+	; WinGetPos, Xpos, Ypos, Wwidth, , % "ahk_id" . A_Space . HS3GuiHwnd
+	Gui, 	LibHeader: New, 	+Resize +HwndLibHeaderGuiHwnd +Owner -DPIScale, % A_ScriptName . ":" . A_Space . TransA["Edit library header"] . "." . A_Space . TransA["Library name:"] A_Space . SelectedLibraryName ;DPI scaling only applies to Gui sub-commands and related variables, so coordinates coming directly from other sources such WinGetPos will not work. There are a number of ways to deal with this, e.g. disable (Gui -DPIScale) scaling on the fly, as needed.
+	Gui,		LibHeader: Margin, 	% c_xmarg, % c_ymarg
+	Gui,		LibHeader: Add,	Button,	x0 y0 HwndIdLHB_Button1 gLHB_Button_Save, 	% TransA["Save"]
+	Gui,		LibHeader: Add,	Button,	x0 y0 HwndIdLHB_Button2 gLHB_Button_Cancel, 	% TransA["Cancel"]
+	GuiControlGet, ControlPos1, Pos, % IdLHB_Button1
+	GuiControlGet, ControlPos2, Pos, % IdLHB_Button2
+	MaxButtonWidth := Max(ControlPos1W, ControlPos2W)
+,	EditWidth 	:= Wwidth - (MaxPrimaryMon - WidthOfClient) - 3 * c_xmarg - MaxButtonWidth
+	Gui,		LibHeader: Add,	Edit,  	% "x" . c_xmarg . A_Space . "y" . c_ymarg . A_Space . "HwndIdLHG_Edit1 r10" . A_Space . "w" . EditWidth
+	GuiControlGet, ControlPos1, Pos, % IdLHG_Edit1
+	GuiControl, Move, % IdLHB_Button1, % "x" . ControlPos1X + ControlPos1W + c_xmarg . A_Space . "y" . ControlPos1Y
+	GuiControlGet, ControlPos2, Pos, % IdLHB_Button1
+	GuiControl, Move, % IdLHB_Button2, % "x" . ControlPos1X + ControlPos1W + c_xmarg . A_Space . "y" . ControlPos2Y + ControlPos2H + c_ymarg
 	GuiControl, , % IdLHG_Edit1, % LibraryHeader
-	; Gui, 	LibHeader: Show, % "w" . 600
-	; Gui, 	LibHeader: Show, % "w" . 1435
-	Gui,		LibHeader: -DPIScale
+	Gui, HS3: +Disabled	;To prevent the user from interacting with the owner while one of its owned window is visible, disable the owner via Gui +Disabled.
 	Gui, 	LibHeader: Show, % "x" . Xpos . A_Space . "y" . Ypos . A_Space . "w" . Wwidth - (MaxPrimaryMon - WidthOfClient)
-	; Gui, 	LibHeader: Show, % "x" . Xpos . A_Space . "y" . Ypos . A_Space . "w" . Wwidth - 22
-	; Gui, 	LibHeader: Show, % "x" . Xpos . A_Space . "y" . Ypos . A_Space . "w" . Wwidth * (96/A_ScreenDPI)
-	; Gui, 	LibHeader: Show, % "w" . 1435 . A_Space . "x" . Xpos . A_Space . "y" . Ypos . A_Space
+	ControlSend, , ^{Home}, A
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+LHB_Button_Save()
+{
+
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+LHB_Button_Cancel()
+{
+	Gui, HS3: 		-Disabled
+	Gui,	LibHeader: 	Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ShowLibHeader()	;button: Show header
@@ -1604,7 +1626,7 @@ GuiEventsGuiClose()	;GUI event (close)
 {
 	global	;assume-global mode of operation
 	if (WinExist("ahk_id" HS3GuiHwnd))
-		Gui, HS3: -Disabled	
+		Gui, HS3: -Disabled
 	if (WinExist("ahk_id" HS4GuiHwnd))
 		Gui, HS4: -Disabled	
 	Gui, TTDemo: 		Destroy
@@ -11046,6 +11068,7 @@ By default library files (*.csv) are located in Users subfolder which is protect
 By length 											= By length
 Call Graphical User Interface								= Call Graphical User Interface
 Cancel 												= &Cancel
+Cancel												= Cancel
 caret												= caret
 Case Sensitive (C) 										= Case Sensitive (C)
 Case-Conforming										= Case-Conforming
@@ -11312,7 +11335,8 @@ Row													= Row
 	TransConst .= "`n
 (Join`n `
 Sandbox (F6)											= Sandbox (F6)
-Apply new hotkey											= Apply new hotkey
+Apply new hotkey										= Apply new hotkey
+Save													= Save
 Save position of application window	 					= &Save position of application window
 Save window position									= Save window position
 Saved												= Saved
