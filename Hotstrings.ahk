@@ -656,12 +656,48 @@ F_EditLibHeader()	;button: Edit header
 	GuiControl, , % IdLHG_Edit1, % LibraryHeader
 	Gui, HS3: +Disabled	;To prevent the user from interacting with the owner while one of its owned window is visible, disable the owner via Gui +Disabled.
 	Gui, 	LibHeader: Show, % "x" . Xpos . A_Space . "y" . Ypos . A_Space . "w" . Wwidth - (MaxPrimaryMon - WidthOfClient)
-	ControlSend, , ^{Home}, A
+	GuiControl, Focus, % IdLHG_Edit1
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 LHB_Button_Save()
 {
+	global	;assume-global mode of operation
+	local	SelectedLibraryName := "", TheWholeFile := "", LibraryHeader := "", LibFileBody := ""
 
+	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control.
+	if (!SelectedLibraryName)	;if SelectedLibraryName is empty
+	{
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to edit library header please at first select library name from drop down list."]
+		return
+	}
+	GuiControlGet, LibraryHeader,, % IdLHG_Edit1
+
+	FileRead, TheWholeFile, % ini_HADL . "\" . SelectedLibraryName
+	Loop, Parse, TheWholeFile, `n, `r%A_Space%%A_Tab%
+	{
+		if (SubStr(A_LoopField, 1, 2) = "/*")	;ignore comments
+		{
+			BegCom := true
+			Continue
+		}
+		if (BegCom) and (SubStr(A_LoopField, -1) = "*/") ;ignore comments
+		{
+			BegCom := false
+			Continue
+		}
+		if (BegCom)
+			Continue
+		if (SubStr(A_LoopField, 1, 1) = ";")	;ignore comments
+			Continue
+		if (!A_LoopField)	;ignore empty lines
+			Continue
+		
+          LibFileBody .= A_LoopField . "`n"
+	}
+	TheWholeFile := "/*" . "`n" . LibraryHeader . "`n" . "*/" . "`n" . LibFileBody
+	FileDelete, % ini_HADL . "\" . SelectedLibraryName
+	FileAppend, % TheWholeFile, % ini_HADL . "\" . SelectedLibraryName, UTF-8
+	LHB_Button_Cancel()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 LHB_Button_Cancel()
