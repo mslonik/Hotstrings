@@ -639,7 +639,6 @@ F_EditLibHeader()	;button: Edit header
 	SysGet, WidthOfClient, % SM_CXFULLSCREEN	;Width of the client area for a full-screen window on the primary display monitor, in pixels.
 	SysGet, MaxPrimaryMon, % SM_CXMAXIMIZED		;Default dimensions, in pixels, of a maximized top-level window on the primary display monitor.
 	WinGetPos, Xpos, Ypos, Wwidth, , A
-	; WinGetPos, Xpos, Ypos, Wwidth, , % "ahk_id" . A_Space . HS3GuiHwnd
 	Gui, 	LibHeader: New, 	+Resize +HwndLibHeaderGuiHwnd +Owner -DPIScale, % A_ScriptName . ":" . A_Space . TransA["Edit library header"] . "." . A_Space . TransA["Library name:"] A_Space . SelectedLibraryName ;DPI scaling only applies to Gui sub-commands and related variables, so coordinates coming directly from other sources such WinGetPos will not work. There are a number of ways to deal with this, e.g. disable (Gui -DPIScale) scaling on the fly, as needed.
 	Gui,		LibHeader: Margin, 	% c_xmarg, % c_ymarg
 	Gui,		LibHeader: Add,	Button,	x0 y0 HwndIdLHB_Button1 gLHB_Button_Save, 	% TransA["Save"]
@@ -1912,6 +1911,8 @@ F_BackspaceProcessing()
 F_GUIinit()
 {
 	global	;assume-global mode
+	local	f_FitsToAnyMonitor := false, key := 0
+
 	if (f_MainGUIresizing) ;if run for the very first time
 	{
 		Gui, HS3: +MinSize%HS3MinWidth%x%HS3MinHeight%
@@ -1941,8 +1942,19 @@ F_GUIinit()
 			}
 			if (ini_HS3GuiMaximized)
 				Gui, HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
-			else	
-				Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+			else
+			{
+				F_DetermineMonitors()	;This function is present in library only!
+				for key in MonitorCoordinates
+				{
+					if (ini_HS3WindoPos["X"] > MonitorCoordinates.Left) or (ini_HS3WindoPos["X"] < MonitorCoordinates.Right)
+						f_FitsToAnyMonitor := true
+				}
+				if (f_FitsToAnyMonitor)
+					Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+				else
+					Gui, HS3: Show, Center AutoSize	;tu jestem
+			}
 			
 			Case "HS4":
 			if (ini_HS3WindoPos["W"] = "") or (ini_HS3WindoPos["H"] = "")
@@ -1974,8 +1986,11 @@ F_GUIinit()
 			Case "HS3":
 			if (ini_HS3GuiMaximized)
 				Gui, HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
-			else	
+			else
+			{
+				F_DetermineMonitors()	;This function is present in library only!
 				Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
+			}
 			Case "HS4":
 			Gui, HS4: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
 		}
