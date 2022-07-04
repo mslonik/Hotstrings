@@ -1912,6 +1912,7 @@ F_GUIinit()
 {
 	global	;assume-global mode
 	local	f_FitsToAnyMonitor := false, key := 0
+	, 		WinX := 0, WinY := 0, WinW := 0, WinH := 0
 
 	if (f_MainGUIresizing) ;if run for the very first time
 	{
@@ -1945,18 +1946,65 @@ F_GUIinit()
 			else
 			{
 				F_DetermineMonitors()	;This function is present in library only!
-				for key in MonitorCoordinates
+				for key in MonitorCoordinates	;check if X variable read from ini file is not from outside of current monitor coordinates. This is useful if you unplugged your laptop from docking station or changed on the fly in any other way your workplace setup and now amount of available monitor differs.
 				{
-					if (ini_HS3WindoPos["X"] > MonitorCoordinates.Left) or (ini_HS3WindoPos["X"] < MonitorCoordinates.Right)
+					if (ini_HS3WindoPos.X > MonitorCoordinates[key].Left) and (ini_HS3WindoPos.X < MonitorCoordinates[key].Right)
 						f_FitsToAnyMonitor := true
 				}
 				if (f_FitsToAnyMonitor)
 					Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
 				else
+				{
 					Gui, HS3: Show, Center AutoSize	;tu jestem
+					MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Your current screen coordinates have changed. For example you've unplugged your laptop from docking station. Your settings in .ini file will be adjusted accordingly."]
+					WinGetPos, WinX, WinY, WinW, WinH, % "ahk_id" . HS3GuiHwnd
+					IniWrite, % WinX, % ini_HADConfig, GraphicalUserInterface, MainWindowPosX 
+					IniWrite, % WinY, % ini_HADConfig, GraphicalUserInterface, MainWindowPosY
+					IniWrite, "", % ini_HADConfig, GraphicalUserInterface, MainWindowPosW 
+					IniWrite, "", % ini_HADConfig, GraphicalUserInterface, MainWindowPosH
+					ini_HS3WindoPos["X"] := WinX
+,					ini_HS3WindoPos["Y"] := WinY
+,					ini_HS3WindoPos["W"] := ""
+,					ini_HS3WindoPos["H"] := ""
+				}
 			}
 			
 			Case "HS4":
+				F_DetermineMonitors()	;This function is present in library only!
+				for key in MonitorCoordinates	;check if X variable read from ini file is not from outside of current monitor coordinates. This is useful if you unplugged your laptop from docking station or changed on the fly in any other way your workplace setup and now amount of available monitor differs.
+				{
+					if (ini_HS3WindoPos.X > MonitorCoordinates[key].Left) and (ini_HS3WindoPos.X < MonitorCoordinates[key].Right)
+						f_FitsToAnyMonitor := true
+				}
+				if (f_FitsToAnyMonitor)
+				{
+					Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+					if (ini_ShowIntro)
+						Gui, ShowIntro: Show, AutoSize Center
+					f_MainGUIresizing := false
+				}
+				else
+				{
+					Gui, HS4: Show, Center AutoSize	;tu jestem
+					MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Your current screen coordinates have changed. For example you've unplugged your laptop from docking station. Your settings in .ini file will be adjusted accordingly."]
+					WinGetPos, WinX, WinY, WinW, WinH, % "ahk_id" . HS4GuiHwnd
+					IniWrite, % WinX, % ini_HADConfig, GraphicalUserInterface, MainWindowPosX 
+					IniWrite, % WinY, % ini_HADConfig, GraphicalUserInterface, MainWindowPosY
+					IniWrite, "", % ini_HADConfig, GraphicalUserInterface, MainWindowPosW 
+					IniWrite, "", % ini_HADConfig, GraphicalUserInterface, MainWindowPosH
+					ini_HS3WindoPos["X"] := WinX
+,					ini_HS3WindoPos["Y"] := WinY
+,					ini_HS3WindoPos["W"] := ""
+,					ini_HS3WindoPos["H"] := ""
+				}
+/* 			if (ini_HS3WindoPos["X"] = "") or !(ini_HS3WindoPos["Y"] = "")
+			{
+				Gui, HS4: Show, AutoSize Center
+				if (ini_ShowIntro)
+					Gui, ShowIntro: Show, AutoSize Center
+				f_MainGUIresizing := false
+				return
+			}
 			if (ini_HS3WindoPos["W"] = "") or (ini_HS3WindoPos["H"] = "")
 			{	
 				Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
@@ -1965,34 +2013,24 @@ F_GUIinit()
 				f_MainGUIresizing := false
 				return
 			}
-			if (ini_HS3WindoPos["X"] = "") or !(ini_HS3WindoPos["Y"] = "")
-			{
-				Gui, HS4: Show, AutoSize Center
-				if (ini_ShowIntro)
-					Gui, ShowIntro: Show, AutoSize Center
-				f_MainGUIresizing := false
-				return
-			}
 			Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+ */
 		}
 		if (ini_ShowIntro)
 			Gui, ShowIntro: Show, AutoSize Center
 		f_MainGUIresizing := false
 	}		
-	else ;future: dodać sprawdzenie, czy odczytane współrzędne nie są poza zakresem dostępnym na tym komputerze w momencie uruchomienia
+	else
 	{
 		Switch ini_WhichGui
 		{
 			Case "HS3":
-			if (ini_HS3GuiMaximized)
-				Gui, HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
-			else
-			{
-				F_DetermineMonitors()	;This function is present in library only!
-				Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
-			}
+				if (ini_HS3GuiMaximized)
+					Gui, HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
+				else
+					Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
 			Case "HS4":
-			Gui, HS4: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
+				Gui, HS4: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
 		}
 	}
 }
@@ -11563,6 +11601,7 @@ yes													= yes
 You've cancelled this process.							= You've cancelled this process.
 You've changed at least one configuration parameter, but didn't yet apply it. = You've changed at least one configuration parameter, but didn't yet apply it.
 Your hotstring definition contain one of the following characters: = Your hotstring definition contain one of the following characters:
+Your current screen coordinates have changed. For example you've unplugged your laptop from docking station. Your settings in .ini file will be adjusted accordingly. = Your current screen coordinates have changed. For example you've unplugged your laptop from docking station. Your settings in .ini file will be adjusted accordingly.
 ↓ Click here to select hotstring library ↓					= ↓ Click here to select hotstring library ↓
 {Up} or {Down} or {Home} or {End} or {PgUp} or {PgDown}		= {Up} or {Down} or {Home} or {End} or {PgUp} or {PgDown}
 ShowInfoText											= In order to display graphical user interface (GUI) of the application just press shortcut: Win + Ctrl + H. `n`nSuggested steps after installation: `n`n1. Download some libraries (files containing (triggerstring, hotstring) definitions. You can do it from application menu:  → Libraries. `n`n2. After downloading of libraries restart application to apply the changes. Again, you can do it from application menu: Application → Restart. `n`n3. Application is preconfigured on the first start. Options available to be configured area available from GUI, application menu → Configuration. `n`n4. Application runs by default in default mode. If you don't wish to modify configuration, `nmay consider to run it in simplified mode: application menu → Application → Reload → Reload in silent mode.
