@@ -1922,94 +1922,36 @@ F_GUIinit()
 		ini_GuiReload := false
 		IniWrite, % ini_GuiReload,		% ini_HADConfig, GraphicalUserInterface, GuiReload
 		
-		Switch ini_WhichGui
+		if (ini_HS3WindoPos["X"] = "") or (ini_HS3WindoPos["Y"] = "")
 		{
-			Case "HS3":
-			if (ini_HS3WindoPos["X"] = "") or (ini_HS3WindoPos["Y"] = "")
-			{
-				Gui, HS3: Show, AutoSize Center
-				if (ini_ShowIntro)
-					Gui, ShowIntro: Show, AutoSize Center
-				f_MainGUIresizing := false
-				return
-			}
+			Gui, % ini_WhichGui . ": Show", AutoSize Center
+			if (ini_ShowIntro)
+				Gui, ShowIntro: Show, AutoSize Center
+			f_MainGUIresizing := false
+			return
+		
+		F_DetermineMonitors()	;This function is present in library only!
+		for key in MonitorCoordinates	;check if X variable read from ini file is not from outside of current monitor coordinates. This is useful if you unplugged your laptop from docking station or changed on the fly in any other way your workplace setup and now amount of available monitor differs.
+		{
+			if (ini_HS3WindoPos.X > MonitorCoordinates[key].Left) and (ini_HS3WindoPos.X < MonitorCoordinates[key].Right)
+				f_FitsToAnyMonitor := true
+		}
+		if (f_FitsToAnyMonitor)
+		{
 			if (ini_HS3WindoPos["W"] = "") or (ini_HS3WindoPos["H"] = "")
-			{
-				Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
-				if (ini_ShowIntro)
-					Gui, ShowIntro: Show, AutoSize Center
-				f_MainGUIresizing := false
-				return
-			}
-			if (ini_HS3GuiMaximized)
-				Gui, HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
+				Gui,	% ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
 			else
-			{
-				F_DetermineMonitors()	;This function is present in library only!
-				for key in MonitorCoordinates	;check if X variable read from ini file is not from outside of current monitor coordinates. This is useful if you unplugged your laptop from docking station or changed on the fly in any other way your workplace setup and now amount of available monitor differs.
-				{
-					if (ini_HS3WindoPos.X > MonitorCoordinates[key].Left) and (ini_HS3WindoPos.X < MonitorCoordinates[key].Right)
-						f_FitsToAnyMonitor := true
-				}
-				if (f_FitsToAnyMonitor)
-					Gui,	HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
-				else
-				{
-					Gui, HS3: Show, Center AutoSize	;tu jestem
-					MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Your current screen coordinates have changed. For example you've unplugged your laptop from docking station. Your settings in .ini file will be adjusted accordingly."]
-					WinGetPos, WinX, WinY, WinW, WinH, % "ahk_id" . HS3GuiHwnd
-					IniWrite, % WinX, % ini_HADConfig, GraphicalUserInterface, MainWindowPosX 
-					IniWrite, % WinY, % ini_HADConfig, GraphicalUserInterface, MainWindowPosY
-					IniWrite, "", % ini_HADConfig, GraphicalUserInterface, MainWindowPosW 
-					IniWrite, "", % ini_HADConfig, GraphicalUserInterface, MainWindowPosH
-					ini_HS3WindoPos["X"] := WinX
-,					ini_HS3WindoPos["Y"] := WinY
-,					ini_HS3WindoPos["W"] := ""
-,					ini_HS3WindoPos["H"] := ""
-				}
-			}
-			
-			Case "HS4":
-				if (ini_HS3WindoPos["X"] = "") or (ini_HS3WindoPos["Y"] = "")
-				{
-					Gui, HS4: Show, AutoSize Center
-					if (ini_ShowIntro)
-						Gui, ShowIntro: Show, AutoSize Center
-					f_MainGUIresizing := false
-					return
-				}
-
-				F_DetermineMonitors()	;This function is present in library only!
-				for key in MonitorCoordinates	;check if X variable read from ini file is not from outside of current monitor coordinates. This is useful if you unplugged your laptop from docking station or changed on the fly in any other way your workplace setup and now amount of available monitor differs.
-				{
-					if (ini_HS3WindoPos.X > MonitorCoordinates[key].Left) and (ini_HS3WindoPos.X < MonitorCoordinates[key].Right)
-						f_FitsToAnyMonitor := true
-				}
-				if (f_FitsToAnyMonitor)
-				{
-					if (ini_HS3WindoPos["W"] = "") or (ini_HS3WindoPos["H"] = "")
-						Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
-					else
-					{
-						; Gui,	HS4: -DPIScale
-						Gui,	HS4: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
-					}
-				}
-				else
-				{
-					Gui, HS4: Show, Center AutoSize	;tu jestem
-					MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Your current screen coordinates have changed. For example you've unplugged your laptop from docking station. Your settings in .ini file will be adjusted accordingly."]
-					WinGetPos, WinX, WinY, WinW, WinH, % "ahk_id" . HS4GuiHwnd
-					IniWrite, % WinX, 		 % ini_HADConfig, GraphicalUserInterface, MainWindowPosX 
-					IniWrite, % WinY, 		 % ini_HADConfig, GraphicalUserInterface, MainWindowPosY
-					IniWrite, % HS4_GuiWidth, % ini_HADConfig, GraphicalUserInterface, MainWindowPosW 
-					IniWrite, % HS4_GuiHeigt, % ini_HADConfig, GraphicalUserInterface, MainWindowPosH
-					IniWrite, HS4,    		 % ini_HADConfig, GraphicalUserInterface, WhichGui
-					ini_HS3WindoPos["X"] := WinX
-,					ini_HS3WindoPos["Y"] := WinY
-,					ini_HS3WindoPos["W"] := WinW
-,					ini_HS3WindoPos["H"] := WinY
-				}
+				Gui,	% ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+		}
+		else
+		{
+			Gui, % ini_WhichGui . ": Show", Center AutoSize
+			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Your current screen coordinates have changed. For example you've unplugged your laptop from docking station. Your settings in .ini file will be adjusted accordingly."]
+			F_SaveGUIPos()
+			ini_HS3WindoPos["X"] := WinX
+,			ini_HS3WindoPos["Y"] := WinY
+,			ini_HS3WindoPos["W"] := WinW
+,			ini_HS3WindoPos["H"] := WinY
 		}
 		if (ini_ShowIntro)
 			Gui, ShowIntro: Show, AutoSize Center
@@ -2017,16 +1959,10 @@ F_GUIinit()
 	}		
 	else
 	{
-		Switch ini_WhichGui
-		{
-			Case "HS3":
-				if (ini_HS3GuiMaximized)
-					Gui, HS3: Show, % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
-				else
-					Gui, HS3: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
-			Case "HS4":
-				Gui, HS4: Show, Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.
-		}
+		if (ini_HS3GuiMaximized) and (ini_WhichGui)
+			Gui, % ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
+		else
+			Gui, % ini_WhichGui . ": Show", Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.		
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
