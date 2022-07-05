@@ -1908,6 +1908,28 @@ F_BackspaceProcessing()
 	; OutputDebug, % "F_BackspaceProcessing, end" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_DetermineMonitors()	; Multi monitor environment, initialization of monitor width and height parameters
+{
+	global	;assume-global mode
+	local	NoOfMonitors
+			,Temp := 0, TempLeft := 0, TempRight := 0, TempTop := 0, TempBottom := 0, TempWidth := 0, TempHeight := 0
+	
+	MonitorCoordinates := {} ;global variable
+	
+	SysGet, NoOfMonitors, MonitorCount	
+	Loop, % NoOfMonitors
+	{
+		SysGet, Temp, Monitor, % A_Index
+		MonitorCoordinates[A_Index] 			:= {}
+		MonitorCoordinates[A_Index].Left 		:= TempLeft
+		MonitorCoordinates[A_Index].Right 		:= TempRight
+		MonitorCoordinates[A_Index].Top 		:= TempTop
+		MonitorCoordinates[A_Index].Bottom 	:= TempBottom
+		MonitorCoordinates[A_Index].Width 		:= TempRight - TempLeft
+		MonitorCoordinates[A_Index].Height 	:= TempBottom - TempTop
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GUIinit()
 {
 	global	;assume-global mode
@@ -1921,15 +1943,15 @@ F_GUIinit()
 		;OutputDebug, % "ini_GuiReload:" . A_Tab . ini_GuiReload . A_Tab . "ini_WhichGui:" . A_Tab . ini_WhichGui
 		ini_GuiReload := false
 		IniWrite, % ini_GuiReload,		% ini_HADConfig, GraphicalUserInterface, GuiReload
-		
-		if (ini_HS3WindoPos["X"] = "") or (ini_HS3WindoPos["Y"] = "")
+
+		if (ini_HS3WindoPos.X = "") or (ini_HS3WindoPos.Y = "")
 		{
 			Gui, % ini_WhichGui . ": Show", AutoSize Center
 			if (ini_ShowIntro)
 				Gui, ShowIntro: Show, AutoSize Center
 			f_MainGUIresizing := false
 			return
-		
+		}
 		F_DetermineMonitors()	;This function is present in library only!
 		for key in MonitorCoordinates	;check if X variable read from ini file is not from outside of current monitor coordinates. This is useful if you unplugged your laptop from docking station or changed on the fly in any other way your workplace setup and now amount of available monitor differs.
 		{
@@ -1938,20 +1960,20 @@ F_GUIinit()
 		}
 		if (f_FitsToAnyMonitor)
 		{
-			if (ini_HS3WindoPos["W"] = "") or (ini_HS3WindoPos["H"] = "")
-				Gui,	% ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "AutoSize"
+			if (ini_HS3WindoPos.W = "") or (ini_HS3WindoPos.H = "")
+				Gui,	% ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos.X . A_Space . "Y" . ini_HS3WindoPos.Y . A_Space . "AutoSize"
 			else
-				Gui,	% ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "W" . ini_HS3WindoPos["W"] . A_Space . "H" . ini_HS3WindoPos["H"]
+				Gui,	% ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos.X . A_Space . "Y" . ini_HS3WindoPos.Y . A_Space . "W" . ini_HS3WindoPos.W . A_Space . "H" . ini_HS3WindoPos.H
 		}
 		else
 		{
 			Gui, % ini_WhichGui . ": Show", Center AutoSize
 			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Your current screen coordinates have changed. For example you've unplugged your laptop from docking station. Your settings in .ini file will be adjusted accordingly."]
 			F_SaveGUIPos()
-			ini_HS3WindoPos["X"] := WinX
-,			ini_HS3WindoPos["Y"] := WinY
-,			ini_HS3WindoPos["W"] := WinW
-,			ini_HS3WindoPos["H"] := WinY
+			ini_HS3WindoPos.X := WinX
+,			ini_HS3WindoPos.Y := WinY
+,			ini_HS3WindoPos.W := WinW
+,			ini_HS3WindoPos.H := WinY
 		}
 		if (ini_ShowIntro)
 			Gui, ShowIntro: Show, AutoSize Center
@@ -1960,7 +1982,7 @@ F_GUIinit()
 	else
 	{
 		if (ini_HS3GuiMaximized) and (ini_WhichGui)
-			Gui, % ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos["X"] . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
+			Gui, % ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos.X . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
 		else
 			Gui, % ini_WhichGui . ": Show", Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.		
 	}
@@ -2256,7 +2278,7 @@ F_LoadGUIstatic()
 	IniRead, ini_ReadTemp, 						% ini_HADConfig, StaticTriggerstringHotstring, SWPosX, % A_Space
 	if (ini_ReadTemp = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 		IniWrite, % ini_ReadTemp, % ini_HADConfig, StaticTriggerstringHotstring, SWPosX
-	ini_SWPos["X"] := ini_ReadTemp
+	ini_SWPos.X := ini_ReadTemp
 	IniRead, ini_ReadTemp, 						% ini_HADConfig, StaticTriggerstringHotstring, SWPosY, % A_Space
 	if (ini_ReadTemp = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 		IniWrite, % ini_ReadTemp, % ini_HADConfig, StaticTriggerstringHotstring, SWPosY
@@ -2264,11 +2286,11 @@ F_LoadGUIstatic()
 	IniRead, ini_ReadTemp, 						% ini_HADConfig, StaticTriggerstringHotstring, SWPosW, % A_Space
 	if (ini_ReadTemp = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 		IniWrite, % ini_ReadTemp, % ini_HADConfig, StaticTriggerstringHotstring, SWPosW
-	ini_SWPos["W"] := ini_ReadTemp
+	ini_SWPos.W := ini_ReadTemp
 	IniRead, ini_ReadTemp, 						% ini_HADConfig, StaticTriggerstringHotstring, SWPosH, % A_Space
 	if (ini_ReadTemp = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 		IniWrite, % ini_ReadTemp, % ini_HADConfig, StaticTriggerstringHotstring, SWPosH
-	ini_SWPos["H"] := ini_ReadTemp
+	ini_SWPos.H := ini_ReadTemp
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_RecreateGuiStatic()
@@ -2522,10 +2544,10 @@ F_GuiTrigTipsMenuDefC4()
 	GuiControlGet, PosOutputVar, Pos, % IdTT_C4_LB4
 	GuiControl, Move, % IdTT_C4_B1, % "x" . PosOutputVarX . A_Space . "y" . PosOutputVarY + PosOutputVarH + c_ymarg
 	
-	if (ini_SWPos["X"] = "") or (ini_SWPos["Y"] = "")	
+	if (ini_SWPos.X = "") or (ini_SWPos["Y"] = "")	
 		Gui, TT_C4: Show, Center AutoSize NoActivate
 	else
-		Gui, TT_C4: Show, % "X" . ini_SWPos["X"] . A_Space . "Y" . ini_SWPos["Y"] . A_Space . "NoActivate" . A_Space . "AutoSize"
+		Gui, TT_C4: Show, % "X" . ini_SWPos.X . A_Space . "Y" . ini_SWPos["Y"] . A_Space . "NoActivate" . A_Space . "AutoSize"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TT_C4_B1()	;Button: save position of "static" triggerstring / hotstring window
@@ -10530,18 +10552,18 @@ F_LoadGUIPos()
 ,	ini_Sandbox 		:= true
 	;after loading values (empty by default) those parameters are further used in F_GUIinit()
 	IniRead, ini_ReadTemp, 					% ini_HADConfig, GraphicalUserInterface, MainWindowPosX, 	% A_Space	;empty by default
-	ini_HS3WindoPos["X"] := ini_ReadTemp
+	ini_HS3WindoPos.X := ini_ReadTemp
 	IniRead, ini_ReadTemp, 					% ini_HADConfig, GraphicalUserInterface, MainWindowPosY, 	% A_Space	;empty by default
-	ini_HS3WindoPos["Y"] := ini_ReadTemp
+	ini_HS3WindoPos.Y := ini_ReadTemp
 	IniRead, ini_ReadTemp, 					% ini_HADConfig, GraphicalUserInterface, MainWindowPosW, 	% A_Space	;empty by default
-	ini_HS3WindoPos["W"] := ini_ReadTemp
+	ini_HS3WindoPos.W := ini_ReadTemp
 	IniRead, ini_ReadTemp, 					% ini_HADConfig, GraphicalUserInterface, MainWindowPosH, 	% A_Space	;empty by default
-	ini_HS3WindoPos["H"] := ini_ReadTemp
+	ini_HS3WindoPos.H := ini_ReadTemp
 	
 	IniRead, ini_ReadTemp,					% ini_HADConfig, GraphicalUserInterface, ListViewPosW, 	% A_Space
-	ini_ListViewPos["W"] := ini_ReadTemp
+	ini_ListViewPos.W := ini_ReadTemp
 	IniRead, ini_ReadTemp,					% ini_HADConfig, GraphicalUserInterface, ListViewPosH, 	% A_Space
-	ini_ListViewPos["H"] := ini_ReadTemp
+	ini_ListViewPos.H := ini_ReadTemp
 	
 	IniRead, ini_Sandbox, 					% ini_HADConfig, GraphicalUserInterface, Sandbox,			1
 	IniRead, ini_IsSandboxMoved,				% ini_HADConfig, GraphicalUserInterface, IsSandboxMoved, 	0 
@@ -12744,7 +12766,7 @@ F_GuiMain_Redraw()
 	{
 		v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
 		v_yNext := c_ymarg + HofText
-		if (!(ini_ListViewPos["W"]) or !(ini_ListViewPos["H"])) ;if HS3 Gui is generated for the very first time
+		if (!(ini_ListViewPos.W) or !(ini_ListViewPos.H)) ;if HS3 Gui is generated for the very first time
 		{
 			v_wNext := RightColumnW
 			if ((ini_Sandbox) and !(ini_IsSandboxMoved))
@@ -12765,7 +12787,7 @@ F_GuiMain_Redraw()
 			GuiControl, Move, % IdListView1, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext . "h" . v_hNext
 		}
 		else
-			GuiControl, Move, % IdListView1, % "x" . v_xNext . "y" . v_yNext . "w" . ini_ListViewPos["W"] . "h" ini_ListViewPos["H"]
+			GuiControl, Move, % IdListView1, % "x" . v_xNext . "y" . v_yNext . "w" . ini_ListViewPos.W . "h" ini_ListViewPos.H
 		b_FirstRun := false
 	}
 	else
