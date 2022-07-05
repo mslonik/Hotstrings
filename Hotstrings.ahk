@@ -159,7 +159,7 @@ GuiControl, , % IdText13b, % v_LibHotstringCnt
 F_LoadHotstringsFromLibraries()	;→ F_LoadDefinitionsFromFile() -> F_CreateHotstring
 F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 F_GuiSearch_CreateObject()		;When all tables are full, initialize GuiSearch
-F_Searching("Reload")			;prepare content of Search tables
+; F_Searching("Reload")			;prepare content of Search tables
 F_InitiateInputHook()
 
 TrayTip, % A_ScriptName, % TransA["Hotstrings have been loaded"], , 1 ;1 = Info icon
@@ -419,7 +419,6 @@ Critical, Off
 	^f::
 	^s::
 	F3:: ;new thread starts here
-		F_GuiSearch_DetermineConstraints()
 		F_Searching()
 		return
 
@@ -8932,13 +8931,15 @@ F_SearchPhrase()
 	GuiControl, +Redraw, % IdSearchLV1 ;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Searching(ReloadListView*)
+F_Searching(ReloadListView*)	;tu jestem
 {
 	global	;assume-global mode
 	local	Window1X := 0, 	Window1Y := 0, 	Window1W := 0, 	Window1H := 0
 			,Window2X := 0, 	Window2Y := 0, 	Window2W := 0, 	Window2H := 0
 			,NewWinPosX := 0, 	NewWinPosY := 0
 			,WhichGui := "", PreviousGui := ""
+	
+	F_GuiSearch_DetermineConstraints()		
 	Switch ReloadListView[1]
 	{
 		Case "ReloadAndView":
@@ -8961,15 +8962,14 @@ F_Searching(ReloadListView*)
 			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
 		
 		Case "Reload":
-		Gui, HS3Search: Default
-		GuiControl, % "Count" . a_Library.MaxIndex() . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
-		LV_Delete()
-		Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
-			LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
-		GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
+			Gui, HS3Search: Default
+			GuiControl, % "Count" . a_Library.MaxIndex() . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
+			LV_Delete()
+			Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
+				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+			GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 		
-		Case TransA["Search Hotstrings (F3)"]:
-		Case "": ;new thread starts here
+		Case TransA["Search Hotstrings (F3)"], "": ;new thread starts here
 			WinGetPos, Window1X, Window1Y, Window1W, Window1H, A	;Retrieves the position of the active window.
 			F_WhichGui()
 			Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
@@ -9019,7 +9019,7 @@ F_GuiSearch_DetermineConstraints()
 		,v_ButtonW := 0
 	
 	v_xNext := c_xmarg
-	v_yNext := c_ymarg
+,	v_yNext := c_ymarg
 	GuiControl, Move, % IdSearchT1, % "x" v_xNext "y" v_yNext ;Phrase to search
 	v_yNext += HofText
 	GuiControlGet, v_OutVarTemp, Pos, % IdSearchT1
@@ -9043,9 +9043,11 @@ F_GuiSearch_DetermineConstraints()
 	HofRadio := v_OutVarTempH
 	v_OutVarTemp := Max(HofRadio, HofEdit)
 	v_xNext := c_xmarg
-	v_yNext += v_OutVarTemp + c_ymarg
+	v_yNext += v_OutVarTemp + c_ymarg	;tu jestem
+	F_WhichGui()
 	v_wNext := HS3_GuiWidth - 2 * c_ymarg
 	v_hNext := HS3_GuiHeight - (c_ymarg + HofText + v_OutVarTemp + c_ymarg + HofText * 2)
+	OutputDebug, % "HS3_GuiWidth:" . A_Space . HS3_GuiWidth . A_Space . "HS3_GuiHeight:" . A_Space . HS3_GuiHeight . A_Space . "v_wNext:" . A_Space . v_wNext . A_Space . "v_hNext:" . A_Space . v_hNext . "`n"
 	GuiControl, MoveDraw, % IdSearchLV1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
 	
 	Gui, HS3Search: Default	;in order to enable LV_ModifyCol
