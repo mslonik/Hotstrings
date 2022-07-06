@@ -8931,7 +8931,7 @@ F_SearchPhrase()
 	GuiControl, +Redraw, % IdSearchLV1 ;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Searching(ReloadListView*)	;tu jestem
+F_Searching(ReloadListView*)
 {
 	global	;assume-global mode
 	local	Window1X := 0, 	Window1Y := 0, 	Window1W := 0, 	Window1H := 0
@@ -8939,11 +8939,10 @@ F_Searching(ReloadListView*)	;tu jestem
 			,NewWinPosX := 0, 	NewWinPosY := 0
 			,WhichGui := "", PreviousGui := ""
 	
-	F_GuiSearch_DetermineConstraints()		
+	F_GuiSearch_DetermineConstraints()
 	Switch ReloadListView[1]
 	{
-		Case "ReloadAndView":
-			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
+		Case "ReloadAndView": ;<- F_Move()
 			Gui, HS3Search: Default
 			GuiControl, % "Count" . a_Library.MaxIndex() . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 			LV_Delete()
@@ -8956,12 +8955,14 @@ F_Searching(ReloadListView*)	;tu jestem
 				Case 1: LV_ModifyCol(2, "Sort") ;by default: triggerstring
 				Case 2: LV_ModifyCol(6, "Sort")
 				Case 3: LV_ModifyCol(1, "Sort")
-			}
-			WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
-			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight	;no idea why twice, but then it shows correct size
-			Gui, HS3Search: Show, % "X" . Window1X . A_Space . "Y" . Window1Y . A_Space . "W" HS3MinWidth . A_Space . "H" HS3MinHeight 
+			}	
+			if (WinExist("ahk_id" HS3GuiHwnd))
+				WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
+			if (WinExist("ahk_id" HS4GuiHwnd))
+				WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS4GuiHwnd
+			Gui, HS3Search: Show, % "x" . Window1X + 2 * c_xmarg . A_Space . "y" . Window1Y + 2 * c_ymarg
 		
-		Case "Reload":
+		Case "Reload":	;<- F_DeleteHotstring()
 			Gui, HS3Search: Default
 			GuiControl, % "Count" . a_Library.MaxIndex() . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 			LV_Delete()
@@ -8982,8 +8983,8 @@ F_Searching(ReloadListView*)	;tu jestem
 			F_SearchPhrase()
 			Switch PreviousGui
 			{
-				Case "HS3": Gui, HS3Search: Show, % "x" . Window1X . A_Space . "y" . Window1Y . A_Space . "w" . HS3_GuiWidth . A_Space . "h" . HS3_GuiHeight
-				Case "HS4": Gui, HS3Search: Show, % "x" . Window1X . A_Space . "y" . Window1Y . A_Space . "w" . HS4_GuiWidth . A_Space . "h" . HS4_GuiHeight
+				Case "HS3": Gui, HS3Search: Show, % "x" . Window1X + 2 * c_xmarg . "y" . Window1Y + 2 * c_ymarg . "w" . HS3_GuiWidth . "h" . HS3_GuiHeight
+				Case "HS4": Gui, HS3Search: Show, % "x" . Window1X + 2 * c_xmarg . "y" . Window1Y + 2 * c_ymarg . "w" . HS4_GuiWidth * 2 . "h" . HS4_GuiHeight
 			}
 	}
 }
@@ -8993,7 +8994,8 @@ F_GuiSearch_CreateObject()
 	global	;assume-global mode
 	
 	;1. Prepare Gui general parameters
-	Gui, HS3Search: New, 	% "+Resize +HwndHS3SearchHwnd +Owner +MinSize" HS3MinWidth + 3 * c_xmarg "x" HS3MinHeight, % TransA["Search Hotstrings"]
+	Gui, HS3Search: New, 	+Resize +HwndHS3SearchHwnd +Owner, % TransA["Search Hotstrings"]
+	; Gui, HS3Search: New, 	% "+Resize +HwndHS3SearchHwnd +Owner +MinSize" HS3MinWidth + 3 * c_xmarg "x" HS3MinHeight, % TransA["Search Hotstrings"]
 	Gui, HS3Search: Margin,	% c_xmarg, % c_ymarg
 	Gui,	HS3Search: Color,	% c_WindowColor, % c_ControlColor
 	
@@ -9028,7 +9030,7 @@ F_GuiSearch_DetermineConstraints()
 	
 	GuiControlGet, v_OutVarTemp, Pos, % IdSearchE1
 	v_xNext := c_xmarg + v_OutVarTempW + 2 * c_xmarg
-	v_yNext := c_ymarg
+,	v_yNext := c_ymarg
 	GuiControl, Move, % IdSearchT2, % "x" v_xNext "y" v_yNext	;Search by
 	v_yNext += HofText
 	GuiControl, Move, % IdSearchR1, % "x" v_xNext "y" v_yNext
@@ -9040,14 +9042,17 @@ F_GuiSearch_DetermineConstraints()
 	v_xNext += v_OutVarTempW + c_xmarg
 	GuiControl, Move, % IdSearchR3, % "x" v_xNext "y" v_yNext
 	
-	HofRadio := v_OutVarTempH
-	v_OutVarTemp := Max(HofRadio, HofEdit)
-	v_xNext := c_xmarg
-	v_yNext += v_OutVarTemp + c_ymarg	;tu jestem
+	HofRadio 		:= v_OutVarTempH
+,	v_OutVarTemp 	:= Max(HofRadio, HofEdit)
+,	v_xNext 		:= c_xmarg
+,	v_yNext 		+= v_OutVarTemp + c_ymarg
 	F_WhichGui()
-	v_wNext := HS3_GuiWidth - 2 * c_ymarg
-	v_hNext := HS3_GuiHeight - (c_ymarg + HofText + v_OutVarTemp + c_ymarg + HofText * 2)
-	OutputDebug, % "HS3_GuiWidth:" . A_Space . HS3_GuiWidth . A_Space . "HS3_GuiHeight:" . A_Space . HS3_GuiHeight . A_Space . "v_wNext:" . A_Space . v_wNext . A_Space . "v_hNext:" . A_Space . v_hNext . "`n"
+	Switch A_DefaultGui
+	{
+		Case "HS3": v_wNext := HS3_GuiWidth - 2 * c_ymarg
+		Case "HS4": v_wNext := HS4_GuiWidth * 2 - 2 * c_ymarg
+	}
+	v_hNext := HS4_GuiHeight - (c_ymarg + HofText + v_OutVarTemp + c_ymarg + HofText * 2)
 	GuiControl, MoveDraw, % IdSearchLV1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
 	
 	Gui, HS3Search: Default	;in order to enable LV_ModifyCol
@@ -9057,17 +9062,17 @@ F_GuiSearch_DetermineConstraints()
 	LV_ModifyCol(3, Round(0.1 * v_OutVarTempW))	
 	LV_ModifyCol(4, Round(0.1 * v_OutVarTempW))
 	LV_ModifyCol(5, Round(0.1 * v_OutVarTempW))
-	LV_ModifyCol(6, Round(0.27 * v_OutVarTempW))
+	LV_ModifyCol(6, Round(0.3 * v_OutVarTempW))
 	LV_ModifyCol(7, Round(0.1 * v_OutVarTempW) - 3)
 	GuiControl, +Redraw, % IdSearchLV1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
-	v_xNext := c_xmarg
-	v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
+	v_xNext 	:= c_xmarg
+,	v_yNext 	:= v_OutVarTempY + v_OutVarTempH + c_ymarg
 	GuiControl, Move, % IdSearchT4, % "x" v_xNext "y" v_yNext ;information about shortcuts
 	
 	GuiControlGet, v_OutVarTemp, Pos, % IdSearchB1
 	v_ButtonW := v_OutVarTempW + 2 * c_ymarg
-	v_xNext := HS3MinWidth + c_xmarg - v_ButtonW
-	v_yNext -= c_ymarg
+,	v_xNext 	:= HS3MinWidth + c_xmarg - v_ButtonW
+,	v_yNext 	-= c_ymarg
 	GuiControl, Move, % IdSearchB1, % "x" v_xNext "y" v_yNext "w" v_ButtonW
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9093,7 +9098,7 @@ HS3SearchGuiSize()
 		LV_ModifyCol(3, Round(0.1 * v_OutVarTemp2W))	
 		LV_ModifyCol(4, Round(0.1 * v_OutVarTemp2W))
 		LV_ModifyCol(5, Round(0.1 * v_OutVarTemp2W))
-		LV_ModifyCol(6, Round(0.27 * v_OutVarTemp2W))
+		LV_ModifyCol(6, Round(0.3 * v_OutVarTemp2W))
 		LV_ModifyCol(7, Round(0.1 * v_OutVarTemp2W) - 3)
 	}
 	v_xNext := c_xmarg
