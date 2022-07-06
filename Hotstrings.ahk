@@ -615,6 +615,20 @@ Critical, Off
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_RenameLibrary()
+{
+	global	;assume-global mode of operation
+	local	SelectedLibraryName := ""
+	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control.
+	if (!SelectedLibraryName) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])	;if SelectedLibraryName is empty
+	{
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to change existing library filename at first select one from drop down list."]
+		return
+	}
+	F_GuiAddLibrary(TransA["Choose new library file name:"])	;tu jestem
+	; FileMove, % ini_HADL . "\" . SelectedLibraryName, % ini_HADL . "\" . NewLibraryName
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EditLibHeader()	;button: Edit header
 {
 	global	;assume-global mode of operation
@@ -627,7 +641,7 @@ F_EditLibHeader()	;button: Edit header
 	,		MaxButtonWidth		:= 0
 
 	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control.
-	if (!SelectedLibraryName)	;if SelectedLibraryName is empty
+	if (!SelectedLibraryName) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])	;if SelectedLibraryName is empty
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to edit library header please at first select library name from drop down list."]
 		return
@@ -657,13 +671,19 @@ F_EditLibHeader()	;button: Edit header
 	GuiControl, Focus, % IdLHG_Edit1
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+LibHeaderGuiEscape()
+{
+	Gui, HS3: -Disabled
+	Gui, LibHeader: Destroy
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 LHB_Button_Save()
 {
 	global	;assume-global mode of operation
 	local	SelectedLibraryName := "", TheWholeFile := "", LibraryHeader := "", LibFileBody := ""
 
 	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control.
-	if (!SelectedLibraryName)	;if SelectedLibraryName is empty
+	if (!SelectedLibraryName) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])	;if SelectedLibraryName is empty
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to edit library header please at first select library name from drop down list."]
 		return
@@ -710,7 +730,7 @@ F_ShowLibHeader()	;button: Show header
 	local	SelectedLibraryName := "", TheWholeFile := "", LibraryHeader := ""
 
 	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control.
-	if (!SelectedLibraryName)	;if SelectedLibraryName is empty
+	if (!SelectedLibraryName) or or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])	;if SelectedLibraryName is empty
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to display library header please at first select library name from drop down list."]
 		return
@@ -9220,7 +9240,7 @@ F_WhichGui()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiAddLibrary()
+F_GuiAddLibrary(TextString*)
 {
 	global	;assume-global mode
 	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
@@ -9237,7 +9257,11 @@ F_GuiAddLibrary()
 	Gui,	ALib: Color,	% c_WindowColor, % c_ControlColor
 	Gui,	ALib: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
-	Gui, ALib: Add, Text, HwndIdText1, % TransA["Enter a name for the new library"]
+	Switch TextString[1]
+	{
+		Case "": Gui, ALib: Add, Text, HwndIdText1, % TransA["Enter a name for the new library"]
+		Default: Gui, ALib: Add, Text, HwndIdText1, % TextString[1]
+	}
 	Gui, ALib: Add, Edit, HwndIdEdit1 vv_NewLib
 	
 	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdText1
@@ -9251,7 +9275,7 @@ F_GuiAddLibrary()
 	vTempWidth += v_OutVarTemp1W
 	
 	Gui, ALib: Add, Button, HwndIdButt1 Default gF_ALibOK, 	% TransA["OK"]
-	Gui, ALib: Add, Button, HwndIdButt2 gALibGuiClose, 	% TransA["Cancel"]
+	Gui, ALib: Add, Button, HwndIdButt2 gALibGuiClose, 		% TransA["Cancel"]
 	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdButt1
 	GuiControlGet, v_OutVarTemp2, ALib: Pos, % IdButt2
 	
@@ -11128,6 +11152,7 @@ Check repository version									= Check repository version
 Choose existing hotstring library file before saving new (triggerstring, hotstring) definition!	= Choose existing hotstring library file before saving new (triggerstring, hotstring) definition!
 Choose (.ahk) file containing (triggerstring, hotstring) definitions for import	= Choose (.ahk) file containing (triggerstring, hotstring) definitions for import
 Choose library file (.csv) for export 						= Choose library file (.csv) for export
+Choose new library file name:								= Choose new library file name:
 Choose menu position 									= Choose menu position
 Choose sending function! 								= Choose sending function!
 Choose the method of sending the hotstring! 					= Choose the method of sending the hotstring!
@@ -11274,6 +11299,7 @@ In order to aplly new font style it's necesssary to reload the application. 	= I
 In order to aplly new font type it's necesssary to reload the application. 	= In order to aplly new font type it's necesssary to reload the application.
 In order to aplly new size of margin it's necesssary to reload the application. = In order to aplly new size of margin it's necesssary to reload the application.
 In order to aplly new style it's necesssary to reload the application. 		= In order to aplly new style it's necesssary to reload the application.
+In order to change existing library filename at first select one from drop down list. = In order to change existing library filename at first select one from drop down list.
 In order to edit library header please at first select library name from drop down list. = In order to edit library header please at first select library name from drop down list.
 In order to display library header please at first select library name from drop down list. = In order to display library header please at first select library name from drop down list.
 is added in section  [GraphicalUserInterface] of Config.ini		= is added in section  [GraphicalUserInterface] of Config.ini
