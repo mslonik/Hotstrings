@@ -329,6 +329,8 @@ Menu, 	HSMenu, 		Add, % TransA["About / Help"], 										:AboutHelpSub
 Gui, 	HS3: Menu, HSMenu
 Gui, 	HS4: Menu, HSMenu
 
+Menu,	ListView1_ContextMenu, Add, % TransA["Move definition to another library"],				F_MoveList
+
 F_MenuLogEnDis()	;Position in Menu about loging
 F_GuiAbout_CreateObjects()
 F_GuiAbout_DetermineConstraints()
@@ -629,7 +631,7 @@ F_RenameLibrary()
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to change existing library filename at first select one from drop down list."]
 		return
 	}
-	F_GuiAddLibrary(TransA["Choose new library file name:"])	;tu jestem
+	F_GuiAddLibrary(TransA["Choose new library file name:"])
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ChangeLibNameOK()
@@ -2301,8 +2303,9 @@ HS3SearchGuiEscape() ; Gui event!
 	{
 		Gui, HS3Search:	+Disabled
 		Gui, HS3: -Disabled
+		GuiControl, Focus, % IdListView1
+		; Gui, HS3: Show
 	}
-		; Gui, HS3: -Disabled
 	if (WinExist("ahk_id" HS4GuiHwnd))
 		Gui, HS4: -Disabled		
 	Gui, HS3Search: Hide
@@ -8708,7 +8711,7 @@ F_Clear()
 	GuiControl, HS4: ChooseString, % IdDDL2b, % TransA["↓ Click here to select hotstring library ↓"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Move()
+F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs ;tu jestem
 {
 	global	;assume-global mode
 	local NoOnTheList := 0, v_Temp1 := "", SourceLibrary := v_SelectHotstringLibrary, DestinationLibrary := ""
@@ -8863,7 +8866,7 @@ F_GuiMoveLibs_CreateDetermine()
 			LV_Add("", key)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_MoveList() 
+F_MoveList()
 {
 	global	;assume-global mode
 	local 	v_SelectedRow := 0
@@ -8871,7 +8874,7 @@ F_MoveList()
 			,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 			,NewWinPosX := 0, NewWinPosY := 0
 	
-	Gui, HS3Search: Submit, NoHide 
+	; Gui, HS3Search: Submit, NoHide 
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	F_GuiMoveLibs_CreateDetermine()
 	Gui, MoveLibs: Show, Hide
@@ -8882,24 +8885,24 @@ F_MoveList()
 	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
 	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
 	
-	Gui, HS3Search: Default
-	v_SelectedRow := LV_GetNext()	;this variable now contains row number of source table
-	if !(v_SelectedRow) 
-	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
-		if (WinExist("ahk_id" MoveLibsHwnd))
-			Gui, HS3: -Disabled
-		return
-	}
+	; Gui, HS3Search: Default
+	; v_SelectedRow := LV_GetNext()	;this variable now contains row number of source table
+	; if !(v_SelectedRow) 
+	; {
+		; MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
+		; if (WinExist("ahk_id" MoveLibsHwnd))
+			; Gui, HS3: -Disabled
+		; return
+	; }
 	;The following lines will be used by "next function": Move, moving of (triggerstrin, hotstring) definition between libraries.
-	LV_GetText(v_SourceLibrary,	v_SelectedRow, 1)
-	v_SourceLibrary .= ".csv"
-	LV_GetText(v_Triggerstring, 	v_SelectedRow, 2)
-	LV_GetText(v_TriggOpt,		v_SelectedRow, 3)
-	LV_GetText(v_OutFun,		v_SelectedRow, 4)
-	LV_GetText(v_EnDis,			v_SelectedRow, 5)
-	LV_GetText(v_Hotstring,		v_SelectedRow, 6)
-	LV_GetText(v_Comment,		v_SelectedRow, 7)
+	; LV_GetText(v_SourceLibrary,	v_SelectedRow, 1)
+	; v_SourceLibrary .= ".csv"
+	; LV_GetText(v_Triggerstring, 	v_SelectedRow, 2)
+	; LV_GetText(v_TriggOpt,		v_SelectedRow, 3)
+	; LV_GetText(v_OutFun,		v_SelectedRow, 4)
+	; LV_GetText(v_EnDis,			v_SelectedRow, 5)
+	; LV_GetText(v_Hotstring,		v_SelectedRow, 6)
+	; LV_GetText(v_Comment,		v_SelectedRow, 7)
 	
 	Gui, MoveLibs: Show, % "AutoSize" . A_Space . "X" . NewWinPosX . A_Space . "Y" . NewWinPosY . A_Space . "yCenter"
 }
@@ -8910,9 +8913,9 @@ F_HSLV2() ;load content of chosen row from Search Gui into HS3 Gui
 	local v_SelectedRow2 := 0, v_Library := "", v_Triggerstring := "", v_SearchedTriggerString := ""
 	static v_PreviousSelectedRow2 := 0
 ;The following lines protect from refreshing of ListView if user chooses the same row couple of times.
-	v_PreviousSelectedRow2 := v_SelectedRow2
-	v_SelectedRow2 := LV_GetNext()
-	If (!v_SelectedRow2) ;if empty
+	v_PreviousSelectedRow2 	:= v_SelectedRow2
+,	v_SelectedRow2 		:= LV_GetNext()
+	if (!v_SelectedRow2) ;if empty
 		return
 	if (v_PreviousSelectedRow2 == v_SelectedRow2) ;if the same
 		return
@@ -8921,7 +8924,6 @@ F_HSLV2() ;load content of chosen row from Search Gui into HS3 Gui
 	LV_GetText(v_Triggerstring, 	v_SelectedRow2, 2)
 	
 	v_SelectHotstringLibrary := % v_Library . ".csv"
-	
 	GuiControl, Choose, % IdDDL2, % v_SelectHotstringLibrary
 	F_SelectLibrary()
 	
@@ -9036,9 +9038,9 @@ F_Searching(ReloadListView*)
 			PreviousGui := A_DefaultGui
 			Gui, HS3Search: -Disabled
 			Gui, HS3Search: Default
-			LV_Delete()
-			Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
-				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+			; LV_Delete()
+			; Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
+				; LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
 			F_SearchPhrase()
 			Switch PreviousGui
 			{
@@ -9108,10 +9110,14 @@ F_GuiSearch_DetermineConstraints()
 	F_WhichGui()
 	Switch A_DefaultGui
 	{
-		Case "HS3": v_wNext := HS3_GuiWidth - 2 * c_ymarg
-		Case "HS4": v_wNext := HS4_GuiWidth * 2 - 2 * c_ymarg
+		Case "HS3": 
+			v_wNext := HS3_GuiWidth - 2 * c_ymarg
+			v_hNext := HS3_GuiHeight - (c_ymarg + HofText + v_OutVarTemp + c_ymarg + HofText * 2)
+		Case "HS4": 
+			v_wNext := HS4_GuiWidth * 2 - 2 * c_ymarg
+			v_hNext := HS4_GuiHeight - (c_ymarg + HofText + v_OutVarTemp + c_ymarg + HofText * 2)
 	}
-	v_hNext := HS4_GuiHeight - (c_ymarg + HofText + v_OutVarTemp + c_ymarg + HofText * 2)
+	OutputDebug, % "v_wNext:" . A_Space . v_wNext . A_Space . "v_hNext" . v_wNext . "`n"
 	GuiControl, MoveDraw, % IdSearchLV1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
 	
 	Gui, HS3Search: Default	;in order to enable LV_ModifyCol
@@ -11382,6 +11388,7 @@ Menu position: caret									= Menu position: caret
 Menu position: cursor									= Menu position: cursor
 Minus - 												= Minus -
 Mode of operation										= Mode of operation
+Move definition to another library							= Move definition to another library
 Move (F8)												= Move (F8)
 navy													= navy
 Next the default language file (English.txt) will be deleted,	= Next the default language file (English.txt) will be deleted,
@@ -12318,7 +12325,7 @@ F_GuiMain_CreateObject()
 	GuiControl +g, % IdTextInfo1, % F_TI_EnterTriggerstring
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString 
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui,			HS3: Add,			GroupBox, 	x0 y0 HwndIdGroupBox1, 									% TransA["Select triggerstring option(s)"]
@@ -12434,7 +12441,7 @@ F_GuiMain_CreateObject()
 	TI_LibraryContent		:= func("F_ShowLongTooltip").bind(TransA["TI_LibraryContent"])
 	GuiControl +g, % IdTextInfo16, % TI_LibraryContent
 	
-	Gui,			HS3:Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText2, % TransA["Total:"] . A_Space 
@@ -12455,11 +12462,20 @@ F_GuiMain_CreateObject()
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
 	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit10 vv_Sandbox r3 						; r3 = 3x rows of text
-	Gui,			HS3: Add,		Text,		x0 y0 HwndIdText11, % TransA["This library:"] . A_Space
+	Gui,			HS3: Add,			Text,		x0 y0 HwndIdText11, % TransA["This library:"] . A_Space
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText13,  %  v_LibHotstringCnt ;value of Hotstrings counter in the current library
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui, 		HS3: Add, 		Button, Hidden Default gF_HSLV	;trick to catch if user presses Enter on ListView1
+}
+; ------------------------------------------------------------------------------------------------------------------------------------
+HS3GuiContextMenu(GuiHwnd, CtrlHwnd, EventInfo, IsRightClick, X, Y)
+{
+	global ;assume-global mode 
+	if (CtrlHwnd != IdListView1)
+		return
+	Menu, ListView1_ContextMenu, Show, %X%, %Y%
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_GuiMain_DefineConstants()
