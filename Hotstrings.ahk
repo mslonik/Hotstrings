@@ -285,7 +285,11 @@ Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  									F_ExportLib
 Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],								:ExportSubmenu
 Menu, LibrariesSubmenu,	Add	;line separator
 Menu, LibrariesSubmenu,	Add,	% TransA["Add new library file"],									F_GuiAddLibrary
+Menu, LibrariesSubmenu,	Add, % TransA["Rename library filename"],								F_RenameLibrary
 Menu, LibrariesSubmenu,	Add, % TransA["Delete existing library file"],							F_DeleteLibrary
+Menu, LibrariesSubmenu,	Add	;line separator
+Menu, LibrariesSubmenu,	Add, % TransA["Edit library header"],									F_EditLibHeader
+Menu, LibrariesSubmenu,	Add, % TransA["Show library header"],									F_ShowLibHeader
 
 Menu, HSMenu, 			Add, % TransA["Libraries"], 											:LibrariesSubmenu
 Menu, HSMenu, 			Add, % TransA["Clipboard Delay (F7)"], 									F_GuiHSdelay
@@ -619,17 +623,52 @@ F_RenameLibrary()
 {
 	global	;assume-global mode of operation
 	local	SelectedLibraryName := ""
-	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control.
-	if (!SelectedLibraryName) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])	;if SelectedLibraryName is empty
+	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control. v_SelectHotstringLibrary
+	if (!SelectedLibraryName) or (SelectedLibraryName = TransA["↓ Click here to select hotstring library ↓"])	;if SelectedLibraryName is empty
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to change existing library filename at first select one from drop down list."]
 		return
 	}
 	F_GuiAddLibrary(TransA["Choose new library file name:"])	;tu jestem
-	; FileMove, % ini_HADL . "\" . SelectedLibraryName, % ini_HADL . "\" . NewLibraryName
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EditLibHeader()	;button: Edit header
+F_ChangeLibNameOK()
+{
+	global	;assume-global mode of operation
+	local	SelectedLibraryName := "", key := 0
+
+	Gui, ALib: Submit, NoHide
+	if (v_NewLib == "")
+	{
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Enter a new library name"]
+		return
+	}
+	v_NewLib .= ".csv"
+	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control.
+	FileMove, % ini_HADL . "\" . SelectedLibraryName, % ini_HADL . "\" . v_NewLib
+	if (ErrorLevel)
+	{
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Something went wrong on time of file rename. Perhaps file was occupied by any process?"]
+		return
+	}
+	else
+	{
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The library"] . "`n`n" . SelectedLibraryName . "`n`n" . TransA["has been renamed to"] . "`n`n" . v_NewLib
+		if (WinExist("ahk_id" HS3GuiHwnd))
+			Gui, HS3: -Disabled
+		if (WinExist("ahk_id" HS4GuiHwnd))
+			Gui, HS4: -Disabled
+		Gui, ALib: Destroy
+		F_ValidateIniLibSections()
+		F_RefreshListOfLibraries()	; this function calls F_RefreshListOfLibraryTips() as both options are interrelated
+		F_UpdateSelHotLibDDL()
+		for key in a_Library
+			if (a_Library[key] = SubStr(SelectedLibraryName, 1, -4))
+				a_Library[key] := SubStr(v_NewLib, 1, -4)
+	}	
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EditLibHeader()
 {
 	global	;assume-global mode of operation
 	local	SelectedLibraryName := "", TheWholeFile := "", LibraryHeader := "", Xpos := 0, Ypos := 0, Wwidth := 0, Height := 0
@@ -641,7 +680,7 @@ F_EditLibHeader()	;button: Edit header
 	,		MaxButtonWidth		:= 0
 
 	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control.
-	if (!SelectedLibraryName) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])	;if SelectedLibraryName is empty
+	if (!SelectedLibraryName) or (SelectedLibraryName = TransA["↓ Click here to select hotstring library ↓"])	;if SelectedLibraryName is empty
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to edit library header please at first select library name from drop down list."]
 		return
@@ -683,7 +722,7 @@ LHB_Button_Save()
 	local	SelectedLibraryName := "", TheWholeFile := "", LibraryHeader := "", LibFileBody := ""
 
 	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control.
-	if (!SelectedLibraryName) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])	;if SelectedLibraryName is empty
+	if (!SelectedLibraryName) or (SelectedLibraryName = TransA["↓ Click here to select hotstring library ↓"])	;if SelectedLibraryName is empty
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to edit library header please at first select library name from drop down list."]
 		return
@@ -730,7 +769,7 @@ F_ShowLibHeader()	;button: Show header
 	local	SelectedLibraryName := "", TheWholeFile := "", LibraryHeader := ""
 
 	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control.
-	if (!SelectedLibraryName) or or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])	;if SelectedLibraryName is empty
+	if (!SelectedLibraryName) or (SelectedLibraryName = TransA["↓ Click here to select hotstring library ↓"])	;if SelectedLibraryName is empty
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to display library header please at first select library name from drop down list."]
 		return
@@ -9274,7 +9313,11 @@ F_GuiAddLibrary(TextString*)
 	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdText2
 	vTempWidth += v_OutVarTemp1W
 	
-	Gui, ALib: Add, Button, HwndIdButt1 Default gF_ALibOK, 	% TransA["OK"]
+	Switch TextString[1]
+	{
+		Case "": Gui, ALib: Add, Button, HwndIdButt1 Default gF_ALibOK, 			% TransA["OK"]
+		Default: Gui, ALib: Add, Button, HwndIdButt1 Default gF_ChangeLibNameOK, 	% TransA["OK"]
+	}
 	Gui, ALib: Add, Button, HwndIdButt2 gALibGuiClose, 		% TransA["Cancel"]
 	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdButt1
 	GuiControlGet, v_OutVarTemp2, ALib: Pos, % IdButt2
@@ -10842,7 +10885,6 @@ F_LoadHotstringsFromLibraries()
 	, a_Hotstring				:= []
 	, a_Comment 				:= []
 	, a_Combined				:= []
-	; , a_Gain					:= []
 	
 ; Prepare TrayTip message taking into account value of command line parameter.
 	if (v_Param == "l")
@@ -11107,7 +11149,6 @@ Active triggerstring tips styling							= Active triggerstring tips styling
 Actually the ""Libraries"" folder is already located in default location, so it won't be moved. = Actually the ""Libraries"" folder is already located in default location, so it won't be moved.
 Add comment (optional) 									= Add comment (optional)
 Add / Edit hotstring (F9) 								= Add / Edit hotstring (F9)
-Add library 											= Add library
 Add new library file									= Add new library file
 Add to Autostart										= Add to Autostart
 After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder into memory? = After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder into memory?
@@ -11194,7 +11235,6 @@ custom												= custom
 Dark													= Dark
 default 												= default
 Default mode											= Default mode
-Del library											= Del library
 Delete existing library file								= Delete existing library file
 Delete hotstring (F8) 									= Delete hotstring (F8)
 Deleting hotstring... 									= Deleting hotstring...
@@ -11214,7 +11254,6 @@ doesn't exist in application folder						= doesn't exist in application folder
 Download repository version								= Download repository version
 Downloading public library files							= Downloading public library files
 Dynamic hotstrings 										= &Dynamic hotstrings
-Edit header											= Edit header
 Edit library header										= Edit library header
 Edit Hotstrings 										= Edit Hotstrings
 Enable												= Enable
@@ -11225,6 +11264,7 @@ Enable/disable triggerstring tips 							= Enable/disable triggerstring tips
 Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 4th edition of this application, 2021 by Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
 Enter 												= Enter 
 Enter a name for the new library 							= Enter a name for the new library
+Enter a new library name									= Enter a new library name
 Enter hotstring 										= Enter hotstring
 Enter triggerstring										= Enter triggerstring
 Triggerstring cannot be empty  if you wish to add new hotstring	= Triggerstring cannot be empty  if you wish to add new hotstring
@@ -11254,6 +11294,7 @@ gray													= gray
 green												= green
 has been created. 										= has been created.
 has been downloaded to the location						= has been downloaded to the location
+has been renamed to										= has been renamed to
 have to be escaped in the following form:					= have to be escaped in the following form:
 Header of library										= Header of library
 Help: AutoHotkey Hotstrings reference guide					= Help: AutoHotkey Hotstrings reference guide
@@ -11398,6 +11439,7 @@ red													= red
 Reload												= Reload
 Reload in default mode									= Reload in default mode
 Reload in silent mode									= Reload in silent mode
+Rename library filename									= Rename library filename
 Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
 Repository version										= Repository version
 Required encoding: UTF-8 with BOM. Application will exit now.	= Required encoding: UTF-8 with BOM. Application will exit now.
@@ -11439,9 +11481,9 @@ Set parameters of menu sound								= Set parameters of menu sound
 Set parameters of triggerstring sound						= Set parameters of triggerstring sound
 Shortcut (hotkey) definition								= Shortcut (hotkey) definition
 Shortcut (hotkey) definitions								= Shortcut (hotkey) definitions
-Show header											= Show header
 Show intro											= Show intro
 Show Introduction window after application is restarted?		= Show Introduction window after application is restarted?
+Show library header										= Show library header
 Show Sandbox											= Show Sandbox
 Events: signaling										= Events: signaling
 Silent mode											= Silent mode
@@ -11452,6 +11494,7 @@ Slash / 												= Slash /
 Something went wrong during hotstring setup					= Something went wrong during hotstring setup
 Something went wrong on time of file removal.				= Something went wrong on time of file removal.
 Something went wrong on time of library file selection or you've cancelled. = Something went wrong on time of library file selection or you've cancelled.
+Something went wrong on time of file rename. Perhaps file was occupied by any process? = Something went wrong on time of file rename. Perhaps file was occupied by any process?
 Something went wrong on time of moving Config.ini file. This operation is aborted. = Something went wrong on time of moving Config.ini file. This operation is aborted.
 Something went wrong with disabling of existing hotstring		= Something went wrong with disabling of existing hotstring
 Something went wrong with enabling of existing hotstring		= Something went wrong with enabling of existing hotstring
@@ -12005,13 +12048,11 @@ F_GuiHS4_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, % EnDis, % IdEdit9b
 	GuiControl, % EnDis, % IdText6b
 	GuiControl, % EnDis, % IdTextInfo15b
-	GuiControl, % EnDis, % IdButton1b
 	GuiControl, % EnDis, % IdDDL2b
 	GuiControl, % EnDis, % IdButton2b
 	GuiControl, % EnDis, % IdButton3b
 	GuiControl, % EnDis, % IdButton4b
 	GuiControl, % EnDis, % IdButton5b
-	GuiControl, % EnDis, % IdButton6B
 	GuiControl, % EnDis, % IdText10b
 	GuiControl, % EnDis, % IdTextInfo17b
 	GuiControl, % EnDis, % IdEdit10b
@@ -12141,8 +12182,6 @@ F_GuiHS4_CreateObject()
 	GuiControl +g, % IdTextInfo15b, % TI_SelectHotstringLib
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 	HS4: Add, 	Button, 		x0 y0 HwndIdButton1b gF_GuiAddLibrary, 						% TransA["Add library"]
-	Gui, 	HS4: Add, 	Button, 		x0 y0 HwndIdButton6b gF_DelLibByButton,						% TransA["Del library"]
 	Gui,		HS4: Add,		DropDownList,	x0 y0 HwndIdDDL2b vv_SelectHotstringLibrary gF_SelectLibrary Sort
 	
 	Gui, 	HS4: Add,		Button, 		x0 y0 HwndIdButton2b gF_AddHotstring,						% TransA["Add / Edit hotstring (F9)"]
@@ -12235,13 +12274,11 @@ F_GuiMain_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, % EnDis, % IdEdit9
 	GuiControl, % EnDis, % IdText6
 	GuiControl, % EnDis, % IdTextInfo15
-	GuiControl, % EnDis, % IdButton1
 	GuiControl, % EnDis, % IdDDL2
 	GuiControl, % EnDis, % IdButton2
 	GuiControl, % EnDis, % IdButton3
 	GuiControl, % EnDis, % IdButton4
 	GuiControl, % EnDis, % IdButton5
-	GuiControl, % EnDis, % IdButton6
 	GuiControl, % EnDis, % IdText7
 	GuiControl, % EnDis, % IdTextInfo16
 	GuiControl, % EnDis, % IdText2
@@ -12383,9 +12420,6 @@ F_GuiMain_CreateObject()
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton7 gF_EditLibHeader,						% TransA["Edit header"]
-	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton1 gF_GuiAddLibrary, 						% TransA["Add library"]
-	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton6 gF_DelLibByButton, 						% TransA["Del library"]
 	Gui,			HS3: Add,			DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SelectLibrary Sort
 	
 	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton2 gF_AddHotstring,						% TransA["Add / Edit hotstring (F9)"]
@@ -12438,7 +12472,7 @@ F_GuiMain_DefineConstants()
 	HofText			:= v_OutVarTempH
 	GuiControlGet, v_OutVarTemp, Pos, % IdEdit1
 	HofEdit			:= v_OutVarTempH
-	GuiControlGet, v_OutVarTemp, Pos, % IdButton1
+	GuiControlGet, v_OutVarTemp, Pos, % IdButton5
 	HofButton			:= v_OutVarTempH
 	GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 	HofListView		:= v_OutVarTempH
@@ -12744,25 +12778,15 @@ F_GuiHS4_DetermineConstraints()
 ,	v_yNext += HofText
 ,	v_wNext := LeftColumnW - 2 * c_xmarg
 	GuiControl, Move, % IdEdit9b, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
-;5.1.6. Select hotstring library 	
+;5.1.6. Select hotstring library
 	v_yNext += HofEdit + c_ymarg
 ,	v_xNext := c_xmarg
 	GuiControl, Move, % IdText6b, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp1, Pos, % IdText6b
 	v_xNext += v_OutVarTemp1W + c_xmarg
 	GuiControl, Move, % IdTextInfo15b, % "x" . v_xNext . "y" . v_yNext
-	GuiControlGet, v_OutVarTemp2, Pos, % IdButton1b
-	v_OutVarTemp := LeftColumnW - (v_OutVarTemp1W + v_OutVarTemp2W + c_xmarg)
-,	v_xNext := v_OutVarTemp1W + v_OutVarTemp
-,	v_wNext := v_OutVarTemp2W
-	GuiControl, Move, % IdButton1b, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext ;Add library button
 
-	GuiControlGet, v_OutVarTemp1, Pos, % IdButton1b	;Add library button
-	GuiControlGet, v_OutVarTemp2, Pos, % IdButton6b	;Del library button
-	v_xNext := v_OutVarTemp1X - (c_xmarg + v_OutVarTemp2W) ; ,	v_wNext := v_OutVarTemp2W	
-	GuiControl, Move, % IdButton6b, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext ;Del library button
-
-	v_yNext += HofButton
+	v_yNext += HofText
 ,	v_xNext := c_xmarg
 ,	v_wNext := LeftColumnW - v_xNext - c_xmarg
 	GuiControl, Move, % IdDDL2b, % "x" v_xNext "y" v_yNext "w" . v_wNext
@@ -13084,22 +13108,8 @@ F_GuiMain_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp1, Pos, % IdText6
 	v_xNext += v_OutVarTemp1W + c_xmarg
 	GuiControl, Move, % IdTextInfo15, % "x" . v_xNext . "y" . v_yNext
-	GuiControlGet, v_OutVarTemp2, Pos, % IdButton1
-	v_OutVarTemp := LeftColumnW - (v_OutVarTemp1W + v_OutVarTemp2W + c_xmarg)
-,	v_xNext := v_OutVarTemp1W + v_OutVarTemp
-,	v_wNext := v_OutVarTemp2W
-	GuiControl, Move, % IdButton1, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext ;Add library button
 
-	GuiControlGet, v_OutVarTemp1, Pos, % IdButton1	;Add library button
-	GuiControlGet, v_OutVarTemp2, Pos, % IdButton6	;Del library button
-	v_xNext := v_OutVarTemp1X - (c_xmarg + v_OutVarTemp2W)
-	GuiControl, Move, % IdButton6, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext ;Del library button
-	GuiControlGet, v_OutVarTemp1, Pos, % IdButton6	
-	GuiControlGet, v_OutVarTemp2, Pos, % IdButton7	;Show header button
-	v_xNext := v_OutVarTemp1X - (v_OutVarTemp2W)
-	GuiControl, Move, % IdButton7, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext ;Del library button
-
-	v_yNext += HofButton
+	v_yNext += HofText
 ,	v_xNext := c_xmarg
 ,	v_wNext := LeftColumnW - v_xNext - c_xmarg
 	GuiControl, Move, % IdDDL2, % "x" v_xNext "y" v_yNext "w" . v_wNext
