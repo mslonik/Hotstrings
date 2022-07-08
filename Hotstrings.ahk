@@ -8714,12 +8714,13 @@ F_Clear()
 F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs ;tu jestem
 {
 	global	;assume-global mode
-	local NoOnTheList := 0, v_Temp1 := "", SourceLibrary := v_SelectHotstringLibrary, DestinationLibrary := ""
+	local NoOnTheList := 0, v_Temp1 := "", SourceLibrary := "", DestinationLibrary := "", SearchedTriggerstring := ""
 		,txt := "", txt1 := "", txt2 := "", txt3 := "", txt4 := "", txt5 := "", txt6 := ""
 		,v_Triggerstring := "", v_TriggOpt := "", v_OutFun := "", v_EnDis := "", v_Hotstring := "", v_Comment := ""
 		,WhichRow := 0
 
 	Gui, HS3Search:	+Disabled
+	Gui, HS3:			+Disabled
 	Gui, MoveLibs: 	Default
 	Gui, MoveLibs: 	Submit, NoHide
 	NoOnTheList := LV_GetNext()
@@ -8729,19 +8730,31 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs ;t
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
 		return
 	}
-	Gui, HS3Search:	-Disabled
+	; Gui, HS3Search:	-Disabled
+	Gui, HS3:			-Disabled
 	Gui, MoveLibs: 	Destroy
+	GuiControlGet, SourceLibrary, , % IdDDL2
 
-	Gui, HS3Search:	Default
+	; Gui, HS3Search:	Default
+	; WhichRow := LV_GetNext(, "Focused")
+	; LV_GetText(v_Triggerstring, 	WhichRow, 2)
+	; LV_GetText(v_TriggOpt, 		WhichRow, 3)
+	; LV_GetText(v_OutFun, 		WhichRow, 4)
+	; LV_GetText(v_EnDis, 		WhichRow, 5)
+	; LV_GetText(v_Hotstring, 		WhichRow, 6)
+	; LV_GetText(v_Comment, 		WhichRow, 7)
+
+	; Gui, HS3Search: 	Hide	
+
+	Gui, HS3:	Default
 	WhichRow := LV_GetNext(, "Focused")
-	LV_GetText(v_Triggerstring, 	WhichRow, 2)
-	LV_GetText(v_TriggOpt, 		WhichRow, 3)
-	LV_GetText(v_OutFun, 		WhichRow, 4)
-	LV_GetText(v_EnDis, 		WhichRow, 5)
-	LV_GetText(v_Hotstring, 		WhichRow, 6)
-	LV_GetText(v_Comment, 		WhichRow, 7)
+	LV_GetText(v_Triggerstring, 	WhichRow, 1)
+	LV_GetText(v_TriggOpt, 		WhichRow, 2)
+	LV_GetText(v_OutFun, 		WhichRow, 3)
+	LV_GetText(v_EnDis, 		WhichRow, 4)
+	LV_GetText(v_Hotstring, 		WhichRow, 5)
+	LV_GetText(v_Comment, 		WhichRow, 6)
 
-	Gui, HS3Search: 	Hide	
 	GuiControl, ChooseString, % IdDDL2, % DestinationLibrary
 	Gui, HS3: 		Submit, NoHide	;this line is necessary to v_SelectHotstringLibrary <- DestinationLibrary
 	F_SelectLibrary()	;DestinationLibrary 
@@ -8760,7 +8773,7 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs ;t
 			}
 			IfMsgBox, No
 			{
-				Gui, HS3Search:	+Disabled
+				; Gui, HS3Search:	+Disabled
 				Gui, HS3:			-Disabled
 				Gui, HS3:			Default
 				return
@@ -8809,9 +8822,21 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs ;t
 		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
 	}
 	FileAppend, % txt, % ini_HADL . "\" . SourceLibrary, UTF-8
-	F_Clear()
+	; F_Clear()
 	F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
-	F_Searching("ReloadAndView")
+	; F_Searching("ReloadAndView")
+	GuiControl, ChooseString, % IdDDL2, % DestinationLibrary
+	Gui, HS3: 		Submit, NoHide	;this line is necessary to v_SelectHotstringLibrary <- DestinationLibrary
+	F_SelectLibrary()	;DestinationLibrary 
+	Loop, % LV_GetCount()
+	{
+		LV_GetText(v_SearchedTriggerString, A_Index, 1)
+		if (v_SearchedTriggerString == v_Triggerstring)
+		{
+			LV_Modify(A_Index, "Vis +Select +Focus")
+			break
+		}
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiMoveLibs_CreateDetermine()
@@ -8907,7 +8932,7 @@ F_MoveList()
 	Gui, MoveLibs: Show, % "AutoSize" . A_Space . "X" . NewWinPosX . A_Space . "Y" . NewWinPosY . A_Space . "yCenter"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HSLV2() ;load content of chosen row from Search Gui into HS3 Gui
+F_HSLV2() ;load content of chosen row from Search Gui into HS3 Gui ;tu jesem: zrobic Critical jak w F_HSLV
 {
 	global	;assume-global mode
 	local v_SelectedRow2 := 0, v_Library := "", v_Triggerstring := "", v_SearchedTriggerString := ""
