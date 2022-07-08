@@ -330,8 +330,11 @@ Gui, 	HS3: Menu, HSMenu
 Gui, 	HS4: Menu, HSMenu
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Menu / Context menus - - - - - - - - - - - - - - - - - -
+Menu,	ListView1_ContextMenu, Add, % TransA["Show library header"],							F_ShowLibHeader
+Menu,	ListView1_ContextMenu, Add, % TransA["Edit library header"],							F_EditLibHeader
+Menu,	ListView1_ContextMenu, Add
 Menu,	ListView1_ContextMenu, Add, % TransA["Move definition to another library"],				F_MoveList
-
+Menu,	ListView1_ContextMenu, Add, % TransA["Delete selected definition"],						F_DeleteHotstring
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Menu / Context menus - - - - - - - - - - - - - - - - - -
 F_MenuLogEnDis()	;Position in Menu about loging
 F_GuiAbout_CreateObjects()
@@ -9446,6 +9449,7 @@ F_DeleteHotstring()
 			,v_SelectedRow := 0, v_Pointer := 0, index := 0
 			,key := 0, val := "", options := "", triggerstring := "", EnDis := "", hotstring := ""
 	
+	Gui, HS3: Default
 	Gui, HS3: +OwnDialogs
 	
 	v_SelectedRow := LV_GetNext()
@@ -11218,6 +11222,7 @@ default 												= default
 Default mode											= Default mode
 Delete existing library file								= Delete existing library file
 Delete hotstring (F8) 									= Delete hotstring (F8)
+Delete selected definition								= Delete selected definition
 Deleting hotstring... 									= Deleting hotstring...
 Deleting hotstring. Please wait... 						= Deleting hotstring. Please wait...
 Disable 												= Disable
@@ -12140,13 +12145,13 @@ F_GuiHS4_CreateObject()
 	GuiControl +g, % IdTextInfo13b, % TI_EnterHotstring
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit2b vv_EnterHotstring
-	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit3b vv_EnterHotstring1  Disabled
-	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit4b vv_EnterHotstring2  Disabled
-	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit5b vv_EnterHotstring3  Disabled
-	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit6b vv_EnterHotstring4  Disabled
-	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit7b vv_EnterHotstring5  Disabled
-	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit8b vv_EnterHotstring6  Disabled
+	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit2b vv_EnterHotstring r2
+	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit3b vv_EnterHotstring1  r2 Disabled
+	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit4b vv_EnterHotstring2  r2 Disabled
+	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit5b vv_EnterHotstring3  r2 Disabled
+	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit6b vv_EnterHotstring4  r2 Disabled
+	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit7b vv_EnterHotstring5  r2 Disabled
+	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit8b vv_EnterHotstring6  r2 Disabled
 	
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText5b,				 						% TransA["Add comment (optional)"]
@@ -12759,7 +12764,7 @@ F_GuiHS4_DetermineConstraints()
 	v_yNext += HofEdit
 	GuiControl, Move, % IdEdit8b, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 ;5.1.5. Add comment (optional)	
-	v_yNext += HofEdit + c_ymarg
+	v_yNext += HofEdit * 2 + c_ymarg
 ,	v_xNext := c_xmarg
 	GuiControl, Move, % IdText5b, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp1, Pos, % IdText5b
@@ -13082,7 +13087,7 @@ F_GuiMain_DetermineConstraints()
 	v_yNext += HofEdit
 	GuiControl, Move, % IdEdit8, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 ;5.1.5. Add comment (optional)	
-	v_yNext += HofEdit + c_ymarg
+	v_yNext += HofEdit * 2 + c_ymarg
 ,	v_xNext := c_xmarg
 	GuiControl, Move, % IdText5, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp1, Pos, % IdText5
