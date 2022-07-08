@@ -8898,7 +8898,21 @@ F_MoveList()
 	Gui, MoveLibs: Show, % "AutoSize" . A_Space . "X" . NewWinPosX . A_Space . "Y" . NewWinPosY . A_Space . "yCenter"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HSLV2() ;load content of chosen row from Search Gui into HS3 Gui
+F_HSLV2() ; copy content of List View 1 to editable fields of HS3 Gui
+{
+	Critical, On
+	; OutputDebug, % "A_ThisFunc:" . A_Space . A_ThisFunc . A_Tab . "A_GuiEvent:" . A_Space . A_GuiEvent . A_Tab . "A_GuiControl:" . A_Space . A_GuiControl . A_Tab . "A_EventInfo:" . A_Space . A_EventInfo . A_Tab . "ErrorLevel:" . A_Space . ErrorLevel . "`n"
+	Switch A_GuiEvent
+	{
+		Default:
+			Critical, Off
+			return
+		Case "Normal":		LV2_CopyContentToHS3LV()
+	}
+	Critical, Off
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+LV2_CopyContentToHS3LV() ;load content of chosen row from Search Gui into HS3 Gui
 {
 	global	;assume-global mode
 	local SelectedRow := 0, Library := "", Triggerstring := "", SearchedTriggerString := "", SelectHotstringLibrary := ""
@@ -9084,7 +9098,7 @@ F_GuiSearch_DetermineConstraints()
 			v_wNext := HS4_GuiWidth * 2 - 2 * c_ymarg
 			v_hNext := HS4_GuiHeight - (c_ymarg + HofText + v_OutVarTemp + c_ymarg + HofText * 2)
 	}
-	OutputDebug, % "v_wNext:" . A_Space . v_wNext . A_Space . "v_hNext" . v_wNext . "`n"
+	; OutputDebug, % "v_wNext:" . A_Space . v_wNext . A_Space . "v_hNext:" . A_Space . v_wNext . "`n"
 	GuiControl, MoveDraw, % IdSearchLV1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
 	
 	Gui, HS3Search: Default	;in order to enable LV_ModifyCol
