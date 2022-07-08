@@ -329,8 +329,10 @@ Menu, 	HSMenu, 		Add, % TransA["About / Help"], 										:AboutHelpSub
 Gui, 	HS3: Menu, HSMenu
 Gui, 	HS4: Menu, HSMenu
 
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Menu / Context menus - - - - - - - - - - - - - - - - - -
 Menu,	ListView1_ContextMenu, Add, % TransA["Move definition to another library"],				F_MoveList
 
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Menu / Context menus - - - - - - - - - - - - - - - - - -
 F_MenuLogEnDis()	;Position in Menu about loging
 F_GuiAbout_CreateObjects()
 F_GuiAbout_DetermineConstraints()
@@ -2304,7 +2306,6 @@ HS3SearchGuiEscape() ; Gui event!
 		Gui, HS3Search:	+Disabled
 		Gui, HS3: -Disabled
 		GuiControl, Focus, % IdListView1
-		; Gui, HS3: Show
 	}
 	if (WinExist("ahk_id" HS4GuiHwnd))
 		Gui, HS4: -Disabled		
@@ -8711,7 +8712,7 @@ F_Clear()
 	GuiControl, HS4: ChooseString, % IdDDL2b, % TransA["↓ Click here to select hotstring library ↓"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs ;tu jestem
+F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 {
 	global	;assume-global mode
 	local NoOnTheList := 0, v_Temp1 := "", SourceLibrary := "", DestinationLibrary := "", SearchedTriggerstring := ""
@@ -8730,23 +8731,11 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs ;t
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
 		return
 	}
-	; Gui, HS3Search:	-Disabled
 	Gui, HS3:			-Disabled
 	Gui, MoveLibs: 	Destroy
 	GuiControlGet, SourceLibrary, , % IdDDL2
 
-	; Gui, HS3Search:	Default
-	; WhichRow := LV_GetNext(, "Focused")
-	; LV_GetText(v_Triggerstring, 	WhichRow, 2)
-	; LV_GetText(v_TriggOpt, 		WhichRow, 3)
-	; LV_GetText(v_OutFun, 		WhichRow, 4)
-	; LV_GetText(v_EnDis, 		WhichRow, 5)
-	; LV_GetText(v_Hotstring, 		WhichRow, 6)
-	; LV_GetText(v_Comment, 		WhichRow, 7)
-
-	; Gui, HS3Search: 	Hide	
-
-	Gui, HS3:	Default
+	Gui, HS3:			Default
 	WhichRow := LV_GetNext(, "Focused")
 	LV_GetText(v_Triggerstring, 	WhichRow, 1)
 	LV_GetText(v_TriggOpt, 		WhichRow, 2)
@@ -8773,7 +8762,6 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs ;t
 			}
 			IfMsgBox, No
 			{
-				; Gui, HS3Search:	+Disabled
 				Gui, HS3:			-Disabled
 				Gui, HS3:			Default
 				return
@@ -8822,9 +8810,7 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs ;t
 		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"
 	}
 	FileAppend, % txt, % ini_HADL . "\" . SourceLibrary, UTF-8
-	; F_Clear()
 	F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
-	; F_Searching("ReloadAndView")
 	GuiControl, ChooseString, % IdDDL2, % DestinationLibrary
 	Gui, HS3: 		Submit, NoHide	;this line is necessary to v_SelectHotstringLibrary <- DestinationLibrary
 	F_SelectLibrary()	;DestinationLibrary 
@@ -8899,7 +8885,6 @@ F_MoveList()
 			,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 			,NewWinPosX := 0, NewWinPosY := 0
 	
-	; Gui, HS3Search: Submit, NoHide 
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	F_GuiMoveLibs_CreateDetermine()
 	Gui, MoveLibs: Show, Hide
@@ -8910,58 +8895,36 @@ F_MoveList()
 	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
 	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
 	
-	; Gui, HS3Search: Default
-	; v_SelectedRow := LV_GetNext()	;this variable now contains row number of source table
-	; if !(v_SelectedRow) 
-	; {
-		; MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
-		; if (WinExist("ahk_id" MoveLibsHwnd))
-			; Gui, HS3: -Disabled
-		; return
-	; }
-	;The following lines will be used by "next function": Move, moving of (triggerstrin, hotstring) definition between libraries.
-	; LV_GetText(v_SourceLibrary,	v_SelectedRow, 1)
-	; v_SourceLibrary .= ".csv"
-	; LV_GetText(v_Triggerstring, 	v_SelectedRow, 2)
-	; LV_GetText(v_TriggOpt,		v_SelectedRow, 3)
-	; LV_GetText(v_OutFun,		v_SelectedRow, 4)
-	; LV_GetText(v_EnDis,			v_SelectedRow, 5)
-	; LV_GetText(v_Hotstring,		v_SelectedRow, 6)
-	; LV_GetText(v_Comment,		v_SelectedRow, 7)
-	
 	Gui, MoveLibs: Show, % "AutoSize" . A_Space . "X" . NewWinPosX . A_Space . "Y" . NewWinPosY . A_Space . "yCenter"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HSLV2() ;load content of chosen row from Search Gui into HS3 Gui ;tu jesem: zrobic Critical jak w F_HSLV
+F_HSLV2() ;load content of chosen row from Search Gui into HS3 Gui
 {
 	global	;assume-global mode
-	local v_SelectedRow2 := 0, v_Library := "", v_Triggerstring := "", v_SearchedTriggerString := ""
-	static v_PreviousSelectedRow2 := 0
-;The following lines protect from refreshing of ListView if user chooses the same row couple of times.
-	v_PreviousSelectedRow2 	:= v_SelectedRow2
-,	v_SelectedRow2 		:= LV_GetNext()
-	if (!v_SelectedRow2) ;if empty
-		return
-	if (v_PreviousSelectedRow2 == v_SelectedRow2) ;if the same
-		return
+	local SelectedRow := 0, Library := "", Triggerstring := "", SearchedTriggerString := "", SelectHotstringLibrary := ""
 	
-	LV_GetText(v_Library, 		v_SelectedRow2, 1)
-	LV_GetText(v_Triggerstring, 	v_SelectedRow2, 2)
+	SelectedRow 		:= LV_GetNext()
+	LV_GetText(Library, 		SelectedRow, 1)
+	LV_GetText(Triggerstring, 	SelectedRow, 2)
 	
-	v_SelectHotstringLibrary := % v_Library . ".csv"
-	GuiControl, Choose, % IdDDL2, % v_SelectHotstringLibrary
+	SelectHotstringLibrary := % Library . ".csv"
+	GuiControl, Choose, % IdDDL2, % SelectHotstringLibrary
+	Gui, HS3: 		Submit, NoHide	;this line is necessary to v_SelectHotstringLibrary <- SelectHotstringLibrary
 	F_SelectLibrary()
 	
-	v_SearchedTriggerString := v_Triggerstring
+	SearchedTriggerString := Triggerstring
 	Loop
 	{
-		LV_GetText(v_Triggerstring, A_Index, 1)
-		if (v_Triggerstring == v_SearchedTriggerString)
+		LV_GetText(Triggerstring, A_Index, 1)
+		if (Triggerstring == SearchedTriggerString)
 		{
 			LV_Modify(A_Index, "Vis +Select +Focus")
 			break
 		}
 	}
+	Gui, HS3: 		-Disabled
+	Gui, HS3Search:	Hide
+	GuiControl, Focus, % IdListView1
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SearchPhrase()
@@ -9028,26 +8991,6 @@ F_Searching(ReloadListView*)
 	F_GuiSearch_DetermineConstraints()
 	Switch ReloadListView[1]
 	{
-		Case "ReloadAndView": ;<- F_Move()
-			Gui, HS3Search: Default
-			GuiControl, % "Count" . a_Library.MaxIndex() . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
-			LV_Delete()
-			Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
-				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
-			GuiControl, , % IdSearchE1		;start with always blanked search edit field
-			GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
-			Switch v_RadioGroup
-			{
-				Case 1: LV_ModifyCol(2, "Sort") ;by default: triggerstring
-				Case 2: LV_ModifyCol(6, "Sort")
-				Case 3: LV_ModifyCol(1, "Sort")
-			}	
-			if (WinExist("ahk_id" HS3GuiHwnd))
-				WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS3GuiHwnd
-			if (WinExist("ahk_id" HS4GuiHwnd))
-				WinGetPos, Window1X, Window1Y, Window1W, Window1H, % "ahk_id" . HS4GuiHwnd
-			Gui, HS3Search: Show, % "x" . Window1X + 2 * c_xmarg . A_Space . "y" . Window1Y + 2 * c_ymarg
-		
 		Case "Reload":	;<- F_DeleteHotstring()
 			Gui, HS3Search: Default
 			GuiControl, % "Count" . a_Library.MaxIndex() . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
@@ -9081,7 +9024,6 @@ F_GuiSearch_CreateObject()
 	
 	;1. Prepare Gui general parameters
 	Gui, HS3Search: New, 	+Resize +HwndHS3SearchHwnd +Owner, % TransA["Search Hotstrings"]
-	; Gui, HS3Search: New, 	% "+Resize +HwndHS3SearchHwnd +Owner +MinSize" HS3MinWidth + 3 * c_xmarg "x" HS3MinHeight, % TransA["Search Hotstrings"]
 	Gui, HS3Search: Margin,	% c_xmarg, % c_ymarg
 	Gui,	HS3Search: Color,	% c_WindowColor, % c_ControlColor
 	
@@ -9094,9 +9036,9 @@ F_GuiSearch_CreateObject()
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR1 vv_RadioGroup gF_SearchPhrase Checked, % TransA["Triggerstring"]
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR2 gF_SearchPhrase, 					% TransA["Hotstring"]
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR3 gF_SearchPhrase, 					% TransA["Library"]
-	Gui, HS3Search: Add, Button, 		x0 y0 HwndIdSearchB1 gF_MoveList Default,				% TransA["Move (F8)"]
 	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 gF_HSLV2 +AltSubmit Grid -Multi,		% TransA["Library|Triggerstring|Trigger Options|Output Function|Enable/Disable|Hotstring|Comment"]
-	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT4, 								% TransA["F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries"]
+	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT4, 								% TransA["F3 or Esc: Close Search hotstrings | Enter: Select definition and close"]
+	Gui, HS3Search: Add, Button, 		Hidden Default gF_HSLV2	;trick to catch if user presses Enter on ListView
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiSearch_DetermineConstraints()
@@ -9158,12 +9100,6 @@ F_GuiSearch_DetermineConstraints()
 	v_xNext 	:= c_xmarg
 ,	v_yNext 	:= v_OutVarTempY + v_OutVarTempH + c_ymarg
 	GuiControl, Move, % IdSearchT4, % "x" v_xNext "y" v_yNext ;information about shortcuts
-	
-	GuiControlGet, v_OutVarTemp, Pos, % IdSearchB1
-	v_ButtonW := v_OutVarTempW + 2 * c_ymarg
-,	v_xNext 	:= HS3MinWidth + c_xmarg - v_ButtonW
-,	v_yNext 	-= c_ymarg
-	GuiControl, Move, % IdSearchB1, % "x" v_xNext "y" v_yNext "w" v_ButtonW
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS3SearchGuiSize()
@@ -9195,10 +9131,10 @@ HS3SearchGuiSize()
 	v_yNext := v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
 	GuiControl, MoveDraw, % IdSearchT4, % "x" v_xNext "y" v_yNext ;information about shortcuts
 	
-	GuiControlGet, v_OutVarTemp1, Pos, % IdSearchB1
-	v_xNext := HS3MinWidth + c_xmarg - v_OutVarTemp1W
-	v_yNext -= c_ymarg
-	GuiControl, MoveDraw, % IdSearchB1, % "x" v_xNext "y" v_yNext 
+	; GuiControlGet, v_OutVarTemp1, Pos, % IdSearchB1
+	; v_xNext := HS3MinWidth + c_xmarg - v_OutVarTemp1W
+	; v_yNext -= c_ymarg
+	; GuiControl, MoveDraw, % IdSearchB1, % "x" v_xNext "y" v_yNext 
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_RestoreDefaultConfig()
@@ -11312,7 +11248,7 @@ Export to .ahk with static definitions of hotstrings			= Export to .ahk with sta
 Export to .ahk with dynamic definitions of hotstrings			= Export to .ahk with dynamic definitions of hotstrings
 Exported												= Exported
 Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries = Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries
-F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries = F3 or Esc: Close Search hotstrings | F8: Move hotstring between libraries
+F3 or Esc: Close Search hotstrings | Enter: Select definition and close = F3 or Esc: Close Search hotstrings | Enter: Select definition and close
 file! 												= file!
 file in Languages subfolder!								= file in Languages subfolder!
 file is now created in the following subfolder:				= file is now created in the following subfolder:
@@ -11385,7 +11321,7 @@ Libraries folder: move it to new location					= Libraries folder: move it to new
 Libraries folder: restore it to default location				= Libraries folder: restore it to default location
 Libraries 											= &Libraries
 Libraries folder:										= Libraries folder:
-Library content (F2)									= Library content (F2)
+Library content (F2, context menu)							= Library content (F2, context menu)
 Library 												= Library
 Library name:											= Library name:
 Library export. Please wait... 							= Library export. Please wait...
@@ -12460,7 +12396,7 @@ F_GuiMain_CreateObject()
 	Gui,			HS3: Add,			Button,		x0 y0 HwndIdButton5 gF_ToggleRightColumn,					⯇`nF4
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText7,		 								% TransA["Library content (F2)"]
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText7,		 								% TransA["Library content (F2, context menu)"]
 	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2	
 	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo16,									ⓘ
 	TI_LibraryContent		:= func("F_ShowLongTooltip").bind(TransA["TI_LibraryContent"])
