@@ -9545,39 +9545,47 @@ F_DeleteHotstring()
 	F_Searching("Reload")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui 
+F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui ;tu jestem
 {
 	global ;assume-global mode
 	local WinX := 0, WinY := 0, OutputvarTemp := 0, OutputvarTempW := 0
 	
+	; Switch A_DefaultGui
+	; {
+		; Case "HS3": F_GuiMain_Redraw(true)
+		; Case "HS4": F_GuiHS4_Redraw(true)
+	; }
+
 	Switch A_DefaultGui
 	{
 		Case "HS3":
-		WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
-		Gui, HS3: Submit, NoHide
-		Gui, HS4: Default
-		F_UpdateSelHotLibDDL()
-		GuiControl,, % IdEdit1b, % v_Triggerstring
-		GuiControl,, % IdEdit2b, % v_EnterHotstring
-		GuiControl, ChooseString, % IdDDL2b, % v_SelectHotstringLibrary
-		Gui, HS3: Show, Hide
-		Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
-		Gui, HS4: Show, AutoSize ;don't know why it has to be doubled to properly display...
-		F_HS4RadioCaseGroup(v_RadioCaseGroup)
-		ini_WhichGui := "HS4"
+			WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
+			Gui, HS3: Submit, NoHide
+			Gui, HS4: Default
+			F_UpdateSelHotLibDDL()
+			GuiControl,, % IdEdit1b, % v_Triggerstring
+			GuiControl,, % IdEdit2b, % v_EnterHotstring
+			GuiControl, ChooseString, % IdDDL2b, % v_SelectHotstringLibrary
+			Gui, HS3: Show, Hide
+			Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
+			; Gui, HS4: Show, AutoSize ;don't know why it has to be doubled to properly display...
+			F_GuiHS4_Redraw(true)
+			F_HS4RadioCaseGroup(v_RadioCaseGroup)
+			ini_WhichGui := "HS4"
 		Case "HS4":
-		WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
-		Gui, HS4: Submit, NoHide
-		Gui, HS3: Default
-		F_UpdateSelHotLibDDL()
-		GuiControl,, % IdEdit1, % v_Triggerstring
-		GuiControl,, % IdEdit2, % v_EnterHotstring
-		GuiControl, ChooseString, % IdDDL2, % v_SelectHotstringLibrary
-		Gui, HS4: Show, Hide
-		Gui, HS3: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
-		Gui, HS3: Show, AutoSize ;don't know why it has to be doubled to properly display...
-		F_HS3RadioCaseGroup(v_RadioCaseGroup)
-		ini_WhichGui := "HS3"
+			WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
+			Gui, HS4: Submit, NoHide
+			Gui, HS3: Default
+			F_UpdateSelHotLibDDL()
+			GuiControl,, % IdEdit1, % v_Triggerstring
+			GuiControl,, % IdEdit2, % v_EnterHotstring
+			GuiControl, ChooseString, % IdDDL2, % v_SelectHotstringLibrary
+			Gui, HS4: Show, Hide
+			Gui, HS3: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
+			F_GuiMain_Redraw(true)
+			; Gui, HS3: Show, AutoSize ;don't know why it has to be doubled to properly display...
+			F_HS3RadioCaseGroup(v_RadioCaseGroup)
+			ini_WhichGui := "HS3"
 	}
 	if (ini_WhichGui = "HS3")
 		Menu, ConfGUI, Check, 	% TransA["Toggle main GUI"] . "`tF4"
