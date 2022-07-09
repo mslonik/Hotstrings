@@ -9561,7 +9561,6 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui ;tu
 			GuiControl,, % IdEdit2b, % v_EnterHotstring
 			GuiControl, ChooseString, % IdDDL2b, % v_SelectHotstringLibrary
 			Gui, HS3: Show, Hide
-			; F_GuiHS4_Redraw(false)
 			Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
 			F_HS4RadioCaseGroup(v_RadioCaseGroup)
 			ini_WhichGui := "HS4"
@@ -9574,7 +9573,6 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui ;tu
 			GuiControl,, % IdEdit2, % v_EnterHotstring
 			GuiControl, ChooseString, % IdDDL2, % v_SelectHotstringLibrary
 			Gui, HS4: Show, Hide
-			; F_GuiMain_Redraw(false)
 			Gui, HS3: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
 			F_HS3RadioCaseGroup(v_RadioCaseGroup)
 			ini_WhichGui := "HS3"
@@ -12181,7 +12179,6 @@ F_GuiHS4_CreateObject()
 	
 	Gui, 	HS4: Add,		Button, 		x0 y0 HwndIdButton2b gF_AddHotstring,						% TransA["Add / Edit hotstring (F9)"]
 	Gui, 	HS4: Add, 	Button, 		x0 y0 HwndIdButton3b gF_Clear,							% TransA["Clear (F5)"]
-	Gui, 	HS4: Add, 	Button, 		x0 y0 HwndIdButton4b gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
 	
 	Gui,		HS4: Add,		Button,		x0 y0 HwndIdButton5b gF_ToggleRightColumn,					⯈`nF4
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
@@ -12419,7 +12416,7 @@ F_GuiMain_CreateObject()
 	
 	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton2 gF_AddHotstring,						% TransA["Add / Edit hotstring (F9)"]
 	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton3 gF_Clear,								% TransA["Clear (F5)"]
-	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton4 gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
+	; Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton4 gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
 	Gui,			HS3: Add,			Button,		x0 y0 HwndIdButton5 gF_ToggleRightColumn,					⯇`nF4
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
@@ -12801,18 +12798,11 @@ F_GuiHS4_DetermineConstraints()
 	
 ;5.1.7. Buttons	
 	v_yNext += HofDropDownList + c_ymarg
-	GuiControlGet, v_OutVarTemp1, Pos, % IdButton2b
-	GuiControlGet, v_OutVarTemp2, Pos, % IdButton3b
-	GuiControlGet, v_OutVarTemp3, Pos, % IdButton4b
-	GPB := (LeftColumnW - (c_xmarg + v_OutVarTemp1W + v_OutVarTemp2W + v_OutVarTemp3W + c_xmarg)) // 2 ;GPB = Gap Between Buttons
-,	v_xNext := c_xmarg
+	v_xNext := c_xmarg
 	GuiControl, Move, % IdButton2b, % "x" . v_xNext . "y" . v_yNext
-	GuiControlGet, v_OutVarTemp1, Pos, % IdButton2b
-	v_xNext += v_OutVarTemp1W + GPB
-	GuiControl, Move, % IdButton3b, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp1, Pos, % IdButton3b
-	v_xNext += v_OutVarTemp1W + GPB
-	GuiControl, Move, % IdButton4b, % "x" . v_xNext . "y" . v_yNext
+	v_xNext := LeftColumnW - (v_OutVarTemp1W + c_xmarg)
+	GuiControl, Move, % IdButton3b, % "x" . v_xNext . "y" . v_yNext
 	v_yNext += HofButton
 ,	LeftColumnH := v_yNext
 	;OutputDebug, % "LeftColumnH:" . A_Space . LeftColumnH
@@ -13127,20 +13117,12 @@ F_GuiMain_DetermineConstraints()
 	
 ;5.1.7. Buttons	
 	v_yNext += HofDropDownList + c_ymarg
-	GuiControlGet, v_OutVarTemp1, Pos, % IdButton2
-	GuiControlGet, v_OutVarTemp2, Pos, % IdButton3	;Clear button
-	GuiControlGet, v_OutVarTemp3, Pos, % IdButton4	;Delete button
-	GPB := (LeftColumnW - (c_xmarg + v_OutVarTemp1W + v_OutVarTemp2W + v_OutVarTemp3W + c_xmarg)) // 2 ;GPB = Gap Between Buttons
 ,	v_xNext := c_xmarg
 	GuiControl, Move, % IdButton2, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp1, Pos, % IdButton2
-	v_xNext += v_OutVarTemp1W + GPB
-	GuiControl, Move, % IdButton3, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp1, Pos, % IdButton3
-	; v_xNext := LeftColumnW - (v_OutVarTemp1W + c_xmarg)
-	v_xNext += v_OutVarTemp1W + GPB
-	; GuiControl, Move, % IdButton3, % "x" . v_xNext . "y" . v_yNext
-	GuiControl, Move, % IdButton4, % "x" . v_xNext . "y" . v_yNext
+	v_xNext := LeftColumnW - (v_OutVarTemp1W + c_xmarg)
+	GuiControl, Move, % IdButton3, % "x" . v_xNext . "y" . v_yNext
 	v_yNext += HofButton
 ,	LeftColumnH := v_yNext
 	;OutputDebug, % "LeftColumnH:" . A_Space . LeftColumnH
