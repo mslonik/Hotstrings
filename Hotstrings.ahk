@@ -135,10 +135,10 @@ F_InitiateTrayMenus(v_Param)
 F_GuiMain_CreateObject()
 F_GuiMain_DefineConstants()
 F_GuiMain_DetermineConstraints()
-F_GuiMain_Redraw()
+F_GuiMain_Redraw(false)
 F_GuiHS4_CreateObject()
 F_GuiHS4_DetermineConstraints()
-F_GuiHS4_Redraw()
+F_GuiHS4_Redraw(false)
 
 F_UpdateSelHotLibDDL()
 
@@ -10596,8 +10596,12 @@ F_ToggleSandbox()
 	ini_Sandbox := !(ini_Sandbox)
 	Iniwrite, %ini_Sandbox%, % ini_HADConfig, GraphicalUserInterface, Sandbox
 	
-	F_GuiMain_Redraw()
-	F_GuiHS4_Redraw()
+	F_WhichGui()
+	Switch A_DefaultGui
+	{
+		Case "HS3": F_GuiMain_Redraw(true)
+		Case "HS4": F_GuiHS4_Redraw(true)
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadGUIPos()
@@ -12468,7 +12472,7 @@ F_GuiMain_DefineConstants()
 	HofText			:= v_OutVarTempH
 	GuiControlGet, v_OutVarTemp, Pos, % IdEdit1
 	HofEdit			:= v_OutVarTempH
-	GuiControlGet, v_OutVarTemp, Pos, % IdButton5
+	GuiControlGet, v_OutVarTemp, Pos, % IdButton3	;button "Clear (F5)"
 	HofButton			:= v_OutVarTempH
 	GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 	HofListView		:= v_OutVarTempH
@@ -12552,8 +12556,8 @@ F_HS4RadioCaseGroup(v_RadioCaseGroup)
 		GuiControl, HS4: Font, % TransA["Case-Conforming"]
 	}
 }
-; ------------------------------------------------------------------------------------------------------------------------------------
-F_GuiHS4_Redraw()
+;------------------------------------------------------------------------------------------------------------------------------------
+F_GuiHS4_Redraw(IfShowGui)
 {
 	global ;assume-global mode
 	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
@@ -12562,22 +12566,22 @@ F_GuiHS4_Redraw()
 	if (ini_Sandbox)
 	{
 		v_xNext := c_xmarg
-		v_yNext := LeftColumnH + c_ymarg
-		GuiControl, Move, % IdText10b, % "x" . v_xNext . "y" . v_yNext
+,		v_yNext := LeftColumnH + c_ymarg
+		GuiControl, Move, % IdText10b, % "x" . v_xNext . "y" . v_yNext	;sandobx text
 		GuiControlGet, v_OutVarTemp, Pos, % IdText10b
 		v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
-		GuiControl, Move, % IdTextInfo17b, % "x" . v_xNext . "y" . v_yNext
+		GuiControl, Move, % IdTextInfo17b, % "x" . v_xNext . "y" . v_yNext	;i close to sandbox
 		v_xNext := c_xmarg
-		v_yNext := LeftColumnH + c_ymarg + HofText
-		v_wNext := LeftColumnW - 2 * c_ymarg
-		GuiControl, Move, % IdEdit10b, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
+,		v_yNext := LeftColumnH + HofText + c_ymarg
+,		v_wNext := LeftColumnW - 2 * c_ymarg
+		GuiControl, Move, % IdEdit10b, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext	;sandbox edit field
 		GuiControl, Show, % IdText10b
 		GuiControl, Show, % IdTextInfo17b
 		GuiControl, Show, % IdEdit10b
 		;5.2. Position of counters
 		GuiControlGet, v_OutVarTemp, Pos, % IdEdit10b
 		v_xNext := c_xmarg
-		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg 
+,		v_yNext := v_OutVarTempY + v_OutVarTempH
 		GuiControl, Move, % IdText11b,  % "x" . v_xNext . "y" . v_yNext ;text: Hotstrings
 		GuiControlGet, v_OutVarTemp, Pos, % IdText11b
 		v_xNext := v_OutVarTempX + v_OutVarTempW
@@ -12596,7 +12600,7 @@ F_GuiHS4_Redraw()
 		GuiControl, Hide, % IdEdit10b ;sandbox edit field
 		;5.3. Position of counters
 		v_xNext := c_xmarg
-		v_yNext := LeftColumnH
+,		v_yNext := LeftColumnH
 		GuiControl, Move, % IdText11b,  % "x" . v_xNext . "y" . v_yNext ;text: "This library""
 		GuiControlGet, v_OutVarTemp, Pos, % IdText11b
 		v_xNext := v_OutVarTempX + v_OutVarTempW
@@ -12611,12 +12615,15 @@ F_GuiHS4_Redraw()
 	
 	;5.2. Button between left and right column
 	v_xNext := LeftColumnW
-	v_yNext := c_ymarg
+,	v_yNext := c_ymarg
 	GuiControlGet, v_OutVarTemp, Pos, % IdText2b	; Text "Total:"
 	v_hNext := v_OutVarTempY + v_OutVarTempH - c_ymarg
-	GuiControl, Move, % IdButton5b, % "x" . v_xNext ". y" . v_yNext . "h" . v_hNext
+	GuiControl, Move, % IdButton5b, % "x" . v_xNext ". y" . v_yNext . "h" . v_hNext	;button F4
+
+	if (IfShowGui)
+		Gui, HS4: Show, AutoSize
 }
-; ------------------------------------------------------------------------------------------------------------------------------------
+;------------------------------------------------------------------------------------------------------------------------------------
 F_GuiHS4_DetermineConstraints()
 {
 	global ;assume-global mode
@@ -12763,17 +12770,18 @@ F_GuiHS4_DetermineConstraints()
 	GuiControl, Move, % IdEdit7b, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 	v_yNext += HofEdit
 	GuiControl, Move, % IdEdit8b, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
-;5.1.5. Add comment (optional)	
-	v_yNext += HofEdit * 2 + c_ymarg
+;5.1.5. Add comment (optional)
+	GuiControlGet, v_OutVarTemp1, Pos, % IdEdit8b
+	v_yNext += v_OutVarTemp1H + c_ymarg
 ,	v_xNext := c_xmarg
-	GuiControl, Move, % IdText5b, % "x" . v_xNext . "y" . v_yNext
+	GuiControl, Move, % IdText5b, % "x" . v_xNext . "y" . v_yNext	;Add comment (optional)
 	GuiControlGet, v_OutVarTemp1, Pos, % IdText5b
 	v_xNext += v_OutVarTemp1W + c_xmarg
-	GuiControl, Move, % IdTextInfo14b, % "x" . v_xNext . "y" . v_yNext
+	GuiControl, Move, % IdTextInfo14b, % "x" . v_xNext . "y" . v_yNext	;i
 	v_xNext := c_xmarg
 ,	v_yNext += HofText
 ,	v_wNext := LeftColumnW - 2 * c_xmarg
-	GuiControl, Move, % IdEdit9b, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
+	GuiControl, Move, % IdEdit9b, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext	;edit comment field
 ;5.1.6. Select hotstring library
 	v_yNext += HofEdit + c_ymarg
 ,	v_xNext := c_xmarg
@@ -12807,8 +12815,8 @@ F_GuiHS4_DetermineConstraints()
 	HS4MinWidth		:= LeftColumnW 
 ,	HS4MinHeight		:= LeftColumnH
 }
-; ------------------------------------------------------------------------------------------------------------------------------------
-F_GuiMain_Redraw()
+;------------------------------------------------------------------------------------------------------------------------------------
+F_GuiMain_Redraw(IfShowGui)
 {
 	global ;assume-global mode
 	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
@@ -12934,8 +12942,10 @@ F_GuiMain_Redraw()
 		v_hNext :=  HofText + v_OutVarTempH
 	}
 	GuiControl, Move, % IdButton5, % "x" . v_xNext . "y" . v_yNext . "h" . v_hNext
+	if (IfShowGui)
+		Gui, HS3: Show, AutoSize 
 }
-; ------------------------------------------------------------------------------------------------------------------------------------
+;------------------------------------------------------------------------------------------------------------------------------------
 F_GuiMain_DetermineConstraints()
 {
 	global ;assume-global mode
@@ -13086,8 +13096,9 @@ F_GuiMain_DetermineConstraints()
 	GuiControl, Move, % IdEdit7, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 	v_yNext += HofEdit
 	GuiControl, Move, % IdEdit8, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
-;5.1.5. Add comment (optional)	
-	v_yNext += HofEdit * 2 + c_ymarg
+;5.1.5. Add comment (optional)
+	GuiControlGet, v_OutVarTemp1, Pos, % IdEdit8
+	v_yNext += v_OutVarTemp1H + c_ymarg
 ,	v_xNext := c_xmarg
 	GuiControl, Move, % IdText5, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp1, Pos, % IdText5
