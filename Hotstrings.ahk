@@ -473,6 +473,23 @@ Critical, Off
 		return
 #if
 
+#if F_IsItEdit()
+	AppsKey::	;blocks default context menu for Edit fields
+#if
+
+F_IsItEdit()
+{
+	global
+	local ControlClass := ""
+
+	F_WhichGui()
+	GuiControlGet, ControlClass, Focus
+	if (InStr(ControlClass, "Edit"))
+		return true
+	else
+		return false
+}
+
 #if WinActive("ahk_id" MoveLibsHwnd)
 	F8:: 
 		F_Move()
@@ -8671,7 +8688,6 @@ F_Clear()
 	GuiControl, HS3:, % IdEdit8, 					;v_EnterHotstring6
 	GuiControl, HS3: Disable, % IdEdit8 			;v_EnterHotstring6
 	GuiControl, HS3:, % IdEdit9,  				;Comment
-	GuiControl, HS3: Disable, % IdButton4
 	GuiControl, HS3:, % IdEdit10,  				;Sandbox
 	GuiControl, HS3: ChooseString, % IdDDL2, % TransA["↓ Click here to select hotstring library ↓"]
 	if (A_DefaultGui = "HS3")
@@ -8710,7 +8726,6 @@ F_Clear()
 	GuiControl, HS4: , % IdEdit8b, 					;v_EnterHotstring6
 	GuiControl, HS4: Disable, % IdEdit8b 				;v_EnterHotstring6
 	GuiControl, HS4: , % IdEdit9b,  					;Comment
-	GuiControl, HS4: Disable, % IdButton4b
 	GuiControl, HS4: , % IdEdit10b,  					;Sandbox
 	GuiControl, HS4: ChooseString, % IdDDL2b, % TransA["↓ Click here to select hotstring library ↓"]
 }
@@ -9798,8 +9813,6 @@ F_SelectLibrary()
 		Gui, HS3: Submit, NoHide
 	if (A_DefaultGui = "HS4")
 		Gui, HS4: Submit, NoHide
-	
-	GuiControl, Enable, % IdButton4 ; button Delete hotstring (F8)
 	
 	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
 	GuiControl, -Redraw, % IdListView1 ;The Redraw option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
@@ -12044,7 +12057,6 @@ F_GuiHS4_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, % EnDis, % IdDDL2b
 	GuiControl, % EnDis, % IdButton2b
 	GuiControl, % EnDis, % IdButton3b
-	GuiControl, % EnDis, % IdButton4b
 	GuiControl, % EnDis, % IdButton5b
 	GuiControl, % EnDis, % IdText10b
 	GuiControl, % EnDis, % IdTextInfo17b
@@ -12269,7 +12281,6 @@ F_GuiMain_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, % EnDis, % IdDDL2
 	GuiControl, % EnDis, % IdButton2
 	GuiControl, % EnDis, % IdButton3
-	GuiControl, % EnDis, % IdButton4
 	GuiControl, % EnDis, % IdButton5
 	GuiControl, % EnDis, % IdText7
 	GuiControl, % EnDis, % IdTextInfo16
@@ -12416,7 +12427,6 @@ F_GuiMain_CreateObject()
 	
 	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton2 gF_AddHotstring,						% TransA["Add / Edit hotstring (F9)"]
 	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton3 gF_Clear,								% TransA["Clear (F5)"]
-	; Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton4 gF_DeleteHotstring vv_DeleteHotstring Disabled, 	% TransA["Delete hotstring (F8)"]
 	Gui,			HS3: Add,			Button,		x0 y0 HwndIdButton5 gF_ToggleRightColumn,					⯇`nF4
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
