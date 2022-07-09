@@ -9550,12 +9550,6 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui ;tu
 	global ;assume-global mode
 	local WinX := 0, WinY := 0, OutputvarTemp := 0, OutputvarTempW := 0
 	
-	; Switch A_DefaultGui
-	; {
-		; Case "HS3": F_GuiMain_Redraw(true)
-		; Case "HS4": F_GuiHS4_Redraw(true)
-	; }
-
 	Switch A_DefaultGui
 	{
 		Case "HS3":
@@ -9567,9 +9561,8 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui ;tu
 			GuiControl,, % IdEdit2b, % v_EnterHotstring
 			GuiControl, ChooseString, % IdDDL2b, % v_SelectHotstringLibrary
 			Gui, HS3: Show, Hide
+			; F_GuiHS4_Redraw(false)
 			Gui, HS4: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
-			; Gui, HS4: Show, AutoSize ;don't know why it has to be doubled to properly display...
-			F_GuiHS4_Redraw(true)
 			F_HS4RadioCaseGroup(v_RadioCaseGroup)
 			ini_WhichGui := "HS4"
 		Case "HS4":
@@ -9581,9 +9574,8 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui ;tu
 			GuiControl,, % IdEdit2, % v_EnterHotstring
 			GuiControl, ChooseString, % IdDDL2, % v_SelectHotstringLibrary
 			Gui, HS4: Show, Hide
+			; F_GuiMain_Redraw(false)
 			Gui, HS3: Show, % "X" WinX . A_Space . "Y" WinY . A_Space . "AutoSize"
-			F_GuiMain_Redraw(true)
-			; Gui, HS3: Show, AutoSize ;don't know why it has to be doubled to properly display...
 			F_HS3RadioCaseGroup(v_RadioCaseGroup)
 			ini_WhichGui := "HS3"
 	}
@@ -10607,8 +10599,12 @@ F_ToggleSandbox()
 	F_WhichGui()
 	Switch A_DefaultGui
 	{
-		Case "HS3": F_GuiMain_Redraw(true)
-		Case "HS4": F_GuiHS4_Redraw(true)
+		Case "HS3": 
+			F_GuiMain_Redraw(true)
+			F_GuiHS4_Redraw(false)
+		Case "HS4": 
+			F_GuiHS4_Redraw(true)
+			F_GuiMain_Redraw(false)
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -13132,8 +13128,8 @@ F_GuiMain_DetermineConstraints()
 ;5.1.7. Buttons	
 	v_yNext += HofDropDownList + c_ymarg
 	GuiControlGet, v_OutVarTemp1, Pos, % IdButton2
-	GuiControlGet, v_OutVarTemp2, Pos, % IdButton3
-	GuiControlGet, v_OutVarTemp3, Pos, % IdButton4
+	GuiControlGet, v_OutVarTemp2, Pos, % IdButton3	;Clear button
+	GuiControlGet, v_OutVarTemp3, Pos, % IdButton4	;Delete button
 	GPB := (LeftColumnW - (c_xmarg + v_OutVarTemp1W + v_OutVarTemp2W + v_OutVarTemp3W + c_xmarg)) // 2 ;GPB = Gap Between Buttons
 ,	v_xNext := c_xmarg
 	GuiControl, Move, % IdButton2, % "x" . v_xNext . "y" . v_yNext
@@ -13141,7 +13137,9 @@ F_GuiMain_DetermineConstraints()
 	v_xNext += v_OutVarTemp1W + GPB
 	GuiControl, Move, % IdButton3, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp1, Pos, % IdButton3
+	; v_xNext := LeftColumnW - (v_OutVarTemp1W + c_xmarg)
 	v_xNext += v_OutVarTemp1W + GPB
+	; GuiControl, Move, % IdButton3, % "x" . v_xNext . "y" . v_yNext
 	GuiControl, Move, % IdButton4, % "x" . v_xNext . "y" . v_yNext
 	v_yNext += HofButton
 ,	LeftColumnH := v_yNext
