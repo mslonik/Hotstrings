@@ -12808,7 +12808,7 @@ F_GuiHS4_DetermineConstraints()
 	
 ;5.1.7. Buttons	
 	v_yNext += HofDropDownList + c_ymarg
-	v_xNext := c_xmarg
+,	v_xNext := c_xmarg
 	GuiControl, Move, % IdButton2b, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp1, Pos, % IdButton3b
 	v_xNext := LeftColumnW - (v_OutVarTemp1W + c_xmarg)
@@ -12826,8 +12826,8 @@ F_GuiMain_Redraw(IfShowGui)
 	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
 		,v_xNext := 0, v_yNext := 0,  v_wNext := 0,	v_hNext := 0
 	static b_FirstRun := true
-	
-	if (b_FirstRun) ;position of the List View, but only when HS3 Gui is initiated: before showing. So this code is run only once.
+
+ 	if (b_FirstRun) ;position of the List View, but only when HS3 Gui is initiated: before showing. So this code is run only once.
 	{
 		v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
 		v_yNext := c_ymarg + HofText
@@ -12835,13 +12835,9 @@ F_GuiMain_Redraw(IfShowGui)
 		{
 			v_wNext := RightColumnW
 			if ((ini_Sandbox) and !(ini_IsSandboxMoved))
-			{
 				v_hNext := LeftColumnH - (2 * c_ymarg + 2 * HofText + c_HofSandbox)
-			}
 			if ((ini_Sandbox) and (ini_IsSandboxMoved))
-			{
 				v_hNext := LeftColumnH - (c_ymarg + c_HofSandbox)
-			}
 			if !(ini_Sandbox)
 			{
 				v_hNext := LeftColumnH - 2 * c_ymarg
@@ -12856,7 +12852,7 @@ F_GuiMain_Redraw(IfShowGui)
 		b_FirstRun := false
 	}
 	else
-	{
+ 	{
 		;OutputDebug, % "Redraw" . A_Space . "The first else" . A_Tab . "ini_Sandbox" . A_Space . ini_Sandbox . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved
 		GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 		if (ini_Sandbox)
@@ -12887,14 +12883,14 @@ F_GuiMain_Redraw(IfShowGui)
 	if ((ini_Sandbox) and (ini_IsSandboxMoved))
 	{
 		v_xNext := c_xmarg
-		v_yNext := LeftColumnH + c_ymarg
+,		v_yNext := LeftColumnH + c_ymarg
 		GuiControl, Move, % IdText10, % "x" . v_xNext . "y" . v_yNext
 		GuiControlGet, v_OutVarTemp, Pos, % IdText10
 		v_xNext += v_OutVarTempW + c_xmarg
 		GuiControl, Move, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
 		v_xNext := c_xmarg
-		v_yNext += HofText
-		v_wNext := LeftColumnW - 2 * c_xmarg
+,		v_yNext += HofText
+,		v_wNext := LeftColumnW - 2 * c_xmarg
 		GuiControl, Move, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 		GuiControl, Show, % IdText10
 		GuiControl, Show, % IdTextInfo17
@@ -12904,13 +12900,13 @@ F_GuiMain_Redraw(IfShowGui)
 	{
 		GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 		v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
-		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
+,		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
 		GuiControl, Move, % IdText10, % "x" . v_xNext . "y" . v_yNext
 		GuiControlGet, v_OutVarTemp, Pos, % IdText10
 		v_xNext += v_OutVarTempW + c_xmarg
 		GuiControl, Move, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
 		v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
-		v_yNext += HofText
+,		v_yNext += HofText
 		GuiControlGet, v_OutVarTemp, Pos, % IdListView1
 		v_wNext := v_OutVarTempW
 		GuiControl, Move, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
@@ -12930,20 +12926,20 @@ F_GuiMain_Redraw(IfShowGui)
 	if ((ini_Sandbox) and (ini_IsSandboxMoved))
 	{
 		v_xNext := LeftColumnW 
-		v_yNext := c_ymarg
-		v_hNext := HofText + v_OutVarTempH
+,		v_yNext := c_ymarg
+,		v_hNext := HofText + v_OutVarTempH
 	}
 	if ((ini_Sandbox) and !(ini_IsSandboxMoved))
 	{
 		v_xNext := LeftColumnW 
-		v_yNext := c_ymarg
-		v_hNext := HofText + v_OutVarTempH + c_ymarg + HofText + c_HofSandbox
+,		v_yNext := c_ymarg
+,		v_hNext := HofText + v_OutVarTempH + c_ymarg + HofText + c_HofSandbox
 	}	
 	if !(ini_Sandbox) 
 	{
 		v_xNext := LeftColumnW
-		v_yNext := c_ymarg
-		v_hNext :=  HofText + v_OutVarTempH
+,		v_yNext := c_ymarg
+,		v_hNext :=  HofText + v_OutVarTempH
 	}
 	GuiControl, Move, % IdButton5, % "x" . v_xNext . "y" . v_yNext . "h" . v_hNext
 	if (IfShowGui)
