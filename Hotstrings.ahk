@@ -444,6 +444,16 @@ Critical, Off
 		return
 
 	F6::	;new thread starts here
+		if (!ini_Sandbox) or (A_Gui = "HS4")
+			return
+		else
+		{
+			GuiControl, Focus, % IdEdit10
+
+		}
+		return
+
+	^F6::	;new thread starts here
 		F_WhichGui()
 		F_ToggleSandbox()
 		return
@@ -11171,6 +11181,8 @@ Application language changed to: 							= Application language changed to:
 Application mode										= Application mode
 Application statistics									= Application statistics
 Apply												= &Apply
+Apply default hotkey									= Apply default hotkey
+Apply new hotkey										= Apply new hotkey
 aqua													= aqua
 Are you sure?											= Are you sure?
 Are you sure you want to exit this application now?			= Are you sure you want to exit this application now?
@@ -11455,14 +11467,12 @@ Repository version										= Repository version
 Required encoding: UTF-8 with BOM. Application will exit now.	= Required encoding: UTF-8 with BOM. Application will exit now.
 Reset Recognizer (Z)									= Reset Recognizer (Z)
 Restore default										= Restore default
-Apply default hotkey									= Apply default hotkey
 Restore default configuration								= Restore default configuration
 Row													= Row
 )"
 	TransConst .= "`n
 (Join`n `
-Sandbox (F6)											= Sandbox (F6)
-Apply new hotkey										= Apply new hotkey
+Sandbox												= Sandbox
 Save													= Save
 Save position of application window	 					= &Save position of application window
 Save window position									= Save window position
@@ -11534,10 +11544,8 @@ Style of GUI											= Style of GUI
 Such file already exists									= Such file already exists
 Suspend Hotkeys										= Suspend Hotkeys
 Tab 													= Tab 
-To move folder into ""Program Files"" folder you must allow admin privileges to ""Hotstrings"", which will restart to move its folder. = To move folder into ""Program Files"" folder you must allow admin privileges to ""Hotstrings"", which will restart to move its folder.
 teal													= teal
 Test styling											= Test styling
-Toggle main GUI										= Toggle main GUI
 The application										= The application
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
 The default											= The default
@@ -11581,6 +11589,10 @@ Tilde (~) key modifier									= Tilde (~) key modifier
 Tip: If you copy text from PDF file it's adviced to remove them. = Tip: If you copy text from PDF file it's adviced to remove them.
 Tips are shown after no. of characters						= Tips are shown after no. of characters
 (Together with accompanying files and subfolders).			= (Together with accompanying files and subfolders).
+to activate											= to activate
+To move folder into ""Program Files"" folder you must allow admin privileges to ""Hotstrings"", which will restart to move its folder. = To move folder into ""Program Files"" folder you must allow admin privileges to ""Hotstrings"", which will restart to move its folder.
+to toggle												= to toggle
+Toggle main GUI										= Toggle main GUI
 Toggle trigger characters (↓ or EndChars)					= &Toggle trigger characters (↓ or EndChars)
 Toggle triggerstring tips								= Toggle triggerstring tips
 Tooltip: ""Hotstring was triggered""						= Tooltip: ""Hotstring was triggered""
@@ -12198,7 +12210,7 @@ F_GuiHS4_CreateObject()
 	
 	Gui,		HS4: Add,		Button,		x0 y0 HwndIdButton5b gF_ToggleRightColumn,					⯈`nF4
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText10b,			 						% TransA["Sandbox (F6)"]
+	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText10b,			 						% TransA["Sandbox"] . A_Space . "(" . "F6" . A_Space . TransA["to activate"] . A_Space . "or" . A_Space . "Ctrl + F6" . A_Space . TransA["to toggle"] . ")"
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2	
 	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo17b,									ⓘ
 	GuiControl +g, % IdTextInfo17b, % TI_Sandbox
@@ -12452,7 +12464,7 @@ F_GuiMain_CreateObject()
 	Gui, 		HS3: Add, 		ListView, 	x0 y0 HwndIdListView1 LV0x1 vv_LibraryContent AltSubmit gF_HSLV -Multi, % TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
-	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText10,			 							% TransA["Sandbox (F6)"]
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText10,			 							% TransA["Sandbox"] . A_Space . "(" . "F6" . A_Space . TransA["to activate"] . A_Space . "or" . A_Space . "Ctrl + F6" . A_Space . TransA["to toggle"] . ")"
 	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2	
 	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo17,									ⓘ
 	TI_Sandbox		:= func("F_ShowLongTooltip").bind(TransA["TI_Sandbox"])
