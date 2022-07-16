@@ -294,7 +294,7 @@ Menu, LibrariesSubmenu,	Add, % TransA["Show library header"],									F_ShowLibH
 Menu, HSMenu, 			Add, % TransA["Libraries"], 											:LibrariesSubmenu
 Menu, HSMenu, 			Add, % TransA["Clipboard Delay (F7)"], 									F_GuiHSdelay
 
-Menu, SubmenuReload, 	Add,	% TransA["Reload in default mode"],								F_ReloadApplication
+Menu, SubmenuReload, 	Add,	% TransA["Reload in default mode"] . "`tShift + Ctrl + r",				F_ReloadApplication
 Menu, SubmenuReload, 	Add,	% TransA["Reload in silent mode"],									F_ReloadApplication
 Menu, AppSubmenu, 		Add,	% TransA["Reload"],												:SubmenuReload
 
@@ -470,6 +470,10 @@ Critical, Off
 	
 	F10:: ;new thread starts here
 		F_TraySuspendHotkeys()
+		return
+
+	^+r::	;new thread starts here
+		F_ReloadApplication()							;reload into default mode of operation
 		return
 #if
 
@@ -2436,7 +2440,7 @@ F_InitiateTrayMenus(v_Param)
 		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
 		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"], F_GuiAbout
 		Menu, Tray, Default,	% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"]
-		Menu, Tray, Add, 		% TransA["Reload in default mode"], 	F_ReloadApplication	;it is possible to reload, but then application will be run in default mode of operation (opposit to silent mode)
+		Menu, Tray, Add, 		% TransA["Reload in default mode"] . "`tShift+Ctrl+r", 			 F_ReloadApplication	;it is possible to reload, but then application will be run in default mode of operation (opposit to silent mode)
 		Menu, Tray, Add										;line separator 
 		Menu, Tray, Add,		% TransA["Suspend Hotkeys"] . "`tF10",	F_TraySuspendHotkeys
 		Menu, Tray, Add,		% TransA["Pause application"],		F_TrayPauseScript
@@ -2466,9 +2470,9 @@ F_InitiateTrayMenus(v_Param)
 			Menu, Tray, Add,		% TransA["Help: Hotstrings application"] . "`tF1",					F_GuiAboutLink1
 			Menu, Tray, Add,		% TransA["Help: AutoHotkey Hotstrings reference guide"] . "`tCtrl+F1", 	F_GuiAboutLink2
 			Menu, Tray, Add																	;line separator 
-			Menu, SubmenuReload, 	Add,		% TransA["Reload in default mode"],						F_ReloadApplication
-			Menu, SubmenuReload, 	Add,		% TransA["Reload in silent mode"],							F_ReloadApplication
-			Menu, Tray, Add,		% TransA["Reload"],												:SubmenuReload
+			Menu, TraySubmenuReload,	Add,		% TransA["Reload in default mode"] . "`tShift+Ctrl+r",			F_ReloadApplication
+			Menu, TraySubmenuReload,	Add,		% TransA["Reload in silent mode"],							F_ReloadApplication
+			Menu, Tray, Add,		% TransA["Reload"],												:TraySubmenuReload
 			Menu  Tray, Add																	;line separator 
 			Menu, Tray, Add, 		% TransA["Application statistics"],								F_AppStats
 			Menu, Tray, Add																	;line separator 
