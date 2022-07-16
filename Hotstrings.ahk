@@ -13811,7 +13811,7 @@ F_DetermineGain2(Triggerstring, Hotstring)
 			+	F_CountUnicodeChars(Hotstring)
 
 	Loop, Parse, % Hotstring
-	{    
+	{
 		if A_LoopField is upper
 			CntUpper++
 	}
@@ -13837,16 +13837,7 @@ F_FollowCaseConformity(ReplacementString)
 	global	;assume-global mode
 	local vFirstLetter1 := "", vFirstLetter2 := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, fFirstLetterCap := false, Options := "", key := "", value := "", ThisHotkey := ""
 	
-	ThisHotkey := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", false, 1, 2) + 1)
-	for key, value in a_Triggerstring
-		if (value = ThisHotkey)
-		{
-			Options := a_TriggerOptions[key]
-			Break
-		}
-
-	if (!InStr(Options, "C")) and (!InStr(Options, "C1"))
-	; if (!InStr(v_Options, "C")) and (!InStr(v_Options, "C1"))
+	if (!InStr(v_Options, "C")) and (!InStr(v_Options, "C1"))	;v_Options is global variable, which value comes from F_DeterminePartStrings
 	{
 		vFirstLetter1 		:= SubStr(v_InputString, 1, 1)	;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
 		vRestOfLetters 	:= SubStr(v_InputString, 2)		;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
@@ -13870,8 +13861,7 @@ F_FollowCaseConformity(ReplacementString)
 		if (!fFirstLetterCap)
 			return ReplacementString
 	}
-	if (InStr(Options, "C") or InStr(Options, "C1"))
-	; if (InStr(v_Options, "C") or InStr(v_Options, "C1"))
+	if (InStr(v_Options, "C") or InStr(v_Options, "C1"))
 		return ReplacementString
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
