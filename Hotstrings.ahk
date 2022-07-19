@@ -562,9 +562,11 @@ F_IsItEdit()
 	7::
 	Enter:: 
 		; OutputDebug, % "WinExist(""ahk_id"" HMenuCliHwnd):" . A_Space . A_ThisHotkey . "`n"
-		F_HMenuCLI_Keyboard()
-		v_InputH.VisibleText 	:= true
-,		v_InputString 			:= ""			
+		if (F_HMenuCLI_Keyboard())
+		{
+			v_InputH.VisibleText 	:= true
+,			v_InputString 			:= ""			
+		}
 		return
 	Esc::
 		Gui, HMenuCli: Destroy
@@ -589,9 +591,11 @@ F_IsItEdit()
 	6::
 	7::
 	Enter:: 
-		F_HMenuSI_Keyboard()
-		v_InputH.VisibleText 	:= true
-,		v_InputString 			:= ""			
+		if (F_HMenuSI_Keyboard())
+		{
+			v_InputH.VisibleText 	:= true
+,			v_InputString 			:= ""			
+		}
 		; OutputDebug, % "WinExist(""ahk_id"" HMenuAHKHwnd)" . A_Space . A_ThisHotkey . "`n"
 		return
 	Esc::
@@ -1174,13 +1178,15 @@ F_HMenuSI_Keyboard()
 	}		
 	if (InStr(v_PressedKey, "Enter"))
 	{
-		v_PressedKey := IntCnt
-,		IsCursorPressed := false
-,		IntCnt := 1
+		v_PressedKey 		:= IntCnt
+,		IsCursorPressed 	:= false
+,		IntCnt 			:= 1
 	}
 	if (v_PressedKey > v_MenuMax)
 	{
-		return
+		if (ini_MHSEn)
+			SoundBeep, % ini_MHSF, % ini_MHSD	
+		return false ;if function returns false, characters still be invisible
 	}
 	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuAHK
 	Loop, Parse, v_Temp1, `n
@@ -1197,8 +1203,6 @@ F_HMenuSI_Keyboard()
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_SendIsOflag(v_Temp1, Ovar, "SendInput")
 	Gui, HMenuAHK: Destroy
-	if (ini_MHSEn)
-		SoundBeep, % ini_MHSF, % ini_MHSD	
 	++v_LogCounter
 	if (InStr(A_ThisHotkey, "?"))
 		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
@@ -1207,7 +1211,7 @@ F_HMenuSI_Keyboard()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	v_UndoTriggerstring := v_InputString
-,	v_InputString 		:= ""
+	return true	; v_InputString will be cleared only if function returns true if function returns false, characters still be invisible
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_MouseMouse is lower than this "interrupt"
@@ -1283,13 +1287,15 @@ F_HMenuCLI_Keyboard()
 	
 	if (InStr(v_PressedKey, "Enter"))
 	{
-		v_PressedKey := IntCnt
-		IsCursorPressed := false
-		IntCnt := 1
+		v_PressedKey 		:= IntCnt
+,		IsCursorPressed 	:= false
+,		IntCnt 			:= 1
 	}
 	if (v_PressedKey > v_MenuMax)
 	{
-		return
+		if (ini_MHSEn)
+			SoundBeep, % ini_MHSF, % ini_MHSD
+		return false
 	}
 	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuCli
 	Loop, Parse, v_Temp1, `n
@@ -1305,8 +1311,6 @@ F_HMenuCLI_Keyboard()
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_ClipboardPaste(ReplacementString, Ovar)
 	Gui, HMenuCli: Destroy
-	if (ini_MHSEn)
-		SoundBeep, % ini_MHSF, % ini_MHSD
 	++v_LogCounter
 	if (InStr(A_ThisHotkey, "?"))
 		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
@@ -1315,7 +1319,7 @@ F_HMenuCLI_Keyboard()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	v_UndoTriggerstring := v_InputString
-,	v_InputString 		:= ""
+	return true ;if function returns true, v_InputString will be cleared and input characters will not be invisible anymore
 	; OutputDebug, % "End of F_HMenuCLI_Keyboard:" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1894,12 +1898,12 @@ F_OneCharPressed(ih, Char)
 ,		f_FoundTip	:= false		
 	}
 
-	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))	;Menu Hotstring Sound Enable
+	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd)) and (!v_InputH.VisibleText)	;Menu Hotstring Sound Enable
 	{
-		if (!v_InputH.VisibleText)
-			SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
-		; OutputDebug, % "Branch Char:" . A_Tab . Char . "`n"
+		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
+		Critical, Off
 		return
+		; OutputDebug, % "Branch Char:" . A_Tab . Char . "`n"
 	}
 	;This is compromise: not for all triggerstrings tips will be displayed, e.g. triggerstring with option ? (question mark) and those starting with EndChar: ".ahk", "..."
 	if (InStr(HotstringEndChars, Char))
@@ -1909,9 +1913,7 @@ F_OneCharPressed(ih, Char)
 		f_FoundEndChar		:= true
 	}
 	else	;if EndChar is found, it is not added to the v_InputString, but it is added to TrigTipsInput variable
-	{
 		v_InputString 		.= Char	;the global variable v_InputString is used to determine Gain parameters and to handle F_Undo functions
-	}
 	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n
 	; OutputDebug, % "v_InputString:" . A_Space . v_InputString . "`n"
 	; OutputDebug, % "v_TrigTipsInput:" . A_Space . v_TrigTipsInput . A_Space . "v_InputString:" . A_Space . v_InputString . "`n"
