@@ -1898,9 +1898,9 @@ F_OneCharPressed(ih, Char)
 ,		f_FoundTip	:= false		
 	}
 
-	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd)) and (!v_InputH.VisibleText)	;Menu Hotstring Sound Enable
+	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd)) and (!v_InputH.VisibleText)	;ini_MHSEn = Menu Hotstring Sound Enable; this is very unfortunate that SoundBeep is used (instead of SoundPlay). As a consequence when somebody presses very quickly some characters, this function is run "one after another" character and no other functions are run. This could lead to unwanted behaviour.
 	{
-		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed.
+		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed. Future: replace SoundBeep with SoundPlay.
 		Critical, Off
 		return
 		; OutputDebug, % "Branch Char:" . A_Tab . Char . "`n"
@@ -8989,41 +8989,41 @@ F_SearchPhrase()
 	Switch v_RadioGroup
 	{
 		Case 1:
-		For Each, FileName in a_Triggerstring
-		{
-			if (v_SearchTerm)
+			For Each, FileName in a_Triggerstring
 			{
-				if (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start ;for overall matching without = 1
+				if (v_SearchTerm)
+				{
+					if (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start ;for overall matching without = 1
+						LV_Add("", a_Library[A_Index], FileName, a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+				}
+				else
 					LV_Add("", a_Library[A_Index], FileName, a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
 			}
-			else
-				LV_Add("", a_Library[A_Index], FileName, a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
-		}
-		LV_ModifyCol(2,"Sort") 	
+			LV_ModifyCol(2,"Sort") 	
 		Case 2:
-		For Each, FileName in a_Hotstring
-		{
-			if (v_SearchTerm)
+			For Each, FileName in a_Hotstring
 			{
-				if (InStr(FileName, v_SearchTerm) = 1) ; for overall matching
+				if (v_SearchTerm)
+				{
+					if (InStr(FileName, v_SearchTerm)) ; for overall matching
+						LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], FileName, a_Comment[A_Index])
+				}
+				else
 					LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], FileName, a_Comment[A_Index])
 			}
-			else
-				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], FileName, a_Comment[A_Index])
-		}
-		LV_ModifyCol(6, "Sort")	
+			LV_ModifyCol(6, "Sort")	
 		Case 3:
-		For Each, FileName in a_Library
-		{
-			if (v_SearchTerm)
+			For Each, FileName in a_Library
 			{
-				if (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start
+				if (v_SearchTerm)
+				{
+					if (InStr(FileName, v_SearchTerm)) ; for overall matching
+						LV_Add("", FileName, a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+				}
+				else
 					LV_Add("", FileName, a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
 			}
-			else
-				LV_Add("", FileName, a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
-		}
-		LV_ModifyCol(1,"Sort")
+			LV_ModifyCol(1,"Sort")
 	}
 	GuiControl, +Redraw, % IdSearchLV1 ;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
 }
@@ -9076,7 +9076,7 @@ F_GuiSearch_CreateObject()
 	Gui,	HS3Search: Color,	% c_WindowColor, % c_ControlColor
 	
 	;2. Prepare alll Gui objects
-	Gui,	HS3Search: Font,% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
+	Gui,	HS3Search: Font, % "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT1,								% TransA["Phrase to search for:"]
 	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT2,								% TransA["Search by:"]
 	Gui,	HS3Search: Font, % "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 	% c_FontType
@@ -9495,6 +9495,7 @@ F_DeleteHotstring()
 	LV_GetText(hotstring, 		v_SelectedRow, 5)
 	MsgBox, % 256 + 64 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Selected definition d(t, o, h) will be deleted. Do you want to proceed?"] . "`n`n"
 		. TransA["triggerstring"] . ":" . A_Space . triggerstring . A_Tab . TransA["options"] . ":" . A_Space . options . A_Tab . TransA["hotstring"] . ":" . A_Space . hotstring
+		. "`n`n" . TransA["If you remove one of the definitions which was multiplied (e.g. duplicated), none of definitions will be active. Therefore It is suggested in order to to enable the second one to reload the application."]
 	IfMsgBox, No
 		return
 	TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
@@ -9517,7 +9518,7 @@ F_DeleteHotstring()
 		if (InStr(options, "Z"))
 			options := StrReplace(options, "Z", "Z0")
 		Try
-			Hotstring(":" . options . ":" . triggerstring, , "Off")
+			Hotstring(":" . options . ":" . triggerstring, , "Off")	;if duplicated definition exists, only one is active. As a consequence if one is removed, the second one is not activated automatically: none is enabled anymore till application is restarted.
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % "Function:" . A_ThisFunc . "`n`n" 
 			. TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
@@ -11351,6 +11352,7 @@ If you answer ""No"" edition of the current definition will be interrupted. = If
 If you answer ""No"", then you will get a chance to fix your new created definition. = If you answer ""No"", then you will get a chance to fix your new created definition.
 If you apply ""SI"" or ""MSI"" or ""SE"" output function then some characters like = If you apply ""SI"" or ""MSI"" or ""SE"" output function then some characters like
 If you don't apply it, previous changes will be lost.			= If you don't apply it, previous changes will be lost.
+If you remove one of the definitions which was multiplied (e.g. duplicated), none of definitions will be active. Therefore It is suggested in order to to enable the second one to reload the application. = If you remove one of the definitions which was multiplied (e.g. duplicated), none of definitions will be active. Therefore It is suggested in order to to enable the second one to reload the application.
 Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
 Incorrect value. Select custom RGB hex value. Please try again.	= Incorrect value. Select custom RGB hex value. Please try again.
