@@ -285,8 +285,8 @@ Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  									F_ExportLib
 Menu, LibrariesSubmenu, 	Add, % TransA["Export from .csv to .ahk"],								:ExportSubmenu
 Menu, LibrariesSubmenu,	Add	;line separator
 Menu, LibrariesSubmenu,	Add,	% TransA["Add new library file"],									F_GuiAddLibrary
-Menu, LibrariesSubmenu,	Add, % TransA["Rename library filename"],								F_RenameLibrary
-Menu, LibrariesSubmenu,	Add, % TransA["Delete existing library file"],							F_DeleteLibrary
+Menu, LibrariesSubmenu,	Add, % TransA["Rename selected library filename"],						F_RenameLibrary
+Menu, LibrariesSubmenu,	Add, % TransA["Delete selected library file"],							F_DeleteLibrary
 Menu, LibrariesSubmenu,	Add	;line separator
 Menu, LibrariesSubmenu,	Add, % TransA["Edit library header"],									F_EditLibHeader
 Menu, LibrariesSubmenu,	Add, % TransA["Show library header"],									F_ShowLibHeader
@@ -1347,35 +1347,24 @@ F_ConvertEscapeSequences(string)	;now from file are read sequences like "`" . "t
 F_DeleteLibrary()
 {
 	global	;assume-global mode of operation
-	local	SelectedLibraryFile := "", temp := 0
+	local	SelectedLibraryName := "", SelectedLibraryFile := "", temp := 0
 
-	FileSelectFile, SelectedLibraryFile, 1, % ini_HADL, % TransA["Select library file to be deleted"], *.csv	;1: File Must Exist
-	if (!ErrorLevel)
+	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control. v_SelectHotstringLibrary
+	if (!SelectedLibraryName) or (SelectedLibraryName = TransA["↓ Click here to select hotstring library ↓"])	;if SelectedLibraryName is empty
 	{
-		MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The selected library file will be deleted. The content of this library will be unloaded from memory."]
-		. "`n`n" . SelectedLibraryFile . "`n`n" . TransA["Are you sure?"]
-		IfMsgBox, No
-			return
-		IfMsgBox, Cancel
-			return
-		IfMsgBox, Yes
-			{
-				temp := InStr(SelectedLibraryFile, "\", , 0, 1)
-,				temp := SubStr(SelectedLibraryFile, temp + 1)
-				F_UnloadHotstringsFromFile(temp)
-				FileDelete, % SelectedLibraryFile
-				if (ErrorLevel)
-					MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Something went wrong on time of file removal."	]
-				F_ValidateIniLibSections()
-				F_RefreshListOfLibraries()	; this function calls F_RefreshListOfLibraryTips() as both options are interrelated
-				F_UpdateSelHotLibDDL()	
-				a_Combined := []				;in order to refresh arrays of triggerstring tips
-				F_LoadHotstringsFromLibraries()	;in order to refresh arrays of triggerstring tips
-				F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	;in order to refresh arrays of triggerstring tips
-			}
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to Delete selected library filename at first select one from drop down list."]
+		return
 	}
-	else
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Something went wrong on time of library file selection or you've cancelled."]
+	F_UnloadHotstringsFromFile(SelectedLibraryName)
+	FileDelete, % ini_HADL . "\" . SelectedLibraryName
+	if (ErrorLevel)
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Something went wrong on time of file removal."	]
+	F_ValidateIniLibSections()
+	F_RefreshListOfLibraries()	; this function calls F_RefreshListOfLibraryTips() as both options are interrelated
+	F_UpdateSelHotLibDDL()	
+	a_Combined := []				;in order to refresh arrays of triggerstring tips
+	F_LoadHotstringsFromLibraries()	;in order to refresh arrays of triggerstring tips
+	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	;in order to refresh arrays of triggerstring tips
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_CheckIfMoveToProgramFiles()
@@ -9330,16 +9319,16 @@ F_GuiAddLibrary(TextString*)
 	
 	Switch TextString[1]
 	{
-		Case "": Gui, ALib: Add, Button, HwndIdButt1 Default gF_ALibOK, 			% TransA["OK"]
-		Default: Gui, ALib: Add, Button, HwndIdButt1 Default gF_ChangeLibNameOK, 	% TransA["OK"]
+		Case "Choose new library file name:": 	Gui, ALib: Add, Button, HwndIdButt1 Default gF_ChangeLibNameOK,		% TransA["OK"]
+		Default: 							Gui, ALib: Add, Button, HwndIdButt1 Default gF_ALibOK,				% TransA["OK"]
 	}
-	Gui, ALib: Add, Button, HwndIdButt2 gALibGuiClose, 		% TransA["Cancel"]
+	Gui, ALib: Add, Button, HwndIdButt2 gALibGuiClose, % TransA["Cancel"]
 	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdButt1
 	GuiControlGet, v_OutVarTemp2, ALib: Pos, % IdButt2
 	
 	v_WidthButt1 := v_OutVarTemp1W + 2 * c_xmarg
-	v_WidthButt2 := v_OutVarTemp2W + 2 * c_xmarg
-	xButt2	   := c_xmarg + v_WidthButt1 + vTempWidth - (2 * c_xmarg + v_WidthButt1 + v_WidthButt2)
+,	v_WidthButt2 := v_OutVarTemp2W + 2 * c_xmarg
+,	xButt2	   := c_xmarg + v_WidthButt1 + vTempWidth - (2 * c_xmarg + v_WidthButt1 + v_WidthButt2)
 	
 	GuiControl, ALib: Move, % IdButt1, % "x" c_xmarg . A_Space . "w" v_WidthButt1
 	GuiControl, ALib: Move, % IdButt2, % "x" xButt2  . A_Space . "y" v_OutVarTemp1Y . A_Space . "w" v_WidthButt2
@@ -9351,7 +9340,7 @@ F_GuiAddLibrary(TextString*)
 	DetectHiddenWindows, Off
 	
 	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
-	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+,	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
 	Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	Gui, ALib: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"
 }
@@ -11258,7 +11247,7 @@ custom												= custom
 Dark													= Dark
 default 												= default
 Default mode											= Default mode
-Delete existing library file								= Delete existing library file
+Delete selected library file								= Delete selected library file
 Delete hotstring (F8) 									= Delete hotstring (F8)
 Delete selected definition								= Delete selected definition
 Deleting hotstring... 									= Deleting hotstring...
@@ -11367,6 +11356,7 @@ In order to aplly new size of margin it's necesssary to reload the application. 
 In order to aplly new style it's necesssary to reload the application. 		= In order to aplly new style it's necesssary to reload the application.
 In order to change existing library filename at first select one from drop down list. = In order to change existing library filename at first select one from drop down list.
 In order to edit library header please at first select library name from drop down list. = In order to edit library header please at first select library name from drop down list.
+In order to Delete selected library filename at first select one from drop down list. = In order to Delete selected library filename at first select one from drop down list.
 In order to display library header please at first select library name from drop down list. = In order to display library header please at first select library name from drop down list.
 is added in section  [GraphicalUserInterface] of Config.ini		= is added in section  [GraphicalUserInterface] of Config.ini
 is empty at the moment.									= is empty at the moment.
@@ -11465,7 +11455,7 @@ red													= red
 Reload												= Reload
 Reload in default mode									= Reload in default mode
 Reload in silent mode									= Reload in silent mode
-Rename library filename									= Rename library filename
+Rename selected library filename									= Rename selected library filename
 Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
 Repository version										= Repository version
 Required encoding: UTF-8 with BOM. Application will exit now.	= Required encoding: UTF-8 with BOM. Application will exit now.
