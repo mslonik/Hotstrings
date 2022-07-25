@@ -9620,15 +9620,59 @@ F_GuiMain_LVcolumnScale()
 {
 	global ;assume-global mode
 	local v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.		
-	
+		, c1 := 0, c2 := 0, c3 := 0, c4 := 0, c5 := 0, c6 := 0, ctemp := 0, LVM_GETCOLUMNWIDTH = 0x1000 + 29
+
+	Gui, HS3: -DPIScale
 	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.	
 	ListViewWidth := v_OutVarTemp2W
-	LV_ModifyCol(1, Round(0.1 * ListViewWidth))
-	LV_ModifyCol(2, Round(0.1 * ListViewWidth))
-	LV_ModifyCol(3, Round(0.1 * ListViewWidth))	
-	LV_ModifyCol(4, Round(0.1 * ListViewWidth))
+	OutputDebug, % "ListViewWidth:" . A_Space . ListViewWidth . "`n"
+	; ListViewWidth := Round((v_OutVarTemp2W - (5 * 1 + 24)) / 10)
+	; ListViewWidth := v_OutVarTemp2W - 15 - 5
+	; OutputDebug, % "ListViewWidth:" . A_Space . ListViewWidth . "`n"
+	; LV_ModifyCol(1,  ListViewWidth + 1)
+	c1 := Round(0.1 * ListViewWidth)
+	OutputDebug, % "c1:" . A_Space . c1 . "`n"
+	LV_ModifyCol(1, c1)
+	SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdListView1%
+	OutputDebug, % "c1 width:" . A_Space . ErrorLevel . "`n"
+	; OutputDebug, % "ListViewWidth 0.1 * ListViewWidth * 4:" . A_Space . Round(0.1 * ListViewWidth) * 4 . "`n"
+	; LV_ModifyCol(2,  ListViewWidth + 1)
+	LV_ModifyCol(2, "AutoHdr")
+	SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdListView1%
+	c2 := ErrorLevel
+	OutputDebug, % "c2 width:" . A_Space . c2 . "`n"
+	; LV_ModifyCol(2, Round(0.1 * ListViewWidth))
+	; LV_ModifyCol(3,  ListViewWidth + 1)
+	LV_ModifyCol(3, "AutoHdr")	
+	SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdListView1%
+	c3 := ErrorLevel
+	OutputDebug, % "c3 width:" . A_Space . c3 . "`n"
+	; LV_ModifyCol(3, Round(0.1 * ListViewWidth))	
+	; LV_ModifyCol(4,  ListViewWidth + 1)
+	LV_ModifyCol(4, "AutoHdr")
+	SendMessage, LVM_GETCOLUMNWIDTH, 3, 0, , ahk_id %IdListView1%
+	c4 := ErrorLevel
+	OutputDebug, % "c4 width:" . A_Space . c4 . "`n"
+	; LV_ModifyCol(4, Round(0.1 * ListViewWidth))
+	; LV_ModifyCol(5,  4 * ListViewWidth + 1)
 	LV_ModifyCol(5, Round(0.4 * ListViewWidth))
-	LV_ModifyCol(6, Round(0.2 * (ListViewWidth - 6)))
+	SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdListView1%
+	c5 := ErrorLevel
+	OutputDebug, % "c5 width:" . A_Space . c5 . "`n"
+	; LV_ModifyCol(5, Round(0.4 * ListViewWidth))
+	; OutputDebug, % "ListViewWidth 0.4 * ListViewWidth:" . A_Space . Round(0.4 * ListViewWidth) . "`n"
+	; LV_ModifyCol(6,  2 * ListViewWidth)
+	c6 := ListViewWidth - (c1 + c2 + c3 + c4 + c5) - 30	;30 = 24 (width of vertical bar) + 5 pixels for each column + 1 additional pixel (?)
+	OutputDebug, % "c6:" . A_Space . c6 . "`n"
+	LV_ModifyCol(6, c6)
+	; LV_ModifyCol(6, Round(0.2 * (ListViewWidth)))
+	SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdListView1%
+	c6 := ErrorLevel
+	OutputDebug, % "c6 width:" . A_Space . c6 . "`n"
+	OutputDebug, % "c1 + c2 + c3 + c4 + c5 + c6:" . A_Space . c1 + c2 + c3 + c4 + c5 + c6 . "`n"
+	; OutputDebug, % "ListViewWidth 0.2 * ListViewWidth:" . A_Space . Round(0.2 * ListViewWidth) . "`n"
+	; LV_ModifyCol(6, Round(0.2 * (ListViewWidth - 6)))
+	Gui, HS3: +DPIScale
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiMain_Resize2()
