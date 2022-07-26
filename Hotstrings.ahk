@@ -2020,8 +2020,7 @@ F_DetermineMonitors()	; Multi monitor environment, initialization of monitor wid
 F_GUIinit()
 {
 	global	;assume-global mode
-	local	f_FitsToAnyMonitor := false, key := 0
-	, 		WinX := 0, WinY := 0, WinW := 0, WinH := 0
+	local	f_FitsToAnyMonitor := false, key := 0, 		WinX := 0, WinY := 0, WinW := 0, WinH := 0
 
 	if (f_MainGUIresizing) ;if run for the very first time
 	{
@@ -2034,6 +2033,11 @@ F_GUIinit()
 		if (ini_HS3WindoPos.X = "") or (ini_HS3WindoPos.Y = "")
 		{
 			Gui, % ini_WhichGui . ": Show", AutoSize Center
+			if (ini_WhichGui = "HS3")
+				{
+					Gui, HS3: Default
+					F_GuiMain_LVcolumnScale()
+				}
 			if (ini_ShowIntro)
 				Gui, ShowIntro: Show, AutoSize Center
 			f_MainGUIresizing := false
@@ -2048,13 +2052,32 @@ F_GUIinit()
 		if (f_FitsToAnyMonitor)
 		{
 			if (ini_HS3WindoPos.W = "") or (ini_HS3WindoPos.H = "")
+			{
 				Gui,	% ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos.X . A_Space . "Y" . ini_HS3WindoPos.Y . A_Space . "AutoSize"
+				if (ini_WhichGui = "HS3")
+				{
+					Gui, HS3: Default
+					F_GuiMain_LVcolumnScale()
+				}
+			}
 			else
+			{
 				Gui,	% ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos.X . A_Space . "Y" . ini_HS3WindoPos.Y . A_Space . "W" . ini_HS3WindoPos.W . A_Space . "H" . ini_HS3WindoPos.H
+				if (ini_WhichGui = "HS3")
+				{
+					Gui, HS3: Default
+					F_GuiMain_LVcolumnScale()
+				}
+			}
 		}
 		else
 		{
 			Gui, % ini_WhichGui . ": Show", Center AutoSize
+			if (ini_WhichGui = "HS3")
+				{
+					Gui, HS3: Default
+					F_GuiMain_LVcolumnScale()
+				}
 			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Your current screen coordinates have changed. For example you've unplugged your laptop from docking station. Your settings in .ini file will be adjusted accordingly."]
 			F_SaveGUIPos()
 			ini_HS3WindoPos.X := WinX
@@ -2069,7 +2092,11 @@ F_GUIinit()
 	else
 	{
 		if (ini_HS3GuiMaximized) and (ini_WhichGui)
+		{
 			Gui, % ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos.X . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
+			Gui, HS3: Default
+			F_GuiMain_LVcolumnScale()
+		}
 		else
 			Gui, % ini_WhichGui . ": Show", Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.		
 	}
@@ -9617,61 +9644,45 @@ HS4GuiSize() ;Gui event
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiMain_LVcolumnScale()
-{
+{ ;future: https://www.autohotkey.com/board/topic/30486-listview-tooltip-on-mouse-hover/
 	global ;assume-global mode
 	local v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.		
-		, c1 := 0, c2 := 0, c3 := 0, c4 := 0, c5 := 0, c6 := 0, ctemp := 0, LVM_GETCOLUMNWIDTH = 0x1000 + 29
+		, c1 := 0, c2 := 0, c3 := 0, c4 := 0, c5 := 0, c6 := 0, LVM_GETCOLUMNWIDTH = 0x1000 + 29 ;https://www.autohotkey.com/boards/viewtopic.php?p=25857#p25857
+		, SM_CXVSCROLL := 2, WidthVerScrollBar := 0 ;Width of a vertical scroll bar, in pixels
 
-	Gui, HS3: -DPIScale
+	SysGet, WidthVerScrollBar, % SM_CXVSCROLL ;returns value 26
+	Gui, HS3: -DPIScale	;switch off dpiscale temporarily to get the same values from SendMessage command
 	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.	
 	ListViewWidth := v_OutVarTemp2W
-	OutputDebug, % "ListViewWidth:" . A_Space . ListViewWidth . "`n"
-	; ListViewWidth := Round((v_OutVarTemp2W - (5 * 1 + 24)) / 10)
-	; ListViewWidth := v_OutVarTemp2W - 15 - 5
 	; OutputDebug, % "ListViewWidth:" . A_Space . ListViewWidth . "`n"
-	; LV_ModifyCol(1,  ListViewWidth + 1)
-	c1 := Round(0.1 * ListViewWidth)
-	OutputDebug, % "c1:" . A_Space . c1 . "`n"
+	c1 := Round(0.1 * ListViewWidth)	;0.1 = 10% of ListViewWidth
+	; OutputDebug, % "c1:" . A_Space . c1 . "`n"
 	LV_ModifyCol(1, c1)
-	SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdListView1%
-	OutputDebug, % "c1 width:" . A_Space . ErrorLevel . "`n"
-	; OutputDebug, % "ListViewWidth 0.1 * ListViewWidth * 4:" . A_Space . Round(0.1 * ListViewWidth) * 4 . "`n"
-	; LV_ModifyCol(2,  ListViewWidth + 1)
+	SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdListView1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
+	; OutputDebug, % "c1 width:" . A_Space . ErrorLevel . "`n"
 	LV_ModifyCol(2, "AutoHdr")
 	SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdListView1%
 	c2 := ErrorLevel
-	OutputDebug, % "c2 width:" . A_Space . c2 . "`n"
-	; LV_ModifyCol(2, Round(0.1 * ListViewWidth))
-	; LV_ModifyCol(3,  ListViewWidth + 1)
+	; OutputDebug, % "c2 width:" . A_Space . c2 . "`n"
 	LV_ModifyCol(3, "AutoHdr")	
 	SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdListView1%
 	c3 := ErrorLevel
-	OutputDebug, % "c3 width:" . A_Space . c3 . "`n"
-	; LV_ModifyCol(3, Round(0.1 * ListViewWidth))	
-	; LV_ModifyCol(4,  ListViewWidth + 1)
+	; OutputDebug, % "c3 width:" . A_Space . c3 . "`n"
 	LV_ModifyCol(4, "AutoHdr")
 	SendMessage, LVM_GETCOLUMNWIDTH, 3, 0, , ahk_id %IdListView1%
 	c4 := ErrorLevel
-	OutputDebug, % "c4 width:" . A_Space . c4 . "`n"
-	; LV_ModifyCol(4, Round(0.1 * ListViewWidth))
-	; LV_ModifyCol(5,  4 * ListViewWidth + 1)
+	; OutputDebug, % "c4 width:" . A_Space . c4 . "`n"
 	LV_ModifyCol(5, Round(0.4 * ListViewWidth))
 	SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdListView1%
 	c5 := ErrorLevel
-	OutputDebug, % "c5 width:" . A_Space . c5 . "`n"
-	; LV_ModifyCol(5, Round(0.4 * ListViewWidth))
-	; OutputDebug, % "ListViewWidth 0.4 * ListViewWidth:" . A_Space . Round(0.4 * ListViewWidth) . "`n"
-	; LV_ModifyCol(6,  2 * ListViewWidth)
-	c6 := ListViewWidth - (c1 + c2 + c3 + c4 + c5) - 30	;30 = 24 (width of vertical bar) + 5 pixels for each column + 1 additional pixel (?)
-	OutputDebug, % "c6:" . A_Space . c6 . "`n"
+	; OutputDebug, % "c5 width:" . A_Space . c5 . "`n"
+	c6 := ListViewWidth - (c1 + c2 + c3 + c4 + c5) - WidthVerScrollBar - 4	;idk why 4
+	; OutputDebug, % "c6:" . A_Space . c6 . "`n"
 	LV_ModifyCol(6, c6)
-	; LV_ModifyCol(6, Round(0.2 * (ListViewWidth)))
 	SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdListView1%
 	c6 := ErrorLevel
-	OutputDebug, % "c6 width:" . A_Space . c6 . "`n"
-	OutputDebug, % "c1 + c2 + c3 + c4 + c5 + c6:" . A_Space . c1 + c2 + c3 + c4 + c5 + c6 . "`n"
-	; OutputDebug, % "ListViewWidth 0.2 * ListViewWidth:" . A_Space . Round(0.2 * ListViewWidth) . "`n"
-	; LV_ModifyCol(6, Round(0.2 * (ListViewWidth - 6)))
+	; OutputDebug, % "c6 width:" . A_Space . c6 . "`n"
+	; OutputDebug, % "c1 + c2 + c3 + c4 + c5 + c6:" . A_Space . c1 + c2 + c3 + c4 + c5 + c6 . "`n"
 	Gui, HS3: +DPIScale
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9877,11 +9888,11 @@ F_SelectLibrary()
 		if (value = name)
 		{
 			str1[1] := a_Triggerstring[key]
-			str1[2] := a_TriggerOptions[key]
-			str1[3] := a_OutputFunction[key]
-			str1[4] := a_EnableDisable[key]
-			str1[5] := a_Hotstring[key]
-			str1[6] := a_Comment[key]
+,			str1[2] := a_TriggerOptions[key]
+,			str1[3] := a_OutputFunction[key]
+,			str1[4] := a_EnableDisable[key]
+,			str1[5] := a_Hotstring[key]
+,			str1[6] := a_Comment[key]
 			LV_Add("", str1[1], str1[2], str1[3], str1[4], str1[5], str1[6])	
 			v_LibHotstringCnt++
 		}
@@ -9889,13 +9900,7 @@ F_SelectLibrary()
 	GuiControl, , % IdText13,  % v_LibHotstringCnt
 	GuiControl, , % IdText13b, % v_LibHotstringCnt
 	LV_ModifyCol(1, "Sort")	;without this line content of library is loaded in the same order as it was saved last time; keep in mind that after any change (e.g. change of exiting definition) the whole file is sorted and saved again
-	GuiControlGet, v_OutVarTemp, Pos, % IdListView1 ;Check position of ListView1 again after resizing
-	LV_ModifyCol(1, Round(0.1 * v_OutVarTempW))
-	LV_ModifyCol(2, Round(0.1 * v_OutVarTempW))
-	LV_ModifyCol(3, Round(0.1 * v_OutVarTempW))	
-	LV_ModifyCol(4, Round(0.1 * v_OutVarTempW))
-	LV_ModifyCol(5, Round(0.4 * v_OutVarTempW))
-	LV_ModifyCol(6, Round(0.2 * v_OutVarTempW) - 3)
+	F_GuiMain_LVcolumnScale()
 	GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
