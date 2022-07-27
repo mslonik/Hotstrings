@@ -335,6 +335,7 @@ Menu,	ListView1_ContextMenu, Add, % TransA["Edit library header"],							F_EditL
 Menu,	ListView1_ContextMenu, Add
 Menu,	ListView1_ContextMenu, Add, % TransA["Move definition to another library"],				F_MoveList
 Menu,	ListView1_ContextMenu, Add, % TransA["Delete selected definition"],						F_DeleteHotstring
+Menu,	ListView1_ContextMenu, Add, % TransA["Enable/disable selected definition"],				F_LV1_EnDisDefinition
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Menu / Context menus - - - - - - - - - - - - - - - - - -
 F_MenuLogEnDis()	;Position in Menu about loging
 F_GuiAbout_CreateObjects()
@@ -1887,15 +1888,17 @@ F_OneCharPressed(ih, Char)
 ,		f_FoundTip	:= false		
 	}
 
-	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd)) and (!v_InputH.VisibleText)	;ini_MHSEn = Menu Hotstring Sound Enable; this is very unfortunate that SoundBeep is used (instead of SoundPlay). As a consequence when somebody presses very quickly some characters, this function is run "one after another" character and no other functions are run. This could lead to unwanted behaviour.
+	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))	;ini_MHSEn = Menu Hotstring Sound Enable; this is very unfortunate that SoundBeep is used (instead of SoundPlay). As a consequence when somebody presses very quickly some characters, this function is run "one after another" character and no other functions are run. This could lead to unwanted behaviour.
 	{
 		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed. Future: replace SoundBeep with SoundPlay.
 		Critical, Off
-		return
 		; OutputDebug, % "Branch Char:" . A_Tab . Char . "`n"
+		return
 	}
-	;This is compromise: not for all triggerstrings tips will be displayed, e.g. triggerstring with option ? (question mark) and those starting with EndChar: ".ahk", "..."
-	if (InStr(HotstringEndChars, Char))
+	if (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))
+		return
+	
+	if (InStr(HotstringEndChars, Char)) ;This is compromise: not for all triggerstrings tips will be displayed, e.g. triggerstring with option ? (question mark) and those starting with EndChar: ".ahk", "..."
 	{
 		if (v_InputString)	;if v_InputString is empty, do not concatenate EndChar to it.	
 			v_InputString .= Char	;the global variable v_InputString is used to display triggerstring tips
@@ -8627,7 +8630,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, B
 						return, F_MessageAboutEscapedCharacter(WhichEscape)
 				}
 		}
-		if (SendFunHotstringCreate = "F_HOF_SP")
+	if (SendFunHotstringCreate = "F_HOF_SP")
 		{
 			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["""SP"" or SendPlay may have no effect at all if UAC is enabled, even if the script is running as an administrator. For more information, refer to the AutoHotkey FAQ (help)."]
 			WhichEscape := "{"
@@ -9194,11 +9197,6 @@ HS3SearchGuiSize()
 	v_xNext := c_xmarg
 	v_yNext := v_OutVarTemp2Y + v_OutVarTemp2H + c_ymarg
 	GuiControl, MoveDraw, % IdSearchT4, % "x" v_xNext "y" v_yNext ;information about shortcuts
-	
-	; GuiControlGet, v_OutVarTemp1, Pos, % IdSearchB1
-	; v_xNext := HS3MinWidth + c_xmarg - v_OutVarTemp1W
-	; v_yNext -= c_ymarg
-	; GuiControl, MoveDraw, % IdSearchB1, % "x" v_xNext "y" v_yNext 
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_RestoreDefaultConfig()
@@ -9913,12 +9911,17 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 		Default:
 			Critical, Off
 			return
-		Case "Normal":		LV1_CopyContentToHS3()
+		Case "Normal":		F_LV1_CopyContentToHS3()
 	}
 	Critical, Off
 }	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-LV1_CopyContentToHS3()
+F_LV1_EnDisDefinition()
+{
+
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_LV1_CopyContentToHS3()
 {
 	global ;assume-global mode of operation
 	local Options := "", Fun := "", EnDis := "", TextInsert := "", OTextMenu := "", Comment := ""
@@ -11322,6 +11325,7 @@ Enable												= Enable
 enable												= enable
 En/Dis												= En/Dis
 Enable/disable libraries									= Enable/disable &libraries
+Enable/disable selected definition							= Enable/disable selected definition
 Enable/disable triggerstring tips 							= Enable/disable triggerstring tips	
 Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 4th edition of this application, 2021 by Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
 Enter 												= Enter 
@@ -13040,8 +13044,7 @@ F_GuiMain_DetermineConstraints()
 ,	LeftColumnW := 2 * c_xmarg + W_C1 + c_xmarg + W_C2 + c_xmarg
 	
 ;4.2. Determine right column width
-	GuiControlGet, v_OutVarTemp2, Pos, % IdText9 ;Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
-	RightColumnW := v_OutVarTemp2W
+	RightColumnW := LeftColumnW	;it used to be: ; GuiControlGet, v_OutVarTemp2, Pos, % IdText9 ;Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
 	GuiControl,	Hide,		% IdText9
 	
 ;5. Move text objects to correct position
