@@ -174,7 +174,7 @@ Menu, StyleGUIsubm, Add, % TransA["Light (default)"],	F_StyleOfGUI
 Menu, StyleGUIsubm, Add, % TransA["Dark"],			F_StyleOfGUI
 F_StyleOfGUI()
 
-Menu, ConfGUI,		Add, % TransA["Save position of application window"], 							F_SaveGUIPos
+Menu, ConfGUI,		Add, % TransA["Save position of application window"] . "`tCtrl + S",				F_SaveGUIPos
 Menu, ConfGUI,		Add, % TransA["Change language"], 											:SubmenuLanguage
 Menu, ConfGUI, 	Add	;To add a menu separator line, omit all three parameters.
 Menu, ConfGUI, 	Add, % TransA["Show Sandbox"] . "`tF6", 									F_ToggleSandbox
@@ -359,7 +359,7 @@ if (ini_GuiReload) and (v_Param != "l")
 AppStartTime := A_Now	;Date and time math can be performed with EnvAdd and EnvSub. Also, FormatTime can format the date and/or time according to your locale or preferences.
 Critical, Off
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
-#if WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd) or WinExist("ahk_id" TT_C4_Hwnd)
+#If WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd) or WinExist("ahk_id" TT_C4_Hwnd)
 	^Tab::	;new thread starts here
 	+^Tab::
 	^Up::
@@ -380,9 +380,19 @@ Critical, Off
 	~Shift::
 		SetTimer, TurnOff_Ttt, Off
 		return
-#if
+	^?::
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Shortcuts available for active triggerstring tips:"] . "`n`n" 
+			. "Ctrl + Tab" . A_Tab . A_Tab . 		 TransA["move selection one position down"] . "`n"
+			. "Shift + Ctrl + Tab" . A_Tab . A_Tab . TransA["move selection one position up"] . "`n"
+			. "Ctrl + ↓" . A_Tab . A_Tab . A_Tab .   TransA["move selection one position down"] . "`n"
+			. "Ctrl + ↑" . A_Tab . A_Tab . A_Tab .   TransA["move selection one position up"] . "`n"
+			. "Ctrl + Enter" . A_Tab . A_Tab .		 TransA["enter selected triggerstring"] . "`n"
+			. "Ctrl + Left Mouse Button" . A_Tab .	 TransA["enter selected triggerstring"] . "`n"
+			. "Esc" . A_Tab . A_Tab . A_Tab .		 TransA["close and interrupt"]
+		return
+#If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#if WinActive("ahk_id" HS3SearchHwnd)
+#If WinActive("ahk_id" HS3SearchHwnd)
 	^f::
 	^s::
 	F3::
@@ -392,16 +402,16 @@ Critical, Off
 		Gui, HS3Search: +Disabled
 		F_MoveList()
 		return
-#if
+#If
 
-#if WinActive("ahk_id" HotstringDelay)
+#If WinActive("ahk_id" HotstringDelay)
 	F7::
 		HSDelGuiClose()	;Gui event!
 		HSDelGuiEscape()	;Gui event!
 		return
-#if
+#If
 
-#if WinActive("ahk_id" HS3GuiHwnd) or WinActive("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows are active at the moment. 
+#If WinActive("ahk_id" HS3GuiHwnd) or WinActive("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows are active at the moment. 
 	F1::	;new thread starts here
 		F_GuiAboutLink1()
 		return
@@ -428,8 +438,11 @@ Critical, Off
 			return
 		}
 
+	^s::	;new thread starts here
+		F_SaveGUIPos()
+		return
+
 	^f::
-	^s::
 	F3:: ;new thread starts here
 		F_Searching()
 		return
@@ -486,11 +499,11 @@ Critical, Off
 	^+r::	;new thread starts here
 		F_ReloadApplication()							;reload into default mode of operation
 		return
-#if
+#If
 
-#if F_IsItEdit()
+#If F_IsItEdit()
 	AppsKey::	;blocks default context menu for Edit fields
-#if
+#If
 
 F_IsItEdit()
 {
@@ -505,11 +518,11 @@ F_IsItEdit()
 		return false
 }
 
-#if WinActive("ahk_id" MoveLibsHwnd)
+#If WinActive("ahk_id" MoveLibsHwnd)
 	F8:: 
 		F_Move()
 	return	
-#if
+#If
 
 ~Alt::		;if commented out, only for debugging reasons
 ~MButton::
@@ -547,7 +560,7 @@ F_IsItEdit()
 	;OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString . "`n"
 	return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#if WinExist("ahk_id" HMenuCliHwnd)	;MCLI
+#If WinExist("ahk_id" HMenuCliHwnd)	;MCLI
 	Tab::
 	+Tab::
 	Up::
@@ -577,7 +590,7 @@ F_IsItEdit()
 		return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#if WinExist("ahk_id" HMenuAHKHwnd)	;MSI
+#If WinExist("ahk_id" HMenuAHKHwnd)	;MSI
 	Tab::
 	+Tab::
 	Up::
@@ -604,10 +617,23 @@ F_IsItEdit()
 		SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
 		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
-	return
+		return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#if WinActive("ahk_id" TT_C4_Hwnd)	;Static triggerstring tips (inside separate window). User case scenario: if user decided to switch into static window (makes it active)
+#If WinExist("ahk_id" HMenuAHKHwnd) or WinExist("ahk_id" HMenuCliHwnd)	;MSI or MCLI
+	^?::
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Shortcuts available for hotstring menu:"] . "`n`n" ;it cannot be modal (always on top) as HMenuAHKHwnd has already feature "always on top"
+			. "Tab" . A_Tab . A_Tab . A_Tab .	 	 TransA["move selection one position down"] . "`n"
+			. "Shift + Tab" . A_Tab . A_Tab . 	 	 TransA["move selection one position up"] . "`n"
+			. "↓" . A_Tab . A_Tab . A_Tab .   	 	 TransA["move selection one position down"] . "`n"
+			. "↑" . A_Tab . A_Tab . A_Tab .   	 	 TransA["move selection one position up"] . "`n"
+			. "Enter" . A_Tab . A_Tab . A_Tab .	 TransA["enter selected hotstring"] . "`n"
+			. "Left Mouse Button" . A_Tab . A_Tab .	 TransA["enter selected hotstring"] . "`n"
+			. "Esc" . A_Tab . A_Tab . A_Tab .		 TransA["close and interrupt"]
+		return
+#If
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#If WinActive("ahk_id" TT_C4_Hwnd)	;Static triggerstring tips (inside separate window). User case scenario: if user decided to switch into static window (makes it active)
 	Tab::	
 	+Tab::
 	1::
@@ -623,9 +649,9 @@ F_IsItEdit()
 		; OutputDebug, % "WinActive(ahk_id TT_C4_Hwnd)" . "`n"
 		F_StaticMenu_Keyboard(CheckPreviousWindowID := true)
 		return
-#if
+#If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#if WinExist("ahk_id" TT_C4_Hwnd)	;Static triggerstring tips (inside separate window)
+#If WinExist("ahk_id" TT_C4_Hwnd)	;Static triggerstring tips (inside separate window)
 	~Tab::	;There must be "~" as this code will be run even if IdTT_C4_LB4 is empty
 	~+Tab::
 	~1::
@@ -1900,7 +1926,7 @@ F_OneCharPressed(ih, Char)
 	
 	if (InStr(HotstringEndChars, Char)) ;This is compromise: not for all triggerstrings tips will be displayed, e.g. triggerstring with option ? (question mark) and those starting with EndChar: ".ahk", "..."
 	{
-		if (v_InputString)	;if v_InputString is empty, do not concatenate EndChar to it.	
+		; if (v_InputString)	;if v_InputString is empty, do not concatenate EndChar to it. Commented out to let "/ be correctly escaped.
 			v_InputString .= Char	;the global variable v_InputString is used to display triggerstring tips
 		f_FoundEndChar		:= true
 	}
@@ -8220,20 +8246,13 @@ F_AddHotstring()
 	;1. Read all inputs. 
 	if (F_ReadUserInputs(TextInsert, NewOptions, OnOff, EnDis, SendFunHotstringCreate, SendFunFileFormat))	;return true (1) in case of any problem. 
 		return
-	SelectedLibraryName := SubStr(v_SelectHotstringLibrary, 1, -4)	
 	;Disable all GuiControls for time of adding / editing of d(t, o, h)	
-	WinGet, WinHWND, ID, % "ahk_id" HS3GuiHwnd
-	if (WinHWND)
-	{
-		WhichGuiEnable := "HS3"
-		F_GuiMain_EnDis("Disable")	;EnDis = "Disable" or "Enable"
-	}
-	WinGet, WinHWND, ID, % "ahk_id" HS4GuiHwnd
-	if (WinHWND)
-	{
-		WhichGuiEnable := "HS4"
-		F_GuiHS4_EnDis("Disable")
-	}
+	WhichGuiEnable := F_WhichGui()
+	Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
+		{
+			Case "HS3":	F_GuiMain_EnDis("Disable")	;EnDis = "Disable" or "Enable"
+			Case "HS4": 	F_GuiHS4_EnDis("Disable")
+		}
 	
 	;2. Create or modify (triggerstring, hotstring) definition according to inputs. 
 	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
@@ -8391,11 +8410,10 @@ F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 	a_Triggerstring	.Push(v_Triggerstring)
 	a_TriggerOptions	.Push(NewOptions)
 	a_OutputFunction	.Push(SendFunFileFormat)
-	a_EnableDisable	.Push(EnDis)	;here was a bug: OnOff instead of EnDis
+	a_EnableDisable	.Push(EnDis)
 	a_Hotstring		.Push(TextInsert)
 	a_Comment			.Push(v_Comment)
 	a_Combined		.Push(v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert)
-	; a_Gain			.Push(F_CalculateGain(v_Triggerstring, TextInsert, NewOptions))
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 }	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9298,13 +9316,13 @@ F_WhichGui()
 	if (WinHWND)
 	{
 		Gui, HS3: Default
-		return
+		return "HS3"
 	}
 	WinGet, WinHWND, ID, % "ahk_id" HS4GuiHwnd
 	if (WinHWND)
 	{
 		Gui, HS4: Default
-		return
+		return "HS4"
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9918,14 +9936,80 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LV1_EnDisDefinition()
 {
+	global ;a_Triggerstring, a_TriggerOptions, a_EnableDisable, a_Combined, a_Hotstring, ini_TipsSortAlphabetically, ini_TipsSortByLength, v_SelectHotstringLibrary ;assume-global mode of operation
+	local EnDis := "", SelectedRow := 0, OnOffToggle := false, Triggerstring := "", Options := "", key := 0, value := "", index := 0, Temp1 := "", SelectedHotstringLibrary := "", vHotstring := "", Fun := ""
 
+	Gui, HS3: Default	;in order to activate ListView
+	if !(SelectedRow := LV_GetNext())
+		return
+	LV_GetText(Triggerstring, 	SelectedRow, 	1)
+	LV_GetText(Options, 		SelectedRow, 	2)
+	LV_GetText(Fun, 			SelectedRow, 	3)
+	Switch Fun
+	{
+		Case "SI":	Fun := "F_HOF_SI"
+		Case "CL":	Fun := "F_HOF_CLI"
+		Case "MCL":	Fun := "F_HOF_MCLI"
+		Case "MSI":	Fun := "F_HOF_MSI"
+		Case "SR":	Fun := "F_HOF_SR"
+		Case "SP":	Fun := "F_HOF_SP"
+		Case "SE":	Fun := "F_HOF_SE"
+	}
+	LV_GetText(EnDis, 			SelectedRow, 	4)
+	LV_GetText(vHotstring, 		SelectedRow, 	5)
+	Switch EnDis
+	{
+		Case "En":
+			OnOffToggle 	:= false	;reverse logic
+,			EnDis		:= "Dis"
+		Case "Dis":
+			OnOffToggle 	:= true	;reverse logic
+,			EnDis		:= "En"
+	}
+	;1. Modify Hotstring definition
+	Try
+		Hotstring(":" . Options . ":" . Triggerstring, func(Fun).bind(vHotstring, true), OnOffToggle)
+	Catch
+	{
+		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
+			. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "," . A_Space . OnOffToggle . ")," 
+		return
+	}
+	;2. Modify a_tables
+	for key, value in a_Triggerstring
+	{
+		if (a_Triggerstring[key] = Triggerstring)
+			break
+	}
+	a_EnableDisable[key] := OnOffToggle
+	for index in a_Combined	;recreate array a_Combined
+		a_Combined[index] := a_Triggerstring[index] . "|" . a_TriggerOptions[index] . "|" . a_EnableDisable[index] . "|" . a_Hotstring[index]
+	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
+	;3. Modify content of ListView
+	Loop, % LV_GetCount()
+	{
+		LV_GetText(Temp1, A_Index)
+		if (Temp1 = Triggerstring)	;non-case sensitive comparison
+		{
+			LV_Modify(A_Index, "Col4", EnDis)
+			Break
+		}
+	}
+	;4. Modify content of library file
+	FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary	;delete library file. 
+	F_SaveLVintoLibFile()
+	Switch F_WhichGui()	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
+		{
+			Case "HS3":	F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
+			Case "HS4": 	F_GuiHS4_EnDis("Enable")
+		}
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["New settings are now applied."], 10	;dissapears after 10 s
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LV1_CopyContentToHS3()
 {
 	global ;assume-global mode of operation
-	local Options := "", Fun := "", EnDis := "", TextInsert := "", OTextMenu := "", Comment := ""
-		,v_SelectedRow := 0
+	local Options := "", Fun := "", EnDis := "", TextInsert := "", OTextMenu := "", Comment := "", v_SelectedRow := 0
 
 	if !(v_SelectedRow := LV_GetNext())
 		return
@@ -11266,6 +11350,7 @@ Clear (F5) 											= Clear (F5)
 Clipboard Delay (F7)									= Clipboard &Delay (F7)
 Clipboard paste delay in [ms]:  							= Clipboard paste delay in [ms]:
 Close												= Cl&ose
+close and interrupt										= close and interrupt
 Closing Curly Bracket } 									= Closing Curly Bracket }
 Closing Round Bracket ) 									= Closing Round Bracket )
 Closing Square Bracket ] 								= Closing Square Bracket ]
@@ -11332,6 +11417,8 @@ Enter 												= Enter
 Enter a name for the new library 							= Enter a name for the new library
 Enter a new library name									= Enter a new library name
 Enter hotstring 										= Enter hotstring
+enter selected hotstring									= enter selected hotstring
+enter selected triggerstring								= enter selected triggerstring
 Enter triggerstring										= Enter triggerstring
 Triggerstring cannot be empty  if you wish to add new hotstring	= Triggerstring cannot be empty  if you wish to add new hotstring
 Error												= Error
@@ -11452,6 +11539,8 @@ Minus - 												= Minus -
 Mode of operation										= Mode of operation
 Move definition to another library							= Move definition to another library
 Move (F8)												= Move (F8)
+move selection one position down							= move selection one position down
+move selection one position up							= move selection one position down
 navy													= navy
 Next the default language file (English.txt) will be deleted,	= Next the default language file (English.txt) will be deleted,
 reloaded and fresh language file (English.txt) will be recreated. = reloaded and fresh language file (English.txt) will be recreated.
@@ -11548,6 +11637,8 @@ Set parameters of menu sound								= Set parameters of menu sound
 Set parameters of triggerstring sound						= Set parameters of triggerstring sound
 Shortcut (hotkey) definition								= Shortcut (hotkey) definition
 Shortcut (hotkey) definitions								= Shortcut (hotkey) definitions
+Shortcuts available for active triggerstring tips:			= Shortcuts available for active triggerstring tips:
+Shortcuts available for hotstring menu:						= Shortcuts available for hotstring menu:
 Show intro											= Show intro
 Show Introduction window after application is restarted?		= Show Introduction window after application is restarted?
 Show library header										= Show library header
@@ -11674,6 +11765,9 @@ Undid the last hotstring 								= Undid the last hotstring
 Version / Update										= Version / Update
 Version												= Version
 Visit public libraries webpage							= Visit public libraries webpage
+)"
+	TransConst .= "`n
+(Join`n `
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
 was successfully downloaded.								= was successfully downloaded.
@@ -11690,9 +11784,6 @@ Would you like now to reload it in order to run the just downloaded version? = W
 Would you like to move ""Hotstrings"" script / application to default location? = Would you like to move ""Hotstrings"" script / application to default location?
 Would you like to move ""Hotstrings"" script / application somewhere else? = Would you like to move ""Hotstrings"" script / application somewhere else?
 Would you like to move ""Libraries"" folder to this location?	= Would you like to move ""Libraries"" folder to this location?
-)"
-	TransConst .= "`n
-(Join`n `
 yellow												= yellow
 Yes													= Yes
 yes													= yes
@@ -11703,6 +11794,9 @@ Your current screen coordinates have changed. For example you've unplugged your 
 ↓ Click here to select hotstring library ↓					= ↓ Click here to select hotstring library ↓
 {Up} or {Down} or {Home} or {End} or {PgUp} or {PgDown}		= {Up} or {Down} or {Home} or {End} or {PgUp} or {PgDown}
 ShowInfoText											= In order to display graphical user interface (GUI) of the application just press shortcut: Win + Ctrl + H. `n`nSuggested steps after installation: `n`n1. Download some libraries (files containing (triggerstring, hotstring) definitions. You can do it from application menu:  → Libraries. `n`n2. After downloading of libraries restart application to apply the changes. Again, you can do it from application menu: Application → Restart. `n`n3. Application is preconfigured on the first start. Options available to be configured area available from GUI, application menu → Configuration. `n`n4. Application runs by default in default mode. If you don't wish to modify configuration, `nmay consider to run it in simplified mode: application menu → Application → Reload → Reload in silent mode.
+)"
+	TransConst .= "`n
+(Join`n `
 F_TI_ImmediateExecute									= * (asterisk): An EndChar (e.g. Space, ., or Enter) is not required to trigger the hotstring. For example:`n`n:*:j@::jsmith@somedomain.com`n`nThe example above would send its replacement the moment you type the @ character.
 F_TI_InsideWord										= ? (question mark): The hotstring will be triggered even when it is inside another word; `n`nthat is, when the character typed immediately before it is alphanumeric. `nFor example, if :?:al::airline is a hotstring, `ntyping ""practical "" would produce ""practicairline "".
 F_TI_NoBackSpace										= B0: Automatic backspacing is not done to erase the abbreviation you type. `n`nOne may send ← five times via {left 5}. For example, the following hotstring produces ""<em></em>"" and `nmoves the caret 5 places to the left (so that it's between the tags) `n`n::*b0:<em>::</em>{left 5}
@@ -11741,8 +11835,7 @@ T_TtNoOfChars											= It is possible to configure triggerstring tips to be d
 T_ATT1												= If active triggerstring tips are enabled, then it is possible to use keyboard shortcuts `nto enter one of the triggerstrings from currently displayed list. `n`nActive triggerstring shortcuts: `n`nControl + Enter to enter any of the triggerstring tips `nControl + ↓ or Control + ↑ to move down or up on the list `n Control + Tab or Control + Shift + Tab to move down or up on the list.
 T_TtComposition										= `n`nOf course if additional columns are chosen, window will become wider.
 T_SMT2												= This option let's you to display permanent, ""static"" window `nwhere you can always find up-to-date ""triggerstring tips"" and ""hotstring menus"". `n`nOptions are combinations of other ""events"" options (set in other tabs).
-)"
-	
+)"	
 	TransA					:= {}	;this associative array (global) is used to store translations of this application text strings
 	
 	if (decision[1] = "create")
