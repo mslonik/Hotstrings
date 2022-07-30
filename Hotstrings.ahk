@@ -57,6 +57,7 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		WhichMenu 			:= "" ;available values: CLI or MSI
 ,		v_EndChar 			:= "" ;initialization of this variable is important in case user would like to hit "Esc" and GUI TT_C4 exists.
 ,		AppStartTime			:= "" ;When application got started, this parameter is used for performance statistics
+,		v_EnDis				:= true
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
 F_LoadCreateTranslationTxt() 			;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
@@ -8223,17 +8224,10 @@ F_CreateMenu_SizeOfMargin()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_AddHotstring()
-;1. Read all inputs. 
-;2. Create Hotstring definition according to inputs. 
-;3. Read the library file into List View. 
-;4. Sort List View. 
-;5. Delete library file. 
-;6. Save List View into the library file.
-;7. Increment library counter.
 {
-	global ;assume-global mode of operation
+	global ;v_EnDis ;assume-global mode of operation
 	local 	TextInsert := "", NewOptions := "", f_ChangeExistingDef := false
-			,OnOff := "", EnDis := ""
+			, EnDis := ""
 			,SendFunHotstringCreate := "", SendFunFileFormat := ""
 			,OldOptions := "", OldEnDis := "", TurnOffOldOptions := ""
 			,v_TheWholeFile := "", v_TotalLines := 0
@@ -8244,7 +8238,7 @@ F_AddHotstring()
 			,Overwrite := "", WinHWND := "", WhichGuiEnable := ""
 
 	;1. Read all inputs. 
-	if (F_ReadUserInputs(TextInsert, NewOptions, OnOff, EnDis, SendFunHotstringCreate, SendFunFileFormat))	;return true (1) in case of any problem. 
+	if (F_ReadUserInputs(TextInsert, NewOptions, SendFunHotstringCreate, SendFunFileFormat))	;return true (1) in case of any problem. 
 		return
 	;Disable all GuiControls for time of adding / editing of d(t, o, h)	
 	WhichGuiEnable := F_WhichGui()
@@ -8308,7 +8302,11 @@ F_AddHotstring()
 	; 3. Modify existing definition
 	if (f_ChangeExistingDef)	;modify existing definition
 	{
-		Overwrite := F_ChangeExistingDef(OldOptions, NewOptions, a_Triggerstring[key], a_Library[key], SendFunHotstringCreate, TextInsert, OnOff)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
+		Overwrite := F_ChangeExistingDef(OldOptions, NewOptions, a_Triggerstring[key], a_Library[key], SendFunHotstringCreate, TextInsert)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
+		if (v_EnDis)
+			EnDis := "En"
+		else
+			EnDis := "Dis"
 		if (Overwrite = "Yes")
 		{
 			F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Comment)
@@ -8343,23 +8341,27 @@ F_AddHotstring()
 	if (InStr(NewOptions, "O"))
 	{
 		Try
-			Hotstring(":" . NewOptions . ":" . v_Triggerstring, func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)
+			Hotstring(":" . NewOptions . ":" . v_Triggerstring, func(SendFunHotstringCreate).bind(TextInsert, true), v_EnDis)
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-			. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," . A_Space . OnOff . ")"
+			. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," . A_Space . v_EnDis . ")"
 	}
 	else
 	{
 		Try
-			Hotstring(":" . NewOptions . ":" . v_Triggerstring, func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)
+			Hotstring(":" . NewOptions . ":" . v_Triggerstring, func(SendFunHotstringCreate).bind(TextInsert, false), v_EnDis)
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-			. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . OnOff . ")"
+			. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . v_EnDis . ")"
 	}
 	; 5. Update global arrays
-	F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
+	F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, v_EnDis, TextInsert)
 	
-	;6. Update and sort List View. ;future: gui parameter for sorting 
+	;6. Update and sort List View. ;future: gui parameter for sorting
+	if (v_EnDis)
+		EnDis := "En"
+	else
+		EnDis := "Dis"
 	LV_Add("",  v_Triggerstring, NewOptions, SendFunFileFormat, EnDis, TextInsert, v_Comment)
 	LV_ModifyCol(1, "Sort")
 
@@ -8406,11 +8408,16 @@ F_SaveLVintoLibFile()
 F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 {
 	global	;assume-global mode of operation
+	local	temp := ""
 	a_Library			.Push(SubStr(v_SelectHotstringLibrary, 1, -4))
 	a_Triggerstring	.Push(v_Triggerstring)
 	a_TriggerOptions	.Push(NewOptions)
 	a_OutputFunction	.Push(SendFunFileFormat)
-	a_EnableDisable	.Push(EnDis)
+	if (EnDis)
+		temp := "En"
+	else
+		temp := "Dis"
+	a_EnableDisable	.Push(temp)
 	a_Hotstring		.Push(TextInsert)
 	a_Comment			.Push(v_Comment)
 	a_Combined		.Push(v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert)
@@ -8450,9 +8457,9 @@ F_ModifyLV(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFunHotstringCreate, TextInsert, OnOff)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
+F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFunHotstringCreate, TextInsert)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
 {	
-	global	;assume-global mode of operation
+	global	;v_EnDis ;assume-global mode of operation
 	MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
 		, % TransA["The triggerstring"] . A_Space . """" .  FoundTriggerstring . """" . A_Space .  TransA["exists in the currently selected library"] . ":" . A_Space . Library 
 		. ".csv" . "." . "`n`n" . TransA["Do you want to proceed?"]	. "`n`n" . TransA["If you answer ""Yes"" it will overwritten with chosen settings."]
@@ -8472,12 +8479,12 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 		if (InStr(NewOptions, "O"))	;Add new hotstring which replaces the old one
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func(SendFunHotstringCreate).bind(TextInsert, true), OnOff)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
+				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func(SendFunHotstringCreate).bind(TextInsert, true), v_EnDis)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
 			Catch
 			{
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . "`n" . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," 
-					. A_Space . OnOff . ")"
+					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . true . ")," 
+					. A_Space . v_EnDis . ")"
 				return "No"
 			}
 		}
@@ -8486,13 +8493,13 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			Try
 			{
 				Hotstring(":" . OldOptions . ":" . v_Triggerstring, , "Off")	;help -> Hotstring(): However, since hotstrings with C or ? are considered distinct from other hotstrings, it is not possible to add or remove these options. Instead, turn off the existing hotstring and create a new one.
-				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func(SendFunHotstringCreate).bind(TextInsert, false), OnOff)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
+				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func(SendFunHotstringCreate).bind(TextInsert, false), v_EnDis)	;because v_Triggerstring is read from Edit field, it contains spcial sequences as 2x characters, e.g. `t = ` + t and not A_Tab. as a consequence F_ConvertEscapeSequences function have to be run
 			}
 			Catch
 			{
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong during hotstring setup"] . ":" . "`n`n"
-					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," 
-					. A_Space . OnOff . ")"
+					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," 
+					. A_Space . v_EnDis . ")"
 				return "No"
 			}			
 		}
@@ -8500,17 +8507,18 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, ByRef SendFunHotstringCreate, ByRef SendFunFileFormat)
+F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFunHotstringCreate, ByRef SendFunFileFormat)
 {
 	global ;assume-global mode of operation
 
-	Gui, % A_DefaultGui . ":" A_Space . "Submit", NoHide
-	Gui, % A_DefaultGui . ":" A_Space . "+OwnDialogs"
+	; Gui, % A_DefaultGui . ":" . A_Space . "Submit", NoHide +OwnDialogs
+	Gui, % A_DefaultGui . ":" . A_Space . "Submit", NoHide
+	Gui, % A_DefaultGui . ":" . A_Space . "+OwnDialogs"
 
 	if (Trim(v_Triggerstring) = "")
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Triggerstring cannot be empty  if you wish to add new hotstring"] . "."
-		return, 1
+		return, true
 	}
 	if InStr(v_SelectFunction, "Menu")
 	{
@@ -8518,7 +8526,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, B
 		{
 			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Replacement text is blank. Do you want to proceed?"]
 			IfMsgBox, No
-				return, 1
+				return, true
 		}
 		if (Trim(v_EnterHotstring) != "")
 		{
@@ -8562,7 +8570,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, B
 		{
 			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Replacement text is blank. Do you want to proceed?"] 
 			IfMsgBox, No
-				return, 1
+				return, true
 		}
 		else
 		{
@@ -8573,7 +8581,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, B
 	if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Choose existing hotstring library file before saving new (triggerstring, hotstring) definition!"]
-		return, 1
+		return, true
 	}
 	if (v_OptionImmediateExecute)
 		NewOptions .= "*"
@@ -8590,14 +8598,15 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, B
 		NewOptions .= "O"
 	if (v_OptionReset)
 		NewOptions .= "Z"
-	if (v_OptionDisable)
+/* 	if (v_EnDis)
 	{
 		OnOff := "Off", EnDis := "Dis"	
 	}
 	else
 	{
 		OnOff := "On", EnDis := "En"
-	}
+	} 
+*/
 	Switch v_SelectFunction
 	{
 		Case "Clipboard (CL)":			SendFunHotstringCreate 	:= "F_HOF_CLI", 	SendFunFileFormat 	:= "CL"
@@ -8688,7 +8697,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef OnOff, ByRef EnDis, B
 						return, F_MessageAboutEscapedCharacter(WhichEscape)
 				}
 		}
-	return, 0
+	return, false
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MessageAboutEscapedCharacter(WhichEscape)
@@ -8722,8 +8731,8 @@ F_Clear()
 	GuiControl, HS3:, % IdCheckBox4, 0
 	GuiControl, HS3: Font, % IdCheckBox5
 	GuiControl, HS3:, % IdCheckBox5, 0
-	GuiControl, HS3: Font, % IdCheckBox6
-	GuiControl, HS3:, % IdCheckBox6, 0
+	; GuiControl, HS3: Font, % IdCheckBox6
+	; GuiControl, HS3:, % IdCheckBox6, 0
 	GuiControl, HS3: Font, % IdCheckBox8
 	GuiControl, HS3:, % IdCheckBox8, 0
 	GuiControl, HS3: Choose, % IdDDL1, SendInput (SI) ;v_SelectFunction 
@@ -8760,8 +8769,8 @@ F_Clear()
 	GuiControl, HS4:, % IdCheckBox4b, 0
 	GuiControl, HS4: Font, % IdCheckBox5b
 	GuiControl, HS4:, % IdCheckBox5b, 0
-	GuiControl, HS4: Font, % IdCheckBox6b
-	GuiControl, HS4:, % IdCheckBox6b, 0
+	; GuiControl, HS4: Font, % IdCheckBox6b
+	; GuiControl, HS4:, % IdCheckBox6b, 0
 	GuiControl, HS4: Font, % IdCheckBox8b
 	GuiControl, HS4:, % IdCheckBox8b, 0
 	GuiControl, HS4: Choose, % IdDDL1b, SendInput (SI) 	;v_SelectFunction 
@@ -9242,7 +9251,7 @@ F_Checkbox()
 	
 	if (v_OutputVar)
 	{
-		if (A_GuiControl = "v_OptionDisable")
+		if (A_GuiControl = "v_EnDis")
 		{
 			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cRed Norm", % c_FontType
 			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cRed Norm", % c_FontType
@@ -9955,6 +9964,7 @@ F_LV1_EnDisDefinition()
 		Case "SP":	Fun := "F_HOF_SP"
 		Case "SE":	Fun := "F_HOF_SE"
 	}
+
 	LV_GetText(EnDis, 			SelectedRow, 	4)
 	LV_GetText(vHotstring, 		SelectedRow, 	5)
 	Switch EnDis
@@ -10008,16 +10018,16 @@ F_LV1_EnDisDefinition()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LV1_CopyContentToHS3()
 {
-	global ;assume-global mode of operation
-	local Options := "", Fun := "", EnDis := "", TextInsert := "", OTextMenu := "", Comment := "", v_SelectedRow := 0
+	global ;v_EnDis ;assume-global mode of operation
+	local Options := "", Fun := "", EnDis := "", TextInsert := "", OTextMenu := "", Comment := "", SelectedRow := 0
 
-	if !(v_SelectedRow := LV_GetNext())
+	if !(SelectedRow := LV_GetNext())
 		return
 	
-	LV_GetText(v_Triggerstring, 	v_SelectedRow, 1)
+	LV_GetText(v_Triggerstring, 	SelectedRow, 1)
 	GuiControl, HS3:, % IdEdit1, % v_Triggerstring
 	GuiControl, HS4:, % IdEdit1, % v_Triggerstring
-	LV_GetText(Options, 		v_SelectedRow, 2)
+	LV_GetText(Options, 		SelectedRow, 2)
 	if (InStr(Options, "*"))
 	{
 		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
@@ -10140,7 +10150,7 @@ F_LV1_CopyContentToHS3()
 		GuiControl, HS4:, % IdCheckBox8b, 0
 	}
 	
-	LV_GetText(Fun, 			v_SelectedRow, 3)
+	LV_GetText(Fun, 			SelectedRow, 3)
 	Switch Fun
 	{
 		Case "SI":	;SendFun := "F_HOF_SI"
@@ -10166,27 +10176,31 @@ F_LV1_CopyContentToHS3()
 		GuiControl, HS4: ChooseString, % IdDDL1b, 	SendEvent (SE)
 	}
 	
-	LV_GetText(EnDis, 		v_SelectedRow, 4)
-	if (InStr(EnDis, "En"))
-	{
-		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-		GuiControl, HS3: Font, % IdCheckBox6
-		GuiControl, HS4: Font, % IdCheckBox6b
-		GuiControl, HS3:, % IdCheckBox6,  0
-		GuiControl, HS4:, % IdCheckBox6b, 0
-	}
-	else
-	{
-		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cRed Norm", % c_FontType
-		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cRed Norm", % c_FontType
-		GuiControl, HS3: Font, % IdCheckBox6
-		GuiControl, HS4: Font, % IdCheckBox6b
-		GuiControl, HS3:, % IdCheckBox6,  1
-		GuiControl, HS4:, % IdCheckBox6b, 1
-	}
+	LV_GetText(EnDis,		SelectedRow, 4)
+	if (EnDis = "En")		;local variable
+		v_EnDis := true	;global variable
+	if (EnDis = "Dis")		;local variable
+		v_EnDis := false	;global variable
+	; if (InStr(EnDis, "En"))
+	; {
+	; 	Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+	; 	Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+	; 	GuiControl, HS3: Font, % IdCheckBox6
+	; 	GuiControl, HS4: Font, % IdCheckBox6b
+	; 	GuiControl, HS3:, % IdCheckBox6,  0
+	; 	GuiControl, HS4:, % IdCheckBox6b, 0
+	; }
+	; else
+	; {
+	; 	Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cRed Norm", % c_FontType
+	; 	Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cRed Norm", % c_FontType
+	; 	GuiControl, HS3: Font, % IdCheckBox6
+	; 	GuiControl, HS4: Font, % IdCheckBox6b
+	; 	GuiControl, HS3:, % IdCheckBox6,  1
+	; 	GuiControl, HS4:, % IdCheckBox6b, 1
+	; }
 	
-	LV_GetText(TextInsert, 	v_SelectedRow, 5)
+	LV_GetText(TextInsert, 	SelectedRow, 5)
 	if ((Fun = "MCL") or (Fun = "MSI"))
 	{
 		OTextMenu := StrSplit(TextInsert, "¦")
@@ -10211,7 +10225,7 @@ F_LV1_CopyContentToHS3()
 		GuiControl, HS4:, v_EnterHotstring, % TextInsert
 	}
 	
-	LV_GetText(Comment, 	v_SelectedRow, 6)
+	LV_GetText(Comment, 	SelectedRow, 6)
 	GuiControl, HS3:, v_Comment, %Comment%
 	GuiControl, HS4:, v_Comment, %Comment%
 	
@@ -11565,7 +11579,7 @@ of													= of
 OK													= &OK
 Old location:											= Old location:
 olive												= olive
-OnOff parameter is missing								= OnOff parameter is missing
+EnDis parameter is missing								= EnDis parameter is missing
 On start-up the local version of application was compared with repository version and difference was discovered: = On start-up the local version of application was compared with repository version and difference was discovered:
 Open Config.ini in your default editor						= Open Config.ini in your default editor
 Open folder where Config.ini is located						= Open folder where Config.ini is located
@@ -12175,8 +12189,8 @@ F_GuiHS4_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, % EnDis, % IdTextInfo8b
 	GuiControl, % EnDis, % IdCheckBox8b
 	GuiControl, % EnDis, % IdTextInfo10b
-	GuiControl, % EnDis, % IdCheckBox6b
-	GuiControl, % EnDis, % IdTextInfo11b
+	; GuiControl, % EnDis, % IdCheckBox6b
+	; GuiControl, % EnDis, % IdTextInfo11b
 	GuiControl, % EnDis, % IdText3b
 	GuiControl, % EnDis, % IdTextInfo12b
 	GuiControl, % EnDis, % IdDDL1b
@@ -12298,10 +12312,10 @@ F_GuiHS4_CreateObject()
 	GuiControl +g, % IdTextInfo10b, % F_TI_OptionResetRecognizer
 	
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
-	Gui, 	HS4: Add, 	CheckBox, 	x0 y0 HwndIdCheckBox6b gF_Checkbox vv_OptionDisable, 			% TransA["Disable"]
-	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
-	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo11b,									ⓘ
-	GuiControl +g, % IdTextInfo11b, % F_TI_OptionDisable
+	; Gui, 	HS4: Add, 	CheckBox, 	x0 y0 HwndIdCheckBox6b gF_Checkbox vv_EnDis, 			% TransA["Disable"]
+	; Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
+	; Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo11b,									ⓘ
+	; GuiControl +g, % IdTextInfo11b, % F_TI_OptionDisable
 	
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText3b,						 				% TransA["Select hotstring output function"]
@@ -12400,8 +12414,8 @@ F_GuiMain_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, %  EnDis, % IdTextInfo8
 	GuiControl, %  EnDis, % IdCheckBox8
 	GuiControl, %  EnDis, % IdTextInfo10
-	GuiControl, %  EnDis, % IdCheckBox6
-	GuiControl, %  EnDis, % IdTextInfo11
+	; GuiControl, %  EnDis, % IdCheckBox6
+	; GuiControl, %  EnDis, % IdTextInfo11
 	GuiControl, %  EnDis, % IdText3
 	GuiControl, %  EnDis, % IdTextInfo12
 	GuiControl, %  EnDis, % IdDDL1
@@ -12527,11 +12541,11 @@ F_GuiMain_CreateObject()
 	GuiControl +g, % IdTextInfo10, % F_TI_OptionResetRecognizer
 	
 	Gui, 		HS3: Font, 		% "s" . c_FontSize
-	Gui, 		HS3: Add, 		CheckBox, 	x0 y0 HwndIdCheckBox6 gF_Checkbox vv_OptionDisable, 			% TransA["Disable"]
+	; Gui, 		HS3: Add, 		CheckBox, 	x0 y0 HwndIdCheckBox6 gF_Checkbox vv_EnDis, 			% TransA["Disable"]
 	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2
-	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo11,									ⓘ
-	F_TI_OptionDisable		:= func("F_ShowLongTooltip").bind(TransA["F_TI_OptionDisable"])
-	GuiControl +g, % IdTextInfo11, % F_TI_OptionDisable
+	; Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo11,									ⓘ
+	; F_TI_OptionDisable		:= func("F_ShowLongTooltip").bind(TransA["F_TI_OptionDisable"])
+	; GuiControl +g, % IdTextInfo11, % F_TI_OptionDisable
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText3,						 				% TransA["Select hotstring output function"]
@@ -12821,7 +12835,7 @@ F_GuiHS4_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp1, Pos, % IdRadioCaseCCb
 	GuiControlGet, v_OutVarTemp2, Pos, % IdRadioCaseCSb
 	GuiControlGet, v_OutVarTemp3, Pos, % IdRadioCaseC1b
-	GuiControlGet, v_OutVarTemp4, Pos, % IdCheckBox6b
+	; GuiControlGet, v_OutVarTemp4, Pos, % IdCheckBox6b
 	W_C2 := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W, v_OutVarTemp4W) + c_xmarg + W_InfoSign
 	
 ,	LeftColumnW := 2 * c_xmarg + W_C1 + c_xmarg + W_C2 + c_xmarg
@@ -12896,11 +12910,11 @@ F_GuiHS4_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp1, Pos, % IdCheckBox8
 	v_xNext += v_OutVarTemp1W
 	GuiControl, Move, % IdTextInfo10b, % "x" . v_xNext . "y" . v_yNext 
-	v_xNext := c_xmarg * 2 + W_C1 + c_xmarg
-	GuiControl, Move, % IdCheckBox6b, % "x" . v_xNext . "y" . v_yNext
-	GuiControlGet, v_OutVarTemp1, Pos, % IdCheckBox6b
-	v_xNext += v_OutVarTemp1W
-	GuiControl, Move, % IdTextInfo11b, % "x" . v_xNext . "y" . v_yNext
+	; v_xNext := c_xmarg * 2 + W_C1 + c_xmarg
+	; GuiControl, Move, % IdCheckBox6b, % "x" . v_xNext . "y" . v_yNext
+	; GuiControlGet, v_OutVarTemp1, Pos, % IdCheckBox6b
+	; v_xNext += v_OutVarTemp1W
+	; GuiControl, Move, % IdTextInfo11b, % "x" . v_xNext . "y" . v_yNext
 	
 ;5.1.3. Select hotstring output function
 	v_xNext := c_xmarg
@@ -13131,7 +13145,7 @@ F_GuiMain_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp1, Pos, % IdRadioCaseCC
 	GuiControlGet, v_OutVarTemp2, Pos, % IdRadioCaseCS
 	GuiControlGet, v_OutVarTemp3, Pos, % IdRadioCaseC1
-	GuiControlGet, v_OutVarTemp4, Pos, % IdCheckBox6
+	; GuiControlGet, v_OutVarTemp4, Pos, % IdCheckBox6
 	W_C2 := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W, v_OutVarTemp4W) + c_xmarg + W_InfoSign
 	
 ,	LeftColumnW := 2 * c_xmarg + W_C1 + c_xmarg + W_C2 + c_xmarg
@@ -13210,11 +13224,11 @@ F_GuiMain_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp1, Pos, % IdCheckBox8
 	v_xNext += v_OutVarTemp1W
 	GuiControl, Move, % IdTextInfo10, % "x" . v_xNext . "y" . v_yNext 
-	v_xNext := c_xmarg * 2 + W_C1 + c_xmarg
-	GuiControl, Move, % IdCheckBox6, % "x" . v_xNext . "y" . v_yNext
-	GuiControlGet, v_OutVarTemp1, Pos, % IdCheckBox6
-	v_xNext += v_OutVarTemp1W
-	GuiControl, Move, % IdTextInfo11, % "x" . v_xNext . "y" . v_yNext
+	; v_xNext := c_xmarg * 2 + W_C1 + c_xmarg
+	; GuiControl, Move, % IdCheckBox6, % "x" . v_xNext . "y" . v_yNext
+	; GuiControlGet, v_OutVarTemp1, Pos, % IdCheckBox6
+	; v_xNext += v_OutVarTemp1W
+	; GuiControl, Move, % IdTextInfo11, % "x" . v_xNext . "y" . v_yNext
 	
 ;5.1.3. Select hotstring output function
 	v_xNext := c_xmarg
@@ -13632,7 +13646,7 @@ F_LoadLibrariesToTables()
 F_CreateHotstring(txt, nameoffile) 
 { 
 	global	;assume-global mode
-	local Options := "", SendFun := "", EnDis := "", OnOff := "", TextInsert := "", Oflag := false, Triggerstring := "", LenStr := 0
+	local Options := "", SendFun := "", EnDis := "", TextInsert := "", Oflag := false, Triggerstring := "", LenStr := 0
 
 	Loop, Parse, txt, ‖
 	{
@@ -13661,15 +13675,15 @@ F_CreateHotstring(txt, nameoffile)
 			Case 4: 
 				Switch A_LoopField
 				{
-					Case "En":	OnOff := "On"
-					Case "Dis":	OnOff := "Off"	
+					Case "En":	EnDis := true
+					Case "Dis":	EnDis := false
 				}
 			Case 5:
 				TextInsert := A_LoopField
 		}
 	}
 	
-	if ((!Triggerstring) and (Options or SendFun or OnOff or TextInsert))
+	if ((!Triggerstring) and (Options or SendFun or EnDis or TextInsert))
 	{
 		MsgBox, 262420, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Error reading library file:"] . "`n`n" . nameoffile . "`n`n" . TransA["the following line is found:"] 
 					. "`n" . txt . "`n`n" . TransA["This line do not comply to format required by this application."] . "`n`n" 
@@ -13680,20 +13694,20 @@ F_CreateHotstring(txt, nameoffile)
 		IfMsgBox, Yes
 			return
 	}
-	if (OnOff = "")	;This is consequence of hard lesson: mismatch of "column name". This line hopefully protects against this kind of event in the future.
+	if (EnDis = "")	;This is consequence of hard lesson: mismatch of "column name". This line hopefully protects against this kind of event in the future.
 		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . "`n`n" . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-			. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")" . "`n"
+			. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")" . "`n"
 			. TransA["OnOff parameter is missing."]
 			. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 	
-	if (Triggerstring and (OnOff = "On"))
+	if (Triggerstring and EnDis)
 	{
-		;OutputDebug, % "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
+		;OutputDebug, % "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")"
 		Try
-			Hotstring(":" . Options . ":" . Triggerstring, func(SendFun).bind(TextInsert, Oflag), OnOff)
+			Hotstring(":" . Options . ":" . Triggerstring, func(SendFun).bind(TextInsert, Oflag), EnDis)
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-				. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOff . ")"
+				. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")"
 				. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 	}
 }
