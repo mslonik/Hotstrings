@@ -8355,13 +8355,13 @@ F_AddHotstring()
 			. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(" . SendFunHotstringCreate . ").bind(" . TextInsert . "," . A_Space . false . ")," . A_Space . v_EnDis . ")"
 	}
 	; 5. Update global arrays
-	F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, v_EnDis, TextInsert)
-	
-	;6. Update and sort List View. ;future: gui parameter for sorting
 	if (v_EnDis)
 		EnDis := "En"
 	else
 		EnDis := "Dis"
+	F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
+	
+	;6. Update and sort List View. ;future: gui parameter for sorting
 	LV_Add("",  v_Triggerstring, NewOptions, SendFunFileFormat, EnDis, TextInsert, v_Comment)
 	LV_ModifyCol(1, "Sort")
 
@@ -8413,11 +8413,7 @@ F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 	a_Triggerstring	.Push(v_Triggerstring)
 	a_TriggerOptions	.Push(NewOptions)
 	a_OutputFunction	.Push(SendFunFileFormat)
-	if (EnDis)
-		temp := "En"
-	else
-		temp := "Dis"
-	a_EnableDisable	.Push(temp)
+	a_EnableDisable	.Push(EnDis)
 	a_Hotstring		.Push(TextInsert)
 	a_Comment			.Push(v_Comment)
 	a_Combined		.Push(v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert)
@@ -8598,15 +8594,6 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFunHotstringCreat
 		NewOptions .= "O"
 	if (v_OptionReset)
 		NewOptions .= "Z"
-/* 	if (v_EnDis)
-	{
-		OnOff := "Off", EnDis := "Dis"	
-	}
-	else
-	{
-		OnOff := "On", EnDis := "En"
-	} 
-*/
 	Switch v_SelectFunction
 	{
 		Case "Clipboard (CL)":			SendFunHotstringCreate 	:= "F_HOF_CLI", 	SendFunFileFormat 	:= "CL"
@@ -9714,24 +9701,34 @@ F_GuiMain_LVcolumnScale()
 F_GuiMain_Resize2()
 {
 	global ;assume-global mode
-	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
-		,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
+	local OutVarTemp1 := 0, OutVarTemp1X := 0, OutVarTemp1Y := 0, OutVarTemp1W := 0, OutVarTemp1H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
+		,OutVarTemp2 := 0, OutVarTemp2X := 0, OutVarTemp2Y := 0, OutVarTemp2W := 0, OutVarTemp2H := 0
+		,xNext := 0, yNext := 0, wNext := 0, hNext := 0
 	
-	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
-,	v_hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + c_HofSandbox + c_ymarg)
-	GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext . "h" . v_hNext
-	v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton
-,	v_yNext := A_GuiHeight - (c_ymarg + HofText + c_HofSandbox)
-	GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
-	GuiControlGet, v_OutVarTemp1, Pos, % IdText10
-	v_xNext := v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg
-	GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
-	v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
-,	v_yNext += HofText
-,	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
-	GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
-	v_hNext := A_GuiHeight - 2 * c_ymarg 
-	GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
+	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
+,	hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + c_HofSandbox + c_ymarg)
+	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
+	GuiControl, , % IdText12,  % Format("{1:4} / {2:4}", v_LibHotstringCnt, v_TotalHotstringCnt) ; Text: Puts new contents into the control.
+	GuiControlGet, OutVarTemp1, Pos, % IdListView1
+	GuiControlGet, OutVarTemp2, Pos, % IdText12	;% IdText12	;value Total
+	xNext := OutVarTemp1X + OutVarTemp1W - OutVarTemp2W
+,	yNext := c_ymarg
+	GuiControl, MoveDraw, % IdText12, % "x" . xNext . "y" . yNext
+	GuiControlGet, OutVarTemp1, Pos, % IdText2	;"LS:"
+	xNext -= OutVarTemp1W
+	GuiControl, MoveDraw, % IdText2, % "x" . xNext . "y" . yNext	;IdText2, value of this library counter
+	xNext := LeftColumnW + c_xmarg + c_WofMiddleButton
+,	yNext := A_GuiHeight - (c_ymarg + HofText + c_HofSandbox)
+	GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext
+	GuiControlGet, OutVarTemp1, Pos, % IdText10
+	xNext := OutVarTemp1X + OutVarTemp1W + c_xmarg
+	GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext
+	xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
+,	yNext += HofText
+,	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
+	GuiControl, MoveDraw, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
+	hNext := A_GuiHeight - 2 * c_ymarg 
+	GuiControl, MoveDraw, % IdButton5, % "h" . hNext 
 	F_GuiMain_LVcolumnScale()
 	;OutputDebug, % "Two:" 
 }
@@ -9754,7 +9751,7 @@ F_GuiMain_Resize4()
 F_GuiMain_Resize1()
 {
 	global ;assume-global mode
-	local	v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
+	local	OutVaemp1 := 0, OutVaemp1X := 0, OutVaemp1Y := 0, OutVaemp1W := 0, OutVaemp1H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 			,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
 	
 	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
@@ -9763,8 +9760,8 @@ F_GuiMain_Resize1()
 	v_xNext := c_xmarg
 ,	v_yNext := LeftColumnH + c_ymarg
 	GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
-	GuiControlGet, v_OutVarTemp1, Pos, % IdText10
-	v_xNext := v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg
+	GuiControlGet, OutVaemp1, Pos, % IdText10
+	v_xNext := OutVaemp1X + OutVaemp1W + c_xmarg
 ,	v_yNext := LeftColumnH + c_ymarg
 	GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := c_xmarg
@@ -9780,7 +9777,7 @@ F_GuiMain_Resize1()
 F_GuiMain_Resize3()
 {
 	global ;assume-global mode
-	local	v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
+	local	OutVTemp1 := 0, OutVTemp1X := 0, OutVTemp1Y := 0, OutVTemp1W := 0, OutVTemp1H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 			,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
 	
 	v_hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + c_HofSandbox + c_ymarg)
@@ -9788,8 +9785,8 @@ F_GuiMain_Resize3()
 	v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton
 ,	v_yNext := A_GuiHeight - (c_ymarg + HofText + c_HofSandbox)
 	GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
-	GuiControlGet, v_OutVarTemp1, Pos, % IdText10
-	v_xNext := v_OutVarTemp1X + v_OutVarTemp1W + c_xmarg
+	GuiControlGet, OutVTemp1, Pos, % IdText10
+	v_xNext := OutVTemp1X + OutVTemp1W + c_xmarg
 	GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
 ,	v_yNext += HofText
@@ -10181,24 +10178,6 @@ F_LV1_CopyContentToHS3()
 		v_EnDis := true	;global variable
 	if (EnDis = "Dis")		;local variable
 		v_EnDis := false	;global variable
-	; if (InStr(EnDis, "En"))
-	; {
-	; 	Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-	; 	Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-	; 	GuiControl, HS3: Font, % IdCheckBox6
-	; 	GuiControl, HS4: Font, % IdCheckBox6b
-	; 	GuiControl, HS3:, % IdCheckBox6,  0
-	; 	GuiControl, HS4:, % IdCheckBox6b, 0
-	; }
-	; else
-	; {
-	; 	Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cRed Norm", % c_FontType
-	; 	Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cRed Norm", % c_FontType
-	; 	GuiControl, HS3: Font, % IdCheckBox6
-	; 	GuiControl, HS4: Font, % IdCheckBox6b
-	; 	GuiControl, HS3:, % IdCheckBox6,  1
-	; 	GuiControl, HS4:, % IdCheckBox6b, 1
-	; }
 	
 	LV_GetText(TextInsert, 	SelectedRow, 5)
 	if ((Fun = "MCL") or (Fun = "MSI"))
@@ -11754,7 +11733,7 @@ Tooltip enable											= Tooltip enable
 Tooltip position										= Tooltip position
 Tooltip test											= Tooltip test
 Tooltip timeout										= Tooltip timeout
-Total:												= Total:
+LS:												= LS:
 to undo.												= to undo.
 (triggerstring, hotstring) definitions						= (triggerstring, hotstring) definitions
 Triggers												= Triggers
@@ -11947,7 +11926,8 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 		++v_TotalHotstringCnt
 		a_Library.Push(name) ;for function Search
 	}	
-	GuiControl, , % IdText12,  % v_TotalHotstringCnt ; Text: Puts new contents into the control.
+	GuiControl, , % IdText12,  % Format("{1} / {2}", v_LibHotstringCnt, v_TotalHotstringCnt) ; Text: Puts new contents into the control.
+	; GuiControl, , % IdText12,  % " / " . v_TotalHotstringCnt ; Text: Puts new contents into the control.
 	GuiControl, , % IdText12b, % v_TotalHotstringCnt ; Text: Puts new contents into the control.
 }
  ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -12376,7 +12356,7 @@ F_GuiHS4_CreateObject()
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
 	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText13b,  % v_LibHotstringCnt ;value of Hotstrings counter
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText2b, % TransA["Total:"] . A_Space
+	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText2b, % TransA["LS:"] . A_Space
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
 	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText12b, % v_TotalHotstringCnt
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
@@ -12540,13 +12520,6 @@ F_GuiMain_CreateObject()
 	F_TI_OptionResetRecognizer := func("F_ShowLongTooltip").bind(TransA["F_TI_OptionResetRecognizer"])
 	GuiControl +g, % IdTextInfo10, % F_TI_OptionResetRecognizer
 	
-	Gui, 		HS3: Font, 		% "s" . c_FontSize
-	; Gui, 		HS3: Add, 		CheckBox, 	x0 y0 HwndIdCheckBox6 gF_Checkbox vv_EnDis, 			% TransA["Disable"]
-	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2
-	; Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo11,									ⓘ
-	; F_TI_OptionDisable		:= func("F_ShowLongTooltip").bind(TransA["F_TI_OptionDisable"])
-	; GuiControl +g, % IdTextInfo11, % F_TI_OptionDisable
-	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText3,						 				% TransA["Select hotstring output function"]
 	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2
@@ -12596,7 +12569,7 @@ F_GuiMain_CreateObject()
 	Gui,			HS3: Add,			DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SelectLibrary Sort
 	
 	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton2 gF_AddHotstring,						% TransA["Add / Edit hotstring (F9)"]
-	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton3 gF_Clear,								% TransA["Clear (F5)"]
+	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton3…_Clear,								% TransA["Clear (F5)"]
 	Gui,			HS3: Add,			Button,		x0 y0 HwndIdButton5 gF_ToggleRightColumn,					⯇`nF4
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
@@ -12609,9 +12582,11 @@ F_GuiMain_CreateObject()
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText2, % TransA["Total:"] . A_Space 
+	
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText2, % TransA["LS:"] . A_Space 				;LS = Library Statistics
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			Consolas ;Consolas type is monospace
-	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText12, % v_TotalHotstringCnt
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText12, % Format("{1:4} / {2:4}", v_LibHotstringCnt, v_TotalHotstringCnt)
+	; Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText12, % " / " . v_TotalHotstringCnt
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
 	Gui,			HS3: Add, 		Text, 		x0 y0 HwndIdText9, 										% TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
@@ -12627,11 +12602,11 @@ F_GuiMain_CreateObject()
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
 	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit10 vv_Sandbox r3 						; r3 = 3x rows of text
-	Gui,			HS3: Add,			Text,		x0 y0 HwndIdText11, % TransA["This library:"] . A_Space
-	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
-	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText13,  %  v_LibHotstringCnt ;value of Hotstrings counter in the current library
+	; Gui,			HS3: Add,			Text,		x0 y0 HwndIdText11, % TransA["This library:"] . A_Space	;tu jestem
+	; Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
+	; Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText13,  %  v_LibHotstringCnt ;value of Hotstrings counter in the current library
 	
-	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	; Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, 		HS3: Add, 		Button, Hidden Default gF_HSLV	;trick to catch if user presses Enter on ListView1
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -12797,7 +12772,7 @@ F_GuiHS4_Redraw(IfShowGui)
 	;5.2. Button between left and right column
 	v_xNext := LeftColumnW
 ,	v_yNext := c_ymarg
-	GuiControlGet, v_OutVarTemp, Pos, % IdText2b	; Text "Total:"
+	GuiControlGet, v_OutVarTemp, Pos, % IdText2b	; Text "LS:"
 	v_hNext := v_OutVarTempY + v_OutVarTempH - c_ymarg
 	GuiControl, Move, % IdButton5b, % "x" . v_xNext ". y" . v_yNext . "h" . v_hNext	;button F4
 
@@ -13224,12 +13199,6 @@ F_GuiMain_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp1, Pos, % IdCheckBox8
 	v_xNext += v_OutVarTemp1W
 	GuiControl, Move, % IdTextInfo10, % "x" . v_xNext . "y" . v_yNext 
-	; v_xNext := c_xmarg * 2 + W_C1 + c_xmarg
-	; GuiControl, Move, % IdCheckBox6, % "x" . v_xNext . "y" . v_yNext
-	; GuiControlGet, v_OutVarTemp1, Pos, % IdCheckBox6
-	; v_xNext += v_OutVarTemp1W
-	; GuiControl, Move, % IdTextInfo11, % "x" . v_xNext . "y" . v_yNext
-	
 ;5.1.3. Select hotstring output function
 	v_xNext := c_xmarg
 ,	v_yNext += HofCheckBox + c_ymarg * 2
@@ -13303,21 +13272,21 @@ F_GuiMain_DetermineConstraints()
 	;OutputDebug, % "LeftColumnH:" . A_Space . LeftColumnH
 	
 ;5.3. Right column
-;5.3.1. Position the text "Library content"
+;5.3.1. Position the text "Library content (F2, context menu)"
 	v_yNext := c_ymarg
 ,	v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
 	GuiControl, Move, % IdText7, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp1, Pos, % IdText7
 	v_xNext += v_OutVarTemp1W + c_xmarg
-	GuiControl, Move, % IdTextInfo16, % "x" . v_xNext . "y" . v_yNext
+	GuiControl, Move, % IdTextInfo16, % "x" . v_xNext . "y" . v_yNext	;IdTextInfo16 = i
 	
-;5.3.2. Position of hotstring statistics (in this library: IdText11 / total: IdText2)
-	GuiControlGet, v_OutVarTemp, Pos, % IdTextInfo16 ;text: Library content (F2)
+;5.3.2. Position of hotstring statistics (in "This library:" IdText11 / total: IdText2)
+	GuiControlGet, v_OutVarTemp, Pos, % IdTextInfo16 ;text: "i"
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdText11, % "x" v_xNext "y" v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdText11 ;text: Hotstrings
+	GuiControl, Move, % IdText11, % "x" v_xNext "y" v_yNext	;IdText11 = "This library"
+	GuiControlGet, v_OutVarTemp, Pos, % IdText11
 	v_xNext += v_OutVarTempW
-	GuiControl, Move, % IdText13, % "x" v_xNext "y" v_yNext ;Where to place value of Hotstrings counter
+	GuiControl, Move, % IdText13, % "x" v_xNext "y" v_yNext ;Where to place value of this library counter
 	GuiControlGet, v_OutVarTemp, Pos, % IdText13
 	v_xNext += v_OutVarTempW + c_xmarg
 	GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext ;where to place text Total
