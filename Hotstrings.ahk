@@ -9700,6 +9700,23 @@ F_GuiMain_LVcolumnScale()
 	Gui, HS3: +DPIScale
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiHS3_DrawLibStat()
+{
+	global ;assume-global mode
+	local OutVarTemp1 := 0, OutVarTemp1X := 0, OutVarTemp1Y := 0, OutVarTemp1W := 0, OutVarTemp1H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
+		,OutVarTemp2 := 0, OutVarTemp2X := 0, OutVarTemp2Y := 0, OutVarTemp2W := 0, OutVarTemp2H := 0
+		,xNext := 0, yNext := 0, wNext := 0, hNext := 0
+
+	GuiControlGet, OutVarTemp1, Pos, % IdListView1
+	GuiControlGet, OutVarTemp2, Pos, % IdText2	;% IdText2	;info about libraries statistics
+	xNext := OutVarTemp1X + OutVarTemp1W - OutVarTemp2W
+,	yNext := c_ymarg
+	GuiControl, MoveDraw, % IdText2, % "x" . xNext . "y" . yNext
+	GuiControlGet, OutVarTemp1, Pos, % IdText12
+	xNext -= (OutVarTemp1W + c_xmarg)
+	GuiControl, MoveDraw, % IdText12, % "x" . xNext . "y" . yNext	;IdText2, value of this library statistics (ratio)
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiMain_Resize2()
 {
 	global ;assume-global mode
@@ -9710,16 +9727,15 @@ F_GuiMain_Resize2()
 	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
 ,	hNext := A_GuiHeight - (c_ymarg + c_HofText + c_ymarg + c_HofText + c_HofSandbox + c_ymarg)
 	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
-	; GuiControl, , % IdText12,  % Format("{1:4} / {2:-4}", v_LibHotstringCnt, v_TotalHotstringCnt) ; Text: Puts new contents into the control.
-	GuiControlGet, OutVarTemp1, Pos, % IdListView1
-	GuiControlGet, OutVarTemp2, Pos, % IdText2	;% IdText2	;info about libraries statistics
-
-	xNext := OutVarTemp1X + OutVarTemp1W - OutVarTemp2W
-,	yNext := c_ymarg
-	GuiControl, MoveDraw, % IdText2, % "x" . xNext . "y" . yNext
-	GuiControlGet, OutVarTemp1, Pos, % IdText12
-	xNext -= (OutVarTemp1W + c_xmarg)
-	GuiControl, MoveDraw, % IdText12, % "x" . xNext . "y" . yNext	;IdText2, value of this library counter
+	F_GuiHS3_DrawLibStat()
+; 	GuiControlGet, OutVarTemp1, Pos, % IdListView1
+; 	GuiControlGet, OutVarTemp2, Pos, % IdText2	;% IdText2	;info about libraries statistics
+; 	xNext := OutVarTemp1X + OutVarTemp1W - OutVarTemp2W
+; ,	yNext := c_ymarg
+; 	GuiControl, MoveDraw, % IdText2, % "x" . xNext . "y" . yNext
+; 	GuiControlGet, OutVarTemp1, Pos, % IdText12
+; 	xNext -= (OutVarTemp1W + c_xmarg)
+; 	GuiControl, MoveDraw, % IdText12, % "x" . xNext . "y" . yNext	;IdText2, value of this library statistics (ratio)
 	xNext := LeftColumnW + c_xmarg + c_WofMiddleButton
 ,	yNext := A_GuiHeight - (c_ymarg + c_HofText + c_HofSandbox)
 	GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext
@@ -9760,6 +9776,7 @@ F_GuiMain_Resize1()
 	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
 ,	v_hNext := A_GuiHeight - (2 * c_ymarg + c_HofText)
 	GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext . "h" . v_hNext  ;increase
+	F_GuiHS3_DrawLibStat()
 	v_xNext := c_xmarg
 ,	v_yNext := LeftColumnH + c_ymarg
 	GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
@@ -9788,7 +9805,7 @@ F_GuiMain_Resize3()
 	v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton
 ,	v_yNext := A_GuiHeight - (c_ymarg + c_HofText + c_HofSandbox)
 	GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
-	GuiControlGet, OutVTemp1, Pos, % IdText10
+	GuiControlGet, OutVTemp1, Pos, % IdText10	;Sandbox text
 	v_xNext := OutVTemp1X + OutVTemp1W + c_xmarg
 	GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
@@ -12994,14 +13011,7 @@ F_GuiMain_Redraw(IfShowGui)
 		else
 		{
 			GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . ini_ListViewPos.W . "h" ini_ListViewPos.H
-			GuiControlGet, OutVarTemp1, Pos, % IdListView1
-			GuiControlGet, OutVarTemp2, Pos, % IdText2	;% IdText2	;info about libraries statistics
-			xNext := OutVarTemp1X + OutVarTemp1W - OutVarTemp2W
-,			yNext := c_ymarg
-			GuiControl, MoveDraw, % IdText2, % "x" . xNext . "y" . yNext
-			GuiControlGet, OutVarTemp1, Pos, % IdText12
-			xNext -= (OutVarTemp1W + c_xmarg)
-			GuiControl, MoveDraw, % IdText12, % "x" . xNext . "y" . yNext	;IdText2, value of this library counter
+			F_GuiHS3_DrawLibStat()
 		}
 		b_FirstRun := false
 	}
