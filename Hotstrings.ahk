@@ -269,7 +269,7 @@ Menu, SubmenuPath,		Add, % TransA["Script/application folder: move it to new loc
 Menu, Submenu1, 		Add, % TransA["Location of application specific data"],					:SubmenuPath
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 										:Submenu1
-Menu, HSMenu, 			Add, % TransA["Search Hotstrings (F3)"], 								F_Searching
+Menu, HSMenu, 			Add, % TransA["Search (F3)"], 										F_Searching
 
 Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 								F_RefreshListOfLibraries
 Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 						F_RefreshListOfLibraryTips
@@ -4576,55 +4576,55 @@ F_GuiEvents_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_T1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvBH_R1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_R1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_R2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvBH_T15, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
 	GuiControl, Move, % IdEvBH_T3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_T3
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_T4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvBH_T5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvBH_R3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_R3
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_R4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvBH_T6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText, v_wNext := TheWidestText
+	v_xNext := c_xmarg, v_yNext += c_HofText, v_wNext := TheWidestText
 	GuiControl, Move, % IdEvBH_S1, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
 	v_xNext += 2 * c_xmarg + TheWidestText
 	GuiControl, Move, % IdEvBH_T7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvBH_T16, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
 	GuiControl, Move, % IdEvBH_T8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_T8
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_T9, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvBH_R5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_R5
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_R6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvBH_T17, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
 	GuiControl, Move, % IdEvBH_T10, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_T10
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_T11, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvBH_R7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_R7
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvBH_R8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvBH_T12, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_yNext += HofText
+	v_yNext += c_HofText
 	GuiControl, Move, % IdEvBH_S2, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
 	v_xNext += 2 * c_xmarg + TheWidestText
 	GuiControl, Move, % IdEvBH_T13, % "x+" . v_xNext . A_Space . "y+" . v_yNext
@@ -4634,7 +4634,7 @@ F_GuiEvents_DetermineConstraints()
 	GuiControl, Move, % IdEvBH_S3, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext	
 	v_xNext += 2 * c_xmarg + TheWidestText
 	GuiControl, Move, % IdEvBH_T14, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvBH_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvBH_B1
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
@@ -4655,25 +4655,25 @@ F_GuiEvents_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_T1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvMH_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvMH_R1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_R1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvMH_R2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvMH_T3, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
 	GuiControl, Move, % IdEvMH_T4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_T4
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvMH_T5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvMH_R3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_R3
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvMH_R4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvMH_T6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_yNext += HofText
+	v_yNext += c_HofText
 	GuiControl, Move, % IdEvMH_S1, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
 	v_xNext += 2 * c_xmarg + TheWidestText
 	GuiControl, Move, % IdEvMH_T7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
@@ -4683,7 +4683,7 @@ F_GuiEvents_DetermineConstraints()
 	GuiControl, Move, % IdEvMH_S2, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext	
 	v_xNext += 2 * c_xmarg + TheWidestText
 	GuiControl, Move, % IdEvMH_T8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvMH_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvMH_B1	
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
@@ -4707,55 +4707,55 @@ F_GuiEvents_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_T1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvUH_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvUH_R1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_R1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvUH_R2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvUH_T15, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
 	GuiControl, Move, % IdEvUH_T3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_T3
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvUH_T4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvUH_T5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvUH_R3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_R3
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvUH_R4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvUH_T6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText, v_wNext := TheWidestText
+	v_xNext := c_xmarg, v_yNext += c_HofText, v_wNext := TheWidestText
 	GuiControl, Move, % IdEvUH_S1, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
 	v_xNext += 2 * c_xmarg + TheWidestText
 	GuiControl, Move, % IdEvUH_T7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvUH_T16, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
 	GuiControl, Move, % IdEvUH_T8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_T8
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvUH_T9, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvUH_R5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_R5
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvUH_R6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvUH_T17, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
 	GuiControl, Move, % IdEvUH_T10, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_T10
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvUH_T11, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvUH_R7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_R7
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvUH_R8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvUH_T12, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_yNext += HofText
+	v_yNext += c_HofText
 	GuiControl, Move, % IdEvUH_S2, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
 	v_xNext += 2 * c_xmarg + TheWidestText
 	GuiControl, Move, % IdEvUH_T13, % "x+" . v_xNext . A_Space . "y+" . v_yNext
@@ -4765,7 +4765,7 @@ F_GuiEvents_DetermineConstraints()
 	GuiControl, Move, % IdEvUH_S3, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext	
 	v_xNext += 2 * c_xmarg + TheWidestText
 	GuiControl, Move, % IdEvUH_T14, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvUH_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvUH_B1
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
@@ -4786,82 +4786,82 @@ F_GuiEvents_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_T1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvTt_R1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_R1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_R2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvTt_T3, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
 	GuiControl, Move, % IdEvTt_T4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_T4
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_T5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvTt_T6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvTt_R3, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_R3
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_R4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvTt_T7, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText, v_wNext := TheWidestText
+	v_xNext := c_xmarg, v_yNext += c_HofText, v_wNext := TheWidestText
 	GuiControl, Move, % IdEvTt_S1, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
 	v_xNext += 2 * c_xmarg + TheWidestText
 	GuiControl, Move, % IdEvTt_T8, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvTt_T9, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
 	GuiControl, Move, % IdEvTt_T10, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_T10
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_T11, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvTt_R5, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_R5
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_R6, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvTt_T12, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
 	GuiControl, Move, % IdEvTt_T13, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_T13
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_T14, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvTt_C1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_C1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_C2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvTt_T15, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
 	GuiControl, Move, % IdEvTt_T16, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_T16
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_T17, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText, v_wNext := TheWidestText
+	v_xNext := c_xmarg, v_yNext += c_HofText, v_wNext := TheWidestText
 	GuiControl, Move, % IdEvTt_S2, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
 	v_xNext += 2 * c_xmarg + TheWidestText
 	GuiControl, Move, % IdEvTt_T18, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvTt_T19, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
 	GuiControl, Move, % IdEvTt_T20, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_T20
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_T21, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText, v_wNext := TheWidestText
+	v_xNext := c_xmarg, v_yNext += c_HofText, v_wNext := TheWidestText
 	GuiControl, Move, % IdEvTt_DDL1, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext	
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvTt_T22, % "x+" . v_xNext . A_Space . "y+" . v_yNext - 2 . A_Space . "w+" . TotalWidth . A_Space . "h+" . 1
 	GuiControl, Move, % IdEvTt_T23, % "x+" . v_xNext . A_Space . "y+" . v_yNext	
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_T23
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_T24, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_T25
-	v_xNext := c_xmarg, v_yNext += HofText, v_wNext := v_OutVarTempW + 3 * c_ymarg
+	v_xNext := c_xmarg, v_yNext += c_HofText, v_wNext := v_OutVarTempW + 3 * c_ymarg
 	GuiControl, Move, % IdEvTt_DDL2, % "x+" . v_xNext . A_Space . "y+" . v_yNext . A_Space . "w+" . v_wNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvTt_T25, % "x+" . v_xNext . A_Space . "y+" . v_yNext	;fake text, just to measure its width, but unfortunately as it cannot be deleted, it has to be shifted somewhere
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvTt_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_B1
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
@@ -4879,12 +4879,12 @@ F_GuiEvents_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_T1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvAT_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvAT_R1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_R1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvAT_R2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvAT_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext	
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_B1
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
@@ -4902,12 +4902,12 @@ F_GuiEvents_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_T1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvSM_T2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdEvSM_R1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_R1
 	v_xNext += v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvSM_R2, % "x+" . v_xNext . A_Space . "y+" . v_yNext
-	v_xNext := c_xmarg, v_yNext += 3 * HofText
+	v_xNext := c_xmarg, v_yNext += 3 * c_HofText
 	GuiControl, Move, % IdEvSM_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_B1
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
@@ -6408,7 +6408,7 @@ F_GuiEventsStyling_DetermineConstants(Which)
 ,	DynVarRef := "Id" . Which . "styling_T2"
 	GuiControl, Move, % %DynVarRef%, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext := c_xmarg
-,	v_yNext += HofText
+,	v_yNext += c_HofText
 ,	DynVarRef := "Id" . Which . "styling_DDL1"
 	GuiControl, Move, % %DynVarRef%, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % %DynVarRef%
@@ -6430,7 +6430,7 @@ F_GuiEventsStyling_DetermineConstants(Which)
 ,	DynVarRef := "Id" . Which . "styling_T4"
 	GuiControl, Move, % %DynVarRef%, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext := c_xmarg
-,	v_yNext += HofText
+,	v_yNext += c_HofText
 ,	DynVarRef := "Id" . Which . "styling_DDL2"
 	GuiControl, Move, % %DynVarRef%, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % %DynVarRef%
@@ -6452,7 +6452,7 @@ F_GuiEventsStyling_DetermineConstants(Which)
 ,	DynVarRef := "Id" . Which . "styling_T6"
 	GuiControl, Move, % %DynVarRef%, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext := c_xmarg
-,	v_yNext += HofText
+,	v_yNext += c_HofText
 ,	DynVarRef := "Id" . Which . "styling_DDL3"
 	GuiControl, Move, % %DynVarRef%, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % %DynVarRef%
@@ -6471,7 +6471,7 @@ F_GuiEventsStyling_DetermineConstants(Which)
 	DynVarRef := "Id" . Which . "styling_B3"
 	GuiControlGet, v_OutVarTemp, Pos, % %DynVarRef%
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 5 * c_xmarg
-,	v_yNext += HofText
+,	v_yNext += c_HofText
 ,	DynVarRef := "Id" . Which . "styling_LB1"
 	GuiControl, Move, % %DynVarRef%, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	
@@ -6485,7 +6485,7 @@ F_GuiEventsStyling_DetermineConstants(Which)
 ,	DynVarRef := "Id" . Which . "styling_T8"
 	GuiControl, Move, % %DynVarRef%, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	v_xNext := c_xmarg
-,	v_yNext += HofText
+,	v_yNext += c_HofText
 ,	DynVarRef := "Id" . Which . "styling_DDL4"
 	GuiControl, Move, % %DynVarRef%, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % %DynVarRef%
@@ -6797,14 +6797,14 @@ F_GuiVersionUpdate_DetermineConstraints()
 	v_xNext := c_xmarg
 	v_yNext := c_ymarg
 	GuiControl, Move, % IdVerUpd1, % "x" . v_xNext . "y" . v_yNext
-	v_yNext += HofText
+	v_yNext += c_HofText
 	GuiControl, Move, % IdVerUpd3, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdVerUpd3
 	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
 	GuiControl, Move, % IdVerUpd4, % "x" . v_xNext . "y" . v_yNext
 	v_yNext := c_ymarg
 	GuiControl, Move, % IdVerUpd2, % "x" . v_xNext . "y" . v_yNext
-	v_yNext := v_OutVarTempY + HofText + c_ymarg
+	v_yNext := v_OutVarTempY + c_HofText + c_ymarg
 	v_xNext := c_xmarg
 	GuiControl, Move, % IdVerUpdCheckServ, % "x" . v_xNext . "y" . v_yNext
 	v_yNext += HofButton + c_ymarg
@@ -6994,19 +6994,19 @@ F_GuiShortDef_DetermineConstraints()
 	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
 	GuiControl, Move, % IdShortDefT4, % "x" . v_xNext . "y" . v_yNext		;ⓘ
 	v_xNext := c_xmarg
-,	v_yNext += 2 * HofText
+,	v_yNext += 2 * c_HofText
 	GuiControl, Move, % IdShortDefT2, % "x" . v_xNext . "y" . v_yNext		;Current shortcut (hotkey):
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefT2
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdShortDefT3, % "x" . v_xNext . "y" . v_yNext		;% ShortcutLong
 	v_xNext := c_xmarg
-,	v_yNext += 2 * HofText
+,	v_yNext += 2 * c_HofText
 	GuiControl, Move, % IdShortDefT5, % "x" . v_xNext . "y" . v_yNext		;New shortcut (hotkey)
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefT5
 	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
 	GuiControl, Move, % IdShortDefT6, % "x" . v_xNext . "y" . v_yNext		;ⓘ
 	v_xNext := c_xmarg
-,	v_yNext += 2 * HofText
+,	v_yNext += 2 * c_HofText
 	GuiControl, Move, % IdShortDefCB1, % "x" . v_xNext . "y" . v_yNext		;Windows key modifier
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefCB1						
 	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
@@ -7022,7 +7022,7 @@ F_GuiShortDef_DetermineConstraints()
 ,	v_yNext := v_OutVarTempY 
 	GuiControl, Move, % IdShortDefT7, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := c_xmarg
-,	v_yNext := v_OutVarTempY + v_OutVarTempH + HofText
+,	v_yNext := v_OutVarTempY + v_OutVarTempH + c_HofText
 
 	GuiControl, Move, % IdShortDefCB3, % "x" . v_xNext . "y" . v_yNext	;ScrollLock
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefCB3
@@ -7032,14 +7032,14 @@ F_GuiShortDef_DetermineConstraints()
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdShortDefCB5, % "x" . v_xNext . "y" . v_yNext	;NumLock
 	v_xNext := c_xmarg
-,	v_yNext += 2 * HofText
+,	v_yNext += 2 * c_HofText
 
 	GuiControl, Move, % IdShortDefB1, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefB1
 	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
 	GuiControl, Move, % IdShortDefB2, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := c_xmarg
-,	v_yNext += HofButton + HofText
+,	v_yNext += HofButton + c_HofText
 	GuiControl, Move, % IdShortDefT8, % "x" . v_xNext . "y" . v_yNext
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8374,9 +8374,10 @@ F_AddHotstring()
 	;9. Increment library counter.
 	++v_LibHotstringCnt
 	++v_TotalHotstringCnt
-	GuiControl, , % IdText13,  % v_LibHotstringCnt
+	GuiControl, , % IdText12,  % Format("{1:4} / {2:-4}", v_LibHotstringCnt, v_TotalHotstringCnt) ; Text: Puts new contents into the control.
+	; GuiControl, , % IdText13,  % v_LibHotstringCnt
 	GuiControl, , % IdText13b, % v_LibHotstringCnt
-	GuiControl, , % IdText12,  % v_TotalHotstringCnt
+	; GuiControl, , % IdText12,  % v_TotalHotstringCnt
 	GuiControl, , % IdText12b, % v_TotalHotstringCnt
 	Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
 	{
@@ -8918,7 +8919,7 @@ F_GuiMoveLibs_CreateDetermine()
 	GuiControl, Move, % IdMoveLibs_T1, % "x" v_xNext "y" v_yNext
 	
 	GuiControlGet, v_OutVarTemp2, Pos, % IdMoveLibs_LV
-	v_yNext := HofText + c_ymarg
+	v_yNext := c_HofText + c_ymarg
 	v_hNext := v_OutVarTemp2H * 4
 	GuiControl, Move, % IdMoveLibs_LV, % "x" v_xNext "y" v_yNext "h" v_hNext ; by default ListView shows just 5 rows
 	
@@ -9080,7 +9081,7 @@ F_Searching(ReloadListView*)
 				LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
 			GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 		
-		Case TransA["Search Hotstrings (F3)"], "": ;new thread starts here
+		Case TransA["Search (F3)"], "": ;new thread starts here
 			WinGetPos, Window1X, Window1Y, Window1W, Window1H, A	;Retrieves the position of the active window.
 			F_WhichGui()
 			Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
@@ -9132,7 +9133,7 @@ F_GuiSearch_DetermineConstraints()
 	v_xNext := c_xmarg
 ,	v_yNext := c_ymarg
 	GuiControl, Move, % IdSearchT1, % "x" v_xNext "y" v_yNext ;Phrase to search
-	v_yNext += HofText
+	v_yNext += c_HofText
 	GuiControlGet, v_OutVarTemp, Pos, % IdSearchT1
 	v_wNext := v_OutVarTempW * 2
 	GuiControl, Move, % IdSearchE1, % "x" v_xNext "y" v_yNext "w" v_wNext
@@ -9141,7 +9142,7 @@ F_GuiSearch_DetermineConstraints()
 	v_xNext := c_xmarg + v_OutVarTempW + 2 * c_xmarg
 ,	v_yNext := c_ymarg
 	GuiControl, Move, % IdSearchT2, % "x" v_xNext "y" v_yNext	;Search by
-	v_yNext += HofText
+	v_yNext += c_HofText
 	GuiControl, Move, % IdSearchR1, % "x" v_xNext "y" v_yNext
 	
 	GuiControlGet, v_OutVarTemp, Pos, % IdSearchR1
@@ -9160,10 +9161,10 @@ F_GuiSearch_DetermineConstraints()
 	{
 		Case "HS3": 
 			v_wNext := HS3_GuiWidth - 2 * c_ymarg
-			v_hNext := HS3_GuiHeight - (c_ymarg + HofText + v_OutVarTemp + c_ymarg + HofText * 2)
+			v_hNext := HS3_GuiHeight - (c_ymarg + c_HofText + v_OutVarTemp + c_ymarg + c_HofText * 2)
 		Case "HS4": 
 			v_wNext := HS4_GuiWidth * 2 - 2 * c_ymarg
-			v_hNext := HS4_GuiHeight - (c_ymarg + HofText + v_OutVarTemp + c_ymarg + HofText * 2)
+			v_hNext := HS4_GuiHeight - (c_ymarg + c_HofText + v_OutVarTemp + c_ymarg + c_HofText * 2)
 	}
 	; OutputDebug, % "v_wNext:" . A_Space . v_wNext . A_Space . "v_hNext:" . A_Space . v_wNext . "`n"
 	GuiControl, MoveDraw, % IdSearchLV1, % "x" v_xNext "y" v_yNext "w" v_wNext "h" v_hNext
@@ -9574,9 +9575,10 @@ F_DeleteHotstring()
 	;5. Decrement library counter.
 	--v_LibHotstringCnt
 	--v_TotalHotstringCnt
-	GuiControl, , % IdText13,  % v_LibHotstringCnt
+	GuiControl, , % IdText12,  % Format("{1:4} / {2:-4}", v_LibHotstringCnt, v_TotalHotstringCnt) ; Text: Puts new contents into the control.
+	; GuiControl, , % IdText13,  % v_LibHotstringCnt
 	GuiControl, , % IdText13b, % v_LibHotstringCnt
-	GuiControl, , % IdText12,  % v_TotalHotstringCnt
+	; GuiControl, , % IdText12,  % v_TotalHotstringCnt
 	GuiControl, , % IdText12b, % v_TotalHotstringCnt
 	
 	;6. Remove from "Search" tables. Unfortunately index (v_SelectedRow) is sufficient only for one table, and in Searching there is "super table" containing all definitions from all available tables.
@@ -9706,25 +9708,26 @@ F_GuiMain_Resize2()
 		,xNext := 0, yNext := 0, wNext := 0, hNext := 0
 	
 	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
-,	hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + c_HofSandbox + c_ymarg)
+,	hNext := A_GuiHeight - (c_ymarg + c_HofText + c_ymarg + c_HofText + c_HofSandbox + c_ymarg)
 	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
-	GuiControl, , % IdText12,  % Format("{1:4} / {2:4}", v_LibHotstringCnt, v_TotalHotstringCnt) ; Text: Puts new contents into the control.
+	; GuiControl, , % IdText12,  % Format("{1:4} / {2:-4}", v_LibHotstringCnt, v_TotalHotstringCnt) ; Text: Puts new contents into the control.
 	GuiControlGet, OutVarTemp1, Pos, % IdListView1
-	GuiControlGet, OutVarTemp2, Pos, % IdText12	;% IdText12	;value Total
+	GuiControlGet, OutVarTemp2, Pos, % IdText2	;% IdText2	;info about libraries statistics
+
 	xNext := OutVarTemp1X + OutVarTemp1W - OutVarTemp2W
 ,	yNext := c_ymarg
-	GuiControl, MoveDraw, % IdText12, % "x" . xNext . "y" . yNext
-	GuiControlGet, OutVarTemp1, Pos, % IdText2	;"LS:"
-	xNext -= OutVarTemp1W
-	GuiControl, MoveDraw, % IdText2, % "x" . xNext . "y" . yNext	;IdText2, value of this library counter
+	GuiControl, MoveDraw, % IdText2, % "x" . xNext . "y" . yNext
+	GuiControlGet, OutVarTemp1, Pos, % IdText12
+	xNext -= (OutVarTemp1W + c_xmarg)
+	GuiControl, MoveDraw, % IdText12, % "x" . xNext . "y" . yNext	;IdText2, value of this library counter
 	xNext := LeftColumnW + c_xmarg + c_WofMiddleButton
-,	yNext := A_GuiHeight - (c_ymarg + HofText + c_HofSandbox)
+,	yNext := A_GuiHeight - (c_ymarg + c_HofText + c_HofSandbox)
 	GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext
 	GuiControlGet, OutVarTemp1, Pos, % IdText10
 	xNext := OutVarTemp1X + OutVarTemp1W + c_xmarg
 	GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext
 	xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
-,	yNext += HofText
+,	yNext += c_HofText
 ,	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
 	GuiControl, MoveDraw, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
 	hNext := A_GuiHeight - 2 * c_ymarg 
@@ -9742,7 +9745,7 @@ F_GuiMain_Resize4()
 	GuiControl, MoveDraw, % IdButton5, % "h" . v_hNext 
 	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
 	GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext
-	v_hNext := A_GuiHeight - (2 * c_ymarg + HofText)
+	v_hNext := A_GuiHeight - (2 * c_ymarg + c_HofText)
 	GuiControl, MoveDraw, % IdListView1, % "h" . v_hNext  ;increase
 	F_GuiMain_LVcolumnScale()
 	;OutputDebug, % "Four:" 
@@ -9755,7 +9758,7 @@ F_GuiMain_Resize1()
 			,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
 	
 	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
-,	v_hNext := A_GuiHeight - (2 * c_ymarg + HofText)
+,	v_hNext := A_GuiHeight - (2 * c_ymarg + c_HofText)
 	GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext . "h" . v_hNext  ;increase
 	v_xNext := c_xmarg
 ,	v_yNext := LeftColumnH + c_ymarg
@@ -9765,7 +9768,7 @@ F_GuiMain_Resize1()
 ,	v_yNext := LeftColumnH + c_ymarg
 	GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := c_xmarg
-,	v_yNext := LeftColumnH + c_ymarg + HofText 
+,	v_yNext := LeftColumnH + c_ymarg + c_HofText 
 ,	v_wNext := LeftColumnW - 2 * c_xmarg
 	GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 	v_hNext := A_GuiHeight - (2 * c_ymarg)
@@ -9780,16 +9783,16 @@ F_GuiMain_Resize3()
 	local	OutVTemp1 := 0, OutVTemp1X := 0, OutVTemp1Y := 0, OutVTemp1W := 0, OutVTemp1H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 			,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
 	
-	v_hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + c_HofSandbox + c_ymarg)
+	v_hNext := A_GuiHeight - (c_ymarg + c_HofText + c_ymarg + c_HofText + c_HofSandbox + c_ymarg)
 	GuiControl, MoveDraw, % IdListView1, % "h" . v_hNext ;decrease
 	v_xNext := LeftColumnW + c_xmarg + c_WofMiddleButton
-,	v_yNext := A_GuiHeight - (c_ymarg + HofText + c_HofSandbox)
+,	v_yNext := A_GuiHeight - (c_ymarg + c_HofText + c_HofSandbox)
 	GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, OutVTemp1, Pos, % IdText10
 	v_xNext := OutVTemp1X + OutVTemp1W + c_xmarg
 	GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
-,	v_yNext += HofText
+,	v_yNext += c_HofText
 ,	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
 	GuiControl, MoveDraw, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 	v_hNext := A_GuiHeight - 2 * c_ymarg 
@@ -9803,7 +9806,7 @@ F_GuiMain_Resize5()
 	global ;assume-global mode
 	local	v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
 	
-	v_hNext := A_GuiHeight - (HofText + 2 * c_ymarg)
+	v_hNext := A_GuiHeight - (c_HofText + 2 * c_ymarg)
 ,	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
 	GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext . "h" . v_hNext
 	v_hNext := A_GuiHeight - (2 * c_ymarg)
@@ -9861,7 +9864,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;Check position of ListView1 again after resizing
 	if (ini_Sandbox) and (!ini_IsSandboxMoved) 
 	{
-		if (v_OutVarTemp2H + HofText + c_ymarg >  LeftColumnH)
+		if (v_OutVarTemp2H + c_HofText + c_ymarg >  LeftColumnH)
 		{
 			ini_IsSandboxMoved := true
 			F_GuiMain_Resize1()
@@ -9901,8 +9904,8 @@ F_SelectLibrary()
 	GuiControl, -Redraw, % IdListView1 ;The Redraw option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	LV_Delete()
 	v_LibHotstringCnt := 0
-	GuiControl, , % IdText13,  % v_LibHotstringCnt
-	GuiControl, , % IdText13b, % v_LibHotstringCnt
+	; GuiControl, , % IdText13,  % v_LibHotstringCnt
+	; GuiControl, , % IdText13b, % v_LibHotstringCnt
 
 	name := SubStr(v_SelectHotstringLibrary, 1, -4)
 	for key, value in a_Library
@@ -9919,7 +9922,7 @@ F_SelectLibrary()
 			v_LibHotstringCnt++
 		}
 	}
-	GuiControl, , % IdText13,  % v_LibHotstringCnt
+	GuiControl, , % IdText12,  % Format("{1:4} / {2:-4}", v_LibHotstringCnt, v_TotalHotstringCnt) ; Text: Puts new contents into the control.
 	GuiControl, , % IdText13b, % v_LibHotstringCnt
 	LV_ModifyCol(1, "Sort")	;without this line content of library is loaded in the same order as it was saved last time; keep in mind that after any change (e.g. change of exiting definition) the whole file is sorted and saved again
 	F_GuiMain_LVcolumnScale()
@@ -11611,7 +11614,7 @@ Script/application folder: move it to new location			= Script/application folder
 Script/application folder: restore it to default location		= Script/application folder: restore it to default location
 Search by: 											= Search by:
 Search Hotstrings 										= Search Hotstrings
-Search Hotstrings (F3)									= &Search Hotstrings (F3)
+Search (F3)											= &Search (F3)
 Select a row in the list-view, please! 						= Select a row in the list-view, please!
 Select folder where ""Hotstrings"" folder will be moved.		= Select folder where ""Hotstrings"" folder will be moved.
 Select folder where libraries (*.csv  files) will be moved.		= Select folder where libraries (*.csv  files) will be moved.
@@ -11806,6 +11809,7 @@ TI_AddComment											= You can add optional (not mandatory) comment to new (t
 TI_SelectHotstringLib									= Select .csv file containing (triggerstring, hotstring) definitions. `nBy default those files are located in C:\Users\<UserName>\Documents folder.
 TI_LibraryContent										= After pressing (F2) you can move up or down in the table by pressing ↑ or ↓ arrows. `n`nEach time you select any row, options of the selected definitions are automatically loaded to the left part of this window.
 TI_Sandbox											= Sandbox is used as editing field where you can test `nany (triggerstring, hotstring) definition, e.g. for testing purposes. `nThis area can be switched on/off and moves when you rescale `nthe main application window.
+TI_LibStats											= Amount of definitions in currently selected library to `ntotal amound of currently loaded definitions from all libraries.
 F_HK_CallGUIInfo										= Remark: this hotkey is operating system wide, so before changing it be sure it's not in conflict with any other system wide hotkey.`n`nIt opens Graphical User Interface (GUI) of Hotstrings, even if window is minimized or invisible.
 F_HK_GeneralInfo										= You can enter any hotkey as combination of Shift, Ctrl, Alt modifier and any other keyboard key. `nIf you wish to have hotkey where Win modifier key is applied, use the checkbox separately.
 F_HK_ClipCopyInfo										= Remark: this hotkey is operating system wide, so before changing it be sure it's not in conflict with any other system wide hotkey. `n`nWhen Hotstrings window exists (it could be minimized) pressing this hotkey copies content of clipboard to ""Enter hotstring"" field. `nThanks to that you can prepare new definition much quicker.
@@ -12143,7 +12147,7 @@ F_GuiHS4_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	static	PS_IdEdit3b := false, PS_IdEdit4b := false, PS_IdEdit5b := false, PS_IdEdit6b := false, PS_IdEdit7b := false, PS_IdEdit8b := false
 
 	Menu, HSMenu, % EnDis, % TransA["Configuration"]
-	Menu, HSMenu, % EnDis, % TransA["Search Hotstrings (F3)"]
+	Menu, HSMenu, % EnDis, % TransA["Search (F3)"]
 	Menu, HSMenu, % EnDis, % TransA["Libraries"]
 	Menu, HSMenu, % EnDis, % TransA["Clipboard Delay (F7)"]
 	Menu, HSMenu, % EnDis, % TransA["Application"]
@@ -12368,7 +12372,7 @@ F_GuiMain_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	static	PS_IdEdit3 := false, PS_IdEdit4 := false, PS_IdEdit5 := false, PS_IdEdit6 := false, PS_IdEdit7 := false, PS_IdEdit8 := false
 
 	Menu, HSMenu, % EnDis, % TransA["Configuration"]
-	Menu, HSMenu, % EnDis, % TransA["Search Hotstrings (F3)"]
+	Menu, HSMenu, % EnDis, % TransA["Search (F3)"] 
 	Menu, HSMenu, % EnDis, % TransA["Libraries"]
 	Menu, HSMenu, % EnDis, % TransA["Clipboard Delay (F7)"]
 	Menu, HSMenu, % EnDis, % TransA["Application"]
@@ -12436,12 +12440,10 @@ F_GuiMain_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, % EnDis, % IdTextInfo16
 	GuiControl, % EnDis, % IdText2
 	GuiControl, % EnDis, % IdText12
-	GuiControl, % EnDis, % IdText9
 	GuiControl, % EnDis, % IdListView1
 	GuiControl, % EnDis, % IdText10
 	GuiControl, % EnDis, % IdTextInfo17
 	GuiControl, % EnDis, % IdEdit10
-	GuiControl, % EnDis, % IdText11
 	GuiControl, % EnDis, % IdText13
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -12569,7 +12571,7 @@ F_GuiMain_CreateObject()
 	Gui,			HS3: Add,			DropDownList,	x0 y0 HwndIdDDL2 vv_SelectHotstringLibrary gF_SelectLibrary Sort
 	
 	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton2 gF_AddHotstring,						% TransA["Add / Edit hotstring (F9)"]
-	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton3…_Clear,								% TransA["Clear (F5)"]
+	Gui, 		HS3: Add, 		Button, 		x0 y0 HwndIdButton3 gF_Clear,								% TransA["Clear (F5)"]
 	Gui,			HS3: Add,			Button,		x0 y0 HwndIdButton5 gF_ToggleRightColumn,					⯇`nF4
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
@@ -12579,34 +12581,31 @@ F_GuiMain_CreateObject()
 	TI_LibraryContent		:= func("F_ShowLongTooltip").bind(TransA["TI_LibraryContent"])
 	GuiControl +g, % IdTextInfo16, % TI_LibraryContent
 	
-	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
-	
-	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	
-	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText2, % TransA["LS:"] . A_Space 				;LS = Library Statistics
-	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			Consolas ;Consolas type is monospace
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType 
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText12, % Format("{1:4} / {2:4}", v_LibHotstringCnt, v_TotalHotstringCnt)
-	; Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText12, % " / " . v_TotalHotstringCnt
+	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText2,										ⓘ
+	TI_LibStats		:= func("F_ShowLongTooltip").bind(TransA["TI_LibStats"])
+	GuiControl +g, % IdText2, % TI_LibStats
+
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	
-	Gui,			HS3: Add, 		Text, 		x0 y0 HwndIdText9, 										% TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
 	Gui, 		HS3: Add, 		ListView, 	x0 y0 HwndIdListView1 LV0x1 vv_LibraryContent AltSubmit gF_HSLV -Multi, % TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText10,			 							% TransA["Sandbox"] . A_Space . "(" . "F6" . A_Space . TransA["to activate"] . A_Space . "or" . A_Space . "Ctrl + F6" . A_Space . TransA["to toggle"] . ")"
-	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2	
+	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2
 	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo17,									ⓘ
 	TI_Sandbox		:= func("F_ShowLongTooltip").bind(TransA["TI_Sandbox"])
 	GuiControl +g, % IdTextInfo17, % TI_Sandbox
 	
-	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
 	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit10 vv_Sandbox r3 						; r3 = 3x rows of text
-	; Gui,			HS3: Add,			Text,		x0 y0 HwndIdText11, % TransA["This library:"] . A_Space	;tu jestem
+	Gui,			HS3: Add,			Text,		x0 y0 HwndIdText11, % TransA["This library:"] . A_Space	;tu jestem
 	; Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
-	; Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText13,  %  v_LibHotstringCnt ;value of Hotstrings counter in the current library
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText13,  %  v_LibHotstringCnt ;value of Hotstrings counter in the current library
 	
-	; Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, 		HS3: Add, 		Button, Hidden Default gF_HSLV	;trick to catch if user presses Enter on ListView1
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -12625,7 +12624,7 @@ F_GuiMain_DefineConstants()
 	
 ;3. Determine weight / height of main types of text objects
 	GuiControlGet, v_OutVarTemp, Pos, % IdText1
-	HofText			:= v_OutVarTempH
+	c_HofText			:= v_OutVarTempH
 	GuiControlGet, v_OutVarTemp, Pos, % IdEdit1
 	HofEdit			:= v_OutVarTempH
 	GuiControlGet, v_OutVarTemp, Pos, % IdButton3	;button "Clear (F5)"
@@ -12728,7 +12727,7 @@ F_GuiHS4_Redraw(IfShowGui)
 		v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
 		GuiControl, Move, % IdTextInfo17b, % "x" . v_xNext . "y" . v_yNext	;i close to sandbox
 		v_xNext := c_xmarg
-,		v_yNext := LeftColumnH + HofText + c_ymarg
+,		v_yNext := LeftColumnH + c_HofText + c_ymarg
 ,		v_wNext := LeftColumnW - 2 * c_ymarg
 		GuiControl, Move, % IdEdit10b, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext	;sandbox edit field
 		GuiControl, Show, % IdText10b
@@ -12745,7 +12744,7 @@ F_GuiHS4_Redraw(IfShowGui)
 		GuiControlGet, v_OutVarTemp, Pos, % IdText13b
 		v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
 		GuiControl, Move, % IdText2b, % "x" . v_xNext . "y" . v_yNext ;where to place text Total
-		GuiControlGet, v_OutVarTemp, Pos, % IdText2
+		GuiControlGet, v_OutVarTemp, Pos, % IdText2b
 		v_xNext += v_OutVarTempW
 		GuiControl, Move, % IdText12b, % "x" . v_xNext . "y" . v_yNext ;Where to place value of total counter
 	}
@@ -12764,7 +12763,7 @@ F_GuiHS4_Redraw(IfShowGui)
 		GuiControlGet, v_OutVarTemp, Pos, % IdText13b
 		v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
 		GuiControl, Move, % IdText2b, % "x" . v_xNext . "y" . v_yNext ;where to place text "Total"
-		GuiControlGet, v_OutVarTemp, Pos, % IdText2
+		GuiControlGet, v_OutVarTemp, Pos, % IdText2b
 		v_xNext += v_OutVarTempW
 		GuiControl, Move, % IdText12b, % "x" . v_xNext . "y" . v_yNext ;Where to place value after "Total"
 	}
@@ -12831,13 +12830,13 @@ F_GuiHS4_DetermineConstraints()
 	
 ;5.1.2. Select trigger options
 	v_xNext := c_xmarg 
-,	v_yNext := c_ymarg + HofEdit + HofText 
+,	v_yNext := c_ymarg + HofEdit + c_HofText 
 ,	v_wNext := c_xmarg + W_C1 + c_xmarg  + W_C2
-,	v_hNext := HofText + c_ymarg + HofCheckBox * 5 + c_ymarg
+,	v_hNext := c_HofText + c_ymarg + HofCheckBox * 5 + c_ymarg
 	GuiControl, Move, % IdGroupBox1b, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext . "h" . v_hNext
 ;5.1.2.1. Raw 1: Immediate execute (*) + Case-Conforming
 	v_xNext += c_xmarg
-,	v_yNext += HofText + c_ymarg
+,	v_yNext += c_HofText + c_ymarg
 	GuiControl, Move, % IdCheckBox1b, % "x" . v_xNext . "y" . v_yNext 
 	GuiControlGet, v_OutVarTemp1, Pos, % IdCheckBox1
 	v_xNext += v_OutVarTemp1W
@@ -12899,7 +12898,7 @@ F_GuiHS4_DetermineConstraints()
 	v_xNext += v_OutVarTemp1W + c_xmarg
 	GuiControl, Move, % IdTextInfo12b, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := c_xmarg
-,	v_yNext += HofText
+,	v_yNext += c_HofText
 ,	v_wNext := LeftColumnW - 2 * c_xmarg
 	GuiControl, Move, % IdDDL1b, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 	
@@ -12911,7 +12910,7 @@ F_GuiHS4_DetermineConstraints()
 	v_xNext += v_OutVarTemp1W + c_xmarg
 	GuiControl, Move, % IdTextInfo13b, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := c_xmarg
-,	v_yNext += HofText
+,	v_yNext += c_HofText
 ,	v_wNext := LeftColumnW - 2 * c_xmarg
 	GuiControl, Move, % IdEdit2b, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 	v_yNext += HofEdit
@@ -12935,7 +12934,7 @@ F_GuiHS4_DetermineConstraints()
 	v_xNext += v_OutVarTemp1W + c_xmarg
 	GuiControl, Move, % IdTextInfo14b, % "x" . v_xNext . "y" . v_yNext	;i
 	v_xNext := c_xmarg
-,	v_yNext += HofText
+,	v_yNext += c_HofText
 ,	v_wNext := LeftColumnW - 2 * c_xmarg
 	GuiControl, Move, % IdEdit9b, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext	;edit comment field
 ;5.1.6. Select hotstring library
@@ -12946,7 +12945,7 @@ F_GuiHS4_DetermineConstraints()
 	v_xNext += v_OutVarTemp1W + c_xmarg
 	GuiControl, Move, % IdTextInfo15b, % "x" . v_xNext . "y" . v_yNext
 
-	v_yNext += HofText
+	v_yNext += c_HofText
 ,	v_xNext := c_xmarg
 ,	v_wNext := LeftColumnW - v_xNext - c_xmarg
 	GuiControl, Move, % IdDDL2b, % "x" v_xNext "y" v_yNext "w" . v_wNext
@@ -12967,45 +12966,55 @@ F_GuiHS4_DetermineConstraints()
 ;------------------------------------------------------------------------------------------------------------------------------------
 F_GuiMain_Redraw(IfShowGui)
 {
-	global ;assume-global mode
-	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
-		,v_xNext := 0, v_yNext := 0,  v_wNext := 0,	v_hNext := 0
+	global ;assume-global mode; c_ymarg, c_HofSandbox, c_HofText
+	local OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
+		,xNext := 0, yNext := 0, wNext := 0, hNext := 0
 	static b_FirstRun := true
 
  	if (b_FirstRun) ;position of the List View, but only when HS3 Gui is initiated: before showing. So this code is run only once.
 	{
-		v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
-		v_yNext := c_ymarg + HofText
+		xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
+		yNext := c_ymarg + c_HofText
 		if (!(ini_ListViewPos.W) or !(ini_ListViewPos.H)) ;if HS3 Gui is generated for the very first time
 		{
-			v_wNext := RightColumnW
+			wNext := RightColumnW
 			if ((ini_Sandbox) and !(ini_IsSandboxMoved))
-				v_hNext := LeftColumnH - (2 * c_ymarg + 2 * HofText + c_HofSandbox)
+				hNext := LeftColumnH - (2 * c_ymarg + 2 * c_HofText + c_HofSandbox)
 			if ((ini_Sandbox) and (ini_IsSandboxMoved))
-				v_hNext := LeftColumnH - (c_ymarg + c_HofSandbox)
+				hNext := LeftColumnH - (c_ymarg + c_HofSandbox)
 			if !(ini_Sandbox)
 			{
-				v_hNext := LeftColumnH - 2 * c_ymarg
+				hNext := LeftColumnH - 2 * c_ymarg
 				GuiControl, Hide, % IdText10
 				GuiControl, Hide, % IdTextInfo17
 				GuiControl, Hide, % IdEdit10
 			}
-			GuiControl, Move, % IdListView1, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext . "h" . v_hNext
+			GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
 		}
 		else
-			GuiControl, Move, % IdListView1, % "x" . v_xNext . "y" . v_yNext . "w" . ini_ListViewPos.W . "h" ini_ListViewPos.H
+		{
+			GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . ini_ListViewPos.W . "h" ini_ListViewPos.H
+			GuiControlGet, OutVarTemp1, Pos, % IdListView1
+			GuiControlGet, OutVarTemp2, Pos, % IdText2	;% IdText2	;info about libraries statistics
+			xNext := OutVarTemp1X + OutVarTemp1W - OutVarTemp2W
+,			yNext := c_ymarg
+			GuiControl, MoveDraw, % IdText2, % "x" . xNext . "y" . yNext
+			GuiControlGet, OutVarTemp1, Pos, % IdText12
+			xNext -= (OutVarTemp1W + c_xmarg)
+			GuiControl, MoveDraw, % IdText12, % "x" . xNext . "y" . yNext	;IdText2, value of this library counter
+		}
 		b_FirstRun := false
 	}
 	else
  	{
 		;OutputDebug, % "Redraw" . A_Space . "The first else" . A_Tab . "ini_Sandbox" . A_Space . ini_Sandbox . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved
-		GuiControlGet, v_OutVarTemp, Pos, % IdListView1
+		GuiControlGet, OutVarTemp, Pos, % IdListView1
 		if (ini_Sandbox)
 		{
-			if (v_OutVarTempH <  LeftColumnH + c_HofSandbox)
+			if (OutVarTempH <  LeftColumnH + c_HofSandbox)
 			{
-				v_hNext := v_OutVarTempH - (c_HofSandbox + HofText + c_ymarg)	;decrease ListView
-				GuiControl, Move, % IdListView1, % "h" . v_hNext
+				hNext := OutVarTempH - (c_HofSandbox + c_HofText + c_ymarg)	;decrease ListView
+				GuiControl, Move, % IdListView1, % "h" . hNext
 				ini_IsSandboxMoved := false
 			}
 			else
@@ -13013,10 +13022,10 @@ F_GuiMain_Redraw(IfShowGui)
 		}
 		if (!ini_Sandbox)
 		{
-			if (v_OutVarTempH <  LeftColumnH + c_HofSandbox)
+			if (OutVarTempH <  LeftColumnH + c_HofSandbox)
 			{
-				v_hNext := v_OutVarTempH + (c_HofSandbox + HofText + c_ymarg)	;increase ListView
-				GuiControl, Move, % IdListView1, % "h" . v_hNext
+				hNext := OutVarTempH + (c_HofSandbox + c_HofText + c_ymarg)	;increase ListView
+				GuiControl, Move, % IdListView1, % "h" . hNext
 				ini_IsSandboxMoved := false
 			}
 			else
@@ -13027,34 +13036,34 @@ F_GuiMain_Redraw(IfShowGui)
 	;5.2.4. Sandbox edit text field
 	if ((ini_Sandbox) and (ini_IsSandboxMoved))
 	{
-		v_xNext := c_xmarg
-,		v_yNext := LeftColumnH + c_ymarg
-		GuiControl, Move, % IdText10, % "x" . v_xNext . "y" . v_yNext
-		GuiControlGet, v_OutVarTemp, Pos, % IdText10
-		v_xNext += v_OutVarTempW + c_xmarg
-		GuiControl, Move, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
-		v_xNext := c_xmarg
-,		v_yNext += HofText
-,		v_wNext := LeftColumnW - 2 * c_xmarg
-		GuiControl, Move, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
+		xNext := c_xmarg
+,		yNext := LeftColumnH + c_ymarg
+		GuiControl, Move, % IdText10, % "x" . xNext . "y" . yNext
+		GuiControlGet, OutVarTemp, Pos, % IdText10
+		xNext += OutVarTempW + c_xmarg
+		GuiControl, Move, % IdTextInfo17, % "x" . xNext . "y" . yNext
+		xNext := c_xmarg
+,		yNext += c_HofText
+,		wNext := LeftColumnW - 2 * c_xmarg
+		GuiControl, Move, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
 		GuiControl, Show, % IdText10
 		GuiControl, Show, % IdTextInfo17
 		GuiControl, Show, % IdEdit10
 	}
 	if ((ini_Sandbox) and !(ini_IsSandboxMoved))
 	{
-		GuiControlGet, v_OutVarTemp, Pos, % IdListView1
-		v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
-,		v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
-		GuiControl, Move, % IdText10, % "x" . v_xNext . "y" . v_yNext
-		GuiControlGet, v_OutVarTemp, Pos, % IdText10
-		v_xNext += v_OutVarTempW + c_xmarg
-		GuiControl, Move, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
-		v_xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
-,		v_yNext += HofText
-		GuiControlGet, v_OutVarTemp, Pos, % IdListView1
-		v_wNext := v_OutVarTempW
-		GuiControl, Move, % IdEdit10, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
+		GuiControlGet, OutVarTemp, Pos, % IdListView1
+		xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
+,		yNext := OutVarTempY + OutVarTempH + c_ymarg
+		GuiControl, Move, % IdText10, % "x" . xNext . "y" . yNext
+		GuiControlGet, OutVarTemp, Pos, % IdText10
+		xNext += OutVarTempW + c_xmarg
+		GuiControl, Move, % IdTextInfo17, % "x" . xNext . "y" . yNext
+		xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
+,		yNext += c_HofText
+		GuiControlGet, OutVarTemp, Pos, % IdListView1
+		wNext := OutVarTempW
+		GuiControl, Move, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
 		GuiControl, Show, % IdText10
 		GuiControl, Show, % IdTextInfo17
 		GuiControl, Show, % IdEdit10
@@ -13067,26 +13076,26 @@ F_GuiMain_Redraw(IfShowGui)
 	}
 	
 	;5.2. Button between left and right column
-	GuiControlGet, v_OutVarTemp, Pos, % IdListView1
+	GuiControlGet, OutVarTemp, Pos, % IdListView1
 	if ((ini_Sandbox) and (ini_IsSandboxMoved))
 	{
-		v_xNext := LeftColumnW 
-,		v_yNext := c_ymarg
-,		v_hNext := HofText + v_OutVarTempH
+		xNext := LeftColumnW 
+,		yNext := c_ymarg
+,		hNext := c_HofText + OutVarTempH
 	}
 	if ((ini_Sandbox) and !(ini_IsSandboxMoved))
 	{
-		v_xNext := LeftColumnW 
-,		v_yNext := c_ymarg
-,		v_hNext := HofText + v_OutVarTempH + c_ymarg + HofText + c_HofSandbox
+		xNext := LeftColumnW 
+,		yNext := c_ymarg
+,		hNext := c_HofText + OutVarTempH + c_ymarg + c_HofText + c_HofSandbox
 	}	
 	if !(ini_Sandbox) 
 	{
-		v_xNext := LeftColumnW
-,		v_yNext := c_ymarg
-,		v_hNext :=  HofText + v_OutVarTempH
+		xNext := LeftColumnW
+,		yNext := c_ymarg
+,		hNext :=  c_HofText + OutVarTempH
 	}
-	GuiControl, Move, % IdButton5, % "x" . v_xNext . "y" . v_yNext . "h" . v_hNext
+	GuiControl, Move, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext
 	if (IfShowGui)
 		Gui, HS3: Show, AutoSize 
 }
@@ -13126,8 +13135,7 @@ F_GuiMain_DetermineConstraints()
 ,	LeftColumnW := 2 * c_xmarg + W_C1 + c_xmarg + W_C2 + c_xmarg
 	
 ;4.2. Determine right column width
-	RightColumnW := LeftColumnW	;it used to be: ; GuiControlGet, v_OutVarTemp2, Pos, % IdText9 ;Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
-	GuiControl,	Hide,		% IdText9
+	RightColumnW := LeftColumnW
 	
 ;5. Move text objects to correct position
 ;5.1. Left column
@@ -13145,13 +13153,13 @@ F_GuiMain_DetermineConstraints()
 	
 ;5.1.2. Select trigger options
 	v_xNext := c_xmarg 
-,	v_yNext := c_ymarg + HofEdit + HofText 
+,	v_yNext := c_ymarg + HofEdit + c_HofText 
 ,	v_wNext := c_xmarg + W_C1 + c_xmarg  + W_C2
-,	v_hNext := HofText + c_ymarg + HofCheckBox * 5 + c_ymarg
+,	v_hNext := c_HofText + c_ymarg + HofCheckBox * 5 + c_ymarg
 	GuiControl, Move, % IdGroupBox1, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext . "h" . v_hNext
 ;5.1.2.1. Raw 1: Immediate execute (*) + Case-Conforming
 	v_xNext += c_xmarg
-,	v_yNext += HofText + c_ymarg
+,	v_yNext += c_HofText + c_ymarg
 	GuiControl, Move, % IdCheckBox1, % "x" . v_xNext . "y" . v_yNext 
 	GuiControlGet, v_OutVarTemp1, Pos, % IdCheckBox1
 	v_xNext += v_OutVarTemp1W
@@ -13207,7 +13215,7 @@ F_GuiMain_DetermineConstraints()
 	v_xNext += v_OutVarTemp1W + c_xmarg
 	GuiControl, Move, % IdTextInfo12, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := c_xmarg
-,	v_yNext += HofText
+,	v_yNext += c_HofText
 ,	v_wNext := LeftColumnW - 2 * c_xmarg
 	GuiControl, Move, % IdDDL1, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 	
@@ -13219,7 +13227,7 @@ F_GuiMain_DetermineConstraints()
 	v_xNext += v_OutVarTemp1W + c_xmarg
 	GuiControl, Move, % IdTextInfo13, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := c_xmarg
-,	v_yNext += HofText
+,	v_yNext += c_HofText
 ,	v_wNext := LeftColumnW - 2 * c_xmarg
 	GuiControl, Move, % IdEdit2, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 	v_yNext += HofEdit
@@ -13243,7 +13251,7 @@ F_GuiMain_DetermineConstraints()
 	v_xNext += v_OutVarTemp1W + c_xmarg
 	GuiControl, Move, % IdTextInfo14, % "x" . v_xNext . "y" . v_yNext
 	v_xNext := c_xmarg
-,	v_yNext += HofText
+,	v_yNext += c_HofText
 ,	v_wNext := LeftColumnW - 2 * c_xmarg
 	GuiControl, Move, % IdEdit9, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 ;5.1.6. Select hotstring library 	
@@ -13254,7 +13262,7 @@ F_GuiMain_DetermineConstraints()
 	v_xNext += v_OutVarTemp1W + c_xmarg
 	GuiControl, Move, % IdTextInfo15, % "x" . v_xNext . "y" . v_yNext
 
-	v_yNext += HofText
+	v_yNext += c_HofText
 ,	v_xNext := c_xmarg
 ,	v_wNext := LeftColumnW - v_xNext - c_xmarg
 	GuiControl, Move, % IdDDL2, % "x" v_xNext "y" v_yNext "w" . v_wNext
@@ -13280,19 +13288,6 @@ F_GuiMain_DetermineConstraints()
 	v_xNext += v_OutVarTemp1W + c_xmarg
 	GuiControl, Move, % IdTextInfo16, % "x" . v_xNext . "y" . v_yNext	;IdTextInfo16 = i
 	
-;5.3.2. Position of hotstring statistics (in "This library:" IdText11 / total: IdText2)
-	GuiControlGet, v_OutVarTemp, Pos, % IdTextInfo16 ;text: "i"
-	v_xNext += v_OutVarTempW + 2 * c_xmarg
-	GuiControl, Move, % IdText11, % "x" v_xNext "y" v_yNext	;IdText11 = "This library"
-	GuiControlGet, v_OutVarTemp, Pos, % IdText11
-	v_xNext += v_OutVarTempW
-	GuiControl, Move, % IdText13, % "x" v_xNext "y" v_yNext ;Where to place value of this library counter
-	GuiControlGet, v_OutVarTemp, Pos, % IdText13
-	v_xNext += v_OutVarTempW + c_xmarg
-	GuiControl, Move, % IdText2, % "x" v_xNext "y" v_yNext ;where to place text Total
-	GuiControlGet, v_OutVarTemp, Pos, % IdText2
-	v_xNext += v_OutVarTempW
-	GuiControl, Move, % IdText12, % "x" v_xNext "y" v_yNext ;Where to place value of total counter
 	HS3MinWidth		:= LeftColumnW + c_WofMiddleButton + RightColumnW
 ,	HS3MinHeight		:= LeftColumnH + c_ymarg
 }
@@ -13372,7 +13367,7 @@ F_GuiAbout_DetermineConstraints()
 	GuiControl, Move, % IdAboutT1, % "x" . v_xNext . A_Space . "y" . v_yNext
 	v_xNext := MaxText + 3 * c_xmarg
 	GuiControl, Move, % IdAboutT2, % "x" . v_xNext . A_Space . "y" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdAboutT3, % "x" . v_xNext . A_Space . "y" . v_yNext
 	v_xNext := MaxText + 3 * c_xmarg
 	if (v_Param = "l")
@@ -13380,7 +13375,7 @@ F_GuiAbout_DetermineConstraints()
 	else
 		GuiControl, , % IdAboutT4, % TransA["default"]
 	GuiControl, Move, % IdAboutT4, % "x" . v_xNext . A_Space . "y" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdAboutT5, % "x" . v_xNext . A_Space . "y" . v_yNext
 	v_xNext := MaxText + 3 * c_xmarg
 	if (A_IsCompiled)
@@ -13388,7 +13383,7 @@ F_GuiAbout_DetermineConstraints()
 	else
 		GuiControl, , % IdAboutT6, ahk
 	GuiControl, Move, % IdAboutT6, % "x" . v_xNext . A_Space . "y" . v_yNext
-	v_xNext := c_xmarg, v_yNext += HofText
+	v_xNext := c_xmarg, v_yNext += c_HofText
 	GuiControl, Move, % IdAboutT7, % "x" . v_xNext . A_Space . "y" . v_yNext
 	v_xNext := MaxText + 3 * c_xmarg
 	GuiControl, Move, % IdAboutT8, % "x" . v_xNext . A_Space . "y" . v_yNext
@@ -13398,7 +13393,7 @@ F_GuiAbout_DetermineConstraints()
 	v_wNext := v_OutVarTemp2W + 2 * c_xmarg
 ,	v_xNext := (v_OutVarTemp1W // 2) - (v_wNext // 2)
 	GuiControlGet, v_OutVarTemp, Pos, % IdLine2
-	v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg + 4 * HofText
+	v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg + 4 * c_HofText
 	GuiControl, Move, % IdAboutOkButton, % "x" . v_xNext . "y" . A_Space . v_yNext . "w" . v_wNext
 	
 	v_xNext := v_OutVarTemp1X + v_OutVarTemp1W - 96 ;96 = chosen size of icon
@@ -14383,13 +14378,13 @@ F_ImportLibrary()
 	v_yNext := c_ymarg
 	GuiControl, Move, % IdImport_T1, % "x" v_xNext . A_Space . "y" v_yNext
 ;Gui, Import: Show, Center AutoSize
-	v_yNext += HofText + c_ymarg
+	v_yNext += c_HofText + c_ymarg
 	GuiControl, Move, % IdImport_T2, % "x" v_xNext . A_Space . "y" v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdImport_T2
 	v_wNext := v_OutVarTempW
-	v_hNext := HofText
+	v_hNext := c_HofText
 	GuiControl, Move, % IdImport_P1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space . "w" v_wNext . A_Space . "h" . v_hNext
-	v_yNext += HofText + c_ymarg
+	v_yNext += c_HofText + c_ymarg
 	GuiControl, Move, % IdImport_T2, % "x" v_xNext . A_Space . "y" v_yNext
 ;Gui, Import: Show, Center AutoSize
 	Gui, Import: Show, Hide
@@ -14576,14 +14571,14 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	v_yNext := c_ymarg
 	GuiControl, Move, % IdExport_T1, % "x" v_xNext . A_Space . "y" v_yNext
 	;Gui, Export: Show, Center AutoSize
-	v_yNext += HofText + c_ymarg
+	v_yNext += c_HofText + c_ymarg
 	GuiControl, Move, % IdExport_T2, % "x" v_xNext . A_Space . "y" v_yNext
 	;Gui, Export: Show, Center AutoSize
 	GuiControlGet, v_OutVarTemp, Pos, % IdExport_T2
 	v_wNext := v_OutVarTempW
-	v_hNext := HofText
+	v_hNext := c_HofText
 	GuiControl, Move, % IdExport_P1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space . "w" v_wNext . A_Space . "h" . v_hNext
-	v_yNext += HofText + c_ymarg
+	v_yNext += c_HofText + c_ymarg
 	GuiControl, Move, % IdExport_T2, % "x" v_xNext . A_Space . "y" v_yNext
 	;Gui, Export: Show, Center AutoSize
 	v_Progress   := 0
@@ -14743,14 +14738,14 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	v_yNext := c_ymarg
 	GuiControl, Move, % IdExport_T1, % "x" v_xNext . A_Space . "y" v_yNext
 	;Gui, Export: Show, Center AutoSize
-	v_yNext += HofText + c_ymarg
+	v_yNext += c_HofText + c_ymarg
 	GuiControl, Move, % IdExport_T2, % "x" v_xNext . A_Space . "y" v_yNext
 	;Gui, Export: Show, Center AutoSize
 	GuiControlGet, v_OutVarTemp, Pos, % IdExport_T2
 	v_wNext := v_OutVarTempW
-	v_hNext := HofText
+	v_hNext := c_HofText
 	GuiControl, Move, % IdExport_P1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space . "w" v_wNext . A_Space . "h" . v_hNext
-	v_yNext += HofText + c_ymarg
+	v_yNext += c_HofText + c_ymarg
 	GuiControl, Move, % IdExport_T2, % "x" v_xNext . A_Space . "y" v_yNext
 	;Gui, Export: Show, Center AutoSize
 	v_Progress   := 0
