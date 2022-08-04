@@ -155,7 +155,7 @@ if (ini_HK_IntoEdit != "none")
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
 Gui, 1: Default				;this line is necessary to not show too many Guis on time of loading hotstrings from library
 v_LibHotstringCnt := 0			;dirty trick to show initially 0 instead of 0000
-GuiControl, , % IdText13,  % v_LibHotstringCnt
+; GuiControl, , % IdText13,  % v_LibHotstringCnt
 GuiControl, , % IdText13b, % v_LibHotstringCnt
 F_LoadHotstringsFromLibraries()	;→ F_LoadDefinitionsFromFile() -> F_CreateHotstring
 F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
@@ -9700,23 +9700,6 @@ F_GuiMain_LVcolumnScale()
 	Gui, HS3: +DPIScale
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_DrawLibStat()
-{
-	global ;assume-global mode
-	local OutVarTemp1 := 0, OutVarTemp1X := 0, OutVarTemp1Y := 0, OutVarTemp1W := 0, OutVarTemp1H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
-		,OutVarTemp2 := 0, OutVarTemp2X := 0, OutVarTemp2Y := 0, OutVarTemp2W := 0, OutVarTemp2H := 0
-		,xNext := 0, yNext := 0, wNext := 0, hNext := 0
-
-	GuiControlGet, OutVarTemp1, Pos, % IdListView1
-	GuiControlGet, OutVarTemp2, Pos, % IdText2	;% IdText2	;info about libraries statistics
-	xNext := OutVarTemp1X + OutVarTemp1W - OutVarTemp2W
-,	yNext := c_ymarg
-	GuiControl, MoveDraw, % IdText2, % "x" . xNext . "y" . yNext
-	GuiControlGet, OutVarTemp1, Pos, % IdText12
-	xNext -= (OutVarTemp1W + c_xmarg)
-	GuiControl, MoveDraw, % IdText12, % "x" . xNext . "y" . yNext	;IdText2, value of this library statistics (ratio)
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiMain_Resize2()
 {
 	global ;assume-global mode
@@ -9727,15 +9710,6 @@ F_GuiMain_Resize2()
 	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
 ,	hNext := A_GuiHeight - (c_ymarg + c_HofText + c_ymarg + c_HofText + c_HofSandbox + c_ymarg)
 	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
-	F_GuiHS3_DrawLibStat()
-; 	GuiControlGet, OutVarTemp1, Pos, % IdListView1
-; 	GuiControlGet, OutVarTemp2, Pos, % IdText2	;% IdText2	;info about libraries statistics
-; 	xNext := OutVarTemp1X + OutVarTemp1W - OutVarTemp2W
-; ,	yNext := c_ymarg
-; 	GuiControl, MoveDraw, % IdText2, % "x" . xNext . "y" . yNext
-; 	GuiControlGet, OutVarTemp1, Pos, % IdText12
-; 	xNext -= (OutVarTemp1W + c_xmarg)
-; 	GuiControl, MoveDraw, % IdText12, % "x" . xNext . "y" . yNext	;IdText2, value of this library statistics (ratio)
 	xNext := LeftColumnW + c_xmarg + c_WofMiddleButton
 ,	yNext := A_GuiHeight - (c_ymarg + c_HofText + c_HofSandbox)
 	GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext
@@ -9776,7 +9750,6 @@ F_GuiMain_Resize1()
 	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
 ,	v_hNext := A_GuiHeight - (2 * c_ymarg + c_HofText)
 	GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext . "h" . v_hNext  ;increase
-	F_GuiHS3_DrawLibStat()
 	v_xNext := c_xmarg
 ,	v_yNext := LeftColumnH + c_ymarg
 	GuiControl, MoveDraw, % IdText10, % "x" . v_xNext . "y" . v_yNext
@@ -9874,7 +9847,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	
 	if (!ini_Sandbox)
 	{
-		F_GuiMain_Resize5()		
+		F_GuiMain_Resize5()
 		return
 	}
 	
@@ -9896,7 +9869,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		if (v_OutVarTemp2H <= LeftColumnH + HofEdit + 3 * c_ymarg)
 		{
 			ini_IsSandboxMoved := false
-			F_GuiMain_Resize3()			
+			F_GuiMain_Resize3()
 			return
 		}
 		else
@@ -11280,7 +11253,7 @@ F_UnloadHotstringsFromFile(nameoffile)
 				}
 		}
 	}
-	GuiControl, , % IdText12,  % v_TotalHotstringCnt ; Text: Puts new contents into the control.
+	GuiControl, , % IdText12,  % Format("{1:4} / {2:-4}", v_LibHotstringCnt, v_TotalHotstringCnt) ; Text: Puts new contents into the control.
 	GuiControl, , % IdText12b, % v_TotalHotstringCnt ; Text: Puts new contents into the control.
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -11826,7 +11799,7 @@ TI_AddComment											= You can add optional (not mandatory) comment to new (t
 TI_SelectHotstringLib									= Select .csv file containing (triggerstring, hotstring) definitions. `nBy default those files are located in C:\Users\<UserName>\Documents folder.
 TI_LibraryContent										= After pressing (F2) you can move up or down in the table by pressing ↑ or ↓ arrows. `n`nEach time you select any row, options of the selected definitions are automatically loaded to the left part of this window.
 TI_Sandbox											= Sandbox is used as editing field where you can test `nany (triggerstring, hotstring) definition, e.g. for testing purposes. `nThis area can be switched on/off and moves when you rescale `nthe main application window.
-TI_LibStats											= Amount of definitions in currently selected library to `ntotal amound of currently loaded definitions from all libraries.
+TI_LibStats											= Amount of definitions in currently selected library to `ntotal amount of currently loaded definitions from all libraries.
 F_HK_CallGUIInfo										= Remark: this hotkey is operating system wide, so before changing it be sure it's not in conflict with any other system wide hotkey.`n`nIt opens Graphical User Interface (GUI) of Hotstrings, even if window is minimized or invisible.
 F_HK_GeneralInfo										= You can enter any hotkey as combination of Shift, Ctrl, Alt modifier and any other keyboard key. `nIf you wish to have hotkey where Win modifier key is applied, use the checkbox separately.
 F_HK_ClipCopyInfo										= Remark: this hotkey is operating system wide, so before changing it be sure it's not in conflict with any other system wide hotkey. `n`nWhen Hotstrings window exists (it could be minimized) pressing this hotkey copies content of clipboard to ""Enter hotstring"" field. `nThanks to that you can prepare new definition much quicker.
@@ -11946,8 +11919,8 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 		}
 		++v_TotalHotstringCnt
 		a_Library.Push(name) ;for function Search
-	}	
-	GuiControl, , % IdText12,  % Format("{1} / {2}", v_LibHotstringCnt, v_TotalHotstringCnt) ; Text: Puts new contents into the control.
+	}
+	GuiControl, , % IdText12,  % Format("{1:4} / {2:-4}", v_LibHotstringCnt, v_TotalHotstringCnt) ; Text: Puts new contents into the control.
 	; GuiControl, , % IdText12,  % " / " . v_TotalHotstringCnt ; Text: Puts new contents into the control.
 	GuiControl, , % IdText12b, % v_TotalHotstringCnt ; Text: Puts new contents into the control.
 }
@@ -12357,6 +12330,14 @@ F_GuiHS4_CreateObject()
 	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo15b,									ⓘ
 	GuiControl +g, % IdTextInfo15b, % TI_SelectHotstringLib
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+
+	Gui,		HS4: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType 
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText12b, % Format("{1:4} / {2:-4}", v_LibHotstringCnt, v_TotalHotstringCnt)
+	Gui, 	HS4: Font, 		% "s" . c_FontSize + 2
+	Gui, 	HS4: Add, 		Text, 		x0 y0 HwndIdText2,									% " ⓘ"
+	TI_LibStats		:= func("F_ShowLongTooltip").bind(TransA["TI_LibStats"])
+	GuiControl +g, % IdText2, % TI_LibStats
+
 	
 	Gui,		HS4: Add,		DropDownList,	x0 y0 HwndIdDDL2b vv_SelectHotstringLibrary gF_SelectLibrary Sort
 	
@@ -12373,14 +12354,14 @@ F_GuiHS4_CreateObject()
 	
 	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit10b vv_Sandbox r3 							; r3 = 3x rows of text
 	
-	Gui,		HS4: Add,		Text,		x0 y0 HwndIdText11b, % TransA["This library:"] . A_Space
-	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
-	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText13b,  % v_LibHotstringCnt ;value of Hotstrings counter
-	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText2b, % TransA["LS:"] . A_Space
-	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
-	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText12b, % v_TotalHotstringCnt
-	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	; Gui,		HS4: Add,		Text,		x0 y0 HwndIdText11b, % TransA["This library:"] . A_Space
+	; Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
+	; Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText13b,  % v_LibHotstringCnt ;value of Hotstrings counter
+	; Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+	; Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText2b, % TransA["LS:"] . A_Space
+	; Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
+	; Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText12b, % v_TotalHotstringCnt
+	; Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_GuiMain_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
@@ -12461,7 +12442,6 @@ F_GuiMain_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, % EnDis, % IdText10
 	GuiControl, % EnDis, % IdTextInfo17
 	GuiControl, % EnDis, % IdEdit10
-	GuiControl, % EnDis, % IdText13
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_GuiMain_CreateObject()
@@ -12582,6 +12562,13 @@ F_GuiMain_CreateObject()
 	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo15,									ⓘ
 	TI_SelectHotstringLib	:= func("F_ShowLongTooltip").bind(TransA["TI_SelectHotstringLib"])
 	GuiControl +g, % IdTextInfo15, % TI_SelectHotstringLib
+
+	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType 
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText12, % Format("{1:4} / {2:-4}", v_LibHotstringCnt, v_TotalHotstringCnt)
+	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2
+	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText2,										% " ⓘ"
+	TI_LibStats		:= func("F_ShowLongTooltip").bind(TransA["TI_LibStats"])
+	GuiControl +g, % IdText2, % TI_LibStats
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
@@ -12598,13 +12585,6 @@ F_GuiMain_CreateObject()
 	TI_LibraryContent		:= func("F_ShowLongTooltip").bind(TransA["TI_LibraryContent"])
 	GuiControl +g, % IdTextInfo16, % TI_LibraryContent
 	
-	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType 
-	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText12, % Format("{1:4} / {2:4}", v_LibHotstringCnt, v_TotalHotstringCnt)
-	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2
-	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText2,										ⓘ
-	TI_LibStats		:= func("F_ShowLongTooltip").bind(TransA["TI_LibStats"])
-	GuiControl +g, % IdText2, % TI_LibStats
-
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	Gui, 		HS3: Add, 		ListView, 	x0 y0 HwndIdListView1 LV0x1 vv_LibraryContent AltSubmit gF_HSLV -Multi, % TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
 	
@@ -12616,13 +12596,7 @@ F_GuiMain_CreateObject()
 	GuiControl +g, % IdTextInfo17, % TI_Sandbox
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	
 	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit10 vv_Sandbox r3 						; r3 = 3x rows of text
-	Gui,			HS3: Add,			Text,		x0 y0 HwndIdText11, % TransA["This library:"] . A_Space	;tu jestem
-	; Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, Consolas ;Consolas type is monospace
-	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText13,  %  v_LibHotstringCnt ;value of Hotstrings counter in the current library
-	
-	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, 		HS3: Add, 		Button, Hidden Default gF_HSLV	;trick to catch if user presses Enter on ListView1
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -13009,10 +12983,7 @@ F_GuiMain_Redraw(IfShowGui)
 			GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
 		}
 		else
-		{
 			GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . ini_ListViewPos.W . "h" ini_ListViewPos.H
-			F_GuiHS3_DrawLibStat()
-		}
 		b_FirstRun := false
 	}
 	else
@@ -13264,14 +13235,22 @@ F_GuiMain_DetermineConstraints()
 ,	v_yNext += c_HofText
 ,	v_wNext := LeftColumnW - 2 * c_xmarg
 	GuiControl, Move, % IdEdit9, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
-;5.1.6. Select hotstring library 	
+;5.1.6. Select hotstring library text
 	v_yNext += HofEdit + c_ymarg
 ,	v_xNext := c_xmarg
 	GuiControl, Move, % IdText6, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp1, Pos, % IdText6
 	v_xNext += v_OutVarTemp1W + c_xmarg
 	GuiControl, Move, % IdTextInfo15, % "x" . v_xNext . "y" . v_yNext
+;5.1.7. Definitions in libraries statistics
+	GuiControlGet, v_OutVarTemp1, Pos, % IdText2	;% IdText2	;info about libraries statistics
+	v_xNext := LeftColumnW - c_xmarg - v_OutVarTemp1W
+	GuiControl, Move, % IdText2, % "x" . v_xNext . "y" . v_yNext
+	GuiControlGet, v_OutVarTemp1, Pos, % IdText12
+	v_xNext -= v_OutVarTemp1W
+	GuiControl, MoveDraw, % IdText12, % "x" . v_xNext . "y" . v_yNext	;IdText12, value of this library statistics (ratio)
 
+;5.1.8. Drop-down list, select hotstrings library
 	v_yNext += c_HofText
 ,	v_xNext := c_xmarg
 ,	v_wNext := LeftColumnW - v_xNext - c_xmarg
