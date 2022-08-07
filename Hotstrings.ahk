@@ -9699,13 +9699,13 @@ F_GuiMain_LVcolumnScale()
 	Gui, HS3: +DPIScale
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiMain_Resize2()
+F_GuiHS3_Resize2()
 {
 	global ;assume-global mode
 	local OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 		,xNext := 0, yNext := 0, wNext := 0, hNext := 0
 
-	OutputDebug, % A_ThisFunc . "`n"	
+	; OutputDebug, % A_ThisFunc . "`n"	
 	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
 ,	hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + HofSandbox + c_ymarg)
 	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
@@ -9729,7 +9729,7 @@ F_GuiHS3_Resize4()
 	global ;assume-global mode
 	local wNext := 0, hNext := 0
 	
-	OutputDebug, % A_ThisFunc . "`n"
+	; OutputDebug, % A_ThisFunc . "`n"
 	hNext := A_GuiHeight - (2 * c_ymarg)
 	GuiControl, MoveDraw, % IdButton5, % "h" . hNext 
 	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
@@ -9745,7 +9745,7 @@ F_GuiHS3_Resize1()
 	local	OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 			,xNext := 0, yNext := 0, wNext := 0, hNext := 0
 	
-	OutputDebug, % A_ThisFunc . "`n"
+	; OutputDebug, % A_ThisFunc . "`n"
 	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
 ,	hNext := A_GuiHeight - (2 * c_ymarg + HofText)
 	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext  ;increase
@@ -9771,7 +9771,7 @@ F_GuiHS3_Resize3()
 	local	OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 			,xNext := 0, yNext := 0, wNext := 0, hNext := 0
 	
-	OutputDebug, % A_ThisFunc . "`n"
+	; OutputDebug, % A_ThisFunc . "`n"
 	hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + HofSandbox + c_ymarg)
 	GuiControl, MoveDraw, % IdListView1, % "h" . hNext ;decrease
 	xNext := LeftColumnW + c_xmarg + WofMiddleButton
@@ -9789,13 +9789,13 @@ F_GuiHS3_Resize3()
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize8()
+F_GuiHS3_Resize5()
 {
 	global ;assume-global mode
 	local	xNext := 0, yNext := 0, wNext := 0, hNext := 0
 		,	OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
 	
-	OutputDebug, % A_ThisFunc . "`n"
+	; OutputDebug, % A_ThisFunc . "`n"
 	hNext := A_GuiHeight - (HofText + 2 * c_ymarg)
 ,	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
 	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
@@ -9810,13 +9810,13 @@ F_GuiHS3_Resize8()
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiMain_Resize7()	;switch text to the right
+F_GuiHS3_Resize7()	;switch text to the right
 {
 	global ;assume-global mode
 	local	xNext := 0, yNext := 0, wNext := 0, hNext := 0
 		,	OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
 
-	OutputDebug, % A_ThisFunc . "`n"
+	; OutputDebug, % A_ThisFunc . "`n"
 	hNext := A_GuiHeight - (2 * HofText + 3 * c_ymarg)
 ,	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
 	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
@@ -9832,13 +9832,13 @@ F_GuiMain_Resize7()	;switch text to the right
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiMain_Resize6()
+F_GuiHS3_Resize8()
 {
 	global ;assume-global mode
 	local	xNext := 0, yNext := 0, wNext := 0, hNext := 0
 		,	OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
 
-	OutputDebug, % A_ThisFunc . "`n"
+	; OutputDebug, % A_ThisFunc . "`n"
 	hNext := A_GuiHeight - (HofText + 2 * c_ymarg)
 ,	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
 	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
@@ -9848,13 +9848,13 @@ F_GuiMain_Resize6()
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiMain_Resize5()
+F_GuiHS3_Resize6()
 {
 	global ;assume-global mode
 	local	xNext := 0, yNext := 0, wNext := 0, hNext := 0
 		,	OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
 
-	OutputDebug, % A_ThisFunc . "`n"
+	; OutputDebug, % A_ThisFunc . "`n"
 	hNext := A_GuiHeight - (2 * HofText + 3 * c_ymarg)
 ,	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
 	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
@@ -9896,18 +9896,20 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			ini_IsSandboxMoved := true
 		}
 		else
-			F_GuiMain_Resize5()
+			F_GuiHS3_Resize5()
 		return
 	}
 	if (!A_EventInfo) and (ini_HS3GuiMaximized)	;Window is restored after maximizing
 	{
 		ini_HS3GuiMaximized := false
 		if (ini_Sandbox) and (!ini_IsSandboxMoved)
-			F_GuiMain_Resize2()
+			F_GuiHS3_Resize2()
 		if (ini_Sandbox) and (ini_IsSandboxMoved)
 			F_GuiHS3_Resize4()
-		if (!ini_Sandbox)
-			F_GuiMain_Resize5()	;!!!
+		if (!ini_Sandbox) and (!ini_IsSandboxMoved)
+			F_GuiHS3_Resize6()
+		if (!ini_Sandbox) and (ini_IsSandboxMoved)
+			F_GuiHS3_Resize8()
 		return
 	}
 	
@@ -9921,7 +9923,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			return
 		}
 		else
-			F_GuiMain_Resize2()
+			F_GuiHS3_Resize2()
 		return
 	}
 	if (ini_Sandbox) and (ini_IsSandboxMoved)
@@ -9941,11 +9943,11 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		if (OutVarTemp2H > LeftColumnH - HofText)	;threshold is determined experimentally :-(
 		{
 			ini_IsSandboxMoved := true
-			F_GuiHS3_Resize8()
+			F_GuiHS3_Resize5()
 			return
 		}
 		else
-			F_GuiMain_Resize5()
+			F_GuiHS3_Resize6()
 		return	
 	}
 	if (!ini_Sandbox and ini_IsSandboxMoved)
@@ -9953,11 +9955,11 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		if (OutVarTemp2H <= LeftColumnH + c_ymarg)	;threshold is determined experimentally :-(
 		{
 			ini_IsSandboxMoved := false
-			F_GuiMain_Resize7()
+			F_GuiHS3_Resize7()
 			return
 		}
 		else
-			F_GuiMain_Resize6()
+			F_GuiHS3_Resize8()
 		return
 	}
 }
@@ -10822,8 +10824,7 @@ F_ToggleSandbox()
 	{
 		Case "HS3": 
 			F_GuiHS3_Redraw()
-			Gui, HS3: Show ;without AutoSize do not initiates HS3GuiSize
-			; Gui, HS3: Show, AutoSize ;initiates HS3GuiSize
+			Gui, HS3: Show ;without AutoSize do not initiates HS3GuiSize ; Gui, HS3: Show, AutoSize ;initiates HS3GuiSize
 			F_GuiHS4_Redraw(false)
 		Case "HS4": 
 			F_GuiHS4_Redraw(true)
