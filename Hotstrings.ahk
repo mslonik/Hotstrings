@@ -9606,7 +9606,7 @@ F_DeleteHotstring()
 	F_Searching("Reload")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui ;tu jestem
+F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 {
 	global ;assume-global mode
 	local WinX := 0, WinY := 0, OutputvarTemp := 0, OutputvarTempW := 0
@@ -12996,90 +12996,88 @@ F_HS3_InitialDraw(params*)	;all what have to be drawn are "movable" elements of 
 	global ;assume-global mode; c_ymarg, HofSandbox, HofText
 	local OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
 		,xNext := 0, yNext := 0, wNext := 0, hNext := 0
-		if (ini_Sandbox and !ini_IsSandboxMoved)	;1
-		{
-			GuiControl, Show, % IdEdit10
-			xNext := LeftColumnW + WofMiddleButton + c_xmarg
-,			yNext := c_ymarg + HofText
-			if (params[1])
-				wNext := params[1]
-			else
-				wNext := RightColumnW
-			if (params[2])
-				hNext := params[2]
-			else
-				hNext := LeftColumnH - (2 * c_ymarg + 2 * HofText + HofSandbox)
-			GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
-			GuiControlGet, OutVarTemp, Pos, % IdListView1
-			yNext := OutVarTempY + OutVarTempH + c_ymarg
-			GuiControl, Move, % IdText10, % "x" . xNext . "y" . yNext
-			GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
-			xNext += OutVarTempW + c_xmarg
-			GuiControl, Move, % IdTextInfo17, % "x" . xNext . "y" . yNext
-			xNext := LeftColumnW + WofMiddleButton + c_xmarg
-,			yNext := OutVarTempY + OutVarTempH
-			GuiControlGet, OutVarTemp, Pos, % IdListView1
-			wNext := OutVarTempW
-			GuiControl, Move, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
-			GuiControlGet, OutVarTemp, Pos, % IdEdit10
-			xNext := LeftColumnW
-,			yNext := c_ymarg
-,			hNext := OutVarTempY + OutVarTempH - c_ymarg
-			GuiControl, Move, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext
-		}
-		if (ini_Sandbox and ini_IsSandboxMoved)		;2
-		{
-			GuiControl, Show, % IdEdit10
-			xNext := c_xmarg
-,			yNext := LeftColumnH + c_ymarg
-			GuiControl, Move, % IdText10, % "x" . xNext . "y" . yNext	;Sandbox text
-			GuiControlGet, OutVarTemp, Pos, % IdText10
-			xNext += OutVarTempW + c_xmarg
-			GuiControl, Move, % IdTextInfo17, % "x" . xNext . "y" . yNext
-			xNext := c_xmarg
-,			yNext += HofText
-,			wNext := LeftColumnW - 2 * c_xmarg
-			GuiControl, Move, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
-			GuiControlGet, OutVarTemp, Pos, % IdEdit10
-			hNext := OutVarTempY + OutVarTempH
-			GuiControl, Move, % IdButton5, % "h" . hNext
-			GuiControlGet, OutVarTemp, Pos, % IdEdit10
-			xNext := LeftColumnW
-,			yNext := c_ymarg
-,			hNext := OutVarTempY + OutVarTempH - c_ymarg
-			GuiControl, Move, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext
-			xNext := LeftColumnW + WofMiddleButton + c_xmarg
-,			yNext := c_ymarg + HofText
-			if (params[1])
-				wNext := params[1]
-			else
-				wNext := RightColumnW
-			if (params[2])
-				hNext := params[2]
-			else
-				hNext -= yNext - c_ymarg
-			GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
-		}
-		if (!ini_Sandbox)	;3 IdEdit10 is hidden, ListView is expanded, Sandbox text is moved down
-		{
-			GuiControl, Hide, % IdEdit10
-			xNext := LeftColumnW + WofMiddleButton + c_xmarg
-,			yNext := c_ymarg + HofText
-,			wNext := RightColumnW
-,			hNext := LeftColumnH - (2 * c_ymarg + 2 * HofText)
-			GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
-			GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
-			GuiControlGet, OutVarTemp, Pos, % IdListView1
-			yNext := OutVarTempY + OutVarTempH + c_ymarg
-			GuiControl, Move, % IdText10, % "x" . xNext . "y" . yNext
-			GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
-			xNext += OutVarTempW + c_xmarg
-			GuiControl, Move, % IdTextInfo17, % "x" . xNext . "y" . yNext
-			xNext := LeftColumnW
-,			yNext := c_ymarg
-,			hNext := OutVarTempY + OutVarTempH - c_ymarg
-			GuiControl, Move, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext
-		}
+
+	if (ini_Sandbox and !ini_IsSandboxMoved)	;1
+	{
+		GuiControl, Show, % IdEdit10
+		xNext := LeftColumnW + WofMiddleButton + c_xmarg
+,		yNext := c_ymarg + HofText
+		if (params[1])
+			wNext := params[1]
+		else
+			wNext := RightColumnW
+		if (params[2])
+			hNext := params[2]
+		else
+			hNext := LeftColumnH - (2 * c_ymarg + 2 * HofText + HofSandbox)
+		GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
+		GuiControlGet, OutVarTemp, Pos, % IdListView1
+		yNext := OutVarTempY + OutVarTempH + c_ymarg
+		GuiControl, Move, % IdText10, % "x" . xNext . "y" . yNext
+		GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
+		xNext += OutVarTempW + c_xmarg
+		GuiControl, Move, % IdTextInfo17, % "x" . xNext . "y" . yNext
+		xNext := LeftColumnW + WofMiddleButton + c_xmarg
+,		yNext := OutVarTempY + OutVarTempH
+		GuiControlGet, OutVarTemp, Pos, % IdListView1
+		wNext := OutVarTempW
+		GuiControl, Move, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
+		GuiControlGet, OutVarTemp, Pos, % IdEdit10
+		xNext := LeftColumnW
+,		yNext := c_ymarg
+,		hNext := OutVarTempY + OutVarTempH - c_ymarg
+		GuiControl, Move, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext
+	}
+	if (ini_Sandbox and ini_IsSandboxMoved)		;2
+	{
+		GuiControl, Show, % IdEdit10
+		xNext := c_xmarg
+,		yNext := LeftColumnH + c_ymarg
+		GuiControl, Move, % IdText10, % "x" . xNext . "y" . yNext	;Sandbox text
+		GuiControlGet, OutVarTemp, Pos, % IdText10
+		xNext += OutVarTempW + c_xmarg
+		GuiControl, Move, % IdTextInfo17, % "x" . xNext . "y" . yNext
+		xNext := c_xmarg
+,		yNext += HofText
+,		wNext := LeftColumnW - 2 * c_xmarg
+		GuiControl, Move, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
+		GuiControlGet, OutVarTemp, Pos, % IdEdit10
+		xNext := LeftColumnW
+,		yNext := c_ymarg
+,		hNext := OutVarTempY + OutVarTempH - c_ymarg
+		GuiControl, Move, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext
+		xNext := LeftColumnW + WofMiddleButton + c_xmarg
+,		yNext := c_ymarg + HofText
+		if (params[1])
+			wNext := params[1]
+		else
+			wNext := RightColumnW
+		if (params[2])
+			hNext := params[2]
+		else
+			hNext -= yNext - c_ymarg
+		GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
+	}
+	if (!ini_Sandbox)	;3 IdEdit10 is hidden, ListView is expanded, Sandbox text is moved down ;tu jestem
+	{
+		GuiControl, Hide, % IdEdit10
+		xNext := LeftColumnW + WofMiddleButton + c_xmarg
+,		yNext := c_ymarg + HofText
+,		wNext := RightColumnW
+,		hNext := LeftColumnH - (2 * c_ymarg + 2 * HofText)
+		GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
+		GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
+		GuiControlGet, OutVarTemp, Pos, % IdListView1
+		yNext := OutVarTempY + OutVarTempH + c_ymarg
+		GuiControl, Move, % IdText10, % "x" . xNext . "y" . yNext
+		GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
+		xNext += OutVarTempW + c_xmarg
+		GuiControl, Move, % IdTextInfo17, % "x" . xNext . "y" . yNext
+		xNext := LeftColumnW
+,		yNext := c_ymarg
+,		hNext := OutVarTempY + OutVarTempH - c_ymarg
+		GuiControl, Move, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext
+	}
 }
 ;------------------------------------------------------------------------------------------------------------------------------------
 F_HS3_NormalDraw(LVW, LVH)	;LVW = ListViewWidth, LVH = ListViewHeight
