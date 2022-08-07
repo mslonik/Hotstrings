@@ -425,23 +425,21 @@ Critical, Off
 		return
 
 	F2:: ;new thread starts here
-		F_WhichGui()
-		if (A_DefaultGui = "HS4")
-			return
-		if (A_DefaultGui = "HS3")
+		Switch F_WhichGui()
 		{
-			Gui, HS3: Submit, NoHide
-			if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
-			{
-				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to display library content please at first select hotstring library"] . "."
+			Case "HS3":
+				Gui, HS3: Submit, NoHide
+				if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
+				{
+					MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to display library content please at first select hotstring library"] . "."
+					return
+				}
+				GuiControl, Focus, v_LibraryContent
+				if (LV_GetNext(0,"Focused") == 0)
+					LV_Modify(1, "+Select +Focus")
 				return
-			}
-			GuiControl, Focus, v_LibraryContent
-			if (LV_GetNext(0,"Focused") == 0)
-				LV_Modify(1, "+Select +Focus")
-			return
+			Case "HS4": return
 		}
-
 	^s::	;new thread starts here
 		F_SaveGUIPos()
 		return
@@ -2285,8 +2283,7 @@ F_PasteFromClipboard()
 			ContentOfClipboard := StrReplace(ContentOfClipboard, "`r`n", "``n")
 	}
 	ControlSetText, Edit2, % ContentOfClipboard
-	F_WhichGui()
-	Gui, % A_DefaultGui . ":" . A_Space . "Show"
+	Gui, % F_WhichGui() . ":" . A_Space . "Show"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HSDelGuiClose()	;Gui event!
@@ -7720,7 +7717,7 @@ F_GuiShowIntro()
 	
 	GuiControl,, % IdIntroCheckbox, % ini_ShowIntro	;load initial value
 	if (WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd))
-		Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+		Gui, % F_WhichGui() . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	Gui, ShowIntro: Show, AutoSize Center
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8238,14 +8235,13 @@ F_AddHotstring()
 			,name := "", key := 0, value := "", Counter := 0, key2 := 0, value2 := ""
 			,f_T_GeneralMatch := false, f_T_CaseMatch := false, f_OldOptionsC := false, f_OldOptionsC1 := false, f_OptionsC := false, f_OptionsC1 := false
 			,SelectedLibraryName := ""
-			,Overwrite := "", WinHWND := "", WhichGuiEnable := ""
+			,Overwrite := "", WinHWND := ""
 
 	;1. Read all inputs. 
 	if (F_ReadUserInputs(TextInsert, NewOptions, SendFunHotstringCreate, SendFunFileFormat))	;return true (1) in case of any problem. 
 		return
 	;Disable all GuiControls for time of adding / editing of d(t, o, h)	
-	WhichGuiEnable := F_WhichGui()
-	Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
+	Switch F_WhichGui()	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
 		{
 			Case "HS3":	F_GuiMain_EnDis("Disable")	;EnDis = "Disable" or "Enable"
 			Case "HS4": 	F_GuiHS4_EnDis("Disable")
@@ -9083,8 +9079,7 @@ F_Searching(ReloadListView*)
 		
 		Case TransA["Search (F3)"], "": ;new thread starts here
 			WinGetPos, Window1X, Window1Y, Window1W, Window1H, A	;Retrieves the position of the active window.
-			F_WhichGui()
-			Gui, % A_DefaultGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+			Gui, % F_WhichGui() . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 			PreviousGui := A_DefaultGui
 			Gui, HS3Search: -Disabled
 			Gui, HS3Search: Default
@@ -9156,8 +9151,7 @@ F_GuiSearch_DetermineConstraints()
 ,	v_OutVarTemp 	:= Max(HofRadio, HofEdit)
 ,	v_xNext 		:= c_xmarg
 ,	v_yNext 		+= v_OutVarTemp + c_ymarg
-	F_WhichGui()
-	Switch A_DefaultGui
+	Switch F_WhichGui()
 	{
 		Case "HS3": 
 			v_wNext := HS3_GuiWidth - 2 * c_ymarg
@@ -9793,7 +9787,7 @@ F_GuiMain_Resize5()
 	global ;assume-global mode
 	local	v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
 	
-	v_hNext := A_GuiHeight - (c_HofText + 2 * c_ymarg)
+	v_hNext := A_GuiHeight - (2 * c_HofText + 3 * c_ymarg)
 ,	v_wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + c_WofMiddleButton)
 	GuiControl, MoveDraw, % IdListView1, % "w" . v_wNext . "h" . v_hNext
 	v_hNext := A_GuiHeight - (2 * c_ymarg)
@@ -10731,9 +10725,7 @@ F_ToggleSandbox()
 	Menu, ConfGUI, ToggleCheck, % TransA["Show Sandbox"] . "`tF6"
 	ini_Sandbox := !(ini_Sandbox)
 	Iniwrite, %ini_Sandbox%, % ini_HADConfig, GraphicalUserInterface, Sandbox
-	
-	F_WhichGui()
-	Switch A_DefaultGui
+	Switch F_WhichGui()
 	{
 		Case "HS3": 
 			F_GuiMain_Redraw(true)
@@ -10973,26 +10965,23 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 		IniWrite, % "", 				% ini_HADConfig, GraphicalUserInterface, MainWindowPosH
 		return
 	}	
-	F_WhichGui()		;This line is necessary in case when last Gui is not equal to HS3 or HS4. This is a case e.g. if Gui_VersionUpdate is active
-	if (A_DefaultGui = "HS3")
+	Switch F_WhichGui()		;This line is necessary in case when last Gui is not equal to HS3 or HS4. This is a case e.g. if Gui_VersionUpdate is active
 	{
-		WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
-		IniWrite,  HS3,			% ini_HADConfig, GraphicalUserInterface, WhichGui
-		IniWrite, % HS3_GuiWidth, 	% ini_HADConfig, GraphicalUserInterface, MainWindowPosW
-		IniWrite, % HS3_GuiHeight, 	% ini_HADConfig, GraphicalUserInterface, MainWindowPosH
-		GuiControlGet, TempPos,	Pos, % IdListView1
-		IniWrite, % TempPosW,		% ini_HADConfig, GraphicalUserInterface, ListViewPosW
-		IniWrite, % TempPosH,		% ini_HADConfig, GraphicalUserInterface, ListViewPosH
-		IniWrite, % ini_HS3GuiMaximized, 	% ini_HADConfig, GraphicalUserInterface, GuiMaximized
+		Case "HS3":
+			WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
+			IniWrite,  HS3,			% ini_HADConfig, GraphicalUserInterface, WhichGui
+			IniWrite, % HS3_GuiWidth, 	% ini_HADConfig, GraphicalUserInterface, MainWindowPosW
+			IniWrite, % HS3_GuiHeight, 	% ini_HADConfig, GraphicalUserInterface, MainWindowPosH
+			GuiControlGet, TempPos,	Pos, % IdListView1
+			IniWrite, % TempPosW,		% ini_HADConfig, GraphicalUserInterface, ListViewPosW
+			IniWrite, % TempPosH,		% ini_HADConfig, GraphicalUserInterface, ListViewPosH
+			IniWrite, % ini_HS3GuiMaximized, 	% ini_HADConfig, GraphicalUserInterface, GuiMaximized
+		Case "HS4":
+			WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
+			IniWrite,  HS4,			% ini_HADConfig, GraphicalUserInterface, WhichGui
+			IniWrite, % HS4_GuiWidth, 	% ini_HADConfig, GraphicalUserInterface, MainWindowPosW
+			IniWrite, % HS4_GuiHeight, 	% ini_HADConfig, GraphicalUserInterface, MainWindowPosH
 	}
-	if (A_DefaultGui = "HS4")
-	{
-		WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
-		IniWrite,  HS4,			% ini_HADConfig, GraphicalUserInterface, WhichGui
-		IniWrite, % HS4_GuiWidth, 	% ini_HADConfig, GraphicalUserInterface, MainWindowPosW
-		IniWrite, % HS4_GuiHeight, 	% ini_HADConfig, GraphicalUserInterface, MainWindowPosH
-	}
-	
 	IniWrite, % WinX, 			  % ini_HADConfig, GraphicalUserInterface, MainWindowPosX
 	IniWrite, % WinY, 			  % ini_HADConfig, GraphicalUserInterface, MainWindowPosY
 	
@@ -12615,15 +12604,14 @@ F_GuiMain_DefineConstants()
 F_RadioCaseCol()
 {
 	global ;assume-global mode
-	F_WhichGui()
-	Switch A_DefaultGui
+	Switch F_WhichGui()
 	{
 		Case "HS3": 
-		Gui, HS3: Submit, NoHide
-		F_HS3RadioCaseGroup(v_RadioCaseGroup)
+			Gui, HS3: Submit, NoHide
+			F_HS3RadioCaseGroup(v_RadioCaseGroup)
 		Case "HS4": 
-		Gui, HS4: Submit, NoHide
-		F_HS4RadioCaseGroup(v_RadioCaseGroup)
+			Gui, HS4: Submit, NoHide
+			F_HS4RadioCaseGroup(v_RadioCaseGroup)
 	}
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -12998,33 +12986,18 @@ F_HS3_InitialDraw(params*)	;all what have to be drawn are "movable" elements of 
 		}
 }
 ;------------------------------------------------------------------------------------------------------------------------------------
-F_GuiMain_Redraw(IfShowGui)	;reaction to event: toggle ini_Sandbox; if run for the very first time, width and height of ListView comes from saved values
-{ ;all elements of HS3 are drawn except of "movable" elements
+F_HS3_NormalDraw(LVW, LVH)	;LVW = ListViewWidth, LVH = ListViewHeight
+{
 	global ;assume-global mode; c_ymarg, c_HofSandbox, c_HofText
 	local OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
 		,xNext := 0, yNext := 0, wNext := 0, hNext := 0
-	static b_FirstRun := true
-
-	if (b_FirstRun)
-	{
-		if (!(ini_ListViewPos.W) or !(ini_ListViewPos.H)) ;if HS3 Gui is generated for the very first time
-			F_HS3_InitialDraw()
-		else
-			F_HS3_InitialDraw(ini_ListViewPos.W, ini_ListViewPos.H)
-		b_FirstRun := false
-	}
-	else
- 	{
-		; ini_Sandbox 		:= 0
-; ,		ini_IsSandboxMoved	:= 1
-
-/* 		if (ini_Sandbox and !ini_IsSandboxMoved)	;1 tested
+		if (ini_Sandbox and !ini_IsSandboxMoved)	;1 tested
 		{
 			GuiControl, Show, % IdEdit10
 			xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
 ,			yNext := c_ymarg + c_HofText
-,			wNext := RightColumnW
-,			hNext := LeftColumnH - (2 * c_ymarg + 2 * c_HofText + c_HofSandbox)
+,			wNext := LVW
+,			hNext := LVH - (2 * c_ymarg + 2 * c_HofText + c_HofSandbox)
 			GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
 			GuiControlGet, OutVarTemp, Pos, % IdListView1
 			yNext := OutVarTempY + OutVarTempH + c_ymarg
@@ -13066,8 +13039,9 @@ F_GuiMain_Redraw(IfShowGui)	;reaction to event: toggle ini_Sandbox; if run for t
 			GuiControl, Move, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext
 			xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
 ,			yNext := c_ymarg + c_HofText
-,			wNext := RightColumnW
-,			hNext -= yNext - c_ymarg
+,			wNext := LVW
+,			hNext := LVH
+; ,			hNext -= yNext - c_ymarg
 			GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
 		}
 		if (!ini_Sandbox and !ini_IsSandboxMoved)	;3 IdEdit10 is hidden, ListView is expanded, Sandbox text is moved down; tested
@@ -13075,10 +13049,9 @@ F_GuiMain_Redraw(IfShowGui)	;reaction to event: toggle ini_Sandbox; if run for t
 			GuiControl, Hide, % IdEdit10
 			xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
 ,			yNext := c_ymarg + c_HofText
-,			wNext := RightColumnW
-,			hNext := LeftColumnH - (2 * c_ymarg + 2 * c_HofText)
-			GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
-			GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
+,			wNext := LVW
+,			hNext := LVH + c_HofSandbox
+			GuiControl, MoveDraw, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
 			GuiControlGet, OutVarTemp, Pos, % IdListView1
 			yNext := OutVarTempY + OutVarTempH + c_ymarg
 			GuiControl, Move, % IdText10, % "x" . xNext . "y" . yNext
@@ -13094,110 +13067,42 @@ F_GuiMain_Redraw(IfShowGui)	;reaction to event: toggle ini_Sandbox; if run for t
 		{
 			xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
 ,			yNext := c_ymarg + c_HofText
-,			wNext := RightColumnW
-,			hNext := LeftColumnH - (2 * c_ymarg + 2 * c_HofText)
+,			wNext := LVW
+,			hNext := LVH - (2 * c_ymarg + 2 * c_HofText)
 			GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
 			GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
 			hNext := OutVarTempY + OutVarTempH
 			GuiControl, Move, % IdButton5, % "h" . hNext
 			GuiControl, Hide, % IdEdit10
 		}
- */		
-	; }
-/* 
-		;OutputDebug, % "Redraw" . A_Space . "The first else" . A_Tab . "ini_Sandbox" . A_Space . ini_Sandbox . A_Tab . "ini_IsSandboxMoved" . A_Space . ini_IsSandboxMoved
+}
+;------------------------------------------------------------------------------------------------------------------------------------
+F_GuiMain_Redraw(IfShowGui)	;reaction to event: toggle ini_Sandbox; if run for the very first time, width and height of ListView comes from saved values
+{ ;all elements of HS3 are drawn except of "movable" elements
+	global ;assume-global mode; c_ymarg, c_HofSandbox, c_HofText
+	local OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
+		,xNext := 0, yNext := 0, wNext := 0, hNext := 0
+	static b_FirstRun := true
+
+	Critical, On	;F_GuiMain_Redraw is interrupted by HS3GuiSize
+	if (b_FirstRun)
+	{
+		if (!(ini_ListViewPos.W) or !(ini_ListViewPos.H)) ;if HS3 Gui is generated for the very first time
+			F_HS3_InitialDraw()
+		else
+			F_HS3_InitialDraw(ini_ListViewPos.W, ini_ListViewPos.H)
+		b_FirstRun := false
+	}
+	else
+ 	{
+		; ini_Sandbox 		:= 0
+; ,		ini_IsSandboxMoved	:= 1
 		GuiControlGet, OutVarTemp, Pos, % IdListView1
-		if (ini_Sandbox)
-		{
-			if (OutVarTempH <  LeftColumnH + c_HofSandbox)
-			{
-				hNext := OutVarTempH - (c_HofSandbox + c_HofText + c_ymarg)	;decrease ListView
-				GuiControl, Move, % IdListView1, % "h" . hNext
-				ini_IsSandboxMoved := false
-			}
-			else
-				ini_IsSandboxMoved := true
-		}
-		if (!ini_Sandbox)
-		{
-			if (OutVarTempH <  LeftColumnH + c_HofSandbox)
-			{
-				; hNext := OutVarTempH + c_HofSandbox	;increase ListView	;tu jestem
-				hNext := OutVarTempH + (c_HofSandbox + c_HofText + c_ymarg)	;increase ListView
-				GuiControl, Move, % IdListView1, % "h" . hNext
-				ini_IsSandboxMoved := false
-			}
-			else
-				ini_IsSandboxMoved := true
-		}
-	}	
-	;5.3.3. Text Sandbox
-	;5.2.4. Sandbox edit text field
-	if ((ini_Sandbox) and (ini_IsSandboxMoved))
-	{
-		xNext := c_xmarg
-,		yNext := LeftColumnH + c_ymarg
-		GuiControl, Move, % IdText10, % "x" . xNext . "y" . yNext
-		GuiControlGet, OutVarTemp, Pos, % IdText10
-		xNext += OutVarTempW + c_xmarg
-		GuiControl, Move, % IdTextInfo17, % "x" . xNext . "y" . yNext
-		xNext := c_xmarg
-,		yNext += c_HofText
-,		wNext := LeftColumnW - 2 * c_xmarg
-		GuiControl, Move, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
-		GuiControl, Show, % IdText10
-		GuiControl, Show, % IdTextInfo17
-		GuiControl, Show, % IdEdit10
+		F_HS3_NormalDraw(OutVarTempW, OutVarTempH)
 	}
-	if ((ini_Sandbox) and !(ini_IsSandboxMoved))
-	{
-		GuiControlGet, OutVarTemp, Pos, % IdListView1
-		xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
-,		yNext := OutVarTempY + OutVarTempH + c_ymarg
-		GuiControl, Move, % IdText10, % "x" . xNext . "y" . yNext
-		GuiControlGet, OutVarTemp, Pos, % IdText10
-		xNext += OutVarTempW + c_xmarg
-		GuiControl, Move, % IdTextInfo17, % "x" . xNext . "y" . yNext
-		xNext := LeftColumnW + c_WofMiddleButton + c_xmarg
-,		yNext += c_HofText
-		GuiControlGet, OutVarTemp, Pos, % IdListView1
-		wNext := OutVarTempW
-		GuiControl, Move, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
-		GuiControl, Show, % IdText10
-		GuiControl, Show, % IdTextInfo17
-		GuiControl, Show, % IdEdit10
-	}
-	if !(ini_Sandbox)
-	{
-		GuiControl, Hide, % IdText10
-		GuiControl, Hide, % IdTextInfo17		
-		GuiControl, Hide, % IdEdit10
-	}
-	
-	;5.2. Button between left and right column
-	GuiControlGet, OutVarTemp, Pos, % IdListView1
-	if ((ini_Sandbox) and (ini_IsSandboxMoved))
-	{
-		xNext := LeftColumnW 
-,		yNext := c_ymarg
-,		hNext := c_HofText + OutVarTempH
-	}
-	if ((ini_Sandbox) and !(ini_IsSandboxMoved))
-	{
-		xNext := LeftColumnW 
-,		yNext := c_ymarg
-,		hNext := c_HofText + OutVarTempH + c_ymarg + c_HofText + c_HofSandbox
-	}	
-	if !(ini_Sandbox) 
-	{
-		xNext := LeftColumnW
-,		yNext := c_ymarg
-,		hNext :=  c_HofText + OutVarTempH
-	} 
-*/
-	; GuiControl, Move, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext
-	; if (IfShowGui)
-		Gui, HS3: Show, AutoSize 
+	if (IfShowGui)
+		Gui, HS3: Show, AutoSize ;initiates HS3GuiSize
+	Critical, Off	;F_GuiMain_Redraw is interrupted by HS3GuiSize
 }
 ;------------------------------------------------------------------------------------------------------------------------------------
 F_GuiMain_DetermineConstraints()
@@ -14496,8 +14401,7 @@ F_ImportLibrary()
 ;Gui, Import: Show, Center AutoSize
 	Gui, Import: Show, Hide
 	
-	F_WhichGui()
-	Switch A_DefaultGui
+	Switch F_WhichGui()
 	{
 		Case "HS3": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd
 		Case "HS4": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS4GuiHwnd 
@@ -14675,7 +14579,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	
 	GuiControlGet, v_OutVarTemp, Pos, % IdExport_T1
 	v_xNext := c_xmarg
-	v_yNext := c_ymarg
+,	v_yNext := c_ymarg
 	GuiControl, Move, % IdExport_T1, % "x" v_xNext . A_Space . "y" v_yNext
 	;Gui, Export: Show, Center AutoSize
 	v_yNext += c_HofText + c_ymarg
@@ -14683,19 +14587,18 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	;Gui, Export: Show, Center AutoSize
 	GuiControlGet, v_OutVarTemp, Pos, % IdExport_T2
 	v_wNext := v_OutVarTempW
-	v_hNext := c_HofText
+,	v_hNext := c_HofText
 	GuiControl, Move, % IdExport_P1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space . "w" v_wNext . A_Space . "h" . v_hNext
 	v_yNext += c_HofText + c_ymarg
 	GuiControl, Move, % IdExport_T2, % "x" v_xNext . A_Space . "y" v_yNext
 	;Gui, Export: Show, Center AutoSize
 	v_Progress   := 0
-	v_TotalLines := 0
+,	v_TotalLines := 0
 	GuiControl,, % IdExport_T2, % TransA["Exported"] . A_Space . v_TotalLines . A_Space . TransA["of"] . A_Space . v_TotalLines . A_Space . TransA["(triggerstring, hotstring) definitions"] . A_Space . "(" . v_Progress . A_Space . "%" . ")"
 	;Gui, Export: Show, Center AutoSize	
 	Gui, Export: Show, Hide
 	
-	F_WhichGui()
-	Switch A_DefaultGui
+	Switch F_WhichGui()
 	{
 		Case "HS3": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd
 		Case "HS4": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS4GuiHwnd 
@@ -14861,8 +14764,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	;Gui, Export: Show, Center AutoSize	
 	Gui, Export: Show, Hide
 	
-	F_WhichGui()
-	Switch A_DefaultGui
+	Switch F_WhichGui()
 	{
 		Case "HS3": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS3GuiHwnd
 		Case "HS4": WinGetPos, HS3GuiWinX, HS3GuiWinY, HS3GuiWinW, HS3GuiWinH, % "ahk_id" . HS4GuiHwnd 
