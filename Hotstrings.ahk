@@ -8379,16 +8379,20 @@ F_AddHotstring()
 	F_SaveLVintoLibFile()
 
 	;9. Increment library counter.
-	++v_LibHotstringCnt
-	++v_TotalHotstringCnt
-	GuiControl, , % IdText12,  % Format("{:11}", v_LibHotstringCnt . " / " . v_TotalHotstringCnt) ;Text: Puts new contents into the control.
-	GuiControl, , % IdText12b, % Format("{:11}", v_LibHotstringCnt . " / " . v_TotalHotstringCnt) ;Text: Puts new contents into the control.
+	UpdateLibraryCounter(++v_LibHotstringCnt, ++v_TotalHotstringCnt)
 	Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
 	{
 		Case "HS3":	F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
 		Case "HS4": 	F_GuiHS4_EnDis("Enable")
 	}
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring added to the file"] . A_Space . v_SelectHotstringLibrary . "!", 10 ;this line should be the very last and user confirmation shouldn't be required (10 s, last parameter)
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+UpdateLibraryCounter(v_LibHotstringCnt, v_TotalHotstringCnt)
+{
+	global	;assume-global mode of operation
+	GuiControl, , % IdText12,  % Format("{:11}", v_LibHotstringCnt . " / " . v_TotalHotstringCnt) ;Text: Puts new contents into the control.
+	GuiControl, , % IdText12b, % Format("{:11}", v_LibHotstringCnt . " / " . v_TotalHotstringCnt) ;Text: Puts new contents into the control.
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SaveLVintoLibFile()
@@ -9575,10 +9579,7 @@ F_DeleteHotstring()
 	TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
 	
 	;5. Decrement library counter.
-	--v_LibHotstringCnt
-	--v_TotalHotstringCnt
-	GuiControl, , % IdText12,  % Format("{:11}", v_LibHotstringCnt . " / " . v_TotalHotstringCnt) ;Text: Puts new contents into the control.
-	GuiControl, , % IdText12b, % Format("{:11}", v_LibHotstringCnt . " / " . v_TotalHotstringCnt) ;Text: Puts new contents into the control.
+	UpdateLibraryCounter(--v_LibHotstringCnt, --v_TotalHotstringCnt)
 	
 	;6. Remove from "Search" tables. Unfortunately index (v_SelectedRow) is sufficient only for one table, and in Searching there is "super table" containing all definitions from all available tables.
 	for key, val in a_Library
@@ -9817,8 +9818,8 @@ F_GuiHS3_Resize7()	;switch text to the right
 		,	OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
 
 	; OutputDebug, % A_ThisFunc . "`n"
-	hNext := A_GuiHeight - (2 * HofText + 3 * c_ymarg)
-,	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+,	hNext := A_GuiHeight - (2 * HofText + 3 * c_ymarg)
 	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
 	GuiControlGet, OutputVarTemp, Pos, % IdListView1
 	xNext := OutputVarTempX
@@ -9832,31 +9833,46 @@ F_GuiHS3_Resize7()	;switch text to the right
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize8()
+F_GuiHS3_Resize8(pWeight, pHeight)
 {
 	global ;assume-global mode
 	local	xNext := 0, yNext := 0, wNext := 0, hNext := 0
 		,	OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
 
 	; OutputDebug, % A_ThisFunc . "`n"
-	hNext := A_GuiHeight - (HofText + 2 * c_ymarg)
-,	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+	wNext := pWeight - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+	; wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+,	hNext := pHeight - (HofText + 2 * c_ymarg)
+; ,	hNext := A_GuiHeight - (HofText + 2 * c_ymarg)
 	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
 	GuiControlGet, OutputVarTemp, Pos, % IdListView1
-	hNext := A_GuiHeight - (2 * c_ymarg)
+	hNext := pHeight - (2 * c_ymarg)
+	; hNext := A_GuiHeight - (2 * c_ymarg)
 	GuiControl, MoveDraw, % IdButton5, % "h" . hNext	;middle button
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize6()
+F_GuiHS3_Resize6(params*)
 {
 	global ;assume-global mode
 	local	xNext := 0, yNext := 0, wNext := 0, hNext := 0
 		,	OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
 
+		if (params[1])
+			wNext := params[1]
+		else
+			wNext := RightColumnW
+		if (params[2])
+			hNext := params[2]
+		else
+			hNext -= yNext - c_ymarg
+
+
 	; OutputDebug, % A_ThisFunc . "`n"
-	hNext := A_GuiHeight - (2 * HofText + 3 * c_ymarg)
-,	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+	wNext := params[1] - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+	; wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+,	hNext := params[2] - (2 * HofText + 3 * c_ymarg)
+; ,	hNext := A_GuiHeight - (2 * HofText + 3 * c_ymarg)
 	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
 	GuiControlGet, OutputVarTemp, Pos, % IdListView1
 	xNext := OutputVarTempX
@@ -9865,7 +9881,8 @@ F_GuiHS3_Resize6()
 	GuiControlGet, OutputVarTemp, Pos, % IdText10
 	xNext := OutputVarTempX + OutputVarTempW + c_xmarg
 	GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext	;Sandbox info
-	hNext := A_GuiHeight - (2 * c_ymarg)
+	hNext := params[2] - (2 * c_ymarg)
+	; hNext := A_GuiHeight - (2 * c_ymarg)
 	GuiControl, MoveDraw, % IdButton5, % "h" . hNext	;middle button
 	F_GuiMain_LVcolumnScale()
 }
@@ -9907,9 +9924,9 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		if (ini_Sandbox) and (ini_IsSandboxMoved)
 			F_GuiHS3_Resize4()
 		if (!ini_Sandbox) and (!ini_IsSandboxMoved)
-			F_GuiHS3_Resize6()
+			F_GuiHS3_Resize6(A_GuiWidth, A_GuiHeight)
 		if (!ini_Sandbox) and (ini_IsSandboxMoved)
-			F_GuiHS3_Resize8()
+			F_GuiHS3_Resize8(A_GuiWidth, A_GuiHeight)
 		return
 	}
 	
@@ -9947,7 +9964,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			return
 		}
 		else
-			F_GuiHS3_Resize6()
+			F_GuiHS3_Resize6(A_GuiWidth, A_GuiHeight)
 		return	
 	}
 	if (!ini_Sandbox and ini_IsSandboxMoved)
@@ -9959,7 +9976,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			return
 		}
 		else
-			F_GuiHS3_Resize8()
+			F_GuiHS3_Resize8(A_GuiWidth, A_GuiHeight)
 		return
 	}
 }
@@ -9998,8 +10015,7 @@ F_SelectLibrary()
 			v_LibHotstringCnt++
 		}
 	}
-	GuiControl, , % IdText12,  % Format("{:11}", v_LibHotstringCnt . " / " . v_TotalHotstringCnt) ;Text: Puts new contents into the control.
-	GuiControl, , % IdText12b, % Format("{:11}", v_LibHotstringCnt . " / " . v_TotalHotstringCnt) ;Text: Puts new contents into the control.
+	UpdateLibraryCounter(v_LibHotstringCnt, v_TotalHotstringCnt)
 	LV_ModifyCol(1, "Sort")	;without this line content of library is loaded in the same order as it was saved last time; keep in mind that after any change (e.g. change of exiting definition) the whole file is sorted and saved again
 	F_GuiMain_LVcolumnScale()
 	GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
@@ -11336,8 +11352,7 @@ F_UnloadHotstringsFromFile(nameoffile)
 				}
 		}
 	}
-	GuiControl, , % IdText12,  % v_LibHotstringCnt . " / " .  v_TotalHotstringCnt ; Text: Puts new contents into the control.
-	GuiControl, , % IdText12b, % v_LibHotstringCnt . " / " .  v_TotalHotstringCnt ; Text: Puts new contents into the control.
+	UpdateLibraryCounter(v_LibHotstringCnt, v_TotalHotstringCnt)
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_LoadCreateTranslationTxt(decision*)
@@ -12003,8 +12018,7 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 		++v_TotalHotstringCnt
 		a_Library.Push(name) ;for function Search
 	}
-	GuiControl, , % IdText12,  % Format("{:11}", v_LibHotstringCnt . " / " . v_TotalHotstringCnt) ;Text: Puts new contents into the control.
-	GuiControl, , % IdText12b, % Format("{:11}", v_LibHotstringCnt . " / " . v_TotalHotstringCnt) ;Text: Puts new contents into the control.
+	UpdateLibraryCounter(v_LibHotstringCnt, v_TotalHotstringCnt)
 }
  ; ------------------------------------------------------------------------------------------------------------------------------------
 F_CountUnicodeChars(ByRef String)
@@ -13058,26 +13072,53 @@ F_HS3_InitialDraw(params*)	;all what have to be drawn are "movable" elements of 
 			hNext -= yNext - c_ymarg
 		GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
 	}
-	if (!ini_Sandbox)	;3 IdEdit10 is hidden, ListView is expanded, Sandbox text is moved down ;tu jestem
-	{
-		GuiControl, Hide, % IdEdit10
-		xNext := LeftColumnW + WofMiddleButton + c_xmarg
-,		yNext := c_ymarg + HofText
-,		wNext := RightColumnW
-,		hNext := LeftColumnH - (2 * c_ymarg + 2 * HofText)
-		GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
-		GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
-		GuiControlGet, OutVarTemp, Pos, % IdListView1
-		yNext := OutVarTempY + OutVarTempH + c_ymarg
-		GuiControl, Move, % IdText10, % "x" . xNext . "y" . yNext
-		GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
-		xNext += OutVarTempW + c_xmarg
-		GuiControl, Move, % IdTextInfo17, % "x" . xNext . "y" . yNext
-		xNext := LeftColumnW
-,		yNext := c_ymarg
-,		hNext := OutVarTempY + OutVarTempH - c_ymarg
-		GuiControl, Move, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext
-	}
+	if (!ini_Sandbox and !ini_IsSandboxMoved)
+		F_GuiHS3_Resize6(params*)
+; 	{	
+; 		wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+; ,		hNext := A_GuiHeight - (2 * HofText + 3 * c_ymarg)
+; 		GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
+; 		GuiControlGet, OutputVarTemp, Pos, % IdListView1
+; 		xNext := OutputVarTempX
+; ,		yNext := OutputVarTempY + OutputVarTempH + c_ymarg
+; 		GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext	;Sandbox text
+; 		GuiControlGet, OutputVarTemp, Pos, % IdText10
+; 		xNext := OutputVarTempX + OutputVarTempW + c_xmarg
+; 		GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext	;Sandbox info
+; 		hNext := A_GuiHeight - (2 * c_ymarg)
+; 		GuiControl, MoveDraw, % IdButton5, % "h" . hNext	;middle button
+; 	}
+	if (!ini_Sandbox and ini_IsSandboxMoved)
+		F_GuiHS3_Resize8(RightColumnW, LeftColumnH)
+; 	{
+; 		wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+; ,		hNext := A_GuiHeight - (HofText + 2 * c_ymarg)
+; 		GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
+; 		GuiControlGet, OutputVarTemp, Pos, % IdListView1
+; 		hNext := A_GuiHeight - (2 * c_ymarg)
+; 		GuiControl, MoveDraw, % IdButton5, % "h" . hNext	;middle button
+; 		F_GuiMain_LVcolumnScale()
+; 	}
+; 	if (!ini_Sandbox)	;3 IdEdit10 is hidden, ListView is expanded, Sandbox text is moved down ;tu jestem
+; 	{
+; 		GuiControl, Hide, % IdEdit10
+; 		xNext := LeftColumnW + WofMiddleButton + c_xmarg
+; ,		yNext := c_ymarg + HofText
+; ,		wNext := RightColumnW
+; ,		hNext := LeftColumnH - (2 * c_ymarg + 2 * HofText)
+; 		GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
+; 		GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
+; 		GuiControlGet, OutVarTemp, Pos, % IdListView1
+; 		yNext := OutVarTempY + OutVarTempH + c_ymarg
+; 		GuiControl, Move, % IdText10, % "x" . xNext . "y" . yNext
+; 		GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
+; 		xNext += OutVarTempW + c_xmarg
+; 		GuiControl, Move, % IdTextInfo17, % "x" . xNext . "y" . yNext
+; 		xNext := LeftColumnW
+; ,		yNext := c_ymarg
+; ,		hNext := OutVarTempY + OutVarTempH - c_ymarg
+; 		GuiControl, Move, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext
+; 	}
 }
 ;------------------------------------------------------------------------------------------------------------------------------------
 F_HS3_NormalDraw(LVW, LVH)	;LVW = ListViewWidth, LVH = ListViewHeight
