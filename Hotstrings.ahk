@@ -9833,46 +9833,31 @@ F_GuiHS3_Resize7()	;switch text to the right
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize8(pWeight, pHeight)
+F_GuiHS3_Resize8()
 {
 	global ;assume-global mode
 	local	xNext := 0, yNext := 0, wNext := 0, hNext := 0
 		,	OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
 
 	; OutputDebug, % A_ThisFunc . "`n"
-	wNext := pWeight - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
-	; wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
-,	hNext := pHeight - (HofText + 2 * c_ymarg)
-; ,	hNext := A_GuiHeight - (HofText + 2 * c_ymarg)
+	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+,	hNext := A_GuiHeight - (HofText + 2 * c_ymarg)
 	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
 	GuiControlGet, OutputVarTemp, Pos, % IdListView1
-	hNext := pHeight - (2 * c_ymarg)
-	; hNext := A_GuiHeight - (2 * c_ymarg)
+	hNext := A_GuiHeight - (2 * c_ymarg)
 	GuiControl, MoveDraw, % IdButton5, % "h" . hNext	;middle button
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize6(params*)
+F_GuiHS3_Resize6()
 {
 	global ;assume-global mode
 	local	xNext := 0, yNext := 0, wNext := 0, hNext := 0
 		,	OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
 
-		if (params[1])
-			wNext := params[1]
-		else
-			wNext := RightColumnW
-		if (params[2])
-			hNext := params[2]
-		else
-			hNext -= yNext - c_ymarg
-
-
 	; OutputDebug, % A_ThisFunc . "`n"
-	wNext := params[1] - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
-	; wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
-,	hNext := params[2] - (2 * HofText + 3 * c_ymarg)
-; ,	hNext := A_GuiHeight - (2 * HofText + 3 * c_ymarg)
+	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+,	hNext := A_GuiHeight - (2 * HofText + 3 * c_ymarg)
 	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
 	GuiControlGet, OutputVarTemp, Pos, % IdListView1
 	xNext := OutputVarTempX
@@ -9881,8 +9866,7 @@ F_GuiHS3_Resize6(params*)
 	GuiControlGet, OutputVarTemp, Pos, % IdText10
 	xNext := OutputVarTempX + OutputVarTempW + c_xmarg
 	GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext	;Sandbox info
-	hNext := params[2] - (2 * c_ymarg)
-	; hNext := A_GuiHeight - (2 * c_ymarg)
+	hNext := A_GuiHeight - (2 * c_ymarg)
 	GuiControl, MoveDraw, % IdButton5, % "h" . hNext	;middle button
 	F_GuiMain_LVcolumnScale()
 }
@@ -9924,9 +9908,9 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		if (ini_Sandbox) and (ini_IsSandboxMoved)
 			F_GuiHS3_Resize4()
 		if (!ini_Sandbox) and (!ini_IsSandboxMoved)
-			F_GuiHS3_Resize6(A_GuiWidth, A_GuiHeight)
+			F_GuiHS3_Resize6()
 		if (!ini_Sandbox) and (ini_IsSandboxMoved)
-			F_GuiHS3_Resize8(A_GuiWidth, A_GuiHeight)
+			F_GuiHS3_Resize8()
 		return
 	}
 	
@@ -9964,7 +9948,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			return
 		}
 		else
-			F_GuiHS3_Resize6(A_GuiWidth, A_GuiHeight)
+			F_GuiHS3_Resize6()
 		return	
 	}
 	if (!ini_Sandbox and ini_IsSandboxMoved)
@@ -9976,7 +9960,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			return
 		}
 		else
-			F_GuiHS3_Resize8(A_GuiWidth, A_GuiHeight)
+			F_GuiHS3_Resize8()
 		return
 	}
 }
@@ -13073,52 +13057,58 @@ F_HS3_InitialDraw(params*)	;all what have to be drawn are "movable" elements of 
 		GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
 	}
 	if (!ini_Sandbox and !ini_IsSandboxMoved)
-		F_GuiHS3_Resize6(params*)
-; 	{	
-; 		wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
-; ,		hNext := A_GuiHeight - (2 * HofText + 3 * c_ymarg)
-; 		GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
-; 		GuiControlGet, OutputVarTemp, Pos, % IdListView1
-; 		xNext := OutputVarTempX
-; ,		yNext := OutputVarTempY + OutputVarTempH + c_ymarg
-; 		GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext	;Sandbox text
-; 		GuiControlGet, OutputVarTemp, Pos, % IdText10
-; 		xNext := OutputVarTempX + OutputVarTempW + c_xmarg
-; 		GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext	;Sandbox info
-; 		hNext := A_GuiHeight - (2 * c_ymarg)
-; 		GuiControl, MoveDraw, % IdButton5, % "h" . hNext	;middle button
-; 	}
+	{	
+		GuiControl, Hide, % IdEdit10
+		xNext := LeftColumnW + WofMiddleButton + c_xmarg
+,		yNext := c_ymarg + HofText
+		if (params[1])
+			wNext := params[1]
+		else
+			wNext := RightColumnW
+		if (params[2])
+			hNext := params[2]
+		else
+,			hNext := LeftColumnH  - (2 * HofText + 3 * c_ymarg)
+		GuiControl, MoveDraw, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
+		GuiControlGet, OutputVarTemp, Pos, % IdListView1
+		xNext := OutputVarTempX
+,		yNext := OutputVarTempY + OutputVarTempH + c_ymarg
+		GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext	;Sandbox text
+		GuiControlGet, OutputVarTemp, Pos, % IdText10
+		xNext := OutputVarTempX + OutputVarTempW + c_xmarg
+		GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext	;Sandbox info
+		GuiControlGet, OutputVarTemp, Pos, % IdText10
+		xNext := LeftColumnW
+,		yNext := c_ymarg
+,		hNext := OutputVarTempY + OutputVarTempH - c_ymarg
+		GuiControl, MoveDraw, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext	;middle button
+	}
 	if (!ini_Sandbox and ini_IsSandboxMoved)
-		F_GuiHS3_Resize8(RightColumnW, LeftColumnH)
-; 	{
-; 		wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
-; ,		hNext := A_GuiHeight - (HofText + 2 * c_ymarg)
-; 		GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
-; 		GuiControlGet, OutputVarTemp, Pos, % IdListView1
-; 		hNext := A_GuiHeight - (2 * c_ymarg)
-; 		GuiControl, MoveDraw, % IdButton5, % "h" . hNext	;middle button
-; 		F_GuiMain_LVcolumnScale()
-; 	}
-; 	if (!ini_Sandbox)	;3 IdEdit10 is hidden, ListView is expanded, Sandbox text is moved down ;tu jestem
-; 	{
-; 		GuiControl, Hide, % IdEdit10
-; 		xNext := LeftColumnW + WofMiddleButton + c_xmarg
-; ,		yNext := c_ymarg + HofText
-; ,		wNext := RightColumnW
-; ,		hNext := LeftColumnH - (2 * c_ymarg + 2 * HofText)
-; 		GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
-; 		GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
-; 		GuiControlGet, OutVarTemp, Pos, % IdListView1
-; 		yNext := OutVarTempY + OutVarTempH + c_ymarg
-; 		GuiControl, Move, % IdText10, % "x" . xNext . "y" . yNext
-; 		GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
-; 		xNext += OutVarTempW + c_xmarg
-; 		GuiControl, Move, % IdTextInfo17, % "x" . xNext . "y" . yNext
-; 		xNext := LeftColumnW
-; ,		yNext := c_ymarg
-; ,		hNext := OutVarTempY + OutVarTempH - c_ymarg
-; 		GuiControl, Move, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext
-; 	}
+	{
+		GuiControl, Hide, % IdEdit10
+		xNext := c_xmarg
+,		yNext := LeftColumnH + c_ymarg
+		GuiControl, Move, % IdText10, % "x" . xNext . "y" . yNext	;Sandbox text
+		GuiControlGet, OutVarTemp, Pos, % IdText10
+		xNext += OutVarTempW + c_xmarg
+		GuiControl, Move, % IdTextInfo17, % "x" . xNext . "y" . yNext
+		xNext := LeftColumnW + WofMiddleButton + c_xmarg
+,		yNext := c_ymarg + HofText
+		if (params[1])
+			wNext := params[1]
+		else
+			wNext := LeftColumnH  - (HofText + 2 * c_ymarg)
+		if (params[2])
+			hNext := params[2]
+		else
+			hNext := LeftColumnH - (HofText + 2 * c_ymarg)
+		GuiControl, MoveDraw, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
+		GuiControlGet, OutputVarTemp, Pos, % IdListView1
+		xNext := LeftColumnW
+,		yNext := c_ymarg
+,		hNext := OutputVarTempY + OutputVarTempH - c_ymarg
+		GuiControl, MoveDraw, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext	;middle button
+	}
 }
 ;------------------------------------------------------------------------------------------------------------------------------------
 F_HS3_NormalDraw(LVW, LVH)	;LVW = ListViewWidth, LVH = ListViewHeight
