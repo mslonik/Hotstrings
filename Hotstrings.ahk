@@ -917,7 +917,7 @@ F_DelLibByButton()
 	IfMsgBox, Yes
 	{
 		Critical, On
-		F_GuiMain_EnDis("Disable")	;EnDis = "Disable" or "Enable"
+		F_GuiHS3_EnDis("Disable")	;EnDis = "Disable" or "Enable"
 		F_UnloadHotstringsFromFile(v_SelectHotstringLibrary)
 		FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary
 		if (ErrorLevel)
@@ -929,7 +929,7 @@ F_DelLibByButton()
 		F_LoadHotstringsFromLibraries()	;in order to refresh arrays of triggerstring tips
 		F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	;in order to refresh arrays of triggerstring tips
 		LV_Delete()
-		F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
+		F_GuiHS3_EnDis("Enable")	;EnDis = "Disable" or "Enable"
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The library has been deleted, its content have been removed from memory."] . "`n`n"
 			. v_SelectHotstringLibrary
 		Critical, Off
@@ -7723,8 +7723,7 @@ F_GuiShowIntro()
 	GuiControl, Move,			% IdIntroCheckbox, % "x" . v_xNext . "y" . v_yNext
 	
 	GuiControl,, % IdIntroCheckbox, % ini_ShowIntro	;load initial value
-	if (WinExist("ahk_id" HS3GuiHwnd) or WinExist("ahk_id" HS4GuiHwnd))
-		Gui, % F_WhichGui() . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+	Gui, % F_WhichGui() . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	Gui, ShowIntro: Show, AutoSize Center
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8176,7 +8175,7 @@ F_ToggleEndChars()
 F_AddToAutostart()
 {
 	global	;assume-global mode
-	local v_Temp1 := true, Target := "", LinkFile_DM := "", LinkFile_SM := "", Args_DM := "", Args_SM := "", Description := "", IconFile := "", WorkingDir := ""
+	local Target := "", LinkFile_DM := "", LinkFile_SM := "", Args_DM := "", Args_SM := "", Description := "", IconFile := "", WorkingDir := ""
 	
 	Target 		:= A_ScriptFullPath
 	LinkFile_DM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_DM" . "." . "lnk"
@@ -8190,29 +8189,29 @@ F_AddToAutostart()
 	Switch A_ThisMenuItem
 	{
 		Case TransA["Default mode"]:
-		Try
-			FileCreateShortcut, % Target, % LinkFile_DM, % WorkingDir, % Args_DM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
-		Catch
-		{
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with link file (.lnk) creation"] . ":" 
-				. A_Space . ErrorLevel
-		}
-		F_WhichGui()
-		if (!ErrorLevel)
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Link file (.lnk) was created in AutoStart folder"] . ":" . "`n`n"
-				. A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_DM" . "." . "lnk" . "," . A_Space . TransA["Default mode"]
+			Try
+				FileCreateShortcut, % Target, % LinkFile_DM, % WorkingDir, % Args_DM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+			Catch
+			{
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with link file (.lnk) creation"] . ":" 
+					. A_Space . ErrorLevel
+			}
+			F_WhichGui()
+			if (!ErrorLevel)
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Link file (.lnk) was created in AutoStart folder"] . ":" . "`n`n"
+					. A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_DM" . "." . "lnk" . "," . A_Space . TransA["Default mode"]
 		Case TransA["Silent mode"]:
-		Try
-			FileCreateShortcut, % Target, % LinkFile_SM, % WorkingDir, % Args_SM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
-		Catch
-		{
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with link file (.lnk) creation"] . ":" 
-				. A_Space . ErrorLevel
-		}
-		F_WhichGui()
-		if (!ErrorLevel)
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Link file (.lnk) was created in AutoStart folder"] . ":" . "`n`n"
-				. A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_SM" . "." . "lnk" . "," . A_Space . TransA["Silent mode"]
+			Try
+				FileCreateShortcut, % Target, % LinkFile_SM, % WorkingDir, % Args_SM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+			Catch
+			{
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with link file (.lnk) creation"] . ":" 
+					. A_Space . ErrorLevel
+			}
+			F_WhichGui()
+			if (!ErrorLevel)
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Link file (.lnk) was created in AutoStart folder"] . ":" . "`n`n"
+					. A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_SM" . "." . "lnk" . "," . A_Space . TransA["Silent mode"]
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -8241,17 +8240,17 @@ F_AddHotstring()
 			,ExternalIndex := 0
 			,name := "", key := 0, value := "", Counter := 0, key2 := 0, value2 := ""
 			,f_T_GeneralMatch := false, f_T_CaseMatch := false, f_OldOptionsC := false, f_OldOptionsC1 := false, f_OptionsC := false, f_OptionsC1 := false
-			,SelectedLibraryName := ""
+			,SelectedLibraryName := "", WhichGuiEnable := ""
 			,Overwrite := "", WinHWND := ""
 
 	;1. Read all inputs.
-	F_WhichGui()
+	WhichGuiEnable := F_WhichGui()
 	if (F_ReadUserInputs(TextInsert, NewOptions, SendFunHotstringCreate, SendFunFileFormat))	;return true (1) in case of any problem. 
 		return
 	;Disable all GuiControls for time of adding / editing of d(t, o, h)	
-	Switch F_WhichGui()	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
+	Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
 		{
-			Case "HS3":	F_GuiMain_EnDis("Disable")	;EnDis = "Disable" or "Enable"
+			Case "HS3":	F_GuiHS3_EnDis("Disable")	;EnDis = "Disable" or "Enable"
 			Case "HS4": 	F_GuiHS4_EnDis("Disable")
 		}
 	
@@ -8298,7 +8297,7 @@ F_AddHotstring()
 					{
 						Case "HS3":	
 							GuiControl, +Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
-							F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
+							F_GuiHS3_EnDis("Enable")	;EnDis = "Disable" or "Enable"
 						Case "HS4": 	F_GuiHS4_EnDis("Enable")
 					}
 					return
@@ -8324,7 +8323,7 @@ F_AddHotstring()
 			F_SaveLVintoLibFile()
 			Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
 			{
-				Case "HS3":	F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
+				Case "HS3":	F_GuiHS3_EnDis("Enable")	;EnDis = "Disable" or "Enable"
 				Case "HS4": 	F_GuiHS4_EnDis("Enable")
 			}
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["New settings are now applied."], 10	;dissapears after 10 s
@@ -8336,7 +8335,7 @@ F_AddHotstring()
 			{
 				Case "HS3":	
                          GuiControl, +Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
-                         F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
+                         F_GuiHS3_EnDis("Enable")	;EnDis = "Disable" or "Enable"
 				Case "HS4": 	F_GuiHS4_EnDis("Enable")
 			}
 			return
@@ -8380,9 +8379,9 @@ F_AddHotstring()
 
 	;9. Increment library counter.
 	UpdateLibraryCounter(++v_LibHotstringCnt, ++v_TotalHotstringCnt)
-	Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
+	Switch F_WhichGui	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
 	{
-		Case "HS3":	F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
+		Case "HS3":	F_GuiHS3_EnDis("Enable")	;EnDis = "Disable" or "Enable"
 		Case "HS4": 	F_GuiHS4_EnDis("Enable")
 	}
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring added to the file"] . A_Space . v_SelectHotstringLibrary . "!", 10 ;this line should be the very last and user confirmation shouldn't be required (10 s, last parameter)
@@ -9700,46 +9699,6 @@ F_GuiMain_LVcolumnScale()
 	Gui, HS3: +DPIScale
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize2()
-{
-	global ;assume-global mode
-	local OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
-		,xNext := 0, yNext := 0, wNext := 0, hNext := 0
-
-	; OutputDebug, % A_ThisFunc . "`n"	
-	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
-,	hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + HofSandbox + c_ymarg)
-	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
-	xNext := LeftColumnW + c_xmarg + WofMiddleButton
-,	yNext := A_GuiHeight - (c_ymarg + HofText + HofSandbox)
-	GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext
-	GuiControlGet, OutVarTemp, Pos, % IdText10
-	xNext := OutVarTempX + OutVarTempW + c_xmarg
-	GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext
-	xNext := LeftColumnW + WofMiddleButton + c_xmarg
-,	yNext += HofText
-,	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
-	GuiControl, MoveDraw, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
-	hNext := A_GuiHeight - 2 * c_ymarg 
-	GuiControl, MoveDraw, % IdButton5, % "h" . hNext 
-	F_GuiMain_LVcolumnScale()
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize4()
-{
-	global ;assume-global mode
-	local wNext := 0, hNext := 0
-	
-	; OutputDebug, % A_ThisFunc . "`n"
-	hNext := A_GuiHeight - (2 * c_ymarg)
-	GuiControl, MoveDraw, % IdButton5, % "h" . hNext 
-	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
-	GuiControl, MoveDraw, % IdListView1, % "w" . wNext
-	hNext := A_GuiHeight - (2 * c_ymarg + HofText)
-	GuiControl, MoveDraw, % IdListView1, % "h" . hNext  ;increase
-	F_GuiMain_LVcolumnScale()
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiHS3_Resize1()
 {
 	global ;assume-global mode
@@ -9766,19 +9725,20 @@ F_GuiHS3_Resize1()
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize3()
+F_GuiHS3_Resize2()
 {
 	global ;assume-global mode
-	local	OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
-			,xNext := 0, yNext := 0, wNext := 0, hNext := 0
-	
-	; OutputDebug, % A_ThisFunc . "`n"
-	hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + HofSandbox + c_ymarg)
-	GuiControl, MoveDraw, % IdListView1, % "h" . hNext ;decrease
+	local OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
+		,xNext := 0, yNext := 0, wNext := 0, hNext := 0
+
+	; OutputDebug, % A_ThisFunc . "`n"	
+	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+,	hNext := A_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + HofSandbox + c_ymarg)
+	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
 	xNext := LeftColumnW + c_xmarg + WofMiddleButton
 ,	yNext := A_GuiHeight - (c_ymarg + HofText + HofSandbox)
 	GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext
-	GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
+	GuiControlGet, OutVarTemp, Pos, % IdText10
 	xNext := OutVarTempX + OutVarTempW + c_xmarg
 	GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext
 	xNext := LeftColumnW + WofMiddleButton + c_xmarg
@@ -9787,6 +9747,45 @@ F_GuiHS3_Resize3()
 	GuiControl, MoveDraw, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
 	hNext := A_GuiHeight - 2 * c_ymarg 
 	GuiControl, MoveDraw, % IdButton5, % "h" . hNext 
+	F_GuiMain_LVcolumnScale()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiHS3_Resize3()
+{
+	global ;assume-global mode
+	local	OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
+			,xNext := 0, yNext := 0, wNext := 0, hNext := 0
+	
+	; OutputDebug, % A_ThisFunc . "`n"
+	hNext := HS3_GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + HofSandbox + c_ymarg)
+	GuiControl, MoveDraw, % IdListView1, % "h" . hNext ;decrease
+	xNext := LeftColumnW + c_xmarg + WofMiddleButton
+,	yNext := HS3_GuiHeight - (c_ymarg + HofText + HofSandbox)
+	GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext
+	GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
+	xNext := OutVarTempX + OutVarTempW + c_xmarg
+	GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext
+	xNext := LeftColumnW + WofMiddleButton + c_xmarg
+,	yNext += HofText
+,	wNext := HS3_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+	GuiControl, MoveDraw, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
+	hNext := HS3_GuiHeight - 2 * c_ymarg 
+	GuiControl, MoveDraw, % IdButton5, % "h" . hNext 
+	F_GuiMain_LVcolumnScale()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiHS3_Resize4()
+{
+	global ;assume-global mode
+	local wNext := 0, hNext := 0
+	
+	; OutputDebug, % A_ThisFunc . "`n"
+	hNext := A_GuiHeight - (2 * c_ymarg)
+	GuiControl, MoveDraw, % IdButton5, % "h" . hNext 
+	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+	GuiControl, MoveDraw, % IdListView1, % "w" . wNext
+	hNext := A_GuiHeight - (2 * c_ymarg + HofText)
+	GuiControl, MoveDraw, % IdListView1, % "h" . hNext  ;increase
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9806,6 +9805,28 @@ F_GuiHS3_Resize5()
 	GuiControlGet, OutVTemp, Pos, % IdText10	;Sandbox text
 	v_xNext := OutVTempX + OutVTempW + c_xmarg
 	GuiControl, MoveDraw, % IdTextInfo17, % "x" . v_xNext . "y" . v_yNext
+	hNext := A_GuiHeight - (2 * c_ymarg)
+	GuiControl, MoveDraw, % IdButton5, % "h" . hNext	;middle button
+	F_GuiMain_LVcolumnScale()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiHS3_Resize6()
+{
+	global ;assume-global mode
+	local	xNext := 0, yNext := 0, wNext := 0, hNext := 0
+		,	OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
+
+	; OutputDebug, % A_ThisFunc . "`n"
+	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+,	hNext := A_GuiHeight - (2 * HofText + 3 * c_ymarg)
+	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
+	GuiControlGet, OutputVarTemp, Pos, % IdListView1
+	xNext := OutputVarTempX
+,	yNext := OutputVarTempY + OutputVarTempH + c_ymarg
+	GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext	;Sandbox text
+	GuiControlGet, OutputVarTemp, Pos, % IdText10
+	xNext := OutputVarTempX + OutputVarTempW + c_xmarg
+	GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext	;Sandbox info
 	hNext := A_GuiHeight - (2 * c_ymarg)
 	GuiControl, MoveDraw, % IdButton5, % "h" . hNext	;middle button
 	F_GuiMain_LVcolumnScale()
@@ -9849,38 +9870,15 @@ F_GuiHS3_Resize8()
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize6()
-{
-	global ;assume-global mode
-	local	xNext := 0, yNext := 0, wNext := 0, hNext := 0
-		,	OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
-
-	; OutputDebug, % A_ThisFunc . "`n"
-	wNext := A_GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
-,	hNext := A_GuiHeight - (2 * HofText + 3 * c_ymarg)
-	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
-	GuiControlGet, OutputVarTemp, Pos, % IdListView1
-	xNext := OutputVarTempX
-,	yNext := OutputVarTempY + OutputVarTempH + c_ymarg
-	GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext	;Sandbox text
-	GuiControlGet, OutputVarTemp, Pos, % IdText10
-	xNext := OutputVarTempX + OutputVarTempW + c_xmarg
-	GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext	;Sandbox info
-	hNext := A_GuiHeight - (2 * c_ymarg)
-	GuiControl, MoveDraw, % IdButton5, % "h" . hNext	;middle button
-	F_GuiMain_LVcolumnScale()
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 {	;This function toggles flag ini_IsSandboxMoved
-	global ;assume-global mode of operation
-	local OutVarTemp2 := 0, OutVarTemp2X := 0, OutVarTemp2Y := 0, OutVarTemp2W := 0, OutVarTemp2H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
-		,ListViewWidth := 0
-		,v_xNext := 0, v_yNext := 0, v_wNext := 0, v_hNext := 0
+	global 	;assume-global mode of operation
+	local 	OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 
-	OutputDebug, % A_ThisFunc . "`n"
-	HS3_GuiWidth  := A_GuiWidth	;used by F_SaveGUIPos()
-,	HS3_GuiHeight := A_GuiHeight	;used by F_SaveGUIPos()
+	; OutputDebug, 	% A_ThisFunc . "`n"
+	HS3_GuiWidth  	:= A_GuiWidth	;used by F_SaveGUIPos()
+,	HS3_GuiHeight 	:= A_GuiHeight	;used by F_SaveGUIPos()
+
 	if (f_MainGUIresizing)	;If Hotstrings application is run for the very first time
 		return
 	if (A_EventInfo = 1) ; The window has been minimized.
@@ -9913,11 +9911,11 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			F_GuiHS3_Resize8()
 		return
 	}
-	
-	GuiControlGet, OutVarTemp2, Pos, % IdListView1 ;Check position of ListView1 again after resizing
-	if (ini_Sandbox) and (!ini_IsSandboxMoved) 
+
+	GuiControlGet, OutVarTemp, Pos, % IdListView1 ;Check position of ListView1 again after resizing
+	if (ini_Sandbox) and (!ini_IsSandboxMoved)
 	{
-		if (OutVarTemp2H + HofText + c_ymarg >  LeftColumnH)
+		if (OutVarTempH + HofText + c_ymarg > LeftColumnH)
 		{
 			ini_IsSandboxMoved := true
 			F_GuiHS3_Resize1()
@@ -9929,7 +9927,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	}
 	if (ini_Sandbox) and (ini_IsSandboxMoved)
 	{
-		if (OutVarTemp2H <= LeftColumnH + HofEdit + 3 * c_ymarg)
+		if (OutVarTempH <= LeftColumnH + HofSandbox) ;before simiplification: OutVarTempH + HofText + 2 * c_ymarg <= LeftColumnH + 2 * c_ymarg + HofText + HofSandbox
 		{
 			ini_IsSandboxMoved := false
 			F_GuiHS3_Resize3()
@@ -9941,7 +9939,8 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 	}
 	if (!ini_Sandbox and !ini_IsSandboxMoved)	;IdEdit10 is hidden, ListView is expanded, Sandbox text is moved down; tested
 	{
-		if (OutVarTemp2H > LeftColumnH - HofText)	;threshold is determined experimentally :-(
+		; OutputDebug, % "OutVarTempH:" . A_Space . OutVarTempH . A_Space . "LeftColumnH:" . A_Space . LeftColumnH . "`n"
+		if (OutVarTempH + HofText + c_ymarg > LeftColumnH)
 		{
 			ini_IsSandboxMoved := true
 			F_GuiHS3_Resize5()
@@ -9949,11 +9948,11 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		}
 		else
 			F_GuiHS3_Resize6()
-		return	
+		return
 	}
 	if (!ini_Sandbox and ini_IsSandboxMoved)
 	{
-		if (OutVarTemp2H <= LeftColumnH + c_ymarg)	;threshold is determined experimentally :-(
+		if (OutVarTempH <= LeftColumnH)	;before simplification: OutVarTempH + HofText + c_ymarg <= LeftColumnH + c_ymarg + HofText
 		{
 			ini_IsSandboxMoved := false
 			F_GuiHS3_Resize7()
@@ -9980,11 +9979,8 @@ F_SelectLibrary()
 	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
 	GuiControl, -Redraw, % IdListView1 ;The Redraw option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	LV_Delete()
-	v_LibHotstringCnt := 0
-	; GuiControl, , % IdText13,  % v_LibHotstringCnt
-	; GuiControl, , % IdText13b, % v_LibHotstringCnt
-
-	name := SubStr(v_SelectHotstringLibrary, 1, -4)
+	v_LibHotstringCnt 	:= 0
+,	name 			:= SubStr(v_SelectHotstringLibrary, 1, -4)
 	for key, value in a_Library
 	{
 		if (value = name)
@@ -10086,7 +10082,7 @@ F_LV1_EnDisDefinition()
 	F_SaveLVintoLibFile()
 	Switch F_WhichGui()	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
 		{
-			Case "HS3":	F_GuiMain_EnDis("Enable")	;EnDis = "Disable" or "Enable"
+			Case "HS3":	F_GuiHS3_EnDis("Enable")	;EnDis = "Disable" or "Enable"
 			Case "HS4": 	F_GuiHS4_EnDis("Enable")
 		}
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["New settings are now applied."], 10	;dissapears after 10 s
@@ -10819,7 +10815,7 @@ F_ToggleSandbox()
 	
 	Menu, ConfGUI, ToggleCheck, % TransA["Show Sandbox"] . "`tF6"
 	ini_Sandbox := !(ini_Sandbox)
-	; Iniwrite, %ini_Sandbox%, % ini_HADConfig, GraphicalUserInterface, Sandbox
+	Iniwrite, %ini_Sandbox%, % ini_HADConfig, GraphicalUserInterface, Sandbox
 	Switch F_WhichGui()
 	{
 		Case "HS3": 
@@ -12431,7 +12427,7 @@ F_GuiHS4_CreateObject()
 	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit10b vv_Sandbox r3 							; r3 = 3x rows of text
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
-F_GuiMain_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
+F_GuiHS3_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 {
 	global ;assume-global mode of operation
 	static	PS_IdEdit3 := false, PS_IdEdit4 := false, PS_IdEdit5 := false, PS_IdEdit6 := false, PS_IdEdit7 := false, PS_IdEdit8 := false
@@ -12817,7 +12813,7 @@ F_GuiHS4_DetermineConstraints()
 							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
 		,WleftMiniColumn := 0,	WrightMiniColumn := 0,	SpaceBetweenColumns := 0
 		,W_InfoSign := 0, 		W_C1 := 0,			W_C2 := 0,			GPB := 0
-		,LeftColumnW := 0
+		,LeftColumnW := 0,		LeftColumnH := 0
 	
 ;4. Determine constraints, according to mock-up
 ;4.1. Determine left columnt width
@@ -13117,7 +13113,7 @@ F_HS3_NormalDraw(LVW, LVH)	;LVW = ListViewWidth, LVH = ListViewHeight
 	local OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
 		,xNext := 0, yNext := 0, wNext := 0, hNext := 0
 
-		if (ini_Sandbox and !ini_IsSandboxMoved)	;1 tested
+		if (ini_Sandbox and !ini_IsSandboxMoved)	;1 
 		{
 			GuiControl, Show, % IdEdit10
 			xNext := LeftColumnW + WofMiddleButton + c_xmarg
@@ -13142,33 +13138,41 @@ F_HS3_NormalDraw(LVW, LVH)	;LVW = ListViewWidth, LVH = ListViewHeight
 ,			hNext := OutVarTempY + OutVarTempH - c_ymarg
 			GuiControl, MoveDraw, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext
 		}
-		if (ini_Sandbox and ini_IsSandboxMoved)		;2 tested
+		if (ini_Sandbox and ini_IsSandboxMoved)		;2 uneven
 		{
 			GuiControl, Show, % IdEdit10
-			xNext := c_xmarg
-,			yNext := LeftColumnH + c_ymarg
-			GuiControl, Move, % IdText10, % "x" . xNext . "y" . yNext	;Sandbox text
-			GuiControlGet, OutVarTemp, Pos, % IdText10
-			xNext += OutVarTempW + c_xmarg
-			GuiControl, Move, % IdTextInfo17, % "x" . xNext . "y" . yNext
-			xNext := c_xmarg
-,			yNext += HofText
-,			wNext := LeftColumnW - 2 * c_xmarg
-			GuiControl, Move, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
-			GuiControlGet, OutVarTemp, Pos, % IdEdit10
-			hNext := OutVarTempY + OutVarTempH
-			GuiControl, Move, % IdButton5, % "h" . hNext
-			GuiControlGet, OutVarTemp, Pos, % IdEdit10
-			xNext := LeftColumnW + WofMiddleButton + c_xmarg
-,			yNext := c_ymarg + HofText
-,			wNext := LVW
-,			hNext := LVH
-			GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
-			GuiControlGet, OutVarTemp, Pos, % IdListView1
-			xNext := LeftColumnW
-,			yNext := c_ymarg
-,			hNext := OutVarTempY + OutVarTempH - c_ymarg
-			GuiControl, Move, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext
+			if (HS3_GuiHeight < LeftColumnH + c_ymarg + HofText + HofSandbox)
+			{
+				ini_IsSandboxMoved := false
+				F_GuiHS3_Resize3()
+			}
+			else
+			{
+				xNext := c_xmarg
+,				yNext := LeftColumnH + c_ymarg
+				GuiControl, Move, % IdText10, % "x" . xNext . "y" . yNext	;Sandbox text
+				GuiControlGet, OutVarTemp, Pos, % IdText10
+				xNext += OutVarTempW + c_xmarg
+				GuiControl, Move, % IdTextInfo17, % "x" . xNext . "y" . yNext
+				xNext := c_xmarg
+,				yNext += HofText
+,				wNext := LeftColumnW - 2 * c_xmarg
+				GuiControl, Move, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
+				GuiControlGet, OutVarTemp, Pos, % IdEdit10
+				hNext := OutVarTempY + OutVarTempH
+				GuiControl, Move, % IdButton5, % "h" . hNext
+				GuiControlGet, OutVarTemp, Pos, % IdEdit10
+				xNext := LeftColumnW + WofMiddleButton + c_xmarg
+,				yNext := c_ymarg + HofText
+,				wNext := LVW
+,				hNext := LVH
+				GuiControl, Move, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
+				GuiControlGet, OutVarTemp, Pos, % IdListView1
+				xNext := LeftColumnW
+,				yNext := c_ymarg
+,				hNext := OutVarTempY + OutVarTempH - c_ymarg
+				GuiControl, Move, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext
+			}
 		}
 		if (!ini_Sandbox and !ini_IsSandboxMoved)	;3 IdEdit10 is hidden, ListView is expanded, Sandbox text is moved down; tested
 		{
