@@ -9939,147 +9939,45 @@ F_GuiHS3_Resize8(Width, Height)	;(!ini_Sandbox and ini_SbAtLeft)
 HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generated)
 {	;This function toggles flag ini_SbAtLeft
 	global 	;assume-global mode of operation
-	local 	OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
-	static	PrevHeight := 0, DeltaH := 0
 
-	; OutputDebug, 	% A_ThisFunc . "`n"
+	OutputDebug, 	% A_ThisFunc . A_Space . "EventInfo:" . A_Space . EventInfo . "`n"
 	HS3_GuiWidth  	:= Width	;used by F_SaveGUIPos() Width 	is local variable, HS3_GuiWidth 	is global
 ,	HS3_GuiHeight 	:= Height	;used by F_SaveGUIPos() Height	is local variable, HS3_GuiHeight 	is global
-,	DeltaH		:= Height - PrevHeight
-,	PrevHeight	:= Height
-	OutputDebug, 	% "DeltaH:" . A_Space . DeltaH . A_Space
 
-	if (EventInfo = 1) ; The window has been minimized.
+	Switch EventInfo
 	{
-		ini_WhichGui := "HS3"
-		return
-	}
-	if (EventInfo = 2)	;The window has been maximized
-	{
-		ini_HS3GuiMaximized := true
-		if (ini_Sandbox)
-		{
-			F_GuiHS3_Resize2(Width, Height)
-			; F_GuiHS3_Resize1(Width, Height)
-			ini_SbAtLeft := true
-		}
-		else
-			F_GuiHS3_Resize6(Width, Height)
-			; F_GuiHS3_Resize5(Width, Height)
-		return
-	}
-	if (!EventInfo) and (ini_HS3GuiMaximized)	;Window is restored after maximizing
-	{
-		ini_HS3GuiMaximized := false
-		if (ini_Sandbox) and (!ini_SbAtLeft)
-			F_GuiHS3_Resize2(Width, Height)
-		if (ini_Sandbox) and (ini_SbAtLeft)
-			F_GuiHS3_Resize4(Width, Height)
-		if (!ini_Sandbox) and (!ini_SbAtLeft)
-			F_GuiHS3_Resize6(Width, Height)
-		if (!ini_Sandbox) and (ini_SbAtLeft)
-			F_GuiHS3_Resize8(Width, Height)
-		return
-	}
-
-	if (ini_Sandbox)
-	{
-		if (Height < LeftColumnH + 2 * c_ymarg + HofText + HofSandbox)
-		{
-			F_GuiHS3_Resize2(Width, Height)
-			ini_SbAtLeft := false
-			return
-		}
-		if (Height >= LeftColumnH + 2 * c_ymarg + HofText + HofSandbox)	and (DeltaH >= 0)
-		{
-			ini_SbAtLeft := true
-			; return
-		}
-		if (Height >= LeftColumnH + 2 * c_ymarg + HofText + HofSandbox) and (Height < LeftColumnH + 2 * c_ymarg + HofText + HofSandbox + c_ymarg) and (ini_SbAtLeft)
-		{
-			F_GuiHS3_Resize4(Width, Height)
-			return
-		}
-		if (Height >= LeftColumnH + 2 * c_ymarg + HofText + HofSandbox + c_ymarg)
-		{
-			F_GuiHS3_Resize4(Width, Height)
-			ini_SbAtLeft := false
-			return
-		}
-		if (Height < LeftColumnH + 2 * c_ymarg + HofText + HofSandbox + c_ymarg) and (DeltaH <= 0)
-		{
-			ini_SbAtLeft := true
-			; return
-		}
-		if (Height >= LeftColumnH + 2 * c_ymarg + HofText + HofSandbox) and (Height < LeftColumnH + 2 * c_ymarg + HofText + HofSandbox + c_ymarg) and (ini_SbAtLeft)
-		{
-			F_GuiHS3_Resize2(Width, Height)
-			return
-		}
-	}
-
-/* 	
-	if (ini_Sandbox) and (!ini_SbAtLeft)
-	{
-		if (Height < LeftColumnH + c_ymarg + HofText + HofSandbox)
-		{
-			F_GuiHS3_Resize2(Width, Height)
-			return
-		}
-		if (Height >= LeftColumnH + c_ymarg + HofText + HofSandbox) and (DeltaH > 0)
-		{
-			ini_SbAtLeft := true
-			F_GuiHS3_Resize4(Width, Height)
-			return
-		}
-		; else
-			; F_GuiHS3_Resize2(Width, Height)
-		return
-	}
-	if (ini_Sandbox) and (ini_SbAtLeft)
-	{
-		; if (Height <= LeftColumnH + c_ymarg + HofText + HofSandbox)
-		if (Height < LeftColumnH + c_ymarg + HofText + HofSandbox + c_ymarg)	;hysteresis!
-		{
-			F_GuiHS3_Resize4(Width, Height)
-			return
-		}
-		if (Height >= LeftColumnH + c_ymarg + HofText + HofSandbox + c_ymarg) and (DeltaH < 0)	;hysteresis!
-		{
-			ini_SbAtLeft := false
-			F_GuiHS3_Resize2(Width, Height)
-			return
-		}
-		; else
-			; F_GuiHS3_Resize4(Width, Height)
-		return
-	}
- */
-
-	if (!ini_Sandbox and !ini_SbAtLeft)	;IdEdit10 is hidden, ListView is expanded, Sandbox text is moved down; tested
-	{
-		if (Height > LeftColumnH + c_ymarg + HofText)
-		{
-			ini_SbAtLeft := true
-			F_GuiHS3_Resize8(Width, Height)
-			return
-		}
-		else
-			F_GuiHS3_Resize6(Width, Height)
-		return
-	}
-	if (!ini_Sandbox and ini_SbAtLeft)
-	{
-		; if (Height <= LeftColumnH + c_ymarg + HofText)
-		if (Height < LeftColumnH + c_ymarg + HofText + c_ymarg)	;hysteresis!
-		{
-			ini_SbAtLeft := false
-			F_GuiHS3_Resize6(Width, Height)
-			return
-		}
-		else
-			F_GuiHS3_Resize8(Width, Height)
-		return
+		Case 1: ini_WhichGui := "HS3"		;The window has been minimized.
+		Default:
+			if (ini_Sandbox)
+			{
+				if (Height < LeftColumnH + 2 * c_ymarg + HofText + HofSandbox)
+				{
+					ini_SbAtLeft := false
+					F_GuiHS3_Resize2(Width, Height)
+					return
+				}
+				else	;if (Height >= LeftColumnH + 2 * c_ymarg + HofText + HofSandbox)
+				{
+					ini_SbAtLeft := true
+					F_GuiHS3_Resize4(Width, Height)
+					return
+				}
+			}
+			else		;(!iniSandbox)
+			{
+				if (Height < LeftColumnH + c_ymarg + HofText + c_ymarg)
+				{
+					ini_SbAtLeft := false
+					F_GuiHS3_Resize6(Width, Height)
+					return
+				}
+				else	;if (Height > LeftColumnH + c_ymarg + HofText)
+				{
+					ini_SbAtLeft := true
+					F_GuiHS3_Resize8(Width, Height)
+					return
+				}
+			}
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
