@@ -9093,9 +9093,6 @@ F_Searching(ReloadListView*)
 			PreviousGui := A_DefaultGui
 			Gui, HS3Search: -Disabled
 			Gui, HS3Search: Default
-			; LV_Delete()
-			; Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
-				; LV_Add("", a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_EnableDisable[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
 			F_SearchPhrase()
 			Switch PreviousGui
 			{
@@ -9621,7 +9618,7 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 			GuiControl,, % IdEdit2b, % v_EnterHotstring
 			GuiControl, ChooseString, % IdDDL2b, % v_SelectHotstringLibrary
 			Gui, HS3: Show, Hide
-			HS4GuiSize(GuiHwnd := HS4GuiHwnd, EventInfo := 0, Width := LeftColumnW + c_ymarg + WofMiddleButton, Height := ini_Sandbox ? LeftColumnH + 2 * c_ymarg + HofText + HofSandbox : LeftColumnH + 2 * c_ymarg + HofText) ; tu jestem
+			HS4GuiSize(GuiHwnd := HS4GuiHwnd, EventInfo := 0, Width := LeftColumnW + c_ymarg + WofMiddleButton, Height := ini_Sandbox ? LeftColumnH + 2 * c_ymarg + HofText + HofSandbox : LeftColumnH + 2 * c_ymarg + HofText)
 			Gui, HS4: Show, % "X" . WinX . A_Space . "Y" . WinY . A_Space . "AutoSize"
 			F_HS4RadioCaseGroup(v_RadioCaseGroup)
 			ini_WhichGui := "HS4"
@@ -9926,12 +9923,10 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SelectLibrary()
+F_SelectLibrary()	;tu jestem
 { 
-	global ;assume-global mode
-	local v_TheWholeFile := "", str1 := [], v_TotalLines := 0
-		,v_OutVarTemp := 0, v_OutVarTempX := 0, v_OutVarTempY := 0, v_OutVarTempW := 0, v_OutVarTempH := 0
-		,key := 0, value := "", name := ""
+	global 	;assume-global mode
+	local	key := 0, value := "", name := "", str1 := []
 	
 	if (A_DefaultGui = "HS3")
 		Gui, HS3: Submit, NoHide
@@ -9947,10 +9942,10 @@ F_SelectLibrary()
 	{
 		if (value = name)
 		{
-			str1[1] := a_Triggerstring[key]
-,			str1[2] := a_TriggerOptions[key]
-,			str1[3] := a_OutputFunction[key]
-,			str1[4] := a_EnableDisable[key]
+			str1[1] := a_EnableDisable[key]
+,			str1[2] := a_Triggerstring[key]
+,			str1[3] := a_TriggerOptions[key]
+,			str1[4] := a_OutputFunction[key]
 ,			str1[5] := a_Hotstring[key]
 ,			str1[6] := a_Comment[key]
 			LV_Add("", str1[1], str1[2], str1[3], str1[4], str1[5], str1[6])	
@@ -9958,7 +9953,7 @@ F_SelectLibrary()
 		}
 	}
 	UpdateLibraryCounter(v_LibHotstringCnt, v_TotalHotstringCnt)
-	LV_ModifyCol(1, "Sort")	;without this line content of library is loaded in the same order as it was saved last time; keep in mind that after any change (e.g. change of exiting definition) the whole file is sorted and saved again
+	LV_ModifyCol(2, "Sort")	;without this line content of library is loaded in the same order as it was saved last time; keep in mind that after any change (e.g. change of exiting definition) the whole file is sorted and saved again
 	F_GuiMain_LVcolumnScale()
 	GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 }
@@ -10795,7 +10790,7 @@ F_ToggleSandbox()
 		Case "HS3":
 			HS3GuiSize(GuiHwnd := HS3GuiHwnd, EventInfo := 0, Width := HS3_GuiWidth, Height := HS3_GuiHeight)
 		Case "HS4": 
-			HS4GuiSize(GuiHwnd := HS4GuiHwnd, EventInfo := 0, Width := LeftColumnW + c_ymarg + WofMiddleButton, Height := ini_Sandbox ? LeftColumnH + 2 * c_ymarg + HofText + HofSandbox : LeftColumnH + 2 * c_ymarg + HofText) ; tu jestem
+			HS4GuiSize(GuiHwnd := HS4GuiHwnd, EventInfo := 0, Width := LeftColumnW + c_ymarg + WofMiddleButton, Height := ini_Sandbox ? LeftColumnH + 2 * c_ymarg + HofText + HofSandbox : LeftColumnH + 2 * c_ymarg + HofText)
 			Gui, HS4: Show, AutoSize
 	}
 }
@@ -11790,7 +11785,7 @@ Triggerstring tips related to the following library file have been unloaded from
 Triggerstring tips styling								= Triggerstring tips styling
 Events: styling										= Events: styling
 Triggerstring tooltip timeout in [ms]						= Triggerstring tooltip timeout in [ms]
-Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment 		= Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment
+En/Dis|Triggerstring|Trigg Opt|Out Fun|Hotstring|Comment 		= En/Dis|Triggerstring|Trigg Opt|Out Fun|Hotstring|Comment
 Typeface color											= Typeface color
 Typeface font											= Typeface font
 Typeface size											= Typeface size
@@ -12211,8 +12206,6 @@ F_GuiHS4_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, % EnDis, % IdTextInfo8b
 	GuiControl, % EnDis, % IdCheckBox8b
 	GuiControl, % EnDis, % IdTextInfo10b
-	; GuiControl, % EnDis, % IdCheckBox6b
-	; GuiControl, % EnDis, % IdTextInfo11b
 	GuiControl, % EnDis, % IdText3b
 	GuiControl, % EnDis, % IdTextInfo12b
 	GuiControl, % EnDis, % IdDDL1b
@@ -12615,7 +12608,7 @@ F_GuiMain_CreateObject()
 	GuiControl +g, % IdTextInfo16, % TI_LibraryContent
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, 		HS3: Add, 		ListView, 	x0 y0 HwndIdListView1 LV0x1 vv_LibraryContent AltSubmit gF_HSLV -Multi, % TransA["Triggerstring|Trigg Opt|Out Fun|En/Dis|Hotstring|Comment"]
+	Gui, 		HS3: Add, 		ListView, 	x0 y0 HwndIdListView1 LV0x1 vv_LibraryContent AltSubmit gF_HSLV -Multi, % TransA["En/Dis|Triggerstring|Trigg Opt|Out Fun|Hotstring|Comment"]
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText10,			 							% TransA["Sandbox"] . A_Space . "(" . "F6" . A_Space . TransA["to activate"] . A_Space . "or" . A_Space . "Ctrl + F6" . A_Space . TransA["to toggle"] . ")"
@@ -12911,7 +12904,7 @@ F_GuiHS4_DetermineConstraints()
 	GuiControl, Move, % IdButton3b, % "x" . xNext . "y" . yNext
 	yNext += HofButton
 ,	LeftColumnH := yNext
-	OutputDebug, % "HS4 LeftColumnH:" . A_Space . LeftColumnH . "`n"
+	; OutputDebug, % "HS4 LeftColumnH:" . A_Space . LeftColumnH . "`n"
 ;5.1.10 SANDBOX LABEL
 	xNext := c_xmarg
 ,	yNext := LeftColumnH + c_ymarg
@@ -13118,7 +13111,7 @@ F_GuiHS3_DetermineConstraints()
 	GuiControl, Move, % IdButton3, % "x" . xNext . "y" . yNext
 	yNext += HofButton
 ,	LeftColumnH := yNext
-	OutputDebug, % "HS3 LeftColumnH:" . A_Space . LeftColumnH . "`n"
+	; OutputDebug, % "HS3 LeftColumnH:" . A_Space . LeftColumnH . "`n"
 	
 ;5.3. Right column
 ;5.3.1. Position the text "Library content (F2, context menu)"
