@@ -9725,20 +9725,57 @@ F_GuiHS3_Resize1(Width, Height)
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize2(Width, Height)	;tu jestem
+F_GuiHS3_Resize2(Width, Height)	;if (ini_Sandbox) and (!ini_SbAtLeft)
 {
 	global ;assume-global mode
 	local OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 		,xNext := 0, yNext := 0, wNext := 0, hNext := 0
 
-	OutputDebug, % A_ThisFunc . "`n"	
-	wNext := Width - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+	OutputDebug, % A_ThisFunc . "`n"
+	;Place TABLE (ListView)
+	xNext := LeftColumnW + WofMiddleButton + c_xmarg
+,	yNext := c_ymarg + HofText
+,	wNext := Width - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
 ,	hNext := Height - (c_ymarg + HofText + c_ymarg + HofText + HofSandbox + c_ymarg)
-	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
+	GuiControl, MoveDraw, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
+
+	;Place SANDBOX LABEL + info
 	xNext := LeftColumnW + c_xmarg + WofMiddleButton
 ,	yNext := Height - (c_ymarg + HofText + HofSandbox)
 	GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext
 	GuiControlGet, OutVarTemp, Pos, % IdText10
+	xNext := OutVarTempX + OutVarTempW + c_xmarg
+	GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext
+
+	;Place SANDBOX
+	GuiControlGet, OutVarTemp, Pos, % IdText10
+	xNext := OutVarTempX
+,	yNext := OutVarTempY + OutVarTempH
+,	wNext := Width - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+	GuiControl, MoveDraw, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
+
+	;PLACE MB (Middle Button)
+	xNext := LeftColumnW
+,	yNext := c_ymarg
+,	hNext := Height - 2 * c_ymarg 
+	GuiControl, MoveDraw, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext 
+
+	F_GuiMain_LVcolumnScale()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiHS3_Resize3(Width, Height)
+{
+	global ;assume-global mode
+	local	OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
+			,xNext := 0, yNext := 0, wNext := 0, hNext := 0
+	
+	OutputDebug, % A_ThisFunc . "`n"
+	hNext := Height - (c_ymarg + HofText + c_ymarg + HofText + HofSandbox + c_ymarg)
+	GuiControl, MoveDraw, % IdListView1, % "h" . hNext ;decrease
+	xNext := LeftColumnW + c_xmarg + WofMiddleButton
+,	yNext := Height - (c_ymarg + HofText + HofSandbox)
+	GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext
+	GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
 	xNext := OutVarTempX + OutVarTempW + c_xmarg
 	GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext
 	xNext := LeftColumnW + WofMiddleButton + c_xmarg
@@ -9750,42 +9787,39 @@ F_GuiHS3_Resize2(Width, Height)	;tu jestem
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize3(Width, Height)
-{
-	global ;assume-global mode
-	local	OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
-			,xNext := 0, yNext := 0, wNext := 0, hNext := 0
-	
-	OutputDebug, % A_ThisFunc . "`n"
-	hNext := GuiHeight - (c_ymarg + HofText + c_ymarg + HofText + HofSandbox + c_ymarg)
-	GuiControl, MoveDraw, % IdListView1, % "h" . hNext ;decrease
-	xNext := LeftColumnW + c_xmarg + WofMiddleButton
-,	yNext := GuiHeight - (c_ymarg + HofText + HofSandbox)
-	GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext
-	GuiControlGet, OutVarTemp, Pos, % IdText10	;Sandbox text
-	xNext := OutVarTempX + OutVarTempW + c_xmarg
-	GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext
-	xNext := LeftColumnW + WofMiddleButton + c_xmarg
-,	yNext += HofText
-,	wNext := GuiWidth - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
-	GuiControl, MoveDraw, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
-	hNext := GuiHeight - 2 * c_ymarg 
-	GuiControl, MoveDraw, % IdButton5, % "h" . hNext 
-	F_GuiMain_LVcolumnScale()
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize4(Width, Height)
+F_GuiHS3_Resize4(Width, Height)	;(ini_Sandbox) and (ini_SbAtLeft)
 {
 	global ;assume-global mode
 	local wNext := 0, hNext := 0
 	
 	OutputDebug, % A_ThisFunc . "`n"
-	hNext := Height - (2 * c_ymarg)
-	GuiControl, MoveDraw, % IdButton5, % "h" . hNext 
-	wNext := Width - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
-	GuiControl, MoveDraw, % IdListView1, % "w" . wNext
-	hNext := Height - (2 * c_ymarg + HofText)
-	GuiControl, MoveDraw, % IdListView1, % "h" . hNext  ;increase
+	;Place TABLE (ListView)
+	xNext := LeftColumnW + WofMiddleButton + c_xmarg
+,	yNext := c_ymarg + HofText
+,	wNext := Width - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+,	hNext := Height - (c_ymarg + HofText + c_ymarg)
+	GuiControl, MoveDraw, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
+
+	;Place SANDBOX LABEL + info
+	xNext := c_xmarg
+,	yNext := LeftColumnH + c_ymarg
+	GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext
+	GuiControlGet, OutVarTemp, Pos, % IdText10
+	xNext := OutVarTempX + OutVarTempW + c_xmarg
+	GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext
+	
+	;Place SANDBOX
+	xNext := c_xmarg
+,	yNext := LeftColumnH + c_ymarg + HofText
+,	wNext := LeftColumnW - 2 * c_ymarg
+	GuiControl, MoveDraw, % IdEdit10, % "x" . xNext . "y" . yNext . "w" . wNext
+
+	;PLACE MB (Middle Button)
+	xNext := LeftColumnW
+,	yNext := c_ymarg
+,	hNext := Height - 2 * c_ymarg 
+	GuiControl, MoveDraw, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext 
+
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9810,25 +9844,36 @@ F_GuiHS3_Resize5(Width, Height)
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize6(Width, Height)
+F_GuiHS3_Resize6(Width, Height)	;(!ini_Sandbox and !ini_SbAtLeft)
 {
 	global ;assume-global mode
 	local	xNext := 0, yNext := 0, wNext := 0, hNext := 0
 		,	OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
 
 	OutputDebug, % A_ThisFunc . "`n"
-	wNext := Width - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
-,	hNext := Height - (2 * HofText + 3 * c_ymarg)
-	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
-	GuiControlGet, OutputVarTemp, Pos, % IdListView1
-	xNext := OutputVarTempX
-,	yNext := OutputVarTempY + OutputVarTempH + c_ymarg
-	GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext	;Sandbox text
-	GuiControlGet, OutputVarTemp, Pos, % IdText10
-	xNext := OutputVarTempX + OutputVarTempW + c_xmarg
-	GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext	;Sandbox info
-	hNext := Height - (2 * c_ymarg)
-	GuiControl, MoveDraw, % IdButton5, % "h" . hNext	;middle button
+	;Place TABLE (ListView)
+	xNext := LeftColumnW + WofMiddleButton + c_xmarg
+,	yNext := c_ymarg + HofText
+,	wNext := Width - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+,	hNext := Height - (c_ymarg + 2 * HofText + 2 * c_ymarg)
+	GuiControl, MoveDraw, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
+
+	;Place SANDBOX LABEL + info
+	xNext := LeftColumnW + WofMiddleButton + c_xmarg
+,	yNext := Height - (c_ymarg + HofText)
+	GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext
+	GuiControlGet, OutVarTemp, Pos, % IdText10
+	xNext := OutVarTempX + OutVarTempW + c_xmarg
+	GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext
+
+	;Place SANDBOX (void)
+
+	;PLACE MB (Middle Button)
+	xNext := LeftColumnW
+,	yNext := c_ymarg
+,	hNext := Height - 2 * c_ymarg 
+	GuiControl, MoveDraw, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext 
+
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9854,28 +9899,46 @@ F_GuiHS3_Resize7(Width, Height)	;switch text to the right
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize8(Width, Height)
+F_GuiHS3_Resize8(Width, Height)	;(!ini_Sandbox and ini_SbAtLeft)
 {
 	global ;assume-global mode
 	local	xNext := 0, yNext := 0, wNext := 0, hNext := 0
 		,	OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
 
 	OutputDebug, % A_ThisFunc . "`n"
-	wNext := Width - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
-,	hNext := Height - (HofText + 2 * c_ymarg)
-	GuiControl, MoveDraw, % IdListView1, % "w" . wNext . "h" . hNext
-	GuiControlGet, OutputVarTemp, Pos, % IdListView1
-	hNext := Height - (2 * c_ymarg)
-	GuiControl, MoveDraw, % IdButton5, % "h" . hNext	;middle button
+	;Place TABLE (ListView)
+	xNext := LeftColumnW + WofMiddleButton + c_xmarg
+,	yNext := c_ymarg + HofText
+,	wNext := Width - (2 * c_xmarg + LeftColumnW + WofMiddleButton)
+,	hNext := Height - (c_ymarg + HofText + c_ymarg)
+	GuiControl, MoveDraw, % IdListView1, % "x" . xNext . "y" . yNext . "w" . wNext . "h" . hNext
+
+	;Place SANDBOX LABEL + info
+	xNext := c_ymarg
+,	yNext := LeftColumnH + c_ymarg
+	GuiControl, MoveDraw, % IdText10, % "x" . xNext . "y" . yNext
+	GuiControlGet, OutVarTemp, Pos, % IdText10
+	xNext := OutVarTempX + OutVarTempW + c_xmarg
+	GuiControl, MoveDraw, % IdTextInfo17, % "x" . xNext . "y" . yNext
+
+	;Place SANDBOX (void)
+
+	;PLACE MB (Middle Button)
+	xNext := LeftColumnW
+,	yNext := c_ymarg
+,	hNext := Height - 2 * c_ymarg 
+	GuiControl, MoveDraw, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext 
+	
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
-{	;This function toggles flag ini_IsSandboxMoved
+HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generated)
+{	;This function toggles flag ini_SbAtLeft
 	global 	;assume-global mode of operation
 	local 	OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 
 	OutputDebug, 	% A_ThisFunc . "`n"
+	; OutputDebug,	% "Width:" . A_Space . Width . A_Space . "Height:" . A_Space . Height . "`n"
 	HS3_GuiWidth  	:= Width	;used by F_SaveGUIPos() Width 	is local variable, HS3_GuiWidth 	is global
 ,	HS3_GuiHeight 	:= Height	;used by F_SaveGUIPos() Height	is local variable, HS3_GuiHeight 	is global
 
@@ -9886,38 +9949,39 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 		ini_WhichGui := "HS3"
 		return
 	}
-	if (ventInfo = 2)	;The window has been maximized
+	if (EventInfo = 2)	;The window has been maximized
 	{
 		ini_HS3GuiMaximized := true
 		if (ini_Sandbox)
 		{
 			F_GuiHS3_Resize1(Width, Height)
-			ini_IsSandboxMoved := true
+			ini_SbAtLeft := true
 		}
 		else
-			F_GuiHS3_Resize5()
+			F_GuiHS3_Resize5(Width, Height)
 		return
 	}
-	if (!ventInfo) and (ini_HS3GuiMaximized)	;Window is restored after maximizing
+	if (!EventInfo) and (ini_HS3GuiMaximized)	;Window is restored after maximizing
 	{
 		ini_HS3GuiMaximized := false
-		if (ini_Sandbox) and (!ini_IsSandboxMoved)
+		if (ini_Sandbox) and (!ini_SbAtLeft)
 			F_GuiHS3_Resize2(Width, Height)
-		if (ini_Sandbox) and (ini_IsSandboxMoved)
+		if (ini_Sandbox) and (ini_SbAtLeft)
 			F_GuiHS3_Resize4(Width, Height)
-		if (!ini_Sandbox) and (!ini_IsSandboxMoved)
+		if (!ini_Sandbox) and (!ini_SbAtLeft)
 			F_GuiHS3_Resize6(Width, Height)
-		if (!ini_Sandbox) and (ini_IsSandboxMoved)
+		if (!ini_Sandbox) and (ini_SbAtLeft)
 			F_GuiHS3_Resize8(Width, Height)
 		return
 	}
 
-	GuiControlGet, OutVarTemp, Pos, % IdListView1 ;Check position of ListView1 again after resizing
-	if (ini_Sandbox) and (!ini_IsSandboxMoved)
+	; GuiControlGet, OutVarTemp, Pos, % IdListView1 ;Check previous position of ListView1
+	if (ini_Sandbox) and (!ini_SbAtLeft)
 	{
-		if (OutVarTempH + HofText + c_ymarg > LeftColumnH)
+		if (Height > LeftColumnH + c_ymarg + HofText + HofSandbox)
+		; if (OutVarTempH + HofText + c_ymarg > LeftColumnH)
 		{
-			ini_IsSandboxMoved := true
+			ini_SbAtLeft := true
 			F_GuiHS3_Resize1(Width, Height)
 			return
 		}
@@ -9925,11 +9989,12 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			F_GuiHS3_Resize2(Width, Height)
 		return
 	}
-	if (ini_Sandbox) and (ini_IsSandboxMoved)
+	if (ini_Sandbox) and (ini_SbAtLeft)
 	{
-		if (OutVarTempH <= LeftColumnH + HofSandbox) ;before simiplification: OutVarTempH + HofText + 2 * c_ymarg <= LeftColumnH + 2 * c_ymarg + HofText + HofSandbox
+		if (Height <= LeftColumnH + c_ymarg + HofText + HofSandbox)
+		; if (OutVarTempH <= LeftColumnH + HofSandbox) ;before simiplification: OutVarTempH + HofText + 2 * c_ymarg <= LeftColumnH + 2 * c_ymarg + HofText + HofSandbox
 		{
-			ini_IsSandboxMoved := false
+			ini_SbAtLeft := false
 			F_GuiHS3_Resize3(Width, Height)
 			return
 		}
@@ -9937,12 +10002,12 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			F_GuiHS3_Resize4(Width, Height)
 		return
 	}
-	if (!ini_Sandbox and !ini_IsSandboxMoved)	;IdEdit10 is hidden, ListView is expanded, Sandbox text is moved down; tested
+	if (!ini_Sandbox and !ini_SbAtLeft)	;IdEdit10 is hidden, ListView is expanded, Sandbox text is moved down; tested
 	{
-		; OutputDebug, % "OutVarTempH:" . A_Space . OutVarTempH . A_Space . "LeftColumnH:" . A_Space . LeftColumnH . "`n"
-		if (OutVarTempH + HofText + c_ymarg > LeftColumnH)
+		if (Height > LeftColumnH + c_ymarg + HofText)
+		; if (OutVarTempH + HofText + c_ymarg > LeftColumnH)
 		{
-			ini_IsSandboxMoved := true
+			ini_SbAtLeft := true
 			F_GuiHS3_Resize5(Width, Height)
 			return
 		}
@@ -9950,11 +10015,12 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event
 			F_GuiHS3_Resize6(Width, Height)
 		return
 	}
-	if (!ini_Sandbox and ini_IsSandboxMoved)
+	if (!ini_Sandbox and ini_SbAtLeft)
 	{
-		if (OutVarTempH <= LeftColumnH)	;before simplification: OutVarTempH + HofText + c_ymarg <= LeftColumnH + c_ymarg + HofText
+		if (Height <= LeftColumnH + c_ymarg + HofText)
+		; if (OutVarTempH <= LeftColumnH)	;before simplification: OutVarTempH + HofText + c_ymarg <= LeftColumnH + c_ymarg + HofText
 		{
-			ini_IsSandboxMoved := false
+			ini_SbAtLeft := false
 			F_GuiHS3_Resize7(Width, Height)
 			return
 		}
@@ -10853,7 +10919,7 @@ F_LoadGUIPos()
 	ini_ListViewPos.H := ini_ReadTemp
 	
 	IniRead, ini_Sandbox, 					% ini_HADConfig, GraphicalUserInterface, Sandbox,			1
-	IniRead, ini_IsSandboxMoved,				% ini_HADConfig, GraphicalUserInterface, IsSandboxMoved, 	0 
+	IniRead, ini_SbAtLeft,				% ini_HADConfig, GraphicalUserInterface, IsSandboxMoved, 	0 
 	IniRead, ini_WhichGui,					% ini_HADConfig, GraphicalUserInterface, WhichGui, 		% A_Space
 	if (ini_WhichGui = "")
 		ini_WhichGui := "HS3"
@@ -11078,7 +11144,7 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 	IniWrite, % WinY, 			  % ini_HADConfig, GraphicalUserInterface, MainWindowPosY
 	
 	IniWrite, % ini_Sandbox, 	  % ini_HADConfig, GraphicalUserInterface, Sandbox
-	IniWrite, % ini_IsSandboxMoved, % ini_HADConfig, GraphicalUserInterface, IsSandboxMoved
+	IniWrite, % ini_SbAtLeft, % ini_HADConfig, GraphicalUserInterface, IsSandboxMoved
 	
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Position of this window is saved in Config.ini."]
 }
@@ -12993,7 +13059,7 @@ F_GuiHS3_InitialDraw(params*)	;all what have to be drawn are "movable" elements 
 	static	ExtraFlag := false
 
 	OutputDebug, % A_ThisFunc . "`n"
-	if (ini_Sandbox and !ini_IsSandboxMoved)	;1
+	if (ini_Sandbox and !ini_SbAtLeft)	;1
 	{
 		GuiControl, Show, % IdEdit10
 		xNext := LeftColumnW + WofMiddleButton + c_xmarg
@@ -13030,13 +13096,13 @@ F_GuiHS3_InitialDraw(params*)	;all what have to be drawn are "movable" elements 
 		GuiControlGet, OutVarTemp, Pos, % IdEdit10
 		F_GuiHS3_InitialPosition_MiddleButton(OutVarTempY, OutVarTempH)		
 	}
-	if (ini_Sandbox and ini_IsSandboxMoved)		;2 uneven	;tu jestem
+	if (ini_Sandbox and ini_SbAtLeft)		;2 uneven
 	{
 		GuiControl, Show, % IdEdit10
 		if (params[2] < LeftColumnH + HofSandbox)
 		{
-			ini_IsSandboxMoved := false
-			F_GuiHS3_Resize3()
+			ini_SbAtLeft := false
+			F_GuiHS3_Resize3(Width, Height)
 		}
 		else
 		{
@@ -13055,7 +13121,7 @@ F_GuiHS3_InitialDraw(params*)	;all what have to be drawn are "movable" elements 
 			F_GuiHS3_InitialPosition_MiddleButton(OutVarTempY, OutVarTempH)
 		}
  	}
-	if (!ini_Sandbox and !ini_IsSandboxMoved)
+	if (!ini_Sandbox and !ini_SbAtLeft)
 	{	
 		GuiControl, Hide, % IdEdit10
 		xNext := LeftColumnW + WofMiddleButton + c_xmarg
@@ -13079,7 +13145,7 @@ F_GuiHS3_InitialDraw(params*)	;all what have to be drawn are "movable" elements 
 		GuiControlGet, OutVarTemp, Pos, % IdText10
 		F_GuiHS3_InitialPosition_MiddleButton(OutVarTempY, OutVarTempH)
 	}
-	if (!ini_Sandbox and ini_IsSandboxMoved)
+	if (!ini_Sandbox and ini_SbAtLeft)
 	{
 		GuiControl, Hide, % IdEdit10
 		F_GuiHS3_InitPos_SandboxText()
@@ -13123,7 +13189,7 @@ F_GuiHS3_NormalDraw(LVW, LVH)	;LVW = ListViewWidth, LVH = ListViewHeight
 	local OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
 		,xNext := 0, yNext := 0, wNext := 0, hNext := 0
 
-	if (ini_Sandbox and !ini_IsSandboxMoved)	;1 
+	if (ini_Sandbox and !ini_SbAtLeft)	;1 
 	{
 		GuiControl, Show, % IdEdit10
 		xNext := LeftColumnW + WofMiddleButton + c_xmarg
@@ -13145,13 +13211,13 @@ F_GuiHS3_NormalDraw(LVW, LVH)	;LVW = ListViewWidth, LVH = ListViewHeight
 		GuiControlGet, OutVarTemp, Pos, % IdEdit10
 		F_GuiHS3_InitialPosition_MiddleButton(OutVarTempY, OutVarTempH)
 	}
-	if (ini_Sandbox and ini_IsSandboxMoved)		;2 uneven
+	if (ini_Sandbox and ini_SbAtLeft)		;2 uneven
 	{
 		GuiControl, Show, % IdEdit10
 		if (HS3_GuiHeight < LeftColumnH + c_ymarg + HofText + HofSandbox)
 		{
-			ini_IsSandboxMoved := false
-			F_GuiHS3_Resize3()
+			ini_SbAtLeft := false
+			F_GuiHS3_Resize3(Width, Height)
 		}
 		else
 		{
@@ -13175,7 +13241,7 @@ F_GuiHS3_NormalDraw(LVW, LVH)	;LVW = ListViewWidth, LVH = ListViewHeight
 			GuiControl, Move, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext
 		}
 	}
-	if (!ini_Sandbox and !ini_IsSandboxMoved)	;3 IdEdit10 is hidden, ListView is expanded, Sandbox text is moved down; tested
+	if (!ini_Sandbox and !ini_SbAtLeft)	;3 IdEdit10 is hidden, ListView is expanded, Sandbox text is moved down; tested
 	{
 		GuiControl, Hide, % IdEdit10
 		xNext := LeftColumnW + WofMiddleButton + c_xmarg
@@ -13191,7 +13257,7 @@ F_GuiHS3_NormalDraw(LVW, LVH)	;LVW = ListViewWidth, LVH = ListViewHeight
 		GuiControl, Move, % IdTextInfo17, % "x" . xNext . "y" . yNext
 		F_GuiHS3_InitialPosition_MiddleButton(OutVarTempY, OutVarTempH)
 	}
-	if (!ini_Sandbox and ini_IsSandboxMoved)	;4
+	if (!ini_Sandbox and ini_SbAtLeft)	;4
 	{
 		GuiControl, Hide, % IdEdit10
 		GuiControlGet, OutVarTemp, Pos, % IdListView1
