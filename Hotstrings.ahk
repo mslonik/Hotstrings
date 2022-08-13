@@ -9947,7 +9947,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 ,	HS3_GuiHeight 	:= Height	;used by F_SaveGUIPos() Height	is local variable, HS3_GuiHeight 	is global
 ,	DeltaH		:= Height - PrevHeight
 ,	PrevHeight	:= Height
-	OutputDebug, 	% "DeltaH:" . A_Space . DeltaH . "`n"
+	OutputDebug, 	% "DeltaH:" . A_Space . DeltaH . A_Space
 
 	if (EventInfo = 1) ; The window has been minimized.
 	{
@@ -9982,16 +9982,58 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 		return
 	}
 
+	if (ini_Sandbox)
+	{
+		if (Height < LeftColumnH + 2 * c_ymarg + HofText + HofSandbox)
+		{
+			F_GuiHS3_Resize2(Width, Height)
+			ini_SbAtLeft := false
+			return
+		}
+		if (Height >= LeftColumnH + 2 * c_ymarg + HofText + HofSandbox)	and (DeltaH >= 0)
+		{
+			ini_SbAtLeft := true
+			; return
+		}
+		if (Height >= LeftColumnH + 2 * c_ymarg + HofText + HofSandbox) and (Height < LeftColumnH + 2 * c_ymarg + HofText + HofSandbox + c_ymarg) and (ini_SbAtLeft)
+		{
+			F_GuiHS3_Resize4(Width, Height)
+			return
+		}
+		if (Height >= LeftColumnH + 2 * c_ymarg + HofText + HofSandbox + c_ymarg)
+		{
+			F_GuiHS3_Resize4(Width, Height)
+			ini_SbAtLeft := false
+			return
+		}
+		if (Height < LeftColumnH + 2 * c_ymarg + HofText + HofSandbox + c_ymarg) and (DeltaH <= 0)
+		{
+			ini_SbAtLeft := true
+			; return
+		}
+		if (Height >= LeftColumnH + 2 * c_ymarg + HofText + HofSandbox) and (Height < LeftColumnH + 2 * c_ymarg + HofText + HofSandbox + c_ymarg) and (ini_SbAtLeft)
+		{
+			F_GuiHS3_Resize2(Width, Height)
+			return
+		}
+	}
+
+/* 	
 	if (ini_Sandbox) and (!ini_SbAtLeft)
 	{
-		if (Height > LeftColumnH + c_ymarg + HofText + HofSandbox)
+		if (Height < LeftColumnH + c_ymarg + HofText + HofSandbox)
+		{
+			F_GuiHS3_Resize2(Width, Height)
+			return
+		}
+		if (Height >= LeftColumnH + c_ymarg + HofText + HofSandbox) and (DeltaH > 0)
 		{
 			ini_SbAtLeft := true
 			F_GuiHS3_Resize4(Width, Height)
 			return
 		}
-		else
-			F_GuiHS3_Resize2(Width, Height)
+		; else
+			; F_GuiHS3_Resize2(Width, Height)
 		return
 	}
 	if (ini_Sandbox) and (ini_SbAtLeft)
@@ -9999,14 +10041,21 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 		; if (Height <= LeftColumnH + c_ymarg + HofText + HofSandbox)
 		if (Height < LeftColumnH + c_ymarg + HofText + HofSandbox + c_ymarg)	;hysteresis!
 		{
+			F_GuiHS3_Resize4(Width, Height)
+			return
+		}
+		if (Height >= LeftColumnH + c_ymarg + HofText + HofSandbox + c_ymarg) and (DeltaH < 0)	;hysteresis!
+		{
 			ini_SbAtLeft := false
 			F_GuiHS3_Resize2(Width, Height)
 			return
 		}
-		else
-			F_GuiHS3_Resize4(Width, Height)
+		; else
+			; F_GuiHS3_Resize4(Width, Height)
 		return
 	}
+ */
+
 	if (!ini_Sandbox and !ini_SbAtLeft)	;IdEdit10 is hidden, ListView is expanded, Sandbox text is moved down; tested
 	{
 		if (Height > LeftColumnH + c_ymarg + HofText)
