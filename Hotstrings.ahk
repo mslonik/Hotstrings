@@ -139,6 +139,10 @@ F_InitiateTrayMenus(v_Param)
 F_GuiMain_CreateObject()
 F_GuiMain_DefineConstants()
 F_GuiMain_DetermineConstraints()
+if (ini_Sandbox)
+	GuiControl, Show, % IdEdit10
+else
+	GuiControl, Hide, % IdEdit10
 ; F_GuiHS3_Redraw()	;one time only, initial draw
 F_GuiHS4_CreateObject()
 F_GuiHS4_DetermineConstraints()
@@ -9936,14 +9940,15 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 {	;This function toggles flag ini_SbAtLeft
 	global 	;assume-global mode of operation
 	local 	OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
+	static	PrevHeight := 0, DeltaH := 0
 
-	OutputDebug, 	% A_ThisFunc . "`n"
-	; OutputDebug,	% "Width:" . A_Space . Width . A_Space . "Height:" . A_Space . Height . "`n"
+	; OutputDebug, 	% A_ThisFunc . "`n"
 	HS3_GuiWidth  	:= Width	;used by F_SaveGUIPos() Width 	is local variable, HS3_GuiWidth 	is global
 ,	HS3_GuiHeight 	:= Height	;used by F_SaveGUIPos() Height	is local variable, HS3_GuiHeight 	is global
+,	DeltaH		:= Height - PrevHeight
+,	PrevHeight	:= Height
+	OutputDebug, 	% "DeltaH:" . A_Space . DeltaH . "`n"
 
-	; if (f_MainGUIresizing)	;If Hotstrings application is run for the very first time
-		; return
 	if (EventInfo = 1) ; The window has been minimized.
 	{
 		ini_WhichGui := "HS3"
@@ -9954,11 +9959,13 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 		ini_HS3GuiMaximized := true
 		if (ini_Sandbox)
 		{
-			F_GuiHS3_Resize1(Width, Height)
+			F_GuiHS3_Resize2(Width, Height)
+			; F_GuiHS3_Resize1(Width, Height)
 			ini_SbAtLeft := true
 		}
 		else
-			F_GuiHS3_Resize5(Width, Height)
+			F_GuiHS3_Resize6(Width, Height)
+			; F_GuiHS3_Resize5(Width, Height)
 		return
 	}
 	if (!EventInfo) and (ini_HS3GuiMaximized)	;Window is restored after maximizing
@@ -9975,14 +9982,12 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 		return
 	}
 
-	; GuiControlGet, OutVarTemp, Pos, % IdListView1 ;Check previous position of ListView1
 	if (ini_Sandbox) and (!ini_SbAtLeft)
 	{
 		if (Height > LeftColumnH + c_ymarg + HofText + HofSandbox)
-		; if (OutVarTempH + HofText + c_ymarg > LeftColumnH)
 		{
 			ini_SbAtLeft := true
-			F_GuiHS3_Resize1(Width, Height)
+			F_GuiHS3_Resize4(Width, Height)
 			return
 		}
 		else
@@ -9991,11 +9996,11 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 	}
 	if (ini_Sandbox) and (ini_SbAtLeft)
 	{
-		if (Height <= LeftColumnH + c_ymarg + HofText + HofSandbox)
-		; if (OutVarTempH <= LeftColumnH + HofSandbox) ;before simiplification: OutVarTempH + HofText + 2 * c_ymarg <= LeftColumnH + 2 * c_ymarg + HofText + HofSandbox
+		; if (Height <= LeftColumnH + c_ymarg + HofText + HofSandbox)
+		if (Height < LeftColumnH + c_ymarg + HofText + HofSandbox + c_ymarg)	;hysteresis!
 		{
 			ini_SbAtLeft := false
-			F_GuiHS3_Resize3(Width, Height)
+			F_GuiHS3_Resize2(Width, Height)
 			return
 		}
 		else
@@ -10005,10 +10010,9 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 	if (!ini_Sandbox and !ini_SbAtLeft)	;IdEdit10 is hidden, ListView is expanded, Sandbox text is moved down; tested
 	{
 		if (Height > LeftColumnH + c_ymarg + HofText)
-		; if (OutVarTempH + HofText + c_ymarg > LeftColumnH)
 		{
 			ini_SbAtLeft := true
-			F_GuiHS3_Resize5(Width, Height)
+			F_GuiHS3_Resize8(Width, Height)
 			return
 		}
 		else
@@ -10017,11 +10021,11 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 	}
 	if (!ini_Sandbox and ini_SbAtLeft)
 	{
-		if (Height <= LeftColumnH + c_ymarg + HofText)
-		; if (OutVarTempH <= LeftColumnH)	;before simplification: OutVarTempH + HofText + c_ymarg <= LeftColumnH + c_ymarg + HofText
+		; if (Height <= LeftColumnH + c_ymarg + HofText)
+		if (Height < LeftColumnH + c_ymarg + HofText + c_ymarg)	;hysteresis!
 		{
 			ini_SbAtLeft := false
-			F_GuiHS3_Resize7(Width, Height)
+			F_GuiHS3_Resize6(Width, Height)
 			return
 		}
 		else
@@ -10881,11 +10885,17 @@ F_ToggleSandbox()
 	
 	Menu, ConfGUI, ToggleCheck, % TransA["Show Sandbox"] . "`tF6"
 	ini_Sandbox := !(ini_Sandbox)
-	Iniwrite, %ini_Sandbox%, % ini_HADConfig, GraphicalUserInterface, Sandbox
+	if (ini_Sandbox)
+		GuiControl, Show, % IdEdit10
+	else
+		GuiControl, Hide, % IdEdit10
+
+	; Iniwrite, %ini_Sandbox%, % ini_HADConfig, GraphicalUserInterface, Sandbox
 	Switch F_WhichGui()
 	{
-		Case "HS3": 
-			F_GuiHS3_Redraw()
+		Case "HS3":
+			HS3GuiSize(GuiHwnd := HS3GuiHwnd, EventInfo := 0, Width := HS3_GuiWidth, Height := HS3_GuiHeight)
+			; F_GuiHS3_Redraw()
 			; Gui, HS3: Show ;without AutoSize do not initiates HS3GuiSize ; Gui, HS3: Show, AutoSize ;initiates HS3GuiSize
 			F_GuiHS4_Redraw(false)
 		Case "HS4": 
