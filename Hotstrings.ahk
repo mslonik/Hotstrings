@@ -616,7 +616,7 @@ F_IsItEdit()
 		if (F_HMenuSI_Keyboard())
 		{
 			v_InputH.VisibleText 	:= true
-,			v_InputString 			:= ""			
+,			v_InputString 			:= ""
 		}
 		; OutputDebug, % "WinExist(""ahk_id"" HMenuAHKHwnd)" . A_Space . A_ThisHotkey . "`n"
 		return
@@ -997,11 +997,11 @@ F_Tt_HWT()	;Tt_HWT = Tooltip_Hostring Was Triggered
 F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 {
 	global	;assume-global mode of operation
-	local	v_PressedKey := A_ThisHotkey,	v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", OutputVar1 := "", OutputVar2 := ""
+	local	PressedKey := A_ThisHotkey,	Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", OutputVar1 := "", OutputVar2 := ""
 ,			NoPosInList := 0, Temp2 := "", WhichLB := "", temp := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 
-	OutputDebug, % "F_StaticMenu_Keyboard" . A_Tab . "v_PressedKey:" . A_Tab . v_PressedKey . "`n"
+	OutputDebug, % "F_StaticMenu_Keyboard" . A_Tab . "PressedKey:" . A_Tab . PressedKey . "`n"
 	GuiControlGet, OutputVar1, , % IdTT_C4_LB1	;Retrieves the contents of the control to check if static window contains any information: triggerstring tips
 	GuiControlGet, OutputVar2, , % IdTT_C4_LB4	;Retrieves the contents of the control to check if static window contains any information: hotstrings
 	OutputDebug, % "OutputVar1:" . A_Tab . OutputVar1 . A_Tab . "OutputVar2:" . A_Tab . OutputVar2 . "`n"
@@ -1011,7 +1011,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 		return
 	if (OutputVar1)
 	{
-		if (!InStr(v_PressedKey, "^"))
+		if (!InStr(PressedKey, "^"))
 			return
 		WhichLB := "MTrig"
 		ControlGet, Temp2, List, , , % "ahk_id" IdTT_C4_LB1
@@ -1020,7 +1020,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 	}
 	if (OutputVar2)
 	{
-		if (InStr(v_PressedKey, "^"))
+		if (InStr(PressedKey, "^"))
 			return
 		WhichLB := "MHot"
 		ControlGet, Temp2, List, , , % "ahk_id" IdTT_C4_LB4
@@ -1031,7 +1031,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 	Switch WhichLB
 	{
 		Case "MTrig":
-			if (InStr(v_PressedKey, "^Up") or InStr(v_PressedKey, "+Tab"))
+			if (InStr(PressedKey, "^Up") or InStr(PressedKey, "+Tab"))
 			{
 				IsCursorPressed := true
 ,				IntCnt--
@@ -1040,7 +1040,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB3
 				ShiftTabIsFound := true
 			}
-			if (InStr(v_PressedKey, "^Down") or InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+			if (InStr(PressedKey, "^Down") or InStr(PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
 			{
 				IsCursorPressed := true
 ,				IntCnt++
@@ -1050,14 +1050,14 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 				ShiftTabIsFound := false
 			}
 		Case "MHot":
-			if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
+			if (InStr(PressedKey, "Up") or InStr(PressedKey, "+Tab"))	;the same as "up"
 			{
 				IsCursorPressed := true
 ,				IntCnt--
 				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB4
 				ShiftTabIsFound := true	
 			}
-			if (InStr(v_PressedKey, "Down") or InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+			if (InStr(PressedKey, "Down") or InStr(PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
 			{
 				IsCursorPressed := true
 ,				IntCnt++
@@ -1088,35 +1088,38 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 		IsCursorPressed := false
 		return
 	}		
-	if (InStr(v_PressedKey, "Enter")) or (InStr(v_PressedKey, "^Enter"))
+	if (InStr(PressedKey, "Enter")) or (InStr(PressedKey, "^Enter"))
 	{
-		v_PressedKey := IntCnt
+		PressedKey := IntCnt
 ,		IsCursorPressed := false
 ,		IntCnt := 1
 	}
-	if (v_PressedKey > NoPosInList)
+	if (PressedKey > NoPosInList)
 		return
 	Switch WhichLB
 	{
 		Case "MTrig":
-			ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C4_LB1
-			Loop, Parse, v_Temp1, `n
+			ControlGet, Temp1, List, , , % "ahk_id" IdTT_C4_LB1
+			Loop, Parse, Temp1, `n
 			{
-				if (A_Index = v_PressedKey)
+				if (A_Index = PressedKey)
 				{
-					v_Temp1 := A_LoopField
+					Temp1 := A_LoopField
 					break
 				}
 			}
 		Case "MHot":
-			ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C4_LB4
-			Loop, Parse, v_Temp1, `n
+			ControlGet, Temp1, List, , , % "ahk_id" IdTT_C4_LB4
+			Loop, Parse, Temp1, `n
 			{
-				if (InStr(A_LoopField, v_PressedKey . "."))
-					v_Temp1 := SubStr(A_LoopField, 4)
+				if (A_Index = PressedKey)
+				{
+					Temp1 := A_LoopField
+					break
+				}
 			}
-			v_UndoHotstring 	:= v_Temp1
-,			ReplacementString 	:= F_ReplaceAHKconstants(v_Temp1)
+			v_UndoHotstring 	:= Temp1
+,			ReplacementString 	:= F_ReplaceAHKconstants(Temp1)
 ,			ReplacementString 	:= F_FollowCaseConformity(ReplacementString)
 ,			ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)     
 	}
@@ -1133,11 +1136,11 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 			GuiControl,, % IdTT_C4_LB1, |
 			GuiControl,, % IdTT_C4_LB2, |
 			GuiControl,, % IdTT_C4_LB3, |
-			; OutputDebug, % "v_InputStringOutput:" . A_Tab . v_InputString . A_Tab . "v_Temp1:" . A_Tab . v_Temp1 . A_Tab . "A_IsCritical:" . A_Tab . A_IsCritical . "`n"
+			; OutputDebug, % "v_InputStringOutput:" . A_Tab . v_InputString . A_Tab . "Temp1:" . A_Tab . Temp1 . A_Tab . "A_IsCritical:" . A_Tab . A_IsCritical . "`n"
 			Hotstring("Reset")	;reset hotstring recognizer
 			SendEvent, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
 			SendLevel, 2			;to backtrigger it must be higher than the input level of the hotstrings
-			SendEvent, % v_Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
+			SendEvent, % Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
 			SendLevel, 0
 			v_InputString := 0
 		Case "MHot":
@@ -1159,8 +1162,8 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 			{
 				Switch WhichMenu
 				{
-					Case "SI":	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MSI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-					Case "CLI":	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCLI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+					Case "SI":	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MSI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+					Case "CLI":	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCLI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 				}
 			}
 			v_UndoTriggerstring 	:= v_InputString
@@ -1172,17 +1175,17 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 F_HMenuSI_Keyboard()
 {
 	global	;assume-global moee
-	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", temp := 0
+	local	PressedKey := A_ThisHotkey,		Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", temp := 0
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	
-	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
+	if (InStr(PressedKey, "Up") or InStr(PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
 ,		IntCnt--
 		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
 		ShiftTabIsFound := true
 	}
-	if (InStr(v_PressedKey, "Down") or InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+	if (InStr(PressedKey, "Down") or InStr(PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
 	{
 		IsCursorPressed := true
 ,		IntCnt++
@@ -1211,40 +1214,43 @@ F_HMenuSI_Keyboard()
 		IsCursorPressed := false
 		return
 	}		
-	if (InStr(v_PressedKey, "Enter"))
+	if (InStr(PressedKey, "Enter"))
 	{
-		v_PressedKey 		:= IntCnt
+		PressedKey 		:= IntCnt
 ,		IsCursorPressed 	:= false
 ,		IntCnt 			:= 1
 	}
-	if (v_PressedKey > v_MenuMax)
+	if (PressedKey > v_MenuMax)
 	{
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD	
 		return false ;if function returns false, characters still be invisible
 	}
-	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuAHK
-	Loop, Parse, v_Temp1, `n
+	ControlGet, Temp1, List, , , % "ahk_id" Id_LB_HMenuAHK
+	Loop, Parse, Temp1, `n
 	{
-		if (InStr(A_LoopField, v_PressedKey . "."))
-			v_Temp1 := SubStr(A_LoopField, 4)
+		if (A_Index = PressedKey)
+		{
+			Temp1 := SubStr(A_LoopField, 4)
+			break
+		}
 	}
-	v_UndoHotstring 	:= v_Temp1
-,	v_Temp1 			:= F_ReplaceAHKconstants(v_Temp1)
-,	v_Temp1 			:= F_FollowCaseConformity(v_Temp1)
-,	v_Temp1 			:= F_ConvertEscapeSequences(v_Temp1)     
+	v_UndoHotstring 	:= Temp1
+,	Temp1 			:= F_ReplaceAHKconstants(Temp1)
+,	Temp1 			:= F_FollowCaseConformity(Temp1)
+,	Temp1 			:= F_ConvertEscapeSequences(Temp1)     
 	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
 	if (ini_MHMP = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
-	F_SendIsOflag(v_Temp1, Ovar, "SendInput")
+	F_SendIsOflag(Temp1, Ovar, "SendInput")
 	Gui, HMenuAHK: Destroy
 	++v_LogCounter
 	if (InStr(A_ThisHotkey, "?"))
 		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
-	temp := F_DetermineGain2(v_InputString, v_Temp1)
+	temp := F_DetermineGain2(v_InputString, Temp1)
 	v_CntCumGain += temp
 	if (ini_THLog)
-		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	v_UndoTriggerstring := v_InputString
 	return true	; v_InputString will be cleared only if function returns true if function returns false, characters still be invisible
 }
@@ -1280,17 +1286,17 @@ F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_MouseMouse is lower than this
 F_HMenuCLI_Keyboard()
 {
 	global	;assume-global mode of operation
-	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",	ShiftTabIsFound := false, ReplacementString := "", temp := 0
+	local	PressedKey := A_ThisHotkey,		Temp1 := "",	ShiftTabIsFound := false, ReplacementString := "", temp := 0
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 ;	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_StaticMenu_Keyboard it was crucial for ControlSend to run correctly
-	if (InStr(v_PressedKey, "Up") or InStr(v_PressedKey, "+Tab"))	;the same as "up"
+	if (InStr(PressedKey, "Up") or InStr(PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
 		IntCnt--
 		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuCli
 		ShiftTabIsFound := true
 	}
-	if (InStr(v_PressedKey, "Down") or InStr(v_PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+	if (InStr(PressedKey, "Down") or InStr(PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
 	{
 		IsCursorPressed := true
 		IntCnt++
@@ -1320,26 +1326,29 @@ F_HMenuCLI_Keyboard()
 		return
 	}		
 	
-	if (InStr(v_PressedKey, "Enter"))
+	if (InStr(PressedKey, "Enter"))
 	{
-		v_PressedKey 		:= IntCnt
+		PressedKey 		:= IntCnt
 ,		IsCursorPressed 	:= false
 ,		IntCnt 			:= 1
 	}
-	if (v_PressedKey > v_MenuMax)
+	if (PressedKey > v_MenuMax)
 	{
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
 		return false
 	}
-	ControlGet, v_Temp1, List, , , % "ahk_id" Id_LB_HMenuCli
-	Loop, Parse, v_Temp1, `n
+	ControlGet, Temp1, List, , , % "ahk_id" Id_LB_HMenuCli
+	Loop, Parse, Temp1, `n
 	{
-		if (A_Index = v_PressedKey)
-			v_Temp1 := SubStr(A_LoopField, 4)
+		if (A_Index = PressedKey)
+		{
+			Temp1 := SubStr(A_LoopField, 4)
+			break
+		}
 	}
-	v_UndoHotstring 	:= v_Temp1
-,	ReplacementString 	:= F_ReplaceAHKconstants(v_Temp1)
+	v_UndoHotstring 	:= Temp1
+,	ReplacementString 	:= F_ReplaceAHKconstants(Temp1)
 ,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString)
 ,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)     
 	if (ini_MHMP = 4)
@@ -1349,10 +1358,10 @@ F_HMenuCLI_Keyboard()
 	++v_LogCounter
 	if (InStr(A_ThisHotkey, "?"))
 		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
-	temp := F_DetermineGain2(v_InputString, v_Temp1)
+	temp := F_DetermineGain2(v_InputString, Temp1)
 	v_CntCumGain += temp
 	if (ini_THLog)
-		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . v_Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	v_UndoTriggerstring := v_InputString
 	return true ;if function returns true, v_InputString will be cleared and input characters will not be invisible anymore
 	; OutputDebug, % "End of F_HMenuCLI_Keyboard:" . "`n"
@@ -2889,35 +2898,35 @@ F_MenuLogEnDis()
 F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" coming from "g" event
 {
 	global	;assume-global mode
-	local	v_PressedKey := A_ThisHotkey,		v_Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 0, v_MenuMax := 0
+	local	PressedKey := A_ThisHotkey,		Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
+	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 0, MenuMax := 0
 
 	if (!ini_ATEn)
 		return
-	v_MenuMax := a_Tips.Count()
-	;OutputDebug, % "v_PressedKey:" . A_Tab . v_PressedKey
+	MenuMax := a_Tips.Count()
+	;OutputDebug, % "PressedKey:" . A_Tab . PressedKey
 	Switch ini_TTCn	
 	{
-		Case 1:	ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C1_LB1	;check if triggerstring tips listbox is empty.
-		Case 2:	ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C2_LB1	;check if triggerstring tips listbox is empty.
-		Case 3:	ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C3_LB1	;check if triggerstring tips listbox is empty.
-		Case 4:	ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C4_LB1	;check if triggerstring tips listbox is empty.
+		Case 1:	ControlGet, Temp1, List, , , % "ahk_id" IdTT_C1_LB1	;check if triggerstring tips listbox is empty.
+		Case 2:	ControlGet, Temp1, List, , , % "ahk_id" IdTT_C2_LB1	;check if triggerstring tips listbox is empty.
+		Case 3:	ControlGet, Temp1, List, , , % "ahk_id" IdTT_C3_LB1	;check if triggerstring tips listbox is empty.
+		Case 4:	ControlGet, Temp1, List, , , % "ahk_id" IdTT_C4_LB1	;check if triggerstring tips listbox is empty.
 	}
-	if (!v_Temp1)	;if it is empty and one of the special shortcuts has been pressed, give it back (let it run)
+	if (!Temp1)	;if it is empty and one of the special shortcuts has been pressed, give it back (let it run)
 	{
-		Switch v_PressedKey
+		Switch PressedKey
 		{
-			Case "^Tab":	v_PressedKey := "{Ctrl down}" . "{Tab}" . "{Ctrl up}"
-			Case "+^Tab":	v_PressedKey := "{Shift down}" . "{Ctrl down}" . "{Tab}" . "{Ctrl up}" . "{Shift up}"
-			Case "^Up":	v_PressedKey := "{Ctrl down}" . "{Up}" . "{Ctrl up}"
-			Case "^Down":	v_PressedKey := "{Ctrl down}" . "{Down}" . "{Ctrl up}"
-			Case "^Enter":	v_PressedKey := "{Ctrl down}" . "{Enter}" . "{Ctrl up}"
+			Case "^Tab":	PressedKey := "{Ctrl down}" . "{Tab}" . "{Ctrl up}"
+			Case "+^Tab":	PressedKey := "{Shift down}" . "{Ctrl down}" . "{Tab}" . "{Ctrl up}" . "{Shift up}"
+			Case "^Up":	PressedKey := "{Ctrl down}" . "{Up}" . "{Ctrl up}"
+			Case "^Down":	PressedKey := "{Ctrl down}" . "{Down}" . "{Ctrl up}"
+			Case "^Enter":	PressedKey := "{Ctrl down}" . "{Enter}" . "{Ctrl up}"
 		}
-		SendInput, % v_PressedKey
-		;OutputDebug, % "v_PressedKey:" . A_Tab . v_PressedKey
+		SendInput, % PressedKey
+		;OutputDebug, % "PressedKey:" . A_Tab . PressedKey
 		return
 	}
-	if (InStr(v_PressedKey, "^Up") or InStr(v_PressedKey, "+^Tab"))	;the same as "up"
+	if (InStr(PressedKey, "^Up") or InStr(PressedKey, "+^Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
 		IntCnt--
@@ -2939,7 +2948,7 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 		}
 		ShiftTabIsFound := true
 	}
-	if ((InStr(v_PressedKey, "^Down")) or (InStr(v_PressedKey, "^Tab") and (!ShiftTabIsFound)))	;the same as "down"
+	if ((InStr(PressedKey, "^Down")) or (InStr(PressedKey, "^Tab") and (!ShiftTabIsFound)))	;the same as "down"
 	{
 		IsCursorPressed := true
 		IntCnt++
@@ -2960,22 +2969,22 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 				ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB3
 		}
 	}
-	if InStr(v_PressedKey, "^Enter")
+	if InStr(PressedKey, "^Enter")
 	{
-		v_PressedKey 		:= IntCnt
+		PressedKey 		:= IntCnt
 ,		IsCursorPressed	:= false
 ,		IntCnt 			:= 0
 	}
-	if ((v_MenuMax = 1) and IsCursorPressed)
+	if ((MenuMax = 1) and IsCursorPressed)
 	{
 		IntCnt := 1
 		return
 	}
 	if (IsCursorPressed)
 	{
-		if (IntCnt > v_MenuMax)
+		if (IntCnt > MenuMax)
 		{
-			IntCnt := v_MenuMax
+			IntCnt := MenuMax
 			if (ini_MHSEn)
 				SoundBeep, % ini_MHSF, % ini_MHSD	
 		}
@@ -2988,32 +2997,32 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 		IsCursorPressed := false
 		return
 	}		
-	if (v_PressedKey > v_MenuMax)
+	if (PressedKey > MenuMax)
 		return
 	Switch ini_TTCn
 	{
-		Case 1: ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C1_LB1
-		Case 2: ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C2_LB1
-		Case 3: ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C3_LB1
-		Case 4: ControlGet, v_Temp1, List, , , % "ahk_id" IdTT_C4_LB1
+		Case 1: ControlGet, Temp1, List, , , % "ahk_id" IdTT_C1_LB1
+		Case 2: ControlGet, Temp1, List, , , % "ahk_id" IdTT_C2_LB1
+		Case 3: ControlGet, Temp1, List, , , % "ahk_id" IdTT_C3_LB1
+		Case 4: ControlGet, Temp1, List, , , % "ahk_id" IdTT_C4_LB1
 	}
-	; OutputDebug, % "v_Temp1:" . A_Space . v_Temp1 . A_Tab . "v_PressedKey:" . A_Space . v_PressedKey . "`n"
-	Loop, Parse, v_Temp1, `n
+	; OutputDebug, % "Temp1:" . A_Space . Temp1 . A_Tab . "PressedKey:" . A_Space . PressedKey . "`n"
+	Loop, Parse, Temp1, `n
 	{
-		if (A_Index = v_PressedKey)
+		if (A_Index = PressedKey)
 		{
-			v_Temp1 := A_LoopField
+			Temp1 := A_LoopField
 			break
 		}	
 	}
-	; OutputDebug, % "v_Temp1:" . A_Space . v_Temp1 . A_Tab . "v_InputString:" . A_Space . v_InputString . "`n"
+	; OutputDebug, % "Temp1:" . A_Space . Temp1 . A_Tab . "v_InputString:" . A_Space . v_InputString . "`n"
 	if (ini_TTCn = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_DestroyTriggerstringTips(ini_TTCn)
 	Hotstring("Reset")
 	SendEvent, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
 	SendLevel, 2	;to backtrigger it must be higher than the input level of the hotstrings
-	SendEvent, % v_Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
+	SendEvent, % Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
 	SendLevel, 0
 	v_InputString := ""
 }
