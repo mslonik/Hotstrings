@@ -9608,7 +9608,7 @@ F_ToggleRightColumn() ;Label of Button IdButton5, to toggle left part of gui
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS4GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generated)
-{	;This function toggles flag ini_SbAtLeft
+{
 	global 	;assume-global mode of operation
 	local	xNext := 0, yNext := 0, hNext := 0
 
@@ -9670,7 +9670,7 @@ F_GuiMain_LVcolumnScale()
 	Gui, HS3: +DPIScale
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize2(Width, Height)	;if (ini_Sandbox) and (!ini_SbAtLeft)
+F_GuiHS3_Resize2(Width, Height)	;if (ini_Sandbox) and (!SbAtLeft)
 {
 	global ;assume-global mode
 	local OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
@@ -9708,7 +9708,7 @@ F_GuiHS3_Resize2(Width, Height)	;if (ini_Sandbox) and (!ini_SbAtLeft)
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize4(Width, Height)	;(ini_Sandbox) and (ini_SbAtLeft)
+F_GuiHS3_Resize4(Width, Height)	;(ini_Sandbox) and (SbAtLeft)
 {
 	global ;assume-global mode
 	local wNext := 0, hNext := 0
@@ -9744,7 +9744,7 @@ F_GuiHS3_Resize4(Width, Height)	;(ini_Sandbox) and (ini_SbAtLeft)
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize6(Width, Height)	;(!ini_Sandbox and !ini_SbAtLeft)
+F_GuiHS3_Resize6(Width, Height)	;(!ini_Sandbox and !SbAtLeft)
 {
 	global ;assume-global mode
 	local	xNext := 0, yNext := 0, wNext := 0, hNext := 0
@@ -9777,7 +9777,7 @@ F_GuiHS3_Resize6(Width, Height)	;(!ini_Sandbox and !ini_SbAtLeft)
 	F_GuiMain_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiHS3_Resize8(Width, Height)	;(!ini_Sandbox and ini_SbAtLeft)
+F_GuiHS3_Resize8(Width, Height)	;(!ini_Sandbox and SbAtLeft)
 {
 	global ;assume-global mode
 	local	xNext := 0, yNext := 0, wNext := 0, hNext := 0
@@ -9801,7 +9801,7 @@ F_GuiHS3_Resize8(Width, Height)	;(!ini_Sandbox and ini_SbAtLeft)
 
 	;Place SANDBOX (void)
 
-	;PLACE MB (Middle Button)
+	;Place MB (Middle Button)
 	xNext := LeftColumnW
 ,	yNext := c_ymarg
 ,	hNext := Height - 2 * c_ymarg 
@@ -9811,8 +9811,9 @@ F_GuiHS3_Resize8(Width, Height)	;(!ini_Sandbox and ini_SbAtLeft)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generated)
-{	;This function toggles flag ini_SbAtLeft
+{	;This function toggles static flag f_SbAtLeft
 	global 	;assume-global mode of operation
+	static	f_SbAtLeft := false
 
 	; OutputDebug, 	% A_ThisFunc . A_Space . "EventInfo:" . A_Space . EventInfo . "`n"
 	HS3_GuiWidth  	:= Width	;used by F_SaveGUIPos() Width 	is local variable, HS3_GuiWidth 	is global
@@ -9827,13 +9828,13 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 			{
 				if (Height < LeftColumnH + 2 * c_ymarg + HofText + HofSandbox)
 				{
-					ini_SbAtLeft := false
+					f_SbAtLeft := false
 					F_GuiHS3_Resize2(Width, Height)
 					return
 				}
 				else	;if (Height >= LeftColumnH + 2 * c_ymarg + HofText + HofSandbox)
 				{
-					ini_SbAtLeft := true
+					f_SbAtLeft := true
 					F_GuiHS3_Resize4(Width, Height)
 					return
 				}
@@ -9842,13 +9843,13 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 			{
 				if (Height < LeftColumnH + c_ymarg + HofText + c_ymarg)
 				{
-					ini_SbAtLeft := false
+					f_SbAtLeft := false
 					F_GuiHS3_Resize6(Width, Height)
 					return
 				}
 				else	;if (Height > LeftColumnH + c_ymarg + HofText)
 				{
-					ini_SbAtLeft := true
+					f_SbAtLeft := true
 					F_GuiHS3_Resize8(Width, Height)
 					return
 				}
@@ -9860,13 +9861,13 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 			{
 				if (Height < LeftColumnH + 2 * c_ymarg + HofText + HofSandbox)
 				{
-					ini_SbAtLeft := false
+					f_SbAtLeft := false
 					F_GuiHS3_Resize2(Width, Height)
 					return
 				}
 				else	;if (Height >= LeftColumnH + 2 * c_ymarg + HofText + HofSandbox)
 				{
-					ini_SbAtLeft := true
+					f_SbAtLeft := true
 					F_GuiHS3_Resize4(Width, Height)
 					return
 				}
@@ -9875,13 +9876,13 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 			{
 				if (Height < LeftColumnH + c_ymarg + HofText + c_ymarg)
 				{
-					ini_SbAtLeft := false
+					f_SbAtLeft := false
 					F_GuiHS3_Resize6(Width, Height)
 					return
 				}
 				else	;if (Height > LeftColumnH + c_ymarg + HofText)
 				{
-					ini_SbAtLeft := true
+					f_SbAtLeft := true
 					F_GuiHS3_Resize8(Width, Height)
 					return
 				}
@@ -10780,13 +10781,7 @@ F_LoadGUIPos()
 	IniRead, ini_ReadTemp, 					% ini_HADConfig, GraphicalUserInterface, MainWindowPosH, 	% A_Space	;empty by default
 	ini_HS3WindoPos.H := ini_ReadTemp
 	
-	IniRead, ini_ReadTemp,					% ini_HADConfig, GraphicalUserInterface, ListViewPosW, 	% A_Space
-	ini_ListViewPos.W := ini_ReadTemp
-	IniRead, ini_ReadTemp,					% ini_HADConfig, GraphicalUserInterface, ListViewPosH, 	% A_Space
-	ini_ListViewPos.H := ini_ReadTemp
-	
 	IniRead, ini_Sandbox, 					% ini_HADConfig, GraphicalUserInterface, Sandbox,			1
-	IniRead, ini_SbAtLeft,				% ini_HADConfig, GraphicalUserInterface, IsSandboxMoved, 	0 
 	IniRead, ini_WhichGui,					% ini_HADConfig, GraphicalUserInterface, WhichGui, 		% A_Space
 	if (ini_WhichGui = "")
 		ini_WhichGui := "HS3"
@@ -10891,10 +10886,7 @@ MainWindowPosX=
 MainWindowPosY=
 MainWindowPosW=
 MainWindowPosH=
-ListViewPosW=
-ListViewPosH=
 Sandbox=1
-IsSandboxMoved=0
 WhichGui=HS3
 GuiFontColor=Black
 GuiFontColorHighlighted=Blue
@@ -10970,49 +10962,33 @@ Underscore _=1
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_SaveGUIPos(param*) ;Save to Config.ini
 {
-	global ;assume-global mode
-	local WinX := 0, WinY := 0
-		,TempPos := 0, TempPosX := 0, TempPosY := 0, TempPosW := 0, TempPosH := 0
+	global 	;assume-global mode
+	local 	WinX := 0, WinY := 0
 	
+	WinGetPos, WinX, WinY, , , % "ahk_id" . A_Space . A_DefaultGui . "GuiHwnd"
 	if (param[1] = "reset") ;if AutoSize option will be used for Gui after reload
 	{
-		if (A_DefaultGui = "HS3")
-		{
-			WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
-		}
-		if (A_DefaultGui = "HS4")
-		{
-			WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
-		}
 		IniWrite, % WinX, 			  	% ini_HADConfig, GraphicalUserInterface, MainWindowPosX
 		IniWrite, % WinY, 			  	% ini_HADConfig, GraphicalUserInterface, MainWindowPosY
 		IniWrite, % "", 				% ini_HADConfig, GraphicalUserInterface, MainWindowPosW
 		IniWrite, % "", 				% ini_HADConfig, GraphicalUserInterface, MainWindowPosH
 		return
 	}	
-	Switch F_WhichGui()		;This line is necessary in case when last Gui is not equal to HS3 or HS4. This is a case e.g. if Gui_VersionUpdate is active
+	Switch A_DefaultGui		;This line is necessary in case when last Gui is not equal to HS3 or HS4. This is a case e.g. if Gui_VersionUpdate is active
 	{
 		Case "HS3":
-			WinGetPos, WinX, WinY, , , % "ahk_id" . HS3GuiHwnd
 			IniWrite,  HS3,			% ini_HADConfig, GraphicalUserInterface, WhichGui
 			IniWrite, % HS3_GuiWidth, 	% ini_HADConfig, GraphicalUserInterface, MainWindowPosW
 			IniWrite, % HS3_GuiHeight, 	% ini_HADConfig, GraphicalUserInterface, MainWindowPosH
-			GuiControlGet, TempPos,	Pos, % IdListView1
-			IniWrite, % TempPosW,		% ini_HADConfig, GraphicalUserInterface, ListViewPosW
-			IniWrite, % TempPosH,		% ini_HADConfig, GraphicalUserInterface, ListViewPosH
 			IniWrite, % ini_HS3GuiMaximized, 	% ini_HADConfig, GraphicalUserInterface, GuiMaximized
 		Case "HS4":
-			WinGetPos, WinX, WinY, , , % "ahk_id" . HS4GuiHwnd
 			IniWrite,  HS4,			% ini_HADConfig, GraphicalUserInterface, WhichGui
 			IniWrite, % HS4_GuiWidth, 	% ini_HADConfig, GraphicalUserInterface, MainWindowPosW
 			IniWrite, % HS4_GuiHeight, 	% ini_HADConfig, GraphicalUserInterface, MainWindowPosH
 	}
 	IniWrite, % WinX, 			  % ini_HADConfig, GraphicalUserInterface, MainWindowPosX
 	IniWrite, % WinY, 			  % ini_HADConfig, GraphicalUserInterface, MainWindowPosY
-	
 	IniWrite, % ini_Sandbox, 	  % ini_HADConfig, GraphicalUserInterface, Sandbox
-	IniWrite, % ini_SbAtLeft, % ini_HADConfig, GraphicalUserInterface, IsSandboxMoved
-	
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Position of this window is saved in Config.ini."]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
