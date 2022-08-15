@@ -165,13 +165,9 @@ if (ini_HK_IntoEdit != "none")
 
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
 Gui, 1: Default				;this line is necessary to not show too many Guis on time of loading hotstrings from library
-; v_LibHotstringCnt := 0			;dirty trick to show initially 0 instead of 0000
-; GuiControl, , % IdText13,  % v_LibHotstringCnt
-; GuiControl, , % IdText13b, % v_LibHotstringCnt
 F_LoadHotstringsFromLibraries()	;→ F_LoadDefinitionsFromFile() -> F_CreateHotstring
 F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 F_GuiSearch_CreateObject()		;When all tables are full, initialize GuiSearch
-; F_Searching("Reload")			;prepare content of Search tables
 F_InitiateInputHook()
 
 TrayTip, % A_ScriptName, % TransA["Hotstrings have been loaded"], , 1 ;1 = Info icon
@@ -8945,16 +8941,22 @@ F_MoveList()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HSLV2() ; copy content of List View 1 to editable fields of HS3 Gui
 {
-	Critical, On
+	global	;assume-global mode
 	; OutputDebug, % "A_ThisFunc:" . A_Space . A_ThisFunc . A_Tab . "A_GuiEvent:" . A_Space . A_GuiEvent . A_Tab . "A_GuiControl:" . A_Space . A_GuiControl . A_Tab . "A_EventInfo:" . A_Space . A_EventInfo . A_Tab . "ErrorLevel:" . A_Space . ErrorLevel . "`n"
 	Switch A_GuiEvent
 	{
 		Default:
-			Critical, Off
 			return
-		Case "Normal":		LV2_CopyContentToHS3LV()
+		Case "Normal":
+			if (LV_GetNext())
+				LV2_CopyContentToHS3LV()
+			else	;if just Enter is pressed, without selecting any row
+			{
+				LV_Modify(1, "Vis +Select +Focus")
+				GuiControl, Focus, % IdSearchLV1
+				return
+			}
 	}
-	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 LV2_CopyContentToHS3LV() ;load content of chosen row from Search Gui into HS3 Gui
@@ -8963,76 +8965,76 @@ LV2_CopyContentToHS3LV() ;load content of chosen row from Search Gui into HS3 Gu
 	local SelectedRow := 0, Library := "", Triggerstring := "", SearchedTriggerString := "", SelectHotstringLibrary := ""
 	
 	SelectedRow 		:= LV_GetNext()
-	LV_GetText(Library, 		SelectedRow, 1)
-	LV_GetText(Triggerstring, 	SelectedRow, 2)
+	LV_GetText(Library, 		SelectedRow, 2)
+	LV_GetText(Triggerstring, 	SelectedRow, 3)
 	
 	SelectHotstringLibrary := % Library . ".csv"
 	GuiControl, Choose, % IdDDL2, % SelectHotstringLibrary
 	Gui, HS3: 		Submit, NoHide	;this line is necessary to v_SelectHotstringLibrary <- SelectHotstringLibrary
 	F_SelectLibrary()
+	Gui, HS3: 		-Disabled
+	Gui, HS3Search:	Hide
+	GuiControl, Focus, % IdListView1
 	
 	SearchedTriggerString := Triggerstring
 	Loop
 	{
-		LV_GetText(Triggerstring, A_Index, 1)
+		LV_GetText(Triggerstring, A_Index, 2)
 		if (Triggerstring == SearchedTriggerString)
 		{
 			LV_Modify(A_Index, "Vis +Select +Focus")
 			break
 		}
 	}
-	Gui, HS3: 		-Disabled
-	Gui, HS3Search:	Hide
-	GuiControl, Focus, % IdListView1
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SearchPhrase()
 {
 	global	;assume-global mode
-	local	Each := 0, FileName := ""
+	local	index := 0, value := ""
 	
 	Gui, HS3Search: Submit, NoHide
-	if getkeystate("CapsLock","T") ;I don't understand it
+	if getkeystate("CapsLock", "T") ;I don't understand it
 		return
-	GuiControlGet, v_SearchTerm
+	; GuiControlGet, v_SearchTerm
 	GuiControl, -Redraw, % IdSearchLV1	;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
 	LV_Delete()
 	Switch v_RadioGroup
 	{
 		Case 1:	;search by Triggerstring
-			For Each, FileName in a_Triggerstring
+			For index, value in a_Triggerstring
 			{
 				if (v_SearchTerm)
 				{
-					if (InStr(FileName, v_SearchTerm) = 1) ; for matching at the start ;for overall matching without = 1
-						LV_Add("", a_EnableDisable[A_Index], a_Library[A_Index], FileName, a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+					if (InStr(value, v_SearchTerm) = 1) ; for matching at the start ;for overall matching without = 1
+						LV_Add("", a_EnableDisable[index], a_Library[index], value, a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 				}
 				else
-					LV_Add("", a_EnableDisable[A_Index], a_Library[A_Index], FileName, a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+					LV_Add("", a_EnableDisable[index], a_Library[index], value, a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 			}
 			LV_ModifyCol(3, "Sort")
 		Case 2:	;search by Hotstring
-			For Each, FileName in a_Hotstring
+			For index, value in a_Hotstring
 			{
 				if (v_SearchTerm)
 				{
-					if (InStr(FileName, v_SearchTerm)) ; for overall matching
-						LV_Add("", a_EnableDisable[A_Index], a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], FileName, a_Comment[A_Index])
+					if (InStr(value, v_SearchTerm)) ; for overall matching
+						LV_Add("", a_EnableDisable[index], a_Library[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], value, a_Comment[index])
 				}
 				else
-					LV_Add("", a_EnableDisable[A_Index], a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], FileName, a_Comment[A_Index])
+					LV_Add("", a_EnableDisable[index], a_Library[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], value, a_Comment[index])
 			}
 			LV_ModifyCol(6, "Sort")	
 		Case 3:	;search by Library
-			For Each, FileName in a_Library
+			For index, value in a_Library
 			{
 				if (v_SearchTerm)
 				{
-					if (InStr(FileName, v_SearchTerm)) ; for overall matching
-						LV_Add("", a_EnableDisable[A_Index], FileName, a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+					if (InStr(value, v_SearchTerm)) ; for overall matching
+						LV_Add("", a_EnableDisable[index], value, a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 				}
 				else
-					LV_Add("", a_EnableDisable[A_Index], FileName, a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
+					LV_Add("", a_EnableDisable[index], value, a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 			}
 			LV_ModifyCol(2, "Sort")
 	}
@@ -9087,7 +9089,7 @@ F_GuiSearch_CreateObject()
 	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT1,								% TransA["Phrase to search for:"]
 	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT2,								% TransA["Search by:"]
 	Gui,	HS3Search: Font, % "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 	% c_FontType
-	Gui, HS3Search: Add, Edit, 		x0 y0 HwndIdSearchE1 vv_SearchTerm gF_SearchPhrase
+	Gui, HS3Search: Add, Edit, 		x0 y0 HwndIdSearchE1 vv_SearchTerm gF_SearchPhrase Limit	;Restricts the user's input to the visible width of the edit field.
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR1 vv_RadioGroup gF_SearchPhrase Checked, % TransA["Triggerstring"]
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR2 gF_SearchPhrase, 					% TransA["Hotstring"]
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR3 gF_SearchPhrase, 					% TransA["Library"]
