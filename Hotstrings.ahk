@@ -2065,7 +2065,7 @@ F_GUIinit()
 			if (ini_WhichGui = "HS3")
 				{
 					Gui, HS3: Default
-					F_GuiMain_LVcolumnScale()
+					F_GuiHS3_LVcolumnScale()
 				}
 			if (ini_ShowIntro)
 				Gui, ShowIntro: Show, AutoSize Center
@@ -2086,7 +2086,7 @@ F_GUIinit()
 				if (ini_WhichGui = "HS3")
 				{
 					Gui, HS3: Default
-					F_GuiMain_LVcolumnScale()
+					F_GuiHS3_LVcolumnScale()
 				}
 			}
 			else
@@ -2095,7 +2095,7 @@ F_GUIinit()
 				if (ini_WhichGui = "HS3")
 				{
 					Gui, HS3: Default
-					F_GuiMain_LVcolumnScale()
+					F_GuiHS3_LVcolumnScale()
 				}
 			}
 		}
@@ -2105,7 +2105,7 @@ F_GUIinit()
 			if (ini_WhichGui = "HS3")
 				{
 					Gui, HS3: Default
-					F_GuiMain_LVcolumnScale()
+					F_GuiHS3_LVcolumnScale()
 				}
 			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Your current screen coordinates have changed. For example you've unplugged your laptop from docking station. Your settings in .ini file will be adjusted accordingly."]
 			F_SaveGUIPos()
@@ -2124,7 +2124,7 @@ F_GUIinit()
 		{
 			Gui, % ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos.X . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
 			Gui, HS3: Default
-			F_GuiMain_LVcolumnScale()
+			F_GuiHS3_LVcolumnScale()
 		}
 		else
 			Gui, % ini_WhichGui . ": Show", Restore ;Unminimizes or unmaximizes the window, if necessary. The window is also shown and activated, if necessary.		
@@ -8952,9 +8952,18 @@ LV2_CopyContentToHS3LV() ;load content of chosen row from Search Gui into HS3 Gu
 	local SelectedRow := 0, Library := "", Triggerstring := "", SearchedTriggerString := "", SelectHotstringLibrary := ""
 	
 	SelectedRow 		:= LV_GetNext()
-	LV_GetText(Library, 		SelectedRow, 2)
-	LV_GetText(Triggerstring, 	SelectedRow, 3)
-	
+	Switch v_RadioGroup
+	{
+		Case 1:	;search by Triggerstring
+			LV_GetText(Library, 		SelectedRow, 3)
+			LV_GetText(Triggerstring, 	SelectedRow, 1)
+		Case 2:	;search by Hotstring
+			LV_GetText(Library, 		SelectedRow, 3)
+			LV_GetText(Triggerstring, 	SelectedRow, 4)
+		Case 3:	;search by Library
+			LV_GetText(Library, 		SelectedRow, 1)
+			LV_GetText(Triggerstring, 	SelectedRow, 3)
+	}
 	SelectHotstringLibrary := % Library . ".csv"
 	GuiControl, Choose, % IdDDL2, % SelectHotstringLibrary
 	Gui, HS3: 		Submit, NoHide	;this line is necessary to v_SelectHotstringLibrary <- SelectHotstringLibrary
@@ -8979,16 +8988,50 @@ F_SearchPhrase()
 {
 	global	;assume-global mode
 	local	index := 0, value := ""
-	
+,			OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.		
+,			c1 := 0, c2 := 0, c3 := 0, c4 := 0, c5 := 0, c6 := 0, c7 := 0, LVM_GETCOLUMNWIDTH = 0x1000 + 29 ;https://www.autohotkey.com/boards/viewtopic.php?p=25857#p25857
+,			SM_CXVSCROLL := 2, WidthVerScrollBar := 0 ;Width of a vertical scroll bar, in pixels
+
+	SysGet, WidthVerScrollBar, % SM_CXVSCROLL ;returns value 26
+	Gui, HS3Search: -DPIScale	;switch off dpiscale temporarily to get the same values from SendMessage command
 	Gui, HS3Search: Submit, NoHide
+	GuiControlGet, OutVarTemp, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.	
+	ListViewWidth := OutVarTempW	
 	if getkeystate("CapsLock", "T") ;I don't understand it
 		return
-	; GuiControlGet, v_SearchTerm
 	GuiControl, -Redraw, % IdSearchLV1	;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
 	LV_Delete()
 	Switch v_RadioGroup
 	{
-		Case 1:	;search by Triggerstring
+		Case 1:	;search by Triggerstring ;% TransA["Enable/Disable|Library|Triggerstring|Trigger Options|Output Function|Hotstring|Comment"]
+			LV_ModifyCol(1, Round(0.1 * ListViewWidth), TransA["Triggerstring"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdListView1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
+			c1 := ErrorLevel
+
+			LV_ModifyCol(2, "AutoHdr", TransA["Enable/Disable"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdListView1%
+			c2 := ErrorLevel
+
+			LV_ModifyCol(3, Round(0.1 * ListViewWidth), TransA["Library"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdListView1%
+			c3 := ErrorLevel
+
+			LV_ModifyCol(4, "AutoHdr", TransA["Trigger Options"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 3, 0, , ahk_id %IdListView1%
+			c4 := ErrorLevel
+
+			LV_ModifyCol(5, "AutoHdr", TransA["Output Function"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdListView1%
+			c5 := ErrorLevel
+
+			LV_ModifyCol(6, Round(0.4 * ListViewWidth), TransA["Hotstring"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdListView1%
+			c6 := ErrorLevel
+			
+			LV_ModifyCol(7, ListViewWidth - (c1 + c2 + c3 + c4 + c5 + c6) - WidthVerScrollBar - 4, TransA["Comment"]) ;idk why 4
+			SendMessage, LVM_GETCOLUMNWIDTH, 6, 0, , ahk_id %IdListView1%
+			c7 := ErrorLevel
+
 			For index, value in a_Triggerstring
 			{
 				if (v_SearchTerm)
@@ -8999,8 +9042,14 @@ F_SearchPhrase()
 				else
 					LV_Add("", value, a_EnableDisable[index], a_Library[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 			}
-			LV_ModifyCol(3, "Sort")
 		Case 2:	;search by Hotstring
+			LV_ModifyCol(1, , TransA["Hotstring"])
+			LV_ModifyCol(2, , TransA["Enable/Disable"])
+			LV_ModifyCol(3, , TransA["Library"])
+			LV_ModifyCol(4, , TransA["Triggerstring"])
+			LV_ModifyCol(5, , TransA["Trigger Options"])
+			LV_ModifyCol(6, , TransA["Output Function"])
+			LV_ModifyCol(7, , TransA["Comment"])
 			For index, value in a_Hotstring
 			{
 				if (v_SearchTerm)
@@ -9011,8 +9060,14 @@ F_SearchPhrase()
 				else
 					LV_Add("", value, a_EnableDisable[index], a_Library[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Comment[index])
 			}
-			LV_ModifyCol(6, "Sort")	
 		Case 3:	;search by Library
+			LV_ModifyCol(1, , TransA["Library"])
+			LV_ModifyCol(2, , TransA["Enable/Disable"])
+			LV_ModifyCol(3, , TransA["Triggerstring"])
+			LV_ModifyCol(4, , TransA["Trigger Options"])
+			LV_ModifyCol(5, , TransA["Output Function"])
+			LV_ModifyCol(6, , TransA["Hotstring"])
+			LV_ModifyCol(7, , TransA["Comment"])
 			For index, value in a_Library
 			{
 				if (v_SearchTerm)
@@ -9023,9 +9078,10 @@ F_SearchPhrase()
 				else
 					LV_Add("", value, a_EnableDisable[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 			}
-			LV_ModifyCol(2, "Sort")
 	}
+	LV_ModifyCol(1, "Sort")
 	GuiControl, +Redraw, % IdSearchLV1 ;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
+	Gui, HS3Search: +DPIScale
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Searching(ReloadListView*)
@@ -9080,7 +9136,7 @@ F_GuiSearch_CreateObject()
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR1 vv_RadioGroup gF_SearchPhrase Checked, % TransA["Triggerstring"]
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR2 gF_SearchPhrase, 					% TransA["Hotstring"]
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR3 gF_SearchPhrase, 					% TransA["Library"]
-	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 gF_HSLV2 +AltSubmit Grid -Multi,		% TransA["Enable/Disable|Library|Triggerstring|Trigger Options|Output Function|Hotstring|Comment"]
+	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 gF_HSLV2 +AltSubmit Grid -Multi,		% TransA["Enable/Disable"] . "|" . TransA["Library"] . "|" . TransA["Triggerstring"] . "|" . TransA["Trigger Options"] . "|" . TransA["Output Function"] . "|" . TransA["Hotstring"] . "|" . TransA["Comment"]
 	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT4, 								% TransA["F3 or Esc: Close Search hotstrings | Enter: Select definition and close"]
 	Gui, HS3Search: Add, Button, 		Hidden Default gF_HSLV2	;trick to catch if user presses Enter on ListView
 }
@@ -9625,17 +9681,17 @@ HS4GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiMain_LVcolumnScale()
+F_GuiHS3_LVcolumnScale()
 { ;future: https://www.autohotkey.com/board/topic/30486-listview-tooltip-on-mouse-hover/
 	global ;assume-global mode
-	local v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.		
+	local OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.		
 		, c1 := 0, c2 := 0, c3 := 0, c4 := 0, c5 := 0, c6 := 0, LVM_GETCOLUMNWIDTH = 0x1000 + 29 ;https://www.autohotkey.com/boards/viewtopic.php?p=25857#p25857
 		, SM_CXVSCROLL := 2, WidthVerScrollBar := 0 ;Width of a vertical scroll bar, in pixels
 
 	SysGet, WidthVerScrollBar, % SM_CXVSCROLL ;returns value 26
 	Gui, HS3: -DPIScale	;switch off dpiscale temporarily to get the same values from SendMessage command
-	GuiControlGet, v_OutVarTemp2, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.	
-	ListViewWidth := v_OutVarTemp2W
+	GuiControlGet, OutVarTemp, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.	
+	ListViewWidth := OutVarTempW
 	; OutputDebug, % "ListViewWidth:" . A_Space . ListViewWidth . "`n"
 	c1 := Round(0.1 * ListViewWidth)	;0.1 = 10% of ListViewWidth
 	; OutputDebug, % "c1:" . A_Space . c1 . "`n"
@@ -9703,7 +9759,7 @@ F_GuiHS3_Resize2(Width, Height)	;if (ini_Sandbox) and (!SbAtLeft)
 ,	hNext := Height - 2 * c_ymarg 
 	GuiControl, MoveDraw, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext 
 
-	F_GuiMain_LVcolumnScale()
+	F_GuiHS3_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiHS3_Resize4(Width, Height)	;(ini_Sandbox) and (SbAtLeft)
@@ -9739,7 +9795,7 @@ F_GuiHS3_Resize4(Width, Height)	;(ini_Sandbox) and (SbAtLeft)
 ,	hNext := Height - 2 * c_ymarg 
 	GuiControl, MoveDraw, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext 
 
-	F_GuiMain_LVcolumnScale()
+	F_GuiHS3_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiHS3_Resize6(Width, Height)	;(!ini_Sandbox and !SbAtLeft)
@@ -9772,7 +9828,7 @@ F_GuiHS3_Resize6(Width, Height)	;(!ini_Sandbox and !SbAtLeft)
 ,	hNext := Height - 2 * c_ymarg 
 	GuiControl, MoveDraw, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext 
 
-	F_GuiMain_LVcolumnScale()
+	F_GuiHS3_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiHS3_Resize8(Width, Height)	;(!ini_Sandbox and SbAtLeft)
@@ -9805,7 +9861,7 @@ F_GuiHS3_Resize8(Width, Height)	;(!ini_Sandbox and SbAtLeft)
 ,	hNext := Height - 2 * c_ymarg 
 	GuiControl, MoveDraw, % IdButton5, % "x" . xNext . "y" . yNext . "h" . hNext 
 	
-	F_GuiMain_LVcolumnScale()
+	F_GuiHS3_LVcolumnScale()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generated)
@@ -9919,7 +9975,7 @@ F_SelectLibrary()
 	}
 	UpdateLibraryCounter(v_LibHotstringCnt, v_TotalHotstringCnt)
 	LV_ModifyCol(2, "Sort")	;without this line content of library is loaded in the same order as it was saved last time; keep in mind that after any change (e.g. change of exiting definition) the whole file is sorted and saved again
-	F_GuiMain_LVcolumnScale()
+	F_GuiHS3_LVcolumnScale()
 	GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11327,6 +11383,7 @@ Closing Round Bracket ) 									= Closing Round Bracket )
 Closing Square Bracket ] 								= Closing Square Bracket ]
 Colon : 												= Colon :
 Comma , 												= Comma ,
+Comment												= Comment
 Convert to executable (.exe)								= Convert to executable (.exe)
 Composition of triggerstring tips							= Composition of triggerstring tips
 Compressed executable (upx.exe)							= Compressed executable (upx.exe)
@@ -11380,6 +11437,7 @@ Edit Hotstrings 										= Edit Hotstrings
 Enable												= Enable
 enable												= enable
 En/Dis												= En/Dis
+Enable/Disable											= Enable/Disable
 Enable/disable libraries									= Enable/disable &libraries
 Enable/disable selected definition							= Enable/disable selected definition
 Enable/disable triggerstring tips 							= Enable/disable triggerstring tips	
@@ -11486,7 +11544,6 @@ Library name:											= Library name:
 Library export. Please wait... 							= Library export. Please wait...
 Library has been exported 								= Library has been exported
 Library has been imported. 								= Library has been imported.
-Enable/Disable|Library|Triggerstring|Trigger Options|Output Function|Hotstring|Comment = Enable/Disable|Library|Triggerstring|Trigger Options|Output Function|Hotstring|Comment
 Light (default)										= Light (default)
 lime													= lime
 Link file (.lnk) was created in AutoStart folder				= Link file (.lnk) was created in AutoStart folder
@@ -11547,6 +11604,7 @@ Opening Round Bracket ( 									= Opening Round Bracket (
 Opening Square Bracket [ 								= Opening Square Bracket [
 options												= options	
 or													= or
+Output Function										= Output Function
 question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
@@ -11714,6 +11772,7 @@ Tooltip timeout										= Tooltip timeout
 LS:												= LS:
 to undo.												= to undo.
 (triggerstring, hotstring) definitions						= (triggerstring, hotstring) definitions
+Trigger Options										= Trigger Options
 Triggers												= Triggers
 Triggerstring 											= Triggerstring
 Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
