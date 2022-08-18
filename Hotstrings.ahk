@@ -1915,20 +1915,9 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
-	static	f_FoundTip := false, f_FoundEndChar := false
+	static	InputStringWithoutEndChar := ""
 
 	Critical, On
-	if (f_FoundEndChar) and (!f_FoundTip)		;now works undo for triggerstrings containing endchars
-	{
-		v_InputString 	:= ""
-		f_FoundEndChar := false
-	}
-
-; 	if (v_InputString = "")
-; 	{
-; 		f_FoundEndChar := false
-; ,		f_FoundTip	:= false		
-; 	}
 
 	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))	;ini_MHSEn = Menu Hotstring Sound Enable; this is very unfortunate that SoundBeep is used (instead of SoundPlay). As a consequence when somebody presses very quickly some characters, this function is run "one after another" character and no other functions are run. This could lead to unwanted behaviour.
 	{
@@ -1940,56 +1929,39 @@ F_OneCharPressed(ih, Char)
 	if (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))
 		return
 	
-	if (InStr(HotstringEndChars, Char)) ;This is compromise: not for all triggerstrings tips will be displayed, e.g. triggerstring with option ? (question mark) and those starting with EndChar: ".ahk", "..."
-	{
-		; if (v_InputString)	;if v_InputString is empty, do not concatenate EndChar to it. Commented out to let "/ be correctly escaped.
-			v_InputString .= Char	;the global variable v_InputString is used to display triggerstring tips
-		f_FoundEndChar		:= true
-	}
-	else	;if EndChar is found, it is not added to the v_InputString, but it is added to TrigTipsInput variable
-		v_InputString 		.= Char	;the global variable v_InputString is used to determine Gain parameters and to handle F_Undo functions
+	v_InputString .= Char	;the global variable v_InputString is used to display triggerstring tips
+	if (!InStr(HotstringEndChars, Char))
+		InputStringWithoutEndChar .= Char
+	else
+		InputStringWithoutEndChar := ""
 	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n
-	OutputDebug, % "v_InputString:" . A_Space . v_InputString . "`n"
+	; OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Space . "InputStringWithoutEndChar:" . A_Space . InputStringWithoutEndChar . "`n"
 	; OutputDebug, % "v_TrigTipsInput:" . A_Space . v_TrigTipsInput . A_Space . "v_InputString:" . A_Space . v_InputString . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn) and (v_InputString)
 	{
 		F_PrepareTriggerstringTipsTables2(v_InputString)	;old version: F_PrepareTriggerstringTipsTables()
-		OutputDebug, % "f_FoundEndChar przed:" . A_Space . f_FoundEndChar . A_Tab . "f_FoundTip:" . A_Space . f_FoundTip . A_Space . "a_Tips.Count():" . a_Tips.Count() . "`n"
+		; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
 		if (a_Tips.Count())	;if tips are available display then
 		{
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
-			Loop, % a_Tips.Count()
-				if (InStr(a_Tips[A_Index], v_InputString))
-				{
-					OutputDebug, % "What was found:" . A_Space . a_Tips[A_Index] . "`n"
-					f_FoundTip := true
-					break
-				}
 		}
 		else	;or destroy previously visible tips
 		{
 			F_DestroyTriggerstringTips(ini_TTCn)
-			f_FoundTip := false
+			v_InputString := InputStringWithoutEndChar
+			F_PrepareTriggerstringTipsTables2(v_InputString)
+			if (a_Tips.Count())	;if tips are available display then
+			{
+				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
+				if (ini_TTTD > 0)
+					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
+			}
 		}
 	}
-	; OutputDebug, % "f_FoundEndChar przed:" . A_Space . f_FoundEndChar . A_Tab . "f_FoundTip:" . A_Space . f_FoundTip . A_Space . "a_Tips.Count():" . a_Tips.Count() . "`n"
-	; if (f_FoundEndChar) and (v_InputString)
-	; {
-	; 	Loop, % a_Tips.Count()
-	; 		if (InStr(a_Tips[A_Index], v_InputString))
-	; 		{
-	; 			OutputDebug, % "What was found:" . A_Space . a_Tips[A_Index] . "`n"
-	; 			f_FoundTip := true
-	; 			break
-	; 		}
-	; 		else
-	; 			f_FoundTip := false	
-	; }
-	; OutputDebug, % "f_FoundEndChar po:" . A_Space . f_FoundEndChar . A_Tab . "f_FoundTip:" . A_Space . f_FoundTip . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
