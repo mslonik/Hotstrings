@@ -1919,13 +1919,16 @@ F_OneCharPressed(ih, Char)
 
 	Critical, On
 	if (f_FoundEndChar) and (!f_FoundTip)		;now works undo for triggerstrings containing endchars
-		v_InputString 	:= ""
-
-	if (v_InputString = "")
 	{
+		v_InputString 	:= ""
 		f_FoundEndChar := false
-,		f_FoundTip	:= false		
 	}
+
+; 	if (v_InputString = "")
+; 	{
+; 		f_FoundEndChar := false
+; ,		f_FoundTip	:= false		
+; 	}
 
 	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))	;ini_MHSEn = Menu Hotstring Sound Enable; this is very unfortunate that SoundBeep is used (instead of SoundPlay). As a consequence when somebody presses very quickly some characters, this function is run "one after another" character and no other functions are run. This could lead to unwanted behaviour.
 	{
@@ -1946,34 +1949,46 @@ F_OneCharPressed(ih, Char)
 	else	;if EndChar is found, it is not added to the v_InputString, but it is added to TrigTipsInput variable
 		v_InputString 		.= Char	;the global variable v_InputString is used to determine Gain parameters and to handle F_Undo functions
 	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n
-	; OutputDebug, % "v_InputString:" . A_Space . v_InputString . "`n"
+	OutputDebug, % "v_InputString:" . A_Space . v_InputString . "`n"
 	; OutputDebug, % "v_TrigTipsInput:" . A_Space . v_TrigTipsInput . A_Space . "v_InputString:" . A_Space . v_InputString . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn) and (v_InputString)
 	{
 		F_PrepareTriggerstringTipsTables2(v_InputString)	;old version: F_PrepareTriggerstringTipsTables()
+		OutputDebug, % "f_FoundEndChar przed:" . A_Space . f_FoundEndChar . A_Tab . "f_FoundTip:" . A_Space . f_FoundTip . A_Space . "a_Tips.Count():" . a_Tips.Count() . "`n"
 		if (a_Tips.Count())	;if tips are available display then
 		{
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
+			Loop, % a_Tips.Count()
+				if (InStr(a_Tips[A_Index], v_InputString))
+				{
+					OutputDebug, % "What was found:" . A_Space . a_Tips[A_Index] . "`n"
+					f_FoundTip := true
+					break
+				}
 		}
 		else	;or destroy previously visible tips
+		{
 			F_DestroyTriggerstringTips(ini_TTCn)
+			f_FoundTip := false
+		}
 	}
-	; OutputDebug, % "f_FoundEndChar przed:" . A_Space . f_FoundEndChar . A_Tab . "f_FoundTip:" . A_Space . f_FoundTip . "`n"
-	if (f_FoundEndChar) and (v_InputString)
-	{
-		Loop, % a_Tips.Count()
-			if (InStr(a_Tips[A_Index], v_InputString))
-			{
-				f_FoundTip := true
-				break
-			}
-			else
-				f_FoundTip := false	
-	}
+	; OutputDebug, % "f_FoundEndChar przed:" . A_Space . f_FoundEndChar . A_Tab . "f_FoundTip:" . A_Space . f_FoundTip . A_Space . "a_Tips.Count():" . a_Tips.Count() . "`n"
+	; if (f_FoundEndChar) and (v_InputString)
+	; {
+	; 	Loop, % a_Tips.Count()
+	; 		if (InStr(a_Tips[A_Index], v_InputString))
+	; 		{
+	; 			OutputDebug, % "What was found:" . A_Space . a_Tips[A_Index] . "`n"
+	; 			f_FoundTip := true
+	; 			break
+	; 		}
+	; 		else
+	; 			f_FoundTip := false	
+	; }
 	; OutputDebug, % "f_FoundEndChar po:" . A_Space . f_FoundEndChar . A_Tab . "f_FoundTip:" . A_Space . f_FoundTip . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8313,14 +8328,14 @@ F_AddHotstring()
 		EnDis := "En"
 	else
 		EnDis := "Dis"
-	if (Overwrite = "Yes")
 	; 3. Modify existing definition
 	if (f_ChangeExistingDef)	;modify existing definition
 	{
 		Overwrite := F_ChangeExistingDef(OldOptions, NewOptions, a_Triggerstring[key], a_Library[key], SendFunHotstringCreate, vHotstring)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
+		if (Overwrite = "Yes")
 		{
-			F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, vHotstring, EnDis, v_Comment)
-			F_ModifyLV(v_Triggerstring, NewOptions, SendFunFileFormat, EnDis, vHotstring, v_Comment)
+			F_ChangeDefInArrays(key, EnDis, NewOptions, SendFunFileFormat, vHotstring, v_Comment)
+			F_ModifyLV(EnDis, v_Triggerstring, NewOptions, SendFunFileFormat, vHotstring, v_Comment)
 			;7. Delete library file. 
 			FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary
 			;8. Save List View into the library file.
@@ -8379,7 +8394,7 @@ F_AddHotstring()
 
 	;9. Increment library counter.
 	UpdateLibraryCounter(++v_LibHotstringCnt, ++v_TotalHotstringCnt)
-	Switch F_WhichGui	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
+	Switch F_WhichGui()	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
 	{
 		Case "HS3":	F_GuiHS3_EnDis("Enable")	;EnDis = "Disable" or "Enable"
 		Case "HS4": 	F_GuiHS4_EnDis("Enable")
@@ -8417,7 +8432,7 @@ F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 }	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Comment)
+F_ChangeDefInArrays(key, EnDis, NewOptions, SendFunFileFormat, TextInsert, v_Comment)
 {
 	global	;assume-global mode of operation
 	local	index := 0
@@ -8433,7 +8448,7 @@ F_ChangeDefInArrays(key, NewOptions, SendFunFileFormat, TextInsert, EnDis, v_Com
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ModifyLV(v_Triggerstring, NewOptions, SendFunFileFormat, EnDis, TextInsert, v_Comment)
+F_ModifyLV(EnDis, v_Triggerstring, NewOptions, SendFunFileFormat, TextInsert, v_Comment)
 {
 	global	;assume-global mode of operation
 	local	Triggerstring := ""
@@ -8444,7 +8459,7 @@ F_ModifyLV(v_Triggerstring, NewOptions, SendFunFileFormat, EnDis, TextInsert, v_
 		LV_GetText(Triggerstring, A_Index, 2)
 		if (Triggerstring = v_Triggerstring)	;non-case sensitive comparison
 		{
-			LV_Modify(A_Index, "", v_Triggerstring, NewOptions, SendFunFileFormat, EnDis, TextInsert, v_Comment)
+			LV_Modify(A_Index, "", EnDis, v_Triggerstring, NewOptions, SendFunFileFormat, TextInsert, v_Comment)
 			Break
 		}
 	}
@@ -9007,10 +9022,10 @@ F_SearchPhrase()
 				if (v_SearchTerm)
 				{
 					if (InStr(value, v_SearchTerm) = 1) ; for matching at the start ;for overall matching without = 1
-						LV_Add("", a_EnableDisable[index], a_Library[index], value, a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
+						LV_Add("", value, a_EnableDisable[index], a_Library[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 				}
 				else
-					LV_Add("", a_EnableDisable[index], a_Library[index], value, a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
+					LV_Add("", value, a_EnableDisable[index], a_Library[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 			}
 			LV_ModifyCol(3, "Sort")
 		Case 2:	;search by Hotstring
@@ -9019,10 +9034,10 @@ F_SearchPhrase()
 				if (v_SearchTerm)
 				{
 					if (InStr(value, v_SearchTerm)) ; for overall matching
-						LV_Add("", a_EnableDisable[index], a_Library[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], value, a_Comment[index])
+						LV_Add("", value, a_EnableDisable[index], a_Library[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Comment[index])
 				}
 				else
-					LV_Add("", a_EnableDisable[index], a_Library[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], value, a_Comment[index])
+					LV_Add("", value, a_EnableDisable[index], a_Library[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Comment[index])
 			}
 			LV_ModifyCol(6, "Sort")	
 		Case 3:	;search by Library
@@ -9031,10 +9046,10 @@ F_SearchPhrase()
 				if (v_SearchTerm)
 				{
 					if (InStr(value, v_SearchTerm)) ; for overall matching
-						LV_Add("", a_EnableDisable[index], value, a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
+						LV_Add("", value, a_EnableDisable[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 				}
 				else
-					LV_Add("", a_EnableDisable[index], value, a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
+					LV_Add("", value, a_EnableDisable[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 			}
 			LV_ModifyCol(2, "Sort")
 	}
