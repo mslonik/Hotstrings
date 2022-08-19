@@ -8905,7 +8905,7 @@ F_GuiMoveLibs_CreateDetermine()
 			LV_Add("", key)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_MoveList()
+F_MoveList() 
 {
 	global	;assume-global mode
 	local 	v_SelectedRow := 0
@@ -8991,11 +8991,23 @@ F_SearchPhrase()
 ,			OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.		
 ,			c1 := 0, c2 := 0, c3 := 0, c4 := 0, c5 := 0, c6 := 0, c7 := 0, LVM_GETCOLUMNWIDTH = 0x1000 + 29 ;https://www.autohotkey.com/boards/viewtopic.php?p=25857#p25857
 ,			SM_CXVSCROLL := 2, WidthVerScrollBar := 0 ;Width of a vertical scroll bar, in pixels
+,			PreviousGui := "", Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0, ListViewWidth := 0
+
+	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A	;Retrieves the position of the active window.
+	PreviousGui := F_WhichGui()
+	Gui, % PreviousGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+	Gui, HS3Search: -Disabled
+	Gui, HS3Search: Default
+	Switch PreviousGui
+	{
+		Case "HS3": Gui, HS3Search: Show, % "x" . Window1X + 2 * c_xmarg . "y" . Window1Y + 2 * c_ymarg . "w" . HS3_GuiWidth . "h" . HS3_GuiHeight
+		Case "HS4": Gui, HS3Search: Show, % "x" . Window1X + 2 * c_xmarg . "y" . Window1Y + 2 * c_ymarg . "w" . HS4_GuiWidth * 2 . "h" . HS4_GuiHeight
+	}
 
 	SysGet, WidthVerScrollBar, % SM_CXVSCROLL ;returns value 26
 	Gui, HS3Search: -DPIScale	;switch off dpiscale temporarily to get the same values from SendMessage command
 	Gui, HS3Search: Submit, NoHide
-	GuiControlGet, OutVarTemp, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.	
+	GuiControlGet, OutVarTemp, Pos, % IdSearchLV1 ;This line will be used for "if" and "else" statement.	
 	ListViewWidth := OutVarTempW	
 	if getkeystate("CapsLock", "T") ;I don't understand it
 		return
@@ -9003,36 +9015,9 @@ F_SearchPhrase()
 	LV_Delete()
 	Switch v_RadioGroup
 	{
-		Case 1:	;search by Triggerstring ;% TransA["Enable/Disable|Library|Triggerstring|Trigger Options|Output Function|Hotstring|Comment"]
-			LV_ModifyCol(1, Round(0.1 * ListViewWidth), TransA["Triggerstring"])
-			SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdListView1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
-			c1 := ErrorLevel
+		Case 1:	;search by Triggerstring which is default
 
-			LV_ModifyCol(2, "AutoHdr", TransA["Enable/Disable"])
-			SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdListView1%
-			c2 := ErrorLevel
-
-			LV_ModifyCol(3, Round(0.1 * ListViewWidth), TransA["Library"])
-			SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdListView1%
-			c3 := ErrorLevel
-
-			LV_ModifyCol(4, "AutoHdr", TransA["Trigger Options"])
-			SendMessage, LVM_GETCOLUMNWIDTH, 3, 0, , ahk_id %IdListView1%
-			c4 := ErrorLevel
-
-			LV_ModifyCol(5, "AutoHdr", TransA["Output Function"])
-			SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdListView1%
-			c5 := ErrorLevel
-
-			LV_ModifyCol(6, Round(0.4 * ListViewWidth), TransA["Hotstring"])
-			SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdListView1%
-			c6 := ErrorLevel
-			
-			LV_ModifyCol(7, ListViewWidth - (c1 + c2 + c3 + c4 + c5 + c6) - WidthVerScrollBar - 4, TransA["Comment"]) ;idk why 4
-			SendMessage, LVM_GETCOLUMNWIDTH, 6, 0, , ahk_id %IdListView1%
-			c7 := ErrorLevel
-
-			For index, value in a_Triggerstring
+			for index, value in a_Triggerstring
 			{
 				if (v_SearchTerm)
 				{
@@ -9042,15 +9027,36 @@ F_SearchPhrase()
 				else
 					LV_Add("", value, a_EnableDisable[index], a_Library[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 			}
+			GuiControl, +Redraw, % IdSearchLV1
+
+			LV_ModifyCol(1, Round(0.1 * ListViewWidth), TransA["Triggerstring"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
+			c1 := ErrorLevel
+
+			LV_ModifyCol(2, "AutoHdr", TransA["Enable/Disable"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdSearchLV1%
+			c2 := ErrorLevel
+
+			LV_ModifyCol(3, Round(0.1 * ListViewWidth), TransA["Library"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdSearchLV1%
+			c3 := ErrorLevel
+
+			LV_ModifyCol(4, "AutoHdr", TransA["Trigger Options"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 3, 0, , ahk_id %IdSearchLV1%
+			c4 := ErrorLevel
+
+			LV_ModifyCol(5, "AutoHdr", TransA["Output Function"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdSearchLV1%
+			c5 := ErrorLevel
+
+			LV_ModifyCol(6, Round(0.2 * ListViewWidth), TransA["Hotstring"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdSearchLV1%
+			c6 := ErrorLevel
+
+			LV_ModifyCol(7, ListViewWidth - (c1 + c2 + c3 + c4 + c5 + c6) - WidthVerScrollBar - 4, TransA["Comment"])
+			
 		Case 2:	;search by Hotstring
-			LV_ModifyCol(1, , TransA["Hotstring"])
-			LV_ModifyCol(2, , TransA["Enable/Disable"])
-			LV_ModifyCol(3, , TransA["Library"])
-			LV_ModifyCol(4, , TransA["Triggerstring"])
-			LV_ModifyCol(5, , TransA["Trigger Options"])
-			LV_ModifyCol(6, , TransA["Output Function"])
-			LV_ModifyCol(7, , TransA["Comment"])
-			For index, value in a_Hotstring
+			for index, value in a_Hotstring
 			{
 				if (v_SearchTerm)
 				{
@@ -9060,15 +9066,15 @@ F_SearchPhrase()
 				else
 					LV_Add("", value, a_EnableDisable[index], a_Library[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Comment[index])
 			}
-		Case 3:	;search by Library
-			LV_ModifyCol(1, , TransA["Library"])
+			LV_ModifyCol(1, , TransA["Hotstring"])
 			LV_ModifyCol(2, , TransA["Enable/Disable"])
-			LV_ModifyCol(3, , TransA["Triggerstring"])
-			LV_ModifyCol(4, , TransA["Trigger Options"])
-			LV_ModifyCol(5, , TransA["Output Function"])
-			LV_ModifyCol(6, , TransA["Hotstring"])
+			LV_ModifyCol(3, , TransA["Library"])
+			LV_ModifyCol(4, , TransA["Triggerstring"])
+			LV_ModifyCol(5, , TransA["Trigger Options"])
+			LV_ModifyCol(6, , TransA["Output Function"])
 			LV_ModifyCol(7, , TransA["Comment"])
-			For index, value in a_Library
+		Case 3:	;search by Library
+			for index, value in a_Library
 			{
 				if (v_SearchTerm)
 				{
@@ -9078,9 +9084,16 @@ F_SearchPhrase()
 				else
 					LV_Add("", value, a_EnableDisable[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 			}
+			LV_ModifyCol(1, , TransA["Library"])
+			LV_ModifyCol(2, , TransA["Enable/Disable"])
+			LV_ModifyCol(3, , TransA["Triggerstring"])
+			LV_ModifyCol(4, , TransA["Trigger Options"])
+			LV_ModifyCol(5, , TransA["Output Function"])
+			LV_ModifyCol(6, , TransA["Hotstring"])
+			LV_ModifyCol(7, , TransA["Comment"])
 	}
 	LV_ModifyCol(1, "Sort")
-	GuiControl, +Redraw, % IdSearchLV1 ;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
+	; GuiControl, +Redraw, % IdSearchLV1 ;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
 	Gui, HS3Search: +DPIScale
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9104,17 +9117,7 @@ F_Searching(ReloadListView*)
 			GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 
 		Case TransA["Search (F3)"], "": ;new thread starts here
-			WinGetPos, Window1X, Window1Y, Window1W, Window1H, A	;Retrieves the position of the active window.
-			Gui, % F_WhichGui() . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
-			PreviousGui := A_DefaultGui
-			Gui, HS3Search: -Disabled
-			Gui, HS3Search: Default
 			F_SearchPhrase()
-			Switch PreviousGui
-			{
-				Case "HS3": Gui, HS3Search: Show, % "x" . Window1X + 2 * c_xmarg . "y" . Window1Y + 2 * c_ymarg . "w" . HS3_GuiWidth . "h" . HS3_GuiHeight
-				Case "HS4": Gui, HS3Search: Show, % "x" . Window1X + 2 * c_xmarg . "y" . Window1Y + 2 * c_ymarg . "w" . HS4_GuiWidth * 2 . "h" . HS4_GuiHeight
-			}
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9200,7 +9203,7 @@ F_GuiSearch_DetermineConstraints()
 	GuiControl, Move, % IdSearchT4, % "x" xNext "y" yNext ;information about shortcuts
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-HS3SearchGuiSize()
+HS3SearchGuiSize()	;tu jestem
 {
 	global	;assume-global mode
 	local OutVarTemp1 := 0, OutVarTemp1X := 0, OutVarTemp1Y := 0, OutVarTemp1W := 0, OutVarTemp1H := 0
