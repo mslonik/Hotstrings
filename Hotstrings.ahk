@@ -9014,11 +9014,12 @@ F_SearchColumnWidth()
 ,			SM_CXVSCROLL := 2, WidthVerScrollBar := 0 ;Width of a vertical scroll bar, in pixels
 
 	SysGet, WidthVerScrollBar, % SM_CXVSCROLL ;returns value 26
+	Gui, HS3Search: -DPIScale	;switch off dpiscale temporarily to get the same values from SendMessage command	
 	GuiControlGet, OutVarTemp, Pos, % IdSearchLV1 ;This line will be used for "if" and "else" statement.	
 	ListViewWidth := OutVarTempW	
-	if getkeystate("CapsLock", "T") ;I don't understand it
-		return
-	GuiControl, -Redraw, % IdSearchLV1	;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
+	; if getkeystate("CapsLock", "T") ;I don't understand it
+		; return
+	; GuiControl, -Redraw, % IdSearchLV1	;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
 	; LV_Delete()
 	GuiControl, +Redraw, % IdSearchLV1
 	LV_ModifyCol(1, Round(0.1 * ListViewWidth), TransA["Triggerstring"])
@@ -9057,6 +9058,7 @@ F_SearchPhrase()
 	OutputDebug, % A_ThisFunc . "`n"
 	Gui, HS3Search: Submit, NoHide
 	LV_Delete()
+	GuiControl, -Redraw, % IdSearchLV1
 	; F_SearchColumnWidth()
 	Switch v_RadioGroup
 	{
@@ -9110,9 +9112,10 @@ F_SearchPhrase()
 			LV_ModifyCol(7, , TransA["Comment"])
 	}
 	LV_ModifyCol(1, "Sort")
+	GuiControl, +Redraw, % IdSearchLV1
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Searching(ReloadListView*)
+F_Searching(ReloadListView*)	;tu jestem
 {
 	global	;assume-global mode
 	local	Window1X := 0, 	Window1Y := 0, 	Window1W := 0, 	Window1H := 0
@@ -9168,11 +9171,9 @@ F_GuiSearch_DetermineConstraints()
 	
 	xNext := c_xmarg
 ,	yNext := c_ymarg
-	GuiControl, Move, % IdSearchT1, % "x" xNext "y" yNext ;Phrase to search
-	; yNext := c_ymarg + 2 * HofText
-	; yNext += HofText
+	GuiControl, Move, % IdSearchT1, % "x" . xNext . "y" . yNext ;Phrase to search
 	GuiControlGet, OutVarTemp, Pos, % IdSearchT1
-	yNext := OutVarTempY + OutVarTempH
+	yNext += HofText
 	wNext := OutVarTempW * 2
 	GuiControl, Move, % IdSearchE1, % "x" xNext "y" yNext "w" wNext
 
@@ -9219,8 +9220,6 @@ F_GuiSearch_DetermineConstraints()
 	xNext 	:= c_xmarg
 ,	yNext 	:= OutVarTempY + OutVarTempH + c_ymarg
 	GuiControl, Move, % IdSearchT4, % "x" xNext "y" yNext ;information about shortcuts
-	Gui, HS3Search: Show, AutoSize
-	; Gui, HS3Search: Show, % "x" . Window1X + 2 * c_xmarg . "y" . Window1Y + 2 * c_ymarg . "w" . HS3_GuiWidth . "h" . HS3_GuiHeight
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS3SearchGuiSize(GuiHwnd, EventInfo, Width, Height)	;Gui event (automatically generated)
@@ -9353,13 +9352,12 @@ F_WhichGui()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiAddLibrary(TextString*)	;tu jestem
+F_GuiAddLibrary(TextString*)
 {
 	global	;assume-global mode
-	local v_OutVarTemp1 := 0, v_OutVarTemp1X := 0, v_OutVarTemp1Y := 0, v_OutVarTemp1W := 0, v_OutVarTemp1H := 0
-		,v_OutVarTemp2 := 0, v_OutVarTemp2X := 0, v_OutVarTemp2Y := 0, v_OutVarTemp2W := 0, v_OutVarTemp2H := 0
-		,IdText1 := 0, IdText2 := 0, IdEdit1 := 0, IdButt1 := 0, IdButt2 := 0
-		,vTempWidth := 2 * c_xmarg, v_WidthButt1 := 0, v_WidthButt2 := 0, xButt2 := 0
+	local OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0
+		,OutVarTemp2 := 0, OutVarTemp2X := 0, OutVarTemp2Y := 0, OutVarTemp2W := 0, OutVarTemp2H := 0
+		,TempWidth := 2 * c_xmarg, WidthButt1 := 0, WidthButt2 := 0, xButt2 := 0
 		,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
@@ -9371,37 +9369,37 @@ F_GuiAddLibrary(TextString*)	;tu jestem
 	Gui,	ALib: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	
 	Switch TextString[1]
-	{	;tu jestem
-		Case "": Gui, ALib: Add, Text, HwndIdText1, % TransA["Enter a name for the new library"]
-		Default: Gui, ALib: Add, Text, HwndIdText1, % TextString[1]
+	{
+		Case "": Gui, ALib: Add, Text, HwndIdALibText1, % TransA["Enter a name for the new library"]
+		Default: Gui, ALib: Add, Text, HwndIdALibText1, % TextString[1]
 	}
-	Gui, ALib: Add, Edit, HwndIdEdit1 vv_NewLib
+	Gui, ALib: Add, Edit, HwndIdALibEdit1 vv_NewLib
 	
-	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdText1
-	GuiControl, ALib: Move, % IdEdit1, % "w" c_xmarg + v_OutVarTemp1W
+	GuiControlGet, OutVarTemp, ALib: Pos, % IdALibText1
+	GuiControl, ALib: Move, % IdALibEdit1, % "w" c_xmarg + OutVarTempW
 	
-	Gui, ALib: Add, Text, HwndIdText2, .csv
-	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdEdit1
-	vTempWidth += v_OutVarTemp1W
-	GuiControl, ALib: Move, % IdText2, % "x" v_OutVarTemp1X + v_OutVarTemp1W . A_Space . "y" v_OutVarTemp1Y
-	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdText2
-	vTempWidth += v_OutVarTemp1W
+	Gui, ALib: Add, Text, HwndIdALibText2, .csv
+	GuiControlGet, OutVarTemp, ALib: Pos, % IdALibEdit1
+	TempWidth += OutVarTempW
+	GuiControl, ALib: Move, % IdALibText2, % "x" OutVarTempX + OutVarTempW . A_Space . "y" OutVarTempY
+	GuiControlGet, OutVarTemp, ALib: Pos, % IdALibText2
+	TempWidth += OutVarTempW
 	
 	Switch TextString[1]
 	{
-		Case "Choose new library file name:": 	Gui, ALib: Add, Button, HwndIdButt1 Default gF_ChangeLibNameOK,		% TransA["OK"]
-		Default: 							Gui, ALib: Add, Button, HwndIdButt1 Default gF_ALibOK,				% TransA["OK"]
+		Case "Choose new library file name:": 	Gui, ALib: Add, Button, HwndIdALibButt1 Default gF_ChangeLibNameOK,		% TransA["OK"]
+		Default: 							Gui, ALib: Add, Button, HwndIdALibButt1 Default gF_ALibOK,				% TransA["OK"]
 	}
-	Gui, ALib: Add, Button, HwndIdButt2 gALibGuiClose, % TransA["Cancel"]
-	GuiControlGet, v_OutVarTemp1, ALib: Pos, % IdButt1
-	GuiControlGet, v_OutVarTemp2, ALib: Pos, % IdButt2
+	Gui, ALib: Add, Button, HwndIdALibButt2 gALibGuiClose, % TransA["Cancel"]
+	GuiControlGet, OutVarTemp, ALib: Pos, % IdALibButt1
+	GuiControlGet, OutVarTemp2, ALib: Pos, % IdALibButt2
 	
-	v_WidthButt1 := v_OutVarTemp1W + 2 * c_xmarg
-,	v_WidthButt2 := v_OutVarTemp2W + 2 * c_xmarg
-,	xButt2	   := c_xmarg + v_WidthButt1 + vTempWidth - (2 * c_xmarg + v_WidthButt1 + v_WidthButt2)
+	WidthButt1 := OutVarTempW + 2 * c_xmarg
+,	WidthButt2 := OutVarTemp2W + 2 * c_xmarg
+,	xButt2	   := c_xmarg + WidthButt1 + TempWidth - (2 * c_xmarg + WidthButt1 + WidthButt2)
 	
-	GuiControl, ALib: Move, % IdButt1, % "x" c_xmarg . A_Space . "w" v_WidthButt1
-	GuiControl, ALib: Move, % IdButt2, % "x" xButt2  . A_Space . "y" v_OutVarTemp1Y . A_Space . "w" v_WidthButt2
+	GuiControl, ALib: Move, % IdALibButt1, % "x" c_xmarg . A_Space . "w" WidthButt1
+	GuiControl, ALib: Move, % IdALibButt2, % "x" xButt2  . A_Space . "y" OutVarTempY . A_Space . "w" WidthButt2
 	
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	Gui, ALib: Show, Hide
@@ -9702,7 +9700,6 @@ F_GuiHS3_LVcolumnScale()
 		, c1 := 0, c2 := 0, c3 := 0, c4 := 0, c5 := 0, c6 := 0, LVM_GETCOLUMNWIDTH = 0x1000 + 29 ;https://www.autohotkey.com/boards/viewtopic.php?p=25857#p25857
 		, SM_CXVSCROLL := 2, WidthVerScrollBar := 0 ;Width of a vertical scroll bar, in pixels
 
-	Gui, HS3Search: -DPIScale	;switch off dpiscale temporarily to get the same values from SendMessage command
 	SysGet, WidthVerScrollBar, % SM_CXVSCROLL ;returns value 26
 	Gui, HS3: -DPIScale	;switch off dpiscale temporarily to get the same values from SendMessage command
 	GuiControlGet, OutVarTemp, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.	
@@ -12491,7 +12488,6 @@ F_GuiMain_CreateObject()
 ,	HS3_GuiHeight 				:= 0
 	
 ;1. Definition of HS3 GUI.
-;-DPIScale doesn't work in Microsoft Windows 10
 ;+Border doesn't work in Microsoft Windows 10
 	Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs,			 						% A_ScriptName
 	Gui, 		HS3: Margin,		% c_xmarg, % c_ymarg
@@ -12647,25 +12643,25 @@ HS3GuiContextMenu(GuiHwnd, CtrlHwnd, EventInfo, IsRightClick, X, Y)
 F_GuiMain_DefineConstants()
 {
 	global ;assume-global mode
-	local v_OutVarTemp := 0, v_OutVarTempX := 0, v_OutVarTempY := 0, v_OutVarTempW := 0, v_OutVarTempH := 0	;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
+	local OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0	;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.	
 	
 ;3. Determine weight / height of main types of text objects
-	GuiControlGet, v_OutVarTemp, Pos, % IdText1
-	HofText			:= v_OutVarTempH
-	GuiControlGet, v_OutVarTemp, Pos, % IdEdit1
-	HofEdit			:= v_OutVarTempH
-	GuiControlGet, v_OutVarTemp, Pos, % IdButton3	;button "Clear (F5)"
-	HofButton			:= v_OutVarTempH
-	GuiControlGet, v_OutVarTemp, Pos, % IdListView1
-	HofListView		:= v_OutVarTempH
-	GuiControlGet, v_OutVarTemp, Pos, % IdCheckBox1
-	HofCheckBox		:= v_OutVarTempH
-	GuiControlGet, v_OutVarTemp, Pos, % IdDDL1
-	HofDropDownList 	:= v_OutVarTempH
-	GuiControlGet, v_OutVarTemp, Pos, % IdEdit10
-	HofSandbox		:= v_OutVarTempH
-	GuiControlGet, v_OutVarTemp, Pos, % IdButton5
-	WofMiddleButton   := v_OutVarTempW
+	GuiControlGet, OutVarTemp, Pos, % IdText1
+	HofText			:= OutVarTempH	;24
+	GuiControlGet, OutVarTemp, Pos, % IdEdit1
+	HofEdit			:= OutVarTempH
+	GuiControlGet, OutVarTemp, Pos, % IdButton3	;button "Clear (F5)"
+	HofButton			:= OutVarTempH
+	GuiControlGet, OutVarTemp, Pos, % IdListView1
+	HofListView		:= OutVarTempH
+	GuiControlGet, OutVarTemp, Pos, % IdCheckBox1
+	HofCheckBox		:= OutVarTempH
+	GuiControlGet, OutVarTemp, Pos, % IdDDL1
+	HofDropDownList 	:= OutVarTempH
+	GuiControlGet, OutVarTemp, Pos, % IdEdit10
+	HofSandbox		:= OutVarTempH
+	GuiControlGet, OutVarTemp, Pos, % IdButton5
+	WofMiddleButton   	:= OutVarTempW
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_RadioCaseCol()
