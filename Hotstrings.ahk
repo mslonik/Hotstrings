@@ -8993,61 +8993,11 @@ F_HS3Search_PlotWindow()
 	; Gui, HS3Search: Submit, NoHide
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SearchColumnWidth()
+F_HS3Search_LoadLV()
 {
 	global	;assume-global mode
 	local	index := 0, value := ""
-,			OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.		
-,			c1 := 0, c2 := 0, c3 := 0, c4 := 0, c5 := 0, c6 := 0, c7 := 0, LVM_GETCOLUMNWIDTH = 0x1000 + 29 ;https://www.autohotkey.com/boards/viewtopic.php?p=25857#p25857
-,			SM_CXVSCROLL := 2, WidthVerScrollBar := 0 ;Width of a vertical scroll bar, in pixels
 
-	SysGet, WidthVerScrollBar, % SM_CXVSCROLL ;returns value 26
-	Gui, HS3Search: -DPIScale	;switch off dpiscale temporarily to get the same values from SendMessage command	
-	GuiControlGet, OutVarTemp, Pos, % IdSearchLV1 ;This line will be used for "if" and "else" statement.	
-	ListViewWidth := OutVarTempW	
-	; if getkeystate("CapsLock", "T") ;I don't understand it
-		; return
-	; GuiControl, -Redraw, % IdSearchLV1	;Trick: use GuiControl, -Redraw, MyListView prior to adding a large number of rows. Afterward, use GuiControl, +Redraw, MyListView to re-enable redrawing (which also repaints the control).
-	; LV_Delete()
-	GuiControl, +Redraw, % IdSearchLV1
-	LV_ModifyCol(1, Round(0.1 * ListViewWidth), TransA["Triggerstring"])
-	SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
-	c1 := ErrorLevel
-	LV_ModifyCol(2, "AutoHdr", TransA["Enable/Disable"])
-	SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdSearchLV1%
-	c2 := ErrorLevel
-	LV_ModifyCol(3, Round(0.1 * ListViewWidth), TransA["Library"])
-	SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdSearchLV1%
-	c3 := ErrorLevel
-	LV_ModifyCol(4, "AutoHdr", TransA["Trigger Options"])
-	SendMessage, LVM_GETCOLUMNWIDTH, 3, 0, , ahk_id %IdSearchLV1%
-	c4 := ErrorLevel
-	LV_ModifyCol(5, "AutoHdr", TransA["Output Function"])
-	SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdSearchLV1%
-	c5 := ErrorLevel
-	LV_ModifyCol(6, Round(0.2 * ListViewWidth), TransA["Hotstring"])
-	SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdSearchLV1%
-	c6 := ErrorLevel
-	LV_ModifyCol(7, ListViewWidth - (c1 + c2 + c3 + c4 + c5 + c6) - WidthVerScrollBar - 4, TransA["Comment"])
-			
-	; LV_ModifyCol(1, "Sort")
-	Gui, HS3Search: +DPIScale
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SearchPhrase()
-{
-	global	;assume-global mode
-	local	index := 0, value := ""
-,			OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.		
-,			c1 := 0, c2 := 0, c3 := 0, c4 := 0, c5 := 0, c6 := 0, c7 := 0, LVM_GETCOLUMNWIDTH = 0x1000 + 29 ;https://www.autohotkey.com/boards/viewtopic.php?p=25857#p25857
-,			SM_CXVSCROLL := 2, WidthVerScrollBar := 0 ;Width of a vertical scroll bar, in pixels
-,			PreviousGui := "", Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0, ListViewWidth := 0
-
-	OutputDebug, % A_ThisFunc . "`n"
-	Gui, HS3Search: Submit, NoHide
-	LV_Delete()
-	GuiControl, -Redraw, % IdSearchLV1
-	; F_SearchColumnWidth()
 	Switch v_RadioGroup
 	{
 		Case 1:	;search by Triggerstring which is default
@@ -9061,7 +9011,6 @@ F_SearchPhrase()
 				else
 					LV_Add("", value, a_EnableDisable[index], a_Library[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 			}
-			F_SearchColumnWidth()
 		Case 2:	;search by Hotstring
 			for index, value in a_Hotstring
 			{
@@ -9073,13 +9022,6 @@ F_SearchPhrase()
 				else
 					LV_Add("", value, a_EnableDisable[index], a_Library[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Comment[index])
 			}
-			LV_ModifyCol(1, , TransA["Hotstring"])
-			LV_ModifyCol(2, , TransA["Enable/Disable"])
-			LV_ModifyCol(3, , TransA["Library"])
-			LV_ModifyCol(4, , TransA["Triggerstring"])
-			LV_ModifyCol(5, , TransA["Trigger Options"])
-			LV_ModifyCol(6, , TransA["Output Function"])
-			LV_ModifyCol(7, , TransA["Comment"])
 		Case 3:	;search by Library
 			for index, value in a_Library
 			{
@@ -9091,14 +9033,95 @@ F_SearchPhrase()
 				else
 					LV_Add("", value, a_EnableDisable[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 			}
-			LV_ModifyCol(1, , TransA["Library"])
-			LV_ModifyCol(2, , TransA["Enable/Disable"])
-			LV_ModifyCol(3, , TransA["Triggerstring"])
-			LV_ModifyCol(4, , TransA["Trigger Options"])
-			LV_ModifyCol(5, , TransA["Output Function"])
-			LV_ModifyCol(6, , TransA["Hotstring"])
-			LV_ModifyCol(7, , TransA["Comment"])
 	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HS3Search_SetColumnWidth()
+{
+	global	;assume-global mode
+	local	OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.		
+,			c1 := 0, c2 := 0, c3 := 0, c4 := 0, c5 := 0, c6 := 0, c7 := 0, LVM_GETCOLUMNWIDTH = 0x1000 + 29 ;https://www.autohotkey.com/boards/viewtopic.php?p=25857#p25857
+,			SM_CXVSCROLL := 2, WidthVerScrollBar := 0 ;Width of a vertical scroll bar, in pixels
+
+	SysGet, WidthVerScrollBar, % SM_CXVSCROLL ;returns value 26
+	Gui, HS3Search: -DPIScale	;switch off dpiscale temporarily to get the same values from SendMessage command	
+	GuiControlGet, OutVarTemp, Pos, % IdSearchLV1 ;This line will be used for "if" and "else" statement.	
+	ListViewWidth := OutVarTempW	
+	
+	Switch v_RadioGroup
+	{
+		Case 1:	;search by Triggerstring which is default
+			LV_ModifyCol(1, Round(0.1 * ListViewWidth), TransA["Triggerstring"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
+			c1 := ErrorLevel
+			LV_ModifyCol(2, "AutoHdr", TransA["Enable/Disable"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdSearchLV1%
+			c2 := ErrorLevel
+			LV_ModifyCol(3, Round(0.1 * ListViewWidth), TransA["Library"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdSearchLV1%
+			c3 := ErrorLevel
+			LV_ModifyCol(4, "AutoHdr", TransA["Trigger Options"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 3, 0, , ahk_id %IdSearchLV1%
+			c4 := ErrorLevel
+			LV_ModifyCol(5, "AutoHdr", TransA["Output Function"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdSearchLV1%
+			c5 := ErrorLevel
+			LV_ModifyCol(6, Round(0.2 * ListViewWidth), TransA["Hotstring"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdSearchLV1%
+			c6 := ErrorLevel
+		Case 2:	;search by Hotstring
+			LV_ModifyCol(1, Round(0.3 * ListViewWidth), TransA["Hotstring"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
+			c1 := ErrorLevel
+			LV_ModifyCol(2, "AutoHdr", TransA["Enable/Disable"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdSearchLV1%
+			c2 := ErrorLevel
+			LV_ModifyCol(3, Round(0.1 * ListViewWidth), TransA["Library"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdSearchLV1%
+			c3 := ErrorLevel
+			LV_ModifyCol(4, "AutoHdr", TransA["Triggerstring"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 3, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
+			c4 := ErrorLevel
+			LV_ModifyCol(5, "AutoHdr", TransA["Trigger Options"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdSearchLV1%
+			c5 := ErrorLevel
+			LV_ModifyCol(6, "AutoHdr", TransA["Output Function"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdSearchLV1%
+			c6 := ErrorLevel
+		Case 3:	;search by Library
+			LV_ModifyCol(1, Round(0.1 * ListViewWidth), TransA["Library"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
+			c1 := ErrorLevel
+			LV_ModifyCol(2, "AutoHdr", TransA["Enable/Disable"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdSearchLV1%
+			c2 := ErrorLevel
+			LV_ModifyCol(3, "AutoHdr", TransA["Triggerstring"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
+			c3 := ErrorLevel
+			LV_ModifyCol(4, "AutoHdr", TransA["Trigger Options"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 3, 0, , ahk_id %IdSearchLV1%
+			c4 := ErrorLevel
+			LV_ModifyCol(5, "AutoHdr", TransA["Output Function"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdSearchLV1%
+			c5 := ErrorLevel
+			LV_ModifyCol(6, "AutoHdr", TransA["Hotstring"])
+			SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
+			c6 := ErrorLevel
+	}
+	LV_ModifyCol(7, ListViewWidth - (c1 + c2 + c3 + c4 + c5 + c6) - WidthVerScrollBar - 4, TransA["Comment"])
+	Gui, HS3Search: +DPIScale
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SearchPhrase()	;handles 2x events: HS3Search: Edit and Radio.
+{
+	global	;assume-global mode
+
+	OutputDebug, % A_ThisFunc . "`n"
+	Gui, HS3Search: Submit, NoHide
+	LV_Delete()
+	GuiControl, -Redraw, % IdSearchLV1
+	F_HS3Search_LoadLV()
+	F_HS3Search_SetColumnWidth()
 	LV_ModifyCol(1, "Sort")
 	GuiControl, +Redraw, % IdSearchLV1
 }
