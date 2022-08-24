@@ -167,7 +167,6 @@ if (ini_HK_IntoEdit != "none")
 Gui, 1: Default				;this line is necessary to not show too many Guis on time of loading hotstrings from library
 F_LoadHotstringsFromLibraries()	;→ F_LoadDefinitionsFromFile() -> F_CreateHotstring
 F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
-F_GuiSearch_CreateObject()		;When all tables are full, initialize GuiSearch
 F_InitiateInputHook()
 
 TrayTip, % A_ScriptName, % TransA["Hotstrings have been loaded"], , 1 ;1 = Info icon
@@ -2160,7 +2159,6 @@ MoveLibsGuiEscape()	;Gui event
 	MoveLibsGuiCancel()	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 HS4GuiEscape()	;Gui event
 {
 	global	;assume-global mode
@@ -2379,17 +2377,9 @@ ShortDefGuiClose()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS3SearchGuiEscape() ; Gui event!
 {
-	global	;assume-global mode
-	;F_WhichGui()	;sets A_DefaultGui to one of the current windows
-	if (WinExist("ahk_id" HS3GuiHwnd))	;activates one of the main Windows
-	{
-		Gui, HS3Search:	+Disabled
-		Gui, HS3: -Disabled
-		GuiControl, Focus, % IdListView1
-	}
-	if (WinExist("ahk_id" HS4GuiHwnd))
-		Gui, HS4: -Disabled		
-	Gui, HS3Search: Hide
+	Gui, HS3Search:	+Disabled
+	Gui, HS3: 		-Disabled
+	Gui, HS3Search: 	Hide
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS3SearchGuiClose() ; Gui event!
@@ -7624,9 +7614,7 @@ F_DownloadPublicLibraries()
 		F_LoadHotstringsFromLibraries()
 		F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 		F_RefreshListOfLibraries()	; this function calls F_RefreshListOfLibraryTips() as both options are interrelated
-		; F_RefreshListOfLibraryTips()
 		F_UpdateSelHotLibDDL()
-		F_Searching("Reload")			;prepare content of Search tables
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8984,7 +8972,7 @@ LV2_CopyContentToHS3LV() ;load content of chosen row from Search Gui into HS3 Gu
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SearchPlotWindow()
+F_HS3Search_PlotWindow()
 {
 	global	;assume-global mode
 	local	PreviousGui := "", Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0, ListViewWidth := 0
@@ -9115,32 +9103,26 @@ F_SearchPhrase()
 	GuiControl, +Redraw, % IdSearchLV1
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Searching(ReloadListView*)	;tu jestem
+F_Searching()	;tu jestem
 {
-	global	;assume-global mode
-	local	Window1X := 0, 	Window1Y := 0, 	Window1W := 0, 	Window1H := 0
-			,Window2X := 0, 	Window2Y := 0, 	Window2W := 0, 	Window2H := 0
-			,NewWinPosX := 0, 	NewWinPosY := 0
-			,WhichGui := "", PreviousGui := ""
-	
-	F_GuiSearch_DetermineConstraints()
-	Switch ReloadListView[1]
+	DetectHiddenWindows, On
+	if (WinExist("ahk_id" HS3SearchHwnd))
+		{
+			Gui, HS3: 		+Disabled
+			Gui, HS3Search:	-Disabled
+			Gui, HS3Search: 	Show
+		}
+	else
 	{
-		Case "Reload":	;<- F_DeleteHotstring()
-			Gui, HS3Search: Default
-			GuiControl, % "Count" . a_Library.MaxIndex() . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
-			LV_Delete()
-			Loop, % a_Library.MaxIndex() ; Those arrays have been loaded by F_LoadLibrariesToTables()
-				LV_Add("", a_EnableDisable[A_Index], a_Library[A_Index], a_Triggerstring[A_Index], a_TriggerOptions[A_Index], a_OutputFunction[A_Index], a_Hotstring[A_Index], a_Comment[A_Index])
-			GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
-
-		Case TransA["Search (F3)"], "": ;new thread starts here
-			F_SearchPlotWindow()
-			F_SearchPhrase()
+		F_HS3Search_CreateObject()
+		F_HS3Search_DetermineConstraints()
+		F_HS3Search_PlotWindow()
+		F_SearchPhrase()
 	}
+	DetectHiddenWindows, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiSearch_CreateObject()
+F_HS3Search_CreateObject()
 {
 	global	;assume-global mode
 	
@@ -9163,7 +9145,7 @@ F_GuiSearch_CreateObject()
 	Gui, HS3Search: Add, Button, 		Hidden Default gF_HSLV2	;trick to catch if user presses Enter on ListView
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiSearch_DetermineConstraints()
+F_HS3Search_DetermineConstraints()
 {
 	global	;assume-global mode
 	local OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
@@ -9209,14 +9191,6 @@ F_GuiSearch_DetermineConstraints()
 	
 	Gui, HS3Search: Default	;in order to enable LV_ModifyCol
 	GuiControlGet, OutVarTemp, Pos, % IdSearchLV1
-	; LV_ModifyCol(1, Round(0.1 * OutVarTempW))	;future: to use the same trick with variable width of columns like for ListView1
-	; LV_ModifyCol(2, Round(0.2 * OutVarTempW))
-	; LV_ModifyCol(3, Round(0.1 * OutVarTempW))
-	; LV_ModifyCol(4, Round(0.1 * OutVarTempW))
-	; LV_ModifyCol(5, Round(0.1 * OutVarTempW))
-	; LV_ModifyCol(6, Round(0.3 * OutVarTempW))
-	; LV_ModifyCol(7, Round(0.1 * OutVarTempW) - 3)
-	; GuiControl, +Redraw, % IdSearchLV1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 	xNext 	:= c_xmarg
 ,	yNext 	:= OutVarTempY + OutVarTempH + c_ymarg
 	GuiControl, Move, % IdSearchT4, % "x" xNext "y" yNext ;information about shortcuts
@@ -9237,8 +9211,6 @@ HS3SearchGuiSize(GuiHwnd, EventInfo, Width, Height)	;Gui event (automatically ge
 			F_AutoXYWH("*wh", IdSearchLV1)
 		Default:
 			F_AutoXYWH("*wh", IdSearchLV1)
-			; F_SearchColumnWidth()
-			; F_SearchPhrase()
 	}
 	LV_ModifyCol(1, "Sort")
 }
@@ -9613,9 +9585,6 @@ F_DeleteHotstring()
 	for index in a_Combined	;recreate array a_Combined
 		a_Combined[index] := a_Triggerstring[index] . "|" . a_TriggerOptions[index] . "|" . a_EnableDisable[index] . "|" . a_Hotstring[index]
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	
-
-	;8. Update table for searching
-	F_Searching("Reload")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ConvertListViewIntoTxt()
@@ -14333,7 +14302,6 @@ F_ImportLibrary()
 		F_UpdateSelHotLibDDL()
 		F_LoadDefinitionsFromFile(OutNameNoExt . ".csv")
 		F_LoadTriggTipsFromFile(OutNameNoExt . ".csv")
-		F_Searching("Reload")
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
