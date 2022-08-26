@@ -405,10 +405,6 @@ Critical, Off
 	F3::
 		HS3SearchGuiEscape()
 		return	;end of this thread
-	F8:: ;new thread starts here
-		Gui, HS3Search: +Disabled
-		F_MoveList()
-		return
 #If
 
 #If WinActive("ahk_id" HotstringDelay)
@@ -506,25 +502,6 @@ Critical, Off
 
 #If F_IsItEdit()
 	AppsKey::	;blocks default context menu for Edit fields
-#If
-
-F_IsItEdit()
-{
-	global
-	local ControlClass := ""
-
-	F_WhichGui()
-	GuiControlGet, ControlClass, Focus
-	if (InStr(ControlClass, "Edit"))
-		return true
-	else
-		return false
-}
-
-#If WinActive("ahk_id" MoveLibsHwnd)
-	F8:: 
-		F_Move()
-	return	
 #If
 
 ~Alt::		;if commented out, only for debugging reasons
@@ -691,6 +668,20 @@ F_IsItEdit()
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+
+F_IsItEdit()
+{
+	global
+	local 	ControlClass := ""
+
+	F_WhichGui()
+	GuiControlGet, ControlClass, Focus
+	if (InStr(ControlClass, "Edit"))
+		return true
+	else
+		return false
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_RenameLibrary()
 {
 	global	;assume-global mode of operation
@@ -8893,7 +8884,7 @@ F_GuiMoveLibs_CreateDetermine()
 			LV_Add("", key)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_MoveList() 
+F_MoveList()
 {
 	global	;assume-global mode
 	local 	v_SelectedRow := 0
@@ -9146,7 +9137,7 @@ F_HS3Search_Create()
 	global	;assume-global mode
 	
 	;1. Prepare Gui general parameters
-	Gui, HS3Search: New, 	+Resize +HwndHS3SearchHwnd +Owner, % TransA["Search Hotstrings"]
+	Gui, HS3Search: New, 	+Resize +HwndHS3SearchHwnd +OwnerHS3, % TransA["Search Hotstrings"]
 	Gui, HS3Search: Margin,	% c_xmarg, % c_ymarg
 	Gui,	HS3Search: Color,	% c_WindowColor, % c_ControlColor
 	
@@ -9218,11 +9209,11 @@ F_HS3Search_DetermineConstraints()
 HS3SearchGuiSize(GuiHwnd, EventInfo, Width, Height)	;Gui event (automatically generated)
 {
 	global	;assume-global mode
-	local OutVarTemp1 := 0, OutVarTemp1X := 0, OutVarTemp1Y := 0, OutVarTemp1W := 0, OutVarTemp1H := 0
-		,OutVarTemp2 := 0, OutVarTemp2X := 0, OutVarTemp2Y := 0, OutVarTemp2W := 0, OutVarTemp2H := 0
-		,xNext := 0, 		yNext := 0, 			wNext := 0, 			hNext := 0
-	
-	OutputDebug, % A_ThisFunc . "`n" 
+	local 	OutVarTemp1 := 0, OutVarTemp1X := 0, OutVarTemp1Y := 0, OutVarTemp1W := 0, OutVarTemp1H := 0
+,			OutVarTemp2 := 0, OutVarTemp2X := 0, OutVarTemp2Y := 0, OutVarTemp2W := 0, OutVarTemp2H := 0
+,			xNext := 0, 		yNext := 0, 			wNext := 0, 			hNext := 0
+
+	; OutputDebug, % A_ThisFunc . A_Space . " EventInfo:" . A_Space .  EventInfo . "`n" 
 	Switch EventInfo
 	{
 		Case 1: 		;The window has been minimized.
@@ -9230,13 +9221,6 @@ HS3SearchGuiSize(GuiHwnd, EventInfo, Width, Height)	;Gui event (automatically ge
 			F_AutoXYWH("*wh", 	IdSearchLV1)
 			F_AutoXYWH("*y", 	IdSearchT4)
 		Default:		;Any other case, e.g. manual window size manipulation or window is restored
-			; if (WinExist("ahk_id" HS3SearchHwnd))
-			; 	{
-			; 		Gui, HS3: 		+Disabled
-			; 		Gui, HS3Search:	-Disabled
-			; 		Gui, HS3Search: 	Show
-			; 	}
-
 			F_AutoXYWH("*wh", 	IdSearchLV1)
 			F_AutoXYWH("*y", 	IdSearchT4)
 	}
@@ -9883,7 +9867,11 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 
 	Switch EventInfo
 	{
-		Case 1: ini_WhichGui 		:= "HS3"		;The window has been minimized.
+		Case 1: 
+			ini_WhichGui 		:= "HS3"		;The window has been minimized.
+			Critical, Off
+			Sleep, -1
+
 		Case 2: 
 			ini_HS3GuiMaximized 	:= true		;The window has been maximized.
 			if (ini_Sandbox)
