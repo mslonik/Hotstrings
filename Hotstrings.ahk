@@ -9133,7 +9133,7 @@ F_Searching()	;after pressing F3
 		}
 	else	;if not exists, create it
 	{
-		F_HS3Search_CreateObject()
+		F_HS3Search_Create()
 		F_HS3Search_DetermineConstraints()
 		F_HS3Search_PlotWindow()
 		F_SearchPhrase()
@@ -9141,7 +9141,7 @@ F_Searching()	;after pressing F3
 	DetectHiddenWindows, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HS3Search_CreateObject()
+F_HS3Search_Create()
 {
 	global	;assume-global mode
 	
@@ -9229,7 +9229,14 @@ HS3SearchGuiSize(GuiHwnd, EventInfo, Width, Height)	;Gui event (automatically ge
 		Case 2: 		;The window has been maximized.
 			F_AutoXYWH("*wh", 	IdSearchLV1)
 			F_AutoXYWH("*y", 	IdSearchT4)
-		Default:		;Any other case, e.g. manual window size manipulation
+		Default:		;Any other case, e.g. manual window size manipulation or window is restored
+			; if (WinExist("ahk_id" HS3SearchHwnd))
+			; 	{
+			; 		Gui, HS3: 		+Disabled
+			; 		Gui, HS3Search:	-Disabled
+			; 		Gui, HS3Search: 	Show
+			; 	}
+
 			F_AutoXYWH("*wh", 	IdSearchLV1)
 			F_AutoXYWH("*y", 	IdSearchT4)
 	}
@@ -9909,7 +9916,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 					return
 				}
 			}
-		Default:
+		Default:	;E.G. window has been restored
 			if (ini_HS3GuiMaximized)
 				ini_HS3GuiMaximized := false
 			if (ini_Sandbox)
@@ -11840,7 +11847,7 @@ F_TI_EnterTriggerstring									= Enter text of triggerstring. `n`nTip1: If you 
 F_TI_OptionDisable										= Disables the hotstring. `n`nIf ticked, this option is shown in red color. `nBe aware that triggerstring tooltips (if enabled) `nare displayed even for disabled (triggerstring, hotstring) definitions.
 TI_SHOF												= Select function, which will be used to show up hotstring. `n`nAvailable options: `n`nSendInput (SI): SendInput is generally the preferred method because of its superior speed and reliability. `nUnder most conditions, SendInput is nearly instantaneous, even when sending long strings. `nSince SendInput is so fast, it is also more reliable because there is less opportunity for some other window to pop up unexpectedly `nand intercept the keystrokes. Reliability is further improved by the fact `nthat anything the user types during a SendInput is postponed until afterward. `n`nClipboard (CL): hotstring is copied from clipboard. `nIn case of long hotstrings this is the fastest method. The downside of this method is delay `nrequired for operating system to paste content into specific window. `nIn order to change value of this delay see ""Clipboard Delay (F7)"" option in menu. `n`nMenu and SendInput (MSI): One triggerstring can be used to enter up to 7 hotstrings which are desplayed in form of list (menu). `nFor entering of chosen hotstring again SendInput (SI) is used. `n`nMenu & Clipboard (MCL): One triggerstring can be used to enter up to 7 hotstrings which are desplayed in form of list (menu). `nFor entering of chosen hotstring Clipboard (CL) is used. `n`nSenRaw (R): All subsequent characters, including the special characters ^+!#{}, `nto be interpreted literally rather than translating {Enter} to Enter, ^c to Ctrl+C, etc. `n`nSendPlay (SP): SendPlay's biggest advantage is its ability to ""play back"" keystrokes and mouse clicks in a broader variety of games `nthan the other modes. `nFor example, a particular game may accept hotstrings only when they have the SendPlay option. `n`nSendEvent (SE): SendEvent sends keystrokes using the same method as the pre-1.0.43 Send command.
 TI_EnterHotstring										= Enter hotstring corresponding to the triggerstring. `n`nTip: You can use special key names in curved brackets. E.g.: {left 5} will move caret by 5x characters to the left.`n{Backspace 3} or {BS 3} will remove 3 characters from the end of triggerstring. `n`nTo send an extra space or tab after a replacement, include the space or tab at the end of the replacement `nbut make the last character an accent/backtick (`). `nFor example: `n:*:btw::By the way ``n`nBy default (that is, if SendRaw isn't used), the characters ^+!#{} have a special meaning. `nTo send those keys on its own, enclose the name in curly braces. `nFor example: {+}48 600 000.
-TI_AddComment											= You can add optional (not mandatory) comment to new (triggerstring, hotstring) definition. `n`nThe comment can be max. 64 characters long. `n`nTip: Put here link to Wikipedia definition or any other external resource containing reference to entered definition.
+TI_AddComment											= You can add optional (not mandatory) comment to new (triggerstring, hotstring) definition. `n`nThe comment can be max. 96 characters long. `n`nTip: Put here link to Wikipedia definition or any other external resource containing reference to entered definition.
 TI_SelectHotstringLib									= Select .csv file containing (triggerstring, hotstring) definitions. `nBy default those files are located in C:\Users\<UserName>\Documents folder.
 TI_LibraryContent										= After pressing (F2) you can move up or down in the table by pressing ↑ or ↓ arrows. `n`nEach time you select any row, options of the selected definitions are automatically loaded to the left part of this window.
 TI_Sandbox											= Sandbox is used as editing field where you can test `nany (triggerstring, hotstring) definition, e.g. for testing purposes. `nThis area can be switched on/off and moves when you rescale `nthe main application window.
@@ -12470,8 +12477,8 @@ F_GuiHS3_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_HS3_Create()
 {
-	global ;assume-global mode of operation
-	local x0 := 0, y0 := 0
+	global 	;assume-global mode of operation
+	local 	x0 := 0, y0 := 0
 
 	HS3_GuiWidth  				:= 0
 ,	HS3_GuiHeight 				:= 0
@@ -12491,7 +12498,7 @@ F_HS3_Create()
 	GuiControl +g, % IdTextInfo1, % F_TI_EnterTriggerstring
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString Limit	;Limit: Restricts the user's input to the visible width of the edit field.
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui,			HS3: Add,			GroupBox, 	x0 y0 HwndIdGroupBox1, 									% TransA["Select triggerstring option(s)"]
