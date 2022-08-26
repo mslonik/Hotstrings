@@ -8975,7 +8975,7 @@ LV2_CopyContentToHS3LV() ;load content of chosen row from Search Gui into HS3 Gu
 F_HS3Search_PlotWindow()
 {
 	global	;assume-global mode
-	local	PreviousGui := "", Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0, ListViewWidth := 0
+	local	PreviousGui := ""
 
 	PreviousGui := F_WhichGui()
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A	;Retrieves the position of the active window.
@@ -8984,13 +8984,9 @@ F_HS3Search_PlotWindow()
 	Gui, HS3Search: Default
 	Switch PreviousGui
 	{
-		Case "HS3": 
-			; Gui, HS3Search: Show, % "x" . Window1X + 2 * c_xmarg . "y" . Window1Y + 2 * c_ymarg
-			Gui, HS3Search: Show, % "x" . Window1X + 2 * c_xmarg . "y" . Window1Y + 2 * c_ymarg . "w" . HS3_GuiWidth . "h" . HS3_GuiHeight
-			; Gui, HS3Search: Show, % "x" . Window1X + 2 * c_xmarg . "y" . Window1Y + 2 * c_ymarg . "w" . HS3_GuiWidth . "h" . HS3_GuiHeight
+		Case "HS3": Gui, HS3Search: Show, % "x" . Window1X + 2 * c_xmarg . "y" . Window1Y + 2 * c_ymarg . "w" . HS3_GuiWidth . "h" . HS3_GuiHeight
 		Case "HS4": Gui, HS3Search: Show, % "x" . Window1X + 2 * c_xmarg . "y" . Window1Y + 2 * c_ymarg . "w" . HS4_GuiWidth * 2 . "h" . HS4_GuiHeight
 	}
-	; Gui, HS3Search: Submit, NoHide
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HS3Search_LoadLV()
@@ -9039,7 +9035,7 @@ F_HS3Search_LoadLV()
 F_HS3Search_SetColumnWidth()
 {
 	global	;assume-global mode
-	local	OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.		
+	local	ListViewWidth := 0, OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.		
 ,			c1 := 0, c2 := 0, c3 := 0, c4 := 0, c5 := 0, c6 := 0, c7 := 0, LVM_GETCOLUMNWIDTH = 0x1000 + 29 ;https://www.autohotkey.com/boards/viewtopic.php?p=25857#p25857
 ,			SM_CXVSCROLL := 2, WidthVerScrollBar := 0 ;Width of a vertical scroll bar, in pixels
 
@@ -9054,61 +9050,61 @@ F_HS3Search_SetColumnWidth()
 			LV_ModifyCol(1, Round(0.1 * ListViewWidth), TransA["Triggerstring"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
 			c1 := ErrorLevel
-			LV_ModifyCol(2, "AutoHdr", TransA["Enable/Disable"])
+			LV_ModifyCol(2, "AutoHdr" . A_Space . "Center", TransA["En. / Dis."])	;Adjusts the column's width to fit its contents and the column's header text, whichever is wider.
 			SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdSearchLV1%
 			c2 := ErrorLevel
 			LV_ModifyCol(3, Round(0.1 * ListViewWidth), TransA["Library"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdSearchLV1%
 			c3 := ErrorLevel
-			LV_ModifyCol(4, "AutoHdr", TransA["Trigger Options"])
+			LV_ModifyCol(4, "AutoHdr" . A_Space . "Center", TransA["Trigger Options"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 3, 0, , ahk_id %IdSearchLV1%
 			c4 := ErrorLevel
-			LV_ModifyCol(5, "AutoHdr", TransA["Output Function"])
+			LV_ModifyCol(5, "AutoHdr" . A_Space . "Center", TransA["Out. Fun."])
 			SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdSearchLV1%
 			c5 := ErrorLevel
-			LV_ModifyCol(6, Round(0.2 * ListViewWidth), TransA["Hotstring"])
+			LV_ModifyCol(6, Round(0.3 * ListViewWidth), TransA["Hotstring"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdSearchLV1%
 			c6 := ErrorLevel
 		Case 2:	;search by Hotstring
 			LV_ModifyCol(1, Round(0.3 * ListViewWidth), TransA["Hotstring"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
 			c1 := ErrorLevel
-			LV_ModifyCol(2, "AutoHdr", TransA["Enable/Disable"])
+			LV_ModifyCol(2, "AutoHdr" . A_Space . "Center", TransA["En. / Dis."])
 			SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdSearchLV1%
 			c2 := ErrorLevel
 			LV_ModifyCol(3, Round(0.1 * ListViewWidth), TransA["Library"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdSearchLV1%
 			c3 := ErrorLevel
-			LV_ModifyCol(4, "AutoHdr", TransA["Triggerstring"])
+			LV_ModifyCol(4, Round(0.1 * ListViewWidth), TransA["Triggerstring"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 3, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
 			c4 := ErrorLevel
-			LV_ModifyCol(5, "AutoHdr", TransA["Trigger Options"])
+			LV_ModifyCol(5, "AutoHdr" . A_Space . "Center", TransA["Trigger Options"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdSearchLV1%
 			c5 := ErrorLevel
-			LV_ModifyCol(6, "AutoHdr", TransA["Output Function"])
+			LV_ModifyCol(6, "AutoHdr" . A_Space . "Center", TransA["Out. Fun."])
 			SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdSearchLV1%
 			c6 := ErrorLevel
 		Case 3:	;search by Library
-			LV_ModifyCol(1, Round(0.1 * ListViewWidth), TransA["Library"])
+			LV_ModifyCol(1, Round(0.2 * ListViewWidth), TransA["Library"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
 			c1 := ErrorLevel
-			LV_ModifyCol(2, "AutoHdr", TransA["Enable/Disable"])
+			LV_ModifyCol(2, "AutoHdr" . A_Space . "Center", TransA["En. / Dis."])
 			SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdSearchLV1%
 			c2 := ErrorLevel
-			LV_ModifyCol(3, "AutoHdr", TransA["Triggerstring"])
+			LV_ModifyCol(3, Round(0.1 * ListViewWidth), TransA["Triggerstring"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
 			c3 := ErrorLevel
-			LV_ModifyCol(4, "AutoHdr", TransA["Trigger Options"])
+			LV_ModifyCol(4, "AutoHdr" . A_Space . "Center", TransA["Trigger Options"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 3, 0, , ahk_id %IdSearchLV1%
 			c4 := ErrorLevel
-			LV_ModifyCol(5, "AutoHdr", TransA["Output Function"])
+			LV_ModifyCol(5, "AutoHdr" . A_Space . "Center", TransA["Out. Fun."])
 			SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdSearchLV1%
 			c5 := ErrorLevel
-			LV_ModifyCol(6, "AutoHdr", TransA["Hotstring"])
+			LV_ModifyCol(6, Round(0.3 * ListViewWidth), TransA["Hotstring"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
 			c6 := ErrorLevel
 	}
-	LV_ModifyCol(7, ListViewWidth - (c1 + c2 + c3 + c4 + c5 + c6) - WidthVerScrollBar - 4, TransA["Comment"])
+	LV_ModifyCol(7, ListViewWidth - (c1 + c2 + c3 + c4 + c5 + c6) - WidthVerScrollBar - 4, TransA["Comment"])	;This "trick" excludes horizontal scroll once for all. The consequence: additional headerless column will be visible on a screen even when there is no available data.
 	Gui, HS3Search: +DPIScale
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9163,8 +9159,8 @@ F_HS3Search_CreateObject()
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR1 vv_RadioGroup gF_SearchPhrase Checked, % TransA["Triggerstring"]
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR2 gF_SearchPhrase, 					% TransA["Hotstring"]
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR3 gF_SearchPhrase, 					% TransA["Library"]
-	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 gF_HSLV2 +AltSubmit Grid -Multi,		% TransA["Enable/Disable"] . "|" . TransA["Library"] . "|" . TransA["Triggerstring"] . "|" . TransA["Trigger Options"] . "|" . TransA["Output Function"] . "|" . TransA["Hotstring"] . "|" . TransA["Comment"]
-	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT4, 								% TransA["F3 or Esc: Close Search hotstrings | Enter: Select definition and close"]
+	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 gF_HSLV2 +AltSubmit Grid BackgroundE1E1E1 -Multi,	% TransA["En. / Dis."] . "|" . TransA["Library"] . "|" . TransA["Triggerstring"] . "|" . TransA["Trigger Options"] . "|" . TransA["Out. Fun."] . "|" . TransA["Hotstring"] . "|" . TransA["Comment"]	;Trick with "BackgroundE1E1E1": There is no simple way to distinguish ListView header from the rest of table, but to change background color.
+	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT4, 								% TransA["F3 or Esc: Close Search hotstrings | Enter: Select definition and close | Tab to change position"]
 	Gui, HS3Search: Add, Button, 		Hidden Default gF_HSLV2	;trick to catch if user presses Enter on ListView
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9231,11 +9227,12 @@ HS3SearchGuiSize(GuiHwnd, EventInfo, Width, Height)	;Gui event (automatically ge
 	{
 		Case 1: 		;The window has been minimized.
 		Case 2: 		;The window has been maximized.
-			F_AutoXYWH("*wh", IdSearchLV1)
-		Default:
-			F_AutoXYWH("*wh", IdSearchLV1)
+			F_AutoXYWH("*wh", 	IdSearchLV1)
+			F_AutoXYWH("*y", 	IdSearchT4)
+		Default:		;Any other case, e.g. manual window size manipulation
+			F_AutoXYWH("*wh", 	IdSearchLV1)
+			F_AutoXYWH("*y", 	IdSearchT4)
 	}
-	LV_ModifyCol(1, "Sort")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_RestoreDefaultConfig()
@@ -11441,7 +11438,7 @@ Edit Hotstrings 										= Edit Hotstrings
 Enable												= Enable
 enable												= enable
 En/Dis												= En/Dis
-Enable/Disable											= Enable/Disable
+En. / Dis.											= En. / Dis.
 Enable/disable libraries									= Enable/disable &libraries
 Enable/disable selected definition							= Enable/disable selected definition
 Enable/disable triggerstring tips 							= Enable/disable triggerstring tips	
@@ -11467,7 +11464,7 @@ Export to .ahk with static definitions of hotstrings			= Export to .ahk with sta
 Export to .ahk with dynamic definitions of hotstrings			= Export to .ahk with dynamic definitions of hotstrings
 Exported												= Exported
 Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries = Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries
-F3 or Esc: Close Search hotstrings | Enter: Select definition and close = F3 or Esc: Close Search hotstrings | Enter: Select definition and close
+F3 or Esc: Close Search hotstrings | Enter: Select definition and close | Tab to change position = F3 or Esc: Close Search hotstrings | Enter: Select definition and close | Tab to change position
 file! 												= file!
 file in Languages subfolder!								= file in Languages subfolder!
 file is now created in the following subfolder:				= file is now created in the following subfolder:
@@ -11608,7 +11605,7 @@ Opening Round Bracket ( 									= Opening Round Bracket (
 Opening Square Bracket [ 								= Opening Square Bracket [
 options												= options	
 or													= or
-Output Function										= Output Function
+Out. Fun.										= Out. Fun.
 question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
@@ -12610,7 +12607,7 @@ F_GuiMain_CreateObject()
 	GuiControl +g, % IdTextInfo16, % TI_LibraryContent
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, 		HS3: Add, 		ListView, 	x0 y0 HwndIdListView1 LV0x1 vv_LibraryContent AltSubmit gF_HSLV -Multi, % TransA["En/Dis|Triggerstring|Trigg Opt|Out Fun|Hotstring|Comment"]
+	Gui, 		HS3: Add, 		ListView, 	x0 y0 HwndIdListView1 LV0x1 vv_LibraryContent AltSubmit gF_HSLV -Multi Grid BackgroundE1E1E1, % TransA["En/Dis|Triggerstring|Trigg Opt|Out Fun|Hotstring|Comment"]	;Trick with "BackgroundE1E1E1": There is no simple way to distinguish ListView header from the rest of table, but to change background color.
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText10,			 							% TransA["Sandbox"] . A_Space . "(" . "F6" . A_Space . TransA["to activate"] . A_Space . "or" . A_Space . "Ctrl + F6" . A_Space . TransA["to toggle"] . ")"
