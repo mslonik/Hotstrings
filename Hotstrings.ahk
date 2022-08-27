@@ -313,7 +313,7 @@ Menu, AutoStartSub,		Add, % TransA["Default mode"],										F_AddToAutostart
 Menu, AutoStartSub,		Add,	% TransA["Silent mode"],											F_AddToAutostart
 Menu, AppSubmenu, 		Add, % TransA["Add to Autostart"],										:AutoStartSub
 
-F_CompileSubmenu()					
+F_CompileSubmenu()
 
 Menu, AppSubmenu,		Add, % TransA["Version / Update"],										F_GuiVersionUpdate
 Menu, AppSubmenu,		Add					
@@ -1924,11 +1924,15 @@ F_OneCharPressed(ih, Char)
 	
 	if (!v_InputString)
 		InputStringWithoutEndChar := ""
+	if (!InputStringWithoutEndChar)
+		v_InputString := ""
 	v_InputString .= Char	;the global variable v_InputString is used to display triggerstring tips
 	if (!InStr(HotstringEndChars, Char))
 		InputStringWithoutEndChar .= Char
+	else
+		InputStringWithoutEndChar := ""
 	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n"
-	; OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Space . "InputStringWithoutEndChar:" . A_Space . InputStringWithoutEndChar . "`n"
+	; OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Space . "ISWEndChar:" . A_Space . InputStringWithoutEndChar . "`n"
 	; OutputDebug, % "v_TrigTipsInput:" . A_Space . v_TrigTipsInput . A_Space . "v_InputString:" . A_Space . v_InputString . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
@@ -1945,8 +1949,9 @@ F_OneCharPressed(ih, Char)
 		else	;or destroy previously visible tips
 		{
 			F_DestroyTriggerstringTips(ini_TTCn)
-			v_InputString := InputStringWithoutEndChar
-			F_PrepareTriggerstringTipsTables2(v_InputString)
+			; v_InputString := InputStringWithoutEndChar
+			F_PrepareTriggerstringTipsTables2(InputStringWithoutEndChar)
+			; F_PrepareTriggerstringTipsTables2(v_InputString)
 			if (a_Tips.Count())	;if tips are available display then
 			{
 				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
@@ -1957,6 +1962,7 @@ F_OneCharPressed(ih, Char)
 				InputStringWithoutEndChar := ""
 		}
 	}
+	; OutputDebug, % "The end" . A_Space . "v_InputString:" . A_Space . v_InputString . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
@@ -13704,7 +13710,7 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 	local	temp := 0
 
 	Critical, On
-	; OutputDebug, % A_ThisFunc . "`n"
+	OutputDebug, % A_ThisFunc . "`n"
 	if (InStr(A_ThisHotkey, "?"))
 		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
