@@ -321,6 +321,7 @@ Menu, SubmenuLog,		Add,	% TransA["enable"],												F_MenuLogEnDis
 Menu, SubmenuLog,		Add, % TransA["disable"],											F_MenuLogEnDis
 Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],								:SubmenuLog	
 Menu, AppSubmenu,		Add, % TransA["Open folder where log files are located"], 					F_OpenLogFolder
+Menu, AppSubmenu,		Add, % TransA["Open current log (view only)"],							F_ViewCurrentLog
 Menu, AppSubmenu,		Add
 Menu, AppSubmenu,		Add, % TransA["Application statistics"] . "`tShift + Ctrl + S",				F_AppStats
 
@@ -671,10 +672,77 @@ Critical, Off
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_ViewCurrentLog()
+{
+	global	;assume-global mode of operation
+	local	TheWholeFile := ""
+,			ControlPos1 := 0, ControlPos1X := 0, ControlPos1Y := 0, ControlPos1W := 0, ControlPos1H := 0
+,			MaxButtonWidth := 0, WidthOfClient := 0, MaxPrimaryMon := 0, SM_CXFULLSCREEN := 16, SM_CXMAXIMIZED := 61
+,			Xpos := 0, Ypos := 0, Wwidth := 0, EditWidth := 0
+,			LastGui := ""
 
+	FileRead, TheWholeFile, % v_LogFileName
+	if (!TheWholeFile)
+	{
+		MsgBox,64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Content of current log file (read only)"] . "`n" . v_LogFileName . "`n`n" . TransA["is empty at the moment."]
+		return
+	}
+
+	LastGui 		:= F_WhichGui()
+	Gui,			% LastGui . ": +Disabled"
+	SysGet, 		WidthOfClient, % SM_CXFULLSCREEN	;Width of the client area for a full-screen window on the primary display monitor, in pixels.
+	SysGet, 		MaxPrimaryMon, % SM_CXMAXIMIZED		;Default dimensions, in pixels, of a maximized top-level window on the primary display monitor.
+	WinGetPos, 	Xpos, Ypos, Wwidth, , A
+	Gui, 		ShowLog: New, 		+Resize +HwndShowLogGuiHwnd +OwnerHS3 -DPIScale, % A_ScriptName . ":" . A_Space . TransA["Content of current log file (read only)"] . "`n" . v_LogFileName ;DPI scaling only applies to Gui sub-commands and related variables, so coordinates coming directly from other sources such WinGetPos will not work. There are a number of ways to deal with this, e.g. disable (Gui -DPIScale) scaling on the fly, as needed.
+	Gui,			ShowLog: Margin, 	% c_xmarg, % c_ymarg
+	Gui,			ShowLog: Add,		Button,	x0 y0 HwndIdSL_Button1 gF_SL_ButtonOK, 	% TransA["OK"]
+	GuiControlGet, ControlPos1, Pos, % IdSL_Button1
+	MaxButtonWidth := ControlPos1W
+,	EditWidth 	:= Wwidth - (MaxPrimaryMon - WidthOfClient) - 3 * c_xmarg - MaxButtonWidth
+	Gui,			ShowLog: Add,	Edit,  	% "x" . c_xmarg . A_Space . "y" . c_ymarg . A_Space . "HwndIdSL_Edit1 r25" . A_Space . "w" . EditWidth
+	GuiControlGet, ControlPos1, Pos, % IdSL_Edit1
+	GuiControl, 	Move, % IdSL_Button1, % "x" . ControlPos1X + ControlPos1W + c_xmarg . A_Space . "y" . ControlPos1Y
+	GuiControl, 	, % IdSL_Edit1, % TheWholeFile
+	Gui, 		HS3: +Disabled	;To prevent the user from interacting with the owner while one of its owned window is visible, disable the owner via Gui +Disabled.
+	Gui, 		ShowLog: Show, % "x" . Xpos . A_Space . "y" . Ypos . A_Space . "w" . Wwidth - (MaxPrimaryMon - WidthOfClient)
+	GuiControl, 	Focus, % IdSL_Edit1
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ShowLogGuiSize(GuiHwnd, EventInfo, Width, Height)	;Gui event
+{
+	global	;assume-global mode of operation
+	
+	Switch EventInfo
+	{
+		Case 1: 		;The window has been minimized.
+		Case 2: 		;The window has been maximized.
+			F_AutoXYWH("*wh", 	IdSL_Edit1)
+			F_AutoXYWH("*x", 	IdSL_Button1)
+		Default:		;Any other case, e.g. manual window size manipulation or window is restored
+			F_AutoXYWH("*wh", 	IdSL_Edit1)
+			F_AutoXYWH("*x", 	IdSL_Button1)
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ShowLogGuiClose(GuiHwnd)	;Gui event
+{
+	F_SL_ButtonOK()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SL_ButtonOK()
+{
+	global	;assume-global mode of operation
+	local	WhichGui := ""
+
+	WhichGui := F_WhichGui()
+	Gui,			% WhichGui . ": -Disabled"
+	Gui,			ShowLog: 	+Disabled
+	Gui, 		ShowLog: 	Destroy
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_IsItEdit()
 {
-	global
+	global	;assume-global mode of operation
 	local 	ControlClass := ""
 
 	F_WhichGui()
@@ -11391,6 +11459,7 @@ Closing Square Bracket ] 								= Closing Square Bracket ]
 Colon : 												= Colon :
 Comma , 												= Comma ,
 Comment												= Comment
+Content of current log file (read only)						= Content of current log file (read only)
 Convert to executable (.exe)								= Convert to executable (.exe)
 Composition of triggerstring tips							= Composition of triggerstring tips
 Compressed executable (upx.exe)							= Compressed executable (upx.exe)
@@ -11602,6 +11671,7 @@ Old location:											= Old location:
 olive												= olive
 EnDis parameter is missing								= EnDis parameter is missing
 On start-up the local version of application was compared with repository version and difference was discovered: = On start-up the local version of application was compared with repository version and difference was discovered:
+Open current log (view only)								= Open current log (view only)
 Open Config.ini in your default editor						= Open Config.ini in your default editor
 Open folder where Config.ini is located						= Open folder where Config.ini is located
 Open folder where log files are located						= Open folder where log files are located
