@@ -322,27 +322,26 @@ Menu, SubmenuLog,		Add, % TransA["disable"],											F_MenuLogEnDis
 Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],								:SubmenuLog	
 Menu, AppSubmenu,		Add, % TransA["Open folder where log files are located"], 					F_OpenLogFolder
 Menu, AppSubmenu,		Add
-Menu, AppSubmenu,		Add, % TransA["Application statistics"],								F_AppStats
+Menu, AppSubmenu,		Add, % TransA["Application statistics"] . "`tShift + Ctrl + S",				F_AppStats
 
-Menu,	AboutHelpSub,	Add,	% TransA["Help: Hotstrings application"] . "`tF1",					F_GuiAboutLink1
-Menu,	AboutHelpSub,	Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"] . "`tCtrl+F1",	F_GuiAboutLink2
-Menu,	AboutHelpSub,	Add
-Menu,	AboutHelpSub,	Add,	% TransA["About this application..."],								F_GuiAbout
-Menu,	AboutHelpSub,	Add
-Menu,	AboutHelpSub,	Add, % TransA["Show intro"],											F_GuiShowIntro
-
-Menu, 	HSMenu,		Add, % TransA["Application"],											:AppSubmenu
-Menu, 	HSMenu, 		Add, % TransA["About / Help"], 										:AboutHelpSub
-Gui, 	HS3: Menu, HSMenu
-Gui, 	HS4: Menu, HSMenu
+Menu, AboutHelpSub,		Add,	% TransA["Help: Hotstrings application"] . "`tF1",					F_GuiAboutLink1
+Menu, AboutHelpSub,		Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"] . "`tCtrl+F1",	F_GuiAboutLink2
+Menu, AboutHelpSub,		Add
+Menu, AboutHelpSub,		Add,	% TransA["About this application..."],								F_GuiAbout
+Menu, AboutHelpSub,		Add
+Menu, AboutHelpSub,		Add, % TransA["Show intro"],											F_GuiShowIntro 
+Menu, HSMenu,			Add, % TransA["Application"],											:AppSubmenu
+Menu, HSMenu, 			Add, % TransA["About / Help"], 										:AboutHelpSub
+Gui,  HS3: Menu, HSMenu
+Gui,  HS4: Menu, HSMenu
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Menu / Context menus - - - - - - - - - - - - - - - - - -
-Menu,	ListView1_ContextMenu, Add, % TransA["Show library header"],							F_ShowLibHeader
-Menu,	ListView1_ContextMenu, Add, % TransA["Edit library header"],							F_EditLibHeader
-Menu,	ListView1_ContextMenu, Add
-Menu,	ListView1_ContextMenu, Add, % TransA["Move definition to another library"],				F_MoveList
-Menu,	ListView1_ContextMenu, Add, % TransA["Delete selected definition"],						F_DeleteHotstring
-Menu,	ListView1_ContextMenu, Add, % TransA["Enable/disable selected definition"],				F_LV1_EnDisDefinition
+Menu, ListView1_ContextMenu, Add, % TransA["Show library header"],							F_ShowLibHeader
+Menu, ListView1_ContextMenu, Add, % TransA["Edit library header"],							F_EditLibHeader
+Menu, ListView1_ContextMenu, Add
+Menu, ListView1_ContextMenu, Add, % TransA["Move definition to another library"],				F_MoveList
+Menu, ListView1_ContextMenu, Add, % TransA["Delete selected definition"],						F_DeleteHotstring
+Menu, ListView1_ContextMenu, Add, % TransA["Enable/disable selected definition"],				F_LV1_EnDisDefinition
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Menu / Context menus - - - - - - - - - - - - - - - - - -
 F_MenuLogEnDis()	;Position in Menu about loging
 F_GuiAbout_CreateObjects()
@@ -496,6 +495,10 @@ Critical, Off
 
 	^F6::	;new thread starts here; only on time of degugging HS3GuiSize will be initiated!
 		F_ToggleSandbox()
+		return
+
+	+^s::
+		F_AppStats()
 		return
 #If
 
@@ -1924,10 +1927,8 @@ F_OneCharPressed(ih, Char)
 	v_InputString .= Char	;the global variable v_InputString is used to display triggerstring tips
 	if (!InStr(HotstringEndChars, Char))
 		InputStringWithoutEndChar .= Char
-	; else
-		; InputStringWithoutEndChar := ""
-	OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n"
-	OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Space . "InputStringWithoutEndChar:" . A_Space . InputStringWithoutEndChar . "`n"
+	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n"
+	; OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Space . "InputStringWithoutEndChar:" . A_Space . InputStringWithoutEndChar . "`n"
 	; OutputDebug, % "v_TrigTipsInput:" . A_Space . v_TrigTipsInput . A_Space . "v_InputString:" . A_Space . v_InputString . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
@@ -1952,6 +1953,8 @@ F_OneCharPressed(ih, Char)
 				if (ini_TTTD > 0)
 					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
 			}
+			else
+				InputStringWithoutEndChar := ""
 		}
 	}
 }
@@ -11839,7 +11842,7 @@ TI_SHOF												= Select function, which will be used to show up hotstring. `
 TI_EnterHotstring										= Enter hotstring corresponding to the triggerstring. `n`nTip: You can use special key names in curved brackets. E.g.: {left 5} will move caret by 5x characters to the left.`n{Backspace 3} or {BS 3} will remove 3 characters from the end of triggerstring. `n`nTo send an extra space or tab after a replacement, include the space or tab at the end of the replacement `nbut make the last character an accent/backtick (`). `nFor example: `n:*:btw::By the way ``n`nBy default (that is, if SendRaw isn't used), the characters ^+!#{} have a special meaning. `nTo send those keys on its own, enclose the name in curly braces. `nFor example: {+}48 600 000.
 TI_AddComment											= You can add optional (not mandatory) comment to new (triggerstring, hotstring) definition. `n`nThe comment can be max. 96 characters long. `n`nTip: Put here link to Wikipedia definition or any other external resource containing reference to entered definition.
 TI_SelectHotstringLib									= Select .csv file containing (triggerstring, hotstring) definitions. `nBy default those files are located in C:\Users\<UserName>\Documents folder.
-TI_LibraryContent										= After pressing (F2) you can move up or down in the table by pressing ↑ or ↓ arrows. `n`nEach time you select any row, options of the selected definitions are automatically loaded to the left part of this window.
+TI_LibraryContent										= After pressing (F2) you can move up or down in the table by pressing ↑ or ↓ keys. `n`nIf you press Enter key when any row is selected, its content will be automatically loaded to left part of this window. `n`nPress context key or Shift + F10 to display context menu with additional options: `n     * Show library header `n     * Edit library header `n`n     * Move definition to another library `n     * Delete selected definition `n     * Enable/disable selected definition
 TI_Sandbox											= Sandbox is used as editing field where you can test `nany (triggerstring, hotstring) definition, e.g. for testing purposes. `nThis area can be switched on/off and moves when you rescale `nthe main application window.
 TI_LibStats											= Amount of definitions in currently selected library to `ntotal amount of currently loaded definitions from all libraries.
 F_HK_CallGUIInfo										= Remark: this hotkey is operating system wide, so before changing it be sure it's not in conflict with any other system wide hotkey.`n`nIt opens Graphical User Interface (GUI) of Hotstrings, even if window is minimized or invisible.
