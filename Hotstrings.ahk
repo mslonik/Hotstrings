@@ -1919,13 +1919,15 @@ F_OneCharPressed(ih, Char)
 	if (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))
 		return
 	
+	if (!v_InputString)
+		InputStringWithoutEndChar := ""
 	v_InputString .= Char	;the global variable v_InputString is used to display triggerstring tips
 	if (!InStr(HotstringEndChars, Char))
 		InputStringWithoutEndChar .= Char
-	else
-		InputStringWithoutEndChar := ""
-	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n
-	; OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Space . "InputStringWithoutEndChar:" . A_Space . InputStringWithoutEndChar . "`n"
+	; else
+		; InputStringWithoutEndChar := ""
+	OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n"
+	OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Space . "InputStringWithoutEndChar:" . A_Space . InputStringWithoutEndChar . "`n"
 	; OutputDebug, % "v_TrigTipsInput:" . A_Space . v_TrigTipsInput . A_Space . "v_InputString:" . A_Space . v_InputString . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
