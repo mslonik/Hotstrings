@@ -260,7 +260,7 @@ Menu, Submenu1,		Add
 Menu, Submenu1,  	   	Add, % TransA["Toggle trigger characters (↓ or EndChars)"], 				:SubmenuEndChars
 Menu, Submenu1,  	   	Add		
 Menu, Submenu1,	 	Add, % TransA["Restore default configuration"],							F_RestoreDefaultConfig
-Menu, Submenu1,		Add, % TransA["Open folder where Config.ini is located"],					F_OpenConfigIniLocation	
+Menu, Submenu1,		Add, % TransA["Open Config.ini folder in Windows Explorer"],					F_OpenConfigIniLocation	
 Menu, Submenu1,		Add, % TransA["Open Config.ini in your default editor"],					F_OpenConfigIniInEditor
 Menu, Submenu1,		Add	;line separator		
 
@@ -283,7 +283,7 @@ F_RefreshListOfLibraries()	; this function calls F_RefreshListOfLibraryTips() as
 ; F_RefreshListOfLibraryTips()
 Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.		
 Menu, LibrariesSubmenu,	Add, % TransA["Visit public libraries webpage"],							F_PublicLibraries
-Menu, LibrariesSubmenu,	Add, % TransA["Open libraries folder in Explorer"], 						F_OpenLibrariesFolderInExplorer
+Menu, LibrariesSubmenu,	Add, % TransA["Open libraries folder in Windows Explorer"], 						F_OpenLibrariesFolderInExplorer
 Menu, LibrariesSubmenu,	Add, % TransA["Download public libraries"],								F_DownloadPublicLibraries
 Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.		
 Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],								F_ImportLibrary
@@ -320,8 +320,10 @@ Menu, AppSubmenu,		Add
 Menu, SubmenuLog,		Add,	% TransA["enable"],												F_MenuLogEnDis
 Menu, SubmenuLog,		Add, % TransA["disable"],											F_MenuLogEnDis
 Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],								:SubmenuLog	
-Menu, AppSubmenu,		Add, % TransA["Open folder where log files are located"], 					F_OpenLogFolder
+Menu, AppSubmenu,		Add, % TransA["Open log folder in Windows Explorer"], 						F_OpenLogFolder
 Menu, AppSubmenu,		Add, % TransA["Open current log (view only)"],							F_ViewCurrentLog
+; Menu, AppSubmenu,		Add, % TransA["Copy log folder path to Clipboard"],						F_LFtoClipboard
+
 Menu, AppSubmenu,		Add
 Menu, AppSubmenu,		Add, % TransA["Application statistics"] . "`tShift + Ctrl + S",				F_AppStats
 
@@ -677,8 +679,8 @@ F_ViewCurrentLog()
 	global	;assume-global mode of operation
 	local	TheWholeFile := ""
 ,			ControlPos1 := 0, ControlPos1X := 0, ControlPos1Y := 0, ControlPos1W := 0, ControlPos1H := 0
-,			MaxButtonWidth := 0, WidthOfClient := 0, MaxPrimaryMon := 0, SM_CXFULLSCREEN := 16, SM_CXMAXIMIZED := 61
-,			Xpos := 0, Ypos := 0, Wwidth := 0, EditWidth := 0
+,			WidthOfClient := 0, HeightOfClient := 0, WMaxPrimaryMon := 0, HMaxPrimaryMon := 0, SM_CXFULLSCREEN := 16, SM_CYFULLSCREEN := 17, SM_CXMAXIMIZED := 61, SM_CYMAXIMIZED := 62
+,			Xpos := 0, Ypos := 0, Wwidth := 0, Hheight := 0, EditWidth := 0, EditHeight := 0
 ,			LastGui := ""
 
 	FileRead, TheWholeFile, % v_LogFileName
@@ -690,21 +692,23 @@ F_ViewCurrentLog()
 
 	LastGui 		:= F_WhichGui()
 	Gui,			% LastGui . ": +Disabled"
-	SysGet, 		WidthOfClient, % SM_CXFULLSCREEN	;Width of the client area for a full-screen window on the primary display monitor, in pixels.
-	SysGet, 		MaxPrimaryMon, % SM_CXMAXIMIZED		;Default dimensions, in pixels, of a maximized top-level window on the primary display monitor.
-	WinGetPos, 	Xpos, Ypos, Wwidth, , A
+	SysGet, 		WidthOfClient, 	% SM_CXFULLSCREEN	;Width of the client area for a full-screen window on the primary display monitor, in pixels.
+	SysGet,		HeightOfClient, 	% SM_CYFULLSCREEN	;Height of the client area for a full-screen window on the primary display monitor, in pixels.
+	SysGet, 		WMaxPrimaryMon, 	% SM_CXMAXIMIZED	;Default dimensions, in pixels, of a maximized top-level window on the primary display monitor.
+	SysGet,		HMaxPrimaryMon,	% SM_CYMAXIMIZED
+	WinGetPos, 	Xpos, Ypos, Wwidth, Hheight, A
 	Gui, 		ShowLog: New, 		+Resize +HwndShowLogGuiHwnd +OwnerHS3 -DPIScale, % A_ScriptName . ":" . A_Space . TransA["Content of current log file (read only)"] . "`n" . v_LogFileName ;DPI scaling only applies to Gui sub-commands and related variables, so coordinates coming directly from other sources such WinGetPos will not work. There are a number of ways to deal with this, e.g. disable (Gui -DPIScale) scaling on the fly, as needed.
 	Gui,			ShowLog: Margin, 	% c_xmarg, % c_ymarg
 	Gui,			ShowLog: Add,		Button,	x0 y0 HwndIdSL_Button1 gF_SL_ButtonOK, 	% TransA["OK"]
 	GuiControlGet, ControlPos1, Pos, % IdSL_Button1
-	MaxButtonWidth := ControlPos1W
-,	EditWidth 	:= Wwidth - (MaxPrimaryMon - WidthOfClient) - 3 * c_xmarg - MaxButtonWidth
-	Gui,			ShowLog: Add,	Edit,  	% "x" . c_xmarg . A_Space . "y" . c_ymarg . A_Space . "HwndIdSL_Edit1 r25" . A_Space . "w" . EditWidth
+	EditWidth 	:= Wwidth - (WMaxPrimaryMon - WidthOfClient) - 3 * c_xmarg - ControlPos1W
+,	EditHeight	:= Hheight - (HMaxPrimaryMon - HeightOfClient) - 2 * c_ymarg
+	Gui,			ShowLog: Add,	Edit,  	% "x" . c_xmarg . A_Space . "y" . c_ymarg . A_Space . "HwndIdSL_Edit1" . A_Space . "w" . EditWidth . A_Space . "h" . EditHeight
 	GuiControlGet, ControlPos1, Pos, % IdSL_Edit1
 	GuiControl, 	Move, % IdSL_Button1, % "x" . ControlPos1X + ControlPos1W + c_xmarg . A_Space . "y" . ControlPos1Y
 	GuiControl, 	, % IdSL_Edit1, % TheWholeFile
 	Gui, 		HS3: +Disabled	;To prevent the user from interacting with the owner while one of its owned window is visible, disable the owner via Gui +Disabled.
-	Gui, 		ShowLog: Show, % "x" . Xpos . A_Space . "y" . Ypos . A_Space . "w" . Wwidth - (MaxPrimaryMon - WidthOfClient)
+	Gui, 		ShowLog: Show, % "x" . Xpos + 25 . A_Space . "y" . Ypos + 25 . A_Space . "w" . Wwidth - (WMaxPrimaryMon - WidthOfClient) . A_Space . "h" . Hheight - (HMaxPrimaryMon - HeightOfClient)
 	GuiControl, 	Focus, % IdSL_Edit1
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1990,10 +1994,10 @@ F_OneCharPressed(ih, Char)
 	if (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))
 		return
 	
-	if (!v_InputString)
+	if (!v_InputString)	;if (v_Inputstring = ""): each time d(t, o, h) is triggered, v_InputString is cleared.
 	{
-		InputStringWithoutEndChar := ""
-		f_FirstEndChar := false
+		InputStringWithoutEndChar := "" ;clear sub-buffer, which collects only strings without EndChars
+,		f_FirstEndChar := false		;clear the flag informing if first character within buffer is EndChar
 	}
 
 	if (!InStr(HotstringEndChars, Char))	;new Char is NOT EndChar`
@@ -2001,10 +2005,21 @@ F_OneCharPressed(ih, Char)
 		v_InputString .= Char	;the global variable v_InputString is used to display triggerstring tips. 
 		InputStringWithoutEndChar .= Char
 	}
-	; else								;new Char is EndChar
+	; else								;new Char is EndChar, see below
+	if (InStr(HotstringEndChars, Char))	;new Char is EndChar
+	{
+		if (!v_InputString)	;if (v_InputString = "")
+		{
+			f_FirstEndChar := true
+			v_InputString .= Char	;the global variable v_InputString is used to display triggerstring tips. 
+		}
+		if (!f_FirstEndChar)
+			v_InputString := ""			;EndChar is last in buffer, so make it empty
+		InputStringWithoutEndChar := ""
+	}
 
 	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n"
-	OutputDebug, % "v_InputString:" . v_InputString . A_Space . "ISWEndChar:" . InputStringWithoutEndChar . "`n"
+	; OutputDebug, % "v_InputString:" . v_InputString . A_Space . "ISWEndChar:" . InputStringWithoutEndChar . "`n"
 	; OutputDebug, % "v_TrigTipsInput:" . A_Space . v_TrigTipsInput . A_Space . "v_InputString:" . A_Space . v_InputString . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
@@ -2044,18 +2059,7 @@ F_OneCharPressed(ih, Char)
 				return
 			}
 	}
-	if (InStr(HotstringEndChars, Char))	;new Char is EndChar
-	{
-		if (!v_InputString)
-		{
-			f_FirstEndChar := true
-			v_InputString .= Char	;the global variable v_InputString is used to display triggerstring tips. 
-		}
-		if (!f_FirstEndChar)
-			v_InputString := ""			;EndChar is last in buffer, so make it empty
-		InputStringWithoutEndChar := ""
-	}
-
+	F_DestroyTriggerstringTips(ini_TTCn)
 	OutputDebug, % "The end" . A_Space . "v_InputString:" . v_InputString . A_Space . "ISWEndChar:" . InputStringWithoutEndChar . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11699,15 +11703,15 @@ EnDis parameter is missing								= EnDis parameter is missing
 On start-up the local version of application was compared with repository version and difference was discovered: = On start-up the local version of application was compared with repository version and difference was discovered:
 Open current log (view only)								= Open current log (view only)
 Open Config.ini in your default editor						= Open Config.ini in your default editor
-Open folder where Config.ini is located						= Open folder where Config.ini is located
-Open folder where log files are located						= Open folder where log files are located
-Open libraries folder in Explorer							= Open libraries folder in Explorer
+Open Config.ini folder in Windows Explorer					= Open Config.ini folder in Windows Explorer
+Open log folder in Windows Explorer						= Open log folder in Windows Explorer
+Open libraries folder in Windows Explorer					= Open libraries folder in Windows Explorer
 Opening Curly Bracket { 									= Opening Curly Bracket {
 Opening Round Bracket ( 									= Opening Round Bracket (
 Opening Square Bracket [ 								= Opening Square Bracket [
 options												= options	
 or													= or
-Out. Fun.										= Out. Fun.
+Out. Fun.												= Out. Fun.
 question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
