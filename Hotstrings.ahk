@@ -711,7 +711,7 @@ F_ViewCurrentLog()
 ShowLogGuiSize(GuiHwnd, EventInfo, Width, Height)	;Gui event
 {
 	global	;assume-global mode of operation
-	
+
 	Switch EventInfo
 	{
 		Case 1: 		;The window has been minimized.
@@ -1976,7 +1976,7 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
-	static	InputStringWithoutEndChar := ""
+	static	InputStringWithoutEndChar := "", f_FirstEndChar := false
 
 	Critical, On
 
@@ -1991,46 +1991,72 @@ F_OneCharPressed(ih, Char)
 		return
 	
 	if (!v_InputString)
+	{
 		InputStringWithoutEndChar := ""
-	if (!InputStringWithoutEndChar)
-		v_InputString := ""
-	v_InputString .= Char	;the global variable v_InputString is used to display triggerstring tips
-	if (!InStr(HotstringEndChars, Char))
+		f_FirstEndChar := false
+	}
+
+	if (!InStr(HotstringEndChars, Char))	;new Char is NOT EndChar`
+	{
+		v_InputString .= Char	;the global variable v_InputString is used to display triggerstring tips. 
 		InputStringWithoutEndChar .= Char
-	else
-		InputStringWithoutEndChar := ""
+	}
+	; else								;new Char is EndChar
+
 	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n"
-	; OutputDebug, % "v_InputString:" . A_Space . v_InputString . A_Space . "ISWEndChar:" . A_Space . InputStringWithoutEndChar . "`n"
+	OutputDebug, % "v_InputString:" . v_InputString . A_Space . "ISWEndChar:" . InputStringWithoutEndChar . "`n"
 	; OutputDebug, % "v_TrigTipsInput:" . A_Space . v_TrigTipsInput . A_Space . "v_InputString:" . A_Space . v_InputString . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn) and (v_InputString)
 	{
-		F_PrepareTriggerstringTipsTables2(v_InputString)	;old version: F_PrepareTriggerstringTipsTables()
+		F_PrepareTriggerstringTipsTables2(v_InputString)	;Variant when new sequence starts from EndChar.
 		; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
 		if (a_Tips.Count())	;if tips are available display then
 		{
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
+			Critical, Off	
+			return	
 		}
-		else	;or destroy previously visible tips
+		if (f_FirstEndChar)
 		{
-			F_DestroyTriggerstringTips(ini_TTCn)
-			; v_InputString := InputStringWithoutEndChar
-			F_PrepareTriggerstringTipsTables2(InputStringWithoutEndChar)
-			; F_PrepareTriggerstringTipsTables2(v_InputString)
+			F_PrepareTriggerstringTipsTables2(SubStr(v_InputString, 2))	;Variant without first character, e.g. EndChar.
+			; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
 			if (a_Tips.Count())	;if tips are available display then
+			{
+				v_InputString := SubStr(v_InputString, 2)
+				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
+				if (ini_TTTD > 0)
+					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
+				Critical, Off	
+				return	
+			}
+		}
+		F_PrepareTriggerstringTipsTables2(InputStringWithoutEndChar)
+		if (a_Tips.Count())	;if tips are available display then
 			{
 				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 				if (ini_TTTD > 0)
 					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
+				Critical, Off
+				return
 			}
-			else
-				InputStringWithoutEndChar := ""
-		}
 	}
-	; OutputDebug, % "The end" . A_Space . "v_InputString:" . A_Space . v_InputString . "`n"
+	if (InStr(HotstringEndChars, Char))	;new Char is EndChar
+	{
+		if (!v_InputString)
+		{
+			f_FirstEndChar := true
+			v_InputString .= Char	;the global variable v_InputString is used to display triggerstring tips. 
+		}
+		if (!f_FirstEndChar)
+			v_InputString := ""			;EndChar is last in buffer, so make it empty
+		InputStringWithoutEndChar := ""
+	}
+
+	OutputDebug, % "The end" . A_Space . "v_InputString:" . v_InputString . A_Space . "ISWEndChar:" . InputStringWithoutEndChar . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
