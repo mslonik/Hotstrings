@@ -260,8 +260,9 @@ Menu, Submenu1,		Add
 Menu, Submenu1,  	   	Add, % TransA["Toggle trigger characters (↓ or EndChars)"], 				:SubmenuEndChars
 Menu, Submenu1,  	   	Add		
 Menu, Submenu1,	 	Add, % TransA["Restore default configuration"],							F_RestoreDefaultConfig
-Menu, Submenu1,		Add, % TransA["Open Config.ini folder in Windows Explorer"],					F_OpenConfigIniLocation	
+Menu, Submenu1,		Add, % TransA["Open Config.ini folder in Windows Explorer"],				F_OpenConfigIniLocation	
 Menu, Submenu1,		Add, % TransA["Open Config.ini in your default editor"],					F_OpenConfigIniInEditor
+Menu, Submenu1,		Add, % TransA["Copy Config.ini folder path to Clipboard"],					F_PathtoClipboard
 Menu, Submenu1,		Add	;line separator		
 
 Menu, SubmenuPath,		Add, % TransA["Libraries folder: restore it to default location"], 			F_PathLibrariesRestoreDefault
@@ -294,6 +295,7 @@ Menu, LibrariesSubmenu,	Add	;line separator
 Menu, LibrariesSubmenu,	Add,	% TransA["Add new library file"],									F_GuiAddLibrary
 Menu, LibrariesSubmenu,	Add, % TransA["Rename selected library filename"],						F_RenameLibrary
 Menu, LibrariesSubmenu,	Add, % TransA["Delete selected library file"],							F_DeleteLibrary
+Menu, LibrariesSubmenu,	Add, % TransA["Copy Libraries folder path to Clipboard"],					F_PathtoClipboard
 Menu, LibrariesSubmenu,	Add	;line separator
 Menu, LibrariesSubmenu,	Add, % TransA["Edit library header"],									F_EditLibHeader
 Menu, LibrariesSubmenu,	Add, % TransA["Show library header"],									F_ShowLibHeader
@@ -322,7 +324,7 @@ Menu, SubmenuLog,		Add, % TransA["disable"],											F_MenuLogEnDis
 Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],								:SubmenuLog	
 Menu, AppSubmenu,		Add, % TransA["Open log folder in Windows Explorer"], 						F_OpenLogFolder
 Menu, AppSubmenu,		Add, % TransA["Open current log (view only)"],							F_ViewCurrentLog
-; Menu, AppSubmenu,		Add, % TransA["Copy log folder path to Clipboard"],						F_LFtoClipboard
+Menu, AppSubmenu,		Add, % TransA["Copy Log folder path to Clipboard"],						F_PathtoClipboard
 
 Menu, AppSubmenu,		Add
 Menu, AppSubmenu,		Add, % TransA["Application statistics"] . "`tShift + Ctrl + S",				F_AppStats
@@ -674,6 +676,26 @@ Critical, Off
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_PathtoClipboard()
+{
+	global	;assume-global mode of operation
+
+	Clipboard := ""
+	Switch A_ThisMenuItem
+	{
+		Case TransA["Copy Log folder path to Clipboard"]:
+			Clipboard := HADLog
+
+		Case TransA["Copy Libraries folder path to Clipboard"]:
+			Clipboard := ini_HADL
+		
+		Case TransA["Copy Config.ini folder path to Clipboard"]:
+			Clipboard := SubStr(ini_HADConfig, 1, -10)	;-10 = length of "Config.ini" text string
+	}
+	ClipWait	; Wait for the clipboard to contain text.
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Required content is copied to the Clipboard"]
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ViewCurrentLog()
 {
 	global	;assume-global mode of operation
@@ -686,7 +708,7 @@ F_ViewCurrentLog()
 	FileRead, TheWholeFile, % v_LogFileName
 	if (!TheWholeFile)
 	{
-		MsgBox,64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Content of current log file (read only)"] . "`n" . v_LogFileName . "`n`n" . TransA["is empty at the moment."]
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Content of current log file (read only)"] . "`n" . v_LogFileName . "`n`n" . TransA["is empty at the moment."]
 		return
 	}
 
@@ -697,7 +719,7 @@ F_ViewCurrentLog()
 	SysGet, 		WMaxPrimaryMon, 	% SM_CXMAXIMIZED	;Default dimensions, in pixels, of a maximized top-level window on the primary display monitor.
 	SysGet,		HMaxPrimaryMon,	% SM_CYMAXIMIZED
 	WinGetPos, 	Xpos, Ypos, Wwidth, Hheight, A
-	Gui, 		ShowLog: New, 		+Resize +HwndShowLogGuiHwnd +OwnerHS3 -DPIScale, % A_ScriptName . ":" . A_Space . TransA["Content of current log file (read only)"] . "`n" . v_LogFileName ;DPI scaling only applies to Gui sub-commands and related variables, so coordinates coming directly from other sources such WinGetPos will not work. There are a number of ways to deal with this, e.g. disable (Gui -DPIScale) scaling on the fly, as needed.
+	Gui, 		ShowLog: New, 		+Resize +HwndShowLogGuiHwnd +OwnerHS3 -DPIScale, % A_ScriptName . ":" . A_Space . TransA["Content of current log file (read only)"] . A_Space . v_LogFileName ;DPI scaling only applies to Gui sub-commands and related variables, so coordinates coming directly from other sources such WinGetPos will not work. There are a number of ways to deal with this, e.g. disable (Gui -DPIScale) scaling on the fly, as needed.
 	Gui,			ShowLog: Margin, 	% c_xmarg, % c_ymarg
 	Gui,			ShowLog: Add,		Button,	x0 y0 HwndIdSL_Button1 gF_SL_ButtonOK, 	% TransA["OK"]
 	GuiControlGet, ControlPos1, Pos, % IdSL_Button1
@@ -1503,7 +1525,6 @@ F_CheckIfRemoveOldDir()
 	local	OldAppFolder := "", OldScriptPID := 0
 
 	IniRead, OldAppFolder, 	% ini_HADConfig, Configuration, OldScriptDir, % A_Space
-	; IniRead, OldScriptPID, 	% ini_HADConfig, Configuration, OldScriptPID, % A_Space
 	; OutputDebug, % "OldAppFolder:" . A_Tab . OldAppFolder . "`n"
 	if (OldAppFolder != "")
 	{
@@ -1620,46 +1641,46 @@ F_PathRestoreDefaultAppFolder()
 		return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_PathConfigIni()
-{
-	global	;assume-global mode of operation
-	local	  Old_HADConfig 		:= ini_HADConfig	;HAD = Hotstrings Application Data
-			, HADConfig_AppData  	:= A_AppData   . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Config.ini"	;Hotstrings Application Data Config .ini
-			, HADConfig_App		:= A_ScriptDir . "\" . "Config.ini"
+; F_PathConfigIni()	;no longer used code?
+; {
+; 	global	;assume-global mode of operation
+; 	local	  Old_HADConfig 		:= ini_HADConfig	;HAD = Hotstrings Application Data
+; 			, HADConfig_AppData  	:= A_AppData   . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Config.ini"	;Hotstrings Application Data Config .ini
+; 			, HADConfig_App		:= A_ScriptDir . "\" . "Config.ini"
 
-	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Would you like to change Config.ini file location to folder where is ""Hotstrings"" script / app?"] 
-		. "`n`n" . TransA["Current Config.ini file location:"]
-		. "`n" . Old_HADConfig	;Yes/No/Cancel + Icon Asterisk (info)
-	IfMsgBox, Yes
-	{		
-		if (Old_HADConfig = HADConfig_App)
-		{
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Nothing to do to me, Config.ini is already where you want it."]
-			return
-		}
-		if (Old_HADConfig = HADConfig_AppData)
-		{
-			FileMove, % HADConfig_AppData, *.*, Overwrite := true
-			ini_HADConfig := HADConfig_App
-			if (!ErrorLevel)
-			{
-				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Config.ini file was successfully moved to the new location."]
-					. "`n`n" . TransA["Now application must be restarted (into default mode) in order to apply settings from new location."]
-				IniWrite, % ini_HADConfig, % ini_HADConfig, Configuration, HADConfig	;HADconfig = Hotstrings Application Data Config (.ini)
-				F_ReloadApplication()							;reload into default mode of operation
-			}
-			else
-			{
-				MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Something went wrong on time of moving Config.ini file. This operation is aborted."]
-				return
-			}
-		}
-	}
-	IfMsgBox, No
-		return
-	IfMsgBox, Cancel
-		return
-}
+; 	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Would you like to change Config.ini file location to folder where is ""Hotstrings"" script / app?"] 
+; 		. "`n`n" . TransA["Current Config.ini file location:"]
+; 		. "`n" . Old_HADConfig	;Yes/No/Cancel + Icon Asterisk (info)
+; 	IfMsgBox, Yes
+; 	{		
+; 		if (Old_HADConfig = HADConfig_App)
+; 		{
+; 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Nothing to do to me, Config.ini is already where you want it."]
+; 			return
+; 		}
+; 		if (Old_HADConfig = HADConfig_AppData)
+; 		{
+; 			FileMove, % HADConfig_AppData, *.*, Overwrite := true
+; 			ini_HADConfig := HADConfig_App
+; 			if (!ErrorLevel)
+; 			{
+; 				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Config.ini file was successfully moved to the new location."]
+; 					. "`n`n" . TransA["Now application must be restarted (into default mode) in order to apply settings from new location."]
+; 				IniWrite, % ini_HADConfig, % ini_HADConfig, Configuration, HADConfig	;HADconfig = Hotstrings Application Data Config (.ini)
+; 				F_ReloadApplication()							;reload into default mode of operation
+; 			}
+; 			else
+; 			{
+; 				MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Something went wrong on time of moving Config.ini file. This operation is aborted."]
+; 				return
+; 			}
+; 		}
+; 	}
+; 	IfMsgBox, No
+; 		return
+; 	IfMsgBox, Cancel
+; 		return
+; }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PathConfigIniRestoreDefault()
 {
@@ -2060,7 +2081,7 @@ F_OneCharPressed(ih, Char)
 			}
 	}
 	F_DestroyTriggerstringTips(ini_TTCn)
-	OutputDebug, % "The end" . A_Space . "v_InputString:" . v_InputString . A_Space . "ISWEndChar:" . InputStringWithoutEndChar . "`n"
+	; OutputDebug, % "The end" . A_Space . "v_InputString:" . v_InputString . A_Space . "ISWEndChar:" . InputStringWithoutEndChar . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
@@ -11506,6 +11527,9 @@ Conversion of .csv library file into new .ahk file containing static (triggerstr
 Conversion of .csv library file into new .ahk file containing dynamic (triggerstring, hotstring) definitions = Conversion of .csv library file into new .ahk file containing dynamic (triggerstring, hotstring) definitions
 Converted												= Converted
 Copy clipboard content into ""Enter hotstring""				= Copy clipboard content into ""Enter hotstring""
+Copy Config.ini folder path to Clipboard					= Copy Config.ini folder path to Clipboard
+Copy Libraries folder path to Clipboard						= Copy Libraries folder path to Clipboard
+Copy Log folder path to Clipboard							= Copy Log folder path to Clipboard
 Cumulative gain [characters]								= Cumulative gain [characters]
 Current Config.ini file location:							= Current Config.ini file location:
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
@@ -11736,6 +11760,7 @@ Reload in silent mode									= Reload in silent mode
 Rename selected library filename									= Rename selected library filename
 Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
 Repository version										= Repository version
+Required content is copied to the Clipboard					= Required content is copied to the Clipboard
 Required encoding: UTF-8 with BOM. Application will exit now.	= Required encoding: UTF-8 with BOM. Application will exit now.
 Reset Recognizer (Z)									= Reset Recognizer (Z)
 Restore default										= Restore default
