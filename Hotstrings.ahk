@@ -1641,46 +1641,46 @@ F_PathRestoreDefaultAppFolder()
 		return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-; F_PathConfigIni()	;no longer used code?
-; {
-; 	global	;assume-global mode of operation
-; 	local	  Old_HADConfig 		:= ini_HADConfig	;HAD = Hotstrings Application Data
-; 			, HADConfig_AppData  	:= A_AppData   . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Config.ini"	;Hotstrings Application Data Config .ini
-; 			, HADConfig_App		:= A_ScriptDir . "\" . "Config.ini"
+F_PathConfigIni()
+{
+	global	;assume-global mode of operation
+	local	  Old_HADConfig 		:= ini_HADConfig	;HAD = Hotstrings Application Data
+			, HADConfig_AppData  	:= A_AppData   . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Config.ini"	;Hotstrings Application Data Config .ini
+			, HADConfig_App		:= A_ScriptDir . "\" . "Config.ini"
 
-; 	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Would you like to change Config.ini file location to folder where is ""Hotstrings"" script / app?"] 
-; 		. "`n`n" . TransA["Current Config.ini file location:"]
-; 		. "`n" . Old_HADConfig	;Yes/No/Cancel + Icon Asterisk (info)
-; 	IfMsgBox, Yes
-; 	{		
-; 		if (Old_HADConfig = HADConfig_App)
-; 		{
-; 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Nothing to do to me, Config.ini is already where you want it."]
-; 			return
-; 		}
-; 		if (Old_HADConfig = HADConfig_AppData)
-; 		{
-; 			FileMove, % HADConfig_AppData, *.*, Overwrite := true
-; 			ini_HADConfig := HADConfig_App
-; 			if (!ErrorLevel)
-; 			{
-; 				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Config.ini file was successfully moved to the new location."]
-; 					. "`n`n" . TransA["Now application must be restarted (into default mode) in order to apply settings from new location."]
-; 				IniWrite, % ini_HADConfig, % ini_HADConfig, Configuration, HADConfig	;HADconfig = Hotstrings Application Data Config (.ini)
-; 				F_ReloadApplication()							;reload into default mode of operation
-; 			}
-; 			else
-; 			{
-; 				MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Something went wrong on time of moving Config.ini file. This operation is aborted."]
-; 				return
-; 			}
-; 		}
-; 	}
-; 	IfMsgBox, No
-; 		return
-; 	IfMsgBox, Cancel
-; 		return
-; }
+	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Would you like to change Config.ini file location to folder where is ""Hotstrings"" script / app?"] 
+		. "`n`n" . TransA["Current Config.ini file location:"]
+		. "`n" . Old_HADConfig	;Yes/No/Cancel + Icon Asterisk (info)
+	IfMsgBox, Yes
+	{		
+		if (Old_HADConfig = HADConfig_App)
+		{
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Nothing to do to me, Config.ini is already where you want it."]
+			return
+		}
+		if (Old_HADConfig = HADConfig_AppData)
+		{
+			FileMove, % HADConfig_AppData, *.*, Overwrite := true
+			ini_HADConfig := HADConfig_App
+			if (!ErrorLevel)
+			{
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Config.ini file was successfully moved to the new location."]
+					. "`n`n" . TransA["Now application must be restarted (into default mode) in order to apply settings from new location."]
+				IniWrite, % ini_HADConfig, % ini_HADConfig, Configuration, HADConfig	;HADconfig = Hotstrings Application Data Config (.ini)
+				F_ReloadApplication()							;reload into default mode of operation
+			}
+			else
+			{
+				MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Something went wrong on time of moving Config.ini file. This operation is aborted."]
+				return
+			}
+		}
+	}
+	IfMsgBox, No
+		return
+	IfMsgBox, Cancel
+		return
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PathConfigIniRestoreDefault()
 {
@@ -2001,7 +2001,7 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
-	static	InputStringWithoutEndChar := "", f_FirstEndChar := false
+	static	f_EndCharDetected := false, LastTip := ""
 
 	Critical, On
 
@@ -2015,73 +2015,60 @@ F_OneCharPressed(ih, Char)
 	if (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))
 		return
 	
-	if (!v_InputString)	;if (v_Inputstring = ""): each time d(t, o, h) is triggered, v_InputString is cleared.
-	{
-		InputStringWithoutEndChar := "" ;clear sub-buffer, which collects only strings without EndChars
-,		f_FirstEndChar := false		;clear the flag informing if first character within buffer is EndChar
-	}
+	f_EndCharDetected := false
+	if (!v_InputString)
+		LastTip := ""
+	if (InStr(HotstringEndChars, Char))
+		f_EndCharDetected := true
+	
+	v_InputString .= Char
 
-	if (!InStr(HotstringEndChars, Char))	;new Char is NOT EndChar`
-	{
-		v_InputString .= Char	;the global variable v_InputString is used to display triggerstring tips. 
-		InputStringWithoutEndChar .= Char
-	}
-	; else								;new Char is EndChar, see below
-	if (InStr(HotstringEndChars, Char))	;new Char is EndChar
-	{
-		if (!v_InputString)	;if (v_InputString = "")
-		{
-			f_FirstEndChar := true
-			v_InputString .= Char	;the global variable v_InputString is used to display triggerstring tips. 
-		}
-		if (!f_FirstEndChar)
-			v_InputString := ""			;EndChar is last in buffer, so make it empty
-		InputStringWithoutEndChar := ""
-	}
-
-	; OutputDebug, % "InputHookBuffer:" . A_Tab . ih.Input . "`n"
-	; OutputDebug, % "v_InputString:" . v_InputString . A_Space . "ISWEndChar:" . InputStringWithoutEndChar . "`n"
-	; OutputDebug, % "v_TrigTipsInput:" . A_Space . v_TrigTipsInput . A_Space . "v_InputString:" . A_Space . v_InputString . "`n"
+	OutputDebug, % "v_InputString:" . v_InputString . A_Space . "LastTip:" . LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
-	if (ini_TTTtEn) and (v_InputString)
+	if (ini_TTTtEn)
 	{
+		F_DestroyTriggerstringTips(ini_TTCn)
 		F_PrepareTriggerstringTipsTables2(v_InputString)	;Variant when new sequence starts from EndChar.
 		; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
 		if (a_Tips.Count())	;if tips are available display then
 		{
+			; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
+			if (a_Tips.Count() = 1)
+				LastTip := a_Tips[1]
+			else
+				LastTip := ""
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
 			Critical, Off	
 			return	
 		}
-		if (f_FirstEndChar)
+		if (v_InputString) and (InStr(HotstringEndChars, v_InputString)) ;if v_InputString isn't empty and contains EndChar
 		{
-			F_PrepareTriggerstringTipsTables2(SubStr(v_InputString, 2))	;Variant without first character, e.g. EndChar.
-			; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
-			if (a_Tips.Count())	;if tips are available display then
-			{
-				v_InputString := SubStr(v_InputString, 2)
-				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
-				if (ini_TTTD > 0)
-					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
-				Critical, Off	
-				return	
-			}
+			v_InputString := SubStr(v_InputString, 2)	;Remove first character from input buffer which is EndChar
+			F_OneCharPressed(ih, Char := "")			;recursion: try again if tips are available
 		}
-		F_PrepareTriggerstringTipsTables2(InputStringWithoutEndChar)
-		if (a_Tips.Count())	;if tips are available display then
+
+		if (LastTip)
+		{
+			if (LastTip . Char = v_InputString)
 			{
-				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
-				if (ini_TTTD > 0)
-					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
+				LastTip := ""
 				Critical, Off
 				return
 			}
+			else
+				LastTip := ""
+		}
+
+		if (!LastTip) and (f_EndCharDetected)
+		{
+			v_InputString := ""
+,			f_EndCharDetected := false
+		}
 	}
-	F_DestroyTriggerstringTips(ini_TTCn)
-	; OutputDebug, % "The end" . A_Space . "v_InputString:" . v_InputString . A_Space . "ISWEndChar:" . InputStringWithoutEndChar . "`n"
+	OutputDebug, % "The end" . A_Space . "v_InputString:" . v_InputString . A_Space . "LastTip:" . LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
