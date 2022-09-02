@@ -2001,7 +2001,7 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
-	static	f_EndCharDetected := false, LastTip := ""
+	static	f_EndCharDetected := false, LastTip := false ;LastTip := ""
 
 	Critical, On
 
@@ -2017,7 +2017,8 @@ F_OneCharPressed(ih, Char)
 	
 	f_EndCharDetected := false
 	if (!v_InputString)
-		LastTip := ""
+		LastTip := false
+		; LastTip := ""
 	if (InStr(HotstringEndChars, Char))
 		f_EndCharDetected := true
 	
@@ -2034,10 +2035,14 @@ F_OneCharPressed(ih, Char)
 		if (a_Tips.Count())	;if tips are available display then
 		{
 			; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
-			if (a_Tips.Count() = 1)
-				LastTip := a_Tips[1]
+			if (a_Tips.Count())
+				LastTip := true
 			else
-				LastTip := ""
+				LastTip := false
+			; if (a_Tips.Count() = 1)
+				; LastTip := a_Tips[1]
+			; else
+				; LastTip := ""
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
@@ -2052,15 +2057,25 @@ F_OneCharPressed(ih, Char)
 
 		if (LastTip)
 		{
-			if (LastTip . Char = v_InputString)
-			{
-				LastTip := ""
-				Critical, Off
-				return
-			}
-			else
-				LastTip := ""
+			for key, value in a_Tips
+				if (a_Tips[key] . Char = v_InputString)
+					{
+						LastTip := false
+						Critical, Off
+						return
+					}
 		}
+		; if (LastTip)
+		; {
+		; 	if (LastTip . Char = v_InputString)
+		; 	{
+		; 		LastTip := ""
+		; 		Critical, Off
+		; 		return
+		; 	}
+		; 	else
+		; 		LastTip := ""
+		; }
 
 		if (!LastTip) and (f_EndCharDetected)
 		{
