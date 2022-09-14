@@ -2040,33 +2040,32 @@ F_OneCharPressed(ih, Char)
 		if (a_Tips.Count())	;if tips are available display then
 		{
 			; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
-			if (a_Tips.Count())
-				f_LastTip := true
-			else
-				f_LastTip := false
+			f_LastTip := true
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
 			Critical, Off	
 			return	
 		}
-		if (v_InputString) and (InStr(HotstringEndChars, SubStr(v_InputString, 1, 1))) ;if v_InputString isn't empty and contains EndChar
-		; if (v_InputString) and (InStr(HotstringEndChars, v_InputString)) ;if v_InputString isn't empty and contains EndChar
-		{
-			v_InputString := SubStr(v_InputString, 2)	;Remove first character from input buffer which is EndChar
-			F_OneCharPressed(ih, Char := "")			;recursion: try again if tips are available
-		}
+		else
+			f_LastTip := false
 
-		if (f_LastTip)
-		{
-			for key, value in a_Tips
-				if (a_Tips[key] . Char = v_InputString)
-					{
-						f_LastTip := false
-						Critical, Off
-						return
-					}
-		}
+		; if (v_InputString) and (InStr(HotstringEndChars, SubStr(v_InputString, 1, 1))) ;if v_InputString isn't empty and its first character is EndChar
+		; {
+		; 	v_InputString := SubStr(v_InputString, 2)	;Remove first character from input buffer which is EndChar
+		; 	F_OneCharPressed(ih, Char := "")			;recursion: try again if tips are available
+		; }
+
+		; if (f_LastTip)
+		; {
+		; 	for key, value in a_Tips
+		; 		if (a_Tips[key] . Char = v_InputString)
+		; 			{
+		; 				f_LastTip := false
+		; 				Critical, Off
+		; 				return
+		; 			}
+		; }
 	}
 	OutputDebug, % "The end" . A_Space . "v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 }
