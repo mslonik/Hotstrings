@@ -307,7 +307,7 @@ Menu, SubmenuReload, 	Add,	% TransA["Reload in default mode"] . "`tShift + Ctrl 
 Menu, SubmenuReload, 	Add,	% TransA["Reload in silent mode"],									F_ReloadApplication
 Menu, AppSubmenu, 		Add,	% TransA["Reload"],												:SubmenuReload
 
-Menu, AppSubmenu,		Add, % TransA["Suspend Hotkeys"] . "`tF10",								F_TraySuspendHotkeys
+Menu, AppSubmenu,		Add, % TransA["Suspend Hotstrings"] . "`tF10",								F_TraySuspendHotkeys
 Menu, AppSubmenu,		Add, % TransA["Pause"],												F_TrayPauseScript
 Menu, AppSubmenu,		Add, % TransA["Exit"],												F_Exit
 Menu, AppSubmenu,		Add	;To add a menu separator line, omit all three parameters.
@@ -2458,13 +2458,13 @@ F_TraySuspendHotkeys()
 	Suspend, Toggle
 	if (A_IsSuspended)
 	{
-		Menu, Tray, 		Check, 	% TransA["Suspend Hotkeys"] . "`tF10"
-		Menu, AppSubmenu, 	Check, 	% TransA["Suspend Hotkeys"] . "`tF10"
+		Menu, Tray, 		Check, 	% TransA["Suspend Hotstrings"] . "`tF10"
+		Menu, AppSubmenu, 	Check, 	% TransA["Suspend Hotstrings"] . "`tF10"
 	}
 	else
 	{
-		Menu, Tray, 		UnCheck, 	% TransA["Suspend Hotkeys"] . "`tF10"
-		Menu, AppSubmenu,	UnCheck, 	% TransA["Suspend Hotkeys"] . "`tF10"
+		Menu, Tray, 		UnCheck, 	% TransA["Suspend Hotstrings"] . "`tF10"
+		Menu, AppSubmenu,	UnCheck, 	% TransA["Suspend Hotstrings"] . "`tF10"
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2611,7 +2611,7 @@ F_InitiateTrayMenus(v_Param)
 		Menu, Tray, Default,	% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"]
 		Menu, Tray, Add, 		% TransA["Reload in default mode"] . "`tShift+Ctrl+r", 			 F_ReloadApplication	;it is possible to reload, but then application will be run in default mode of operation (opposit to silent mode)
 		Menu, Tray, Add										;line separator 
-		Menu, Tray, Add,		% TransA["Suspend Hotkeys"] . "`tF10",	F_TraySuspendHotkeys
+		Menu, Tray, Add,		% TransA["Suspend Hotstrings"] . "`tF10",	F_TraySuspendHotkeys
 		Menu, Tray, Add,		% TransA["Pause application"],		F_TrayPauseScript
 		Menu  Tray, Add,		% TransA["Exit application"],			F_TrayExit		
 
@@ -2645,7 +2645,7 @@ F_InitiateTrayMenus(v_Param)
 			Menu  Tray, Add																	;line separator 
 			Menu, Tray, Add, 		% TransA["Application statistics"],								F_AppStats
 			Menu, Tray, Add																	;line separator 
-			Menu, Tray, Add,		% TransA["Suspend Hotkeys"] . "`tF10",								F_TraySuspendHotkeys
+			Menu, Tray, Add,		% TransA["Suspend Hotstrings"] . "`tF10",								F_TraySuspendHotkeys
 			Menu, Tray, Add,		% TransA["Pause application"],									F_TrayPauseScript
 			Menu  Tray, Add,		% TransA["Exit application"],										F_TrayExit
 	}
@@ -9170,13 +9170,13 @@ F_HS3Search_SetColumnWidth()
 	Switch v_RadioGroup
 	{
 		Case 1:	;search by Triggerstring which is default
-			LV_ModifyCol(1, Round(0.1 * ListViewWidth), TransA["Triggerstring"])
+			LV_ModifyCol(1, Round(0.1 * ListViewWidth) . A_Space . "Left", TransA["Triggerstring"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
 			c1 := ErrorLevel
 			LV_ModifyCol(2, "AutoHdr" . A_Space . "Center", TransA["En. / Dis."])	;Adjusts the column's width to fit its contents and the column's header text, whichever is wider.
 			SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdSearchLV1%
 			c2 := ErrorLevel
-			LV_ModifyCol(3, Round(0.1 * ListViewWidth), TransA["Library"])
+			LV_ModifyCol(3, Round(0.1 * ListViewWidth) . A_Space . "Left", TransA["Library"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdSearchLV1%
 			c3 := ErrorLevel
 			LV_ModifyCol(4, "AutoHdr" . A_Space . "Center", TransA["Trigger Options"])
@@ -9185,20 +9185,20 @@ F_HS3Search_SetColumnWidth()
 			LV_ModifyCol(5, "AutoHdr" . A_Space . "Center", TransA["Out. Fun."])
 			SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdSearchLV1%
 			c5 := ErrorLevel
-			LV_ModifyCol(6, Round(0.3 * ListViewWidth), TransA["Hotstring"])
+			LV_ModifyCol(6, Round(0.3 * ListViewWidth) . A_Space . "Left", TransA["Hotstring"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdSearchLV1%
 			c6 := ErrorLevel
 		Case 2:	;search by Hotstring
-			LV_ModifyCol(1, Round(0.3 * ListViewWidth), TransA["Hotstring"])
+			LV_ModifyCol(1, Round(0.3 * ListViewWidth) . A_Space . "Left", TransA["Hotstring"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
 			c1 := ErrorLevel
 			LV_ModifyCol(2, "AutoHdr" . A_Space . "Center", TransA["En. / Dis."])
 			SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdSearchLV1%
 			c2 := ErrorLevel
-			LV_ModifyCol(3, Round(0.1 * ListViewWidth), TransA["Library"])
+			LV_ModifyCol(3, Round(0.1 * ListViewWidth) . A_Space . "Left", TransA["Library"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdSearchLV1%
 			c3 := ErrorLevel
-			LV_ModifyCol(4, Round(0.1 * ListViewWidth), TransA["Triggerstring"])
+			LV_ModifyCol(4, Round(0.1 * ListViewWidth) . A_Space . "Left", TransA["Triggerstring"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 3, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
 			c4 := ErrorLevel
 			LV_ModifyCol(5, "AutoHdr" . A_Space . "Center", TransA["Trigger Options"])
@@ -9208,13 +9208,13 @@ F_HS3Search_SetColumnWidth()
 			SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdSearchLV1%
 			c6 := ErrorLevel
 		Case 3:	;search by Library
-			LV_ModifyCol(1, Round(0.2 * ListViewWidth), TransA["Library"])
+			LV_ModifyCol(1, Round(0.2 * ListViewWidth) . A_Space . "Left", TransA["Library"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
 			c1 := ErrorLevel
 			LV_ModifyCol(2, "AutoHdr" . A_Space . "Center", TransA["En. / Dis."])
 			SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdSearchLV1%
 			c2 := ErrorLevel
-			LV_ModifyCol(3, Round(0.1 * ListViewWidth), TransA["Triggerstring"])
+			LV_ModifyCol(3, Round(0.1 * ListViewWidth) . A_Space . "Left", TransA["Triggerstring"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
 			c3 := ErrorLevel
 			LV_ModifyCol(4, "AutoHdr" . A_Space . "Center", TransA["Trigger Options"])
@@ -9223,7 +9223,7 @@ F_HS3Search_SetColumnWidth()
 			LV_ModifyCol(5, "AutoHdr" . A_Space . "Center", TransA["Out. Fun."])
 			SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdSearchLV1%
 			c5 := ErrorLevel
-			LV_ModifyCol(6, Round(0.3 * ListViewWidth), TransA["Hotstring"])
+			LV_ModifyCol(6, Round(0.3 * ListViewWidth) . A_Space . "Left", TransA["Hotstring"])
 			SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
 			c6 := ErrorLevel
 	}
@@ -11843,7 +11843,7 @@ Static hotstrings 										= &Static hotstrings
 Static triggerstring / hotstring menus						= Static triggerstring / hotstring menus
 Style of GUI											= Style of GUI
 Such file already exists									= Such file already exists
-Suspend Hotkeys										= Suspend Hotkeys
+Suspend Hotstrings										= Suspend Hotstrings
 Tab 													= Tab 
 teal													= teal
 Test styling											= Test styling
