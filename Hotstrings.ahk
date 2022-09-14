@@ -2017,10 +2017,13 @@ F_OneCharPressed(ih, Char)
 	}
 	if (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))
 		return
-	
-	f_EndCharDetected := false
-	if (!v_InputString)
-		f_LastTip := false
+
+	if (!f_LastTip) and (f_EndCharDetected)
+		v_InputString 		:= ""
+
+	f_EndCharDetected 	:= false
+,	f_LastTip			:= false
+
 	if (InStr(HotstringEndChars, Char))
 		f_EndCharDetected := true
 	
@@ -2047,7 +2050,8 @@ F_OneCharPressed(ih, Char)
 			Critical, Off	
 			return	
 		}
-		if (v_InputString) and (InStr(HotstringEndChars, v_InputString)) ;if v_InputString isn't empty and contains EndChar
+		if (v_InputString) and (InStr(HotstringEndChars, SubStr(v_InputString, 1, 1))) ;if v_InputString isn't empty and contains EndChar
+		; if (v_InputString) and (InStr(HotstringEndChars, v_InputString)) ;if v_InputString isn't empty and contains EndChar
 		{
 			v_InputString := SubStr(v_InputString, 2)	;Remove first character from input buffer which is EndChar
 			F_OneCharPressed(ih, Char := "")			;recursion: try again if tips are available
@@ -2062,14 +2066,6 @@ F_OneCharPressed(ih, Char)
 						Critical, Off
 						return
 					}
-		}
-
-		if (f_EndCharDetected)
-		; if (!f_LastTip) and (f_EndCharDetected)
-		{
-			v_InputString 		:= ""
-,			f_EndCharDetected 	:= false
-,			f_LastTip 			:= false
 		}
 	}
 	OutputDebug, % "The end" . A_Space . "v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
@@ -9224,7 +9220,7 @@ F_SearchPhrase()	;handles 2x GUI events: HS3Search: Edit and Radio.
 {
 	global	;assume-global mode
 
-	OutputDebug, % A_ThisFunc . "`n"
+	; OutputDebug, % A_ThisFunc . "`n"
 	Gui, HS3Search: Submit, NoHide
 	LV_Delete()
 	GuiControl, -Redraw, % IdSearchLV1
