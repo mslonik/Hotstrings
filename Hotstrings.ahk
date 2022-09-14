@@ -512,7 +512,10 @@ Critical, Off
 	AppsKey::	;blocks default context menu for Edit fields
 #If
 
-~Alt::		;if commented out, only for debugging reasons
+~LShift::
+~RShift::
+~LAlt::		;if commented out, only for debugging reasons
+~RAlt::		;if commented out, only for debugging reasons
 ~MButton::
 ~RButton::
 ~LWin::
@@ -2001,7 +2004,7 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
-	static	f_EndCharDetected := false, LastTip := false ;LastTip := ""
+	static	f_EndCharDetected := false, f_LastTip := false
 
 	Critical, On
 
@@ -2017,14 +2020,13 @@ F_OneCharPressed(ih, Char)
 	
 	f_EndCharDetected := false
 	if (!v_InputString)
-		LastTip := false
-		; LastTip := ""
+		f_LastTip := false
 	if (InStr(HotstringEndChars, Char))
 		f_EndCharDetected := true
 	
 	v_InputString .= Char
 
-	OutputDebug, % "v_InputString:" . v_InputString . A_Space . "LastTip:" . LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
+	OutputDebug, % "v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -2036,13 +2038,9 @@ F_OneCharPressed(ih, Char)
 		{
 			; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
 			if (a_Tips.Count())
-				LastTip := true
+				f_LastTip := true
 			else
-				LastTip := false
-			; if (a_Tips.Count() = 1)
-				; LastTip := a_Tips[1]
-			; else
-				; LastTip := ""
+				f_LastTip := false
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
@@ -2055,35 +2053,26 @@ F_OneCharPressed(ih, Char)
 			F_OneCharPressed(ih, Char := "")			;recursion: try again if tips are available
 		}
 
-		if (LastTip)
+		if (f_LastTip)
 		{
 			for key, value in a_Tips
 				if (a_Tips[key] . Char = v_InputString)
 					{
-						LastTip := false
+						f_LastTip := false
 						Critical, Off
 						return
 					}
 		}
-		; if (LastTip)
-		; {
-		; 	if (LastTip . Char = v_InputString)
-		; 	{
-		; 		LastTip := ""
-		; 		Critical, Off
-		; 		return
-		; 	}
-		; 	else
-		; 		LastTip := ""
-		; }
 
-		if (!LastTip) and (f_EndCharDetected)
+		if (f_EndCharDetected)
+		; if (!f_LastTip) and (f_EndCharDetected)
 		{
-			v_InputString := ""
-,			f_EndCharDetected := false
+			v_InputString 		:= ""
+,			f_EndCharDetected 	:= false
+,			f_LastTip 			:= false
 		}
 	}
-	OutputDebug, % "The end" . A_Space . "v_InputString:" . v_InputString . A_Space . "LastTip:" . LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
+	OutputDebug, % "The end" . A_Space . "v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
