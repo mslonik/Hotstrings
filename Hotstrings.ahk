@@ -545,6 +545,7 @@ Critical, Off
 	; OutputDebug, % "Destroy..."
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
+	F_DestroyTriggerstringTips(ini_TTCn)
 	; OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString . "`n"
 	if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
 		v_InputString := ""
