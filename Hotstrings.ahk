@@ -184,11 +184,11 @@ F_StyleOfGUI()
 Menu, ConfGUI,		Add, % TransA["Save position of application window"] . "`tCtrl + S",				F_SaveGUIPos
 Menu, ConfGUI,		Add, % TransA["Change language"], 											:SubmenuLanguage
 Menu, ConfGUI, 	Add	;To add a menu separator line, omit all three parameters.
-Menu, ConfGUI, 	Add, % TransA["Show Sandbox"] . "`tF6", 									F_ToggleSandbox
+Menu, ConfGUI, 	Add, % TransA["Show Sandbox"] . "`tCtrl + F6", 									F_ToggleSandbox
 if (ini_Sandbox)
-	Menu, ConfGUI, Check, 	% TransA["Show Sandbox"] . "`tF6"
+	Menu, ConfGUI, Check, 	% TransA["Show Sandbox"] . "`tCtrl + F6"
 else
-	Menu, ConfGUI, UnCheck, 	% TransA["Show Sandbox"] . "`tF6"
+	Menu, ConfGUI, UnCheck, 	% TransA["Show Sandbox"] . "`tCtrl + F6"
 
 Menu, ConfGUI,		Add, 	% TransA["Toggle main GUI"] . "`tF4",								F_ToggleRightColumn
 if (ini_WhichGui = "HS3")
@@ -2029,7 +2029,7 @@ F_OneCharPressed(ih, Char)
 	
 	v_InputString .= Char
 
-	OutputDebug, % "v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
+	; OutputDebug, % "v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -2049,25 +2049,8 @@ F_OneCharPressed(ih, Char)
 		}
 		else
 			f_LastTip := false
-
-		; if (v_InputString) and (InStr(HotstringEndChars, SubStr(v_InputString, 1, 1))) ;if v_InputString isn't empty and its first character is EndChar
-		; {
-		; 	v_InputString := SubStr(v_InputString, 2)	;Remove first character from input buffer which is EndChar
-		; 	F_OneCharPressed(ih, Char := "")			;recursion: try again if tips are available
-		; }
-
-		; if (f_LastTip)
-		; {
-		; 	for key, value in a_Tips
-		; 		if (a_Tips[key] . Char = v_InputString)
-		; 			{
-		; 				f_LastTip := false
-		; 				Critical, Off
-		; 				return
-		; 			}
-		; }
 	}
-	OutputDebug, % "The end" . A_Space . "v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
+	; OutputDebug, % "The end" . A_Space . "v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
@@ -2369,7 +2352,7 @@ F_PasteFromClipboard()
 	global	;assume-global mode
 	local	ContentOfClipboard := ""
 	
-	if (ini_HK_IntoEdit != "~#c")
+	if (ini_HK_IntoEdit != "~^#c")
 		Send, ^c
 	Sleep, % ini_CPDelay
 	ContentOfClipboard := Clipboard
@@ -3146,11 +3129,11 @@ F_LoadConfiguration()
 		Hotkey, If			;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 	}
 	
-	ini_HK_IntoEdit			:= "~#c"
+	ini_HK_IntoEdit			:= "~^#c"
 	IniRead, ini_HK_IntoEdit,				% ini_HADConfig, Configuration, HK_IntoEdit,		% A_Space
 	if (ini_HK_IntoEdit = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
-		ini_HK_IntoEdit := "~#c"
+		ini_HK_IntoEdit := "~^#c"
 		IniWrite, % ini_HK_IntoEdit, % ini_HADConfig, Configuration, HK_IntoEdit
 	}
 	
@@ -7377,7 +7360,7 @@ F_ShortDefB2_RestoreHotkey()
 			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
 			Hotkey, IfWinExist				;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 		}
-		ini_HK_IntoEdit := "~#c"
+		ini_HK_IntoEdit := "~^#c"
 		GuiControl,, % IdShortDefCB3, 0
 		GuiControl,, % IdShortDefCB4, 0
 		GuiControl,, % IdShortDefCB5, 0
@@ -10905,7 +10888,7 @@ F_ToggleSandbox()
 {
 	global ;assume-global mode
 	
-	Menu, ConfGUI, ToggleCheck, % TransA["Show Sandbox"] . "`tF6"
+	Menu, ConfGUI, ToggleCheck, % TransA["Show Sandbox"] . "`tCtrl + F6"
 	ini_Sandbox := !(ini_Sandbox)
 	if (ini_Sandbox)
 	{
@@ -10970,7 +10953,7 @@ ShowIntro=1
 CheckRepo=0
 DownloadRepo=0
 HK_Main=#^h
-HK_IntoEdit=~#c
+HK_IntoEdit=~^#c
 HK_UndoLH=~#z
 HK_ToggleTt=none
 THLog=0
@@ -13845,7 +13828,7 @@ F_DetermineGain2(Triggerstring, Hotstring)
 {
 	CntUpper := 0, LenHots := 0, LenTrig := 0
 	Loop, Parse, % Triggerstring
-	{    
+	{
 		if A_LoopField is upper
 			CntUpper++
 	}
