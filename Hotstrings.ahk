@@ -513,7 +513,12 @@ Critical, Off
 #If
 
 ~LShift::
-~RShift::
+~RShift::	;Actually "Shifts" work a bit different as some keys like @ or ? are available only after pressing Shift.
+	ToolTip,	;this line is necessary to close tooltips.
+	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
+	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
+	F_DestroyTriggerstringTips(ini_TTCn)
+	return
 ~LAlt::		;if commented out, only for debugging reasons
 ~RAlt::		;if commented out, only for debugging reasons
 ~MButton::
@@ -531,7 +536,6 @@ Critical, Off
 ~Esc::
 	; OutputDebug, % "Regular:" . "`n"
 	ToolTip,	;this line is necessary to close tooltips.
-	; OutputDebug, % "Destroy..."
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
 	F_DestroyTriggerstringTips(ini_TTCn)
@@ -541,15 +545,15 @@ Critical, Off
 	return
 
 ~LButton::	;as above, but without F_DestroyTriggerstringTips()
+	OutputDebug, % "~LButton:" . "`n"
 	ToolTip,	;this line is necessary to close tooltips.
-	; OutputDebug, % "Destroy..."
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
 	F_DestroyTriggerstringTips(ini_TTCn)
 	; OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString . "`n"
 	if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
 		v_InputString := ""
-	;OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString . "`n"
+	; OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString . "`n"
 	return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If WinExist("ahk_id" HMenuCliHwnd)	;MCLI
@@ -571,14 +575,14 @@ Critical, Off
 		if (F_HMenuCLI_Keyboard())
 		{
 			v_InputH.VisibleText 	:= true
-,			v_InputString 			:= ""			
+,			v_InputString 			:= ""
 		}
 		return
 	Esc::
 		Gui, HMenuCli: Destroy
 		SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
 		v_InputH.VisibleText 	:= true
-,		v_InputString 			:= ""	
+,		v_InputString 			:= ""
 		return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2019,6 +2023,7 @@ F_OneCharPressed(ih, Char)
 	if (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))
 		return
 
+	; OutputDebug, % "1)v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 	if (!f_LastTip) and (f_EndCharDetected)
 		v_InputString 		:= ""
 
@@ -2030,23 +2035,22 @@ F_OneCharPressed(ih, Char)
 	
 	v_InputString .= Char
 
-	; OutputDebug, % "v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
+	; OutputDebug, % "2)v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
 	{
 		F_DestroyTriggerstringTips(ini_TTCn)
 		F_PrepareTriggerstringTipsTables2(v_InputString)	;Variant when new sequence starts from EndChar.
-		; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
 		if (a_Tips.Count())	;if tips are available display then
 		{
-			; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
+			OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
 			f_LastTip := true
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads }
-			Critical, Off	
-			return	
+			Critical, Off
+			return
 		}
 		else
 			f_LastTip := false
@@ -2968,7 +2972,7 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 	if (!ini_ATEn)
 		return
 	MenuMax := a_Tips.Count()
-	;OutputDebug, % "PressedKey:" . A_Tab . PressedKey
+	; OutputDebug, % "PressedKey:" . A_Tab . PressedKey
 	Switch ini_TTCn	
 	{
 		Case 1:	ControlGet, Temp1, List, , , % "ahk_id" IdTT_C1_LB1	;check if triggerstring tips listbox is empty.
@@ -13694,6 +13698,7 @@ F_HOF_SE(ReplacementString, Oflag)	;Hotstring Output Function _ SendEvent
 	global	;assume-global mode of operation
 	local	temp := 0
 	Critical, On
+	; OutputDebug, % A_ThisFunc . "`n"
 	if (InStr(A_ThisHotkey, "?"))
 		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
@@ -13718,6 +13723,7 @@ F_HOF_SP(ReplacementString, Oflag)	;Hotstring Output Function _ SendPlay
 	global	;assume-global mode of operation
 	local	temp := 0
 	Critical, On
+	; OutputDebug, % A_ThisFunc . "`n"
 	if (InStr(A_ThisHotkey, "?"))
 		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
@@ -13741,7 +13747,9 @@ F_HOF_SR(ReplacementString, Oflag)	;Hotstring Output Function _ SendRaw
 {
 	global	;assume-global mode of operation
 	local	temp := 0
+
 	Critical, On
+	; OutputDebug, % A_ThisFunc . "`n"
 	if (InStr(A_ThisHotkey, "?"))
 		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
@@ -13805,7 +13813,7 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 	local	temp := 0
 
 	Critical, On
-	OutputDebug, % A_ThisFunc . "`n"
+	; OutputDebug, % A_ThisFunc . "`n"
 	if (InStr(A_ThisHotkey, "?"))
 		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 	F_DestroyTriggerstringTips(ini_TTCn)
@@ -13933,9 +13941,9 @@ F_HOF_CLI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ Clip
 	global	;assume-global mode
 	local	temp := ""
 	Critical, On
+	; OutputDebug, % A_ThisFunc . "`n"
 	if (InStr(A_ThisHotkey, "?"))
 		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
-	; OutputDebug, % A_ThisFunc . "`n"
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
@@ -13957,6 +13965,8 @@ F_MouseMenu_MCLI() ;The subroutine may consult the following built-in variables:
 {
 	global	;assume-global mode
 	local	OutputVarTemp := "", temp := 0, ChoicePos := 0
+
+	; OutputDebug, % A_ThisFunc . "`n"
 	if (A_PriorKey = "LButton")
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuCli
@@ -14036,6 +14046,8 @@ F_MouseMenu_MSI() ; Handling of mouse events for F_HOF_MSI;The subroutine may co
 {	
 	global	;assume-global mode of operation
 	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0, temp := 0
+
+	; OutputDebug, % A_ThisFunc . "`n"
 	if (A_PriorKey = "LButton")
 	{
 		MouseGetPos, , , , OutputVarControl			;to store the name (ClassNN) of the control under the mouse cursor
@@ -14120,6 +14132,8 @@ F_TTMenuStatic_Mouse() ;The subroutine may consult the following built-in variab
 	global	;assume-global mode
 	local	OutputVarTemp := "",	ThisHotkey := A_PriorKey
 			, OutputVarTemp2 := "", ChoicePos := 0
+
+	OutputDebug, % A_ThisFunc . "`n"
 	if (!ini_ATEn)
 		return
 	; OutputDebug, % "ThisHotkey:" . A_Tab . ThisHotkey . A_Tab . "v_InputString:" . A_Tab . v_InputString . "`n"
@@ -14159,6 +14173,8 @@ F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid i
 {
 	global	;assume-global mode of operation
 	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0, temp := 0
+
+	; OutputDebug, % A_ThisFunc . "`n"
 	if (A_PriorKey = "LButton")
 	{
 		MouseGetPos, , , , OutputVarControl			;to store the name (ClassNN) of the control under the mouse cursor
