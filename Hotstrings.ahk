@@ -519,6 +519,8 @@ Critical, Off
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
 	F_DestroyTriggerstringTips(ini_TTCn)
 	return
+~LControl::
+~RControl::
 ~LAlt::		;if commented out, only for debugging reasons
 ~RAlt::		;if commented out, only for debugging reasons
 ~MButton::
