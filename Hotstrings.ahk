@@ -11151,7 +11151,7 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 F_LoadHotstringsFromLibraries()
 {
 	global ; assume-global mode
-	local key := "", value := "", PriorityFlag := false
+	local key := "", value := "", PriorityFlag := false, temp := "", PriorityFilename := ""
 	a_Library 				:= []	;initialization of global variable
 	, a_TriggerOptions 			:= []
 	, a_Triggerstring 			:= []
@@ -11173,18 +11173,22 @@ F_LoadHotstringsFromLibraries()
 	
 	for key, value in ini_LoadLib
 	{
-		if ((key != "PriorityLibrary.csv") and (value))
+		temp := SubStr(key, 1, 2)	;extract the first 2 characters
+		if ((temp != "S2") and (value))
 		{
 			F_LoadDefinitionsFromFile(key)
 			F_LoadTriggTipsFromFile(key)
 		}
-		if ((key == "PriorityLibrary.csv") and (value))
-			PriorityFlag := true
+		if ((temp = "S2") and (value))
+		{
+			PriorityFlag 		:= true
+,			PriorityFilename 	:= key
+		}
 	}
-	if (PriorityFlag)
+	if (PriorityFlag)	;loaded as last = with the highest priority
 	{
-		F_LoadDefinitionsFromFile("PriorityLibrary.csv")
-		F_LoadTriggTipsFromFile("PriorityLibrary.csv")
+		F_LoadDefinitionsFromFile(PriorityFilename)
+		F_LoadTriggTipsFromFile(PriorityFilename)
 		PriorityFlag := false
 	}
 }
@@ -13573,6 +13577,7 @@ F_CreateHotstring(txt, nameoffile)
 					Case "SR":	SendFun := "F_HOF_SR"
 					Case "SP":	SendFun := "F_HOF_SP"
 					Case "SE":	SendFun := "F_HOF_SE"
+					Case "S2:"	SendFun := "F_HOF_S2"	;tu jestem
 				}
 			Case 4: 
 				Switch A_LoopField
