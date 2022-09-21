@@ -547,7 +547,7 @@ Critical, Off
 	return
 
 ~LButton::	;as above, but without F_DestroyTriggerstringTips()
-	OutputDebug, % "~LButton:" . "`n"
+	; OutputDebug, % "~LButton:" . "`n"
 	ToolTip,	;this line is necessary to close tooltips.
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
@@ -2046,7 +2046,7 @@ F_OneCharPressed(ih, Char)
 		F_PrepareTriggerstringTipsTables2(v_InputString)	;Variant when new sequence starts from EndChar.
 		if (a_Tips.Count())	;if tips are available display then
 		{
-			OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
+			; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
 			f_LastTip := true
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			if (ini_TTTD > 0)
@@ -7637,6 +7637,9 @@ F_Sort_a_Triggers(ByRef a_Table, f_SortAlpha, f_SortByLength)
 	global	;assume-global mode
 	local	key := "", value := "", s_SelectedTriggers := ""
 	
+	if (f_SortByLength)
+		a_Table := F_SortArrayByLength(a_Table)
+
 	if (f_SortAlpha)
 	{
 		;a_SelectedTriggers := F_SortArrayAlphabetically(a_SelectedTriggers)
@@ -7647,8 +7650,6 @@ F_Sort_a_Triggers(ByRef a_Table, f_SortAlpha, f_SortByLength)
 			if (A_LoopField)
 				a_Table[A_Index] := A_LoopField
 	}
-	if (f_SortByLength)
-		a_Table := F_SortArrayByLength(a_Table)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DownloadPublicLibraries()
@@ -8013,7 +8014,7 @@ F_PrepareTriggerstringTipsTables2(string)
 		, a_TipsHS	:= []	;HS = Hotstrings
 		Loop, % a_Combined.MaxIndex()
 		{
-			if (InStr(a_Combined[A_Index], string) = 1)	;This is the reason why triggerstring tips aren't shown for triggerstring definitions containing option "?"
+			if (InStr(a_Combined[A_Index], string, true) = 1)	;This is the reason why triggerstring tips aren't shown for triggerstring definitions containing option "?"
 			{
 				Switch ini_TTCn
 				{
@@ -8022,7 +8023,7 @@ F_PrepareTriggerstringTipsTables2(string)
 					     	if (A_Index = 1)
 					     		a_Tips.Push(A_LoopField)
 					Case 2:	;2 columns: Triggerstring Tips + Triggerstring Trigger
-					     Loop, Parse, % a_Combined[A_Index], |	
+					     Loop, Parse, % a_Combined[A_Index], |
 					     {
 					     	if (A_Index = 1)
 					     		a_Tips.Push(A_LoopField)
@@ -13577,7 +13578,7 @@ F_CreateHotstring(txt, nameoffile)
 					Case "SR":	SendFun := "F_HOF_SR"
 					Case "SP":	SendFun := "F_HOF_SP"
 					Case "SE":	SendFun := "F_HOF_SE"
-					Case "S2:"	SendFun := "F_HOF_S2"	;tu jestem
+					Case "S2":	SendFun := "F_HOF_S2"	;tu jestem
 				}
 			Case 4: 
 				Switch A_LoopField
@@ -13829,6 +13830,38 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 ,	ReplacementString := F_FollowCaseConformity(ReplacementString)
 ,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
  	F_SendIsOflag(ReplacementString, Oflag, "SendInput")
+ 	F_EventSigOrdHotstring()
+	++v_LogCounter
+	temp := F_DetermineGain2(v_InputString, ReplacementString)
+	v_CntCumGain += temp
+	if (ini_THLog)
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+	v_UndoTriggerstring := v_InputString
+,	v_InputString 		:= ""
+	Critical, Off	
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HOF_S2(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ S2, special function
+{
+	global	;assume-global mode of operation
+	local	temp := 0
+
+	Critical, On
+	OutputDebug, % A_ThisFunc . A_Space . "A_SendLevel:" . A_Space . A_SendLevel . "`n"
+	if (InStr(A_ThisHotkey, "?"))
+		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
+	F_DestroyTriggerstringTips(ini_TTCn)
+	F_DeterminePartStrings(ReplacementString)
+	ReplacementString := F_ReplaceAHKconstants(ReplacementString)
+,	ReplacementString := F_FollowCaseConformity(ReplacementString)
+,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
+	SendLevel, 2
+	if (Oflag = false)
+		SendInput, % ReplacementString . A_EndChar
+	else
+		SendInput, % ReplacementString
+	SendLevel, 0
+ 	; F_SendIsOflag(ReplacementString, Oflag, "SendInput")
  	F_EventSigOrdHotstring()
 	++v_LogCounter
 	temp := F_DetermineGain2(v_InputString, ReplacementString)
