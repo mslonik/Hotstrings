@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -409,7 +409,19 @@ Critical, Off
 	F3::
 		HS3SearchGuiEscape()
 		return	;end of this thread
+	Down::
+		F_HS3Search_Down()
+		return
 #If
+
+F_HS3Search_Down()
+{
+	FocusedControl := ""
+
+	GuiControlGet, FocusedControl, HS3Search: Focus
+	; if (FocusedControl = "Edit1")
+	OutputDebug, % "HS3Search:" . FocusedControl
+}
 
 #If WinActive("ahk_id" HotstringDelay)
 	F7::
@@ -889,7 +901,7 @@ LibHeaderGuiEscape()
 LHB_Button_Save()
 {
 	global	;assume-global mode of operation
-	local	SelectedLibraryName := "", TheWholeFile := "", LibraryHeader := "", LibFileBody := ""
+	local	SelectedLibraryName := "", TheWholeFile := "", LibraryHeader := "", LibFileBody := "", BegCom := false
 
 	GuiControlGet, SelectedLibraryName, , % IdDDL2	;Select hotstring library (drop down list), retrieves the conntents of the control.
 	if (!SelectedLibraryName) or (SelectedLibraryName = TransA["↓ Click here to select hotstring library ↓"])	;if SelectedLibraryName is empty
@@ -9792,12 +9804,12 @@ F_GuiHS3_LVcolumnScale()
 	GuiControlGet, OutVarTemp, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.	
 	ListViewWidth := OutVarTempW
 	; OutputDebug, % "ListViewWidth:" . A_Space . ListViewWidth . "`n"
-	c1 := Round(0.1 * ListViewWidth)	;0.1 = 10% of ListViewWidth
 	; OutputDebug, % "c1:" . A_Space . c1 . "`n"
-	LV_ModifyCol(1, c1)
+	LV_ModifyCol(1, "AutoHdr")
 	SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdListView1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
 	; OutputDebug, % "c1 width:" . A_Space . ErrorLevel . "`n"
-	LV_ModifyCol(2, "AutoHdr")
+	c2 := Round(0.1 * ListViewWidth)	;0.1 = 10% of ListViewWidth
+	LV_ModifyCol(2, c2)
 	SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdListView1%
 	c2 := ErrorLevel
 	; OutputDebug, % "c2 width:" . A_Space . c2 . "`n"
