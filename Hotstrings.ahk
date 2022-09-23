@@ -136,10 +136,10 @@ F_CreateLogFolder()
 
 F_InitiateTrayMenus(v_Param)
 
-F_HS3_Create()
+F_GuiHS3_Create()
 F_HS3_DefineConstants()
 F_GuiHS3_DetermineConstraints()
-F_GuiHS4_CreateObject()
+F_GuiHS4_Create()
 F_GuiHS4_DetermineConstraints()
 if (ini_Sandbox)
 	{
@@ -1110,7 +1110,7 @@ F_DelLibByButton()
 {
 	global	;assume-global mode of operation
 
-	Gui, % A_DefaultGui . ":" . A_Space . "Submit", NoHide
+	Gui, % F_WhichGui() . ":" . A_Space . "Submit", NoHide
 	if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["At first select library name which you intend to delete."]
@@ -2246,12 +2246,12 @@ F_DetermineMonitors()	; Multi monitor environment, initialization of monitor wid
 	{
 		SysGet, Temp, Monitor, % A_Index
 		MonitorCoordinates[A_Index] 			:= {}
-		MonitorCoordinates[A_Index].Left 		:= TempLeft
-		MonitorCoordinates[A_Index].Right 		:= TempRight
-		MonitorCoordinates[A_Index].Top 		:= TempTop
-		MonitorCoordinates[A_Index].Bottom 	:= TempBottom
-		MonitorCoordinates[A_Index].Width 		:= TempRight - TempLeft
-		MonitorCoordinates[A_Index].Height 	:= TempBottom - TempTop
+,		MonitorCoordinates[A_Index].Left 		:= TempLeft
+,		MonitorCoordinates[A_Index].Right 		:= TempRight
+,		MonitorCoordinates[A_Index].Top 		:= TempTop
+,		MonitorCoordinates[A_Index].Bottom 	:= TempBottom
+,		MonitorCoordinates[A_Index].Width 		:= TempRight - TempLeft
+,		MonitorCoordinates[A_Index].Height 	:= TempBottom - TempTop
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2262,8 +2262,16 @@ F_GUIinit()
 
 	if (f_MainGUIresizing) ;if run for the very first time
 	{
+		; OutputDebug, % A_ThisFunc . A_Space . "ini_HS3GuiMaximized:" . A_Space . ini_HS3GuiMaximized . A_Space . "ini_WhichGui:" . A_Space . ini_WhichGui . A_Space . "ini_HS3WindoPos.X:" . A_Space . ini_HS3WindoPos.X . "ini_HS3WindoPos.Y:" . A_Space . ini_HS3WindoPos.Y  . A_Space . "ini_HS3WindoPos.W:" . ini_HS3WindoPos.W . A_Space . "ini_HS3WindoPos.H:" . ini_HS3WindoPos.H . "`n"
 		Gui, HS3: +MinSize%HS3MinWidth%x%HS3MinHeight%
 		Gui, HS4: +MinSize%HS4MinWidth%x%HS4MinHeight%
+		if (ini_HS3GuiMaximized)	;after restart if window was maximized
+		{
+			Gui, % ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos.X . A_Space . "Y" . ini_HS3WindoPos.Y . A_Space . "W" . ini_HS3WindoPos.W . A_Space . "H" . ini_HS3WindoPos.H
+			Gui, HS3: Default
+			F_GuiHS3_LVcolumnScale()
+			return
+		}
 		;OutputDebug, % "ini_GuiReload:" . A_Tab . ini_GuiReload . A_Tab . "ini_WhichGui:" . A_Tab . ini_WhichGui
 		ini_GuiReload := false
 		IniWrite, % ini_GuiReload,		% ini_HADConfig, GraphicalUserInterface, GuiReload
@@ -2326,12 +2334,12 @@ F_GUIinit()
 		if (ini_ShowIntro)
 			Gui, ShowIntro: Show, AutoSize Center
 		f_MainGUIresizing := false
-	}		
+	}
 	else
 	{
-		if (ini_HS3GuiMaximized) and (ini_WhichGui)
+		if (ini_HS3GuiMaximized)
 		{
-			Gui, % ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos.X . A_Space . "Y" . ini_HS3WindoPos["Y"] . A_Space . "Maximize"
+			Gui, % ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos.X . A_Space . "Y" . ini_HS3WindoPos.Y . A_Space . "Maximize"
 			Gui, HS3: Default
 			F_GuiHS3_LVcolumnScale()
 		}
@@ -8689,10 +8697,11 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFunHotstringCreate, ByRef SendFunFileFormat)
 {
 	global 	;assume-global mode of operation
+	local	WhichGUI := F_WhichGui()
 
 	; Gui, % A_DefaultGui . ":" . A_Space . "Submit", NoHide +OwnDialogs
-	Gui, % A_DefaultGui . ":" . A_Space . "Submit", NoHide
-	Gui, % A_DefaultGui . ":" . A_Space . "+OwnDialogs"
+	Gui, % WhichGUI . ":" . A_Space . "Submit", NoHide
+	Gui, % WhichGUI . ":" . A_Space . "+OwnDialogs"
 
 	if (Trim(v_Triggerstring) = "")
 	{
@@ -8922,7 +8931,7 @@ F_Clear()
 	GuiControl, HS3:, % IdEdit9,  				;Comment
 	GuiControl, HS3:, % IdEdit10,  				;Sandbox
 	GuiControl, HS3: ChooseString, % IdDDL2, % TransA["↓ Click here to select hotstring library ↓"]
-	if (A_DefaultGui = "HS3")
+	if (F_WhichGui() = "HS3")
 		LV_Delete()
 	
 	Gui,		  HS4: Font, % "c" . c_FontColor
@@ -10088,7 +10097,8 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 	Switch EventInfo
 	{
 		Case 1: 
-			ini_WhichGui 		:= "HS3"		;The window has been minimized.
+			ini_HS3GuiMaximized := false
+,			ini_WhichGui 		:= "HS3"		;The window has been minimized.
 			Critical, Off
 			Sleep, -1
 
@@ -10125,8 +10135,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 				}
 			}
 		Default:	;E.G. window has been restored
-			if (ini_HS3GuiMaximized)
-				ini_HS3GuiMaximized := false
+			ini_HS3GuiMaximized := false
 			if (ini_Sandbox)
 			{
 				if (Height < LeftColumnH + 2 * c_ymarg + c_HofText + c_HofSandbox)
@@ -10165,11 +10174,7 @@ F_SelectLibrary()
 	global 	;assume-global mode
 	local	key := 0, value := "", name := "", str1 := []
 	
-	if (A_DefaultGui = "HS3")
-		Gui, HS3: Submit, NoHide
-	if (A_DefaultGui = "HS4")
-		Gui, HS4: Submit, NoHide
-	
+	Gui, % F_WhichGui() . ":" . A_Space . "Submit", NoHide
 	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
 	GuiControl, -Redraw, % IdListView1 ;The Redraw option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	LV_Delete()
@@ -10484,14 +10489,7 @@ F_SelectFunction()
 {
 	global ;assume-global mode
 	
-	if (A_DefaultGui = "HS3")
-	{
-		GuiControlGet, v_SelectFunction, HS3: ;Retrieves the contents of the control. 
-	}
-	if (A_DefaultGui = "HS4")
-	{
-		GuiControlGet, v_SelectFunction, HS4: ;Retrieves the contents of the control. 
-	}
+	GuiControlGet, v_SelectFunction, % F_WhichGui() . ":" ;Retrieves the contents of the control. 
 	
 	if InStr(v_SelectFunction, "Menu")
 	{
@@ -11056,6 +11054,7 @@ F_LoadGUIPos()
 	if (ini_WhichGui = "")
 		ini_WhichGui := "HS3"
 	IniRead, ini_HS3GuiMaximized,				% ini_HADConfig, GraphicalUserInterface, GuiMaximized, 	0
+	; OutputDebug, % A_ThisFunc . A_Space . "ini_HS3WindoPos.X:" . A_Space . ini_HS3WindoPos.X . A_Space . "ini_HS3WindoPos.Y:" . A_Space . ini_HS3WindoPos.Y . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_CheckCreateConfigIni(params*)
@@ -11235,7 +11234,7 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 	global 	;assume-global mode
 	local 	WinX := 0, WinY := 0
 	
-	WinGetPos, WinX, WinY, , , % "ahk_id" . A_Space . A_DefaultGui . "GuiHwnd"
+	WinGetPos, WinX, WinY, , , A
 	if (param[1] = "reset") ;if AutoSize option will be used for Gui after reload
 	{
 		IniWrite, % WinX, 			  	% ini_HADConfig, GraphicalUserInterface, MainWindowPosX
@@ -11243,8 +11242,8 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 		IniWrite, % "", 				% ini_HADConfig, GraphicalUserInterface, MainWindowPosW
 		IniWrite, % "", 				% ini_HADConfig, GraphicalUserInterface, MainWindowPosH
 		return
-	}	
-	Switch A_DefaultGui		;This line is necessary in case when last Gui is not equal to HS3 or HS4. This is a case e.g. if Gui_VersionUpdate is active
+	}
+	Switch F_WhichGui()		;This line is necessary in case when last Gui is not equal to HS3 or HS4. This is a case e.g. if Gui_VersionUpdate is active
 	{
 		Case "HS3":
 			IniWrite,  HS3,			% ini_HADConfig, GraphicalUserInterface, WhichGui
@@ -11260,6 +11259,7 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 	IniWrite, % WinY, 			  % ini_HADConfig, GraphicalUserInterface, MainWindowPosY
 	IniWrite, % ini_Sandbox, 	  % ini_HADConfig, GraphicalUserInterface, Sandbox
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Position of this window is saved in Config.ini."]
+	; OutputDebug, % A_ThisFunc . A_Space . "WinX:" . A_Space . WinX . A_Space . "WinY:" . A_Space . WinY . A_Space . "HS3_GuiWidth:" . A_Space . HS3_GuiWidth . A_Space . "HS3_GuiHeight:" . A_Space . HS3_GuiHeight . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadHotstringsFromLibraries()
@@ -12475,7 +12475,7 @@ F_GuiHS4_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, % EnDis, % IdText12b
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
-F_GuiHS4_CreateObject()
+F_GuiHS4_Create()
 {
 	global ;assume-global mode of operation
 	local x0 := 0, y0 := 0
@@ -12693,7 +12693,7 @@ F_GuiHS3_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, % EnDis, % IdEdit10
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
-F_HS3_Create()
+F_GuiHS3_Create()
 {
 	global 	;assume-global mode of operation
 	local 	x0 := 0, y0 := 0
@@ -14502,7 +14502,7 @@ F_ImportLibrary()
 	DetectHiddenWindows, On
 	WinGetPos, , , ImportGuiWinW, ImportGuiWinH, % "ahk_id" . ImportGuiHwnd
 	DetectHiddenWindows, Off
-	Gui, % A_DefaultGui . ":" . A_Space . "+Disabled"
+	Gui, % WhichGUI . ":" . A_Space . "+Disabled"
 	Gui, Import: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ImportGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ImportGuiWinH) / 2 . A_Space . "AutoSize"
 	
 	FileRead, TheWholeFile, % LibraryName
@@ -14513,7 +14513,7 @@ F_ImportLibrary()
 		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["The selected file is empty. Process of import will be interrupted."]
 		return
 	}
-	if (A_DefaultGui = "HS4") ;in order to have access to ListView even when HS4 is active, temporarily default gui is switched to HS3.
+	if (WhichGui = "HS4") ;in order to have access to ListView even when HS4 is active, temporarily default gui is switched to HS3.
 		Gui, HS3: Default
 	GuiControl, % "Count" . TotalLines . A_Space . "-Redraw", % IdListView1 ;This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	LV_Delete()
@@ -14701,7 +14701,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	WinGetPos, , , ExportGuiWinW, ExportGuiWinH, % "ahk_id" . ExportGuiHwnd
 	DetectHiddenWindows, Off
 	Gui, Export: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ExportGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ExportGuiWinH) / 2 . A_Space . "AutoSize"
-	Gui, % A_DefaultGui . ":" . A_Space . "+Disabled"
+	Gui, % WhichGUI . ":" . A_Space . "+Disabled"
 	
 	FileRead, TheWholeFile, % LibraryName
 	TotalLines := F_HowManyLines(TheWholeFile)
@@ -14873,7 +14873,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	WinGetPos, , , ExportGuiWinW, ExportGuiWinH, % "ahk_id" . ExportGuiHwnd
 	DetectHiddenWindows, Off
 	Gui, Export: Show, % "x" . HS3GuiWinX + (HS3GuiWinW - ExportGuiWinW) / 2 . A_Space . "y" . HS3GuiWinY + (HS3GuiWinH - ExportGuiWinH) / 2 . A_Space . "AutoSize"
-	Gui, % A_DefaultGui . ":" . A_Space . "+Disabled"
+	Gui, % WhichGUI . ":" . A_Space . "+Disabled"
 	
 	FileRead, TheWholeFile, % LibraryName
 	TotalLines := F_HowManyLines(TheWholeFile)
