@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -412,16 +412,19 @@ Critical, Off
 	Down::
 		F_HS3Search_Down()
 		return
+	Up::
+		F_HS3Search_Up()
+		return
+	Right::
+		F_HS3SearchRight()
+		return
+	Left::
+		F_HS3SearchLeft()
+		return
+	Tab::
+		return
 #If
 
-F_HS3Search_Down()
-{
-	FocusedControl := ""
-
-	GuiControlGet, FocusedControl, HS3Search: Focus
-	; if (FocusedControl = "Edit1")
-	OutputDebug, % "HS3Search:" . FocusedControl
-}
 
 #If WinActive("ahk_id" HotstringDelay)
 	F7::
@@ -698,6 +701,104 @@ F_HS3Search_Down()
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_HS3SearchLeft()
+{
+	global	;assume-global mode of operation
+	local	FocusedControl := "", NextRow := 0
+
+	GuiControlGet, FocusedControl, HS3Search: Focus
+	if (FocusedControl = "Button1")
+	{
+		GuiControl, Focus, % IdSearchE1
+		return
+	}
+	Gui, HS3Search: Default
+	if (FocusedControl = "Button2")
+	{
+		GuiControl, , % IdSearchR1, 1
+		GuiControl, Focus, % IdSearchR1
+		F_SearchPhrase()
+		return
+	}
+	if (FocusedControl = "Button3")
+	{
+		GuiControl, , % IdSearchR2, 1
+		GuiControl, Focus, % IdSearchR2
+		F_SearchPhrase()
+		return
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HS3SearchRight()
+{
+	global	;assume-global mode of operation
+	local	FocusedControl := "", NextRow := 0
+
+	GuiControlGet, FocusedControl, HS3Search: Focus
+	if (FocusedControl = "Edit1")
+	{
+		GuiControl, , % IdSearchR1, 1
+		GuiControl, Focus, % IdSearchR1
+		return
+	}
+	Gui, HS3Search: Default
+	if (FocusedControl = "Button1")
+	{
+		GuiControl, , % IdSearchR2, 1
+		GuiControl, Focus, % IdSearchR2
+		F_SearchPhrase()
+		return
+	}
+	if (FocusedControl = "Button2")
+	{
+		GuiControl, , % IdSearchR3, 1
+		GuiControl, Focus, % IdSearchR3
+		F_SearchPhrase()
+		return
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HS3Search_Up()
+{
+	global	;assume-global mode of operation
+	local	FocusedControl := "", NextRow := 0
+
+	GuiControlGet, FocusedControl, HS3Search: Focus
+
+	if (FocusedControl = "SysListView321")
+	{
+		Gui, HS3Search: Default
+		NextRow := LV_GetNext()
+
+		if (NextRow = 1)
+			GuiControl, Focus, % IdSearchE1
+		else
+			LV_Modify(--NextRow, "Select")
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HS3Search_Down()
+{
+	global	;assume-global mode of operation
+	local	FocusedControl := "", NextRow := 0
+
+	GuiControlGet, FocusedControl, HS3Search: Focus
+	if (FocusedControl = "Edit1")
+	{
+		Gui, HS3Search: Default
+		GuiControl, Focus, % IdSearchLV1
+		LV_Modify(1, "+Select +Focus")
+		return
+	}
+
+	if (FocusedControl = "SysListView321")
+	{
+		Gui, HS3Search: Default
+		NextRow := LV_GetNext()
+		LV_Modify(++NextRow, "Select")
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PathtoClipboard()
 {
 	global	;assume-global mode of operation
@@ -9270,7 +9371,7 @@ F_HS3Search_Create()
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR2 gF_SearchPhrase, 					% TransA["Hotstring"]
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR3 gF_SearchPhrase, 					% TransA["Library"]
 	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 gF_HSLV2 +AltSubmit Grid BackgroundE1E1E1 -Multi,	% TransA["En. / Dis."] . "|" . TransA["Library"] . "|" . TransA["Triggerstring"] . "|" . TransA["Trigger Options"] . "|" . TransA["Out. Fun."] . "|" . TransA["Hotstring"] . "|" . TransA["Comment"]	;Trick with "BackgroundE1E1E1": There is no simple way to distinguish ListView header from the rest of table, but to change background color.
-	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT4, 								% TransA["F3 or Esc: Close Search hotstrings | Enter: Select definition and close | Tab to change position"]
+	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT4, 								% TransA["F3 or Esc: Close Search hotstrings | ↓ ↑ → ←: to change position | Enter: Select definition and close"]
 	Gui, HS3Search: Add, Button, 		Hidden Default gF_HSLV2	;trick to catch if user presses Enter on ListView
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11586,7 +11687,7 @@ Export to .ahk with static definitions of hotstrings			= Export to .ahk with sta
 Export to .ahk with dynamic definitions of hotstrings			= Export to .ahk with dynamic definitions of hotstrings
 Exported												= Exported
 Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries = Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries
-F3 or Esc: Close Search hotstrings | Enter: Select definition and close | Tab to change position = F3 or Esc: Close Search hotstrings | Enter: Select definition and close | Tab to change position
+F3 or Esc: Close Search hotstrings | ↓ ↑ → ←: to change position | Enter: Select definition and close = F3 or Esc: Close Search hotstrings | ↓ ↑ → ←: to change position | Enter: Select definition and close
 file! 												= file!
 file in Languages subfolder!								= file in Languages subfolder!
 file is now created in the following subfolder:				= file is now created in the following subfolder:
