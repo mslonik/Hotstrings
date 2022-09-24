@@ -1189,17 +1189,17 @@ F_Tt_HWT()	;Tt_HWT = Tooltip_Hostring Was Triggered
 	Gui, Tt_HWT: Add, Listbox, 	% "HwndIdTt_HWT_LB1" . A_Space . "r1" . A_Space . "x" . OutputVarTempX . A_Space . "y" . OutputVarTempX . A_Space . "w" . OutputVarTempW + 4, % TempText
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
+F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, ControlSend, determine number of items in ListBox: https://www.autohotkey.com/boards/viewtopic.php?t=43057
 {
 	global	;assume-global mode of operation
 	local	PressedKey := A_ThisHotkey,	Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", OutputVar1 := "", OutputVar2 := ""
 ,			NoPosInList := 0, Temp2 := "", WhichLB := "", temp := ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 
-	OutputDebug, % "F_StaticMenu_Keyboard" . A_Tab . "PressedKey:" . A_Tab . PressedKey . "`n"
+	; OutputDebug, % "F_StaticMenu_Keyboard" . A_Tab . "PressedKey:" . A_Tab . PressedKey . "`n"
 	GuiControlGet, OutputVar1, , % IdTT_C4_LB1	;Retrieves the contents of the control to check if static window contains any information: triggerstring tips
 	GuiControlGet, OutputVar2, , % IdTT_C4_LB4	;Retrieves the contents of the control to check if static window contains any information: hotstrings
-	OutputDebug, % "OutputVar1:" . A_Tab . OutputVar1 . A_Tab . "OutputVar2:" . A_Tab . OutputVar2 . "`n"
+	; OutputDebug, % "OutputVar1:" . A_Tab . OutputVar1 . A_Tab . "OutputVar2:" . A_Tab . OutputVar2 . "`n"
 	if (!OutputVar1) and (!OutputVar2)			;if no information, leave this functionfunction
 		return
 	if (OutputVar1) and (!ini_ATEn)
@@ -1221,8 +1221,8 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 		ControlGet, Temp2, List, , , % "ahk_id" IdTT_C4_LB4
 		Loop, Parse, Temp2, `n
 			NoPosInList++
-		SetKeyDelay, 100, 100	;values (100, 100) determined experimentally
 	}
+	SetKeyDelay, -1, -1	;Delay = -1, PressDuration = -1, -1: no delay at all; this can be necessary if SendInput is reduced to SendEvent (in case low level input hook is active in another script)
 	Switch WhichLB
 	{
 		Case "MTrig":
@@ -1258,7 +1258,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 ,				IntCnt++
 				ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB4
 				ShiftTabIsFound := false
-			}		
+			}
 	}
 
 	if ((NoPosInList = 1) and IsCursorPressed)
@@ -1333,9 +1333,9 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 			GuiControl,, % IdTT_C4_LB3, |
 			; OutputDebug, % "v_InputStringOutput:" . A_Tab . v_InputString . A_Tab . "Temp1:" . A_Tab . Temp1 . A_Tab . "A_IsCritical:" . A_Tab . A_IsCritical . "`n"
 			Hotstring("Reset")	;reset hotstring recognizer
-			SendEvent, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
+			SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
 			SendLevel, 2			;to backtrigger it must be higher than the input level of the hotstrings
-			SendEvent, % Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
+			SendInput, % Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
 			SendLevel, 0
 			v_InputString := 0
 		Case "MHot":
@@ -1364,6 +1364,10 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 			v_UndoTriggerstring 	:= v_InputString
 ,			v_InputString 			:= ""
 ,			v_InputH.VisibleText	:= true
+,			IfUpF 				:= false,	
+,			IfDownF 				:= false
+, 			IsCursorPressed 		:= false, 
+,			IntCnt 				:= 1
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1483,7 +1487,7 @@ F_HMenuCLI_Keyboard()
 	global	;assume-global mode of operation
 	local	PressedKey := A_ThisHotkey,		Temp1 := "",	ShiftTabIsFound := false, ReplacementString := "", temp := 0
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
-;	SetKeyDelay, 100, 100	;not 100% sure if this line is necessary, but for F_StaticMenu_Keyboard it was crucial for ControlSend to run correctly
+
 	if (InStr(PressedKey, "Up") or InStr(PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -1558,6 +1562,10 @@ F_HMenuCLI_Keyboard()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	v_UndoTriggerstring := v_InputString
+,	IfUpF 			:= false
+,	IfDownF 			:= false
+,	IsCursorPressed 	:= false
+, 	IntCnt 			:= 1
 	return true ;if function returns true, v_InputString will be cleared and input characters will not be invisible anymore
 	; OutputDebug, % "End of F_HMenuCLI_Keyboard:" . "`n"
 }
@@ -3083,9 +3091,9 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 
 	if (!ini_ATEn)
 		return
-	MenuMax := a_Tips.Count()
-	DynVarRef := "IdTT_C" . ini_TTCn . "_LB1"
-	OutputDebug, % "IntCnt:" . A_Space . IntCnt . "`n"
+	MenuMax 	:= a_Tips.Count()
+,	DynVarRef := "IdTT_C" . ini_TTCn . "_LB1"
+	; OutputDebug, % "IntCnt:" . A_Space . IntCnt . "`n"
 
 	Switch PressedKey
 	{
