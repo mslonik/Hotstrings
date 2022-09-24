@@ -370,7 +370,7 @@ if (ini_GuiReload) and (v_Param != "l")
 AppStartTime := A_Now	;Date and time math can be performed with EnvAdd and EnvSub. Also, FormatTime can format the date and/or time according to your locale or preferences.
 Critical, Off
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
-#If WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd) or WinExist("ahk_id" TT_C4_Hwnd)
+#If WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd) or WinExist("ahk_id" TT_C4_Hwnd)	;active triggerstring tips
 	^Tab::	;new thread starts here
 	+^Tab::
 	^Up::
@@ -534,8 +534,6 @@ Critical, Off
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
 	F_DestroyTriggerstringTips(ini_TTCn)
 	return
-~LControl::
-~RControl::
 ~LAlt::		;if commented out, only for debugging reasons
 ~RAlt::		;if commented out, only for debugging reasons
 ~MButton::
@@ -550,17 +548,8 @@ Critical, Off
 ~PgUp::
 ~Home::
 ~End::
-~Esc::
-	; OutputDebug, % "Regular:" . "`n"
-	ToolTip,	;this line is necessary to close tooltips.
-	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
-	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
-	F_DestroyTriggerstringTips(ini_TTCn)
-	;OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString
-	v_InputString := ""
-	;OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString
-	return
-
+~WheelLeft::
+~WheelRight::
 ~LButton::	;as above, but without F_DestroyTriggerstringTips()
 	; OutputDebug, % "~LButton:" . "`n"
 	ToolTip,	;this line is necessary to close tooltips.
@@ -1220,7 +1209,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)
 		if (!InStr(PressedKey, "^"))
 			return
 		WhichLB := "MTrig"
-		ControlGet, Temp2, List, , , % "ahk_id" IdTT_C4_LB1
+		ControlGet, Temp2, List, , , % "ahk_id" IdTT_C4_LB1	;tu jestem
 		Loop, Parse, Temp2, `n
 			NoPosInList++
 	}
@@ -3089,83 +3078,29 @@ F_MenuLogEnDis()
 F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" coming from "g" event
 {
 	global	;assume-global mode
-	local	PressedKey := A_ThisHotkey,		Temp1 := "",		ClipboardBack := "", OutputVarTemp := "", ShiftTabIsFound := false
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 0, MenuMax := 0
+	local	PressedKey := A_ThisHotkey, Temp1 := "", DynVarRef := ""
+	static 	IsCursorPressed := false, IntCnt := 1, MenuMax := 0
 
 	if (!ini_ATEn)
 		return
 	MenuMax := a_Tips.Count()
-	; OutputDebug, % "PressedKey:" . A_Tab . PressedKey
-	Switch ini_TTCn	
+	DynVarRef := "IdTT_C" . ini_TTCn . "_LB1"
+	OutputDebug, % "IntCnt:" . A_Space . IntCnt . "`n"
+
+	Switch PressedKey
 	{
-		Case 1:	ControlGet, Temp1, List, , , % "ahk_id" IdTT_C1_LB1	;check if triggerstring tips listbox is empty.
-		Case 2:	ControlGet, Temp1, List, , , % "ahk_id" IdTT_C2_LB1	;check if triggerstring tips listbox is empty.
-		Case 3:	ControlGet, Temp1, List, , , % "ahk_id" IdTT_C3_LB1	;check if triggerstring tips listbox is empty.
-		Case 4:	ControlGet, Temp1, List, , , % "ahk_id" IdTT_C4_LB1	;check if triggerstring tips listbox is empty.
+		Case "^Down", "^Tab":
+			GuiControl, Choose, % %DynVarRef%, % ++IntCnt
+			IsCursorPressed := true
+		Case "^Up", "+^Tab":
+			GuiControl, Choose, % %DynVarRef%, % (--IntCnt = 0) ? (IntCnt := 1) : IntCnt
+			IsCursorPressed := true
+		Case "^Enter":
+			PressedKey 		:= IntCnt
+,			IsCursorPressed	:= false
+,			IntCnt 			:= 0
 	}
-	if (!Temp1)	;if it is empty and one of the special shortcuts has been pressed, give it back (let it run)
-	{
-		Switch PressedKey
-		{
-			Case "^Tab":	PressedKey := "{Ctrl down}" . "{Tab}" . "{Ctrl up}"
-			Case "+^Tab":	PressedKey := "{Shift down}" . "{Ctrl down}" . "{Tab}" . "{Ctrl up}" . "{Shift up}"
-			Case "^Up":	PressedKey := "{Ctrl down}" . "{Up}" . "{Ctrl up}"
-			Case "^Down":	PressedKey := "{Ctrl down}" . "{Down}" . "{Ctrl up}"
-			Case "^Enter":	PressedKey := "{Ctrl down}" . "{Enter}" . "{Ctrl up}"
-		}
-		SendInput, % PressedKey
-		;OutputDebug, % "PressedKey:" . A_Tab . PressedKey
-		return
-	}
-	if (InStr(PressedKey, "^Up") or InStr(PressedKey, "+^Tab"))	;the same as "up"
-	{
-		IsCursorPressed := true
-		IntCnt--
-		Switch ini_TTCn
-		{
-			Case 1: 
-				ControlSend, , {Up}, % "ahk_id" IdTT_C1_LB1
-			Case 2: 
-				ControlSend, , {Up}, % "ahk_id" IdTT_C2_LB1
-				ControlSend, , {Up}, % "ahk_id" IdTT_C2_LB2
-			Case 3: 
-				ControlSend, , {Up}, % "ahk_id" IdTT_C3_LB1
-				ControlSend, , {Up}, % "ahk_id" IdTT_C3_LB2
-				ControlSend, , {Up}, % "ahk_id" IdTT_C3_LB3
-			Case 4:
-				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB1
-				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB2
-				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB3
-		}
-		ShiftTabIsFound := true
-	}
-	if ((InStr(PressedKey, "^Down")) or (InStr(PressedKey, "^Tab") and (!ShiftTabIsFound)))	;the same as "down"
-	{
-		IsCursorPressed := true
-		IntCnt++
-		Switch ini_TTCn
-		{
-			Case 1: 
-				ControlSend, , {Down}, % "ahk_id" IdTT_C1_LB1
-			Case 2: 
-				ControlSend, , {Down}, % "ahk_id" IdTT_C2_LB1
-				ControlSend, , {Down}, % "ahk_id" IdTT_C2_LB2
-			Case 3: 
-				ControlSend, , {Down}, % "ahk_id" IdTT_C3_LB1
-				ControlSend, , {Down}, % "ahk_id" IdTT_C3_LB2
-				ControlSend, , {Down}, % "ahk_id" IdTT_C3_LB3
-			Case 4:
-				ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB1
-				ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB2
-				ControlSend, , {Down}, % "ahk_id" IdTT_C4_LB3
-		}
-	}
-	if InStr(PressedKey, "^Enter")
-	{
-		PressedKey 		:= IntCnt
-,		IsCursorPressed	:= false
-,		IntCnt 			:= 0
-	}
+
 	if ((MenuMax = 1) and IsCursorPressed)
 	{
 		IntCnt := 1
@@ -3179,43 +3114,30 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 			if (ini_MHSEn)
 				SoundBeep, % ini_MHSF, % ini_MHSD	
 		}
-		if (IntCnt < 1)
+		if (IntCnt = 1)
 		{
-			IntCnt := 1
 			if (ini_MHSEn)
 				SoundBeep, % ini_MHSF, % ini_MHSD	
 		}
 		IsCursorPressed := false
 		return
-	}		
+	}
 	if (PressedKey > MenuMax)
 		return
-	Switch ini_TTCn
-	{
-		Case 1: ControlGet, Temp1, List, , , % "ahk_id" IdTT_C1_LB1
-		Case 2: ControlGet, Temp1, List, , , % "ahk_id" IdTT_C2_LB1
-		Case 3: ControlGet, Temp1, List, , , % "ahk_id" IdTT_C3_LB1
-		Case 4: ControlGet, Temp1, List, , , % "ahk_id" IdTT_C4_LB1
-	}
-	; OutputDebug, % "Temp1:" . A_Space . Temp1 . A_Tab . "PressedKey:" . A_Space . PressedKey . "`n"
-	Loop, Parse, Temp1, `n
-	{
-		if (A_Index = PressedKey)
-		{
-			Temp1 := A_LoopField
-			break
-		}	
-	}
-	; OutputDebug, % "Temp1:" . A_Space . Temp1 . A_Tab . "v_InputString:" . A_Space . v_InputString . "`n"
+
+	GuiControlGet, Temp1, , % %DynVarRef%
 	if (ini_TTCn = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_DestroyTriggerstringTips(ini_TTCn)
 	Hotstring("Reset")
-	SendEvent, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
+	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
 	SendLevel, 2	;to backtrigger it must be higher than the input level of the hotstrings
-	SendEvent, % Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
+	SendInput, % Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
 	SendLevel, 0
-	v_InputString := ""
+	v_InputString 		:= ""
+,	IsCursorPressed 	:= false
+, 	IntCnt 			:= 1
+, 	MenuMax 			:= 0
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadConfiguration()
