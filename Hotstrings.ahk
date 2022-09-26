@@ -2168,7 +2168,7 @@ F_OneCharPressed(ih, Char)
 		F_PrepareTriggerstringTipsTables2(v_InputString)	;Variant when new sequence starts from EndChar.
 		if (a_Tips.Count())	;if tips are available display then
 		{
-			OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
+			; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
 			f_LastTip := true
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			if (ini_TTTD > 0)
@@ -2182,7 +2182,7 @@ F_OneCharPressed(ih, Char)
 			F_PrepareTriggerstringTipsTables2(v_InputString)	;Variant when new sequence starts from EndChar.
 			if (a_Tips.Count())	;if tips are available display then
 			{
-				OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
+				; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
 				f_LastTip := true
 				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 				if (ini_TTTD > 0)
@@ -2190,9 +2190,8 @@ F_OneCharPressed(ih, Char)
 				Critical, Off
 				return
 			}
-			else
-				f_LastTip := false
 		}
+		f_LastTip := false
 	}
 	; OutputDebug, % "The end" . A_Space . "v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 }
@@ -10174,6 +10173,7 @@ F_LV1_EnDisDefinition()
 	global ;a_Triggerstring, a_TriggerOptions, a_EnableDisable, a_Combined, a_Hotstring, ini_TipsSortAlphabetically, ini_TipsSortByLength, v_SelectHotstringLibrary ;assume-global mode of operation
 	local EnDis := "", SelectedRow := 0, OnOffToggle := false, Triggerstring := "", Options := "", key := 0, value := "", index := 0, Temp1 := "", SelectedHotstringLibrary := "", vHotstring := "", Fun := ""
 
+	F_GuiHS3_EnDis("Disable")
 	Gui, HS3: Default	;in order to activate ListView
 	if !(SelectedRow := LV_GetNext())
 		return
@@ -10214,9 +10214,10 @@ F_LV1_EnDisDefinition()
 	;2. Modify a_tables
 	for key, value in a_Triggerstring
 	{
-		if (a_Triggerstring[key] = Triggerstring)
+		if (a_Triggerstring[key] = Triggerstring) and (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))	;if matched within current library
 			break
 	}
+	
 	a_EnableDisable[key] := OnOffToggle
 	for index in a_Combined	;recreate array a_Combined
 		a_Combined[index] := a_Triggerstring[index] . "|" . a_TriggerOptions[index] . "|" . a_EnableDisable[index] . "|" . a_Hotstring[index]
@@ -10228,17 +10229,17 @@ F_LV1_EnDisDefinition()
 		if (Temp1 = Triggerstring)	;non-case sensitive comparison
 		{
 			LV_Modify(A_Index, "Col1", EnDis)
+			key := A_Index
+			OutputDebug, % "EnDis:" . EnDis . "`n"
 			Break
 		}
 	}
 	;4. Modify content of library file
 	FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary	;delete library file. 
 	F_SaveLVintoLibFile()
-	Switch F_WhichGui()	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
-		{
-			Case "HS3":	F_GuiHS3_EnDis("Enable")	;EnDis = "Disable" or "Enable"
-			Case "HS4": 	F_GuiHS4_EnDis("Enable")
-		}
+	F_GuiHS3_EnDis("Enable")	;Enable all GuiControls
+	GuiControl, Focus, % IdListView1
+	LV_Modify(key, "Select" . A_Space . "Focus")
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["New settings are now applied."], 10	;dissapears after 10 s
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12645,6 +12646,16 @@ F_GuiHS3_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, % EnDis, % IdText2
 	GuiControl, % EnDis, % IdText12
 	GuiControl, % EnDis, % IdListView1
+	if (EnDis = "Disable")	;Text font of ListView isn't grayed out automatically.
+	{	; SendMessage, 0x1024, 0, 0x808080,, ahk_id %IdListView1% ; this is alternative
+		Gui, HS3: Font, cGray
+		GuiControl, Font, % IdListView1
+		Gui, HS3: Font, cBlack
+	}
+  		
+	if (EnDis = "Enable")	; SendMessage, 0x1024, 0, 0,, ahk_id %IdListView1% ;this is alternative ala  fikolek bic ale pwd abcd 
+		GuiControl, Font, % IdListView1
+
 	GuiControl, % EnDis, % IdText10
 	GuiControl, % EnDis, % IdTextInfo17
 	GuiControl, % EnDis, % IdEdit10
