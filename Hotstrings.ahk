@@ -376,6 +376,9 @@ Critical, Off
 	^Up::
 	^Down::
 	^Enter::
+	^WheelUp::
+	^WheelDown::
+	^MButton::
 		Critical, On
 		SetTimer, TurnOff_Ttt, Off
 		; OutputDebug, % "WinExist(ahk_id TT_C1_Hwnd) or WinExist(ahk_id TT_C2_Hwnd) or WinExist(ahk_id TT_C3_Hwnd)" . "`n"
@@ -393,13 +396,23 @@ Critical, Off
 		return
 	^?::
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Shortcuts available for active triggerstring tips:"] . "`n`n" 
-			. "Ctrl + Tab" . A_Tab . A_Tab . 		 TransA["move selection one position down"] . "`n"
-			. "Shift + Ctrl + Tab" . A_Tab . A_Tab . TransA["move selection one position up"] . "`n"
-			. "Ctrl + ↓" . A_Tab . A_Tab . A_Tab .   TransA["move selection one position down"] . "`n"
-			. "Ctrl + ↑" . A_Tab . A_Tab . A_Tab .   TransA["move selection one position up"] . "`n"
-			. "Ctrl + Enter" . A_Tab . A_Tab .		 TransA["enter selected triggerstring"] . "`n"
-			. "Ctrl + Left Mouse Button" . A_Tab .	 TransA["enter selected triggerstring"] . "`n"
-			. "Esc" . A_Tab . A_Tab . A_Tab .		 TransA["close and interrupt"]
+			. TransA["Keyboard or mouse scrolling"] . ":" . "`n"
+			. "Ctrl + Tab" . A_Tab . A_Tab . 		 TransA["down"] . "`n"
+			. "Ctrl + ↓" . A_Tab . A_Tab . A_Tab .   TransA["down"] . "`n"
+			. "Ctrl + WheelDown" . A_Tab . A_Tab .   TransA["down"] . "`n"
+			. "`n"
+			. TransA["Keyboard or mouse scrolling"] . ":" . "`n"
+			. "Shift + Ctrl + Tab" . A_Tab . A_Tab . TransA["up"] . "`n"
+			. "Ctrl + ↑" . A_Tab . A_Tab . A_Tab .   TransA["up"] . "`n"
+			. "Ctrl + WheelUp" . A_Tab . A_Tab .     TransA["up"] . "`n"
+			. "`n"
+			. TransA["Keyboard or mouse selection"] . ":" . "`n"
+			. "Ctrl + Enter" . A_Tab . A_Tab .		 TransA["selection"] . "`n"
+			. "Ctrl + Left Mouse Button" . A_Tab .	 TransA["selection"] . "`n"
+			. "Ctrl + Middle Mouse Button" . A_Tab . TransA["selection"] . "`n"
+			. "`n"
+			. TransA["Close and interrupt"] . ":" . "`n"
+			. "Esc"
 		return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -625,13 +638,13 @@ Critical, Off
 #If WinExist("ahk_id" HMenuAHKHwnd) or WinExist("ahk_id" HMenuCliHwnd)	;MSI or MCLI
 	^?::
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Shortcuts available for hotstring menu:"] . "`n`n" ;it cannot be modal (always on top) as HMenuAHKHwnd has already feature "always on top"
-			. "Tab" . A_Tab . A_Tab . A_Tab .	 	 TransA["move selection one position down"] . "`n"
-			. "Shift + Tab" . A_Tab . A_Tab . 	 	 TransA["move selection one position up"] . "`n"
-			. "↓" . A_Tab . A_Tab . A_Tab .   	 	 TransA["move selection one position down"] . "`n"
-			. "↑" . A_Tab . A_Tab . A_Tab .   	 	 TransA["move selection one position up"] . "`n"
+			. "Tab" . A_Tab . A_Tab . A_Tab .	 	 TransA["down"] . "`n"
+			. "Shift + Tab" . A_Tab . A_Tab . 	 	 TransA["up"] . "`n"
+			. "↓" . A_Tab . A_Tab . A_Tab .   	 	 TransA["down"] . "`n"
+			. "↑" . A_Tab . A_Tab . A_Tab .   	 	 TransA["up"] . "`n"
 			. "Enter" . A_Tab . A_Tab . A_Tab .	 TransA["enter selected hotstring"] . "`n"
 			. "Left Mouse Button" . A_Tab . A_Tab .	 TransA["enter selected hotstring"] . "`n"
-			. "Esc" . A_Tab . A_Tab . A_Tab .		 TransA["close and interrupt"]
+			. "Esc" . A_Tab . A_Tab . A_Tab .		 TransA["Close and interrupt"]
 		return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2135,19 +2148,18 @@ F_OneCharPressed(ih, Char)
 	if (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))
 		return
 
-	; OutputDebug, % "1)v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
+	OutputDebug, % "1)v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 	if (!f_LastTip) and (f_EndCharDetected)
 		v_InputString 		:= ""
 
-	f_EndCharDetected 	:= false
-,	f_LastTip			:= false
-
 	if (InStr(HotstringEndChars, Char))
 		f_EndCharDetected := true
+	else
+		f_EndCharDetected := false
 	
 	v_InputString .= Char
 
-	; OutputDebug, % "2)v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
+	OutputDebug, % "2)v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -2156,7 +2168,7 @@ F_OneCharPressed(ih, Char)
 		F_PrepareTriggerstringTipsTables2(v_InputString)	;Variant when new sequence starts from EndChar.
 		if (a_Tips.Count())	;if tips are available display then
 		{
-			; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
+			OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
 			f_LastTip := true
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			if (ini_TTTD > 0)
@@ -2167,7 +2179,7 @@ F_OneCharPressed(ih, Char)
 		else
 			f_LastTip := false
 	}
-	; OutputDebug, % "The end" . A_Space . "v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
+	OutputDebug, % "The end" . A_Space . "v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
@@ -2198,10 +2210,9 @@ F_InputHookOnEnd(ih)	;for debugging purposes
 		ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_BackspaceProcessing()
+F_BackspaceProcessing(ih, VK, SC)
 {
 	global	;assume-global mode of operation
-	; OutputDebug, % "F_BackspaceProcessing, beginning" . "`n"
 	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 	{
 		if (ini_MHSEn)
@@ -2227,7 +2238,6 @@ F_BackspaceProcessing()
 		if (!v_InputString)	;if v_InputString = "" = empty
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
-	; OutputDebug, % "F_BackspaceProcessing, end" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DetermineMonitors()	; Multi monitor environment, initialization of monitor width and height parameters
@@ -3087,7 +3097,7 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 {
 	global	;assume-global mode
 	local	PressedKey := A_ThisHotkey, Temp1 := "", DynVarRef := ""
-	static 	IsCursorPressed := false, IntCnt := 1, MenuMax := 0
+	static 	IsCursorPressed := false, IntCnt := 0, MenuMax := 0
 
 	if (!ini_ATEn)
 		return
@@ -3097,13 +3107,13 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 
 	Switch PressedKey
 	{
-		Case "^Down", "^Tab":
+		Case "^Down", "^Tab", "^WheelDown":
 			GuiControl, Choose, % %DynVarRef%, % ++IntCnt
 			IsCursorPressed := true
-		Case "^Up", "+^Tab":
+		Case "^Up", "+^Tab", "^WheelUp":
 			GuiControl, Choose, % %DynVarRef%, % (--IntCnt = 0) ? (IntCnt := 1) : IntCnt
 			IsCursorPressed := true
-		Case "^Enter":
+		Case "^Enter", "^MButton":
 			PressedKey 		:= IntCnt
 ,			IsCursorPressed	:= false
 ,			IntCnt 			:= 0
@@ -3144,7 +3154,7 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 	SendLevel, 0
 	v_InputString 		:= ""
 ,	IsCursorPressed 	:= false
-, 	IntCnt 			:= 1
+, 	IntCnt 			:= 0
 , 	MenuMax 			:= 0
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8065,7 +8075,7 @@ F_PrepareTriggerstringTipsTables2(string)
 		, a_TipsHS	:= []	;HS = Hotstrings
 		Loop, % a_Combined.MaxIndex()
 		{
-			if (InStr(a_Combined[A_Index], string, true) = 1)	;This is the reason why triggerstring tips aren't shown for triggerstring definitions containing option "?"
+			if (InStr(a_Combined[A_Index], string) = 1)	;This comparison cannot be case sensitive. This is the reason why triggerstring tips aren't shown for triggerstring definitions containing option "?"
 			{
 				Switch ini_TTCn
 				{
@@ -11527,7 +11537,7 @@ Clear (F5) 											= Clear (F5)
 Clipboard Delay (F7)									= Clipboard &Delay (F7)
 Clipboard paste delay in [ms]:  							= Clipboard paste delay in [ms]:
 Close												= Cl&ose
-close and interrupt										= close and interrupt
+Close and interrupt										= Close and interrupt
 Closing Curly Bracket } 									= Closing Curly Bracket }
 Closing Round Bracket ) 									= Closing Round Bracket )
 Closing Square Bracket ] 								= Closing Square Bracket ]
@@ -11601,7 +11611,7 @@ Enter a name for the new library 							= Enter a name for the new library
 Enter a new library name									= Enter a new library name
 Enter hotstring 										= Enter hotstring
 enter selected hotstring									= enter selected hotstring
-enter selected triggerstring								= enter selected triggerstring
+selection								= selection
 Enter triggerstring										= Enter triggerstring
 Triggerstring cannot be empty  if you wish to add new hotstring	= Triggerstring cannot be empty  if you wish to add new hotstring
 Error												= Error
@@ -11685,6 +11695,8 @@ is added in section  [GraphicalUserInterface] of Config.ini		= is added in secti
 is empty at the moment.									= is empty at the moment.
 is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv? = is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?
 Introduction											= Introduction
+Keyboard or mouse scrolling								= Keyboard or mouse scrolling
+Keyboard or mouse selection								= Keyboard or mouse selection
 \Languages\`nMind that Config.ini Language variable is equal to 	= \Languages\`nMind that Config.ini Language variable is equal to
 Last hotstring undo function is currently unsuported for those characters, sorry. = Last hotstring undo function is currently unsuported for those characters, sorry.
 Let's make your PC personal again... 						= Let's make your PC personal again...
@@ -11721,8 +11733,8 @@ Minus - 												= Minus -
 Mode of operation										= Mode of operation
 Move definition to another library							= Move definition to another library
 Move (F8)												= Move (F8)
-move selection one position down							= move selection one position down
-move selection one position up							= move selection one position down
+down							= down
+up							= up
 navy													= navy
 Next the default language file (English.txt) will be deleted,	= Next the default language file (English.txt) will be deleted,
 reloaded and fresh language file (English.txt) will be recreated. = reloaded and fresh language file (English.txt) will be recreated.
@@ -13593,7 +13605,7 @@ F_LoadLibrariesToTables()
 	TrayTip, %A_ScriptName%, % TransA["Hotstrings have been loaded"], 1
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_CreateHotstring(txt, nameoffile) 
+F_CreateHotstring(txt, nameoffile)
 { 
 	global	;assume-global mode
 	local Options := "", SendFun := "", EnDis := "", TextInsert := "", Oflag := false, Triggerstring := "", LenStr := 0
