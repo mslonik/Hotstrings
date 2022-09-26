@@ -2360,7 +2360,8 @@ F_GUIinit()
 	{
 		if (ini_HS3GuiMaximized)
 		{
-			Gui, % ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos.X . A_Space . "Y" . ini_HS3WindoPos.Y . A_Space . "Maximize"
+			Gui, HS3: Show, Maximize
+			; Gui, % ini_WhichGui . ": Show", % "X" . ini_HS3WindoPos.X . A_Space . "Y" . ini_HS3WindoPos.Y . A_Space . "Maximize"
 			Gui, HS3: Default
 			F_GuiHS3_LVcolumnScale()
 		}
