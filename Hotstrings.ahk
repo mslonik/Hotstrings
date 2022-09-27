@@ -9207,79 +9207,72 @@ F_HS3Search_LoadLV()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HS3Search_SetColumnWidth()
+F_GuiHS3Search_LVcolumnScale()
 {	;changes width and order of columns depending on user decision (choice of radio button)
 	global	;assume-global mode
 	local	ListViewWidth := 0, OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.		
 ,			c1 := 0, c2 := 0, c3 := 0, c4 := 0, c5 := 0, c6 := 0, c7 := 0, LVM_GETCOLUMNWIDTH = 0x1000 + 29 ;https://www.autohotkey.com/boards/viewtopic.php?p=25857#p25857
 ,			SM_CXVSCROLL := 2, WidthVerScrollBar := 0 ;Width of a vertical scroll bar, in pixels
+,			ListViewWidth := 0, TheRest := 0
 
 	SysGet, WidthVerScrollBar, % SM_CXVSCROLL ;returns value 26
 	Gui, HS3Search: -DPIScale	;switch off dpiscale temporarily to get the same values from SendMessage command	
 	GuiControlGet, OutVarTemp, Pos, % IdSearchLV1 ;This line will be used for "if" and "else" statement.	
-	ListViewWidth := OutVarTempW	
+	ListViewWidth := OutVarTempW
 	
 	Switch v_RadioGroup
 	{
 		Case 1:	;search by Triggerstring which is default
-			LV_ModifyCol(1, Round(0.1 * ListViewWidth) . A_Space . "Left", TransA["Triggerstring"])
-			SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
-			c1 := ErrorLevel
 			LV_ModifyCol(2, "AutoHdr" . A_Space . "Center", TransA["En. / Dis."])	;Adjusts the column's width to fit its contents and the column's header text, whichever is wider.
 			SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdSearchLV1%
 			c2 := ErrorLevel
-			LV_ModifyCol(3, Round(0.1 * ListViewWidth) . A_Space . "Left", TransA["Library"])
-			SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdSearchLV1%
-			c3 := ErrorLevel
-			LV_ModifyCol(4, "AutoHdr" . A_Space . "Center", TransA["Trigger Options"])
+			LV_ModifyCol(4, "AutoHdr" . A_Space . "Center", TransA["Trigger Opt."])
 			SendMessage, LVM_GETCOLUMNWIDTH, 3, 0, , ahk_id %IdSearchLV1%
 			c4 := ErrorLevel
 			LV_ModifyCol(5, "AutoHdr" . A_Space . "Center", TransA["Out. Fun."])
 			SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdSearchLV1%
 			c5 := ErrorLevel
-			LV_ModifyCol(6, Round(0.3 * ListViewWidth) . A_Space . "Left", TransA["Hotstring"])
-			SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdSearchLV1%
-			c6 := ErrorLevel
+
+			TheRest := ListViewWidth - (c2 + c4 + c5 + WidthVerScrollBar + 4)
+			LV_ModifyCol(1, TheRest / 4 . A_Space . "Left", TransA["Triggerstring"])
+			LV_ModifyCol(3, TheRest / 4 . A_Space . "Left", TransA["Library"])
+			LV_ModifyCol(6, TheRest / 4 . A_Space . "Left", TransA["Hotstring"])
+			LV_ModifyCol(7, TheRest / 4 . A_Space . "Left", TransA["Comment"])
+
 		Case 2:	;search by Hotstring
-			LV_ModifyCol(1, Round(0.3 * ListViewWidth) . A_Space . "Left", TransA["Hotstring"])
-			SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
-			c1 := ErrorLevel
 			LV_ModifyCol(2, "AutoHdr" . A_Space . "Center", TransA["En. / Dis."])
 			SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdSearchLV1%
 			c2 := ErrorLevel
-			LV_ModifyCol(3, Round(0.1 * ListViewWidth) . A_Space . "Left", TransA["Library"])
-			SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdSearchLV1%
-			c3 := ErrorLevel
-			LV_ModifyCol(4, Round(0.1 * ListViewWidth) . A_Space . "Left", TransA["Triggerstring"])
-			SendMessage, LVM_GETCOLUMNWIDTH, 3, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
-			c4 := ErrorLevel
-			LV_ModifyCol(5, "AutoHdr" . A_Space . "Center", TransA["Trigger Options"])
+			LV_ModifyCol(5, "AutoHdr" . A_Space . "Center", TransA["Trigger Opt."])
 			SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdSearchLV1%
 			c5 := ErrorLevel
 			LV_ModifyCol(6, "AutoHdr" . A_Space . "Center", TransA["Out. Fun."])
 			SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdSearchLV1%
 			c6 := ErrorLevel
+
+			TheRest := ListViewWidth - (c2 + c5 + c6 + WidthVerScrollBar + 4)
+			LV_ModifyCol(1, TheRest / 4 . A_Space . "Left", TransA["Hotstring"])
+			LV_ModifyCol(3, TheRest / 4 . A_Space . "Left", TransA["Library"])
+			LV_ModifyCol(4, TheRest / 4 . A_Space . "Left", TransA["Triggerstring"])
+			LV_ModifyCol(7, TheRest / 4 . A_Space . "Left", TransA["Comment"])
+
 		Case 3:	;search by Library
-			LV_ModifyCol(1, Round(0.2 * ListViewWidth) . A_Space . "Left", TransA["Library"])
-			SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
-			c1 := ErrorLevel
 			LV_ModifyCol(2, "AutoHdr" . A_Space . "Center", TransA["En. / Dis."])
 			SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdSearchLV1%
 			c2 := ErrorLevel
-			LV_ModifyCol(3, Round(0.1 * ListViewWidth) . A_Space . "Left", TransA["Triggerstring"])
-			SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
-			c3 := ErrorLevel
-			LV_ModifyCol(4, "AutoHdr" . A_Space . "Center", TransA["Trigger Options"])
+			LV_ModifyCol(4, "AutoHdr" . A_Space . "Center", TransA["Trigger Opt."])
 			SendMessage, LVM_GETCOLUMNWIDTH, 3, 0, , ahk_id %IdSearchLV1%
 			c4 := ErrorLevel
 			LV_ModifyCol(5, "AutoHdr" . A_Space . "Center", TransA["Out. Fun."])
 			SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdSearchLV1%
 			c5 := ErrorLevel
-			LV_ModifyCol(6, Round(0.3 * ListViewWidth) . A_Space . "Left", TransA["Hotstring"])
-			SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdSearchLV1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
-			c6 := ErrorLevel
+
+			TheRest := ListViewWidth - (c2 + c4 + c5 + WidthVerScrollBar + 4)
+			LV_ModifyCol(1, TheRest / 4 . A_Space . "Left", TransA["Library"])
+			LV_ModifyCol(3, TheRest / 4 . A_Space . "Left", TransA["Triggerstring"])
+			LV_ModifyCol(6, TheRest / 4 . A_Space . "Left", TransA["Hotstring"])
+			LV_ModifyCol(7, TheRest / 4 . A_Space . "Left", TransA["Comment"])
 	}
-	LV_ModifyCol(7, ListViewWidth - (c1 + c2 + c3 + c4 + c5 + c6) - WidthVerScrollBar - 4, TransA["Comment"])	;This "trick" excludes horizontal scroll once for all. The consequence: additional headerless column will be visible on a screen even when there is no available data.
 	Gui, HS3Search: +DPIScale
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9292,7 +9285,7 @@ F_SearchPhrase()	;handles 2x GUI events: HS3Search: Edit and Radio.
 	LV_Delete()
 	GuiControl, -Redraw, % IdSearchLV1
 	F_HS3Search_LoadLV()
-	F_HS3Search_SetColumnWidth()
+	F_GuiHS3Search_LVcolumnScale()
 	LV_ModifyCol(1, "Sort")
 	GuiControl, +Redraw, % IdSearchLV1
 }
@@ -9334,7 +9327,7 @@ F_HS3Search_Create()
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR1 vv_RadioGroup gF_SearchPhrase Checked, % TransA["Triggerstring"]
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR2 gF_SearchPhrase, 					% TransA["Hotstring"]
 	Gui, HS3Search: Add, Radio, 		x0 y0 HwndIdSearchR3 gF_SearchPhrase, 					% TransA["Library"]
-	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 gF_HSLV2 +AltSubmit Grid BackgroundE1E1E1 -Multi,	% TransA["En. / Dis."] . "|" . TransA["Library"] . "|" . TransA["Triggerstring"] . "|" . TransA["Trigger Options"] . "|" . TransA["Out. Fun."] . "|" . TransA["Hotstring"] . "|" . TransA["Comment"]	;Trick with "BackgroundE1E1E1": There is no simple way to distinguish ListView header from the rest of table, but to change background color.
+	Gui, HS3Search: Add, ListView, 	x0 y0 HwndIdSearchLV1 gF_HSLV2 +AltSubmit Grid BackgroundE1E1E1 -Multi,	% TransA["En. / Dis."] . "|" . TransA["Library"] . "|" . TransA["Triggerstring"] . "|" . TransA["Trigger Opt."] . "|" . TransA["Out. Fun."] . "|" . TransA["Hotstring"] . "|" . TransA["Comment"]	;Trick with "BackgroundE1E1E1": There is no simple way to distinguish ListView header from the rest of table, but to change background color.
 	Gui, HS3Search: Add, Text, 		x0 y0 HwndIdSearchT4, 								% TransA["F3 or Esc: Close Search hotstrings | ↓ ↑ → ←: to change position | Enter: Select definition and close"]
 	Gui, HS3Search: Add, Button, 		Hidden Default gF_HSLV2	;trick to catch if user presses Enter on ListView
 }
@@ -9863,40 +9856,27 @@ F_GuiHS3_LVcolumnScale()
 	local OutVarTemp := 0, OutVarTempX := 0, OutVarTempY := 0, OutVarTempW := 0, OutVarTempH := 0 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.		
 		, c1 := 0, c2 := 0, c3 := 0, c4 := 0, c5 := 0, c6 := 0, LVM_GETCOLUMNWIDTH = 0x1000 + 29 ;https://www.autohotkey.com/boards/viewtopic.php?p=25857#p25857
 		, SM_CXVSCROLL := 2, WidthVerScrollBar := 0 ;Width of a vertical scroll bar, in pixels
+		, ListViewWidth := 0, TheRest := 0
 
 	SysGet, WidthVerScrollBar, % SM_CXVSCROLL ;returns value 26
 	Gui, HS3: -DPIScale	;switch off dpiscale temporarily to get the same values from SendMessage command
 	GuiControlGet, OutVarTemp, Pos, % IdListView1 ;This line will be used for "if" and "else" statement.	
 	ListViewWidth := OutVarTempW
-	; OutputDebug, % "ListViewWidth:" . A_Space . ListViewWidth . "`n"
-	; OutputDebug, % "c1:" . A_Space . c1 . "`n"
-	LV_ModifyCol(1, "AutoHdr")
+
+	LV_ModifyCol(1, "AutoHdr" . A_Space . "Center", TransA["En/Dis"])	;EnDis
 	SendMessage, LVM_GETCOLUMNWIDTH, 0, 0, , ahk_id %IdListView1%	;columns are counted from 0 (not from 1); result (column width) is returned within ErrorLevel system variable
-	; OutputDebug, % "c1 width:" . A_Space . ErrorLevel . "`n"
-	c2 := Round(0.1 * ListViewWidth)	;0.1 = 10% of ListViewWidth
-	LV_ModifyCol(2, c2)
-	SendMessage, LVM_GETCOLUMNWIDTH, 1, 0, , ahk_id %IdListView1%
-	c2 := ErrorLevel
-	; OutputDebug, % "c2 width:" . A_Space . c2 . "`n"
-	LV_ModifyCol(3, "AutoHdr")	
+	c1 := ErrorLevel
+	LV_ModifyCol(3, "AutoHdr" . A_Space . "Center", TransA["Trigger Opt."])	;Trigg Opt
 	SendMessage, LVM_GETCOLUMNWIDTH, 2, 0, , ahk_id %IdListView1%
 	c3 := ErrorLevel
-	; OutputDebug, % "c3 width:" . A_Space . c3 . "`n"
-	LV_ModifyCol(4, "AutoHdr")
+	LV_ModifyCol(4, "AutoHdr" . A_Space . "Center", TransA["Out. Fun."])	;Out Fun
 	SendMessage, LVM_GETCOLUMNWIDTH, 3, 0, , ahk_id %IdListView1%
 	c4 := ErrorLevel
-	; OutputDebug, % "c4 width:" . A_Space . c4 . "`n"
-	LV_ModifyCol(5, Round(0.4 * ListViewWidth))
-	SendMessage, LVM_GETCOLUMNWIDTH, 4, 0, , ahk_id %IdListView1%
-	c5 := ErrorLevel
-	; OutputDebug, % "c5 width:" . A_Space . c5 . "`n"
-	c6 := ListViewWidth - (c1 + c2 + c3 + c4 + c5) - WidthVerScrollBar - 4	;idk why 4
-	; OutputDebug, % "c6:" . A_Space . c6 . "`n"
-	LV_ModifyCol(6, c6)
-	SendMessage, LVM_GETCOLUMNWIDTH, 5, 0, , ahk_id %IdListView1%
-	c6 := ErrorLevel
-	; OutputDebug, % "c6 width:" . A_Space . c6 . "`n"
-	; OutputDebug, % "c1 + c2 + c3 + c4 + c5 + c6:" . A_Space . c1 + c2 + c3 + c4 + c5 + c6 . "`n"
+
+	TheRest := ListViewWidth - (c1 + c3 + c4 + WidthVerScrollBar + 4)
+	LV_ModifyCol(2, TheRest / 3 . A_Space . "Left", TransA["Triggerstring"])
+	LV_ModifyCol(5, TheRest / 3 . A_Space . "Left", TransA["Hotstring"])
+	LV_ModifyCol(6, TheRest / 3 . A_Space . "Left", TransA["Comment"])
 	Gui, HS3: +DPIScale
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10150,9 +10130,9 @@ F_SelectLibrary()
 		}
 	}
 	UpdateLibraryCounter(v_LibHotstringCnt, v_TotalHotstringCnt)
-	LV_ModifyCol(2, "Sort")	;without this line content of library is loaded in the same order as it was saved last time; keep in mind that after any change (e.g. change of exiting definition) the whole file is sorted and saved again
-	F_GuiHS3_LVcolumnScale()
+	; F_GuiHS3_LVcolumnScale()
 	GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
+	LV_ModifyCol(2, "Sort")	;without this line content of library is loaded in the same order as it was saved last time; keep in mind that after any change (e.g. change of exiting definition) the whole file is sorted and saved again
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
@@ -11956,7 +11936,7 @@ Tooltip timeout										= Tooltip timeout
 LS:												= LS:
 to undo.												= to undo.
 (triggerstring, hotstring) definitions						= (triggerstring, hotstring) definitions
-Trigger Options										= Trigger Options
+Trigger Opt.										= Trigger Opt.
 Triggers												= Triggers
 Triggerstring 											= Triggerstring
 Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
