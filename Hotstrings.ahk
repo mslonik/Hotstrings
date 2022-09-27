@@ -1167,6 +1167,7 @@ F_ToggleTt()
 {
 	global	;assume-global mode of operation
 	ini_TTTtEn := !ini_TTTtEn
+	IniWrite, % ini_TTTtEn, 	% ini_HADConfig, Event_TriggerstringTips, 	TTTtEn
 	F_UpdateStateOfLockKeys(ini_HK_ToggleTt, ini_TTTtEn)	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4243,6 +4244,7 @@ F_EvTt_B2()	;Event Tooltip (is triggered) Button Apply
 	IniWrite, % ini_TTCn,	% ini_HADConfig, Event_TriggerstringTips,	TTCn
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered	
 	F_EvTab3(true)	;to memory that something was applied
+	F_UpdateStateOfLockKeys(ini_HK_ToggleTt, ini_TTTtEn)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvTt_B3()	;Event Tooltip (is triggered) Button Close
@@ -4276,6 +4278,7 @@ F_EvTt_B3()	;Event Tooltip (is triggered) Button Close
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
 	F_EvTab3(true)	;to memory that something was applied
      F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
+	F_UpdateStateOfLockKeys(ini_HK_ToggleTt, ini_TTTtEn)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvTt_B4()	;Event Tooltip (is triggered) Button Cancel
@@ -4324,74 +4327,75 @@ F_EvTt_R1R2()
 	Switch EvTt_R1R2
 	{
 		Case 1:
-		GuiControl, Enable, 	% IdEvTt_T3
-		GuiControl, Enable, 	% IdEvTt_T4
-		GuiControl, Enable, 	% IdEvTt_T5
-		GuiControl, Enable, 	% IdEvTt_R3
-		GuiControl, Enable, 	% IdEvTt_R4
-		GuiControl, Enable, 	% IdEvTt_T6
-		GuiControl, Enable, 	% IdEvTt_S1
-		GuiControl, Enable, 	% IdEvTt_T7
-		GuiControl, Enable, 	% IdEvTt_T8
-		GuiControl, Enable, 	% IdEvTt_T9
-		GuiControl, Enable, 	% IdEvTt_T10
-		GuiControl, Enable, 	% IdEvTt_T11
-		GuiControl, Enable, 	% IdEvTt_R5
-		GuiControl, Enable, 	% IdEvTt_R6
-		GuiControl, Enable, 	% IdEvTt_T13
-		GuiControl, Enable, 	% IdEvTt_T14
-		GuiControl, Enable, 	% IdEvTt_C1
-		GuiControl, Enable, 	% IdEvTt_C2
-		GuiControl, Enable, 	% IdEvTt_T16
-		GuiControl, Enable, 	% IdEvTt_T17
-		GuiControl, Enable, 	% IdEvTt_S2
-		GuiControl, Enable, 	% IdEvTt_T18
-		GuiControl, Enable, 	% IdEvTt_T20
-		GuiControl, Enable, 	% IdEvTt_T21
-		GuiControl, Enable, 	% IdEvTt_DDL1
-		GuiControl, Enable,		% IdEvTt_T23
-		GuiControl, Enable,		% IdEvTt_T24
-		GuiControl, Enable, 	% IdEvTt_DDL2
-		Switch EvTt_R3R4
-		{
-			Case 1:
-			GuiControl, Enable,		% IdEvTt_T7
-			GuiControl, Enable,		% IdEvTt_S1
-			GuiControl, Enable,		% IdEvTt_T8
-			Case 2:
-			GuiControl, Disable,	% IdEvTt_T7
-			GuiControl, Disable,	% IdEvTt_S1
-			GuiControl, Disable,	% IdEvTt_T8
-		}
+			GuiControl, Enable, 	% IdEvTt_T3
+			GuiControl, Enable, 	% IdEvTt_T4
+			GuiControl, Enable, 	% IdEvTt_T5
+			GuiControl, Enable, 	% IdEvTt_R3
+			GuiControl, Enable, 	% IdEvTt_R4
+			GuiControl, Enable, 	% IdEvTt_T6
+			GuiControl, Enable, 	% IdEvTt_S1
+			GuiControl, Enable, 	% IdEvTt_T7
+			GuiControl, Enable, 	% IdEvTt_T8
+			GuiControl, Enable, 	% IdEvTt_T9
+			GuiControl, Enable, 	% IdEvTt_T10
+			GuiControl, Enable, 	% IdEvTt_T11
+			GuiControl, Enable, 	% IdEvTt_R5
+			GuiControl, Enable, 	% IdEvTt_R6
+			GuiControl, Enable, 	% IdEvTt_T13
+			GuiControl, Enable, 	% IdEvTt_T14
+			GuiControl, Enable, 	% IdEvTt_C1
+			GuiControl, Enable, 	% IdEvTt_C2
+			GuiControl, Enable, 	% IdEvTt_T16
+			GuiControl, Enable, 	% IdEvTt_T17
+			GuiControl, Enable, 	% IdEvTt_S2
+			GuiControl, Enable, 	% IdEvTt_T18
+			GuiControl, Enable, 	% IdEvTt_T20
+			GuiControl, Enable, 	% IdEvTt_T21
+			GuiControl, Enable, 	% IdEvTt_DDL1
+			GuiControl, Enable,		% IdEvTt_T23
+			GuiControl, Enable,		% IdEvTt_T24
+			GuiControl, Enable, 	% IdEvTt_DDL2
+			Switch EvTt_R3R4
+			{
+				Case 1:
+					GuiControl, Enable,		% IdEvTt_T7
+					GuiControl, Enable,		% IdEvTt_S1
+					GuiControl, Enable,		% IdEvTt_T8
+				Case 2:
+					GuiControl, Disable,	% IdEvTt_T7
+					GuiControl, Disable,	% IdEvTt_S1
+					GuiControl, Disable,	% IdEvTt_T8
+			}
+			
 		Case 2:
-		GuiControl, Disable, 	% IdEvTt_T3
-		GuiControl, Disable, 	% IdEvTt_T4
-		GuiControl, Disable, 	% IdEvTt_T5
-		GuiControl, Disable, 	% IdEvTt_R3
-		GuiControl, Disable, 	% IdEvTt_R4
-		GuiControl, Disable, 	% IdEvTt_T6
-		GuiControl, Disable, 	% IdEvTt_S1
-		GuiControl, Disable, 	% IdEvTt_T7
-		GuiControl, Disable, 	% IdEvTt_T8
-		GuiControl, Disable, 	% IdEvTt_T9
-		GuiControl, Disable, 	% IdEvTt_T10
-		GuiControl, Disable, 	% IdEvTt_T11
-		GuiControl, Disable, 	% IdEvTt_R5
-		GuiControl, Disable, 	% IdEvTt_R6
-		GuiControl, Disable, 	% IdEvTt_T13
-		GuiControl, Disable, 	% IdEvTt_T14
-		GuiControl, Disable, 	% IdEvTt_C1
-		GuiControl, Disable, 	% IdEvTt_C2
-		GuiControl, Disable, 	% IdEvTt_T16
-		GuiControl, Disable, 	% IdEvTt_T17
-		GuiControl, Disable, 	% IdEvTt_S2
-		GuiControl, Disable, 	% IdEvTt_T18
-		GuiControl, Disable, 	% IdEvTt_T20
-		GuiControl, Disable, 	% IdEvTt_T21
-		GuiControl, Disable, 	% IdEvTt_DDL1
-		GuiControl, Disable,	% IdEvTt_T23
-		GuiControl, Disable,	% IdEvTt_T24
-		GuiControl, Disable, 	% IdEvTt_DDL2
+			GuiControl, Disable, 	% IdEvTt_T3
+			GuiControl, Disable, 	% IdEvTt_T4
+			GuiControl, Disable, 	% IdEvTt_T5
+			GuiControl, Disable, 	% IdEvTt_R3
+			GuiControl, Disable, 	% IdEvTt_R4
+			GuiControl, Disable, 	% IdEvTt_T6
+			GuiControl, Disable, 	% IdEvTt_S1
+			GuiControl, Disable, 	% IdEvTt_T7
+			GuiControl, Disable, 	% IdEvTt_T8
+			GuiControl, Disable, 	% IdEvTt_T9
+			GuiControl, Disable, 	% IdEvTt_T10
+			GuiControl, Disable, 	% IdEvTt_T11
+			GuiControl, Disable, 	% IdEvTt_R5
+			GuiControl, Disable, 	% IdEvTt_R6
+			GuiControl, Disable, 	% IdEvTt_T13
+			GuiControl, Disable, 	% IdEvTt_T14
+			GuiControl, Disable, 	% IdEvTt_C1
+			GuiControl, Disable, 	% IdEvTt_C2
+			GuiControl, Disable, 	% IdEvTt_T16
+			GuiControl, Disable, 	% IdEvTt_T17
+			GuiControl, Disable, 	% IdEvTt_S2
+			GuiControl, Disable, 	% IdEvTt_T18
+			GuiControl, Disable, 	% IdEvTt_T20
+			GuiControl, Disable, 	% IdEvTt_T21
+			GuiControl, Disable, 	% IdEvTt_DDL1
+			GuiControl, Disable,	% IdEvTt_T23
+			GuiControl, Disable,	% IdEvTt_T24
+			GuiControl, Disable, 	% IdEvTt_DDL2
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
