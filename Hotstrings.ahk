@@ -10219,7 +10219,7 @@ F_LV1_EnDisDefinition()
 			break
 	}
 	
-	a_EnableDisable[key] := OnOffToggle
+	a_EnableDisable[key] := EnDis
 	for index in a_Combined	;recreate array a_Combined
 		a_Combined[index] := a_Triggerstring[index] . "|" . a_TriggerOptions[index] . "|" . a_EnableDisable[index] . "|" . a_Hotstring[index]
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
@@ -10231,7 +10231,6 @@ F_LV1_EnDisDefinition()
 		{
 			LV_Modify(A_Index, "Col1", EnDis)
 			key := A_Index
-			OutputDebug, % "EnDis:" . EnDis . "`n"
 			Break
 		}
 	}
