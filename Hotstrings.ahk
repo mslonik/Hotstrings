@@ -251,8 +251,8 @@ Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 											F_ToggleEndChar
 F_ToggleEndChars()
 Func_GuiEventsMenu		:= func("F_GuiEvents")
 Menu, Submenu1,		Add, % TransA["Events: signaling"],									% Func_GuiEventsMenu
-Func_GuiEventsMenu.Call(true)		
-Func_GuiStylingMenu		:= func("F_EventsStyling")		
+Func_GuiEventsMenu.Call(true)
+Func_GuiStylingMenu		:= func("F_EventsStyling")
 Menu, Submenu1,		Add, % TransA["Events: styling"],										% Func_GuiStylingMenu
 Func_GuiStylingMenu.Call(true)		
 Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 								:ConfGUI
@@ -2160,7 +2160,7 @@ F_OneCharPressed(ih, Char)
 	
 	v_InputString .= Char
 
-	OutputDebug, % "2)v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
+	; OutputDebug, % "2)v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -3253,7 +3253,7 @@ F_LoadConfiguration()
 		ini_HK_ToggleTt 		:= "none"
 		IniWrite, % ini_HK_ToggleTt, % ini_HADConfig, Configuration, HK_ToggleTt
 	}
-     
+
 	if (ini_HK_ToggleTt != "none")
      {
 		Hotkey, % ini_HK_ToggleTt, F_ToggleTt, On
@@ -4437,13 +4437,13 @@ F_EvUH_B1() ;Event Undo Hotstring (is triggered) Button Tooltip test
 					SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
 			}
 		}
-	}
-	if (EvUH_R5R6 = 2)
-	{
-		MouseGetPos, v_MouseX, v_MouseY
-		Gui, Tt_ULH: Show, % "x" . v_MouseX + 20 . A_Space . "y" . v_MouseY - 20
-		if (ini_UHTD > 0)
-			SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
+		if (EvUH_R5R6 = 2)
+		{
+			MouseGetPos, v_MouseX, v_MouseY
+			Gui, Tt_ULH: Show, % "x" . v_MouseX + 20 . A_Space . "y" . v_MouseY - 20
+			if (ini_UHTD > 0)
+				SetTimer, TurnOff_UHE, % "-" . ini_UHTD, 60 ;Priority = 60 to avoid conflicts with other threads 
+		}
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5370,7 +5370,7 @@ F_EvBH_B3()	;Events Basic Hotstring (is triggered) Button Apply
 	F_EvTab3(true)	;to memory that something was applied
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvBH_B4(CloseGuiEvents)	;Events Basic Hotstring (is triggered) Button Close
+F_EvBH_B4()	;Events Basic Hotstring (is triggered) Button Close
 {
 	global ;assume-global mode
 	Gui, GuiEvents: Submit
@@ -5484,8 +5484,8 @@ F_GuiEvents_LoadValues()
 	GuiControl,, % IdEvUH_T7, 	% TransA["Timeout value [ms]"] . ":" . A_Space . ini_UHTD
 	Switch ini_UHTP
 	{
-		Case 1: 		GuiControl,, % IdEvUH_R6, 1
-		Case 2: 		GuiControl,, % IdEvUH_R5, 1
+		Case 1: 		GuiControl,, % IdEvUH_R5, 1
+		Case 2: 		GuiControl,, % IdEvUH_R6, 1
 	}
 	Switch ini_UHSEn
 	{
@@ -6792,7 +6792,7 @@ F_EventsStyling(OneTime*)
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
 	
-	if (OneTime[3])	
+	if (OneTime[3])
 		Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	F_GuiEventsStyling_CreateObjects()
 	F_GuiEventsStyling_DetermineConstants("TT")	;TT = Triggerstring Tips
