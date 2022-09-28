@@ -2160,7 +2160,7 @@ F_OneCharPressed(ih, Char)
 	
 	v_InputString .= Char
 
-	; OutputDebug, % "2)v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
+	OutputDebug, % "2)v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -2180,6 +2180,21 @@ F_OneCharPressed(ih, Char)
 		if (StrLen(v_InputString) >= 2) and (InStr(HotstringEndChars, SubStr(v_InputString, 1, 1))) ;if v_InputString is at least 2x chars and the first char is EndChar
 		{
 			v_InputString := SubStr(v_InputString, 2)	;cut down v_InputString and try again if triggerstring tip exists.
+			F_PrepareTriggerstringTipsTables2(v_InputString)	;Variant when new sequence starts from EndChar.
+			if (a_Tips.Count())	;if tips are available display then
+			{
+				; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
+				f_LastTip := true
+				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
+				if (ini_TTTD > 0)
+					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD
+				Critical, Off
+				return
+			}
+		}
+		if (StrLen(v_InputString) >= 2)
+		{
+			v_InputString := SubStr(v_InputString, 3)	;cut down v_InputString and try again if triggerstring tip exists.
 			F_PrepareTriggerstringTipsTables2(v_InputString)	;Variant when new sequence starts from EndChar.
 			if (a_Tips.Count())	;if tips are available display then
 			{
