@@ -11243,22 +11243,34 @@ F_LoadHotstringsFromLibraries()
 	for key, value in ini_LoadLib
 	{
 		temp := SubStr(key, 1, 2)	;extract the first 2 characters
-		if ((temp != "S2") and (value))
+		if (temp != "S1") and (temp != "S2") and (value)
 		{
 			F_LoadDefinitionsFromFile(key)
 			F_LoadTriggTipsFromFile(key)
 		}
-		if ((temp = "S2") and (value))
+	}
+	key := "", value := 0
+	for key, value in ini_LoadLib
+	{
+		temp := SubStr(key, 1, 2)	;extract the first 2 characters
+		if (temp = "S1") and (value)
 		{
-			PriorityFlag 		:= true
-,			PriorityFilename 	:= key
+			F_LoadDefinitionsFromFile(key)
+			F_LoadTriggTipsFromFile(key)
+			break
 		}
 	}
-	if (PriorityFlag)	;loaded as last = with the highest priority
+
+	key := "", value := 0
+	for key, value in ini_LoadLib
 	{
-		F_LoadDefinitionsFromFile(PriorityFilename)
-		F_LoadTriggTipsFromFile(PriorityFilename)
-		PriorityFlag := false
+		temp := SubStr(key, 1, 2)	;extract the first 2 characters
+		if (temp = "S2") and (value)
+		{
+			F_LoadDefinitionsFromFile(key)
+			F_LoadTriggTipsFromFile(key)
+			break
+		}
 	}
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -11274,21 +11286,15 @@ F_UpdateSelHotLibDDL()
 		for key, value in ini_LoadLib
 		{
 			if !(value)
-			{
 				FinalString .= key . A_Space . TransA["DISABLED"]
-				
-			}
 			else
-			{
 				FinalString .= key 
-			}
+
 			FinalString .= "|"
 		}
 	}
 	else ;if ini_LoadLib is empty
-	{
 		FinalString .=  TransA["No libraries have been found!"] . "||" 
-	}
 	
 	GuiControl, , % IdDDL2, % "|" . FinalString 	;To replace (overwrite) the list instead, include a pipe as the first character
 	GuiControl, , % IdDDL2b, % "|" . FinalString	;To replace (overwrite) the list instead, include a pipe as the first character
@@ -13658,6 +13664,7 @@ F_CreateHotstring(txt, nameoffile)
 					Case "SR":	SendFun := "F_HOF_SR"
 					Case "SP":	SendFun := "F_HOF_SP"
 					Case "SE":	SendFun := "F_HOF_SE"
+					Case "S1":	SendFun := "F_HOF_S1"
 					Case "S2":	SendFun := "F_HOF_S2"	;tu jestem
 				}
 			Case 4: 
@@ -13910,6 +13917,44 @@ F_HOF_SI(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ SendI
 ,	ReplacementString := F_FollowCaseConformity(ReplacementString)
 ,	ReplacementString := F_ConvertEscapeSequences(ReplacementString)
  	F_SendIsOflag(ReplacementString, Oflag, "SendInput")
+ 	F_EventSigOrdHotstring()
+	++v_LogCounter
+	temp := F_DetermineGain2(v_InputString, ReplacementString)
+	v_CntCumGain += temp
+	if (ini_THLog)
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+	v_UndoTriggerstring := v_InputString
+,	v_InputString 		:= ""
+	Critical, Off	
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HOF_S1(ReplacementString, Oflag)	;Function _ Hotstring Output Function _ S2, special function
+{
+	global	;assume-global mode of operation
+	local	temp := 0, FirstPart := "", SecondPart := ""
+
+	Critical, On
+	; OutputDebug, % A_ThisFunc . A_Space . "A_SendLevel:" . A_Space . A_SendLevel . "`n"
+	if (InStr(A_ThisHotkey, "?"))
+		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
+	F_DestroyTriggerstringTips(ini_TTCn)
+	F_DeterminePartStrings(ReplacementString)
+	ReplacementString 	:= F_ReplaceAHKconstants(ReplacementString)
+,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString)
+,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
+,	SecondPart		:= SubStr(ReplacementString, 0)	 ;extracts the last character
+,	FirstPart			:= SubStr(ReplacementString, 1, -1) ;omits last character
+	if (Oflag = false)
+		SendInput, % FirstPart . A_EndChar
+	else
+		SendInput, % FirstPart
+	Hotstring("Reset")
+	SendLevel, 2
+	if (Oflag = false)
+		SendInput, % SecondPart . A_EndChar
+	else
+		SendInput, % SecondPart
+	SendLevel, 0
  	F_EventSigOrdHotstring()
 	++v_LogCounter
 	temp := F_DetermineGain2(v_InputString, ReplacementString)
