@@ -578,7 +578,7 @@ Critical, Off
 	; OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString . "`n"
 	return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#If WinExist("ahk_id" HMenuCliHwnd)	;MCLI
+#If WinExist("ahk_id" HMenuCliHwnd)	;MCL
 	Tab::
 	+Tab::
 	Up::
@@ -642,7 +642,7 @@ Critical, Off
 		return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#If WinExist("ahk_id" HMenuAHKHwnd) or WinExist("ahk_id" HMenuCliHwnd)	;MSI or MCLI
+#If WinExist("ahk_id" HMenuAHKHwnd) or WinExist("ahk_id" HMenuCliHwnd)	;MSI or MCL
 	^?::
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Shortcuts available for hotstring menu:"] . "`n`n" ;it cannot be modal (always on top) as HMenuAHKHwnd has already feature "always on top"
 			. "Tab" . A_Tab . A_Tab . A_Tab .	 	 TransA["down"] . "`n"
@@ -1379,7 +1379,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 				Switch WhichMenu
 				{
 					Case "SI":	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MSI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-					Case "CLI":	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCLI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+					Case "CLI":	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 				}
 			}
 			v_UndoTriggerstring 	:= v_InputString
@@ -2238,7 +2238,7 @@ F_OneCharPressed(ih, Char)
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
 {
 	global	;assume-global mode of operation
-	v_InputString := "", v_TrigTipsInput := "", v_UndoHotstring := "", v_UndoTriggerstring := ""	;used by output functions: F_HOF_CLI, F_HOF_MCLI, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
+	v_InputString := "", v_TrigTipsInput := "", v_UndoHotstring := "", v_UndoTriggerstring := ""	;used by output functions: F_HOF_CLI, F_HOF_MCL, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
 ,	v_InputH 			:= InputHook("V I1 L0")	;I1 by default
 ,	v_InputH.OnChar 	:= Func("F_OneCharPressed")
 ,	v_InputH.OnKeyUp 	:= Func("F_BackspaceProcessing")
@@ -8548,7 +8548,7 @@ F_AddHotstring()
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . NewOptions . ":" . vTriggerstring . "," . "func(""SimpleOutput"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . EnDis . ")"
 		}
-		if (SendFun = "MSI") or (SendFun = "MCLI")
+		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
 			Try
 				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_HOF_" . SendFun).bind(vHotstring, true), EnDis)
@@ -8568,7 +8568,7 @@ F_AddHotstring()
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . NewOptions . ":" . vTriggerstring . "," . "func(""SimpleOutput"").bind(" . vHotstring . "," . A_Space . false . "," . A_Space . SendFun . ")," . A_Space . EnDis . ")"
 		}
-		if (SendFun = "MSI") or (SendFun = "MCLI")
+		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
 			Try
 				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_HOF_" . SendFun).bind(vHotstring, false), EnDis)
@@ -8693,7 +8693,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 						. "Hotstring(:" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring) . "," . "func(""SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . SendFun . ")," . A_Space . EnDis . ")"
 			}
-			if (SendFun = "MSI") or (SendFun = "MCLI")
+			if (SendFun = "MSI") or (SendFun = "MCL")
 			{
 				Try
 					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HOF_" . SendFun).bind(TextInsert, true), EnDis)
@@ -8713,7 +8713,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 						. "Hotstring(:" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring) . "," . "func(""SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . SendFun . ")," . A_Space . EnDis . ")"
 			}
-			if (SendFun = "MSI") or (SendFun = "MCLI")
+			if (SendFun = "MSI") or (SendFun = "MCL")
 			{
 				Try
 					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HOF_" . SendFun).bind(TextInsert, false), EnDis)
@@ -10260,7 +10260,7 @@ F_LV1_EnDisDefinition()
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 				. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(""SimpleOutput"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
 	}
-	if (SendFun = "MSI") or (SendFun = "MCLI")
+	if (SendFun = "MSI") or (SendFun = "MCL")
 	{
 		Try
 			Hotstring(":" . Options . ":" . Triggerstring, func("F_HOF_" . SendFun).bind(vHotstring, true), OnOffToggle)
@@ -10444,7 +10444,7 @@ F_LV1_CopyContentToHS3()
 		Case "CL":	;SendFun := "F_HOF_CLI"
 		GuiControl, HS3: ChooseString, % IdDDL1, 	Clipboard (CL)
 		GuiControl, HS4: ChooseString, % IdDDL1b, 	Clipboard (CL)
-		Case "MCL":	;SendFun := "F_HOF_MCLI"
+		Case "MCL":	;SendFun := "F_HOF_MCL"
 		GuiControl, HS3: ChooseString, % IdDDL1, 	Menu & Clipboard (MCL)
 		GuiControl, HS4: ChooseString, % IdDDL1b, 	Menu & Clipboard (MCL)
 		Case "MSI":	;SendFun := "F_HOF_MSI"
@@ -13754,7 +13754,7 @@ F_CreateHotstring(txt, nameoffile)
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(""SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . SendFun . ")," . A_Space . EnDis . ")"
 		}
-		if (SendFun = "MSI") or (SendFun = "MCLI")
+		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
 			Try
 				Hotstring(":" . Options . ":" . Triggerstring, func("F_HOF_" . SendFun).bind(TextInsert, Oflag), EnDis)
@@ -14015,7 +14015,7 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HOF_MCLI(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipboard: for keyboard F_HMenuCLI_Keyboard(), for mouse: F_MouseMenu_MCLI()
+F_HOF_MCL(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipboard: for keyboard F_HMenuCLI_Keyboard(), for mouse: F_MouseMenu_MCL()
 {
 	global	;assume-global mode
 	Critical, On
@@ -14041,7 +14041,7 @@ F_HOF_MCLI(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clip
 			Gui, HMenuCli: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
 		else
 			Gui, HMenuCli: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
-		Gui, HMenuCli: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuCli" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenu_MCLI"
+		Gui, HMenuCli: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuCli" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenu_MCL"
 		Loop, Parse, TextOptions, ¦
 			GuiControl,, % Id_LB_HMenuCli, % A_Index . ". " . A_LoopField . "|"
 		
@@ -14064,7 +14064,7 @@ F_HOF_MCLI(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clip
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_MouseMenu_MCLI() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
+F_MouseMenu_MCL() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
 	local	OutputVarTemp := "", temp := 0, ChoicePos := 0
@@ -14088,7 +14088,7 @@ F_MouseMenu_MCLI() ;The subroutine may consult the following built-in variables:
 			v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 		v_CntCumGain += F_DetermineGain2(v_InputString, ReplacementString)
 		if (ini_THLog)
-			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCLI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 		v_UndoTriggerstring 	:= v_InputString
 ,		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
@@ -14297,7 +14297,7 @@ F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid i
 ,		ReplacementString 	:= F_ReplaceAHKconstants(OutputVarTemp)
 ,		ReplacementString 	:= F_FollowCaseConformity(ReplacementString)
 ,		ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
-		Switch WhichMenu	;this parameter is set wihin F_HOF_MSI and F_HOF_MCLI
+		Switch WhichMenu	;this parameter is set wihin F_HOF_MSI and F_HOF_MCL
 		{
 			Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
 			Case "CLI":	F_ClipboardPaste(ReplacementString, Ovar)
