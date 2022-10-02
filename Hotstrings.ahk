@@ -465,8 +465,11 @@ Critical, Off
 					MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to display library content please at first select hotstring library"] . "."
 					return
 				}
-				GuiControl, Focus, v_LibraryContent
-				if (LV_GetNext(0, "Focused") == 0)
+				GuiControl, HS3: Focus, v_SelectHotstringLibrary
+				GuiControl, Focus, % IdListView1
+				if (LV_GetNext(0, "Focused"))
+					LV_Modify(LV_GetNext(0, "Focused"), "+Select +Focus")
+				else
 					LV_Modify(1, "+Select +Focus")
 				return
 			Case "HS4": return
@@ -595,6 +598,7 @@ Critical, Off
 		{
 			v_InputH.VisibleText 	:= true
 ,			v_InputString 			:= ""
+			Hotstring("Reset")
 		}
 		return
 	Esc::
@@ -602,6 +606,7 @@ Critical, Off
 		SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
 		v_InputH.VisibleText 	:= true
 ,		v_InputString 			:= ""
+		Hotstring("Reset")
 		return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -624,6 +629,7 @@ Critical, Off
 		{
 			v_InputH.VisibleText 	:= true
 ,			v_InputString 			:= ""
+			Hotstring("Reset")
 		}
 		; OutputDebug, % "WinExist(""ahk_id"" HMenuAHKHwnd)" . A_Space . A_ThisHotkey . "`n"
 		return
@@ -632,6 +638,7 @@ Critical, Off
 		SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
 		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
+		Hotstring("Reset")
 		return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1460,8 +1467,7 @@ F_HMenuSI_Keyboard()
 	++v_LogCounter
 	if (InStr(A_ThisHotkey, "?"))
 		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
-	temp := F_DetermineGain2(v_InputString, Temp1)
-	v_CntCumGain += temp
+	v_CntCumGain += F_DetermineGain2(v_InputString, Temp1)
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	v_UndoTriggerstring := v_InputString
@@ -2136,6 +2142,7 @@ F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
 	static	f_EndCharDetected := false, f_LastTip := false
+	local	WhereToCut := 0
 
 	Critical, On
 	; OutputDebug, % "Char:" . Char . "`n"
@@ -2169,7 +2176,7 @@ F_OneCharPressed(ih, Char)
 		F_PrepareTriggerstringTipsTables2(v_InputString)	;Variant when new sequence starts from EndChar.
 		if (a_Tips.Count())	;if tips are available display then
 		{
-			; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
+			; OutputDebug, % "B1 a_Tips.Count():" . a_Tips.Count() . "`n"
 			f_LastTip := true
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			if (ini_TTTD > 0)
@@ -2181,10 +2188,10 @@ F_OneCharPressed(ih, Char)
 		if (StrLen(v_InputString) >= 2) and (InStr(HotstringEndChars, SubStr(v_InputString, 1, 1))) ;if v_InputString is at least 2x chars and the first char is EndChar
 		{
 			v_InputString := SubStr(v_InputString, 2)	;cut down v_InputString and try again if triggerstring tip exists.
-			F_PrepareTriggerstringTipsTables2(v_InputString)	;Variant when new sequence starts from EndChar.
+			F_PrepareTriggerstringTipsTables2(v_InputString)
 			if (a_Tips.Count())	;if tips are available display then
 			{
-				; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
+				; OutputDebug, % "B2 a_Tips.Count():" . a_Tips.Count() . "`n"
 				f_LastTip := true
 				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 				if (ini_TTTD > 0)
@@ -2194,20 +2201,33 @@ F_OneCharPressed(ih, Char)
 				return
 			}
 		}
-		if (StrLen(v_InputString) >= 2)
+		if (f_LastTip)
 		{
-			v_InputString := SubStr(v_InputString, 3)	;cut down v_InputString and try again if triggerstring tip exists.
-			F_PrepareTriggerstringTipsTables2(v_InputString)	;Variant when new sequence starts from EndChar.
-			if (a_Tips.Count())	;if tips are available display then
+			Loop, Parse, v_InputString
 			{
-				; OutputDebug, % "a_Tips.Count():" . a_Tips.Count() . "`n"
-				f_LastTip := true
-				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
-				if (ini_TTTD > 0)
-					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD
-				; OutputDebug, % "Return 3" . "`n"
-				Critical, Off
-				return
+				; OutputDebug, % "A_Index:" . A_Index . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
+				if (InStr(HotstringEndChars, A_LoopField))
+				{
+					WhereToCut := A_Index
+					break
+				}
+			}
+			if (WhereToCut)
+			{
+				v_InputString := SubStr(v_InputString, ++WhereToCut)	;cut down v_InputString and try again if triggerstring tip exists.
+				; OutputDebug, % "Cut v_InputString:" . v_InputString . "`n"
+				F_PrepareTriggerstringTipsTables2(v_InputString)
+				if (a_Tips.Count())	;if tips are available display then
+				{
+					; OutputDebug, % "B3 a_Tips.Count():" . a_Tips.Count() . "`n"
+					f_LastTip := true
+					F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
+					if (ini_TTTD > 0)
+						SetTimer, TurnOff_Ttt, % "-" . ini_TTTD
+					; OutputDebug, % "Return 3" . "`n"
+					Critical, Off
+					return
+				}
 			}
 		}
 		f_LastTip := false
@@ -10228,15 +10248,10 @@ F_LV1_EnDisDefinition()
 	}
 	LV_GetText(Triggerstring, 	SelectedRow, 	2)
 	LV_GetText(Options, 		SelectedRow, 	3)
-	if (InStr(Options, "O", false))
-		Oflag := true
-	else
-		Oflag := false
-
 	LV_GetText(Fun, 			SelectedRow, 	4)
 	LV_GetText(vHotstring, 		SelectedRow, 	5)
 
-	;1. Modify Hotstring definition	;tu jestem, dodac obsluge Oflag dokonczyc z eliminacja F_HOF_CLI i podobnych, sprawdzic, czy dla MSI i MCLI tez jest Hotstring("Reset")
+	;1. Modify Hotstring definition
 	if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 	{
 		Try
@@ -13901,7 +13916,7 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 		Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenu_MSI"
 		Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
 			GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . "|"
-		
+
 		a_MCSIMenuPos := F_WhereDisplayMenu(ini_MHMP)
 		F_FlipMenu(HMenuAHKHwnd, a_MCSIMenuPos[1], a_MCSIMenuPos[2], "HMenuAHK")
 		GuiControl, Choose, % Id_LB_HMenuAHK, 1
@@ -13991,17 +14006,16 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 	}
  	F_EventSigOrdHotstring()
 	++v_LogCounter
-	temp 			:= F_DetermineGain2(v_InputString, ReplacementString)
-	v_CntCumGain += temp
+	v_CntCumGain += F_DetermineGain2(v_InputString, ReplacementString)
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	v_UndoTriggerstring := v_InputString
 ,	v_InputString 		:= ""
 	Hotstring("Reset")	;By default, non-auto-replace hotstrings only remove the trigger text from the buffer. To reset it completely, you must use the Z option or Hotstring("Reset").https://www.autohotkey.com/boards/viewtopic.php?f=76&t=108988&p=484841#p484841
-	Critical, Off	
+	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HOF_MCLI(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipboard
+F_HOF_MCLI(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipboard: for keyboard F_HMenuCLI_Keyboard(), for mouse: F_MouseMenu_MCLI()
 {
 	global	;assume-global mode
 	Critical, On
@@ -14059,10 +14073,10 @@ F_MouseMenu_MCLI() ;The subroutine may consult the following built-in variables:
 	if (A_PriorKey = "LButton")
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuCli
-		ChoicePos := SubStr(OutputVarTemp, 1, 1)
-,		OutputVarTemp := SubStr(OutputVarTemp, 4)
 		Gui, HMenuCli: Destroy
-		v_UndoHotstring 	:= OutputVarTemp
+		ChoicePos 		:= SubStr(OutputVarTemp, 1, 1)
+,		OutputVarTemp 		:= SubStr(OutputVarTemp, 4)
+,		v_UndoHotstring 	:= OutputVarTemp
 ,	     ReplacementString 	:= F_ReplaceAHKconstants(OutputVarTemp)
 ,	     ReplacementString 	:= F_FollowCaseConformity(ReplacementString)
 ,	     ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
@@ -14072,13 +14086,13 @@ F_MouseMenu_MCLI() ;The subroutine may consult the following built-in variables:
 		++v_LogCounter
 		if (InStr(A_ThisHotkey, "?"))
 			v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
-		temp := F_DetermineGain2(v_InputString, ReplacementString)
-		v_CntCumGain += temp
+		v_CntCumGain += F_DetermineGain2(v_InputString, ReplacementString)
 		if (ini_THLog)
 			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCLI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 		v_UndoTriggerstring 	:= v_InputString
 ,		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
+		Hotstring("Reset")
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14203,7 +14217,7 @@ F_MouseMenu_MSI() ; Handling of mouse events for F_HOF_MSI;The subroutine may co
 		v_UndoHotstring 	:= OutputVarTemp
 ,		OutputVarTemp 		:= F_ReplaceAHKconstants(OutputVarTemp)
 ,		OutputVarTemp 		:= F_FollowCaseConformity(OutputVarTemp)
-,		OutputVarTemp 		:= F_ConvertEscapeSequences(OutputVarTemp)          
+,		OutputVarTemp 		:= F_ConvertEscapeSequences(OutputVarTemp)
 		F_SendIsOflag(OutputVarTemp, Ovar, "SendInput")
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
@@ -14217,6 +14231,7 @@ F_MouseMenu_MSI() ; Handling of mouse events for F_HOF_MSI;The subroutine may co
 		v_UndoTriggerstring 	:= v_InputString
 ,		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
+		Hotstring("Reset")
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
