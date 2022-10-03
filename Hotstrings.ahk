@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -8436,7 +8436,7 @@ F_AddHotstring()
 ,			ExternalIndex := 0, Overwrite := ""
 ,			name := "", key := 0, value := "", Counter := 0, key2 := 0, value2 := ""
 ,			f_T_GeneralMatch := false, f_T_CaseMatch := false, f_OldOptionsC := false, f_OldOptionsC1 := false, f_OptionsC := false, f_OptionsC1 := false
-,			SelectedLibraryName := "", WhichGuiEnable := ""
+,			SelectedLibraryName := "", WhichGuiEnable := "", TheWholeFile := "", LibraryHeader := ""
 
 	;1. Read all inputs.
 	WhichGuiEnable := F_WhichGui()
@@ -8513,11 +8513,17 @@ F_AddHotstring()
 		{
 			F_ChangeDefInArrays(key, EnDis, NewOptions, SendFun, vHotstring, v_Comment)
 			F_ModifyLV(EnDis, v_Triggerstring, NewOptions, SendFun, vHotstring, v_Comment)
-			;7. Delete library file. 
+
+			;7. Delete library file.
+			FileRead, TheWholeFile, % ini_HADL . "\" . v_SelectHotstringLibrary
+			LibraryHeader 	:= F_ExtractHeader(TheWholeFile)
+,			TheWholeFile	:= ""
 			FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary
+
 			;8. Save List View into the library file.
+			FileAppend, % LibraryHeader, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8
 			F_SaveLVintoLibFile()
-			Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
+			Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)
 			{
 				Case "HS3":	F_GuiHS3_EnDis("Enable")	;EnDis = "Disable" or "Enable"
 				Case "HS4": 	F_GuiHS4_EnDis("Enable")
@@ -8588,9 +8594,13 @@ F_AddHotstring()
 	LV_ModifyCol(2, "Sort")
 
 	;7. Delete library file. 
+	FileRead, TheWholeFile, % ini_HADL . "\" . v_SelectHotstringLibrary
+	LibraryHeader 	:= F_ExtractHeader(TheWholeFile)
+,	TheWholeFile	:= ""	
 	FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary
-	
+
 	;8. Save List View into the library file.
+	FileAppend, % LibraryHeader, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8
 	F_SaveLVintoLibFile()
 
 	;9. Increment library counter.
@@ -9009,9 +9019,9 @@ F_Clear()
 F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 {
 	global	;assume-global mode
-	local NoOnTheList := 0, Temp1 := "", SourceLibrary := "", DestinationLibrary := "", SearchedTriggerstring := ""
-		,Triggerstring := "", TriggOpt := "", OutFun := "", EnDis := "", Hotstring := "", Comment := ""
-		,WhichRow := 0
+	local 	NoOnTheList := 0, Temp1 := "", SourceLibrary := "", DestinationLibrary := "", SearchedTriggerstring := ""
+,			Triggerstring := "", TriggOpt := "", OutFun := "", EnDis := "", Hotstring := "", Comment := ""
+,			WhichRow := 0, TheWholeFile := "", LibraryHeader := ""
 
 	Gui, HS3Search:	+Disabled
 	Gui, HS3:			+Disabled
@@ -9064,7 +9074,11 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 	
 	LV_Add("", EnDis, Triggerstring, TriggOpt, OutFun, Hotstring, Comment) ;add to ListView
 	LV_ModifyCol(2, "Sort")
+	FileRead, TheWholeFile, % ini_HADL . "\" . DestinationLibrary
+	LibraryHeader 	:= F_ExtractHeader(TheWholeFile)
+,	TheWholeFile	:= ""	
 	FileDelete, % ini_HADL . "\" . DestinationLibrary	;delete the old destination file.
+	FileAppend, % LibraryHeader, % ini_HADL . "\" . DestinationLibrary, UTF-8
 	FileAppend, % F_ConvertListViewIntoTxt(), % ini_HADL . "\" . DestinationLibrary, UTF-8
 	
 	GuiControl, ChooseString, % IdDDL2, % SourceLibrary
@@ -9079,7 +9093,11 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 			break
 		}
 	}
+	FileRead, TheWholeFile, % ini_HADL . "\" . SourceLibrary
+	LibraryHeader 	:= F_ExtractHeader(TheWholeFile)
+,	TheWholeFile	:= ""	
 	FileDelete, % ini_HADL . "\" . SourceLibrary	;delete the old source filename.
+	FileAppend, % LibraryHeader, % ini_HADL . "\" . SourceLibrary, UTF-8
 	FileAppend, % F_ConvertListViewIntoTxt(), % ini_HADL . "\" . SourceLibrary, UTF-8
 	F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
 	GuiControl, ChooseString, % IdDDL2, % DestinationLibrary
@@ -9772,9 +9790,9 @@ F_DeleteHotstring()
 	;5. Remove trigger hint.
 	;6. Decrement library counter.
 	global ;assume-global mode
-	local 	LibraryFullPathAndName := "" 
-			,SelectedRow := 0, Pointer := 0, index := 0
-			,key := 0, val := "", options := "", triggerstring := "", EnDis := "", hotstring := ""
+	local 	LibraryFullPathAndName := ini_HADL . "\" . v_SelectHotstringLibrary, TheWholeFile := "", LibraryHeader := ""
+,			SelectedRow := 0, Pointer := 0, index := 0
+,			key := 0, val := "", options := "", triggerstring := "", EnDis := "", hotstring := ""
 	
 	Gui, HS3: Default
 	Gui, HS3: +OwnDialogs
@@ -9797,7 +9815,9 @@ F_DeleteHotstring()
 	TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
 	
 	;1. Remove selected library file.
-	LibraryFullPathAndName := ini_HADL . "\" . v_SelectHotstringLibrary
+	FileRead, TheWholeFile, % LibraryFullPathAndName
+	LibraryHeader 	:= F_ExtractHeader(TheWholeFile)
+,	TheWholeFile	:= ""
 	FileDelete, % LibraryFullPathAndName
 	
 	;2. Disable selected hotstring.
@@ -9826,7 +9846,8 @@ F_DeleteHotstring()
 	LV_Delete(SelectedRow)
 	
 	;4. Save List View into the library file.
-	FileAppend, % F_ConvertListViewIntoTxt(), % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8
+	FileAppend, % LibraryHeader, % LibraryFullPathAndName, UTF-8
+	FileAppend, % F_ConvertListViewIntoTxt(), % LibraryFullPathAndName, UTF-8
 	TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
 	
 	;5. Decrement library counter.
@@ -10232,7 +10253,7 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 F_LV1_EnDisDefinition()
 {
 	global ;a_Triggerstring, a_TriggerOptions, a_EnableDisable, a_Combined, a_Hotstring, ini_TipsSortAlphabetically, ini_TipsSortByLength, v_SelectHotstringLibrary ;assume-global mode of operation
-	local EnDis := "", SelectedRow := 0, OnOffToggle := false, Triggerstring := "", Options := "", key := 0, value := "", index := 0, Temp1 := "", SelectedHotstringLibrary := "", vHotstring := "", Fun := "", Oflag := false
+	local EnDis := "", SelectedRow := 0, OnOffToggle := false, Triggerstring := "", Options := "", key := 0, value := "", index := 0, Temp1 := "", SelectedHotstringLibrary := "", vHotstring := "", Fun := "", Oflag := false, TheWholeFile	:= "", LibraryHeader := ""
 
 	F_GuiHS3_EnDis("Disable")
 	Gui, HS3: Default	;in order to activate ListView
@@ -10295,7 +10316,11 @@ F_LV1_EnDisDefinition()
 		}
 	}
 	;4. Modify content of library file
+	FileRead, TheWholeFile, % ini_HADL . "\" . v_SelectHotstringLibrary
+	LibraryHeader 	:= F_ExtractHeader(TheWholeFile)
+,	TheWholeFile	:= ""
 	FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary	;delete library file. 
+	FileAppend, % LibraryHeader, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8	
 	F_SaveLVintoLibFile()
 	F_GuiHS3_EnDis("Enable")	;Enable all GuiControls
 	GuiControl, Focus, % IdListView1
@@ -14001,7 +14026,7 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 				SendInput, % SecondPart
 			SendLevel, 0
 			v_CntCumGain := F_DetermineGain2(v_InputString, ReplacementString)
-			OutputDebug, % "v_InputString:" . v_InputString . A_Space . "First part:" . FirstPart . A_Space . "Second part:" . SecondPart . "|" . "temp:" . temp . "|" . "`n"
+			; OutputDebug, % "v_InputString:" . v_InputString . A_Space . "First part:" . FirstPart . A_Space . "Second part:" . SecondPart . "|" . "temp:" . temp . "|" . "`n"
 			if (ini_THLog)
 				FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 			return
