@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -60,6 +60,7 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		v_EnDis				:= true
 , 		v_TotalHotstringCnt 	:= 0
 ,		v_LibHotstringCnt		:= 0 ;no of (triggerstring, hotstring) definitions in single library
+,		ini_TTCn				:= 0 ;this variable could be triggered by left mouse click when script is initialized.
 
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
@@ -2205,14 +2206,15 @@ F_OneCharPressed(ih, Char)
 		{
 			Loop, Parse, v_InputString
 			{
-				; OutputDebug, % "A_Index:" . A_Index . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
+				; OutputDebug, % "A_LoopField:" . A_LoopField . A_Space . "A_Index:" . A_Index . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 				if (InStr(HotstringEndChars, A_LoopField))
 				{
 					WhereToCut := A_Index
 					break
 				}
 			}
-			if (WhereToCut)
+			; OutputDebug, % "WhereToCut:" . WhereToCut . "`n"
+			if (WhereToCut < StrLen(v_InputString))
 			{
 				v_InputString := SubStr(v_InputString, ++WhereToCut)	;cut down v_InputString and try again if triggerstring tip exists.
 				; OutputDebug, % "Cut v_InputString:" . v_InputString . "`n"
@@ -8509,8 +8511,8 @@ F_AddHotstring()
 		Overwrite := F_ChangeExistingDef(OldOptions, NewOptions, a_Triggerstring[key], a_Library[key], SendFun, vHotstring)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
 		if (Overwrite = "Yes")
 		{
-			F_ChangeDefInArrays(key, EnDis, NewOptions, SendFunFileFormat, vHotstring, v_Comment)
-			F_ModifyLV(EnDis, v_Triggerstring, NewOptions, SendFunFileFormat, vHotstring, v_Comment)
+			F_ChangeDefInArrays(key, EnDis, NewOptions, SendFun, vHotstring, v_Comment)
+			F_ModifyLV(EnDis, v_Triggerstring, NewOptions, SendFun, vHotstring, v_Comment)
 			;7. Delete library file. 
 			FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary
 			;8. Save List View into the library file.
@@ -8543,18 +8545,18 @@ F_AddHotstring()
 		if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_SimpleOutput").bind(vHotstring, true, SendFun), EnDis)
+				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_SimpleOutput").bind(vHotstring, true, SendFun), v_EnDis)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . NewOptions . ":" . vTriggerstring . "," . "func(""SimpleOutput"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . EnDis . ")"
+					. "Hotstring(:" . NewOptions . ":" . vTriggerstring . "," . A_Space . "func(""SimpleOutput"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . v_EnDis . ")"
 		}
 		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_HOF_" . SendFun).bind(vHotstring, true), EnDis)
+				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_HOF_" . SendFun).bind(vHotstring, true), v_EnDis)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(F_HOF_" . SendFun . ").bind(" . vHotstring . "," . A_Space . true . ")," . A_Space . EnDis . ")"
+					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(F_HOF_" . SendFun . ").bind(" . vHotstring . "," . A_Space . true . ")," . A_Space . v_EnDis . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 		}
 	}
@@ -8563,26 +8565,26 @@ F_AddHotstring()
 		if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_SimpleOutput").bind(vHotstring, false, SendFun), EnDis)
+				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_SimpleOutput").bind(vHotstring, false, SendFun), v_EnDis)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . NewOptions . ":" . vTriggerstring . "," . "func(""SimpleOutput"").bind(" . vHotstring . "," . A_Space . false . "," . A_Space . SendFun . ")," . A_Space . EnDis . ")"
+					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_SimpleOutput"").bind(" . vHotstring . "," . A_Space . false . "," . A_Space . SendFun . ")," . A_Space . v_EnDis . ")"
 		}
 		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_HOF_" . SendFun).bind(vHotstring, false), EnDis)
+				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_HOF_" . SendFun).bind(vHotstring, false), v_EnDis)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . "func(F_HOF_" . SendFun . ").bind(" . vHotstring . "," . A_Space . false . ")," . A_Space . EnDis . ")"
+					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(F_HOF_" . SendFun . ").bind(" . vHotstring . "," . A_Space . false . ")," . A_Space . v_EnDis . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 		}
 	}
 	; 5. Update global arrays
-	F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, vHotstring)
+	F_UpdateGlobalArrays(NewOptions, SendFun, EnDis, vHotstring)
 	
 	;6. Update and sort List View. ;future: gui parameter for sorting
-	LV_Add("",  EnDis, v_Triggerstring, NewOptions, SendFunFileFormat, vHotstring, v_Comment)
+	LV_Add("",  EnDis, v_Triggerstring, NewOptions, SendFun, vHotstring, v_Comment)
 	LV_ModifyCol(2, "Sort")
 
 	;7. Delete library file. 
@@ -8688,18 +8690,18 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_SimpleOutput").bind(TextInsert, true, SendFun), EnDis)
+					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_SimpleOutput").bind(TextInsert, true, SendFun), v_EnDis)
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring) . "," . "func(""SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . SendFun . ")," . A_Space . EnDis . ")"
+						. "Hotstring(:" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring) . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . SendFun . ")," . A_Space . v_EnDis . ")"
 			}
 			if (SendFun = "MSI") or (SendFun = "MCL")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HOF_" . SendFun).bind(TextInsert, true), EnDis)
+					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HOF_" . SendFun).bind(TextInsert, true), v_EnDis)
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring) . "," . "func(F_HOF_" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")"
+						. "Hotstring(:" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring) . "," . "func(F_HOF_" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . v_EnDis . ")"
 						. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 			}
 		}
@@ -8708,18 +8710,18 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_SimpleOutput").bind(TextInsert, false, SendFun), EnDis)
+					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_SimpleOutput").bind(TextInsert, false, SendFun), v_EnDis)
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring) . "," . "func(""SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . SendFun . ")," . A_Space . EnDis . ")"
+						. "Hotstring(:" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring) . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . v_SendFun . ")," . A_Space . EnDis . ")"
 			}
 			if (SendFun = "MSI") or (SendFun = "MCL")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HOF_" . SendFun).bind(TextInsert, false), EnDis)
+					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HOF_" . SendFun).bind(TextInsert, false), v_EnDis)
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring) . "," . "func(F_HOF_" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")"
+						. "Hotstring(:" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring) . "," . "func(F_HOF_" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . v_EnDis . ")"
 						. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 			}
 		}
@@ -10258,7 +10260,7 @@ F_LV1_EnDisDefinition()
 			Hotstring(":" . Options . ":" . Triggerstring, func("F_SimpleOutput").bind(vHotstring, true, SendFun), OnOffToggle)
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-				. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(""SimpleOutput"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
+				. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(""F_SimpleOutput"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
 	}
 	if (SendFun = "MSI") or (SendFun = "MCL")
 	{
@@ -13752,7 +13754,7 @@ F_CreateHotstring(txt, nameoffile)
 				Hotstring(":" . Options . ":" . Triggerstring, func("F_SimpleOutput").bind(TextInsert, Oflag, SendFun), EnDis)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(""SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . SendFun . ")," . A_Space . EnDis . ")"
+					. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . SendFun . ")," . A_Space . EnDis . ")"
 		}
 		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
@@ -13983,32 +13985,43 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 		Case "CL":
 			F_ClipboardPaste(ReplacementString, Oflag)
 		Case "S1":
+			FirstPart			:= SubStr(ReplacementString, 1, -1) ;omits last character
 			SecondPart		:= SubStr(ReplacementString, 0)	 ;extracts the last character
-,			FirstPart			:= SubStr(ReplacementString, 1, -1) ;omits last character
+			; OutputDebug, % "First part:" . FirstPart . A_Space . "Second part:" . SecondPart . "|" . "`n"
 			if (Oflag = false)
 				SendInput, % FirstPart . A_EndChar
 			else
 				SendInput, % FirstPart
 			Hotstring("Reset")
+			v_InputString 		:= ""
 			SendLevel, 2
 			if (Oflag = false)
 				SendInput, % SecondPart . A_EndChar
 			else
 				SendInput, % SecondPart
 			SendLevel, 0
+			v_CntCumGain := F_DetermineGain2(v_InputString, ReplacementString)
+			OutputDebug, % "v_InputString:" . v_InputString . A_Space . "First part:" . FirstPart . A_Space . "Second part:" . SecondPart . "|" . "temp:" . temp . "|" . "`n"
+			if (ini_THLog)
+				FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+			return
 		Case "S2":
+			v_InputString 		:= ""
 			SendLevel, 2
 			if (Oflag = false)
 				SendInput, % ReplacementString . A_EndChar
 			else
 				SendInput, % ReplacementString
 			SendLevel, 0
+			v_CntCumGain := F_DetermineGain2(v_InputString, ReplacementString)
+			if (ini_THLog)
+				FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+			return
 	}
  	F_EventSigOrdHotstring()
-	++v_LogCounter
 	v_CntCumGain += F_DetermineGain2(v_InputString, ReplacementString)
 	if (ini_THLog)
-		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	v_UndoTriggerstring := v_InputString
 ,	v_InputString 		:= ""
 	Hotstring("Reset")	;By default, non-auto-replace hotstrings only remove the trigger text from the buffer. To reset it completely, you must use the Z option or Hotstring("Reset").https://www.autohotkey.com/boards/viewtopic.php?f=76&t=108988&p=484841#p484841
@@ -14112,6 +14125,7 @@ F_DetermineGain2(Triggerstring, Hotstring)
 			+ 	F_CountSpecialChar("{Up}", 		Hotstring)
 			+	F_CountSpecialChar("{Down}", 		Hotstring)
 			+	F_CountSpecialChar("{Backspace}", 	Hotstring)
+			+	F_CountSpecialChar("{BS}",	 	Hotstring)
 			+	F_CountSpecialChar("{Shift}", 	Hotstring)
 			+	F_CountSpecialChar("{Ctrl}", 		Hotstring)
 			+	F_CountSpecialChar("{Alt}", 		Hotstring)
