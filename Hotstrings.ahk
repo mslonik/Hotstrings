@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -8540,7 +8540,7 @@ F_AddHotstring()
 
 			;7. Delete library file.
 			FileRead, TheWholeFile, % ini_HADL . "\" . v_SelectHotstringLibrary
-			LibraryHeader 	:= F_ExtractHeader(TheWholeFile)
+			LibraryHeader 	:= "/*`n" . F_ExtractHeader(TheWholeFile) . "`n*/`n`n"
 ,			TheWholeFile	:= ""
 			FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary
 
@@ -8619,7 +8619,7 @@ F_AddHotstring()
 
 	;7. Delete library file. 
 	FileRead, TheWholeFile, % ini_HADL . "\" . v_SelectHotstringLibrary
-	LibraryHeader 	:= F_ExtractHeader(TheWholeFile)
+	LibraryHeader 	:= "/*`n" . F_ExtractHeader(TheWholeFile) . "`n*/`n`n"
 ,	TheWholeFile	:= ""	
 	FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary
 
@@ -9099,7 +9099,7 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 	LV_Add("", EnDis, Triggerstring, TriggOpt, OutFun, Hotstring, Comment) ;add to ListView
 	LV_ModifyCol(2, "Sort")
 	FileRead, TheWholeFile, % ini_HADL . "\" . DestinationLibrary
-	LibraryHeader 	:= F_ExtractHeader(TheWholeFile)
+	LibraryHeader 	:= "/*`n" . F_ExtractHeader(TheWholeFile) . "`n*/`n`n"
 ,	TheWholeFile	:= ""	
 	FileDelete, % ini_HADL . "\" . DestinationLibrary	;delete the old destination file.
 	FileAppend, % LibraryHeader, % ini_HADL . "\" . DestinationLibrary, UTF-8
@@ -9118,7 +9118,7 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 		}
 	}
 	FileRead, TheWholeFile, % ini_HADL . "\" . SourceLibrary
-	LibraryHeader 	:= F_ExtractHeader(TheWholeFile)
+	LibraryHeader 	:= "/*`n" . F_ExtractHeader(TheWholeFile) . "`n*/`n`n"
 ,	TheWholeFile	:= ""	
 	FileDelete, % ini_HADL . "\" . SourceLibrary	;delete the old source filename.
 	FileAppend, % LibraryHeader, % ini_HADL . "\" . SourceLibrary, UTF-8
@@ -9840,10 +9840,10 @@ F_DeleteHotstring()
 	
 	;1. Remove selected library file.
 	FileRead, TheWholeFile, % LibraryFullPathAndName
-	LibraryHeader 	:= F_ExtractHeader(TheWholeFile)
+	LibraryHeader 	:= "/*`n" . F_ExtractHeader(TheWholeFile) . "`n*/`n`n"
 ,	TheWholeFile	:= ""
 	FileDelete, % LibraryFullPathAndName
-	
+
 	;2. Disable selected hotstring.
 
 	;In order to switch off, some options have to run in "reversed" state:
@@ -10341,7 +10341,7 @@ F_LV1_EnDisDefinition()
 	}
 	;4. Modify content of library file
 	FileRead, TheWholeFile, % ini_HADL . "\" . v_SelectHotstringLibrary
-	LibraryHeader 	:= F_ExtractHeader(TheWholeFile)
+	LibraryHeader 	:= "/*`n" . F_ExtractHeader(TheWholeFile) . "`n*/`n`n"
 ,	TheWholeFile	:= ""
 	FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary	;delete library file. 
 	FileAppend, % LibraryHeader, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8	
