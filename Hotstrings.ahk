@@ -623,7 +623,7 @@ Critical, Off
 		{
 			v_InputH.VisibleText 	:= true
 ,			v_InputString 			:= ""
-			Hotstring("Reset")
+			; Hotstring("Reset")
 		}
 		return
 	Esc::
@@ -631,7 +631,7 @@ Critical, Off
 		SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
 		v_InputH.VisibleText 	:= true
 ,		v_InputString 			:= ""
-		Hotstring("Reset")
+		; Hotstring("Reset")
 		return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -654,7 +654,7 @@ Critical, Off
 		{
 			v_InputH.VisibleText 	:= true
 ,			v_InputString 			:= ""
-			Hotstring("Reset")
+			; Hotstring("Reset")
 		}
 		; OutputDebug, % "WinExist(""ahk_id"" HMenuAHKHwnd)" . A_Space . A_ThisHotkey . "`n"
 		return
@@ -663,7 +663,7 @@ Critical, Off
 		SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
 		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
-		Hotstring("Reset")
+		; Hotstring("Reset")
 		return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1378,8 +1378,8 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 			GuiControl,, % IdTT_C4_LB2, |
 			GuiControl,, % IdTT_C4_LB3, |
 			; OutputDebug, % "v_InputStringOutput:" . A_Tab . v_InputString . A_Tab . "Temp1:" . A_Tab . Temp1 . A_Tab . "A_IsCritical:" . A_Tab . A_IsCritical . "`n"
-			Hotstring("Reset")	;reset hotstring recognizer
 			SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
+			Hotstring("Reset")	;reset hotstring recognizer
 			SendLevel, 2			;to backtrigger it must be higher than the input level of the hotstrings
 			SendInput, % Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
 			SendLevel, 0
@@ -3227,8 +3227,8 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 	if (ini_TTCn = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_DestroyTriggerstringTips(ini_TTCn)
-	Hotstring("Reset")
 	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
+	Hotstring("Reset")
 	SendLevel, 2	;to backtrigger it must be higher than the input level of the hotstrings
 	SendInput, % Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
 	SendLevel, 0
@@ -8453,14 +8453,8 @@ F_CreateMenu_SizeOfMargin()
 F_AddHotstring()
 {
 	global ;v_EnDis ;assume-global mode of operation
-	local 	vHotstring := "", NewOptions := "", f_ChangeExistingDef := false
-, 			EnDis := "", SendFun := ""
-,			OldOptions := "", OldEnDis := "", TurnOffOldOptions := ""
-,			v_TheWholeFile := "", v_TotalLines := 0
-,			ExternalIndex := 0, Overwrite := ""
-,			name := "", key := 0, value := "", Counter := 0, key2 := 0, value2 := ""
-,			f_T_GeneralMatch := false, f_T_CaseMatch := false, f_OldOptionsC := false, f_OldOptionsC1 := false, f_OptionsC := false, f_OptionsC1 := false
-,			SelectedLibraryName := "", WhichGuiEnable := "", TheWholeFile := "", LibraryHeader := ""
+	local 	vHotstring := "", NewOptions := "", OldOptions := "", f_ChangeExistingDef := false
+, 			EnDis := "", SendFun := "", Overwrite := "",	key := 0, value := "", WhichGuiEnable := "", TheWholeFile := "", LibraryHeader := ""
 
 	;1. Read all inputs.
 	WhichGuiEnable := F_WhichGui()
@@ -8468,60 +8462,50 @@ F_AddHotstring()
 		return
 	
 	Switch WhichGuiEnable	;Disable all GuiControls for time of adding / editing of d(t, o, h)	
-		{
-			Case "HS3":	F_GuiHS3_EnDis("Disable")	;EnDis = "Disable" or "Enable"
-			Case "HS4": 	F_GuiHS4_EnDis("Disable")
-		}
+	{
+		Case "HS3":	F_GuiHS3_EnDis("Disable")	;EnDis = "Disable" or "Enable"
+		Case "HS4": 	F_GuiHS4_EnDis("Disable")
+	}
 	
 	;2. Create or modify (triggerstring, hotstring) definition according to inputs. 
 	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
 	GuiControl, -Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	for key, value in a_Triggerstring
 	{
-		f_T_GeneralMatch := false, f_T_CaseMatch := false, f_OldOptionsC := false, f_OldOptionsC1 := false, f_OptionsC := false, f_OptionsC1 := false
-		if (a_Triggerstring[key] = v_Triggerstring)	;case insensitive string comparison!
+		if (a_Triggerstring[key] == v_Triggerstring) and (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))	;case sensitive string comparison!
 		{
-			f_T_GeneralMatch := true
-			if (a_Triggerstring[key] == v_Triggerstring)
-				f_T_CaseMatch := true
-			OldOptions 	:= a_TriggerOptions[key]
-,			OldEnDis		:= a_EnableDisable[key]
-			if (InStr(OldOptions, "C"))
-				f_OldOptionsC 	:= true
-			if (InStr(NewOptions, "C"))
-				f_OptionsC 	:= true
-
-			if (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))	;if matched within current library
+			OldOptions 		:= a_TriggerOptions[key]
+,			f_ChangeExistingDef := true
+			break
+		}
+		if (a_Triggerstring[key] = v_Triggerstring) and (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))	;case insensitive string comparison!
+		{
+			if (InStr(NewOptions, "C", false))	;case sensitive
 			{
-				if (f_T_CaseMatch   and f_OldOptionsC and f_OptionsC)         	or (f_T_CaseMatch and !f_OldOptionsC and !f_OptionsC) 
-                    or (f_T_CaseMatch   and f_OldOptionsC and !f_OptionsC)        	or (f_T_CaseMatch and !f_OldOptionsC and f_OptionsC)
-				or (f_T_GeneralMatch and !f_OldOptionsC and !f_OldOptionsC)		or (f_T_GeneralMatch and !f_OldOptionsC and f_OldOptionsC) 
-				or (f_T_GeneralMatch and f_OldOptionsC and !f_OldOptionsC)
-				{
-					f_ChangeExistingDef := true
-					break
-				}
-				else	;add
-					break
+				f_ChangeExistingDef := false
+				break
 			}
-			else
+		}
+		if (a_Triggerstring[key] = v_Triggerstring) and (a_Library[key] != SubStr(v_SelectHotstringLibrary, 1, -4))	;case insensitive string comparison!
+		{
+			f_ChangeExistingDef := false
+			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+				, % "The triggerstring" . A_Space . """" .  v_Triggerstring . """" . A_Space .  TransA["already exists in another library"] . ":" . A_Space . a_Library[key] . "." . "csv" . "`n`n" 
+				. TransA["Do you want to proceed?"] . "`n`n" . TransA["If you answer ""No"" edition of the current definition will be interrupted."]
+				. "`n" . TransA["If you answer ""Yes"" definition existing in another library will not be changed."]
+			IfMsgBox, No
 			{
-				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-					, % "The triggerstring" . A_Space . """" .  v_Triggerstring . """" . A_Space .  TransA["already exists in another library"] . ":" . A_Space . a_Library[key] . "." . "csv" . "`n`n" 
-					. TransA["Do you want to proceed?"] . "`n`n" . TransA["If you answer ""No"" edition of the current definition will be interrupted."]
-					. "`n" . TransA["If you answer ""Yes"" definition existing in another library will not be changed."]
-				IfMsgBox, No
+				Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
 				{
-					Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
-					{
-						Case "HS3":	
-							GuiControl, +Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
-							F_GuiHS3_EnDis("Enable")	;EnDis = "Disable" or "Enable"
-						Case "HS4": 	F_GuiHS4_EnDis("Enable")
-					}
-					return
+					Case "HS3":	
+						GuiControl, +Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
+						F_GuiHS3_EnDis("Enable")	;EnDis = "Disable" or "Enable"
+					Case "HS4": 	F_GuiHS4_EnDis("Enable")
 				}
+				return
 			}
+			IfMsgBox, Yes
+				break
 		}
 	}
 	;Conversion of binary global variable v_EnDis into string variable EnDis.
@@ -8559,7 +8543,7 @@ F_AddHotstring()
 		{
 			Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
 			{
-				Case "HS3":	
+				Case "HS3":
                          GuiControl, +Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
                          F_GuiHS3_EnDis("Enable")	;EnDis = "Disable" or "Enable"
 				Case "HS4": 	F_GuiHS4_EnDis("Enable")
@@ -8665,7 +8649,7 @@ F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 	a_Comment			.Push(v_Comment)
 	a_Combined		.Push(v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert)
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
-}	
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ChangeDefInArrays(key, EnDis, NewOptions, SendFun, TextInsert, v_Comment)
 {
@@ -8710,32 +8694,39 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 		return, "No"
 
 	IfMsgBox, Yes
-	{	;the "C" and "C1" options are handled directly in functions F_HOF_SI... by function F_FollowCaseConformity
+	{
 		if (InStr(OldOptions, "*") and !InStr(NewOptions,"*"))
-			NewOptions := StrReplace(OldOptions, "*", "*0")
+			OldOptions := StrReplace(OldOptions, "*", "*0")
 		if (InStr(OldOptions, "B0") and !InStr(NewOptions, "B0"))
 			NewOptions := StrReplace(OldOptions, "B0", "B")
-		if (InStr(OldOptions, "O") and !InStr(NewOptions, "O"))
-			NewOptions := StrReplace(OldOptions, "O", "O0")
 		if (InStr(OldOptions, "Z") and !InStr(NewOptions, "Z"))
 			NewOptions := StrReplace(OldOptions, "Z", "Z0")
+
+		Try
+			Hotstring(":" . OldOptions . ":" . FoundTriggerstring, , "Off")
+		Catch
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+				. "Hotstring(:" . OldOptions . ":" . FoundTriggerstring . "," . A_Space . "Off" . ")"
+				. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
+
 		if (InStr(NewOptions, "O"))	;Add new hotstring which replaces the old one
 		{
 			if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_SimpleOutput").bind(TextInsert, true, SendFun), v_EnDis)
+					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_SimpleOutput").bind(TextInsert, true, SendFun), v_EnDis)
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring) . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . SendFun . ")," . A_Space . v_EnDis . ")"
+						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . SendFun . ")," . A_Space . v_EnDis . ")"
+						. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 			}
 			if (SendFun = "MSI") or (SendFun = "MCL")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HOF_" . SendFun).bind(TextInsert, true), v_EnDis)
+					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_HOF_" . SendFun).bind(TextInsert, true), v_EnDis)
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring) . "," . "func(F_HOF_" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . v_EnDis . ")"
+						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(F_HOF_" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . v_EnDis . ")"
 						. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 			}
 		}
@@ -8744,18 +8735,19 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_SimpleOutput").bind(TextInsert, false, SendFun), v_EnDis)
+					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_SimpleOutput").bind(TextInsert, false, SendFun), v_EnDis)
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring) . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . v_SendFun . ")," . A_Space . EnDis . ")"
+						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . v_SendFun . ")," . A_Space . EnDis . ")"
+						. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 			}
 			if (SendFun = "MSI") or (SendFun = "MCL")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HOF_" . SendFun).bind(TextInsert, false), v_EnDis)
+					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_HOF_" . SendFun).bind(TextInsert, false), v_EnDis)
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring) . "," . "func(F_HOF_" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . v_EnDis . ")"
+						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(F_HOF_" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . v_EnDis . ")"
 						. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 			}
 		}
@@ -10300,28 +10292,12 @@ F_LV1_EnDisDefinition()
 
 	;1. Modify Hotstring definition
 	OutputDebug, % "Options:" . Options . A_Space . "Triggerstring:" . Triggerstring . A_Space . "OnOffToggle:" . OnOffToggle . "`n"
-	; if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
-	; {
-		Try
-			Hotstring(":" . Options . ":" . Triggerstring, , OnOffToggle)
-			; Hotstring(":" . Options . ":" . Triggerstring, func("F_SimpleOutput").bind(vHotstring, true, SendFun), OnOffToggle)
-		Catch
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-				. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . OnOffToggle . ")"
-				; . "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(""F_SimpleOutput"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
-				. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
-	; }
-	; if (SendFun = "MSI") or (SendFun = "MCL")
-	; {
-		; Try
-			; Hotstring(":" . Options . ":" . Triggerstring,  OnOffToggle)
-			; Hotstring(":" . Options . ":" . Triggerstring, func("F_HOF_" . SendFun).bind(vHotstring, true), OnOffToggle)
-		; Catch
-			; MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-				. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . OnOffToggle . ")"
-				; . "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(F_HOF_" . SendFun . ").bind(" . vHotstring . "," . A_Space . true . ")," . A_Space . OnOffToggle . ")"
-				; . "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
-	; }
+	Try
+		Hotstring(":" . Options . ":" . Triggerstring, , OnOffToggle)
+	Catch
+		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+			. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . OnOffToggle . ")"
+			. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 
 	;2. Modify a_tables
 	for key, value in a_Triggerstring
@@ -14079,7 +14055,7 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . SubStr(v_Options, 2, -1) . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	v_UndoTriggerstring := v_InputString
 ,	v_InputString 		:= ""
-	Hotstring("Reset")	;By default, non-auto-replace hotstrings only remove the trigger text from the buffer. To reset it completely, you must use the Z option or Hotstring("Reset").https://www.autohotkey.com/boards/viewtopic.php?f=76&t=108988&p=484841#p484841
+	; Hotstring("Reset")	;By default, non-auto-replace hotstrings only remove the trigger text from the buffer. To reset it completely, you must use the Z option or Hotstring("Reset").https://www.autohotkey.com/boards/viewtopic.php?f=76&t=108988&p=484841#p484841
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14160,7 +14136,7 @@ F_MouseMenu_MCL() ;The subroutine may consult the following built-in variables: 
 		v_UndoTriggerstring 	:= v_InputString
 ,		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
-		Hotstring("Reset")
+		; Hotstring("Reset")
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14212,8 +14188,16 @@ F_DeterminePartStrings(ReplacementString)
 {
 	global	;assume-global mode of operation
 	local	ThisHotkey := A_ThisHotkey	;This value will change if the current thread is interrupted by another hotkey, so be sure to copy it into another variable immediately if you need the original value for later use in a subroutine.
-	
-	v_Options 	 := SubStr(ThisHotkey, 1, InStr(ThisHotkey, ":", false, 1, 2))
+, 			Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", false, 1, 2) + 1)
+,			key := 0, value := ""
+
+	for key, value in a_Triggerstring
+		if (Triggerstring = a_Triggerstring[key])
+			{
+				v_Options := a_TriggerOptions[key]
+				break
+			}
+	; v_Options 	 := SubStr(ThisHotkey, 1, InStr(ThisHotkey, ":", false, 1, 2))
 	v_UndoHotstring := ReplacementString
 	if (InStr(v_Options, "*"))
 		v_EndChar  := SubStr(ThisHotkey, 0) ;extracts the last character; This form is important to run correctly F_Undo 
@@ -14300,7 +14284,7 @@ F_MouseMenu_MSI() ; Handling of mouse events for F_HOF_MSI;The subroutine may co
 		v_UndoTriggerstring 	:= v_InputString
 ,		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
-		Hotstring("Reset")
+		; Hotstring("Reset")
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
