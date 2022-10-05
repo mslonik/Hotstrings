@@ -8515,12 +8515,15 @@ F_AddHotstring()
 
 			;7. Delete library file.
 			FileRead, TheWholeFile, % ini_HADL . "\" . v_SelectHotstringLibrary
-			LibraryHeader 	:= "/*`n" . F_ExtractHeader(TheWholeFile) . "`n*/`n`n"
-,			TheWholeFile	:= ""
+			LibraryHeader 	:= F_ExtractHeader(TheWholeFile)
+			if (LibraryHeader)
+				LibraryHeader 	:= "/*`n" . LibraryHeader . "`n*/`n`n"
+,				TheWholeFile	:= ""
 			FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary
 
 			;8. Save List View into the library file.
-			FileAppend, % LibraryHeader, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8
+			if (LibraryHeader)
+				FileAppend, % LibraryHeader, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8
 			F_SaveLVintoLibFile()
 			Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)
 			{
@@ -8596,12 +8599,16 @@ F_AddHotstring()
 
 	;7. Delete library file. 
 	FileRead, TheWholeFile, % ini_HADL . "\" . v_SelectHotstringLibrary
-	LibraryHeader 	:= "/*`n" . F_ExtractHeader(TheWholeFile) . "`n*/`n`n"
-,	TheWholeFile	:= ""	
+	LibraryHeader	:= F_ExtractHeader(TheWholeFile)
+	if (LibraryHeader)
+		LibraryHeader 	:= "/*`n" . LibraryHeader . "`n*/`n`n"
+,		TheWholeFile	:= ""	
+
 	FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary
 
 	;8. Save List View into the library file.
-	FileAppend, % LibraryHeader, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8
+	if (LibraryHeader)
+		FileAppend, % LibraryHeader, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8
 	F_SaveLVintoLibFile()
 
 	;9. Increment library counter.
@@ -9084,10 +9091,14 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 	LV_Add("", EnDis, Triggerstring, TriggOpt, OutFun, Hotstring, Comment) ;add to ListView
 	LV_ModifyCol(2, "Sort")
 	FileRead, TheWholeFile, % ini_HADL . "\" . DestinationLibrary
-	LibraryHeader 	:= "/*`n" . F_ExtractHeader(TheWholeFile) . "`n*/`n`n"
-,	TheWholeFile	:= ""	
+
+	LibraryHeader	:= F_ExtractHeader(TheWholeFile)
+	if (LibraryHeader)
+		LibraryHeader 	:= "/*`n" . LibraryHeader . "`n*/`n`n"
+,		TheWholeFile	:= ""	
 	FileDelete, % ini_HADL . "\" . DestinationLibrary	;delete the old destination file.
-	FileAppend, % LibraryHeader, % ini_HADL . "\" . DestinationLibrary, UTF-8
+	if (LibraryHeader)
+		FileAppend, % LibraryHeader, % ini_HADL . "\" . DestinationLibrary, UTF-8
 	FileAppend, % F_ConvertListViewIntoTxt(), % ini_HADL . "\" . DestinationLibrary, UTF-8
 	
 	GuiControl, ChooseString, % IdDDL2, % SourceLibrary
@@ -9103,10 +9114,13 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 		}
 	}
 	FileRead, TheWholeFile, % ini_HADL . "\" . SourceLibrary
-	LibraryHeader 	:= "/*`n" . F_ExtractHeader(TheWholeFile) . "`n*/`n`n"
-,	TheWholeFile	:= ""	
+	LibraryHeader	:= F_ExtractHeader(TheWholeFile)
+	if (LibraryHeader)
+		LibraryHeader 	:= "/*`n" . LibraryHeader . "`n*/`n`n"
+,		TheWholeFile	:= ""	
 	FileDelete, % ini_HADL . "\" . SourceLibrary	;delete the old source filename.
-	FileAppend, % LibraryHeader, % ini_HADL . "\" . SourceLibrary, UTF-8
+	if (LibraryHeader)
+		FileAppend, % LibraryHeader, % ini_HADL . "\" . SourceLibrary, UTF-8
 	FileAppend, % F_ConvertListViewIntoTxt(), % ini_HADL . "\" . SourceLibrary, UTF-8
 	F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
 	GuiControl, ChooseString, % IdDDL2, % DestinationLibrary
@@ -9825,8 +9839,10 @@ F_DeleteHotstring()
 	
 	;1. Remove selected library file.
 	FileRead, TheWholeFile, % LibraryFullPathAndName
-	LibraryHeader 	:= "/*`n" . F_ExtractHeader(TheWholeFile) . "`n*/`n`n"
-,	TheWholeFile	:= ""
+	LibraryHeader :=  F_ExtractHeader(TheWholeFile)
+	if (LibraryHeader)
+		LibraryHeader 	:= "/*`n" . LibraryHeader . "`n*/`n`n"
+,		TheWholeFile	:= ""
 	FileDelete, % LibraryFullPathAndName
 
 	;2. Disable selected hotstring.
@@ -9855,7 +9871,8 @@ F_DeleteHotstring()
 	LV_Delete(SelectedRow)
 	
 	;4. Save List View into the library file.
-	FileAppend, % LibraryHeader, % LibraryFullPathAndName, UTF-8
+	if (LibraryHeader)
+		FileAppend, % LibraryHeader, % LibraryFullPathAndName, UTF-8
 	FileAppend, % F_ConvertListViewIntoTxt(), % LibraryFullPathAndName, UTF-8
 	TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
 	
@@ -10352,10 +10369,13 @@ F_LV1_EnDisDefinition()
 	}
 	;4. Modify content of library file
 	FileRead, TheWholeFile, % ini_HADL . "\" . v_SelectHotstringLibrary
-	LibraryHeader 	:= "/*`n" . F_ExtractHeader(TheWholeFile) . "`n*/`n`n"
-,	TheWholeFile	:= ""
+	LibraryHeader 	:= F_ExtractHeader(TheWholeFile)
+	if (LibraryHeader)
+		LibraryHeader 	:= "/*`n" . LibraryHeader . "`n*/`n`n"
+,		TheWholeFile	:= ""
 	FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary	;delete library file. 
-	FileAppend, % LibraryHeader, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8	
+	if (LibraryHeader)
+		FileAppend, % LibraryHeader, % ini_HADL . "\" . v_SelectHotstringLibrary, UTF-8	
 	F_SaveLVintoLibFile()
 	F_GuiHS3_EnDis("Enable")	;Enable all GuiControls
 	GuiControl, Focus, % IdListView1
