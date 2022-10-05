@@ -1389,7 +1389,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 			Switch WhichMenu
 			{
 				Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
-				Case "CLI":	F_ClipboardPaste(ReplacementString, Ovar)
+				Case "CLI":	F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
 			}
 			GuiControl,, % IdTT_C4_LB4, |
 			if (ini_MHSEn)
@@ -1596,7 +1596,7 @@ F_HMenuCLI_Keyboard()
 ,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
 	if (ini_MHMP = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
-	F_ClipboardPaste(ReplacementString, Ovar)
+	F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
 	Gui, HMenuCli: Destroy
 	++v_LogCounter
 	if (InStr(A_ThisHotkey, "?"))
@@ -13983,6 +13983,7 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 ,		LengthToBeCut 		:= StrLen(WhatPartTriggered)
 ,		v_InputString		:= SubStr(v_InputString, -LengthToBeCut)
 	}
+	F_DeterminePartStrings(TextOptions)
 	F_DestroyTriggerstringTips(ini_TTCn)
 	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop 
 		SoundBeep, % ini_MHSF, % ini_MHSD
@@ -14019,7 +14020,6 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 		WhichMenu := "SI"	;this setting will be used within F_MouseMenuCombined() to handle mouse event
 	}
 	Ovar := Oflag
-	F_DeterminePartStrings(TextOptions)
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14073,7 +14073,7 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 			else
 				SendRaw, % ReplacementString
 		Case "CL":
-			F_ClipboardPaste(ReplacementString, Oflag)
+			F_ClipboardPaste(ReplacementString, Oflag, v_EndChar)
 		Case "S1":
 			FirstPart			:= SubStr(ReplacementString, 1, -1) ;omits last character
 			SecondPart		:= SubStr(ReplacementString, 0)	 ;extracts the last character
@@ -14110,11 +14110,11 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 			return
 	}
  	F_EventSigOrdHotstring()
-	temp := F_DetermineGain2(InputString, ReplacementString)
+	temp := F_DetermineGain2(v_InputString, ReplacementString)
 	v_CntCumGain += temp
 	if (ini_THLog)
-		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . InputString . "|" . v_EndChar . "|" . v_Options . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-	v_UndoTriggerstring := InputString
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+	v_UndoTriggerstring := v_InputString
 ,	v_InputString 		:= ""
 	; Hotstring("Reset")	;By default, non-auto-replace hotstrings only remove the trigger text from the buffer. To reset it completely, you must use the Z option or Hotstring("Reset").https://www.autohotkey.com/boards/viewtopic.php?f=76&t=108988&p=484841#p484841
 	Critical, Off
@@ -14133,6 +14133,7 @@ F_HOF_MCL(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipb
 ,		LengthToBeCut 		:= StrLen(WhatPartTriggered)
 ,		v_InputString		:= SubStr(v_InputString, -LengthToBeCut)
 	}
+	F_DeterminePartStrings(TextOptions)
 	F_DestroyTriggerstringTips(ini_TTCn)
 	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop
 		SoundBeep, % ini_MHSF, % ini_MHSD
@@ -14171,7 +14172,6 @@ F_HOF_MCL(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipb
 		WhichMenu := "CLI"	;this parameter is used within function F_MouseMenuCombined() to handle mouse event
 	}
 	Ovar := Oflag
-	F_DeterminePartStrings(TextOptions)
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14191,7 +14191,7 @@ F_MouseMenu_MCL() ;The subroutine may consult the following built-in variables: 
 ,	     ReplacementString 	:= F_ReplaceAHKconstants(OutputVarTemp)
 ,	     ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options)
 ,	     ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
-		F_ClipboardPaste(ReplacementString, Ovar)
+		F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
 		++v_LogCounter
@@ -14299,7 +14299,7 @@ F_FollowCaseConformity(ReplacementString, InputString, Options)
 		return ReplacementString
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ClipboardPaste(string, Oflag)
+F_ClipboardPaste(string, Oflag, v_EndChar)
 {
 	global	;assume-global mode
 	local ClipboardBackup := ClipboardAll
@@ -14414,7 +14414,7 @@ F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid i
 		Switch WhichMenu	;this parameter is set wihin F_HOF_MSI and F_HOF_MCL
 		{
 			Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
-			Case "CLI":	F_ClipboardPaste(ReplacementString, Ovar)
+			Case "CLI":	F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
 		}
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
