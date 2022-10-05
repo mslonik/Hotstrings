@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -11,6 +11,7 @@
 #NoEnv  						; Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn  						; Enable warnings to assist with detecting common errors.
 #LTrim						; Omits spaces and tabs at the beginning of each line. This is primarily used to allow the continuation section to be indented. Also, this option may be turned on for multiple continuation sections by specifying #LTrim on a line by itself. #LTrim is positional: it affects all continuation sections physically beneath it.
+#KeyHistory 0				; KeyHistory is disabled to make it harder to get info how script works.
 SendMode Input  				; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%		; Ensures a consistent starting directory.
 FileEncoding, UTF-16			; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN
@@ -10269,7 +10270,7 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 F_LV1_EnDisDefinition()
 {
 	global ;a_Triggerstring, a_TriggerOptions, a_EnableDisable, a_Combined, a_Hotstring, ini_TipsSortAlphabetically, ini_TipsSortByLength, v_SelectHotstringLibrary ;assume-global mode of operation
-	local EnDis := "", SelectedRow := 0, OnOffToggle := false, Triggerstring := "", Options := "", key := 0, value := "", index := 0, Temp1 := "", SelectedHotstringLibrary := "", vHotstring := "", SendFun := "", Oflag := false, TheWholeFile	:= "", LibraryHeader := ""
+	local EnDis := "", SelectedRow := 0, OnOffToggle := false, Triggerstring := "", Options := "", key := 0, value := "", index := 0, Temp1 := "",  vHotstring := "", SendFun := "", Oflag := false, TheWholeFile	:= "", LibraryHeader := ""
 
 	F_GuiHS3_EnDis("Disable")
 	Gui, HS3: Default	;in order to activate ListView
@@ -10297,7 +10298,7 @@ F_LV1_EnDisDefinition()
 	Catch
 		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 			. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . OnOffToggle . ")"
-			. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
+			. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 
 	;2. Modify a_tables
 	for key, value in a_Triggerstring
@@ -14189,15 +14190,8 @@ F_DeterminePartStrings(ReplacementString)
 	global	;assume-global mode of operation
 	local	ThisHotkey := A_ThisHotkey	;This value will change if the current thread is interrupted by another hotkey, so be sure to copy it into another variable immediately if you need the original value for later use in a subroutine.
 , 			Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", false, 1, 2) + 1)
-,			key := 0, value := ""
 
-	for key, value in a_Triggerstring
-		if (Triggerstring = a_Triggerstring[key])
-			{
-				v_Options := a_TriggerOptions[key]
-				break
-			}
-	; v_Options 	 := SubStr(ThisHotkey, 1, InStr(ThisHotkey, ":", false, 1, 2))
+	v_Options 	 := SubStr(ThisHotkey, 1, InStr(ThisHotkey, ":", false, 1, 2))
 	v_UndoHotstring := ReplacementString
 	if (InStr(v_Options, "*"))
 		v_EndChar  := SubStr(ThisHotkey, 0) ;extracts the last character; This form is important to run correctly F_Undo 
