@@ -14045,18 +14045,50 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_DetermineOptions(Triggerstring)
+{
+	global	;assume-global mode of operation
+	local	key := 0, value := "", Options := ""
+
+	for key, value in a_Triggerstring
+		if (Triggerstring = a_Triggerstring[key])
+			{
+				Options := a_TriggerOptions[key]
+				break
+			}
+	return Options
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
+{
+	if (InStr(v_Options, "*"))
+		return SubStr(ThisHotkey, 0) ;extracts the last character; This form is important to run correctly F_Undo 
+	else
+		return EndChar
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ProcessQuestionMark(v_Options, ThisHotkey, v_InputString)
+{
+	local	WhatPartTriggered := "", LengthToBeCut := 0, ShorterInputString := ""
+
+	WhatPartTriggered 	:= SubStr(ThisHotkey, InStr(ThisHotkey, ":", , 2) + 1)	
+,	LengthToBeCut 		:= StrLen(WhatPartTriggered)
+,	ShorterInputString	:= SubStr(v_InputString, -LengthToBeCut + 1)
+	return ShorterInputString
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output Function _ SendInput
 {
 	global	;assume-global mode of operation
-	local	ThisHotkey := A_ThisHotkey, temp := 0, FirstPart := "", SecondPart := "", WhatPartTriggered := "", LengthToBeCut := 0
-
 	Critical, On
-	if (InStr(ThisHotkey, "?"))	;tu jestem. Tu tez nie mozna bazowac na ThisHotkey tylko na a_Triggerstring[key]
-	{
-		WhatPartTriggered 	:= SubStr(ThisHotkey, InStr(ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
-,		LengthToBeCut 		:= StrLen(WhatPartTriggered)
-,		v_InputString		:= SubStr(v_InputString, -LengthToBeCut)
-	}
+	local	ThisHotkey := A_ThisHotkey, EndChar := A_EndChar, temp := 0, FirstPart := "", SecondPart := "", Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1)
+
+	v_UndoHotstring := ReplacementString
+	v_Options := F_DetermineOptions(Triggerstring)
+	v_EndChar := F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
+	if (InStr(v_Options, "?"))
+		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString)
+
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString 	:= F_ReplaceAHKconstants(ReplacementString)
