@@ -1,8 +1,0 @@
-﻿C‖cr‖SI‖En‖CR‖Carriage Return
-*C‖cr/‖MSI‖En‖Carriage Return¦{U+000D}¦␍‖
-C‖crlf‖SI‖En‖CRLF‖Carriage Return + Line Feed
-*C‖crlf/‖MSI‖En‖Carriage Return {+} Line Feed¦{U+000D}{U+000A}¦␍␊‖Carriage Return + Line Feed
-C‖lf‖SI‖En‖LF‖Line Feed
-*C‖lf/‖MSI‖En‖Line Feed¦{U+000A}¦␊‖
-C‖vt‖SI‖En‖VT‖
-*C‖vt/‖MSI‖En‖Vertical Tabulation¦{U+000B}‖
