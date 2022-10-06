@@ -14052,7 +14052,19 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 
 	Critical, On
 	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . A_Space . v_InputString . "`n"
-	if (InStr(ThisHotkey, "?"))
+	for key, value in a_Triggerstring
+		if (Triggerstring = a_Triggerstring[key])
+			{
+				v_Options := a_TriggerOptions[key]
+				break
+			}
+	v_UndoHotstring := ReplacementString
+	if (InStr(v_Options, "*"))
+		v_EndChar  := SubStr(ThisHotkey, 0) ;extracts the last character; This form is important to run correctly F_Undo 
+	else
+		v_EndChar  := A_EndChar
+
+	if (InStr(ThisHotkey, "?"))	;tu jestem. Tu tez nie mozna bazowac na ThisHotkey tylko na a_Triggerstring[key]
 	{
 		WhatPartTriggered 	:= SubStr(ThisHotkey, InStr(ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 ,		LengthToBeCut 		:= StrLen(WhatPartTriggered)
@@ -14061,7 +14073,7 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 	F_DestroyTriggerstringTips(ini_TTCn)
 	F_DeterminePartStrings(ReplacementString)
 	ReplacementString 	:= F_ReplaceAHKconstants(ReplacementString)
-,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, Options := SubStr(ThisHotkey, 2, InStr(ThisHotkey, ":", false, 2, 1) - 2))
+,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options)
 ,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
 	SetKeyDelay, -1, -1	;Delay = -1, PressDuration = -1, -1: no delay at all; this can be necessary if SendInput is reduced to SendEvent (in case low level input hook is active in another script)
 	; OutputDebug, % "A_SendLevel:" . A_Tab . A_SendLevel . "`n"
@@ -14296,8 +14308,14 @@ F_DeterminePartStrings(ReplacementString)
 	global	;assume-global mode of operation
 	local	ThisHotkey := A_ThisHotkey	;This value will change if the current thread is interrupted by another hotkey, so be sure to copy it into another variable immediately if you need the original value for later use in a subroutine.
 , 			Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", false, 1, 2) + 1)
+,			key := 0, value := ""
 
-	v_Options 	 := SubStr(ThisHotkey, 2, InStr(ThisHotkey, ":", false, 2, 1) - 2)
+	for key, value in a_Triggerstring
+		if (Triggerstring = a_Triggerstring[key])
+			{
+				v_Options := a_TriggerOptions[key]
+				break
+			}
 	v_UndoHotstring := ReplacementString
 	if (InStr(v_Options, "*"))
 		v_EndChar  := SubStr(ThisHotkey, 0) ;extracts the last character; This form is important to run correctly F_Undo 
