@@ -8452,15 +8452,9 @@ F_AddHotstring()
 	if (F_ReadUserInputs(vHotstring, NewOptions, SendFun))	;return true (1) in case of any problem. 
 		return
 	
-	Switch WhichGuiEnable	;Disable all GuiControls for time of adding / editing of d(t, o, h)	
-	{
-		Case "HS3":	F_GuiHS3_EnDis("Disable")	;EnDis = "Disable" or "Enable"
-		Case "HS4": 	F_GuiHS4_EnDis("Disable")
-	}
-	
 	;2. Create or modify (triggerstring, hotstring) definition according to inputs. 
 	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
-	GuiControl, -Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
+	; GuiControl, -Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	for key, value in a_Triggerstring
 	{
 		if (a_Triggerstring[key] == v_Triggerstring) and (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))	;case sensitive string comparison!
@@ -8481,16 +8475,16 @@ F_AddHotstring()
 		{
 			f_ChangeExistingDef := false
 			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-				, % "The triggerstring" . A_Space . """" .  v_Triggerstring . """" . A_Space .  TransA["already exists in another library"] . ":" . A_Space . a_Library[key] . "." . "csv" . "`n`n" 
+				, % TransA["The triggerstring"] . A_Space . """" .  v_Triggerstring . """" . A_Space .  TransA["already exists in another library"] . ":" . A_Space . a_Library[key] . "." . "csv" . "`n`n" 
 				. TransA["Do you want to proceed?"] . "`n`n" . TransA["If you answer ""No"" edition of the current definition will be interrupted."]
 				. "`n" . TransA["If you answer ""Yes"" definition existing in another library will not be changed."]
 			IfMsgBox, No
 			{
 				Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
 				{
-					Case "HS3":	
+					Case "HS3":
 						GuiControl, +Redraw, % IdListView1 ; -Readraw: This option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
-						F_GuiHS3_EnDis("Enable")	;EnDis = "Disable" or "Enable"
+						F_GuiHS3_EnDis("Enable")
 					Case "HS4": 	F_GuiHS4_EnDis("Enable")
 				}
 				return
@@ -8507,6 +8501,18 @@ F_AddHotstring()
 	; 3. Modify existing definition
 	if (f_ChangeExistingDef)	;modify existing definition
 	{
+		if (NewOptions = OldOptions) and (vHotstring == a_Hotstring[key])
+		{
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+				, % "Nothing was changed."
+			return
+		}
+		Switch WhichGuiEnable	;Disable all GuiControls for time of adding / editing of d(t, o, h)	
+		{
+			Case "HS3":	F_GuiHS3_EnDis("Disable")	;EnDis = "Disable" or "Enable"
+			Case "HS4": 	F_GuiHS4_EnDis("Disable")
+		}
+
 		Overwrite := F_ChangeExistingDef(OldOptions, NewOptions, a_Triggerstring[key], a_Library[key], SendFun, vHotstring)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
 		if (Overwrite = "Yes")
 		{
@@ -8547,6 +8553,11 @@ F_AddHotstring()
 	}
 
 	; 4. Create new definition
+	Switch WhichGuiEnable	;Disable all GuiControls for time of adding / editing of d(t, o, h)	
+	{
+		Case "HS3":	F_GuiHS3_EnDis("Disable")	;EnDis = "Disable" or "Enable"
+		Case "HS4": 	F_GuiHS4_EnDis("Disable")
+	}
 	;OutputDebug, % "NewOptions:" . A_Space . NewOptions . A_Tab . "OldOptions:" . A_Space . OldOptions . A_Tab . "v_Triggerstring:" . A_Space . v_Triggerstring
 	if (InStr(NewOptions, "O"))
 	{
@@ -8613,7 +8624,7 @@ F_AddHotstring()
 
 	;9. Increment library counter.
 	UpdateLibraryCounter(++v_LibHotstringCnt, ++v_TotalHotstringCnt)
-	Switch F_WhichGui()	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
+	Switch WhichGuiEnable	;Enable all GuiControls for time of adding / editing of d(t, o, h)	
 	{
 		Case "HS3":	F_GuiHS3_EnDis("Enable")	;EnDis = "Disable" or "Enable"
 		Case "HS4": 	F_GuiHS4_EnDis("Enable")
@@ -10299,6 +10310,16 @@ F_LV1_EnDisDefinition()
 	LV_GetText(Options, 		SelectedRow, 	3)
 	LV_GetText(SendFun,			SelectedRow, 	4)
 	LV_GetText(vHotstring, 		SelectedRow, 	5)
+
+	if (EnDis = "Dis")	;;the following lines are necessary for the scenario when definition is swtiched off in one library and created with different set of options in another one.
+	{
+		if (InStr(Options, "*"))
+			Options := StrReplace(Options, "*", "*0")
+		if (InStr(Options, "B0"))
+			Options := StrReplace(Options, "B0", "B")
+		if (InStr(Options, "Z"))
+			Options := StrReplace(Options, "Z", "Z0")
+	}
 
 	;1. Modify Hotstring definition
 	; OutputDebug, % "Options:" . Options . A_Space . "Triggerstring:" . Triggerstring . A_Space . "OnOffToggle:" . OnOffToggle . "`n"
