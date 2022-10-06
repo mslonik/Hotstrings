@@ -8713,32 +8713,33 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 		if (InStr(OldOptions, "Z") and !InStr(NewOptions, "Z"))
 			NewOptions := StrReplace(OldOptions, "Z", "Z0")
 
+		;turn off existing hotstring
 		Try
 			Hotstring(":" . OldOptions . ":" . FoundTriggerstring, , "Off")
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 				. "Hotstring(:" . OldOptions . ":" . FoundTriggerstring . "," . A_Space . "Off" . ")"
-				. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
+				. "`n`n" . TransA["Library name:"] . A_Tab . Library
 
 		if (InStr(NewOptions, "O"))	;Add new hotstring which replaces the old one
 		{
 			if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_SimpleOutput").bind(TextInsert, true, SendFun), v_EnDis)
+					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_SimpleOutput").bind(TextInsert, true, SendFun), "On")
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . SendFun . ")," . A_Space . v_EnDis . ")"
-						. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
+						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . SendFun . ")," . A_Space . "On" . ")"
+						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
 			}
 			if (SendFun = "MSI") or (SendFun = "MCL")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_HOF_" . SendFun).bind(TextInsert, true), v_EnDis)
+					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_HOF_" . SendFun).bind(TextInsert, true), "On")
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(F_HOF_" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . v_EnDis . ")"
-						. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
+						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(F_HOF_" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . "On" . ")"
+						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
 			}
 		}
 		else
@@ -8746,20 +8747,20 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_SimpleOutput").bind(TextInsert, false, SendFun), v_EnDis)
+					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_SimpleOutput").bind(TextInsert, false, SendFun), "On")
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . v_SendFun . ")," . A_Space . EnDis . ")"
-						. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
+						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . v_SendFun . ")," . A_Space . "On" . ")"
+						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
 			}
 			if (SendFun = "MSI") or (SendFun = "MCL")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_HOF_" . SendFun).bind(TextInsert, false), v_EnDis)
+					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_HOF_" . SendFun).bind(TextInsert, false), "On")
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(F_HOF_" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . v_EnDis . ")"
-						. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
+						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(F_HOF_" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . "On" . ")"
+						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
 			}
 		}
 		return, "Yes"
