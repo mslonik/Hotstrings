@@ -14051,8 +14051,6 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 	local	ThisHotkey := A_ThisHotkey, temp := 0, FirstPart := "", SecondPart := "", WhatPartTriggered := "", LengthToBeCut := 0
 
 	Critical, On
-	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . A_Space . v_InputString . "`n"
-	
 	if (InStr(ThisHotkey, "?"))	;tu jestem. Tu tez nie mozna bazowac na ThisHotkey tylko na a_Triggerstring[key]
 	{
 		WhatPartTriggered 	:= SubStr(ThisHotkey, InStr(ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
