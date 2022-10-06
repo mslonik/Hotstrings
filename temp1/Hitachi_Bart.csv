@@ -1,0 +1,74 @@
+﻿*‖017823‖SI‖En‖Section 01 78 23 Operation and Maintenance Data, Release: R3.2, Issued: December 2020‖
+*‖017844‖SI‖En‖Section 01 78 44 Spare Parts and Maintenance Materials, Release: R3.2, Issued: December 2020‖
+*‖017900‖SI‖En‖Section 01 79 00 Demonstration and Training, Release: R3.2, Issued: December 2020‖
+*‖aar/‖CL‖En‖Association of American Railroads‖
+*‖aatc/‖CL‖En‖Advanced Automatic Train Control‖
+*‖acsps/‖MSI‖En‖Axle Counting System Purchase Specification¦SFBART.SYS.CBTC.IXL.S12.00EN Revision 00.00¦SAN FRANCISCO BAY AREA RAPID TRANSIT CONTRACT NO. 49GH-110 Design-Build of a Communications Based Train Control (CBTC) System Axle Counting System Purchase Specification‖
+*‖ada/‖CL‖En‖Americans with Disabilities Act‖
+C‖arema‖CL‖En‖AREMA‖
+*‖arema/‖CL‖En‖American Railroad Engineering and Maintenance-of-Way Association‖
+C‖asc‖CL‖En‖ASC‖
+*‖asc/‖CL‖En‖Automatic Speed Control‖
+C‖asr‖CL‖En‖ASR‖
+*‖asr/‖CL‖En‖Automated Schedule Routing‖
+C‖atc‖SI‖En‖ATC‖
+*‖atc/‖MSI‖En‖Automatic Train Control¦The system for automatically controlling train movement,enforcing train safety, and directing train operations. Thisincludes subsystems for automatic train operations, automatictrain protection, and automatic train supervision.‖
+C‖ato‖SI‖En‖ATO‖
+*‖ato/‖MSI‖En‖Automatic Train Operation¦The subsystem within Automatic Train Control system whichperforms the functions of speed regulation, programmedstopping, and door operation.‖
+C‖atp‖SI‖En‖ATP‖
+*‖atp/‖MSI‖En‖Automatic Train Protection¦The subsystem within Automatic Train Control system whichenforces safe operation, including speed restriction andseparation of trains running on the same track, unauthorizedtrain door opening, and over interlocked routes.‖
+C‖ats‖CL‖En‖ATS‖
+*‖ats/‖MCL‖En‖Automatic Train Supervision¦The subsystem within the Automatic Train Control system thatmonitors trains, adjusts the performance of individual trains tomaintain schedules, and provides data to adjust service tominimize inconveniences otherwise caused by irregularities.‖
+C‖atts‖CL‖En‖ATTS‖
+*‖atts/‖CL‖En‖Auxiliary Train Tracking System‖
+*‖axcps/‖MSI‖En‖Axle Counting System Purchase Specification¦SFBART.SYS.CBTC.IXL.S12.00EN Revision 00.00 San Francisco Bay Area Rapid Transit CONTRACT NO. 49GH-110 Design-Build of a Communications Based Train Control (CBTC) System‖
+C‖bafos‖CL‖En‖BAFOS‖
+*‖bafos/‖CL‖En‖Best and Final Offers‖
+C‖bte‖SI‖En‖BTE‖
+*‖bte/‖MSI‖En‖Bench Test Equipment¦A self-contained diagnostic test station utilized to test anddiagnose the proper operation and/or Failure modes of allsystems, to the lowest level replaceable unit level.‖
+C‖cbtc‖SI‖En‖CBTC‖
+*‖cbtc/‖SI‖En‖Communications Based Train Control‖
+C‖cdrl‖SI‖En‖CDRL‖
+*‖cdrl/‖SI‖En‖Contract Data Requirements List‖
+‖eds‖SI‖En‖EDS‖
+*‖eds/‖SI‖En‖Employee Dev System‖
+‖ews‖SI‖En‖EWS‖
+*‖ews/‖SI‖En‖Electrical Wiring System‖EWS is an application that runs on top of Microstation
+C‖fdr‖SI‖En‖FDR‖
+*‖fdr/‖SI‖En‖Final Design Review‖Volume 2 - Procedural Requirements
+C‖fouo‖CL‖En‖FOUO‖
+*‖fouo/‖CL‖En‖For Official Use Only‖
+C‖fta‖SI‖En‖FTA‖
+*‖fta/‖SI‖En‖Federal Transit Administration‖
+C‖ics‖SI‖En‖ICS‖
+*‖ics/‖MSI‖En‖Integrated Computer System¦The District’s existing system within the Operations ControlCenter to control and monitor the existing BART OperatingSystem.‖
+‖irs‖SI‖En‖IRS‖Volume 2 - Procedural Requirements
+*‖irs/‖SI‖En‖Interface Requirement Specifications‖Volume 2 - Procedural Requirements
+C‖lru‖SI‖En‖LRU‖
+*C‖lru/‖MSI‖En‖Line Replaceable Unit¦A unit/component or subsystem that is normally replaced insitu (e.g. on the vehicle, in the right-of-way).¦an essential support item which is removed and replaced at the field level to restore the end item to an operational ready condition. Conversely, a non-LRU is a part, component, or assembly used in the repair of an LRU / LLRU, when the LRU has failed and has been removed from the end item for repair.`n[SOURCE: MIL-PRF-49506, Notice 1 of 18 Jan 05]‖
+‖m&e‖SI‖En‖M&E‖
+*‖m&e/‖SI‖En‖Maintenance & Engineering‖
+C‖mil‖CL‖En‖MIL‖
+*‖mil/‖CL‖En‖Material Iitem List‖
+C‖mne‖SI‖En‖M&E‖
+*‖mne/‖SI‖En‖Maintenance & Engineering‖
+C‖o&m‖SI‖En‖O&M‖
+*‖o&m/‖SI‖En‖Operations & Maintenance‖
+C‖occ‖SI‖En‖OCC‖
+*‖occ/‖SI‖En‖Operations Control Center‖
+‖onm‖SI‖En‖O&M‖
+*‖onm/‖SI‖En‖Operations & Maintenance‖
+C‖osha‖SI‖En‖OSHA‖
+*‖osha/‖SI‖En‖Occupational Safety and Health Agency‖
+‖pdr‖SI‖En‖PDR‖
+*‖pdr/‖SI‖En‖Preliminary Design Review‖
+C‖pte‖SI‖En‖PTE‖
+*‖pte/‖MSI‖En‖Portable Test Equipment¦Test equipment incorporating electronics, software,interconnecting cables used for testing carborne CBTCsystems, subsystems, and equipment.‖
+C‖ptu‖SI‖En‖PTU‖
+*‖ptu/‖MSI‖En‖Portable Test Unit¦A laptop or other portable test equipment enabling atechnician to test and diagnose any CBTC system, subsystemor equipment.‖
+*‖safe/‖CL‖En‖The condition in which passengers, crew, or maintenance, and repair workers are secure from threat or danger, harm, or loss arising from improper design, manufacture, assembly, malfunction, or failure of the vehicle or any of its components or systems.‖
+C‖tbt‖CL‖En‖TBT‖
+*‖tbt/‖CL‖En‖Transbay Tube‖
+C‖tph‖CL‖En‖TPH‖
+*‖tph/‖CL‖En‖Trains Per Hour‖
+*‖vol2/‖SI‖En‖Volume 2 ─ Procedural Requirements‖

@@ -1,0 +1,35 @@
+﻿;+--------------------------------+-----------------------------+
+;| Julia Kierska                  | 24.06.2022                  |
+;+--------------------------------+-----------------------------+
+;| In this library are punctuation and non-breaking characters. |
+;+--------------------------------------------------------------+
+*‖"/‖MSI‖En‖„”{left}¦“”{left}¦«»{left}¦""{left}‖Polish, English double, French, universal
+*?‖...‖SI‖En‖…‖Horizontal Ellipsis {U+2026}
+*‖bell/‖SI‖En‖{U+0007}‖
+*‖cgj/‖SI‖En‖{U+034F}‖
+‖cr‖SI‖En‖CR‖Carriage Return
+*C‖cr/‖MSI‖En‖Carriage Return¦{U+000D}¦␍‖
+C‖crlf‖SI‖En‖CRLF‖
+*C‖crlf/‖MSI‖En‖Carriage Return {+} Line Feed¦{U+000D}{U+000A}‖
+‖emdash/‖SI‖En‖—‖
+*?‖emspace/‖SI‖En‖{U+2003}‖Em Space
+‖endash/‖SI‖En‖–‖
+*?‖enspace/‖SI‖En‖{U+2002}‖En Space
+*‖hairspace/‖SI‖En‖{U+200A}‖Hair Space
+*‖hyphens/‖MSI‖En‖—¦–¦−¦‑‖
+‖lf‖SI‖En‖LF‖Line Feed
+*‖lf/‖SI‖En‖Line Feed‖
+*‖minus/‖SI‖En‖−‖
+*?‖nbs/‖SI‖En‖{U+00A0}‖No-Break Space
+*‖newline/‖SI‖En‖{U+000A}‖
+*?‖nobreakspace/‖SI‖En‖{U+00A0}‖No-Break Space
+*‖nonbreakinghyphen/‖SI‖En‖‑‖
+*‖pauza/‖SI‖En‖—‖
+*‖półpauza/‖SI‖En‖–‖
+*‖space1/‖SI‖En‖{U+2003}‖Em Space
+*‖space3/‖SI‖En‖{U+2004}‖Three-Per-Em
+*‖space4/‖SI‖En‖{U+2005}‖Four-Per-Em
+*‖space6/‖SI‖En‖{U+2006}‖Six-Per-Em
+*‖thinspace/‖SI‖En‖{U+2009}‖Thin Space
+C‖vt‖SI‖En‖VT‖
+*C‖vt/‖MSI‖En‖Vertical Tabulation¦{U+000B}‖

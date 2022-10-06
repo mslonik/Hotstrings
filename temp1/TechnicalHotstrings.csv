@@ -1,0 +1,56 @@
+﻿*‖033281/‖CL‖En‖ERA/ERTMS/033281 Interfaces between CCS trackside and other subsystems, Rev. 4.0.‖
+*‖19/‖SI‖En‖19 inches (482.6 mm)‖
+*‖2008/57/‖CL‖En‖Dyrektywa Parlamentu Europejskiego i Rady 2008/57/WE z dnia 17 czerwca 2008 r. w sprawie interoperacyjności systemu kolei we Wspólnocie.‖
+*‖2009/131/‖CL‖En‖Dyrektywa Komisji 2009/131/WE z dnia 16 października 2009 r. zmieniająca załącznik VII do dyrektywy Parlamentu Europejskiego i Rady 2008/57/WE w sprawie interoperacyjności systemu kolei we Wspólnocie.‖
+*‖2010/713/‖CL‖En‖Decyzja Komisji 2010/713/UE z dnia 9 listopada 2010 r. w sprawie modułów procedur oceny zgodności, przydatności do stosowania i weryfikacji WE stosowanych w technicznych specyfikacjach interoperacyjności przyjętych na mocy dyrektywy Parlamentu Europejskiego i Rady 2008/57/WE.‖
+*‖2011/18/‖CL‖En‖Dyrektywa Komisji 2011/18/UE z dnia 1 marca 2011 r. zmieniająca załączniki II, V i VI do dyrektywy Parlamentu Europejskiego i Rady 2008/57/WE w sprawie interoperacyjności systemu kolei we Wspólnocie.‖
+*‖2013/9/‖CL‖En‖Dyrektywa Komisji 2013/9/UE z dnia 11 marca 2013 r. zmieniająca załącznik III do dyrektywy Parlamentu Europejskiego i Rady 2008/57/WE w sprawie interoperacyjności systemu kolei we Wspólnocie.‖
+*‖2014/106/‖CL‖En‖Dyrektywa Komisji 2014/106/UE z dnia 5 grudnia 2014 r. zmieniająca załącznik V i VI do dyrektywy Parlamentu Europejskiego i Rady 2008/57/WE w sprawie interoperacyjności systemu kolei we Wspólnocie.‖
+C‖3408_10‖CL‖En‖Zadanie Nr 3408/10 Badania systemu diagnostyki stanów awaryjnych taboru typu ASDEK, Warszawa lipiec 2007 r., Centrum Naukowo-Techniczne Kolejnictwa.‖
+*C‖availability/‖SI‖En‖ability of a product to be in a state to perform a required function under given conditions at a given instant of time or over a given time interval assuming that the required external resources are provided.`n[SOURCE: IEC 62278:2002, 3.4]`n‖
+*B0‖axle counter/‖SI‖En‖{BackSpace}{Space}system using counting points with a wheel detector and a counter which detects the occupancy of a section of track by comparing the number of axles which enter the section with the number of axles which leave the section, parity of the numbers being necessary to give a clear indication [SOURCE: IEC 62427:2007, 3.15]‖https://www.electropedia.org/iev/iev.nsf/display?openform&ievref
+‖en50122_1‖SI‖En‖PN-EN 50122-1:2011/A4:2017-03 Zastosowania kolejowe – Urządzenia stacjonarne – Bezpieczeństwo elektryczne, uziemianie i sieć powrotna – Część 1: Środki ochrony przed porażeniem elektrycznym.‖
+‖en50124_1‖SI‖En‖PN-EN 50124-1:2017-09 Zastosowania kolejowe – Koordynacja izolacji – Część 1: Wymagania podstawowe – Odstępy izolacyjne powietrzne i powierzchniowe dla całego wyposażenia elektrycznego i elektronicznego.‖
+‖en50124_2‖SI‖En‖PN-EN 50124-2:2017-09 Zastosowania kolejowe – Koordynacja izolacji – Część 2: Przepięcia i ochrona przeciwprzepięciowa.‖
+‖en50125-3‖SI‖En‖EN 50125-3:2003‖
+*‖en50125-3/‖MSI‖En‖EN 50125-3:2003 Railway applications ─ Environmental conditions for equipment ─ Part 3: Equipment for signalling and telecommunications¦PN-EN 50125-3:2003/AC:2010E Zastosowania kolejowe – Warunki środowiskowe stawiane urządzeniom – Część 3: Wyposażenie dla sygnalizacji i telekomunikacji‖
+C‖en50126‖SI‖Dis‖EN 50126‖
+C‖en50126-1‖SI‖En‖EN 50126-1:2018‖
+*‖en50126-1/‖CL‖En‖EN 50126-1:2018 Railway applications – The specification and demonstration of reliability, availability, maintainability and safety (RAMS) – Part 1: Generic RAMS Process.‖
+C‖en50126-2‖SI‖En‖EN 50126-2:2017‖
+*‖en50126-2/‖CL‖En‖EN 50126-2:2017 Railway applications – The specification and demonstration of reliability, availability, maintainability and safety (RAMS) – Part 2: Systems Approach to Safety.‖
+*‖en50126old/‖CL‖En‖EN 50126:1999 Railway applications – The specification and demonstration of Reliability, Availability, Maintainability and Safety (RAMS).‖
+‖en50128‖CL‖En‖EN 50128:2011‖
+*‖en50128/‖CL‖En‖EN 50128:2011 Railway applications – Communication, signalling and processing systems – Software for railway control and protection system.‖
+‖en50129‖CL‖En‖EN 50129:2018‖
+*‖en50129/‖CL‖En‖EN 50129:2018 Railway applications – Communication, signalling and processing systems – Safety related electronic systems for signalling.‖
+*‖en50129old/‖CL‖En‖EN 50129:2003 E Railway applications – Communication, signaling and processing systems – Safety related electronic systems for signaling.‖
+‖en50159‖CL‖En‖EN 50159:2010‖
+*‖en50159/‖CL‖En‖EN 50159:2010 Railway applications – Communication, signalling and processing systems – Safety-related communication in transmission systems.‖
+‖en 50122_1‖SI‖En‖PN-EN 50122-1:2011/A4:2017-03 Zastosowania kolejowe -- Urządzenia stacjonarne -- Bezpieczeństwo elektryczne, uziemianie i sieć powrotna -- Część 1: Środki ochrony przed porażeniem elektrycznym.‖
+‖en 50124_1‖SI‖En‖PN-EN 50124-1:2017-09 Zastosowania kolejowe -- Koordynacja izolacji -- Część 1: Wymagania podstawowe -- Odstępy izolacyjne powietrzne i powierzchniowe dla całego wyposażenia elektrycznego i elektronicznego.‖
+‖en 50124_2‖SI‖En‖PN-EN 50124-2:2017-09 Zastosowania kolejowe -- Koordynacja izolacji -- Część 2: Przepięcia i ochrona przeciwprzepięciowa.‖
+‖en 50125-3‖SI‖En‖EN 50125-3:2003‖
+*‖en 50125-3/‖MSI‖En‖EN 50125-3:2003 Railway applications ─ Environmental conditions for equipment ─ Part 3: Equipment for signalling and telecommunications¦PN-EN 50125-3:2003/AC:2010E Zastosowania kolejowe -- Warunki środowiskowe stawiane urządzeniom -- Część 3: Wyposażenie dla sygnalizacji i telekomunikacji‖
+C‖en 50126‖SI‖Dis‖EN 50126‖
+*C‖FIT/‖MSI‖En‖Failure in Time¦rate of a device is the number of failures that can be expected in one billion (109) device-hours of operation.[14] (E.g. 1000 devices for 1 million hours, or 1 million devices for 1000 hours each, or some other combination.) The relationship of FIT to MTBF may be expressed as: MTBF = 1,000,000,000 x 1/FIT.`n[SOURCE: https://en.wikipedia.org/wiki/Failure_rate]`n‖
+*C‖FR/‖MSI‖En‖Failure Rate¦limit of the ratio of the conditional probability that the instant of time, T, of a failure of a product falls within a given time interval (t, t + Δt) and the duration of this interval, Δt, when Δt tends towards zero, given that the item is in an up state at the start of the time interval.`n[SOURCE: IEC 60050-821:FDIS2016]`n‖
+‖iec62443-4-1‖SI‖En‖IEC 62443-4-1‖
+*‖iet120/‖CL‖En‖Iet-120. Wymagania techniczne dla zapewnienia ochrony przed porażeniem prądem elektrycznym, przed przepięciami i od wyładowań atmosferycznych w strefie oddziaływania sieci trakcyjnej DC 3 kV. PKP Polskie Linie Kolejowe S.A. Warszawa 2018.‖
+*‖interface/‖SI‖En‖Location at which at least two independent systems meet and act upon or communicate with each other. Interface is made out of certain set of technical means, which can be divided up to three layers: physical layer (e.g. cables, sockets, connectors), electrical layer (e.g. level of voltages, power consumption etc.) and logical layer (e.g. protocol, frames, rules of handshake etc.). ‖
+CO‖interlocking/‖MCL‖En‖An arrangement of gates and control apparatus within definedlimits so interconnected that functions must succeed eachother in proper sequence, permitting train movements overcontrolled routes only if safe conditions exist.‖
+*‖irisnorm‖CL‖En‖ISO/TS 22163:2017(E) Railway applications - Quality management system - Business management system requirements for rail organizations: ISO 9001:2015 and particular requirements for application in the rail sector‖
+*‖iso14001/‖SI‖En‖ISO 14001:2015 Environmental management systems ─ Requirements with guidance for use‖https://en.wikipedia.org/wiki/ISO_14000#ISO_14001_standard
+*‖iso2ld‖CL‖En‖EN ISO 9001:2008 Quality management systems - Requirements.‖
+*C‖isots22163‖SI‖En‖ISO/TS 22163:2017‖
+*‖lp2017/‖CL‖En‖Lista Prezesa Urzędu Transportu Kolejowego w sprawie właściwych krajowych specyfikacji technicznych i dokumentów normalizacyjnych, których zastosowanie umożliwia spełnienie zasadniczych wymagań dotyczących interoperacyjności kolei; Warszawa, dnia 19 stycznia 2017 r.‖
+*C‖maintainability/‖SI‖En‖ability to be retained in, or restored to, a state to perform as required, under given conditions of use and maintenance.`n[SOURCE: IEC 60050-192:2015, 192-01-27]`n ‖
+*‖rack/‖SI‖En‖free-standing or fixed structure for housing electrical and electronic equipment‖IEV ref		581-25-03
+*C‖redundancy/‖CL‖En‖The existence in a system of more than one means of accomplishing a given function.‖source: Hitachi
+*C‖reliability/‖MSI‖En‖The probability that a system will perform its intended functions without failure, within design parameters, under specific operating conditions, and for a specific period of time.¦Ability to perform as required, without failure, for given time interval, under conditions.`n[SOURCE: IEC 60050-192:2015, 193-12-03, modified]`n‖source: Hitachi
+*C‖rsiic/‖MCL‖En‖Railway Signalling & Interlocking, International Compendium, 2nd Edition, Editors: Gregor Theeg, Sergej Vlasenko, ISBN 978-3-96245-156-1, © 2018 PMC Media House GmbH¦Railway Signalling & Interlocking, International Compendium, 3rd Edition, Editors: Gregor Theeg, Sergej Vlasenko, ISBN 978-3-96245-169-1, © 2020 PMC Media House GmbH‖
+*‖shall/‖SI‖En‖“shall” is used to express a required command or obligation; in the context of this document its meaning is equal to “must”, expressing a strong imperative‖
+*‖u/‖MSI‖En‖rack unit¦unit of measure defined as 1 3/4 inches (44.45 mm)‖https://en.wikipedia.org/wiki/Rack_unit
+C‖v&v‖CL‖En‖V&V‖
+*‖v&v/‖CL‖En‖Verfication & Validation‖
+C‖vnv‖CL‖En‖V&V‖

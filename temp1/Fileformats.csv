@@ -1,0 +1,41 @@
+﻿B0?‖.ahk‖SI‖En‖‖only for extensions
+B0?‖.csv‖SI‖En‖‖only for extensions
+B0?‖.docx‖SI‖En‖‖only for extensions
+B0?‖.dwf‖SI‖En‖‖
+CB0?‖.dwfx‖SI‖En‖‖https://en.wikipedia.org/wiki/Design_Web_Format
+B0?‖.easm‖SI‖En‖‖only for extensions
+B0?‖.exe‖SI‖En‖‖
+B0?‖.fbx‖SI‖En‖‖only for file extensions
+B0?‖.gif‖SI‖En‖‖
+CB0?‖.odf‖SI‖En‖‖
+B0?‖.pdf‖SI‖En‖‖only for extensions
+B0?‖.png‖SI‖En‖‖
+CB0?‖.rtf‖SI‖En‖‖
+B0?‖.svg‖SI‖En‖‖only for extensions
+B0?‖.xlsx‖SI‖En‖‖only for extensions
+B0?‖.xml‖SI‖En‖‖only for extensions
+C‖csv‖SI‖En‖CSV‖
+*‖csv/‖SI‖En‖Comma Separated Values‖https://en.wikipedia.org/wiki/Comma-separated_values
+CO‖docx‖SI‖En‖DOCX‖https://en.wikipedia.org/wiki/Office_Open_XML
+C‖dwf‖SI‖En‖DWF‖
+*C‖dwf/‖MSI‖En‖Design Web Format¦file format developed by Autodesk for the efficient distribution and communication of rich design data to anyone who needs to view, review, or print design files‖https://en.wikipedia.org/wiki/Design_Web_Format
+C‖dwfx‖SI‖En‖DWFX‖https://en.wikipedia.org/wiki/Design_Web_Format
+*C‖dwfx/‖MSI‖En‖Design Web Format¦file format developed by Autodesk for the efficient distribution and communication of rich design data to anyone who needs to view, review, or print design files‖https://en.wikipedia.org/wiki/Design_Web_Format
+C‖easm‖SI‖En‖EASM‖
+C‖exe‖SI‖En‖EXE‖
+*C‖exe/‖SI‖En‖executable‖
+‖fbx‖SI‖En‖FBX‖
+*‖fbx/‖SI‖En‖(Filmbox) is a proprietary file format (.fbx) developed by Kaydara and owned by Autodesk since 2006‖
+C‖gif‖SI‖En‖GIF‖
+*‖gif/‖SI‖En‖Graphics Interchange Format‖
+C‖odf‖SI‖En‖ODF‖
+*C‖odf/‖SI‖En‖Open Document Format for Office Applications‖https://en.wikipedia.org/wiki/OpenDocument
+CO‖pdf‖SI‖En‖PDF‖
+*‖pdf/‖CL‖En‖Portable Document Format‖
+C‖png‖SI‖En‖PNG‖
+‖rtf‖SI‖En‖RTF‖
+C‖rtf/‖SI‖En‖Rich Text Format‖
+C‖svg‖SI‖En‖SVG‖
+*‖svg/‖SI‖En‖Scalable Vector Graphics‖
+C‖xlsx‖SI‖En‖XLSX‖
+C‖xml‖SI‖En‖XML‖

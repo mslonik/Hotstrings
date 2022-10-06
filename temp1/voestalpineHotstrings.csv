@@ -1,0 +1,314 @@
+﻿‖ secrac‖SI‖En‖SecRAC‖
+*‖ secrac/‖SI‖En‖Security Related Application Condition‖
+*‖ab/‖SI‖En‖ASDEK_BAZ‖
+C‖abm‖SI‖En‖ABM‖
+*‖abm/‖MCL‖En‖enclosure¦kaseta‖
+‖acd‖SI‖En‖ACD‖
+*‖acd/‖MSI‖En‖Axle Counter Detector¦axle counter detector: detector consisting of the axle counter sensor and of the detection circuit, which includes in general filters and rectifiers [EN 50617-2:2015: 3.1.2]‖
+C‖acm‖SI‖En‖ACM‖
+*‖acm/‖MCL‖En‖axle counting module¦moduł liczący osie‖
+‖acs‖SI‖En‖ACS‖
+*‖acs/‖SI‖En‖Axle Counting System‖
+C‖adm‖SI‖En‖ADM‖
+*‖adm/‖MCL‖En‖extended diagnostics module¦moduł rozszerzonej diagnostyki‖
+*‖adres/‖MCL‖En‖Jana z Kolna 26c, 81-859 Sopot, Polska¦Jana z Kolna 26c, 81-859 Sopot, Poland¦Gdańska 31, 83-034, Trąbki Wielkie, Polska¦Gdańska 31, 83-034, Trąbki Wielkie, Poland‖
+C‖ads‖SI‖En‖ADS‖not functioning brakes
+*‖ads/‖SI‖En‖Antenna Detection System‖voestalpine Signaling Siershahn
+C‖agm‖SI‖En‖AGM‖
+*C‖agm/‖SI‖En‖Gateway module‖
+C‖aim‖SI‖En‖AIM‖voestalpine Signaling Siershahn
+*‖aim/‖MCL‖En‖inputs and outputs module UniAC[1]¦moduł wejść wyjść UniAC[1]‖
+C‖ams‖SI‖En‖AMS‖
+*‖ams/‖SI‖En‖Accustic Monitoring System‖
+C‖anszua‖SI‖En‖AnSzuA‖
+*‖anszua/‖CL‖En‖system zarządzania usługami‖
+‖asdek‖MCL‖En‖ASDEK¦ASDEK/GM/GH/PHOENIX¦ASDEK/PM/GM/GH/OK/PHOENIX/GOTCHA‖
+*‖asdek/‖CL‖En‖automatyczny system diagnostyki i eksploatacji kół pojazdów kolejowych‖
+C‖asm‖SI‖En‖ASM‖
+*‖asm/‖MCL‖En‖evaluation module¦moduł oceniający‖
+C‖at‖SI‖Dis‖AT‖
+C‖at	‖SI‖En‖AT‖
+*C‖at/‖SI‖En‖Automatyczny Terminal‖
+C‖atc‖SI‖En‖ATC‖
+*‖atc/‖SI‖En‖Academy Training Center‖
+C‖axc‖SI‖En‖AxC‖
+*‖axc/‖CL‖En‖Axle Counting‖
+C‖axm‖SI‖En‖AXM‖
+*‖axm/‖MCL‖En‖multipurpose module¦moduł uniwersalny¦Universalmodul‖
+*‖axma/‖MSI‖En‖AXM{Space}/{Space}AXM^=R^={Space}/{Space}AXM^=IO^=¦AXM / AXM_R / AXM_IO‖
+‖axmio‖MSI‖En‖AXM^=IO^=¦AXM_IO‖
+*‖axmio/‖MCL‖En‖multipurpose module extended by binary inputs and outputs¦moduł uniwersalny rozszerzony o wejścia i wyjścia binarne‖
+*‖axmp/‖MSI‖En‖AXM,{Space}AXM^=R^=,{Space}AXM^=IO^=¦AXM, AXM_R, AXM_IO‖
+‖axmr‖SI‖En‖AXM-R‖
+*‖axmr/‖MCL‖En‖multipurpose module extended by potential free relay outputs¦moduł uniwersalny rozszerzony o przekaźnikowe wyjścia bezpotencjałowe‖
+C‖azc‖SI‖En‖AZC‖
+*‖azc/‖MCL‖En‖surge protection module dedicated for UniAS[x] wheel sensor family¦moduł ochrony przeciwprzepięciowej dedykowany dla rodziny czujników osi UniAS[x]¦Überspannungsschutzmodul‖
+C‖bbt‖SI‖En‖BBT‖
+*‖bbt/‖CL‖En‖Bearing and Brake Temperature‖
+*‖bm/‖MSI‖En‖Block Mode¦Tryb blokowy‖
+C‖bpu‖SI‖En‖BPU‖
+*C‖bpu/‖SI‖En‖Backplane Unit‖
+‖cable harness/‖SI‖En‖wiązka kablowa‖
+‖ccs‖SI‖En‖CCS‖źródło: Ie-3
+*‖ccs/‖SI‖En‖Control-Command and Signalling‖źródło: Ie-3
+*‖cm/‖MSI‖En‖Counting Mode¦tryb liczenia‖
+C?‖cok‖SI‖En‖COK‖
+*‖cok/‖CL‖En‖czujnik koła‖źródło: Ie-3
+‖cpk‖SI‖En‖CPK‖źródło: Ie-3
+*‖cpk/‖SI‖En‖Centralny Port Komunikacyjny‖
+*‖cps‖MCL‖En‖Cooperation Platform Sopot¦https://solidsystemteamwork.voestalpine.root.local/internalprojects/vaSupp/CPS/SitePages/Home.aspx‖
+C‖crd‖SI‖En‖CRD‖
+*‖crd/‖SI‖En‖Cracked Rim Detection‖
+C‖cth‖SI‖En‖CTH‖
+*‖cth/‖SI‖En‖Czujnik Temperatury Hamulców‖
+C‖ctm‖SI‖En‖CTM‖
+*‖ctm/‖SI‖En‖Czujnik Temperatury Maźnic‖
+‖ctml‖SI‖En‖CTML‖
+*‖ctml/‖SI‖En‖Czujnik Temperatury Maźnic Lewy‖
+‖ctmp‖SI‖En‖CTMP‖
+*‖ctmp/‖SI‖En‖Czujnik Temperatury Maźnic Prawy‖
+*‖cu/‖MSI‖En‖CU AxC¦Competence Unit for Axle Counting Systems‖
+‖cuid‖SI‖En‖CUiD‖
+*‖cuid/‖SI‖En‖Centrum Utrzymania i Diagnostyki‖
+C‖cwd‖SI‖En‖CWD‖
+*‖cwd/‖SI‖En‖Cold Wheel Detection‖
+C‖ded‖SI‖En‖DED‖https://www.gifas-electric.com/en/gifas-austria
+*‖ded/‖SI‖En‖Dragging Equipment Detection‖
+C*‖dlds ‖SI‖En‖DLD/S‖
+*‖dlds/‖SI‖En‖Drive, Locking, Detection & Signaling‖
+*‖dmt rs/‖CL‖Dis‖Diagnostic and Monitoring Technologies for Rolling Stock‖
+C*‖dmti ‖SI‖En‖DMT Infra ‖
+*‖dmti/‖CL‖En‖Diagnostic and Monitoring Technologies for Infrastructure‖
+*‖dmtrs ‖SI‖En‖DMT RS ‖
+*‖dmtrs/‖CL‖En‖Diagnostic and Monitoring Technologies for Rolling Stock‖
+C‖dokr‖CL‖En‖DokR‖
+*‖dokr/‖CL‖En‖Dokumentacja Robocza‖
+C‖dokt‖CL‖En‖DokT‖
+*‖dokt/‖CL‖En‖Dokumentacja Techniczna‖
+C‖dp‖SI‖En‖DPiZ‖
+*‖dp/‖CL‖En‖Dział Produkcji i Zaopatrzenia‖
+C‖dpiz‖SI‖En‖DPiZ‖
+*‖dpiz/‖CL‖En‖Dział Produkcji i Zaopatrzenia‖
+‖dr ‖SI‖Dis‖DR ‖
+*‖dr/‖CL‖En‖Dział Rozwoju‖
+C‖dsat‖SI‖En‖dSAT‖
+*‖dsat/‖CL‖En‖detekcja Stanów Awaryjnych Taboru‖
+‖dtm‖SI‖En‖DTM‖
+*‖dtm/‖SI‖En‖Digital Track Management‖
+C‖du‖SI‖En‖DUiR‖
+*‖du/‖MCL‖En‖DUiR¦Dział Usług i Realizacji‖
+C‖duir‖SI‖En‖DUiR‖
+*‖duir/‖CL‖En‖Dział Usług i Realizacji‖
+C‖ecostar‖SI‖En‖ECHOSTAR‖
+*‖ecostar/‖SI‖En‖The compact electro-hydraulic point machine with external lock.‖
+C‖emros‖SI‖En‖EMROS‖system do nadawania uprawnień
+*‖emros/‖SI‖En‖Elektroniczny Moduł Rejestracji Obsługi Serwisowej‖
+C‖ersat‖SI‖En‖ERSAT‖
+*‖ersat/‖SI‖En‖Elektroniczny Rejestr Stanów Awaryjnych Taboru‖
+‖eulynx‖SI‖En‖EULYNX‖
+*‖eulynx/‖SI‖En‖European initiative in the area of railway signalling, with the aim of reducing the cost and installation time of signalling equipment‖
+C‖fadc‖SI‖En‖FAdC‖
+*‖fadc/‖SI‖En‖Frauscher Advanced Counter‖
+‖fasa‖SI‖En‖FASA‖
+*‖fasa/‖SI‖En‖False Alarm Suppression Algorithm‖
+C‖fbg‖SI‖En‖FBG‖
+*‖fbg/‖SI‖En‖Fiber Bragg Grating‖
+C‖fp52‖SI‖En‖FP52‖
+*‖fp52/‖MCL‖En‖shape gauge with simulation side dedicated for installation of UniAS wheel sensor¦przymiar z symulatorem koła przeznaczony do instalacji czujników koła UniAS‖
+C*‖frauscher‖SI‖En‖Frauscher‖źródło: Ie-3
+C*‖frausher‖SI‖En‖Frauscher‖źródło: Ie-3
+C*‖g3qv‖SI‖En‖G3QV‖
+C‖gh‖SI‖En‖GH‖
+*C‖gh/‖SI‖En‖Gorące Hamulce‖
+C*‖gifas‖SI‖En‖GIFAS‖
+C‖gm‖SI‖En‖GM‖
+*C‖gm/‖SI‖En‖Gorące Maźnice‖
+C*‖gotcha‖CL‖En‖GOTCHA‖
+‖gpe‖SI‖En‖GPE‖
+*‖gpe/‖SI‖En‖Grand Paris Express‖
+*‖has	‖SI‖En‖HAS‖
+*‖has/‖CL‖En‖Hardware Architecture Specification‖
+C‖hbd‖SI‖En‖HBD‖
+*‖hbd/‖CL‖En‖Hot-Box Detector‖
+C‖hd1‖SI‖En‖HD1‖
+*‖hd1/‖MCL‖En‖HD1 (the 1st head of wheel sensor)¦HD1 (pierwsza głowica czujnika koła)‖
+C‖hd2‖SI‖En‖HD2‖
+*‖hd2/‖MCL‖En‖HD2 (the 2nd head of wheel sensor)¦HD2 (druga głowica czujnika koła)‖
+C‖hds‖SI‖En‖HDS‖
+*‖hds/‖CL‖En‖Hardware Design Specification‖
+*‖header/‖CL‖En‖integrated diagnostic, communication and voltage supply module‖
+C‖hgd‖SI‖En‖HGD‖
+*‖hgd/‖SI‖En‖Hot Gear Detection‖
+C‖hmd‖SI‖En‖HMD‖
+*‖hmd/‖SI‖En‖Hot Motor Detection‖
+C‖hmi‖SI‖En‖HMI‖
+*‖hmi/‖SI‖En‖Human-Machine Interface‖
+C‖hpir‖SI‖En‖HPIR‖
+*‖hpir/‖CL‖En‖Hardware Prototype Implementation Report‖
+*‖hsz31‖SI‖En‖HSZ31‖
+C‖hwd‖SI‖En‖HWD‖
+*‖hwd/‖CL‖En‖Hot-Wheel Detector‖
+C‖idm‖SI‖En‖IDM‖voestalpine Signaling Siershahn
+*‖idm/‖MCL‖En‖Identity Management¦https://idm.voestalpine.net/IdentityManager/page.axd‖voestalpine Signaling Siershahn
+*‖iec‖SI‖En‖IEC‖
+*‖ihd1‖SI‖En‖I^=HD1^=‖
+*‖ihd2‖SI‖En‖I^=HD2^=‖
+*‖ikbad/‖SI‖En‖IK.OFR.10.7000.0544.00.2021‖identyfikator oferty
+*‖im/‖MSI‖En‖Communication Mode¦Tryb komunikacji‖
+‖inter‖MSI‖En‖interoperability constituent‖https://en.wikipedia.org/wiki/SCADA
+*‖iomini‖SI‖En‖IOmini‖
+‖isa‖SI‖En‖ISA‖
+*‖isa/‖SI‖En‖Independent Safety Assessment‖
+‖ixl‖SI‖En‖IxL‖źródło: Ie-3
+*‖ixl/‖SI‖En‖Interlocking‖źródło: Ie-3
+*‖kodv/‖SI‖En‖81-859‖
+C*?‖kombud‖SI‖En‖Kombud‖
+‖kzo‖SI‖En‖KZO‖
+*‖kzo/‖SI‖En‖Karta Zmian Oprogramowania‖
+C‖lcs‖SI‖En‖LCS‖
+*‖lcs/‖SI‖En‖Lokalne Centrum Sterowania‖
+C‖mag‖SI‖En‖MAG‖
+*‖mag/‖MCL‖En‖backplane¦magistrala¦Busplatine‖
+C*‖mag14‖SI‖En‖MAG14‖
+C*‖mag15‖SI‖En‖MAG15‖
+C*‖mag6‖SI‖En‖MAG6‖
+C‖magadm‖SI‖En‖MAG_ADM‖
+*‖magadm/‖MSI‖En‖basic diagnostic module¦moduł podstawowej diagnostyki‖
+C‖magsac‖MSI‖En‖MAGSAC¦MAGSAC (MAG_SUP {+} MAG_ADM {+} MAG_COM)‖źródło: Ie-3
+*‖magsac/‖MCL‖En‖integrated diagnostic, communication and power supply module¦zintegrowany moduł diagnostyczny, komunikacyjny i zasilający‖
+C‖magsak‖MCL‖En‖MAGSAC¦MAGSAC (MAG_SUP + MAG_ADM + MAG_COM)‖
+*‖magsak/‖MSI‖En‖integrated diagnostic, communication and power supply module¦zintegrowany moduł diagnostyczny, komunikacyjny i zasilający‖
+C‖magsup‖SI‖En‖MAG_SUP‖
+*‖magsup/‖MSI‖En‖voltage supply module¦moduł zasilający‖
+?‖mds‖SI‖En‖MDS‖
+*‖mds/‖CL‖En‖Modular Diagnostic System‖
+C‖mt52‖SI‖En‖MT52‖
+*‖mt52/‖MCL‖En‖handheld, portable tool for electric adjustment of UniAS wheel senor¦podręczne, przenośne narzędzie do strojenia czujników koła UniAS‖
+*‖muk‖MCL‖En‖MDS Upgrade Kit¦https://solidsystemteamwork.voestalpine.root.local/Processes/custprojects/780MDSUpgradeKit/SitePages/Home.aspx‖
+C‖nd‖SI‖En‖ND‖
+*C‖nd/‖SI‖En‖Nastawnia Dysponująca‖
+*‖nipv‖MCL‖En‖584-025-39-29¦5840253929¦PL 5840253929¦PL5840253929‖
+*‖nout‖CL‖En‖~OUT‖
+‖om‖SI‖En‖OM‖
+*‖om/‖SI‖En‖Order Management‖
+‖osb‖SI‖En‖OSB‖
+*‖osb/‖SI‖En‖Obudowa Systemu Bazowego‖
+*‖otagle‖MCL‖En‖Otagle¦O T A G L E‖
+C*‖phoenix‖CL‖En‖PHOENIX‖
+C‖pip‖SI‖En‖PIP‖
+*C‖pip/‖SI‖En‖Przekazywanie Informacji o Pociągach‖
+C‖pm‖SI‖En‖PM‖
+C*‖prorail‖SI‖En‖ProRail‖
+*‖pug/‖SI‖En‖Purchasing Guide‖
+C‖pvs‖SI‖En‖PVS‖
+*‖pvs/‖SI‖En‖Profile Validation System‖
+C*‖railpro‖SI‖En‖RailPro‖
+C‖rnd‖SI‖En‖R&D‖
+*‖rnd/‖CL‖En‖Research & Development‖
+*‖roadmaster‖SI‖En‖ROADMASTERⓇ‖
+C‖rot‖SI‖En‖ROT‖
+*‖rot/‖SI‖En‖Regulamin Obsługi Terminala‖
+*‖sai/‖CL‖En‖Sainerholz‖
+C*‖sat ‖SI‖En‖SAT‖
+*‖sat/‖CL‖En‖Site Acceptance Test‖TRAKO
+‖scnk‖SI‖En‖SCNK‖TRAKO
+*‖scnk/‖SI‖En‖Światłowodowy Czujnik Nacisku Kół‖
+C‖secrac‖SI‖En‖SecRAC‖
+*C‖secrac/‖SI‖En‖Security Related Application Condition‖
+‖sg‖CL‖En‖SG‖
+‖sg/‖MCL‖En‖Shape Gauge for UniAS[x] wheel sensor¦przymiar do czujników koła UniAS[x]‖
+C‖sg52‖SI‖En‖SG52‖UniAS[1]
+*‖sg52/‖MCL‖En‖shape gauge for UniAS[2] wheel sensors¦przymiar do czujników UniAS[2]‖
+‖shcl‖SI‖En‖S&HCL‖
+*‖shcl/‖MCL‖En‖"Software and Hardware Compatibility Log"¦TW-2090-171R-SoftwareandHardwareCompatibilityLog.xlsx‖
+*‖si/‖CL‖En‖Siershahn‖
+C‖sid‖SI‖En‖SID‖
+*‖sid/‖SI‖En‖System Informatyczny dSAT‖
+*‖sil4/‖MSI‖En‖EN 50126-1:2017, EN 50126-2:2017, EN 50128:2011/A2:2020, EN 50129:2018, EN 50159:2010¦EN 50126-1:2017{Shift Down}{Enter}{Shift Up}, EN 50126-2:2017{Shift Down}{Enter}{Shift Up}, EN 50128:2011/A2:2020{Shift Down}{Enter}{Shift Up}, EN 50129:2018{Shift Down}{Enter}{Shift Up}, EN 50159:2010{Shift Down}{Enter}{Shift Up}¦EN 50126-1:2017 Railway applications - The specification and demonstration of reliability, availability, maintainability and safety (RAMS) - Part 1: Generic RAMS Process.{Shift Down}{Enter}{Shift Up}EN 50126-2:2017 Railway applications - The specification and demonstration of reliability, availability, maintainability and safety (RAMS) - Part 2: Systems Approach to Safety.{Shift Down}{Enter}{Shift Up}EN 50128:2011 Railway applications - Communication, signalling and processing systems - Software for railway control and protection system.{Shift Down}{Enter}{Shift Up}EN 50129:2018 Railway applications - Communication, signalling and processing systems - Safety related electronic systems for signalling.{Shift Down}{Enter}{Shift Up}EN 50159:2010 Railway applications - Communication, signalling and processing systems - Safety-related communication in transmission systems.¦EN 50126-1:2017 Railway applications - The specification and demonstration of reliability, availability, maintainability and safety (RAMS) - Part 1: Generic RAMS Process.`nEN 50126-2:2017 Railway applications - The specification and demonstration of reliability, availability, maintainability and safety (RAMS) - Part 2: Systems Approach to Safety.`nEN 50128:2011 Railway applications - Communication, signalling and processing systems - Software for railway control and protection system.`nEN 50129:2018 Railway applications - Communication, signalling and processing systems - Safety related electronic systems for signalling.`nEN 50159:2010 Railway applications - Communication, signalling and processing systems - Safety-related communication in transmission systems.`n¦EN 50126-1:2017 Railway applications - The specification and demonstration of reliability, availability, maintainability and safety (RAMS) - Part 1: Generic RAMS Process.{U+000B}EN 50126-2:2017 Railway applications - The specification and demonstration of reliability, availability, maintainability and safety (RAMS) - Part 2: Systems Approach to Safety.{U+000B}EN 50128:2011 Railway applications - Communication, signalling and processing systems - Software for railway control and protection system.{U+000B}EN 50129:2018 Railway applications - Communication, signalling and processing systems - Safety related electronic systems for signalling.{U+000B}EN 50159:2010 Railway applications - Communication, signalling and processing systems - Safety-related communication in transmission systems.{U+000B}‖
+C‖sit ‖SI‖En‖SIT‖
+*‖sit/‖CL‖En‖System Integration Test‖
+*‖so/‖CL‖En‖Sopot‖
+C‖sop‖SI‖En‖SOP‖
+*‖sop/‖SI‖En‖Sales and Operations Planning‖
+C‖sor‖SI‖En‖SOR‖
+*‖sor/‖SI‖En‖Sales, Operation and Realisation‖
+‖sps‖SI‖En‖Documentation Sharepoint Sopot (https://team.voestalpine.net/site/4077/default.aspx)‖
+C‖ssd‖SI‖En‖SSD‖
+*‖ssd/‖CL‖En‖szlakowy system diagnostyki‖
+‖subrack‖MCL‖En‖subrack¦Subrack 14¦Subrack 15¦Subrack 6‖
+*‖subrack/‖SI‖En‖set of mechanical enclosure with electronic backplane board‖
+C‖svp‖SI‖En‖SVP‖
+*‖svp/‖SI‖En‖Senior Vice President‖
+‖teg‖SI‖En‖TEG‖
+*‖teg/‖SI‖En‖Moduł Transformatora Elementów Grzejnych‖
+C‖tens‖SI‖En‖TENS‖
+*‖tens/‖SI‖En‖TENS Sp. z o.o.‖
+*‖terminal block/‖MSI‖En‖zaciski¦zespół zacisków‖
+‖tpm‖SI‖En‖TPM‖
+*‖tpm/‖SI‖En‖Technical Project Management‖
+‖trako‖SI‖En‖TRAKO‖
+*‖trako/‖SI‖En‖http://trakotargi.amberexpo.pl/title,Jezyk,pid,216,lang,2.html‖
+‖ts‖SI‖En‖TS‖
+*‖ts/‖SI‖En‖Technical Sales‖
+‖tspc‖MSI‖En‖TSPC¦TSPC-IO‖
+C‖uniac‖SI‖En‖UniAC‖
+*‖uniac/‖MCL‖En‖(universal) axle counting system¦(uniwersalny) system liczenia osi‖
+‖uniac1‖SI‖En‖UniAC[1]‖
+*‖uniac1/‖MSI‖En‖(universal) axle counting system of 1st generation¦(uniwersalny) system liczenia osi pierwszej generacji‖
+‖uniac2‖SI‖En‖UniAC[2]‖
+*‖uniac2/‖MSI‖En‖axle counting system UniAC[2]. `nProper name of Axle Counting System made by voestalpine Signaling Poland. Another name used as proper name is UniAC2, which means the same.¦system liczenia osi UniAC[2]. Nazwa własna systemu liczenia osi wytwarzanego przez voestalpine Signaling Poland. Inna stosowana nazwa własna, oznaczająca to samo: UniAC2.¦Achzählsystem‖
+‖uniacx‖SI‖En‖UniAC[x]‖
+*‖uniacx/‖MSI‖En‖family of universal axle counting systems¦rodzina uniwersalnych systemów liczenia osi‖
+?O‖unias‖SI‖En‖UniAS‖
+*‖unias/‖MCL‖En‖wheel sensor¦czujnik koła¦Radsensor‖
+?‖unias1‖SI‖En‖UniAS[1]‖
+*‖unias1/‖MSI‖En‖UniAS[1] type wheel sensor¦czujnik koła typu UniAS[1]¦Radsensor UniAS[1]‖
+‖unias1p‖SI‖En‖UniAS[1{+}]‖
+*‖unias1p/‖MSI‖En‖(universal) UniAS[1{+}] type wheel sensor¦(uniwersalny) czujnik koła typu UniAS[1{+}]¦Radsensor UniAS[1+]‖
+?‖unias2‖SI‖En‖UniAS[2]‖
+*‖unias2/‖MSI‖En‖wheel sensor UniAS[2]`nProper name of wheel sensor made by voestalpine Signaling Poland. Another name used as proper name is UniAS2 , which means the same.¦czujnik koła typu UniAS[2]¦Radsensor UniAS[2]‖
+*‖uniasp‖SI‖Dis‖UniAS[1{+}]‖
+?‖uniasx‖SI‖En‖UniAS[x]‖
+*‖uniasx/‖MSI‖En‖family of (universal) wheel sensors¦rodzina (uniwersalnych) czujników osi‖
+C‖unibl‖SI‖En‖UniBL‖
+*‖unibl/‖CL‖En‖system blokady liniowej‖
+‖unirc‖SI‖En‖UniRC‖
+*‖unirc/‖MCL‖En‖(universal) wheel sensor clamp¦(uniwersalny) uchwyt czujnika koła‖
+*?‖unirc1‖SI‖En‖UniRC1‖
+*?‖unirc2‖SI‖En‖UniRC2‖
+*?‖unirc3‖SI‖En‖UniRC3‖
+*‖uniwdt‖CL‖En‖UniWDT‖
+C‖va-dtds‖SI‖En‖VA-DTDS‖
+*‖va-dtds/‖SI‖En‖voestalpine Digital Train Detection System Protocol‖
+*‖vadres‖MCL‖En‖Jana z Kolna 26c, 81-859 Sopot, Poland¦Gdańska 31, 83-034, Trąbki Wielkie, Poland¦Jana z Kolna 26c, 81-859 Sopot, Polska¦Gdańska 31, 83-034, Trąbki Wielkie, Polska‖
+*‖vkod‖SI‖En‖81-859‖
+*‖vkrs‖SI‖En‖0000177851‖
+*‖vo/‖MCL‖En‖voestalpine¦voestalpine Signaling Poland¦voestalpine Signaling Poland Sp. z o.o.¦voestalpine Signaling Siershahn¦voestalpine group-IT GmbH¦Vereinigte Österreichische Eisen und Stahlwerke Alpine Montangesellschaft‖
+C‖vp‖SI‖En‖VP‖
+*‖vp/‖SI‖En‖Vice President‖
+*‖vpostalcode/‖SI‖En‖81-859‖
+‖vregon‖CL‖En‖002834710 ‖U+25EF
+*‖vrs‖SI‖En‖voestalpine Railway Systems GmbH‖
+‖vsp‖SI‖En‖vSP‖
+*‖vsp/‖SI‖En‖voestalpine Signaling Poland‖
+*‖vstreet‖SI‖En‖Jana z Kolna 26c‖
+C‖vta‖SI‖En‖VTA‖
+*‖vta/‖SI‖En‖Visual Train Analysis‖
+*‖vtel‖SI‖En‖{+}48 58 555 77 11‖U+25EF
+*‖vulica‖SI‖En‖Jana z Kolna 26c‖
+C‖wdd‖SI‖En‖WDD‖
+*‖wdd/‖CL‖En‖Wheel Defect Detection‖
+C‖wild‖SI‖En‖WILD‖
+*‖wild/‖SI‖En‖Wheel Impact Load Detection‖
+C‖wim‖SI‖En‖WIM‖
+*‖wim/‖CL‖En‖Weighing in Motion‖
+‖witu‖SI‖En‖WITU‖
+*‖witu/‖SI‖En‖Wojskowy Instytut Techniczny Uzbrojenia‖
+‖wiązka kablowa/‖MSI‖En‖cable harness¦wire harness‖
+C‖wm‖SI‖En‖WM‖
+*‖wm/‖CL‖En‖Wykaz Materiałowy‖
+C‖wsc‖SI‖En‖WSC‖
+*‖wsc/‖CL‖En‖Wheel Sensor Cable‖
+C‖wsu‖SI‖En‖WSU‖
+*‖wsu/‖MSI‖En‖Wheel Sensor Unit¦wheel sensor {+} wheel sensor clamp {+} wheel sensor cable‖
+*‖zop/‖SI‖En‖Złącza Ochrony Przeciwprzepięciowej‖

@@ -1,0 +1,498 @@
+﻿*‖-/‖MCL‖En‖- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -¦-----------------------------------------------------------------------------------------¦= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ¦===========================================================¦# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #¦################################################################‖
+B0?‖.ahk‖SI‖En‖‖only for extensions
+B0?‖.fbx‖SI‖En‖‖only for file extensions
+C*‖2d‖MSI‖En‖2D¦two-dimensional‖
+C‖2fa‖SI‖En‖2FA‖
+*‖2fa/‖SI‖En‖Two-Factor Authentication‖
+C*‖3d‖MSI‖En‖3D ¦three-dimensional‖
+*‖a/‖SI‖En‖Availability‖
+C*‖a3‖MSI‖En‖A3¦297 × 420 [mm]‖size of paper sheet in Europe
+C*‖a4‖MSI‖En‖A4¦210 × 297 [mm]‖
+C‖ac‖SI‖En‖AC‖
+*‖ac/‖MSI‖En‖Alternating Current¦Axle Counter‖
+C‖acl‖SI‖En‖ACL‖
+*‖acl/‖SI‖En‖Access Control List‖
+C‖adc‖SI‖En‖ADC‖
+*‖adc/‖MSI‖En‖Analog to digital Converter¦is a system in electronics that converts an analog signal, such as a sound picked up by a microphone or light entering a digital camera, into a digital signal.‖
+C‖ahk‖SI‖En‖AHK‖
+*‖ahk/‖MSI‖En‖AutoHotkey¦https://www.autohotkey.com/docs/AutoHotkey.htm‖https://www.autohotkey.com/
+‖ai‖SI‖En‖AI‖
+‖ai/‖SI‖En‖Artificial Inteligence‖
+C‖ansi‖SI‖En‖ANSI‖
+*‖ansi/‖SI‖En‖American National Standards Institute‖https://en.wikipedia.org/wiki/American_National_Standards_Instit
+C‖api‖SI‖En‖API‖
+*‖api/‖CL‖En‖Application Programming Interface‖https://en.wikipedia.org/wiki/API
+C‖ar‖SI‖En‖AR‖
+*‖ar/‖SI‖En‖Augmented Reality‖
+C‖asci‖SI‖En‖ASCII‖
+*‖asci/‖CL‖En‖American Standard Code for Information Interchange‖
+C‖ascii‖SI‖En‖ASCII‖
+*‖ascii/‖SI‖En‖American Standard Code for Information Interchange‖https://en.wikipedia.org/wiki/ASCII
+C‖ato‖SI‖En‖ATO‖
+*C‖availability/‖SI‖En‖ability of a product to be in a state to perform a required function under given conditions at a given instant of time or over a given time interval assuming that the required external resources are provided.`n[SOURCE: IEC 62278:2002, 3.4]`n‖
+‖awg‖SI‖En‖AWG‖
+*‖awg/‖SI‖En‖American Wire Gauge‖
+‖b2b‖SI‖En‖B2B‖
+*‖b2b/‖SI‖En‖Business-to-Business‖
+C‖bios‖SI‖En‖BIOS‖
+*‖bios/‖SI‖En‖Basic Input/Output System‖https://en.wikipedia.org/wiki/BIOS
+C‖bom‖SI‖En‖BOM‖
+*‖bom/‖MSI‖En‖Bill of Materials¦Byte Order Mark‖
+‖bpmn‖SI‖En‖BPMN‖
+*‖bpmn/‖SI‖En‖Business Process Model and Notation‖https://en.wikipedia.org/wiki/Business_Process_Model_and_Notation
+C‖cad‖SI‖En‖CAD‖
+*‖cad/‖CL‖En‖Computer Aided Design‖https://en.wikipedia.org/wiki/Computer-aided_design
+C‖cam‖SI‖En‖CAM‖
+*‖cam/‖SI‖En‖Computer Aided Manufacturing‖https://en.wikipedia.org/wiki/Computer-aided_manufacturing
+*‖can	‖SI‖En‖CAN‖
+*‖can/‖CL‖En‖Controller Area Network‖https://en.wikipedia.org/wiki/CAN_bus
+C‖cat‖SI‖En‖CAT‖
+*‖cat/‖CL‖En‖Computer Assisted Translation‖https://en.wikipedia.org/wiki/Computer-assisted_translation
+C‖ccms‖SI‖En‖CCMS‖
+*‖ccms/‖SI‖En‖Component Content Management System‖
+C‖cctv‖CL‖En‖CCTV‖
+*‖cctv/‖CL‖En‖Closed-Circuit Television‖
+‖ce‖SI‖En‖CE‖
+*‖ce/‖MSI‖En‖Conformité Européenne¦The CE mark indicates that the product may be sold freely in any part of the European Economic Area, regardless of its country of origin.‖
+*‖ce/‖MSI‖En‖Conformité Européenne¦The CE mark indicates that the product may be sold freely in any part of the European Economic Area, regardless of its country of origin.¦Znak CE wskazuje, że produkt może zostać wprowadzony do obrotu w każdym z państw europejskiej  wspólnoty gospodarczej, bez względu na jego kraj pochodzenia.‖
+C‖ceo‖SI‖En‖CEO‖
+*‖ceo/‖CL‖En‖Chief Executive Officer‖
+C‖cfo‖SI‖En‖CFO‖
+*‖cfo/‖SI‖En‖Chief Financial Officer‖
+‖cgi‖SI‖En‖CGI‖
+*‖cgi/‖SI‖En‖Computer-Generated Imagery‖
+‖ci‖SI‖Dis‖CI‖
+*‖ci/‖SI‖En‖Continuous Integration‖
+*‖ci`t‖SI‖En‖CI‖
+‖cli‖SI‖En‖CLI‖
+*‖cli/‖SI‖En‖Command Line Interface‖
+C‖cms‖SI‖En‖CMS‖
+*‖cms/‖SI‖En‖Content Management System‖
+C‖com‖SI‖Dis‖COM‖
+*C‖com	‖SI‖En‖COM‖
+*‖com/‖MCL‖En‖a serial port interface on IBM PC-compatible computers¦Component Object Model, a Microsoft software interface technology‖https://en.wikipedia.org/wiki/Com
+C‖cop‖SI‖En‖CoP‖
+*‖cop/‖CL‖En‖Code of Practice‖
+C‖cot‖SI‖En‖CoT‖
+*‖cot/‖SI‖En‖Clearance of Track‖
+C‖cots‖SI‖En‖COTS‖
+*‖cots/‖CL‖En‖Commercial Off-The-Shelf‖
+‖covid‖MSI‖En‖COVID-19¦👑🦠‖U+1F451 | U+83CC
+*‖covid/‖CL‖En‖severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2)‖
+C‖crc‖SI‖En‖CRC‖
+*‖crc/‖SI‖En‖Cyclic Redundancy Check‖
+C‖crm‖SI‖En‖CRM‖
+*‖crm/‖SI‖En‖Customer Relationship Management‖
+C‖cso‖SI‖En‖CSO‖
+*‖cso/‖SI‖En‖Chief Sales Officer‖
+C‖cv‖SI‖En‖CV‖
+‖cv/‖SI‖En‖Curriculum Vitae‖course of life
+C‖dc‖SI‖En‖DC‖
+*‖dc/‖CL‖En‖Direct Current‖
+C‖ddns‖SI‖En‖DDNS‖
+*‖ddns/‖CL‖En‖Dynamic DNS‖https://en.wikipedia.org/wiki/Dynamic_DNS
+‖ddos‖SI‖En‖DDoS‖
+*‖ddos/‖SI‖En‖Distributed Denial of Service‖
+‖dftba‖SI‖En‖DFTBA‖
+*‖dftba/‖SI‖En‖Don't Forget To Be Awsome‖
+C‖dhcp‖SI‖En‖DHCP‖
+*‖dhcp/‖SI‖En‖Dynamic Host Configuration Protocol‖https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protoco
+C‖din‖SI‖En‖DIN‖
+C‖dita‖SI‖En‖DITA‖
+*‖dita/‖CL‖En‖Darwin Information Typing Architecture‖https://en.wikipedia.org/wiki/Darwin_Information_Typing_Architec
+‖diy‖SI‖En‖DIY‖
+*‖diy/‖SI‖En‖Do It Yourself‖
+‖dmu‖SI‖En‖DMU‖
+*‖dmu/‖SI‖En‖Diesel Multiple Unit‖
+‖dna‖SI‖En‖DNA‖
+*‖dna/‖SI‖En‖deoxyribonucleic acid‖
+C‖dnd‖SI‖En‖D&D‖
+*‖dnd/‖SI‖En‖Drag&Drop‖
+C‖dns‖SI‖En‖DNS‖
+‖dns/‖SI‖En‖Domain Name System‖https://en.wikipedia.org/wiki/Domain_Name_System
+*‖doors/‖SI‖En‖ Dynamic Object Oriented Requirements System‖https://www.ibm.com/pl-pl/products/requirements-management
+‖dos‖SI‖En‖DoS‖
+*‖dos/‖SI‖En‖Denial of Service‖
+‖drm‖CL‖En‖DRM‖
+*‖drm/‖CL‖En‖Digital Right Management‖
+C‖dsl‖SI‖En‖DSL‖
+*‖dsl/‖SI‖En‖Digital Subscriber Line‖https://en.wikipedia.org/wiki/Digital_subscriber_line
+C‖dslr‖SI‖En‖DSLR‖
+*‖dslr/‖SI‖En‖Digital Single-Lens Reflex camera‖https://en.wikipedia.org/wiki/Digital_single-lens_reflex_camera
+C‖dvd‖SI‖En‖DVD‖
+*‖dvd/‖SI‖En‖Digital Versatile Disc‖https://en.wikipedia.org/wiki/DVD
+C‖dwg‖SI‖En‖DWG‖
+*‖dwg/‖SI‖En‖Drawings binary file format‖https://en.wikipedia.org/wiki/.dwg
+C‖dxf‖SI‖En‖DXF‖
+*‖dxf/‖SI‖En‖Drawing Exchange Format‖
+C‖ebit‖SI‖En‖EBIT‖
+*‖ebit/‖SI‖En‖Earnings Before Interest and Taxes‖
+C‖ebitda‖SI‖En‖EBITDA‖
+*‖ebitda/‖SI‖En‖Earnings before interest, taxes, depreciation and amortization‖https://en.wikipedia.org/wiki/Earnings_before_interest,_taxes,_d
+‖ecm‖SI‖En‖ECM‖
+*C‖ecm/‖SI‖En‖Enterprise Content Management‖
+*‖eg/‖SI‖En‖exempli gratia‖
+C‖ei‖SI‖En‖EI‖
+*‖ei/‖CL‖En‖Emotional Intelligence‖
+C‖emc‖SI‖En‖EMC‖
+*‖emc/‖CL‖En‖Electro-Magnetic Compatibility‖
+‖emea‖SI‖En‖EMEA‖
+‖emea/‖SI‖En‖Europe, the Middle East and Africa‖
+C‖emf‖SI‖En‖EMF‖
+*‖emf/‖CL‖En‖Enhanced Metafile‖https://en.wikipedia.org/wiki/Windows_Metafile#EMF
+C‖emi‖SI‖En‖EMI‖
+*‖emi/‖CL‖En‖Electromagnetic Interference‖
+C‖ems‖SI‖En‖EMS‖
+*‖ems/‖CL‖En‖Electronics Manufacturing Services‖
+‖emu‖SI‖En‖EMU‖
+*‖emu/‖SI‖En‖Electric Multiple Unit‖
+C‖eol‖SI‖En‖EOL‖
+*‖eol/‖SI‖En‖End of Life‖
+C‖eq‖SI‖En‖EQ ‖
+*‖eq/‖CL‖En‖Emotional Quotient‖
+C‖era‖SI‖En‖ERA‖
+*‖era/‖CL‖En‖European Railway Agency‖
+C‖ere‖SI‖En‖ERE‖
+*‖ere/‖CL‖En‖Explicit Risk Estimation‖
+C‖erp‖SI‖En‖ERP‖
+*‖erp/‖CL‖En‖Enterprise Resource Planning‖
+C‖ertms‖SI‖En‖ERTMS‖
+*‖ertms/‖CL‖En‖European Rail Traffic Management System‖
+C‖esd‖SI‖En‖ESD‖
+*C‖esd/‖SI‖En‖Electro Static Discharge‖
+C‖etcs‖SI‖En‖ETCS‖
+*‖etcs/‖SI‖En‖European Train Control System‖
+C‖eto‖SI‖En‖ETO‖
+*‖eto/‖CL‖En‖Engineer To Order‖
+C‖eu‖SI‖En‖EU‖
+*‖eu/‖SI‖En‖European Union‖
+C‖eut‖SI‖En‖EUT‖
+*‖eut/‖SI‖En‖Equipment Under Test‖
+C‖fai‖SI‖En‖FAI‖
+*‖fai/‖CL‖En‖First Article Inspection‖
+C‖faq‖SI‖En‖FAQ‖
+*‖faq/‖CL‖En‖Frequently Asked Questions‖
+C‖fat‖SI‖En‖FAT‖
+*‖fat/‖CL‖En‖Factory Acceptance Test‖
+‖fbx‖SI‖En‖FBX‖
+*‖fbx/‖SI‖En‖(Filmbox) is a proprietary file format (.fbx) developed by Kaydara and owned by Autodesk since 2006‖
+‖fido‖SI‖En‖FIDO‖
+*‖fido/‖MSI‖En‖Fast IDentity Online¦The FIDO Alliance is an open industry association launched in February 2013 whose stated mission is to develop and promote authentication standards that "help reduce the world’s over-reliance on passwords".‖https://en.wikipedia.org/wiki/FIDO_Alliance
+C‖fifa‖SI‖En‖FIFA‖
+*C‖fifa/‖MSI‖En‖Fédération Internationale de Football Association¦International Federation of Association Football‖
+C‖fmea‖SI‖En‖FMEA‖
+*‖fmea/‖CL‖En‖Failure Mode and Effects Analysis‖
+C‖fmeca‖SI‖En‖FMECA‖
+*‖fmeca/‖SI‖En‖Failure mode effects and criticality analysis‖
+C‖fo‖SI‖En‖FO‖
+*‖fo/‖SI‖En‖Fiber Optics‖
+C‖ga‖SI‖En‖GA‖Generic Application
+*‖ga/‖MSI‖En‖Generic Application¦generische Anwendung¦product independent of application, fulfilling predefined boundary conditions, interfaces and functionality (black box). Example: Examples point machines, axle counters, real-time operating systems, fail-safe computer platform without application software.¦SOURCE: IEC 60050-821:FDIS2016, 821-01-57‖
+C‖gdpr‖SI‖En‖GDPR‖
+*‖gdpr/‖SI‖En‖General Data Protection Regulation‖
+C‖gmt‖SI‖En‖GMT‖
+*‖gmt/‖MSI‖En‖Greenwich Mean Time¦Poland: GMT + 01:00¦Polska: GMT + 01:00‖https://en.wikipedia.org/wiki/Greenwich_Mean_Time
+C‖gnu‖SI‖En‖GNU‖
+*‖gnu/‖MCL‖En‖GNU's Not Unix!¦https://en.wikipedia.org/wiki/GNU‖https://en.wikipedia.org/wiki/GNU
+‖gpg‖SI‖En‖GPG‖https://en.wikipedia.org/wiki/One-time_password
+*‖gpg/‖SI‖En‖GNU Privacy Guard‖https://en.wikipedia.org/wiki/GNU_Privacy_Guard
+C‖gpl‖SI‖En‖GPL‖
+*‖gpl/‖MCL‖En‖General Public License¦https://en.wikipedia.org/wiki/GNU_General_Public_License‖https://en.wikipedia.org/wiki/GNU_General_Public_License
+C‖gps‖SI‖En‖GPS‖
+*‖gps/‖CL‖En‖Global Positioning System‖
+C‖gsm‖SI‖En‖GSM‖
+*‖gsm/‖CL‖En‖Global System for Mobile Communications‖
+C‖gui‖SI‖En‖GUI‖
+*‖gui/‖CL‖En‖Graphical User Interface‖
+C‖hart‖SI‖En‖HART‖
+*‖hart/‖CL‖En‖Highway Addressable Remote Transducer Protocol‖
+C‖hdmi‖SI‖En‖HDMI‖
+*‖hdmi/‖CL‖En‖High-Definition Multimedia Interface‖
+C‖html‖SI‖En‖HTML‖
+*‖html/‖SI‖En‖HyperText Markup Language‖
+C‖hvac‖CL‖En‖HVAC‖
+*‖hvac/‖CL‖En‖Heating Ventilation Air Conditioning‖
+C‖hw‖SI‖En‖HW‖
+*‖hw/‖SI‖En‖hardware‖
+‖iacs‖SI‖En‖IACS‖
+*‖iacs/‖SI‖En‖Industrial Automation and Control Systems‖IEC 62443-4-1
+C‖ic‖SI‖En‖IC‖
+*‖ic/‖CL‖En‖Interoperability Constituent‖
+C‖ide‖SI‖En‖IDE‖
+*‖ide/‖SI‖En‖Integrated Development Environment‖
+‖iot‖SI‖En‖IoT‖
+*‖iot/‖SI‖En‖Internet of Things‖
+C‖ip‖SI‖En‖IP‖
+*‖ip/‖MCL‖En‖IP Code, Ingress Protection code¦https://en.wikipedia.org/wiki/IP_Code‖
+C‖iq‖SI‖En‖IQ‖
+*‖iq/‖CL‖En‖Inteligence Quotient‖
+C‖iris‖SI‖En‖IRIS‖
+*‖iris/‖CL‖En‖International Railway Industry Standard for the evaluation of railway management systems‖
+C‖iso‖SI‖En‖ISO‖
+*‖iso/‖SI‖En‖International Standard Organisation‖
+C*‖javascript‖SI‖En‖JavaScript‖
+C‖kpi‖SI‖En‖KPI‖
+*‖kpi/‖CL‖En‖Key Performance Indicator‖
+C‖lad‖SI‖En‖LAD‖
+*‖lad/‖CL‖En‖Logistic and Administrative Delay‖
+C‖lan‖SI‖En‖LAN‖
+*‖lan/‖SI‖En‖Local Area Network‖
+*C‖latex‖SI‖En‖LaTeX‖
+‖lcd‖SI‖En‖LCD‖
+*‖lcd/‖SI‖En‖Liquid Cristal Display‖
+C‖led‖SI‖En‖LED‖
+*‖led/‖CL‖En‖Light Emitting Diode‖
+C‖lgbt‖SI‖En‖LGBT‖
+*‖lgbt/‖SI‖En‖Lesbian Gay Bisexual Transgender‖
+C‖llc‖CL‖En‖LLC‖
+*‖llc/‖CL‖En‖Life Cycle Cost‖
+C‖lms‖SI‖En‖LMS‖
+*‖lms/‖SI‖En‖Learning Management System‖https://en.wikipedia.org/wiki/Learning_management_system
+C‖lop‖SI‖En‖LOP‖
+*‖lop/‖CL‖En‖List of Open Points‖
+C‖lte‖SI‖En‖LTE‖
+*‖lte/‖SI‖En‖Long-Term Evolution‖
+C‖mac‖SI‖En‖MAC‖
+*‖mac/‖SI‖En‖Media Access control Address ‖https://en.wikipedia.org/wiki/MAC_address
+C‖mba‖SI‖En‖MBA‖
+*‖mba/‖SI‖En‖Master of Business Administration‖
+C‖md5‖SI‖En‖MD5‖
+*‖md5/‖MSI‖En‖Message-Digest Algorithm¦hash function producing a 128-bit hash value‖https://en.wikipedia.org/wiki/MD5
+C‖mdt‖SI‖En‖MDT‖
+*‖mdt/‖CL‖En‖Mean Down Time‖
+C‖mfa‖SI‖En‖MFA‖
+*‖mfa/‖SI‖En‖Multi Factor Authentication‖
+‖mom‖SI‖En‖MoM‖
+*‖mom/‖SI‖En‖Minutes of Meeting‖
+C‖mtbf‖SI‖En‖MTBF‖
+*‖mtbf/‖MSI‖En‖Mean Time Between Failures¦the predicted elapsed time between inherent failures of a mechanical or electronic system, during normal system operation. MTBF can be calculated as the arithmetic mean (average) time between failures of a system. The term is used for repairable systems, while mean time to failure (MTTF) denotes the expected time to failure for a non-repairable system.`n[SOURCE: https://en.wikipedia.org/wiki/Mean_time_between_failures]`n‖
+C‖mtbm‖SI‖En‖MTBM‖
+*‖mtbm/‖CL‖En‖Mean Time Between Maintainances‖
+*‖mtm‖SI‖En‖MTM‖
+C‖mto‖SI‖En‖MTO‖
+*‖mto/‖CL‖En‖Make To Order‖
+C‖mttf‖SI‖En‖MTTF‖
+*‖mttf/‖MSI‖En‖Mean Time To Failure¦the expected time to failure for a non-repairable system.`n[SOURCE: https://en.wikipedia.org/wiki/Mean_time_between_failures]`n‖
+*‖mttm‖SI‖En‖MTTM‖
+*‖mttm/‖SI‖En‖Mean Time To Maintain‖
+C‖mttr‖SI‖En‖MTTR‖
+*‖mttr/‖CL‖En‖Mean Time To Restore‖
+C‖mtu‖SI‖En‖MTU‖
+*‖mtu/‖SI‖En‖Maximum Transmission Unit‖https://en.wikipedia.org/wiki/Maximum_transmission_unit
+C‖mut‖SI‖En‖MUT‖
+*‖mut/‖CL‖En‖Mean Up Time‖
+*‖nas	‖SI‖En‖NAS‖
+*‖nas/‖SI‖En‖Network Attached Storage‖
+‖nato‖SI‖En‖NATO‖
+*‖nato/‖SI‖En‖North Atlantic Treaty Organization‖
+C‖ncr‖SI‖En‖NCR‖
+*‖ncr/‖CL‖En‖Non Conformance Report‖
+C‖nda‖SI‖En‖NDA‖
+*‖nda/‖CL‖En‖Non-Disclosure Agreement‖
+‖nfc‖SI‖En‖NFC‖
+*‖nfc/‖SI‖En‖Near-Field Communication‖https://en.wikipedia.org/wiki/Near-field_communication
+*‖nic	‖SI‖En‖NIC‖
+*‖nic/‖SI‖En‖Network Interface Card‖
+‖nobo‖SI‖En‖NoBo‖
+*‖nobo/‖SI‖En‖Notified Body‖
+‖ntp‖SI‖En‖NTP‖
+*‖ntp/‖SI‖En‖Network Time Protocol‖https://en.wikipedia.org/wiki/Network_Time_Protocol
+‖ocr‖SI‖En‖OCR‖
+‖ocr/‖SI‖En‖Optical Character Recognition‖
+C‖oem‖SI‖En‖OEM‖
+*‖oem/‖SI‖En‖Original Equipment Manufacturer‖
+‖ohsas‖SI‖En‖OHSAS‖
+*‖ohsas/‖SI‖En‖Occupational Health and Safety Assessment Series‖https://pl.wikipedia.org/wiki/OHSAS_18001
+‖otp‖SI‖En‖OTP‖
+*‖otp/‖MSI‖En‖One-Time Password¦is a password that is valid for only one login session or transaction, on a computer system or other digital device‖https://en.wikipedia.org/wiki/One-time_password
+‖pbs‖SI‖En‖PBS‖
+*‖pbs/‖SI‖En‖Product Breakdown Structure‖
+C‖pcb‖SI‖En‖PCB‖
+*‖pcb/‖CL‖En‖Printed Circuit Board‖
+C‖pcn‖SI‖En‖PCN‖
+*‖pcn/‖SI‖En‖Product Change Notification‖
+?‖pgp‖SI‖En‖PGP‖
+*‖pgp/‖SI‖En‖Pretty Good Privacy‖https://en.wikipedia.org/wiki/Pretty_Good_Privacy
+C‖phd‖SI‖En‖PhD‖
+C‖phd/‖SI‖En‖philosophiae doctor‖
+C‖php‖SI‖En‖PHP‖
+*‖php/‖SI‖En‖Hypertext Preprocessor‖
+‖pin‖SI‖En‖PIN‖
+*‖pin/‖SI‖En‖Personal Identification Number‖
+C‖pit‖SI‖En‖PIT‖
+*‖pit/‖SI‖En‖Personal Income Tax‖
+C‖plc‖SI‖En‖PLC‖
+*‖plc/‖SI‖En‖Programmable Logic Controller‖https://en.wikipedia.org/wiki/Programmable_logic_controller
+C‖plm‖SI‖En‖PLM‖
+*‖plm/‖CL‖En‖Product Lifecycle Management‖
+*‖png/‖SI‖En‖Portable Network Graphics‖
+‖pnp‖SI‖En‖PnP‖
+*‖pnp/‖MSI‖En‖device with a specification that facilitates the discovery of a hardware component in a system without the need for physical device configuration or user intervention in resolving resource conflicts¦Plug and Play‖https://en.wikipedia.org/wiki/Plug_and_play
+C‖poc‖SI‖En‖PoC‖
+*‖poc/‖CL‖En‖Proof of Concept‖
+C‖poe‖SI‖En‖PoE‖
+*‖poe/‖SI‖En‖Power over Ethernet‖
+‖pov‖SI‖En‖POV‖
+*‖pov/‖SI‖En‖Point of View‖
+‖pp‖SI‖En‖PP‖
+*‖pp/‖SI‖En‖Pair Programming‖
+C‖ppi‖SI‖En‖PPI‖
+*‖ppi/‖SI‖En‖Point Per Inch‖
+‖puk‖SI‖En‖PUK‖
+*‖puk/‖SI‖En‖PIN Unlock Key‖
+C‖pwm‖SI‖En‖PWM‖
+*‖PWM/‖SI‖En‖Pulse-Width Modulation‖
+C‖qna‖SI‖En‖Q&A‖
+*‖qna/‖CL‖En‖Questions and Answers‖
+C‖qr‖SI‖En‖QR code‖
+*‖qr/‖SI‖En‖Quick Response code‖
+C‖qrams‖SI‖En‖QRAMS‖
+*‖qrams/‖CL‖En‖Quality, Reliability, Availability, Maintainability, Safety‖
+*‖r/‖SI‖En‖Reliability‖
+C‖rac‖SI‖En‖RAC‖
+*‖rac/‖CL‖En‖Risk Acceptance Criteria‖
+C‖ral‖SI‖En‖RAL‖
+*‖ral/‖SI‖En‖Reichs-Ausschuß für Lieferbedingungen (National Committee for Delivery and Quality Assurance)‖
+C‖ram‖SI‖En‖RAM‖
+*‖ram/‖CL‖En‖Reliability, Availability, Maintainability‖
+C‖rams‖SI‖En‖RAMS‖
+*‖rams/‖CL‖En‖Reliability, Availability, Maintainability and Safety‖
+C‖rap‖SI‖En‖RAP‖
+*‖rap/‖CL‖En‖Risk Acceptance Principle‖
+‖rcd‖SI‖En‖RCD‖
+*‖rcd/‖SI‖En‖Residual Current Device‖
+C‖rfid‖SI‖En‖RFID‖
+*‖rfid/‖SI‖En‖Radio Frequency Identification‖
+C‖rgb‖SI‖En‖RGB‖
+*‖rgb/‖SI‖En‖Red Green Blue‖https://en.wikipedia.org/wiki/RGB_color_model
+C‖rma‖SI‖En‖RMA‖
+*‖rma/‖CL‖En‖Return Merchandise Authorization‖
+C‖rms‖SI‖En‖RMS‖
+*‖rms/‖CL‖En‖Root Mean Square‖
+C‖roce‖SI‖En‖ROCE‖
+C1*‖roce/‖SI‖En‖Return on Capital Employed‖https://en.wikipedia.org/wiki/Return_on_capital_employed
+C‖rohs‖SI‖En‖RoHS‖
+*‖rohs/‖SI‖En‖Restriction of Hazardous Substances Directive‖https://en.wikipedia.org/wiki/Restriction_of_Hazardous_Substance
+C‖rpa‖SI‖En‖RPA‖
+*‖rpa/‖SI‖En‖Robotics Process Automation‖
+C‖rpu‖SI‖En‖RPU‖
+*‖rpu/‖SI‖En‖Reinforced Polyurethane Hose‖"peszel"
+‖rsa‖SI‖En‖RSA‖
+*‖rsa/‖MSI‖En‖Rivest–Shamir–Adleman¦a public-key cryptosystem that is widely used for secure data transmission‖https://en.wikipedia.org/wiki/RSA_(cryptosystem)
+C‖rtc‖SI‖En‖RTC‖
+*‖rtc/‖SI‖En‖Real Time Clock‖
+*C‖sa	‖SI‖En‖SA‖
+*‖sa/‖CL‖En‖Specific Application‖
+C‖saas‖SI‖En‖SaaS‖
+‖scada‖SI‖En‖SCADA‖
+*‖scada/‖SI‖En‖Supervisory Control and Data Acquisition‖https://en.wikipedia.org/wiki/SCADA
+‖scm‖SI‖En‖SCM‖
+*‖scm/‖SI‖En‖Supply Chain Management‖
+C‖scorm‖SI‖En‖SCORM‖
+*‖scorm/‖SI‖En‖Sharable Content Object Reference Model‖https://en.wikipedia.org/wiki/Sharable_Content_Object_Reference_
+‖sdk‖SI‖En‖SDK‖
+*‖sdk/‖SI‖En‖Software Development Kit‖https://en.wikipedia.org/wiki/Software_development_kit
+C‖seo‖SI‖En‖SEO‖
+*‖seo/‖SI‖En‖Search Engine Optimization‖
+C‖sil‖MSI‖En‖SIL¦number which indicates the required degree of confidence that a system will meet its specified safety functions with respect to systematic failures`n[SOURCE: IEC 62280:2014, 3.1.50]‖
+*‖sil/‖MSI‖En‖Safety Integrity Level¦poziom nienaruszalności bezpieczeństwa funkcjonalnego‖
+C‖sla‖SI‖En‖SLA‖
+*‖sla/‖CL‖En‖Service-Level Agreement‖
+‖smime‖SI‖En‖S/MIME‖
+*‖smime/‖SI‖En‖Secure/Multipurpose Internet Mail Extensions‖https://en.wikipedia.org/wiki/S/MIME
+C‖sms‖SI‖En‖SMS‖
+*‖sms/‖CL‖En‖Short Message Service‖
+C‖snmp‖SI‖En‖SNMP‖
+*‖snmp/‖SI‖En‖Simple Network Management Protocol‖https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol
+‖spd‖SI‖En‖SPD‖
+*‖spd/‖SI‖En‖Surge Protection Device‖
+C‖sql‖SI‖En‖SQL‖
+*‖sql/‖CL‖En‖Structured Query Language‖
+C‖srac‖SI‖En‖SRAC‖
+*‖srac/‖MCL‖En‖Safety Related Application Condition¦Those conditions which need to be met in order for a system to be safely integrated and safely operated. Note 1 to entry: Application conditions can for example be: operational restrictions (e.g. speed limit, maximum duration of use), operational rules, maintenance restrictions (e.g. requested maintenance intervals) or environmental conditions.‖Source: 3.75 → EN 50126-1:2017 (E)
+‖ssh‖SI‖En‖SSH‖
+‖ssh/‖MSI‖En‖Secure Shell¦a cryptographic network protocol for operating network services securely over an unsecured network‖
+‖ssl‖SI‖En‖SSL‖
+*‖ssl/‖SI‖En‖Secure Sockets Layer‖
+‖stem‖SI‖En‖STEM‖
+*‖stem/‖SI‖En‖Science Technology Engineering and Mathematics‖
+C‖suv‖SI‖En‖SUV‖
+*‖suv/‖SI‖En‖Sport Utility Vehicle‖
+C‖sw‖SI‖En‖SW‖
+*‖sw/‖SI‖En‖software‖
+C‖swift‖SI‖En‖SWIFT‖
+*C‖swift/‖SI‖En‖Society for Worldwide Interbank Financial Telecommunication‖
+C‖tco‖SI‖En‖TCO‖
+*‖tco/‖SI‖En‖Total Cost of Ownership‖
+‖tdd‖SI‖En‖TDD‖
+*‖tdd/‖SI‖En‖Test Driven Development‖
+‖ted‖SI‖En‖TED‖
+*‖ted/‖SI‖En‖Technology Entertainment Design‖
+‖tedx‖SI‖En‖TEDx‖
+*‖tedx/‖SI‖En‖independent event similar to TED presentation‖
+C‖tffr‖SI‖En‖TFFR‖
+*‖tffr/‖CL‖En‖Tolerable Functional Failure Rate‖
+C‖thr‖SI‖En‖THR‖
+*‖thr/‖MSI‖En‖Tolerable Hazard Rate¦współczynnik tolerowanego zagrożenia‖
+‖tls‖SI‖En‖TLS‖
+*‖tls/‖SI‖En‖Transport Layer Security‖https://en.wikipedia.org/wiki/Transport_Layer_Security#SSL_1.0,_
+‖toc‖SI‖En‖TOC‖
+*‖toc/‖SI‖En‖Table of Content‖
+‖totp‖SI‖En‖TOTP‖
+*‖totp/‖SI‖En‖Time-based One-time Password‖https://en.wikipedia.org/wiki/Time-based_One-Time_Password
+C‖tsi‖SI‖En‖TSI‖
+*‖tsi/‖CL‖En‖Technical Specifications for Interoperability‖
+‖u2f‖SI‖En‖U2F‖
+*‖u2f/‖SI‖En‖Universal 2nd Factor‖https://en.wikipedia.org/wiki/Universal_2nd_Factor
+C‖uefa‖SI‖En‖UEFA‖
+*C‖uefa/‖SI‖En‖Union of European Football Associations‖
+C‖uefi‖SI‖En‖UEFI‖
+*‖uefi/‖SI‖En‖Unified Extensible Firmware Interface‖https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interf
+C‖ui‖SI‖En‖UI‖
+*‖ui/‖CL‖En‖User Interface‖
+C‖uic‖SI‖En‖UIC‖
+*‖uic/‖MCL‖En‖International Union of Railways¦French: Union internationale des chemins de fer‖https://uic.org/
+C‖ups‖SI‖En‖UPS‖
+*‖ups/‖CL‖En‖Uninterruptable Power Supply‖
+C‖url‖SI‖En‖URL‖
+*‖url/‖SI‖En‖Uniform Resource Locator‖https://en.wikipedia.org/wiki/URL
+C‖usb‖SI‖En‖USB‖
+*‖usb/‖CL‖En‖Universal Serial Bus‖
+‖usp‖SI‖En‖USP‖
+*‖usp/‖SI‖En‖Unique Selling Point‖
+‖utc‖SI‖En‖UTC‖https://en.wikipedia.org/wiki/Network_Time_Protocol
+*‖utc/‖SI‖En‖Coordinated Universal Time‖https://en.wikipedia.org/wiki/Network_Time_Protocol
+C‖utf‖SI‖En‖UTF‖
+*‖utf/‖CL‖En‖Unicode Transformation Format‖
+C‖uv‖SI‖En‖UV‖
+*‖uv/‖SI‖En‖Ultra Violet‖
+C‖ux‖SI‖En‖UX‖
+*‖ux/‖CL‖En‖User Experience‖
+C‖vat‖SI‖En‖VAT‖
+*‖vat/‖CL‖En‖Value Added Tax‖
+C‖vba‖SI‖En‖VBA‖
+*‖vba/‖CL‖En‖Visual Basic for Applications‖
+‖vip‖SI‖En‖VIP‖
+*‖vip/‖MSI‖En‖Very Important Person¦Very Individual Person‖
+C‖vlan‖SI‖En‖VLAN‖
+*‖vlan/‖SI‖En‖Virtual LAN‖https://en.wikipedia.org/wiki/Virtual_LAN
+C‖voip‖CL‖En‖VoIP‖
+*‖voip/‖CL‖En‖Voice over Internet Protocol‖
+C‖vpn‖SI‖En‖VPN‖
+*‖vpn/‖CL‖En‖Virtual Private Network‖
+C‖vps‖SI‖En‖VPS‖
+*‖vps/‖SI‖En‖Virtual Private Server‖
+C‖vr‖CL‖En‖VR‖
+*‖vr/‖CL‖En‖Virtual Reality‖
+‖vsc‖SI‖En‖VSC‖Visual Studio Code
+*‖vsc/‖SI‖En‖Visual Studio Code‖Visual Studio Code
+‖wcag‖SI‖En‖WCAG‖
+*‖wcag/‖SI‖En‖Web Content Accessibility Guidelines‖https://en.wikipedia.org/wiki/Web_Content_Accessibility_Guidelines
+C‖wmf‖SI‖En‖WMF‖
+*‖wmf/‖CL‖En‖Windows Metafile‖https://en.wikipedia.org/wiki/Windows_Metafile#EMF
+C‖wol‖SI‖En‖WoL‖
+*‖wol/‖SI‖En‖Wake-on-LAN‖
+C‖www‖SI‖En‖WWW‖
+*‖www/‖SI‖En‖World Wide Web‖
+C‖wysiwyg‖SI‖En‖WYSIWYG‖
+*‖wysiwyg/‖SI‖En‖What You See Is What You Get‖
