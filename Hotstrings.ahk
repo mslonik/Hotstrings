@@ -13993,19 +13993,17 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 {
 	global	;assume-global mode
 	Critical, On
-	local	MenuX := 0, MenuY := 0, v_MouseX := 0, v_MouseY := 0, a_MCSIMenuPos := [],	TriggerChar := "", UserInput := "", ThisHotkey := A_ThisHotkey, WhatPartTriggered := "", LengthToBeCut := 0
+	local	MenuX := 0, MenuY := 0, v_MouseX := 0, v_MouseY := 0, a_MCSIMenuPos := [],	TriggerChar := "", UserInput := "", ThisHotkey := A_ThisHotkey, WhatPartTriggered := "", LengthToBeCut := 0, EndChar := A_EndChar
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
 
 	v_InputH.VisibleText 	:= false
-,	v_MenuMax				:= 0	;global variable used in F_HMenuAHK
+,	v_Options 			:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
+,	v_EndChar 			:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
+	if (InStr(v_Options, "?"))
+		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString)
+
+	v_MenuMax				:= 0	;global variable used in F_HMenuAHK
 ,	TextOptions 			:= F_ReplaceAHKconstants(TextOptions)
-	if (InStr(ThisHotkey, "?"))
-	{
-		WhatPartTriggered 	:= SubStr(ThisHotkey, InStr(ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
-,		LengthToBeCut 		:= StrLen(WhatPartTriggered)
-,		v_InputString		:= SubStr(v_InputString, -LengthToBeCut)
-	}
-	F_DeterminePartStrings(TextOptions)
 	F_DestroyTriggerstringTips(ini_TTCn)
 	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop 
 		SoundBeep, % ini_MHSF, % ini_MHSD
@@ -14081,17 +14079,17 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 {
 	global	;assume-global mode of operation
 	Critical, On
-	local	ThisHotkey := A_ThisHotkey, EndChar := A_EndChar, temp := 0, FirstPart := "", SecondPart := "", Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1)
-
-	v_UndoHotstring := ReplacementString
-	v_Options := F_DetermineOptions(Triggerstring)
-	v_EndChar := F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
-	if (InStr(v_Options, "?"))
-		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString)
+	local	ThisHotkey := A_ThisHotkey, EndChar := A_EndChar, temp := 0, FirstPart := "", SecondPart := ""
 
 	F_DestroyTriggerstringTips(ini_TTCn)
-	F_DeterminePartStrings(ReplacementString)
-	ReplacementString 	:= F_ReplaceAHKconstants(ReplacementString)
+	v_UndoHotstring 	:= ReplacementString
+,	v_Options 		:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
+,	v_EndChar 		:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
+	if (InStr(v_Options, "?"))
+		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString)
+	
+	v_UndoTriggerstring := v_InputString
+,	ReplacementString 	:= F_ReplaceAHKconstants(ReplacementString)
 ,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options)
 ,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
 	SetKeyDelay, -1, -1	;Delay = -1, PressDuration = -1, -1: no delay at all; this can be necessary if SendInput is reduced to SendEvent (in case low level input hook is active in another script)
@@ -14184,9 +14182,7 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 	v_CntCumGain += temp
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-	v_UndoTriggerstring := v_InputString
-,	v_InputString 		:= ""
-	; Hotstring("Reset")	;By default, non-auto-replace hotstrings only remove the trigger text from the buffer. To reset it completely, you must use the Z option or Hotstring("Reset").https://www.autohotkey.com/boards/viewtopic.php?f=76&t=108988&p=484841#p484841
+	v_InputString 		:= ""
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14194,16 +14190,13 @@ F_HOF_MCL(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipb
 {
 	global	;assume-global mode
 	Critical, On
-	local	MenuX := 0, MenuY := 0, v_MouseX := 0, v_MouseY := 0, a_MCLIMenuPos := [], ThisHotkey := A_ThisHotkey, WhatPartTriggered := "", LengthToBeCut := 0
+	local	MenuX := 0, MenuY := 0, v_MouseX := 0, v_MouseY := 0, a_MCLIMenuPos := [], ThisHotkey := A_ThisHotkey, WhatPartTriggered := "", LengthToBeCut := 0, EndChar := A_EndChar
 
-	v_InputH.VisibleText := false
-	if (InStr(ThisHotkey, "?"))
-	{
-		WhatPartTriggered 	:= SubStr(ThisHotkey, InStr(ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
-,		LengthToBeCut 		:= StrLen(WhatPartTriggered)
-,		v_InputString		:= SubStr(v_InputString, -LengthToBeCut)
-	}
-	F_DeterminePartStrings(TextOptions)
+	v_InputH.VisibleText 	:= false
+,	v_Options 			:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
+,	v_EndChar 			:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
+	if (InStr(v_Options, "?"))
+		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString)
 	F_DestroyTriggerstringTips(ini_TTCn)
 	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop
 		SoundBeep, % ini_MHSF, % ini_MHSD
