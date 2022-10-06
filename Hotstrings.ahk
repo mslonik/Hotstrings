@@ -14098,6 +14098,23 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 			return
 		Case "S2":
 			SendLevel, 2
+			if (ReplacementString = "{NumLock}") or (ReplacementString = "{ScrollLock}") or (ReplacementString = "{CapsLock}")
+				Switch ReplacementString
+					{
+						Case "{NumLock}":
+							Send, {NumLock}
+     						SendLevel, 0
+							return
+						Case "{ScrollLock}":
+							Send, {ScrollLock}
+							SendLevel, 0
+							return
+						Case "{CapsLock}":
+							SetStoreCapslockMode, Off	;it doesn't work on all keyboards!
+							Send, {CapsLock}
+							SendLevel, 0
+							return
+					}
 			if (Oflag = false)
 				SendInput, % ReplacementString . A_EndChar
 			else
