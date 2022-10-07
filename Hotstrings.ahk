@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -8568,7 +8568,7 @@ F_AddHotstring()
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . NewOptions . ":" . vTriggerstring . "," . A_Space . "func(""SimpleOutput"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . v_EnDis . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
+					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
 		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
@@ -8577,7 +8577,7 @@ F_AddHotstring()
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(F_HOF_" . SendFun . ").bind(" . vHotstring . "," . A_Space . true . ")," . A_Space . v_EnDis . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
+					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
 	}
 	else
@@ -8589,7 +8589,7 @@ F_AddHotstring()
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_SimpleOutput"").bind(" . vHotstring . "," . A_Space . false . "," . A_Space . SendFun . ")," . A_Space . v_EnDis . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
+					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
 		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
@@ -8598,7 +8598,7 @@ F_AddHotstring()
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(F_HOF_" . SendFun . ").bind(" . vHotstring . "," . A_Space . false . ")," . A_Space . v_EnDis . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
+					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
 	}
 	; 5. Update global arrays
@@ -11590,7 +11590,7 @@ F_ToggleLibrary()	;load / unload d(t, o, h)
 	F_RefreshListOfLibraryTips()
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
-F_UnloadHotstringsFromFile(nameoffile)	
+F_UnloadHotstringsFromFile(nameoffile)
 {	
 	global ;assume-global mode of operation
 	local	v_TheWholeFile := "",	Options := "",	TriggerString := "", key := 0, value := ""
@@ -14000,7 +14000,7 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 ,	v_Options 			:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
 ,	v_EndChar 			:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
 	if (InStr(v_Options, "?"))
-		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString)
+		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
 
 	v_MenuMax				:= 0	;global variable used in F_HMenuAHK
 ,	TextOptions 			:= F_ReplaceAHKconstants(TextOptions)
@@ -14043,7 +14043,7 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_DetermineOptions(Triggerstring)
+F_DetermineOptions(Triggerstring)	;
 {
 	global	;assume-global mode of operation
 	local	key := 0, value := "", Options := ""
@@ -14065,10 +14065,12 @@ F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
 		return EndChar
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-ProcessQuestionMark(v_Options, ThisHotkey, v_InputString)
-{
+ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
+{ ;https://www.autohotkey.com/docs/commands/Hotstring.htm: When a hotstring is first created -- either by the Hotstring function or a double-colon label in the script -- its trigger string and sequence of option characters becomes the permanent name of that hotstring as reflected by A_ThisHotkey. This name does not change even if the Hotstring function later accesses the hotstring with different option characters. Therefore it is imperative to store otpions in a separate variable / array.
 	local	WhatPartTriggered := "", LengthToBeCut := 0, ShorterInputString := ""
 
+	if (!InStr(v_Options, "*"))
+		v_InputString	:= SubStr(v_InputString, 1, -1)
 	WhatPartTriggered 	:= SubStr(ThisHotkey, InStr(ThisHotkey, ":", , 2) + 1)	
 ,	LengthToBeCut 		:= StrLen(WhatPartTriggered)
 ,	ShorterInputString	:= SubStr(v_InputString, -LengthToBeCut + 1)
@@ -14086,7 +14088,7 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 ,	v_Options 		:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
 ,	v_EndChar 		:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
 	if (InStr(v_Options, "?"))
-		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString)
+		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
 	
 	v_UndoTriggerstring := v_InputString
 ,	ReplacementString 	:= F_ReplaceAHKconstants(ReplacementString)
@@ -14196,7 +14198,7 @@ F_HOF_MCL(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipb
 ,	v_Options 			:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
 ,	v_EndChar 			:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
 	if (InStr(v_Options, "?"))
-		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString)
+		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
 	F_DestroyTriggerstringTips(ini_TTCn)
 	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop
 		SoundBeep, % ini_MHSF, % ini_MHSD
@@ -14313,26 +14315,6 @@ F_DetermineGain2(Triggerstring, Hotstring)
 	}
 	LenHots += StrLen(Hotstring) + CntUpper
      return, LenHots - LenTrig
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_DeterminePartStrings(ReplacementString)
-{
-	global	;assume-global mode of operation
-	local	ThisHotkey := A_ThisHotkey	;This value will change if the current thread is interrupted by another hotkey, so be sure to copy it into another variable immediately if you need the original value for later use in a subroutine.
-, 			Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", false, 1, 2) + 1)
-,			key := 0, value := ""
-
-	for key, value in a_Triggerstring
-		if (Triggerstring = a_Triggerstring[key])
-			{
-				v_Options := a_TriggerOptions[key]
-				break
-			}
-	v_UndoHotstring := ReplacementString
-	if (InStr(v_Options, "*"))
-		v_EndChar  := SubStr(ThisHotkey, 0) ;extracts the last character; This form is important to run correctly F_Undo 
-	else
-		v_EndChar  := A_EndChar
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_FollowCaseConformity(ReplacementString, InputString, Options)
