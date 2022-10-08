@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -2641,11 +2641,15 @@ F_TraySuspendHotkeys()
 	{
 		Menu, Tray, 		Check, 	% TransA["Suspend Hotstrings"] . "`tF10"
 		Menu, AppSubmenu, 	Check, 	% TransA["Suspend Hotstrings"] . "`tF10"
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now SUSPENDED."]
+			. "`n`n" . TransA["It means hotstring definitions will be not triggered, but triggerstring tips (if enabled) still will be visible."]
 	}
 	else
 	{
 		Menu, Tray, 		UnCheck, 	% TransA["Suspend Hotstrings"] . "`tF10"
 		Menu, AppSubmenu,	UnCheck, 	% TransA["Suspend Hotstrings"] . "`tF10"
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now ACTIVE."]
+			. "`n`n" . TransA["It means hotstring definitions will be triggered as usual."]
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11831,6 +11835,8 @@ Help: AutoHotkey Hotstrings reference guide					= Help: AutoHotkey Hotstrings re
 Help: Hotstrings application								= Help: Hotstrings application
 Hotstring 											= Hotstring
 Hotstring added to the file								= Hotstring added to the file
+Hotstring definitions are now ACTIVE.						= Hotstring definitions are now ACTIVE.
+Hotstring definitions are now SUSPENDED.					= Hotstring definitions are now SUSPENDED.
 Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv) = Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
 Hotstring menu styling									= Hotstring menu styling
 Hotstring was triggered! 								= Hotstring was triggered!
@@ -11879,6 +11885,8 @@ is added in section  [GraphicalUserInterface] of Config.ini		= is added in secti
 is empty at the moment.									= is empty at the moment.
 is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv? = is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?
 Introduction											= Introduction
+It means hotstring definitions will be not triggered, but triggerstring tips (if enabled) still will be visible. = It means hotstring definitions will be not triggered, but triggerstring tips (if enabled) still will be visible.
+It means hotstring definitions will be triggered as usual.		= It means hotstring definitions will be triggered as usual.
 Keyboard or mouse scrolling								= Keyboard or mouse scrolling
 Keyboard or mouse selection								= Keyboard or mouse selection
 \Languages\`nMind that Config.ini Language variable is equal to 	= \Languages\`nMind that Config.ini Language variable is equal to
