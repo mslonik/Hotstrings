@@ -8469,10 +8469,17 @@ F_AddHotstring()
 		}
 		if (a_Triggerstring[key] = v_Triggerstring) and (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))	;case insensitive string comparison!
 		{
-			if (InStr(NewOptions, "C", false))	;case sensitive
+			OldOptions 		:= a_TriggerOptions[key]
+			if (InStr(OldOptions, "C", false)) and (InStr(NewOptions, "C", false))	;if old definitions had C option set and new definition has C option set and they are not identical.
 			{
 				f_ChangeExistingDef := false
 				break
+			}
+			else
+			{
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+					, % TransA["In order to add similar definition to existing one use C option for both definitions (old and new) and change the case of triggerstrings."]
+				return
 			}
 		}
 		if (a_Triggerstring[key] = v_Triggerstring) and (a_Library[key] != SubStr(v_SelectHotstringLibrary, 1, -4))	;case insensitive string comparison!
@@ -8508,7 +8515,7 @@ F_AddHotstring()
 		if (NewOptions = OldOptions) and (vHotstring == a_Hotstring[key])
 		{
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-				, % "Nothing was changed."
+				, % TransA["New definition is identical with existing one. Please try again."]
 			return
 		}
 		Switch WhichGuiEnable	;Disable all GuiControls for time of adding / editing of d(t, o, h)	
@@ -11873,6 +11880,7 @@ In order to display library content please at first select hotstring library = I
 In order to restore default configuration, the current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and upon start the Config.ini with default settings will be created. = In order to restore default configuration, the current Config.ini file will be deleted. This action cannot be undone. Next application will be reloaded and upon start the Config.ini with default settings will be created.
 information											= information
 Inside Word (?) 										= Inside Word (?)
+In order to add similar definition to existing one use C option for both definitions (old and new) and change the case of triggerstrings. = In order to add similar definition to existing one use C option for both definitions (old and new) and change the case of triggerstrings.
 In order to aplly new font style it's necesssary to reload the application. 	= In order to aplly new font style it's necesssary to reload the application.
 In order to aplly new font type it's necesssary to reload the application. 	= In order to aplly new font type it's necesssary to reload the application.
 In order to aplly new size of margin it's necesssary to reload the application. = In order to aplly new size of margin it's necesssary to reload the application.
@@ -11928,12 +11936,13 @@ Move (F8)												= Move (F8)
 down							= down
 up							= up
 navy													= navy
-Next the default language file (English.txt) will be deleted,	= Next the default language file (English.txt) will be deleted,
 reloaded and fresh language file (English.txt) will be recreated. = reloaded and fresh language file (English.txt) will be recreated.
+New definition is identical with existing one. Please try again.	= New definition is identical with existing one. Please try again.
 New location:											= New location:
 New location (default):									= New location (default):
 New settings are now applied.							     = New settings are now applied.
 New shortcut (hotkey)									= New shortcut (hotkey)
+Next the default language file (English.txt) will be deleted,	= Next the default language file (English.txt) will be deleted,
 No													= No
 no													= no
 No Backspace (B0) 										= No Backspace (B0)
