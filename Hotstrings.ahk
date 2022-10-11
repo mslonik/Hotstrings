@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -8608,7 +8608,7 @@ F_AddHotstring()
 		}
 	}
 	; 5. Update global arrays
-	F_UpdateGlobalArrays(NewOptions, SendFun, true, vHotstring)
+	F_UpdateGlobalArrays(NewOptions, SendFun, "En", vHotstring)
 	
 	;6. Update and sort List View. ;future: gui parameter for sorting
 	LV_Add("",  "En", v_Triggerstring, NewOptions, SendFun, vHotstring, v_Comment)
