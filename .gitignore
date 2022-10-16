@@ -1,4 +1,4 @@
-temp/unicodes.txt
+unicodes.txt
 *.csv
 temp.ahk
 temp2.ahk
@@ -6,3 +6,5 @@ Languages/English.txt
 ThirdMinimal.ahk
 SecondMinimal.ahk
 Hotstrings.code-workspace
+AHKCon.AHK
+FirstMinimal.ahk
