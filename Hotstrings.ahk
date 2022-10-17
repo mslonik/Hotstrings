@@ -1011,7 +1011,7 @@ F_EditLibHeader()
 	WinGetPos, Xpos, Ypos, Wwidth, , A
 	Gui, 	LibHeader: New, 	+Resize +HwndLibHeaderGuiHwnd +Owner -DPIScale, % A_ScriptName . ":" . A_Space . TransA["Edit library header"] . "." . A_Space . TransA["Library name:"] A_Space . SelectedLibraryName ;DPI scaling only applies to Gui sub-commands and related variables, so coordinates coming directly from other sources such WinGetPos will not work. There are a number of ways to deal with this, e.g. disable (Gui -DPIScale) scaling on the fly, as needed.
 	Gui,		LibHeader: Margin, 	% c_xmarg, % c_ymarg
-	Gui,		LibHeader: Add,	Button,	x0 y0 HwndIdLHB_Button1 gLHB_Button_Save, 	% TransA["Save"]
+	Gui,		LibHeader: Add,	Button,	x0 y0 HwndIdLHB_Button1 gLHB_Button_Save, 	% TransA["Save && Close"]	;double ampersand in order to display literal ampersand
 	Gui,		LibHeader: Add,	Button,	x0 y0 HwndIdLHB_Button2 gLHB_Button_Cancel, 	% TransA["Cancel"]
 	GuiControlGet, ControlPos1, Pos, % IdLHB_Button1
 	GuiControlGet, ControlPos2, Pos, % IdLHB_Button2
@@ -1030,8 +1030,26 @@ F_EditLibHeader()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 LibHeaderGuiEscape()
 {
-	Gui, HS3: -Disabled
-	Gui, LibHeader: Destroy
+	global	;assume-global mode of operation
+	local	LibraryHeader := ""
+
+	GuiControlGet, LibraryHeader,, % IdLHG_Edit1
+	if (LibraryHeader)
+	{
+		MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % "You've pressed Esc key which cancels header edition. However edit field isn't empty. Would you like to save it?"
+		IfMsgBox, Yes
+			LHB_Button_Save()
+		IfMsgBox, No
+		{
+			Gui, HS3: 		-Disabled
+			Gui, LibHeader: 	Destroy
+		}
+	}
+	else
+	{
+		Gui, HS3: 		-Disabled
+		Gui, LibHeader: 	Destroy
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 LHB_Button_Save()
@@ -12020,7 +12038,7 @@ Row													= Row
 	TransConst .= "`n
 (Join`n `
 Sandbox												= Sandbox
-Save													= Save
+Save && Close											= Save && Close
 Save position of application window	 					= &Save position of application window
 Save window position									= Save window position
 Saved												= Saved
