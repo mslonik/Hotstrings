@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
  	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
@@ -23,7 +23,7 @@ CoordMode, Mouse,	Screen		; Only Screen makes sense for functions prepared in th
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.9"
+global AppVersion				:= "3.6.8"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -284,11 +284,11 @@ Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 								F_Ref
 Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 						F_RefreshListOfLibraryTips
 F_RefreshListOfLibraries()	; this function calls F_RefreshListOfLibraryTips() as both options are interrelated
 ; F_RefreshListOfLibraryTips()
-Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.		
+Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.
 Menu, LibrariesSubmenu,	Add, % TransA["Visit public libraries webpage"],							F_PublicLibraries
-Menu, LibrariesSubmenu,	Add, % TransA["Open libraries folder in Windows Explorer"], 						F_OpenLibrariesFolderInExplorer
+Menu, LibrariesSubmenu,	Add, % TransA["Open libraries folder in Windows Explorer"], 					F_OpenLibrariesFolderInExplorer
 Menu, LibrariesSubmenu,	Add, % TransA["Download public libraries"],								F_DownloadPublicLibraries
-Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.		
+Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.
 Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],								F_ImportLibrary
 Menu, ExportSubmenu, 	Add, % TransA["Static hotstrings"],  									F_ExportLibraryStatic
 Menu, ExportSubmenu, 	Add, % TransA["Dynamic hotstrings"],  									F_ExportLibraryDynamic
@@ -309,7 +309,7 @@ Menu, SubmenuReload, 	Add,	% TransA["Reload in default mode"] . "`tShift + Ctrl 
 Menu, SubmenuReload, 	Add,	% TransA["Reload in silent mode"],									F_ReloadApplication
 Menu, AppSubmenu, 		Add,	% TransA["Reload"],												:SubmenuReload
 
-Menu, AppSubmenu,		Add, % TransA["Suspend Hotstrings"] . "`tF10",								F_TraySuspendHotkeys
+Menu, AppSubmenu,		Add, % TransA["Suspend Hotstrings"] . "`tF10",							F_TraySuspendHotkeys
 Menu, AppSubmenu,		Add, % TransA["Pause"],												F_TrayPauseScript
 Menu, AppSubmenu,		Add, % TransA["Exit"],												F_Exit
 Menu, AppSubmenu,		Add	;To add a menu separator line, omit all three parameters.
@@ -320,7 +320,7 @@ Menu, AppSubmenu, 		Add, % TransA["Add to Autostart"],										:AutoStartSub
 F_CompileSubmenu()
 
 Menu, AppSubmenu,		Add, % TransA["Version / Update"],										F_GuiVersionUpdate
-Menu, AppSubmenu,		Add					
+Menu, AppSubmenu,		Add
 Menu, SubmenuLog,		Add,	% TransA["enable"],												F_MenuLogEnDis
 Menu, SubmenuLog,		Add, % TransA["disable"],											F_MenuLogEnDis
 Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],								:SubmenuLog	
@@ -2624,32 +2624,40 @@ F_TrayPauseScript()
 	if (A_IsPaused)
 	{
 		Menu, Tray, 		Check, 	% TransA["Pause application"]
-		Menu, AppSubmenu,	Check, 	% TransA["Pause"]
+		Menu, AppSubmenu,	Check, 	% TransA["Pause application"]
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Only current thread is now PAUSED."]
+			. "`n`n" . TransA["It means As a side-effect, any interrupted threads beneath it will lie dormant."]
 	}
 	else
 	{
 		Menu, Tray, 		UnCheck, 	% TransA["Pause application"]
-		Menu, AppSubmenu,	UnCheck, 	% TransA["Pause"]
+		Menu, AppSubmenu,	UnCheck, 	% TransA["Pause application"]
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Current thread is now ACTIVE."]
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TraySuspendHotkeys()
 {
 	global	;assume-global mode
+	static	PreviousStateTrigTips := false
+
 	Suspend, Toggle
 	if (A_IsSuspended)
 	{
+		PreviousStateTrigTips 	:= ini_TTTtEn
+,		ini_TTTtEn 			:= false
 		Menu, Tray, 		Check, 	% TransA["Suspend Hotstrings"] . "`tF10"
 		Menu, AppSubmenu, 	Check, 	% TransA["Suspend Hotstrings"] . "`tF10"
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now SUSPENDED."]
-			. "`n`n" . TransA["It means hotstring definitions will be not triggered, but triggerstring tips (if enabled) still will be visible."]
+			. "`n`n" . TransA["It means other script threads are still running. Triggerstring tips are off for your convenience."]
 	}
 	else
 	{
+		ini_TTTtEn			:= PreviousStateTrigTips
 		Menu, Tray, 		UnCheck, 	% TransA["Suspend Hotstrings"] . "`tF10"
 		Menu, AppSubmenu,	UnCheck, 	% TransA["Suspend Hotstrings"] . "`tF10"
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now ACTIVE."]
-			. "`n`n" . TransA["It means hotstring definitions will be triggered as usual."]
+			. "`n`n" . TransA["It means triggerstring tips state is restored and hotstring definitions will be triggered as usual."]
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11804,6 +11812,7 @@ Enable/disable libraries									= Enable/disable &libraries
 Enable/disable selected definition							= Enable/disable selected definition
 Enable/disable triggerstring tips 							= Enable/disable triggerstring tips	
 Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 4th edition of this application, 2021 by Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
+EnDis parameter is missing								= EnDis parameter is missing
 Enter 												= Enter 
 Enter a name for the new library 							= Enter a name for the new library
 Enter a new library name									= Enter a new library name
@@ -11896,8 +11905,9 @@ is added in section  [GraphicalUserInterface] of Config.ini		= is added in secti
 is empty at the moment.									= is empty at the moment.
 is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv? = is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?
 Introduction											= Introduction
-It means hotstring definitions will be not triggered, but triggerstring tips (if enabled) still will be visible. = It means hotstring definitions will be not triggered, but triggerstring tips (if enabled) still will be visible.
-It means hotstring definitions will be triggered as usual.		= It means hotstring definitions will be triggered as usual.
+It means As a side-effect, any interrupted threads beneath it will lie dormant. = It means As a side-effect, any interrupted threads beneath it will lie dormant.
+It means other script threads are still running. Triggerstring tips are off for your convenience. = It means other script threads are still running. Triggerstring tips are off for your convenience.
+It means triggerstring tips state is restored and hotstring definitions will be triggered as usual.		= It means triggerstring tips state is restored and hotstring definitions will be triggered as usual.
 Keyboard or mouse scrolling								= Keyboard or mouse scrolling
 Keyboard or mouse selection								= Keyboard or mouse selection
 \Languages\`nMind that Config.ini Language variable is equal to 	= \Languages\`nMind that Config.ini Language variable is equal to
@@ -11963,7 +11973,7 @@ of													= of
 OK													= &OK
 Old location:											= Old location:
 olive												= olive
-EnDis parameter is missing								= EnDis parameter is missing
+Only current thread is now PAUSED.							= Only current thread is now PAUSED.
 On start-up the local version of application was compared with repository version and difference was discovered: = On start-up the local version of application was compared with repository version and difference was discovered:
 Open current log (view only)								= Open current log (view only)
 Open Config.ini in your default editor						= Open Config.ini in your default editor
