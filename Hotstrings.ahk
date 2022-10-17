@@ -305,7 +305,7 @@ Menu, LibrariesSubmenu,	Add, % TransA["Show library header"],									F_ShowLibH
 Menu, HSMenu, 			Add, % TransA["Libraries"], 											:LibrariesSubmenu
 Menu, HSMenu, 			Add, % TransA["Clipboard Delay (F7)"], 									F_GuiHSdelay
 
-Menu, SubmenuReload, 	Add,	% TransA["Reload in default mode"] . "`tShift + Ctrl + r",				F_ReloadApplication
+Menu, SubmenuReload, 	Add,	% TransA["Reload in default mode"] . "`tShift + Ctrl + R",				F_ReloadApplication
 Menu, SubmenuReload, 	Add,	% TransA["Reload in silent mode"],									F_ReloadApplication
 Menu, AppSubmenu, 		Add,	% TransA["Reload"],												:SubmenuReload
 
@@ -9177,7 +9177,7 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 	F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
 	GuiControl, ChooseString, % IdDDL2, % DestinationLibrary
 	Gui, HS3: 		Submit, NoHide	;this line is necessary to v_SelectHotstringLibrary <- DestinationLibrary
-	F_SelectLibrary()	;DestinationLibrary 
+	F_SelectLibrary()	;DestinationLibrary
 	Loop, % LV_GetCount()
 	{
 		LV_GetText(v_SearchedTriggerString, A_Index, 2)
@@ -10290,7 +10290,7 @@ F_SelectLibrary()
 	
 	Gui, % F_WhichGui() . ":" . A_Space . "Submit", NoHide
 	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
-	GuiControl, -Redraw, % IdListView1 ;The Redraw option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
+	; GuiControl, -Redraw, % IdListView1 ;The Redraw option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	LV_Delete()
 	v_LibHotstringCnt 	:= 0
 ,	name 			:= SubStr(v_SelectHotstringLibrary, 1, -4)
@@ -10309,7 +10309,6 @@ F_SelectLibrary()
 		}
 	}
 	UpdateLibraryCounter(v_LibHotstringCnt, v_TotalHotstringCnt)
-	; F_GuiHS3_LVcolumnScale()
 	GuiControl, +Redraw, % IdListView1 ;Afterward, use GuiControl, +Redraw to re-enable redrawing (which also repaints the control).
 	LV_ModifyCol(2, "Sort")	;without this line content of library is loaded in the same order as it was saved last time; keep in mind that after any change (e.g. change of exiting definition) the whole file is sorted and saved again
 }
@@ -13803,7 +13802,7 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 F_LoadLibrariesToTables()
 { 
 	global	;assume-global mode
-	local name := "", varSearch := "", tabSearch := ""
+	local 	name := "", varSearch := "", tabSearch := "", BegCom := false
 
 		a_Library 				:= []
 	,	a_TriggerOptions 			:= []
@@ -13824,9 +13823,26 @@ F_LoadLibrariesToTables()
 	{
 		Loop
 		{
-			FileReadLine, varSearch, %A_LoopFileFullPath%, %A_Index%
+			FileReadLine, varSearch, %A_LoopFileFullPath%, %A_Index%	;tu jestem
 			if (ErrorLevel)
 				break
+			if (SubStr(varSearch, 1, 1) = ";")	;catch the comments
+				continue
+			if (SubStr(varSearch, 1, 2) = "/*")	;catch beginning of the first comment in the file = beginning of header
+			{
+				BegCom := true
+				continue
+			}
+			if (BegCom) and (SubStr(varSearch, -1) = "*/") ;catch the end of the last comment in the file = end of of header
+			{
+				BegCom := false
+				continue
+			}
+			if (BegCom)
+				continue
+			if (!varSearch)	;ignore empty lines
+				continue
+
 			name 	:= SubStr(A_LoopFileName, 1, -4)
 ,			tabSearch := StrSplit(varSearch, "‖")
 ,			a_Library			.Push(name)
