@@ -1,0 +1,7 @@
+*.csv
+*Minimal.ahk
+AHKCon.ahk
+Hotstrings.code-workspace
+SecondMinimal.ahk
+temp*.ahk
+*.txt
