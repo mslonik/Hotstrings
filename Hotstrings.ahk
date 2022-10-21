@@ -2184,7 +2184,7 @@ F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
 	static	f_EndCharDetected := false, f_LastTip := false
-	local	WhereToCut := 0
+	local	WhereToCut := 0, shortened := ""
 
 	Critical, On
 	; OutputDebug, % "Char:" . Char . "`n"
@@ -2257,13 +2257,14 @@ F_OneCharPressed(ih, Char)
 			; OutputDebug, % "WhereToCut:" . WhereToCut . "`n"
 			if (WhereToCut < StrLen(v_InputString))
 			{
-				v_InputString := SubStr(v_InputString, ++WhereToCut)	;cut down v_InputString and try again if triggerstring tip exists.
+				shortened := SubStr(v_InputString, ++WhereToCut)	;cut down v_InputString and try again if triggerstring tip exists.
 				; OutputDebug, % "Cut v_InputString:" . v_InputString . "`n"
-				F_PrepareTriggerstringTipsTables2(v_InputString)
+				F_PrepareTriggerstringTipsTables2(shortened)
 				if (a_Tips.Count())	;if tips are available display then
 				{
 					; OutputDebug, % "B3 a_Tips.Count():" . a_Tips.Count() . "`n"
-					f_LastTip := true
+					f_LastTip 	:= true
+,					v_InputString	:= shortened	;example: "iec62443-4-1" contains few EndChars
 					F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 					if (ini_TTTD > 0)
 						SetTimer, TurnOff_Ttt, % "-" . ini_TTTD
