@@ -1669,8 +1669,8 @@ F_DeleteLibrary()
 	if (ErrorLevel)
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Something went wrong on time of file removal."	]
 	F_ValidateIniLibSections()
-	F_RefreshListOfLibraries()	; this function calls F_RefreshListOfLibraryTips() as both options are interrelated
-	F_UpdateSelHotLibDDL()	
+	F_RefreshListOfLibraries()		; this function calls F_RefreshListOfLibraryTips() as both options are interrelated
+	F_UpdateSelHotLibDDL()
 	a_Combined := []				;in order to refresh arrays of triggerstring tips
 	F_LoadHotstringsFromLibraries()	;in order to refresh arrays of triggerstring tips
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	;in order to refresh arrays of triggerstring tips
@@ -8635,7 +8635,7 @@ F_AddHotstring()
 	}
 	; 5. Update global arrays
 	F_UpdateGlobalArrays(NewOptions, SendFun, "En", vHotstring)
-	
+
 	;6. Update and sort List View. ;future: gui parameter for sorting
 	LV_Add("",  "En", v_Triggerstring, NewOptions, SendFun, vHotstring, v_Comment)
 	LV_ModifyCol(2, "Sort")
@@ -9932,6 +9932,18 @@ F_DeleteHotstring()
 	UpdateLibraryCounter(--v_LibHotstringCnt, --v_TotalHotstringCnt)
 	
 	;6. Remove from "Search" tables. Unfortunately index (SelectedRow) is sufficient only for one table, and in Searching there is "super table" containing all definitions from all available tables.
+	for key, val in a_Triggerstring
+		if (val == triggerstring)
+		{
+			a_Library			.RemoveAt(key)
+			a_Triggerstring	.RemoveAt(key)
+			a_TriggerOptions	.RemoveAt(key)
+			a_OutputFunction	.RemoveAt(key)
+			a_EnableDisable	.RemoveAt(key)
+			a_Hotstring		.RemoveAt(key)
+			a_Comment			.RemoveAt(key)
+		}
+/* 
 	for key, val in a_Library
 		if (val = SubStr(v_SelectHotstringLibrary, 1, -4))
 		{
@@ -9947,7 +9959,7 @@ F_DeleteHotstring()
 	a_EnableDisable	.RemoveAt(Pointer)
 	a_Hotstring		.RemoveAt(Pointer)
 	a_Comment			.RemoveAt(Pointer)
-
+*/
 	;7. Remove trigger hint. 
 	for index in a_Combined	;recreate array a_Combined
 		a_Combined[index] := a_Triggerstring[index] . "|" . a_TriggerOptions[index] . "|" . a_EnableDisable[index] . "|" . a_Hotstring[index]
@@ -10284,7 +10296,7 @@ HS3GuiSize(GuiHwnd, EventInfo, Width, Height) ;Gui event (automatically generate
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SelectLibrary()
-{ 
+{
 	global 	;assume-global mode
 	local	key := 0, value := "", name := "", str1 := []
 	
@@ -10304,7 +10316,7 @@ F_SelectLibrary()
 ,			str1[4] := a_OutputFunction[key]
 ,			str1[5] := a_Hotstring[key]
 ,			str1[6] := a_Comment[key]
-			LV_Add("", str1[1], str1[2], str1[3], str1[4], str1[5], str1[6])	
+			LV_Add("", str1[1], str1[2], str1[3], str1[4], str1[5], str1[6])
 			v_LibHotstringCnt++
 		}
 	}
@@ -11477,8 +11489,7 @@ F_LoadHotstringsFromLibraries()
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_UpdateSelHotLibDDL()
-;Load content of DDL2 and mark disabled libraries
-{
+{	;Load content of DDL2 and mark disabled libraries
 	global ;assume-global mode
 	local key := "", value := "", FinalString := ""
 	
@@ -12754,7 +12765,7 @@ F_GuiHS4_Create()
 	
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText6b,						 				% TransA["Select hotstring library"]
-	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2	
+	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
 	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo15b,									ⓘ
 	GuiControl +g, % IdTextInfo15b, % TI_SelectHotstringLib
 
@@ -13732,11 +13743,11 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 		Loop, Parse, TempLoadLib, `n, `r
 		{
 			v_LibFileName 	:= SubStr(A_LoopField, 1, InStr(A_LoopField, "=") - 1)
-			v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=",, v_LibFileName) + 1)
+,			v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=",, v_LibFileName) + 1)
 			if (value == v_LibFileName)
 			{
-				ini_LoadLib[value] := v_LibFlagTemp
-				FlagFound := true
+				ini_LoadLib[value] 	:= v_LibFlagTemp
+,				FlagFound 		:= true
 			}
 		}	
 		if !(FlagFound)
@@ -13770,11 +13781,11 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 		Loop, Parse, TempShowTipsLib, `n, `r
 		{
 			v_LibFileName 	:= SubStr(A_LoopField, 1, InStr(A_LoopField, "=") - 1)
-			v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=",, v_LibFileName) + 1)
+,			v_LibFlagTemp 	:= SubStr(A_LoopField, InStr(A_LoopField, "=",, v_LibFileName) + 1)
 			if (value == v_LibFileName)
 			{
-				ini_ShowTipsLib[value] := v_LibFlagTemp
-				FlagFound := true
+				ini_ShowTipsLib[value] 	:= v_LibFlagTemp
+,				FlagFound 			:= true
 			}
 		}	
 		if !(FlagFound)
@@ -13789,8 +13800,8 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 			SectionTemp .= key . "=" . value . "`n"
 		else
 		{
-			PriorityFlag := true
-			ValueTemp := value
+			PriorityFlag 	:= true
+,			ValueTemp 	:= value
 		}
 	}
 	if (PriorityFlag)
@@ -13823,7 +13834,7 @@ F_LoadLibrariesToTables()
 	{
 		Loop
 		{
-			FileReadLine, varSearch, %A_LoopFileFullPath%, %A_Index%	;tu jestem
+			FileReadLine, varSearch, %A_LoopFileFullPath%, %A_Index%
 			if (ErrorLevel)
 				break
 			if (SubStr(varSearch, 1, 1) = ";")	;catch the comments
