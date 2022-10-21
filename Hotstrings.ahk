@@ -8080,8 +8080,6 @@ F_Undo()	;turning off of * option requires special conditions.
 				Case "^", "+", "!", "#", "{", "}":	SendRaw, 	% A_LoopField
 				Default:						Send, 	% A_LoopField
 			}
-			if (!InStr(v_Options, "*"))
-				Send, % v_EndChar
 		}
 		v_UndoTriggerstring := ""
 		F_UndoSignalling()
@@ -9943,23 +9941,6 @@ F_DeleteHotstring()
 			a_Hotstring		.RemoveAt(key)
 			a_Comment			.RemoveAt(key)
 		}
-/* 
-	for key, val in a_Library
-		if (val = SubStr(v_SelectHotstringLibrary, 1, -4))
-		{
-			Pointer := key
-			Break
-		}
-	Pointer += SelectedRow - 1
-	
-	a_Library			.RemoveAt(Pointer)
-	a_Triggerstring	.RemoveAt(Pointer)
-	a_TriggerOptions	.RemoveAt(Pointer)
-	a_OutputFunction	.RemoveAt(Pointer)
-	a_EnableDisable	.RemoveAt(Pointer)
-	a_Hotstring		.RemoveAt(Pointer)
-	a_Comment			.RemoveAt(Pointer)
-*/
 	;7. Remove trigger hint. 
 	for index in a_Combined	;recreate array a_Combined
 		a_Combined[index] := a_Triggerstring[index] . "|" . a_TriggerOptions[index] . "|" . a_EnableDisable[index] . "|" . a_Hotstring[index]
