@@ -578,6 +578,8 @@ Critical, Off
 ~F24::
 ~LAlt::		;if commented out, only for debugging reasons
 ~RAlt::		;if commented out, only for debugging reasons
+~WheelDown::
+~WheelUp::
 ~MButton::
 ~RButton::
 ~LWin::
