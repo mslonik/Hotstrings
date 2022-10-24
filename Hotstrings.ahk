@@ -2514,13 +2514,15 @@ HS3GuiClose()	;Gui event
 F_ALibOK()
 {
 	global	;assume-global mode
+	local	LastChosenLibraryName := "", WhichGui := F_WhichGui()
+
 	Gui, ALib: Submit, NoHide
 	if (v_NewLib == "")
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Enter a name for the new library"]
-		if (WinExist("ahk_id" HS3GuiHwnd))
+		if (WhichGui = "HS3")
 			Gui, HS3: -Disabled
-		if (WinExist("ahk_id" HS4GuiHwnd))
+		if (WhichGui = "HS4")
 			Gui, HS4: -Disabled
 		return
 	}
@@ -2529,16 +2531,25 @@ F_ALibOK()
 	{
 		FileAppend,, % ini_HADL . "\" . v_NewLib, UTF-8
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The library"] . A_Space . v_NewLib . A_Space . TransA["has been created."]
-		if (WinExist("ahk_id" HS3GuiHwnd))
+		if (WhichGui = "HS3")
+		{
 			Gui, HS3: -Disabled
-		if (WinExist("ahk_id" HS4GuiHwnd))
+			GuiControlGet, LastChosenLibraryName, , % IdDDL2
+		}
+		if (WhichGui = "HS4")
+		{
 			Gui, HS4: -Disabled
+			GuiControlGet, LastChosenLibraryName, , % IdDDL2b
+		}
 		Gui, ALib: Destroy
 		
 		F_ValidateIniLibSections()
 		F_RefreshListOfLibraries()	; this function calls F_RefreshListOfLibraryTips() as both options are interrelated
-		; F_RefreshListOfLibraryTips()
 		F_UpdateSelHotLibDDL()
+		if (WhichGui = "HS3")
+			GuiControl, ChooseString, % IdDDL2, % LastChosenLibraryName
+		if (WhichGui = "HS4")
+			GuiControl, ChooseString, % IdDDL2b, % LastChosenLibraryName
 	}
 	else
 		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["A library with that name already exists!"]
@@ -9108,7 +9119,7 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 	}
 	Gui, HS3:			-Disabled
 	Gui, MoveLibs: 	Destroy
-	GuiControlGet, SourceLibrary, , % IdDDL2
+	GuiControlGet, SourceLibrary, , % IdDDL2	;tu jestem: jak najpierw wybiore definicje a potem klikne w "utworz biblioteke".
 
 	Gui, HS3:			Default
 	WhichRow := LV_GetNext(, "Focused")
@@ -9159,7 +9170,7 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 	
 	GuiControl, ChooseString, % IdDDL2, % SourceLibrary
 	Gui, HS3: 		Submit, NoHide	;this line is necessary to v_SelectHotstringLibrary <- SourceLibrary
-	F_SelectLibrary() ;Remove the definition from source table / file.
+	F_SelectLibrary() ;Remove the definition from source table / file.	;tu jestem
 	Loop, % LV_GetCount()
 	{
 		LV_GetText(Temp1, A_Index, 2)
@@ -11496,8 +11507,8 @@ F_UpdateSelHotLibDDL()
 	else ;if ini_LoadLib is empty
 		FinalString .=  TransA["No libraries have been found!"] . "||" 
 	
-	GuiControl, , % IdDDL2, % "|" . FinalString 	;To replace (overwrite) the list instead, include a pipe as the first character
-	GuiControl, , % IdDDL2b, % "|" . FinalString	;To replace (overwrite) the list instead, include a pipe as the first character
+	GuiControl, , % IdDDL2, 	% "|" . FinalString 	;To replace (overwrite) the list instead, include a pipe as the first character
+	GuiControl, , % IdDDL2b, % "|" . FinalString		;To replace (overwrite) the list instead, include a pipe as the first character
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_ToggleLibraryTips()
