@@ -1502,7 +1502,7 @@ F_HMenuSI_Keyboard()
 		}
 	}
 	v_UndoHotstring 	:= Temp1
-,	Temp1 			:= F_ReplaceAHKconstants(Temp1)
+	Temp1 			:= F_ReplaceAHKconstants(Temp1)
 ,	Temp1 			:= F_FollowCaseConformity(Temp1, v_InputString, v_Options)
 ,	Temp1 			:= F_ConvertEscapeSequences(Temp1)
 	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
@@ -1613,7 +1613,7 @@ F_HMenuCLI_Keyboard()
 	v_UndoHotstring 	:= Temp1
 ,	ReplacementString 	:= F_ReplaceAHKconstants(Temp1)
 ,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options)
-,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
+; 	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString) ;This line is unnecessary as clipboard do not process escaped characters.
 	if (ini_MHMP = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
@@ -1644,6 +1644,7 @@ ActiveControlIsOfClass(Class)	;https://www.autohotkey.com/docs/commands/_If.htm
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ConvertEscapeSequences(string)	;now from file are read sequences like "`" . "t" which are 2x characters. now we have to convert this pair into single character "`t" = single Tab character
 {	;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc. https://www.autohotkey.com/docs/misc/EscapeChar.htm
+	StringCaseSense, On	;necessary as without it ``A is converted to `a and `a is "Go to" or "/BEL".
 	string := StrReplace(string, "``n", "`n") 
 ,	string := StrReplace(string, "``r", "`r")
 ,	string := StrReplace(string, "``b", "`b")
@@ -1651,7 +1652,9 @@ F_ConvertEscapeSequences(string)	;now from file are read sequences like "`" . "t
 ,	string := StrReplace(string, "``v", "`v")
 ,	string := StrReplace(string, "``a", "`a")
 ,	string := StrReplace(string, "``f", "`f")
-,	string := RegExReplace(string, "[[:blank:]].*\K``$", "")	;hottring finished with back-tick (`) prededing by blanks 
+,	string := RegExReplace(string, "[[:blank:]].*\K`$", "")	;hottring finished with back-tick (`) prededing by blanks 
+,	string := StrReplace(string, "````", "``")	;because of escaping: "````" -> "``" and "`` -> "`""
+	StringCaseSense, Off
 	return string
 }	;future: https://www.autohotkey.com/boards/viewtopic.php?f=76&t=91953
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8534,7 +8537,7 @@ F_AddHotstring()
 	; 3. Modify existing definition
 	if (f_ChangeExistingDef)	;modify existing definition
 	{
-		if (NewOptions = OldOptions) and (vHotstring == a_Hotstring[key])
+		if (NewOptions = OldOptions) and (vHotstring == a_Hotstring[key]) and (SendFun = a_OutputFunction[key])
 		{
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
 				, % TransA["New definition is identical with existing one. Please try again."]
