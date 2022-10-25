@@ -310,8 +310,9 @@ Menu, SubmenuReload, 	Add,	% TransA["Reload in silent mode"],									F_ReloadAp
 Menu, AppSubmenu, 		Add,	% TransA["Reload"],												:SubmenuReload
 
 Menu, AppSubmenu,		Add, % TransA["Suspend Hotstrings"] . "`tF10",							F_TraySuspendHotkeys
-Menu, AppSubmenu,		Add, % TransA["Pause"],												F_TrayPauseScript
 Menu, AppSubmenu,		Add, % TransA["Exit"],												F_Exit
+Menu, AppSubmenu,		Add	;To add a menu separator line, omit all three parameters.
+Menu, AppSubmenu,		Add, % TransA["Application hotstrings"],									F_InternalHotstrings
 Menu, AppSubmenu,		Add	;To add a menu separator line, omit all three parameters.
 Menu, AutoStartSub,		Add, % TransA["Default mode"],										F_AddToAutostart
 Menu, AutoStartSub,		Add,	% TransA["Silent mode"],											F_AddToAutostart
@@ -524,7 +525,7 @@ Critical, Off
 		return
 	
 	F10:: ;new thread starts here
-		F_TraySuspendHotkeys()
+		F_TraySuspendHotkeys()							;suspend hotstrings
 		return
 
 	^+r::	;new thread starts here
@@ -536,7 +537,7 @@ Critical, Off
 		return
 
 	+^s::
-		F_AppStats()
+		F_AppStats()									;show application statistics
 		return
 #If
 
@@ -545,6 +546,38 @@ Critical, Off
 	AppsKey::	;blocks default context menu for Edit fields
 #If
 
+;section of build-in hotstrings (system wide!)
+:*:hshelp/::										;run web browser and enter Hotstrings application help on Github.
+	F_GuiAboutLink2()
+return
+
+:*:hsexit/::										;exit Hotststrings application
+	F_Exit()
+return
+
+:*:hstrig/::										;toggle triggerstring tips
+	ini_TTTtEn := !ini_TTTtEn
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Triggerstring tips  are now"] . A_Space . (ini_TTTtEn ? TransA["ENABLED"] : TransA["DISABLED"]) . "."
+	if (ini_TTTtEn)
+	{
+		v_InputString := ""
+		Hotstring("Reset")
+	}
+return
+
+:*:hssuspend/::									;toggle suspend hotstrings and triggerstrings
+	F_TraySuspendHotkeys()
+return
+
+:*:hsreload/::										;reload into default mode of operation
+	F_ReloadApplication()
+return
+
+:*:hsstats/::										;show application statistics
+	F_AppStats()
+return
+
+;section of build-in hotkeys (system wide!)
 ~LShift::
 ~RShift::	;Actually "Shifts" work a bit different as some keys like @ or ? are available only after pressing Shift.
 	ToolTip,	;this line is necessary to close tooltips.
@@ -738,6 +771,19 @@ Critical, Off
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_InternalHotstrings()
+{
+	global	;assume-global mode of operation
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Application hotstrings"] . "." . A_Space . TransA["All of them are ""immediate execute"" (*)"] . "`n"
+		. TransA["and active in whole operating system (any window)"]											. "`n"
+		. "`n`n"
+		. "hshelp/" . A_Tab . A_Tab . 	TransA["run web browser, enter Hotstrings webpage"]					 	. "`n"
+		. "hsexit/" . A_Tab . A_Tab . 	TransA["exit Hotstrings application"]				 					. "`n"
+		. "hssuspend/" . A_Tab . 	 	TransA["suspend triggerstrings tips and hotstrings"]						. "`n"
+		. "hsreload/" . A_Tab .			TransA["reload Hotstrings application"]									. "`n"
+		. "hsstats/" . A_Tab . A_Tab . 	TransA["show application statistics"]
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HS3SearchLeft()
 {
 	global	;assume-global mode of operation
@@ -2652,45 +2698,22 @@ F_TrayExit()
 	ExitApp, 2	;2 = by Tray
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TrayPauseScript()
-{
-	global	;assume  global mode
-	Pause, Toggle, 1
-	if (A_IsPaused)
-	{
-		Menu, Tray, 		Check, 	% TransA["Pause application"]
-		Menu, AppSubmenu,	Check, 	% TransA["Pause application"]
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Only current thread is now PAUSED."]
-			. "`n`n" . TransA["It means As a side-effect, any interrupted threads beneath it will lie dormant."]
-	}
-	else
-	{
-		Menu, Tray, 		UnCheck, 	% TransA["Pause application"]
-		Menu, AppSubmenu,	UnCheck, 	% TransA["Pause application"]
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Current thread is now ACTIVE."]
-	}
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TraySuspendHotkeys()
 {
-	global	;assume-global mode
+	global	;assume-global mode: v_InputH
 	static	PreviousStateTrigTips := false
 
-	Suspend, Toggle
-	if (A_IsSuspended)
+	if (v_InputH.InProgress)
 	{
-		PreviousStateTrigTips 	:= ini_TTTtEn
-,		ini_TTTtEn 			:= false
-		Menu, Tray, 		Check, 	% TransA["Suspend Hotstrings"] . "`tF10"
-		Menu, AppSubmenu, 	Check, 	% TransA["Suspend Hotstrings"] . "`tF10"
+		v_InputH.Stop()
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now SUSPENDED."]
 			. "`n`n" . TransA["It means other script threads are still running. Triggerstring tips are off for your convenience."]
 	}
 	else
 	{
-		ini_TTTtEn			:= PreviousStateTrigTips
-		Menu, Tray, 		UnCheck, 	% TransA["Suspend Hotstrings"] . "`tF10"
-		Menu, AppSubmenu,	UnCheck, 	% TransA["Suspend Hotstrings"] . "`tF10"
+		v_InputH.Start()
+		Hotstring("Reset")
+		v_InputString := ""
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now ACTIVE."]
 			. "`n`n" . TransA["It means triggerstring tips state is restored and hotstring definitions will be triggered as usual."]
 	}
@@ -2837,10 +2860,9 @@ F_InitiateTrayMenus(v_Param)
 		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
 		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"], F_GuiAbout
 		Menu, Tray, Default,	% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"]
-		Menu, Tray, Add, 		% TransA["Reload in default mode"] . "`tShift+Ctrl+r", 			 F_ReloadApplication	;it is possible to reload, but then application will be run in default mode of operation (opposit to silent mode)
+		Menu, Tray, Add, 		% TransA["Reload in default mode"] . "`tShift+Ctrl+R", 			 F_ReloadApplication	;it is possible to reload, but then application will be run in default mode of operation (opposit to silent mode)
 		Menu, Tray, Add										;line separator 
 		Menu, Tray, Add,		% TransA["Suspend Hotstrings"] . "`tF10",	F_TraySuspendHotkeys
-		Menu, Tray, Add,		% TransA["Pause application"],		F_TrayPauseScript
 		Menu  Tray, Add,		% TransA["Exit application"],			F_TrayExit		
 
 		Case "":
@@ -2861,20 +2883,19 @@ F_InitiateTrayMenus(v_Param)
 			Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
 			Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Default mode"], 	F_GuiAbout
 			Menu, Tray, Add																	;line separator 
-			Menu, Tray, Add, 		% TransA["Edit Hotstrings"], 										F_GUIinit
-			Menu, Tray, Default, 	% TransA["Edit Hotstrings"]
+			Menu, Tray, Add, 		% TransA["Edit Hotstrings"] . "`tCtrl + Win + H",						F_GUIinit
+			Menu, Tray, Default, 	% TransA["Edit Hotstrings"] . "`tCtrl + Win + H"
 			Menu, Tray, Add																	;line separator 
 			Menu, Tray, Add,		% TransA["Help: Hotstrings application"] . "`tF1",					F_GuiAboutLink1
-			Menu, Tray, Add,		% TransA["Help: AutoHotkey Hotstrings reference guide"] . "`tCtrl+F1", 	F_GuiAboutLink2
+			Menu, Tray, Add,		% TransA["Help: AutoHotkey Hotstrings reference guide"] . "`tCtrl + F1", 	F_GuiAboutLink2
 			Menu, Tray, Add																	;line separator 
-			Menu, TraySubmenuReload,	Add,		% TransA["Reload in default mode"] . "`tShift+Ctrl+r",			F_ReloadApplication
+			Menu, TraySubmenuReload,	Add,		% TransA["Reload in default mode"] . "`tShift+Ctrl+R",			F_ReloadApplication
 			Menu, TraySubmenuReload,	Add,		% TransA["Reload in silent mode"],							F_ReloadApplication
 			Menu, Tray, Add,		% TransA["Reload"],												:TraySubmenuReload
 			Menu  Tray, Add																	;line separator 
 			Menu, Tray, Add, 		% TransA["Application statistics"],								F_AppStats
 			Menu, Tray, Add																	;line separator 
 			Menu, Tray, Add,		% TransA["Suspend Hotstrings"] . "`tF10",								F_TraySuspendHotkeys
-			Menu, Tray, Add,		% TransA["Pause application"],									F_TrayPauseScript
 			Menu  Tray, Add,		% TransA["Exit application"],										F_TrayExit
 	}
 }
@@ -11168,8 +11189,6 @@ F_Exit()
 		return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ToggleSandbox()
 {
 	global ;assume-global mode
@@ -11705,7 +11724,7 @@ F_LoadCreateTranslationTxt(decision*)
 )"
 
 	TransConst .= "`n`n
-(Join`n `			
+(Join`n `
 About / Help 											= &About / Help
 About this application...								= About this application...
 According to your wish the new version of application was found on the server and downloaded. = According to your wish the new version of application was found on the server and downloaded.
@@ -11718,12 +11737,15 @@ Add new library file									= Add new library file
 Add to Autostart										= Add to Autostart
 After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder into memory? = After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder into memory?
 A library with that name already exists! 					= A library with that name already exists!
+All of them are ""immediate execute"" (*)					= All of them are ""immediate execute"" (*)
 Alphabetically 										= Alphabetically
 already exists in another library							= already exists in another library
+and active in whole operating system (any window)				= and active in whole operating system (any window)
 Apostrophe ' 											= Apostrophe '
 Application											= A&pplication
 Application has been running since							= Application has been running since
 Application help										= Application help
+Application hotstrings									= Application hotstrings
 Application language changed to: 							= Application language changed to:
 Application mode										= Application mode
 Application statistics									= Application statistics
@@ -11832,6 +11854,7 @@ Edit library header										= Edit library header
 Edit Hotstrings 										= Edit Hotstrings
 Enable												= Enable
 enable												= enable
+ENABLED												= ENABLED
 En/Dis												= En/Dis
 En. / Dis.											= En. / Dis.
 Enable/disable libraries									= Enable/disable &libraries
@@ -11855,6 +11878,7 @@ exists in the currently selected library					= exists in the currently selected 
 exists in the library									= exists in the library
 Exit													= Exit
 Exit application										= Exit application
+exit Hotstrings application								= exit Hotstrings application
 Export from .csv to .ahk 								= &Export from .csv to .ahk
 Export to .ahk with static definitions of hotstrings			= Export to .ahk with static definitions of hotstrings
 Export to .ahk with dynamic definitions of hotstrings			= Export to .ahk with dynamic definitions of hotstrings
@@ -11931,7 +11955,6 @@ is added in section  [GraphicalUserInterface] of Config.ini		= is added in secti
 is empty at the moment.									= is empty at the moment.
 is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv? = is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?
 Introduction											= Introduction
-It means As a side-effect, any interrupted threads beneath it will lie dormant. = It means As a side-effect, any interrupted threads beneath it will lie dormant.
 It means other script threads are still running. Triggerstring tips are off for your convenience. = It means other script threads are still running. Triggerstring tips are off for your convenience.
 It means triggerstring tips state is restored and hotstring definitions will be triggered as usual.		= It means triggerstring tips state is restored and hotstring definitions will be triggered as usual.
 Keyboard or mouse scrolling								= Keyboard or mouse scrolling
@@ -11999,7 +12022,6 @@ of													= of
 OK													= &OK
 Old location:											= Old location:
 olive												= olive
-Only current thread is now PAUSED.							= Only current thread is now PAUSED.
 On start-up the local version of application was compared with repository version and difference was discovered: = On start-up the local version of application was compared with repository version and difference was discovered:
 Open current log (view only)								= Open current log (view only)
 Open Config.ini in your default editor						= Open Config.ini in your default editor
@@ -12016,7 +12038,6 @@ question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
 Pause												= Pause
-Pause application										= Pause application
 Perhaps check if any other application (like File Manager) do not occupy folder to be removed. = Perhaps check if any other application (like File Manager) do not occupy folder to be removed.
 Phrase to search for:									= Phrase to search for:
 pixels												= pixels
@@ -12031,9 +12052,10 @@ question												= question
 Recognized encoding of the file:							= Recognized encoding of the file:
 red													= red
 Reload												= Reload
+reload Hotstrings application								= reload Hotstrings application
 Reload in default mode									= Reload in default mode
 Reload in silent mode									= Reload in silent mode
-Rename selected library filename									= Rename selected library filename
+Rename selected library filename							= Rename selected library filename
 Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
 Repository version										= Repository version
 Required content is copied to the Clipboard					= Required content is copied to the Clipboard
@@ -12042,6 +12064,7 @@ Reset Recognizer (Z)									= Reset Recognizer (Z)
 Restore default										= Restore default
 Restore default configuration								= Restore default configuration
 Row													= Row
+run web browser, enter Hotstrings webpage					= run web browser, enter Hotstrings webpage
 )"
 	TransConst .= "`n
 (Join`n `
@@ -12076,6 +12099,7 @@ Shortcut (hotkey) definition								= Shortcut (hotkey) definition
 Shortcut (hotkey) definitions								= Shortcut (hotkey) definitions
 Shortcuts available for active triggerstring tips:			= Shortcuts available for active triggerstring tips:
 Shortcuts available for hotstring menu:						= Shortcuts available for hotstring menu:
+show application statistics								= show application statistics
 Show intro											= Show intro
 Show Introduction window after application is restarted?		= Show Introduction window after application is restarted?
 Show library header										= Show library header
@@ -12118,6 +12142,7 @@ Static triggerstring / hotstring menus						= Static triggerstring / hotstring m
 Style of GUI											= Style of GUI
 Such file already exists									= Such file already exists
 Suspend Hotstrings										= Suspend Hotstrings
+suspend triggerstrings tips and hotstrings					= suspend triggerstrings tips and hotstrings
 Tab 													= Tab 
 teal													= teal
 Test styling											= Test styling
@@ -12187,6 +12212,7 @@ Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
 Triggerstring sound duration [ms]							= Triggerstring sound duration [ms]
 Triggerstring sound frequency range						= Triggerstring sound frequency range
 Triggerstring tips 										= Triggerstring tips
+Triggerstring tips  are now								= Triggerstring tips  are now
 Triggerstring tips have been loaded from the following library file to memory: = Triggerstring tips have been loaded from the following library file to memory:
 Triggerstring tips related to the following library file have been unloaded from memory: = Triggerstring tips related to the following library file have been unloaded from memory:
 Triggerstring tips styling								= Triggerstring tips styling
@@ -12663,7 +12689,7 @@ F_GuiHS4_Create()
 	local x0 := 0, y0 := 0
 	
 ;1. Definition of HS4 GUI.
-	Gui, 	HS4: New, 	-Resize +HwndHS4GuiHwnd +OwnDialogs -MaximizeBox, % A_ScriptName
+	Gui, 	HS4: New, 	-Resize +HwndHS4GuiHwnd +OwnDialogs -MaximizeBox, % A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(Ctrl + Win + H)"
 	Gui, 	HS4: Margin,	% c_xmarg, % c_ymarg
 	Gui,		HS4: Color,	% c_WindowColor, % c_ControlColor
 	
@@ -12889,7 +12915,7 @@ F_GuiHS3_Create()
 	
 ;1. Definition of HS3 GUI.
 ;+Border doesn't work in Microsoft Windows 10
-	Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs,			 						% A_ScriptName
+	Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs,			 						% A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(Ctrl + Win + H)"
 	Gui, 		HS3: Margin,		% c_xmarg, % c_ymarg
 	Gui,			HS3: Color,		% c_WindowColor, % c_ControlColor
 	
