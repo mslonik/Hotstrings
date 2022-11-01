@@ -551,10 +551,12 @@ Critical, Off
 	F_GuiAboutLink2()
 return
 
+:*:hsstop/::
 :*:hsexit/::										;exit Hotststrings application
 	F_Exit()
 return
 
+:*:hstoggle/::										;toggle triggerstring tips
 :*:hstrig/::										;toggle triggerstring tips
 	ini_TTTtEn := !ini_TTTtEn
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Triggerstring tips  are now"] . A_Space . (ini_TTTtEn ? TransA["ENABLED"] : TransA["DISABLED"]) . "."
@@ -565,10 +567,15 @@ return
 	}
 return
 
+:*:hsenable/::
+	F_TrayEnableHotkeys()
+return	
+
 :*:hssuspend/::									;toggle suspend hotstrings and triggerstrings
 	F_TraySuspendHotkeys()
 return
 
+:*:hsrestart/::									;reload into default mode of operation
 :*:hsreload/::										;reload into default mode of operation
 	F_ReloadApplication()
 return
@@ -778,8 +785,12 @@ F_InternalHotstrings()
 		. TransA["and active in whole operating system (any window)"]											. "`n"
 		. "`n`n"
 		. "hshelp/" . A_Tab . A_Tab . 	TransA["run web browser, enter Hotstrings webpage"]					 	. "`n"
+		. "hsstop/" . A_Tab . A_Tab . 	TransA["exit Hotstrings application"]				 					. "`n"
 		. "hsexit/" . A_Tab . A_Tab . 	TransA["exit Hotstrings application"]				 					. "`n"
+		. "hstobble/" . A_Tab . 	 		TransA["toggle triggerstrings tips and hotstrings"]						. "`n"
 		. "hssuspend/" . A_Tab . 	 	TransA["suspend triggerstrings tips and hotstrings"]						. "`n"
+		. "hsenable/" . A_Tab . 			TransA["enable triggerstring tips and hotstrings"]						. "`n"
+		. "hsrestart/" . A_Tab . 		TransA["reload Hotstrings application"]									. "`n"
 		. "hsreload/" . A_Tab .			TransA["reload Hotstrings application"]									. "`n"
 		. "hsstats/" . A_Tab . A_Tab . 	TransA["show application statistics"]
 }
@@ -2698,24 +2709,29 @@ F_TrayExit()
 	ExitApp, 2	;2 = by Tray
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TraySuspendHotkeys()
+F_TrayEnableHotkeys()
 {
 	global	;assume-global mode: v_InputH
-	static	PreviousStateTrigTips := false
 
-	if (v_InputH.InProgress)
-	{
-		v_InputH.Stop()
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now SUSPENDED."]
-			. "`n`n" . TransA["It means other script threads are still running. Triggerstring tips are off for your convenience."]
-	}
-	else
+	if (!v_InputH.InProgress)
 	{
 		v_InputH.Start()
 		Hotstring("Reset")
 		v_InputString := ""
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now ACTIVE."]
 			. "`n`n" . TransA["It means triggerstring tips state is restored and hotstring definitions will be triggered as usual."]
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_TraySuspendHotkeys()
+{
+	global	;assume-global mode: v_InputH
+
+	if (v_InputH.InProgress)
+	{
+		v_InputH.Stop()
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now SUSPENDED."]
+			. "`n`n" . TransA["It means other script threads are still running. Triggerstring tips are off for your convenience."]
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7969,6 +7985,7 @@ F_GuiShowIntro()
 	local	v_xNext := 0,	v_yNext := 0, v_wNext := 0,	v_hNext := 0
 			,v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
 			,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
+			,WhichGui := ""
 	
 	;1. Prepare MyAbout Gui
 	Gui, ShowIntro: New, 	-Resize +HwndShowIntroGuiHwnd +Owner -MaximizeBox -MinimizeBox, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Introduction"]
@@ -8011,7 +8028,8 @@ F_GuiShowIntro()
 	GuiControl, Move,			% IdIntroCheckbox, % "x" . v_xNext . "y" . v_yNext
 	
 	GuiControl,, % IdIntroCheckbox, % ini_ShowIntro	;load initial value
-	Gui, % F_WhichGui() . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+	if (WhichGui := F_WhichGui() )
+		Gui, % WhichGui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	Gui, ShowIntro: Show, AutoSize Center
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12192,6 +12210,7 @@ Tips are shown after no. of characters						= Tips are shown after no. of charac
 to activate											= to activate
 To move folder into ""Program Files"" folder you must allow admin privileges to ""Hotstrings"", which will restart to move its folder. = To move folder into ""Program Files"" folder you must allow admin privileges to ""Hotstrings"", which will restart to move its folder.
 to toggle												= to toggle
+toggle triggerstrings tips and hotstrings					= toggle triggerstrings tips and hotstrings
 Toggle main GUI										= Toggle main GUI
 Toggle trigger characters (↓ or EndChars)					= &Toggle trigger characters (↓ or EndChars)
 Toggle triggerstring tips								= Toggle triggerstring tips
