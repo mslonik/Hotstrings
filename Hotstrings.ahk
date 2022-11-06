@@ -286,7 +286,7 @@ F_RefreshListOfLibraries()	; this function calls F_RefreshListOfLibraryTips() as
 ; F_RefreshListOfLibraryTips()
 Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.
 Menu, LibrariesSubmenu,	Add, % TransA["Visit public libraries webpage"],							F_PublicLibraries
-Menu, LibrariesSubmenu,	Add, % TransA["Open libraries folder in Windows Explorer"], 					F_OpenLibrariesFolderInExplorer
+Menu, LibrariesSubmenu,	Add, % TransA["Open libraries folder in Windows Explorer"], 				F_OpenLibrariesFolderInExplorer
 Menu, LibrariesSubmenu,	Add, % TransA["Download public libraries"],								F_DownloadPublicLibraries
 Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.
 Menu, LibrariesSubmenu, 	Add, % TransA["Import from .ahk to .csv"],								F_ImportLibrary
@@ -312,7 +312,7 @@ Menu, AppSubmenu, 		Add,	% TransA["Reload"],												:SubmenuReload
 Menu, AppSubmenu,		Add, % TransA["Suspend Hotstrings"] . "`tF10",							F_TraySuspendHotkeys
 Menu, AppSubmenu,		Add, % TransA["Exit"],												F_Exit
 Menu, AppSubmenu,		Add	;To add a menu separator line, omit all three parameters.
-Menu, AppSubmenu,		Add, % TransA["Application hotstrings && hotkeys"],								F_InternalHot
+Menu, AppSubmenu,		Add, % TransA["Application hotstrings && hotkeys"],						F_InternalHot
 Menu, AppSubmenu,		Add	;To add a menu separator line, omit all three parameters.
 Menu, AutoStartSub,		Add, % TransA["Default mode"],										F_AddToAutostart
 Menu, AutoStartSub,		Add,	% TransA["Silent mode"],											F_AddToAutostart
@@ -344,12 +344,12 @@ Gui,  HS3: Menu, HSMenu
 Gui,  HS4: Menu, HSMenu
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Menu / Context menus - - - - - - - - - - - - - - - - - -
-Menu, ListView1_ContextMenu, Add, % TransA["Show library header"],							F_ShowLibHeader
-Menu, ListView1_ContextMenu, Add, % TransA["Edit library header"],							F_EditLibHeader
-Menu, ListView1_ContextMenu, Add
-Menu, ListView1_ContextMenu, Add, % TransA["Move definition to another library"],				F_MoveList
-Menu, ListView1_ContextMenu, Add, % TransA["Delete selected definition"],						F_DeleteHotstring
-Menu, ListView1_ContextMenu, Add, % TransA["Enable/disable selected definition"],				F_LV1_EnDisDefinition
+Menu, ListView1_ContextMenu, Add, % TransA["Show library header"],								F_ShowLibHeader
+Menu, ListView1_ContextMenu, Add, % TransA["Edit library header"],								F_EditLibHeader
+Menu, ListView1_ContextMenu, Add	
+Menu, ListView1_ContextMenu, Add, % TransA["Move definition to another library"],					F_MoveList
+Menu, ListView1_ContextMenu, Add, % TransA["Delete selected definition"],							F_DeleteHotstring
+Menu, ListView1_ContextMenu, Add, % TransA["Enable/disable selected definition"],					F_LV1_EnDisDefinition
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Menu / Context menus - - - - - - - - - - - - - - - - - -
 F_MenuLogEnDis()	;Position in Menu about loging
 F_GuiAbout_CreateObjects()
@@ -1076,6 +1076,12 @@ F_EditLibHeader()
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to edit library header please at first select library name from drop down list."]
 		return
 	}
+	if (InStr(SelectedLibraryName, "DISABLED", true))
+	{
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Editing of library header is possible only if library is enabled (not DISABLED)."]
+		return
+	}
+
 	FileRead, TheWholeFile, % ini_HADL . "\" . SelectedLibraryName
 	LibraryHeader := F_ExtractHeader(TheWholeFile)
 
@@ -1183,6 +1189,8 @@ F_ShowLibHeader()	;button: Show header
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["In order to display library header please at first select library name from drop down list."]
 		return
 	}
+	if (InStr(SelectedLibraryName, "DISABLED", true))
+		SelectedLibraryName := StrReplace(SelectedLibraryName, "DISABLED", "")
 	FileRead, TheWholeFile, % ini_HADL . "\" . SelectedLibraryName
 	LibraryHeader := F_ExtractHeader(TheWholeFile)
 	if (LibraryHeader)
@@ -11887,6 +11895,7 @@ Downloading public library files							= Downloading public library files
 Dynamic hotstrings 										= &Dynamic hotstrings
 Edit library header										= Edit library header
 Edit Hotstrings 										= Edit Hotstrings
+Editing of library header is possible only if library is enabled (not DISABLED). = Editing of library header is possible only if library is enabled (not DISABLED).
 Enable												= Enable
 enable												= enable
 ENABLED												= ENABLED
@@ -12289,6 +12298,7 @@ Would you like to move ""Libraries"" folder to this location?	= Would you like t
 yellow												= yellow
 Yes													= Yes
 yes													= yes
+You cannot move existing definition to library which is DISABLED. = You cannot move existing definition to library which is DISABLED.
 You've cancelled this process.							= You've cancelled this process.
 You've changed at least one configuration parameter, but didn't yet apply it. = You've changed at least one configuration parameter, but didn't yet apply it.
 Your hotstring definition contain one of the following characters: = Your hotstring definition contain one of the following characters:
