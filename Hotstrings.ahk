@@ -312,7 +312,7 @@ Menu, AppSubmenu, 		Add,	% TransA["Reload"],												:SubmenuReload
 Menu, AppSubmenu,		Add, % TransA["Suspend Hotstrings"] . "`tF10",							F_TraySuspendHotkeys
 Menu, AppSubmenu,		Add, % TransA["Exit"],												F_Exit
 Menu, AppSubmenu,		Add	;To add a menu separator line, omit all three parameters.
-Menu, AppSubmenu,		Add, % TransA["Application hotstrings"],									F_InternalHotstrings
+Menu, AppSubmenu,		Add, % TransA["Application hotstrings && hotkeys"],								F_InternalHot
 Menu, AppSubmenu,		Add	;To add a menu separator line, omit all three parameters.
 Menu, AutoStartSub,		Add, % TransA["Default mode"],										F_AddToAutostart
 Menu, AutoStartSub,		Add,	% TransA["Silent mode"],											F_AddToAutostart
@@ -585,56 +585,67 @@ return
 return
 
 ;section of build-in hotkeys (system wide!)
-~LShift::
-~RShift::	;Actually "Shifts" work a bit different as some keys like @ or ? are available only after pressing Shift.
-	ToolTip,	;this line is necessary to close tooltips.
+~LControl UP::			;UP: to be sure it will work only when button is released
+~RControl UP::
+	ToolTip,			;this line is necessary to close tooltips.
+	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
+	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
+	Hotstring("Reset")
+	F_DestroyTriggerstringTips(ini_TTCn)
+	if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
+		v_InputString := ""
+return
+
+~*LShift::
+~*RShift::			;Actually "Shifts" work a bit different as some keys like @ or ? are available only after pressing Shift.
+	ToolTip,			;this line is necessary to close tooltips.
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
 	F_DestroyTriggerstringTips(ini_TTCn)
 	return
-~F1::	;pressing any of function keys will destroy triggerstring tips
-~F2::
-~F3::
-~F4::
-~F5::
-~F6::
-~F7::
-~F8::
-~F9::
-~F10::
-~F11::
-~F12::
-~F13::
-~F14::
-~F15::
-~F16::
-~F17::
-~F18::
-~F19::
-~F20::
-~F21::
-~F22::
-~F23::
-~F24::
-~LAlt::		;if commented out, only for debugging reasons
-~RAlt::		;if commented out, only for debugging reasons
-~WheelDown::
-~WheelUp::
-~MButton::
-~RButton::
-~LWin::
-~RWin::
-~Down::
-~Up::
-~Left::
-~Right::
-~PgDn::
-~PgUp::
-~Home::
-~End::
-~WheelLeft::
-~WheelRight::
-~LButton::	;as above, but without F_DestroyTriggerstringTips()
+~*F1::		;pressing any of function keys will destroy triggerstring tips
+~*F2::
+~*F3::
+~*F4::
+~*F5::
+~*F6::
+~*F7::
+~*F8::
+~*F9::
+~*F10::
+~*F11::
+~*F12::
+~*F13::
+~*F14::
+~*F15::
+~*F16::
+~*F17::
+~*F18::
+~*F19::
+~*F20::
+~*F21::
+~*F22::
+~*F23::
+~*F24::
+~*LAlt::		;if commented out, only for debugging reasons
+~*RAlt::		;if commented out, only for debugging reasons
+~*WheelDown::
+~*WheelUp::
+~*MButton::
+~*RButton::
+~*LWin::
+~*RWin::
+~*Down::
+~*Up::
+~*Left::
+~*Right::
+~*PgDn::
+~*PgUp::
+~*Home::
+~*End::
+~*WheelLeft::
+~*WheelRight::
+~*LButton::	;as above, but without F_DestroyTriggerstringTips()
 	; OutputDebug, % "~LButton:" . "`n"
 	ToolTip,	;this line is necessary to close tooltips.
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
@@ -778,21 +789,24 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
-F_InternalHotstrings()
+F_InternalHot()
 {
 	global	;assume-global mode of operation
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Application hotstrings"] . "." . A_Space . TransA["All of them are ""immediate execute"" (*)"] . "`n"
-		. TransA["and active in whole operating system (any window)"]											. "`n"
+		. TransA["and active in whole operating system (any window)"] . ":"										. "`n"
 		. "`n`n"
 		. "hshelp/" . A_Tab . A_Tab . 	TransA["run web browser, enter Hotstrings webpage"]					 	. "`n"
 		. "hsstop/" . A_Tab . A_Tab . 	TransA["exit Hotstrings application"]				 					. "`n"
 		. "hsexit/" . A_Tab . A_Tab . 	TransA["exit Hotstrings application"]				 					. "`n"
-		. "hstobble/" . A_Tab . 	 		TransA["toggle triggerstrings tips and hotstrings"]						. "`n"
+		. "hstoggle/" . A_Tab . 	 		TransA["toggle triggerstrings tips and hotstrings"]						. "`n"
 		. "hssuspend/" . A_Tab . 	 	TransA["suspend triggerstrings tips and hotstrings"]						. "`n"
 		. "hsenable/" . A_Tab . 			TransA["enable triggerstring tips and hotstrings"]						. "`n"
 		. "hsrestart/" . A_Tab . 		TransA["reload Hotstrings application"]									. "`n"
 		. "hsreload/" . A_Tab .			TransA["reload Hotstrings application"]									. "`n"
-		. "hsstats/" . A_Tab . A_Tab . 	TransA["show application statistics"]
+		. "hsstats/" . A_Tab . A_Tab . 	TransA["show application statistics"]									. "`n"
+		. "`n`n"
+		. "Application hotkeys" . ":"																		. "`n"
+		. "Ctrl + Win + H" . A_Tab . 		TransA["show main application GUI"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HS3SearchLeft()
@@ -2249,7 +2263,7 @@ F_OneCharPressed(ih, Char)
 	local	WhereToCut := 0, shortened := ""
 
 	Critical, On
-	; OutputDebug, % "Char:" . Char . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "Char:" . Char . "`n"
 	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))	;ini_MHSEn = Menu Hotstring Sound Enable; this is very unfortunate that SoundBeep is used (instead of SoundPlay). As a consequence when somebody presses very quickly some characters, this function is run "one after another" character and no other functions are run. This could lead to unwanted behaviour.
 	{
 		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed. Future: replace SoundBeep with SoundPlay.
@@ -3262,6 +3276,7 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 	local	PressedKey := A_ThisHotkey, Temp1 := "", DynVarRef := ""
 	static 	IsCursorPressed := false, IntCnt := 0, MenuMax := 0
 
+	; OutputDebug, % A_ThisFunc . "`n"
 	if (!ini_ATEn)
 		return
 	MenuMax 	:= a_Tips.Count()
@@ -11763,7 +11778,9 @@ Apostrophe ' 											= Apostrophe '
 Application											= A&pplication
 Application has been running since							= Application has been running since
 Application help										= Application help
+Application hotkeys										= Application hotkeys
 Application hotstrings									= Application hotstrings
+Application hotstrings && hotkeys							= Application hotstrings && hotkeys
 Application language changed to: 							= Application language changed to:
 Application mode										= Application mode
 Application statistics									= Application statistics
@@ -11879,6 +11896,7 @@ Enable/disable libraries									= Enable/disable &libraries
 Enable/disable selected definition							= Enable/disable selected definition
 Enable/disable triggerstring tips 							= Enable/disable triggerstring tips	
 Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 4th edition of this application, 2021 by Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
+enable triggerstring tips and hotstrings					= enable triggerstring tips and hotstrings
 EnDis parameter is missing								= EnDis parameter is missing
 Enter 												= Enter 
 Enter a name for the new library 							= Enter a name for the new library
@@ -12121,6 +12139,7 @@ show application statistics								= show application statistics
 Show intro											= Show intro
 Show Introduction window after application is restarted?		= Show Introduction window after application is restarted?
 Show library header										= Show library header
+show main application GUI								= show main application GUI
 Show Sandbox											= Show Sandbox
 Events: signaling										= Events: signaling
 Silent mode											= Silent mode
