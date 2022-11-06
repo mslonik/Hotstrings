@@ -551,6 +551,7 @@ Critical, Off
 	F_GuiAboutLink2()
 return
 
+:*:hsquit/::
 :*:hsstop/::
 :*:hsexit/::										;exit Hotststrings application
 	F_Exit()
@@ -569,8 +570,9 @@ return
 
 :*:hsenable/::
 	F_TrayEnableHotkeys()
-return	
+return
 
+:*:hsdisable/::
 :*:hssuspend/::									;toggle suspend hotstrings and triggerstrings
 	F_TraySuspendHotkeys()
 return
@@ -797,9 +799,11 @@ F_InternalHot()
 		. "`n`n"
 		. "hshelp/" . A_Tab . A_Tab . 	TransA["run web browser, enter Hotstrings webpage"]					 	. "`n"
 		. "hsstop/" . A_Tab . A_Tab . 	TransA["exit Hotstrings application"]				 					. "`n"
+		. "hsquit/" . A_Tab . A_Tab . 	TransA["exit Hotstrings application"]				 					. "`n"
 		. "hsexit/" . A_Tab . A_Tab . 	TransA["exit Hotstrings application"]				 					. "`n"
 		. "hstoggle/" . A_Tab . 	 		TransA["toggle triggerstrings tips and hotstrings"]						. "`n"
 		. "hssuspend/" . A_Tab . 	 	TransA["suspend triggerstrings tips and hotstrings"]						. "`n"
+		. "hsdisable/" . A_Tab . 		TransA["disable triggerstring tips and hotstrings"]
 		. "hsenable/" . A_Tab . 			TransA["enable triggerstring tips and hotstrings"]						. "`n"
 		. "hsrestart/" . A_Tab . 		TransA["reload Hotstrings application"]									. "`n"
 		. "hsreload/" . A_Tab .			TransA["reload Hotstrings application"]									. "`n"
@@ -11890,6 +11894,7 @@ Deleting hotstring... 									= Deleting hotstring...
 Deleting hotstring. Please wait... 						= Deleting hotstring. Please wait...
 Disable 												= Disable
 disable												= disable
+disable triggerstring tips and hotstrings					= disable triggerstring tips and hotstrings
 DISABLED												= DISABLED
 Do you want to replace it with source definition?				= Do you want to replace it with source definition?
 Download if update is available on startup?					= Download if update is available on startup?
