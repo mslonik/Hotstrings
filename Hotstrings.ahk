@@ -11998,7 +11998,6 @@ In order to Delete selected library filename at first select one from drop down 
 In order to display library header please at first select library name from drop down list. = In order to display library header please at first select library name from drop down list.
 is added in section  [GraphicalUserInterface] of Config.ini		= is added in section  [GraphicalUserInterface] of Config.ini
 is empty at the moment.									= is empty at the moment.
-is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv? = is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?
 Introduction											= Introduction
 It means other script threads are still running. Triggerstring tips are off for your convenience. = It means other script threads are still running. Triggerstring tips are off for your convenience.
 It means triggerstring tips state is restored and hotstring definitions will be triggered as usual.		= It means triggerstring tips state is restored and hotstring definitions will be triggered as usual.
@@ -12010,7 +12009,6 @@ Let's make your PC personal again... 						= Let's make your PC personal again..
 Libraries folder: move it to new location					= Libraries folder: move it to new location
 Libraries folder: restore it to default location				= Libraries folder: restore it to default location
 Libraries 											= &Libraries
-Libraries folder:										= Libraries folder:
 Library content (F2, context menu)							= Library content (F2, context menu)
 Library 												= Library
 Library name:											= Library name:
@@ -13758,8 +13756,7 @@ F_CreateLogFolder()
 F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 {
 	global ;assume-global mode of operation
-	local 		v_IsLibraryEmpty 	:= true
-			,	v_ConfigLibrary 	:= ""
+	local 		v_ConfigLibrary 	:= ""
 			,	o_Libraries 		:= {}
 			,	v_LibFileName 		:= ""
 			,	key 				:= 0
@@ -13784,28 +13781,12 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exists!"] 
 			. "`n`n" . ini_HADL . "`n`n" . TransA["folder is now created"] . "."
 	}
-	else 	;Check if Libraries subfolder is empty. If it does, display warning.
+	else
 	{
-		Loop, Files, % ini_HADL . "\*.csv"
-		{
-			v_IsLibraryEmpty := false
-			break
-		}
-	}
-	if (v_IsLibraryEmpty)
-	{
-		MsgBox, 52, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Libraries folder:"] . "`n`n" . ini_HADL . A_Space . "`n`n"
-			. TransA["is empty. No (triggerstring, hotstring) definition will be loaded. Do you want to create the default library file: PriorityLibrary.csv?"]
-		IfMsgBox, Yes
-		{
-			FileAppend, , % ini_HADL . "\" . "PriorityLibrary.csv", UTF-8
-			F_ValidateIniLibSections()
-		}
-	}
-	else	;if !(v_IsLibraryEmpty) ;Read names library files (*.csv) from Library subfolder into object o_Libraries
 		Loop, Files, % ini_HADL . "\*.csv"
 			o_Libraries.Push(A_LoopFileName)
-	
+	}
+
 ;Check if Config.ini contains in section [Libraries] file names which are actually in library subfolder. Synchronize [Libraries] section with content of subfolder.
 ;Parse the TempLoadLib.
 	IniRead, TempLoadLib, % ini_HADConfig, LoadLibraries
@@ -13826,20 +13807,10 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 			ini_LoadLib[value] := 1
 	}
 	
-;Delete and recreate [Libraries] section of Config.ini mirroring ini_LoadLib associative table. "PriorityLibrary.csv" as the last one.
+;Delete and recreate [Libraries] section of Config.ini mirroring ini_LoadLib associative table.
 	IniDelete, % ini_HADConfig, LoadLibraries
 	for key, value in ini_LoadLib
-	{
-		if (key != "PriorityLibrary.csv")
-			SectionTemp .= key . "=" . value . "`n"
-		else
-		{
-			PriorityFlag := true
-			ValueTemp := value
-		}
-	}
-	if (PriorityFlag)
-		SectionTemp .= "PriorityLibrary.csv" . "=" . ValueTemp
+		SectionTemp .= key . "=" . value . "`n"
 	
 	IniWrite, % SectionTemp, % ini_HADConfig, LoadLibraries
 	
@@ -13859,26 +13830,16 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 				ini_ShowTipsLib[value] 	:= v_LibFlagTemp
 ,				FlagFound 			:= true
 			}
-		}	
+		}
 		if !(FlagFound)
 			ini_ShowTipsLib[value] := 1
 	}
 	
-;Delete and recreate [ShowTipsLibraries] section of Config.ini mirroring ini_ShowTipsLib associative table. "PriorityLibrary.csv" as the last one.
+;Delete and recreate [ShowTipsLibraries] section of Config.ini mirroring ini_ShowTipsLib associative table.
 	IniDelete, % ini_HADConfig, ShowTipsLibraries
 	for key, value in ini_ShowTipsLib
-	{
-		if (key != "PriorityLibrary.csv")
-			SectionTemp .= key . "=" . value . "`n"
-		else
-		{
-			PriorityFlag 	:= true
-,			ValueTemp 	:= value
-		}
-	}
-	if (PriorityFlag)
-		SectionTemp .= "PriorityLibrary.csv" . "=" . ValueTemp
-	
+		SectionTemp .= key . "=" . value . "`n"
+
 	IniWrite, % SectionTemp, % ini_HADConfig, ShowTipsLibraries
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
