@@ -9168,6 +9168,7 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 ,			Triggerstring := "", TriggOpt := "", OutFun := "", EnDis := "", Hotstring := "", Comment := ""
 ,			WhichRow := 0, TheWholeFile := "", LibraryHeader := ""
 
+	F_GuiHS3_EnDis("Disable")			;Disable all GuiControls for deletion time d(t, o, h)
 	Gui, HS3Search:	+Disabled
 	Gui, HS3:			+Disabled
 	Gui, MoveLibs: 	Default
@@ -9181,7 +9182,7 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 	}
 	Gui, HS3:			-Disabled
 	Gui, MoveLibs: 	Destroy
-	GuiControlGet, SourceLibrary, , % IdDDL2	;tu jestem: jak najpierw wybiore definicje a potem klikne w "utworz biblioteke".
+	GuiControlGet, SourceLibrary, , % IdDDL2
 
 	Gui, HS3:			Default
 	WhichRow := LV_GetNext(, "Focused")
@@ -9264,6 +9265,7 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 			break
 		}
 	}
+	F_GuiHS3_EnDis("Enable")			;Enable all GuiControls for deletion time d(t, o, h)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiMoveLibs_CreateDetermine()
@@ -9943,10 +9945,11 @@ F_DeleteHotstring()
 	;6. Decrement library counter.
 	global ;assume-global mode
 	local 	LibraryFullPathAndName := ini_HADL . "\" . v_SelectHotstringLibrary, TheWholeFile := "", LibraryHeader := ""
-,			SelectedRow := 0, Pointer := 0, index := 0
+,			SelectedRow := 0, index := 0
 ,			key := 0, val := "", options := "", triggerstring := "", EnDis := "", hotstring := ""
-	
+
 	Gui, HS3: Default
+	F_GuiHS3_EnDis("Disable")			;Disable all GuiControls for deletion time d(t, o, h)	
 	Gui, HS3: +OwnDialogs
 	
 	SelectedRow := LV_GetNext()
@@ -9960,7 +9963,7 @@ F_DeleteHotstring()
 	LV_GetText(EnDis,			SelectedRow, 1)	;enabled or disabled definition
 	LV_GetText(hotstring, 		SelectedRow, 5)
 	MsgBox, % 256 + 64 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Selected definition d(t, o, h) will be deleted. Do you want to proceed?"] . "`n`n"
-		. TransA["triggerstring"] . ":" . A_Space . triggerstring . A_Tab . TransA["options"] . ":" . A_Space . options . A_Tab . TransA["hotstring"] . ":" . A_Space . hotstring
+		. TransA["Triggerstring"] . ":" . A_Space . triggerstring . A_Tab . TransA["options"] . ":" . A_Space . options . A_Tab . TransA["hotstring"] . ":" . A_Space . hotstring
 		. "`n`n" . TransA["If you remove one of the definitions which was multiplied (e.g. duplicated), none of definitions will be active. Therefore It is suggested in order to to enable the second one to reload the application."]
 	IfMsgBox, No
 		return
@@ -9991,9 +9994,10 @@ F_DeleteHotstring()
 			Hotstring(":" . options . ":" . triggerstring, , "Off")	;if duplicated definition exists, only one is active. As a consequence if one is removed, the second one is not activated automatically: none is enabled anymore till application is restarted.
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % "Function:" . A_ThisFunc . "`n`n" 
-			. TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
-			. "triggerstring:" . A_Space . v_Triggerstring . A_Tab . "options:" . A_Space . options . "`n" 
-			. TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 
+				. TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
+				. TransA["Triggerstring"] . ":" . A_Space . v_Triggerstring . A_Tab . TransA["options"] . ":" . A_Space . options . "`n" 
+				. TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 
+				, 10	;10 s timeout
 	}
 	
 	;3. Remove selected row from List View.
@@ -10003,7 +10007,6 @@ F_DeleteHotstring()
 	if (LibraryHeader)
 		FileAppend, % LibraryHeader, % LibraryFullPathAndName, UTF-8
 	FileAppend, % F_ConvertListViewIntoTxt(), % LibraryFullPathAndName, UTF-8
-	TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
 	
 	;5. Decrement library counter.
 	UpdateLibraryCounter(--v_LibHotstringCnt, --v_TotalHotstringCnt)
@@ -10024,6 +10027,13 @@ F_DeleteHotstring()
 	for index in a_Combined	;recreate array a_Combined
 		a_Combined[index] := a_Triggerstring[index] . "|" . a_TriggerOptions[index] . "|" . a_EnableDisable[index] . "|" . a_Hotstring[index]
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	
+	F_GuiHS3_EnDis("Enable")			;Enable all GuiControls for deletion time d(t, o, h)
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The definition:"] . "`n`n"
+			. TransA["Triggerstring"] . ":" . A_Space . v_Triggerstring . A_Tab . TransA["options"] . ":" . A_Space . options . "`n" 
+			. TransA["was just deleted from"] . "`n"
+			. TransA["Library name:"] . A_Space . v_SelectHotstringLibrary
+			, 10	;10 s timeout
+	TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ConvertListViewIntoTxt()
@@ -12074,7 +12084,7 @@ Open libraries folder in Windows Explorer					= Open libraries folder in Windows
 Opening Curly Bracket { 									= Opening Curly Bracket {
 Opening Round Bracket ( 									= Opening Round Bracket (
 Opening Square Bracket [ 								= Opening Square Bracket [
-options												= options	
+options												= options
 or													= or
 Out. Fun.												= Out. Fun.
 question												= question
@@ -12279,6 +12289,7 @@ Visit public libraries webpage							= Visit public libraries webpage
 (Join`n `
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
+was just deleted from									= was just deleted from
 was successfully downloaded.								= was successfully downloaded.
 Welcome to Hotstrings application!							= Welcome to Hotstrings application!
 Windows key modifier									= Windows key modifier
