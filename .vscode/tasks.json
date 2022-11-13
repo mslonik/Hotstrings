@@ -40,9 +40,11 @@
 							"c:\\Users\\macie\\Documents\\GitHub\\Hotstrings\\Hotstrings.exe",
 							"-Destination",
 							"c:\\Users\\macie\\Documents\\GitHub\\Hotstrings2\\Hotstrings2.exe"
-							]
+							],
 			},
-			"group": "build",
+			"dependsOrder":	"sequence",
+			"dependsOn":		["Hotstrings.ahk  → Hotstrings.exe and compress"],
+			"group": 			"build",
 			"presentation":
 			{
                     "echo": 			false,
@@ -65,7 +67,7 @@
 			},
 			"dependsOrder":	"sequence",
 			"dependsOn":		["Hotstrings.ahk  → Hotstrings.exe and compress", "Prepare Hotstrings2.exe"],
-			"group": "build",
+			"group": 			"build",
 			"presentation":
 			{
 				"echo": 			true,
