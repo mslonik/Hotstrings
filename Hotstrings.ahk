@@ -14,11 +14,10 @@
 #KeyHistory, 			0		; KeyHistory is disabled to make it harder to determine how script works.
 #HotkeyInterval, 		1000		; Specifies the rate of hotkey activations beyond which a warning dialog will be displayed. Default value = 2000 ms.
 #MaxHotkeysPerInterval, 	200		; Specifies the rate of hotkey activations beyond which a warning dialog will be displayed. Default value = 70.
+ListLines, 			Off		; ListLines is disabled to make it harder to determine how script works.
 SendMode, 			Input	; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir, 	%A_ScriptDir%	; Ensures a consistent starting directory.
-FileEncoding, 			UTF-16	; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN
-; Warning! UTF-16 is not recognized by Notepad++ editor (2021), which recognizes correctly UCS-2 (defined by the International Standard ISO/IEC 10646). 
-; BMP = Basic Multilingual Plane.
+SetWorkingDir, 	% A_ScriptDir	; Ensures a consistent starting directory.
+FileEncoding, 			UTF-16	; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN Warning! UTF-16 is not recognized by Notepad++ editor (2021), which recognizes correctly UCS-2 (defined by the International Standard ISO/IEC 10646). BMP = Basic Multilingual Plane.
 CoordMode, Caret,	Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs. 
 CoordMode, ToolTip,	Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs.
 CoordMode, Mouse,	Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs.
@@ -35,8 +34,8 @@ global AppVersion				:= "3.6.8"
 ;@Ahk2Exe-Set OriginalScriptlocation, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings
 ;@Ahk2Exe-SetCompanyName  http://mslonik.pl
 ;@Ahk2Exe-SetFileVersion %U_vAppVersion%
-FileInstall, hotstrings.ico, % AppIcon, 0
-FileInstall, LICENSE, LICENSE, 0
+FileInstall, hotstrings.ico, 	% AppIcon, 	0
+FileInstall, LICENSE, 		LICENSE, 		0
 ; - - - - - - - - - - - - - - - - - - - - - - - S E C T I O N    O F    G L O B A L     V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l like "silent mode"
 ,		v_IndexLog 			:= 1			;for logging, if Hotstrings application is run with d parameter.
@@ -2372,7 +2371,7 @@ F_OneCharPressed(ih, Char)
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
 {
 	global	;assume-global mode of operation
-	v_InputString := "", v_TrigTipsInput := "", v_UndoHotstring := "", v_UndoTriggerstring := ""	;used by output functions: F_HOF_CLI, F_HOF_MCL, F_HOF_MSI, F_HOF_SE, F_HOF_SI, F_HOF_SP, F_HOF_SR
+	v_InputString := "", v_TrigTipsInput := "", v_UndoHotstring := "", v_UndoTriggerstring := ""	;used by output functions: F_HOF_MCL, F_HOF_MSI
 ,	v_InputH 			:= InputHook("V I1 L0")	;I1 by default
 ,	v_InputH.OnChar 	:= Func("F_OneCharPressed")
 ,	v_InputH.OnKeyUp 	:= Func("F_BackspaceProcessing")
@@ -3714,7 +3713,7 @@ F_GuiEvents_CreateObjects()
 	
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T25,					% TransA["Triggerstring tips"] . A_Space . "+" . A_Space . TransA["Triggers"] . A_Space . "+" . A_Space . TransA["Hotstrings"]
 	GuiControl, Hide, % IdEvTt_T25
-	
+;#/* commercial only beginning
 	Gui, GuiEvents: Tab, 											% TransA["Active triggerstring tips"]
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvAT_T1,						% TransA["Active triggerstring tips"] . ":"
@@ -3744,6 +3743,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B2 gF_EvSM_B2 +Default,		% TransA["Apply"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B3 gF_EvSM_B3,			% TransA["Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B4 gF_EvSM_B4,			% TransA["Cancel"]
+;#*/ commercial only end
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_CloseSubGui(WhatGuiToDestroy)
@@ -14113,8 +14113,11 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 {
 	global	;assume-global mode
 	Critical, On
-	local	MenuX := 0, MenuY := 0, v_MouseX := 0, v_MouseY := 0, a_MCSIMenuPos := [],	TriggerChar := "", UserInput := "", ThisHotkey := A_ThisHotkey, WhatPartTriggered := "", LengthToBeCut := 0, EndChar := A_EndChar
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1, ShiftTabIsFound := false
+	local	tempx := "", a_MCSIMenuPos := [], ThisHotkey := A_ThisHotkey, EndChar := A_EndChar
+
+	tempx := SubStr(v_InputString, 1, 1)
+	if tempx is not alnum
+		v_InputString := SubStr(v_InputString, 2)
 
 	v_InputH.VisibleText 	:= false
 ,	v_Options 			:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
@@ -14201,7 +14204,11 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 {
 	global	;assume-global mode of operation
 	Critical, On
-	local	ThisHotkey := A_ThisHotkey, EndChar := A_EndChar, temp := 0, FirstPart := "", SecondPart := ""
+	local	tempx := "", ThisHotkey := A_ThisHotkey, EndChar := A_EndChar, temp := 0, FirstPart := "", SecondPart := ""
+
+	tempx := SubStr(v_InputString, 1, 1)
+	if tempx is not alnum
+		v_InputString := SubStr(v_InputString, 2)
 
 	F_DestroyTriggerstringTips(ini_TTCn)
 	v_UndoHotstring 	:= ReplacementString
@@ -14312,7 +14319,11 @@ F_HOF_MCL(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipb
 {
 	global	;assume-global mode
 	Critical, On
-	local	MenuX := 0, MenuY := 0, v_MouseX := 0, v_MouseY := 0, a_MCLIMenuPos := [], ThisHotkey := A_ThisHotkey, WhatPartTriggered := "", LengthToBeCut := 0, EndChar := A_EndChar
+	local	tempx := "", a_MCLIMenuPos := [], ThisHotkey := A_ThisHotkey, EndChar := A_EndChar
+
+	tempx := SubStr(v_InputString, 1, 1)
+	if tempx is not alnum
+		v_InputString := SubStr(v_InputString, 2)
 
 	v_InputH.VisibleText 	:= false
 ,	v_Options 			:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
