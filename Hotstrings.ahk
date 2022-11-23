@@ -542,6 +542,11 @@ Critical, Off
 		return
 #If
 
+#If WinActive("ahk_id" MoveLibsHwnd)
+	F8::
+		F_Move()
+	return
+#If
 
 #If F_IsItEdit()
 	AppsKey::	;blocks default context menu for Edit fields
@@ -606,7 +611,7 @@ return
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
 	F_DestroyTriggerstringTips(ini_TTCn)
 	return
-~*F1::		;pressing any of function keys will destroy triggerstring tips
+~*F1::		;pressed any function key destroy triggerstring tips
 ~*F2::
 ~*F3::
 ~*F4::
@@ -2251,7 +2256,7 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 	NewX := Window2X, NewY := Window2Y - Window2H, NewW := Window2W, NewH := Window2H	;bottom -> top
 	if (NewX = "") or (NewY = "")
 		{
-			OutputDebug, % "A_ThisFunc:" . A_Space . A_ThisFunc . A_Tab . "return" . "`n"
+			; OutputDebug, % "A_ThisFunc:" . A_Space . A_ThisFunc . A_Tab . "return" . "`n"
 			return
 		}
 	Gui, % GuiName . ": Show", Hide x%NewX%  y%NewY%	;coordinates: screen
@@ -8899,50 +8904,61 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 	Gui, % WhichGUI . ":" . A_Space . "Submit", NoHide	;I don't know how to combine these 2x lines into 1.
 	Gui, % WhichGUI . ":" . A_Space . "+OwnDialogs"
 
-	if (Trim(v_Triggerstring) = "")
+	if (v_Triggerstring = "")
 	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Triggerstring cannot be empty  if you wish to add new hotstring"] . "."
+		MsgBox, % 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Triggerstring cannot be empty if you wish to add new hotstring"] . "."
 		return, true
 	}
+	if (Trim(v_Triggerstring) = "")
+		MsgBox, % 48 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Triggerstring contains only white characters. Are you sure to continue?"]
+		IfMsgBox, No
+			return, true
 	if InStr(v_SelectFunction, "Menu")
 	{
 		if ((Trim(v_EnterHotstring) = "") and (Trim(v_EnterHotstring1) = "") and (Trim(v_EnterHotstring2) = "") and (Trim(v_EnterHotstring3) = "") and (Trim(v_EnterHotstring4) = "") and (Trim(v_EnterHotstring5) = "") and (Trim(v_EnterHotstring6) = ""))
 		{
-			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Replacement text is blank. Do you want to proceed?"]
+			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring text is blank. Do you want to proceed?"]
 			IfMsgBox, No
 				return, true
 		}
-		if (Trim(v_EnterHotstring) != "")
+		v_EnterHotstring := Trim(v_EnterHotstring)
+		if (v_EnterHotstring != "")
 		{
 			v_EnterHotstring := StrReplace(v_EnterHotstring, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
 			TextInsert .=  v_EnterHotstring
 		}
-		if (Trim(v_EnterHotstring1) != "")
+		v_EnterHotstring1 := Trim(v_EnterHotstring1)
+		if (v_EnterHotstring1 != "")
 		{
 			v_EnterHotstring1 := StrReplace(v_EnterHotstring1, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
 			TextInsert .= "¦" . v_EnterHotstring1
 		}
-		if (Trim(v_EnterHotstring2) != "")
+		v_EnterHotstring2 := Trim(v_EnterHotstring2)
+		if (v_EnterHotstring2 != "")
 		{
 			v_EnterHotstring2 := StrReplace(v_EnterHotstring2, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
 			TextInsert .= "¦" . v_EnterHotstring2
 		}
-		if (Trim(v_EnterHotstring3) != "")
+		v_EnterHotstring3 := Trim(v_EnterHotstring3)
+		if (v_EnterHotstring3 != "")
 		{
 			v_EnterHotstring3 := StrReplace(v_EnterHotstring3, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
 			TextInsert .= "¦" . v_EnterHotstring3
 		}
-		if (Trim(v_EnterHotstring4) != "")
+		v_EnterHotstring4 := Trim(v_EnterHotstring4)
+		if (v_EnterHotstring4 != "")
 		{
 			v_EnterHotstring4 := StrReplace(v_EnterHotstring4, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
 			TextInsert .= "¦" . v_EnterHotstring4
 		}
-		if (Trim(v_EnterHotstring5) != "")
+		v_EnterHotstring5 := Trim(v_EnterHotstring5)
+		if (v_EnterHotstring5 != "")
 		{
 			v_EnterHotstring5 := StrReplace(v_EnterHotstring5, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
 			TextInsert .= "¦" . v_EnterHotstring5
 		}
-		if (Trim(v_EnterHotstring6) != "")
+		v_EnterHotstring6 := Trim(v_EnterHotstring6)
+		if (v_EnterHotstring6 != "")
 		{
 			v_EnterHotstring6 := StrReplace(v_EnterHotstring6, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
 			TextInsert .= "¦" . v_EnterHotstring6
@@ -8950,9 +8966,10 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 	}
 	else
 	{
-		if (Trim(v_EnterHotstring) = "")
+		v_EnterHotstring := Trim(v_EnterHotstring)
+		if (v_EnterHotstring = "")
 		{
-			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Replacement text is blank. Do you want to proceed?"] 
+			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring text is blank. Do you want to proceed?"] 
 			IfMsgBox, No
 				return, true
 		}
@@ -9219,6 +9236,7 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 			{
 				Gui, HS3:			-Disabled
 				Gui, HS3:			Default
+				F_GuiHS3_EnDis("Enable")
 				return
 			}
 		}
@@ -9283,6 +9301,7 @@ F_GuiMoveLibs_CreateDetermine()
 							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
 		,v_WB1 := 0,			v_WB2 := 0,			v_DB := 0
 		,key := "",			value := 0,			v_SelectedRow := 0
+	,	SourceLibrary := ""	
 	
 	Gui, MoveLibs: New, 	-Caption +Border -Resize +HwndMoveLibsHwnd +Owner
 	Gui, MoveLibs: Margin,	% c_xmarg, % c_ymarg
@@ -9291,17 +9310,17 @@ F_GuiMoveLibs_CreateDetermine()
 	Gui, MoveLibs: Default
 	
 	Gui, MoveLibs: Add, Text,     x0 y0 HwndIdMoveLibs_T1, 						% TransA["Select the target library:"]
-	Gui, MoveLibs: Add, ListView, x0 y0 HwndIdMoveLibs_LV LV0x1 +AltSubmit -Hdr -Multi, 	| 	;-Hdr (minus Hdr) to omit the header (the special top row that contains column titles). "|" is required!
+	Gui, MoveLibs: Add, ListView, x0 y0 HwndIdMoveLibs_LV LV0x1 +AltSubmit -Hdr -Multi, 	| 	;-Hdr (minus Hdr) to omit the header (the special top row that contains column titles). "|" is required! ;LV0x1 +/-Grid. Displays gridlines around rows and columns.
 	Gui, MoveLibs: Add, Button, 	x0 y0 HwndIdMoveLibs_B1 Default gF_Move,			% TransA["Move (F8)"]
 	Gui, MoveLibs: Add, Button, 	x0 y0 HwndIdMoveLibs_B2 gMoveLibsGuiCancel,			% TransA["Cancel"]
 	
 	v_xNext := c_xmarg
-	v_yNext := c_ymarg
+,	v_yNext := c_ymarg
 	GuiControl, Move, % IdMoveLibs_T1, % "x" v_xNext "y" v_yNext
 	
 	GuiControlGet, v_OutVarTemp2, Pos, % IdMoveLibs_LV
 	v_yNext := c_HofText + c_ymarg
-	v_hNext := v_OutVarTemp2H * 4
+,	v_hNext := v_OutVarTemp2H * 4
 	GuiControl, Move, % IdMoveLibs_LV, % "x" v_xNext "y" v_yNext "h" v_hNext ; by default ListView shows just 5 rows
 	
 	GuiControlGet, v_OutVarTemp1, Pos, % IdMoveLibs_LV
@@ -9309,20 +9328,22 @@ F_GuiMoveLibs_CreateDetermine()
 	GuiControlGet, v_OutVarTemp3, Pos, % IdMoveLibs_B2
 	
 	v_WB1 := v_OutVarTemp2W + 2 * c_xmarg
-	v_WB2 := v_OutVarTemp3W + 2 * c_xmarg
-	v_DB  := v_OutVarTemp1W - (v_WB1 + v_WB2)
+,	v_WB2 := v_OutVarTemp3W + 2 * c_xmarg
+,	v_DB  := v_OutVarTemp1W - (v_WB1 + v_WB2)
 	
-	v_xNext := c_xmarg
-	v_yNext := v_OutVarTemp1Y + v_OutVarTemp1H + c_ymarg
-	v_wNext := v_WB1
+,	v_xNext := c_xmarg
+,	v_yNext := v_OutVarTemp1Y + v_OutVarTemp1H + c_ymarg
+,	v_wNext := v_WB1
 	GuiControl, Move, % IdMoveLibs_B1, % "x" v_xNext "y" v_yNext "w" v_wNext
 	
 	v_xNext := c_xmarg + v_WB1 + v_DB
-	v_wNext := v_WB2
+,	v_wNext := v_WB2
 	GuiControl, Move, % IdMoveLibs_B2, % "x" v_xNext "y" v_yNext "w" v_wNext
 	
+	; Fill in IdMoveLibs_LV with values
+	GuiControlGet, SourceLibrary, , % IdDDL2
 	for key, value in ini_LoadLib
-		if (value)
+		if (value) and (key != SourceLibrary)
 			LV_Add("", key)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9330,9 +9351,9 @@ F_MoveList()
 {
 	global	;assume-global mode
 	local 	v_SelectedRow := 0
-			,Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
-			,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
-			,NewWinPosX := 0, NewWinPosY := 0
+		,	Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,	Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,	NewWinPosX := 0, NewWinPosY := 0
 	
 	WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	F_GuiMoveLibs_CreateDetermine()
@@ -9344,7 +9365,7 @@ F_MoveList()
 	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
 	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
 	
-	Gui, MoveLibs: Show, % "AutoSize" . A_Space . "X" . NewWinPosX . A_Space . "Y" . NewWinPosY . A_Space . "yCenter"
+	Gui, MoveLibs: Show, % "AutoSize" . A_Space . "X" . NewWinPosX . A_Space . "Y" . NewWinPosY . A_Space
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HSLV2() ; copy content of List View 1 to editable fields of HS3 Gui
@@ -11929,9 +11950,9 @@ Enter a name for the new library 							= Enter a name for the new library
 Enter a new library name									= Enter a new library name
 Enter hotstring 										= Enter hotstring
 enter selected hotstring									= enter selected hotstring
-selection								= selection
+selection												= selection
 Enter triggerstring										= Enter triggerstring
-Triggerstring cannot be empty  if you wish to add new hotstring	= Triggerstring cannot be empty  if you wish to add new hotstring
+Triggerstring cannot be empty if you wish to add new hotstring	= Triggerstring cannot be empty if you wish to add new hotstring
 Error												= Error
 ErrorLevel was triggered by NewInput error. 					= ErrorLevel was triggered by NewInput error.
 Error reading library file:								= Error reading library file:
@@ -12116,7 +12137,7 @@ reload Hotstrings application								= reload Hotstrings application
 Reload in default mode									= Reload in default mode
 Reload in silent mode									= Reload in silent mode
 Rename selected library filename							= Rename selected library filename
-Replacement text is blank. Do you want to proceed? 			= Replacement text is blank. Do you want to proceed?
+Hotstring text is blank. Do you want to proceed? 				= Hotstring text is blank. Do you want to proceed?
 Repository version										= Repository version
 Required content is copied to the Clipboard					= Required content is copied to the Clipboard
 Required encoding: UTF-8 with BOM. Application will exit now.	= Required encoding: UTF-8 with BOM. Application will exit now.
@@ -12270,6 +12291,7 @@ to undo.												= to undo.
 Trigger Opt.										= Trigger Opt.
 Triggers												= Triggers
 Triggerstring 											= Triggerstring
+Triggerstring contains only white characters. Are you sure to continue? = Triggerstring contains only white characters. Are you sure to continue?
 Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
 Triggerstring sound duration [ms]							= Triggerstring sound duration [ms]
 Triggerstring sound frequency range						= Triggerstring sound frequency range
@@ -14221,6 +14243,8 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 ,	ReplacementString 	:= F_ReplaceAHKconstants(ReplacementString)
 ,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options)
 ,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
+	if (SubStr(ReplacementString, 0) = "``")	;extracts the last character
+		ReplacementString := SubStr(ReplacementString, 1, StrLen(ReplacementString) - 1)	;without last character
 	SetKeyDelay, -1, -1	;Delay = -1, PressDuration = -1, -1: no delay at all; this can be necessary if SendInput is reduced to SendEvent (in case low level input hook is active in another script)
 	; OutputDebug, % "A_SendLevel:" . A_Tab . A_SendLevel . "`n"
 	Switch SendFun
