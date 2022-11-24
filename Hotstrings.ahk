@@ -67,7 +67,7 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
 F_LoadCreateTranslationTxt() 			;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
-F_CheckCreateConfigIni() 			;1. Try to load up configuration file. If those files do not exist, create them.
+F_CheckCreateConfigIni() 			;Try to load up configuration file. If those files do not exist, create them.
 F_CheckIfMoveToProgramFiles()			;Checks if move Hotstrings folder to Program Files folder and then restarts application.
 F_CheckIfRemoveOldDir()				;Checks content of Config.ini in order to remove old script directory.
 F_CheckFileEncoding(A_ScriptFullPath)	;checks if script is utf-8 compliant. it has plenty to do wiith github download etc.
@@ -11329,133 +11329,133 @@ F_CheckCreateConfigIni(params*)
 		, HADConfig_App		:= A_ScriptDir . "\" . "Config.ini"
 	
 	ConfigIni := "			
-	(
-[Configuration]
-ClipBoardPasteDelay=300
-HotstringUndo=1
-ShowIntro=1
-CheckRepo=0
-DownloadRepo=0
-HK_Main=#^h
-HK_IntoEdit=~^#c
-HK_UndoLH=~#z
-HK_ToggleTt=none
-THLog=0
-HADConfig=
-HADL=
-[EvStyle_TT]
-TTBackgroundColor=white
-TTBackgroundColorCustom=
-TTTypefaceColor=black
-TTTypefaceColorCustom=
-TTTypefaceFont=Calibri
-TTTypefaceSize=10
-[EvStyle_HM]
-HMBackgroundColor=white
-HMBackgroundColorCustom=
-HMTypefaceColorCustom=
-HMTypefaceColor=black
-HMTypefaceFont=Calibri
-HMTypefaceSize=10
-[EvStyle_AT]
-ATBackgroundColor=green
-ATBackgroundColorCustom=
-ATTypefaceColorCustom=
-ATTypefaceColor=black
-ATTypefaceFont=Calibri
-ATTypefaceSize=10
-[EvStyle_HT]
-HTBackgroundColor=green
-HTBackgroundColorCustom=
-HTTypefaceColorCustom=
-HTTypefaceColor=black
-HTTypefaceFont=Calibri
-HTTypefaceSize=11
-[EvStyle_UH]
-UHBackgroundColor=green
-UHBackgroundColorCustom=
-UHTypefaceColorCustom=
-UHTypefaceColor=black
-UHTypefaceFont=Calibri
-UHTypefaceSize=11
-[Event_ActiveTriggerstringTips]
-ATEn=0
-[Event_BasicHotstring]
-OHTtEn=1
-OHTD=2000
-OHTP=1
-OHSEn=0
-OHSF=500
-OHSD=250
-[Event_MenuHotstring]
-MHMP=1
-MHSEn=1
-MHSF=400
-MHSD=250
-[Event_UndoHotstring]
-UHTtEn=1
-UHTD=2000
-UHTP=1
-UHSEn=0
-UHSF=600
-UHSD=250
-[Event_TriggerstringTips]
-TTTtEn=1
-TTTD=2000
-TTTP=1
-TipsSortAlphabetically=1
-TipsSortByLength=1
-TipsAreShownAfterNoOfCharacters=1
-MNTT=20
-TTCn=2
-[StaticTriggerstringHotstring]
-SWPosX=
-SWPosY=
-SWPosW=
-SWPosH=
-[GraphicalUserInterface]
-Language=English.txt
-MainWindowPosX=
-MainWindowPosY=
-MainWindowPosW=
-MainWindowPosH=
-Sandbox=1
-WhichGui=HS3
-GuiFontColor=Black
-GuiFontColorHighlighted=Blue
-GuiWindowColor=Default
-GuiControlColor=Default
-GuiSizeOfMarginX=10
-GuiSizeOfMarginY=10
-GuiFontType=Calibri
-GuiFontSize=10
-GuiReload=
-GuiMaximized=0
-[EndChars]
-Apostrophe '=1
-Backslash \=1
-Closing Curly Bracket }=1
-Closing Round Bracket )=1
-Closing Square Bracket ]=1
-Colon :=1
-Comma ,=1
-Dot .=1
-Enter=1
-Exclamation Mark !=1
-Minus -=1
-Opening Curly Bracket {=1
-Opening Round Bracket (=1
-Opening Square Bracket [=1
-Question Mark ?=1
-Quote ""=1
-Semicolon ;=1
-Slash /=0
-Space=1
-Tab=1
-Underscore _=1
-[LoadLibraries]
-[ShowTipsLibraries]
-	)"
+		( LTrim
+		[Configuration]
+		ClipBoardPasteDelay=300
+		HotstringUndo=1
+		ShowIntro=1
+		CheckRepo=0
+		DownloadRepo=0
+		HK_Main=#^h
+		HK_IntoEdit=~^#c
+		HK_UndoLH=~#z
+		HK_ToggleTt=none
+		THLog=0
+		HADConfig=
+		HADL=
+		[EvStyle_TT]
+		TTBackgroundColor=white
+		TTBackgroundColorCustom=
+		TTTypefaceColor=black
+		TTTypefaceColorCustom=
+		TTTypefaceFont=Calibri
+		TTTypefaceSize=10
+		[EvStyle_HM]
+		HMBackgroundColor=white
+		HMBackgroundColorCustom=
+		HMTypefaceColorCustom=
+		HMTypefaceColor=black
+		HMTypefaceFont=Calibri
+		HMTypefaceSize=10
+		[EvStyle_AT]
+		ATBackgroundColor=green
+		ATBackgroundColorCustom=
+		ATTypefaceColorCustom=
+		ATTypefaceColor=black
+		ATTypefaceFont=Calibri
+		ATTypefaceSize=10
+		[EvStyle_HT]
+		HTBackgroundColor=green
+		HTBackgroundColorCustom=
+		HTTypefaceColorCustom=
+		HTTypefaceColor=black
+		HTTypefaceFont=Calibri
+		HTTypefaceSize=11
+		[EvStyle_UH]
+		UHBackgroundColor=green
+		UHBackgroundColorCustom=
+		UHTypefaceColorCustom=
+		UHTypefaceColor=black
+		UHTypefaceFont=Calibri
+		UHTypefaceSize=11
+		[Event_ActiveTriggerstringTips]
+		ATEn=0
+		[Event_BasicHotstring]
+		OHTtEn=1
+		OHTD=2000
+		OHTP=1
+		OHSEn=0
+		OHSF=500
+		OHSD=250
+		[Event_MenuHotstring]
+		MHMP=1
+		MHSEn=1
+		MHSF=400
+		MHSD=250
+		[Event_UndoHotstring]
+		UHTtEn=1
+		UHTD=2000
+		UHTP=1
+		UHSEn=0
+		UHSF=600
+		UHSD=250
+		[Event_TriggerstringTips]
+		TTTtEn=1
+		TTTD=2000
+		TTTP=1
+		TipsSortAlphabetically=1
+		TipsSortByLength=1
+		TipsAreShownAfterNoOfCharacters=1
+		MNTT=20
+		TTCn=2
+		[StaticTriggerstringHotstring]
+		SWPosX=
+		SWPosY=
+		SWPosW=
+		SWPosH=
+		[GraphicalUserInterface]
+		Language=English.txt
+		MainWindowPosX=
+		MainWindowPosY=
+		MainWindowPosW=
+		MainWindowPosH=
+		Sandbox=1
+		WhichGui=HS3
+		GuiFontColor=Black
+		GuiFontColorHighlighted=Blue
+		GuiWindowColor=Default
+		GuiControlColor=Default
+		GuiSizeOfMarginX=10
+		GuiSizeOfMarginY=10
+		GuiFontType=Calibri
+		GuiFontSize=10
+		GuiReload=
+		GuiMaximized=0
+		[EndChars]
+		Apostrophe '=1
+		Backslash \=1
+		Closing Curly Bracket }=1
+		Closing Round Bracket )=1
+		Closing Square Bracket ]=1
+		Colon :=1
+		Comma ,=1
+		Dot .=1
+		Enter=1
+		Exclamation Mark !=1
+		Minus -=1
+		Opening Curly Bracket {=1
+		Opening Round Bracket (=1
+		Opening Square Bracket [=1
+		Question Mark ?=1
+		Quote ""=1
+		Semicolon ;=1
+		Slash /=0
+		Space=1
+		Tab=1
+		Underscore _=1
+		[LoadLibraries]
+		[ShowTipsLibraries]
+		)"
 	
 	if (params[1])
 	{
@@ -11566,7 +11566,6 @@ F_LoadHotstringsFromLibraries()
 		{
 			F_LoadDefinitionsFromFile(key)
 			F_LoadTriggTipsFromFile(key)
-			break
 		}
 	}
 
@@ -11578,7 +11577,6 @@ F_LoadHotstringsFromLibraries()
 		{
 			F_LoadDefinitionsFromFile(key)
 			F_LoadTriggTipsFromFile(key)
-			break
 		}
 	}
 }
@@ -13829,7 +13827,6 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 
 ;Check if Config.ini contains in section [Libraries] file names which are actually in library subfolder. Synchronize [Libraries] section with content of subfolder.
 ;Parse the TempLoadLib.
-	IniRead, TempLoadLib, % ini_HADConfig, LoadLibraries
 	for key, value in o_Libraries
 	{
 		FlagFound := false
@@ -13973,7 +13970,7 @@ F_CreateHotstring(txt, nameoffile)
 		}
 	}
 	
-	if ((!Triggerstring) and (Options or SendFun or EnDis or TextInsert))
+	if ((Triggerstring == "") and (Options or SendFun or EnDis or TextInsert))	; previous version: if ((!Triggerstring) and (Options or SendFun or EnDis or TextInsert))
 	{
 		MsgBox, 262420, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Error reading library file:"] . "`n`n" . nameoffile . "`n`n" . TransA["the following line is found:"] 
 					. "`n" . txt . "`n`n" . TransA["This line do not comply to format required by this application."] . "`n`n" 
@@ -13990,7 +13987,7 @@ F_CreateHotstring(txt, nameoffile)
 			. TransA["OnOff parameter is missing."]
 			. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 	
-	if (Triggerstring and EnDis)
+	if (Triggerstring != "") and (EnDis)
 	{
 		if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 		{
