@@ -3112,15 +3112,12 @@ F_TT_C4_B1()	;Button: save position of "static" triggerstring / hotstring window
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Position of this window is saved in Config.ini."]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestString)
+F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestTriggerstring, LongestHotstring)
 {
 	global	;assume-global mode of operation
 	local  vOutput1 := 0, vOutput1X := 0, vOutput1Y := 0, vOutput1W := 0, vOutput1H := 0
 		, W_LB1 := 0, W_LB2 := 0, W_LB3 := 0, X_LB2 := 0, Y_LB2 := 0, X_LB3 := 0, Y_LB3 := 0
-		, OutputString := ""
 	
-	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
-		OutputString .= "w"		;the widest ordinary letter in alphabet
 	Gui, TT_C3: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C3_Hwnd
 	Gui, TT_C3: Margin, 0, 0
 	if (ini_ATEn)
@@ -3145,9 +3142,12 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestString)
 		else
 			Gui, TT_C3: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
 	}
-	Gui, TT_C3: Add, Text, 		% "HwndIdTT_C3_T1 x0 y0", % OutputString
+	Gui, TT_C3: Add, Text, 		% "HwndIdTT_C3_T1 x0 y0", % LongestTriggerstring	;use dummy Text field to check how wide it is actually
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_T1
 	W_LB1 	:= vOutput1W
+	Gui, TT_C3: Add, Text, 		% "HwndIdTT_C3_T1 x0 y0", % LongestHotstring
+	GuiControlGet, vOutput1, Pos, % IdTT_C3_T1
+	W_LB3	:= vOutput1W
 	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB1 x0 y0" . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB1 + 4 . A_Space . "g" . "F_TTMenuStatic_Mouse"
 	Gui, TT_C3: Add, Text, 		% "HwndIdTT_C3_T2 x0 y0", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_T2
@@ -3156,7 +3156,9 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestString)
 	X_LB2 	:= vOutput1X + vOutput1W, Y_LB2	:= vOutput1Y
 	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB2" . A_Space . "x" . X_LB2 . A_Space . "y" . Y_LB2 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB2 + 4 . A_Space . "g" . "F_TTMenuStatic_Mouse"
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_LB2
-	X_LB3	:= vOutput1X + vOutput1W, Y_LB3	:= Y_LB2, W_LB3	:= W_LB1
+	X_LB3	:= vOutput1X + vOutput1W, Y_LB3	:= Y_LB2
+	if (W_LB3 > 3 * W_LB1)	;future: instead of "3" apply ini parameter defining maximum length as multiplication of W_LB1
+		W_LB3 := 3 * W_LB1
 	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB3" . A_Space . "x" . X_LB3 . A_Space . "y" . Y_LB3 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB3 + 4 . A_Space . "g" . "F_TTMenuStatic_Mouse"
 	GuiControl, Hide, % IdTT_C3_T1
 	GuiControl, Hide, % IdTT_C3_T2
@@ -7024,7 +7026,7 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 
 		Case 3: 
 			Gui, TT_C3: Destroy
-			F_GuiTrigTipsMenuDefC3(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
+			F_GuiTrigTipsMenuDefC3(a_Tips.Count(), F_LongestTrigTipString(a_Tips), F_LongestTrigTipString(a_TipsHS))	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
 			GuiControl,, % IdTT_C3_LB1, % F_ConvertArrayToString(a_Tips)
 			GuiControl,, % IdTT_C3_LB2, % F_TrigTipsSecondColumn(a_TipsOpt, a_TipsEnDis)
 			GuiControl,, % IdTT_C3_LB3, % F_ConvertArrayToString(a_TipsHS)
