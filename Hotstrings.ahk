@@ -2302,7 +2302,7 @@ F_OneCharPressed(ih, Char)
 	
 	v_InputString .= Char
 
-	; OutputDebug, % "2)v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
+	OutputDebug, % "2)v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -8289,7 +8289,15 @@ F_EventSigOrdHotstring()
 F_PrepareTriggerstringTipsTables2(string)
 {
 	global	;assume-global mode of operation
-	local	HitCnt := 0
+	local	HitCnt 			:= 0
+		, 	LastChar 			:= SubStr(v_InputString, 0)
+		,	PreviousButLast 	:= ""
+		,	TwoLastChars 		:= ""
+		,	f_IsAlpha 		:= false
+		,	f_FirstPart		:= false
+		,	TestString		:= ""
+		,	f_SecondPart		:= false
+
 	;OutputDebug, % "Length of v_InputString:" . A_Space . StrLen(v_InputString) . A_Tab . "v_InputString:" . A_Space . v_InputString
 	if (StrLen(string) > ini_TASAC - 1)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{
@@ -8299,8 +8307,10 @@ F_PrepareTriggerstringTipsTables2(string)
 		, a_TipsHS	:= []	;HS = Hotstrings
 		Loop, % a_Combined.MaxIndex()
 		{
+			; OutputDebug, % "v_InputString:" . v_InputString . A_Space . "a_Combined.MaxIndex():" . a_Combined.MaxIndex() . "`n"
 			if (InStr(a_Combined[A_Index], string) = 1)	;This comparison cannot be case sensitive. This is the reason why triggerstring tips aren't shown for triggerstring definitions containing option "?"
 			{
+				; OutputDebug, % "InStr(string, a_Combined[A_Index]) = 1" . "`n"
 				Switch ini_TTCn
 				{
 					Case 1:	;only column 1: Triggerstring Tips
@@ -8333,10 +8343,63 @@ F_PrepareTriggerstringTipsTables2(string)
 				HitCnt++
 				if (HitCnt = ini_MNTT)	; MNTT = Maximum Number of Triggerstring Tips
 					Break
+				f_FirstPart := true
 			}
+			if (!f_FirstPart) and (StrLen(v_InputString) > 1)
+			{
+				TwoLastChars 		:= SubStr(v_InputString, -1)
+				PreviousButLast 	:= SubStr(v_InputString, 1, -1)
+				if PreviousButLast is alpha
+					f_IsAlpha := true
+				else
+					return
+				if (f_IsAlpha)
+					{
+						TestString := SubStr(v_InputString, 0)	;take just last character
+						if (InStr(a_Combined[A_Index], TestString) = 1)
+						{
+							; OutputDebug, % "InStr(string, a_Combined[A_Index]) = 1" . "`n"
+							Switch ini_TTCn
+							{
+								Case 1:	;only column 1: Triggerstring Tips
+								     Loop, Parse, % a_Combined[A_Index], |
+								     	if (A_Index = 1)
+								     		a_Tips.Push(A_LoopField)
+								Case 2:	;2 columns: Triggerstring Tips + Triggerstring Trigger
+								     Loop, Parse, % a_Combined[A_Index], |
+								     {
+								     	if (A_Index = 1)
+								     		a_Tips.Push(A_LoopField)
+								     	if (A_Index = 2) 
+								     		a_TipsOpt.Push(A_LoopField)
+								     	if (A_Index = 3) 
+								     		a_TipsEnDis.Push(A_LoopField)
+								     }
+								Case 3, 4:	;3 columns: Triggerstring Tips + Triggerstring Trigger + Triggerstring Hotstring
+								     Loop, Parse, % a_Combined[A_Index], |
+								     {
+								     	if (A_Index = 1)
+								     		a_Tips.Push(A_LoopField)
+								     	if (A_Index = 2) 
+								     		a_TipsOpt.Push(A_LoopField)
+								     	if (A_Index = 3) 
+								     		a_TipsEnDis.Push(A_LoopField)
+								     	if (A_Index = 4)
+								     		a_TipsHS.Push(A_LoopField)
+								     }
+							}
+							HitCnt++
+							if (HitCnt = ini_MNTT)	; MNTT = Maximum Number of Triggerstring Tips
+								Break
+							f_SecondPart := true
+						}
+					}
+			}
+			if (f_SecondPart)
+				v_InputString := SubStr(v_InputString, 0)	;take just last character
 		}
 	}
-}	
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadSignalingParams()
 {
