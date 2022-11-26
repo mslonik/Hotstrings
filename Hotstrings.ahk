@@ -63,6 +63,7 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 , 		v_TotalHotstringCnt 	:= 0
 ,		v_LibHotstringCnt		:= 0 ;no of (triggerstring, hotstring) definitions in single library
 ,		ini_TTCn				:= 0 ;this variable could be triggered by left mouse click when script is initialized.
+,		v_Qinput				:= "" ; to store substring of v_InputString related to possible question mark (inside) option
 
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
@@ -2301,7 +2302,12 @@ F_OneCharPressed(ih, Char)
 	else
 		f_EndCharDetected := false
 	
+	if (v_InputString = "")
+		v_Qinput := ""
+
 	v_InputString .= Char
+	if (v_Qinput)
+		v_Qinput .= Char
 
 	OutputDebug, % "2)v_InputString:" . v_InputString . A_Space . "f_LastTip:" . f_LastTip . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
@@ -2309,22 +2315,25 @@ F_OneCharPressed(ih, Char)
 	if (ini_TTTtEn)
 	{
 		F_DestroyTriggerstringTips(ini_TTCn)
-		F_PrepareTriggerstringTipsTables2(v_InputString)	;Variant when new sequence starts from EndChar.
+		if (v_Qinput)
+			F_PrepareTriggerstringTipsTablesQ(v_Qinput)
+		else
+			F_PrepareTriggerstringTipsTables(v_InputString)	;Variant when new sequence starts from EndChar.
 		if (a_Tips.Count())	;if tips are available display then
 		{
-			OutputDebug, % "B1 a_Tips.Count():" . a_Tips.Count() . "`n"
+			; OutputDebug, % "B1 a_Tips.Count():" . a_Tips.Count() . "`n"
 			f_LastTip := true
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD
-			OutputDebug, % "Return 1" . A_Space . "v_InputString:" . v_InputString . "`n"
+			; OutputDebug, % "Return 1" . A_Space . "v_InputString:" . v_InputString . "`n"
 			Critical, Off
 			return
 		}
 ; 		if (StrLen(v_InputString) >= 2) and (InStr(HotstringEndChars, SubStr(v_InputString, 1, 1))) ;if v_InputString is at least 2x chars and the first char is EndChar
 ; 		{
 ; 			v_InputString := SubStr(v_InputString, 2)	;cut down v_InputString and try again if triggerstring tip exists.
-; 			F_PrepareTriggerstringTipsTables2(v_InputString)
+; 			F_PrepareTriggerstringTipsTables(v_InputString)
 ; 			if (a_Tips.Count())	;if tips are available display then
 ; 			{
 ; 				; OutputDebug, % "B2 a_Tips.Count():" . a_Tips.Count() . "`n"
@@ -2353,7 +2362,7 @@ F_OneCharPressed(ih, Char)
 ; 			{
 ; 				shortened := SubStr(v_InputString, ++WhereToCut)	;cut down v_InputString and try again if triggerstring tip exists.
 ; 				; OutputDebug, % "Cut v_InputString:" . v_InputString . "`n"
-; 				F_PrepareTriggerstringTipsTables2(shortened)
+; 				F_PrepareTriggerstringTipsTables(shortened)
 ; 				if (a_Tips.Count())	;if tips are available display then
 ; 				{
 ; 					; OutputDebug, % "B3 a_Tips.Count():" . a_Tips.Count() . "`n"
@@ -2420,7 +2429,7 @@ F_BackspaceProcessing(ih, VK, SC)
 		; OutputDebug, % "v_InputString after BS:" . A_Tab . v_InputString . "IsCritical:" . A_Tab . A_IsCritical . "`n"
 		if (ini_TTTtEn) and (v_InputString)
 		{
-			F_PrepareTriggerstringTipsTables2(v_InputString)
+			F_PrepareTriggerstringTipsTables(v_InputString)
 			if (a_Tips.Count())
 			{
 				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
@@ -8289,19 +8298,18 @@ F_EventSigOrdHotstring()
 		SoundBeep, % ini_OHSF, % ini_OHSD
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_PrepareTriggerstringTipsTables2(string)
+F_PrepareTriggerstringTipsTables(string)
 {
 	global	;assume-global mode of operation
 	local	HitCnt 			:= 0
-		, 	LastChar 			:= SubStr(v_InputString, 0)
 		,	PreviousButLast 	:= ""
 		,	TwoLastChars 		:= ""
 		,	f_IsAlpha 		:= false
 		,	f_FirstPart		:= false
-		,	TestString		:= ""
 		,	f_SecondPart		:= false
+		,	LastChar			:= SubStr(string, 0)
 
-	OutputDebug, % "Length of v_InputString:" . StrLen(v_InputString) . A_Space . "v_InputString:" . v_InputString . "`n"
+	OutputDebug, % "Length of string:" . StrLen(string) . A_Space . "string:" . string . "`n"
 	if (StrLen(string) > ini_TASAC - 1)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{
 		a_Tips 		:= []	;collect within global array a_Tips subset from full set a_Combined
@@ -8350,68 +8358,88 @@ F_PrepareTriggerstringTipsTables2(string)
 			}
 		}
 
-		; OutputDebug, % "Here I am" . "`n"
-		if (!f_FirstPart) and (StrLen(v_InputString) > 1)
+		OutputDebug, % "Here I am" . "`n"
+		if (!f_FirstPart) and (StrLen(string) > 1)
 		{
-			TwoLastChars 		:= SubStr(v_InputString, -1)
-			PreviousButLast 	:= SubStr(v_InputString, 1, -1)
+			TwoLastChars 		:= SubStr(string, -1)
+			PreviousButLast 	:= SubStr(string, 1, -1)
 			if PreviousButLast is alpha
 				f_IsAlpha := true
 			else
 			{
-				; OutputDebug, % "Non-alpha" . "`n"
+				v_Qinput := LastChar	;last character
+				OutputDebug, % "Non-alpha" . A_Space . "v_Qinput:" . v_Qinput . "`n"
+				F_PrepareTriggerstringTipsTablesQ(LastChar)	;recurrence ;tu jestem
 				return
 			}
 		}
 
 		if (f_IsAlpha)
 		{
-			TestString := SubStr(v_InputString, 0)	;take just last character
-			Loop, % a_Combined.MaxIndex()
-			{
-				if (InStr(a_Combined[A_Index], TestString) = 1)
-				{
-					; OutputDebug, % "InStr(string, a_Combined[A_Index]) = 1" . "`n"
-					Switch ini_TTCn
-					{
-						Case 1:	;only column 1: Triggerstring Tips
-						     Loop, Parse, % a_Combined[A_Index], |
-						     	if (A_Index = 1)
-						     		a_Tips.Push(A_LoopField)
-						Case 2:	;2 columns: Triggerstring Tips + Triggerstring Trigger
-						     Loop, Parse, % a_Combined[A_Index], |
-						     {
-						     	if (A_Index = 1)
-						     		a_Tips.Push(A_LoopField)
-						     	if (A_Index = 2) 
-						     		a_TipsOpt.Push(A_LoopField)
-						     	if (A_Index = 3) 
-						     		a_TipsEnDis.Push(A_LoopField)
-						     }
-						Case 3, 4:	;3 columns: Triggerstring Tips + Triggerstring Trigger + Triggerstring Hotstring
-						     Loop, Parse, % a_Combined[A_Index], |
-						     {
-						     	if (A_Index = 1)
-						     		a_Tips.Push(A_LoopField)
-						     	if (A_Index = 2) 
-						     		a_TipsOpt.Push(A_LoopField)
-						     	if (A_Index = 3) 
-						     		a_TipsEnDis.Push(A_LoopField)
-						     	if (A_Index = 4)
-						     		a_TipsHS.Push(A_LoopField)
-						     }
-					}
-					HitCnt++
-					if (HitCnt = ini_MNTT)	; MNTT = Maximum Number of Triggerstring Tips
-						Break
-					f_SecondPart := true
-				}
-			}
+			F_PrepareTriggerstringTipsTablesQ(LastChar)
 		}
 
-		if (f_SecondPart)
-			v_InputString := SubStr(v_InputString, 0)	;take just last character
+		; if (f_SecondPart)
+			; v_Qinput .= SubStr(string, 0)	;take just last character
 	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_PrepareTriggerstringTipsTablesQ(string)
+{
+	global	;assume-global mode of operation
+	local	HitCnt 			:= 0
+		,	PreviousButLast 	:= ""
+		,	TwoLastChars 		:= ""
+		,	f_IsAlpha 		:= false
+		,	f_FirstPart		:= false
+		,	TestString		:= ""
+		,	QuestionMarkPos	:= 0
+		,	NoOccurrence		:= 2
+		,	SecSeparatorPos	:= 0
+
+	TestString := SubStr(string, 0)	;take just last character
+	Loop, % a_Combined.MaxIndex()
+	{
+		QuestionMarkPos 	:= InStr(a_Combined[A_Index], "?")
+	,	SecSeparatorPos	:= InStr(a_Combined[A_Index], "|", false, 1, NoOccurrence)
+		if (QuestionMarkPos) and (QuestionMarkPos < SecSeparatorPos) and (InStr(a_Combined[A_Index], TestString) = 1)
+		{
+			; OutputDebug, % "InStr(string, a_Combined[A_Index]) = 1" . "`n"
+			Switch ini_TTCn
+			{
+				Case 1:	;only column 1: Triggerstring Tips
+				     Loop, Parse, % a_Combined[A_Index], |
+				     	if (A_Index = 1)
+				     		a_Tips.Push(A_LoopField)
+				Case 2:	;2 columns: Triggerstring Tips + Triggerstring Trigger
+				     Loop, Parse, % a_Combined[A_Index], |
+				     {
+				     	if (A_Index = 1)
+				     		a_Tips.Push(A_LoopField)
+				     	if (A_Index = 2) 
+				     		a_TipsOpt.Push(A_LoopField)
+				     	if (A_Index = 3) 
+				     		a_TipsEnDis.Push(A_LoopField)
+				     }
+				Case 3, 4:	;3 columns: Triggerstring Tips + Triggerstring Trigger + Triggerstring Hotstring
+				     Loop, Parse, % a_Combined[A_Index], |
+				     {
+				     	if (A_Index = 1)
+				     		a_Tips.Push(A_LoopField)
+				     	if (A_Index = 2) 
+				     		a_TipsOpt.Push(A_LoopField)
+				     	if (A_Index = 3) 
+				     		a_TipsEnDis.Push(A_LoopField)
+				     	if (A_Index = 4)
+				     		a_TipsHS.Push(A_LoopField)
+				     }
+			}
+			HitCnt++
+			if (HitCnt = ini_MNTT)	; MNTT = Maximum Number of Triggerstring Tips
+				Break
+		}
+	}
+	OutputDebug, % A_ThisFunc . A_Space . "end" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadSignalingParams()
@@ -14331,11 +14359,7 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 {
 	global	;assume-global mode of operation
 	Critical, On
-	local	tempx := "", ThisHotkey := A_ThisHotkey, EndChar := A_EndChar, temp := 0, FirstPart := "", SecondPart := ""
-
-	; tempx := SubStr(v_InputString, 1, 1)
-	; if tempx is not alnum
-	; 	v_InputString := SubStr(v_InputString, 2)
+	local	ThisHotkey := A_ThisHotkey, EndChar := A_EndChar, temp := 0, FirstPart := "", SecondPart := ""
 
 	F_DestroyTriggerstringTips(ini_TTCn)
 	v_UndoHotstring 	:= ReplacementString
