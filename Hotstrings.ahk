@@ -1742,7 +1742,7 @@ F_ConvertEscapeSequences(string)	;now from file are read sequences like "`" . "t
 ,	string := StrReplace(string, "``a", "`a")
 ,	string := StrReplace(string, "``f", "`f")
 ,	string := RegExReplace(string, "[[:blank:]].*\K`$", "")	;hottring finished with back-tick (`) prededing by blanks 
-,	string := StrReplace(string, "````", "``")	;because of escaping: "````" -> "``" and "`` -> "`""
+,	string := StrReplace(string, "````", "````")	;because of escaping: "````" -> "``" and "`` -> "`""
 	StringCaseSense, Off
 	return string
 }	;future: https://www.autohotkey.com/boards/viewtopic.php?f=76&t=91953
@@ -3117,6 +3117,7 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestTriggerstring, LongestHotstring)
 	global	;assume-global mode of operation
 	local  vOutput1 := 0, vOutput1X := 0, vOutput1Y := 0, vOutput1W := 0, vOutput1H := 0
 		, W_LB1 := 0, W_LB2 := 0, W_LB3 := 0, X_LB2 := 0, Y_LB2 := 0, X_LB3 := 0, Y_LB3 := 0
+		, cListboxMargin :=  4
 	
 	Gui, TT_C3: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C3_Hwnd
 	Gui, TT_C3: Margin, 0, 0
@@ -3142,29 +3143,59 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestTriggerstring, LongestHotstring)
 		else
 			Gui, TT_C3: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
 	}
+	; OutputDebug, % "LongestTriggerstring:" . A_Space . LongestTriggerstring . A_Space . "|" . A_Space . "LongestHotstring:" . A_Space . LongestHotstring . "`n"
 	Gui, TT_C3: Add, Text, 		% "HwndIdTT_C3_T1 x0 y0", % LongestTriggerstring	;use dummy Text field to check how wide it is actually
+	; Gui, TT_C3: Show, x0 y0	;for debugging purpose only
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_T1
-	W_LB1 	:= vOutput1W
+	W_LB1 	:= vOutput1W + cListboxMargin
 	Gui, TT_C3: Add, Text, 		% "HwndIdTT_C3_T1 x0 y0", % LongestHotstring
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_T1
 	W_LB3	:= vOutput1W
-	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB1 x0 y0" . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB1 + 4 . A_Space . "g" . "F_TTMenuStatic_Mouse"
+	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB1 x0 y0" . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB1 + cListboxMargin . A_Space . "g" . "F_TTMenuStatic_Mouse"
 	Gui, TT_C3: Add, Text, 		% "HwndIdTT_C3_T2 x0 y0", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_T2
 	W_LB2 	:= vOutput1W
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_LB1
 	X_LB2 	:= vOutput1X + vOutput1W, Y_LB2	:= vOutput1Y
-	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB2" . A_Space . "x" . X_LB2 . A_Space . "y" . Y_LB2 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB2 + 4 . A_Space . "g" . "F_TTMenuStatic_Mouse"
+	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB2" . A_Space . "x" . X_LB2 . A_Space . "y" . Y_LB2 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB2 + cListboxMargin . A_Space . "g" . "F_TTMenuStatic_Mouse"
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_LB2
 	X_LB3	:= vOutput1X + vOutput1W, Y_LB3	:= Y_LB2
 	if (W_LB3 > 3 * W_LB1)	;future: instead of "3" apply ini parameter defining maximum length as multiplication of W_LB1
 		W_LB3 := 3 * W_LB1
-	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB3" . A_Space . "x" . X_LB3 . A_Space . "y" . Y_LB3 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB3 + 4 . A_Space . "g" . "F_TTMenuStatic_Mouse"
-	GuiControl, Hide, % IdTT_C3_T1
-	GuiControl, Hide, % IdTT_C3_T2
+	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB3" . A_Space . "x" . X_LB3 . A_Space . "y" . Y_LB3 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB3 + cListboxMargin . A_Space . "g" . "F_TTMenuStatic_Mouse"
+	; Gui, TT_C3: Show, x0 y0	;for debugging purpose only
+	Gui, TT_C3: Destroy	;unfortunately even when gui object are hidden, still background is visible; I don't want to have temporary (dummy) text object to be visible. therefore I destroy the whole gui and create it again.
+	Gui, TT_C3: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C3_Hwnd
+	Gui, TT_C3: Margin, 0, 0
+	if (ini_ATEn)
+	{
+		if (ini_ATBgrCol = "custom")
+			Gui, TT_C3: Color,, % ini_ATBgrColCus	;background of listbox
+		else
+			Gui, TT_C3: Color,, % ini_ATBgrCol	;background of listbox
+		if (ini_TTTyFaceCol = "custom")		
+			Gui, TT_C3: Font, % "s" . ini_ATTySize . A_Space . "c" . ini_ATTyFaceColCus, % ini_ATTyFaceFont
+		else
+			Gui, TT_C3: Font, % "s" . ini_ATTySize . A_Space . "c" . ini_ATTyFaceCol, % ini_ATTyFaceFont
+	}
+	else
+	{
+		if (ini_TTBgrCol = "custom")
+			Gui, TT_C3: Color,, % ini_TTBgrColCus	;background of listbox
+		else
+			Gui, TT_C3: Color,, % ini_TTBgrCol	;background of listbox
+		if (ini_TTTyFaceCol = "custom")		
+			Gui, TT_C3: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceColCus, % ini_TTTyFaceFont
+		else
+			Gui, TT_C3: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
+	}
+	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB1 x0 y0" . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB1 + cListboxMargin . A_Space . "g" . "F_TTMenuStatic_Mouse"
+	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB2" . A_Space . "x" . X_LB2 . A_Space . "y" . Y_LB2 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB2 + cListboxMargin . A_Space . "g" . "F_TTMenuStatic_Mouse"
+	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB3" . A_Space . "x" . X_LB3 . A_Space . "y" . Y_LB3 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB3 + cListboxMargin . A_Space . "g" . "F_TTMenuStatic_Mouse"
 	GuiControl, Font, % IdTT_C3_LB1		;fontcolor of listbox
 	GuiControl, Font, % IdTT_C3_LB2		;fontcolor of listbox
 	GuiControl, Font, % IdTT_C3_LB3		;fontcolor of listbox
+	; Gui, TT_C3: Show, x0 y0	;for debugging purpose only
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiTrigTipsMenuDefC2(AmountOfRows, LongestString)
@@ -8167,11 +8198,11 @@ F_Undo()	;turning off of * option requires special conditions.
 			HowManyBackSpaces 	+= StrLenUnicode(v_UndoHotstring)
 			Send, % "{BackSpace " . HowManyBackSpaces . "}"
 			Loop, Parse, v_UndoTriggerstring
-			Switch A_LoopField
-			{
-				Case "^", "+", "!", "#", "{", "}":	SendRaw, 	% A_LoopField
-				Default:						Send, 	% A_LoopField
-			}
+				Switch A_LoopField
+				{
+					Case "^", "+", "!", "#", "{", "}":	SendRaw, 	% A_LoopField
+					Default:						Send, 	% A_LoopField
+				}
 		}
 		v_UndoTriggerstring := ""
 		F_UndoSignalling()
