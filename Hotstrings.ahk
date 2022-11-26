@@ -1701,8 +1701,7 @@ F_HMenuCLI_Keyboard()
 	}
 	v_UndoHotstring 	:= Temp1
 ,	ReplacementString 	:= F_ReplaceAHKconstants(Temp1)
-,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options)
-; 	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString) ;This line is unnecessary as clipboard do not process escaped characters.
+,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options) ; 	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString) ;This line is unnecessary as clipboard do not process escaped characters.
 	if (ini_MHMP = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
@@ -1742,7 +1741,7 @@ F_ConvertEscapeSequences(string)	;now from file are read sequences like "`" . "t
 ,	string := StrReplace(string, "``a", "`a")
 ,	string := StrReplace(string, "``f", "`f")
 ,	string := RegExReplace(string, "[[:blank:]].*\K`$", "")	;hottring finished with back-tick (`) prededing by blanks 
-,	string := StrReplace(string, "````", "````")	;because of escaping: "````" -> "``" and "`` -> "`""
+,	string := StrReplace(string, "``", "``")				;it seems to be exception
 	StringCaseSense, Off
 	return string
 }	;future: https://www.autohotkey.com/boards/viewtopic.php?f=76&t=91953
