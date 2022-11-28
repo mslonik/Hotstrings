@@ -2306,7 +2306,7 @@ F_OneCharPressed(ih, Char)
 	if (v_Qinput)
 		v_Qinput .= Char
 
-	; OutputDebug, % "2)v_IS:" . v_InputString . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "v_QI:" . v_Qinput . "`n"
+	OutputDebug, % "2)v_IS:" . v_InputString . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "v_QI:" . v_Qinput . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -2323,14 +2323,14 @@ F_OneCharPressed(ih, Char)
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD
-			; OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "f_LT:" . f_LastTip . A_Space . "v_QI:" . v_Qinput . "`n"
+			OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "f_LT:" . f_LastTip . A_Space . "v_QI:" . v_Qinput . "`n"
 			Critical, Off
 			return
 		}
 	}
 	if (!f_LastTip) and (f_EndCharDetected)
 		v_InputString := ""
-	; OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . A_Space . "v_IS:" . v_InputString . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
+	OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . A_Space . "v_IS:" . v_InputString . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
@@ -8251,14 +8251,17 @@ F_PTTT(string)
 {
 	global	;assume-global mode of operation
 	local	HitCnt 			:= 0
-		,	PreviousButLast 	:= ""
-		,	TwoLastChars 		:= ""
+		,	PreviousButLast 	:= SubStr(string, 1, -1)
 		,	f_IsAlpha 		:= false
 		,	f_FirstPart		:= false
 		,	LastChar			:= SubStr(string, 0)
+		, 	f_PButLastIsAlpha	:= 
 
 	; OutputDebug, % A_ThisFunc . A_Space . "`n"
-	; OutputDebug, % A_ThisFunc . A_Space . "string:" . string . "LC:" . LastChar . "`n"
+	OutputDebug, % A_ThisFunc . A_Space . "string:" . string . "LC:" . LastChar . "`n"
+	if PreviousButLast is alpha
+		f_PButLastIsAlpha := true
+
 	if (StrLen(string) > ini_TASAC - 1)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{
 		a_Tips 		:= []	;collect within global array a_Tips subset from full set a_Combined
@@ -8307,24 +8310,17 @@ F_PTTT(string)
 			}
 		}
 
-		; OutputDebug, % "Here I am" . "`n"
+		OutputDebug, % "Here I am" . "`n"
 		if (!f_FirstPart) and (StrLen(string) > 1)
 		{
-			TwoLastChars 		:= SubStr(string, -1)
-			PreviousButLast 	:= SubStr(string, 1, -1)
-			if PreviousButLast is alpha
-				f_IsAlpha := true
+			if (f_PButLastIsAlpha)
+				F_PTTTQ(v_Qinput := LastChar)
 			else
 			{
 				; OutputDebug, % "Non-alpha" . A_Space . "v_Qinput:" . v_Qinput . "`n"
+				v_InputString := LastChar
 				F_PTTTQ(v_Qinput := LastChar)
-				return
 			}
-		}
-
-		if (f_IsAlpha)
-		{
-			F_PTTTQ(v_Qinput := LastChar)
 		}
 	}
 }
@@ -8334,7 +8330,6 @@ F_PTTTQ(string)
 	global	;assume-global mode of operation
 	local	HitCnt 			:= 0
 		,	PreviousButLast 	:= ""
-		,	TwoLastChars 		:= ""
 		,	f_IsAlpha 		:= false
 		,	f_FirstPart		:= false
 		,	TestString		:= ""
@@ -8343,7 +8338,7 @@ F_PTTTQ(string)
 		,	SecSeparatorPos	:= 0
 
 	; OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
-	; OutputDebug, % A_ThisFunc . A_Space . "B" . A_Space . "string:" . string . "`n"
+	OutputDebug, % A_ThisFunc . A_Space . "B" . A_Space . "string:" . string . "`n"
 	if (StrLen(string) > ini_TASAC - 1)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{
 		a_Tips 		:= []	;collect within global array a_Tips subset from full set a_Combined
@@ -8394,6 +8389,8 @@ F_PTTTQ(string)
 			}
 		}
 	}
+	if (a_Tips.Count() = 0)
+		v_Qinput := ""
 	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
