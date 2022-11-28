@@ -8329,16 +8329,13 @@ F_PTTTQ(string)
 {
 	global	;assume-global mode of operation
 	local	HitCnt 			:= 0
-		,	PreviousButLast 	:= ""
-		,	f_IsAlpha 		:= false
-		,	f_FirstPart		:= false
-		,	TestString		:= ""
 		,	QuestionMarkPos	:= 0
 		,	NoOccurrence		:= 2
 		,	SecSeparatorPos	:= 0
+		,	Qlength			:= StrLen(string)
 
 	; OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
-	OutputDebug, % A_ThisFunc . A_Space . "B" . A_Space . "string:" . string . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "B" . A_Space . "string:" . string . "`n"
 	if (StrLen(string) > ini_TASAC - 1)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{
 		a_Tips 		:= []	;collect within global array a_Tips subset from full set a_Combined
@@ -8351,7 +8348,6 @@ F_PTTTQ(string)
 			QuestionMarkPos 	:= InStr(a_Combined[A_Index], "?")
 		,	SecSeparatorPos	:= InStr(a_Combined[A_Index], "|", false, 1, NoOccurrence)
 			if (QuestionMarkPos) and (QuestionMarkPos < SecSeparatorPos) and (InStr(a_Combined[A_Index], string) = 1)
-			; if (QuestionMarkPos) and (QuestionMarkPos < SecSeparatorPos) and (InStr(a_Combined[A_Index], TestString) = 1)
 			{
 				; OutputDebug, % "InStr(a_Combined[A_Index], string) = 1:" . a_Combined[A_Index] . "`n"
 				Switch ini_TTCn
@@ -8389,7 +8385,12 @@ F_PTTTQ(string)
 			}
 		}
 	}
-	if (a_Tips.Count() = 0)
+	if (a_Tips.Count() = 0) and (Qlength > 1)
+	{
+		string := SubStr(string, 2)	;all but first
+		F_PTTTQ(string)	;recursive call
+	}
+	if (a_Tips.Count() = 0) and (Qlength = 1)
 		v_Qinput := ""
 	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
 }
