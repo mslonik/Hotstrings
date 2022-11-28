@@ -5938,7 +5938,7 @@ F_EventsStyling_DDL_BackgCol(WhichItem)
 
 	DynVarRef1 := "Id" . WhichItem . "styling_DDL1"
 	GuiControlGet, OutputVarTemp,, % %DynVarRef1%
-	DynVarRef1 := "Id" . WhichItem . "TTstyling_E1"
+	DynVarRef1 := "Id" . WhichItem . "styling_E1"
 	if (OutputVarTemp = "custom")
 		GuiControl, Enable, % %DynVarRef1%
 	else
