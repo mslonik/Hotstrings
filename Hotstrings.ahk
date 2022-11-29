@@ -3108,12 +3108,12 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestTriggerstring, LongestHotstring)
 	; Gui, TT_C3: Show, x0 y0	;for debugging purpose only
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_T1
 	W_LB1 	:= vOutput1W + cListboxMargin
-	Gui, TT_C3: Add, Text, 		% "HwndIdTT_C3_T1 x0 y0", % LongestHotstring
-	GuiControlGet, vOutput1, Pos, % IdTT_C3_T1
+	Gui, TT_C3: Add, Text, 		% "HwndIdTT_C3_T2 x0 y0", % LongestHotstring
+	GuiControlGet, vOutput1, Pos, % IdTT_C3_T2
 	W_LB3	:= vOutput1W
 	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB1 x0 y0" . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB1 + cListboxMargin . A_Space . "g" . "F_TTMenuStatic_Mouse"
-	Gui, TT_C3: Add, Text, 		% "HwndIdTT_C3_T2 x0 y0", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
-	GuiControlGet, vOutput1, Pos, % IdTT_C3_T2
+	Gui, TT_C3: Add, Text, 		% "HwndIdTT_C3_T3 x0 y0", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
+	GuiControlGet, vOutput1, Pos, % IdTT_C3_T3
 	W_LB2 	:= vOutput1W
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_LB1
 	X_LB2 	:= vOutput1X + vOutput1W, Y_LB2	:= vOutput1Y

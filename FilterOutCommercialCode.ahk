@@ -1,4 +1,4 @@
-#Requires,               AutoHotkey v1.1.35+ 	; Displays an error and quits if a version requirement is not met.    
+#Requires,               AutoHotkey v1.1.33+ 	; Displays an error and quits if a version requirement is not met.    
 #SingleInstance, 		force	               ; Only one instance of this script may run at a time!
 #NoEnv  						               ; Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn  						               ; Enable warnings to assist with detecting common errors.
@@ -9,43 +9,91 @@
 ListLines, 			On		               ; ListLines for debugging purposes
 SendMode, 			Input	               ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir, 	     % A_ScriptDir	          ; Ensures a consistent starting directory.
-FileEncoding, 			UTF-8	               ; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN Warning! UTF-16 is not recognized by Notepad++ editor (2021), which recognizes correctly UCS-2 (defined by the International Standard ISO/IEC 10646). BMP = Basic Multilingual Plane.
+FileEncoding, 			UTF-8	               ; with BOM. Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN Warning! UTF-16 is not recognized by Notepad++ editor (2021), which recognizes correctly UCS-2 (defined by the International Standard ISO/IEC 10646). BMP = Basic Multilingual Plane.
 
 global    TheWholeFile   := ""
      ,    temp           := ""
+     ,    c_IconAsterisk := 64
+     ,    c_Overwrite    := true
+	,	f_CommTagB	:= false
+	,	CommTagB		:= ";#/*"			;commercial tag beginning
+	,	CommTagE		:= ";#*/"			;commercial tag end
+	,	CommTagL		:= StrLen(CommTagB)
+	,	CurrentLine	:= ""
+	,	FilteredCont	:= ""			;filtered content
+	,	SourceF		:= "Hotstrings.ahk"
+	,	DestinationF	:= A_ScriptDir . "\filtering\HotstringsFree.ahk"
 
-FileCopy, Hotstrings.ahk, % "..\" . A_ScriptDir . "\filtering\HotstringsFree.ahk", 1
+; MsgBox, % "Your AutoHotkey version:" . A_Space . A_AhkVersion  ;for debugging purposes.
 
-FileRead, TheWholeFile, % "..\" . A_ScriptDir . "\filtering\HotstringsFree.ahk"
+if (!InStr(FileExist(A_ScriptDir . "\filtering"), "D"))
+{
+	FileCreateDir, % A_ScriptDir . "\filtering"
+	if (ErrorLevel)
+	{
+		MsgBox, % c_IconAsterisk, % A_ScriptName . A_Space . "information", % "Error on time of file create dir. Exiting with exit code 3."
+		ExitApp, 3
+	}
+}
 
-Loop, Parse, TheWholeFile, `n, `r%A_Space%%A_Tab%
-     Loop, 5
-          temp := A_LoopField . "`n"
+FileCopy, % SourceF, % DestinationF, % c_Overwrite
+if (ErrorLevel)
+{
+     MsgBox, % c_IconAsterisk, % A_ScriptName . A_Space . "information", % "Error on time of file copy. Exiting with exit code 1."
+     ExitApp, 1
+}
 
-MsgBox, 64, % A_ScriptName, % "5 top lines:" . "`n`n"
-     . temp
+FileRead, TheWholeFile, % DestinationF
+if (ErrorLevel)
+{
+     MsgBox, % c_IconAsterisk, % A_ScriptName . A_Space . "information", % "Error on time of file read. Exiting with exit code 2."
+     ExitApp, 2
+}
+
+FileDelete, % DestinationF
+if (ErrorLevel)
+{
+     MsgBox, % c_IconAsterisk, % A_ScriptName . A_Space . "information", % "Error on time of destination file delete prior to filtering. Exiting with exit code 4."
+     ExitApp, 4
+}
 
 ; Loop, Parse, TheWholeFile, `n, `r%A_Space%%A_Tab%
 ; {
-; 	if (SubStr(A_LoopField, 1, 2) = "/*")	;ignore comments
-; 	{
-; 		BegCom := true
-; 		Continue
-; 	}
-; 	if (BegCom) and (SubStr(A_LoopField, -1) = "*/") ;ignore comments
-; 	{
-; 		BegCom := false
-; 		Continue
-; 	}
-; 	if (BegCom)
-; 		Continue
-; 	if (SubStr(A_LoopField, 1, 1) = ";")	;ignore comments
-; 		Continue
-; 	if (!A_LoopField)	;ignore empty lines
-; 		Continue
-	
-;      LibFileBody .= A_LoopField . "`n"
+;      temp .= A_LoopField . "`n"
+; 	if (A_Index = 5)
+; 		break
 ; }
-; TheWholeFile := "/*" . "`n" . LibraryHeader . "`n" . "*/" . "`n" . LibFileBody
-; FileDelete, % ini_HADL . "\" . SelectedLibraryName
-; FileAppend, % TheWholeFile, % ini_HADL . "\" . SelectedLibraryName, UTF-8
+
+; MsgBox, % c_IconAsterisk, % A_ScriptName . A_Space . "information", % "5 top lines:" . "`n`n"
+;      . temp
+
+Loop, Parse, TheWholeFile, `n	;, `r%A_Space%%A_Tab%
+{
+	CurrentLine := A_LoopField
+	if (SubStr(A_LoopField, 1, CommTagL) = CommTagB)
+	{
+		f_CommTagB 	:= true
+		Continue
+	}
+	if (f_CommTagB) and (SubStr(A_LoopField, 1, CommTagL) = CommTagE)
+	{
+		f_CommTagB := false
+		Continue
+	}
+	if (f_CommTagB)
+	{
+		CurrentLine := ""
+		; Continue
+	}
+	; if (!A_LoopField)	;ignore empty lines
+		; Continue
+	if (CurrentLine != "")
+     	FilteredCont .= CurrentLine . "`n"
+	; if (A_Index = 5)
+		; break
+}
+; MsgBox, % FilteredCont
+FileAppend, % FilteredCont, % DestinationF	;follows FileEncoding setting
+MsgBox, % c_IconAsterisk, % A_ScriptName . A_Space . "information", % "Filtering is finished. Result is available here:"
+	. "`n`n"
+	. DestinationF
