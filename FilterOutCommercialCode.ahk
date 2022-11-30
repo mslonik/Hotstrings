@@ -69,22 +69,19 @@ if (ErrorLevel)
 
 Loop, Parse, TheWholeFile, `n	;, `r%A_Space%%A_Tab%
 {
-	CurrentLine := A_LoopField
 	if (SubStr(A_LoopField, 1, CommTagL) = CommTagB)
 	{
 		f_CommTagB 	:= true
-		FilteredCont .= CurrentLine . "`n"
+		FilteredCont .= A_LoopField . "`n"
 	}
 	if (f_CommTagB) and (SubStr(A_LoopField, 1, CommTagL) = CommTagE)
 	{
 		f_CommTagB := false
-		FilteredCont .= CurrentLine . "`n"
+		FilteredCont .= A_LoopField . "`n"
 		Continue
 	}
-	if (f_CommTagB)
-		CurrentLine := ""
 	if (!f_CommTagB)
-     	FilteredCont .= CurrentLine . "`n"
+     	FilteredCont .= A_LoopField . "`n"
 }
 FileAppend, % FilteredCont, % DestinationF	;follows FileEncoding setting
 MsgBox, % c_IconAsterisk, % A_ScriptName . A_Space . "information", % "Filtering is finished. Result is available here:"
