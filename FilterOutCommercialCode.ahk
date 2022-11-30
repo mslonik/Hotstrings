@@ -12,15 +12,19 @@ SetWorkingDir, 	     % A_ScriptDir	          ; Ensures a consistent starting dir
 FileEncoding, 			UTF-8	               ; with BOM. Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN Warning! UTF-16 is not recognized by Notepad++ editor (2021), which recognizes correctly UCS-2 (defined by the International Standard ISO/IEC 10646). BMP = Basic Multilingual Plane.
 
 global    TheWholeFile   := ""
-     ; ,    temp           := ""
+     ,    RemSemicolon	:= ""
      ,    c_IconAsterisk := 64
      ,    c_Overwrite    := true
 	,	f_CommTagB	:= false
-	,	CommTagB		:= ";#/*"			;commercial tag beginning
-	,	CommTagE		:= ";#*/"			;commercial tag end
-	,	CommTagL		:= StrLen(CommTagB)
+	,	f_FreeTagB	:= false
+	,	CommTagB		:= ";#c/*"			;commercial tag beginning
+	,	CommTagE		:= ";#c*/"			;commercial tag end
+	,	FreeTagB		:= ";#f/*"			;free tag beginning
+	,	FreeTagE		:= ";#f*/"			;free tag end
+	,	CommTagL		:= StrLen(CommTagB)		;L = length of commercial code tag
+	,	FreeTagL		:= StrLen(CommTagB)		;L = length of free code tag
 	,	CurrentLine	:= ""
-	,	FilteredCont	:= ""			;filtered content
+	,	FilteredCont	:= ""				;filtered content
 	,	SourceF		:= "Hotstrings.ahk"
 	,	DestinationF	:= A_ScriptDir . "\filtering\HotstringsFree.ahk"
 
@@ -69,19 +73,39 @@ if (ErrorLevel)
 
 Loop, Parse, TheWholeFile, `n	;, `r%A_Space%%A_Tab%
 {
+	if (f_FreeTagB) and (SubStr(A_LoopField, 1, FreeTagL) = FreeTagE)
+	{
+		f_FreeTagB 	:= false
+		FilteredCont 	.= A_LoopField . "`n"
+		Continue
+	}
+	if (f_FreeTagB)	;tu jestem
+	{
+		RemSemicolon	:= StrReplace(A_LoopField, ";", "", , Limit := 1)
+		; RemSemicolon	:= RegExReplace(A_LoopField, "", Replacement := "", , Limit := 1, StartingPos := 1)
+		FilteredCont 	.= RemSemicolon . "`n"
+		Continue
+	}
+	if (SubStr(A_LoopField, 1, FreeTagL) = FreeTagB)
+	{
+		f_FreeTagB 	:= true
+		FilteredCont 	.= A_LoopField . "`n"
+		Continue
+	}
 	if (SubStr(A_LoopField, 1, CommTagL) = CommTagB)
 	{
 		f_CommTagB 	:= true
-		FilteredCont .= A_LoopField . "`n"
+		FilteredCont 	.= A_LoopField . "`n"
 	}
 	if (f_CommTagB) and (SubStr(A_LoopField, 1, CommTagL) = CommTagE)
 	{
-		f_CommTagB := false
-		FilteredCont .= A_LoopField . "`n"
+		f_CommTagB 	:= false
+		FilteredCont 	.= A_LoopField . "`n"
 		Continue
 	}
 	if (!f_CommTagB)
-     	FilteredCont .= A_LoopField . "`n"
+     	FilteredCont 	.= A_LoopField . "`n"
+	
 }
 FileAppend, % FilteredCont, % DestinationF	;follows FileEncoding setting
 MsgBox, % c_IconAsterisk, % A_ScriptName . A_Space . "information", % "Filtering is finished. Result is available here:"
