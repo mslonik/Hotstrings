@@ -12,7 +12,7 @@ SetWorkingDir, 	     % A_ScriptDir	          ; Ensures a consistent starting dir
 FileEncoding, 			UTF-8	               ; with BOM. Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN Warning! UTF-16 is not recognized by Notepad++ editor (2021), which recognizes correctly UCS-2 (defined by the International Standard ISO/IEC 10646). BMP = Basic Multilingual Plane.
 
 global    TheWholeFile   := ""
-     ,    temp           := ""
+     ; ,    temp           := ""
      ,    c_IconAsterisk := 64
      ,    c_Overwrite    := true
 	,	f_CommTagB	:= false
@@ -73,26 +73,19 @@ Loop, Parse, TheWholeFile, `n	;, `r%A_Space%%A_Tab%
 	if (SubStr(A_LoopField, 1, CommTagL) = CommTagB)
 	{
 		f_CommTagB 	:= true
-		Continue
+		FilteredCont .= CurrentLine . "`n"
 	}
 	if (f_CommTagB) and (SubStr(A_LoopField, 1, CommTagL) = CommTagE)
 	{
 		f_CommTagB := false
+		FilteredCont .= CurrentLine . "`n"
 		Continue
 	}
 	if (f_CommTagB)
-	{
 		CurrentLine := ""
-		; Continue
-	}
-	; if (!A_LoopField)	;ignore empty lines
-		; Continue
-	if (CurrentLine != "")
+	if (!f_CommTagB)
      	FilteredCont .= CurrentLine . "`n"
-	; if (A_Index = 5)
-		; break
 }
-; MsgBox, % FilteredCont
 FileAppend, % FilteredCont, % DestinationF	;follows FileEncoding setting
 MsgBox, % c_IconAsterisk, % A_ScriptName . A_Space . "information", % "Filtering is finished. Result is available here:"
 	. "`n`n"
