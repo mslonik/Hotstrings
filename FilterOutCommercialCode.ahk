@@ -79,7 +79,7 @@ Loop, Parse, TheWholeFile, `n	;, `r%A_Space%%A_Tab%
 		FilteredCont 	.= A_LoopField . "`n"
 		Continue
 	}
-	if (f_FreeTagB)	;tu jestem
+	if (f_FreeTagB)
 	{
 		RemSemicolon	:= StrReplace(A_LoopField, ";", "", , Limit := 1)
 		; RemSemicolon	:= RegExReplace(A_LoopField, "", Replacement := "", , Limit := 1, StartingPos := 1)

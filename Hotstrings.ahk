@@ -24,7 +24,7 @@ CoordMode, Mouse,	Screen		; Only Screen makes sense for functions prepared in th
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.8"
+global AppVersion				:= "3.6.9"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -2070,7 +2070,8 @@ F_Load_ini_HADL()
 	}
 	if (IsLibraryFolderEmpty1) and (IsLibraryFolderEmpty2)
 	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Both optional locations for library folder are empty = do not contain any library files. The second one will be used." . "`n`n"]
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Both optional locations for library folder are empty (do not contain any library files). The second one will be used."] 
+			. "`n`n"
 			. A_ScriptDir . "\" . "Libraries" . "`n"
 			. A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"
 		IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
@@ -2277,8 +2278,7 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
-	static	f_ExpEndChar := false
-	; static	f_EndCharDetected := false, f_LastTip := false
+	static	f_ExpEndChar := false	;this flag is set if in next run of this function is expected that EndChar will be pressed by user
 	local	WhereToCut := 0, shortened := "",  f_LastTip := false, f_EndCharDetected := false, index := 0, value := ""
 
 	Critical, On
@@ -2327,9 +2327,12 @@ F_OneCharPressed(ih, Char)
 			
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD
-			for index, value in a_TipsOpt
+			for index, value in a_TipsOpt	;check all remaining a_TipsOpt if any do not contain "*" option (immediate execute) and then set f_ExpEndChar for next run of this function
 				if (!InStr(a_TipsOpt[index], "*"))
+				{
 					f_ExpEndChar := true
+					break
+				}
 			; OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_ExpEndChar:" . f_ExpEndChar . "`n"
 			Critical, Off
 			return
@@ -3463,7 +3466,9 @@ F_GuiEvents(OneTime*)
 	F_EvTt_S1()
 	F_EvTt_S2()
 	F_EvSM_R1R2()
+;#c/* commercial only beginning	
 	F_EvAT_R1R2()
+;#c*/ commercial only end
 	F_EvTab3(OneTime[1])	;OneTime is used
 	
 	if (OneTime[3])
@@ -3495,9 +3500,14 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Margin,	% c_xmarg, % c_ymarg
 	Gui,	GuiEvents: Color,	% c_WindowColor, % c_ControlColor
 	Gui,	GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
+;#f/* free version only beginning
+	; Gui, GuiEvents: Add,	Tab3, vEvTab3 gF_EvTab3,						% TransA["Basic hotstring is triggered"] . "||" . TransA["Menu hotstring is triggered"] . "|" 
+		; . TransA["Undid the last hotstring"] . "|" . TransA["Triggerstring tips"] . "|" . TransA["Static triggerstring / hotstring menus"] . "|"
+;#f*/ free version only end
+;#c/* commercial only beginning
 	Gui, GuiEvents: Add,	Tab3, vEvTab3 gF_EvTab3,						% TransA["Basic hotstring is triggered"] . "||" . TransA["Menu hotstring is triggered"] . "|" 
 		. TransA["Undid the last hotstring"] . "|" . TransA["Triggerstring tips"] . "|" . TransA["Active triggerstring tips"] . "|" . TransA["Static triggerstring / hotstring menus"] . "|"
-	
+;#c*/ commercial only end	
 	Gui, GuiEvents: Tab, 											% TransA["Basic hotstring is triggered"]
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvBH_T1,						% TransA["Tooltip enable"] . ":"
@@ -3717,12 +3727,8 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B4 gF_EvTt_B4,			% TransA["Cancel"]
 	
 	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T25,					% TransA["Triggerstring tips"] . A_Space . "+" . A_Space . TransA["Triggers"] . A_Space . "+" . A_Space . TransA["Hotstrings"]
-	GuiControl, Hide, % IdEvTt_T25
-	Gui, GuiEvents: Tab, 											% TransA["Active triggerstring tips"]
-;#f/* free version only beginning
-	; Gui, GuiEvents: Tab,	Hide
-;#f*/ free version only end
 ;#c/* commercial only beginning
+	Gui, GuiEvents: Tab, 											% TransA["Active triggerstring tips"]
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvAT_T1,						% TransA["Active triggerstring tips"] . ":"
 	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
@@ -3736,6 +3742,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B2 gF_EvAT_B2 +Default,		% TransA["Apply"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B3 gF_EvAT_B3,			% TransA["Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvAT_B4 gF_EvAT_B4,			% TransA["Cancel"]
+;#c*/ commercial only end
 	
 	Gui, GuiEvents: Tab,											% TransA["Static triggerstring / hotstring menus"]
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
@@ -3751,7 +3758,6 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B2 gF_EvSM_B2 +Default,		% TransA["Apply"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B3 gF_EvSM_B3,			% TransA["Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B4 gF_EvSM_B4,			% TransA["Cancel"]
-;#c*/ commercial only end
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_CloseSubGui(WhatGuiToDestroy)
@@ -3778,7 +3784,9 @@ F_EvTab3(OneTime*)
 			, PreviousEvMH_R1R2 := "", PreviousEvMH_R3R4 := "", PreviousEvMH_S1 := "", PreviousEvMH_S2 := ""
 			, PreviousEvUH_R1R2 := "", PreviousEvUH_R3R4 := "", PreviousEvUH_R5R6 := "", PreviousEvUH_R7R8 := "", PreviousEvUH_S1 := "", PreviousEvUH_S2 := "", PreviousEvUH_S3 := ""
 			, PreviousEvTt_R1R2 := "", PreviousEvTt_R3R4 := "", PreviousEvTt_R5R6 := "", PreviousEvTt_C1 := "", PreviousEvTt_C2 := "", PreviousEvTt_S1 := "", PreviousEvTt_S2 := "", PreviousEvTt_DDL1 := "", PreviousEvTt_DDL2 := ""
+;#c/* commercial only beginning
 			, PreviousEvAT_R1R2 := ""
+;#c*/ commercial only end
 			, PreviousEvSM_R1R2 := ""
 	;OutputDebug, % "OneTime[1]:" . A_Tab . OneTime[1]
 	Gui, GuiEvents: Submit, NoHide	;Loads EvTab3 with current value 
@@ -3789,7 +3797,9 @@ F_EvTab3(OneTime*)
 		, PreviousEvMH_R1R2 := EvMH_R1R2, PreviousEvMH_R3R4 := EvMH_R3R4, PreviousEvMH_S1 := EvMH_S1, PreviousEvMH_S2 := EvMH_S1
 		, PreviousEvUH_R1R2 := EvUH_R1R2, PreviousEvUH_R3R4 := EvUH_R3R4, PreviousEvUH_R5R6 := EvUH_R5R6, PreviousEvUH_R7R8 := EvUH_R7R8, PreviousEvUH_S1 := EvUH_S1, PreviousEvUH_S2 := EvUH_S2, PreviousEvUH_S3 := EvUH_S3
 		, PreviousEvTt_R1R2 := EvTt_R1R2, PreviousEvTt_R3R4 := EvTt_R3R4, PreviousEvTt_R5R6 := EvTt_R5R6, PreviousEvTt_C1 := EvTt_C1, PreviousEvTt_C2 := EvTt_C2, PreviousEvTt_S1 := EvTt_S1, PreviousEvTt_S2 := EvTt_S2, PreviousEvTt_DDL1 := EvTt_DDL1, PreviousEvTt_DDL2 := EvTt_DDL2
+;#c/* commercial only beginning		
 		, PreviousEvAT_R1R2 := EvAT_R1R2
+;#c*/ commercial only end		
 		, PreviousEvSM_R1R2 := EvSM_R1R2
 		return
 	}
@@ -4036,7 +4046,9 @@ F_EvTab3(OneTime*)
 						. "`n`n" . TransA["Do you wish to apply your changes?"]
 					IfMsgBox, Yes
 					{
+;#c/* commercial only beginning						
 						F_EvAT_B2() ;Apply changes
+;#c*/ commercial only end
 						F_EvUpdateTab()
 					}
 					IfMsgBox, No	;restore previous values to each GuiControl
@@ -4177,12 +4189,16 @@ F_EvUpdateTab()
 			F_EvTt_R3R4()
 			F_EvTt_S1()
 			F_EvTt_S2()
+;#c/* commercial only beginning			
 		Case % TransA["Active triggerstring tips"]:
 			GuiControl, +Default, % IdEvAT_B2	;default button Apply
 			F_EvSM_R1R2()
+;#c*/ commercial only end			
 		Case % TransA["Static triggerstring / hotstring menus"]:
 			GuiControl, +Default, % IdEvSM_B2	;default button Apply
+;#c/* commercial only beginning			
 			F_EvAT_R1R2()
+;#c*/ commercial only end			
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4285,13 +4301,16 @@ F_EvSM_R1R2()
 	}
 }	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_EvAT_B4()	;Event Active Triggerstring Tips Button Cancel
 {
 	global ;assume-global mode
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
      F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_EvAT_B2()	;Event Active Triggerstring Tips Button Apply
 {
 	global ;assume-global mode
@@ -4310,7 +4329,9 @@ F_EvAT_B2()	;Event Active Triggerstring Tips Button Apply
 		F_GuiTrigTipsMenuDefC4()
 	}
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_EvAT_B3()	;Event Active Triggerstring Tips Button Close
 {
 	global ;assume-global mode
@@ -4330,7 +4351,9 @@ F_EvAT_B3()	;Event Active Triggerstring Tips Button Close
 		F_GuiTrigTipsMenuDefC4()
 	}
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_EvAT_B1()	;Event Active Triggerstring Tips Button Tooltip test
 {
 	global ;assume-global mode
@@ -4353,13 +4376,15 @@ F_EvAT_B1()	;Event Active Triggerstring Tips Button Tooltip test
 	if ((EvTt_R1R2 = 1) and (EvTt_R3R4 = 1))
 		SetTimer, TurnOff_Ttt, % "-" . EvTt_S1	 ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvAT_R1R2()
+;#c/* commercial version only beginning
+F_EvAT_R1R2()	;Ev = Event, AT = Active Triggerstring, R1R2 = Radio no. 1 and Radio no. 2
 {
 	global ;assume-global mode
 	Gui, GuiEvents: Submit, NoHide
-	; F_TTMenu_KeyboardAHK_Hotkeys(EvAT_R1R2)
 }
+;#c*/ commercial version only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvTt_B1()	;Event Tooltip (is triggered) Button Tooltip test 
 {
@@ -5222,7 +5247,7 @@ F_GuiEvents_DetermineConstraints()
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	maxY4 := v_yNext
-	
+;#c/* commercial only beginning
 	v_xNext := c_xmarg, v_yNext := c_ymarg
 	GuiControl, Move, % IdEvAT_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_T1
@@ -5245,7 +5270,7 @@ F_GuiEvents_DetermineConstraints()
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvAT_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	maxY5 := v_yNext
-	
+;#c*/ commercial only end
 	v_xNext := c_xmarg, v_yNext := c_ymarg ;beginning of static triggerstring / hostring menus
 	GuiControl, Move, % IdEvSM_T1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_T1
@@ -5325,7 +5350,7 @@ F_GuiEvents_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvTt_B3
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvTt_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext	
-	
+;#c/* commercial only beginning	
 	v_xNext := c_xmarg, v_yNext := MaxY
 	GuiControl, Move, % IdEvAT_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_B1
@@ -5337,7 +5362,7 @@ F_GuiEvents_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvAT_B3
 	v_xNext += v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdEvAT_B4, % "x+" . v_xNext . A_Space . "y+" . v_yNext	
-	
+;#c*/ commercial only end	
 	v_xNext := c_xmarg, v_yNext := MaxY	;alignment of tab 6: static triggerstring tips / hotstring menus
 	GuiControl, Move, % IdEvSM_B1, % "x+" . v_xNext . A_Space . "y+" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdEvSM_B1
@@ -5701,11 +5726,13 @@ F_GuiEvents_LoadValues()
 		Case 4:	
 		GuiControl,, % IdEvSM_R1, 1
 	}
+;#c/* commercial only beginning	
 	Switch ini_ATEn
 	{
 		Case true:	GuiControl,, % IdEvAT_R1, 1
 		Case false:	GuiControl,, % IdEvAT_R2, 1
 	}
+;#c*/ commercial only end
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadATStyling()
@@ -8335,7 +8362,7 @@ F_PTTT(string)
 				F_PTTTQ(v_Qinput := LastChar)
 			else
 			{
-				; OutputDebug, % "Non-alpha" . A_Space . "PreviousButLast:" . PreviousButLast . "|" . A_Space . "string:" . string . "|" . A_Space . "v_Qinput:" . v_Qinput . "`n"
+				OutputDebug, % "Non-alpha" . A_Space . "PreviousButLast:" . PreviousButLast . "|" . A_Space . "string:" . string . "|" . A_Space . "v_Qinput:" . v_Qinput . "`n"
 				v_InputString := LastChar
 				F_PTTTQ(v_Qinput := LastChar)
 			}
@@ -11950,7 +11977,7 @@ Backslash \ 											= Backslash \
 Basic hotstring is triggered								= Basic hotstring is triggered
 black												= black
 blue													= blue
-Both optional locations for library folder are empty = do not contain any library files. The second one will be used. = Both optional locations for library folder are empty = do not contain any library files. The second one will be used.
+Both optional locations for library folder are empty (do not contain any library files). The second one will be used. = Both optional locations for library folder are empty (do not contain any library files). The second one will be used.
 Both optional library folder locations contain *.csv files. Would you like to use the first one? = Both optional library folder locations contain *.csv files. Would you like to use the first one?
 Built with Autohotkey.exe version							= Built with Autohotkey.exe version
 By default library files (*.csv) are located in Users subfolder which is protected against other computer users. = By default library files (*.csv) are located in Users subfolder which is protected against other computer users.
