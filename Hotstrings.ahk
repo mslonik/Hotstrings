@@ -2277,9 +2277,9 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
-	static	f_EndCharDetected := false
+	static	f_ExpEndChar := false
 	; static	f_EndCharDetected := false, f_LastTip := false
-	local	WhereToCut := 0, shortened := "",  f_LastTip := false
+	local	WhereToCut := 0, shortened := "",  f_LastTip := false, f_EndCharDetected := false, index := 0, value := ""
 
 	Critical, On
 	; OutputDebug, % A_ThisFunc . A_Space . "Char:" . Char . "`n"
@@ -2300,13 +2300,16 @@ F_OneCharPressed(ih, Char)
 		f_EndCharDetected := false
 	
 	if (v_InputString = "")
-		v_Qinput := ""
+	{
+		v_Qinput 		:= ""
+	,	f_ExpEndChar 	:= true
+	}
 
 	v_InputString .= Char
 	if (v_Qinput)
 		v_Qinput .= Char
 
-	OutputDebug, % "2)v_IS:" . v_InputString . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "v_QI:" . v_Qinput . "`n"
+	; OutputDebug, % "2)v_IS:" . v_InputString . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "v_QI:" . v_Qinput . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -2321,16 +2324,20 @@ F_OneCharPressed(ih, Char)
 			; OutputDebug, % "B1 a_Tips.Count():" . a_Tips.Count() . "`n"
 			f_LastTip := true
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
+			
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD
-			OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "f_LT:" . f_LastTip . A_Space . "v_QI:" . v_Qinput . "`n"
+			for index, value in a_TipsOpt
+				if (!InStr(a_TipsOpt[index], "*"))
+					f_ExpEndChar := true
+			; OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_ExpEndChar:" . f_ExpEndChar . "`n"
 			Critical, Off
 			return
 		}
 	}
-	if (!f_LastTip) and (f_EndCharDetected)
+	if (!f_LastTip) and (f_EndCharDetected) and (!f_ExpEndChar)
 		v_InputString := ""
-	OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . A_Space . "v_IS:" . v_InputString . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . "|" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
@@ -8254,16 +8261,24 @@ F_PTTT(string)
 {
 	global	;assume-global mode of operation
 	local	HitCnt 			:= 0
-		,	PreviousButLast 	:= SubStr(string, 1, -1)
+		,	TwoLastChars		:= ""
+		,	PreviousButLast 	:= ""
 		,	f_IsAlpha 		:= false
 		,	f_FirstPart		:= false
 		,	LastChar			:= SubStr(string, 0)
-		, 	f_PButLastIsAlpha	:= 
+		, 	f_PBLIsAlphanum	:= false
+		,	InStrLen			:= StrLen(string)
 
 	; OutputDebug, % A_ThisFunc . A_Space . "`n"
-	OutputDebug, % A_ThisFunc . A_Space . "string:" . string . "LC:" . LastChar . "`n"
-	if PreviousButLast is alpha
-		f_PButLastIsAlpha := true
+
+	; OutputDebug, % A_ThisFunc . A_Space . "string:" . string . "|" . "LC:" . LastChar . "|" . "`n"
+	if (InStrLen > 1)
+	{
+		TwoLastChars := SubStr(string, -1)
+	,	PreviousButLast := SubStr(TwoLastChars, 1, 1)
+		if PreviousButLast is alnum
+			f_PBLIsAlphanum := true
+	}
 
 	if (StrLen(string) > ini_TASAC - 1)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{
@@ -8313,19 +8328,20 @@ F_PTTT(string)
 			}
 		}
 
-		OutputDebug, % "Here I am" . "`n"
-		if (!f_FirstPart) and (StrLen(string) > 1)
+		; OutputDebug, % "Here I am" . "`n"
+		if (!f_FirstPart) and (InStrLen > 1)
 		{
-			if (f_PButLastIsAlpha)
+			if (f_PBLIsAlphanum)
 				F_PTTTQ(v_Qinput := LastChar)
 			else
 			{
-				; OutputDebug, % "Non-alpha" . A_Space . "v_Qinput:" . v_Qinput . "`n"
+				; OutputDebug, % "Non-alpha" . A_Space . "PreviousButLast:" . PreviousButLast . "|" . A_Space . "string:" . string . "|" . A_Space . "v_Qinput:" . v_Qinput . "`n"
 				v_InputString := LastChar
 				F_PTTTQ(v_Qinput := LastChar)
 			}
 		}
 	}
+	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PTTTQ(string)
@@ -8395,7 +8411,7 @@ F_PTTTQ(string)
 	}
 	if (a_Tips.Count() = 0) and (Qlength = 1)
 		v_Qinput := ""
-	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "string:" . string . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadSignalingParams()
@@ -14318,7 +14334,7 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 	local	ThisHotkey := A_ThisHotkey, EndChar := A_EndChar, temp := 0, FirstPart := "", SecondPart := ""
 
 	F_DestroyTriggerstringTips(ini_TTCn)
-	v_UndoHotstring 	:= ReplacementString
+	v_UndoHotstring	:= ReplacementString
 ,	v_Options 		:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
 ,	v_EndChar 		:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
 	if (InStr(v_Options, "?"))
