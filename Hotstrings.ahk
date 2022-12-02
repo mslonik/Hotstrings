@@ -2302,23 +2302,23 @@ F_OneCharPressed(ih, Char)
 	if (v_InputString = "")
 	{
 		v_Qinput 		:= ""
-	,	f_ExpEndChar 	:= true
+	,	f_ExpEndChar 	:= false
 	}
 
 	v_InputString .= Char
 	if (v_Qinput)
 		v_Qinput .= Char
 
-	; OutputDebug, % "2)v_IS:" . v_InputString . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "v_QI:" . v_Qinput . "`n"
+	OutputDebug, % "2)v_IS:" . v_InputString . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "v_QI:" . v_Qinput . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
 	{
-		F_DestroyTriggerstringTips(ini_TTCn)
 		if (v_Qinput)
 			F_PTTTQ(v_Qinput)
 		else
 			F_PTTT(v_InputString)	;Variant when new sequence starts from EndChar.
+		F_DestroyTriggerstringTips(ini_TTCn)
 		if (a_Tips.Count())	;if tips are available display then
 		{
 			; OutputDebug, % "B1 a_Tips.Count():" . a_Tips.Count() . "`n"
@@ -2333,14 +2333,16 @@ F_OneCharPressed(ih, Char)
 					f_ExpEndChar := true
 					break
 				}
-			; OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_ExpEndChar:" . f_ExpEndChar . "`n"
+				else
+					f_ExpEndChar := false
+			OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_ExpEndChar:" . f_ExpEndChar . "`n"
 			Critical, Off
 			return
 		}
 	}
 	if (!f_LastTip) and (f_EndCharDetected) and (!f_ExpEndChar)
 		v_InputString := ""
-	; OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . "|" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
+	OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . "|" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
@@ -8368,7 +8370,7 @@ F_PTTT(string)
 			}
 		}
 	}
-	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
+	OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PTTTQ(string)
@@ -8438,7 +8440,7 @@ F_PTTTQ(string)
 	}
 	if (a_Tips.Count() = 0) and (Qlength = 1)
 		v_Qinput := ""
-	; OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "string:" . string . "`n"
+	OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "string:" . string . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadSignalingParams()
