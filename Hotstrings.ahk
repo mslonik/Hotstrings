@@ -1489,11 +1489,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 			GuiControl,, % IdTT_C4_LB2, |
 			GuiControl,, % IdTT_C4_LB3, |
 			; OutputDebug, % "v_InputStringOutput:" . A_Tab . v_InputString . A_Tab . "Temp1:" . A_Tab . Temp1 . A_Tab . "A_IsCritical:" . A_Tab . A_IsCritical . "`n"
-			SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
-			Hotstring("Reset")	;reset hotstring recognizer
-			SendLevel, 2			;to backtrigger it must be higher than the input level of the hotstrings
-			SendInput, % Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
-			SendLevel, 0
+			F_BackFeed(Temp1)
 			v_InputString := 0
 		Case "MHot":
 			Switch WhichMenu
@@ -1605,7 +1601,7 @@ F_HMenuSI_Keyboard()
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	v_UndoTriggerstring := v_InputString
-	return true	; v_InputString will be cleared only if function returns true if function returns false, characters still be invisible
+	return true	; v_InputString will be cleared only if function returns true if function returns false, characters still will be invisible
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_MouseMouse is lower than this "interrupt"
@@ -1731,7 +1727,24 @@ ActiveControlIsOfClass(Class)	;https://www.autohotkey.com/docs/commands/_If.htm
     return (FocusedControlClass=Class)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ConvertEscapeSequences(string)	;now from file are read sequences like "`" . "t" which are 2x characters. now we have to convert this pair into single character "`t" = single Tab character
+F_ConvertEscapeSequences2(string)	;This function is called whenever feed back (SendLevel) is applied and then triggerstring is send by SendInput and cannot therefore contain any escape characters.
+{
+	if (InStr(string, "{"))
+		string := StrReplace(string, "{", "{{}}")
+	if (InStr(string, "}"))
+		string := StrReplace(string, "}", "{}}")
+	if (InStr(string, "^"))
+		string := StrReplace(string, "^", "{^}")
+	if (InStr(string, "!"))
+		string := StrReplace(string, "!", "{!}")
+	if (InStr(string, "+"))
+		string := StrReplace(string, "+", "{+}")
+	if (InStr(string, "#"))
+		string := StrReplace(string, "#", "{#}")
+	return string
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ConvertEscapeSequences(string)	;now from file are read sequences like "`" . "t" which are 2x characters. now we have to convert this pair into single character "`t" = single Tab character. 
 {	;theese lines are necessary to handle rear definitions of hotstrings such as those finished with `n, `r etc. https://www.autohotkey.com/docs/misc/EscapeChar.htm
 	StringCaseSense, On	;necessary as without it ``A is converted to `a and `a is "Go to" or "/BEL".
 	string := StrReplace(string, "``n", "`n") 
@@ -2309,7 +2322,7 @@ F_OneCharPressed(ih, Char)
 	if (v_Qinput)
 		v_Qinput .= Char
 
-	OutputDebug, % "2)v_IS:" . v_InputString . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "v_QI:" . v_Qinput . "`n"
+	; OutputDebug, % "2)v_IS:" . v_InputString . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "v_QI:" . v_Qinput . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -2335,14 +2348,14 @@ F_OneCharPressed(ih, Char)
 				}
 				else
 					f_ExpEndChar := false
-			OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_ExpEndChar:" . f_ExpEndChar . "`n"
+			; OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_ExpEndChar:" . f_ExpEndChar . "`n"
 			Critical, Off
 			return
 		}
 	}
 	if (!f_LastTip) and (f_EndCharDetected) and (!f_ExpEndChar)
 		v_InputString := ""
-	OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . "|" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . "|" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
@@ -3341,22 +3354,34 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 		IsCursorPressed := false
 		return
 	}
-	if (PressedKey > MenuMax)
+	if (PressedKey > MenuMax) or (PressedKey = 0)
 		return
 
 	GuiControlGet, Temp1, , % %DynVarRef%
 	if (ini_TTCn = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_DestroyTriggerstringTips(ini_TTCn)
-	SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
-	Hotstring("Reset")
-	SendLevel, 2	;to backtrigger it must be higher than the input level of the hotstrings
-	SendInput, % Temp1	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
-	SendLevel, 0
+	F_BackFeed(Temp1)
 	v_InputString 		:= ""
 ,	IsCursorPressed 	:= false
 , 	IntCnt 			:= 0
 , 	MenuMax 			:= 0
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_BackFeed(MyInput)
+{
+	global ;assume-global mode
+	if (v_Qinput != "")
+		SendInput, % "{BackSpace" . A_Space . StrLen(v_Qinput) . "}"
+	else
+		SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
+	Hotstring("Reset")
+	MyInput := F_ConvertEscapeSequences(MyInput)
+,	MyInput := F_ConvertEscapeSequences2(MyInput)
+	; OutputDebug, % "MyInput:" . F_ConvertEscapeSequences2(MyInput) . "|" . "`n"
+	SendLevel, 	2		;to backtrigger it must be higher than the input level of the hotstrings
+	SendInput,	% MyInput	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
+	SendLevel, 	0
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadConfiguration()
@@ -8286,7 +8311,7 @@ F_EventSigOrdHotstring()
 		SoundBeep, % ini_OHSF, % ini_OHSD
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_PTTT(string)
+F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 {
 	global	;assume-global mode of operation
 	local	HitCnt 			:= 0
@@ -8299,7 +8324,6 @@ F_PTTT(string)
 		,	InStrLen			:= StrLen(string)
 
 	; OutputDebug, % A_ThisFunc . A_Space . "`n"
-
 	; OutputDebug, % A_ThisFunc . A_Space . "string:" . string . "|" . "LC:" . LastChar . "|" . "`n"
 	if (InStrLen > 1)
 	{
@@ -8364,16 +8388,16 @@ F_PTTT(string)
 				F_PTTTQ(v_Qinput := LastChar)
 			else
 			{
-				OutputDebug, % "Non-alpha" . A_Space . "PreviousButLast:" . PreviousButLast . "|" . A_Space . "string:" . string . "|" . A_Space . "v_Qinput:" . v_Qinput . "`n"
+				; OutputDebug, % "Non-alpha" . A_Space . "PreviousButLast:" . PreviousButLast . "|" . A_Space . "string:" . string . "|" . A_Space . "v_Qinput:" . v_Qinput . "`n"
 				v_InputString := LastChar
 				F_PTTTQ(v_Qinput := LastChar)
 			}
 		}
 	}
-	OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_PTTTQ(string)
+F_PTTTQ(string) ;Function_ Prepare Triggerstring Tips Tables Question mark (related to ? option)
 {
 	global	;assume-global mode of operation
 	local	HitCnt 			:= 0
@@ -8436,11 +8460,12 @@ F_PTTTQ(string)
 	if (a_Tips.Count() = 0) and (Qlength > 1)
 	{
 		string := SubStr(string, 2)	;all but first
-		F_PTTTQ(string)	;recursive call
+		F_PTTTQ(v_Qinput := string)	;recursive call
+		; F_PTTTQ(string)	;recursive call
 	}
 	if (a_Tips.Count() = 0) and (Qlength = 1)
 		v_Qinput := ""
-	OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "string:" . string . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "string:" . string . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadSignalingParams()
@@ -14269,11 +14294,7 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 {
 	global	;assume-global mode
 	Critical, On
-	local	tempx := "", a_MCSIMenuPos := [], ThisHotkey := A_ThisHotkey, EndChar := A_EndChar
-
-	tempx := SubStr(v_InputString, 1, 1)
-	if tempx is not alnum
-		v_InputString := SubStr(v_InputString, 2)
+	local	a_MCSIMenuPos := [], ThisHotkey := A_ThisHotkey, EndChar := A_EndChar
 
 	v_InputH.VisibleText 	:= false
 ,	v_Options 			:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
@@ -14473,11 +14494,7 @@ F_HOF_MCL(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipb
 {
 	global	;assume-global mode
 	Critical, On
-	local	tempx := "", a_MCLIMenuPos := [], ThisHotkey := A_ThisHotkey, EndChar := A_EndChar
-
-	tempx := SubStr(v_InputString, 1, 1)
-	if tempx is not alnum
-		v_InputString := SubStr(v_InputString, 2)
+	local	a_MCLIMenuPos := [], ThisHotkey := A_ThisHotkey, EndChar := A_EndChar
 
 	v_InputH.VisibleText 	:= false
 ,	v_Options 			:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
@@ -14681,20 +14698,21 @@ F_MouseMenu_MSI() ; Handling of mouse events for F_HOF_MSI;The subroutine may co
 		v_UndoTriggerstring 	:= v_InputString
 ,		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
-		; Hotstring("Reset")
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTMenuStatic_Mouse() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
-	local	OutputVarTemp := "",	ThisHotkey := A_PriorKey
-			, OutputVarTemp2 := "", ChoicePos := 0
+	local	OutputVarTemp := ""
+		,	ThisHotkey := A_ThisHotkey
+		; ,	ThisHotkey := A_PriorKey
+		,	ChoicePos := 0
 
-	OutputDebug, % A_ThisFunc . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
 	if (!ini_ATEn)
 		return
-	; OutputDebug, % "ThisHotkey:" . A_Tab . ThisHotkey . A_Tab . "v_InputString:" . A_Tab . v_InputString . "`n"
+	; OutputDebug, % "ThisHotkey:" . ThisHotkey . "|" . A_Space . "v_InputString:" . A_Tab . v_InputString . "`n"
 	MouseGetPos, , , , OutputVarTemp			;to store the name (ClassNN) of the control under the mouse cursor
 	SendMessage, 0x0188, 0, 0, % OutputVarTemp	;retrieve the position of the selected item
 	ChoicePos := (ErrorLevel<<32>>32) + 1		;Convert UInt to Int to have -1 if there is no item selected. Convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.
@@ -14717,11 +14735,8 @@ F_TTMenuStatic_Mouse() ;The subroutine may consult the following built-in variab
 				WinActivate, % "ahk_id" PreviousWindowID
 		}
 		; OutputDebug, % "ini_TTCn:" . A_Tab . ini_TTCn . "`n"
-		Hotstring("Reset")			;reset hotstring recognizer
-		SendEvent, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
-		SendLevel, 2				;to backtrigger it must be higher than the input level of the hotstrings
-		SendEvent, % OutputVarTemp	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
-		SendLevel, 0
+		; OutputDebug, % "OutputVarTemp:" . A_Space . OutputVarTemp . "`n"
+		F_BackFeed(OutputVarTemp)
 		v_InputString := ""
 		Critical, Off
 	}
