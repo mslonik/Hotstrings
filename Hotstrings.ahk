@@ -788,11 +788,11 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If ActiveControlIsOfClass("Edit")	;https://www.autohotkey.com/docs/commands/_If.htm
 	^BS::
-		Send ^+{Left}{Del}	;one liner so no need to put return
+		Send, ^+{Left}{Del}
 		F_DestroyTriggerstringTips(ini_TTCn)
 		return
 	^Del::
-		Send ^+{Right}{Del}
+		Send, ^+{Right}{Del}
 		F_DestroyTriggerstringTips(ini_TTCn)
 		return
 #If
@@ -14545,10 +14545,10 @@ F_HOF_MCL(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipb
 F_MouseMenu_MCL() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
-	local	OutputVarTemp := "", temp := 0, ChoicePos := 0
+	local	OutputVarTemp := "", temp := 0, ChoicePos := 0, ThisHotkey := A_ThisHotkey
 
-	; OutputDebug, % A_ThisFunc . "`n"
-	if (A_PriorKey = "LButton")
+	; OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
+	if (InStr(ThisHotkey, "LButton"))
 	{
 		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuCli
 		Gui, HMenuCli: Destroy
@@ -14562,8 +14562,8 @@ F_MouseMenu_MCL() ;The subroutine may consult the following built-in variables: 
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
 		++v_LogCounter
-		if (InStr(A_ThisHotkey, "?"))
-			v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
+		if (InStr(ThisHotkey, "?"))
+			v_InputString := SubStr(ThisHotkey, InStr(ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 		temp := F_DetermineGain2(v_InputString, ReplacementString)
 		v_CntCumGain += temp
 		if (ini_THLog)
@@ -14571,7 +14571,6 @@ F_MouseMenu_MCL() ;The subroutine may consult the following built-in variables: 
 		v_UndoTriggerstring 	:= v_InputString
 ,		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
-		; Hotstring("Reset")
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14669,10 +14668,12 @@ F_ClipboardPaste(string, Oflag, v_EndChar)
 F_MouseMenu_MSI() ; Handling of mouse events for F_HOF_MSI;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {	
 	global	;assume-global mode of operation
-	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0, temp := 0
+	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0, temp := 0, ThisHotkey := A_ThisHotkey
 
-	; OutputDebug, % A_ThisFunc . "`n"
-	if (A_PriorKey = "LButton")
+	; OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
+	; OutputDebug, % "ThisHotkey:" . A_Space . ThisHotkey . "`n"
+	if (InStr(ThisHotkey, "LButton"))
+	; if (A_PriorKey = "LButton")
 	{
 		MouseGetPos, , , , OutputVarControl			;to store the name (ClassNN) of the control under the mouse cursor
 		SendMessage, 0x0188, 0, 0, % OutputVarControl	;retrieve the position of the selected item
@@ -14689,8 +14690,8 @@ F_MouseMenu_MSI() ; Handling of mouse events for F_HOF_MSI;The subroutine may co
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
 		++v_LogCounter
-		if (InStr(A_ThisHotkey, "?"))
-			v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
+		if (InStr(ThisHotkey, "?"))
+			v_InputString := SubStr(ThisHotkey, InStr(ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 		temp := F_DetermineGain2(v_InputString, OutputVarTemp)
 		v_CntCumGain += temp
 		if (ini_THLog)
