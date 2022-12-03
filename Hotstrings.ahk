@@ -43,8 +43,8 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		v_CntCumGain			:= 0			;for logging, Counter Cumulative Gain
 ,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time; f_ stands for "flag"
 ,		TT_C1_Hwnd 			:= 0 
-,		TT_C2_Hwnd 			:= 0 
-,		TT_C3_Hwnd 			:= 0 
+,		TT_C2_Hwnd 			:= 0
+,		TT_C3_Hwnd 			:= 0
 ,		TT_C4_Hwnd 			:= 0 
 ,		HMenuCliHwnd 			:= 0 
 ,		HMenuAHKHwnd			:= 0 
@@ -321,18 +321,28 @@ Menu, AutoStartSub,		Add,	% TransA["Silent mode"],											F_AddToAutostart
 Menu, AppSubmenu, 		Add, % TransA["Add to Autostart"],										:AutoStartSub
 
 F_CompileSubmenu()
-
+;#c/* commercial only beginning
 Menu, AppSubmenu,		Add, % TransA["Version / Update"],										F_GuiVersionUpdate
 Menu, AppSubmenu,		Add
 Menu, SubmenuLog,		Add,	% TransA["enable"],												F_MenuLogEnDis
 Menu, SubmenuLog,		Add, % TransA["disable"],											F_MenuLogEnDis
-Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],								:SubmenuLog	
+Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],								:SubmenuLog
 Menu, AppSubmenu,		Add, % TransA["Open log folder in Windows Explorer"], 						F_OpenLogFolder
 Menu, AppSubmenu,		Add, % TransA["Open current log (view only)"],							F_ViewCurrentLog
 Menu, AppSubmenu,		Add, % TransA["Copy Log folder path to Clipboard"],						F_PathtoClipboard
-
+;#c*/ commercial only end
+;#f/* free version only beginning
+; Menu, AppSubmenu,		Add, % TransA["Log triggered hotstrings"],								F_Empty
+; Menu, AppSubmenu,		Add, % TransA["Open log folder in Windows Explorer"], 						F_Empty
+; Menu, AppSubmenu,		Add, % TransA["Open current log (view only)"],							F_Empty
+; Menu, AppSubmenu,		Add, % TransA["Copy Log folder path to Clipboard"],						F_Empty
+; Menu, AppSubmenu,		Disable, % TransA["Log triggered hotstrings"]
+; Menu, AppSubmenu,		Disable, % TransA["Open log folder in Windows Explorer"]
+; Menu, AppSubmenu,		Disable, % TransA["Open current log (view only)"]					
+; Menu, AppSubmenu,		Disable, % TransA["Copy Log folder path to Clipboard"]
+;#f*/ free version only end
 Menu, AppSubmenu,		Add
-Menu, AppSubmenu,		Add, % TransA["Application statistics"] . "`tShift + Ctrl + S",				F_AppStats
+Menu, AppSubmenu,		Add, % TransA["Application statistics"] . "`tShift + Ctrl + S",				F_AppStats	;tu jestem
 
 Menu, AboutHelpSub,		Add,	% TransA["Help: Hotstrings application"] . "`tF1",					F_GuiAboutLink1
 Menu, AboutHelpSub,		Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"] . "`tCtrl+F1",	F_GuiAboutLink2
@@ -353,7 +363,9 @@ Menu, ListView1_ContextMenu, Add, % TransA["Move definition to another library"]
 Menu, ListView1_ContextMenu, Add, % TransA["Delete selected definition"],							F_DeleteHotstring
 Menu, ListView1_ContextMenu, Add, % TransA["Enable/disable selected definition"],					F_LV1_EnDisDefinition
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Menu / Context menus - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_MenuLogEnDis()	;Position in Menu about loging
+;#c*/ commercial only end
 F_GuiAbout_CreateObjects()
 F_GuiAbout_DetermineConstraints()
 F_GuiVersionUpdate_CreateObjects()
@@ -375,7 +387,9 @@ if (ini_GuiReload) and (v_Param != "l")
 AppStartTime := A_Now	;Date and time math can be performed with EnvAdd and EnvSub. Also, FormatTime can format the date and/or time according to your locale or preferences.
 Critical, Off
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
-#If WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd) or WinExist("ahk_id" TT_C4_Hwnd)	;active triggerstring tips
+#If WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd)	;triggerstring tips
+	or WinExist("ahk_id" TT_C4_Hwnd)	;static triggerstring tips
+
 	^Tab::	;new thread starts here
 	+^Tab::
 	^Up::
@@ -399,6 +413,7 @@ Critical, Off
 	~Shift::
 		SetTimer, TurnOff_Ttt, Off
 		return
+;#c/* commercial only beginning		
 	^?::
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Shortcuts available for active triggerstring tips:"] . "`n`n" 
 			. TransA["Keyboard or mouse scrolling"] . ":" . "`n"
@@ -419,6 +434,7 @@ Critical, Off
 			. TransA["Close and interrupt"] . ":" . "`n"
 			. "Esc"
 		return
+;#c*/ commercial only end		
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If WinActive("ahk_id" HS3SearchHwnd)
@@ -798,6 +814,10 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_Empty()	;empty / dummy function. Applicable for debugging purposes or as destination for Menu command.
+{	
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InternalHot()
 {
 	global	;assume-global mode of operation
@@ -938,6 +958,7 @@ F_PathtoClipboard()
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Required content is copied to the Clipboard"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_ViewCurrentLog()
 {
 	global	;assume-global mode of operation
@@ -975,6 +996,7 @@ F_ViewCurrentLog()
 	Gui, 		ShowLog: Show, % "x" . Xpos + 25 . A_Space . "y" . Ypos + 25 . A_Space . "w" . Wwidth - (WMaxPrimaryMon - WidthOfClient) . A_Space . "h" . Hheight - (HMaxPrimaryMon - HeightOfClient)
 	GuiControl, 	Focus, % IdSL_Edit1
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ShowLogGuiSize(GuiHwnd, EventInfo, Width, Height)	;Gui event
 {
@@ -2532,10 +2554,12 @@ F_GUIinit()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_OpenLogFolder()
 {
 	Run, % "explore" . A_Space . A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log" 
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_OpenConfigIniLocation()
 {
@@ -3270,6 +3294,7 @@ F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)
 	GuiControl, Font, % IdTT_C1_LB1		;fontcolor of listbox
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_MenuLogEnDis()
 {
 	global	;assume-global mode
@@ -3305,6 +3330,7 @@ F_MenuLogEnDis()
 			. "hh:mm:ss" . "|" . "hotstring counter" . "|" . "entered triggerstring" . "|" . "trigger" . "|" . "triggerstring options" . "|" . "hotstring" . "|" . "gain" . "|" . "cumulative gain" . "|" . "`n", % v_LogFileName, UTF-8
 	}
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" coming from "g" event
 {
@@ -3527,14 +3553,14 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Margin,	% c_xmarg, % c_ymarg
 	Gui,	GuiEvents: Color,	% c_WindowColor, % c_ControlColor
 	Gui,	GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-;#f/* free version only beginning
-	; Gui, GuiEvents: Add,	Tab3, vEvTab3 gF_EvTab3,						% TransA["Basic hotstring is triggered"] . "||" . TransA["Menu hotstring is triggered"] . "|" 
-		; . TransA["Undid the last hotstring"] . "|" . TransA["Triggerstring tips"] . "|" . TransA["Static triggerstring / hotstring menus"] . "|"
-;#f*/ free version only end
+	Gui, GuiEvents: Add,	Tab3, vEvTab3 gF_EvTab3,						% TransA["Basic hotstring is triggered"] . "||" 
+																. TransA["Menu hotstring is triggered"] . "|" 
+																. TransA["Undid the last hotstring"] . "|" 
+																. TransA["Triggerstring tips"] . "|" 
 ;#c/* commercial only beginning
-	Gui, GuiEvents: Add,	Tab3, vEvTab3 gF_EvTab3,						% TransA["Basic hotstring is triggered"] . "||" . TransA["Menu hotstring is triggered"] . "|" 
-		. TransA["Undid the last hotstring"] . "|" . TransA["Triggerstring tips"] . "|" . TransA["Active triggerstring tips"] . "|" . TransA["Static triggerstring / hotstring menus"] . "|"
+																. TransA["Active triggerstring tips"] . "|" 
 ;#c*/ commercial only end	
+																. TransA["Static triggerstring / hotstring menus"] . "|"
 	Gui, GuiEvents: Tab, 											% TransA["Basic hotstring is triggered"]
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Text, 	HwndIdEvBH_T1,						% TransA["Tooltip enable"] . ":"
@@ -9407,7 +9433,7 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 	
 	GuiControl, ChooseString, % IdDDL2, % SourceLibrary
 	Gui, HS3: 		Submit, NoHide	;this line is necessary to v_SelectHotstringLibrary <- SourceLibrary
-	F_SelectLibrary() ;Remove the definition from source table / file.	;tu jestem
+	F_SelectLibrary() ;Remove the definition from source table / file.
 	Loop, % LV_GetCount()
 	{
 		LV_GetText(Temp1, A_Index, 2)
