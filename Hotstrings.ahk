@@ -280,11 +280,21 @@ Menu, Submenu1, 		Add, % TransA["Location of application specific data"],					:S
 
 Menu, HSMenu, 			Add, % TransA["Configuration"], 										:Submenu1
 Menu, HSMenu, 			Add, % TransA["Search (F3)"], 										F_Searching
-
+;#c/* commercial only beginning
 Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 								F_RefreshListOfLibraries
+;#c*/ commercial only end
+;#f/* free version only beginning
+; Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 								F_Empty
+; Menu, LibrariesSubmenu,	Disable, % TransA["Enable/disable libraries"]
+;#f*/ free version only end
+;#c/* commercial only beginning
 Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 						F_RefreshListOfLibraryTips
+;#c*/ commercial only end
+;#f/* free version only beginning
+; Menu, LibrariesSubmenu, 	Add, % TransA["Enable/disable triggerstring tips"], 						F_Empty
+; Menu, LibrariesSubmenu, 	Disable, % TransA["Enable/disable triggerstring tips"]
+;#f*/ free version only end
 F_RefreshListOfLibraries()	; this function calls F_RefreshListOfLibraryTips() as both options are interrelated
-; F_RefreshListOfLibraryTips()
 Menu, LibrariesSubmenu,	Add	;To add a menu separator line, omit all three parameters.
 Menu, LibrariesSubmenu,	Add, % TransA["Visit public libraries webpage"],							F_PublicLibraries
 Menu, LibrariesSubmenu,	Add, % TransA["Open libraries folder in Windows Explorer"], 				F_OpenLibrariesFolderInExplorer
@@ -361,9 +371,7 @@ Menu, ListView1_ContextMenu, Add, % TransA["Move definition to another library"]
 Menu, ListView1_ContextMenu, Add, % TransA["Delete selected definition"],							F_DeleteHotstring
 Menu, ListView1_ContextMenu, Add, % TransA["Enable/disable selected definition"],					F_LV1_EnDisDefinition
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Menu / Context menus - - - - - - - - - - - - - - - - - -
-;#c/* commercial only beginning
 F_MenuLogEnDis()	;Position in Menu about loging
-;#c*/ commercial only end
 F_GuiAbout_CreateObjects()
 F_GuiAbout_DetermineConstraints()
 F_GuiVersionUpdate_CreateObjects()
@@ -3293,9 +3301,9 @@ F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)
 	GuiControl, Font, % IdTT_C1_LB1		;fontcolor of listbox
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;#c/* commercial only beginning
 F_MenuLogEnDis()
 {
+;#c/* commercial only beginning
 	global	;assume-global mode
 	static OneTimeMemory := true
 	
@@ -3328,8 +3336,8 @@ F_MenuLogEnDis()
 		FileAppend, % "--------------------------------------------------------------------------------------------------------------" . "`n" ; amount of "-" characters as for mono typeface (Courier)
 			. "hh:mm:ss" . "|" . "hotstring counter" . "|" . "entered triggerstring" . "|" . "trigger" . "|" . "triggerstring options" . "|" . "hotstring" . "|" . "gain" . "|" . "cumulative gain" . "|" . "`n", % v_LogFileName, UTF-8
 	}
-}
 ;#c*/ commercial only end
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" coming from "g" event
 {
@@ -10038,6 +10046,7 @@ F_GuiAddLibrary(TextString*)
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_RefreshListOfLibraryTips()
 {
+;#c/* commercial only beginning
 	global	;assume-global
 	local	key := 0, value := 0
 	
@@ -10095,10 +10104,12 @@ F_RefreshListOfLibraryTips()
 		Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable triggerstring tips"], 	:ToggleLibTrigTipsSubmenu
 	}
 	Menu, ToggleLibTrigTipsSubmenu, UseErrorLevel, OFF	;This setting is global, meaning it affects all menus, not just MenuName.
+;#c*/ commercial only end	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_RefreshListOfLibraries()
 {
+;#c/* commercial only beginning
 	global	;assume-global mode of operation
 	local key := "", value := 0
 	
@@ -10144,6 +10155,7 @@ F_RefreshListOfLibraries()
 	}
 	Menu, EnDisLib, UseErrorLevel, OFF	;This setting is global, meaning it affects all menus, not just MenuName.
 	F_RefreshListOfLibraryTips()	;if library is enabled again, enable switching of library tip (another position in menu)
+;#c*/ commercial only end
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeleteHotstring()
