@@ -6,21 +6,21 @@
 */
 ; -----------Beginning of auto-execute section of the script -------------------------------------------------
 ; After the script has been loaded, it begins executing at the top line, continuing until a Return, Exit, hotkey/hotstring label, or the physical end of the script is encountered (whichever comes first). 
-#Requires AutoHotkey v1.1.33+ 	; Displays an error and quits if a version requirement is not met.    
-#SingleInstance, 		force	; Only one instance of this script may run at a time!
-#NoEnv  						; Recommended for performance and compatibility with future AutoHotkey releases.
-#Warn  						; Enable warnings to assist with detecting common errors.
-#LTrim						; Omits spaces and tabs at the beginning of each line. This is primarily used to allow the continuation section to be indented. Also, this option may be turned on for multiple continuation sections by specifying #LTrim on a line by itself. #LTrim is positional: it affects all continuation sections physically beneath it.
-#KeyHistory, 			0		; KeyHistory is disabled to make it harder to determine how script works.
-#HotkeyInterval, 		1000		; Specifies the rate of hotkey activations beyond which a warning dialog will be displayed. Default value = 2000 ms.
-#MaxHotkeysPerInterval, 	200		; Specifies the rate of hotkey activations beyond which a warning dialog will be displayed. Default value = 70.
-ListLines, 			Off		; ListLines is disabled to make it harder to determine how script works.
-SendMode, 			Input	; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir, 	% A_ScriptDir	; Ensures a consistent starting directory.
-FileEncoding, 			UTF-16	; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN Warning! UTF-16 is not recognized by Notepad++ editor (2021), which recognizes correctly UCS-2 (defined by the International Standard ISO/IEC 10646). BMP = Basic Multilingual Plane.
-CoordMode, Caret,	Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs. 
-CoordMode, ToolTip,	Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs.
-CoordMode, Mouse,	Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs.
+#Requires AutoHotkey v1.1.33+ 		; Displays an error and quits if a version requirement is not met.    
+#SingleInstance, 		force		; Only one instance of this script may run at a time!
+#NoEnv  							; Recommended for performance and compatibility with future AutoHotkey releases.
+#Warn  							; Enable warnings to assist with detecting common errors.
+#LTrim							; Omits spaces and tabs at the beginning of each line. This is primarily used to allow the continuation section to be indented. Also, this option may be turned on for multiple continuation sections by specifying #LTrim on a line by itself. #LTrim is positional: it affects all continuation sections physically beneath it.
+#KeyHistory, 			0			; KeyHistory is disabled to make it harder to determine how script works.
+#HotkeyInterval, 		1000			; Specifies the rate of hotkey activations beyond which a warning dialog will be displayed. Default value = 2000 ms.
+#MaxHotkeysPerInterval, 	200			; Specifies the rate of hotkey activations beyond which a warning dialog will be displayed. Default value = 70.
+ListLines, 			Off			; ListLines is disabled to make it harder to determine how script works.
+SendMode, 			Input		; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir, 		% A_ScriptDir	; Ensures a consistent starting directory.
+FileEncoding, 			UTF-16		; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN Warning! UTF-16 is not recognized by Notepad++ editor (2021), which recognizes correctly UCS-2 (defined by the International Standard ISO/IEC 10646). BMP = Basic Multilingual Plane.
+CoordMode, Caret,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs. 
+CoordMode, ToolTip,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs.
+CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs.
 ; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
@@ -38,7 +38,6 @@ FileInstall, hotstrings.ico, 	% AppIcon, 	0
 FileInstall, LICENSE, 		LICENSE, 		0
 ; - - - - - - - - - - - - - - - - - - - - - - - S E C T I O N    O F    G L O B A L     V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l like "silent mode"
-,		v_IndexLog 			:= 1			;for logging, if Hotstrings application is run with d parameter.
 ,		v_LogCounter 			:= 0
 ,		v_CntCumGain			:= 0			;for logging, Counter Cumulative Gain
 ,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time; f_ stands for "flag"
@@ -1532,8 +1531,6 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 			GuiControl,, % IdTT_C4_LB4, |
 			if (ini_MHSEn)
 				SoundBeep, % ini_MHSF, % ini_MHSD	
-
-			++v_LogCounter
 			if (InStr(A_ThisHotkey, "?"))
 				v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 			temp := F_DetermineGain2(v_InputString, ReplacementString)
@@ -1542,8 +1539,8 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 			{
 				Switch WhichMenu
 				{
-					Case "SI":	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MSI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-					Case "CLI":	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+					Case "SI":	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+					Case "CLI":	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 				}
 			}
 			v_UndoTriggerstring 	:= v_InputString
@@ -1735,13 +1732,12 @@ F_HMenuCLI_Keyboard()
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
 	Gui, HMenuCli: Destroy
-	++v_LogCounter
 	if (InStr(A_ThisHotkey, "?"))
 		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 	temp := F_DetermineGain2(v_InputString, Temp1)
 	v_CntCumGain += temp
 	if (ini_THLog)
-		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 	v_UndoTriggerstring := v_InputString
 ,	IfUpF 			:= false
 ,	IfDownF 			:= false
@@ -8882,6 +8878,7 @@ F_AddHotstring()
 					. "Hotstring(:" . NewOptions . ":" . vTriggerstring . "," . A_Space . "func(""SimpleOutput"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . v_EnDis . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
+;#c/* commercial only beginning		
 		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
 			Try
@@ -8891,6 +8888,7 @@ F_AddHotstring()
 					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(F_HOF_" . SendFun . ").bind(" . vHotstring . "," . A_Space . true . ")," . A_Space . true . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
+;#c*/ commercial only end		
 	}
 	else
 	{
@@ -8903,6 +8901,7 @@ F_AddHotstring()
 					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_SimpleOutput"").bind(" . vHotstring . "," . A_Space . false . "," . A_Space . SendFun . ")," . A_Space . true . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
+;#c/* commercial only beginning		
 		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
 			Try
@@ -8912,6 +8911,7 @@ F_AddHotstring()
 					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(F_HOF_" . SendFun . ").bind(" . vHotstring . "," . A_Space . false . ")," . A_Space . true . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
+;#c*/ commercial only end		
 	}
 	; 5. Update global arrays
 	F_UpdateGlobalArrays(NewOptions, SendFun, "En", vHotstring)
@@ -9053,6 +9053,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
 						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
 			}
+;#c/* commercial only beginning			
 			if (SendFun = "MSI") or (SendFun = "MCL")
 			{
 				Try
@@ -9062,6 +9063,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(F_HOF_" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOffToggle . ")"
 						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
 			}
+;#c*/ commercial only end			
 		}
 		else
 		{
@@ -9074,6 +9076,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . v_SendFun . ")," . A_Space . OnOffToggle . ")"
 						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
 			}
+;#c/* commercial only beginning			
 			if (SendFun = "MSI") or (SendFun = "MCL")
 			{
 				Try
@@ -9083,6 +9086,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(F_HOF_" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . OnOffToggle . ")"
 						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
 			}
+;#c*/ commercial only end			
 		}
 		return, "Yes"
 	}
@@ -13037,7 +13041,11 @@ F_GuiHS4_Create()
 	GuiControl +g, % IdTextInfo12b, % TI_SHOF
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 	HS4: Add, 	DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gF_SelectFunction, 		SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (SR)|SendPlay (SP)|SendEvent (SE)
+	Gui, 	HS4: Add, 	DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gF_SelectFunction, 		% "SendInput (SI)||Clipboard (CL)|"
+;#c/* commercial only beginning	
+																						. "Menu & SendInput (MSI)|Menu & Clipboard (MCL)|"
+;#c*/ commercial only end																						
+																						. "SendRaw (SR)|SendPlay (SP)|SendEvent (SE)"
 	
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText4b,					 					% TransA["Enter hotstring"]
@@ -13046,13 +13054,13 @@ F_GuiHS4_Create()
 	GuiControl +g, % IdTextInfo13b, % TI_EnterHotstring
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit2b vv_EnterHotstring r2
-	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit3b vv_EnterHotstring1  r2 Disabled
-	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit4b vv_EnterHotstring2  r2 Disabled
-	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit5b vv_EnterHotstring3  r2 Disabled
-	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit6b vv_EnterHotstring4  r2 Disabled
-	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit7b vv_EnterHotstring5  r2 Disabled
-	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit8b vv_EnterHotstring6  r2 Disabled
+	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit2b vv_EnterHotstring	r2
+	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit3b vv_EnterHotstring1	r2 Disabled
+	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit4b vv_EnterHotstring2	r2 Disabled
+	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit5b vv_EnterHotstring3	r2 Disabled
+	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit6b vv_EnterHotstring4	r2 Disabled
+	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit7b vv_EnterHotstring5	r2 Disabled
+	Gui, 	HS4: Add, 	Edit, 		x0 y0 HwndIdEdit8b vv_EnterHotstring6	r2 Disabled
 	
 	Gui,		HS4: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 	HS4: Add, 	Text, 		x0 y0 HwndIdText5b,				 						% TransA["Add comment (optional)"]
@@ -13261,7 +13269,11 @@ F_GuiHS3_Create()
 	GuiControl +g, % IdTextInfo12, % TI_SHOF
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	
-	Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 			SendInput (SI)||Clipboard (CL)|Menu & SendInput (MSI)|Menu & Clipboard (MCL)|SendRaw (SR)|SendPlay (SP)|SendEvent (SE)
+	Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 			% "SendInput (SI)||Clipboard (CL)|"
+;#c/* commercial only beginning
+																								. "Menu & SendInput (MSI)|Menu & Clipboard (MCL)|"
+;#c*/ commercial only end																								
+																								. "SendRaw (SR)|SendPlay (SP)|SendEvent (SE)"
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText4,					 					% TransA["Enter hotstring"]
@@ -14591,13 +14603,12 @@ F_MouseMenu_MCL() ;The subroutine may consult the following built-in variables: 
 		F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
-		++v_LogCounter
 		if (InStr(ThisHotkey, "?"))
 			v_InputString := SubStr(ThisHotkey, InStr(ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 		temp := F_DetermineGain2(v_InputString, ReplacementString)
 		v_CntCumGain += temp
 		if (ini_THLog)
-			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 		v_UndoTriggerstring 	:= v_InputString
 ,		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
@@ -14719,13 +14730,12 @@ F_MouseMenu_MSI() ; Handling of mouse events for F_HOF_MSI;The subroutine may co
 		F_SendIsOflag(OutputVarTemp, Ovar, "SendInput")
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
-		++v_LogCounter
 		if (InStr(ThisHotkey, "?"))
 			v_InputString := SubStr(ThisHotkey, InStr(ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 		temp := F_DetermineGain2(v_InputString, OutputVarTemp)
 		v_CntCumGain += temp
 		if (ini_THLog)
-			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MSI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 		v_UndoTriggerstring 	:= v_InputString
 ,		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
@@ -14800,13 +14810,12 @@ F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid i
 		}
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
-		++v_LogCounter
 		if (InStr(A_ThisHotkey, "?"))
 			v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 		temp := F_DetermineGain2(v_InputString, ReplacementString)
 		v_CntCumGain += temp
 		if (ini_THLog)
-			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . v_LogCounter . "|" . "MSI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName			
+			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName			
 		v_UndoTriggerstring 	:= v_InputString
 ,		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
