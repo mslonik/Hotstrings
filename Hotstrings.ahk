@@ -6,7 +6,7 @@
 */
 ; -----------Beginning of auto-execute section of the script -------------------------------------------------
 ; After the script has been loaded, it begins executing at the top line, continuing until a Return, Exit, hotkey/hotstring label, or the physical end of the script is encountered (whichever comes first). 
-#Requires AutoHotkey v1.1.33+ 		; Displays an error and quits if a version requirement is not met.    
+#Requires AutoHotkey v1.1.34+ 		; Displays an error and quits if a version requirement is not met.    
 #SingleInstance, 		force		; Only one instance of this script may run at a time!
 #NoEnv  							; Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn  							; Enable warnings to assist with detecting common errors.
@@ -37,7 +37,12 @@ global AppVersion				:= "3.6.9"
 FileInstall, hotstrings.ico, 	% AppIcon, 	0
 FileInstall, LICENSE, 		LICENSE, 		0
 ; - - - - - - - - - - - - - - - - - - - - - - - S E C T I O N    O F    G L O B A L     V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+;#c/* commercial only beginning
 global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l like "siLent mode"
+;#c*/ commercial only end
+;#f/* free version only beginning
+; global	v_Param 				:= "" ; 
+;#f*/ free version only end
 ,		v_LogCounter 			:= 0
 ,		v_CntCumGain			:= 0			;for logging, Counter Cumulative Gain
 ,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time; f_ stands for "flag"
@@ -337,7 +342,13 @@ Menu, HSMenu, 			Add, % TransA["Libraries"], 											:LibrariesSubmenu
 Menu, HSMenu, 			Add, % TransA["Clipboard Delay (F7)"], 									F_GuiHSdelay
 
 Menu, SubmenuReload, 	Add,	% TransA["Reload in default mode"] . "`tShift + Ctrl + R",				F_ReloadApplication
+;#c/* commercial only beginning
 Menu, SubmenuReload, 	Add,	% TransA["Reload in silent mode"],									F_ReloadApplication
+;#c*/ commercial only end
+;#f/* free version only beginning
+; Menu, SubmenuReload, 	Add,	% TransA["Reload in silent mode"],									F_Empty
+; Menu, SubmenuReload, 	Disable,	% TransA["Reload in silent mode"]
+;#f*/ free version only end
 Menu, AppSubmenu, 		Add,	% TransA["Reload"],												:SubmenuReload
 
 Menu, AppSubmenu,		Add, % TransA["Suspend Hotstrings"] . "`tF10",							F_TraySuspendHotkeys
@@ -349,7 +360,7 @@ Menu, AutoStartSub,		Add, % TransA["Default mode"],										F_AddToAutostart
 Menu, AutoStartSub,		Add,	% TransA["Silent mode"],											F_AddToAutostart
 Menu, AppSubmenu, 		Add, % TransA["Add to Autostart"],										:AutoStartSub
 
-F_CompileSubmenu()
+; F_CompileSubmenu()	;no longer used
 ;#c/* commercial only beginning
 Menu, AppSubmenu,		Add, % TransA["Version / Update"],										F_GuiVersionUpdate
 Menu, AppSubmenu,		Add
@@ -2942,6 +2953,7 @@ F_InitiateTrayMenus(v_Param)
 	global	;assume-global mode
 	Switch v_Param
 	{
+;#c/* commercial only beginning		
 		Case "l":
 		Menu, Tray, NoStandard									; remove all the rest of standard tray menu
 		if (!FileExist(AppIcon))
@@ -2960,7 +2972,7 @@ F_InitiateTrayMenus(v_Param)
 		Menu, Tray, Add										;line separator 
 		Menu, Tray, Add,		% TransA["Suspend Hotstrings"] . "`tF10",	F_TraySuspendHotkeys
 		Menu  Tray, Add,		% TransA["Exit application"],			F_TrayExit		
-
+;#c*/ commercial only end
 		Case "":
 			Menu, Tray, NoStandard									; remove all the rest of standard tray menu
 			; OutputDebug, % "AppIcon:" . AppIcon . A_Tab . "A_ScriptDir:" . A_Tab . A_ScriptDir .  A_Tab . "A_WorkingDir:" . A_Tab . A_WorkingDir . "`n"
@@ -11260,6 +11272,7 @@ F_LoadGUIstyle()
 		c_ControlColor := "Default"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_CompileSubmenu()
 {
 	local v_TempOutStr := ""
@@ -11296,7 +11309,9 @@ F_CompileSubmenu()
 		Menu, AppSubmenu, 		Disable,										% TransA["Convert to executable (.exe)"]
 	}
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_Compile()
 {	;https://www.autohotkey.com/boards/viewtopic.php?f=86&t=90196&p=398198#p398198
 	local v_TempOutStr := "" ;, v_TempOutStr2 := "", v_TempOutStr3 := ""
@@ -11413,6 +11428,7 @@ F_Compile()
 		}
 	}
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ReloadApplication(params*)	;ItemName, ItemPos, MenuName
 {
