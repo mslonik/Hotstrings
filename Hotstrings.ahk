@@ -1,8 +1,9 @@
 ﻿/* 
- 	Author:      Maciej Słojewski (mslonik, http://mslonik.pl)
- 	Purpose:     Facilitate maintenance of (triggerstring, hotstring) concept.
- 	Description: Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
- 	License:     GNU GPL v.3
+ 	Author:      	Maciej Słojewski (mslonik, http://mslonik.pl)
+ 	Purpose:     	Facilitate maintenance of (triggerstring, hotstring) concept.
+ 	Description: 	Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
+ 	License:     	MIT License
+	Year:		2022
 */
 ; -----------Beginning of auto-execute section of the script -------------------------------------------------
 ; After the script has been loaded, it begins executing at the top line, continuing until a Return, Exit, hotkey/hotstring label, or the physical end of the script is encountered (whichever comes first). 
@@ -28,11 +29,11 @@ global AppVersion				:= "3.6.9"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
-;@Ahk2Exe-SetCopyright GNU GPL 3.x
+;@Ahk2Exe-SetCopyright MIT License
 ;@Ahk2Exe-SetDescription Advanced tool for hotstring management.
 ;@Ahk2Exe-SetProductName Original script name: %A_ScriptName%
 ;@Ahk2Exe-Set OriginalScriptlocation, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings
-;@Ahk2Exe-SetCompanyName  http://mslonik.pl
+;@Ahk2Exe-SetCompanyName  © by Maciej Słojewski http://mslonik.pl
 ;@Ahk2Exe-SetFileVersion %U_vAppVersion%
 FileInstall, hotstrings.ico, 	% AppIcon, 	0
 FileInstall, LICENSE, 		LICENSE, 		0
@@ -12186,7 +12187,7 @@ En. / Dis.											= En. / Dis.
 Enable/disable libraries									= Enable/disable &libraries
 Enable/disable selected definition							= Enable/disable selected definition
 Enable/disable triggerstring tips 							= Enable/disable triggerstring tips	
-Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 4th edition of this application, 2021 by Maciej Słojewski (🐘). `nLicense: GNU GPL ver. 3.
+Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 4th edition of this application, 2022 by Maciej Słojewski (🐘). `nLicense: MIT License.
 enable triggerstring tips and hotstrings					= enable triggerstring tips and hotstrings
 EnDis parameter is missing								= EnDis parameter is missing
 Enter 												= Enter 
