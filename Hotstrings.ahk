@@ -341,13 +341,7 @@ Menu, AppSubmenu,		Add, % TransA["Copy Log folder path to Clipboard"],						F_Pa
 ; Menu, AppSubmenu,		Disable, % TransA["Copy Log folder path to Clipboard"]
 ;#f*/ free version only end
 Menu, AppSubmenu,		Add
-;#c/* commercial only beginning
 Menu, AppSubmenu,		Add, % TransA["Application statistics"] . "`tShift + Ctrl + S",				F_AppStats
-;#c*/ commercial only end
-;#f/* free version only beginning
-; Menu, AppSubmenu,		Add, % TransA["Application statistics"] . "`tShift + Ctrl + S",				F_Empty
-; Menu, AppSubmenu,		Disable, % TransA["Application statistics"] . "`tShift + Ctrl + S"
-;#f*/ free version only end
 Menu, AboutHelpSub,		Add,	% TransA["Help: Hotstrings application"] . "`tF1",					F_GuiAboutLink1
 Menu, AboutHelpSub,		Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"] . "`tCtrl+F1",	F_GuiAboutLink2
 Menu, AboutHelpSub,		Add
@@ -557,11 +551,9 @@ Critical, Off
 	^F6::	;new thread starts here; only on time of degugging HS3GuiSize will be initiated!
 		F_ToggleSandbox()
 		return
-;#c/* commercial only beginning
 	+^s::
 		F_AppStats()									;show application statistics
 		return
-;#c*/ commercial only end		
 #If
 
 #If WinActive("ahk_id" MoveLibsHwnd)
@@ -609,11 +601,9 @@ return
 :*:hsreload/::										;reload into default mode of operation
 	F_ReloadApplication()
 return
-;#c/* commercial only beginning
 :*:hsstats/::										;show application statistics
 	F_AppStats()
 return
-;#c*/ commercial only end
 ;section of build-in hotkeys (system wide!)
 ~LControl UP::			;UP: to be sure it will work only when button is released
 ~RControl UP::
@@ -839,9 +829,7 @@ F_InternalHot()
 		. "hsenable/" . A_Tab . 			TransA["enable triggerstring tips and hotstrings"]						. "`n"
 		. "hsrestart/" . A_Tab . 		TransA["reload Hotstrings application"]									. "`n"
 		. "hsreload/" . A_Tab .			TransA["reload Hotstrings application"]									. "`n"
-;#c/* commercial only beginning		
 		. "hsstats/" . A_Tab . A_Tab . 	TransA["show application statistics"]									. "`n"
-;#c*/ commercial only end		
 		. "`n`n"
 		. "Application hotkeys" . ":"																		. "`n"
 		. "Ctrl + Win + H" . A_Tab . 		TransA["show main application GUI"]
@@ -1318,7 +1306,6 @@ F_DelLibByButton()
 		return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;#c/* commercial only beginning
 F_AppStats()
 {
 	global	;assume-global mode of operation
@@ -1335,7 +1322,6 @@ F_AppStats()
 		. TransA["Cumulative gain [characters]"] . A_Tab . v_CntCumGain . "`n"
 		. TransA["Logging of d(t, o, h)"] . A_Tab . A_Tab . (ini_THLog ? TransA["yes"] : TransA["no"])
 }
-;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ToggleTt()
 {
@@ -1535,6 +1521,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 				v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 			temp := F_DetermineGain2(v_InputString, ReplacementString)
 			v_CntCumGain += temp
+;#c/* commercial only beginning			
 			if (ini_THLog)
 			{
 				Switch WhichMenu
@@ -1543,6 +1530,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 					Case "CLI":	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 				}
 			}
+;#c*/ commercial only end			
 			v_UndoTriggerstring 	:= v_InputString
 ,			v_InputString 			:= ""
 ,			v_InputH.VisibleText	:= true
@@ -1627,8 +1615,10 @@ F_HMenuSI_Keyboard()
 	Gui, HMenuAHK: Destroy
 	temp := F_DetermineGain2(v_InputString, Temp1)
 	v_CntCumGain += temp
+;#c/* commercial only beginning
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+;#c*/ commercial only end		
 	v_UndoTriggerstring := v_InputString
 	return true	; v_InputString will be cleared only if function returns true if function returns false, characters still will be invisible
 }
@@ -1736,8 +1726,10 @@ F_HMenuCLI_Keyboard()
 		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 	temp := F_DetermineGain2(v_InputString, Temp1)
 	v_CntCumGain += temp
+;#c/* commercial only beginning
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+;#c*/ commercial only end
 	v_UndoTriggerstring := v_InputString
 ,	IfUpF 			:= false
 ,	IfDownF 			:= false
@@ -2402,7 +2394,7 @@ F_InputHookOnEnd(ih)	;for debugging purposes
 {
 	global	;assume-global mode of operation
 	local 	KeyName 	:= ih.EndKey, Reason	:= ih.EndReason
-	
+;#c/* commercial only beginning	
 	if (ini_THLog)	
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "OnEnd" . "|" . KeyName 
 			. "|" . "GetKeyName:" 	. "|" . GetKeyName(KeyName) 
@@ -2410,6 +2402,7 @@ F_InputHookOnEnd(ih)	;for debugging purposes
 			. "|" . "GetKeySC:" 	. "|" . GetKeySC(KeyName)
 			. "|" . "EndReason:"	. "|" . Reason
 			. "|" . "`n", % v_LogFileName
+;#c*/ commercial only end			
 	if (Reason = "Max")
 		ih.Start()
 }
@@ -2956,13 +2949,7 @@ F_InitiateTrayMenus(v_Param)
 			Menu, TraySubmenuReload,	Add,		% TransA["Reload in silent mode"],							F_ReloadApplication
 			Menu, Tray, Add,		% TransA["Reload"],												:TraySubmenuReload
 			Menu  Tray, Add																	;line separator 
-;#c/* commercial only beginning			
 			Menu, Tray, Add, 		% TransA["Application statistics"],								F_AppStats
-;#c*/ commercial only end
-;#f/* free version only beginning
-			; Menu, Tray, Add,		% TransA["Application statistics"],								F_Empty
-			; Menu, Tray, Disable,	% TransA["Application statistics"]
-;#f*/ free version only end			
 			Menu, Tray, Add																	;line separator 
 			Menu, Tray, Add,		% TransA["Suspend Hotstrings"] . "`tF10",							F_TraySuspendHotkeys
 			Menu  Tray, Add,		% TransA["Exit application"],										F_TrayExit
@@ -3492,7 +3479,7 @@ F_LoadConfiguration()
 		Hotkey, % ini_HK_ToggleTt, F_ToggleTt, On
           F_UpdateStateOfLockKeys(ini_HK_ToggleTt, ini_TTTtEn)
      }
-
+;#c/* commercial only beginning
 	ini_THLog					:= false
 	IniRead, ini_THLog,						% ini_HADConfig, Configuration, THLog,			% A_Space
 	if (ini_THLog = "")			;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
@@ -3500,6 +3487,7 @@ F_LoadConfiguration()
 		ini_THLog 			:= false
 		IniWrite, % ini_THLog, % ini_HADConfig, Configuration, THLog
 	}
+;#c*/ commercial only end	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiEvents(OneTime*)
@@ -14489,8 +14477,10 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 			temp := F_DetermineGain2(v_InputString, ReplacementString)
 			v_CntCumGain += temp
 			; OutputDebug, % "v_InputString:" . v_InputString . A_Space . "First part:" . FirstPart . A_Space . "Second part:" . SecondPart . "|" . "temp:" . temp . "|" . "`n"
+;#c/* commercial only beginning			
 			if (ini_THLog)
 				FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "S1" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+;#c*/ commercial only end				
 			v_InputString 		:= ""
 			return
 		Case "S2":
@@ -14518,16 +14508,20 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 				SendInput, % ReplacementString
 			SendLevel, 0
 			v_CntCumGain := F_DetermineGain2(v_InputString, ReplacementString)
+;#c/* commercial only beginning			
 			if (ini_THLog)
 				FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "S2" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+;#c*/ commercial only end				
 			v_InputString 		:= ""
 			return
 	}
  	F_EventSigOrdHotstring()
 	temp := F_DetermineGain2(v_InputString, ReplacementString)
 	v_CntCumGain += temp
+;#c/* commercial only beginning	
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+;#c*/ commercial only end		
 	v_InputString 		:= ""
 	Critical, Off
 }
@@ -14607,8 +14601,10 @@ F_MouseMenu_MCL() ;The subroutine may consult the following built-in variables: 
 			v_InputString := SubStr(ThisHotkey, InStr(ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 		temp := F_DetermineGain2(v_InputString, ReplacementString)
 		v_CntCumGain += temp
+;#c/* commercial only beginning		
 		if (ini_THLog)
 			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+;#c*/ commercial only end			
 		v_UndoTriggerstring 	:= v_InputString
 ,		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
@@ -14734,8 +14730,10 @@ F_MouseMenu_MSI() ; Handling of mouse events for F_HOF_MSI;The subroutine may co
 			v_InputString := SubStr(ThisHotkey, InStr(ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 		temp := F_DetermineGain2(v_InputString, OutputVarTemp)
 		v_CntCumGain += temp
+;#c/* commercial only beginning		
 		if (ini_THLog)
 			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+;#c*/ commercial only end			
 		v_UndoTriggerstring 	:= v_InputString
 ,		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
@@ -14814,8 +14812,10 @@ F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid i
 			v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 		temp := F_DetermineGain2(v_InputString, ReplacementString)
 		v_CntCumGain += temp
+;#c/* commercial only beginning		
 		if (ini_THLog)
 			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName			
+;#c*/ commercial only end			
 		v_UndoTriggerstring 	:= v_InputString
 ,		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
