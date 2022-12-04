@@ -37,7 +37,7 @@ global AppVersion				:= "3.6.9"
 FileInstall, hotstrings.ico, 	% AppIcon, 	0
 FileInstall, LICENSE, 		LICENSE, 		0
 ; - - - - - - - - - - - - - - - - - - - - - - - S E C T I O N    O F    G L O B A L     V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l like "silent mode"
+global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l like "siLent mode"
 ,		v_LogCounter 			:= 0
 ,		v_CntCumGain			:= 0			;for logging, Counter Cumulative Gain
 ,		f_MainGUIresizing 		:= true 		;when Hotstrings Gui is displayed for the very first time; f_ stands for "flag"
@@ -1393,6 +1393,7 @@ F_Tt_HWT()	;Tt_HWT = Tooltip_Hostring Was Triggered
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, ControlSend, determine number of items in ListBox: https://www.autohotkey.com/boards/viewtopic.php?t=43057
 {
+;#c/* commercial only beginning
 	global	;assume-global mode of operation
 	local	PressedKey := A_ThisHotkey,	Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", OutputVar1 := "", OutputVar2 := ""
 ,			NoPosInList := 0, Temp2 := "", WhichLB := "", temp := ""
@@ -1549,7 +1550,6 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 				v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 			temp := F_DetermineGain2(v_InputString, ReplacementString)
 			v_CntCumGain += temp
-;#c/* commercial only beginning			
 			if (ini_THLog)
 			{
 				Switch WhichMenu
@@ -1558,7 +1558,6 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 					Case "CLI":	FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 				}
 			}
-;#c*/ commercial only end			
 			v_UndoTriggerstring 	:= v_InputString
 ,			v_InputString 			:= ""
 ,			v_InputH.VisibleText	:= true
@@ -1567,6 +1566,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 , 			IsCursorPressed 		:= false, 
 ,			IntCnt 				:= 1
 	}
+;#c*/ commercial only end
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HMenuSI_Keyboard()
@@ -3080,8 +3080,9 @@ F_Load_ini_Language()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiTrigTipsMenuDefC4()
+F_GuiTrigTipsMenuDefC4()	;static gui for triggerstring tips and hotstrings
 {
+;#c/* commercial only beginning	
 	global	;assume-global mode
 	local  vOutput1 := 0, vOutput1X := 0, vOutput1Y := 0, vOutput1W := 0, vOutput1H := 0
 		, vOutput2 := 0, vOutput2X := 0, vOutput2Y := 0, vOutput2W := 0, vOutput2H := 0
@@ -3148,6 +3149,7 @@ F_GuiTrigTipsMenuDefC4()
 		Gui, TT_C4: Show, Center AutoSize NoActivate
 	else
 		Gui, TT_C4: Show, % "X" . ini_SWPos.X . A_Space . "Y" . ini_SWPos["Y"] . A_Space . "NoActivate" . A_Space . "AutoSize"
+;#c*/ commercial only end		
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TT_C4_B1()	;Button: save position of "static" triggerstring / hotstring window
