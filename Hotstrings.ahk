@@ -342,8 +342,13 @@ Menu, AppSubmenu,		Add, % TransA["Copy Log folder path to Clipboard"],						F_Pa
 ; Menu, AppSubmenu,		Disable, % TransA["Copy Log folder path to Clipboard"]
 ;#f*/ free version only end
 Menu, AppSubmenu,		Add
-Menu, AppSubmenu,		Add, % TransA["Application statistics"] . "`tShift + Ctrl + S",				F_AppStats	;tu jestem
-
+;#c/* commercial only beginning
+Menu, AppSubmenu,		Add, % TransA["Application statistics"] . "`tShift + Ctrl + S",				F_AppStats
+;#c*/ commercial only end
+;#f/* free version only beginning
+; Menu, AppSubmenu,		Add, % TransA["Application statistics"] . "`tShift + Ctrl + S",				F_Empty
+; Menu, AppSubmenu,		Disable, % TransA["Application statistics"] . "`tShift + Ctrl + S"
+;#f*/ free version only end
 Menu, AboutHelpSub,		Add,	% TransA["Help: Hotstrings application"] . "`tF1",					F_GuiAboutLink1
 Menu, AboutHelpSub,		Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"] . "`tCtrl+F1",	F_GuiAboutLink2
 Menu, AboutHelpSub,		Add
@@ -553,10 +558,11 @@ Critical, Off
 	^F6::	;new thread starts here; only on time of degugging HS3GuiSize will be initiated!
 		F_ToggleSandbox()
 		return
-
+;#c/* commercial only beginning
 	+^s::
 		F_AppStats()									;show application statistics
 		return
+;#c*/ commercial only end		
 #If
 
 #If WinActive("ahk_id" MoveLibsHwnd)
@@ -604,11 +610,11 @@ return
 :*:hsreload/::										;reload into default mode of operation
 	F_ReloadApplication()
 return
-
+;#c/* commercial only beginning
 :*:hsstats/::										;show application statistics
 	F_AppStats()
 return
-
+;#c*/ commercial only end
 ;section of build-in hotkeys (system wide!)
 ~LControl UP::			;UP: to be sure it will work only when button is released
 ~RControl UP::
@@ -830,11 +836,13 @@ F_InternalHot()
 		. "hsexit/" . A_Tab . A_Tab . 	TransA["exit Hotstrings application"]				 					. "`n"
 		. "hstoggle/" . A_Tab . 	 		TransA["toggle triggerstrings tips and hotstrings"]						. "`n"
 		. "hssuspend/" . A_Tab . 	 	TransA["suspend triggerstrings tips and hotstrings"]						. "`n"
-		. "hsdisable/" . A_Tab . 		TransA["disable triggerstring tips and hotstrings"]
+		. "hsdisable/" . A_Tab . 		TransA["disable triggerstring tips and hotstrings"]						. "`n"
 		. "hsenable/" . A_Tab . 			TransA["enable triggerstring tips and hotstrings"]						. "`n"
 		. "hsrestart/" . A_Tab . 		TransA["reload Hotstrings application"]									. "`n"
 		. "hsreload/" . A_Tab .			TransA["reload Hotstrings application"]									. "`n"
+;#c/* commercial only beginning		
 		. "hsstats/" . A_Tab . A_Tab . 	TransA["show application statistics"]									. "`n"
+;#c*/ commercial only end		
 		. "`n`n"
 		. "Application hotkeys" . ":"																		. "`n"
 		. "Ctrl + Win + H" . A_Tab . 		TransA["show main application GUI"]
@@ -1311,6 +1319,7 @@ F_DelLibByButton()
 		return
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_AppStats()
 {
 	global	;assume-global mode of operation
@@ -1327,6 +1336,7 @@ F_AppStats()
 		. TransA["Cumulative gain [characters]"] . A_Tab . v_CntCumGain . "`n"
 		. TransA["Logging of d(t, o, h)"] . A_Tab . A_Tab . (ini_THLog ? TransA["yes"] : TransA["no"])
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ToggleTt()
 {
@@ -2950,9 +2960,15 @@ F_InitiateTrayMenus(v_Param)
 			Menu, TraySubmenuReload,	Add,		% TransA["Reload in silent mode"],							F_ReloadApplication
 			Menu, Tray, Add,		% TransA["Reload"],												:TraySubmenuReload
 			Menu  Tray, Add																	;line separator 
+;#c/* commercial only beginning			
 			Menu, Tray, Add, 		% TransA["Application statistics"],								F_AppStats
+;#c*/ commercial only end
+;#f/* free version only beginning
+			; Menu, Tray, Add,		% TransA["Application statistics"],								F_Empty
+			; Menu, Tray, Disable,	% TransA["Application statistics"]
+;#f*/ free version only end			
 			Menu, Tray, Add																	;line separator 
-			Menu, Tray, Add,		% TransA["Suspend Hotstrings"] . "`tF10",								F_TraySuspendHotkeys
+			Menu, Tray, Add,		% TransA["Suspend Hotstrings"] . "`tF10",							F_TraySuspendHotkeys
 			Menu  Tray, Add,		% TransA["Exit application"],										F_TrayExit
 	}
 }
@@ -5793,7 +5809,7 @@ F_LoadATStyling()
 	global ;assume-global mode
 	ini_ATBgrCol		:= "green"
 ,	ini_ATTyFaceCol	:= "black"
-,	ini_ATTyFaceFont	:= "Calibri"
+,	ini_ATTyFaceFont	:= "Consolas"
 ,	ini_ATTySize		:= 10
 	
 	IniRead, ini_ATBgrCol, 			% ini_HADConfig, EvStyle_AT, ATBackgroundColor, green
@@ -5806,9 +5822,9 @@ F_LoadATStyling()
 		ini_ATTyFaceCol := "black"
 	if (ini_ATTyFaceCol = "custom")
 		IniRead, ini_ATTyFaceColCus,	% ini_HADConfig, EvStyle_AT, ATTypefaceColorCustom
-	IniRead, ini_ATTyFaceFont, 		% ini_HADConfig, EvStyle_AT, ATTypefaceFont, Calibri
+	IniRead, ini_ATTyFaceFont, 		% ini_HADConfig, EvStyle_AT, ATTypefaceFont, Consolas
 	if (!ini_ATTyFaceFont)
-		ini_ATTyFaceFont := "Calibri"
+		ini_ATTyFaceFont := "Consolas"
 	IniRead, ini_ATTySize,	 		% ini_HADConfig, EvStyle_AT, ATTypefaceSize, 10
 	if (!ini_ATTySize)
 		ini_ATTySize := 10
@@ -5871,7 +5887,7 @@ F_LoadHMStyling()
 	global ;assume-global mode
 	ini_HMBgrCol		:= "white"
 ,	ini_HMTyFaceCol	:= "black"
-,	ini_HMTyFaceFont	:= "Calibri"
+,	ini_HMTyFaceFont	:= "Consolas"
 ,	ini_HMTySize		:= 10
 	
 	IniRead, ini_HMBgrCol, 			% ini_HADConfig, EvStyle_HM, HMBackgroundColor, white
@@ -5884,9 +5900,9 @@ F_LoadHMStyling()
 		ini_HMTyFaceCol := "black"
 	if (ini_HMTyFaceCol = "custom")
 		IniRead, ini_HMTyFaceColCus,	% ini_HADConfig, EvStyle_HM, HMTypefaceColorCustom
-	IniRead, ini_HMTyFaceFont, 		% ini_HADConfig, EvStyle_HM, HMTypefaceFont, Calibri
+	IniRead, ini_HMTyFaceFont, 		% ini_HADConfig, EvStyle_HM, HMTypefaceFont, Consolas
 	if (!ini_HMTyFaceFont)
-		ini_HMTyFaceFont := "Calibri"
+		ini_HMTyFaceFont := "Consolas"
 	IniRead, ini_HMTySize,	 		% ini_HADConfig, EvStyle_HM, HMTypefaceSize, 10
 	if (!ini_HMTySize)
 		ini_HMTySize := 10
@@ -5897,7 +5913,7 @@ F_LoadTTStyling()
 	global ;assume-global mode of operation
 	ini_TTBgrCol		:= "white"
 ,	ini_TTTyFaceCol	:= "black"
-,	ini_TTTyFaceFont	:= "Calibri"
+,	ini_TTTyFaceFont	:= "Consolas"
 ,	ini_TTTySize		:= 10
 	
 	IniRead, ini_TTBgrCol, 			% ini_HADConfig, EvStyle_TT, TTBackgroundColor, white
@@ -5910,9 +5926,9 @@ F_LoadTTStyling()
 		ini_TTTyFaceCol := "black"
 	if (ini_TTTyFaceCol = "custom")
 		IniRead, ini_TTTyFaceColCus,	% ini_HADConfig, EvStyle_TT, TTTypefaceColorCustom
-	IniRead, ini_TTTyFaceFont, 		% ini_HADConfig, EvStyle_TT, TTTypefaceFont, Calibri
+	IniRead, ini_TTTyFaceFont, 		% ini_HADConfig, EvStyle_TT, TTTypefaceFont, Consolas
 	if (!ini_TTTyFaceFont)
-		ini_TTTyFaceFont := "Calibri"
+		ini_TTTyFaceFont := "Consolas"
 	IniRead, ini_TTTySize,	 		% ini_HADConfig, EvStyle_TT, TTTypefaceSize, 10
 	if (!ini_TTTySize)
 		ini_TTTySize := 10
@@ -5957,7 +5973,7 @@ F_GuiStyling_Section(TabId)
 	GuiControl +g, 					% %DynVarRef%, 							% T_STypefaceFont
 	Gui, EventsStyling: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, EventsStyling: Add,	DropDownList,	% "HwndId" . TabId . "styling_DDL3" . A_Space . "v" . TabId . "S_DDL3"
-,		Arial|Calibri||Comic Sans MS|Consolas|Courier|Fixedsys|Lucida Console|Microsoft Sans Serif|Script|System|Tahoma|Times New Roman|Verdana
+,		Arial|Calibri|Comic Sans MS|Consolas||Courier|Fixedsys|Lucida Console|Microsoft Sans Serif|Script|System|Tahoma|Times New Roman|Verdana
 	Gui, EventsStyling: Add,	Button,		% "HwndId" . TabId . "styling_B3" . A_Space . "g" . "F_EventsStyling_B3" 
 ,		% TransA["Restore default"]
 	Gui, EventsStyling: Add,	Text, 		% "HwndId" . TabId . "styling_T7",				% TransA["Typeface size"] . ":"
@@ -6138,15 +6154,15 @@ F_EventsStyling_B3()	;button: Restore default, typeface font
 	Switch EventsStylingTab3
 	{
 		Case % TransA["Triggerstring tips styling"]:
-			ini_TTTyFaceFont := "Calibri"
+			ini_TTTyFaceFont := "Consolas"
 			GuiControl, ChooseString, % IdTTstyling_DDL3, % ini_TTTyFaceFont
 
 		Case % TransA["Hotstring menu styling"]:
-			ini_HMTyFaceFont := "Calibri"
+			ini_HMTyFaceFont := "Consolas"
 			GuiControl, ChooseString, % IdHMstyling_DDL3, % ini_HMTyFaceFont
 ;#c/* commercial only beginning
 		Case % TransA["Active triggerstring tips styling"]:
-			ini_ATTyFaceFont := "Calibri"
+			ini_ATTyFaceFont := "Consolas"
 			GuiControl, ChooseString, % IdATstyling_DDL3, % ini_ATTyFaceFont
 ;#c*/ commercial only end
 		Case % TransA["Tooltip: ""Hotstring was triggered"""]:
@@ -11010,9 +11026,9 @@ F_LoadFontType()
 	global	;assume-global mode
 	c_FontType := ""
 	
-	IniRead, c_FontType, 			% ini_HADConfig, GraphicalUserInterface, GuiFontType, Calibri
+	IniRead, c_FontType, 			% ini_HADConfig, GraphicalUserInterface, GuiFontType, Consolas
 	if (!c_FontType)
-		c_FontType := "Calibri"
+		c_FontType := "Consolas"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SaveFontType()
@@ -11524,35 +11540,35 @@ F_CheckCreateConfigIni(params*)
 		TTBackgroundColorCustom=
 		TTTypefaceColor=black
 		TTTypefaceColorCustom=
-		TTTypefaceFont=Calibri
+		TTTypefaceFont=Consolas
 		TTTypefaceSize=10
 		[EvStyle_HM]
 		HMBackgroundColor=white
 		HMBackgroundColorCustom=
 		HMTypefaceColorCustom=
 		HMTypefaceColor=black
-		HMTypefaceFont=Calibri
+		HMTypefaceFont=Consolas
 		HMTypefaceSize=10
 		[EvStyle_AT]
 		ATBackgroundColor=green
 		ATBackgroundColorCustom=
 		ATTypefaceColorCustom=
 		ATTypefaceColor=black
-		ATTypefaceFont=Calibri
+		ATTypefaceFont=Consolas
 		ATTypefaceSize=10
 		[EvStyle_HT]
 		HTBackgroundColor=green
 		HTBackgroundColorCustom=
 		HTTypefaceColorCustom=
 		HTTypefaceColor=black
-		HTTypefaceFont=Calibri
+		HTTypefaceFont=Consolas
 		HTTypefaceSize=11
 		[EvStyle_UH]
 		UHBackgroundColor=green
 		UHBackgroundColorCustom=
 		UHTypefaceColorCustom=
 		UHTypefaceColor=black
-		UHTypefaceFont=Calibri
+		UHTypefaceFont=Consolas
 		UHTypefaceSize=11
 		[Event_ActiveTriggerstringTips]
 		ATEn=0
