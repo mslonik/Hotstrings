@@ -267,7 +267,7 @@ Menu, Submenu1,		Add, % TransA["Open Config.ini folder in Windows Explorer"],			
 Menu, Submenu1,		Add, % TransA["Open Config.ini in your default editor"],					F_OpenConfigIniInEditor
 Menu, Submenu1,		Add, % TransA["Copy Config.ini folder path to Clipboard"],					F_PathtoClipboard
 Menu, Submenu1,		Add	;line separator		
-
+;#c/* commercial only beginning
 Menu, SubmenuPath,		Add, % TransA["Libraries folder: restore it to default location"], 			F_PathLibrariesRestoreDefault
 Menu, SubmenuPath,		Add, % TransA["Libraries folder: move it to new location"],					F_PathToLibraries
 Menu, SubmenuPath,		Add		
@@ -277,7 +277,27 @@ Menu, SubmenuPath,		Add
 Menu, SubmenuPath,		Add, % TransA["Script/application folder: restore it to default location"],	F_PathRestoreDefaultAppFolder
 Menu, SubmenuPath,		Add, % TransA["Script/application folder: move it to new location"],			F_PathMoveAppFolder
 Menu, Submenu1, 		Add, % TransA["Location of application specific data"],					:SubmenuPath
-
+;#c*/ commercial only end
+;#f/* free version only beginning
+; Menu, SubmenuPath,		Add, % TransA["Libraries folder: restore it to default location"], 			F_Empty
+; Menu, SubmenuPath,		Add, % TransA["Libraries folder: move it to new location"],					F_Empty
+; Menu, SubmenuPath,		Add		
+; Menu, SubmenuPath,		Add, % TransA["Config.ini file: restore it to default location"],			F_Empty
+; Menu, SubmenuPath,		Add, % TransA["Config.ini file: move it to script / app location"],			F_Empty
+; Menu, SubmenuPath,		Add
+; Menu, SubmenuPath,		Add, % TransA["Script/application folder: restore it to default location"],	F_Empty
+; Menu, SubmenuPath,		Add, % TransA["Script/application folder: move it to new location"],			F_Empty
+; Menu, Submenu1, 		Add, % TransA["Location of application specific data"],					:SubmenuPath
+; Menu, SubmenuPath,		Disable, % TransA["Libraries folder: restore it to default location"]
+; Menu, SubmenuPath,		Disable, % TransA["Libraries folder: move it to new location"]
+; Menu, SubmenuPath,		Add
+; Menu, SubmenuPath,		Disable, % TransA["Config.ini file: restore it to default location"]
+; Menu, SubmenuPath,		Disable, % TransA["Config.ini file: move it to script / app location"]
+; Menu, SubmenuPath,		Add
+; Menu, SubmenuPath,		Disable, % TransA["Script/application folder: restore it to default location"]
+; Menu, SubmenuPath,		Disable, % TransA["Script/application folder: move it to new location"]
+; Menu, Submenu1, 		Disable, % TransA["Location of application specific data"]
+;#f*/ free version only end
 Menu, HSMenu, 			Add, % TransA["Configuration"], 										:Submenu1
 Menu, HSMenu, 			Add, % TransA["Search (F3)"], 										F_Searching
 ;#c/* commercial only beginning
@@ -1862,6 +1882,7 @@ F_CheckIfRemoveOldDir()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_PathMoveAppFolder()
 {
 	global	;assume-global mode of operation
@@ -1915,7 +1936,9 @@ F_PathMoveAppFolder()
 	IfMsgBox, Cancel
 		return
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_PathRestoreDefaultAppFolder()
 {
 	global	;assume-global mode of operation
@@ -1957,7 +1980,9 @@ F_PathRestoreDefaultAppFolder()
 	IfMsgBox, Cancel
 		return
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_PathConfigIni()
 {
 	global	;assume-global mode of operation
@@ -1998,7 +2023,9 @@ F_PathConfigIni()
 	IfMsgBox, Cancel
 		return
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_PathConfigIniRestoreDefault()
 {
 	global	;assume-global mode of operation
@@ -2040,7 +2067,9 @@ F_PathConfigIniRestoreDefault()
 	IfMsgBox, Cancel
 		return
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_PathLibrariesRestoreDefault()
 {
 	global	;assume-global mode
@@ -2076,6 +2105,7 @@ F_PathLibrariesRestoreDefault()
 	IfMsgBox, Cancel
 		return
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Load_ini_HADL()
 {
@@ -2149,6 +2179,7 @@ F_Load_ini_HADL()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_PathToLibraries()
 {
 	global	;assume-global mode of operation
@@ -2189,6 +2220,7 @@ F_PathToLibraries()
 	IfMsgBox, Cancel
 		return
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 GuiEventsGuiClose()	;GUI event (close)
 {
