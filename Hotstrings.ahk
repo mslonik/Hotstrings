@@ -5,7 +5,7 @@
  	License:     	MIT License
 	Year:		2022
 */
-; -----------Beginning of auto-execute section of the script -------------------------------------------------
+; -----------Beginning of auto-execute section of the script, directives and general settings -------------------------------------------------
 ; After the script has been loaded, it begins executing at the top line, continuing until a Return, Exit, hotkey/hotstring label, or the physical end of the script is encountered (whichever comes first). 
 #Requires AutoHotkey v1.1.34+ 		; Displays an error and quits if a version requirement is not met.    
 #SingleInstance, 		force		; Only one instance of this script may run at a time!
@@ -22,19 +22,25 @@ FileEncoding, 			UTF-16		; Sets the default encoding for FileRead, FileReadLine,
 CoordMode, Caret,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs. 
 CoordMode, ToolTip,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs.
 CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs.
-; - - - - - - - - - - - - - - - - - - - - - - - G L O B A L    V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+; - - - - - - - - - - - - - - - - - - - - - - - E X E  CONVERSION / INSTALLATOR S E C T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 global AppVersion				:= "3.6.9"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
+;@Ahk2Exe-SetCompanyName © by Maciej Słojewski http://mslonik.pl
 ;@Ahk2Exe-SetCopyright MIT License
-;@Ahk2Exe-SetDescription Advanced tool for hotstring management.
-;@Ahk2Exe-SetProductName Original script name: %A_ScriptName%
-;@Ahk2Exe-Set OriginalScriptlocation, https://github.com/mslonik/Hotstrings/tree/master/Hotstrings
-;@Ahk2Exe-SetCompanyName  © by Maciej Słojewski http://mslonik.pl
-;@Ahk2Exe-SetFileVersion %U_vAppVersion%
+;@Ahk2Exe-SetDescription Advanced tool for text replacement management.
+;@Ahk2Exe-SetFileVersion %U_vAppVersion% 
+;@Ahk2Exe-SetInternalName Hotstrings 1
+;@Ahk2Exe-SetLanguage 0x0409
+;@Ahk2Exe-SetLegalTrademarks Personal license: FirstName SecondName
+;@Ahk2Exe-SetName Hotstrings 2
+;@Ahk2Exe-SetOrigFilename Commercial release
+;@Ahk2Exe-SetProductName Hotstrings
+;@Ahk2Exe-SetProductVersion %U_vAppVersion% 
+;@Ahk2Exe-SetVersion %U_vAppVersion% 
 FileInstall, hotstrings.ico, 	% AppIcon, 	0
 FileInstall, LICENSE, 		LICENSE, 		0
 ; - - - - - - - - - - - - - - - - - - - - - - - S E C T I O N    O F    G L O B A L     V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -645,8 +651,8 @@ return
 	F_AppStats()
 return
 ;section of build-in hotkeys (system wide!)
-~LControl UP::			;UP: to be sure it will work only when button is released
-~RControl UP::
+; ~LControl UP::			;commented out as it is a part of AltGr (LControl & RAlt) and AltGr is used for diacritic letters in many keyboard layouts
+~RControl UP::			;UP: to be sure it will work only when button is released
 	ToolTip,			;this line is necessary to close tooltips.
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
@@ -688,7 +694,7 @@ return
 ~*F23::
 ~*F24::
 ~*LAlt::		;if commented out, only for debugging reasons
-~*RAlt::		;if commented out, only for debugging reasons
+~RAlt::		;no * allowed as it is part of AltGr (LControl & RAlt) and AltGr is used for diacritic letters in many keyboard layouts
 ~*WheelDown::
 ~*WheelUp::
 ~*MButton::
@@ -2378,7 +2384,7 @@ F_OneCharPressed(ih, Char)
 	if (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))
 		return
 
-	; OutputDebug, % "1)v_IS:" . v_InputString . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
+	OutputDebug, % "1)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
 	if (InStr(HotstringEndChars, Char))
 		f_EndCharDetected := true
 	else
@@ -2394,7 +2400,7 @@ F_OneCharPressed(ih, Char)
 	if (v_Qinput)
 		v_Qinput .= Char
 
-	; OutputDebug, % "2)v_IS:" . v_InputString . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "v_QI:" . v_Qinput . "`n"
+	OutputDebug, % "2)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "v_QI:" . v_Qinput . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -2420,14 +2426,14 @@ F_OneCharPressed(ih, Char)
 				}
 				else
 					f_ExpEndChar := false
-			; OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_ExpEndChar:" . f_ExpEndChar . "`n"
+			OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_ExpEndChar:" . f_ExpEndChar . "`n"
 			Critical, Off
 			return
 		}
 	}
 	if (!f_LastTip) and (f_EndCharDetected) and (!f_ExpEndChar)
 		v_InputString := ""
-	; OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . "|" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
+	OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . "|" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
