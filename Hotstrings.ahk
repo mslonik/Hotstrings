@@ -75,11 +75,30 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		v_LibHotstringCnt		:= 0 ;no of (triggerstring, hotstring) definitions in single library
 ,		ini_TTCn				:= 0 ;this variable could be triggered by left mouse click when script is initialized.
 ,		v_Qinput				:= "" ; to store substring of v_InputString related to possible question mark (inside) option
+,		v_LicenseType			:= "commercial"
+,		v_LicensedTo			:= "Maciej Słojewski"
+,		v_LicensedUserName		:= "0123456789012345678901234567890123456789"	;30 char. max
+,		v_LicensedCompName		:= "0123456789012345678901234567890123456789"	;30 char. max
+,		v_ValidTill			:= "20221207"
 
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
 F_LoadCreateTranslationTxt() 			;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
 F_CheckCreateConfigIni() 			;Try to load up configuration file. If those files do not exist, create them.
+if (v_LicenseType = "commercial") and (v_ValidTill != "inf")
+	{
+		ElapsedTime := A_Now
+		EnvSub, ElapsedTime, v_ValidTill, Days
+		if (ElapsedTime > 0)	;one year
+		{
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Sorry, your license is no longer valid (expired). Application will exit now."	;16 = Icon Hand (stop/error)
+			ExitApp, 5	;5 = expired
+		}
+		if (ElapsedTime > -3)
+			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % "Your license is about to expire. It will remain active for less than 3 days."
+				. "`n`n"
+				. "Expiration date:" . A_Space . SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1)
+	}
 F_CheckIfMoveToProgramFiles()			;Checks if move Hotstrings folder to Program Files folder and then restarts application.
 F_CheckIfRemoveOldDir()				;Checks content of Config.ini in order to remove old script directory.
 F_CheckFileEncoding(A_ScriptFullPath)	;checks if script is utf-8 compliant. it has plenty to do wiith github download etc.
@@ -103,7 +122,7 @@ if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_Gui
 		FileDelete, % A_ScriptDir . "\" . "temp.exe"
 	catch e
 	{
-		MsgBox, , Error, % "ErrorLevel" . A_Tab . ErrorLevel
+		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "ErrorLevel" . A_Tab . ErrorLevel	;16 = Icon Hand (stop/error)
 					. "`n`n" . "A_LastError" . A_Tab . A_LastError	;183 : Cannot create a file when that file already exists.
 					. "`n`n" . "Exception" . A_Tab . e
 	}
@@ -2428,7 +2447,7 @@ F_OneCharPressed(ih, Char)
 				}
 				else
 					f_ExpEndChar := false
-			OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_ExpEndChar:" . f_ExpEndChar . "`n"
+			; OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_ExpEndChar:" . f_ExpEndChar . "`n"
 			Critical, Off
 			return
 		}
@@ -12131,6 +12150,7 @@ Closing Square Bracket ] 								= Closing Square Bracket ]
 Colon : 												= Colon :
 Comma , 												= Comma ,
 Comment												= Comment
+commercial											= commercial
 Content of current log file (read only)						= Content of current log file (read only)
 Convert to executable (.exe)								= Convert to executable (.exe)
 Composition of triggerstring tips							= Composition of triggerstring tips
@@ -12195,7 +12215,7 @@ En. / Dis.											= En. / Dis.
 Enable/disable libraries									= Enable/disable &libraries
 Enable/disable selected definition							= Enable/disable selected definition
 Enable/disable triggerstring tips 							= Enable/disable triggerstring tips	
-Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `nThis is 4th edition of this application, 2022 by Maciej Słojewski (🐘). `nLicense: MIT License.
+Enables Convenient Definition 							= Enables convenient definition and use of hotstrings (triggered by shortcuts longer text strings). `n2022 Copyright  by Maciej Słojewski (🐘).
 enable triggerstring tips and hotstrings					= enable triggerstring tips and hotstrings
 EnDis parameter is missing								= EnDis parameter is missing
 Enter 												= Enter 
@@ -12228,6 +12248,7 @@ Finite timeout?										= Finite timeout?
 folder is now created									= folder is now created
 Font type												= Font type
 fuchsia												= fuchsia
+free													= free
 Graphical User Interface									= Graphical User Interface
 gray													= gray
 green												= green
@@ -12306,6 +12327,9 @@ Library name:											= Library name:
 Library export. Please wait... 							= Library export. Please wait...
 Library has been exported 								= Library has been exported
 Library has been imported. 								= Library has been imported.
+License												= License
+License type											= License type
+Licensed to											= Licensed to
 Light (default)										= Light (default)
 lime													= lime
 Link file (.lnk) was created in AutoStart folder				= Link file (.lnk) was created in AutoStart folder
@@ -12326,11 +12350,12 @@ Menu position											= Menu position
 Menu position: caret									= Menu position: caret
 Menu position: cursor									= Menu position: cursor
 Minus - 												= Minus -
+MIT license											= MIT license
 Mode of operation										= Mode of operation
 Move definition to another library							= Move definition to another library
 Move (F8)												= Move (F8)
-down							= down
-up							= up
+down													= down
+up													= up
 navy													= navy
 reloaded and fresh language file (English.txt) will be recreated. = reloaded and fresh language file (English.txt) will be recreated.
 New definition is identical with existing one. Please try again.	= New definition is identical with existing one. Please try again.
@@ -12538,10 +12563,10 @@ Tooltip enable											= Tooltip enable
 Tooltip position										= Tooltip position
 Tooltip test											= Tooltip test
 Tooltip timeout										= Tooltip timeout
-LS:												= LS:
+LS:													= LS:
 to undo.												= to undo.
 (triggerstring, hotstring) definitions						= (triggerstring, hotstring) definitions
-Trigger Opt.										= Trigger Opt.
+Trigger Opt.											= Trigger Opt.
 Triggers												= Triggers
 Triggerstring 											= Triggerstring
 Triggerstring contains only white characters. Are you sure to continue? = Triggerstring contains only white characters. Are you sure to continue?
@@ -12563,6 +12588,7 @@ Underscore _											= Underscore _
 Undo the last hotstring									= Undo the last hotstring
 Undo the last hotstring									= Undo the last hotstring
 Undid the last hotstring 								= Undid the last hotstring
+Valid till											= Valid till
 Version / Update										= Version / Update
 Version												= Version
 Visit public libraries webpage							= Visit public libraries webpage
@@ -13907,9 +13933,11 @@ F_GuiHS3_DetermineConstraints()
 ,	HS3MinHeight		:= LeftColumnH + c_ymarg
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiAbout_CreateObjects()
+F_GuiAbout_CreateObjects()	;tu jestem
 {
 	global ;assume-global mode
+				; . "User Name:" . A_Space . A_UserName
+				; . "Computer name:" . A_Space . A_ComputerName
 	
 	;1. Prepare MyAbout Gui
 	Gui, MyAbout: New, 		-Resize +HwndMyAboutGuiHwnd +Owner -MaximizeBox -MinimizeBox
@@ -13922,7 +13950,7 @@ F_GuiAbout_CreateObjects()
 	Gui, MyAbout: Add, 		Text,    x0 y0 HwndIdLine1, 										% TransA["Let's make your PC personal again..."]
 	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 		% c_FontType
 	Gui, MyAbout: Add, 		Text,    	x0 y0 HwndIdLine2, 										% TransA["Enables Convenient Definition"]
-	Gui, MyAbout: Add, 		Button,  	x0 y0 HwndIdAboutOkButton gMyAboutGuiClose,					% TransA["OK"]
+	Gui, MyAbout: Add, 		Button,  	x0 y0 HwndIdAboutOkButton gMyAboutGuiClose Default,			% TransA["OK"]
 	Gui, MyAbout: Add,		Picture, 	x0 y0 HwndIdAboutPicture w96 h96, 							% AppIcon
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT1,									% TransA["Version"] . ":"
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT2,									% AppVersion
@@ -13932,88 +13960,118 @@ F_GuiAbout_CreateObjects()
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT6,									ahk
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT7,									% TransA["AutoHotkey version"] . ":"
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT8,									% A_AhkVersion
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT9,									% TransA["License"] . ":"
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT10,									% TransA["MIT License"]
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT11,									% TransA["License type"] . ":"
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT12,									% TransA["commercial"]
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT13,									% TransA["Licensed to"] . ":"
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT14,									% "0123456789012345678901234567890123456789"	;arbitrary long name, 30 char. max.
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT15,									% TransA["Valid till"] . ":"
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT16,									% "2022-12-07"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiAbout_DetermineConstraints()
 {
 	global ;assume-global mode
 ;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.
-	local v_OutVarTemp := 0, 	v_OutVarTempX := 0, 	v_OutVarTempY := 0, 	v_OutVarTempW := 0, 	v_OutVarTempH := 0
-		,v_OutVarTemp1 := 0, 	v_OutVarTemp1X := 0, 	v_OutVarTemp1Y := 0, 	v_OutVarTemp1W := 0, 	v_OutVarTemp1H := 0
-		,v_OutVarTemp2 := 0, 	v_OutVarTemp2X := 0, 	v_OutVarTemp2Y := 0, 	v_OutVarTemp2W := 0, 	v_OutVarTemp2H := 0
-		,v_OutVarTemp3 := 0, 	v_OutVarTemp3X := 0, 	v_OutVarTemp3Y := 0, 	v_OutVarTemp3W := 0, 	v_OutVarTemp3H := 0
-		,v_OutVarTemp4 := 0, 	v_OutVarTemp4X := 0, 	v_OutVarTemp4Y := 0, 	v_OutVarTemp4W := 0, 	v_OutVarTemp4H := 0
-							,v_xNext := 0, 		v_yNext := 0, 			v_wNext := 0, 			v_hNext := 0
+	local OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
+		,OutVarTemp1 := 0, 	OutVarTemp1X := 0, 	OutVarTemp1Y := 0, 	OutVarTemp1W := 0, 	OutVarTemp1H := 0
+		,OutVarTemp2 := 0, 	OutVarTemp2X := 0, 	OutVarTemp2Y := 0, 	OutVarTemp2W := 0, 	OutVarTemp2H := 0
+		,OutVarTemp3 := 0, 	OutVarTemp3X := 0, 	OutVarTemp3Y := 0, 	OutVarTemp3W := 0, 	OutVarTemp3H := 0
+		,OutVarTemp4 := 0, 	OutVarTemp4X := 0, 	OutVarTemp4Y := 0, 	OutVarTemp4W := 0, 	OutVarTemp4H := 0
+							,xNext := 0, 		yNext := 0, 			wNext := 0, 			hNext := 0
 		,HwndIdLongest := 0, 	IdLongest := 0, MaxText := 0
 	
 ;4. Determine constraints, according to mock-up
-	v_xNext := c_xmarg, v_yNext := c_ymarg
-	GuiControl, Move, % IdLine1, % "x" . v_xNext . "y"  . v_yNext
-	GuiControlGet, v_OutVarTemp, Pos, % IdLine1
-	v_yNext += v_OutVarTempH + c_ymarg
-	GuiControl, Move, % IdLine2, % "x" v_xNext "y" v_yNext
+	xNext := c_xmarg, yNext := c_ymarg
+	GuiControl, Move, % IdLine1, % "x" . xNext . "y"  . yNext	;Let's make your PC personal again...
+	GuiControlGet, OutVarTemp, Pos, % IdLine1
+	yNext += OutVarTempH + c_ymarg
+	GuiControl, Move, % IdLine2, % "x" . xNext . "y" . yNext	;Enables Convenient Definition
 	
 	;Find the longest substring:
 	Loop, Parse, % TransA["Enables Convenient Definition"], % "`n"
 	{
-		v_OutVarTemp1 := StrLen(Trim(A_LoopField))
-		if (v_OutVarTemp1 > v_OutVarTemp)
-			v_OutVarTemp := v_OutVarTemp1
+		OutVarTemp1 := StrLen(Trim(A_LoopField))
+		if (OutVarTemp1 > OutVarTemp)
+			OutVarTemp := OutVarTemp1
 	}
 	Loop, Parse, % TransA["Enables Convenient Definition"], % "`n"
 	{
-		if (StrLen(Trim(A_LoopField)) = v_OutVarTemp)
+		if (StrLen(Trim(A_LoopField)) = OutVarTemp)
 		{
 			Gui, MyAbout: Add, Text, x0 y0 HwndIdLongest, % Trim(A_LoopField)
-			GuiControlGet, v_OutVarTemp, Pos, % IdLine1
-			v_xNext := c_xmarg, v_yNext := c_ymarg + v_OutVarTempH + c_ymarg
-			GuiControl, Move, % IdLongest, % "x" . v_xNext . "y" . v_yNext 
+			GuiControlGet, OutVarTemp, Pos, % IdLine1
+			xNext := c_xmarg, yNext := c_ymarg + OutVarTempH + c_ymarg
+			GuiControl, Move, % IdLongest, % "x" . xNext . "y" . yNext 
 			GuiControl, Hide, % IdLongest
 			Break
 		}
 	}
-	GuiControlGet, v_OutVarTemp1, Pos, % IdAboutT1
-	GuiControlGet, v_OutVarTemp2, Pos, % IdAboutT3
-	GuiControlGet, v_OutVarTemp3, Pos, % IdAboutT5
-	GuiControlGet, v_OutVarTemp4, Pos, % IdAboutT7
-	MaxText := Max(v_OutVarTemp1W, v_OutVarTemp2W, v_OutVarTemp3W, v_OutVarTemp4W)
-	GuiControlGet, v_OutVarTemp, Pos, % IdLine2
-	v_xNext := c_xmarg, v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg
-	GuiControl, Move, % IdAboutT1, % "x" . v_xNext . A_Space . "y" . v_yNext
-	v_xNext := MaxText + 3 * c_xmarg
-	GuiControl, Move, % IdAboutT2, % "x" . v_xNext . A_Space . "y" . v_yNext
-	v_xNext := c_xmarg, v_yNext += c_HofText
-	GuiControl, Move, % IdAboutT3, % "x" . v_xNext . A_Space . "y" . v_yNext
-	v_xNext := MaxText + 3 * c_xmarg
+	GuiControlGet, OutVarTemp1, Pos, % IdAboutT1	;Version
+	GuiControlGet, OutVarTemp2, Pos, % IdAboutT3	;Mode of operation
+	GuiControlGet, OutVarTemp3, Pos, % IdAboutT5	;Application mode
+	GuiControlGet, OutVarTemp4, Pos, % IdAboutT7	;AutoHotkey version
+	MaxText := Max(OutVarTemp1W, OutVarTemp2W, OutVarTemp3W, OutVarTemp4W)
+	GuiControlGet, OutVarTemp, Pos, % IdLine2
+	xNext := c_xmarg, yNext := OutVarTempY + OutVarTempH + 2 * c_ymarg
+	GuiControl, Move, % IdAboutT1, % "x" . xNext . A_Space . "y" . yNext
+	xNext := MaxText + 3 * c_xmarg
+	GuiControl, Move, % IdAboutT2, % "x" . xNext . A_Space . "y" . yNext
+	xNext := c_xmarg, yNext += c_HofText
+	GuiControl, Move, % IdAboutT3, % "x" . xNext . A_Space . "y" . yNext
+	xNext := MaxText + 3 * c_xmarg
 	if (v_Param = "l")
 		GuiControl, , % IdAboutT4, % TransA["silent"]
 	else
 		GuiControl, , % IdAboutT4, % TransA["default"]
-	GuiControl, Move, % IdAboutT4, % "x" . v_xNext . A_Space . "y" . v_yNext
-	v_xNext := c_xmarg, v_yNext += c_HofText
-	GuiControl, Move, % IdAboutT5, % "x" . v_xNext . A_Space . "y" . v_yNext
-	v_xNext := MaxText + 3 * c_xmarg
+	GuiControl, Move, % IdAboutT4, % "x" . xNext . A_Space . "y" . yNext
+	xNext := c_xmarg, yNext += c_HofText
+	GuiControl, Move, % IdAboutT5, % "x" . xNext . A_Space . "y" . yNext
+	xNext := MaxText + 3 * c_xmarg
 	if (A_IsCompiled)
 		GuiControl, , % IdAboutT6, exe
 	else
 		GuiControl, , % IdAboutT6, ahk
-	GuiControl, Move, % IdAboutT6, % "x" . v_xNext . A_Space . "y" . v_yNext
-	v_xNext := c_xmarg, v_yNext += c_HofText
-	GuiControl, Move, % IdAboutT7, % "x" . v_xNext . A_Space . "y" . v_yNext
-	v_xNext := MaxText + 3 * c_xmarg
-	GuiControl, Move, % IdAboutT8, % "x" . v_xNext . A_Space . "y" . v_yNext
+	GuiControl, Move, % IdAboutT6, % "x" . xNext . A_Space . "y" . yNext
+	xNext := c_xmarg, yNext += c_HofText
+	GuiControl, Move, % IdAboutT7, % "x" . xNext . A_Space . "y" . yNext	;AutoHotkey version
+	xNext := MaxText + 3 * c_xmarg
+	GuiControl, Move, % IdAboutT8, % "x" . xNext . A_Space . "y" . yNext
+	xNext := c_xmarg, yNext += c_HofText
+	GuiControl, Move, % IdAboutT9, % "x" . xNext . A_Space . "y" . yNext
+	xNext := MaxText + 3 * c_xmarg
+	GuiControl, Move, % IdAboutT10, % "x" . xNext . A_Space . "y" . yNext
+	xNext := c_xmarg, yNext += c_HofText
+	GuiControl, Move, % IdAboutT11, % "x" . xNext . A_Space . "y" . yNext	;type
+	xNext := MaxText + 3 * c_xmarg
+	GuiControl, Move, % IdAboutT12, % "x" . xNext . A_Space . "y" . yNext	;type
+	if (v_LicenseType = "commercial")
+		GuiControl, , % IdAboutT12, % TransA["commercial"]
+	if (v_LicenseType = "free")
+		GuiControl, , % IdAboutT12, % TransA["free"]
+	xNext := c_xmarg, yNext += c_HofText
+	GuiControl, Move, % IdAboutT13, % "x" . xNext . A_Space . "y" . yNext	;licensed to
+	xNext := MaxText + 3 * c_xmarg
+	GuiControl, Move, % IdAboutT14, % "x" . xNext . A_Space . "y" . yNext	;licensed to
+	GuiControl, , % IdAboutT14, % v_LicensedTo
+	xNext := c_xmarg, yNext += c_HofText
+	GuiControl, Move, % IdAboutT15, % "x" . xNext . A_Space . "y" . yNext	;valid till
+	xNext := MaxText + 3 * c_xmarg
+	GuiControl, Move, % IdAboutT16, % "x" . xNext . A_Space . "y" . yNext	;valid till
+	GuiControl, , % IdAboutT16, % SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1)
 	
-	GuiControlGet, v_OutVarTemp1, Pos, % IdLongest ; weight of the longest text
-	GuiControlGet, v_OutVarTemp2, Pos, % IdAboutOkButton 
-	v_wNext := v_OutVarTemp2W + 2 * c_xmarg
-,	v_xNext := (v_OutVarTemp1W // 2) - (v_wNext // 2)
-	GuiControlGet, v_OutVarTemp, Pos, % IdLine2
-	v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg + 4 * c_HofText
-	GuiControl, Move, % IdAboutOkButton, % "x" . v_xNext . "y" . A_Space . v_yNext . "w" . v_wNext
+	GuiControlGet, OutVarTemp1, Pos, % IdLongest ; weight of the longest text
+	GuiControlGet, OutVarTemp2, Pos, % IdAboutOkButton 
+	wNext := OutVarTemp2W + 2 * c_xmarg
+,	xNext := (OutVarTemp1W // 2) - (wNext // 2)
+	GuiControlGet, OutVarTemp, Pos, % IdLine2
+	yNext := OutVarTempY + OutVarTempH + 8 * c_HofText + c_ymarg
+	GuiControl, Move, % IdAboutOkButton, % "x" . xNext . "y" . A_Space . yNext . "w" . wNext
 	
-	v_xNext := v_OutVarTemp1X + v_OutVarTemp1W - 96 ;96 = chosen size of icon
-,	v_yNext := v_OutVarTemp1Y + v_OutVarTemp1H
-	GuiControl, Move, % IdAboutPicture, % "x" . v_xNext . A_Space . "y" . v_yNext 
+	xNext := OutVarTemp1X + OutVarTemp1W - 96 ;96 = chosen size of icon
+,	yNext := OutVarTemp1Y + OutVarTemp1H
+	GuiControl, Move, % IdAboutPicture, % "x" . xNext . A_Space . "y" . yNext 
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_GuiAbout()
