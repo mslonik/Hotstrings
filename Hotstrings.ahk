@@ -652,15 +652,15 @@ return
 return
 ;section of build-in hotkeys (system wide!)
 ; ~LControl UP::			;commented out as it is a part of AltGr (LControl & RAlt) and AltGr is used for diacritic letters in many keyboard layouts
-~RControl UP::			;UP: to be sure it will work only when button is released
-	ToolTip,			;this line is necessary to close tooltips.
-	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
-	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
-	Hotstring("Reset")
-	F_DestroyTriggerstringTips(ini_TTCn)
-	if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
-		v_InputString := ""
-return
+; ~RControl UP::			;commented out as it is a part of AltGr (LControl & RAlt) and AltGr is used for diacritic letters in many keyboard layouts
+; 	ToolTip,			;this line is necessary to close tooltips.
+; 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
+; 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
+; 	Hotstring("Reset")
+; 	F_DestroyTriggerstringTips(ini_TTCn)
+; 	if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
+; 		v_InputString := ""
+; return
 
 ~*LShift::
 ~*RShift::			;Actually "Shifts" work a bit different as some keys like @ or ? are available only after pressing Shift.
@@ -693,8 +693,8 @@ return
 ~*F22::
 ~*F23::
 ~*F24::
-~*LAlt::		;if commented out, only for debugging reasons
-~RAlt::		;no * allowed as it is part of AltGr (LControl & RAlt) and AltGr is used for diacritic letters in many keyboard layouts
+; ~*LAlt::		;if commented out, only for debugging reasons
+; ~RAlt::		;no * allowed as it is part of AltGr (LControl & RAlt) and AltGr is used for diacritic letters in many keyboard layouts
 ~*WheelDown::
 ~*WheelUp::
 ~*MButton::
@@ -705,10 +705,12 @@ return
 ~*Up::
 ~*Left::
 ~*Right::
-~*PgDn::
-~*PgUp::
+~*Insert::
+~*Del::
 ~*Home::
 ~*End::
+~*PgUp::
+~*PgDn::
 ~*WheelLeft::
 ~*WheelRight::
 ~*LButton::	;as above, but without F_DestroyTriggerstringTips()
@@ -2384,7 +2386,7 @@ F_OneCharPressed(ih, Char)
 	if (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))
 		return
 
-	OutputDebug, % "1)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
+	; OutputDebug, % "1)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
 	if (InStr(HotstringEndChars, Char))
 		f_EndCharDetected := true
 	else
@@ -2400,7 +2402,7 @@ F_OneCharPressed(ih, Char)
 	if (v_Qinput)
 		v_Qinput .= Char
 
-	OutputDebug, % "2)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "v_QI:" . v_Qinput . "`n"
+	; OutputDebug, % "2)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "v_QI:" . v_Qinput . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -2433,7 +2435,7 @@ F_OneCharPressed(ih, Char)
 	}
 	if (!f_LastTip) and (f_EndCharDetected) and (!f_ExpEndChar)
 		v_InputString := ""
-	OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . "|" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . "|" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
