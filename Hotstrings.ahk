@@ -42,7 +42,12 @@ global AppVersion				:= "3.6.9"
 ;@Ahk2Exe-SetProductVersion %U_vAppVersion% 
 ;@Ahk2Exe-SetVersion %U_vAppVersion% 
 FileInstall, hotstrings.ico, 	% AppIcon, 	0
-FileInstall, LICENSE, 		LICENSE, 		0
+;#f/* free version only beginning
+; FileInstall, LICENSE_MIT, 	LICENSE_MIT,	0
+;#f*/ free version only end
+;#c/* commercial only beginning
+FileInstall, LICENSE_EULA.md, LICENSE_EULA.md,	0
+;#f*/ free version only end
 ; - - - - - - - - - - - - - - - - - - - - - - - S E C T I O N    O F    G L O B A L     V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ;#c/* commercial only beginning
 global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l like "siLent mode"
