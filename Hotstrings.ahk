@@ -77,10 +77,9 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		v_Qinput				:= "" ; to store substring of v_InputString related to possible question mark (inside) option
 ,		v_LicenseType			:= "commercial"
 ,		v_LicensedTo			:= "Maciej Słojewski"
-,		v_LicensedUserName		:= "0123456789012345678901234567890123456789"	;30 char. max
-,		v_LicensedCompName		:= "0123456789012345678901234567890123456789"	;30 char. max
-,		v_ValidTill			:= "20221207"
-
+,		v_LicensedUserName		:= "0123456789012345678901234567890123456789"	;40 char. max. "0123456789012345678901234567890123456789"
+,		v_LicensedCompName		:= "0123456789012345678901234567890123456789"	;40 char. max. "0123456789012345678901234567890123456789"
+,		v_ValidTill			:= "inf"									;date in format yyyymmdd; "inf" for infinity
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
 F_LoadCreateTranslationTxt() 			;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
@@ -12156,6 +12155,7 @@ Convert to executable (.exe)								= Convert to executable (.exe)
 Composition of triggerstring tips							= Composition of triggerstring tips
 Compressed executable (upx.exe)							= Compressed executable (upx.exe)
 Compressed executable (mpress.exe)							= Compressed executable (mpress.exe)
+Computer name											= Computer name
 Config.ini file: move it to script / app location				= Config.ini file: move it to script / app location
 Config.ini file: restore it to default location				= Config.ini file: restore it to default location
 Config.ini file was successfully moved to the new location.		= Config.ini file was successfully moved to the new location.
@@ -12342,6 +12342,7 @@ Loading imported library. Please wait...					= Loading imported library. Please 
 Loaded												= Loaded
 Local version											= Local version
 Logging of d(t, o, h)									= Logging of d(t, o, h)
+Logon name					= Logon name
 Log triggered hotstrings									= Log triggered hotstrings
 maroon												= maroon
 Max. no. of shown tips									= Max. no. of shown tips
@@ -13965,9 +13966,13 @@ F_GuiAbout_CreateObjects()	;tu jestem
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT11,									% TransA["License type"] . ":"
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT12,									% TransA["commercial"]
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT13,									% TransA["Licensed to"] . ":"
-	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT14,									% "0123456789012345678901234567890123456789"	;arbitrary long name, 30 char. max.
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT14,									% "0123456789012345678901234567890123456789"	;arbitrary long name, 40 char. max.
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT15,									% TransA["Valid till"] . ":"
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT16,									% "2022-12-07"
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT17,									% TransA["Logon name"] . ":"
+	Gui,	MyAbout: Add,		Text,	x0 y0 HwndIdAboutT18,									% "012345678901234567890123456789"			;arbitrary long name, 30 char. max. placeholder
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT19,									% TransA["Computer name"] . ":"
+	Gui,	MyAbout: Add,		Text,	x0 y0 HwndIdAboutT20,									% "012345678901234567890123456789"			;arbitrary long name, 30 char. max. placeholder
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiAbout_DetermineConstraints()
@@ -13979,7 +13984,7 @@ F_GuiAbout_DetermineConstraints()
 		,OutVarTemp2 := 0, 	OutVarTemp2X := 0, 	OutVarTemp2Y := 0, 	OutVarTemp2W := 0, 	OutVarTemp2H := 0
 		,OutVarTemp3 := 0, 	OutVarTemp3X := 0, 	OutVarTemp3Y := 0, 	OutVarTemp3W := 0, 	OutVarTemp3H := 0
 		,OutVarTemp4 := 0, 	OutVarTemp4X := 0, 	OutVarTemp4Y := 0, 	OutVarTemp4W := 0, 	OutVarTemp4H := 0
-							,xNext := 0, 		yNext := 0, 			wNext := 0, 			hNext := 0
+	,	xNext := 0, yNext := 0, wNext := 0, hNext := 0
 		,HwndIdLongest := 0, 	IdLongest := 0, MaxText := 0
 	
 ;4. Determine constraints, according to mock-up
@@ -14059,14 +14064,27 @@ F_GuiAbout_DetermineConstraints()
 	GuiControl, Move, % IdAboutT15, % "x" . xNext . A_Space . "y" . yNext	;valid till
 	xNext := MaxText + 3 * c_xmarg
 	GuiControl, Move, % IdAboutT16, % "x" . xNext . A_Space . "y" . yNext	;valid till
-	GuiControl, , % IdAboutT16, % SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1)
-	
+	if (v_ValidTill != "inf")
+		GuiControl, , % IdAboutT16, % SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1)
+	else
+		GuiControl, , % IdAboutT16, % v_ValidTill
+	xNext := c_xmarg, yNext += c_HofText
+	GuiControl, Move, % IdAboutT17, % "x" . xNext . A_Space . "y" . yNext ;Logon name
+	xNext := MaxText + 3 * c_xmarg
+	GuiControl, Move, % IdAboutT18, % "x" . xNext . A_Space . "y" . yNext ;Logon name
+	GuiControl, , % IdAboutT18, % A_UserName
+	xNext := c_xmarg, yNext += c_HofText
+	GuiControl, Move, % IdAboutT19, % "x" . xNext . A_Space . "y" . yNext ;Computer name
+	xNext := MaxText + 3 * c_xmarg
+	GuiControl, Move, % IdAboutT20, % "x" . xNext . A_Space . "y" . yNext ;Computer name
+	GuiControl, , % IdAboutT20, % A_ComputerName
+
 	GuiControlGet, OutVarTemp1, Pos, % IdLongest ; weight of the longest text
 	GuiControlGet, OutVarTemp2, Pos, % IdAboutOkButton 
 	wNext := OutVarTemp2W + 2 * c_xmarg
 ,	xNext := (OutVarTemp1W // 2) - (wNext // 2)
 	GuiControlGet, OutVarTemp, Pos, % IdLine2
-	yNext := OutVarTempY + OutVarTempH + 8 * c_HofText + c_ymarg
+	yNext := OutVarTempY + OutVarTempH + 11 * c_HofText + c_ymarg
 	GuiControl, Move, % IdAboutOkButton, % "x" . xNext . "y" . A_Space . yNext . "w" . wNext
 	
 	xNext := OutVarTemp1X + OutVarTemp1W - 96 ;96 = chosen size of icon
