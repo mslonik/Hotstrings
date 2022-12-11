@@ -1,4 +1,4 @@
-#Requires,               AutoHotkey v1.1.33+ 	; Displays an error and quits if a version requirement is not met.    
+#Requires,               AutoHotkey v1.1.34+ 	; Displays an error and quits if a version requirement is not met.    
 #SingleInstance, 		force	               ; Only one instance of this script may run at a time!
 #NoEnv  						               ; Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn  						               ; Enable warnings to assist with detecting common errors.

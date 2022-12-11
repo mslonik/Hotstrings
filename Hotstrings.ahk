@@ -75,29 +75,23 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		v_LibHotstringCnt		:= 0 ;no of (triggerstring, hotstring) definitions in single library
 ,		ini_TTCn				:= 0 ;this variable could be triggered by left mouse click when script is initialized.
 ,		v_Qinput				:= "" ; to store substring of v_InputString related to possible question mark (inside) option
-,		v_LicenseType			:= "commercial"
-,		v_LicensedTo			:= "Maciej Słojewski"
-,		v_LicensedUserName		:= "0123456789012345678901234567890123456789"	;40 char. max. "0123456789012345678901234567890123456789"
-,		v_LicensedCompName		:= "0123456789012345678901234567890123456789"	;40 char. max. "0123456789012345678901234567890123456789"
-,		v_ValidTill			:= "inf"									;date in format yyyymmdd; "inf" for infinity
+,		c_MsgBoxIconError		:= 16									;constant, MsgBox icon hand (stop/error)
+,		c_MsgBoxIconExclamation	:= 48									;constant, MsgBox icon exclamation
+,		v_LicenseType			:= "free"							;"commercial" or "free"
+,		v_LicensedTo			:= "Maciej Słojewski"						;company name or first and second name of customer
+;#c/* commercial only beginning
+,		v_LogonName			:= "maciej"								;40 char. max. "0123456789012345678901234567890123456789", corresponds to A_UserName
+,		v_LicensedCompName		:= "fikumiku"								;40 char. max. "0123456789012345678901234567890123456789", corresponds to A_ComputerName
+,		v_ValidTill			:= "inf"								;date in format yyyymmdd; "inf" for infinity
+,		v_LicenseID			:= "000001"
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
-F_LoadCreateTranslationTxt() 			;default set of translations (English) is loaded at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
+F_LoadCreateTranslationTxt() 			;default set of text string definitions (English) is loaded into memory at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
 F_CheckCreateConfigIni() 			;Try to load up configuration file. If those files do not exist, create them.
-if (v_LicenseType = "commercial") and (v_ValidTill != "inf")
-	{
-		ElapsedTime := A_Now
-		EnvSub, ElapsedTime, v_ValidTill, Days
-		if (ElapsedTime > 0)	;one year
-		{
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Sorry, your license is no longer valid (expired). Application will exit now."	;16 = Icon Hand (stop/error)
-			ExitApp, 5	;5 = expired
-		}
-		if (ElapsedTime > -3)
-			MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % "Your license is about to expire. It will remain active for less than 3 days."
-				. "`n`n"
-				. "Expiration date:" . A_Space . SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1)
-	}
+;#c/* commercial only beginning
+F_CheckCommercialConditions()			;check v_LicenseType, v_LogonName, v_LicensedCompName, v_ValidTill
+;#c*/ commercial only end
 F_CheckIfMoveToProgramFiles()			;Checks if move Hotstrings folder to Program Files folder and then restarts application.
 F_CheckIfRemoveOldDir()				;Checks content of Config.ini in order to remove old script directory.
 F_CheckFileEncoding(A_ScriptFullPath)	;checks if script is utf-8 compliant. it has plenty to do wiith github download etc.
@@ -875,6 +869,61 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_CheckCommercialConditions()
+{
+	global	;assume-global mode of operation
+	if (v_LicenseType = "commercial") and (v_ValidTill != "inf")
+		{
+			if (A_UserName != v_LogonName)
+			{
+				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Sorry, your computer data do not match with license information. Application will exit now. If you think this is application error please contact our support showing the following data. If you press Ctrl + C content of this message for your convenience will be copied in text mode to clipboard."]
+					. "`n`n"
+					. TransA["Actual logon name"] . ":" . A_Tab . A_UserName
+					. "`n`n"
+					. TransA["Hotstrings application technical support e-mail: support@hotstrings.com"]
+					. "`n`n"
+					. TransA["This instance of Hotstrings application is licensed for the following data"] . ":" 	
+					. "`n`n"
+					. TransA["License type"]		. ":" . A_Tab . A_Tab . v_LicenseType						. "`n"
+					. TransA["Licensed to"]		. ":" . A_Tab . A_Tab . v_LicensedTo						. "`n"
+					. TransA["Computer name"] 	. ":" . A_Tab . A_Tab . v_LicensedCompName					. "`n"
+					. TransA["Logon name"]		. ":" . A_Tab . A_Tab . v_LogonName 						. "`n"
+					. TransA["Valid till"]		. ":" . A_Tab . A_Tab . A_Tab . SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1) . "`n"
+					. TransA["License ID"]		. ":" . A_Tab . A_Tab . v_LicenseID
+				ExitApp, 6	;6 = incorrect user logon name
+			}
+			if (A_ComputerName != v_LicensedCompName)
+			{
+				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Sorry, your computer data do not match with license information. Application will exit now. If you think this is application error please contact our support showing the following data. If you press Ctrl + C content of this message for your convenience will be copied in text mode to clipboard."]
+					. "`n`n"
+					. TransA["Actual computer name"] . ":" . A_Tab . A_ComputerName
+					. "`n`n"
+					. TransA["Hotstrings application technical support e-mail: support@hotstrings.com"]
+					. "`n`n"
+					. TransA["This instance of Hotstrings application is licensed for the following data"] . ":" 	
+					. "`n`n"
+					. TransA["License type"]		. ":" . A_Tab . A_Tab . v_LicenseType						. "`n"
+					. TransA["Licensed to"]		. ":" . A_Tab . A_Tab . v_LicensedTo						. "`n"
+					. TransA["Computer name"] 	. ":" . A_Tab . A_Tab . v_LicensedCompName					. "`n"
+					. TransA["Logon name"]		. ":" . A_Tab . A_Tab . v_LogonName 						. "`n"
+					. TransA["Valid till"]		. ":" . A_Tab . A_Tab . A_Tab . SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1) . "`n"
+					. TransA["License ID"]		. ":" . A_Tab . A_Tab . v_LicenseID
+				ExitApp, 7	;7 = incorrect computer name
+			}
+			ElapsedTime := A_Now
+			EnvSub, ElapsedTime, v_ValidTill, Days
+			if (ElapsedTime > 0)	;one year
+			{
+				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Sorry, your license is no longer valid (expired). Application will exit now."	;16 = Icon Hand (stop/error)
+				ExitApp, 5	;5 = expired
+			}
+			if (ElapsedTime > -3)	;less than 3 days till the end of license time
+				MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % "Your license is about to expire. It will remain active for less than 3 days."
+					. "`n`n"
+					. "Expiration date:" . A_Space . SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1)
+		}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Empty()	;empty / dummy function. Applicable for debugging purposes or as destination for Menu command.
 {	
 }
@@ -12079,6 +12128,8 @@ About this application...								= About this application...
 According to your wish the new version of application was found on the server and downloaded. = According to your wish the new version of application was found on the server and downloaded.
 Active triggerstring tips								= Active triggerstring tips
 Active triggerstring tips styling							= Active triggerstring tips styling
+Actual computer name									= Actual computer name
+Actual logon name										= Actual logon name
 Actually the ""Libraries"" folder is already located in default location, so it won't be moved. = Actually the ""Libraries"" folder is already located in default location, so it won't be moved.
 Add comment (optional) 									= Add comment (optional)
 Add / Edit hotstring (F9) 								= Add / Edit hotstring (F9)
@@ -12261,6 +12312,7 @@ Help: AutoHotkey Hotstrings reference guide					= Help: AutoHotkey Hotstrings re
 Help: Hotstrings application								= Help: Hotstrings application
 Hotstring 											= Hotstring
 Hotstring added to the file								= Hotstring added to the file
+Hotstrings application technical support e-mail: support@hotstrings.com = Hotstrings application technical support e-mail: support@hotstrings.com
 Hotstring definitions are now ACTIVE.						= Hotstring definitions are now ACTIVE.
 Hotstring definitions are now SUSPENDED.					= Hotstring definitions are now SUSPENDED.
 Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv) = Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
@@ -12328,6 +12380,7 @@ Library export. Please wait... 							= Library export. Please wait...
 Library has been exported 								= Library has been exported
 Library has been imported. 								= Library has been imported.
 License												= License
+License ID											= License ID
 License type											= License type
 Licensed to											= Licensed to
 Light (default)										= Light (default)
@@ -12493,6 +12546,7 @@ Sound test											= Sound test
 Sorting order											= Sorting order
 Sorry, it's not allowed to use combination of Caps Lock, Scroll Lock and Num Lock for the same purpose. = Sorry, it's not allowed to use combination of Caps Lock, Scroll Lock and Num Lock for the same purpose.
 Sorry, it's not allowed to use ordinary hotkey combined with Caps Lock or Scroll Lock or Num Lock. = Sorry, it's not allowed to use ordinary hotkey combined with Caps Lock or Scroll Lock or Num Lock.
+Sorry, your computer data do not match with license information. Application will exit now. If you think this is application error please contact our support showing the following data. If you press Ctrl + C content of this message for your convenience will be copied in text mode to clipboard. = Sorry, your computer data do not match with license information. Application will exit now. If you think this is application error please contact our support showing the following data. If you press Ctrl + C content of this message for your convenience will be copied in text mode to clipboard.
 ""SP"" or SendPlay may have no effect at all if UAC is enabled, even if the script is running as an administrator. For more information, refer to the AutoHotkey FAQ (help). = ""SP"" or SendPlay may have no effect at all if UAC is enabled, even if the script is running as an administrator. For more information, refer to the AutoHotkey FAQ (help).
 Space												= Space
 Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
@@ -12540,6 +12594,7 @@ The (triggerstring, hotstring) definitions have been uploaded from library file 
 The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory = The (triggerstring, hotstring) definitions stored in the following library file have been unloaded from memory
 There is no											= There is no
 There was no Languages subfolder, so one now is created.		= There was no Languages subfolder, so one now is created.
+This instance of Hotstrings application is licensed for the following data = This instance of Hotstrings application is licensed for the following data
 This library:											= This library:
 This line do not comply to format required by this application.  = This line do not comply to format required by this application.
 This operation is aborted.								= This operation is aborted.
@@ -13968,24 +14023,27 @@ F_GuiAbout_CreateObjects()	;tu jestem
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT13,									% TransA["Licensed to"] . ":"
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT14,									% "0123456789012345678901234567890123456789"	;arbitrary long name, 40 char. max.
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT15,									% TransA["Valid till"] . ":"
-	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT16,									% "2022-12-07"
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT16,									% "2022-12-07"							;date placeholder in format yyyy-mm-dd
+;#c/* commercial only beginning	
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT17,									% TransA["Logon name"] . ":"
 	Gui,	MyAbout: Add,		Text,	x0 y0 HwndIdAboutT18,									% "012345678901234567890123456789"			;arbitrary long name, 30 char. max. placeholder
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT19,									% TransA["Computer name"] . ":"
 	Gui,	MyAbout: Add,		Text,	x0 y0 HwndIdAboutT20,									% "012345678901234567890123456789"			;arbitrary long name, 30 char. max. placeholder
+	Gui,	MyAbout: Add,		Text,	x0 y0 HwndIdAboutT21,									% TransA["License ID"] . ":"
+	Gui,	MyAbout: Add,		Text,	x0 y0 HwndIdAboutT22,									% "01234567"							;7 characters max. placeholder
+;#c*/ commercial only end	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiAbout_DetermineConstraints()
 {
 	global ;assume-global mode
-;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.
-	local OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0
-		,OutVarTemp1 := 0, 	OutVarTemp1X := 0, 	OutVarTemp1Y := 0, 	OutVarTemp1W := 0, 	OutVarTemp1H := 0
-		,OutVarTemp2 := 0, 	OutVarTemp2X := 0, 	OutVarTemp2Y := 0, 	OutVarTemp2W := 0, 	OutVarTemp2H := 0
-		,OutVarTemp3 := 0, 	OutVarTemp3X := 0, 	OutVarTemp3Y := 0, 	OutVarTemp3W := 0, 	OutVarTemp3H := 0
-		,OutVarTemp4 := 0, 	OutVarTemp4X := 0, 	OutVarTemp4Y := 0, 	OutVarTemp4W := 0, 	OutVarTemp4H := 0
+	local OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0	;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.
+	,	OutVarTemp1 := 0, 	OutVarTemp1X := 0, 	OutVarTemp1Y := 0, 	OutVarTemp1W := 0, 	OutVarTemp1H := 0
+	,	OutVarTemp2 := 0, 	OutVarTemp2X := 0, 	OutVarTemp2Y := 0, 	OutVarTemp2W := 0, 	OutVarTemp2H := 0
+	,	OutVarTemp3 := 0, 	OutVarTemp3X := 0, 	OutVarTemp3Y := 0, 	OutVarTemp3W := 0, 	OutVarTemp3H := 0
+	,	OutVarTemp4 := 0, 	OutVarTemp4X := 0, 	OutVarTemp4Y := 0, 	OutVarTemp4W := 0, 	OutVarTemp4H := 0
 	,	xNext := 0, yNext := 0, wNext := 0, hNext := 0
-		,HwndIdLongest := 0, 	IdLongest := 0, MaxText := 0
+	,	HwndIdLongest := 0, 	IdLongest := 0, MaxText := 0
 	
 ;4. Determine constraints, according to mock-up
 	xNext := c_xmarg, yNext := c_ymarg
@@ -14064,6 +14122,7 @@ F_GuiAbout_DetermineConstraints()
 	GuiControl, Move, % IdAboutT15, % "x" . xNext . A_Space . "y" . yNext	;valid till
 	xNext := MaxText + 3 * c_xmarg
 	GuiControl, Move, % IdAboutT16, % "x" . xNext . A_Space . "y" . yNext	;valid till
+;#c/* commercial only beginning	
 	if (v_ValidTill != "inf")
 		GuiControl, , % IdAboutT16, % SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1)
 	else
@@ -14072,19 +14131,27 @@ F_GuiAbout_DetermineConstraints()
 	GuiControl, Move, % IdAboutT17, % "x" . xNext . A_Space . "y" . yNext ;Logon name
 	xNext := MaxText + 3 * c_xmarg
 	GuiControl, Move, % IdAboutT18, % "x" . xNext . A_Space . "y" . yNext ;Logon name
-	GuiControl, , % IdAboutT18, % A_UserName
+	GuiControl, , % IdAboutT18, % v_LogonName
 	xNext := c_xmarg, yNext += c_HofText
 	GuiControl, Move, % IdAboutT19, % "x" . xNext . A_Space . "y" . yNext ;Computer name
 	xNext := MaxText + 3 * c_xmarg
 	GuiControl, Move, % IdAboutT20, % "x" . xNext . A_Space . "y" . yNext ;Computer name
-	GuiControl, , % IdAboutT20, % A_ComputerName
-
+	GuiControl, , % IdAboutT20, % v_LicensedCompName
+	xNext := c_xmarg, yNext += c_HofText
+	GuiControl, Move, % IdAboutT21, % "x" . xNext . A_Space . "y" . yNext ;License ID
+	xNext := MaxText + 3 * c_xmarg
+	GuiControl, Move, % IdAboutT22, % "x" . xNext . A_Space . "y" . yNext ;License ID
+	GuiControl, , % IdAboutT22, % v_LicenseID
+;#c*/ commercial only end
 	GuiControlGet, OutVarTemp1, Pos, % IdLongest ; weight of the longest text
 	GuiControlGet, OutVarTemp2, Pos, % IdAboutOkButton 
 	wNext := OutVarTemp2W + 2 * c_xmarg
 ,	xNext := (OutVarTemp1W // 2) - (wNext // 2)
 	GuiControlGet, OutVarTemp, Pos, % IdLine2
-	yNext := OutVarTempY + OutVarTempH + 11 * c_HofText + c_ymarg
+	yNext := OutVarTempY + OutVarTempH + 12 * c_HofText + c_ymarg
+;#f/* free version only beginning	
+	; yNext := OutVarTempY + OutVarTempH + 9 * c_HofText + c_ymarg
+;#f*/ free version only end	
 	GuiControl, Move, % IdAboutOkButton, % "x" . xNext . "y" . A_Space . yNext . "w" . wNext
 	
 	xNext := OutVarTemp1X + OutVarTemp1W - 96 ;96 = chosen size of icon
