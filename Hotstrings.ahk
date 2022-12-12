@@ -96,6 +96,7 @@ F_LoadCreateTranslationTxt() 			;default set of text string definitions (English
 F_CheckCreateConfigIni() 			;Try to load up configuration file. If those files do not exist, create them.
 ;#c/* commercial only beginning
 F_CheckCommercialConditions()			;check v_LicenseType, v_LogonName, v_LicensedCompName, v_ValidTill
+SetTimer, F_CheckCommTime, % 1000 * 3600	;1 hour
 ;#c*/ commercial only end
 F_CheckIfMoveToProgramFiles()			;Checks if move Hotstrings folder to Program Files folder and then restarts application.
 F_CheckIfRemoveOldDir()				;Checks content of Config.ini in order to remove old script directory.
@@ -874,6 +875,7 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+;#c/* commercial only beginning
 F_CheckCommercialConditions()
 {
 	global	;assume-global mode of operation
@@ -915,19 +917,30 @@ F_CheckCommercialConditions()
 					. TransA["License ID"]		. ":" . A_Tab . A_Tab . v_LicenseID
 				ExitApp, 7	;7 = incorrect computer name
 			}
-			ElapsedTime := A_Now
-			EnvSub, ElapsedTime, v_ValidTill, Days
-			if (ElapsedTime > 0)	;one year
-			{
-				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Sorry, your license is no longer valid (expired). Application will exit now."	;16 = Icon Hand (stop/error)
-				ExitApp, 5	;5 = expired
-			}
-			if (ElapsedTime > -3)	;less than 3 days till the end of license time
-				MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % "Your license is about to expire. It will remain active for less than 3 days."
-					. "`n`n"
-					. "Expiration date:" . A_Space . SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1)
+			F_CheckCommTime()
 		}
 }
+;#c*/ commercial only end
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
+F_CheckCommTime()
+{
+	global	;assume-global mode of operation
+	local	ElapsedTime := 0
+
+	ElapsedTime := A_Now
+	EnvSub, ElapsedTime, v_ValidTill, Days
+	if (ElapsedTime > 0)	;one year
+	{
+		MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Sorry, your license is no longer valid (expired). Application will exit now."	;16 = Icon Hand (stop/error)
+		ExitApp, 5	;5 = expired
+	}
+	if (ElapsedTime > -3)	;less than 3 days till the end of license time
+		MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % "Your license is about to expire. It will remain active for less than 3 days."
+			. "`n`n"
+			. "Expiration date:" . A_Space . SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1)
+}
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_Empty()	;empty / dummy function. Applicable for debugging purposes or as destination for Menu command.
 {	

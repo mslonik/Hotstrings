@@ -20,17 +20,34 @@ SetWorkingDir, 	%A_ScriptDir%
 
 MsgBox, % c_MsgBoxIconInfo + c_MsgBoxYesNo, % v_AppName, % "This file will:"
 	. "`n`n"
-	. "1. Create necessary files and folders within user space (A_AppData)." 									. "`n"
-	. "2. Create necessary files and folders within ""Program Files"" (A_ProgramFiles)." 						. "`n"
-	. "3. Gather basic user information (A_UserName, A_ComputerName, First and Second name of user or company name)." 	. "`n"
-	. "4. Display to user report when finished." 														. "`n"
-	. "5. Log activities into text file located in the same directory."										. "`n
-	. "`n`n"
+	. "1. Create necessary files and folders within user space (AppData)." 										. "`n"
+	. "2. Create necessary files and folders within ""Program Files""."				 							. "`n"
+	. "3. Gather basic user information (logon user name, computer name, First and Second name of user or company name)." 	. "`n"
+	. "4. Display to user report when finished." 															. "`n"
+	. "This script requires Administrative rights in order to create folder within ""Program Files"" folder."			. "`n"
+	. "It logs activities into text file located in the same directory."												. "`n"
+	. "`n"
 	. "Do you want to proceed?"
 IfMsgBox, No
 	ExitApp, 0	;All is right, exiting
 
-; FileAppend, % TransConst, % A_ScriptDir . "\Languages\English.txt", UTF-8 
+FileDelete, % v_AppName . "_Log.txt"	;Delete any previous log file.
+if (!A_IsAdmin)
+	{
+		MsgBox, % c_MsgBoxIconInfo + c_MsgBoxYesNo, % v_AppName, % "Application wasn't run with Administrative privileges."
+			. "`n"
+			. "Do you agree to restart it with administrative right?"
+		IfMsgBox, Yes
+		{
+			try	;in order to catch exception
+			{
+				Run *RunAs "%A_ScriptFullPath%" /restart
+			}
+			ExitApp, 0	;All is right, exiting
+		}
+	}
+
+;1. Create necessary files and folders within user space (AppData)
 FileCreateDir, % A_AppData . "\Hotstrings"
 if (ErrorLevel)
 {
@@ -41,7 +58,7 @@ if (ErrorLevel)
 		. "was not created for some reason. Exiting."
 	ExitApp, 1	;A_AppData . "\Hotstrings" is not created
 }
-FileAppend, "Created or overwritten folder name:" . A_Space . A_AppData . "\Hotstrings" . "`n", % v_AppName . "_Log.txt"
+FileAppend, % A_YYYY . "-" . A_MM . "-" . A_DD . A_Space . A_Hour . ":" . A_Min . ":" . A_Sec . A_Space . "Created or overwritten folder name:" . A_Space . A_AppData . "\Hotstrings" . "`n", % v_AppName . "_Log.txt"
 FileCreateDir, % A_AppData . "\Hotstrings\Log"
 if (ErrorLevel)
 {
@@ -52,34 +69,8 @@ if (ErrorLevel)
 		. "was not created for some reason. Exiting."
 	ExitApp, 2	;A_AppData . "\Hotstrings\Log" is not created
 }
-FileAppend, "Created or overwritten folder name:" . A_Space . A_AppData . "\Hotstrings\Log" . "`n", % v_AppName . "_Log.txt"
+FileAppend, % A_YYYY . "-" . A_MM . "-" . A_DD . A_Space . A_Hour . ":" . A_Min . ":" . A_Sec . A_Space . "Created or overwritten folder name:" . A_Space . A_AppData . "\Hotstrings\Log" . "`n", % v_AppName . "_Log.txt"
 
-FileCreateDir, % A_ProgramFiles . ""
-
-FileCreateDir, % A_ScriptDir . "\Languages"	;tu jestem. Tu powinien powstac folder w Program Files
-if (ErrorLevel)
-{
-	MsgBox, % c_MsgBoxIconError, % v_AppName . ":" . A_Space . "error", % "The directory"
-		. "`n"
-		. A_ScriptDir . "\Languages"
-		. "`n"
-		. "was not created for some reason. Exiting."
-	ExitApp, 3	;A_ScriptDir . "\Languages" is not created
-}
-
-FileInstall, C:\Users\macie\Documents\GitHub\Hotstrings\Languages\English.txt,				% A_ScriptDir . "\Languages\English.txt",		% c_FI_Overwrite
-if (ErrorLevel)
-{
-	MsgBox, % c_MsgBoxIconError, % v_AppName . ":" . A_Space . "error", % "The file"
-		. "`n"
-		. A_AppData . "\Hotstrings\Languages\English.txt"
-		. "`n"
-		. "was not installed for some reason. Exiting."
-	ExitApp, 3	;A_AppData . "\Hotstrings\Languages\English.txt" is not created
-}
-
-FileInstall, hotstrings.ico, 														hotstrings.ico, 						% c_FI_Overwrite
-FileInstall, LICENSE_EULA.md, 													LICENSE_EULA.md,						% c_FI_Overwrite
 ; FileInstall, C:\Users\macie\AppData\Roaming\Hotstrings\Libraries\AbbreviationsEnglish.csv		, % A_AppData . "\Hotstring\Libraries\",	% c_FI_Overwrite	;1
 ; FileInstall, C:\Users\macie\AppData\Roaming\Hotstrings\Libraries\AutocorrectionHotstrings.csv	, % A_AppData . "\Hotstring\Libraries\",	% c_FI_Overwrite	;2	
 ; FileInstall, C:\Users\macie\AppData\Roaming\Hotstrings\Libraries\BoxDrawing.csv 			, % A_AppData . "\Hotstring\Libraries\",	% c_FI_Overwrite	;3
@@ -97,5 +88,45 @@ FileInstall, LICENSE_EULA.md, 													LICENSE_EULA.md,						% c_FI_Overwrit
 ; FileInstall, C:\Users\macie\AppData\Roaming\Hotstrings\Libraries\PhysicsHotstrings.csv 		, % A_AppData . "\Hotstring\Libraries\",	% c_FI_Overwrite	;15
 ; FileInstall, C:\Users\macie\AppData\Roaming\Hotstrings\Libraries\punctuation.csv 			, % A_AppData . "\Hotstring\Libraries\",	% c_FI_Overwrite	;16
 ; FileInstall, C:\Users\macie\AppData\Roaming\Hotstrings\Libraries\TimeHotstrings.csv 			, % A_AppData . "\Hotstring\Libraries\",	% c_FI_Overwrite	;17
+
+; 2. Create necessary files and folders within ""Program Files"".
+FileCreateDir, % A_ProgramFiles . "\Hotstrings"
+if (ErrorLevel)
+{
+	MsgBox, % c_MsgBoxIconError, % v_AppName . ":" . A_Space . "error", % "The directory"
+		. "`n"
+		. A_ProgramFiles . "\Hotstrings"
+		. "`n"
+		. "was not created for some reason. Exiting."
+	ExitApp, 3	;A_ProgramFiles . "\Hotstrings" is not created
+}
+FileAppend, % A_YYYY . "-" . A_MM . "-" . A_DD . A_Space . A_Hour . ":" . A_Min . ":" . A_Sec . A_Space .  "Created or overwritten folder name:" . A_Space . A_ProgramFiles . "\Hotstrings" . "`n", % v_AppName . "_Log.txt"
+
+FileCreateDir, % A_ProgramFiles . "\Hotstrings\Languages"
+if (ErrorLevel)
+{
+	MsgBox, % c_MsgBoxIconError, % v_AppName . ":" . A_Space . "error", % "The directory"
+		. "`n"
+		. A_ProgramFiles . "\Hotstrings\Languages"
+		. "`n"
+		. "was not created for some reason. Exiting."
+	ExitApp, 4	;A_ProgramFiles . "\Hotstrings\Languages"
+}
+FileAppend, % A_YYYY . "-" . A_MM . "-" . A_DD . A_Space . A_Hour . ":" . A_Min . ":" . A_Sec . A_Space .  "Created or overwritten folder name:" . A_Space . A_ProgramFiles . "\Hotstrings\Languages" . "`n", % v_AppName . "_Log.txt"
+
+FileInstall, C:\Users\macie\Documents\GitHub\Hotstrings\Languages\English.txt,				% A_ScriptDir . "\Languages\English.txt",		% c_FI_Overwrite
+if (ErrorLevel)
+{
+	MsgBox, % c_MsgBoxIconError, % v_AppName . ":" . A_Space . "error", % "The file"
+		. "`n"
+		. A_AppData . "\Hotstrings\Languages\English.txt"
+		. "`n"
+		. "was not installed for some reason. Exiting."
+	ExitApp, 5	;A_AppData . "\Hotstrings\Languages\English.txt" is not created
+}
+FileAppend, % A_YYYY . "-" . A_MM . "-" . A_DD . A_Space . A_Hour . ":" . A_Min . ":" . A_Sec . A_Space .  "Created or overwritten folder name:" . A_Space . A_AppData . "\Hotstrings\Languages\English.txt" . "`n", % v_AppName . "_Log.txt"
+
+; FileInstall, hotstrings.ico, 														hotstrings.ico, 						% c_FI_Overwrite
+FileInstall, LICENSE_EULA.md, 													LICENSE_EULA.md,						% c_FI_Overwrite
 
 FileInstall, C:\Users\macie\AppData\Roaming\Hotstrings\Config.ini,						% A_AppData . "\Hotstrings\Config.ini",		% c_FI_Overwrite
