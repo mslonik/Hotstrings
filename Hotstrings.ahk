@@ -41,9 +41,9 @@ global AppVersion				:= "3.6.9"
 ;@Ahk2Exe-SetProductName Hotstrings
 ;@Ahk2Exe-SetProductVersion %U_vAppVersion% 
 ;@Ahk2Exe-SetVersion %U_vAppVersion% 
-FileInstall, hotstrings.ico, 	% AppIcon, 	0
+FileInstall, hotstrings.ico, 	% AppIcon, 		0
 ;#f/* free version only beginning
-; FileInstall, LICENSE_MIT, 	LICENSE_MIT,	0
+; FileInstall, LICENSE_MIT, 	LICENSE_MIT,		0
 ;#f*/ free version only end
 ;#c/* commercial only beginning
 FileInstall, LICENSE_EULA.md, LICENSE_EULA.md,	0
