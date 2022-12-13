@@ -2457,7 +2457,7 @@ F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
 	static	f_ExpEndChar := false	;this flag is set if in next run of this function is expected that EndChar will be pressed by user
-	local	WhereToCut := 0, shortened := "",  f_LastTip := false, f_EndCharDetected := false, index := 0, value := ""
+	local	WhereToCut := 0, InputLength := 0,  f_LastTip := false, f_EndCharDetected := false, index := 0, value := ""
 
 	Critical, On
 	; OutputDebug, % A_ThisFunc . A_Space . "Char:" . Char . "`n"
@@ -2471,7 +2471,7 @@ F_OneCharPressed(ih, Char)
 	if (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))
 		return
 
-	; OutputDebug, % "1)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
+	OutputDebug, % "1)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
 	if (InStr(HotstringEndChars, Char))
 		f_EndCharDetected := true
 	else
@@ -2487,7 +2487,7 @@ F_OneCharPressed(ih, Char)
 	if (v_Qinput)
 		v_Qinput .= Char
 
-	; OutputDebug, % "2)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "v_QI:" . v_Qinput . "`n"
+	OutputDebug, % "2)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "f_EE:" . f_ExpEndChar . A_Space . "v_QI:" . v_Qinput . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -2502,25 +2502,40 @@ F_OneCharPressed(ih, Char)
 			; OutputDebug, % "B1 a_Tips.Count():" . a_Tips.Count() . "`n"
 			f_LastTip := true
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
+			if (v_Qinput)
+				InputLength := StrLen(v_Qinput)
+			else
+				InputLength := StrLen(v_InputString)
+			OutputDebug, % "IL:" . A_Space . InputLength . "`n"
 			
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD
-			for index, value in a_TipsOpt	;check all remaining a_TipsOpt if any do not contain "*" option (immediate execute) and then set f_ExpEndChar for next run of this function
-				if (!InStr(a_TipsOpt[index], "*"))
+
+			for index, value in a_Tips
+				if (StrLen(a_Tips[index]) = InputLength) and (!InStr(a_TipsOpt[index], "*"))	;check all remaining a_TipsOpt if any do not contain "*" option (immediate execute) and then set f_ExpEndChar for next run of this function
 				{
 					f_ExpEndChar := true
 					break
 				}
 				else
 					f_ExpEndChar := false
-			; OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_ExpEndChar:" . f_ExpEndChar . "`n"
+
+			; for index, value in a_TipsOpt	;check all remaining a_TipsOpt if any do not contain "*" option (immediate execute) and then set f_ExpEndChar for next run of this function
+			; 	if (!InStr(a_TipsOpt[index], "*"))
+			; 	{
+			; 		f_ExpEndChar := true
+			; 		break
+			; 	}
+			; 	else
+			; 		f_ExpEndChar := false
+			OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_EE:" . f_ExpEndChar . "`n"
 			Critical, Off
 			return
 		}
 	}
 	if (!f_LastTip) and (f_EndCharDetected) and (!f_ExpEndChar)
 		v_InputString := ""
-	; OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . "|" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
+	OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . "|" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "f_EE:" . f_ExpEndChar . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
@@ -8546,14 +8561,19 @@ F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 		; OutputDebug, % "Here I am" . "`n"
 		if (!f_FirstPart) and (InStrLen > 1)
 		{
-			if (f_PBLIsAlphanum)
-				F_PTTTQ(v_Qinput := LastChar)
-			else
-			{
-				; OutputDebug, % "Non-alpha" . A_Space . "PreviousButLast:" . PreviousButLast . "|" . A_Space . "string:" . string . "|" . A_Space . "v_Qinput:" . v_Qinput . "`n"
+			if (!f_PBLIsAlphanum)
 				v_InputString := LastChar
-				F_PTTTQ(v_Qinput := LastChar)
-			}
+			F_PTTTQ(v_Qinput := LastChar)
+			; OutputDebug, % "Non-alpha" . A_Space . "PreviousButLast:" . PreviousButLast . "|" . A_Space . "string:" . string . "|" . A_Space . "v_Qinput:" . v_Qinput . "`n"
+
+			; if (f_PBLIsAlphanum)
+			; 	F_PTTTQ(v_Qinput := LastChar)
+			; else
+			; {
+			; 	; OutputDebug, % "Non-alpha" . A_Space . "PreviousButLast:" . PreviousButLast . "|" . A_Space . "string:" . string . "|" . A_Space . "v_Qinput:" . v_Qinput . "`n"
+			; 	v_InputString := LastChar
+			; 	F_PTTTQ(v_Qinput := LastChar)
+			; }
 		}
 	}
 	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
@@ -8623,7 +8643,6 @@ F_PTTTQ(string) ;Function_ Prepare Triggerstring Tips Tables Question mark (rela
 	{
 		string := SubStr(string, 2)	;all but first
 		F_PTTTQ(v_Qinput := string)	;recursive call
-		; F_PTTTQ(string)	;recursive call
 	}
 	if (a_Tips.Count() = 0) and (Qlength = 1)
 		v_Qinput := ""
