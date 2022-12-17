@@ -2456,8 +2456,8 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
-	static	f_ExpEndChar := false	;this flag is set if in next run of this function is expected that EndChar will be pressed by user
-	local	WhereToCut := 0, InputLength := 0,  f_LastTip := false, f_EndCharDetected := false, index := 0, value := ""
+	static	f_ExpEndChar := false,  f_LastTip := false	;this flag is set if in next run of this function is expected that EndChar will be pressed by user
+	local	InputLength := 0, f_EndCharDetected := false, index := 0, value := "", BeforeLast := ""
 
 	Critical, On
 	; OutputDebug, % A_ThisFunc . A_Space . "Char:" . Char . "`n"
@@ -2472,10 +2472,6 @@ F_OneCharPressed(ih, Char)
 		return
 
 	OutputDebug, % "1)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
-	if (InStr(HotstringEndChars, Char))
-		f_EndCharDetected := true
-	else
-		f_EndCharDetected := false
 	
 	if (v_InputString = "")
 	{
@@ -2487,7 +2483,30 @@ F_OneCharPressed(ih, Char)
 	if (v_Qinput)
 		v_Qinput .= Char
 
-	OutputDebug, % "2)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "f_EE:" . f_ExpEndChar . A_Space . "v_QI:" . v_Qinput . "`n"
+	InputLength := StrLen(v_InputString)
+	if (InputLength > 1)
+	{
+		BeforeLast := SubStr(SubStr(v_InputString, -1), 1, 1)	;two last chars and then first char
+		if (InStr(HotstringEndChars, BeforeLast))
+			f_EndCharDetected := true
+		else
+			f_EndCharDetected := false
+		OutputDebug, % "BeforeLast:" . BeforeLast . "|" A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
+	}
+
+	if (!f_LastTip) and (f_EndCharDetected)
+	; if (!f_LastTip) and (f_EndCharDetected) and (!f_ExpEndChar)
+	{
+		v_InputString := ""
+		return
+	}
+	if (f_LastTip) and (f_EndCharDetected)
+	{
+		f_LastTip 	:= false
+	,	v_InputString 	:= SubStr(v_InputString, 0)	;Last char only
+	}
+
+	OutputDebug, % "2)v_IS:" . v_InputString . "|" . A_Space . "IL:" . InputLength . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "f_EE:" . f_ExpEndChar . A_Space . "v_QI:" . v_Qinput . "|" . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -2511,31 +2530,21 @@ F_OneCharPressed(ih, Char)
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD
 
-			for index, value in a_Tips
-				if (StrLen(a_Tips[index]) = InputLength) and (!InStr(a_TipsOpt[index], "*"))	;check all remaining a_TipsOpt if any do not contain "*" option (immediate execute) and then set f_ExpEndChar for next run of this function
-				{
-					f_ExpEndChar := true
-					break
-				}
-				else
-					f_ExpEndChar := false
-
-			; for index, value in a_TipsOpt	;check all remaining a_TipsOpt if any do not contain "*" option (immediate execute) and then set f_ExpEndChar for next run of this function
-			; 	if (!InStr(a_TipsOpt[index], "*"))
+			; for index, value in a_Tips
+			; 	if (StrLen(a_Tips[index]) = InputLength) and (!InStr(a_TipsOpt[index], "*"))	;check all remaining a_TipsOpt if any do not contain "*" option (immediate execute) and then set f_ExpEndChar for next run of this function
 			; 	{
 			; 		f_ExpEndChar := true
 			; 		break
 			; 	}
 			; 	else
 			; 		f_ExpEndChar := false
+
 			OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_EE:" . f_ExpEndChar . "`n"
 			Critical, Off
 			return
 		}
 	}
-	if (!f_LastTip) and (f_EndCharDetected) and (!f_ExpEndChar)
-		v_InputString := ""
-	OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . "|" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "f_EE:" . f_ExpEndChar . "`n"
+	OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . "|" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "f_EE:" . f_ExpEndChar . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
@@ -2546,7 +2555,7 @@ F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
 ,	v_InputH.OnChar 	:= Func("F_OneCharPressed")
 ,	v_InputH.OnKeyUp 	:= Func("F_BackspaceProcessing")
 ,	v_InputH.OnEnd		:= Func("F_InputHookOnEnd")
-	v_InputH.KeyOpt("{Backspace}", "N")
+	v_InputH.KeyOpt("{Backspace}", "N")	;Backspace is not Char
 	v_InputH.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2581,7 +2590,7 @@ F_BackspaceProcessing(ih, VK, SC)
 	else
 	{
 		v_InputString := SubStr(v_InputString, 1, -1)	;whole string except last character
-		; OutputDebug, % "v_InputString after BS:" . A_Tab . v_InputString . "IsCritical:" . A_Tab . A_IsCritical . "`n"
+		OutputDebug, % "v_IS BS:" . v_InputString . "|" . A_Space . "IsCritical:" . A_Space . A_IsCritical . "`n"
 		if (ini_TTTtEn) and (v_InputString)
 		{
 			F_PTTT(v_InputString)
@@ -14026,7 +14035,7 @@ F_GuiHS3_DetermineConstraints()
 ,	HS3MinHeight		:= LeftColumnH + c_ymarg
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiAbout_CreateObjects()	;tu jestem
+F_GuiAbout_CreateObjects()
 {
 	global ;assume-global mode
 				; . "User Name:" . A_Space . A_UserName

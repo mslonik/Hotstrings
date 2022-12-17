@@ -182,11 +182,11 @@ FileAppend, % A_YYYY . "-" . A_MM . "-" . A_DD . A_Space . A_Hour . ":" . A_Min 
 
 ; 3. Gather basic user information (logon user name, computer name, First and Second name of user or company name).
 Run, % "mailto:service@hotstrings.com?subject=Request for Hotstrings trial version&body="
-. "Logon user name:" 	. c_ASCII_HorTab . A_UserName 	. c_ASCII_NewLine
-. "Computer name:" 		. c_ASCII_HorTab . A_ComputerName 	. c_ASCII_NewLine
-. "First and second name of license owner or company name (please fill in manually):" . c_ASCII_Space .  c_ASCII_NewLine . c_ASCII_NewLine
-. "This e-mail will be processed as soon as possible, within ~1 working day (24 hours). Nevertheless please be patient." . c_ASCII_NewLine . c_ASCII_NewLine
-. "The proud Hotstrings team and Maciej Slojewski", , UseErrorLevel
+	. "Logon user name:" 	. c_ASCII_HorTab . A_UserName 	. c_ASCII_NewLine
+	. "Computer name:" 		. c_ASCII_HorTab . A_ComputerName 	. c_ASCII_NewLine
+	. "First and second name of license owner or company name (please fill in manually):" . c_ASCII_Space .  c_ASCII_NewLine . c_ASCII_NewLine
+	. "This e-mail will be processed as soon as possible, within ~1 working day (24 hours). Nevertheless please be patient." . c_ASCII_NewLine . c_ASCII_NewLine
+	. "The proud Hotstrings team and Maciej Slojewski", , UseErrorLevel
 if (ErrorLevel = "ERROR")
 {
 	v_EmailMsgBox := true
