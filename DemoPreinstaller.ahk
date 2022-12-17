@@ -22,7 +22,25 @@ SetWorkingDir, 	%A_ScriptDir%
 ,	c_ASCII_HorTab 	:= "`%09"
 ,	c_ASCII_Space		:= "`%20"
 ,	v_EmailMsgBox		:= false
-/*
+
+; - - - - - - - - - - - - - - - - - - - - - - - E X E  CONVERSION / INSTALLATOR S E C T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+global AppVersion				:= "0.9.9"
+;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
+;@Ahk2Exe-SetMainIcon imageres_5303.ico
+;@Ahk2Exe-SetCompanyName © by Maciej Słojewski http://mslonik.pl
+;@Ahk2Exe-SetCopyright License: EULA
+;@Ahk2Exe-SetDescription Preinstaller for Hotstrings application.
+;@Ahk2Exe-SetFileVersion %U_vAppVersion% 
+;@Ahk2Exe-SetInternalName Hotstrings Preinstaller
+;@Ahk2Exe-SetLanguage 0x0409
+;@Ahk2Exe-SetLegalTrademarks Personal license: Maciej Słojewski
+;@Ahk2Exe-SetName Hotstrings Preinstaller
+;@Ahk2Exe-SetOrigFilename Commercial release
+;@Ahk2Exe-SetProductName Hotstrings Preinstaller
+;@Ahk2Exe-SetProductVersion %U_vAppVersion% 
+;@Ahk2Exe-SetVersion %U_vAppVersion% 
+
+
 MsgBox, % c_MsgBoxIconInfo + c_MsgBoxYesNo, % v_AppName, % "This file will:"
 	. "`n`n"
 	. "1. Create necessary files and folders within user space (AppData)." 										. "`n`n"
@@ -178,7 +196,6 @@ v_Temp := A_ProgramFiles . "\Hotstrings\Config.ini"
 FileInstall, C:\Users\macie\AppData\Roaming\Hotstrings\Config.ini,						% v_Temp,	% c_FI_Overwrite
 F_CheckError("F", v_Temp, 4)
 FileAppend, % A_YYYY . "-" . A_MM . "-" . A_DD . A_Space . A_Hour . ":" . A_Min . ":" . A_Sec . A_Space .  "Created or overwritten file name:" . A_Space . v_Temp . "`n", % v_AppName . "_Log.txt"
-*/
 
 ; 3. Gather basic user information (logon user name, computer name, First and Second name of user or company name).
 Run, % "mailto:service@hotstrings.com?subject=Request for Hotstrings trial version&body="
@@ -198,8 +215,19 @@ if (ErrorLevel = "ERROR")
 		. "First and second name of license owner or company name (please fill in manually):" . A_Space . "`n`n"
 		. "This e-mail will be processed as soon as possible, within ~1 working day (24 hours). Nevertheless please be patient."
 }
+FileAppend, % A_YYYY . "-" . A_MM . "-" . A_DD . A_Space . A_Hour . ":" . A_Min . ":" . A_Sec . A_Space . "Logon user name:" . A_Space . A_UserName . "`n"
+		.   A_YYYY . "-" . A_MM . "-" . A_DD . A_Space . A_Hour . ":" . A_Min . ":" . A_Sec . A_Space . "Computer name:" . A_Space . A_ComputerName
+		, % v_AppName . "_Log.txt"
 
 ; 4. Display report.
+MsgBox, % c_MsgBoxIconInfo, % v_AppName, % "Mission accomplished!"
+	. "`n`n"
+	. "1. Created necessary files and folders within user space (AppData): ☑"	. "`n`n"
+	. "2. Created necessary files and folders within ""Program Files"": ☑"	. "`n`n"
+	. "3. Gather basic user information and composed e-mail: ☑" 			. "`n`n"
+	. "That's it! Please send the e-mail immediately."					. "`n`n"
+	. "You can read log of activities here:"							. "`n"
+	. A_ScriptDir . "\" . v_AppName . "_Log.txt"
 
 ; - - - - - - - S E C T I O N  O F  F U N C T I O N S - - - - - - - - - - - - - - - - - - - - - 
 F_CheckError(FileOrDirectory, path, ErrorNo)
