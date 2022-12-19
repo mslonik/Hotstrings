@@ -283,7 +283,7 @@ Menu, SubmenuEndChars, Add, % TransA["Tab"], 												F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 											F_ToggleEndChars
 F_ToggleEndChars()
 Func_GuiEventsMenu		:= func("F_GuiEvents")
-Menu, Submenu1,		Add, % TransA["Events: signaling"],									% Func_GuiEventsMenu
+Menu, Submenu1,		Add, % TransA["Events: signalling"],									% Func_GuiEventsMenu
 Func_GuiEventsMenu.Call(true)
 Func_GuiStylingMenu		:= func("F_EventsStyling")
 Menu, Submenu1,		Add, % TransA["Events: styling"],										% Func_GuiStylingMenu
@@ -1468,7 +1468,7 @@ F_Tt_ULH()
 {
 	global	;assume-global mode of operation
 	local	TempText := TransA["Undid the last hotstring"]
-,			OutputVarTemp := 0, OutputVarTempX := 0, OutputVarTempY := 0, OutputVarTempW := 0, OutputVarTempH := 0
+		,	OutputVarTemp := 0, OutputVarTempX := 0, OutputVarTempY := 0, OutputVarTempW := 0, OutputVarTempH := 0
 
 	Gui, Tt_ULH: New, -Caption +ToolWindow HwndTt_ULHHwnd	+AlwaysOnTop ;Tt_ULH = Tooltip_Undid the Last Hotstring
 	Gui, Tt_ULH: Margin, 0, 0
@@ -2495,7 +2495,6 @@ F_OneCharPressed(ih, Char)
 	}
 
 	if (!f_LastTip) and (f_EndCharDetected)
-	; if (!f_LastTip) and (f_EndCharDetected) and (!f_ExpEndChar)
 	{
 		v_InputString := ""
 		return
@@ -2529,15 +2528,6 @@ F_OneCharPressed(ih, Char)
 			
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD
-
-			; for index, value in a_Tips
-			; 	if (StrLen(a_Tips[index]) = InputLength) and (!InStr(a_TipsOpt[index], "*"))	;check all remaining a_TipsOpt if any do not contain "*" option (immediate execute) and then set f_ExpEndChar for next run of this function
-			; 	{
-			; 		f_ExpEndChar := true
-			; 		break
-			; 	}
-			; 	else
-			; 		f_ExpEndChar := false
 
 			OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_EE:" . f_ExpEndChar . "`n"
 			Critical, Off
@@ -3725,10 +3715,10 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Margin,	% c_xmarg, % c_ymarg
 	Gui,	GuiEvents: Color,	% c_WindowColor, % c_ControlColor
 	Gui,	GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, GuiEvents: Add,	Tab3, vEvTab3 gF_EvTab3,						% TransA["Basic hotstring is triggered"] . "||" 
+	Gui, GuiEvents: Add,	Tab3, vEvTab3 gF_EvTab3,						% TransA["Basic hotstring is triggered"] . "|" 
 																. TransA["Menu hotstring is triggered"] . "|" 
 																. TransA["Undid the last hotstring"] . "|" 
-																. TransA["Triggerstring tips"] . "|" 
+																. TransA["Triggerstring tips"] . "||" 
 ;#c/* commercial only beginning
 																. TransA["Active triggerstring tips"] . "|" 
 ;#c*/ commercial only end	
@@ -6594,12 +6584,12 @@ F_EventsStyling_Apply(WhichTab)
 {
 	global ;assume-global mode of operation
 	local	DynVarRef1 := "", DynVarRef2 := ""		;dynamic variable: https://www.autohotkey.com/docs/Language.htm#dynamic-variables
-,			TTS_TTBgrColCus := "", TTS_TTTyFaceColCus := "" 
-,			HMS_TTBgrColCus := "", HMS_TTTyFaceColCus := ""  
-, 			ATS_TTBgrColCus := "", ATS_TTTyFaceColCus := ""  
-, 			HTS_TTBgrColCus := "", HTS_TTTyFaceColCus := ""  
-, 			UHS_TTBgrColCus := "", UHS_TTTyFaceColCus := ""  
-,			OutputVarTemp   := ""
+		,	TTS_TTBgrColCus := "", TTS_TTTyFaceColCus := "" 
+		,	HMS_TTBgrColCus := "", HMS_TTTyFaceColCus := ""  
+		, 	ATS_TTBgrColCus := "", ATS_TTTyFaceColCus := ""  
+		, 	HTS_TTBgrColCus := "", HTS_TTTyFaceColCus := ""  
+		, 	UHS_TTBgrColCus := "", UHS_TTTyFaceColCus := ""  
+		,	OutputVarTemp   := ""
 
 	DynVarRef1 := WhichTab . "S_DDL1"
 	if ( %DynVarRef1% = "custom")
@@ -6698,8 +6688,14 @@ F_EventsStyling_B6(Parameter*)	;button: Apply
 ;#c/* commercial only beginning
 		Case % TransA["Active triggerstring tips styling"]:		F_EventsStyling_Apply("AT")
 ;#c*/ commercial only end		
-		Case % TransA["Tooltip: ""Hotstring was triggered"""]:		F_EventsStyling_Apply("HT")
-		Case % TransA["Tooltip: ""Undid the last hotstring"""]:	F_EventsStyling_Apply("UH")
+		Case % TransA["Tooltip: ""Hotstring was triggered"""]:		
+			F_EventsStyling_Apply("HT")
+			Gui, Tt_HWT: Destroy
+			F_Tt_HWT()	;prepare Gui → Tt_HWT = Tooltip_Hostring Was Triggered
+		Case % TransA["Tooltip: ""Undid the last hotstring"""]:	
+			F_EventsStyling_Apply("UH")
+			Gui, Tt_ULH: Destroy
+			F_Tt_ULH()	;prepare Gui → Tooltip (ULH = Undid the Last Hotstring)
 	}
 	F_EventsStylingTab3(true)	;something was changed
 }
@@ -6802,8 +6798,14 @@ F_EventsStyling_B7()	;button: Close
 ;#c/* commercial only beginning		
 		Case % TransA["Active triggerstring tips styling"]:		F_EventsStyling_Close("AT")
 ;#c*/ commercial only end		
-		Case % TransA["Tooltip: ""Hotstring was triggered"""]:		F_EventsStyling_Close("HT")
-		Case % TransA["Tooltip: ""Undid the last hotstring"""]:	F_EventsStyling_Close("UH")
+		Case % TransA["Tooltip: ""Hotstring was triggered"""]:		
+			F_EventsStyling_Close("HT")
+			Gui, Tt_HWT: Destroy
+			F_Tt_HWT()	;prepare Gui → Tt_HWT = Tooltip_Hostring Was Triggered
+		Case % TransA["Tooltip: ""Undid the last hotstring"""]:	
+			F_EventsStyling_Close("UH")
+			Gui, Tt_ULH: Destroy
+			F_Tt_ULH()	;prepare Gui → Tooltip (ULH = Undid the Last Hotstring)
  	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7184,9 +7186,9 @@ F_GS_LV_Dynamic(TabId)
 F_EventsStyling(OneTime*)
 {
 	global	;assume-global mode
-	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
-		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
-		,NewWinPosX := 0, NewWinPosY := 0
+	local 	Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		,	Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		,	NewWinPosX := 0, NewWinPosY := 0
 	
 	if (OneTime[3])
 		Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
@@ -8479,7 +8481,7 @@ F_EventSigOrdHotstring()
 			else
 			{
 				MouseGetPos, v_MouseX, v_MouseY
-				Gui, Tt_HWT: Show, % "x" v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 . A_Space . "NoActivate" 	;Tooltip _ Hotstring Was Triggered
+				Gui, Tt_HWT: Show, % "x" . v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 . A_Space . "NoActivate" 	;Tooltip _ Hotstring Was Triggered
 				if (ini_OHTD > 0)
 					SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
 			}
@@ -8487,7 +8489,7 @@ F_EventSigOrdHotstring()
 		if (ini_OHTP = 2)
 		{
 			MouseGetPos, v_MouseX, v_MouseY
-			Gui, Tt_HWT: Show, % "x" v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 . A_Space . "NoActivate" 	;Tooltip _ Hotstring Was Triggered
+			Gui, Tt_HWT: Show, % "x" . v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 . A_Space . "NoActivate" 	;Tooltip _ Hotstring Was Triggered
 			if (ini_OHTD > 0)
 				SetTimer, TurnOff_OHE, % "-" . ini_OHTD, 40 ;Priority = 40 to avoid conflicts with other threads 
 		}
@@ -12564,7 +12566,7 @@ Show Introduction window after application is restarted?		= Show Introduction wi
 Show library header										= Show library header
 show main application GUI								= show main application GUI
 Show Sandbox											= Show Sandbox
-Events: signaling										= Events: signaling
+Events: signalling										= Events: signalling
 Silent mode											= Silent mode
 silver												= silver
 Size of font											= Size of font

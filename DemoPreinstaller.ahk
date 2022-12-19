@@ -55,6 +55,7 @@ IfMsgBox, No
 	ExitApp, 0	;All is right, exiting
 
 FileDelete, % v_AppName . "_Log.txt"	;Delete any previous log file.
+/*
 if (!A_IsAdmin)
 	{
 		MsgBox, % c_MsgBoxIconInfo + c_MsgBoxYesNo, % v_AppName, % "Application wasn't run with Administrative privileges."
@@ -196,7 +197,7 @@ v_Temp := A_ProgramFiles . "\Hotstrings\Config.ini"
 FileInstall, C:\Users\macie\AppData\Roaming\Hotstrings\Config.ini,						% v_Temp,	% c_FI_Overwrite
 F_CheckError("F", v_Temp, 4)
 FileAppend, % A_YYYY . "-" . A_MM . "-" . A_DD . A_Space . A_Hour . ":" . A_Min . ":" . A_Sec . A_Space .  "Created or overwritten file name:" . A_Space . v_Temp . "`n", % v_AppName . "_Log.txt"
-
+*/
 ; 3. Gather basic user information (logon user name, computer name, First and Second name of user or company name).
 Run, % "mailto:service@hotstrings.com?subject=Request for Hotstrings trial version&body="
 	. "Logon user name:" 	. c_ASCII_HorTab . A_UserName 	. c_ASCII_NewLine
@@ -224,7 +225,12 @@ MsgBox, % c_MsgBoxIconInfo, % v_AppName, % "Mission accomplished!"
 	. "`n`n"
 	. "1. Created necessary files and folders within user space (AppData): ☑"	. "`n`n"
 	. "2. Created necessary files and folders within ""Program Files"": ☑"	. "`n`n"
-	. "3. Gather basic user information and composed e-mail: ☑" 			. "`n`n"
+	. "3. Gather basic user information and compose e-mail: ?" 				. "`n`n"
+	. "Unfortunately this application is not able to check if e-mail was composed correctly. If not then please compose it manually. Press now Ctrl + C, open your e-mail application and press Ctrl + V." . "`n"
+		. "To:" . A_Tab . "service@hotstrings.com" 	. "`n"
+		. "Logon user name:" . A_Tab . A_UserName 	. "`n"
+		. "Computer name:" 	. A_Tab . A_ComputerName . "`n"
+		. "First and second name of license owner or company name (please fill in manually):" . A_Space . "`n`n"
 	. "That's it! Please send the e-mail immediately."					. "`n`n"
 	. "You can read log of activities here:"							. "`n"
 	. A_ScriptDir . "\" . v_AppName . "_Log.txt"
