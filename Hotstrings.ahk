@@ -2460,8 +2460,13 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
-	static	f_ExpEndChar := false,  f_LastTip := false	;this flag is set if in next run of this function is expected that EndChar will be pressed by user
-	local	InputLength := 0, f_EndCharDetected := false, index := 0, value := "", BeforeLast := ""
+	static	f_ExpEndChar 	:= false	;when triggerstring contains EndChars, e.g. two words separated with space
+		,	f_LastTip 	:= false	;this flag is set if in next run of this function is expected that EndChar will be pressed by user
+	local	InputLength 	:= 0		;input length of v_InputString global variable
+		,	f_EndCharDetected := false	;flag set when EndChar is detected
+		,	index := 0, value := ""	;usual set of variables applicable for "for" function
+		, 	BeforeLast 	:= ""	;not last, but one before last character
+		,	LastChar		:= ""	;last character
 
 	Critical, On
 	; OutputDebug, % A_ThisFunc . A_Space . "Char:" . Char . "`n"
@@ -2503,7 +2508,7 @@ F_OneCharPressed(ih, Char)
 		v_InputString := ""
 		return
 	}
-	if (f_LastTip) and (f_EndCharDetected)
+	if (f_LastTip) and (f_EndCharDetected) and (!f_ExpEndChar)
 	{
 		f_LastTip 	:= false
 	,	v_InputString 	:= SubStr(v_InputString, 0)	;Last char only
@@ -2525,9 +2530,21 @@ F_OneCharPressed(ih, Char)
 			f_LastTip := true
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			if (v_Qinput)
+			{
 				InputLength := StrLen(v_Qinput)
+				if (InStr(HotstringEndChars, SubStr(v_Qinput, 0)))	;if last char is EndChar and existed triggerstring tip, then in next iteration v_InputString should not be trimmed or erased, so f_ExpEndChar is set
+					f_ExpEndChar := true
+				else
+					f_ExpEndChar := false
+			}
 			else
-				InputLength := StrLen(v_InputString)
+			{
+				InputLength 	:= StrLen(v_InputString)
+				if (InStr(HotstringEndChars, SubStr(v_InputString, 0)))	;if last char is EndChar and existed triggerstring tip, then in next iteration v_InputString should not be trimmed or erased, so f_ExpEndChar is set
+					f_ExpEndChar := true
+				else
+					f_ExpEndChar := false
+			}
 			OutputDebug, % "IL:" . A_Space . InputLength . "`n"
 			
 			if (ini_TTTD > 0)
@@ -2910,20 +2927,6 @@ F_GuiAboutLink2()
 F_TrayExit()
 {
 	ExitApp, 2	;2 = by Tray
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TrayEnableHotkeys()
-{
-	global	;assume-global mode: v_InputH
-
-	if (!v_InputH.InProgress)
-	{
-		v_InputH.Start()
-		Hotstring("Reset")
-		v_InputString := ""
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now ACTIVE."]
-			. "`n`n" . TransA["It means triggerstring tips state is restored and hotstring definitions will be triggered as usual."]
-	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TraySuspendHotkeys(parameter*)
