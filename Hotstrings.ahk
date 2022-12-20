@@ -861,7 +861,7 @@ return
 		F_StaticMenu_Keyboard()
 		return
 	~Esc::	;tilde in order to run function TT_C4GuiEscape
-		GuiControl,, % IdTT_C4_LB4, |
+		GuiControl,, % IdTT_C4_LB4, ¦
 		;OutputDebug, % "v_InputString:" . A_Tab . v_InputString . A_Tab . "v_EndChar:" . A_Tab . v_EndChar
 		v_InputString 			:= ""	
 		return
@@ -1640,9 +1640,9 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 	Switch WhichLB
 	{
 		Case "MTrig":
-			GuiControl,, % IdTT_C4_LB1, |
-			GuiControl,, % IdTT_C4_LB2, |
-			GuiControl,, % IdTT_C4_LB3, |
+			GuiControl,, % IdTT_C4_LB1, ¦
+			GuiControl,, % IdTT_C4_LB2, ¦
+			GuiControl,, % IdTT_C4_LB3, ¦
 			; OutputDebug, % "v_InputStringOutput:" . A_Tab . v_InputString . A_Tab . "Temp1:" . A_Tab . Temp1 . A_Tab . "A_IsCritical:" . A_Tab . A_IsCritical . "`n"
 			F_BackFeed(Temp1)
 			v_InputString := 0
@@ -1652,7 +1652,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 				Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
 				Case "CLI":	F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
 			}
-			GuiControl,, % IdTT_C4_LB4, |
+			GuiControl,, % IdTT_C4_LB4, ¦
 			if (ini_MHSEn)
 				SoundBeep, % ini_MHSF, % ini_MHSD	
 			if (InStr(A_ThisHotkey, "?"))
@@ -1854,7 +1854,8 @@ F_HMenuCLI_Keyboard()
 	}
 	v_UndoHotstring 	:= Temp1
 ,	ReplacementString 	:= F_ReplaceAHKconstants(Temp1)
-,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options) ; 	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString) ;This line is unnecessary as clipboard do not process escaped characters.
+,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options) ; 	
+,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
 	if (ini_MHMP = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
@@ -2384,15 +2385,15 @@ F_WhereDisplayMenu(ini_TTTP)
 F_TrigTipsSecondColumn(a_array1, a_array2)
 {
 	local
-	key := 0, value := "", ThisValue := "|"
+	key := 0, value := "", ThisValue := "¦"
 	for key, value in a_array1
 	{
 		if (a_array2[key] = "En") and (InStr(value, "*"))
-			ThisValue .= "✓" . "|"	
+			ThisValue .= "✓" . "¦"	
 		if (a_array2[key] = "En") and (!InStr(value, "*"))						
-			ThisValue .= "↓" . "|"	
+			ThisValue .= "↓" . "¦"	
 		if (a_array2[key] = "Dis")
-			ThisValue .= "╳" . "|"	
+			ThisValue .= "╳" . "¦"	
 	}
 	return ThisValue
 }
@@ -2400,10 +2401,10 @@ F_TrigTipsSecondColumn(a_array1, a_array2)
 F_ConvertArrayToString(a_array)
 {
 	local
-	key := 0, value := "", ThisValue := "|"
+	key := 0, value := "", ThisValue := "¦"
 
 	for key, value in a_array
-		ThisValue .= value . "|"
+		ThisValue .= value . "¦"
 	return ThisValue
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3093,9 +3094,9 @@ F_DestroyTriggerstringTips(ini_TTCn)
 		Case 2: Gui, TT_C2: Destroy
 		Case 3: Gui, TT_C3: Destroy
 		Case 4:
-			GuiControl,, % IdTT_C4_LB1, |
-			GuiControl,, % IdTT_C4_LB2, |
-			GuiControl,, % IdTT_C4_LB3, |
+			GuiControl,, % IdTT_C4_LB1, ¦
+			GuiControl,, % IdTT_C4_LB2, ¦
+			GuiControl,, % IdTT_C4_LB3, ¦
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3253,6 +3254,7 @@ F_GuiTrigTipsMenuDefC4()	;static gui for triggerstring tips and hotstrings
 		, PosOutputVar := 0, PosOutputVarX := 0, PosOutputVarY := 0, PosOutputVarW := 0, PosOutputVarH := 0
 	
 	Gui, TT_C4: New, +AlwaysOnTop +Caption +HwndTT_C4_Hwnd +Resize, % A_ScriptName . ":" . A_Space . TransA["Static triggerstring / hotstring menus"]
+	Gui, TT_C4: +Delimiter¦	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 	Gui, TT_C4: Margin, 0, 0
 	if (ini_ATEn)
 	{
@@ -3333,6 +3335,7 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestTriggerstring, LongestHotstring)
 		, cListboxMargin :=  4
 	
 	Gui, TT_C3: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C3_Hwnd
+	Gui, TT_C3: +Delimiter¦	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 	Gui, TT_C3: Margin, 0, 0
 	if (ini_ATEn)
 	{
@@ -3420,6 +3423,7 @@ F_GuiTrigTipsMenuDefC2(AmountOfRows, LongestString)
 	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
 		OutputString .= "w"		;the widest ordinary letter in alphabet
 	Gui, TT_C2: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C2_Hwnd
+	Gui, TT_C2: +Delimiter¦	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 	Gui, TT_C2: Margin, 0, 0
 	if (ini_ATEn)
 	{
@@ -3468,6 +3472,7 @@ F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)
 	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
 		OutputString .= "w"		;the widest ordinary letter in alphabet
 	Gui, TT_C1: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C1_Hwnd
+	Gui, TT_C1: +Delimiter¦	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 	Gui, TT_C1: Margin, 0, 0
 	if (ini_ATEn)
 	{
@@ -7304,7 +7309,7 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 
 		Case 2:
 			Gui, TT_C2: Destroy
-			F_GuiTrigTipsMenuDefC2(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.			; GuiControl,, % IdTT_C2_LB1, ||	;make TT_C2_LB1 empty
+			F_GuiTrigTipsMenuDefC2(a_Tips.Count(), F_LongestTrigTipString(a_Tips))	;Each time new list of triggerstring tips is created also new gui is created. as a consequence new set of hotkeys is created.
 			GuiControl,, % IdTT_C2_LB1, % F_ConvertArrayToString(a_Tips)
 			GuiControl,, % IdTT_C2_LB2, % F_TrigTipsSecondColumn(a_TipsOpt, a_TipsEnDis)
 			a_TTMenuPos := F_WhereDisplayMenu(ini_TTTP)
@@ -7322,9 +7327,9 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 		Case 4:
 			PreviousWindowID := WinExist("A")
 			; OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID . "`n"
-			; GuiControl,, % IdTT_C4_LB1, |	;this line is necessary to display new menu each time this function is called.
-			; GuiControl,, % IdTT_C4_LB2, |	;this line is necessary to display new menu each time this function is called.
-			; GuiControl,, % IdTT_C4_LB3, |	;this line is necessary to display new menu each time this function is called.
+			; GuiControl,, % IdTT_C4_LB1, ¦	;this line is necessary to display new menu each time this function is called.
+			; GuiControl,, % IdTT_C4_LB2, ¦	;this line is necessary to display new menu each time this function is called.
+			; GuiControl,, % IdTT_C4_LB3, ¦	;this line is necessary to display new menu each time this function is called.
 			GuiControl,, % IdTT_C4_LB1, % F_ConvertArrayToString(a_Tips)
 			GuiControl,, % IdTT_C4_LB2, % F_TrigTipsSecondColumn(a_TipsOpt, a_TipsEnDis)
 			GuiControl,, % IdTT_C4_LB3, % F_ConvertArrayToString(a_TipsHS)
@@ -7343,9 +7348,9 @@ F_UpdateTT_C3()
 ,		ControlHeight 		:= RHpx * a_Tips.Count
 ,		NoOfRows 			:= a_Tips.Count
 
-	GuiControl,, % IdTT_C3_LB1, ||
-	GuiControl,, % IdTT_C3_LB2, ||
-	GuiControl,, % IdTT_C3_LB3, ||
+	GuiControl,, % IdTT_C3_LB1, ¦¦
+	GuiControl,, % IdTT_C3_LB2, ¦¦
+	GuiControl,, % IdTT_C3_LB3, ¦¦
 	for key, value in a_Tips
 	{
 		CurrentValue := StrLen(a_Tips[key])
@@ -8618,16 +8623,6 @@ F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 			if (!f_PBLIsAlphanum)
 				v_InputString := LastChar
 			F_PTTTQ(v_Qinput := LastChar)
-			; OutputDebug, % "Non-alpha" . A_Space . "PreviousButLast:" . PreviousButLast . "|" . A_Space . "string:" . string . "|" . A_Space . "v_Qinput:" . v_Qinput . "`n"
-
-			; if (f_PBLIsAlphanum)
-			; 	F_PTTTQ(v_Qinput := LastChar)
-			; else
-			; {
-			; 	; OutputDebug, % "Non-alpha" . A_Space . "PreviousButLast:" . PreviousButLast . "|" . A_Space . "string:" . string . "|" . A_Space . "v_Qinput:" . v_Qinput . "`n"
-			; 	v_InputString := LastChar
-			; 	F_PTTTQ(v_Qinput := LastChar)
-			; }
 		}
 	}
 	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
@@ -14648,6 +14643,7 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 	if (ini_TTCn != 4)	;if not static window, draw small simple GUI
 	{
 		Gui, HMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuAHKHwnd
+		Gui, HMenuAHK: +Delimiter¦	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 		Gui, HMenuAHK: Margin, 0, 0
 		if (ini_HMBgrCol = "custom")
 			Gui, HMenuAHK: Color,, % ini_HMBgrColCus
@@ -14659,7 +14655,7 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 			Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
 		Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenu_MSI"
 		Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
-			GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . "|"
+			GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . "¦"
 
 		a_MCSIMenuPos := F_WhereDisplayMenu(ini_MHMP)
 		F_FlipMenu(HMenuAHKHwnd, a_MCSIMenuPos[1], a_MCSIMenuPos[2], "HMenuAHK")
@@ -14669,7 +14665,7 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 	{
 		; OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID . "`n"
 		Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
-			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . "|"
+			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . "¦"
 		GuiControl, Choose, % IdTT_C4_LB4, 1
 		Gui, TT_C4: Flash	;future: flashing (blinking) in a loop until user do not take action
 		WhichMenu := "SI"	;this setting will be used within F_MouseMenuCombined() to handle mouse event
@@ -14852,6 +14848,7 @@ F_HOF_MCL(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipb
 	if (ini_TTCn != 4)
 	{
 		Gui, HMenuCli: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuCliHwnd
+		Gui, HMenuCli: +Delimiter¦	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 		Gui, HMenuCli: Margin, 0, 0
 		if (ini_HMBgrCol = "custom")
 			Gui, HMenuCli: Color,, % ini_HMBgrColCus
@@ -14863,7 +14860,7 @@ F_HOF_MCL(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipb
 			Gui, HMenuCli: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
 		Gui, HMenuCli: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuCli" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenu_MCL"
 		Loop, Parse, TextOptions, ¦
-			GuiControl,, % Id_LB_HMenuCli, % A_Index . ". " . A_LoopField . "|"
+			GuiControl,, % Id_LB_HMenuCli, % A_Index . ". " . A_LoopField . "¦"
 		
 		a_MCLIMenuPos := F_WhereDisplayMenu(ini_MHMP)
 		F_FlipMenu(HMenuCliHwnd, a_MCLIMenuPos[1], a_MCLIMenuPos[2], "HMenuCli")
@@ -14873,7 +14870,7 @@ F_HOF_MCL(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipb
 	{
 		PreviousWindowID := WinExist("A")
 		Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
-			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . "|"
+			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . "¦"
 		GuiControl, Choose, % IdTT_C4_LB4, 1
 		WinActivate, % "ahk_id" TT_C4_Hwnd
 		Gui, TT_C4: Flash	;future: flashing (blinking) in a loop until user do not take action
@@ -15100,7 +15097,7 @@ F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid i
 		GuiControl, Choose, % OutputVarControl, % ChoicePos
 		GuiControlGet, OutputVarTemp, , % OutputVarControl
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
-		GuiControl,, % IdTT_C4_LB4, |
+		GuiControl,, % IdTT_C4_LB4, ¦
 		WinActivate, % "ahk_id" PreviousWindowID
 		v_UndoHotstring 	:= OutputVarTemp
 ,		ReplacementString 	:= F_ReplaceAHKconstants(OutputVarTemp)
