@@ -605,6 +605,7 @@ Critical, Off
 		return
 	
 	F10:: ;new thread starts here
+		Suspend	;Any hotkey/hotstring subroutine whose very first line is Suspend (except Suspend On) will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON. This allows suspension to be turned off via such a hotkey.
 		F_TraySuspendHotkeys()							;suspend hotstrings
 		return
 
@@ -653,10 +654,13 @@ return
 return
 
 :*:hsenable/::
-	F_TrayEnableHotkeys()
+	F_TraySuspendHotkeys("enable")
 return
 
 :*:hsdisable/::
+	F_TraySuspendHotkeys("disable")
+return
+
 :*:hssuspend/::									;toggle suspend hotstrings and triggerstrings
 	F_TraySuspendHotkeys()
 return
@@ -2922,15 +2926,51 @@ F_TrayEnableHotkeys()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TraySuspendHotkeys()
+F_TraySuspendHotkeys(parameter*)
 {
 	global	;assume-global mode: v_InputH
 
-	if (v_InputH.InProgress)
+	Switch parameter[1]
 	{
-		v_InputH.Stop()
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now SUSPENDED."]
-			. "`n`n" . TransA["It means other script threads are still running. Triggerstring tips are off for your convenience."]
+		Case "enable":
+			v_InputH.Start()
+			Suspend, Off
+			Hotstring("Reset")
+			v_InputString := ""
+			Menu, Tray, 		UnCheck, % TransA["Suspend Hotstrings"] . "`tF10"
+			Menu, AppSubmenu, 	UnCheck, % TransA["Suspend Hotstrings"] . "`tF10"
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now ACTIVE."]
+				. "`n`n" . TransA["It means triggerstring tips state is restored and hotstring definitions will be triggered as usual."]
+
+		Case "disable":
+			v_InputH.Stop()
+			Suspend, On
+			Menu, Tray, 		Check, % TransA["Suspend Hotstrings"] . "`tF10"
+			Menu, AppSubmenu, 	Check, % TransA["Suspend Hotstrings"] . "`tF10"
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now SUSPENDED."]
+				. "`n`n" . TransA["It means other script threads are still running. Triggerstring tips are off for your convenience."]
+
+		Default:
+			if (v_InputH.InProgress)
+			{
+				v_InputH.Stop()
+				Suspend, On
+				Menu, Tray, 		Check, % TransA["Suspend Hotstrings"] . "`tF10"
+				Menu, AppSubmenu, 	Check, % TransA["Suspend Hotstrings"] . "`tF10"
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now SUSPENDED."]
+					. "`n`n" . TransA["It means other script threads are still running. Triggerstring tips are off for your convenience."]
+			}
+			else
+			{
+				v_InputH.Start()
+				Suspend, Off
+				Hotstring("Reset")
+				v_InputString := ""
+				Menu, Tray, 		UnCheck, % TransA["Suspend Hotstrings"] . "`tF10"
+				Menu, AppSubmenu, 	UnCheck, % TransA["Suspend Hotstrings"] . "`tF10"
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now ACTIVE."]
+					. "`n`n" . TransA["It means triggerstring tips state is restored and hotstring definitions will be triggered as usual."]
+			}
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
