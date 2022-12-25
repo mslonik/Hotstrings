@@ -2385,15 +2385,15 @@ F_WhereDisplayMenu(ini_TTTP)
 F_TrigTipsSecondColumn(a_array1, a_array2)
 {
 	local
-	key := 0, value := "", ThisValue := "¦"
+	key := 0, value := "", ThisValue := "|"
 	for key, value in a_array1
 	{
 		if (a_array2[key] = "En") and (InStr(value, "*"))
-			ThisValue .= "✓" . "¦"	
+			ThisValue .= "✓" . "|"	
 		if (a_array2[key] = "En") and (!InStr(value, "*"))						
-			ThisValue .= "↓" . "¦"	
+			ThisValue .= "↓" . "|"	
 		if (a_array2[key] = "Dis")
-			ThisValue .= "╳" . "¦"	
+			ThisValue .= "╳" . "|"	
 	}
 	return ThisValue
 }
@@ -2401,10 +2401,10 @@ F_TrigTipsSecondColumn(a_array1, a_array2)
 F_ConvertArrayToString(a_array)
 {
 	local
-	key := 0, value := "", ThisValue := "¦"
+	key := 0, value := "", ThisValue := "|"
 
 	for key, value in a_array
-		ThisValue .= value . "¦"
+		ThisValue .= value . "|"
 	return ThisValue
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
