@@ -164,7 +164,7 @@ F_LoadUHStyling()
 F_LoadConfiguration()
 F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of characters used as ending characters by the hotstring recognizer.
 
-F_ValidateIniLibSections() ;create Libraries subfolder if it doesn't exist
+F_ValidateIniLibSections() ;create Libraries subfolder if it doesn't exist ; Load from / to Config.ini from Libraries folder
 F_CreateLogFolder()
 
 F_InitiateTrayMenus(v_Param)
@@ -199,6 +199,7 @@ if (ini_HK_IntoEdit != "none")
 ; 4. Load definitions of (triggerstring, hotstring) from Library subfolder.
 Gui, 1: Default				;this line is necessary to not show too many Guis on time of loading hotstrings from library
 F_LoadHotstringsFromLibraries()	;→ F_LoadDefinitionsFromFile() -> F_CreateHotstring
+F_LoadTTperLibrary()
 F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 F_InitiateInputHook()
 
@@ -1431,6 +1432,7 @@ F_DelLibByButton()
 		F_UpdateSelHotLibDDL()	
 		a_Combined := []				;in order to refresh arrays of triggerstring tips
 		F_LoadHotstringsFromLibraries()	;in order to refresh arrays of triggerstring tips
+		F_LoadTTperLibrary()
 		F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	;in order to refresh arrays of triggerstring tips
 		LV_Delete()
 		F_GuiHS3_EnDis("Enable")	;EnDis = "Disable" or "Enable"
@@ -1938,6 +1940,7 @@ F_DeleteLibrary()
 	F_UpdateSelHotLibDDL()
 	a_Combined := []				;in order to refresh arrays of triggerstring tips
 	F_LoadHotstringsFromLibraries()	;in order to refresh arrays of triggerstring tips
+	F_LoadTTperLibrary()
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	;in order to refresh arrays of triggerstring tips
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3405,9 +3408,9 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestTriggerstring, LongestHotstring)
 		else
 			Gui, TT_C3: Font, % "s" . ini_TTTySize . A_Space . "c" . ini_TTTyFaceCol, % ini_TTTyFaceFont
 	}
-	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB1 x0 y0" . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB1 + cListboxMargin . A_Space . "g" . "F_TTMenuStatic_Mouse"
-	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB2" . A_Space . "x" . X_LB2 . A_Space . "y" . Y_LB2 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB2 + cListboxMargin . A_Space . "g" . "F_TTMenuStatic_Mouse"
-	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB3" . A_Space . "x" . X_LB3 . A_Space . "y" . Y_LB3 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB3 + cListboxMargin . A_Space . "g" . "F_TTMenuStatic_Mouse"
+	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB1 x0 y0" 									. A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB1 + cListboxMargin . A_Space . "g" . "F_TTMenuStatic_Mouse"
+	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB2" . A_Space . "x" . X_LB2 . A_Space . "y" . Y_LB2 	. A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB2 + cListboxMargin . A_Space . "g" . "F_TTMenuStatic_Mouse"
+	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB3" . A_Space . "x" . X_LB3 . A_Space . "y" . Y_LB3 	. A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB3 + cListboxMargin . A_Space . "g" . "F_TTMenuStatic_Mouse"
 	GuiControl, Font, % IdTT_C3_LB1		;fontcolor of listbox
 	GuiControl, Font, % IdTT_C3_LB2		;fontcolor of listbox
 	GuiControl, Font, % IdTT_C3_LB3		;fontcolor of listbox
@@ -8264,6 +8267,7 @@ F_DownloadPublicLibraries()
 	{
 		F_ValidateIniLibSections()
 		F_LoadHotstringsFromLibraries()
+		F_LoadTTperLibrary()
 		F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 		F_RefreshListOfLibraries()	; this function calls F_RefreshListOfLibraryTips() as both options are interrelated
 		F_UpdateSelHotLibDDL()
@@ -9677,6 +9681,7 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 		FileAppend, % LibraryHeader, % ini_HADL . "\" . SourceLibrary, UTF-8
 	FileAppend, % F_ConvertListViewIntoTxt(), % ini_HADL . "\" . SourceLibrary, UTF-8
 	F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
+	F_LoadTTperLibrary()
 	GuiControl, ChooseString, % IdDDL2, % DestinationLibrary
 	Gui, HS3: 		Submit, NoHide	;this line is necessary to v_SelectHotstringLibrary <- DestinationLibrary
 	F_SelectLibrary()	;DestinationLibrary
@@ -10308,8 +10313,8 @@ F_RefreshListOfLibraryTips()
 	}
 	else
 	{
-		Menu, ToggleLibTrigTipsSubmenu, 	Add, % TransA["No libraries have been found!"], 		F_ToggleLibraryTips
-		Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable triggerstring tips"], 	:ToggleLibTrigTipsSubmenu
+		Menu, ToggleLibTrigTipsSubmenu, 	Add, % TransA["No libraries have been found!"], 	F_ToggleLibraryTips
+		Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable triggerstring tips"], 		:ToggleLibTrigTipsSubmenu
 	}
 	Menu, ToggleLibTrigTipsSubmenu, UseErrorLevel, OFF	;This setting is global, meaning it affects all menus, not just MenuName.
 ;#c*/ commercial only end	
@@ -11937,7 +11942,7 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 F_LoadHotstringsFromLibraries()
 {
 	global ; assume-global mode
-	local key := "", value := "", PriorityFlag := false, temp := "", PriorityFilename := ""
+	local key := "", value := "", temp := ""
 	a_Library 				:= []	;initialization of global variable
 	, a_TriggerOptions 			:= []
 	, a_Triggerstring 			:= []
@@ -11961,20 +11966,14 @@ F_LoadHotstringsFromLibraries()
 	{
 		temp := SubStr(key, 1, 2)	;extract the first 2 characters
 		if (temp != "S1") and (temp != "S2") and (value)
-		{
 			F_LoadDefinitionsFromFile(key)
-			F_LoadTriggTipsFromFile(key)
-		}
 	}
 	key := "", value := 0
 	for key, value in ini_LoadLib
 	{
 		temp := SubStr(key, 1, 2)	;extract the first 2 characters
 		if (temp = "S1") and (value)
-		{
 			F_LoadDefinitionsFromFile(key)
-			F_LoadTriggTipsFromFile(key)
-		}
 	}
 
 	key := "", value := 0
@@ -11982,11 +11981,18 @@ F_LoadHotstringsFromLibraries()
 	{
 		temp := SubStr(key, 1, 2)	;extract the first 2 characters
 		if (temp = "S2") and (value)
-		{
 			F_LoadDefinitionsFromFile(key)
-			F_LoadTriggTipsFromFile(key)
-		}
 	}
+}
+; ------------------------------------------------------------------------------------------------------------------------------------
+F_LoadTTperLibrary()	;Load Triggerstring Tips per library, as specified in Config.ini (variable ini_ShowTipsLib)
+{
+	global 	;assume-global mode
+	local 	key := "", value := ""
+
+	for key, value in ini_ShowTipsLib
+		if (value)
+			F_LoadTriggTipsFromFile(key)
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_UpdateSelHotLibDDL()
@@ -14283,7 +14289,7 @@ F_CreateLogFolder()
 	}
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
-F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
+F_ValidateIniLibSections() ;create Libraries subfolder if it doesn't exist; Load from / to Config.ini from Libraries folder
 {
 	global ;assume-global mode of operation
 	local 		v_ConfigLibrary 	:= ""
@@ -14304,7 +14310,6 @@ F_ValidateIniLibSections() ; Load from / to Config.ini from Libraries folder
 	IniRead, TempLoadLib,	% ini_HADConfig, LoadLibraries
 	
 	;Check if Libraries subfolder exists. If not, create it and display warning.
-	;v_IsLibraryEmpty := true
 	if (!InStr(FileExist(ini_HADL), "D"))				; if  there is no "Libraries" subfolder 
 	{
 		FileCreateDir, % ini_HADL							; Future: check against errors
