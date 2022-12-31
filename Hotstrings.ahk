@@ -2484,7 +2484,7 @@ F_OneCharPressed(ih, Char)
 	if (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))
 		return
 
-	OutputDebug, % "1)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
+	; OutputDebug, % "1)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
 	
 	if (v_InputString = "")
 	{
@@ -2518,7 +2518,7 @@ F_OneCharPressed(ih, Char)
 	,	v_InputString 	:= SubStr(v_InputString, 0)	;Last char only
 	}
 
-	OutputDebug, % "2)v_IS:" . v_InputString . "|" . A_Space . "IL:" . InputLength . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "f_EE:" . f_ExpEndChar . A_Space . "v_QI:" . v_Qinput . "|" . "`n"
+	; OutputDebug, % "2)v_IS:" . v_InputString . "|" . A_Space . "IL:" . InputLength . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "f_EE:" . f_ExpEndChar . A_Space . "v_QI:" . v_Qinput . "|" . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -2549,17 +2549,17 @@ F_OneCharPressed(ih, Char)
 				else
 					f_ExpEndChar := false
 			}
-			OutputDebug, % "IL:" . A_Space . InputLength . "`n"
+			; OutputDebug, % "IL:" . A_Space . InputLength . "`n"
 			
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD
 
-			OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_EE:" . f_ExpEndChar . "`n"
+			; OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_EE:" . f_ExpEndChar . "`n"
 			Critical, Off
 			return
 		}
 	}
-	OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . "|" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "f_EE:" . f_ExpEndChar . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . "|" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "f_EE:" . f_ExpEndChar . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
@@ -12093,7 +12093,9 @@ F_LoadTriggTipsFromFile(LibraryFilename)
 F_UnloadTriggTipsFromMemory(LibraryFilename)
 {
 	global ;assume-global mode of operation
-	local	key := 0,	value := "", LibraryName := SubStr(LibraryFilename, 1, -4)	;remove extension
+	local	key := 0,	value := ""
+		, 	LibraryName := SubStr(LibraryFilename, 1, -4)	;remove extension
+		,	key2 := 0
 	
 	for key, value in a_Library
 	{
@@ -12113,8 +12115,15 @@ F_UnloadTriggTipsFromMemory(LibraryFilename)
 	}
 	key := 0, value := ""	;recreate a_Combined
 ,	a_Combined := []
-	for key in a_Library
-		a_Combined.Push(a_Triggerstring[key] . "|" . a_TriggerOptions[key] . "|" . a_EnableDisable[key] . "|" . a_Hotstring[key])
+	for key, value in ini_ShowTipsLib
+	{
+		if (value)
+			{
+				for key2 in a_Library
+					if (a_Library[key2] = SubStr(key, 1, -4))	;remove extension
+						a_Combined.Push(a_Triggerstring[key2] . "|" . a_TriggerOptions[key2] . "|" . a_EnableDisable[key2] . "|" . a_Hotstring[key2])
+			}
+	}
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_ToggleLibrary()	;load / unload d(t, o, h)
@@ -12123,7 +12132,7 @@ F_ToggleLibrary()	;load / unload d(t, o, h)
 	local 	v_LibraryFlag := 0, name := SubStr(A_ThisMenuItem, 1, -4)	;without file extension
 	
 	Menu, EnDisLib, ToggleCheck, %A_ThisMenuItem%	;future: don't ready .ini file, instead use appropriate table
-	IniRead, v_LibraryFlag,	% ini_HADConfig, LoadLibraries, %A_ThisMenuitem%
+	IniRead, v_LibraryFlag,		% ini_HADConfig, LoadLibraries, %A_ThisMenuitem%
 	v_LibraryFlag := !(v_LibraryFlag)
 	Iniwrite, %v_LibraryFlag%,	% ini_HADConfig, LoadLibraries, %A_ThisMenuItem%
 	
