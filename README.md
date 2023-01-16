@@ -5,6 +5,7 @@ Copyright ©: Maciej Słojewski, mslonik (🐘).
 Licensed according to MIT license.
 
 This is free edition of Hotstrings application. If you wish to get commercial edition, contact me please.
+For comparison between free and commercial edition please see the file 20221204_HotstringsForAll.pdf available in this repository.
 
 This file contains only general info about **Hotstrings** project.
 
