@@ -469,13 +469,13 @@ Critical, Off
 	~LButton::			;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected → F_TTMenu_Mouse().
 		F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_Mouse is lower than this "interrupt"
 		return
-	~LWin::
-	~RWin::
-	~Control::	;pressing of any modifier stops timer (triggerstring tips menu will not dissapear if time is for Triggerstring tips is limited)
-	~Alt::
-	~Shift::
-		SetTimer, TurnOff_Ttt, Off
-		return
+	; ~LWin::
+	; ~RWin::
+	; ~Control::	;pressing of any modifier stops timer (triggerstring tips menu will not dissapear if time is for Triggerstring tips is limited)
+	; ~Alt::
+	; ~Shift::
+	; 	SetTimer, TurnOff_Ttt, Off
+	; 	return
 ;#c/* commercial only beginning		
 	^?::
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Shortcuts available for active triggerstring tips:"] . "`n`n" 
@@ -716,8 +716,9 @@ return
 ~*F22::
 ~*F23::
 ~*F24::
-; ~*LAlt::		;if commented out, only for debugging reasons
-; ~RAlt::		;no * allowed as it is part of AltGr (LControl & RAlt) and AltGr is used for diacritic letters in many keyboard layouts
+~*LAlt::		;if commented out, only for debugging reasons
+~RAlt::		;no * allowed as it is part of AltGr (LControl & RAlt) and AltGr is used for diacritic letters in many keyboard layouts
+~Control UP::
 ~*WheelDown::
 ~*WheelUp::
 ~*MButton::
@@ -737,7 +738,7 @@ return
 ~*WheelLeft::
 ~*WheelRight::
 ~*LButton::	;as above, but without F_DestroyTriggerstringTips()
-	; OutputDebug, % "~LButton:" . "`n"
+	; OutputDebug, % "~Win:" . "`n"
 	ToolTip,	;this line is necessary to close tooltips.
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
@@ -746,6 +747,17 @@ return
 	if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
 		v_InputString := ""
 	; OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString . "`n"
+	return
+
+~*Esc::	;the only difference in comparison to previous section is that Esc also resets hotstring recognizer.
+	OutputDebug, % "~Esc:" . "`n"
+	ToolTip,	;this line is necessary to close tooltips.
+	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
+	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
+	F_DestroyTriggerstringTips(ini_TTCn)
+	if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
+		v_InputString := ""
+	Hotstring("Reset")
 	return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If WinExist("ahk_id" HMenuCliHwnd)	;MCL
@@ -776,7 +788,6 @@ return
 		SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
 		v_InputH.VisibleText 	:= true
 ,		v_InputString 			:= ""
-		; Hotstring("Reset")
 		return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2504,7 +2515,7 @@ F_OneCharPressed(ih, Char)
 			f_EndCharDetected := true
 		else
 			f_EndCharDetected := false
-		OutputDebug, % "BeforeLast:" . BeforeLast . "|" A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
+		; OutputDebug, % "BeforeLast:" . BeforeLast . "|" A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 	}
 
 	if (!f_LastTip) and (f_EndCharDetected)
@@ -2605,7 +2616,7 @@ F_BackspaceProcessing(ih, VK, SC)
 	else
 	{
 		v_InputString := SubStr(v_InputString, 1, -1)	;whole string except last character
-		OutputDebug, % "v_IS BS:" . v_InputString . "|" . A_Space . "IsCritical:" . A_Space . A_IsCritical . "`n"
+		; OutputDebug, % "v_IS BS:" . v_InputString . "|" . A_Space . "IsCritical:" . A_Space . A_IsCritical . "`n"
 		if (ini_TTTtEn) and (v_InputString)
 		{
 			F_PTTT(v_InputString)
@@ -11991,7 +12002,7 @@ F_LoadTTperLibrary()	;Load Triggerstring Tips per library, as specified in Confi
 	local 	key := "", value := ""
 
 	for key, value in ini_ShowTipsLib
-		if (value)
+		if (value) and (ini_LoadLib[key])
 			F_LoadTriggTipsFromFile(key)
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
