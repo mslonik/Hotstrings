@@ -3437,7 +3437,6 @@ F_GuiTrigTipsMenuDefC2(AmountOfRows, LongestString)
 	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
 		OutputString .= "w"		;the widest ordinary letter in alphabet
 	Gui, TT_C2: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C2_Hwnd
-	Gui, TT_C2: +Delimiter¦	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 	Gui, TT_C2: Margin, 0, 0
 	if (ini_ATEn)
 	{
@@ -3486,7 +3485,6 @@ F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)
 	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
 		OutputString .= "w"		;the widest ordinary letter in alphabet
 	Gui, TT_C1: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C1_Hwnd
-	Gui, TT_C1: +Delimiter¦	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 	Gui, TT_C1: Margin, 0, 0
 	if (ini_ATEn)
 	{
