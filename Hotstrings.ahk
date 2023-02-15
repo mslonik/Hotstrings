@@ -50,10 +50,10 @@ FileInstall, LICENSE_EULA.md, LICENSE_EULA.md,	0
 ;#f*/ free version only end
 ; - - - - - - - - - - - - - - - - - - - - - - - S E C T I O N    O F    G L O B A L     V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ;#c/* commercial only beginning
-global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app available to user: l like "siLent mode"
+global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app available to user: l like "siLent mode"
 ;#c*/ commercial only end
 ;#f/* free version only beginning
-; global	v_Param 				:= "" ; 
+; global	v_SilentMode 				:= "" ; 
 ;#f*/ free version only end
 ,		v_LogCounter 			:= 0
 ,		v_CntCumGain			:= 0			;for logging, Counter Cumulative Gain
@@ -69,25 +69,25 @@ global	v_Param 				:= A_Args[1] ; the only one parameter of Hotstrings app avail
 ,		HS4GuiHwnd 			:= 0 
 ,		MoveLibsHwnd			:= 0
 ,		TDemoHwnd 			:= 0 
-,		HDemoHwnd 			:= 0 ;This is a trick to initialize global variables in order to not get warning (#Warn) message
+,		HDemoHwnd 			:= 0 		;This is a trick to initialize global variables in order to not get warning (#Warn) message
 ,		ATDemoHwnd			:= 0
 ,		HotstringDelay			:= 0
-,		WhichMenu 			:= "" ;available values: CLI or MSI
-,		v_EndChar 			:= "" ;initialization of this variable is important in case user would like to hit "Esc" and GUI TT_C4 exists.
-,		AppStartTime			:= "" ;When application got started, this parameter is used for performance statistics
+,		WhichMenu 			:= "" 		;available values: CLI or MSI
+,		v_EndChar 			:= "" 		;initialization of this variable is important in case user would like to hit "Esc" and GUI TT_C4 exists.
+,		AppStartTime			:= "" 		;When application got started, this parameter is used for performance statistics
 ,		v_EnDis				:= true
 , 		v_TotalHotstringCnt 	:= 0
-,		v_LibHotstringCnt		:= 0 ;no of (triggerstring, hotstring) definitions in single library
-,		ini_TTCn				:= 0 ;this variable could be triggered by left mouse click when script is initialized.
-,		v_Qinput				:= "" ; to store substring of v_InputString related to possible question mark (inside) option
-,		c_MsgBoxIconError		:= 16									;constant, MsgBox icon hand (stop/error)
-,		c_MsgBoxIconExclamation	:= 48									;constant, MsgBox icon exclamation
-,		v_LicenseType			:= "free"							;"commercial" or "free"
-,		v_LicensedTo			:= "Maciej Słojewski"						;company name or first and second name of customer
+,		v_LibHotstringCnt		:= 0 		;no of (triggerstring, hotstring) definitions in single library
+,		ini_TTCn				:= 0 		;this variable could be triggered by left mouse click when script is initialized.
+,		v_Qinput				:= "" 		; to store substring of v_InputString related to possible question mark (inside) option
+,		c_MsgBoxIconError		:= 16		;constant, MsgBox icon hand (stop/error)
+,		c_MsgBoxIconExclamation	:= 48		;constant, MsgBox icon exclamation
+,		v_LicenseType			:= "free"		;"commercial" or "free"
+,		v_LicensedTo			:= "Maciej Słojewski"	;company name or first and second name of customer
 ;#c/* commercial only beginning
-,		v_LogonName			:= "maciej"								;40 char. max. "0123456789012345678901234567890123456789", corresponds to A_UserName
-,		v_LicensedCompName		:= "fikumiku"								;40 char. max. "0123456789012345678901234567890123456789", corresponds to A_ComputerName
-,		v_ValidTill			:= "inf"								;date in format yyyymmdd; "inf" for infinity
+,		v_LogonName			:= "maciej"			;40 char. max. "0123456789012345678901234567890123456789", corresponds to A_UserName
+,		v_LicensedCompName		:= "fikumiku"			;40 char. max. "0123456789012345678901234567890123456789", corresponds to A_ComputerName
+,		v_ValidTill			:= "inf"				;date in format yyyymmdd; "inf" for infinity
 ,		v_LicenseID			:= "000001"
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -167,7 +167,7 @@ F_LoadEndChars() ; Read from Config.ini values of EndChars. Modifies the set of 
 F_ValidateIniLibSections() ;create Libraries subfolder if it doesn't exist ; Load from / to Config.ini from Libraries folder
 F_CreateLogFolder()
 
-F_InitiateTrayMenus(v_Param)
+F_InitiateTrayMenus(v_SilentMode)
 
 F_GuiHS3_Create()
 F_HS3_DefineConstants()
@@ -258,8 +258,8 @@ Menu, Submenu1Shortcuts, Add, % TransA["Call Graphical User Interface"] 				. "`
 Menu, Submenu1Shortcuts, Add, % TransA["Copy clipboard content into ""Enter hotstring"""] . "`t" . F_ParseHotkey(ini_HK_IntoEdit, "space"),	F_GuiShortDef
 Menu, Submenu1Shortcuts, Add, % TransA["Undo the last hotstring"] 					. "`t" . F_ParseHotkey(ini_HK_UndoLH, 	"space"),	F_GuiShortDef
 Menu, Submenu1Shortcuts, Add, % TransA["Toggle triggerstring tips"] 					. "`t" . F_ParseHotkey(ini_HK_ToggleTt, "space"),	F_GuiShortDef
-Menu, Submenu1, 		Add, % TransA["Shortcut (hotkey) definitions"],							:Submenu1Shortcuts
-Menu, Submenu1, 		Add
+Menu, Configuration, 	Add, % TransA["Shortcut (hotkey) definitions"],							:Submenu1Shortcuts
+
 ;Warning: order of SubmenuEndChars have to be alphabetical. Keep an eye on it. This is because after change of language specific menu items are related with associative array which also keeps to alphabetical order.
 Menu, SubmenuEndChars, Add, % TransA["Apostrophe '"], 											F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Backslash \"], 											F_ToggleEndChars
@@ -284,20 +284,20 @@ Menu, SubmenuEndChars, Add, % TransA["Tab"], 												F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 											F_ToggleEndChars
 F_ToggleEndChars()
 Func_GuiEventsMenu		:= func("F_GuiEvents")
-Menu, Submenu1,		Add, % TransA["Events: signalling"],									% Func_GuiEventsMenu
+Menu, Configuration,		Add, % TransA["Events: signalling"],									% Func_GuiEventsMenu
 Func_GuiEventsMenu.Call(true)
 Func_GuiStylingMenu		:= func("F_EventsStyling")
-Menu, Submenu1,		Add, % TransA["Events: styling"],										% Func_GuiStylingMenu
+Menu, Configuration,		Add, % TransA["Events: styling"],										% Func_GuiStylingMenu
 Func_GuiStylingMenu.Call(true)		
-Menu, Submenu1,		Add, % TransA["Graphical User Interface"], 								:ConfGUI
-Menu, Submenu1,		Add		
-Menu, Submenu1,  	   	Add, % TransA["Toggle trigger characters (↓ or EndChars)"], 				:SubmenuEndChars
-Menu, Submenu1,  	   	Add		
-Menu, Submenu1,	 	Add, % TransA["Restore default configuration"],							F_RestoreDefaultConfig
-Menu, Submenu1,		Add, % TransA["Open Config.ini folder in Windows Explorer"],				F_OpenConfigIniLocation	
-Menu, Submenu1,		Add, % TransA["Open Config.ini in your default editor"],					F_OpenConfigIniInEditor
-Menu, Submenu1,		Add, % TransA["Copy Config.ini folder path to Clipboard"],					F_PathtoClipboard
-Menu, Submenu1,		Add	;line separator		
+Menu, Configuration,		Add, % TransA["Graphical User Interface"], 								:ConfGUI
+Menu, Configuration,		Add		
+Menu, Configuration,  	   	Add, % TransA["Toggle trigger characters (↓ or EndChars)"], 				:SubmenuEndChars
+Menu, Configuration,  	   	Add		
+Menu, Configuration,	 	Add, % TransA["Restore default configuration"],							F_RestoreDefaultConfig
+Menu, Configuration,		Add, % TransA["Open Config.ini folder in Windows Explorer"],				F_OpenConfigIniLocation	
+Menu, Configuration,		Add, % TransA["Open Config.ini in your default editor"],					F_OpenConfigIniInEditor
+Menu, Configuration,		Add, % TransA["Copy Config.ini folder path to Clipboard"],					F_PathtoClipboard
+Menu, Configuration,		Add	;line separator		
 ;#c/* commercial only beginning
 Menu, SubmenuPath,		Add, % TransA["Libraries folder: restore it to default location"], 			F_PathLibrariesRestoreDefault
 Menu, SubmenuPath,		Add, % TransA["Libraries folder: move it to new location"],					F_PathToLibraries
@@ -307,7 +307,20 @@ Menu, SubmenuPath,		Add, % TransA["Config.ini file: move it to script / app loca
 Menu, SubmenuPath,		Add
 Menu, SubmenuPath,		Add, % TransA["Script/application folder: restore it to default location"],	F_PathRestoreDefaultAppFolder
 Menu, SubmenuPath,		Add, % TransA["Script/application folder: move it to new location"],			F_PathMoveAppFolder
-Menu, Submenu1, 		Add, % TransA["Location of application specific data"],					:SubmenuPath
+Menu, Configuration, 	Add, % TransA["Location of application specific data"],					:SubmenuPath
+Menu, Configuration,	Add	;To add a menu separator line, omit all three parameters.
+Menu, SendLevelSumbmenu,	Add, 0,															F_SetSendLevel
+Menu, SendLevelSumbmenu,	Add, 1,															F_SetSendLevel
+Menu, SendLevelSumbmenu,	Add, 2,															F_SetSendLevel
+Menu, SendLevelSumbmenu,	Add, 3,															F_SetSendLevel
+Menu, Configuration, 	Add, % TransA["SendLevel value"],										:SendLevelSumbmenu
+Menu, SendLevelSumbmenu, Check, 	% ini_SendLevel
+Menu, MinSendLevelSubm,	Add, 0,															F_SetMinSendLevel
+Menu, MinSendLevelSubm,	Add, 1,															F_SetMinSendLevel
+Menu, MinSendLevelSubm,	Add, 2,															F_SetMinSendLevel
+Menu, MinSendLevelSubm,	Add, 3,															F_SetMinSendLevel
+Menu, Configuration,	Add, % TransA["MinSendLevel value"],									:MinSendLevelSubm
+Menu, MinSendLevelSubm, 	Check, 	% ini_MinSendLevel
 ;#c*/ commercial only end
 ;#f/* free version only beginning
 ; Menu, SubmenuPath,		Add, % TransA["Libraries folder: restore it to default location"], 			F_Empty
@@ -318,7 +331,7 @@ Menu, Submenu1, 		Add, % TransA["Location of application specific data"],					:S
 ; Menu, SubmenuPath,		Add
 ; Menu, SubmenuPath,		Add, % TransA["Script/application folder: restore it to default location"],	F_Empty
 ; Menu, SubmenuPath,		Add, % TransA["Script/application folder: move it to new location"],			F_Empty
-; Menu, Submenu1, 		Add, % TransA["Location of application specific data"],					:SubmenuPath
+; Menu, Configuration, 		Add, % TransA["Location of application specific data"],					:SubmenuPath
 ; Menu, SubmenuPath,		Disable, % TransA["Libraries folder: restore it to default location"]
 ; Menu, SubmenuPath,		Disable, % TransA["Libraries folder: move it to new location"]
 ; Menu, SubmenuPath,		Add
@@ -327,9 +340,9 @@ Menu, Submenu1, 		Add, % TransA["Location of application specific data"],					:S
 ; Menu, SubmenuPath,		Add
 ; Menu, SubmenuPath,		Disable, % TransA["Script/application folder: restore it to default location"]
 ; Menu, SubmenuPath,		Disable, % TransA["Script/application folder: move it to new location"]
-; Menu, Submenu1, 		Disable, % TransA["Location of application specific data"]
+; Menu, Configuration, 		Disable, % TransA["Location of application specific data"]
 ;#f*/ free version only end
-Menu, HSMenu, 			Add, % TransA["Configuration"], 										:Submenu1
+Menu, HSMenu, 			Add, % TransA["Configuration"], 										:Configuration
 Menu, HSMenu, 			Add, % TransA["Search (F3)"], 										F_Searching
 ;#c/* commercial only beginning
 Menu, LibrariesSubmenu,	Add, % TransA["Enable/disable libraries"], 								F_RefreshListOfLibraries
@@ -444,14 +457,14 @@ if (ini_UHTtEn)	;Undid Hotstring Tooltip Enable
 F_LoadGUIstatic()
 if (ini_TTCn = 4)	;static triggerstring / hotstring GUI 
 	F_GuiTrigTipsMenuDefC4()
-if (ini_GuiReload) and (v_Param != "l")
+if (ini_GuiReload) and (v_SilentMode != "l")
 	F_GUIinit()
 
 AppStartTime := A_Now	;Date and time math can be performed with EnvAdd and EnvSub. Also, FormatTime can format the date and/or time according to your locale or preferences.
 Critical, Off
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
-#If WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd)	;triggerstring tips
-	or WinExist("ahk_id" TT_C4_Hwnd)	;static triggerstring tips
+#If WinExist("ahk_id" TT_C1_Hwnd) or WinExist("ahk_id" TT_C2_Hwnd) or WinExist("ahk_id" TT_C3_Hwnd)	;active triggerstring tips
+	or WinExist("ahk_id" TT_C4_Hwnd)													;static triggerstring tips
 
 	^Tab::	;new thread starts here
 	+^Tab::
@@ -673,21 +686,11 @@ return
 :*:hsstats/::										;show application statistics
 	F_AppStats()
 return
-;section of build-in hotkeys (system wide!)
-; ~LControl UP::			;commented out as it is a part of AltGr (LControl & RAlt) and AltGr is used for diacritic letters in many keyboard layouts
-; ~RControl UP::			;commented out as it is a part of AltGr (LControl & RAlt) and AltGr is used for diacritic letters in many keyboard layouts
-; 	ToolTip,			;this line is necessary to close tooltips.
-; 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
-; 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
-; 	Hotstring("Reset")
-; 	F_DestroyTriggerstringTips(ini_TTCn)
-; 	if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
-; 		v_InputString := ""
-; return
 
 ~*LShift::
 ~*RShift::			;Actually "Shifts" work a bit different as some keys like @ or ? are available only after pressing Shift.
 	ToolTip,			;this line is necessary to close tooltips.
+	OutputDebug, % "Tu jestem" . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
 	F_DestroyTriggerstringTips(ini_TTCn)
@@ -737,7 +740,7 @@ return
 ~*PgDn::
 ~*WheelLeft::
 ~*WheelRight::
-~*LButton::	;as above, but without F_DestroyTriggerstringTips()
+; ~*LButton::	;as above, but without F_DestroyTriggerstringTips()
 	; OutputDebug, % "~Win:" . "`n"
 	ToolTip,	;this line is necessary to close tooltips.
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
@@ -760,7 +763,7 @@ return
 	Hotstring("Reset")
 	return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#If WinExist("ahk_id" HMenuCliHwnd)	;MCL
+#If WinExist("ahk_id" HMenuCliHwnd)	;MCL -> F_HMenuCLI_Keyboard() -> F_ClipboardPaste
 	Tab::
 	+Tab::
 	Up::
@@ -791,7 +794,7 @@ return
 		return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#If WinExist("ahk_id" HMenuAHKHwnd)	;MSI
+#If WinExist("ahk_id" HMenuAHKHwnd)	;MSI -> F_HMenuSI_Keyboard() -> F_SendIsOflag
 	Tab::
 	+Tab::
 	Up::
@@ -819,7 +822,6 @@ return
 		SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
 		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
-		; Hotstring("Reset")
 		return
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -891,6 +893,44 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+F_SetMinSendLevel()
+{
+	global	;assume-global mode of operation
+
+	Loop, 4
+	{
+		if (A_Index - 1 = A_ThisMenuItem)
+		{
+			Menu, MinSendLevelSubm, Check, 	% A_Index - 1
+			ini_MinSendLevel 		:= A_Index - 1
+		,	v_InputH.MinSendLevel 	:= ini_MinSendLevel
+			IniWrite, % ini_MinSendLevel, % ini_HADConfig, Configuration, MinSendLevel
+		}
+		else
+			Menu, MinSendLevelSubm, UnCheck, 	% A_Index - 1
+	}
+	OutputDebug, % "ini_MinSendLevel:" . ini_MinSendLevel . "`n"
+
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SetSendLevel()
+{
+	global	;assume-global mode of operation
+
+	Loop, 4
+	{
+		if (A_Index - 1 = A_ThisMenuItem)
+		{
+			Menu, SendLevelSumbmenu, Check, 	% A_Index - 1
+			ini_SendLevel := A_Index - 1
+			IniWrite, % ini_SendLevel, % ini_HADConfig, Configuration, SendLevel
+		}
+		else
+			Menu, SendLevelSumbmenu, UnCheck, 	% A_Index - 1
+	}
+	OutputDebug, % "ini_SendLevel:" . ini_SendLevel . "`n"
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;#c/* commercial only beginning
 F_CheckCommercialConditions()
 {
@@ -1662,7 +1702,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 		Case "MHot":
 			Switch WhichMenu
 			{
-				Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
+				Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SI")
 				Case "CLI":	F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
 			}
 			GuiControl,, % IdTT_C4_LB4, ¦
@@ -1761,7 +1801,7 @@ F_HMenuSI_Keyboard()
 	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
 	if (ini_MHMP = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
-	F_SendIsOflag(Temp1, Ovar, "SendInput")
+	F_SendIsOflag(Temp1, Ovar, "SI")
 	Gui, HMenuAHK: Destroy
 	temp := F_DetermineGain2(v_InputString, Temp1)
 	v_CntCumGain += temp
@@ -2529,7 +2569,12 @@ F_OneCharPressed(ih, Char)
 	,	v_InputString 	:= SubStr(v_InputString, 0)	;Last char only
 	}
 
-	; OutputDebug, % "2)v_IS:" . v_InputString . "|" . A_Space . "IL:" . InputLength . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "f_EE:" . f_ExpEndChar . A_Space . "v_QI:" . v_Qinput . "|" . "`n"
+	; OutputDebug, % "2)v_IS:" . v_InputString . "|" . A_Space 
+	; 			. "IL:" . InputLength . A_Space 
+	; 			. "f_LT:" . f_LastTip . A_Space 
+	; 			. "f_EC:" . f_EndCharDetected . A_Space 
+	; 			. "f_EE:" . f_ExpEndChar . A_Space 
+	; 			. "v_QI:" . v_Qinput . "|" . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -2577,12 +2622,14 @@ F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
 {
 	global	;assume-global mode of operation
 	v_InputString := "", v_TrigTipsInput := "", v_UndoHotstring := "", v_UndoTriggerstring := ""	;used by output functions: F_HOF_MCL, F_HOF_MSI
-,	v_InputH 			:= InputHook("V I1 L0")	;I1 by default
-,	v_InputH.OnChar 	:= Func("F_OneCharPressed")
-,	v_InputH.OnKeyUp 	:= Func("F_BackspaceProcessing")
-,	v_InputH.OnEnd		:= Func("F_InputHookOnEnd")
-	v_InputH.KeyOpt("{Backspace}", "N")	;Backspace is not Char
+,	v_InputH 				:= InputHook("V L0")			
+,	v_InputH.MinSendLevel 	:= ini_MinSendLevel			;I1 by default
+,	v_InputH.OnChar 		:= Func("F_OneCharPressed")
+,	v_InputH.OnKeyUp 		:= Func("F_BackspaceProcessing")	;this function is run whenever Backspace key is up 
+,	v_InputH.OnEnd			:= Func("F_InputHookOnEnd")
+	v_InputH.KeyOpt("{Backspace}", "N")				;Backspace is not Char ;N: Notify. Causes the OnKeyDown and OnKeyUp callbacks to be called each time the key is pressed.
 	v_InputH.Start()
+	OutputDebug, % A_ThisFunc . A_Space . "ini_MinSendLevel:" . ini_MinSendLevel . "|" . A_Space . v_InputH.MinSendLevel . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InputHookOnEnd(ih)	;for debugging purposes
@@ -2602,7 +2649,7 @@ F_InputHookOnEnd(ih)	;for debugging purposes
 		ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_BackspaceProcessing(ih, VK, SC)
+F_BackspaceProcessing(ih, VK, SC)	;this function is run whenever Backspace key is up.
 {
 	global	;assume-global mode of operation
 	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
@@ -2630,6 +2677,7 @@ F_BackspaceProcessing(ih, VK, SC)
 		if (!v_InputString)	;if v_InputString = "" = empty
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
+	OutputDebug, % A_ThisFunc . A_Space . GetKeyName(Format("vk{:x}sc{:x}", VK, SC)) . A_Space . "E" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DetermineMonitors()	; Multi monitor environment, initialization of monitor width and height parameters
@@ -3114,10 +3162,10 @@ F_DestroyTriggerstringTips(ini_TTCn)
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_InitiateTrayMenus(v_Param)
+F_InitiateTrayMenus(v_SilentMode)
 {
 	global	;assume-global mode
-	Switch v_Param
+	Switch v_SilentMode
 	{
 ;#c/* commercial only beginning		
 		Case "l":
@@ -3625,38 +3673,56 @@ F_BackFeed(MyInput)
 	Hotstring("Reset")
 	MyInput := F_ConvertEscapeSequences(MyInput)
 ,	MyInput := F_ConvertEscapeSequences2(MyInput)
-	; OutputDebug, % "MyInput:" . F_ConvertEscapeSequences2(MyInput) . "|" . "`n"
-	SendLevel, 	2		;to backtrigger it must be higher than the input level of the hotstrings
-	SendInput,	% MyInput	;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
+	SendLevel, 	% ini_SendLevel	;to backtrigger it must be higher than the input level of the hotstrings
+	SendInput,	% MyInput			;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
+	OutputDebug, % "MyInput:" . MyInput . "|" . A_Space . "ini_SendLevel:" . ini_SendLevel . A_Space . "MinSendLevel:" . v_InputH.MinSendLevel . "`n"
 	SendLevel, 	0
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadConfiguration()
 {
 	global ;assume-global mode
+
+	ini_SendLevel				:= 0			;SendLevel by default
+	IniRead, ini_SendLevel, 					% ini_HADConfig, Configuration, SendLevel, 				% A_Space	;To store a blank value (empty string), specify % A_Space.
+	if (ini_SendLevel = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_SendLevel := 0
+		IniWrite, % ini_SendLevel, % ini_HADConfig, Configuration, SendLevel
+	}
+
+	ini_MinSendLevel			:= 1			;MinSendLevel (InputHook) by default
+	IniRead, ini_MinSendLevel, 				% ini_HADConfig, Configuration, MinSendLevel,			% A_Space	;To store a blank value (empty string), specify % A_Space.
+	if (ini_MinSendLevel = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+	{
+		ini_MinSendLevel := 1
+		IniWrite, % ini_MinSendLevel, % ini_HADConfig, Configuration, MinSendLevel
+	}
+
 	ini_CPDelay 				:= 300		;1-1000 [ms], default: 300
-	IniRead, ini_CPDelay, 					% ini_HADConfig, Configuration, ClipBoardPasteDelay,		% A_Space
+	IniRead, ini_CPDelay, 					% ini_HADConfig, Configuration, ClipBoardPasteDelay,		% A_Space	;To store a blank value (empty string), specify % A_Space.
 	if (ini_CPDelay = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
 		ini_CPDelay := 300
 		IniWrite, % ini_CPDelay, % ini_HADConfig, Configuration, ClipBoardPasteDelay 
 	}
+
 	ini_HotstringUndo			:= true
-	IniRead, ini_HotstringUndo,				% ini_HADConfig, Configuration, HotstringUndo,			% A_Space
+	IniRead, ini_HotstringUndo,				% ini_HADConfig, Configuration, HotstringUndo,			% A_Space	;To store a blank value (empty string), specify % A_Space.
 	if (ini_HotstringUndo = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
 		ini_HotstringUndo 		:= true
 		Iniwrite, % ini_HotstringUndo, % ini_HADConfig, Configuration, HotstringUndo
 	}
 	ini_ShowIntro				:= true
-	IniRead, ini_ShowIntro,					% ini_HADConfig, Configuration, ShowIntro,				% A_Space	;GUI with introduction to Hotstrings application.
+	IniRead, ini_ShowIntro,					% ini_HADConfig, Configuration, ShowIntro,				% A_Space	;To store a blank value (empty string), specify % A_Space.
 	if (ini_ShowIntro = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
 		ini_ShowIntro 			:= true
 		Iniwrite, % ini_ShowIntro, % ini_HADConfig, Configuration, ShowIntro
 	}
 	ini_HK_Main				:= "#^h"
-	IniRead, ini_HK_Main,					% ini_HADConfig, Configuration, HK_Main,				% A_Space
+	IniRead, ini_HK_Main,					% ini_HADConfig, Configuration, HK_Main,				% A_Space	;To store a blank value (empty string), specify % A_Space.
 	if (ini_HK_Main = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
 		ini_HK_Main 			:= "#^h"
@@ -3664,14 +3730,14 @@ F_LoadConfiguration()
 	}
 	if (ini_HK_Main != "none")
 	{
-		#If v_Param != "l"
-		Hotkey, If, v_Param != "l" 
+		#If v_SilentMode != "l"
+		Hotkey, If, v_SilentMode != "l" 
 		Hotkey, % ini_HK_Main, F_GUIInit, On
 		Hotkey, If			;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 	}
 	
 	ini_HK_IntoEdit			:= "~^#c"
-	IniRead, ini_HK_IntoEdit,				% ini_HADConfig, Configuration, HK_IntoEdit,		% A_Space
+	IniRead, ini_HK_IntoEdit,				% ini_HADConfig, Configuration, HK_IntoEdit,				% A_Space	;To store a blank value (empty string), specify % A_Space.
 	if (ini_HK_IntoEdit = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
 		ini_HK_IntoEdit := "~^#c"
@@ -3679,7 +3745,7 @@ F_LoadConfiguration()
 	}
 	
 	ini_HK_UndoLH				:= "~#z"
-	IniRead, ini_HK_UndoLH,					% ini_HADConfig, Configuration, HK_UndoLH,		% A_Space
+	IniRead, ini_HK_UndoLH,					% ini_HADConfig, Configuration, HK_UndoLH,				% A_Space	;To store a blank value (empty string), specify % A_Space.
 	if (ini_HK_UndoLH = "")		;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
 		ini_HK_UndoLH 			:= "~#z"
@@ -3689,7 +3755,7 @@ F_LoadConfiguration()
 		Hotkey, % ini_HK_UndoLH, F_Undo, On
 
 	ini_HK_ToggleTt			:= "none"	;HK = HotKey, ToggleTt = Toggle Triggerstring tips
-	IniRead, ini_HK_ToggleTt,				% ini_HADConfig, Configuration, HK_ToggleTt,		% A_Space
+	IniRead, ini_HK_ToggleTt,				% ini_HADConfig, Configuration, HK_ToggleTt,				% A_Space	;To store a blank value (empty string), specify % A_Space.
 	if (ini_HK_ToggleTt = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
 		ini_HK_ToggleTt 		:= "none"
@@ -3703,7 +3769,7 @@ F_LoadConfiguration()
      }
 ;#c/* commercial only beginning
 	ini_THLog					:= false
-	IniRead, ini_THLog,						% ini_HADConfig, Configuration, THLog,			% A_Space
+	IniRead, ini_THLog,						% ini_HADConfig, Configuration, THLog,					% A_Space	;To store a blank value (empty string), specify % A_Space.
 	if (ini_THLog = "")			;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
 		ini_THLog 			:= false
@@ -4001,7 +4067,7 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B3 gF_EvTt_B3,			% TransA["Close"]
 	Gui, GuiEvents: Add,	Button,	HwndIdEvTt_B4 gF_EvTt_B4,			% TransA["Cancel"]
 	
-	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T25,					% TransA["Triggerstring tips"] . A_Space . "+" . A_Space . TransA["Triggers"] . A_Space . "+" . A_Space . TransA["Hotstrings"]
+	Gui, GuiEvents: Add,	Text,	HwndIdEvTt_T25,					% TransA["Triggerstring tips"] . A_Space . "+" . A_Space . TransA["Triggers"] . A_Space . "+" . A_Space . TransA["Hotstrings"] ;fake text, just to measure its width, but unfortunately as it cannot be deleted, it has to be shifted somewhere
 ;#c/* commercial only beginning
 	Gui, GuiEvents: Tab, 											% TransA["Active triggerstring tips"]
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, % c_FontType
@@ -7915,7 +7981,7 @@ F_ShortDefB2_RestoreHotkey()
 		GuiControl,, % IdShortDefCB3, 0
 		GuiControl,, % IdShortDefCB4, 0
 		GuiControl,, % IdShortDefCB5, 0
-		Hotkey, If, v_Param != "l" 
+		Hotkey, If, v_SilentMode != "l" 
 		Hotkey, % ini_HK_Main, F_GUIInit, On
 		Hotkey, If						;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
@@ -8077,7 +8143,7 @@ F_ShortDefB1_SaveHotkey()
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
 		if (ini_HK_Main != "none")
 		{
-			Hotkey, If, v_Param != "l" 
+			Hotkey, If, v_SilentMode != "l" 
 			Hotkey, % OldHotkey, F_GUIInit, Off
 			Hotkey, % ini_HK_Main, F_GUIInit, On
 			Hotkey, If				;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
@@ -8392,6 +8458,7 @@ F_Undo()	;turning off of * option requires special conditions.
 	local	TriggerOpt := "", HowManyBackSpaces := 0, HowManyBackSpaces2 := 0
 			,ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey, OrigTriggerstring := "", HowManySpecials := 0
 	
+	OutputDebug, % "v_UndoTriggerstring:" . v_UndoTriggerstring . A_Space . "v_UndoHotstring:" . v_UndoHotstring . "`n"
 	if (v_UndoTriggerstring)
 	; if (v_UndoTriggerstring and (ThisHotkey != PriorHotkey))
 	{	
@@ -8558,6 +8625,7 @@ F_EventSigOrdHotstring()
 	
 	if (ini_OHSEn)	;Basic Hotstring Sound Enable
 		SoundBeep, % ini_OHSF, % ini_OHSD
+	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
@@ -8569,7 +8637,7 @@ F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 		,	f_IsAlpha 		:= false
 		,	f_FirstPart		:= false
 		,	LastChar			:= SubStr(string, 0)
-		, 	f_PBLIsAlphanum	:= false
+		, 	f_PBLIsAlphanum	:= false	;local flag: Previous But Last character in input string is AlphaNumeric
 		,	InStrLen			:= StrLen(string)
 
 	; OutputDebug, % A_ThisFunc . A_Space . "`n"
@@ -8626,18 +8694,15 @@ F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 				HitCnt++
 				if (HitCnt = ini_MNTT)	; MNTT = Maximum Number of Triggerstring Tips
 					Break
-				f_FirstPart := true
+				f_FirstPart := true	;if string was not find among available strings within a_Combined tables, then try to search for a substring related to question mark triggerstrings (Q)
 			}
 		}
 
-		; OutputDebug, % "Here I am" . "`n"
+		; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . A_Space . "f_FirstPart:" . f_FirstPart . "`n"
 		if (!f_FirstPart) and (InStrLen > 1)
-		{
-			if (!f_PBLIsAlphanum)
-				v_InputString := LastChar
 			F_PTTTQ(v_Qinput := LastChar)
-		}
 	}
+	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . A_Space . "E" . "`n"
 	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11962,7 +12027,7 @@ F_LoadHotstringsFromLibraries()
 	, a_Combined				:= []
 	
 ; Prepare TrayTip message taking into account value of command line parameter.
-	if (v_Param == "l")
+	if (v_SilentMode == "l")
 		TrayTip, %A_ScriptName% - Lite mode, 	% TransA["Loading hotstrings from libraries..."], 1
 	else	
 		TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
@@ -12513,6 +12578,7 @@ Menu hotstring is triggered								= Menu hotstring is triggered
 Menu position											= Menu position
 Menu position: caret									= Menu position: caret
 Menu position: cursor									= Menu position: cursor
+MinSendLevel value										= MinSendLevel value
 Minus - 												= Minus -
 MIT license											= MIT license
 Mode of operation										= Mode of operation
@@ -12612,6 +12678,7 @@ Select library file to be deleted							= Select library file to be deleted
 Select the target library: 								= Select the target library:
 Select triggerstring option(s)							= Select triggerstring option(s)
 Semicolon ; 											= Semicolon ;
+SendLevel value										= SendLevel value
 Send Raw (R)											= Send Raw (R)
 Set Clipboard Delay										= Set Clipboard Delay
 Set delay												= Set delay
@@ -14194,7 +14261,7 @@ F_GuiAbout_DetermineConstraints()
 	xNext := c_xmarg, yNext += c_HofText
 	GuiControl, Move, % IdAboutT3, % "x" . xNext . A_Space . "y" . yNext
 	xNext := MaxText + 3 * c_xmarg
-	if (v_Param = "l")
+	if (v_SilentMode = "l")
 		GuiControl, , % IdAboutT4, % TransA["silent"]
 	else
 		GuiControl, , % IdAboutT4, % TransA["default"]
@@ -14409,7 +14476,7 @@ F_LoadLibrariesToTables()
 	,	a_Comment 				:= []
 	
 	; Prepare TrayTip message taking into account value of command line parameter.
-	if (v_Param == "l")
+	if (v_SilentMode == "l")
 		TrayTip, %A_ScriptName% - Lite mode, 	% TransA["Loading hotstrings from libraries..."], 1
 	else	
 		TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
@@ -14605,44 +14672,6 @@ F_PrepareUndo(string)
 	return string
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SendIsOflag(OutputString, Oflag, SendFunctionName)
-{
-	global	;assume-global mode of operation
-
-	SetKeyDelay, -1, -1	;Delay = -1, PressDuration = -1, -1: no delay at all; this can be necessary if SendInput is reduced to SendEvent (in case low level input hook is active in another script)
-	; OutputDebug, % "A_SendLevel:" . A_Tab . A_SendLevel . "`n"
-	Switch SendFunctionName
-	{
-		Case "SendInput":
-			; OutputDebug, % "SendInput:" . OutputString . "`n"
-			if (Oflag = false)
-			{
-				SendInput, % OutputString . A_EndChar
-				; OutputDebug, % "Finished SendInput" . "`n"
-			}
-			else
-				SendInput, % OutputString
-		Case "SendEvent":
-			if (Oflag = false)
-				SendEvent, % OutputString . A_EndChar
-			else
-				SendEvent, % OutputString
-		Case "SendPlay":
-			if (Oflag = false)
-			{
-				SendPlay, % OutputString . A_EndChar
-				; OutputDebug, % "SendPlay:" . A_Space . OutputString . "`n"
-			}
-			else
-				SendPlay, % OutputString
-		Case "SendRaw":
-			if (Oflag = false)
-				SendRaw, % OutputString . A_EndChar
-			else
-				SendRaw, % OutputString 
-	}
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendInput; This function creates only on screen menu. Events are handled by F_HMenuSI_Keyboard and F_MouseMenu_MSI.
 {
 	global	;assume-global mode
@@ -14695,6 +14724,7 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 	}
 	Ovar := Oflag
 	Critical, Off
+	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . A_Space . "ThisHotkey:" . ThisHotkey . "|" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DetermineOptions(Triggerstring)	;
@@ -14731,25 +14761,10 @@ ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
 	return ShorterInputString
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output Function _ SendInput
+F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenuSI_Keyboard() -> F_SendIsOflag; F_MouseMenu_MSI -> F_SendIsOflag; F_SimpleOutput -> F_SendIsOflag
 {
 	global	;assume-global mode of operation
-	Critical, On
-	local	ThisHotkey := A_ThisHotkey, EndChar := A_EndChar, temp := 0, FirstPart := "", SecondPart := ""
 
-	F_DestroyTriggerstringTips(ini_TTCn)
-	v_UndoHotstring	:= ReplacementString
-,	v_Options 		:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
-,	v_EndChar 		:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
-	if (InStr(v_Options, "?"))
-		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
-	
-	v_UndoTriggerstring := v_InputString
-,	ReplacementString 	:= F_ReplaceAHKconstants(ReplacementString)
-,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options)
-,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
-	if (SubStr(ReplacementString, 0) = "``")	;extracts the last character
-		ReplacementString := SubStr(ReplacementString, 1, StrLen(ReplacementString) - 1)	;without last character
 	SetKeyDelay, -1, -1	;Delay = -1, PressDuration = -1, -1: no delay at all; this can be necessary if SendInput is reduced to SendEvent (in case low level input hook is active in another script)
 	; OutputDebug, % "A_SendLevel:" . A_Tab . A_SendLevel . "`n"
 	Switch SendFun
@@ -14757,60 +14772,61 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 		Case "SI":	;SendInput
 			; OutputDebug, % "SendInput:" . OutputString . "`n"
 			if (Oflag = false)
-			{
-				SendInput, % ReplacementString . A_EndChar
-				; OutputDebug, % "Finished SendInput" . "`n"
-			}
+				{
+					SendInput, 	% OutputString
+					SendRaw, 		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
+					; OutputDebug, % "Finished SendInput" . "`n"
+				}
 			else
-				SendInput, % ReplacementString
+				SendInput, % OutputString
 		Case "SE":	;SendEvent
 			if (Oflag = false)
-				SendEvent, % ReplacementString . A_EndChar
+				{
+					SendEvent, 	% OutputString
+					SendRaw,		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
+				}
 			else
-				SendEvent, % ReplacementString
-		Case "SP":	;SendPlay
+				SendEvent, % OutputString
+		Case "SP":	;SendPlay does not trigger hotkeys or hotstrings
 			if (Oflag = false)
-			{
-				SendPlay, % ReplacementString . A_EndChar
-				; OutputDebug, % "SendPlay:" . A_Space . OutputString . "`n"
-			}
+				{
+					SendPlay, % OutputString . A_EndChar	;It seems that for SendPlay EndChars do not require escaping
+					; OutputDebug, % "SendPlay:" . A_Space . OutputString . "`n"
+				}
 			else
-				SendPlay, % ReplacementString
+				SendPlay, % OutputString
 		Case "SR":	;SendRaw
 			if (Oflag = false)
-				SendRaw, % ReplacementString . A_EndChar
+				SendRaw, % OutputString . A_EndChar
 			else
-				SendRaw, % ReplacementString
+				SendRaw, % OutputString
 		Case "CL":
-			F_ClipboardPaste(ReplacementString, Oflag, v_EndChar)
+			F_ClipboardPaste(OutputString, Oflag, v_EndChar)
 		Case "S1":
-			FirstPart			:= SubStr(ReplacementString, 1, -1) ;omits last character
-			SecondPart		:= SubStr(ReplacementString, 0)	 ;extracts the last character
+			FirstPart			:= SubStr(OutputString, 1, -1) ;omits last character
+			SecondPart		:= SubStr(OutputString, 0)	 ;extracts the last character
 			; OutputDebug, % "First part:" . FirstPart . A_Space . "Second part:" . SecondPart . "|" . "`n"
 			if (Oflag = false)
-				SendInput, % FirstPart . A_EndChar
+				{
+					SendInput, 	% FirstPart 
+					SendRaw,		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
+				}
 			else
 				SendInput, % FirstPart
 			Hotstring("Reset")
-			SendLevel, 2
+			SendLevel, % ini_SendLevel
 			if (Oflag = false)
-				SendInput, % SecondPart . A_EndChar
+				{
+					SendInput, 	% SecondPart
+					SendRaw,		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
+				}
 			else
 				SendInput, % SecondPart
 			SendLevel, 0
-			temp := F_DetermineGain2(v_InputString, ReplacementString)
-			v_CntCumGain += temp
-			; OutputDebug, % "v_InputString:" . v_InputString . A_Space . "First part:" . FirstPart . A_Space . "Second part:" . SecondPart . "|" . "temp:" . temp . "|" . "`n"
-;#c/* commercial only beginning			
-			if (ini_THLog)
-				FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "S1" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-;#c*/ commercial only end				
-			v_InputString 		:= ""
-			return
 		Case "S2":
-			SendLevel, 2
-			if (ReplacementString = "{NumLock}") or (ReplacementString = "{ScrollLock}") or (ReplacementString = "{CapsLock}")
-				Switch ReplacementString
+			SendLevel, % ini_SendLevel
+			if (OutputString = "{NumLock}") or (OutputString = "{ScrollLock}") or (OutputString = "{CapsLock}")
+				Switch OutputString
 					{
 						Case "{NumLock}":
 							Send, {NumLock}
@@ -14827,26 +14843,49 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 							return
 					}
 			if (Oflag = false)
-				SendInput, % ReplacementString . A_EndChar
+				{
+					SendInput, 	% OutputString
+					SendRaw,		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
+				}
 			else
-				SendInput, % ReplacementString
+				SendInput, % OutputString
 			SendLevel, 0
-			v_CntCumGain := F_DetermineGain2(v_InputString, ReplacementString)
-;#c/* commercial only beginning			
-			if (ini_THLog)
-				FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "S2" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-;#c*/ commercial only end				
-			v_InputString 		:= ""
-			return
 	}
- 	F_EventSigOrdHotstring()
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output Function _ SendInput
+{
+	global	;assume-global mode of operation
+	Critical, On
+	local	ThisHotkey := A_ThisHotkey, EndChar := A_EndChar, temp := 0, FirstPart := "", SecondPart := ""
+
+	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
+	OutputDebug, % A_ThisFunc . A_Space . "MinSendLevel:" . v_InputH.MinSendLevel . "|" . "`n"
+	F_DestroyTriggerstringTips(ini_TTCn)
+	v_UndoHotstring	:= ReplacementString
+	,	v_Options 		:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
+	,	v_EndChar 		:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
+	if (InStr(v_Options, "?"))
+		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
+	
+	v_UndoTriggerstring := v_InputString
+	,	ReplacementString 	:= F_ReplaceAHKconstants(ReplacementString)
+	,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options)
+	,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
+	if (SubStr(ReplacementString, 0) = "``")	;extracts the last character
+		ReplacementString := SubStr(ReplacementString, 1, StrLen(ReplacementString) - 1)	;without last character
+	
+	F_SendIsOflag(ReplacementString, Oflag, SendFun)
+	F_EventSigOrdHotstring()
 	temp := F_DetermineGain2(v_InputString, ReplacementString)
 	v_CntCumGain += temp
+	; OutputDebug, % A_ThisFunc . A_Space . "ThisHotkey:" . ThisHotkey . A_Space . "v_EndChar:" . v_EndChar . "`n"
 ;#c/* commercial only beginning	
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 ;#c*/ commercial only end		
 	v_InputString 		:= ""
+	Hotstring("Reset")
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -15048,7 +15087,7 @@ F_MouseMenu_MSI() ; Handling of mouse events for F_HOF_MSI;The subroutine may co
 ,		OutputVarTemp 		:= F_ReplaceAHKconstants(OutputVarTemp)
 ,		OutputVarTemp 		:= F_FollowCaseConformity(OutputVarTemp, v_InputString, v_Options)
 ,		OutputVarTemp 		:= F_ConvertEscapeSequences(OutputVarTemp)
-		F_SendIsOflag(OutputVarTemp, Ovar, "SendInput")
+		F_SendIsOflag(OutputVarTemp, Ovar, "SI")
 		if (ini_MHSEn)
 			SoundBeep, % ini_MHSF, % ini_MHSD
 		if (InStr(ThisHotkey, "?"))
@@ -15128,7 +15167,7 @@ F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid i
 ,		ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
 		Switch WhichMenu	;this parameter is set wihin F_HOF_MSI and F_HOF_MCL
 		{
-			Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SendInput")
+			Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SI")
 			Case "CLI":	F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
 		}
 		if (ini_MHSEn)
