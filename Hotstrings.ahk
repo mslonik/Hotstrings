@@ -12,7 +12,7 @@
 #NoEnv  							; Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn  							; Enable warnings to assist with detecting common errors.
 #LTrim							; Omits spaces and tabs at the beginning of each line. This is primarily used to allow the continuation section to be indented. Also, this option may be turned on for multiple continuation sections by specifying #LTrim on a line by itself. #LTrim is positional: it affects all continuation sections physically beneath it.
-#KeyHistory, 			0			; KeyHistory is disabled to make it harder to determine how script works.
+#KeyHistory, 			10			; KeyHistory is necessary for A_PriorKey
 #HotkeyInterval, 		1000			; Specifies the rate of hotkey activations beyond which a warning dialog will be displayed. Default value = 2000 ms.
 #MaxHotkeysPerInterval, 	200			; Specifies the rate of hotkey activations beyond which a warning dialog will be displayed. Default value = 70.
 ListLines, 			Off			; ListLines is disabled to make it harder to determine how script works.
@@ -308,19 +308,19 @@ Menu, SubmenuPath,		Add
 Menu, SubmenuPath,		Add, % TransA["Script/application folder: restore it to default location"],	F_PathRestoreDefaultAppFolder
 Menu, SubmenuPath,		Add, % TransA["Script/application folder: move it to new location"],			F_PathMoveAppFolder
 Menu, Configuration, 	Add, % TransA["Location of application specific data"],					:SubmenuPath
-Menu, Configuration,	Add	;To add a menu separator line, omit all three parameters.
-Menu, SendLevelSumbmenu,	Add, 0,															F_SetSendLevel
-Menu, SendLevelSumbmenu,	Add, 1,															F_SetSendLevel
-Menu, SendLevelSumbmenu,	Add, 2,															F_SetSendLevel
-Menu, SendLevelSumbmenu,	Add, 3,															F_SetSendLevel
-Menu, Configuration, 	Add, % TransA["SendLevel value"],										:SendLevelSumbmenu
-Menu, SendLevelSumbmenu, Check, 	% ini_SendLevel
-Menu, MinSendLevelSubm,	Add, 0,															F_SetMinSendLevel
-Menu, MinSendLevelSubm,	Add, 1,															F_SetMinSendLevel
-Menu, MinSendLevelSubm,	Add, 2,															F_SetMinSendLevel
-Menu, MinSendLevelSubm,	Add, 3,															F_SetMinSendLevel
-Menu, Configuration,	Add, % TransA["MinSendLevel value"],									:MinSendLevelSubm
-Menu, MinSendLevelSubm, 	Check, 	% ini_MinSendLevel
+; Menu, Configuration,	Add	;To add a menu separator line, omit all three parameters.
+; Menu, SendLevelSumbmenu,	Add, 0,															F_SetSendLevel
+; Menu, SendLevelSumbmenu,	Add, 1,															F_SetSendLevel
+; Menu, SendLevelSumbmenu,	Add, 2,															F_SetSendLevel
+; Menu, SendLevelSumbmenu,	Add, 3,															F_SetSendLevel
+; Menu, Configuration, 	Add, % TransA["SendLevel value"],										:SendLevelSumbmenu
+; Menu, SendLevelSumbmenu, Check, 	% ini_SendLevel
+; Menu, MinSendLevelSubm,	Add, 0,															F_SetMinSendLevel
+; Menu, MinSendLevelSubm,	Add, 1,															F_SetMinSendLevel
+; Menu, MinSendLevelSubm,	Add, 2,															F_SetMinSendLevel
+; Menu, MinSendLevelSubm,	Add, 3,															F_SetMinSendLevel
+; Menu, Configuration,	Add, % TransA["MinSendLevel value"],									:MinSendLevelSubm
+; Menu, MinSendLevelSubm, 	Check, 	% ini_MinSendLevel
 ;#c*/ commercial only end
 ;#f/* free version only beginning
 ; Menu, SubmenuPath,		Add, % TransA["Libraries folder: restore it to default location"], 			F_Empty
@@ -721,7 +721,6 @@ return
 ~*F24::
 ~*LAlt::		;if commented out, only for debugging reasons
 ~RAlt::		;no * allowed as it is part of AltGr (LControl & RAlt) and AltGr is used for diacritic letters in many keyboard layouts
-~Control UP::
 ~*WheelDown::
 ~*WheelUp::
 ~*MButton::
@@ -746,11 +745,23 @@ return
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
 	F_DestroyTriggerstringTips(ini_TTCn)
-	; OutputDebug, % "v_InputString before" . ":" . A_Space . v_InputString . "`n"
+	; OutputDebug, % "v_InputString before:" . v_InputString . "|" . A_Space . "A_ThisHotkey:" . A_ThisHotkey . A_Space . "A_PriorKey:" . A_PriorKey . "`n"
 	if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
 		v_InputString := ""
-	; OutputDebug, % "v_InputString after" . ":" . A_Space . v_InputString . "`n"
+	; OutputDebug, % "v_InputString after:" . v_InputString . "|" . "`n"
 	return
+
+~Control UP::
+	if (A_PriorKey = "LControl") or (A_PriorKey = "RControl")
+		{
+			ToolTip,	;this line is necessary to close tooltips.
+			Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
+			Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
+			F_DestroyTriggerstringTips(ini_TTCn)
+			if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
+				v_InputString := ""
+		}
+	return		
 
 ~*Esc::	;the only difference in comparison to previous section is that Esc also resets hotstring recognizer.
 	OutputDebug, % "~Esc:" . "`n"
@@ -928,7 +939,7 @@ F_SetSendLevel()
 		else
 			Menu, SendLevelSumbmenu, UnCheck, 	% A_Index - 1
 	}
-	OutputDebug, % "ini_SendLevel:" . ini_SendLevel . "`n"
+	; OutputDebug, % "ini_SendLevel:" . ini_SendLevel . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;#c/* commercial only beginning
@@ -2629,7 +2640,7 @@ F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
 ,	v_InputH.OnEnd			:= Func("F_InputHookOnEnd")
 	v_InputH.KeyOpt("{Backspace}", "N")				;Backspace is not Char ;N: Notify. Causes the OnKeyDown and OnKeyUp callbacks to be called each time the key is pressed.
 	v_InputH.Start()
-	OutputDebug, % A_ThisFunc . A_Space . "ini_MinSendLevel:" . ini_MinSendLevel . "|" . A_Space . v_InputH.MinSendLevel . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "ini_MinSendLevel:" . ini_MinSendLevel . "|" . A_Space . v_InputH.MinSendLevel . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InputHookOnEnd(ih)	;for debugging purposes
@@ -2677,7 +2688,7 @@ F_BackspaceProcessing(ih, VK, SC)	;this function is run whenever Backspace key i
 		if (!v_InputString)	;if v_InputString = "" = empty
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
-	OutputDebug, % A_ThisFunc . A_Space . GetKeyName(Format("vk{:x}sc{:x}", VK, SC)) . A_Space . "E" . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . GetKeyName(Format("vk{:x}sc{:x}", VK, SC)) . A_Space . "E" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DetermineMonitors()	; Multi monitor environment, initialization of monitor width and height parameters
@@ -3656,6 +3667,7 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 	if (ini_TTCn = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_DestroyTriggerstringTips(ini_TTCn)
+	; OutputDebug, % "Temp1:" . Temp1 . "|" . "v_Qinput:" . v_Qinput . "|" . "v_InputString:" . v_InputString . "|" . "`n"
 	F_BackFeed(Temp1)
 	v_InputString 		:= ""
 ,	IsCursorPressed 	:= false
@@ -3675,7 +3687,6 @@ F_BackFeed(MyInput)
 ,	MyInput := F_ConvertEscapeSequences2(MyInput)
 	SendLevel, 	% ini_SendLevel	;to backtrigger it must be higher than the input level of the hotstrings
 	SendInput,	% MyInput			;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
-	OutputDebug, % "MyInput:" . MyInput . "|" . A_Space . "ini_SendLevel:" . ini_SendLevel . A_Space . "MinSendLevel:" . v_InputH.MinSendLevel . "`n"
 	SendLevel, 	0
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9091,7 +9102,7 @@ F_AddHotstring()
 	; 3. Modify existing definition
 	if (f_ChangeExistingDef)	;modify existing definition
 	{
-		if (NewOptions = OldOptions) and (vHotstring == a_Hotstring[key]) and (SendFun = a_OutputFunction[key])
+		if (NewOptions = OldOptions) and (vHotstring == a_Hotstring[key]) and (SendFun = a_OutputFunction[key]) and (v_Comment == a_Comment[key])
 		{
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
 				, % TransA["New definition is identical with existing one. Please try again."]
@@ -10538,9 +10549,9 @@ F_DeleteHotstring()
 		a_Combined[index] := a_Triggerstring[index] . "|" . a_TriggerOptions[index] . "|" . a_EnableDisable[index] . "|" . a_Hotstring[index]
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	
 	F_GuiHS3_EnDis("Enable")			;Enable all GuiControls for deletion time d(t, o, h)
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The definition:"] . "`n`n"
-			. TransA["Triggerstring"] . ":" . A_Space . v_Triggerstring . A_Tab . TransA["options"] . ":" . A_Space . options . "`n" 
-			. TransA["was just deleted from"] . "`n"
+	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The definition"] . ":" . "`n`n"
+			. TransA["Triggerstring"] . ":" . A_Space . v_Triggerstring . A_Tab . TransA["options"] . ":" . A_Space . options . "`n`n"
+			. TransA["was just deleted from"] . "`n`n"
 			. TransA["Library name:"] . A_Space . v_SelectHotstringLibrary
 			, 10	;10 s timeout
 	TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
@@ -12742,6 +12753,7 @@ The application										= The application
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
 The default											= The default
 The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually. = The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually.
+The definition											= The definition
 The executable file is prepared by Ahk2Exe and compressed by mpress.exe: = The executable file is prepared by Ahk2Exe and compressed by mpress.exe:
 The executable file is prepared by Ahk2Exe and compressed by upx.exe: = The executable file is prepared by Ahk2Exe and compressed by upx.exe:
 The executable file is prepared by Ahk2Exe, but not compressed:	= The executable file is prepared by Ahk2Exe, but not compressed:
@@ -14801,6 +14813,7 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenuSI_Keyboard() -> F_SendIsOfl
 			else
 				SendRaw, % OutputString
 		Case "CL":
+			; OutputDebug, % "OutputString:" . OutputString . "|" . A_Space . "Oflag:" . Oflag . "|" . A_Space . "v_EndChar:" . v_EndChar . "|" . "`n"
 			F_ClipboardPaste(OutputString, Oflag, v_EndChar)
 		Case "S1":
 			FirstPart			:= SubStr(OutputString, 1, -1) ;omits last character
@@ -14860,7 +14873,7 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 	local	ThisHotkey := A_ThisHotkey, EndChar := A_EndChar, temp := 0, FirstPart := "", SecondPart := ""
 
 	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
-	OutputDebug, % A_ThisFunc . A_Space . "MinSendLevel:" . v_InputH.MinSendLevel . "|" . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "MinSendLevel:" . v_InputH.MinSendLevel . "|" . "`n"
 	F_DestroyTriggerstringTips(ini_TTCn)
 	v_UndoHotstring	:= ReplacementString
 	,	v_Options 		:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
