@@ -25,7 +25,7 @@ CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in t
 ; - - - - - - - - - - - - - - - - - - - - - - - E X E  CONVERSION / INSTALLATOR S E C T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.9"
+global AppVersion				:= "3.6.10"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -89,6 +89,8 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		v_LicensedCompName		:= "fikumiku"			;40 char. max. "0123456789012345678901234567890123456789", corresponds to A_ComputerName
 ,		v_ValidTill			:= "inf"				;date in format yyyymmdd; "inf" for infinity
 ,		v_LicenseID			:= "000001"
+,		f_100msRun 			:= false				;global flag: timer is running, 100 ms, for concurrent press of Shift keys
+,		f_WasReset			:= false				;global flag: Shift key memory reset (to reset hotstring recognizer)
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
@@ -690,7 +692,7 @@ return
 ~*LShift::
 ~*RShift::			;Actually "Shifts" work a bit different as some keys like @ or ? are available only after pressing Shift.
 	ToolTip,			;this line is necessary to close tooltips.
-	OutputDebug, % "Tu jestem" . "`n"
+	; OutputDebug, % "Tu jestem" . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
 	F_DestroyTriggerstringTips(ini_TTCn)
@@ -739,7 +741,7 @@ return
 ~*PgDn::
 ~*WheelLeft::
 ~*WheelRight::
-; ~*LButton::	;as above, but without F_DestroyTriggerstringTips()
+~*LButton::	;as above, but without F_DestroyTriggerstringTips()
 	; OutputDebug, % "~Win:" . "`n"
 	ToolTip,	;this line is necessary to close tooltips.
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
@@ -2636,11 +2638,54 @@ F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
 ,	v_InputH 				:= InputHook("V L0")			
 ,	v_InputH.MinSendLevel 	:= ini_MinSendLevel			;I1 by default
 ,	v_InputH.OnChar 		:= Func("F_OneCharPressed")
+,	v_InputH.OnKeyDown		:= Func("F_OnKeyDown")
 ,	v_InputH.OnKeyUp 		:= Func("F_BackspaceProcessing")	;this function is run whenever Backspace key is up 
 ,	v_InputH.OnEnd			:= Func("F_InputHookOnEnd")
-	v_InputH.KeyOpt("{Backspace}", "N")				;Backspace is not Char ;N: Notify. Causes the OnKeyDown and OnKeyUp callbacks to be called each time the key is pressed.
+	v_InputH.KeyOpt("{Backspace}{LShift}{RShift}", "N")				;Backspace is not Char ;N: Notify. Causes the OnKeyDown and OnKeyUp callbacks to be called each time the key is pressed.
 	v_InputH.Start()
 	; OutputDebug, % A_ThisFunc . A_Space . "ini_MinSendLevel:" . ini_MinSendLevel . "|" . A_Space . v_InputH.MinSendLevel . "`n"
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_OnKeyDown(ih, VK, SC)	;On Key Down
+{
+	global		;assume-global mode of operation
+	Critical, On	;This function starts as the first one (prior to "On Character Down"), but unfortunately can be interrupted by it. To prevent it Critical command is applied.
+	; OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "WhatWasDown:" . v_WhatWasDown . A_Space . "B" . "`n"
+	Switch GetKeyName(Format("vk{:x}sc{:x}", VK, SC)) 
+	{
+		Case "LShift":
+			F_CheckIf100ms()
+		Case "RShift":
+			F_CheckIf100ms()
+	}
+	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
+	Critical, Off
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_100msTimeout()
+{
+	global		;assume-global mode of operation
+
+	f_100msRun 	:= false
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_CheckIf100ms()
+{
+	global		;assume-global mode of operation
+
+	if (f_100msRun)
+		{
+			SetTimer, F_100msTimeout, Off
+			f_100msRun 	:= false
+			f_WasReset	:= true
+			; OutputDebug, % "concurrent" . "`n"
+		}
+	else
+		{
+			SetTimer, F_100msTimeout, -100	;100 ms once
+			f_100msRun 	:= true
+		}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InputHookOnEnd(ih)	;for debugging purposes
@@ -2663,6 +2708,16 @@ F_InputHookOnEnd(ih)	;for debugging purposes
 F_BackspaceProcessing(ih, VK, SC)	;this function is run whenever Backspace key is up.
 {
 	global	;assume-global mode of operation
+
+	if (f_WasReset)
+	{
+		Hotstring("Reset")
+		v_InputString 	:= ""
+	,	f_WasReset 	:= false
+		OutputDebug, % "Double Shift reset" . "`n"
+		SoundPlay, *16	;future: add option to choose behavior (play sound or not, how long to play sound, what sound) and to define time to wait for reset scenario
+		return
+	}
 	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
 	{
 		if (ini_MHSEn)
@@ -3694,11 +3749,11 @@ F_LoadConfiguration()
 {
 	global ;assume-global mode
 
-	ini_SendLevel				:= 0			;SendLevel by default
+	ini_SendLevel				:= 1			;SendLevel by default
 	IniRead, ini_SendLevel, 					% ini_HADConfig, Configuration, SendLevel, 				% A_Space	;To store a blank value (empty string), specify % A_Space.
 	if (ini_SendLevel = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
-		ini_SendLevel := 0
+		ini_SendLevel := 1
 		IniWrite, % ini_SendLevel, % ini_HADConfig, Configuration, SendLevel
 	}
 
@@ -5847,14 +5902,15 @@ F_EvBH_B1() ;Events Basic Hotstring (is triggered) Button Tooltip test
 			if (A_CaretX and A_CaretY)
 			{
 				Gui, Tt_HWT: Show, % "x" . A_CaretX + 20 . A_Space . "y" . A_CaretY - 20	;Tooltip _ Hotstring Was Triggered
-				if (EvBH_R3R4 > 0)
+				if (EvBH_R3R4 = 1)
 					SetTimer, TurnOff_OHE, % "-" . EvBH_S1, 40 ;Priority = 40 to avoid conflicts with other threads 
 			}
 			else
 			{
 				MouseGetPos, v_MouseX, v_MouseY
+				OutputDebug, % "EvBH_R3R4:" . EvBH_R3R4 . A_Space . "ini_OHTD:" . ini_OHTD . A_Space . "EvBH_S1:" . EvBH_S1 . "`n"
 				Gui, Tt_HWT: Show, % "x" v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 	;Tooltip _ Hotstring Was Triggered
-				if (EvBH_R3R4 > 0)
+				if (EvBH_R3R4 = 1)
 					SetTimer, TurnOff_OHE, % "-" . EvBH_S1, 40 ;Priority = 40 to avoid conflicts with other threads 
 			}
 		}
@@ -5862,7 +5918,7 @@ F_EvBH_B1() ;Events Basic Hotstring (is triggered) Button Tooltip test
 		{
 			MouseGetPos, v_MouseX, v_MouseY
 			Gui, Tt_HWT: Show, % "x" v_MouseX + 20 . A_Space . "y" . v_MouseY - 20 	;Tooltip _ Hotstring Was Triggered
-			if (EvBH_R3R4 > 0)
+			if (EvBH_R3R4 = 1)
 				SetTimer, TurnOff_OHE, % "-" . EvBH_S1, 40 ;Priority = 40 to avoid conflicts with other threads 
 		}
 	}
