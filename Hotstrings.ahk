@@ -9100,7 +9100,7 @@ F_AddHotstring()
 {
 	global ;v_EnDis ;assume-global mode of operation
 	local 	vHotstring := "", NewOptions := "", OldOptions := "", f_ChangeExistingDef := false
-, 			SendFun := "", Overwrite := "",	key := 0, value := "", WhichGuiEnable := "", TheWholeFile := "", LibraryHeader := ""
+ 		,	SendFun := "", Overwrite := "",	key := 0, value := "", WhichGuiEnable := "", TheWholeFile := "", LibraryHeader := ""
 
 	;1. Read all inputs.
 	WhichGuiEnable := F_WhichGui()
@@ -9114,7 +9114,7 @@ F_AddHotstring()
 		if (a_Triggerstring[key] == v_Triggerstring) and (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))	;case sensitive string comparison!
 		{
 			OldOptions 		:= a_TriggerOptions[key]
-,			f_ChangeExistingDef := true
+		,	f_ChangeExistingDef := true
 			break
 		}
 		if (a_Triggerstring[key] = v_Triggerstring) and (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))	;case insensitive string comparison!
@@ -9370,6 +9370,8 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 
 	IfMsgBox, Yes
 	{
+		if (OldEnDis = "Dis")	;if old definition is disabled, do not try to change Hotstring definition. Change only definition parameters.
+			return, "Yes"
 		if (InStr(OldOptions, "*") and !InStr(NewOptions,"*"))
 			OldOptions := StrReplace(OldOptions, "*", "*0")
 		if (InStr(OldOptions, "B0") and !InStr(NewOptions, "B0"))
