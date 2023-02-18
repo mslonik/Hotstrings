@@ -781,8 +781,6 @@ return
 	+Tab::
 	Up::
 	Down::
-		F_HMenuCLI_Keyboard()
-		return
 	1::
 	2::
 	3::
@@ -791,13 +789,8 @@ return
 	6::
 	7::
 	Enter:: 
-		; OutputDebug, % "WinExist(""ahk_id"" HMenuCliHwnd):" . A_Space . A_ThisHotkey . "`n"
-		if (F_HMenuCLI_Keyboard())
-		{
-			v_InputH.VisibleText 	:= true
-,			v_InputString 			:= ""
-			; Hotstring("Reset")
-		}
+	; OutputDebug, % "WinExist(""ahk_id"" HMenuCliHwnd):" . A_Space . A_ThisHotkey . "`n"
+		F_HMenuCLI_Keyboard()
 		return
 	Esc::
 		Gui, HMenuCli: Destroy
@@ -812,8 +805,6 @@ return
 	+Tab::
 	Up::
 	Down::
-		F_HMenuSI_Keyboard()
-		return
 	1::
 	2::
 	3::
@@ -822,13 +813,7 @@ return
 	6::
 	7::
 	Enter:: 
-		if (F_HMenuSI_Keyboard())
-		{
-			v_InputH.VisibleText 	:= true
-,			v_InputString 			:= ""
-			; Hotstring("Reset")
-		}
-		; OutputDebug, % "WinExist(""ahk_id"" HMenuAHKHwnd)" . A_Space . A_ThisHotkey . "`n"
+		F_HMenuSI_Keyboard()
 		return
 	Esc::
 		Gui, HMenuAHK: Destroy
@@ -1746,7 +1731,8 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HMenuSI_Keyboard()
 {
-	global	;assume-global moee
+	global	;assume-global mode of operation
+	Critical, On
 	local	PressedKey := A_ThisHotkey,		Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", temp := 0
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	
@@ -1812,10 +1798,12 @@ F_HMenuSI_Keyboard()
 ,	Temp1 			:= F_FollowCaseConformity(Temp1, v_InputString, v_Options)
 ,	Temp1 			:= F_ConvertEscapeSequences(Temp1)
 	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
-	if (ini_MHMP = 4)
+	if (ini_TTCn = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
-	F_SendIsOflag(Temp1, Ovar, "SI")
 	Gui, HMenuAHK: Destroy
+	F_SendIsOflag(Temp1, Ovar, "SI")
+	v_InputH.VisibleText 	:= true
+	Hotstring("Reset")
 	temp := F_DetermineGain2(v_InputString, Temp1)
 	v_CntCumGain += temp
 ;#c/* commercial only beginning
@@ -1823,6 +1811,8 @@ F_HMenuSI_Keyboard()
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 ;#c*/ commercial only end		
 	v_UndoTriggerstring := v_InputString
+	v_InputString := ""
+	Critical, Off
 	return true	; v_InputString will be cleared only if function returns true if function returns false, characters still will be invisible
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1922,12 +1912,14 @@ F_HMenuCLI_Keyboard()
 ,	ReplacementString 	:= F_ReplaceAHKconstants(Temp1)
 ,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options) ; 	
 ,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
-	if (ini_MHMP = 4)
+	if (ini_TTCn = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
-	F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
 	Gui, HMenuCli: Destroy
+	F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
 	if (InStr(A_ThisHotkey, "?"))
 		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
+	v_InputH.VisibleText := true
+	Hotstring("Reset")
 	temp := F_DetermineGain2(v_InputString, Temp1)
 	v_CntCumGain += temp
 ;#c/* commercial only beginning
@@ -2522,7 +2514,7 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 	if (Window2X + Window2W > Window1X + Window1W)	;if triggerstring tips are too far to the right
 		NewX -= Window2W + 40	;right -> left
 	DetectHiddenWindows, Off
-	Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate 	
+	Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_OneCharPressed(ih, Char)
@@ -2537,7 +2529,6 @@ F_OneCharPressed(ih, Char)
 		,	LastChar		:= ""	;last character
 
 	Critical, On
-	; OutputDebug, % A_ThisFunc . A_Space . "Char:" . Char . "`n"
 	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))	;ini_MHSEn = Menu Hotstring Sound Enable; this is very unfortunate that SoundBeep is used (instead of SoundPlay). As a consequence when somebody presses very quickly some characters, this function is run "one after another" character and no other functions are run. This could lead to unwanted behaviour.
 	{
 		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed. Future: replace SoundBeep with SoundPlay.
@@ -2596,6 +2587,7 @@ F_OneCharPressed(ih, Char)
 			F_PTTTQ(v_Qinput)
 		else
 			F_PTTT(v_InputString)	;Variant when new sequence starts from EndChar.
+		OutputDebug, % "F_DestroyTriggerstringTips" . "`n"
 		F_DestroyTriggerstringTips(ini_TTCn)
 		if (a_Tips.Count())	;if tips are available display then
 		{
@@ -14745,7 +14737,7 @@ F_PrepareUndo(string)
 F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendInput; This function creates only on screen menu. Events are handled by F_HMenuSI_Keyboard and F_MouseMenu_MSI.
 {
 	global	;assume-global mode
-	Critical, On
+	; Critical, On
 	local	a_MCSIMenuPos := [], ThisHotkey := A_ThisHotkey, EndChar := A_EndChar
 
 	v_InputH.VisibleText 	:= false
@@ -14783,7 +14775,7 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 		F_FlipMenu(HMenuAHKHwnd, a_MCSIMenuPos[1], a_MCSIMenuPos[2], "HMenuAHK")
 		GuiControl, Choose, % Id_LB_HMenuAHK, 1
 	}
-	else	;(ini_MHMP = 4)
+	else	;(ini_TTCn = 4)
 	{
 		; OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID . "`n"
 		Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
@@ -14793,7 +14785,7 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 		WhichMenu := "SI"	;this setting will be used within F_MouseMenuCombined() to handle mouse event
 	}
 	Ovar := Oflag
-	Critical, Off
+	; Critical, Off
 	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . A_Space . "ThisHotkey:" . ThisHotkey . "|" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14999,7 +14991,7 @@ F_HOF_MCL(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipb
 		F_FlipMenu(HMenuCliHwnd, a_MCLIMenuPos[1], a_MCLIMenuPos[2], "HMenuCli")
 		GuiControl, Choose, % Id_LB_HMenuCli, 1
 	}
-	else	;(ini_MHMP = 4)
+	else	;(ini_TTCn = 4)
 	{
 		PreviousWindowID := WinExist("A")
 		Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
