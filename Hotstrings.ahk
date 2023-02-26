@@ -522,15 +522,19 @@ Critical, Off
 		HS3SearchGuiEscape()
 		return	;end of this thread
 	Down::
+		F_DestroyTriggerstringTips(ini_TTCn)
 		F_HS3Search_Down()
 		return
 	Up::
+		F_DestroyTriggerstringTips(ini_TTCn)
 		F_HS3Search_Up()
 		return
 	Right::
+		F_DestroyTriggerstringTips(ini_TTCn)
 		F_HS3SearchRight()
 		return
 	Left::
+		F_DestroyTriggerstringTips(ini_TTCn)
 		F_HS3SearchLeft()
 		return
 	Tab::
@@ -1054,15 +1058,16 @@ F_HS3SearchRight()
 {
 	global	;assume-global mode of operation
 	local	FocusedControl := "", NextRow := 0
-
+	
+	Gui, HS3Search: Default
 	GuiControlGet, FocusedControl, HS3Search: Focus
 	if (FocusedControl = "Edit1")
 	{
 		GuiControl, , % IdSearchR1, 1
 		GuiControl, Focus, % IdSearchR1
+		F_SearchPhrase()
 		return
 	}
-	Gui, HS3Search: Default
 	if (FocusedControl = "Button1")
 	{
 		GuiControl, , % IdSearchR2, 1
@@ -1103,20 +1108,25 @@ F_HS3Search_Down()
 	global	;assume-global mode of operation
 	local	FocusedControl := "", NextRow := 0
 
+	Gui, HS3Search: Default
 	GuiControlGet, FocusedControl, HS3Search: Focus
-	if (FocusedControl = "Edit1")
+	Switch FocusedControl
 	{
-		Gui, HS3Search: Default
-		GuiControl, Focus, % IdSearchLV1
-		LV_Modify(1, "+Select +Focus")
-		return
-	}
-
-	if (FocusedControl = "SysListView321")
-	{
-		Gui, HS3Search: Default
-		NextRow := LV_GetNext()
-		LV_Modify(++NextRow, "Select")
+		Case "Edit1", "Button1", "Button2", "Button3":	;Button2 = Hotstring, Button3 = Library
+			Gui, HS3Search: Default
+			NextRow := LV_GetCount()
+			OutputDebug, % "NextRow case 1:" . NextRow . "|" . "`n"			
+			if (NextRow = 0)
+				GuiControl, Focus, % IdSearchE1
+			else
+			{
+				GuiControl, Focus, % IdSearchLV1
+				LV_Modify(1, "+Select +Focus")
+			}
+		Case "SysListView321":
+			NextRow := LV_GetNext()
+			OutputDebug, % "NextRow case 2:" . NextRow . "|" . "`n"
+			LV_Modify(++NextRow, "Select")
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2587,7 +2597,7 @@ F_OneCharPressed(ih, Char)
 			F_PTTTQ(v_Qinput)
 		else
 			F_PTTT(v_InputString)	;Variant when new sequence starts from EndChar.
-		OutputDebug, % "F_DestroyTriggerstringTips" . "`n"
+		; OutputDebug, % "F_DestroyTriggerstringTips" . "`n"
 		F_DestroyTriggerstringTips(ini_TTCn)
 		if (a_Tips.Count())	;if tips are available display then
 		{
@@ -14922,8 +14932,7 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 	Critical, On
 	local	ThisHotkey := A_ThisHotkey, EndChar := A_EndChar, temp := 0, FirstPart := "", SecondPart := ""
 
-	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
-	; OutputDebug, % A_ThisFunc . A_Space . "MinSendLevel:" . v_InputH.MinSendLevel . "|" . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . "ReplacementString:" . ReplacementString . "|" . "`n"
 	F_DestroyTriggerstringTips(ini_TTCn)
 	v_UndoHotstring	:= ReplacementString
 	,	v_Options 		:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
@@ -14933,11 +14942,15 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 	
 	v_UndoTriggerstring := v_InputString
 	,	ReplacementString 	:= F_ReplaceAHKconstants(ReplacementString)
+	; OutputDebug, % "F_ReplaceAHKconstants" . A_Space . "ReplacementString:" . ReplacementString . "|" . "`n"
 	,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options)
+	; OutputDebug, % "F_FollowCaseConformity" . A_Space . "ReplacementString:" . ReplacementString . "|" . "`n"
 	,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
+	; OutputDebug, % "F_ConvertEscapeSequences" . A_Space . "ReplacementString:" . ReplacementString . "|" . "`n"
 	if (SubStr(ReplacementString, 0) = "``")	;extracts the last character
 		ReplacementString := SubStr(ReplacementString, 1, StrLen(ReplacementString) - 1)	;without last character
 	
+	; OutputDebug, % A_ThisFunc . A_Space . "ReplacementString:" . ReplacementString . "|" . "`n"
 	F_SendIsOflag(ReplacementString, Oflag, SendFun)
 	F_EventSigOrdHotstring()
 	temp := F_DetermineGain2(v_InputString, ReplacementString)
