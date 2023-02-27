@@ -1031,56 +1031,57 @@ F_HS3SearchLeft()
 	global	;assume-global mode of operation
 	local	FocusedControl := "", NextRow := 0
 
-	GuiControlGet, FocusedControl, HS3Search: Focus
-	if (FocusedControl = "Button1")
-	{
-		GuiControl, Focus, % IdSearchE1
-		return
-	}
 	Gui, HS3Search: Default
-	if (FocusedControl = "Button2")
+	GuiControlGet, FocusedControl, HS3Search: Focus
+	
+	Switch FocusedControl
 	{
-		GuiControl, , % IdSearchR1, 1
-		GuiControl, Focus, % IdSearchR1
-		F_SearchPhrase()
-		return
-	}
-	if (FocusedControl = "Button3")
-	{
-		GuiControl, , % IdSearchR2, 1
-		GuiControl, Focus, % IdSearchR2
-		F_SearchPhrase()
-		return
+		Case "Button1":	;Triggerstring
+			GuiControl, Focus, % IdSearchE1
+		Case "Button2":	;Hotstring
+			GuiControl, , % IdSearchR1, 1
+			GuiControl, Focus, % IdSearchR1
+			F_SearchPhrase()
+		Case "Button3":	;Library
+			GuiControl, , % IdSearchR2, 1
+			GuiControl, Focus, % IdSearchR2
+			F_SearchPhrase()
+		Case "Edit1":		;Phrase to search for
+			ControlSend, Edit1, {left}
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HS3SearchRight()
 {
 	global	;assume-global mode of operation
-	local	FocusedControl := "", NextRow := 0
+	local	FocusedControl := "", CaretPos := 0, LineText := ""
 	
 	Gui, HS3Search: Default
 	GuiControlGet, FocusedControl, HS3Search: Focus
-	if (FocusedControl = "Edit1")
+	Switch FocusedControl
 	{
-		GuiControl, , % IdSearchR1, 1
-		GuiControl, Focus, % IdSearchR1
-		F_SearchPhrase()
-		return
-	}
-	if (FocusedControl = "Button1")
-	{
-		GuiControl, , % IdSearchR2, 1
-		GuiControl, Focus, % IdSearchR2
-		F_SearchPhrase()
-		return
-	}
-	if (FocusedControl = "Button2")
-	{
-		GuiControl, , % IdSearchR3, 1
-		GuiControl, Focus, % IdSearchR3
-		F_SearchPhrase()
-		return
+		Case "Button1":	;Triggerstring
+			GuiControl, , % IdSearchR2, 1
+			GuiControl, Focus, % IdSearchR2
+			F_SearchPhrase()
+		Case "Button2":	;Hotstring
+			GuiControl, , % IdSearchR3, 1
+			GuiControl, Focus, % IdSearchR3
+			F_SearchPhrase()
+		Case "Button3":	;Library
+
+		Case "Edit1":		;Phrase to search for
+			ControlGet, CaretPos, CurrentCol,, Edit1	;get current position of the caret
+			ControlGet, LineText, Line, 1, Edit1		;get current text from edit field
+			OutputDebug, % "CaretPos:" . CaretPos . "|" . A_Space . "LineText:" . LineText . "|" . "`n"
+			if (StrLen(LineText) >= CaretPos)
+				ControlSend, Edit1, {right}
+			else
+			{
+				GuiControl, , % IdSearchR1, 1
+				GuiControl, Focus, % IdSearchR1
+				F_SearchPhrase()
+			}
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
