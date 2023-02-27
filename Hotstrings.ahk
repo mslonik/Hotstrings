@@ -91,6 +91,8 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		v_LicenseID			:= "000001"
 ,		f_100msRun 			:= false				;global flag: timer is running, 100 ms, for concurrent press of Shift keys
 ,		f_WasReset			:= false				;global flag: Shift key memory reset (to reset hotstring recognizer)
+,		f_RShiftDown 			:= false
+,		f_LShiftDown 			:= false
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
@@ -780,52 +782,35 @@ return
 	Hotstring("Reset")
 	return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#If WinExist("ahk_id" HMenuCliHwnd)	;MCL -> F_HMenuCLI_Keyboard() -> F_ClipboardPaste
-	Tab::
-	+Tab::
-	Up::
-	Down::
-	1::
-	2::
-	3::
-	4::
-	5::
-	6::
-	7::
-	Enter:: 
-	; OutputDebug, % "WinExist(""ahk_id"" HMenuCliHwnd):" . A_Space . A_ThisHotkey . "`n"
-		F_HMenuCLI_Keyboard()
-		return
-	Esc::
-		Gui, HMenuCli: Destroy
-		SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
-		v_InputH.VisibleText 	:= true
-,		v_InputString 			:= ""
-		return
-#If
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#If WinExist("ahk_id" HMenuAHKHwnd)	;MSI -> F_HMenuSI_Keyboard() -> F_SendIsOflag
-	Tab::
-	+Tab::
-	Up::
-	Down::
-	1::
-	2::
-	3::
-	4::
-	5::
-	6::
-	7::
-	Enter:: 
-		F_HMenuSI_Keyboard()
-		return
-	Esc::
-		Gui, HMenuAHK: Destroy
-		SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
-		v_InputString 			:= ""
-,		v_InputH.VisibleText 	:= true
-		return
-#If
+; #If WinExist("ahk_id" HMenuAHKHwnd) or WinExist("ahk_id" HMenuCliHwnd)	;MSI or MCL -> F_HMenuSI_Keyboard() -> F_SendIsOflag or F_ClipboardPaste
+; 	Tab::
+; 	+Tab::
+; 	Up::
+; 	Down::
+; 	1::
+; 	2::
+; 	3::
+; 	4::
+; 	5::
+; 	6::
+; 	7::
+; 	Enter::
+; 		if (WinExist("ahk_id" HMenuAHKHwnd))
+; 			WinActivate, % "ahk_id" HMenuAHKHwnd
+; 		if (WinExist("ahk_id" HMenuCliHwnd))
+; 			WinActivate, % "ahk_id" HMenuCliHwnd
+; 		F_HMenuSI_Keyboard()
+; 		return
+; 	Esc::
+; 		if (WinExist("ahk_id" HMenuAHKHwnd))
+; 			Gui, HMenuAHK: Destroy
+; 		if (WinExist("ahk_id" HMenuCliHwnd))
+; 			Gui, HMenuCli: Destroy
+; 		SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
+; 		v_InputString 			:= ""
+; ,		v_InputH.VisibleText 	:= true
+; 		return
+; #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If WinExist("ahk_id" HMenuAHKHwnd) or WinExist("ahk_id" HMenuCliHwnd)	;MSI or MCL
 	^?::
@@ -1739,25 +1724,32 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 ;#c*/ commercial only end
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HMenuSI_Keyboard()
+F_HMenuSI_Keyboard(PressedKey)
+; F_HMenuSI_Keyboard()
 {
 	global	;assume-global mode of operation
 	Critical, On
-	local	PressedKey := A_ThisHotkey,		Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", temp := 0
+	local	Temp1 := ""
+		; ,	PressedKey := A_ThisHotkey
+		, 	ShiftTabIsFound := false
+		,	ReplacementString := ""
+		, 	temp := 0
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 	
 	if (InStr(PressedKey, "Up") or InStr(PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
 ,		IntCnt--
-		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
+		ControlSend, , {Up}, A
+		; ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
 		ShiftTabIsFound := true
 	}
 	if (InStr(PressedKey, "Down") or InStr(PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
 	{
 		IsCursorPressed := true
 ,		IntCnt++
-		ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
+		ControlSend, , {Down}, A
+		; ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
 		ShiftTabIsFound := false
 	}
 	if ((v_MenuMax = 1) and IsCursorPressed)
@@ -1794,7 +1786,8 @@ F_HMenuSI_Keyboard()
 			SoundBeep, % ini_MHSF, % ini_MHSD	
 		return false ;if function returns false, characters still be invisible
 	}
-	ControlGet, Temp1, List, , , % "ahk_id" Id_LB_HMenuAHK
+	ControlGet, Temp1, List, , , A
+	; ControlGet, Temp1, List, , , % "ahk_id" Id_LB_HMenuAHK
 	Loop, Parse, Temp1, `n
 	{
 		if (A_Index = PressedKey)
@@ -1810,8 +1803,18 @@ F_HMenuSI_Keyboard()
 	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
 	if (ini_TTCn = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
-	Gui, HMenuAHK: Destroy
-	F_SendIsOflag(Temp1, Ovar, "SI")
+	if (WinExist("ahk_id" HMenuAHKHwnd))
+	{
+		Gui, HMenuAHK: Destroy
+		OutputDebug, % "Temp1:" . Temp1 . "|" . "`n"
+		F_SendIsOflag(Temp1, Ovar, "SI")
+	}	
+	if (WinExist("ahk_id" HMenuCliHwnd))
+	{
+		Gui, HMenuCli: Destroy
+		F_ClipboardPaste(Temp1, Ovar, v_EndChar)
+	}	
+	
 	v_InputH.VisibleText 	:= true
 	if (InStr(v_Options, "z", false))	;fundamental change, now "z" parameter metters
 		Hotstring("Reset")
@@ -1853,98 +1856,6 @@ F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_MouseMouse is lower than this
 			}
 	}
 	; ToolTip, ;switch off tooltips created when Unicode symbol is clicked	2022-02-06: I'm not sure if this line is necessary
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HMenuCLI_Keyboard()
-{
-	global	;assume-global mode of operation
-	local	PressedKey := A_ThisHotkey,		Temp1 := "",	ShiftTabIsFound := false, ReplacementString := "", temp := 0
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
-
-	if (InStr(PressedKey, "Up") or InStr(PressedKey, "+Tab"))	;the same as "up"
-	{
-		IsCursorPressed := true
-		IntCnt--
-		ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuCli
-		ShiftTabIsFound := true
-	}
-	if (InStr(PressedKey, "Down") or InStr(PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
-	{
-		IsCursorPressed := true
-		IntCnt++
-		ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuCli
-	}
-	if ((v_MenuMax = 1) and IsCursorPressed)
-	{
-		IntCnt := 1
-		return
-	}
-	
-	if (IsCursorPressed)
-	{
-		if (IntCnt > v_MenuMax)
-		{
-			IntCnt := v_MenuMax
-			if (ini_MHSEn)
-				SoundBeep, % ini_MHSF, % ini_MHSD	
-		}
-		if (IntCnt < 1)
-		{
-			IntCnt := 1
-			if (ini_MHSEn)
-				SoundBeep, % ini_MHSF, % ini_MHSD	
-		}
-		IsCursorPressed := false
-		return
-	}		
-	
-	if (InStr(PressedKey, "Enter"))
-	{
-		PressedKey 		:= IntCnt
-,		IsCursorPressed 	:= false
-,		IntCnt 			:= 1
-	}
-	if (PressedKey > v_MenuMax)
-	{
-		if (ini_MHSEn)
-			SoundBeep, % ini_MHSF, % ini_MHSD
-		return false
-	}
-	ControlGet, Temp1, List, , , % "ahk_id" Id_LB_HMenuCli
-	Loop, Parse, Temp1, `n
-	{
-		if (A_Index = PressedKey)
-		{
-			Temp1 := SubStr(A_LoopField, 4)
-			break
-		}
-	}
-	v_UndoHotstring 	:= Temp1
-,	ReplacementString 	:= F_ReplaceAHKconstants(Temp1)
-,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options) ; 	
-,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
-	if (ini_TTCn = 4)
-		WinActivate, % "ahk_id" PreviousWindowID
-	Gui, HMenuCli: Destroy
-	F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
-	if (InStr(A_ThisHotkey, "?"))
-		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
-	v_InputH.VisibleText := true
-	if (InStr(v_Options, "z", false))	;fundamental change, now "z" parameter metters
-		Hotstring("Reset")
-	temp := F_DetermineGain2(v_InputString, Temp1)
-	v_CntCumGain += temp
-;#c/* commercial only beginning
-	if (ini_THLog)
-		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-;#c*/ commercial only end
-	v_UndoTriggerstring := v_InputString
-,	IfUpF 			:= false
-,	IfDownF 			:= false
-,	IsCursorPressed 	:= false
-, 	IntCnt 			:= 1
-	return true ;if function returns true, v_InputString will be cleared and input characters will not be invisible anymore
-	; OutputDebug, % "End of F_HMenuCLI_Keyboard:" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ActiveControlIsOfClass(Class)	;https://www.autohotkey.com/docs/commands/_If.htm
@@ -2545,7 +2456,7 @@ F_OneCharPressed(ih, Char)
 	{
 		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed. Future: replace SoundBeep with SoundPlay.
 		Critical, Off
-		; OutputDebug, % "Branch Char:" . A_Tab . Char . "`n"
+		OutputDebug, % A_ThisFunc . A_Space . "SoundBeep" . "`n"
 		return
 	}
 	if (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))
@@ -2643,7 +2554,7 @@ F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
 ,	v_InputH.MinSendLevel 	:= ini_MinSendLevel			;I1 by default
 ,	v_InputH.OnChar 		:= Func("F_OneCharPressed")
 ,	v_InputH.OnKeyDown		:= Func("F_OnKeyDown")
-,	v_InputH.OnKeyUp 		:= Func("F_BackspaceProcessing")	;this function is run whenever Backspace key is up 
+,	v_InputH.OnKeyUp 		:= Func("F_BackspaceProcessing")	;this function is run whenever Backspace key or LShift or RShift is up 
 ,	v_InputH.OnEnd			:= Func("F_InputHookOnEnd")
 	v_InputH.KeyOpt("{Backspace}{LShift}{RShift}", "N")				;Backspace is not Char ;N: Notify. Causes the OnKeyDown and OnKeyUp callbacks to be called each time the key is pressed.
 	v_InputH.Start()
@@ -2659,8 +2570,10 @@ F_OnKeyDown(ih, VK, SC)	;On Key Down
 	Switch GetKeyName(Format("vk{:x}sc{:x}", VK, SC)) 
 	{
 		Case "LShift":
+			f_LShiftDown := true
 			F_CheckIf100ms()
 		Case "RShift":
+			f_RShiftDown := true
 			F_CheckIf100ms()
 	}
 	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
@@ -2679,17 +2592,20 @@ F_CheckIf100ms()
 	global		;assume-global mode of operation
 
 	if (f_100msRun)
-		{
-			SetTimer, F_100msTimeout, Off
-			f_100msRun 	:= false
-			f_WasReset	:= true
-			; OutputDebug, % "concurrent" . "`n"
-		}
+	{
+		SetTimer, F_100msTimeout, Off
+		f_100msRun := false
+		if (f_LShiftDown) and (f_RShiftDown)
+			f_WasReset := true
+		f_LShiftDown := false
+	,	f_RShiftDown := false	
+		; OutputDebug, % "concurrent" . "`n"
+	}
 	else
-		{
-			SetTimer, F_100msTimeout, -100	;100 ms once
-			f_100msRun 	:= true
-		}
+	{
+		SetTimer, F_100msTimeout, -100	;100 ms once
+		f_100msRun 	:= true
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InputHookOnEnd(ih)	;for debugging purposes
@@ -2709,7 +2625,7 @@ F_InputHookOnEnd(ih)	;for debugging purposes
 		ih.Start()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_BackspaceProcessing(ih, VK, SC)	;this function is run whenever Backspace key is up.
+F_BackspaceProcessing(ih, VK, SC)	;this function is run whenever Backspace key or LShift or RShift is up 
 {
 	global	;assume-global mode of operation
 
@@ -2727,6 +2643,7 @@ F_BackspaceProcessing(ih, VK, SC)	;this function is run whenever Backspace key i
 		if (ini_MHSEn)
 		{
 			SoundBeep, % ini_MHSF, % ini_MHSD
+			OutputDebug, % A_ThisFunc . A_Space . "Beep" . "`n"
 			return		
 		}
 	}
@@ -14656,7 +14573,8 @@ F_CreateHotstring(txt, nameoffile)
 		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
 			Try
-				Hotstring(":" . Options . ":" . Triggerstring, func("F_HOF_" . SendFun).bind(TextInsert, Oflag), EnDis)
+				Hotstring(":" . Options . ":" . Triggerstring, func("F_MenuOutput").bind(TextInsert, Oflag, SendFun), EnDis)
+				; Hotstring(":" . Options . ":" . Triggerstring, func("F_HOF_" . SendFun).bind(TextInsert, Oflag), EnDis)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(F_HOF_" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")"
@@ -14746,11 +14664,16 @@ F_PrepareUndo(string)
 	return string
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendInput; This function creates only on screen menu. Events are handled by F_HMenuSI_Keyboard and F_MouseMenu_MSI.
+F_MenuOutput(TextOptions, Oflag, SendFun)
+; F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendInput; This function creates only on screen menu. Events are handled by F_HMenuSI_Keyboard and F_MouseMenu_MSI.
+; F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendInput; This function creates only on screen menu. Events are handled by F_HMenuSI_Keyboard and F_MouseMenu_MSI.
 {
 	global	;assume-global mode
-	; Critical, On
+	Critical, On
 	local	a_MCSIMenuPos := [], ThisHotkey := A_ThisHotkey, EndChar := A_EndChar
+		,	SingleKey := ""
+		,	WhatWasPressed := ""
+		,	f_Shift := false
 
 	v_InputH.VisibleText 	:= false
 ,	v_Options 			:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
@@ -14797,7 +14720,44 @@ F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendIn
 		WhichMenu := "SI"	;this setting will be used within F_MouseMenuCombined() to handle mouse event
 	}
 	Ovar := Oflag
-	; Critical, Off
+
+	WinActivate, % "ahk_id" HMenuAHKHwnd
+	Loop
+	{
+		Input, SingleKey, L1, {Tab}{Up}{Down}1234567{Enter}{LShift}{RShift}{Esc}
+		if (InStr(ErrorLevel, "EndKey:"))
+		{
+			WhatWasPressed := SubStr(ErrorLevel, 8)
+			OutputDebug, % "Terminated by EndKey:" . WhatWasPressed . "|" . "`n"	;8 = EndKey: + 1
+			if (WhatWasPressed = "Escape")
+			{
+				Gui, HMenuAHK: Destroy
+				SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
+				v_InputString 			:= ""
+			,	v_InputH.VisibleText 	:= true
+				break
+			}	
+
+			if (!f_Shift) and ((WhatWasPressed = "LShift") or (WhatWasPressed = "RShift"))
+			{
+				f_Shift := true
+				Continue
+			}
+			if (f_Shift) and (WhatWasPressed = "Tab")
+			{
+				WhatWasPressed := "+Tab"
+			,	f_Shift := false
+				if (F_HMenuSI_Keyboard(WhatWasPressed))
+					break
+			}
+			if (f_Shift) and (WhatWasPressed != "Tab")
+				Continue
+			if (F_HMenuSI_Keyboard(WhatWasPressed))
+				break
+		}
+	}
+	Critical, Off
+	OutputDebug, % A_ThisFunc . A_Space . "end" . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
 	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . A_Space . "ThisHotkey:" . ThisHotkey . "|" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
