@@ -1047,7 +1047,7 @@ F_HS3SearchLeft()
 			GuiControl, Focus, % IdSearchR2
 			F_SearchPhrase()
 		Case "Edit1":		;Phrase to search for
-			ControlSend, Edit1, {left}
+			ControlSend, Edit1, {left}	;send to a guicontrol cursor pressing
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1073,9 +1073,8 @@ F_HS3SearchRight()
 		Case "Edit1":		;Phrase to search for
 			ControlGet, CaretPos, CurrentCol,, Edit1	;get current position of the caret
 			ControlGet, LineText, Line, 1, Edit1		;get current text from edit field
-			OutputDebug, % "CaretPos:" . CaretPos . "|" . A_Space . "LineText:" . LineText . "|" . "`n"
 			if (StrLen(LineText) >= CaretPos)
-				ControlSend, Edit1, {right}
+				ControlSend, Edit1, {right}	;send to a guicontrol cursor pressing
 			else
 			{
 				GuiControl, , % IdSearchR1, 1
@@ -1814,7 +1813,8 @@ F_HMenuSI_Keyboard()
 	Gui, HMenuAHK: Destroy
 	F_SendIsOflag(Temp1, Ovar, "SI")
 	v_InputH.VisibleText 	:= true
-	Hotstring("Reset")
+	if (InStr(v_Options, "z", false))	;fundamental change, now "z" parameter metters
+		Hotstring("Reset")
 	temp := F_DetermineGain2(v_InputString, Temp1)
 	v_CntCumGain += temp
 ;#c/* commercial only beginning
@@ -1930,7 +1930,8 @@ F_HMenuCLI_Keyboard()
 	if (InStr(A_ThisHotkey, "?"))
 		v_InputString := SubStr(A_ThisHotkey, InStr(A_ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
 	v_InputH.VisibleText := true
-	Hotstring("Reset")
+	if (InStr(v_Options, "z", false))	;fundamental change, now "z" parameter metters
+		Hotstring("Reset")
 	temp := F_DetermineGain2(v_InputString, Temp1)
 	v_CntCumGain += temp
 ;#c/* commercial only beginning
@@ -14962,7 +14963,9 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 ;#c*/ commercial only end		
 	v_InputString 		:= ""
-	Hotstring("Reset")
+	OutputDebug, % "v_Options:" . v_Options . "|" . "`n"
+	if (InStr(v_Options, "z", false))	;fundamental change, now "z" parameter metters
+		Hotstring("Reset")
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
