@@ -782,36 +782,6 @@ return
 	Hotstring("Reset")
 	return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-; #If WinExist("ahk_id" HMenuAHKHwnd) or WinExist("ahk_id" HMenuCliHwnd)	;MSI or MCL -> F_HMenuSI_Keyboard() -> F_SendIsOflag or F_ClipboardPaste
-; 	Tab::
-; 	+Tab::
-; 	Up::
-; 	Down::
-; 	1::
-; 	2::
-; 	3::
-; 	4::
-; 	5::
-; 	6::
-; 	7::
-; 	Enter::
-; 		if (WinExist("ahk_id" HMenuAHKHwnd))
-; 			WinActivate, % "ahk_id" HMenuAHKHwnd
-; 		if (WinExist("ahk_id" HMenuCliHwnd))
-; 			WinActivate, % "ahk_id" HMenuCliHwnd
-; 		F_HMenuSI_Keyboard()
-; 		return
-; 	Esc::
-; 		if (WinExist("ahk_id" HMenuAHKHwnd))
-; 			Gui, HMenuAHK: Destroy
-; 		if (WinExist("ahk_id" HMenuCliHwnd))
-; 			Gui, HMenuCli: Destroy
-; 		SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
-; 		v_InputString 			:= ""
-; ,		v_InputH.VisibleText 	:= true
-; 		return
-; #If
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If WinExist("ahk_id" HMenuAHKHwnd) or WinExist("ahk_id" HMenuCliHwnd)	;MSI or MCL
 	^?::
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Shortcuts available for hotstring menu:"] . "`n`n" ;it cannot be modal (always on top) as HMenuAHKHwnd has already feature "always on top"
@@ -1724,24 +1694,24 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 ;#c*/ commercial only end
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HMenuSI_Keyboard(PressedKey)
-; F_HMenuSI_Keyboard()
+F_HMenu_Keyboard(PressedKey, SendFun)
 {
 	global	;assume-global mode of operation
-	Critical, On
+	; Critical, On
 	local	Temp1 := ""
-		; ,	PressedKey := A_ThisHotkey
 		, 	ShiftTabIsFound := false
 		,	ReplacementString := ""
 		, 	temp := 0
-	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
+	static 	IfUpF := false
+		,	IfDownF := false
+		,	IsCursorPressed := false
+		,	IntCnt := 1
 	
 	if (InStr(PressedKey, "Up") or InStr(PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
 ,		IntCnt--
 		ControlSend, , {Up}, A
-		; ControlSend, , {Up}, % "ahk_id" Id_LB_HMenuAHK
 		ShiftTabIsFound := true
 	}
 	if (InStr(PressedKey, "Down") or InStr(PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
@@ -1749,7 +1719,6 @@ F_HMenuSI_Keyboard(PressedKey)
 		IsCursorPressed := true
 ,		IntCnt++
 		ControlSend, , {Down}, A
-		; ControlSend, , {Down}, % "ahk_id" Id_LB_HMenuAHK
 		ShiftTabIsFound := false
 	}
 	if ((v_MenuMax = 1) and IsCursorPressed)
@@ -1787,7 +1756,6 @@ F_HMenuSI_Keyboard(PressedKey)
 		return false ;if function returns false, characters still be invisible
 	}
 	ControlGet, Temp1, List, , , A
-	; ControlGet, Temp1, List, , , % "ahk_id" Id_LB_HMenuAHK
 	Loop, Parse, Temp1, `n
 	{
 		if (A_Index = PressedKey)
@@ -1803,17 +1771,16 @@ F_HMenuSI_Keyboard(PressedKey)
 	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
 	if (ini_TTCn = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
-	if (WinExist("ahk_id" HMenuAHKHwnd))
+	Gui, HMenuAHK: Destroy
+	Switch SendFun
 	{
-		Gui, HMenuAHK: Destroy
-		OutputDebug, % "Temp1:" . Temp1 . "|" . "`n"
-		F_SendIsOflag(Temp1, Ovar, "SI")
-	}	
-	if (WinExist("ahk_id" HMenuCliHwnd))
-	{
-		Gui, HMenuCli: Destroy
-		F_ClipboardPaste(Temp1, Ovar, v_EndChar)
-	}	
+		Case "MSI":
+			OutputDebug, % "Temp1:" . Temp1 . "|" . "SendFun:" . SendFun . "|" . "`n"
+			F_SendIsOflag(Temp1, Ovar, "SI")
+		Case "MCL":
+			OutputDebug, % "Temp1:" . Temp1 . "|" . "SendFun:" . SendFun . "|" . "`n"
+			F_ClipboardPaste(Temp1, Ovar, v_EndChar)
+	}
 	
 	v_InputH.VisibleText 	:= true
 	if (InStr(v_Options, "z", false))	;fundamental change, now "z" parameter metters
@@ -1824,9 +1791,9 @@ F_HMenuSI_Keyboard(PressedKey)
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 ;#c*/ commercial only end		
-	v_UndoTriggerstring := v_InputString
-	v_InputString := ""
-	Critical, Off
+	; v_UndoTriggerstring := v_InputString
+	; v_InputString := ""
+	; Critical, Off
 	return true	; v_InputString will be cleared only if function returns true if function returns false, characters still will be invisible
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14573,8 +14540,7 @@ F_CreateHotstring(txt, nameoffile)
 		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
 			Try
-				Hotstring(":" . Options . ":" . Triggerstring, func("F_MenuOutput").bind(TextInsert, Oflag, SendFun), EnDis)
-				; Hotstring(":" . Options . ":" . Triggerstring, func("F_HOF_" . SendFun).bind(TextInsert, Oflag), EnDis)
+				Hotstring(":" . Options . ":" . Triggerstring, func("F_HMenu_Output").bind(TextInsert, Oflag, SendFun), EnDis)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(F_HOF_" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")"
@@ -14664,29 +14630,80 @@ F_PrepareUndo(string)
 	return string
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_MenuOutput(TextOptions, Oflag, SendFun)
-; F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendInput; This function creates only on screen menu. Events are handled by F_HMenuSI_Keyboard and F_MouseMenu_MSI.
-; F_HOF_MSI(TextOptions, Oflag)	;Function _ Hotsring Output Function - Menu SendInput; This function creates only on screen menu. Events are handled by F_HMenuSI_Keyboard and F_MouseMenu_MSI.
+F_HMenu_Mouse(SendFun) ; Handling of mouse events for F_HOF_MSI;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
+{	
+	global	;assume-global mode of operation
+	Critical, On
+	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0, temp := 0, ThisHotkey := A_ThisHotkey
+
+	OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
+	; OutputDebug, % "ThisHotkey:" . A_Space . ThisHotkey . "`n"
+	if (InStr(ThisHotkey, "LButton"))
+	{
+		Input									;terminates Input from within F_HMenu_Output and sets ErrorLevel to value "NewInput"
+		MouseGetPos, , , , OutputVarControl			;to store the name (ClassNN) of the control under the mouse cursor
+		SendMessage, 0x0188, 0, 0, % OutputVarControl	;retrieve the position of the selected item
+		ChoicePos := (ErrorLevel<<32>>32) + 1			;Convert UInt to Int to have -1 if there is no item selected and convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.
+		GuiControl, Choose, % OutputVarControl, % ChoicePos
+		GuiControlGet, OutputVarTemp, , % OutputVarControl
+		OutputVarTemp := SubStr(OutputVarTemp, 4)
+		Gui, HMenuAHK: Destroy
+		v_UndoHotstring 	:= OutputVarTemp
+,		OutputVarTemp 		:= F_ReplaceAHKconstants(OutputVarTemp)
+,		OutputVarTemp 		:= F_FollowCaseConformity(OutputVarTemp, v_InputString, v_Options)
+,		OutputVarTemp 		:= F_ConvertEscapeSequences(OutputVarTemp)
+		
+		Switch SendFun
+		{
+			Case "MSI":
+				OutputDebug, % "OutputVarTemp:" . OutputVarTemp . "|" . "SendFun:" . SendFun . "|" . "`n"
+				F_SendIsOflag(OutputVarTemp, Ovar, "SI")
+			Case "MCL":
+				OutputDebug, % "OutputVarTemp:" . OutputVarTemp . "|" . "SendFun:" . SendFun . "|" . "`n"
+				F_ClipboardPaste(OutputVarTemp, Ovar, v_EndChar)
+		}
+
+		if (ini_MHSEn)
+			SoundBeep, % ini_MHSF, % ini_MHSD
+		if (InStr(ThisHotkey, "?"))
+			v_InputString := SubStr(ThisHotkey, InStr(ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
+		temp := F_DetermineGain2(v_InputString, OutputVarTemp)
+		v_CntCumGain += temp
+;#c/* commercial only beginning		
+		if (ini_THLog)
+			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
+;#c*/ commercial only end			
+		v_UndoTriggerstring 	:= v_InputString
+,		v_InputString 			:= ""
+,		v_InputH.VisibleText 	:= true
+	}
+	OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "ErrorLevel:" . ErrorLevel . "|" . "`n"
+	Critical, Off
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_HMenu_Output(ReplacementString, Oflag, SendFun)
 {
 	global	;assume-global mode
-	Critical, On
 	local	a_MCSIMenuPos := [], ThisHotkey := A_ThisHotkey, EndChar := A_EndChar
 		,	SingleKey := ""
 		,	WhatWasPressed := ""
 		,	f_Shift := false
 
 	v_InputH.VisibleText 	:= false
+,	v_UndoHotstring		:= ReplacementString	
 ,	v_Options 			:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
 ,	v_EndChar 			:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
 	if (InStr(v_Options, "?"))
 		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
+	v_UndoTriggerstring := v_InputString
+,	v_MenuMax				:= 0	;global variable used in F_HMenuAHK
+; ,	TextOptions 			:= F_ReplaceAHKconstants(TextOptions)
 
-	v_MenuMax				:= 0	;global variable used in F_HMenuAHK
-,	TextOptions 			:= F_ReplaceAHKconstants(TextOptions)
+
 	F_DestroyTriggerstringTips(ini_TTCn)
 	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop 
 		SoundBeep, % ini_MHSF, % ini_MHSD
-	Loop, Parse, TextOptions, ¦	;determine amount of rows for Listbox
+	Loop, Parse, ReplacementString, ¦	;determine amount of rows for Listbox
 		v_MenuMax := A_Index
 	
 	if (ini_TTCn != 4)	;if not static window, draw small simple GUI
@@ -14702,8 +14719,11 @@ F_MenuOutput(TextOptions, Oflag, SendFun)
 			Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
 		else
 			Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
-		Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenu_MSI"
-		Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
+		Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax
+		Func_HMenu_Mouse := func("F_HMenu_Mouse").bind(SendFun)
+		GuiControl +g, % Id_LB_HMenuAHK, % Func_HMenu_Mouse
+		; Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_HMenu_Mouse"
+		Loop, Parse, ReplacementString, ¦	;second parse of the same variable, this time in order to fill in the Listbox
 			GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . "¦"
 
 		a_MCSIMenuPos := F_WhereDisplayMenu(ini_MHMP)
@@ -14713,7 +14733,7 @@ F_MenuOutput(TextOptions, Oflag, SendFun)
 	else	;(ini_TTCn = 4)
 	{
 		; OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID . "`n"
-		Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
+		Loop, Parse, ReplacementString, ¦	;second parse of the same variable, this time in order to fill in the Listbox
 			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . "¦"
 		GuiControl, Choose, % IdTT_C4_LB4, 1
 		Gui, TT_C4: Flash	;future: flashing (blinking) in a loop until user do not take action
@@ -14723,8 +14743,10 @@ F_MenuOutput(TextOptions, Oflag, SendFun)
 
 	WinActivate, % "ahk_id" HMenuAHKHwnd
 	Loop
-	{
-		Input, SingleKey, L1, {Tab}{Up}{Down}1234567{Enter}{LShift}{RShift}{Esc}
+	{	
+		if (ErrorLevel = "NewInput")	;when user used mouse to make a choice from menu
+			break
+		Input, SingleKey, L1, {Tab}{Up}{Down}1234567{Enter}{Esc}
 		if (InStr(ErrorLevel, "EndKey:"))
 		{
 			WhatWasPressed := SubStr(ErrorLevel, 8)
@@ -14738,27 +14760,21 @@ F_MenuOutput(TextOptions, Oflag, SendFun)
 				break
 			}	
 
-			if (!f_Shift) and ((WhatWasPressed = "LShift") or (WhatWasPressed = "RShift"))
+			if (WhatWasPressed = "Tab")
 			{
-				f_Shift := true
-				Continue
-			}
-			if (f_Shift) and (WhatWasPressed = "Tab")
-			{
-				WhatWasPressed := "+Tab"
-			,	f_Shift := false
-				if (F_HMenuSI_Keyboard(WhatWasPressed))
+				if (GetKeyState("LShift")) or (GetKeyState("RShift"))
+					WhatWasPressed := "+Tab"
+				if (F_HMenu_Keyboard(WhatWasPressed, SendFun))
 					break
 			}
-			if (f_Shift) and (WhatWasPressed != "Tab")
-				Continue
-			if (F_HMenuSI_Keyboard(WhatWasPressed))
-				break
+			else 
+			{	
+				if (F_HMenu_Keyboard(WhatWasPressed, SendFun))
+					break
+			}	
 		}
 	}
-	Critical, Off
 	OutputDebug, % A_ThisFunc . A_Space . "end" . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
-	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . A_Space . "ThisHotkey:" . ThisHotkey . "|" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DetermineOptions(Triggerstring)	;
@@ -14795,7 +14811,7 @@ ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
 	return ShorterInputString
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenuSI_Keyboard() -> F_SendIsOflag; F_MouseMenu_MSI -> F_SendIsOflag; F_SimpleOutput -> F_SendIsOflag
+F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenuSI_Keyboard() -> F_SendIsOflag; F_HMenu_Mouse -> F_SendIsOflag; F_SimpleOutput -> F_SendIsOflag
 {
 	global	;assume-global mode of operation
 
@@ -14929,92 +14945,6 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HOF_MCL(TextOptions, Oflag)	;Function _ Hotstring Output Function _ Menu Clipboard: for keyboard F_HMenuCLI_Keyboard(), for mouse: F_MouseMenu_MCL()
-{
-	global	;assume-global mode
-	Critical, On
-	local	a_MCLIMenuPos := [], ThisHotkey := A_ThisHotkey, EndChar := A_EndChar
-
-	v_InputH.VisibleText 	:= false
-,	v_Options 			:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
-,	v_EndChar 			:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
-	if (InStr(v_Options, "?"))
-		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
-	F_DestroyTriggerstringTips(ini_TTCn)
-	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop
-		SoundBeep, % ini_MHSF, % ini_MHSD
-	v_MenuMax			 := 0
-,	TextOptions 		 := F_ReplaceAHKconstants(TextOptions)
-	Loop, Parse, TextOptions, ¦
-		v_MenuMax := A_Index
-	if (ini_TTCn != 4)
-	{
-		Gui, HMenuCli: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuCliHwnd
-		Gui, HMenuCli: +Delimiter¦	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
-		Gui, HMenuCli: Margin, 0, 0
-		if (ini_HMBgrCol = "custom")
-			Gui, HMenuCli: Color,, % ini_HMBgrColCus
-		else
-			Gui, HMenuCli: Color,, % ini_HMBgrCol
-		if (ini_HMTyFaceCol = "custom")
-			Gui, HMenuCli: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
-		else
-			Gui, HMenuCli: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
-		Gui, HMenuCli: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuCli" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_MouseMenu_MCL"
-		Loop, Parse, TextOptions, ¦
-			GuiControl,, % Id_LB_HMenuCli, % A_Index . ". " . A_LoopField . "¦"
-		
-		a_MCLIMenuPos := F_WhereDisplayMenu(ini_MHMP)
-		F_FlipMenu(HMenuCliHwnd, a_MCLIMenuPos[1], a_MCLIMenuPos[2], "HMenuCli")
-		GuiControl, Choose, % Id_LB_HMenuCli, 1
-	}
-	else	;(ini_TTCn = 4)
-	{
-		PreviousWindowID := WinExist("A")
-		Loop, Parse, TextOptions, ¦	;second parse of the same variable, this time in order to fill in the Listbox
-			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . "¦"
-		GuiControl, Choose, % IdTT_C4_LB4, 1
-		WinActivate, % "ahk_id" TT_C4_Hwnd
-		Gui, TT_C4: Flash	;future: flashing (blinking) in a loop until user do not take action
-		WhichMenu := "CLI"	;this parameter is used within function F_MouseMenuCombined() to handle mouse event
-	}
-	Ovar := Oflag
-	Critical, Off
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_MouseMenu_MCL() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
-{
-	global	;assume-global mode
-	local	OutputVarTemp := "", temp := 0, ChoicePos := 0, ThisHotkey := A_ThisHotkey
-
-	; OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
-	if (InStr(ThisHotkey, "LButton"))
-	{
-		GuiControlGet, OutputVarTemp, , % Id_LB_HMenuCli
-		Gui, HMenuCli: Destroy
-		ChoicePos 		:= SubStr(OutputVarTemp, 1, 1)
-,		OutputVarTemp 		:= SubStr(OutputVarTemp, 4)
-,		v_UndoHotstring 	:= OutputVarTemp
-,	     ReplacementString 	:= F_ReplaceAHKconstants(OutputVarTemp)
-,	     ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options)
-,	     ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
-		F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
-		if (ini_MHSEn)
-			SoundBeep, % ini_MHSF, % ini_MHSD
-		if (InStr(ThisHotkey, "?"))
-			v_InputString := SubStr(ThisHotkey, InStr(ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
-		temp := F_DetermineGain2(v_InputString, ReplacementString)
-		v_CntCumGain += temp
-;#c/* commercial only beginning		
-		if (ini_THLog)
-			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MCL" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-;#c*/ commercial only end			
-		v_UndoTriggerstring 	:= v_InputString
-,		v_InputString 			:= ""
-,		v_InputH.VisibleText 	:= true
-	}
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DetermineGain2(Triggerstring, Hotstring)
 {
 	CntUpper := 0, LenHots := 0, LenTrig := 0
@@ -15106,44 +15036,6 @@ F_ClipboardPaste(string, Oflag, v_EndChar)
 	Clipboard := ClipboardBackup	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_MouseMenu_MSI() ; Handling of mouse events for F_HOF_MSI;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
-{	
-	global	;assume-global mode of operation
-	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0, temp := 0, ThisHotkey := A_ThisHotkey
-
-	; OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
-	; OutputDebug, % "ThisHotkey:" . A_Space . ThisHotkey . "`n"
-	if (InStr(ThisHotkey, "LButton"))
-	; if (A_PriorKey = "LButton")
-	{
-		MouseGetPos, , , , OutputVarControl			;to store the name (ClassNN) of the control under the mouse cursor
-		SendMessage, 0x0188, 0, 0, % OutputVarControl	;retrieve the position of the selected item
-		ChoicePos := (ErrorLevel<<32>>32) + 1			;Convert UInt to Int to have -1 if there is no item selected and convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.
-		GuiControl, Choose, % OutputVarControl, % ChoicePos
-		GuiControlGet, OutputVarTemp, , % OutputVarControl
-		OutputVarTemp := SubStr(OutputVarTemp, 4)
-		Gui, HMenuAHK: Destroy
-		v_UndoHotstring 	:= OutputVarTemp
-,		OutputVarTemp 		:= F_ReplaceAHKconstants(OutputVarTemp)
-,		OutputVarTemp 		:= F_FollowCaseConformity(OutputVarTemp, v_InputString, v_Options)
-,		OutputVarTemp 		:= F_ConvertEscapeSequences(OutputVarTemp)
-		F_SendIsOflag(OutputVarTemp, Ovar, "SI")
-		if (ini_MHSEn)
-			SoundBeep, % ini_MHSF, % ini_MHSD
-		if (InStr(ThisHotkey, "?"))
-			v_InputString := SubStr(ThisHotkey, InStr(ThisHotkey, ":", , 2) + 1)	;A_ThisHotkey: the most recently executed non-auto-replace hotstring (blank if none).
-		temp := F_DetermineGain2(v_InputString, OutputVarTemp)
-		v_CntCumGain += temp
-;#c/* commercial only beginning		
-		if (ini_THLog)
-			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
-;#c*/ commercial only end			
-		v_UndoTriggerstring 	:= v_InputString
-,		v_InputString 			:= ""
-,		v_InputH.VisibleText 	:= true
-	}
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TTMenuStatic_Mouse() ;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {
 	global	;assume-global mode
