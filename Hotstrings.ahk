@@ -93,6 +93,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		f_WasReset			:= false				;global flag: Shift key memory reset (to reset hotstring recognizer)
 ,		f_RShiftDown 			:= false
 ,		f_LShiftDown 			:= false
+,		v_SendFun				:= ""				;last used output function; important for F_Undo
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
@@ -1697,7 +1698,6 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 F_HMenu_Keyboard(PressedKey, SendFun)
 {
 	global	;assume-global mode of operation
-	; Critical, On
 	local	Temp1 := ""
 		, 	ShiftTabIsFound := false
 		,	ReplacementString := ""
@@ -1775,10 +1775,10 @@ F_HMenu_Keyboard(PressedKey, SendFun)
 	Switch SendFun
 	{
 		Case "MSI":
-			OutputDebug, % "Temp1:" . Temp1 . "|" . "SendFun:" . SendFun . "|" . "`n"
+			; OutputDebug, % "Temp1:" . Temp1 . "|" . "SendFun:" . SendFun . "|" . "`n"
 			F_SendIsOflag(Temp1, Ovar, "SI")
 		Case "MCL":
-			OutputDebug, % "Temp1:" . Temp1 . "|" . "SendFun:" . SendFun . "|" . "`n"
+			; OutputDebug, % "Temp1:" . Temp1 . "|" . "SendFun:" . SendFun . "|" . "`n"
 			F_ClipboardPaste(Temp1, Ovar, v_EndChar)
 	}
 	
@@ -1791,9 +1791,6 @@ F_HMenu_Keyboard(PressedKey, SendFun)
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . Temp1 . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 ;#c*/ commercial only end		
-	; v_UndoTriggerstring := v_InputString
-	; v_InputString := ""
-	; Critical, Off
 	return true	; v_InputString will be cleared only if function returns true if function returns false, characters still will be invisible
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8413,9 +8410,8 @@ F_Undo()	;turning off of * option requires special conditions.
 	local	TriggerOpt := "", HowManyBackSpaces := 0, HowManyBackSpaces2 := 0
 			,ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey, OrigTriggerstring := "", HowManySpecials := 0
 	
-	OutputDebug, % "v_UndoTriggerstring:" . v_UndoTriggerstring . A_Space . "v_UndoHotstring:" . v_UndoHotstring . "`n"
+	; OutputDebug, % "v_UndoTriggerstring:" . v_UndoTriggerstring . A_Space . "v_UndoHotstring:" . v_UndoHotstring . "`n"
 	if (v_UndoTriggerstring)
-	; if (v_UndoTriggerstring and (ThisHotkey != PriorHotkey))
 	{	
 		if (!(InStr(v_Options, "*")) and !(InStr(v_Options, "O")))
 			Send, {BackSpace}
@@ -8487,9 +8483,12 @@ F_Undo()	;turning off of * option requires special conditions.
 				v_UndoHotstring := StrReplace(v_UndoHotstring, "``t", "", HowManyBackSpaces2)
 				HowManyBackSpaces += HowManyBackSpaces2
 			}
-			v_UndoHotstring 	:= F_ReplaceAHKconstants(v_UndoHotstring)
-,			v_UndoHotstring 	:= F_PrepareUndo(v_UndoHotstring)
-,			v_UndoHotstring 	:= RegExReplace(v_UndoHotstring, "{U+.*}", " ")
+			if (v_SendFun != "MCL") and (v_SendFun != "CL") and (v_SendFun != "SR")
+			{
+				v_UndoHotstring 	:= F_ReplaceAHKconstants(v_UndoHotstring)
+			,	v_UndoHotstring 	:= F_PrepareUndo(v_UndoHotstring)
+			,	v_UndoHotstring 	:= RegExReplace(v_UndoHotstring, "{U+.*}", " ")
+			}
 			HowManyBackSpaces 	+= StrLenUnicode(v_UndoHotstring)
 			Send, % "{BackSpace " . HowManyBackSpaces . "}"
 			Loop, Parse, v_UndoTriggerstring
@@ -14543,7 +14542,7 @@ F_CreateHotstring(txt, nameoffile)
 				Hotstring(":" . Options . ":" . Triggerstring, func("F_HMenu_Output").bind(TextInsert, Oflag, SendFun), EnDis)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(F_HOF_" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")"
+					. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(F_HMenu_Output).bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 		}
 	}
@@ -14636,8 +14635,7 @@ F_HMenu_Mouse(SendFun) ; Handling of mouse events for F_HOF_MSI;The subroutine m
 	Critical, On
 	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0, temp := 0, ThisHotkey := A_ThisHotkey
 
-	OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
-	; OutputDebug, % "ThisHotkey:" . A_Space . ThisHotkey . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
 	if (InStr(ThisHotkey, "LButton"))
 	{
 		Input									;terminates Input from within F_HMenu_Output and sets ErrorLevel to value "NewInput"
@@ -14677,7 +14675,7 @@ F_HMenu_Mouse(SendFun) ; Handling of mouse events for F_HOF_MSI;The subroutine m
 ,		v_InputString 			:= ""
 ,		v_InputH.VisibleText 	:= true
 	}
-	OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "ErrorLevel:" . ErrorLevel . "|" . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "ErrorLevel:" . ErrorLevel . "|" . "`n"
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14690,12 +14688,13 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 		,	f_Shift := false
 
 	v_InputH.VisibleText 	:= false
-,	v_UndoHotstring		:= ReplacementString	
+,	v_UndoHotstring		:= ReplacementString	;important for F_Undo	
 ,	v_Options 			:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
 ,	v_EndChar 			:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
 	if (InStr(v_Options, "?"))
 		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
-	v_UndoTriggerstring := v_InputString
+	v_UndoTriggerstring 	:= v_InputString		;important for F_Undo
+,	v_SendFun				:= SendFun			;important for F_Undo
 ,	v_MenuMax				:= 0	;global variable used in F_HMenuAHK
 ; ,	TextOptions 			:= F_ReplaceAHKconstants(TextOptions)
 
@@ -14750,7 +14749,7 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 		if (InStr(ErrorLevel, "EndKey:"))
 		{
 			WhatWasPressed := SubStr(ErrorLevel, 8)
-			OutputDebug, % "Terminated by EndKey:" . WhatWasPressed . "|" . "`n"	;8 = EndKey: + 1
+			; OutputDebug, % "Terminated by EndKey:" . WhatWasPressed . "|" . "`n"	;8 = EndKey: + 1
 			if (WhatWasPressed = "Escape")
 			{
 				Gui, HMenuAHK: Destroy
@@ -14774,7 +14773,7 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 			}	
 		}
 	}
-	OutputDebug, % A_ThisFunc . A_Space . "end" . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "end" . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DetermineOptions(Triggerstring)	;
@@ -14912,18 +14911,19 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 
 	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . "ReplacementString:" . ReplacementString . "|" . "`n"
 	F_DestroyTriggerstringTips(ini_TTCn)
-	v_UndoHotstring	:= ReplacementString
-	,	v_Options 		:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
-	,	v_EndChar 		:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
+	v_UndoHotstring	:= ReplacementString	;important for F_Undo
+,	v_SendFun			:= SendFun			;important for F_Undo
+,	v_Options 		:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
+,	v_EndChar 		:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
 	if (InStr(v_Options, "?"))
 		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
 	
 	v_UndoTriggerstring := v_InputString
-	,	ReplacementString 	:= F_ReplaceAHKconstants(ReplacementString)
+,	ReplacementString 	:= F_ReplaceAHKconstants(ReplacementString)
 	; OutputDebug, % "F_ReplaceAHKconstants" . A_Space . "ReplacementString:" . ReplacementString . "|" . "`n"
-	,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options)
+,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options)
 	; OutputDebug, % "F_FollowCaseConformity" . A_Space . "ReplacementString:" . ReplacementString . "|" . "`n"
-	,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
+,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
 	; OutputDebug, % "F_ConvertEscapeSequences" . A_Space . "ReplacementString:" . ReplacementString . "|" . "`n"
 	if (SubStr(ReplacementString, 0) = "``")	;extracts the last character
 		ReplacementString := SubStr(ReplacementString, 1, StrLen(ReplacementString) - 1)	;without last character
