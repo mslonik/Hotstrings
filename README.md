@@ -1,15 +1,19 @@
 # Hotstrings
 
-Advanced, configurable, text replacement tool written in Autohotkey licensed according to GNU GPL v3 rules.
+Description: Advanced, configurable, text replacement tool written in AutoHotkey language. 
+Copyright ©: Maciej Słojewski, mslonik (🐘).
+Licensed according to MIT license.
+
+This is free edition of Hotstrings application. If you wish to get commercial edition, contact me please.
+For comparison between free and commercial edition please see the file 20221204_HotstringsForAll.pdf available in this repository.
 
 This file contains only general info about **Hotstrings** project.
 
 There are dedicated repositiories:
 
-- "base" repository: [Hotstrings](https://github.com/mslonik/Hotstrings)
-- to provide help information: [Hotstrings-help](https://github.com/mslonik/Hotstrings-Help)
-- free set of Libraries to start with: [Hotstrings-Libraries](https://github.com/mslonik/Hotstrings-Libraries)
-- localization of GUI: [Hotstrings-Languages](https://github.com/mslonik/Hotstrings-Languages) (at the moment English only)
+- help: [Hotstrings-help](https://github.com/mslonik/Hotstrings-Help)
+- free set of Libraries: [Hotstrings-Libraries](https://github.com/mslonik/Hotstrings-Libraries)
+- localization of GUI: [Hotstrings-Languages](https://github.com/mslonik/Hotstrings-Languages)
 - additional conversion scripts and miscellaneous other files: [Hotstrings-Tools](https://github.com/mslonik/Hotstrings-Tools)
 
 This project is present at [SourceForge](https://sourceforge.net/projects/hotstrings/).
