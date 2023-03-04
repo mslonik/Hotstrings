@@ -8240,11 +8240,9 @@ F_DownloadPublicLibraries()
 {
 	global	;assume-global mode
 	local	ToBeFiltered := "",	Result := "",	ToBeDownloaded := [], DownloadedFile := "", whr := ""
-;			,URLconst 	:= "https://gitHub.com/mslonik/Hotstrings/blob/master/Hotstrings/Libraries/", temp := ""	;https://github.com/mslonik/Hotstrings/tree/master/Hotstrings/Libraries
-			,URLconst 	:= "https://github.com/mslonik/Hotstrings-Libraries/", temp := ""	
-;			,URLraw 		:= "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings/Libraries/"
-			,URLraw 		:= "https://raw.githubusercontent.com/mslonik/Hotstrings-Libraries/main/"
-			,ExistingLibraries := "", NewLibraries := "", part := 0, key := "", value := ""
+		,	URLconst 	:= "https://github.com/mslonik/Hotstrings-Libraries/"
+		,	URLraw 	:= "https://raw.githubusercontent.com/mslonik/Hotstrings-Libraries/main/"
+		,	ExistingLibraries := "", NewLibraries := "", part := 0, key := "", value := "", rest := 0
 	
 	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 	whr.Open("GET", URLconst, true)
@@ -8255,28 +8253,32 @@ F_DownloadPublicLibraries()
 	Loop, Parse, ToBeFiltered, `n
 		if (InStr(A_LoopField, ".csv"))
 		{
-			RegExMatch(A_LoopField, "i)v"">.*.csv", Result)
-			ToBeDownloaded.Push(SubStr(Result, 4))
+			RegExMatch(A_LoopField, "i)title="".*.csv"" ", Result)	;i) = case sensitive matching
+			if (Result != "")
+				ToBeDownloaded.Push(SubStr(Result, 8, -2))			;start from 8th character, omit last 2 characters
 		}
 	
 	Gui, DLG: New, +HwndDLGHwnd +OwnDialogs,	% A_ScriptName	;DLG: Download Libraries Gui
-	Gui, DLG: Add, Text,, % TransA["Downloading public library files" . "(0 ÷ 100%):"]
-	Gui, DLG: Add, Progress, w200 h20 HwndLibProgress, cBlue, 0
+	Gui, DLG: Add, Text,, % TransA["Downloading public library files"] . A_Space . "(0 ÷ 100%):"
+	Gui, DLG: Add, Progress, w400 h20 HwndLibProgress, cBlue, 0
 	Gui, DLG: Show, AutoSize
-	part := (1 / ToBeDownloaded.Count()) * 100
+	part := 100 // ToBeDownloaded.Count()		;floor divide, because progress bar requires integer values
+,	rest := 100 - ToBeDownloaded.Count() * part	;rest which have to be used to reach 100
 	for key, value in ToBeDownloaded
 	{
-		if (value)
+		if (rest)
 		{
-			temp := URLraw . value
+			GuiControl,, % LibProgress, % "+" . part + 1
+			rest--
+		}
+		else
 			GuiControl,, % LibProgress, % "+" . part
-			if (FileExist(ini_HADL . "\" . value))
-				ExistingLibraries .= value . "`n"
-			else
-			{
-				NewLibraries  .= value . "`n"
-				URLDownloadToFile, % temp, % ini_HADL . "\" . value
-			}
+		if (FileExist(ini_HADL . "\" . value))
+			ExistingLibraries .= value . "`n"
+		else
+		{
+			NewLibraries  .= value . "`n"
+			URLDownloadToFile, % URLraw . value, % ini_HADL . "\" . value
 		}
 	}
 	Gui, DLG: Destroy
