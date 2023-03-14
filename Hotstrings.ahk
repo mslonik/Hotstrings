@@ -9179,8 +9179,9 @@ F_AddHotstring()
 	F_UpdateGlobalArrays(NewOptions, SendFun, "En", vHotstring)
 
 	;6. Update and sort List View. ;future: gui parameter for sorting
-	LV_Add("",  "En", v_Triggerstring, NewOptions, SendFun, vHotstring, v_Comment)
+	LV_Add("Select",  "En", v_Triggerstring, NewOptions, SendFun, vHotstring, v_Comment)
 	LV_ModifyCol(2, "Sort")
+	F_LV1_CopyContentToHS3()
 
 	;7. Delete library file. 
 	FileRead, TheWholeFile, % ini_HADL . "\" . v_SelectHotstringLibrary
@@ -10437,8 +10438,8 @@ F_DeleteHotstring()
 	;6. Decrement library counter.
 	global ;assume-global mode
 	local 	LibraryFullPathAndName := ini_HADL . "\" . v_SelectHotstringLibrary, TheWholeFile := "", LibraryHeader := ""
-,			SelectedRow := 0, index := 0
-,			key := 0, val := "", options := "", triggerstring := "", EnDis := "", hotstring := ""
+	,		SelectedRow := 0, index := 0
+	,		key := 0, val := "", options := "", triggerstring := "", EnDis := "", hotstring := ""
 
 	Gui, HS3: Default
 	F_GuiHS3_EnDis("Disable")			;Disable all GuiControls for deletion time d(t, o, h)	
@@ -10448,6 +10449,7 @@ F_DeleteHotstring()
 	if (!SelectedRow) 
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
+		F_GuiHS3_EnDis("Enable")			;Enable all GuiControls for deletion time d(t, o, h)	
 		return
 	}
 	LV_GetText(triggerstring, 	SelectedRow, 2)	;triggerstring
@@ -10469,7 +10471,7 @@ F_DeleteHotstring()
 	LibraryHeader :=  F_ExtractHeader(TheWholeFile)
 	if (LibraryHeader)
 		LibraryHeader 	:= "/*`n" . LibraryHeader . "`n*/`n`n"
-,		TheWholeFile	:= ""
+	,	TheWholeFile	:= ""
 	FileDelete, % LibraryFullPathAndName
 
 	;2. Disable selected hotstring.
@@ -10867,7 +10869,6 @@ F_SelectLibrary()
 	
 	Gui, % F_WhichGui() . ":" . A_Space . "Submit", NoHide
 	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
-	; GuiControl, -Redraw, % IdListView1 ;The Redraw option serves as a hint to the control that allows it to allocate memory only once rather than each time a row is added, which greatly improves row-adding performance (it may also improve sorting performance). 
 	LV_Delete()
 	v_LibHotstringCnt 	:= 0
 ,	name 			:= SubStr(v_SelectHotstringLibrary, 1, -4)
@@ -11041,6 +11042,8 @@ F_LV1_CopyContentToHS3()
 		GuiControl, HS4: Font, % IdCheckBox1b
 		GuiControl, HS3:, % IdCheckBox1, 	1
 		GuiControl, HS4:, % IdCheckBox1b, 	1
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
 	}
 	else
 	{
@@ -11059,6 +11062,8 @@ F_LV1_CopyContentToHS3()
 		GuiControl, HS4: Font, % TransA["Case Sensitive (C)"]
 		GuiControl, HS3:, % TransA["Case Sensitive (C)"], 1
 		GuiControl, HS4:, % TransA["Case Sensitive (C)"], 1
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
 	}
 	if (InStr(Options, "C1"))
 	{
@@ -11068,6 +11073,8 @@ F_LV1_CopyContentToHS3()
 		GuiControl, HS4: Font, % TransA["Not Case-Conforming (C1)"]
 		GuiControl, HS3:, % TransA["Not Case-Conforming (C1)"], 1
 		GuiControl, HS4:, % TransA["Not Case-Conforming (C1)"], 1
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
 	}
 	if (!InStr(Options, "C1")) and (!InStr(Options, "C"))
 	{
@@ -11090,6 +11097,8 @@ F_LV1_CopyContentToHS3()
 		GuiControl, HS4: Font, % IdCheckBox3b
 		GuiControl, HS3:, % IdCheckBox3, 	1
 		GuiControl, HS4:, % IdCheckBox3b, 	1
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
 	}
 	else
 	{
@@ -11108,6 +11117,8 @@ F_LV1_CopyContentToHS3()
 		GuiControl, HS4: Font, % IdCheckBox4b
 		GuiControl, HS3:, % IdCheckBox4, 	1
 		GuiControl, HS4:, % IdCheckBox4b, 	1
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
 	}
 	else
 	{
@@ -11126,6 +11137,8 @@ F_LV1_CopyContentToHS3()
 		GuiControl, HS4: Font, % IdCheckBox5b
 		GuiControl, HS3:, % IdCheckBox5, 	1
 		GuiControl, HS4:, % IdCheckBox5b, 	1
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
 	}
 	else
 	{
@@ -11144,6 +11157,8 @@ F_LV1_CopyContentToHS3()
 		GuiControl, HS4: Font, % IdCheckBox8b
 		GuiControl, HS3:, % IdCheckBox8,  1
 		GuiControl, HS4:, % IdCheckBox8b, 1
+		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
 	}
 	else
 	{
