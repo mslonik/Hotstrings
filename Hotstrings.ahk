@@ -25,7 +25,7 @@ CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in t
 ; - - - - - - - - - - - - - - - - - - - - - - - E X E  CONVERSION / INSTALLATOR S E C T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.10"
+global AppVersion				:= "3.6.11"
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -2334,10 +2334,20 @@ F_TrigTipsSecondColumn(a_array1, a_array2)
 	key := 0, value := "", ThisValue := "|"
 	for key, value in a_array1
 	{
+		if (a_array2[key] = "En") and (InStr(value, "*")) and (InStr(value, "?"))
+		{
+			ThisValue .= "?" . "|"	
+			Continue
+		}	
 		if (a_array2[key] = "En") and (InStr(value, "*"))
+		{
 			ThisValue .= "✓" . "|"	
+			Continue
+		}	
+		if (a_array2[key] = "En") and (InStr(value, "?"))
+			ThisValue .= "?" . "|"
 		if (a_array2[key] = "En") and (!InStr(value, "*"))						
-			ThisValue .= "↓" . "|"	
+			ThisValue .= "↓" . "|"
 		if (a_array2[key] = "Dis")
 			ThisValue .= "╳" . "|"	
 	}
@@ -2426,7 +2436,7 @@ F_OneCharPressed(ih, Char)
 	if (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))
 		return
 
-	; OutputDebug, % "1)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . "`n"
+	; OutputDebug, % "1)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "Char:" . Char . "|" . "`n"
 	
 	if (v_InputString = "")
 	{
@@ -2449,10 +2459,9 @@ F_OneCharPressed(ih, Char)
 		; OutputDebug, % "BeforeLast:" . BeforeLast . "|" A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 	}
 
-	if (!f_LastTip) and (f_EndCharDetected)
+	if (!f_LastTip) and (f_EndCharDetected)	;I'm not sure of that ; if (!f_LastTip) and (f_EndCharDetected)
 	{
-		v_InputString := ""
-		return
+		v_InputString := Char 
 	}
 	if (f_LastTip) and (f_EndCharDetected) and (!f_ExpEndChar)
 	{
@@ -2461,7 +2470,7 @@ F_OneCharPressed(ih, Char)
 	}
 
 	; OutputDebug, % "2)v_IS:" . v_InputString . "|" . A_Space 
-	; 			. "IL:" . InputLength . A_Space 
+	; 			. "IL:" 	. InputLength . A_Space 
 	; 			. "f_LT:" . f_LastTip . A_Space 
 	; 			. "f_EC:" . f_EndCharDetected . A_Space 
 	; 			. "f_EE:" . f_ExpEndChar . A_Space 
@@ -2560,9 +2569,11 @@ F_CheckIf100ms()
 		SetTimer, F_100msTimeout, Off
 		f_100msRun := false
 		if (f_LShiftDown) and (f_RShiftDown)
+		{
 			f_WasReset := true
-		f_LShiftDown := false
-	,	f_RShiftDown := false	
+		,	f_LShiftDown := false
+		,	f_RShiftDown := false	
+		}	
 		; OutputDebug, % "concurrent" . "`n"
 	}
 	else
@@ -2592,6 +2603,8 @@ F_InputHookOnEnd(ih)	;for debugging purposes
 F_BackspaceProcessing(ih, VK, SC)	;this function is run whenever Backspace key or LShift or RShift is up 
 {
 	global	;assume-global mode of operation
+	Critical, On
+	local	WhatWasUp := GetKeyName(Format("vk{:x}sc{:x}", VK, SC))
 
 	if (f_WasReset)
 	{
@@ -2628,6 +2641,17 @@ F_BackspaceProcessing(ih, VK, SC)	;this function is run whenever Backspace key o
 		if (!v_InputString)	;if v_InputString = "" = empty
 			F_DestroyTriggerstringTips(ini_TTCn)
 	}
+	if (WhatWasUp = "LShift") 
+	{
+		f_LShiftDown := false
+		OutputDebug, % "LShift Up" . "`n"
+	}	
+	if (WhatWasUp = "RShift")
+	{
+		f_RShiftDown := false
+		OutputDebug, % "RShift Up" . "`n"
+	}
+	Critical, Off
 	; OutputDebug, % A_ThisFunc . A_Space . GetKeyName(Format("vk{:x}sc{:x}", VK, SC)) . A_Space . "E" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10434,7 +10458,10 @@ F_DeleteHotstring()
 		. TransA["Triggerstring"] . ":" . A_Space . triggerstring . A_Tab . TransA["options"] . ":" . A_Space . options . A_Tab . TransA["hotstring"] . ":" . A_Space . hotstring
 		. "`n`n" . TransA["If you remove one of the definitions which was multiplied (e.g. duplicated), none of definitions will be active. Therefore It is suggested in order to to enable the second one to reload the application."]
 	IfMsgBox, No
+	{
+		F_GuiHS3_EnDis("Enable")			;Enable all GuiControls for deletion time d(t, o, h)	
 		return
+	}	
 	TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
 	
 	;1. Remove selected library file.
@@ -14875,6 +14902,7 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenuSI_Keyboard() -> F_SendIsOfl
 				SendInput, % SecondPart
 			SendLevel, 0
 		Case "S2":
+			OutputDebug, % "ini_SendLevel:" . A_Space . ini_SendLevel . "`n"
 			SendLevel, % ini_SendLevel
 			if (OutputString = "{NumLock}") or (OutputString = "{ScrollLock}") or (OutputString = "{CapsLock}")
 				Switch OutputString
@@ -14910,7 +14938,7 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 	Critical, On
 	local	ThisHotkey := A_ThisHotkey, EndChar := A_EndChar, temp := 0, FirstPart := "", SecondPart := ""
 
-	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . "ReplacementString:" . ReplacementString . "|" . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "ReplacementString:" . ReplacementString . "|" . "SendFun:" . SendFun . "|" . "`n"
 	F_DestroyTriggerstringTips(ini_TTCn)
 	v_UndoHotstring	:= ReplacementString	;important for F_Undo
 ,	v_SendFun			:= SendFun			;important for F_Undo
@@ -14929,7 +14957,7 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 	if (SubStr(ReplacementString, 0) = "``")	;extracts the last character
 		ReplacementString := SubStr(ReplacementString, 1, StrLen(ReplacementString) - 1)	;without last character
 	
-	; OutputDebug, % A_ThisFunc . A_Space . "ReplacementString:" . ReplacementString . "|" . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "SendFun:" . SendFun . "|" . "`n"
 	F_SendIsOflag(ReplacementString, Oflag, SendFun)
 	F_EventSigOrdHotstring()
 	temp := F_DetermineGain2(v_InputString, ReplacementString)
@@ -14940,7 +14968,7 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "SI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . ReplacementString . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 ;#c*/ commercial only end		
 	v_InputString 		:= ""
-	OutputDebug, % "v_Options:" . v_Options . "|" . "`n"
+	; OutputDebug, % "v_Options:" . v_Options . "|" . "`n"
 	if (InStr(v_Options, "z", false))	;fundamental change, now "z" parameter metters
 		Hotstring("Reset")
 	Critical, Off
