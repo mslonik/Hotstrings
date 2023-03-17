@@ -2415,8 +2415,9 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_OneCharPressed(ih, Char)
-{	;This function is always run BEFORE the hotstring functions (eg. F_HOF_SI, F_HOF_CLI etc.). Therefore v_InputString cannot be cleared by this function.
+{	;This function is always run BEFORE the hotstring functions (eg. F_Simple_Output, F_Simple_Output etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
+	Critical, On
 	static	f_ExpEndChar 	:= false	;when triggerstring contains EndChars, e.g. two words separated with space
 		,	f_LastTip 	:= false	;this flag is set if in next run of this function is expected that EndChar will be pressed by user
 	local	InputLength 	:= 0		;input length of v_InputString global variable
@@ -2425,15 +2426,7 @@ F_OneCharPressed(ih, Char)
 		, 	BeforeLast 	:= ""	;not last, but one before last character
 		,	LastChar		:= ""	;last character
 
-	Critical, On
-	if (ini_MHSEn) and (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))	;ini_MHSEn = Menu Hotstring Sound Enable; this is very unfortunate that SoundBeep is used (instead of SoundPlay). As a consequence when somebody presses very quickly some characters, this function is run "one after another" character and no other functions are run. This could lead to unwanted behaviour.
-	{
-		SoundBeep, % ini_MHSF, % ini_MHSD	;This line will produce second beep if user presses keys on time menu is displayed. Future: replace SoundBeep with SoundPlay.
-		Critical, Off
-		OutputDebug, % A_ThisFunc . A_Space . "SoundBeep" . "`n"
-		return
-	}
-	if (WinExist("ahk_id" HMenuAHKHwnd) or WinActive("ahk_id" TT_C4_Hwnd) or WinExist("ahk_id" HMenuCliHwnd))
+	if (WinActive("ahk_id" TT_C4_Hwnd))
 		return
 
 	; OutputDebug, % "1)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "Char:" . Char . "|" . "`n"
@@ -2512,17 +2505,16 @@ F_OneCharPressed(ih, Char)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD
 
 			; OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_EE:" . f_ExpEndChar . "`n"
-			Critical, Off
-			return
 		}
 	}
+	Critical, Off
 	; OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . "|" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "f_EE:" . f_ExpEndChar . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
 {
 	global	;assume-global mode of operation
-	v_InputString := "", v_TrigTipsInput := "", v_UndoHotstring := "", v_UndoTriggerstring := ""	;used by output functions: F_HOF_MCL, F_HOF_MSI
+	v_InputString := "", v_TrigTipsInput := "", v_UndoHotstring := "", v_UndoTriggerstring := ""	;used by output functions: F_HMenu_Output, F_HMenu_Output
 ,	v_InputH 				:= InputHook("V L0")			
 ,	v_InputH.MinSendLevel 	:= ini_MinSendLevel			;I1 by default
 ,	v_InputH.OnChar 		:= Func("F_OneCharPressed")
@@ -2538,17 +2530,26 @@ F_OnKeyDown(ih, VK, SC)	;On Key Down
 {
 	global		;assume-global mode of operation
 	Critical, On	;This function starts as the first one (prior to "On Character Down"), but unfortunately can be interrupted by it. To prevent it Critical command is applied.
+	local 	WhatWasDown := GetKeyName(Format("vk{:x}sc{:x}", VK, SC))
+		,	KeyIsDownPhysically := 0
+	
+	Sleep, 1	;sequence of events: function F_OnKeyDown is run automatically (like interruption), next we need to read-out physical state of key, so some time is necessary (sleep) to set keyboard state before it can be read. Interestingly 1 ms seems to be enough. It looks like any sleep (delay) is required.
+	KeyIsDownPhysically := GetKeyState(WhatWasDown, "P")	;it is necessary to recognize if key was pressed physically or logically as 3x scripts run on the same time and ShiftFunctions sends out many Shift key presses.
 	; OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
-	; OutputDebug, % A_ThisFunc . A_Space . "WhatWasDown:" . v_WhatWasDown . A_Space . "B" . "`n"
-	Switch GetKeyName(Format("vk{:x}sc{:x}", VK, SC)) 
-	{
-		Case "LShift":
-			f_LShiftDown := true
-			F_CheckIf100ms()
-		Case "RShift":
-			f_RShiftDown := true
-			F_CheckIf100ms()
-	}
+	; OutputDebug, % A_ThisFunc . A_Space . "WhatWasDown:" . WhatWasDown . A_Space . "KeyIsDownPhysically:" . KeyIsDownPhysically . A_Space .  "B" . "`n"
+	if (KeyIsDownPhysically)
+		Switch WhatWasDown
+		{
+			Case "LShift":
+				f_LShiftDown := true
+				F_CheckIf100ms()
+			Case "RShift":
+				f_RShiftDown := true
+				F_CheckIf100ms()
+			Default:
+				f_LShiftDown := false
+			,	f_RShiftDown := false	
+		}
 	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
 	Critical, Off
 }
@@ -2606,50 +2607,41 @@ F_BackspaceProcessing(ih, VK, SC)	;this function is run whenever Backspace key o
 	Critical, On
 	local	WhatWasUp := GetKeyName(Format("vk{:x}sc{:x}", VK, SC))
 
+	; OutputDebug, % A_ThisFunc . A_Space . "WhatWasUp:" . WhatWasUp . A_Space . "B" . "`n"
 	if (f_WasReset)
 	{
 		Hotstring("Reset")
 		v_InputString 	:= ""
 	,	f_WasReset 	:= false
-		OutputDebug, % "Double Shift reset" . "`n"
+		; OutputDebug, % "Double Shift reset" . "`n"
 		SoundPlay, *16	;future: add option to choose behavior (play sound or not, how long to play sound, what sound) and to define time to wait for reset scenario
 		return
 	}
-	if (WinExist("ahk_id" HMenuCliHwnd) or WinExist("ahk_id" HMenuAHKHwnd))
-	{
-		if (ini_MHSEn)
-		{
-			SoundBeep, % ini_MHSF, % ini_MHSD
-			OutputDebug, % A_ThisFunc . A_Space . "Beep" . "`n"
-			return		
-		}
-	}
-	else
-	{
+	if (WhatWasUp = "Backspace")
 		v_InputString := SubStr(v_InputString, 1, -1)	;whole string except last character
-		; OutputDebug, % "v_IS BS:" . v_InputString . "|" . A_Space . "IsCritical:" . A_Space . A_IsCritical . "`n"
-		if (ini_TTTtEn) and (v_InputString)
+	; OutputDebug, % "v_IS BS:" . v_InputString . "|" . A_Space . "IsCritical:" . A_Space . A_IsCritical . "`n"
+	if (ini_TTTtEn) and (v_InputString)
+	{
+		F_PTTT(v_InputString)
+		if (a_Tips.Count())
 		{
-			F_PTTT(v_InputString)
-			if (a_Tips.Count())
-			{
-				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
-				if ((ini_TTTtEn) and (ini_TTTD > 0))
-					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
-			}
+			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
+			if ((ini_TTTtEn) and (ini_TTTD > 0))
+				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 		}
-		if (!v_InputString)	;if v_InputString = "" = empty
-			F_DestroyTriggerstringTips(ini_TTCn)
 	}
+	if (!v_InputString)	;if v_InputString = "" = empty
+		F_DestroyTriggerstringTips(ini_TTCn)
+
 	if (WhatWasUp = "LShift") 
 	{
 		f_LShiftDown := false
-		OutputDebug, % "LShift Up" . "`n"
+		; OutputDebug, % "LShift Up" . "`n"
 	}	
 	if (WhatWasUp = "RShift")
 	{
 		f_RShiftDown := false
-		OutputDebug, % "RShift Up" . "`n"
+		; OutputDebug, % "RShift Up" . "`n"
 	}
 	Critical, Off
 	; OutputDebug, % A_ThisFunc . A_Space . GetKeyName(Format("vk{:x}sc{:x}", VK, SC)) . A_Space . "E" . "`n"
@@ -11173,16 +11165,16 @@ F_LV1_CopyContentToHS3()
 	LV_GetText(Fun, 			SelectedRow, 4)
 	Switch Fun
 	{
-		Case "SI":	;SendFun := "F_HOF_SI"
+		Case "SI":	;SendFun := "F_Simple_Output"
 		GuiControl, HS3: ChooseString, % IdDDL1, 	SendInput (SI)
 		GuiControl, HS4: ChooseString, % IdDDL1b, 	SendInput (SI)
-		Case "CL":	;SendFun := "F_HOF_CLI"
+		Case "CL":	;SendFun := "F_Simple_Output"
 		GuiControl, HS3: ChooseString, % IdDDL1, 	Clipboard (CL)
 		GuiControl, HS4: ChooseString, % IdDDL1b, 	Clipboard (CL)
-		Case "MCL":	;SendFun := "F_HOF_MCL"
+		Case "MCL":	;SendFun := "F_HMenu_Output"
 		GuiControl, HS3: ChooseString, % IdDDL1, 	Menu & Clipboard (MCL)
 		GuiControl, HS4: ChooseString, % IdDDL1b, 	Menu & Clipboard (MCL)
-		Case "MSI":	;SendFun := "F_HOF_MSI"
+		Case "MSI":	;SendFun := "F_HMenu_Output"
 		GuiControl, HS3: ChooseString, % IdDDL1, 	Menu & SendInput (MSI)
 		GuiControl, HS4: ChooseString, % IdDDL1b, 	Menu & SendInput (MSI)
 		Case "SR":	
@@ -14672,7 +14664,7 @@ F_PrepareUndo(string)
 	return string
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HMenu_Mouse(SendFun) ; Handling of mouse events for F_HOF_MSI;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
+F_HMenu_Mouse(SendFun) ; Handling of mouse events for F_HMenu_Output;The subroutine may consult the following built-in variables: A_Gui, A_GuiControl, A_GuiEvent, and A_EventInfo.
 {	
 	global	;assume-global mode of operation
 	Critical, On
@@ -14725,11 +14717,13 @@ F_HMenu_Mouse(SendFun) ; Handling of mouse events for F_HOF_MSI;The subroutine m
 F_HMenu_Output(ReplacementString, Oflag, SendFun)
 {
 	global	;assume-global mode
+	Critical, On
 	local	a_MCSIMenuPos := [], ThisHotkey := A_ThisHotkey, EndChar := A_EndChar
 		,	SingleKey := ""
 		,	WhatWasPressed := ""
 		,	f_Shift := false
 
+	OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
 	v_InputH.VisibleText 	:= false
 ,	v_UndoHotstring		:= ReplacementString	;important for F_Undo	
 ,	v_Options 			:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
@@ -14739,8 +14733,6 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 	v_UndoTriggerstring 	:= v_InputString		;important for F_Undo
 ,	v_SendFun				:= SendFun			;important for F_Undo
 ,	v_MenuMax				:= 0	;global variable used in F_HMenuAHK
-; ,	TextOptions 			:= F_ReplaceAHKconstants(TextOptions)
-
 
 	F_DestroyTriggerstringTips(ini_TTCn)
 	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop 
@@ -14788,7 +14780,7 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 	{	
 		if (ErrorLevel = "NewInput")	;when user used mouse to make a choice from menu
 			break
-		Input, SingleKey, L1, {Tab}{Up}{Down}1234567{Enter}{Esc}
+		Input, SingleKey, L1 E, {Tab}{Up}{Down}1234567{Enter}{Esc}
 		if (InStr(ErrorLevel, "EndKey:"))
 		{
 			WhatWasPressed := SubStr(ErrorLevel, 8)
@@ -14815,8 +14807,14 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 					break
 			}	
 		}
+		if (ini_MHSEn)
+		{
+			SoundBeep, % ini_MHSF, % ini_MHSD
+			; OutputDebug, % A_ThisFunc . A_Space . "Beep" . "`n"
+		}
 	}
 	; OutputDebug, % A_ThisFunc . A_Space . "end" . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
+	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DetermineOptions(Triggerstring)	;
@@ -15138,10 +15136,10 @@ F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid i
 		GuiControl,, % IdTT_C4_LB4, ¦
 		WinActivate, % "ahk_id" PreviousWindowID
 		v_UndoHotstring 	:= OutputVarTemp
-,		ReplacementString 	:= F_ReplaceAHKconstants(OutputVarTemp)
-,		ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options)
-,		ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
-		Switch WhichMenu	;this parameter is set wihin F_HOF_MSI and F_HOF_MCL
+	,	ReplacementString 	:= F_ReplaceAHKconstants(OutputVarTemp)
+	,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options)
+	,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
+		Switch WhichMenu	;this parameter is set wihin F_HMenu_Output and F_HMenu_Output
 		{
 			Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SI")
 			Case "CLI":	F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
@@ -15157,8 +15155,8 @@ F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid i
 			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName			
 ;#c*/ commercial only end			
 		v_UndoTriggerstring 	:= v_InputString
-,		v_InputString 			:= ""
-,		v_InputH.VisibleText 	:= true
+	,	v_InputString 			:= ""
+	,	v_InputH.VisibleText 	:= true
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
