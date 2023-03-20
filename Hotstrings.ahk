@@ -2472,10 +2472,10 @@ F_OneCharPressed(ih, Char)
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
 	{
-		if (v_Qinput)
-			F_PTTTQ(v_Qinput)
-		else
+		if (v_InputString)
 			F_PTTT(v_InputString)	;Variant when new sequence starts from EndChar.
+		else
+			F_PTTTQ(v_Qinput)
 		; OutputDebug, % "F_DestroyTriggerstringTips" . "`n"
 		F_DestroyTriggerstringTips(ini_TTCn)
 		if (a_Tips.Count())	;if tips are available display then
@@ -15083,7 +15083,6 @@ F_TTMenuStatic_Mouse() ;The subroutine may consult the following built-in variab
 	global	;assume-global mode
 	local	OutputVarTemp := ""
 		,	ThisHotkey := A_ThisHotkey
-		; ,	ThisHotkey := A_PriorKey
 		,	ChoicePos := 0
 
 	; OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
@@ -15093,26 +15092,30 @@ F_TTMenuStatic_Mouse() ;The subroutine may consult the following built-in variab
 	MouseGetPos, , , , OutputVarTemp			;to store the name (ClassNN) of the control under the mouse cursor
 	SendMessage, 0x0188, 0, 0, % OutputVarTemp	;retrieve the position of the selected item
 	ChoicePos := (ErrorLevel<<32>>32) + 1		;Convert UInt to Int to have -1 if there is no item selected. Convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.
+	; OutputDebug, % "OutputVarTemp:" . OutputVarTemp . "|" . A_Space . "ChoicePos:" . ChoicePos . "|" . "`n"
 	if (InStr(ThisHotkey, "LButton"))
 	{
 		Critical, On
 		Switch ini_TTCn
 		{
 			Case 1: 
-				GuiControlGet, OutputVarTemp, , % IdTT_C1_LB1
+				GuiControl, 	Choose, 			% IdTT_C1_LB1, % ChoicePos
+				GuiControlGet, OutputVarTemp, , 	% IdTT_C1_LB1
 				Gui, TT_C1: Destroy
 			Case 2: 
-				GuiControlGet, OutputVarTemp, , % IdTT_C2_LB1 
+				GuiControl, 	Choose, 			% IdTT_C2_LB1, % ChoicePos
+				GuiControlGet, OutputVarTemp, , 	% IdTT_C2_LB1 
 				Gui, TT_C2: Destroy
 			Case 3: 
-				GuiControlGet, OutputVarTemp, , % IdTT_C3_LB1 
+				GuiControl, 	Choose, 			% IdTT_C3_LB1, % ChoicePos
+				GuiControlGet, OutputVarTemp, , 	% IdTT_C3_LB1
 				Gui, TT_C3: Destroy
 			Case 4:
-				GuiControlGet, OutputVarTemp, , % IdTT_C4_LB1 
+				GuiControl, 	Choose, 			% IdTT_C4_LB1, % ChoicePos
+				GuiControlGet, OutputVarTemp, , 	% IdTT_C4_LB1 
 				WinActivate, % "ahk_id" PreviousWindowID
 		}
-		; OutputDebug, % "ini_TTCn:" . A_Tab . ini_TTCn . "`n"
-		; OutputDebug, % "OutputVarTemp:" . A_Space . OutputVarTemp . "`n"
+		; OutputDebug, % "ini_TTCn:" . ini_TTCn . A_Space . "OutputVarTemp:" . OutputVarTemp . "`n"
 		F_BackFeed(OutputVarTemp)
 		v_InputString := ""
 		Critical, Off
