@@ -614,6 +614,7 @@ Critical, Off
 		return
 
 	F8::	;new thread starts here
+	Del::
 		Switch F_WhichGui()
 		{
 			Case "HS3":
@@ -10431,7 +10432,7 @@ F_DeleteHotstring()
 	global ;assume-global mode
 	local 	LibraryFullPathAndName := ini_HADL . "\" . v_SelectHotstringLibrary, TheWholeFile := "", LibraryHeader := ""
 	,		SelectedRow := 0, index := 0
-	,		key := 0, val := "", options := "", triggerstring := "", EnDis := "", hotstring := ""
+	,		key := 0, val := "", options := "", triggerstring := "", EnDis := "", hotstring := "", OldOptions := ""
 
 	Gui, HS3: Default
 	F_GuiHS3_EnDis("Disable")			;Disable all GuiControls for deletion time d(t, o, h)	
@@ -10449,8 +10450,11 @@ F_DeleteHotstring()
 	LV_GetText(EnDis,			SelectedRow, 1)	;enabled or disabled definition
 	LV_GetText(hotstring, 		SelectedRow, 5)
 	MsgBox, % 256 + 64 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Selected definition d(t, o, h) will be deleted. Do you want to proceed?"] . "`n`n"
-		. TransA["Triggerstring"] . ":" . A_Space . triggerstring . A_Tab . TransA["options"] . ":" . A_Space . options . A_Tab . TransA["hotstring"] . ":" . A_Space . hotstring
-		. "`n`n" . TransA["If you remove one of the definitions which was multiplied (e.g. duplicated), none of definitions will be active. Therefore It is suggested in order to to enable the second one to reload the application."]
+		. TransA["Triggerstring"] . ":" 	. A_Space . triggerstring . "`n" 
+		. TransA["options"] . ":" 		. A_Space . options . "`n"
+		. TransA["hotstring"] . ":" 		. A_Space . hotstring	. "`n`n" 
+		. TransA["If you remove one of the definitions which was multiplied (e.g. duplicated), none of definitions will be active. Therefore It is suggested in order to to enable the second one to reload the application."]
+	OldOptions := options		
 	IfMsgBox, No
 	{
 		F_GuiHS3_EnDis("Enable")			;Enable all GuiControls for deletion time d(t, o, h)	
@@ -10484,8 +10488,10 @@ F_DeleteHotstring()
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % "Function:" . A_ThisFunc . "`n`n" 
 				. TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
-				. TransA["Triggerstring"] . ":" . A_Space . v_Triggerstring . A_Tab . TransA["options"] . ":" . A_Space . options . "`n" 
-				. TransA["Library name:"] . A_Space . v_SelectHotstringLibrary 
+				. TransA["Triggerstring"] . ":" 	. A_Space . v_Triggerstring . "`n" 
+				. TransA["options"] . ":" 		. A_Space . options . "`n" 
+				. TransA["hotstring"] . ":"		. A_Space . triggerstring . "`n"
+				. TransA["Library name:"] 		. A_Space . v_SelectHotstringLibrary 
 				, 10	;10 s timeout
 	}
 	
@@ -10518,9 +10524,11 @@ F_DeleteHotstring()
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	
 	F_GuiHS3_EnDis("Enable")			;Enable all GuiControls for deletion time d(t, o, h)
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The definition"] . ":" . "`n`n"
-			. TransA["Triggerstring"] . ":" . A_Space . v_Triggerstring . A_Tab . TransA["options"] . ":" . A_Space . options . "`n`n"
+			. TransA["Triggerstring"] . ":" 	. A_Space . v_Triggerstring . "`n" 
+			. TransA["options"] . ":" 		. A_Space . OldOptions . "`n"
+			. TransA["hotstring"] . ":" 		. A_Space . hotstring . "`n`n"
 			. TransA["was just deleted from"] . "`n`n"
-			. TransA["Library name:"] . A_Space . v_SelectHotstringLibrary
+			. TransA["Library name:"] 		. A_Space . v_SelectHotstringLibrary
 			, 10	;10 s timeout
 	TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
 }
