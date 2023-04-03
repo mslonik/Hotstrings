@@ -614,14 +614,18 @@ Critical, Off
 		return
 
 	F8::	;new thread starts here
-	Del::
-		Switch F_WhichGui()
-		{
-			Case "HS3":
-				F_DeleteHotstring()
+	~Del::
+		; Switch F_WhichGui()
+		; {
+			; Case "HS3":
+				; FocusedControl2 := ""
+				GuiControlGet, FocusedControl, HS3: Focus
+				; OutputDebug, % "FocusedControl2:" . FocusedControl2 . "`n"
+				if (FocusedControl = "SysListView321")
+					F_DeleteHotstring()
 				return
-			Case "HS4": return
-		}
+			; Case "HS4": return
+		; }
 
 	F9::	;new thread starts here
 		F_AddHotstring()
@@ -1825,10 +1829,11 @@ F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_MouseMouse is lower than this
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ActiveControlIsOfClass(Class)	;https://www.autohotkey.com/docs/commands/_If.htm
 {
-    ControlGetFocus, FocusedControl, A
-    ControlGet, FocusedControlHwnd, Hwnd,, %FocusedControl%, A
-    WinGetClass, FocusedControlClass, ahk_id %FocusedControlHwnd%
-    return (FocusedControlClass=Class)
+	local	
+    	ControlGetFocus, FocusedControl, A
+    	ControlGet, FocusedControlHwnd, Hwnd,, %FocusedControl%, A
+    	WinGetClass, FocusedControlClass, ahk_id %FocusedControlHwnd%
+    	return (FocusedControlClass=Class)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ConvertEscapeSequences2(string)	;This function is called whenever feed back (SendLevel) is applied and then triggerstring is send by SendInput and cannot therefore contain any escape characters.
