@@ -754,7 +754,7 @@ return
 ~*WheelLeft::
 ~*WheelRight::
 ~*LButton::	;as above, but without F_DestroyTriggerstringTips()
-	; OutputDebug, % "~Win:" . "`n"
+	OutputDebug, % "Here I am:" . "`n"
 	ToolTip,	;this line is necessary to close tooltips.
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
@@ -778,7 +778,7 @@ return
 	return		
 
 ~*Esc::	;the only difference in comparison to previous section is that Esc also resets hotstring recognizer.
-	OutputDebug, % "~Esc:" . "`n"
+	; OutputDebug, % "~Esc:" . "`n"
 	ToolTip,	;this line is necessary to close tooltips.
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
@@ -14730,13 +14730,12 @@ F_HMenu_Mouse(SendFun) ; Handling of mouse events for F_HMenu_Output;The subrout
 F_HMenu_Output(ReplacementString, Oflag, SendFun)
 {
 	global	;assume-global mode
-	Critical, On
 	local	a_MCSIMenuPos := [], ThisHotkey := A_ThisHotkey, EndChar := A_EndChar
 		,	SingleKey := ""
 		,	WhatWasPressed := ""
 		,	f_Shift := false
 
-	OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
 	v_InputH.VisibleText 	:= false
 ,	v_UndoHotstring		:= ReplacementString	;important for F_Undo	
 ,	v_Options 			:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
@@ -14766,10 +14765,9 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 			Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
 		else
 			Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
-		Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax
+		Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax ;. A_Space . "g" . "F_HMenu_Mouse"
 		Func_HMenu_Mouse := func("F_HMenu_Mouse").bind(SendFun)
 		GuiControl +g, % Id_LB_HMenuAHK, % Func_HMenu_Mouse
-		; Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax . A_Space . "g" . "F_HMenu_Mouse"
 		Loop, Parse, ReplacementString, ¦	;second parse of the same variable, this time in order to fill in the Listbox
 			GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . "¦"
 
@@ -14789,6 +14787,7 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 	Ovar := Oflag
 
 	WinActivate, % "ahk_id" HMenuAHKHwnd
+
 	Loop
 	{	
 		if (ErrorLevel = "NewInput")	;when user used mouse to make a choice from menu
@@ -14820,14 +14819,8 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 					break
 			}	
 		}
-		if (ini_MHSEn)
-		{
-			SoundBeep, % ini_MHSF, % ini_MHSD
-			; OutputDebug, % A_ThisFunc . A_Space . "Beep" . "`n"
-		}
 	}
 	; OutputDebug, % A_ThisFunc . A_Space . "end" . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
-	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DetermineOptions(Triggerstring)	;
