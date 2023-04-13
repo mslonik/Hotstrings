@@ -754,7 +754,6 @@ return
 ~*WheelLeft::
 ~*WheelRight::
 ~*LButton::	;as above, but without F_DestroyTriggerstringTips()
-	OutputDebug, % "Here I am:" . "`n"
 	ToolTip,	;this line is necessary to close tooltips.
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
@@ -1656,7 +1655,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 	if (IsPreviousWindowIDvital[1])
 	{
 		WinActivate, % "ahk_id" PreviousWindowID
-		OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
+		; OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
 	}
 
 	Switch WhichLB
@@ -1707,6 +1706,7 @@ F_HMenu_Keyboard(PressedKey, SendFun)
 		, 	ShiftTabIsFound := false
 		,	ReplacementString := ""
 		, 	temp := 0
+		,	WhichControl := ""
 	static 	IfUpF := false
 		,	IfDownF := false
 		,	IsCursorPressed := false
@@ -1773,20 +1773,23 @@ F_HMenu_Keyboard(PressedKey, SendFun)
 	Temp1 			:= F_ReplaceAHKconstants(Temp1)
 ,	Temp1 			:= F_FollowCaseConformity(Temp1, v_InputString, v_Options)
 ,	Temp1 			:= F_ConvertEscapeSequences(Temp1)
-	;OutputDebug, % "PreviousWindowID 2:" . A_Tab . PreviousWindowID
+	; OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID . "`n"
 	if (ini_TTCn = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
 	Gui, HMenuAHK: Destroy
 	Switch SendFun
 	{
 		Case "MSI":
-			; OutputDebug, % "Temp1:" . Temp1 . "|" . "SendFun:" . SendFun . "|" . "`n"
+			ControlGetFocus, WhichControl, A	;some applications, e.g. Total Commander, Firefox, activate and focus last control; to enable correct processing of menu it is important to de-focus it; I use single left mouse click for that purpose
+			if (WhichControl)
+				ControlClick, % WhichControl
 			F_SendIsOflag(Temp1, Ovar, "SI")
 		Case "MCL":
-			; OutputDebug, % "Temp1:" . Temp1 . "|" . "SendFun:" . SendFun . "|" . "`n"
+			ControlGetFocus, WhichControl, A	;some applications, e.g. Total Commander, Firefox, activate and focus last control; to enable correct processing of menu it is important to de-focus it; I use single left mouse click for that purpose
+			if (WhichControl)
+				ControlClick, % WhichControl
 			F_ClipboardPaste(Temp1, Ovar, v_EndChar)
 	}
-	
 	v_InputH.VisibleText 	:= true
 	if (InStr(v_Options, "z", false))	;fundamental change, now "z" parameter metters
 		Hotstring("Reset")
@@ -14754,6 +14757,8 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 	
 	if (ini_TTCn != 4)	;if not static window, draw small simple GUI
 	{
+		PreviousWindowID := WinExist("A")
+		; OutputDebug, % "PreviousWindowID1:" . PreviousWindowID . "`n"
 		Gui, HMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuAHKHwnd
 		Gui, HMenuAHK: +Delimiter¦	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 		Gui, HMenuAHK: Margin, 0, 0
