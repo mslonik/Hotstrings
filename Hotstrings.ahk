@@ -1760,7 +1760,8 @@ F_HMenu_Keyboard(PressedKey, SendFun)
 			SoundBeep, % ini_MHSF, % ini_MHSD	
 		return false ;if function returns false, characters still be invisible
 	}
-	ControlGet, Temp1, List, , , A
+	; ControlGet, Temp1, List, , , A	;tu jestem
+	ControlGet, Temp1, List, , , % "ahk_id" . A_Space . HMenuAHKHwnd
 	Loop, Parse, Temp1, `n
 	{
 		if (A_Index = PressedKey)
@@ -1769,25 +1770,19 @@ F_HMenu_Keyboard(PressedKey, SendFun)
 			break
 		}
 	}
+	OutputDebug, % "Temp1:" . Temp1 . "`n"
 	v_UndoHotstring 	:= Temp1
 	Temp1 			:= F_ReplaceAHKconstants(Temp1)
 ,	Temp1 			:= F_FollowCaseConformity(Temp1, v_InputString, v_Options)
 ,	Temp1 			:= F_ConvertEscapeSequences(Temp1)
-	; OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID . "`n"
 	if (ini_TTCn = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
 	Gui, HMenuAHK: Destroy
 	Switch SendFun
 	{
 		Case "MSI":
-			ControlGetFocus, WhichControl, A	;some applications, e.g. Total Commander, Firefox, activate and focus last control; to enable correct processing of menu it is important to de-focus it; I use single left mouse click for that purpose
-			if (WhichControl)
-				ControlClick, % WhichControl
 			F_SendIsOflag(Temp1, Ovar, "SI")
 		Case "MCL":
-			ControlGetFocus, WhichControl, A	;some applications, e.g. Total Commander, Firefox, activate and focus last control; to enable correct processing of menu it is important to de-focus it; I use single left mouse click for that purpose
-			if (WhichControl)
-				ControlClick, % WhichControl
 			F_ClipboardPaste(Temp1, Ovar, v_EndChar)
 	}
 	v_InputH.VisibleText 	:= true
@@ -14757,8 +14752,6 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 	
 	if (ini_TTCn != 4)	;if not static window, draw small simple GUI
 	{
-		PreviousWindowID := WinExist("A")
-		; OutputDebug, % "PreviousWindowID1:" . PreviousWindowID . "`n"
 		Gui, HMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuAHKHwnd
 		Gui, HMenuAHK: +Delimiter¦	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 		Gui, HMenuAHK: Margin, 0, 0
@@ -14782,7 +14775,7 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 	}
 	else	;(ini_TTCn = 4)
 	{
-		; OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID . "`n"
+		; OutputDebug, % "PreviousWindowID1:" . A_Tab . PreviousWindowID . "`n"
 		Loop, Parse, ReplacementString, ¦	;second parse of the same variable, this time in order to fill in the Listbox
 			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . "¦"
 		GuiControl, Choose, % IdTT_C4_LB4, 1
@@ -14790,8 +14783,6 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 		WhichMenu := "SI"	;this setting will be used within F_MouseMenuCombined() to handle mouse event
 	}
 	Ovar := Oflag
-
-	WinActivate, % "ahk_id" HMenuAHKHwnd
 
 	Loop
 	{	
