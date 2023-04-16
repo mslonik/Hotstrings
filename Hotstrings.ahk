@@ -83,17 +83,6 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_MsgBoxIconError		:= 16		;constant, MsgBox icon hand (stop/error)
 ,		c_MsgBoxIconExclamation	:= 48		;constant, MsgBox icon exclamation
 ,		v_LicenseType			:= "commercial"		;"commercial" or "free"
-,		v_LicensedTo			:= "Maciej Słojewski"	;company name or first and second name of customer
-;#c/* commercial only beginning
-,		v_LogonName			:= "maciej"			;40 char. max. "0123456789012345678901234567890123456789", corresponds to A_UserName
-; ,		v_LicensedCompName		:= "fikumiku"			;40 char. max. "0123456789012345678901234567890123456789", corresponds to A_ComputerName
-,		v_ValidTill			:= "limited"			;date in format yyyymmdd; "inf" for infinity
-; ,		v_LicenseID			:= "000001"
-,		f_100msRun 			:= false				;global flag: timer is running, 100 ms, for concurrent press of Shift keys
-,		f_WasReset			:= false				;global flag: Shift key memory reset (to reset hotstring recognizer)
-,		f_RShiftDown 			:= false
-,		f_LShiftDown 			:= false
-,		v_SendFun				:= ""				;last used output function; important for F_Undo
 ,		c_xmarg 				:= 10				;pixels, default value (it can be changed by user)
 ,		c_ymarg 				:= 10				;pixels, default value (it can be changed by user)
 ,		c_FontColor			:= "Black"
@@ -102,15 +91,18 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_ControlColor 		:= "Default"
 ,		c_FontSize 			:= 10 ;points
 ,		c_FontType 			:= "Consolas"
+;#c/* commercial only beginning
+,		v_ValidTill			:= "inf"				;"inf" for infinity, "limited" for other cases
+,		f_100msRun 			:= false				;global flag: timer is running, 100 ms, for concurrent press of Shift keys
+,		f_WasReset			:= false				;global flag: Shift key memory reset (to reset hotstring recognizer)
+,		f_RShiftDown 			:= false
+,		f_LShiftDown 			:= false
+,		v_SendFun				:= ""				;last used output function; important for F_Undo
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
 F_LoadCreateTranslationTxt() 			;default set of text string definitions (English) is loaded into memory at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
 F_CheckCreateConfigIni() 			;Try to load up configuration file. If those files do not exist, create them.
-;#c/* commercial only beginning
-F_CheckCommercialConditions()			;check v_LicenseType, v_LogonName, v_LicensedCompName, v_ValidTill
-SetTimer, F_CheckCommTime, % 1000 * 3600	;1 hour
-;#c*/ commercial only end
 F_CheckIfMoveToProgramFiles()			;Checks if move Hotstrings folder to Program Files folder and then restarts application.
 F_CheckIfRemoveOldDir()				;Checks content of Config.ini in order to remove old script directory.
 F_CheckFileEncoding(A_ScriptFullPath)	;checks if script is utf-8 compliant. it has plenty to do wiith github download etc.
@@ -188,15 +180,15 @@ F_GuiHS3_DetermineConstraints()
 F_GuiHS4_Create()
 F_GuiHS4_DetermineConstraints()
 if (ini_Sandbox)
-	{
-		GuiControl, Show, % IdEdit10
-		GuiControl, Show, % IdEdit10b
-	}
+{
+	GuiControl, Show, % IdEdit10
+	GuiControl, Show, % IdEdit10b
+}
 else
-	{
-		GuiControl, Hide, % IdEdit10
-		GuiControl, Hide, % IdEdit10b
-	}
+{
+	GuiControl, Hide, % IdEdit10
+	GuiControl, Hide, % IdEdit10b
+}
 
 F_UpdateSelHotLibDDL()
 
@@ -480,6 +472,11 @@ if (ini_TTCn = 4)	;static triggerstring / hotstring GUI
 if (ini_GuiReload) and (v_SilentMode != "l")
 	F_GUIinit()
 
+;#c/* commercial only beginning
+F_CheckCommercialConditions()			;check v_LicenseType, v_LogonName, v_LicensedCompName, v_ValidTill
+SetTimer, F_CheckCommTime, % 1000 * 3600	;1 hour
+;#c*/ commercial only end
+
 AppStartTime := A_Now	;Date and time math can be performed with EnvAdd and EnvSub. Also, FormatTime can format the date and/or time according to your locale or preferences.
 Critical, Off
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
@@ -719,7 +716,6 @@ return
 ~*LShift::
 ~*RShift::			;Actually "Shifts" work a bit different as some keys like @ or ? are available only after pressing Shift.
 	ToolTip,			;this line is necessary to close tooltips.
-	; OutputDebug, % "Tu jestem" . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
 	F_DestroyTriggerstringTips(ini_TTCn)
@@ -1059,7 +1055,6 @@ F_SetSendLevel()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;#c/* commercial only beginning
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiEnterLicense()
 {
 	global ;assume-global mode
@@ -1074,15 +1069,15 @@ F_GuiEnterLicense()
 	DetectHiddenWindows, On
 	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . EnterLicenseGuiHwnd
 	DetectHiddenWindows, Off
-	Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	if (Window1W)
 	{
+		Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
 		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
-		Gui, EnterLicense: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Please enter below your license number"]
+		Gui, EnterLicense: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["License"]
 	}
 	else
-		Gui, EnterLicense: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Please enter below your license number"]
+		Gui, EnterLicense: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["License"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_CheckCommercialConditions()
@@ -1097,21 +1092,9 @@ F_CheckCommercialConditions()
 	{
 		if (ini_LicenseKey = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 		{
-			;1. Prepare MyAbout Gui
-			Gui, EnterLicense: New, 		-Resize +HwndEnterLicenseGuiHwnd +Owner -MaximizeBox -MinimizeBox
-			Gui, EnterLicense: Margin,	% c_xmarg, % c_ymarg
-			Gui,	EnterLicense: Color,	% c_WindowColor, % c_ControlColor
-
-			; TransA["Enables Convenient Definition"] := StrReplace(TransA["Enables Convenient Definition"], "``n", "`n")
-			;2. Prepare all text objects according to mock-up.
-			Gui,	EnterLicense: Font,		% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, 		% c_FontType
-			Gui, EnterLicense: Add, 		Text,    x0 y0 HwndIdEnterLicenseT1,								% TransA["Please enter below your license number"]
-			Gui,	EnterLicense: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 		% c_FontType
-			Gui, EnterLicense: Add, 		Text,    	x0 y0 HwndIdEnterLicenseT1, 								% TransA["You should receive it by e-mail"]
-			Gui, EnterLicense: Add,		Edit,	x0 y0 HwndIdEnterLicenseE1 r1,							12345678-ABCD-1234-ABCD-012345678901 
-			Gui, EnterLicense: Add, 		Button,  	x0 y0 HwndIdEnterLicenseB1 gF_EnterLicenseB1 Default,			% TransA["OK"]
+			F_GuiEnterLicense_CreateGui()
+			F_GuiEnterLicense_DetermineConstraints()
 			F_GuiEnterLicense()
-			; Gui, MyAbout: Add,		Picture, 	x0 y0 HwndIdAboutPicture w96 h96, 							% AppIcon
 
 			; IniWrite, % ini_LicenseKey, % ini_HADConfig, LicenseInfo, LicenseKey
 		}
@@ -1162,7 +1145,54 @@ F_CheckCommercialConditions()
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EnterLicenseB1()
+F_GuiEnterLicense_CreateGui()
+{
+	global ;assume-global mode
+
+	;1. Prepare MyAbout Gui
+	Gui, EnterLicense: New, 		-Resize +HwndEnterLicenseGuiHwnd +Owner -MaximizeBox -MinimizeBox
+	Gui, EnterLicense: Margin,	% c_xmarg, % c_ymarg
+	Gui,	EnterLicense: Color,	% c_WindowColor, % c_ControlColor
+
+	;2. Prepare all text objects according to mock-up.
+	Gui,	EnterLicense: Font,		% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, 		% c_FontType
+	Gui, EnterLicense: Add, 		Text,    x0 y0 HwndIdEnterLicenseT1,								% TransA["Please enter below your license number"]
+	Gui,	EnterLicense: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 		% c_FontType
+	Gui, EnterLicense: Add, 		Text,    	x0 y0 HwndIdEnterLicenseT2, 								% TransA["You should receive it by e-mail"]
+	Gui, EnterLicense: Add,		Edit,	x0 y0 HwndIdEnterLicenseE1 r1 Limit36,						12345678-ABCD-1234-ABCD-012345678901	;8 + 1 + 4 + 1 + 4 + 1 + 4 + 1 + 12 = 36
+	Gui, EnterLicense: Add,		Button,  	x0 y0 HwndIdEnterLicenseB1 gF_EnterLicenseB1 Default,			% TransA["OK"]
+	; Gui, MyAbout: Add,		Picture, 	x0 y0 HwndIdAboutPicture w96 h96, 							% AppIcon
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiEnterLicense_DetermineConstraints()
+{
+	global ;assume-global mode
+	local OutVarTemp := 0, 	OutVarTempX := 0, 	OutVarTempY := 0, 	OutVarTempW := 0, 	OutVarTempH := 0	;Within a function, to create a set of variables that is local instead of global, declare OutputVar as a local variable prior to using command GuiControlGet, Pos. However, it is often also necessary to declare each variable in the set, due to a common source of confusion.
+	,	OutVarTemp1 := 0, 	OutVarTemp1X := 0, 	OutVarTemp1Y := 0, 	OutVarTemp1W := 0, 	OutVarTemp1H := 0
+	,	xNext := 0, yNext := 0, wNext := 0, hNext := 0
+	
+;3. Determine constraints, according to mock-up
+	xNext := c_xmarg, yNext := c_ymarg
+	GuiControl, Move, % IdEnterLicenseT1, % "x" . xNext . A_Space . "y"  . yNext	;Please enter below your license number
+	GuiControlGet, OutVarTemp, Pos, % IdEnterLicenseT1
+	yNext += OutVarTempH + c_ymarg
+	GuiControl, Move, % IdEnterLicenseT2, % "x" . xNext . A_Space . "y" . yNext	;You should receive it by e-mail
+	GuiControlGet, OutVarTemp, Pos, % IdEnterLicenseT2
+	yNext += OutVarTempH + c_ymarg
+	GuiControl, Move, % IdEnterLicenseE1, % "x" . xNext . A_Space . "y" . yNext	;12345678-ABCD-1234-ABCD-012345678901
+	GuiControlGet, OutVarTemp, Pos, % IdEnterLicenseE1
+	GuiControlGet, OutVarTemp1, Pos, % IdEnterLicenseB1
+	wNext := OutVarTemp1W + 2 * c_xmarg
+,	xNext := (OutVarTempW // 2) - (wNext // 2)
+,	yNext += OutVarTempH + c_ymarg
+	GuiControl, Move, % IdEnterLicenseB1, % "x" . xNext . A_Space . "y" . yNext . A_Space . "w" . wNext	;ok
+	
+	; xNext := OutVarTemp1X + OutVarTemp1W - 96 ;96 = chosen size of icon
+; ,	yNext := OutVarTemp1Y + OutVarTemp1H
+	; GuiControl, Move, % IdAboutPicture, % "x" . xNext . A_Space . "y" . yNext 
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EnterLicenseB1()	;tu jestem
 {
 
 }
@@ -1988,7 +2018,6 @@ F_HMenu_Keyboard(PressedKey, SendFun)
 			SoundBeep, % ini_MHSF, % ini_MHSD	
 		return false ;if function returns false, characters still be invisible
 	}
-	; ControlGet, Temp1, List, , , A	;tu jestem
 	ControlGet, Temp1, List, , , % "ahk_id" . A_Space . HMenuAHKHwnd
 	Loop, Parse, Temp1, `n
 	{
@@ -13085,6 +13114,7 @@ yellow												= yellow
 Yes													= Yes
 yes													= yes
 You cannot move existing definition to library which is DISABLED. = You cannot move existing definition to library which is DISABLED.
+You should receive it by e-mail							= You should receive it by e-mail
 You've cancelled this process.							= You've cancelled this process.
 You've changed at least one configuration parameter, but didn't yet apply it. = You've changed at least one configuration parameter, but didn't yet apply it.
 Your hotstring definition contain one of the following characters: = Your hotstring definition contain one of the following characters:
