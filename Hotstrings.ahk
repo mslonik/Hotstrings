@@ -82,7 +82,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		v_Qinput				:= "" 		; to store substring of v_InputString related to possible question mark (inside) option
 ,		c_MsgBoxIconError		:= 16		;constant, MsgBox icon hand (stop/error)
 ,		c_MsgBoxIconExclamation	:= 48		;constant, MsgBox icon exclamation
-,		v_LicenseType			:= "free"		;"commercial" or "free"
+,		v_LicenseType			:= "commercial"		;"commercial" or "free"
 ,		v_LicensedTo			:= "Maciej Słojewski"	;company name or first and second name of customer
 ;#c/* commercial only beginning
 ,		v_LogonName			:= "maciej"			;40 char. max. "0123456789012345678901234567890123456789", corresponds to A_UserName
@@ -430,6 +430,13 @@ Menu, AppSubmenu,		Add, % TransA["Application statistics"] . "`tShift + Ctrl + S
 Menu, AboutHelpSub,		Add,	% TransA["Help: Hotstrings application"] . "`tF1",					F_GuiAboutLink1
 Menu, AboutHelpSub,		Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"] . "`tCtrl+F1",	F_GuiAboutLink2
 Menu, AboutHelpSub,		Add
+;#c/* commercial only beginning
+Menu, AboutHelpSub,		Add, % TransA["Support: technical issue"],								F_SupportContact
+Menu, AboutHelpSub,		Add, % TransA["Support: commercial / license issue"],						F_SupportLicense
+Menu, AboutHelpSub,		Add
+Menu, AboutHelpSub,		Add, % TransA["License details"],										F_LicenseDetails
+Menu, AboutHelpSub,		Add
+;#c*/ commercial only end
 Menu, AboutHelpSub,		Add,	% TransA["About this application..."],								F_GuiAbout
 Menu, AboutHelpSub,		Add
 Menu, AboutHelpSub,		Add, % TransA["Show intro"],											F_GuiShowIntro 
@@ -855,6 +862,156 @@ return
 #If
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
+;#c/* commercial only beginning
+F_LicenseValidate()
+{
+	url 					:= "https://api.lemonsqueezy.com/v1/licenses/validate"
+,	header1 				:= "application/json"
+,	header2				:= "application/x-www-form-urlencoded"
+,	license_key 			:= "FDC56759-F8BA-434A-94B9-18B080A7F2DA"
+,	instance_id 			:= "c3f065a6-7541-472b-9553-1c1f9257bded"
+,	oHTTP 				:= ComObjCreate("WinHttp.WinHttpRequest.5.1")
+,	counter1				:= 0
+,	TempLoopField1			:= ""
+,	TempLoopField2			:= ""
+,	LicenseArray			:= {}
+,	FirstColon			:= 0
+,	Key					:= ""
+,	Value				:= ""
+
+	oHTTP.Open("POST", url, false)
+	oHTTP.SetRequestHeader("Accept", header1)
+	oHTTP.SetRequestHeader("Content-Type", header2)
+	oHTTP.Send("license_key=" . license_key . "&instance_id=" . instance_id)
+
+	responseText := oHTTP.ResponseText
+
+	Loop, Parse, responseText, {}, `, ;comma must be escaped by "`"
+	{
+		if (A_LoopField)
+		{
+			TempLoopField1 := A_LoopField
+			Loop, Parse, TempLoopField1, `,	;comma must be escaped by "`"
+			{
+				TempLoopField2 := A_LoopField
+			,	FirstColon := InStr(TempLoopField2, ":")
+			,	Key := SubStr(TempLoopField2, 2, FirstColon - 3)
+				Value := SubStr(TempLoopField2, FirstColon + 1)
+			,	Value := StrReplace(Value, """")
+			,	LicenseArray[Key] := Value
+			}
+		}
+	}
+	return LicenseArray
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_LicenseDetails()	;dedicated script: LemonAPI.ahk, structure: 
+/* {
+	"valid": true,
+	"error": null,
+	"license_key": {
+	  "id": 65364,
+	  "status": "active",
+	  "key": "FDC56759-F8BA-434A-94B9-18B080A7F2DA",
+	  "activation_limit": null,
+	  "activation_usage": 1,
+	  "created_at": "2023-03-29 20:47:06",
+	  "expires_at": null,
+	  "test_mode": true
+	},
+	"instance": {
+	  "id": "c3f065a6-7541-472b-9553-1c1f9257bded",
+	  "name": "Test",
+	  "created_at": "2023-04-03 20:40:58"
+	},
+	"meta": {
+	  "store_id": 19492,
+	  "order_id": 575712,
+	  "order_item_id": 564672,
+	  "product_id": 58043,
+	  "product_name": "Hottrings",
+	  "variant_id": 55875,
+	  "variant_name": "Hotstrings",
+	  "customer_id": 584858,
+	  "customer_name": "Maciej S\u0142ojewski",
+	  "customer_email": "maciej.slojewski@mslonik.pl"
+	}
+   }
+ */   
+{
+	global						;assume-global mode of operation
+	local c_MsgBoxIconAsterisk	:= 64
+	,	c_License				:= "LICENSE_EULA.md"
+	,	LicenseInfo			:= F_LicenseValidate()
+
+	MsgBox, % c_MsgBoxIconAsterisk, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+		, % TransA["License details"] . ":"									. "`n`n"
+		. TransA["Type"] . ":" 			. A_Tab . v_LicenseType 					. "`n"
+		. TransA["License"] . ":" 		. A_Tab . A_ScriptDir . "\" . c_License 	. "`n"
+		. TransA["License key"] . ":" 	. A_Tab . LicenseInfo.key 				. "`n"
+		. TransA["Activation limit"] . ":" . A_Tab . LicenseInfo.activation_limit 		. "`n"
+		. TransA["Activation usage"] . ":" . A_Tab . LicenseInfo.activation_usage		. "`n"
+		. TransA["Created at"] . ":" 		. A_Tab . LicenseInfo.created_at			. "`n"
+		. TransA["Expires at"] . ":" 		. A_Tab . LicenseInfo.expires_at			. "`n"
+		. TransA["Customer name"] . ":" 	. A_Tab . LicenseInfo.customer_name		. "`n"
+		. TransA["Customer id"] . ":" 	. A_Tab . LicenseInfo.customer_id			. "`n"
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SupportLicense()
+{
+	c_MsgBoxIconError	:= 16
+,	c_ASCII_NewLine 	:= "`%0A"
+,	c_ASCII_HorTab 	:= "`%09"
+,	c_ASCII_Space		:= "`%20"
+,	c_MailToCommercial	:= "damit.hotstrings@gmail.com"
+
+	Run, % "mailto:" . c_MailToCommercial . "?subject=Request for Hotstrings support, commercial / license issue&body="
+		. "Logon user name:" 	. c_ASCII_HorTab . A_UserName 	. c_ASCII_NewLine
+		. "Computer name:" 		. c_ASCII_HorTab . A_ComputerName 	. c_ASCII_NewLine
+		. "First and second name of license owner or company name (please fill in manually):" . c_ASCII_Space .  c_ASCII_NewLine . c_ASCII_NewLine
+		. "This e-mail will be processed as soon as possible, within ~1 working day (24 hours). Nevertheless please be patient." . c_ASCII_NewLine . c_ASCII_NewLine
+		. "The proud Hotstrings team and Maciej Słojewski", , UseErrorLevel
+	if (ErrorLevel = "ERROR")
+	{
+		MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . A_Space . "error", % "Something went wrong, e-mail client wasn't found?" . "`n`n"
+			. "Please prepare it manually: press Ctrl + C, open your e-mail application and press Ctrl + V." . "`n`n"
+			. "To:" . A_Tab . c_MailToCommercial			. "`n"
+			. "Logon user name:" . A_Tab . A_UserName 		. "`n"
+			. "Computer name:" 	. A_Tab . A_ComputerName 	. "`n"
+			. "First and second name of license owner or company name (please fill in manually):" . A_Space . "`n`n"
+			. "This e-mail will be processed as soon as possible, within ~1 working day (24 hours). Nevertheless please be patient." . "`n"
+			. "The proud Hotstrings team and Maciej Słojewski" . "`n"
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SupportContact()
+{
+	c_MsgBoxIconError	:= 16
+,	c_ASCII_NewLine 	:= "`%0A"
+,	c_ASCII_HorTab 	:= "`%09"
+,	c_ASCII_Space		:= "`%20"
+,	c_MailToTechnical	:= "support@hotstrings.technology"
+
+	Run, % "mailto:" . c_MailToTechnical . "?subject=Request for Hotstrings technical support&body="
+		. "Logon user name:" 	. c_ASCII_HorTab . A_UserName 	. c_ASCII_NewLine
+		. "Computer name:" 		. c_ASCII_HorTab . A_ComputerName 	. c_ASCII_NewLine
+		. "First and second name of license owner or company name (please fill in manually):" . c_ASCII_Space .  c_ASCII_NewLine . c_ASCII_NewLine
+		. "This e-mail will be processed as soon as possible, within ~1 working day (24 hours). Nevertheless please be patient." . c_ASCII_NewLine . c_ASCII_NewLine
+		. "The proud Hotstrings team and Maciej Słojewski", , UseErrorLevel
+	if (ErrorLevel = "ERROR")
+	{
+		MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . A_Space . "error", % "Something went wrong, e-mail client wasn't found?" . "`n`n"
+			. "Please prepare it manually: press Ctrl + C, open your e-mail application and press Ctrl + V." . "`n`n"
+			. "To:" . A_Tab . c_MailToTechnical			. "`n"
+			. "Logon user name:" . A_Tab . A_UserName 		. "`n"
+			. "Computer name:" 	. A_Tab . A_ComputerName 	. "`n"
+			. "First and second name of license owner or company name (please fill in manually):" . A_Space . "`n`n"
+			. "This e-mail will be processed as soon as possible, within ~1 working day (24 hours). Nevertheless please be patient." . "`n`n"
+			. "The proud Hotstrings team and Maciej Słojewski" . "`n"
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c*/ commercial only end
 F_SetMinSendLevel()
 {
 	global	;assume-global mode of operation
@@ -12304,6 +12461,8 @@ F_LoadCreateTranslationTxt(decision*)
 About / Help 											= &About / Help
 About this application...								= About this application...
 According to your wish the new version of application was found on the server and downloaded. = According to your wish the new version of application was found on the server and downloaded.
+Activation limit										= Activation limit
+Activation usage										= Activation usage
 Active triggerstring tips								= Active triggerstring tips
 Active triggerstring tips styling							= Active triggerstring tips styling
 Actual computer name									= Actual computer name
@@ -12400,6 +12559,7 @@ Copy clipboard content into ""Enter hotstring""				= Copy clipboard content into
 Copy Config.ini folder path to Clipboard					= Copy Config.ini folder path to Clipboard
 Copy Libraries folder path to Clipboard						= Copy Libraries folder path to Clipboard
 Copy Log folder path to Clipboard							= Copy Log folder path to Clipboard
+Created at											= Created at
 Cumulative gain [characters]								= Cumulative gain [characters]
 Current Config.ini file location:							= Current Config.ini file location:
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
@@ -12409,6 +12569,8 @@ Current shortcut (hotkey):								= Current shortcut (hotkey):
 Current time											= Current time
 cursor												= cursor
 custom												= custom
+Customer id											= Customer id
+Customer name											= Customer name
 Dark													= Dark
 default 												= default
 Default mode											= Default mode
@@ -12436,6 +12598,7 @@ Dynamic hotstrings 										= &Dynamic hotstrings
 Edit library header										= Edit library header
 Edit Hotstrings 										= Edit Hotstrings
 Editing of library header is possible only if library is enabled (not DISABLED). = Editing of library header is possible only if library is enabled (not DISABLED).
+En/Dis|Triggerstring|Trigg Opt|Out Fun|Hotstring|Comment 		= En/Dis|Triggerstring|Trigg Opt|Out Fun|Hotstring|Comment
 Enable												= Enable
 enable												= enable
 ENABLED												= ENABLED
@@ -12452,18 +12615,18 @@ Enter a name for the new library 							= Enter a name for the new library
 Enter a new library name									= Enter a new library name
 Enter hotstring 										= Enter hotstring
 enter selected hotstring									= enter selected hotstring
-selection												= selection
 Enter triggerstring										= Enter triggerstring
-Triggerstring cannot be empty if you wish to add new hotstring	= Triggerstring cannot be empty if you wish to add new hotstring
 Error												= Error
 ErrorLevel was triggered by NewInput error. 					= ErrorLevel was triggered by NewInput error.
 Error reading library file:								= Error reading library file:
+Events: styling										= Events: styling
 Exclamation Mark ! 										= Exclamation Mark !
 exists in the currently selected library					= exists in the currently selected library
 exists in the library									= exists in the library
 Exit													= Exit
 Exit application										= Exit application
 exit Hotstrings application								= exit Hotstrings application
+Expires at											= Expires at
 Export from .csv to .ahk 								= &Export from .csv to .ahk
 Export to .ahk with static definitions of hotstrings			= Export to .ahk with static definitions of hotstrings
 Export to .ahk with dynamic definitions of hotstrings			= Export to .ahk with dynamic definitions of hotstrings
@@ -12558,7 +12721,9 @@ Library export. Please wait... 							= Library export. Please wait...
 Library has been exported 								= Library has been exported
 Library has been imported. 								= Library has been imported.
 License												= License
+License details										= License details
 License ID											= License ID
+License key											= License key
 License type											= License type
 Licensed to											= Licensed to
 Light (default)										= Light (default)
@@ -12680,6 +12845,7 @@ Select hotstring output function 							= Select hotstring output function
 Select library file to be deleted							= Select library file to be deleted
 Select the target library: 								= Select the target library:
 Select triggerstring option(s)							= Select triggerstring option(s)
+selection												= selection
 Semicolon ; 											= Semicolon ;
 SendLevel value										= SendLevel value
 Send Raw (R)											= Send Raw (R)
@@ -12736,6 +12902,8 @@ Static hotstrings 										= &Static hotstrings
 Static triggerstring / hotstring menus						= Static triggerstring / hotstring menus
 Style of GUI											= Style of GUI
 Such file already exists									= Such file already exists
+Support: technical issue									= Support: technical issue
+Support: commercial / license issue						= Support: commercial / license issue
 Suspend Hotstrings										= Suspend Hotstrings
 suspend triggerstrings tips and hotstrings					= suspend triggerstrings tips and hotstrings
 Tab 													= Tab 
@@ -12806,6 +12974,7 @@ to undo.												= to undo.
 Trigger Opt.											= Trigger Opt.
 Triggers												= Triggers
 Triggerstring 											= Triggerstring
+Triggerstring cannot be empty if you wish to add new hotstring	= Triggerstring cannot be empty if you wish to add new hotstring
 Triggerstring contains only white characters. Are you sure to continue? = Triggerstring contains only white characters. Are you sure to continue?
 Triggerstring / hotstring behaviour						= Triggerstring / hotstring behaviour
 Triggerstring sound duration [ms]							= Triggerstring sound duration [ms]
@@ -12815,9 +12984,8 @@ Triggerstring tips  are now								= Triggerstring tips  are now
 Triggerstring tips have been loaded from the following library file to memory: = Triggerstring tips have been loaded from the following library file to memory:
 Triggerstring tips related to the following library file have been unloaded from memory: = Triggerstring tips related to the following library file have been unloaded from memory:
 Triggerstring tips styling								= Triggerstring tips styling
-Events: styling										= Events: styling
 Triggerstring tooltip timeout in [ms]						= Triggerstring tooltip timeout in [ms]
-En/Dis|Triggerstring|Trigg Opt|Out Fun|Hotstring|Comment 		= En/Dis|Triggerstring|Trigg Opt|Out Fun|Hotstring|Comment
+Type													= Type
 Typeface color											= Typeface color
 Typeface font											= Typeface font
 Typeface size											= Typeface size
@@ -14283,11 +14451,11 @@ F_GuiAbout_DetermineConstraints()
 	xNext := MaxText + 3 * c_xmarg
 	GuiControl, Move, % IdAboutT8, % "x" . xNext . A_Space . "y" . yNext
 	xNext := c_xmarg, yNext += c_HofText
-	GuiControl, Move, % IdAboutT9, % "x" . xNext . A_Space . "y" . yNext
+	GuiControl, Move, % IdAboutT9, % "x" . xNext . A_Space . "y" . yNext	;License:
 	xNext := MaxText + 3 * c_xmarg
-	GuiControl, Move, % IdAboutT10, % "x" . xNext . A_Space . "y" . yNext
+	GuiControl, Move, % IdAboutT10, % "x" . xNext . A_Space . "y" . yNext	;EULA or MIT 
 	xNext := c_xmarg, yNext += c_HofText
-	GuiControl, Move, % IdAboutT11, % "x" . xNext . A_Space . "y" . yNext	;type
+	GuiControl, Move, % IdAboutT11, % "x" . xNext . A_Space . "y" . yNext	;License type:
 	xNext := MaxText + 3 * c_xmarg
 	GuiControl, Move, % IdAboutT12, % "x" . xNext . A_Space . "y" . yNext	;type
 	if (v_LicenseType = "commercial")
