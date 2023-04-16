@@ -86,14 +86,22 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		v_LicensedTo			:= "Maciej Słojewski"	;company name or first and second name of customer
 ;#c/* commercial only beginning
 ,		v_LogonName			:= "maciej"			;40 char. max. "0123456789012345678901234567890123456789", corresponds to A_UserName
-,		v_LicensedCompName		:= "fikumiku"			;40 char. max. "0123456789012345678901234567890123456789", corresponds to A_ComputerName
-,		v_ValidTill			:= "inf"				;date in format yyyymmdd; "inf" for infinity
-,		v_LicenseID			:= "000001"
+; ,		v_LicensedCompName		:= "fikumiku"			;40 char. max. "0123456789012345678901234567890123456789", corresponds to A_ComputerName
+,		v_ValidTill			:= "limited"			;date in format yyyymmdd; "inf" for infinity
+; ,		v_LicenseID			:= "000001"
 ,		f_100msRun 			:= false				;global flag: timer is running, 100 ms, for concurrent press of Shift keys
 ,		f_WasReset			:= false				;global flag: Shift key memory reset (to reset hotstring recognizer)
 ,		f_RShiftDown 			:= false
 ,		f_LShiftDown 			:= false
 ,		v_SendFun				:= ""				;last used output function; important for F_Undo
+,		c_xmarg 				:= 10				;pixels, default value (it can be changed by user)
+,		c_ymarg 				:= 10				;pixels, default value (it can be changed by user)
+,		c_FontColor			:= "Black"
+,		c_FontColorHighlighted	:= "Blue"
+,		c_WindowColor			:= "Default"
+,		c_ControlColor 		:= "Default"
+,		c_FontSize 			:= 10 ;points
+,		c_FontType 			:= "Consolas"
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
@@ -1051,49 +1059,112 @@ F_SetSendLevel()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;#c/* commercial only beginning
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiEnterLicense()
+{
+	global ;assume-global mode
+	local 	Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+	,		Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+	,		NewWinPosX := 0, NewWinPosY := 0
+	
+	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
+		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, EnterLicense: Show, Hide
+	
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . EnterLicenseGuiHwnd
+	DetectHiddenWindows, Off
+	Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+	if (Window1W)
+	{
+		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+		Gui, EnterLicense: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Please enter below your license number"]
+	}
+	else
+		Gui, EnterLicense: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Please enter below your license number"]
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_CheckCommercialConditions()
 {
 	global	;assume-global mode of operation
+	local	LicenseInfo := {}
+
+	ini_LicenseKey			:= ""			;global variable, default value
+	IniRead, ini_LicenseKey, 					% ini_HADConfig, LicenseInfo, LicenseKey,		% A_Space
+
 	if (v_LicenseType = "commercial") and (v_ValidTill != "inf")
+	{
+		if (ini_LicenseKey = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 		{
-			if (A_UserName != v_LogonName)
-			{
-				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Sorry, your computer data do not match with license information. Application will exit now. If you think this is application error please contact our support showing the following data. If you press Ctrl + C content of this message for your convenience will be copied in text mode to clipboard."]
-					. "`n`n"
-					. TransA["Actual logon name"] . ":" . A_Tab . A_UserName
-					. "`n`n"
-					. TransA["Hotstrings application technical support e-mail: support@hotstrings.com"]
-					. "`n`n"
-					. TransA["This instance of Hotstrings application is licensed for the following data"] . ":" 	
-					. "`n`n"
-					. TransA["License type"]		. ":" . A_Tab . A_Tab . v_LicenseType						. "`n"
-					. TransA["Licensed to"]		. ":" . A_Tab . A_Tab . v_LicensedTo						. "`n"
-					. TransA["Computer name"] 	. ":" . A_Tab . A_Tab . v_LicensedCompName					. "`n"
-					. TransA["Logon name"]		. ":" . A_Tab . A_Tab . v_LogonName 						. "`n"
-					. TransA["Valid till"]		. ":" . A_Tab . A_Tab . A_Tab . SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1) . "`n"
-					. TransA["License ID"]		. ":" . A_Tab . A_Tab . v_LicenseID
-				ExitApp, 6	;6 = incorrect user logon name
-			}
-			if (A_ComputerName != v_LicensedCompName)
-			{
-				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Sorry, your computer data do not match with license information. Application will exit now. If you think this is application error please contact our support showing the following data. If you press Ctrl + C content of this message for your convenience will be copied in text mode to clipboard."]
-					. "`n`n"
-					. TransA["Actual computer name"] . ":" . A_Tab . A_ComputerName
-					. "`n`n"
-					. TransA["Hotstrings application technical support e-mail: support@hotstrings.com"]
-					. "`n`n"
-					. TransA["This instance of Hotstrings application is licensed for the following data"] . ":" 	
-					. "`n`n"
-					. TransA["License type"]		. ":" . A_Tab . A_Tab . v_LicenseType						. "`n"
-					. TransA["Licensed to"]		. ":" . A_Tab . A_Tab . v_LicensedTo						. "`n"
-					. TransA["Computer name"] 	. ":" . A_Tab . A_Tab . v_LicensedCompName					. "`n"
-					. TransA["Logon name"]		. ":" . A_Tab . A_Tab . v_LogonName 						. "`n"
-					. TransA["Valid till"]		. ":" . A_Tab . A_Tab . A_Tab . SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1) . "`n"
-					. TransA["License ID"]		. ":" . A_Tab . A_Tab . v_LicenseID
-				ExitApp, 7	;7 = incorrect computer name
-			}
-			F_CheckCommTime()
+			;1. Prepare MyAbout Gui
+			Gui, EnterLicense: New, 		-Resize +HwndEnterLicenseGuiHwnd +Owner -MaximizeBox -MinimizeBox
+			Gui, EnterLicense: Margin,	% c_xmarg, % c_ymarg
+			Gui,	EnterLicense: Color,	% c_WindowColor, % c_ControlColor
+
+			; TransA["Enables Convenient Definition"] := StrReplace(TransA["Enables Convenient Definition"], "``n", "`n")
+			;2. Prepare all text objects according to mock-up.
+			Gui,	EnterLicense: Font,		% "s" . c_FontSize . A_Space . "bold" . A_Space . "c" . c_FontColor, 		% c_FontType
+			Gui, EnterLicense: Add, 		Text,    x0 y0 HwndIdEnterLicenseT1,								% TransA["Please enter below your license number"]
+			Gui,	EnterLicense: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 		% c_FontType
+			Gui, EnterLicense: Add, 		Text,    	x0 y0 HwndIdEnterLicenseT1, 								% TransA["You should receive it by e-mail"]
+			Gui, EnterLicense: Add,		Edit,	x0 y0 HwndIdEnterLicenseE1 r1,							12345678-ABCD-1234-ABCD-012345678901 
+			Gui, EnterLicense: Add, 		Button,  	x0 y0 HwndIdEnterLicenseB1 gF_EnterLicenseB1 Default,			% TransA["OK"]
+			F_GuiEnterLicense()
+			; Gui, MyAbout: Add,		Picture, 	x0 y0 HwndIdAboutPicture w96 h96, 							% AppIcon
+
+			; IniWrite, % ini_LicenseKey, % ini_HADConfig, LicenseInfo, LicenseKey
 		}
+		else
+		{
+			LicenseInfo := F_LicenseValidate()
+			if (LicenseInfo.key != ini_LicenseKey)
+				OutputDebug, % "License problem" . "`n"
+		}
+	
+		; if (A_UserName != v_LogonName)
+		; {
+		; 	MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Sorry, your computer data do not match with license information. Application will exit now. If you think this is application error please contact our support showing the following data. If you press Ctrl + C content of this message for your convenience will be copied in text mode to clipboard."]
+		; 		. "`n`n"
+		; 		. TransA["Actual logon name"] . ":" . A_Tab . A_UserName
+		; 		. "`n`n"
+		; 		. TransA["Hotstrings application technical support e-mail: support@hotstrings.com"]
+		; 		. "`n`n"
+		; 		. TransA["This instance of Hotstrings application is licensed for the following data"] . ":" 	
+		; 		. "`n`n"
+		; 		. TransA["License type"]		. ":" . A_Tab . A_Tab . v_LicenseType						. "`n"
+		; 		. TransA["Licensed to"]		. ":" . A_Tab . A_Tab . v_LicensedTo						. "`n"
+		; 		. TransA["Computer name"] 	. ":" . A_Tab . A_Tab . v_LicensedCompName					. "`n"
+		; 		. TransA["Logon name"]		. ":" . A_Tab . A_Tab . v_LogonName 						. "`n"
+		; 		. TransA["Valid till"]		. ":" . A_Tab . A_Tab . A_Tab . SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1) . "`n"
+		; 		. TransA["License ID"]		. ":" . A_Tab . A_Tab . v_LicenseID
+		; 	ExitApp, 6	;6 = incorrect user logon name
+		; }
+		; if (A_ComputerName != v_LicensedCompName)
+		; {
+		; 	MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Sorry, your computer data do not match with license information. Application will exit now. If you think this is application error please contact our support showing the following data. If you press Ctrl + C content of this message for your convenience will be copied in text mode to clipboard."]
+		; 		. "`n`n"
+		; 		. TransA["Actual computer name"] . ":" . A_Tab . A_ComputerName
+		; 		. "`n`n"
+		; 		. TransA["Hotstrings application technical support e-mail: support@hotstrings.com"]
+		; 		. "`n`n"
+		; 		. TransA["This instance of Hotstrings application is licensed for the following data"] . ":" 	
+		; 		. "`n`n"
+		; 		. TransA["License type"]		. ":" . A_Tab . A_Tab . v_LicenseType						. "`n"
+		; 		. TransA["Licensed to"]		. ":" . A_Tab . A_Tab . v_LicensedTo						. "`n"
+		; 		. TransA["Computer name"] 	. ":" . A_Tab . A_Tab . v_LicensedCompName					. "`n"
+		; 		. TransA["Logon name"]		. ":" . A_Tab . A_Tab . v_LogonName 						. "`n"
+		; 		. TransA["Valid till"]		. ":" . A_Tab . A_Tab . A_Tab . SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1) . "`n"
+		; 		. TransA["License ID"]		. ":" . A_Tab . A_Tab . v_LicenseID
+		; 	ExitApp, 7	;7 = incorrect computer name
+		; }
+		F_CheckCommTime()
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EnterLicenseB1()
+{
+
 }
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10364,8 +10435,8 @@ F_GuiHSdelay()
 	Gui, HSDel: Add, Text, HwndIdHD_T1, % TransA["Clipboard paste delay in [ms]:"] . A_Space . ini_CPDelay . "`n`n" . TransA["This option is valid"]
 	GuiControlGet, v_OutVarTemp, Pos, % IdHD_T1
 	v_xNext := c_xmarg
-	v_yNext := c_ymarg
-	v_wNext := v_OutVarTempW
+,	v_yNext := c_ymarg
+,	v_wNext := v_OutVarTempW
 	GuiControl, Move, % IdHD_S1, % "x" v_xNext . A_Space . "y" v_yNext . A_Space "w" v_wNext
 	GuiControl, Move, % IdHD_T1, % "x" v_xNext
 	
@@ -10376,7 +10447,7 @@ F_GuiHSdelay()
 	DetectHiddenWindows, Off
 	
 	NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
-	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+,	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
 	
 	Gui, HSDel: Show, % "x" . NewWinPosX . A_Space . "y" . NewWinPosY . A_Space . "AutoSize"	
 }
@@ -11475,7 +11546,6 @@ F_FontType()
 F_LoadFontType()
 {
 	global	;assume-global mode
-	c_FontType := ""
 	
 	IniRead, c_FontType, 			% ini_HADConfig, GraphicalUserInterface, GuiFontType, Consolas
 	if (!c_FontType)
@@ -11536,11 +11606,9 @@ F_LoadSizeOfMargin()
 {
 	global	;assume-global mode
 	SizeOfMargin				:= {1: 0, 2: 5, 3: 10, 4: 15, 5: 20} ;pixels
-	c_xmarg := 10	;pixels
-	c_ymarg := 10	;pixels
 	
-	IniRead, c_xmarg, 			% ini_HADConfig, GraphicalUserInterface, GuiSizeOfMarginX, 10
-	IniRead, c_ymarg,			% ini_HADConfig, GraphicalUserInterface, GuiSizeOfMarginY, 10
+	IniRead, c_xmarg, 			% ini_HADConfig, GraphicalUserInterface, GuiSizeOfMarginX, 10	;10 = default value
+	IniRead, c_ymarg,			% ini_HADConfig, GraphicalUserInterface, GuiSizeOfMarginY, 10	;10 = default value
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
 F_SizeOfFont()
@@ -11580,9 +11648,8 @@ F_SaveFontSize()
 F_LoadFontSize()
 {
 	global ;assume-global mode
-	c_FontSize 				:= 0 ;points
-	
-	IniRead, c_FontSize, 			% ini_HADConfig, GraphicalUserInterface, GuiFontSize, 10
+		
+	IniRead, c_FontSize, 			% ini_HADConfig, GraphicalUserInterface, GuiFontSize, 10	;10 points, default value
 	if (!c_FontSize)
 		c_FontSize := 10
 }
@@ -11653,10 +11720,6 @@ F_SaveGUIstyle()
 F_LoadGUIstyle()
 {
 	global ;assume-global mode
-	c_FontColor				:= ""
-	c_FontColorHighlighted		:= ""
-	c_WindowColor				:= ""
-	c_ControlColor 			:= ""
 	
 	IniRead, c_FontColor, 			% ini_HADConfig, GraphicalUserInterface, GuiFontColor, 		 Black
 	IniRead, c_FontColorHighlighted, 	% ini_HADConfig, GraphicalUserInterface, GuiFontColorHighlighted, Blue
@@ -12116,7 +12179,7 @@ F_CheckCreateConfigIni(params*)
 
 	if (!FileExist(HADConfig_AppData)) and (!FileExist(HADConfig_App))
 	{
-		OutputDebug, % "HADConfig_AppData:" . A_Tab . HADConfig_AppData . "`n" . "HADConfig_App:" . A_Tab . HADConfig_App . "`n`n"
+		; OutputDebug, % "HADConfig_AppData:" . A_Tab . HADConfig_AppData . "`n" . "HADConfig_App:" . A_Tab . HADConfig_App . "`n`n"
 		if (!InStr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4)), "D"))	;if there is no folder...
 		{
 			FileCreateDir, % A_AppData . "\" . SubStr(A_ScriptName, 1, -4)	;future: check against errors
@@ -12798,6 +12861,7 @@ Pause												= Pause
 Perhaps check if any other application (like File Manager) do not occupy folder to be removed. = Perhaps check if any other application (like File Manager) do not occupy folder to be removed.
 Phrase to search for:									= Phrase to search for:
 pixels												= pixels
+Please enter below your license number						= Please enter below your license number
 Please try again.										= Please try again.
 Please wait, uploading .csv files... 						= Please wait, uploading .csv files...
 Position of this window is saved in Config.ini.				= Position of this window is saved in Config.ini.	
@@ -14341,8 +14405,6 @@ F_GuiHS3_DetermineConstraints()
 F_GuiAbout_CreateObjects()
 {
 	global ;assume-global mode
-				; . "User Name:" . A_Space . A_UserName
-				; . "Computer name:" . A_Space . A_ComputerName
 	
 	;1. Prepare MyAbout Gui
 	Gui, MyAbout: New, 		-Resize +HwndMyAboutGuiHwnd +Owner -MaximizeBox -MinimizeBox
