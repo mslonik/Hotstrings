@@ -14366,21 +14366,9 @@ F_GuiAbout_CreateObjects()
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT7,									% TransA["AutoHotkey version"] . ":"
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT8,									% A_AhkVersion
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT9,									% TransA["License"] . ":"
-	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT10,									% TransA["MIT License"]
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT10,									% "EULA" . A_Space . TransA["license"]
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT11,									% TransA["License type"] . ":"
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT12,									% TransA["commercial"]
-	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT13,									% TransA["Licensed to"] . ":"
-	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT14,									% "0123456789012345678901234567890123456789"	;arbitrary long name, 40 char. max.
-	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT15,									% TransA["Valid till"] . ":"
-	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT16,									% "2022-12-07"							;date placeholder in format yyyy-mm-dd
-;#c/* commercial only beginning	
-	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT17,									% TransA["Logon name"] . ":"
-	Gui,	MyAbout: Add,		Text,	x0 y0 HwndIdAboutT18,									% "012345678901234567890123456789"			;arbitrary long name, 30 char. max. placeholder
-	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT19,									% TransA["Computer name"] . ":"
-	Gui,	MyAbout: Add,		Text,	x0 y0 HwndIdAboutT20,									% "012345678901234567890123456789"			;arbitrary long name, 30 char. max. placeholder
-	Gui,	MyAbout: Add,		Text,	x0 y0 HwndIdAboutT21,									% TransA["License ID"] . ":"
-	Gui,	MyAbout: Add,		Text,	x0 y0 HwndIdAboutT22,									% "01234567"							;7 characters max. placeholder
-;#c*/ commercial only end	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiAbout_DetermineConstraints()
@@ -14454,6 +14442,10 @@ F_GuiAbout_DetermineConstraints()
 	GuiControl, Move, % IdAboutT9, % "x" . xNext . A_Space . "y" . yNext	;License:
 	xNext := MaxText + 3 * c_xmarg
 	GuiControl, Move, % IdAboutT10, % "x" . xNext . A_Space . "y" . yNext	;EULA or MIT 
+	if (v_LicenseType = "commercial")
+		GuiControl, , % IdAboutT10, % "EULA" . A_Space . TransA["license"]
+	if (v_LicenseType = "free")
+		GuiControl, , % IdAboutT10, % "MIT" . A_Space . TransA["license"]
 	xNext := c_xmarg, yNext += c_HofText
 	GuiControl, Move, % IdAboutT11, % "x" . xNext . A_Space . "y" . yNext	;License type:
 	xNext := MaxText + 3 * c_xmarg
@@ -14463,44 +14455,12 @@ F_GuiAbout_DetermineConstraints()
 	if (v_LicenseType = "free")
 		GuiControl, , % IdAboutT12, % TransA["free"]
 	xNext := c_xmarg, yNext += c_HofText
-	GuiControl, Move, % IdAboutT13, % "x" . xNext . A_Space . "y" . yNext	;licensed to
-	xNext := MaxText + 3 * c_xmarg
-	GuiControl, Move, % IdAboutT14, % "x" . xNext . A_Space . "y" . yNext	;licensed to
-	GuiControl, , % IdAboutT14, % v_LicensedTo
-	xNext := c_xmarg, yNext += c_HofText
-	GuiControl, Move, % IdAboutT15, % "x" . xNext . A_Space . "y" . yNext	;valid till
-	xNext := MaxText + 3 * c_xmarg
-	GuiControl, Move, % IdAboutT16, % "x" . xNext . A_Space . "y" . yNext	;valid till
-;#c/* commercial only beginning	
-	if (v_ValidTill != "inf")
-		GuiControl, , % IdAboutT16, % SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1)
-	else
-		GuiControl, , % IdAboutT16, % v_ValidTill
-	xNext := c_xmarg, yNext += c_HofText
-	GuiControl, Move, % IdAboutT17, % "x" . xNext . A_Space . "y" . yNext ;Logon name
-	xNext := MaxText + 3 * c_xmarg
-	GuiControl, Move, % IdAboutT18, % "x" . xNext . A_Space . "y" . yNext ;Logon name
-	GuiControl, , % IdAboutT18, % v_LogonName
-	xNext := c_xmarg, yNext += c_HofText
-	GuiControl, Move, % IdAboutT19, % "x" . xNext . A_Space . "y" . yNext ;Computer name
-	xNext := MaxText + 3 * c_xmarg
-	GuiControl, Move, % IdAboutT20, % "x" . xNext . A_Space . "y" . yNext ;Computer name
-	GuiControl, , % IdAboutT20, % v_LicensedCompName
-	xNext := c_xmarg, yNext += c_HofText
-	GuiControl, Move, % IdAboutT21, % "x" . xNext . A_Space . "y" . yNext ;License ID
-	xNext := MaxText + 3 * c_xmarg
-	GuiControl, Move, % IdAboutT22, % "x" . xNext . A_Space . "y" . yNext ;License ID
-	GuiControl, , % IdAboutT22, % v_LicenseID
-;#c*/ commercial only end
 	GuiControlGet, OutVarTemp1, Pos, % IdLongest ; weight of the longest text
 	GuiControlGet, OutVarTemp2, Pos, % IdAboutOkButton 
 	wNext := OutVarTemp2W + 2 * c_xmarg
 ,	xNext := (OutVarTemp1W // 2) - (wNext // 2)
 	GuiControlGet, OutVarTemp, Pos, % IdLine2
-	yNext := OutVarTempY + OutVarTempH + 12 * c_HofText + c_ymarg
-;#f/* free version only beginning	
-	; yNext := OutVarTempY + OutVarTempH + 9 * c_HofText + c_ymarg
-;#f*/ free version only end	
+	yNext := OutVarTempY + OutVarTempH + 7 * c_HofText + c_ymarg
 	GuiControl, Move, % IdAboutOkButton, % "x" . xNext . "y" . A_Space . yNext . "w" . wNext
 	
 	xNext := OutVarTemp1X + OutVarTemp1W - 96 ;96 = chosen size of icon
