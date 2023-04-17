@@ -92,7 +92,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_FontSize 			:= 10 ;points
 ,		c_FontType 			:= "Consolas"
 ;#c/* commercial only beginning
-,		v_ValidTill			:= "inf"				;"inf" for infinity, "limited" for other cases
+,		v_ValidTill			:= "limited"				;"inf" for infinity, "limited" for other cases
 ,		f_100msRun 			:= false				;global flag: timer is running, 100 ms, for concurrent press of Shift keys
 ,		f_WasReset			:= false				;global flag: Shift key memory reset (to reset hotstring recognizer)
 ,		f_RShiftDown 			:= false
@@ -867,15 +867,14 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 ;#c/* commercial only beginning
-F_LicenseValidate()
-{
-	url 					:= "https://api.lemonsqueezy.com/v1/licenses/validate"
+F_LicenseHttpRequest(WhatRequest, LicenseKey, InstanceId, WhatInstance)	; WhatRequest = activate / validate / deactivate; WhatInstance = "instance_id=" (validate) or "instance_name" (activate)
+{	;https://docs.lemonsqueezy.com/help/licensing/license-api
+	url 					:= "https://api.lemonsqueezy.com/v1/licenses/"
 ,	header1 				:= "application/json"
 ,	header2				:= "application/x-www-form-urlencoded"
-,	license_key 			:= "FDC56759-F8BA-434A-94B9-18B080A7F2DA"
-,	instance_id 			:= "c3f065a6-7541-472b-9553-1c1f9257bded"
+; ,	license_key 			:= "FDC56759-F8BA-434A-94B9-18B080A7F2DA"
+; ,	instance_id 			:= "c3f065a6-7541-472b-9553-1c1f9257bded"
 ,	oHTTP 				:= ComObjCreate("WinHttp.WinHttpRequest.5.1")
-,	counter1				:= 0
 ,	TempLoopField1			:= ""
 ,	TempLoopField2			:= ""
 ,	LicenseArray			:= {}
@@ -883,10 +882,10 @@ F_LicenseValidate()
 ,	Key					:= ""
 ,	Value				:= ""
 
-	oHTTP.Open("POST", url, false)
+	oHTTP.Open("POST", url . WhatRequest, false)
 	oHTTP.SetRequestHeader("Accept", header1)
 	oHTTP.SetRequestHeader("Content-Type", header2)
-	oHTTP.Send("license_key=" . license_key . "&instance_id=" . instance_id)
+	oHTTP.Send("license_key=" . LicenseKey . "&" . WhatInstance . "=" . InstanceId)
 
 	responseText := oHTTP.ResponseText
 
@@ -946,7 +945,7 @@ F_LicenseDetails()	;dedicated script: LemonAPI.ahk, structure:
 	global						;assume-global mode of operation
 	local c_MsgBoxIconAsterisk	:= 64
 	,	c_License				:= "LICENSE_EULA.md"
-	,	LicenseInfo			:= F_LicenseValidate()
+	,	LicenseInfo			:= F_LicenseHttpRequest(WhatRequest := "validate", LicenseKey, InstanceId, WhatInstance := "instance_id=")
 
 	MsgBox, % c_MsgBoxIconAsterisk, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
 		, % TransA["License details"] . ":"									. "`n`n"
@@ -1062,7 +1061,7 @@ F_GuiEnterLicense()
 	,		Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 	,		NewWinPosX := 0, NewWinPosY := 0
 	
-	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
+	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
 		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
 	Gui, EnterLicense: Show, Hide
 	
@@ -1071,9 +1070,12 @@ F_GuiEnterLicense()
 	DetectHiddenWindows, Off
 	if (Window1W)
 	{
-		Gui, % A_Gui . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+		if (WinExist("ahk_id" . HS3GuiHwnd))
+			Gui, HS3: +Disabled	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+		if (WinExist("ahk_id" . HS4GuiHwnd))
+			Gui, HS4: +Disabled	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
-		NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+	,	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
 		Gui, EnterLicense: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["License"]
 	}
 	else
@@ -1086,62 +1088,25 @@ F_CheckCommercialConditions()
 	local	LicenseInfo := {}
 
 	ini_LicenseKey			:= ""			;global variable, default value
-	IniRead, ini_LicenseKey, 					% ini_HADConfig, LicenseInfo, LicenseKey,		% A_Space
+	IniRead, ini_LicenseKey, 		% ini_HADConfig, LicenseInfo, LicenseKey, % A_Space
+	IniRead, ini_LicenseInstanceId, 	% ini_HADConfig, LicenseInfo, InstanceId, % A_Space
 
 	if (v_LicenseType = "commercial") and (v_ValidTill != "inf")
 	{
 		if (ini_LicenseKey = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 		{
+			F_GUIinit()
 			F_GuiEnterLicense_CreateGui()
 			F_GuiEnterLicense_DetermineConstraints()
 			F_GuiEnterLicense()
-
-			; IniWrite, % ini_LicenseKey, % ini_HADConfig, LicenseInfo, LicenseKey
 		}
 		else
 		{
-			LicenseInfo := F_LicenseValidate()
+			LicenseInfo := F_LicenseHttpRequest(WhatRequest := "validate", ini_LicenseKey, ini_LicenseInstanceId, WhatInstance := "instance_name")
 			if (LicenseInfo.key != ini_LicenseKey)
 				OutputDebug, % "License problem" . "`n"
 		}
-	
-		; if (A_UserName != v_LogonName)
-		; {
-		; 	MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Sorry, your computer data do not match with license information. Application will exit now. If you think this is application error please contact our support showing the following data. If you press Ctrl + C content of this message for your convenience will be copied in text mode to clipboard."]
-		; 		. "`n`n"
-		; 		. TransA["Actual logon name"] . ":" . A_Tab . A_UserName
-		; 		. "`n`n"
-		; 		. TransA["Hotstrings application technical support e-mail: support@hotstrings.com"]
-		; 		. "`n`n"
-		; 		. TransA["This instance of Hotstrings application is licensed for the following data"] . ":" 	
-		; 		. "`n`n"
-		; 		. TransA["License type"]		. ":" . A_Tab . A_Tab . v_LicenseType						. "`n"
-		; 		. TransA["Licensed to"]		. ":" . A_Tab . A_Tab . v_LicensedTo						. "`n"
-		; 		. TransA["Computer name"] 	. ":" . A_Tab . A_Tab . v_LicensedCompName					. "`n"
-		; 		. TransA["Logon name"]		. ":" . A_Tab . A_Tab . v_LogonName 						. "`n"
-		; 		. TransA["Valid till"]		. ":" . A_Tab . A_Tab . A_Tab . SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1) . "`n"
-		; 		. TransA["License ID"]		. ":" . A_Tab . A_Tab . v_LicenseID
-		; 	ExitApp, 6	;6 = incorrect user logon name
-		; }
-		; if (A_ComputerName != v_LicensedCompName)
-		; {
-		; 	MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Sorry, your computer data do not match with license information. Application will exit now. If you think this is application error please contact our support showing the following data. If you press Ctrl + C content of this message for your convenience will be copied in text mode to clipboard."]
-		; 		. "`n`n"
-		; 		. TransA["Actual computer name"] . ":" . A_Tab . A_ComputerName
-		; 		. "`n`n"
-		; 		. TransA["Hotstrings application technical support e-mail: support@hotstrings.com"]
-		; 		. "`n`n"
-		; 		. TransA["This instance of Hotstrings application is licensed for the following data"] . ":" 	
-		; 		. "`n`n"
-		; 		. TransA["License type"]		. ":" . A_Tab . A_Tab . v_LicenseType						. "`n"
-		; 		. TransA["Licensed to"]		. ":" . A_Tab . A_Tab . v_LicensedTo						. "`n"
-		; 		. TransA["Computer name"] 	. ":" . A_Tab . A_Tab . v_LicensedCompName					. "`n"
-		; 		. TransA["Logon name"]		. ":" . A_Tab . A_Tab . v_LogonName 						. "`n"
-		; 		. TransA["Valid till"]		. ":" . A_Tab . A_Tab . A_Tab . SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1) . "`n"
-		; 		. TransA["License ID"]		. ":" . A_Tab . A_Tab . v_LicenseID
-		; 	ExitApp, 7	;7 = incorrect computer name
-		; }
-		F_CheckCommTime()
+		F_CheckCommTime()	;tu jestem
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1192,9 +1157,84 @@ F_GuiEnterLicense_DetermineConstraints()
 	; GuiControl, Move, % IdAboutPicture, % "x" . xNext . A_Space . "y" . yNext 
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EnterLicenseB1()	;tu jestem
+EnterLicenseGuiClose()
 {
+	global	;assume-global mode of operation
+	local	c_MsgBoxIconExclamation 	:= 48
+	,		c_MsgBoxButtonsYes		:= 4	
 
+	MsgBox, % c_MsgBoxIconExclamation + c_MsgBoxButtonsYes, % SubStr(A_ScriptName, 1, -4)
+		, % TransA["Are you sure you want to close this window?"] .  "`n`n"
+		. TransA["Closing it will exit application."]
+	IfMsgBox, Yes
+		ExitApp, 6	;no license key specified
+	IfMsgBox, No
+		return true	;If GuiClose is a function, the GUI is hidden by default. The function can prevent this by returning a non-zero integer
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_EnterLicenseB1()
+{
+	global	;assume-global mode of operation
+	local	EditValue
+		,	c_MsgBoxIconExclamation 	:= 48
+		,	c_MsgBoxButtonsYes		:= 4	
+		,	c_MsgBoxIconAsterisk	:= 64
+		,	LicenseInfo			:= {}
+
+	Gui,	EnterLicense: Submit	;hides the window
+	GuiControlGet, EditValue, , % IdEnterLicenseE1
+	; OutputDebug, % "EditValue:" . EditValue . "`n"
+	if (EditValue = "12345678-ABCD-1234-ABCD-012345678901")	;default / dummy value
+	{
+		MsgBox, % c_MsgBoxIconExclamation + c_MsgBoxButtonsYes, % SubStr(A_ScriptName, 1, -4)
+			, % TransA["This isn't correct license key. Do you want to try again?"] . "`n`n"
+			. TransA["If you answer ""No"" application will exit."]
+		IfMsgBox, Yes
+		{
+			Gui,	EnterLicense: restore
+			GuiControl, Focus, % IdEnterLicenseE1
+		}	
+		IfMsgBox, No
+			ExitApp, 6	;no license key specified
+	}
+	if (StrLen(EditValue) < 36)	;license key length is always 36 characters
+	{
+		MsgBox, % c_MsgBoxIconExclamation + c_MsgBoxButtonsYes, % SubStr(A_ScriptName, 1, -4)
+			, % TransA["Insufficient length of license key. Do you want to try again?"] . "`n`n"
+			. TransA["If you answer ""No"" application will exit."]
+		IfMsgBox, Yes
+		{
+			Gui,	EnterLicense: restore
+			GuiControl, Focus, % IdEnterLicenseE1
+		}	
+		IfMsgBox, No
+			ExitApp, 6	;no license key specified
+	}
+	LicenseInfo := F_LicenseHttpRequest(WhatRequest := "activate", EditValue, "Test", WhatInstance := "instance_name")	;https://docs.lemonsqueezy.com/help/licensing/license-api
+	MsgBox, % c_MsgBoxIconAsterisk, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+		, % TransA["License details"] . ":"										. "`n`n"
+		. TransA["License activated"] . ":" 	. A_Tab . LicenseInfo.activated			. "`n"
+		. TransA["License status"] . ":" 		. A_Tab . LicenseInfo.status				. "`n"
+		. TransA["License key"] . ":" 		. A_Tab . LicenseInfo.key 				. "`n"
+		. TransA["Activation limit"] . ":" 	. A_Tab . LicenseInfo.activation_limit 		. "`n"
+		. TransA["Activation usage"] . ":" 	. A_Tab . LicenseInfo.activation_usage		. "`n"
+		. TransA["Created at"] . ":" 			. A_Tab . LicenseInfo.created_at			. "`n"
+		. TransA["Expires at"] . ":" 			. A_Tab . LicenseInfo.expires_at			. "`n"
+		. TransA["License instance"] . ":"		. A_Tab . LicenseInfo.id					. "`n"
+		. TransA["Customer name"] . ":" 		. A_Tab . LicenseInfo.customer_name		. "`n"
+		. TransA["Customer id"] . ":" 		. A_Tab . LicenseInfo.customer_id			. "`n"
+		. "`n`n"
+		. TransA["Above information is saved to configuration file."]
+	
+	IniWrite, % LicenseInfo.key, 			% ini_HADConfig, LicenseInfo,	LicenseKey
+	IniWrite, % LicenseInfo.id, 			% ini_HADConfig, LicenseInfo,	InstanceId
+	IniWrite, % LicenseInfo.customer_name, 	% ini_HADConfig, LicenseInfo,	CustomerName
+	IniWrite, % LicenseInfo.customer_id, 	% ini_HADConfig, LicenseInfo,	CustomerId
+	if (WinExist("ahk_id" . HS3GuiHwnd))
+		Gui, HS3: +Disabled	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+	if (WinExist("ahk_id" . HS4GuiHwnd))
+		Gui, HS4: +Disabled	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+	Gui, EnterLicense: Destroy
 }
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2027,7 +2067,7 @@ F_HMenu_Keyboard(PressedKey, SendFun)
 			break
 		}
 	}
-	OutputDebug, % "Temp1:" . Temp1 . "`n"
+	; OutputDebug, % "Temp1:" . Temp1 . "`n"
 	v_UndoHotstring 	:= Temp1
 	Temp1 			:= F_ReplaceAHKconstants(Temp1)
 ,	Temp1 			:= F_FollowCaseConformity(Temp1, v_InputString, v_Options)
@@ -12552,6 +12592,7 @@ F_LoadCreateTranslationTxt(decision*)
 (Join`n `
 About / Help 											= &About / Help
 About this application...								= About this application...
+Above information is saved to configuration file.				= Above information is saved to configuration file.
 According to your wish the new version of application was found on the server and downloaded. = According to your wish the new version of application was found on the server and downloaded.
 Activation limit										= Activation limit
 Activation usage										= Activation usage
@@ -12585,6 +12626,7 @@ Apply default hotkey									= Apply default hotkey
 Apply new hotkey										= Apply new hotkey
 aqua													= aqua
 Are you sure?											= Are you sure?
+Are you sure you want to close this window?					= Are you sure you want to close this window?
 Are you sure you want to exit this application now?			= Are you sure you want to exit this application now?
 Are you sure you want to move ""Hotstrings"" folder and all its content to the new location? = Are you sure you want to move ""Hotstrings"" folder and all its content to the new location?
 Are you sure you want to reload this application now?			= Are you sure you want to reload this application now?
@@ -12624,6 +12666,7 @@ Clipboard paste delay in [ms]:  							= Clipboard paste delay in [ms]:
 Close												= Cl&ose
 Close and interrupt										= Close and interrupt
 Closing Curly Bracket } 									= Closing Curly Bracket }
+Closing it will exit application.							= Closing it will exit application.
 Closing Round Bracket ) 									= Closing Round Bracket )
 Closing Square Bracket ] 								= Closing Square Bracket ]
 Colon : 												= Colon :
@@ -12770,6 +12813,7 @@ If you answer ""Yes"" it will overwritten with chosen settings. = If you answer 
 If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used. = If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used.
 If you answer ""Yes"", the existing file will be overwritten. This is recommended choice. If you answer ""No"", new content will be added to existing file. = If you answer ""Yes"", the existing file will be overwritten. This is recommended choice. If you answer ""No"", new content will be added to existing file.
 If you answer ""Yes"", then new definition will be created, but seleced special character will not be visible. = If you answer ""Yes"", then new definition will be created, but seleced special character will not be visible.
+If you answer ""No"" application will exit.					= If you answer ""No"" application will exit.
 If you answer ""No"" edition of the current definition will be interrupted. = If you answer ""No"" edition of the current definition will be interrupted.
 (If you answer ""No"", the second one will be used).			= (If you answer ""No"", the second one will be used).
 If you answer ""No"", then you will get a chance to fix your new created definition. = If you answer ""No"", then you will get a chance to fix your new created definition.
@@ -12793,6 +12837,7 @@ In order to change existing library filename at first select one from drop down 
 In order to edit library header please at first select library name from drop down list. = In order to edit library header please at first select library name from drop down list.
 In order to Delete selected library filename at first select one from drop down list. = In order to Delete selected library filename at first select one from drop down list.
 In order to display library header please at first select library name from drop down list. = In order to display library header please at first select library name from drop down list.
+Insufficient length of license key. Do you want to try again?	= Insufficient length of license key. Do you want to try again?
 is added in section  [GraphicalUserInterface] of Config.ini		= is added in section  [GraphicalUserInterface] of Config.ini
 is empty at the moment.									= is empty at the moment.
 Introduction											= Introduction
@@ -12813,9 +12858,12 @@ Library export. Please wait... 							= Library export. Please wait...
 Library has been exported 								= Library has been exported
 Library has been imported. 								= Library has been imported.
 License												= License
+License activated										= License activated
 License details										= License details
 License ID											= License ID
+License instance										= License instance
 License key											= License key
+License status											= License status
 License type											= License type
 Licensed to											= Licensed to
 Light (default)										= Light (default)
@@ -13037,6 +13085,7 @@ The (triggerstring, hotstring) definitions stored in the following library file 
 There is no											= There is no
 There was no Languages subfolder, so one now is created.		= There was no Languages subfolder, so one now is created.
 This instance of Hotstrings application is licensed for the following data = This instance of Hotstrings application is licensed for the following data
+This isn't correct license key. Do you want to try again?		= This isn't correct license key. Do you want to try again?
 This library:											= This library:
 This line do not comply to format required by this application.  = This line do not comply to format required by this application.
 This operation is aborted.								= This operation is aborted.
