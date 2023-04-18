@@ -92,7 +92,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_FontSize 			:= 10 ;points
 ,		c_FontType 			:= "Consolas"
 ;#c/* commercial only beginning
-,		v_ValidTill			:= "limited"				;"inf" for infinity, "limited" for other cases
+,		v_ValidTill			:= "inf"				;"inf" for infinity, "limited" for other cases
 ,		f_100msRun 			:= false				;global flag: timer is running, 100 ms, for concurrent press of Shift keys
 ,		f_WasReset			:= false				;global flag: Shift key memory reset (to reset hotstring recognizer)
 ,		f_RShiftDown 			:= false
@@ -473,7 +473,7 @@ if (ini_GuiReload) and (v_SilentMode != "l")
 	F_GUIinit()
 
 ;#c/* commercial only beginning
-F_CheckCommercialConditions()			;check v_LicenseType, v_LogonName, v_LicensedCompName, v_ValidTill
+F_CheckCommercialConditions()			;check Lemon squeezy
 SetTimer, F_CheckCommTime, % 1000 * 3600	;1 hour
 ;#c*/ commercial only end
 
@@ -889,7 +889,7 @@ F_LicenseHttpRequest(WhatRequest, LicenseKey, InstanceId, WhatInstance)	; WhatRe
 
 	responseText := oHTTP.ResponseText
 
-	Loop, Parse, responseText, {}, `, ;comma must be escaped by "`"
+	Loop, Parse, % oHTTP.ResponseText, {}, `, ;comma must be escaped by "`"
 	{
 		if (A_LoopField)
 		{
@@ -899,7 +899,7 @@ F_LicenseHttpRequest(WhatRequest, LicenseKey, InstanceId, WhatInstance)	; WhatRe
 				TempLoopField2 := A_LoopField
 			,	FirstColon := InStr(TempLoopField2, ":")
 			,	Key := SubStr(TempLoopField2, 2, FirstColon - 3)
-				Value := SubStr(TempLoopField2, FirstColon + 1)
+			,	Value := SubStr(TempLoopField2, FirstColon + 1)
 			,	Value := StrReplace(Value, """")
 			,	LicenseArray[Key] := Value
 			}
@@ -1086,8 +1086,11 @@ F_CheckCommercialConditions()
 {
 	global	;assume-global mode of operation
 	local	LicenseInfo := {}
+		,	ElapsedTime := 0
+		,	LicenseDateTimeStamp := 0
 
-	ini_LicenseKey			:= ""			;global variable, default value
+	ElapsedTime := A_Now	
+,	ini_LicenseKey	:= ""			;global variable, default value
 	IniRead, ini_LicenseKey, 		% ini_HADConfig, LicenseInfo, LicenseKey, % A_Space
 	IniRead, ini_LicenseInstanceId, 	% ini_HADConfig, LicenseInfo, InstanceId, % A_Space
 
@@ -1102,11 +1105,26 @@ F_CheckCommercialConditions()
 		}
 		else
 		{
-			LicenseInfo := F_LicenseHttpRequest(WhatRequest := "validate", ini_LicenseKey, ini_LicenseInstanceId, WhatInstance := "instance_name")
+			LicenseInfo := F_LicenseHttpRequest(WhatRequest := "validate", ini_LicenseKey, ini_LicenseInstanceId, WhatInstance := "instance_id")
+		,	LicenseDateTimeStamp := StrReplace(LicenseInfo.expires_at, "-", "")
+		,	LicenseDateTimeStamp := StrReplace(LicenseDateTimeStamp, ":", "")
+		,	LicenseDateTimeStamp := StrReplace(LicenseDateTimeStamp, " ", "")
+			EnvSub, ElapsedTime, LicenseDateTimeStamp, Days	;Sets a variable to itself minus the given value (can also compare date-time values). 
+			OutputDebug, % "LicenseInfo.expires_at:" . LicenseInfo.expires_at . "`n"
 			if (LicenseInfo.key != ini_LicenseKey)
-				OutputDebug, % "License problem" . "`n"
+				OutputDebug, % "License problem, differente license id" . "`n"
+			if (LicenseInfo.status != "active")
+				OutputDebug, % "License problem, license inactive" . "`n"
+			if (ElapsedTime > 0)
+			{
+				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Sorry, your license is no longer valid (expired). Application will exit now."	;16 = Icon Hand (stop/error)
+				ExitApp, 5	;5 = expired
+			}
+			if (ElapsedTime > -3)	;less than 3 days till the end of license time
+				MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % "Your license is about to expire. It will remain active for less than 3 days."
+					. "`n`n"
+					. "Expiration date:" . A_Space . SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1)
 		}
-		F_CheckCommTime()	;tu jestem
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1236,16 +1254,14 @@ F_EnterLicenseB1()
 		Gui, HS4: +Disabled	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	Gui, EnterLicense: Destroy
 }
-;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;#c/* commercial only beginning
 F_CheckCommTime()
 {
 	global	;assume-global mode of operation
 	local	ElapsedTime := 0
 
-	ElapsedTime := A_Now
-	EnvSub, ElapsedTime, v_ValidTill, Days
+	ElapsedTime := A_Now	
+	EnvSub, ElapsedTime, v_ValidTill, Days	;Sets a variable to itself minus the given value (can also compare date-time values). 
 	if (ElapsedTime > 0)	;one year
 	{
 		MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Sorry, your license is no longer valid (expired). Application will exit now."	;16 = Icon Hand (stop/error)
@@ -2014,14 +2030,14 @@ F_HMenu_Keyboard(PressedKey, SendFun)
 	{
 		IsCursorPressed := true
 ,		IntCnt--
-		ControlSend, , {Up}, A
+		ControlSend, , {Up}, % "ahk_id" . A_Space . HMenuAHKHwnd
 		ShiftTabIsFound := true
 	}
 	if (InStr(PressedKey, "Down") or InStr(PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
 	{
 		IsCursorPressed := true
 ,		IntCnt++
-		ControlSend, , {Down}, A
+		ControlSend, , {Down}, % "ahk_id" . A_Space . HMenuAHKHwnd
 		ShiftTabIsFound := false
 	}
 	if ((v_MenuMax = 1) and IsCursorPressed)
