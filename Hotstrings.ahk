@@ -25,7 +25,7 @@ CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in t
 ; - - - - - - - - - - - - - - - - - - - - - - - E X E  CONVERSION / INSTALLATOR S E C T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.11"
+global AppVersion				:= "3.6.13"	;starting on 2023-04-23 (Sunday). 
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -91,9 +91,9 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_ControlColor 		:= "Default"
 ,		c_FontSize 			:= 10 ;points
 ,		c_FontType 			:= "Consolas"
-;#c/* commercial only beginning
-,		v_ValidTill			:= "inf"				;"inf" for infinity, "limited" for other cases
 ,		f_100msRun 			:= false				;global flag: timer is running, 100 ms, for concurrent press of Shift keys
+;#c/* commercial only beginning
+,		v_ValidTill			:= "limited"				;"inf" for infinity, "limited" for other cases
 ,		f_WasReset			:= false				;global flag: Shift key memory reset (to reset hotstring recognizer)
 ,		f_RShiftDown 			:= false
 ,		f_LShiftDown 			:= false
@@ -431,8 +431,7 @@ Menu, AboutHelpSub,		Add,	% TransA["Help: Hotstrings application"] . "`tF1",				
 Menu, AboutHelpSub,		Add,	% TransA["Help: AutoHotkey Hotstrings reference guide"] . "`tCtrl+F1",	F_GuiAboutLink2
 Menu, AboutHelpSub,		Add
 ;#c/* commercial only beginning
-Menu, AboutHelpSub,		Add, % TransA["Support: technical issue"],								F_SupportContact
-Menu, AboutHelpSub,		Add, % TransA["Support: commercial / license issue"],						F_SupportLicense
+Menu, AboutHelpSub,		Add, % TransA["Support: technical issue request"],						F_SupportContact
 Menu, AboutHelpSub,		Add
 Menu, AboutHelpSub,		Add, % TransA["License details"],										F_LicenseDetails
 Menu, AboutHelpSub,		Add
@@ -867,13 +866,40 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 ;#c/* commercial only beginning
+F_CheckCommTime()	;tu jestem domyślnie włączyć logowanie dla wersji komercyjnej
+{
+	global						;assume-global mode of operation
+	local	LicenseInfo := {}	
+
+	LicenseInfo := F_LicenseHttpRequest(WhatRequest := "validate", ini_LicenseKey, ini_LicenseInstanceId, WhatInstance := "instance_id")
+	if (ini_THLog)
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . TransA["License key was validated"] . "." . "`n", % v_LogFileName			
+	if (LicenseInfo.status = "expired")
+		{
+			MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+				, % TransA["Sorry, your license is no longer active."] . A_Space . TransA["It had expired."]
+				. "`n`n"
+				. TransA["Expiration date"] . ":"		. A_Tab . LicenseInfo.expires_at			. "`n"
+				. TransA["License key"] . ":" 		. A_Tab . LicenseInfo.key 				. "`n"
+				. TransA["Created at"] . ":" 			. A_Tab . LicenseInfo.created_at			. "`n"
+				. TransA["License instance"] . ":"		. A_Tab . LicenseInfo.id					. "`n"
+				. TransA["Customer name"] . ":" 		. A_Tab . LicenseInfo.customer_name		. "`n"
+				. TransA["Customer id"] . ":" 		. A_Tab . LicenseInfo.customer_id			. "`n"
+				. "`n`n"
+				. TransA["Application will exit now."]
+				. "`n`n"
+				. TransA["Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference."]
+			if (ini_THLog)
+				FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . TransA["License key was expired"] . "." . A_Space . TransA["Exiting"] . "." . "`n", % v_LogFileName			
+			ExitApp, 5	;5 = expired
+		}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LicenseHttpRequest(WhatRequest, LicenseKey, InstanceId, WhatInstance)	; WhatRequest = activate / validate / deactivate; WhatInstance = "instance_id=" (validate) or "instance_name" (activate)
 {	;https://docs.lemonsqueezy.com/help/licensing/license-api
 	url 					:= "https://api.lemonsqueezy.com/v1/licenses/"
 ,	header1 				:= "application/json"
 ,	header2				:= "application/x-www-form-urlencoded"
-; ,	license_key 			:= "FDC56759-F8BA-434A-94B9-18B080A7F2DA"
-; ,	instance_id 			:= "c3f065a6-7541-472b-9553-1c1f9257bded"
 ,	oHTTP 				:= ComObjCreate("WinHttp.WinHttpRequest.5.1")
 ,	TempLoopField1			:= ""
 ,	TempLoopField2			:= ""
@@ -945,46 +971,21 @@ F_LicenseDetails()	;dedicated script: LemonAPI.ahk, structure:
 	global						;assume-global mode of operation
 	local c_MsgBoxIconAsterisk	:= 64
 	,	c_License				:= "LICENSE_EULA.md"
-	,	LicenseInfo			:= F_LicenseHttpRequest(WhatRequest := "validate", LicenseKey, InstanceId, WhatInstance := "instance_id=")
+	,	LicenseInfo			:= F_LicenseHttpRequest(WhatRequest := "validate", ini_LicenseKey, ini_LicenseInstanceId, WhatInstance := "instance_id")
 
 	MsgBox, % c_MsgBoxIconAsterisk, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-		, % TransA["License details"] . ":"									. "`n`n"
-		. TransA["Type"] . ":" 			. A_Tab . v_LicenseType 					. "`n"
-		. TransA["License"] . ":" 		. A_Tab . A_ScriptDir . "\" . c_License 	. "`n"
-		. TransA["License key"] . ":" 	. A_Tab . LicenseInfo.key 				. "`n"
-		. TransA["Activation limit"] . ":" . A_Tab . LicenseInfo.activation_limit 		. "`n"
-		. TransA["Activation usage"] . ":" . A_Tab . LicenseInfo.activation_usage		. "`n"
-		. TransA["Created at"] . ":" 		. A_Tab . LicenseInfo.created_at			. "`n"
-		. TransA["Expires at"] . ":" 		. A_Tab . LicenseInfo.expires_at			. "`n"
-		. TransA["Customer name"] . ":" 	. A_Tab . LicenseInfo.customer_name		. "`n"
-		. TransA["Customer id"] . ":" 	. A_Tab . LicenseInfo.customer_id			. "`n"
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SupportLicense()
-{
-	c_MsgBoxIconError	:= 16
-,	c_ASCII_NewLine 	:= "`%0A"
-,	c_ASCII_HorTab 	:= "`%09"
-,	c_ASCII_Space		:= "`%20"
-,	c_MailToCommercial	:= "damit.hotstrings@gmail.com"
-
-	Run, % "mailto:" . c_MailToCommercial . "?subject=Request for Hotstrings support, commercial / license issue&body="
-		. "Logon user name:" 	. c_ASCII_HorTab . A_UserName 	. c_ASCII_NewLine
-		. "Computer name:" 		. c_ASCII_HorTab . A_ComputerName 	. c_ASCII_NewLine
-		. "First and second name of license owner or company name (please fill in manually):" . c_ASCII_Space .  c_ASCII_NewLine . c_ASCII_NewLine
-		. "This e-mail will be processed as soon as possible, within ~1 working day (24 hours). Nevertheless please be patient." . c_ASCII_NewLine . c_ASCII_NewLine
-		. "The proud Hotstrings team and Maciej Słojewski", , UseErrorLevel
-	if (ErrorLevel = "ERROR")
-	{
-		MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . A_Space . "error", % "Something went wrong, e-mail client wasn't found?" . "`n`n"
-			. "Please prepare it manually: press Ctrl + C, open your e-mail application and press Ctrl + V." . "`n`n"
-			. "To:" . A_Tab . c_MailToCommercial			. "`n"
-			. "Logon user name:" . A_Tab . A_UserName 		. "`n"
-			. "Computer name:" 	. A_Tab . A_ComputerName 	. "`n"
-			. "First and second name of license owner or company name (please fill in manually):" . A_Space . "`n`n"
-			. "This e-mail will be processed as soon as possible, within ~1 working day (24 hours). Nevertheless please be patient." . "`n"
-			. "The proud Hotstrings team and Maciej Słojewski" . "`n"
-	}
+		, % TransA["License details"] . ":"										. "`n`n"
+		. TransA["Type"] . ":" 				. A_Tab . v_LicenseType 					. "`n"
+		. TransA["License"] . ":" 			. A_Tab . A_ScriptDir . "\" . c_License 	. "`n"
+		. TransA["License status"] . ":" 		. A_Tab . LicenseInfo.status				. "`n"
+		. TransA["License key"] . ":" 		. A_Tab . LicenseInfo.key 				. "`n"
+		. TransA["Activation limit"] . ":" 	. A_Tab . LicenseInfo.activation_limit 		. "`n"
+		. TransA["Activation usage"] . ":" 	. A_Tab . LicenseInfo.activation_usage		. "`n"
+		. TransA["Created at"] . ":" 			. A_Tab . LicenseInfo.created_at			. "`n"
+		. TransA["Expires at"] . ":" 			. A_Tab . LicenseInfo.expires_at			. "`n"
+		. TransA["License instance"] . ":"		. A_Tab . LicenseInfo.id					. "`n"
+		. TransA["Customer name"] . ":" 		. A_Tab . LicenseInfo.customer_name		. "`n"
+		. TransA["Customer id"] . ":" 		. A_Tab . LicenseInfo.customer_id			. "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SupportContact()
@@ -1088,6 +1089,8 @@ F_CheckCommercialConditions()
 	local	LicenseInfo := {}
 		,	ElapsedTime := 0
 		,	LicenseDateTimeStamp := 0
+		,	c_MsgBoxIconError := 16
+		,	c_MsgBoxIconExclamation := 48
 
 	ElapsedTime := A_Now	
 ,	ini_LicenseKey	:= ""			;global variable, default value
@@ -1110,20 +1113,45 @@ F_CheckCommercialConditions()
 		,	LicenseDateTimeStamp := StrReplace(LicenseDateTimeStamp, ":", "")
 		,	LicenseDateTimeStamp := StrReplace(LicenseDateTimeStamp, " ", "")
 			EnvSub, ElapsedTime, LicenseDateTimeStamp, Days	;Sets a variable to itself minus the given value (can also compare date-time values). 
-			OutputDebug, % "LicenseInfo.expires_at:" . LicenseInfo.expires_at . "`n"
-			if (LicenseInfo.key != ini_LicenseKey)
-				OutputDebug, % "License problem, differente license id" . "`n"
-			if (LicenseInfo.status != "active")
-				OutputDebug, % "License problem, license inactive" . "`n"
-			if (ElapsedTime > 0)
+			; OutputDebug, % "LicenseInfo.expires_at:" . LicenseInfo.expires_at . "`n"
+			if (LicenseInfo.status = "expired")
 			{
-				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Sorry, your license is no longer valid (expired). Application will exit now."	;16 = Icon Hand (stop/error)
+				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+					, % TransA["Sorry, your license is no longer active."] . A_Space . TransA["It had expired."]
+					. "`n`n"
+					. TransA["Expiration date"] . ":"		. A_Tab . LicenseInfo.expires_at			. "`n"
+					. TransA["License key"] . ":" 		. A_Tab . LicenseInfo.key 				. "`n"
+					. TransA["Created at"] . ":" 			. A_Tab . LicenseInfo.created_at			. "`n"
+					. TransA["License instance"] . ":"		. A_Tab . LicenseInfo.id					. "`n"
+					. TransA["Customer name"] . ":" 		. A_Tab . LicenseInfo.customer_name		. "`n"
+					. TransA["Customer id"] . ":" 		. A_Tab . LicenseInfo.customer_id			. "`n"
+					. "`n`n"
+					. TransA["Application will exit now."]
+					. "`n`n"
+					. TransA["Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference."]
 				ExitApp, 5	;5 = expired
 			}
+			if (LicenseInfo.status != "active")
+			{
+				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+					, % TransA["Sorry, your license is no longer active."]
+					. TransA["License key"] . ":" 		. A_Tab . LicenseInfo.key 				. "`n"
+					. TransA["Created at"] . ":" 			. A_Tab . LicenseInfo.created_at			. "`n"
+					. TransA["License instance"] . ":"		. A_Tab . LicenseInfo.id					. "`n"
+					. TransA["Customer name"] . ":" 		. A_Tab . LicenseInfo.customer_name		. "`n"
+					. TransA["Customer id"] . ":" 		. A_Tab . LicenseInfo.customer_id			. "`n"
+					. "`n`n"
+					. "`n`n"
+					. TransA["Application will exit now."]
+					. "`n`n"
+					. TransA["Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference."]
+				ExitApp, 9	; lemon squeezy, license nor active nor expired
+			}	
+
 			if (ElapsedTime > -3)	;less than 3 days till the end of license time
 				MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % "Your license is about to expire. It will remain active for less than 3 days."
 					. "`n`n"
-					. "Expiration date:" . A_Space . SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1)
+					. TransA["Expiration date"] . ":" . A_Space . LicenseInfo.expires_at
 		}
 	}
 }
@@ -1211,6 +1239,7 @@ F_EnterLicenseB1()
 		{
 			Gui,	EnterLicense: restore
 			GuiControl, Focus, % IdEnterLicenseE1
+			return
 		}	
 		IfMsgBox, No
 			ExitApp, 6	;no license key specified
@@ -1224,11 +1253,40 @@ F_EnterLicenseB1()
 		{
 			Gui,	EnterLicense: restore
 			GuiControl, Focus, % IdEnterLicenseE1
+			return
 		}	
 		IfMsgBox, No
 			ExitApp, 6	;no license key specified
 	}
 	LicenseInfo := F_LicenseHttpRequest(WhatRequest := "activate", EditValue, "Test", WhatInstance := "instance_name")	;https://docs.lemonsqueezy.com/help/licensing/license-api
+
+	if (LicenseInfo.activated = "false") and (LicenseInfo.error = "license_key not found.")
+	{	
+		MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+			, % TransA["License activation unsuccessful."] . A_Space . TransA["Entered license key was not found."]
+			. "`n`n"
+			. TransA["Entered license key"] . ":" . A_Tab . EditValue			. "`n"
+			. "`n"
+			. TransA["Application will exit now."]
+			. "`n`n" 
+			. TransA["Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference."]
+		ExitApp, 7	;lemon squeezy: license_key not found
+	}
+
+	if (LicenseInfo.activated = "false")
+	{	
+		MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+			, % TransA["License activation unsuccessful."]
+			. "`n`n"
+			. TransA["Entered license key"] . ":" . A_Tab . EditValue			. "`n"
+			. "`n"
+			. TransA["Error"] . ":" . A_Space . LicenseInfo.error					. "`n`n"
+			. TransA["Application will exit now."]
+			. "`n`n" 
+			. TransA["Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference."]
+		ExitApp, 8	;lemon squeezy: activation = false
+	}
+
 	MsgBox, % c_MsgBoxIconAsterisk, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
 		, % TransA["License details"] . ":"										. "`n`n"
 		. TransA["License activated"] . ":" 	. A_Tab . LicenseInfo.activated			. "`n"
@@ -1244,33 +1302,20 @@ F_EnterLicenseB1()
 		. "`n`n"
 		. TransA["Above information is saved to configuration file."]
 	
+	ini_LicenseKey			:= LicenseInfo.key
+, 	ini_LicenseInstanceId	:= LicenseInfo.id
 	IniWrite, % LicenseInfo.key, 			% ini_HADConfig, LicenseInfo,	LicenseKey
 	IniWrite, % LicenseInfo.id, 			% ini_HADConfig, LicenseInfo,	InstanceId
 	IniWrite, % LicenseInfo.customer_name, 	% ini_HADConfig, LicenseInfo,	CustomerName
 	IniWrite, % LicenseInfo.customer_id, 	% ini_HADConfig, LicenseInfo,	CustomerId
 	if (WinExist("ahk_id" . HS3GuiHwnd))
-		Gui, HS3: +Disabled	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+		Gui, HS3: -Disabled	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	if (WinExist("ahk_id" . HS4GuiHwnd))
-		Gui, HS4: +Disabled	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
+		Gui, HS4: -Disabled	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	Gui, EnterLicense: Destroy
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_CheckCommTime()
-{
-	global	;assume-global mode of operation
-	local	ElapsedTime := 0
-
-	ElapsedTime := A_Now	
-	EnvSub, ElapsedTime, v_ValidTill, Days	;Sets a variable to itself minus the given value (can also compare date-time values). 
-	if (ElapsedTime > 0)	;one year
-	{
-		MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % "Sorry, your license is no longer valid (expired). Application will exit now."	;16 = Icon Hand (stop/error)
-		ExitApp, 5	;5 = expired
-	}
-	if (ElapsedTime > -3)	;less than 3 days till the end of license time
-		MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % "Your license is about to expire. It will remain active for less than 3 days."
-			. "`n`n"
-			. "Expiration date:" . A_Space . SubStr(v_ValidTill, 1, 4) . "-" . SubStr(v_ValidTill, 5, 2) . "-" . SubStr(v_ValidTill, -1)
+	if (ini_THLog)
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . "License key was activated" . "." . TransA["License key"] . ":" . A_Space . LicenseInfo.key . A_Space . TransA["License instance"] . ":" . A_Space . LicenseInfo.id . A_Space . TransA["Customer name"] . ":" . A_Space . LicenseInfo.customer_name . A_Space . TransA["Customer id"] . ":" . A_Space . LicenseInfo.customer_id . "`n"
+			, % v_LogFileName			
 }
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12637,6 +12682,7 @@ Application hotstrings && hotkeys							= Application hotstrings && hotkeys
 Application language changed to: 							= Application language changed to:
 Application mode										= Application mode
 Application statistics									= Application statistics
+Application will exit now.								= Application will exit now.
 Apply												= &Apply
 Apply default hotkey									= Apply default hotkey
 Apply new hotkey										= Apply new hotkey
@@ -12767,6 +12813,8 @@ Enter a new library name									= Enter a new library name
 Enter hotstring 										= Enter hotstring
 enter selected hotstring									= enter selected hotstring
 Enter triggerstring										= Enter triggerstring
+Entered license key										= Entered license key
+Entered license key was not found.							= Entered license key was not found.
 Error												= Error
 ErrorLevel was triggered by NewInput error. 					= ErrorLevel was triggered by NewInput error.
 Error reading library file:								= Error reading library file:
@@ -12777,6 +12825,8 @@ exists in the library									= exists in the library
 Exit													= Exit
 Exit application										= Exit application
 exit Hotstrings application								= exit Hotstrings application
+Exiting												= Exiting
+Expiration date										= Expiration date
 Expires at											= Expires at
 Export from .csv to .ahk 								= &Export from .csv to .ahk
 Export to .ahk with static definitions of hotstrings			= Export to .ahk with static definitions of hotstrings
@@ -12857,6 +12907,7 @@ Insufficient length of license key. Do you want to try again?	= Insufficient len
 is added in section  [GraphicalUserInterface] of Config.ini		= is added in section  [GraphicalUserInterface] of Config.ini
 is empty at the moment.									= is empty at the moment.
 Introduction											= Introduction
+It had expired.										= It had expired.
 It means other script threads are still running. Triggerstring tips are off for your convenience. = It means other script threads are still running. Triggerstring tips are off for your convenience.
 It means triggerstring tips state is restored and hotstring definitions will be triggered as usual.		= It means triggerstring tips state is restored and hotstring definitions will be triggered as usual.
 Keyboard or mouse scrolling								= Keyboard or mouse scrolling
@@ -12874,8 +12925,11 @@ Library export. Please wait... 							= Library export. Please wait...
 Library has been exported 								= Library has been exported
 Library has been imported. 								= Library has been imported.
 License												= License
+License activation unsuccessful.							= License activation unsuccessful.
 License activated										= License activated
 License details										= License details
+License key was expired									= License key was expired
+License key was validated								= License key was validated
 License ID											= License ID
 License instance										= License instance
 License key											= License key
@@ -12954,6 +13008,7 @@ Pause												= Pause
 Perhaps check if any other application (like File Manager) do not occupy folder to be removed. = Perhaps check if any other application (like File Manager) do not occupy folder to be removed.
 Phrase to search for:									= Phrase to search for:
 pixels												= pixels
+Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference. = Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference.
 Please enter below your license number						= Please enter below your license number
 Please try again.										= Please try again.
 Please wait, uploading .csv files... 						= Please wait, uploading .csv files...
@@ -13050,6 +13105,7 @@ Sorting order											= Sorting order
 Sorry, it's not allowed to use combination of Caps Lock, Scroll Lock and Num Lock for the same purpose. = Sorry, it's not allowed to use combination of Caps Lock, Scroll Lock and Num Lock for the same purpose.
 Sorry, it's not allowed to use ordinary hotkey combined with Caps Lock or Scroll Lock or Num Lock. = Sorry, it's not allowed to use ordinary hotkey combined with Caps Lock or Scroll Lock or Num Lock.
 Sorry, your computer data do not match with license information. Application will exit now. If you think this is application error please contact our support showing the following data. If you press Ctrl + C content of this message for your convenience will be copied in text mode to clipboard. = Sorry, your computer data do not match with license information. Application will exit now. If you think this is application error please contact our support showing the following data. If you press Ctrl + C content of this message for your convenience will be copied in text mode to clipboard.
+Sorry, your license is no longer active.					= Sorry, your license is no longer active.
 ""SP"" or SendPlay may have no effect at all if UAC is enabled, even if the script is running as an administrator. For more information, refer to the AutoHotkey FAQ (help). = ""SP"" or SendPlay may have no effect at all if UAC is enabled, even if the script is running as an administrator. For more information, refer to the AutoHotkey FAQ (help).
 Space												= Space
 Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
@@ -13059,8 +13115,7 @@ Static hotstrings 										= &Static hotstrings
 Static triggerstring / hotstring menus						= Static triggerstring / hotstring menus
 Style of GUI											= Style of GUI
 Such file already exists									= Such file already exists
-Support: technical issue									= Support: technical issue
-Support: commercial / license issue						= Support: commercial / license issue
+Support: technical issue request							= Support: technical issue request
 Suspend Hotstrings										= Suspend Hotstrings
 suspend triggerstrings tips and hotstrings					= suspend triggerstrings tips and hotstrings
 Tab 													= Tab 
