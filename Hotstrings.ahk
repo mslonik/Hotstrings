@@ -473,7 +473,7 @@ if (ini_GuiReload) and (v_SilentMode != "l")
 
 ;#c/* commercial only beginning
 F_CheckCommercialConditions()			;check Lemon squeezy
-SetTimer, F_CheckCommTime, % 1000 * 3600	;1 hour
+SetTimer, F_CheckCommTime, % 1000 * 3600	;1 hour = 1000 ms * 3 600
 ;#c*/ commercial only end
 
 AppStartTime := A_Now	;Date and time math can be performed with EnvAdd and EnvSub. Also, FormatTime can format the date and/or time according to your locale or preferences.
@@ -880,7 +880,6 @@ F_CheckCommTime()
 			. TransA["Expiration date"] . ":"		. A_Tab . LicenseInfo.expires_at			. "`n"
 			. TransA["License key"] . ":" 		. A_Tab . LicenseInfo.key 				. "`n"
 			. TransA["Created at"] . ":" 			. A_Tab . LicenseInfo.created_at			. "`n"
-			. TransA["License instance"] . ":"		. A_Tab . LicenseInfo.id					. "`n"
 			. TransA["Customer name"] . ":" 		. A_Tab . LicenseInfo.customer_name		. "`n"
 			. TransA["Customer id"] . ":" 		. A_Tab . LicenseInfo.customer_id			. "`n"
 			. "`n`n"
@@ -911,10 +910,13 @@ F_LicenseHttpRequest(WhatRequest, LicenseKey, InstanceId, WhatInstance)	; WhatRe
 ,	Key					:= ""
 ,	Value				:= ""
 
-	oHTTP.Open("POST", url . WhatRequest, false)
-	oHTTP.SetRequestHeader("Accept", header1)
-	oHTTP.SetRequestHeader("Content-Type", header2)
-	oHTTP.Send("license_key=" . LicenseKey . "&" . WhatInstance . "=" . InstanceId)
+	try
+	{
+		oHTTP.Open("POST", url . WhatRequest, false)
+		oHTTP.SetRequestHeader("Accept", header1)
+		oHTTP.SetRequestHeader("Content-Type", header2)
+		oHTTP.Send("license_key=" . LicenseKey . "&" . WhatInstance . "=" . InstanceId)
+	}
 
 	responseText := oHTTP.ResponseText
 
@@ -934,42 +936,11 @@ F_LicenseHttpRequest(WhatRequest, LicenseKey, InstanceId, WhatInstance)	; WhatRe
 			}
 		}
 	}
+	oHTTP := ""
 	return LicenseArray
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LicenseDetails()	;dedicated script: LemonAPI.ahk, structure: 
-/* {
-	"valid": true,
-	"error": null,
-	"license_key": {
-	  "id": 65364,
-	  "status": "active",
-	  "key": "FDC56759-F8BA-434A-94B9-18B080A7F2DA",
-	  "activation_limit": null,
-	  "activation_usage": 1,
-	  "created_at": "2023-03-29 20:47:06",
-	  "expires_at": null,
-	  "test_mode": true
-	},
-	"instance": {
-	  "id": "c3f065a6-7541-472b-9553-1c1f9257bded",
-	  "name": "Test",
-	  "created_at": "2023-04-03 20:40:58"
-	},
-	"meta": {
-	  "store_id": 19492,
-	  "order_id": 575712,
-	  "order_item_id": 564672,
-	  "product_id": 58043,
-	  "product_name": "Hottrings",
-	  "variant_id": 55875,
-	  "variant_name": "Hotstrings",
-	  "customer_id": 584858,
-	  "customer_name": "Maciej S\u0142ojewski",
-	  "customer_email": "maciej.slojewski@mslonik.pl"
-	}
-   }
- */   
 {
 	global						;assume-global mode of operation
 	local c_MsgBoxIconAsterisk	:= 64
@@ -986,7 +957,6 @@ F_LicenseDetails()	;dedicated script: LemonAPI.ahk, structure:
 		. TransA["Activation usage"] . ":" 	. A_Tab . LicenseInfo.activation_usage		. "`n"
 		. TransA["Created at"] . ":" 			. A_Tab . LicenseInfo.created_at			. "`n"
 		. TransA["Expires at"] . ":" 			. A_Tab . LicenseInfo.expires_at			. "`n"
-		. TransA["License instance"] . ":"		. A_Tab . LicenseInfo.id					. "`n"
 		. TransA["Customer name"] . ":" 		. A_Tab . LicenseInfo.customer_name		. "`n"
 		. TransA["Customer id"] . ":" 		. A_Tab . LicenseInfo.customer_id			. "`n"
 }
@@ -1096,12 +1066,25 @@ F_CheckCommercialConditions()
 		,	c_MsgBoxIconExclamation := 48
 
 	ElapsedTime := A_Now	
-,	ini_LicenseKey	:= ""			;global variable, default value
-	IniRead, ini_LicenseKey, 		% ini_HADConfig, LicenseInfo, LicenseKey, % A_Space
-	IniRead, ini_LicenseInstanceId, 	% ini_HADConfig, LicenseInfo, InstanceId, % A_Space
 
 	if (v_LicenseType = "commercial") and (v_ValidTill != "inf")
 	{
+		ini_LicenseKey	:= ""			;global variable, default value
+		IniRead, ini_LicenseKey, 		% ini_HADConfig, LicenseInfo, LicenseKey, % A_Space
+		if (ini_LicenseKey = "")
+		{
+			MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+				, % TransA["No license key was found in Config.ini."]
+				. "`n`n"
+				. TransA["The [LicenseInfo] section will be removed from Congig.ini. When run next time, prompt to enter valid license key will be displayed."]
+				. "`n`n"
+				. TransA["Application will exit now."]
+				. "`n`n"
+				. TransA["Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference."]
+			IniDelete, % ini_HADConfig, LicenseInfo
+			ExitApp, 12	;12 = no license key was found within Config.ini.
+		}
+
 		if (ini_LicenseKey = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 		{
 			F_GUIinit()
@@ -1111,6 +1094,21 @@ F_CheckCommercialConditions()
 		}
 		else
 		{
+			RegRead, ini_LicenseInstanceId, HKCU, SOFTWARE\TRT,	;	IniRead, ini_LicenseInstanceId, 	% ini_HADConfig, LicenseInfo, InstanceId, % A_Space
+			if (ErrorLevel)
+			{
+				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+					, % TransA["License instance was not found on this PC / user domain account."]
+					. "`n`n"
+					. TransA["License key"] . ":" 		. A_Tab . ini_LicenseKey
+					. "`n`n"
+					. TransA["Application will exit now."]
+					. "`n`n"
+					. TransA["Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference."]
+					if (ini_THLog)
+						FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . TransA["License instance was not found on this PC / user domain account."] . A_Space . TransA["License key"] . ":" . A_Space . LicenseInfo.key . "." . A_Space . TransA["Exiting"] . "." . "`n", % v_LogFileName
+					ExitApp, 11	;11 = license key not found on this PC / user domain account.
+			}	
 			LicenseInfo := F_LicenseHttpRequest(WhatRequest := "validate", ini_LicenseKey, ini_LicenseInstanceId, WhatInstance := "instance_id")
 		,	LicenseDateTimeStamp := StrReplace(LicenseInfo.expires_at, "-", "")
 		,	LicenseDateTimeStamp := StrReplace(LicenseDateTimeStamp, ":", "")
@@ -1125,7 +1123,6 @@ F_CheckCommercialConditions()
 					. TransA["Expiration date"] . ":"		. A_Tab . LicenseInfo.expires_at			. "`n"
 					. TransA["License key"] . ":" 		. A_Tab . LicenseInfo.key 				. "`n"
 					. TransA["Created at"] . ":" 			. A_Tab . LicenseInfo.created_at			. "`n"
-					. TransA["License instance"] . ":"		. A_Tab . LicenseInfo.id					. "`n"
 					. TransA["Customer name"] . ":" 		. A_Tab . LicenseInfo.customer_name		. "`n"
 					. TransA["Customer id"] . ":" 		. A_Tab . LicenseInfo.customer_id			. "`n"
 					. "`n`n"
@@ -1219,6 +1216,8 @@ F_EnterLicenseB1()
 		,	c_MsgBoxButtonsYes		:= 4	
 		,	c_MsgBoxIconAsterisk	:= 64
 		,	LicenseInfo			:= {}
+		,	LS_StoreId			:= 19492	;hardcoded because of security. https://docs.lemonsqueezy.com/guides/tutorials/license-keys; "store_id"
+		,	LS_ProductId			:= 58043	;hardcoded because of security. https://docs.lemonsqueezy.com/guides/tutorials/license-keys; "product_id"
 
 	Gui,	EnterLicense: Submit	;hides the window
 	GuiControlGet, EditValue, , % IdEnterLicenseE1
@@ -1253,6 +1252,17 @@ F_EnterLicenseB1()
 	}
 	LicenseInfo := F_LicenseHttpRequest(WhatRequest := "activate", EditValue, "Test", WhatInstance := "instance_name")	;https://docs.lemonsqueezy.com/help/licensing/license-api
 
+	if (LicenseInfo.store_id != LS_StoreId) or (LicenseInfo.product_id != LS_ProductId)	;Important: You should verify that the store_id, product_id and/or variant_id from this response match the IDs of your Lemon Squeezy product. If you don't do this, someone using a license key from another Lemon Squeezy product could use it to get access to your product. We recommend hard-coding the store_id, product_id and/or variant_id into your client and using them to validate that the key belongs to your product.
+	{
+		MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+			, % TransA["License server response do not contain correct id of store or product."] 
+			. "`n`n"
+			. TransA["Application will exit now."]
+			. "`n`n" 
+			. TransA["Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference."]
+		ExitApp, 10	;license key do not match to store or product id
+	}
+	
 	if (LicenseInfo.activated = "false") and (LicenseInfo.error = "license_key not found.")
 	{	
 		MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
@@ -1289,7 +1299,6 @@ F_EnterLicenseB1()
 		. TransA["Activation usage"] . ":" 	. A_Tab . LicenseInfo.activation_usage		. "`n"
 		. TransA["Created at"] . ":" 			. A_Tab . LicenseInfo.created_at			. "`n"
 		. TransA["Expires at"] . ":" 			. A_Tab . LicenseInfo.expires_at			. "`n"
-		. TransA["License instance"] . ":"		. A_Tab . LicenseInfo.id					. "`n"
 		. TransA["Customer name"] . ":" 		. A_Tab . LicenseInfo.customer_name		. "`n"
 		. TransA["Customer id"] . ":" 		. A_Tab . LicenseInfo.customer_id			. "`n"
 		. "`n`n"
@@ -1298,7 +1307,17 @@ F_EnterLicenseB1()
 	ini_LicenseKey			:= LicenseInfo.key
 , 	ini_LicenseInstanceId	:= LicenseInfo.id
 	IniWrite, % LicenseInfo.key, 			% ini_HADConfig, LicenseInfo,	LicenseKey
-	IniWrite, % LicenseInfo.id, 			% ini_HADConfig, LicenseInfo,	InstanceId
+	RegWrite, REG_SZ, HKCU, SOFTWARE\TRT, , % LicenseInfo.id	;IniWrite, % LicenseInfo.id, 			% ini_HADConfig, LicenseInfo,	InstanceId
+	if (ErrorLevel)
+	{
+		MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+			, % "Internal application problem" . "."
+			. "`n`n"
+			. TransA["Application will exit now."]
+			. "`n`n" 
+			. TransA["Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference."]
+		ExitApp, 12	;12 = Registry write unsuccessful	
+	}	
 	IniWrite, % LicenseInfo.customer_name, 	% ini_HADConfig, LicenseInfo,	CustomerName
 	IniWrite, % LicenseInfo.customer_id, 	% ini_HADConfig, LicenseInfo,	CustomerId
 	if (WinExist("ahk_id" . HS3GuiHwnd))
@@ -1307,7 +1326,7 @@ F_EnterLicenseB1()
 		Gui, HS4: -Disabled	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 	Gui, EnterLicense: Destroy
 	if (ini_THLog)
-		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . "License key was activated" . "." . TransA["License key"] . ":" . A_Space . LicenseInfo.key . A_Space . TransA["License instance"] . ":" . A_Space . LicenseInfo.id . A_Space . TransA["Customer name"] . ":" . A_Space . LicenseInfo.customer_name . A_Space . TransA["Customer id"] . ":" . A_Space . LicenseInfo.customer_id . "`n"
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . "License key was activated" . "." . A_Space . TransA["License key"] . ":" . A_Space . LicenseInfo.key . "." . A_Space . TransA["Customer name"] . ":" . A_Space . LicenseInfo.customer_name . "." . A_Space . TransA["Customer id"] . ":" . A_Space . LicenseInfo.customer_id . "." . "`n"
 			, % v_LogFileName			
 }
 ;#c*/ commercial only end
@@ -13056,11 +13075,12 @@ License												= License
 License activation unsuccessful.							= License activation unsuccessful.
 License activated										= License activated
 License details										= License details
+License instance was not found on this PC / user domain account.	= License instance was not found on this PC / user domain account.
 License key was										= License key was
 License key was validated								= License key was validated
 License ID											= License ID
-License instance										= License instance
 License key											= License key
+License server response do not contain correct id of store or product. = License server response do not contain correct id of store or product.
 License status											= License status
 License type											= License type
 Licensed to											= Licensed to
@@ -13105,6 +13125,7 @@ no													= no
 No Backspace (B0) 										= No Backspace (B0)
 No EndChar (O) 										= No EndChar (O)
 No libraries have been found!								= No libraries have been found!
+No license key was found in Config.ini.						= No license key was found in Config.ini.
 Not Case-Conforming (C1)									= Not Case-Conforming (C1)
 Nothing to do to me, Config.ini is already where you want it.	= Nothing to do to me, Config.ini is already where you want it.
 Now application must be restarted (into default mode) in order to apply settings from new location. = Now application must be restarted (into default mode) in order to apply settings from new location.
@@ -13270,6 +13291,7 @@ the following line is found:								= the following line is found:
 The ""Hotstrings"" folder was successfully moved to the new location: = The ""Hotstrings"" folder was successfully moved to the new location:
 The ""Libraries"" folder was successfully moved to the new location. = The ""Libraries"" folder was successfully moved to the new location.
 The library has been deleted, its content have been removed from memory. = The library has been deleted, its content have been removed from memory.
+The [LicenseInfo] section will be removed from Congig.ini. When run next time, prompt to enter valid license key will be displayed. = The [LicenseInfo] section will be removed from Congig.ini. When run next time, prompt to enter valid license key will be displayed.
 The old ""Hotstrings"" folder was successfully removed.		= The old ""Hotstrings"" folder was successfully removed.
 There is no Libraries subfolder and no lbrary (*.csv) file exists! = There is no Libraries subfolder and no lbrary (*.csv) file exists!
 There is no ""Log"" subfolder. It is now created in parallel with Libraries subfolder. = There is no ""Log"" subfolder. It is now created in parallel with Libraries subfolder.
