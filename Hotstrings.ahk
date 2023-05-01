@@ -93,7 +93,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_FontType 			:= "Consolas"
 ,		f_100msRun 			:= false				;global flag: timer is running, 100 ms, for concurrent press of Shift keys
 ;#c/* commercial only beginning
-,		v_ValidTill			:= "limited"				;"inf" for infinity, "limited" for other cases
+,		v_ValidTill			:= "inf"				;"inf" for infinity, "limited" for other cases
 ,		f_WasReset			:= false				;global flag: Shift key memory reset (to reset hotstring recognizer)
 ,		f_RShiftDown 			:= false
 ,		f_LShiftDown 			:= false
@@ -532,26 +532,32 @@ Critical, Off
 #If WinActive("ahk_id" HS3SearchHwnd)
 	^f::
 	^s::
-	F3::
+	F3::		;To disable all hotstrings definitions within search window.
+		Suspend		;Any hotkey/hotstring subroutine whose very first line is Suspend (except Suspend On) will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		HS3SearchGuiEscape()
 		return	;end of this thread
 	Down::
+		Suspend		;Any hotkey/hotstring subroutine whose very first line is Suspend (except Suspend On) will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		F_DestroyTriggerstringTips(ini_TTCn)
 		F_HS3Search_Down()
 		return
 	Up::
+		Suspend		;Any hotkey/hotstring subroutine whose very first line is Suspend (except Suspend On) will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		F_DestroyTriggerstringTips(ini_TTCn)
 		F_HS3Search_Up()
 		return
 	Right::
+		Suspend		;Any hotkey/hotstring subroutine whose very first line is Suspend (except Suspend On) will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		F_DestroyTriggerstringTips(ini_TTCn)
 		F_HS3SearchRight()
 		return
 	Left::
+		Suspend		;Any hotkey/hotstring subroutine whose very first line is Suspend (except Suspend On) will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		F_DestroyTriggerstringTips(ini_TTCn)
 		F_HS3SearchLeft()
 		return
 	Tab::
+		Suspend		;Any hotkey/hotstring subroutine whose very first line is Suspend (except Suspend On) will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		return
 #If
 
@@ -597,7 +603,8 @@ Critical, Off
 
 	^f::
 	F3:: ;new thread starts here
-		F_Searching()
+		Suspend		;Any hotkey/hotstring subroutine whose very first line is Suspend (except Suspend On) will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
+		F_Searching()	;To disable all hotstrings definitions within search window.
 		return
 
 	F4::	;new thread starts here
@@ -1446,7 +1453,7 @@ F_HS3Search_Down()
 		Case "Edit1", "Button1", "Button2", "Button3":	;Button2 = Hotstring, Button3 = Library
 			Gui, HS3Search: Default
 			NextRow := LV_GetCount()
-			OutputDebug, % "NextRow case 1:" . NextRow . "|" . "`n"			
+			; OutputDebug, % "NextRow case 1:" . NextRow . "|" . "`n"			
 			if (NextRow = 0)
 				GuiControl, Focus, % IdSearchE1
 			else
@@ -1456,7 +1463,7 @@ F_HS3Search_Down()
 			}
 		Case "SysListView321":
 			NextRow := LV_GetNext()
-			OutputDebug, % "NextRow case 2:" . NextRow . "|" . "`n"
+			; OutputDebug, % "NextRow case 2:" . NextRow . "|" . "`n"
 			LV_Modify(++NextRow, "Select")
 	}
 }
@@ -3416,6 +3423,7 @@ HS3SearchGuiEscape() ; Gui event!
 	Gui, HS3Search:	+Disabled
 	Gui, HS3: 		-Disabled
 	Gui, HS3Search: 	Hide
+	Suspend, Off	;Enabling all hoststrings again
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HS3SearchGuiClose() ; Gui event!
@@ -10401,6 +10409,8 @@ F_SearchPhrase()	;handles 2x GUI events: HS3Search: Edit and Radio.
 F_Searching()	;after pressing F3
 {
 	DetectHiddenWindows, On
+	Suspend, On			;To disable all hotstrings definitions within search window.
+	Menu, Tray, Icon,		% AppIcon, , 1	;When a script's hotkeys are suspended, its tray icon changes to the letter S. This can be avoided by freezing the icon, which is done by specifying 1 for the last parameter of the Menu command.
 	if (WinExist("ahk_id" HS3SearchHwnd))
 		{
 			Gui, HS3: 		+Disabled
@@ -13353,6 +13363,9 @@ Type													= Type
 Typeface color											= Typeface color
 Typeface font											= Typeface font
 Typeface size											= Typeface size
+)"
+TransConst .= "`n
+(Join`n `
 Underscore _											= Underscore _
 Undo the last hotstring									= Undo the last hotstring
 Undo the last hotstring									= Undo the last hotstring
@@ -13361,9 +13374,6 @@ Valid till											= Valid till
 Version / Update										= Version / Update
 Version												= Version
 Visit public libraries webpage							= Visit public libraries webpage
-)"
-	TransConst .= "`n
-(Join`n `
 warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
 was just deleted from									= was just deleted from
