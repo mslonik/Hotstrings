@@ -47,7 +47,7 @@ FileInstall, hotstrings.ico, 	% AppIcon, 		0
 ;#f*/ free version only end
 ;#c/* commercial only beginning
 FileInstall, LICENSE_EULA.md, LICENSE_EULA.md,	0
-;#f*/ free version only end
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - S E C T I O N    O F    G L O B A L     V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ;#c/* commercial only beginning
 global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app available to user: l like "siLent mode"
@@ -866,33 +866,36 @@ return
 
 ; ------------------------- SECTION OF FUNCTIONS --------------------------------------------------------------------------------------------------------------------------------------------
 ;#c/* commercial only beginning
-F_CheckCommTime()	;tu jestem domyślnie włączyć logowanie dla wersji komercyjnej
+F_CheckCommTime()
 {
 	global						;assume-global mode of operation
 	local	LicenseInfo := {}	
 
 	LicenseInfo := F_LicenseHttpRequest(WhatRequest := "validate", ini_LicenseKey, ini_LicenseInstanceId, WhatInstance := "instance_id")
-	if (ini_THLog)
-		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . TransA["License key was validated"] . "." . "`n", % v_LogFileName			
-	if (LicenseInfo.status = "expired")
-		{
-			MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
-				, % TransA["Sorry, your license is no longer active."] . A_Space . TransA["It had expired."]
-				. "`n`n"
-				. TransA["Expiration date"] . ":"		. A_Tab . LicenseInfo.expires_at			. "`n"
-				. TransA["License key"] . ":" 		. A_Tab . LicenseInfo.key 				. "`n"
-				. TransA["Created at"] . ":" 			. A_Tab . LicenseInfo.created_at			. "`n"
-				. TransA["License instance"] . ":"		. A_Tab . LicenseInfo.id					. "`n"
-				. TransA["Customer name"] . ":" 		. A_Tab . LicenseInfo.customer_name		. "`n"
-				. TransA["Customer id"] . ":" 		. A_Tab . LicenseInfo.customer_id			. "`n"
-				. "`n`n"
-				. TransA["Application will exit now."]
-				. "`n`n"
-				. TransA["Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference."]
-			if (ini_THLog)
-				FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . TransA["License key was expired"] . "." . A_Space . TransA["Exiting"] . "." . "`n", % v_LogFileName			
-			ExitApp, 5	;5 = expired
-		}
+	if (LicenseInfo.status = "expired") or (LicenseInfo.status = "disabled")
+	{
+		MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+			, % TransA["Sorry, your license is no longer active."] . A_Space . TransA["It had expired."]
+			. "`n`n"
+			. TransA["Expiration date"] . ":"		. A_Tab . LicenseInfo.expires_at			. "`n"
+			. TransA["License key"] . ":" 		. A_Tab . LicenseInfo.key 				. "`n"
+			. TransA["Created at"] . ":" 			. A_Tab . LicenseInfo.created_at			. "`n"
+			. TransA["License instance"] . ":"		. A_Tab . LicenseInfo.id					. "`n"
+			. TransA["Customer name"] . ":" 		. A_Tab . LicenseInfo.customer_name		. "`n"
+			. TransA["Customer id"] . ":" 		. A_Tab . LicenseInfo.customer_id			. "`n"
+			. "`n`n"
+			. TransA["Application will exit now."]
+			. "`n`n"
+			. TransA["Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference."]
+		if (ini_THLog)
+			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . TransA["License key was"] . A_Space . LicenseInfo.status . "." . A_Space . TransA["License key"] . ":" . A_Space . LicenseInfo.key . "." . A_Space . TransA["Exiting"] . "." . "`n", % v_LogFileName
+		ExitApp, 5	;5 = expired or disabled
+	}
+	if (LicenseInfo.status = "active")
+	{
+		if (ini_THLog)
+			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . TransA["License key was validated"] . "." . "`n", % v_LogFileName			
+	}	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LicenseHttpRequest(WhatRequest, LicenseKey, InstanceId, WhatInstance)	; WhatRequest = activate / validate / deactivate; WhatInstance = "instance_id=" (validate) or "instance_name" (activate)
@@ -1114,7 +1117,7 @@ F_CheckCommercialConditions()
 		,	LicenseDateTimeStamp := StrReplace(LicenseDateTimeStamp, " ", "")
 			EnvSub, ElapsedTime, LicenseDateTimeStamp, Days	;Sets a variable to itself minus the given value (can also compare date-time values). 
 			; OutputDebug, % "LicenseInfo.expires_at:" . LicenseInfo.expires_at . "`n"
-			if (LicenseInfo.status = "expired")
+			if (LicenseInfo.status = "expired") or (LicenseInfo.status = "disabled")
 			{
 				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
 					, % TransA["Sorry, your license is no longer active."] . A_Space . TransA["It had expired."]
@@ -1129,29 +1132,19 @@ F_CheckCommercialConditions()
 					. TransA["Application will exit now."]
 					. "`n`n"
 					. TransA["Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference."]
-				ExitApp, 5	;5 = expired
+				if (ini_THLog)
+					FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . TransA["License key was"] . A_Space . LicenseInfo.status . "." . A_Space . TransA["License key"] . ":" . A_Space . LicenseInfo.key . "." . A_Space . TransA["Exiting"] . "." . "`n", % v_LogFileName
+				ExitApp, 5	;5 = expired or disabled
 			}
-			if (LicenseInfo.status != "active")
-			{
-				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
-					, % TransA["Sorry, your license is no longer active."]
-					. TransA["License key"] . ":" 		. A_Tab . LicenseInfo.key 				. "`n"
-					. TransA["Created at"] . ":" 			. A_Tab . LicenseInfo.created_at			. "`n"
-					. TransA["License instance"] . ":"		. A_Tab . LicenseInfo.id					. "`n"
-					. TransA["Customer name"] . ":" 		. A_Tab . LicenseInfo.customer_name		. "`n"
-					. TransA["Customer id"] . ":" 		. A_Tab . LicenseInfo.customer_id			. "`n"
-					. "`n`n"
-					. "`n`n"
-					. TransA["Application will exit now."]
-					. "`n`n"
-					. TransA["Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference."]
-				ExitApp, 9	; lemon squeezy, license nor active nor expired
-			}	
-
 			if (ElapsedTime > -3)	;less than 3 days till the end of license time
 				MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % "Your license is about to expire. It will remain active for less than 3 days."
 					. "`n`n"
 					. TransA["Expiration date"] . ":" . A_Space . LicenseInfo.expires_at
+			if (LicenseInfo.status = "active")
+				{
+					if (ini_THLog)
+						FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . TransA["License key was validated"] . "." . "`n", % v_LogFileName			
+				}	
 		}
 	}
 }
@@ -3926,6 +3919,7 @@ F_MenuLogEnDis()
 		v_LogFileName := % HADLog . "\" . A_YYYY . A_MM . A_DD . "_" . "HotstringsLog" . ".txt"
 		FileAppend, % "--------------------------------------------------------------------------------------------------------------" . "`n" ; amount of "-" characters as for mono typeface (Courier)
 			. "hh:mm:ss" . "|" . "hotstring counter" . "|" . "entered triggerstring" . "|" . "trigger" . "|" . "triggerstring options" . "|" . "hotstring" . "|" . "gain" . "|" . "cumulative gain" . "|" . "`n", % v_LogFileName, UTF-8
+		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . SubStr(A_ScriptName, 1, -4) . A_Space . TransA["started"] . "." . "`n", % v_LogFileName	
 	}
 ;#c*/ commercial only end
 }
@@ -12167,136 +12161,270 @@ F_CheckCreateConfigIni(params*)
 	local  ConfigIni 	:= ""	; variable which is used as default content of Config.ini
 		, HADConfig_AppData  	:= A_AppData   . "\" . SubStr(A_ScriptName, 1, -4) . "\"	. "Config.ini"	;Hotstrings Application Data Config .ini
 		, HADConfig_App		:= A_ScriptDir . "\" . "Config.ini"
-	
-	ConfigIni := "			
-		( LTrim
-		[Configuration]
-		ClipBoardPasteDelay=300
-		HotstringUndo=1
-		ShowIntro=1
-		CheckRepo=0
-		DownloadRepo=0
-		HK_Main=#^h
-		HK_IntoEdit=~^#c
-		HK_UndoLH=~#z
-		HK_ToggleTt=none
-		THLog=0
-		HADConfig=
-		HADL=
-		[EvStyle_TT]
-		TTBackgroundColor=white
-		TTBackgroundColorCustom=
-		TTTypefaceColor=black
-		TTTypefaceColorCustom=
-		TTTypefaceFont=Consolas
-		TTTypefaceSize=10
-		[EvStyle_HM]
-		HMBackgroundColor=white
-		HMBackgroundColorCustom=
-		HMTypefaceColorCustom=
-		HMTypefaceColor=black
-		HMTypefaceFont=Consolas
-		HMTypefaceSize=10
-		[EvStyle_AT]
-		ATBackgroundColor=green
-		ATBackgroundColorCustom=
-		ATTypefaceColorCustom=
-		ATTypefaceColor=black
-		ATTypefaceFont=Consolas
-		ATTypefaceSize=10
-		[EvStyle_HT]
-		HTBackgroundColor=green
-		HTBackgroundColorCustom=
-		HTTypefaceColorCustom=
-		HTTypefaceColor=black
-		HTTypefaceFont=Consolas
-		HTTypefaceSize=11
-		[EvStyle_UH]
-		UHBackgroundColor=green
-		UHBackgroundColorCustom=
-		UHTypefaceColorCustom=
-		UHTypefaceColor=black
-		UHTypefaceFont=Consolas
-		UHTypefaceSize=11
-		[Event_ActiveTriggerstringTips]
-		ATEn=0
-		[Event_BasicHotstring]
-		OHTtEn=1
-		OHTD=2000
-		OHTP=1
-		OHSEn=0
-		OHSF=500
-		OHSD=250
-		[Event_MenuHotstring]
-		MHMP=1
-		MHSEn=1
-		MHSF=400
-		MHSD=250
-		[Event_UndoHotstring]
-		UHTtEn=1
-		UHTD=2000
-		UHTP=1
-		UHSEn=0
-		UHSF=600
-		UHSD=250
-		[Event_TriggerstringTips]
-		TTTtEn=1
-		TTTD=2000
-		TTTP=1
-		TipsSortAlphabetically=1
-		TipsSortByLength=1
-		TipsAreShownAfterNoOfCharacters=1
-		MNTT=20
-		TTCn=2
-		[StaticTriggerstringHotstring]
-		SWPosX=
-		SWPosY=
-		SWPosW=
-		SWPosH=
-		[GraphicalUserInterface]
-		Language=English.txt
-		MainWindowPosX=
-		MainWindowPosY=
-		MainWindowPosW=
-		MainWindowPosH=
-		Sandbox=1
-		WhichGui=HS3
-		GuiFontColor=Black
-		GuiFontColorHighlighted=Blue
-		GuiWindowColor=Default
-		GuiControlColor=Default
-		GuiSizeOfMarginX=10
-		GuiSizeOfMarginY=10
-		GuiFontType=Calibri
-		GuiFontSize=10
-		GuiReload=
-		GuiMaximized=0
-		[EndChars]
-		Apostrophe '=1
-		Backslash \=1
-		Closing Curly Bracket }=1
-		Closing Round Bracket )=1
-		Closing Square Bracket ]=1
-		Colon :=1
-		Comma ,=1
-		Dot .=1
-		Enter=1
-		Exclamation Mark !=1
-		Minus -=1
-		Opening Curly Bracket {=1
-		Opening Round Bracket (=1
-		Opening Square Bracket [=1
-		Question Mark ?=1
-		Quote ""=1
-		Semicolon ;=1
-		Slash /=0
-		Space=1
-		Tab=1
-		Underscore _=1
-		[LoadLibraries]
-		[ShowTipsLibraries]
-		)"
-	
+
+;#c/* commercial only beginning
+ConfigIni := "			
+	( LTrim
+	[Configuration]
+	ClipBoardPasteDelay=300
+	HotstringUndo=1
+	ShowIntro=1
+	CheckRepo=0
+	DownloadRepo=0
+	HK_Main=#^h
+	HK_IntoEdit=~^#c
+	HK_UndoLH=~#z
+	HK_ToggleTt=none
+	THLog=0
+	HADConfig=
+	HADL=
+	[EvStyle_TT]
+	TTBackgroundColor=white
+	TTBackgroundColorCustom=
+	TTTypefaceColor=black
+	TTTypefaceColorCustom=
+	TTTypefaceFont=Consolas
+	TTTypefaceSize=10
+	[EvStyle_HM]
+	HMBackgroundColor=white
+	HMBackgroundColorCustom=
+	HMTypefaceColorCustom=
+	HMTypefaceColor=black
+	HMTypefaceFont=Consolas
+	HMTypefaceSize=10
+	[EvStyle_AT]
+	ATBackgroundColor=green
+	ATBackgroundColorCustom=
+	ATTypefaceColorCustom=
+	ATTypefaceColor=black
+	ATTypefaceFont=Consolas
+	ATTypefaceSize=10
+	[EvStyle_HT]
+	HTBackgroundColor=green
+	HTBackgroundColorCustom=
+	HTTypefaceColorCustom=
+	HTTypefaceColor=black
+	HTTypefaceFont=Consolas
+	HTTypefaceSize=11
+	[EvStyle_UH]
+	UHBackgroundColor=green
+	UHBackgroundColorCustom=
+	UHTypefaceColorCustom=
+	UHTypefaceColor=black
+	UHTypefaceFont=Consolas
+	UHTypefaceSize=11
+	[Event_ActiveTriggerstringTips]
+	ATEn=0
+	[Event_BasicHotstring]
+	OHTtEn=1
+	OHTD=2000
+	OHTP=1
+	OHSEn=0
+	OHSF=500
+	OHSD=250
+	[Event_MenuHotstring]
+	MHMP=1
+	MHSEn=1
+	MHSF=400
+	MHSD=250
+	[Event_UndoHotstring]
+	UHTtEn=1
+	UHTD=2000
+	UHTP=1
+	UHSEn=0
+	UHSF=600
+	UHSD=250
+	[Event_TriggerstringTips]
+	TTTtEn=1
+	TTTD=2000
+	TTTP=1
+	TipsSortAlphabetically=1
+	TipsSortByLength=1
+	TipsAreShownAfterNoOfCharacters=1
+	MNTT=20
+	TTCn=2
+	[StaticTriggerstringHotstring]
+	SWPosX=
+	SWPosY=
+	SWPosW=
+	SWPosH=
+	[GraphicalUserInterface]
+	Language=English.txt
+	MainWindowPosX=
+	MainWindowPosY=
+	MainWindowPosW=
+	MainWindowPosH=
+	Sandbox=1
+	WhichGui=HS3
+	GuiFontColor=Black
+	GuiFontColorHighlighted=Blue
+	GuiWindowColor=Default
+	GuiControlColor=Default
+	GuiSizeOfMarginX=10
+	GuiSizeOfMarginY=10
+	GuiFontType=Calibri
+	GuiFontSize=10
+	GuiReload=
+	GuiMaximized=0
+	[EndChars]
+	Apostrophe '=1
+	Backslash \=1
+	Closing Curly Bracket }=1
+	Closing Round Bracket )=1
+	Closing Square Bracket ]=1
+	Colon :=1
+	Comma ,=1
+	Dot .=1
+	Enter=1
+	Exclamation Mark !=1
+	Minus -=1
+	Opening Curly Bracket {=1
+	Opening Round Bracket (=1
+	Opening Square Bracket [=1
+	Question Mark ?=1
+	Quote ""=1
+	Semicolon ;=1
+	Slash /=0
+	Space=1
+	Tab=1
+	Underscore _=1
+	[LoadLibraries]
+	[ShowTipsLibraries]
+	)"
+
+;#c*/ commercial version only end
+		
+;#f/* free version only beginning
+	; ConfigIni := "			
+	; 	( LTrim
+	; 	[Configuration]
+	; 	ClipBoardPasteDelay=300
+	; 	HotstringUndo=1
+	; 	ShowIntro=1
+	; 	CheckRepo=0
+	; 	DownloadRepo=0
+	; 	HK_Main=#^h
+	; 	HK_IntoEdit=~^#c
+	; 	HK_UndoLH=~#z
+	; 	HK_ToggleTt=none
+	; 	THLog=0
+	; 	HADConfig=
+	; 	HADL=
+	; 	[EvStyle_TT]
+	; 	TTBackgroundColor=white
+	; 	TTBackgroundColorCustom=
+	; 	TTTypefaceColor=black
+	; 	TTTypefaceColorCustom=
+	; 	TTTypefaceFont=Consolas
+	; 	TTTypefaceSize=10
+	; 	[EvStyle_HM]
+	; 	HMBackgroundColor=white
+	; 	HMBackgroundColorCustom=
+	; 	HMTypefaceColorCustom=
+	; 	HMTypefaceColor=black
+	; 	HMTypefaceFont=Consolas
+	; 	HMTypefaceSize=10
+	; 	[EvStyle_AT]
+	; 	ATBackgroundColor=green
+	; 	ATBackgroundColorCustom=
+	; 	ATTypefaceColorCustom=
+	; 	ATTypefaceColor=black
+	; 	ATTypefaceFont=Consolas
+	; 	ATTypefaceSize=10
+	; 	[EvStyle_HT]
+	; 	HTBackgroundColor=green
+	; 	HTBackgroundColorCustom=
+	; 	HTTypefaceColorCustom=
+	; 	HTTypefaceColor=black
+	; 	HTTypefaceFont=Consolas
+	; 	HTTypefaceSize=11
+	; 	[EvStyle_UH]
+	; 	UHBackgroundColor=green
+	; 	UHBackgroundColorCustom=
+	; 	UHTypefaceColorCustom=
+	; 	UHTypefaceColor=black
+	; 	UHTypefaceFont=Consolas
+	; 	UHTypefaceSize=11
+	; 	[Event_ActiveTriggerstringTips]
+	; 	ATEn=0
+	; 	[Event_BasicHotstring]
+	; 	OHTtEn=1
+	; 	OHTD=2000
+	; 	OHTP=1
+	; 	OHSEn=0
+	; 	OHSF=500
+	; 	OHSD=250
+	; 	[Event_MenuHotstring]
+	; 	MHMP=1
+	; 	MHSEn=1
+	; 	MHSF=400
+	; 	MHSD=250
+	; 	[Event_UndoHotstring]
+	; 	UHTtEn=1
+	; 	UHTD=2000
+	; 	UHTP=1
+	; 	UHSEn=0
+	; 	UHSF=600
+	; 	UHSD=250
+	; 	[Event_TriggerstringTips]
+	; 	TTTtEn=1
+	; 	TTTD=2000
+	; 	TTTP=1
+	; 	TipsSortAlphabetically=1
+	; 	TipsSortByLength=1
+	; 	TipsAreShownAfterNoOfCharacters=1
+	; 	MNTT=20
+	; 	TTCn=2
+	; 	[StaticTriggerstringHotstring]
+	; 	SWPosX=
+	; 	SWPosY=
+	; 	SWPosW=
+	; 	SWPosH=
+	; 	[GraphicalUserInterface]
+	; 	Language=English.txt
+	; 	MainWindowPosX=
+	; 	MainWindowPosY=
+	; 	MainWindowPosW=
+	; 	MainWindowPosH=
+	; 	Sandbox=1
+	; 	WhichGui=HS3
+	; 	GuiFontColor=Black
+	; 	GuiFontColorHighlighted=Blue
+	; 	GuiWindowColor=Default
+	; 	GuiControlColor=Default
+	; 	GuiSizeOfMarginX=10
+	; 	GuiSizeOfMarginY=10
+	; 	GuiFontType=Calibri
+	; 	GuiFontSize=10
+	; 	GuiReload=
+	; 	GuiMaximized=0
+	; 	[EndChars]
+	; 	Apostrophe '=1
+	; 	Backslash \=1
+	; 	Closing Curly Bracket }=1
+	; 	Closing Round Bracket )=1
+	; 	Closing Square Bracket ]=1
+	; 	Colon :=1
+	; 	Comma ,=1
+	; 	Dot .=1
+	; 	Enter=1
+	; 	Exclamation Mark !=1
+	; 	Minus -=1
+	; 	Opening Curly Bracket {=1
+	; 	Opening Round Bracket (=1
+	; 	Opening Square Bracket [=1
+	; 	Question Mark ?=1
+	; 	Quote ""=1
+	; 	Semicolon ;=1
+	; 	Slash /=0
+	; 	Space=1
+	; 	Tab=1
+	; 	Underscore _=1
+	; 	[LoadLibraries]
+	; 	[ShowTipsLibraries]
+	; 	)"
+;#f*/ free version only end
+
 	if (params[1])
 	{
 		Switch params[1]
@@ -12928,7 +13056,7 @@ License												= License
 License activation unsuccessful.							= License activation unsuccessful.
 License activated										= License activated
 License details										= License details
-License key was expired									= License key was expired
+License key was										= License key was
 License key was validated								= License key was validated
 License ID											= License ID
 License instance										= License instance
@@ -13110,6 +13238,7 @@ Sorry, your license is no longer active.					= Sorry, your license is no longer 
 Space												= Space
 Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
 Standard executable (Ahk2Exe.exe)							= Standard executable (Ahk2Exe.exe)
+started												= started
 Start-up time											= Start-up time
 Static hotstrings 										= &Static hotstrings
 Static triggerstring / hotstring menus						= Static triggerstring / hotstring menus
