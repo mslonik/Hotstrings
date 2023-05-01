@@ -25,7 +25,7 @@ CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in t
 ; - - - - - - - - - - - - - - - - - - - - - - - E X E  CONVERSION / INSTALLATOR S E C T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.13"	;starting on 2023-04-23 (Sunday). 
+global AppVersion				:= "3.6.14"	;starting on 2023-05-01 (Monday). 
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -472,8 +472,11 @@ if (ini_GuiReload) and (v_SilentMode != "l")
 	F_GUIinit()
 
 ;#c/* commercial only beginning
-F_CheckCommercialConditions()			;check Lemon squeezy
-SetTimer, F_CheckCommTime, % 1000 * 3600	;1 hour = 1000 ms * 3 600
+if (v_LicenseType = "commercial") and (v_ValidTill != "inf")
+{
+	F_CheckCommercialConditions()			;check Lemon squeezy
+	SetTimer, F_CheckCommTime, % 1000 * 3600	;1 hour = 1000 ms * 3 600
+}
 ;#c*/ commercial only end
 
 AppStartTime := A_Now	;Date and time math can be performed with EnvAdd and EnvSub. Also, FormatTime can format the date and/or time according to your locale or preferences.
