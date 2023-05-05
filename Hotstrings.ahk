@@ -926,11 +926,10 @@ F_LicenseHttpRequest(WhatRequest, LicenseKey, InstanceId, WhatInstance)	; WhatRe
 		oHTTP.SetRequestHeader("Accept", header1)
 		oHTTP.SetRequestHeader("Content-Type", header2)
 		oHTTP.Send("license_key=" . LicenseKey . "&" . WhatInstance . "=" . InstanceId)
+		responseText := oHTTP.ResponseText
 	}
 
-	responseText := oHTTP.ResponseText
-
-	Loop, Parse, % oHTTP.ResponseText, {}, `, ;comma must be escaped by "`"
+	Loop, Parse, % responseText, {}, `, ;comma must be escaped by "`"
 	{
 		if (A_LoopField)
 		{
@@ -2804,17 +2803,17 @@ F_OneCharPressed(ih, Char)
 	Critical, On
 	static	f_ExpEndChar 	:= false	;when triggerstring contains EndChars, e.g. two words separated with space
 		,	f_LastTip 	:= false	;this flag is set if in next run of this function is expected that EndChar will be pressed by user
-	local	InputLength 	:= 0		;input length of v_InputString global variable
+	local	InputLength 	:= 0		;
 		,	f_EndCharDetected := false	;flag set when EndChar is detected
 		,	index := 0, value := ""	;usual set of variables applicable for "for" function
 		, 	BeforeLast 	:= ""	;not last, but one before last character
-		,	LastChar		:= ""	;last character
+		,	LastChar		:= ""	;last character of input buffer (v_InputString)
+		,	TwoLastChar	:= ""	;two last characters of input buffer (v_InputString)
 
 	if (WinActive("ahk_id" TT_C4_Hwnd))
 		return
 
 	; OutputDebug, % "1)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "Char:" . Char . "|" . "`n"
-	
 	if (v_InputString = "")
 	{
 		v_Qinput 		:= ""
@@ -2825,21 +2824,23 @@ F_OneCharPressed(ih, Char)
 	if (v_Qinput)
 		v_Qinput .= Char
 
-	InputLength := StrLen(v_InputString)
+	InputLength := StrLen(v_InputString)		;after concatenation
 	if (InputLength > 1)
 	{
-		BeforeLast := SubStr(SubStr(v_InputString, -1), 1, 1)	;two last chars and then first char
+		TwoLastChar := SubStr(v_InputString, -1)
+	,	BeforeLast := SubStr(TwoLastChar, 1, 1)	;two last chars and then first char
 		if (InStr(HotstringEndChars, BeforeLast))
 			f_EndCharDetected := true
 		else
 			f_EndCharDetected := false
-		; OutputDebug, % "BeforeLast:" . BeforeLast . "|" A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
 	}
-
+	; OutputDebug, % "BL:" . BeforeLast . "|" A_Space . "f_ECD:" . f_EndCharDetected . "|" . "`n"
 	if (!f_LastTip) and (f_EndCharDetected)	;I'm not sure of that ; if (!f_LastTip) and (f_EndCharDetected)
 	{
 		v_InputString := Char 
 	}
+	; OutputDebug, % "IS after trim:" . v_InputString . "|" . "`n" 
+	
 	if (f_LastTip) and (f_EndCharDetected) and (!f_ExpEndChar)
 	{
 		f_LastTip 	:= false
@@ -2847,11 +2848,12 @@ F_OneCharPressed(ih, Char)
 	}
 
 	; OutputDebug, % "2)v_IS:" . v_InputString . "|" . A_Space 
-	; 			. "IL:" 	. InputLength . A_Space 
+	; 			. "IL:" 	. EndNoChar . A_Space 
 	; 			. "f_LT:" . f_LastTip . A_Space 
 	; 			. "f_EC:" . f_EndCharDetected . A_Space 
 	; 			. "f_EE:" . f_ExpEndChar . A_Space 
-	; 			. "v_QI:" . v_Qinput . "|" . "`n"
+	; 			. "v_QI:" . v_Qinput . "|" 
+	;			. "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -2860,7 +2862,7 @@ F_OneCharPressed(ih, Char)
 			F_PTTT(v_InputString)	;Variant when new sequence starts from EndChar.
 		else
 			F_PTTTQ(v_Qinput)
-		; OutputDebug, % "F_DestroyTriggerstringTips" . "`n"
+		; OutputDebug, % "v_Qinput:" . v_Qinput . "|" . "f_ExpEndChar:" . f_ExpEndChar . "`n"
 		F_DestroyTriggerstringTips(ini_TTCn)
 		if (a_Tips.Count())	;if tips are available display then
 		{
@@ -2869,25 +2871,21 @@ F_OneCharPressed(ih, Char)
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			if (v_Qinput)
 			{
-				InputLength := StrLen(v_Qinput)
-				if (InStr(HotstringEndChars, SubStr(v_Qinput, 0)))	;if last char is EndChar and existed triggerstring tip, then in next iteration v_InputString should not be trimmed or erased, so f_ExpEndChar is set
-					f_ExpEndChar := true
-				else
+				if (InStr(HotstringEndChars, SubStr(v_Qinput, 0)))	;if last char of v_Qinput is EndChar and existed triggerstring tip, then in next iteration v_InputString should not be trimmed or erased, so f_ExpEndChar is set
+					; f_ExpEndChar := true
+				; else
 					f_ExpEndChar := false
 			}
 			else
 			{
-				InputLength 	:= StrLen(v_InputString)
-				if (InStr(HotstringEndChars, SubStr(v_InputString, 0)))	;if last char is EndChar and existed triggerstring tip, then in next iteration v_InputString should not be trimmed or erased, so f_ExpEndChar is set
+				if (InStr(HotstringEndChars, SubStr(v_InputString, 0)))	;if last char of v_InputString is EndChar and existed triggerstring tip, then in next iteration v_InputString should not be trimmed or erased, so f_ExpEndChar is set
 					f_ExpEndChar := true
 				else
 					f_ExpEndChar := false
 			}
-			; OutputDebug, % "IL:" . A_Space . InputLength . "`n"
 			
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD
-
 			; OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_EE:" . f_ExpEndChar . "`n"
 		}
 	}
@@ -3006,7 +3004,8 @@ F_BackspaceProcessing(ih, VK, SC)	;this function is run whenever Backspace key o
 	; OutputDebug, % "v_IS BS:" . v_InputString . "|" . A_Space . "IsCritical:" . A_Space . A_IsCritical . "`n"
 	if (ini_TTTtEn) and (v_InputString)
 	{
-		F_PTTT(v_InputString)
+		if (WhatWasUp = "Backspace")
+			F_PTTT(v_InputString)
 		if (a_Tips.Count())
 		{
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
@@ -8497,11 +8496,17 @@ F_ShortDefB1_SaveHotkey()
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
 		if (ini_HK_Main != "none")
 		{
-			Hotkey, If, v_SilentMode != "l" 
+			Hotkey, If, v_SilentMode != "l"
 			Hotkey, % OldHotkey, F_GUIInit, Off
 			Hotkey, % ini_HK_Main, F_GUIInit, On
 			Hotkey, If				;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 		}
+		else
+		{
+			Hotkey, If, v_SilentMode != "l"
+			Hotkey, % OldHotkey, F_GUIInit, Off
+			Hotkey, If				;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
+		}	
 		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Call Graphical User Interface"] . "`t" . F_ParseHotkey(ini_HK_Main, 	"space")
 	}
 
@@ -8518,38 +8523,37 @@ F_ShortDefB1_SaveHotkey()
 			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
 			Hotkey, IfWinExist			;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 		}
+		else
+		{
+			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
+			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
+			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			Hotkey, IfWinExist			;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
+		}
 		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Copy clipboard content into ""Enter hotstring"""] . "`t" . F_ParseHotkey(ini_HK_IntoEdit, "space")
 	}
 
 	if (InStr(A_ThisMenuitem, TransA["Undo the last hotstring"]))
 	{
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH, "space")
-		if (ini_HotstringUndo)
+		; OutputDebug, % "ini_HK_UndoLH:" . ini_HK_UndoLH . "`n"
+		if (ini_HK_UndoLH != "none")
 		{
-			if (ini_HK_UndoLH != "none")
-			{
-				; OutputDebug, % "OldHotkey:" . A_Space . OldHotkey . "`n"
-				Hotkey, % OldHotkey, 	F_Undo, Off
-				Hotkey, % ini_HK_UndoLH, F_Undo, On
-			}
+			Hotkey, % OldHotkey, 	F_Undo, Off
+			Hotkey, % ini_HK_UndoLH, F_Undo, On
 		}
 		else
-		{
-			; OutputDebug, % "OldHotkey:" . A_Space . OldHotkey . "`n"
-			Hotkey, % OldHotkey, 	F_Undo, UseErrorLevel Off
-			if (ini_HK_UndoLH != "none")
-				Hotkey, % ini_HK_UndoLH, F_Undo, UseErrorLevel Off
-		}
+			Hotkey, % OldHotkey, 	F_Undo, Off
 		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Undo the last hotstring"] . "`t" . F_ParseHotkey(ini_HK_UndoLH, 	"space")
 	}
 
 	if (InStr(A_ThisMenuitem, TransA["Toggle triggerstring tips"]))
 	{
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_ToggleTt, "space")
-		if (OldHotkey != "none")
-			Hotkey, % OldHotkey, F_ToggleTt, Off
 		if (ini_HK_ToggleTt != "none")
 		{
+			Hotkey, % OldHotkey, F_ToggleTt, Off
 			Hotkey, % ini_HK_ToggleTt, F_ToggleTt, On
 			F_UpdateStateOfLockKeys(ini_HK_ToggleTt, ini_TTTtEn)
 			Switch ini_HK_ToggleTt
@@ -8558,6 +8562,16 @@ F_ShortDefB1_SaveHotkey()
 				Case "CapsLock":	SetCapsLockState, 	AlwaysOff
 				Case "NumLock":	SetNumLockState, 	AlwaysOff
 			}
+		}
+		else
+		{
+			Hotkey, % OldHotkey, F_ToggleTt, Off
+			Switch OldHotkey
+			{
+				Case "ScrollLock":	SetScrollLockState,	;If last parameter is omitted, the AlwaysOn/Off attribute of the key is removed (if present). 
+				Case "CapsLock":	SetCapsLockState,	;If last parameter is omitted, the AlwaysOn/Off attribute of the key is removed (if present). 
+				Case "NumLock":	SetNumLockState,	;If last parameter is omitted, the AlwaysOn/Off attribute of the key is removed (if present). 
+			}	
 		}
 		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Toggle triggerstring tips"] . "`t" . F_ParseHotkey(ini_HK_ToggleTt, "space")
 	}
@@ -8594,7 +8608,7 @@ F_GuiShortDef(ItemName)
 		,Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
 		,NewWinPosX := 0, NewWinPosY := 0
 	
-	OutputDebug, % "ItemName:" . A_Space . ItemName . "`n"
+	; OutputDebug, % "ItemName:" . A_Space . ItemName . "`n"
 	F_GuiShortDef_CreateObjects(ItemName)
 	F_GuiShortDef_DetermineConstraints()
 	
@@ -8814,7 +8828,7 @@ F_Undo()	;turning off of * option requires special conditions.
 	local	TriggerOpt := "", HowManyBackSpaces := 0, HowManyBackSpaces2 := 0
 			,ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey, OrigTriggerstring := "", HowManySpecials := 0
 	
-	; OutputDebug, % "v_UndoTriggerstring:" . v_UndoTriggerstring . A_Space . "v_UndoHotstring:" . v_UndoHotstring . "`n"
+	OutputDebug, % "v_UndoTriggerstring:" . v_UndoTriggerstring . "|" . A_Space . "v_UndoHotstring:" . v_UndoHotstring . "|" . "`n"
 	if (v_UndoTriggerstring)
 	{	
 		if (!(InStr(v_Options, "*")) and !(InStr(v_Options, "O")))
@@ -9056,9 +9070,11 @@ F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 			}
 		}
 
-		; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . A_Space . "f_FirstPart:" . f_FirstPart . "`n"
 		if (!f_FirstPart) and (InStrLen > 1)
+		{
+			; OutputDebug, % A_ThisFunc . A_Space . "InStrLen:" . InStrLen . "|" . A_Space . "f_FirstPart:" . f_FirstPart . A_Space . "v_Qinput:" . LastChar . "|" . "`n"
 			F_PTTTQ(v_Qinput := LastChar)
+		}
 	}
 	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . A_Space . "E" . "`n"
 	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
@@ -9073,7 +9089,6 @@ F_PTTTQ(string) ;Function_ Prepare Triggerstring Tips Tables Question mark (rela
 		,	SecSeparatorPos	:= 0
 		,	Qlength			:= StrLen(string)
 
-	; OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
 	; OutputDebug, % A_ThisFunc . A_Space . "B" . A_Space . "string:" . string . "`n"
 	if (StrLen(string) > ini_TASAC - 1)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{
@@ -9126,11 +9141,15 @@ F_PTTTQ(string) ;Function_ Prepare Triggerstring Tips Tables Question mark (rela
 	}
 	if (a_Tips.Count() = 0) and (Qlength > 1)
 	{
+		; OutputDebug, % A_ThisFunc . A_Space . "1 branch" . "`n"
 		string := SubStr(string, 2)	;all but first
 		F_PTTTQ(v_Qinput := string)	;recursive call
 	}
 	if (a_Tips.Count() = 0) and (Qlength = 1)
+	{
 		v_Qinput := ""
+		; OutputDebug, % A_ThisFunc . A_Space . "2 branch" . "`n"
+	}
 	; OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "string:" . string . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
