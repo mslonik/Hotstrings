@@ -469,7 +469,7 @@ F_LoadGUIstatic()
 if (ini_TTCn = 4)	;static triggerstring / hotstring GUI 
 	F_GuiTrigTipsMenuDefC4()
 if (ini_GuiReload) and (v_SilentMode != "l")
-	F_GUIinit()
+	F_GUIInit()
 
 ;#c/* commercial only beginning
 if (v_LicenseType = "commercial") and (v_ValidTill != "inf")
@@ -497,17 +497,11 @@ Critical, Off
 		SetTimer, TurnOff_Ttt, Off
 		; OutputDebug, % "WinExist(ahk_id TT_C1_Hwnd) or WinExist(ahk_id TT_C2_Hwnd) or WinExist(ahk_id TT_C3_Hwnd)" . "`n"
 		F_TTMenu_Keyboard()
-		return
+	return
+
 	~LButton::			;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected → F_TTMenu_Mouse().
 		F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_Mouse is lower than this "interrupt"
-		return
-	; ~LWin::
-	; ~RWin::
-	; ~Control::	;pressing of any modifier stops timer (triggerstring tips menu will not dissapear if time is for Triggerstring tips is limited)
-	; ~Alt::
-	; ~Shift::
-	; 	SetTimer, TurnOff_Ttt, Off
-	; 	return
+	return
 ;#c/* commercial only beginning		
 	^?::
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Shortcuts available for active triggerstring tips:"] . "`n`n" 
@@ -528,7 +522,7 @@ Critical, Off
 			. "`n"
 			. TransA["Close and interrupt"] . ":" . "`n"
 			. "Esc"
-		return
+	return
 ;#c*/ commercial only end		
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -536,32 +530,32 @@ Critical, Off
 	^f::
 	^s::
 	F3::		;To disable all hotstrings definitions within search window.
-		Suspend		;Any hotkey/hotstring subroutine whose very first line is Suspend (except Suspend On) will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
+		Suspend, Permit		;Any hotkey/hotstring subroutine whose very first line is Suspend, Permit  will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		HS3SearchGuiEscape()
-		return	;end of this thread
+	return	;end of this thread
 	Down::
-		Suspend		;Any hotkey/hotstring subroutine whose very first line is Suspend (except Suspend On) will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
+		Suspend, Permit		;Any hotkey/hotstring subroutine whose very first line is Suspend, Permit will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		F_DestroyTriggerstringTips(ini_TTCn)
 		F_HS3Search_Down()
-		return
+	return
 	Up::
-		Suspend		;Any hotkey/hotstring subroutine whose very first line is Suspend (except Suspend On) will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
+		Suspend, Permit		;Any hotkey/hotstring subroutine whose very first line is Suspend, Permit will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		F_DestroyTriggerstringTips(ini_TTCn)
 		F_HS3Search_Up()
-		return
+	return
 	Right::
-		Suspend		;Any hotkey/hotstring subroutine whose very first line is Suspend (except Suspend On) will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
+		Suspend, Permit		;Any hotkey/hotstring subroutine whose very first line is Suspend, Permit will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		F_DestroyTriggerstringTips(ini_TTCn)
 		F_HS3SearchRight()
-		return
+	return
 	Left::
-		Suspend		;Any hotkey/hotstring subroutine whose very first line is Suspend (except Suspend On) will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
+		Suspend, Permit		;Any hotkey/hotstring subroutine whose very first line is Suspend, Permit will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		F_DestroyTriggerstringTips(ini_TTCn)
 		F_HS3SearchLeft()
-		return
+	return
 	Tab::
-		Suspend		;Any hotkey/hotstring subroutine whose very first line is Suspend (except Suspend On) will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
-		return
+		Suspend, Permit		;Any hotkey/hotstring subroutine whose very first line is Suspend, Permit will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
+	return
 #If
 
 
@@ -569,17 +563,17 @@ Critical, Off
 	F7::
 		HSDelGuiClose()	;Gui event!
 		HSDelGuiEscape()	;Gui event!
-		return
+	return
 #If
 
 #If WinActive("ahk_id" HS3GuiHwnd) or WinActive("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows are active at the moment. 
 	F1::	;new thread starts here
 		F_GuiAboutLink1()
-		return
+	return
 
 	^F1:: ;new thread starts here
 		F_GuiAboutLink2()
-		return
+	return
 
 	F2:: ;new thread starts here
 		Switch F_WhichGui()
@@ -602,22 +596,22 @@ Critical, Off
 		}
 	^s::	;new thread starts here
 		F_SaveGUIPos()
-		return
+	return
 
 	^f::
 	F3:: ;new thread starts here
-		Suspend		;Any hotkey/hotstring subroutine whose very first line is Suspend (except Suspend On) will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
+		Suspend, Permit		;Any hotkey/hotstring subroutine whose very first line is Suspend, Permit will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		F_Searching()	;To disable all hotstrings definitions within search window.
-		return
+	return
 
 	F4::	;new thread starts here
 		F_ToggleRightColumn()
-		return
+	return
 
 	F5::	;new thread starts here
 		F_WhichGui()
 		F_Clear()
-		return
+	return
 
 	F6::	;new thread starts here
 		if (!ini_Sandbox) or (A_Gui = "HS4")
@@ -625,49 +619,42 @@ Critical, Off
 		else
 		{
 			GuiControl, Focus, % IdEdit10
-
 		}
-		return
+	return
 
 	F7:: ;new thread starts here
 		Gui, % F_WhichGui() . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 		F_GuiHSdelay()
-		return
+	return
 
 	F8::	;new thread starts here
 	~Del::
-		; Switch F_WhichGui()
-		; {
-			; Case "HS3":
-				; FocusedControl2 := ""
-				GuiControlGet, FocusedControl, HS3: Focus
-				; OutputDebug, % "FocusedControl2:" . FocusedControl2 . "`n"
-				if (FocusedControl = "SysListView321")
-					F_DeleteHotstring()
-				return
-			; Case "HS4": return
-		; }
+		GuiControlGet, FocusedControl, HS3: Focus
+		; OutputDebug, % "FocusedControl2:" . FocusedControl2 . "`n"
+		if (FocusedControl = "SysListView321")
+			F_DeleteHotstring()
+	return
 
 	F9::	;new thread starts here
 		F_AddHotstring()
 		v_InputString := ""	;in order to reset internal recognizer and let triggerstring tips to appear
-		return
+	return
 	
 	F10:: ;new thread starts here
-		Suspend	;Any hotkey/hotstring subroutine whose very first line is Suspend (except Suspend On) will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON. This allows suspension to be turned off via such a hotkey.
+		Suspend, Permit	;Any hotkey/hotstring subroutine whose very first line is Suspend, Permit will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON. This allows suspension to be turned off via such a hotkey.
 		F_TraySuspendHotkeys()							;suspend hotstrings
-		return
+	return
 
 	^+r::	;new thread starts here
 		F_ReloadApplication()							;reload into default mode of operation
-		return
+	return
 
 	^F6::	;new thread starts here; only on time of degugging HS3GuiSize will be initiated!
 		F_ToggleSandbox()
-		return
+	return
 	+^s::
 		F_AppStats()									;show application statistics
-		return
+	return
 #If
 
 #If WinActive("ahk_id" MoveLibsHwnd)
@@ -728,7 +715,8 @@ return
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
 	F_DestroyTriggerstringTips(ini_TTCn)
-	return
+return
+
 ~*F1::		;pressed any function key destroy triggerstring tips
 ~*F2::
 ~*F3::
@@ -782,19 +770,19 @@ return
 	if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
 		v_InputString := ""
 	; OutputDebug, % "v_InputString after:" . v_InputString . "|" . "`n"
-	return
+return
 
 ~Control UP::
 	if (A_PriorKey = "LControl") or (A_PriorKey = "RControl")
-		{
-			ToolTip,	;this line is necessary to close tooltips.
-			Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
-			Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
-			F_DestroyTriggerstringTips(ini_TTCn)
-			if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
-				v_InputString := ""
-		}
-	return		
+	{
+		ToolTip,	;this line is necessary to close tooltips.
+		Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
+		Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
+		F_DestroyTriggerstringTips(ini_TTCn)
+		if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
+			v_InputString := ""
+	}
+return		
 
 ~*Esc::	;the only difference in comparison to previous section is that Esc also resets hotstring recognizer.
 	; OutputDebug, % "~Esc:" . "`n"
@@ -805,7 +793,41 @@ return
 	if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
 		v_InputString := ""
 	Hotstring("Reset")
-	return
+return
+
+~*LButton UP::	;if user switches between windows by mouse clicking and e.g. "Search Hotstring" window was active
+	Suspend, Permit	;Suspend, On is set for "Search Hotstrings" window
+	if (WinActive("ahk_id" HS3SearchHwnd))
+		{
+			; OutputDebug, % "A_ThisHotkey:" . A_ThisHotkey . A_Space . "!WinActive(""ahk_id"" HS3GuiHwnd):" . !WinActive("ahk_id" HS3SearchHwnd) . A_Space . "!WinExist(""ahk_id"" HS3SearchHwnd):" . !WinExist("ahk_id" HS3SearchHwnd) . "`n"
+			Suspend, On
+			; OutputDebug, % "S On" . "`n"
+		}	
+		else
+		{
+			Suspend, Off
+			; OutputDebug, % "S Off" . "`n"
+		}	
+return
+	
+~*Enter UP::	;if user switches between windows by keyboard (Alt+Tab or Win+Alt) clicking and e.g. "Search Hotstring" window was active
+~*Alt UP::	;for hotkeys used to switch windows it is important to add "up" modifier. When windows are switched, switch off suspend for hotkeys and hotstrings.
+	Suspend, Permit	;Suspend, On is set for "Search Hotstrings" window
+	; OutputDebug, % "A_ThisHotkey:" . A_ThisHotkey . "`n"
+	Sleep, 100	;100 ms = default value of SetWinDelay; for some reasons SetWinDelay isn't set for WinActive command. A window sometimes needs a period of "rest" after being activated (description copied from SetWinDelay).
+	if (WinActive("ahk_id" HS3SearchHwnd))
+	{
+		Suspend, On
+		; OutputDebug, % "S On" . "`n"
+	}	
+	else
+	{
+		Suspend, Off
+		; OutputDebug, % "S Off" . "`n"
+	}	
+return
+
+
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If WinExist("ahk_id" HMenuAHKHwnd) or WinExist("ahk_id" HMenuCliHwnd)	;MSI or MCL
 	^?::
@@ -1096,7 +1118,7 @@ F_CheckCommercialConditions()
 
 		if (ini_LicenseKey = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 		{
-			F_GUIinit()
+			F_GUIInit()
 			F_GuiEnterLicense_CreateGui()
 			F_GuiEnterLicense_DetermineConstraints()
 			F_GuiEnterLicense()
@@ -3052,7 +3074,7 @@ F_DetermineMonitors()	; Multi monitor environment, initialization of monitor wid
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GUIinit()
+F_GUIInit()
 {
 	global	;assume-global mode
 	local	f_FitsToAnyMonitor := false, key := 0, 		WinX := 0, WinY := 0, WinW := 0, WinH := 0
@@ -8497,7 +8519,8 @@ F_ShortDefB1_SaveHotkey()
 		if (ini_HK_Main != "none")
 		{
 			Hotkey, If, v_SilentMode != "l"
-			Hotkey, % OldHotkey, F_GUIInit, Off
+			if (OldHotkey != "None")
+				Hotkey, % OldHotkey, F_GUIInit, Off
 			Hotkey, % ini_HK_Main, F_GUIInit, On
 			Hotkey, If				;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 		}
@@ -8516,19 +8539,23 @@ F_ShortDefB1_SaveHotkey()
 		if (ini_HK_IntoEdit != "none")
 		{
 			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
-			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			if (OldHotkey != "None")
+				Hotkey, % OldHotkey, F_PasteFromClipboard, Off
 			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
 			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
-			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			if (OldHotkey != "None")
+				Hotkey, % OldHotkey, F_PasteFromClipboard, Off
 			Hotkey, % ini_HK_IntoEdit, F_PasteFromClipboard, On
 			Hotkey, IfWinExist			;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 		}
 		else
 		{
 			Hotkey, IfWinExist, % "ahk_id" HS3GuiHwnd
-			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			if (OldHotkey != "None")
+				Hotkey, % OldHotkey, F_PasteFromClipboard, Off
 			Hotkey, IfWinExist, % "ahk_id" HS4GuiHwnd
-			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
+			if (OldHotkey != "None")
+				Hotkey, % OldHotkey, F_PasteFromClipboard, Off
 			Hotkey, IfWinExist			;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 		}
 		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Copy clipboard content into ""Enter hotstring"""] . "`t" . F_ParseHotkey(ini_HK_IntoEdit, "space")
@@ -8540,11 +8567,15 @@ F_ShortDefB1_SaveHotkey()
 		; OutputDebug, % "ini_HK_UndoLH:" . ini_HK_UndoLH . "`n"
 		if (ini_HK_UndoLH != "none")
 		{
-			Hotkey, % OldHotkey, 	F_Undo, Off
+			if (OldHotkey != "None")
+				Hotkey, % OldHotkey, 	F_Undo, Off
 			Hotkey, % ini_HK_UndoLH, F_Undo, On
 		}
 		else
-			Hotkey, % OldHotkey, 	F_Undo, Off
+		{
+			if (OldHotkey != "None")
+				Hotkey, % OldHotkey, 	F_Undo, Off
+		}	
 		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Undo the last hotstring"] . "`t" . F_ParseHotkey(ini_HK_UndoLH, 	"space")
 	}
 
@@ -12188,7 +12219,7 @@ F_LoadGUIPos()
 ,	ini_ListViewPos 	:= {"X": 0, "Y": 0, "W": 0, "H": 0} ;at the moment associative arrays are not supported in AutoHotkey as parameters of Commands
 ,	ini_WhichGui 		:= ""
 ,	ini_Sandbox 		:= true
-	;after loading values (empty by default) those parameters are further used in F_GUIinit()
+	;after loading values (empty by default) those parameters are further used in F_GUIInit()
 	IniRead, ini_ReadTemp, 					% ini_HADConfig, GraphicalUserInterface, MainWindowPosX, 	% A_Space	;empty by default
 	ini_HS3WindoPos.X := ini_ReadTemp
 	IniRead, ini_ReadTemp, 					% ini_HADConfig, GraphicalUserInterface, MainWindowPosY, 	% A_Space	;empty by default
