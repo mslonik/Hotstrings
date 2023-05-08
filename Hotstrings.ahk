@@ -82,7 +82,18 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		v_Qinput				:= "" 		; to store substring of v_InputString related to possible question mark (inside) option
 ,		c_MsgBoxIconError		:= 16		;constant, MsgBox icon hand (stop/error)
 ,		c_MsgBoxIconExclamation	:= 48		;constant, MsgBox icon exclamation
+;#f/* free version only beginning
+; ,		v_LicenseType			:= "free"		;"commercial" or "free"
+;#f*/ free version only end
+;#c/* commercial only beginning
 ,		v_LicenseType			:= "commercial"		;"commercial" or "free"
+;#c*/ commercial only end
+;#c/* commercial only beginning
+,		v_LicenseName			:= "EULA license"
+;#c*/ commercial only end
+;#f/* free version only beginning
+; ,		v_LicenseName			:= "GNU GPL v3.x license"
+;#f*/ free version only end
 ,		c_xmarg 				:= 10				;pixels, default value (it can be changed by user)
 ,		c_ymarg 				:= 10				;pixels, default value (it can be changed by user)
 ,		c_FontColor			:= "Black"
@@ -92,9 +103,9 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_FontSize 			:= 10 ;points
 ,		c_FontType 			:= "Consolas"
 ,		f_100msRun 			:= false				;global flag: timer is running, 100 ms, for concurrent press of Shift keys
+,		f_WasReset			:= false				;global flag: Shift key memory reset (to reset hotstring recognizer)
 ;#c/* commercial only beginning
 ,		v_ValidTill			:= "inf"				;"inf" for infinity, "limited" for other cases
-,		f_WasReset			:= false				;global flag: Shift key memory reset (to reset hotstring recognizer)
 ,		f_RShiftDown 			:= false
 ,		f_LShiftDown 			:= false
 ,		v_SendFun				:= ""				;last used output function; important for F_Undo
@@ -928,7 +939,9 @@ F_CheckCommTime()
 			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . TransA["License key was validated"] . "." . "`n", % v_LogFileName			
 	}	
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_LicenseHttpRequest(WhatRequest, LicenseKey, InstanceId, WhatInstance)	; WhatRequest = activate / validate / deactivate; WhatInstance = "instance_id=" (validate) or "instance_name" (activate)
 {	;https://docs.lemonsqueezy.com/help/licensing/license-api
 	url 					:= "https://api.lemonsqueezy.com/v1/licenses/"
@@ -970,7 +983,9 @@ F_LicenseHttpRequest(WhatRequest, LicenseKey, InstanceId, WhatInstance)	; WhatRe
 	oHTTP := ""
 	return LicenseArray
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_LicenseDetails()	;dedicated script: LemonAPI.ahk, structure: 
 {
 	global						;assume-global mode of operation
@@ -991,6 +1006,7 @@ F_LicenseDetails()	;dedicated script: LemonAPI.ahk, structure:
 		. TransA["Customer name"] . ":" 		. A_Tab . LicenseInfo.customer_name		. "`n"
 		. TransA["Customer id"] . ":" 		. A_Tab . LicenseInfo.customer_id			. "`n"
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SupportContact()
 {
@@ -1018,8 +1034,8 @@ F_SupportContact()
 			. "The proud Hotstrings team and Maciej Słojewski" . "`n"
 	}
 }
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;#c*/ commercial only end
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SetMinSendLevel()
 {
 	global	;assume-global mode of operation
@@ -1086,7 +1102,9 @@ F_GuiEnterLicense()
 	else
 		Gui, EnterLicense: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["License"]
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_CheckCommercialConditions()
 {
 	global	;assume-global mode of operation
@@ -1176,7 +1194,9 @@ F_CheckCommercialConditions()
 		}
 	}
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_GuiEnterLicense_CreateGui()
 {
 	global ;assume-global mode
@@ -1195,7 +1215,9 @@ F_GuiEnterLicense_CreateGui()
 	Gui, EnterLicense: Add,		Button,  	x0 y0 HwndIdEnterLicenseB1 gF_EnterLicenseB1 Default,			% TransA["OK"]
 	; Gui, MyAbout: Add,		Picture, 	x0 y0 HwndIdAboutPicture w96 h96, 							% AppIcon
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_GuiEnterLicense_DetermineConstraints()
 {
 	global ;assume-global mode
@@ -1223,7 +1245,9 @@ F_GuiEnterLicense_DetermineConstraints()
 ; ,	yNext := OutVarTemp1Y + OutVarTemp1H
 	; GuiControl, Move, % IdAboutPicture, % "x" . xNext . A_Space . "y" . yNext 
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 EnterLicenseGuiClose()
 {
 	global	;assume-global mode of operation
@@ -1238,7 +1262,9 @@ EnterLicenseGuiClose()
 	IfMsgBox, No
 		return true	;If GuiClose is a function, the GUI is hidden by default. The function can prevent this by returning a non-zero integer
 }
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
 F_EnterLicenseB1()
 {
 	global	;assume-global mode of operation
@@ -1880,7 +1906,12 @@ F_AppStats()
 		. TransA["Number of loaded d(t, o, h)"] . A_Tab . A_Tab . v_TotalHotstringCnt . "`n"
 		. TransA["Number of fired hotstrings"]  . A_Tab . A_Tab . v_LogCounter . "`n" 
 		. TransA["Cumulative gain [characters]"] . A_Tab . v_CntCumGain . "`n"
-		. TransA["Logging of d(t, o, h)"] . A_Tab . A_Tab . (ini_THLog ? TransA["yes"] : TransA["no"])
+;#f/* free version only beginning
+		. TransA["Logging of d(t, o, h)"] . A_Tab . A_Tab . TransA["no"]
+;#f*/ free version only end
+;#c/* commercial only beginning
+		. TransA["Logging of d(t, o, h)"] . A_Tab . A_Tab . (ini_THLog ? TransA["yes"] : TransA["no"])	;tu jestem
+;#c*/ commercial only end		
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ToggleTt()
@@ -2965,7 +2996,7 @@ F_100msTimeout()
 	f_100msRun 	:= false
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_CheckIf100ms()
+F_CheckIf100ms()	;To check if defined time elapsed for concurrent Shift keys press (LShift + RShift)
 {
 	global		;assume-global mode of operation
 
@@ -14792,9 +14823,9 @@ F_GuiAbout_CreateObjects()
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT7,									% TransA["AutoHotkey version"] . ":"
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT8,									% A_AhkVersion
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT9,									% TransA["License"] . ":"
-	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT10,									% "EULA" . A_Space . TransA["license"]
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT10,									% v_LicenseName
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT11,									% TransA["License type"] . ":"
-	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT12,									% TransA["commercial"]
+	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT12,									% v_LicenseType
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiAbout_DetermineConstraints()
