@@ -2911,10 +2911,11 @@ F_OneCharPressed(ih, Char)
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
 	{
-		if (v_InputString)
-			F_PTTT(v_InputString)	;Variant when new sequence starts from EndChar.
-		else
+		if (v_Qinput)
 			F_PTTTQ(v_Qinput)
+		else
+			F_PTTT(v_InputString)	;Variant when new sequence starts from EndChar.
+
 		; OutputDebug, % "v_Qinput:" . v_Qinput . "|" . "f_ExpEndChar:" . f_ExpEndChar . "`n"
 		F_DestroyTriggerstringTips(ini_TTCn)
 		if (a_Tips.Count())	;if tips are available display then
@@ -2925,8 +2926,8 @@ F_OneCharPressed(ih, Char)
 			if (v_Qinput)
 			{
 				if (InStr(HotstringEndChars, SubStr(v_Qinput, 0)))	;if last char of v_Qinput is EndChar and existed triggerstring tip, then in next iteration v_InputString should not be trimmed or erased, so f_ExpEndChar is set
-					; f_ExpEndChar := true
-				; else
+					f_ExpEndChar := true
+				else
 					f_ExpEndChar := false
 			}
 			else
@@ -3042,7 +3043,7 @@ F_BackspaceProcessing(ih, VK, SC)	;this function is run whenever Backspace key o
 	Critical, On
 	local	WhatWasUp := GetKeyName(Format("vk{:x}sc{:x}", VK, SC))
 
-	; OutputDebug, % A_ThisFunc . A_Space . "WhatWasUp:" . WhatWasUp . A_Space . "B" . "`n"
+	; OutputDebug, % "Q:" . v_Qinput . "|" . A_Space . "I:" . v_InputString . "|" . "`n"
 	if (f_WasReset)
 	{
 		Hotstring("Reset")
@@ -3052,22 +3053,37 @@ F_BackspaceProcessing(ih, VK, SC)	;this function is run whenever Backspace key o
 		SoundPlay, *16	;future: add option to choose behavior (play sound or not, how long to play sound, what sound) and to define time to wait for reset scenario
 		return
 	}
-	if (WhatWasUp = "Backspace")
-		v_InputString := SubStr(v_InputString, 1, -1)	;whole string except last character
-	; OutputDebug, % "v_IS BS:" . v_InputString . "|" . A_Space . "IsCritical:" . A_Space . A_IsCritical . "`n"
-	if (ini_TTTtEn) and (v_InputString)
+	if (WhatWasUp = "Backspace") and (v_InputString)
 	{
-		if (WhatWasUp = "Backspace")
-			F_PTTT(v_InputString)
+		v_Qinput := SubStr(v_Qinput, 1, -1)
+	,	v_InputString := SubStr(v_InputString, 1, -1)
+	
+		if (ini_TTTtEn) and (v_Qinput)
+			F_PTTTQ(v_Qinput)
+
 		if (a_Tips.Count())
 		{
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			if ((ini_TTTtEn) and (ini_TTTD > 0))
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
 		}
+		if (!v_Qinput)	;if v_InputString = "" = empty
+		{
+			if (ini_TTTtEn) and (v_InputString)
+				F_PTTT(v_InputString)
+
+			if (a_Tips.Count())
+			{
+				F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
+				if ((ini_TTTtEn) and (ini_TTTD > 0))
+					SetTimer, TurnOff_Ttt, % "-" . ini_TTTD ;, 200 ;Priority = 200 to avoid conflicts with other threads 
+			}
+			if (!v_InputString)	;if v_InputString = "" = empty
+				F_DestroyTriggerstringTips(ini_TTCn)
+		}
+		Critical, Off
+		return
 	}
-	if (!v_InputString)	;if v_InputString = "" = empty
-		F_DestroyTriggerstringTips(ini_TTCn)
 
 	if (WhatWasUp = "LShift") 
 	{
@@ -9165,6 +9181,7 @@ F_PTTTQ(string) ;Function_ Prepare Triggerstring Tips Tables Question mark (rela
 		,	SecSeparatorPos	:= InStr(a_Combined[A_Index], "|", false, 1, NoOccurrence)
 			if (QuestionMarkPos) and (QuestionMarkPos < SecSeparatorPos) and (InStr(a_Combined[A_Index], string) = 1)
 			{
+				; OutputDebug, % "string:" . string . "|" . "`n"
 				; OutputDebug, % "InStr(a_Combined[A_Index], string) = 1:" . a_Combined[A_Index] . "`n"
 				Switch ini_TTCn
 				{
