@@ -9612,7 +9612,8 @@ F_AddHotstring()
 			Try
 				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_SimpleOutput").bind(vHotstring, true, SendFun), true)
 			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
+					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . NewOptions . ":" . vTriggerstring . "," . A_Space . "func(""SimpleOutput"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . v_EnDis . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
@@ -9622,7 +9623,8 @@ F_AddHotstring()
 			Try
 				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_HMenu_Output").bind(vHotstring, true, SendFun), true)
 			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
+					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . true . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
@@ -9635,7 +9637,8 @@ F_AddHotstring()
 			Try
 				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_SimpleOutput").bind(vHotstring, false, SendFun), true)
 			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
+					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_SimpleOutput"").bind(" . vHotstring . "," . A_Space . false . "," . A_Space . SendFun . ")," . A_Space . true . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
@@ -9645,7 +9648,8 @@ F_AddHotstring()
 			Try
 				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_HMenu_Output").bind(vHotstring, false, SendFun), true)
 			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
+					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . vHotstring . "," . A_Space . false . "," . A_Space . SendFun . ")," . A_Space . true . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
@@ -9760,6 +9764,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 
 	IfMsgBox, Yes
 	{
+		FoundTriggerstring := F_ConvertEscapeSequences(FoundTriggerstring)
 		if (OldEnDis = "Dis")	;if old definition is disabled, do not try to change Hotstring definition. Change only definition parameters.
 			return, "Yes"
 		if (InStr(OldOptions, "*") and !InStr(NewOptions,"*"))
@@ -9773,7 +9778,8 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 		Try
 			Hotstring(":" . OldOptions . ":" . FoundTriggerstring, , "Off")
 		Catch
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
+				. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 				. "Hotstring(:" . OldOptions . ":" . FoundTriggerstring . "," . A_Space . "Off" . ")"
 				. "`n`n" . TransA["Library name:"] . A_Tab . Library
 
@@ -9790,7 +9796,8 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 				Try
 					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_SimpleOutput").bind(TextInsert, true, SendFun), OnOffToggle)
 				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
+						. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
 						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
 			}
@@ -9800,7 +9807,8 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 				Try
 					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_HMenu_Output").bind(TextInsert, true, SendFun), OnOffToggle)
 				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
+						. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_HMenu_Output"").bind(" . TextInsert . "," . A_Space . Oflag . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
 						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
 			}
@@ -9813,7 +9821,8 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 				Try
 					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_SimpleOutput").bind(TextInsert, false, SendFun), OnOffToggle)
 				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
+						. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . v_SendFun . ")," . A_Space . OnOffToggle . ")"
 						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
 			}
@@ -9823,7 +9832,8 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 				Try
 					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_HMenu_Output").bind(TextInsert, false, SendFun), OnOffToggle)
 				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n"
+						 . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_HMenu_Output"").bind(" . TextInsert . "," . A_Space . Oflag . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
 						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
 			}
@@ -10935,7 +10945,7 @@ F_DeleteHotstring()
 	LV_GetText(EnDis,			SelectedRow, 1)	;enabled or disabled definition
 	LV_GetText(hotstring, 		SelectedRow, 5)
 	MsgBox, % 256 + 64 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Selected definition d(t, o, h) will be deleted. Do you want to proceed?"] . "`n`n"
-		. TransA["Triggerstring"] . ":" 	. A_Space . triggerstring . "`n" 
+		. TransA["triggerstring"] . ":" 	. A_Space . triggerstring . "`n" 
 		. TransA["options"] . ":" 		. A_Space . options . "`n"
 		. TransA["hotstring"] . ":" 		. A_Space . hotstring	. "`n`n" 
 		. TransA["If you remove one of the definitions which was multiplied (e.g. duplicated), none of definitions will be active. Therefore It is suggested in order to to enable the second one to reload the application."]
@@ -10960,6 +10970,7 @@ F_DeleteHotstring()
 	;In order to switch off, some options have to run in "reversed" state:
 	if (EnDis = "En")	;only if definition is enabled, at first try to disable it (if it is disabled, just delete it)
 	{
+		triggerstring := F_ConvertEscapeSequences(triggerstring)
 		if (InStr(options, "*"))
 			options := StrReplace(options, "*", "*0")
 		if (InStr(options, "B0"))
@@ -10971,11 +10982,11 @@ F_DeleteHotstring()
 		Try
 			Hotstring(":" . options . ":" . triggerstring, , "Off")	;if duplicated definition exists, only one is active. As a consequence if one is removed, the second one is not activated automatically: none is enabled anymore till application is restarted.
 		Catch
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % "Function:" . A_ThisFunc . "`n`n" 
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n`n" 
 				. TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
-				. TransA["Triggerstring"] . ":" 	. A_Space . v_Triggerstring . "`n" 
+				. TransA["riggerstring"] . ":" 	. A_Space . triggerstring . "`n" 
 				. TransA["options"] . ":" 		. A_Space . options . "`n" 
-				. TransA["hotstring"] . ":"		. A_Space . triggerstring . "`n"
+				. TransA["hotstring"] . ":"		. A_Space . hotstring . "`n"
 				. TransA["Library name:"] 		. A_Space . v_SelectHotstringLibrary 
 				, 10	;10 s timeout
 	}
@@ -11378,6 +11389,7 @@ F_SelectLibrary()
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 {
+	global	;assume global mode of operation
 	Critical, On
 	; OutputDebug, % "A_ThisFunc:" . A_Space . A_ThisFunc . A_Tab . "A_GuiEvent:" . A_Space . A_GuiEvent . A_Tab . "A_GuiControl:" . A_Space . A_GuiControl . A_Tab . "A_EventInfo:" . A_Space . A_EventInfo . A_Tab . "ErrorLevel:" . A_Space . ErrorLevel . "`n"
 	Switch A_GuiEvent
@@ -11385,7 +11397,9 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 		Default:
 			Critical, Off
 			return
-		Case "Normal":		F_LV1_CopyContentToHS3()
+		Case "Normal", "C":		
+			F_LV1_CopyContentToHS3()
+			GuiControl, Focus, % IdListView1
 	}
 	Critical, Off
 }	
@@ -13099,6 +13113,7 @@ Finite timeout?										= Finite timeout?
 folder is now created									= folder is now created
 Font type												= Font type
 fuchsia												= fuchsia
+Function												= Function
 free													= free
 Graphical User Interface									= Graphical User Interface
 gray													= gray
