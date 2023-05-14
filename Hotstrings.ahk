@@ -151,6 +151,7 @@ if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "L
 }
 
 F_Load_ini_Language()
+OutputDebug, % "A_ScriptDir:" . A_ScriptDir . "|" . A_Space . "ini_Language:" . ini_Language . "|" . "`n"
 if (!FileExist(A_ScriptDir . "\Languages\" . ini_Language))			; if there is no ini_language .ini file, e.g. v_langugae == Polish.txt and there is no such file in Languages folder
 {
 	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no"] . A_Space . ini_Language . A_Space . TransA["file in Languages subfolder!"]
@@ -9610,7 +9611,7 @@ F_AddHotstring()
 		if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_SimpleOutput").bind(vHotstring, true, SendFun), true)
+				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_SimpleOutput").bind(vHotstring, true, SendFun), true)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
 					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -9621,7 +9622,7 @@ F_AddHotstring()
 		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_HMenu_Output").bind(vHotstring, true, SendFun), true)
+				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HMenu_Output").bind(vHotstring, true, SendFun), true)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
 					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -9635,7 +9636,7 @@ F_AddHotstring()
 		if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_SimpleOutput").bind(vHotstring, false, SendFun), true)
+				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_SimpleOutput").bind(vHotstring, false, SendFun), true)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
 					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -9646,7 +9647,7 @@ F_AddHotstring()
 		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . v_Triggerstring, func("F_HMenu_Output").bind(vHotstring, false, SendFun), true)
+				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HMenu_Output").bind(vHotstring, false, SendFun), true)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
 					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -10955,7 +10956,7 @@ F_DeleteHotstring()
 		F_GuiHS3_EnDis("Enable")			;Enable all GuiControls for deletion time d(t, o, h)	
 		return
 	}	
-	TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
+	; TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
 	
 	;1. Remove selected library file.
 	FileRead, TheWholeFile, % LibraryFullPathAndName
@@ -10970,7 +10971,6 @@ F_DeleteHotstring()
 	;In order to switch off, some options have to run in "reversed" state:
 	if (EnDis = "En")	;only if definition is enabled, at first try to disable it (if it is disabled, just delete it)
 	{
-		triggerstring := F_ConvertEscapeSequences(triggerstring)
 		if (InStr(options, "*"))
 			options := StrReplace(options, "*", "*0")
 		if (InStr(options, "B0"))
@@ -10980,7 +10980,7 @@ F_DeleteHotstring()
 		if (InStr(options, "Z"))
 			options := StrReplace(options, "Z", "Z0")
 		Try
-			Hotstring(":" . options . ":" . triggerstring, , "Off")	;if duplicated definition exists, only one is active. As a consequence if one is removed, the second one is not activated automatically: none is enabled anymore till application is restarted.
+			Hotstring(":" . options . ":" . F_ConvertEscapeSequences(triggerstring), , "Off")	;if duplicated definition exists, only one is active. As a consequence if one is removed, the second one is not activated automatically: none is enabled anymore till application is restarted.
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n`n" 
 				. TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
@@ -11026,7 +11026,7 @@ F_DeleteHotstring()
 			. TransA["was just deleted from"] . "`n`n"
 			. TransA["Library name:"] 		. A_Space . v_SelectHotstringLibrary
 			, 10	;10 s timeout
-	TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
+	; TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ConvertListViewIntoTxt()
