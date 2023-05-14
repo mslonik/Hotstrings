@@ -25,7 +25,7 @@ CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in t
 ; - - - - - - - - - - - - - - - - - - - - - - - E X E  CONVERSION / INSTALLATOR S E C T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.14"	;starting on 2023-05-01 (Monday). 
+global AppVersion				:= "3.6.14"	;starting on 2023-05-14 (Sunday). 
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -151,11 +151,13 @@ if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "L
 }
 
 F_Load_ini_Language()
-OutputDebug, % "A_ScriptDir:" . A_ScriptDir . "|" . A_Space . "ini_Language:" . ini_Language . "|" . "`n"
 if (!FileExist(A_ScriptDir . "\Languages\" . ini_Language))			; if there is no ini_language .ini file, e.g. v_langugae == Polish.txt and there is no such file in Languages folder
 {
 	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no"] . A_Space . ini_Language . A_Space . TransA["file in Languages subfolder!"]
-	. "`n`n" . TransA["The default"] . A_Space . "English.txt" . A_Space . TransA["file is now created in the following subfolder:"] . "`n`n"  A_ScriptDir . "\Languages\"
+		. "`n`n" 
+		. TransA["The default"] . A_Space . "English.txt" . A_Space . TransA["file is now created in the following subfolder:"] 
+		. "`n`n" 
+		. A_ScriptDir . "\Languages\"
 	ini_Language := "English.txt"
 	if (!FileExist(A_ScriptDir . "\Languages\" . "English.txt"))
 		F_LoadCreateTranslationTxt("create")
@@ -12583,13 +12585,12 @@ ConfigIni := "
 	{
 		; OutputDebug, % "HADConfig_AppData:" . A_Tab . HADConfig_AppData . "`n" . "HADConfig_App:" . A_Tab . HADConfig_App . "`n`n"
 		if (!InStr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4)), "D"))	;if there is no folder...
-		{
 			FileCreateDir, % A_AppData . "\" . SubStr(A_ScriptName, 1, -4)	;future: check against errors
-		}
-		FileAppend, %ConfigIni%, % HADConfig_AppData
+		FileAppend, % ConfigIni, % HADConfig_AppData
 		if (FileExist(A_ScriptDir . "\Languages\English.txt"))	;if there is no Config.ini, then English.txt should be recreated.
 			FileDelete, % A_ScriptDir . "\Languages\English.txt"	;future: check against errors
 		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"] . "`n`n" . HADConfig_AppData
+			. "`n`n" . TransA["As a consequence the default language file English.txt will be recreated."]
 		ini_HADConfig := HADConfig_AppData
 		return
 	}
@@ -12964,6 +12965,7 @@ Are you sure you want to close this window?					= Are you sure you want to close
 Are you sure you want to exit this application now?			= Are you sure you want to exit this application now?
 Are you sure you want to move ""Hotstrings"" folder and all its content to the new location? = Are you sure you want to move ""Hotstrings"" folder and all its content to the new location?
 Are you sure you want to reload this application now?			= Are you sure you want to reload this application now?
+As a consequence the default language file English.txt will be recreated. = As a consequence the default language file English.txt will be recreated.
 At first select library name which you intend to delete.		= At first select library name which you intend to delete.
 AutoHotkey version										= AutoHotkey version
 Background color										= Background color
@@ -15406,10 +15408,13 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 		if (ErrorLevel = "NewInput")	;when user used mouse to make a choice from menu
 			break
 		Input, SingleKey, L1 E, {Tab}{Up}{Down}1234567{Enter}{Esc}
+		if (SingleKey) and (ini_MHSEn)	;Sound is produced each time user presses other key than EndKey. Assumption: it will help to focus user's attention to on screen menu.
+			SoundBeep, % ini_MHSF, % ini_MHSD	
+
 		if (InStr(ErrorLevel, "EndKey:"))
 		{
-			WhatWasPressed := SubStr(ErrorLevel, 8)
-			; OutputDebug, % "Terminated by EndKey:" . WhatWasPressed . "|" . "`n"	;8 = EndKey: + 1
+			WhatWasPressed := SubStr(ErrorLevel, 8)	;8 = EndKey: + 1
+			; OutputDebug, % "Terminated by EndKey:" . WhatWasPressed . "|" . "`n"	
 			if (WhatWasPressed = "Escape")
 			{
 				Gui, HMenuAHK: Destroy
