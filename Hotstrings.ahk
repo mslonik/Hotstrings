@@ -2903,6 +2903,11 @@ F_OneCharPressed(ih, Char)
 	,	v_InputString 	:= SubStr(v_InputString, 0)	;Last char only
 	}
 
+	if (f_LastTip) and (f_ExpEndChar)	;exception and test-case: "slowo, np. ADC" and F_Undo.
+	{
+		f_LastTip 	:= false
+	,	v_InputString 	:= v_Qinput
+	}	
 	; OutputDebug, % "2)v_IS:" . v_InputString . "|" . A_Space 
 	; 			. "IL:" 	. EndNoChar . A_Space 
 	; 			. "f_LT:" . f_LastTip . A_Space 
@@ -2929,14 +2934,20 @@ F_OneCharPressed(ih, Char)
 			if (v_Qinput)
 			{
 				if (InStr(HotstringEndChars, SubStr(v_Qinput, 0)))	;if last char of v_Qinput is EndChar and existed triggerstring tip, then in next iteration v_InputString should not be trimmed or erased, so f_ExpEndChar is set
+				{
 					f_ExpEndChar := true
+					; OutputDebug, % "if (v_Qinput):" . f_ExpEndChar . "`n"
+				}					
 				else
 					f_ExpEndChar := false
 			}
 			else
 			{
 				if (InStr(HotstringEndChars, SubStr(v_InputString, 0)))	;if last char of v_InputString is EndChar and existed triggerstring tip, then in next iteration v_InputString should not be trimmed or erased, so f_ExpEndChar is set
+				{
 					f_ExpEndChar := true
+					; OutputDebug, % "else:" . f_ExpEndChar . "`n"
+				}	
 				else
 					f_ExpEndChar := false
 			}
