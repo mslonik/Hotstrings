@@ -10942,6 +10942,7 @@ F_DeleteHotstring()
 	local 	LibraryFullPathAndName := ini_HADL . "\" . v_SelectHotstringLibrary, TheWholeFile := "", LibraryHeader := ""
 	,		SelectedRow := 0, index := 0
 	,		key := 0, val := "", options := "", triggerstring := "", EnDis := "", hotstring := "", OldOptions := ""
+	,		key2 := 0
 
 	Gui, HS3: Default
 	F_GuiHS3_EnDis("Disable")			;Disable all GuiControls for deletion time d(t, o, h)	
@@ -10969,7 +10970,6 @@ F_DeleteHotstring()
 		F_GuiHS3_EnDis("Enable")			;Enable all GuiControls for deletion time d(t, o, h)	
 		return
 	}	
-	; TrayTip, %A_ScriptName%, % TransA["Deleting hotstring..."], 1
 	
 	;1. Remove selected library file.
 	FileRead, TheWholeFile, % LibraryFullPathAndName
@@ -11027,9 +11027,8 @@ F_DeleteHotstring()
 			a_Hotstring		.RemoveAt(key)
 			a_Comment			.RemoveAt(key)
 		}
-	;7. Remove trigger hint. 
-	for index in a_Combined	;recreate array a_Combined
-		a_Combined[index] := a_Triggerstring[index] . "|" . a_TriggerOptions[index] . "|" . a_EnableDisable[index] . "|" . a_Hotstring[index]
+	;7. Recreate triggerstring tips.
+	F_Recreate_CombinedTable()
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	
 	F_GuiHS3_EnDis("Enable")			;Enable all GuiControls for deletion time d(t, o, h)
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The definition"] . ":" . "`n`n"
@@ -11039,7 +11038,6 @@ F_DeleteHotstring()
 			. TransA["was just deleted from"] . "`n`n"
 			. TransA["Library name:"] 		. A_Space . v_SelectHotstringLibrary
 			, 10	;10 s timeout
-	; TrayTip, % A_ScriptName, % TransA["Specified definition of hotstring has been deleted"], 1
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ConvertListViewIntoTxt()
@@ -12824,17 +12822,24 @@ F_UnloadTriggTipsFromMemory(LibraryFilename)
 				}
 		}
 	}
-	key := 0, value := ""	;recreate a_Combined
-,	a_Combined := []
+	F_Recreate_CombinedTable()
+}
+; ------------------------------------------------------------------------------------------------------------------------------------
+F_Recreate_CombinedTable()
+{
+	global ;assume-global mode of operation
+	local	key := 0,	key2 := 0, value := ""
+
+	a_Combined := []
 	for key, value in ini_ShowTipsLib
-	{
-		if (value)
+		{
+			if (value)
 			{
 				for key2 in a_Library
 					if (a_Library[key2] = SubStr(key, 1, -4))	;remove extension
 						a_Combined.Push(a_Triggerstring[key2] . "|" . a_TriggerOptions[key2] . "|" . a_EnableDisable[key2] . "|" . a_Hotstring[key2])
 			}
-	}
+		}
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_ToggleLibrary()	;load / unload d(t, o, h)
