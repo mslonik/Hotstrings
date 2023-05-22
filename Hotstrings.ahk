@@ -104,6 +104,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_FontType 			:= "Consolas"
 ,		f_100msRun 			:= false				;global flag: timer is running, 100 ms, for concurrent press of Shift keys
 ,		f_WasReset			:= false				;global flag: Shift key memory reset (to reset hotstring recognizer)
+,		c_TTDelimiter			:= "¦"				;global constant: unique character applied as delimiter for triggerstring tips
 ;#c/* commercial only beginning
 ,		v_ValidTill			:= "inf"				;"inf" for infinity, "limited" for other cases
 ,		f_RShiftDown 			:= false
@@ -2769,43 +2770,70 @@ F_WhereDisplayMenu(ini_TTTP)
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_TrigTipsSecondColumn(a_array1, a_array2)
 {
-	local
-	key := 0, value := "", ThisValue := "|"
+	global	;assume-global mode of operation
+	local key := 0, value := "", ThisValue := "", AmountOfItems := a_array1.Count()
+
 	for key, value in a_array1
 	{
 		if (a_array2[key] = "En") and (InStr(value, "*")) and (InStr(value, "?"))
 		{
-			ThisValue .= "?" . "|"	
+			if (key != AmountOfItems)
+				ThisValue .= "?" . c_TTDelimiter
+			else
+				ThisValue .= "?"
 			Continue
 		}	
 		if (a_array2[key] = "En") and (InStr(value, "*"))
 		{
-			ThisValue .= "✓" . "|"	
+			if (key != AmountOfItems)
+				ThisValue .= "✓" . c_TTDelimiter
+			else
+				ThisValue .= "✓"
 			Continue
 		}	
 		if (a_array2[key] = "En") and (InStr(value, "?"))
-			ThisValue .= "?" . "|"
-		if (a_array2[key] = "En") and (!InStr(value, "*"))						
-			ThisValue .= "↓" . "|"
+		{
+			if (key != AmountOfItems)
+				ThisValue .= "?" . c_TTDelimiter
+			else
+				ThisValue .= "?"
+		}	
+		if (a_array2[key] = "En") and (!InStr(value, "*"))
+		{
+			if (key != AmountOfItems)
+				ThisValue .= "↓" . c_TTDelimiter
+			else
+				ThisValue .= "↓"
+		}	
 		if (a_array2[key] = "Dis")
-			ThisValue .= "╳" . "|"	
+		{
+			if (key != AmountOfItems)
+				ThisValue .= "╳" . c_TTDelimiter
+			else
+				ThisValue .= "╳"
+		}	
 	}
 	return ThisValue
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ConvertArrayToString(a_array)
 {
-	local
-	key := 0, value := "", ThisValue := "|"
+	global	;global-mode of operation
+	local	key := 0, value := "", ThisValue := "", AmountOfItems := a_array.Count()
 
 	for key, value in a_array
-		ThisValue .= value . "|"
+	{
+		if (key != AmountOfItems)
+			ThisValue .= value . c_TTDelimiter
+		else
+			ThisValue .= value
+	}	
 	return ThisValue
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LongestTrigTipString(a_array)	
 {
-	local
+	local	
 	key := 0, value := "", ThisValue := "", MaxValue := 0, WhichKey := 0, WhichValue := ""
 
 	for key, value in a_array
@@ -3749,8 +3777,7 @@ F_GuiTrigTipsMenuDefC4()	;static gui for triggerstring tips and hotstrings
 		, OutputString := ""
 		, PosOutputVar := 0, PosOutputVarX := 0, PosOutputVarY := 0, PosOutputVarW := 0, PosOutputVarH := 0
 	
-	Gui, TT_C4: New, +AlwaysOnTop +Caption +HwndTT_C4_Hwnd +Resize, % A_ScriptName . ":" . A_Space . TransA["Static triggerstring / hotstring menus"]
-	Gui, TT_C4: +Delimiter¦	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
+	Gui, TT_C4: New, +AlwaysOnTop +Caption +HwndTT_C4_Hwnd +Resize +Delimiter%c_TTDelimiter%, % A_ScriptName . ":" . A_Space . TransA["Static triggerstring / hotstring menus"] ;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 	Gui, TT_C4: Margin, 0, 0
 	if (ini_ATEn)
 	{
@@ -3830,8 +3857,7 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestTriggerstring, LongestHotstring)
 		, W_LB1 := 0, W_LB2 := 0, W_LB3 := 0, X_LB2 := 0, Y_LB2 := 0, X_LB3 := 0, Y_LB3 := 0
 		, cListboxMargin :=  4
 	
-	Gui, TT_C3: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C3_Hwnd
-	Gui, TT_C3: +Delimiter¦	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
+	Gui, TT_C3: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C3_Hwnd +Delimiter%c_TTDelimiter%	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 	Gui, TT_C3: Margin, 0, 0
 	if (ini_ATEn)
 	{
@@ -3877,7 +3903,7 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestTriggerstring, LongestHotstring)
 	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB3" . A_Space . "x" . X_LB3 . A_Space . "y" . Y_LB3 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB3 + cListboxMargin . A_Space . "g" . "F_TTMenuStatic_Mouse"
 	; Gui, TT_C3: Show, x0 y0	;for debugging purpose only
 	Gui, TT_C3: Destroy	;unfortunately even when gui object are hidden, still background is visible; I don't want to have temporary (dummy) text object to be visible. therefore I destroy the whole gui and create it again.
-	Gui, TT_C3: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C3_Hwnd
+	Gui, TT_C3: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C3_Hwnd +Delimiter%c_TTDelimiter%	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 	Gui, TT_C3: Margin, 0, 0
 	if (ini_ATEn)
 	{
@@ -3918,7 +3944,7 @@ F_GuiTrigTipsMenuDefC2(AmountOfRows, LongestString)
 	
 	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
 		OutputString .= "w"		;the widest ordinary letter in alphabet
-	Gui, TT_C2: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C2_Hwnd
+	Gui, TT_C2: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C2_Hwnd +Delimiter%c_TTDelimiter%	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 	Gui, TT_C2: Margin, 0, 0
 	if (ini_ATEn)
 	{
@@ -3961,12 +3987,12 @@ F_GuiTrigTipsMenuDefC2(AmountOfRows, LongestString)
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)
 {
-	global	;assume-global mode
-	local vOutput := 0, vOutputX := 0, vOutputY := 0, vOutputW := 0, vOutputH := 0, OutputString := ""
+	global	;assume-global mode of operation
+	local 	vOutput := 0, vOutputX := 0, vOutputY := 0, vOutputW := 0, vOutputH := 0, OutputString := ""
 	
 	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
 		OutputString .= "w"		;the widest ordinary letter in alphabet
-	Gui, TT_C1: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C1_Hwnd
+	Gui, TT_C1: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C1_Hwnd +Delimiter%c_TTDelimiter%	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 	Gui, TT_C1: Margin, 0, 0
 	if (ini_ATEn)
 	{
@@ -5164,7 +5190,7 @@ F_EvAT_R1R2()	;Ev = Event, AT = Active Triggerstring, R1R2 = Radio no. 1 and Rad
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvTt_B1()	;Event Tooltip (is triggered) Button Tooltip test 
 {
-	global ;assume-global mode
+	global ;assume-global mode of operation
 	local a_Tips 		:= []
 		, a_TipsOpt	:= []	;collect withing global array a_TipsOpt subset from full set a_TriggerOptions; next it will be used to show triggering character in F_ShowTriggerstringTips2()
 		, a_TipsEnDis	:= []
@@ -5190,7 +5216,7 @@ F_EvTt_B1()	;Event Tooltip (is triggered) Button Tooltip test
 				, a_TipsEnDis[A_Index]	:= "En"
 				, a_TipsHS[A_Index]		:= "Ex HotString" . A_Index
 			}
-			a_Combined[A_Index]			:= a_Tips[A_Index] . "|" . a_TipsOpt[A_Index] . "|" . a_TipsEnDis[A_Index] . "|" . a_TipsHS[A_Index]
+			a_Combined[A_Index]			:= a_Tips[A_Index] . c_TTDelimiter . a_TipsOpt[A_Index] . c_TTDelimiter . a_TipsEnDis[A_Index] . c_TTDelimiter . a_TipsHS[A_Index]
 		}
 		F_Sort_a_Triggers(a_Combined, EvTt_C1, EvTt_C2)
 		F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, EvTt_DDL2)
@@ -9129,11 +9155,11 @@ F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 				Switch ini_TTCn
 				{
 					Case 1:	;only column 1: Triggerstring Tips
-					     Loop, Parse, % a_Combined[A_Index], |
+					     Loop, Parse, % a_Combined[A_Index], % c_TTDelimiter
 					     	if (A_Index = 1)
 					     		a_Tips.Push(A_LoopField)
 					Case 2:	;2 columns: Triggerstring Tips + Triggerstring Trigger
-					     Loop, Parse, % a_Combined[A_Index], |
+					     Loop, Parse, % a_Combined[A_Index], % c_TTDelimiter
 					     {
 					     	if (A_Index = 1)
 					     		a_Tips.Push(A_LoopField)
@@ -9143,7 +9169,7 @@ F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 					     		a_TipsEnDis.Push(A_LoopField)
 					     }
 					Case 3, 4:	;3 columns: Triggerstring Tips + Triggerstring Trigger + Triggerstring Hotstring
-					     Loop, Parse, % a_Combined[A_Index], |
+					     Loop, Parse, % a_Combined[A_Index], % c_TTDelimiter
 					     {
 					     	if (A_Index = 1)
 					     		a_Tips.Push(A_LoopField)
@@ -9192,7 +9218,7 @@ F_PTTTQ(string) ;Function_ Prepare Triggerstring Tips Tables Question mark (rela
 		Loop, % a_Combined.MaxIndex()
 		{
 			QuestionMarkPos 	:= InStr(a_Combined[A_Index], "?")
-		,	SecSeparatorPos	:= InStr(a_Combined[A_Index], "|", false, 1, NoOccurrence)
+		,	SecSeparatorPos	:= InStr(a_Combined[A_Index], c_TTDelimiter, false, 1, NoOccurrence)
 			if (QuestionMarkPos) and (QuestionMarkPos < SecSeparatorPos) and (InStr(a_Combined[A_Index], string) = 1)
 			{
 				; OutputDebug, % "string:" . string . "|" . "`n"
@@ -9200,11 +9226,11 @@ F_PTTTQ(string) ;Function_ Prepare Triggerstring Tips Tables Question mark (rela
 				Switch ini_TTCn
 				{
 					Case 1:	;only column 1: Triggerstring Tips
-					     Loop, Parse, % a_Combined[A_Index], |
+					     Loop, Parse, % a_Combined[A_Index], % c_TTDelimiter
 					     	if (A_Index = 1)
 					     		a_Tips.Push(A_LoopField)
 					Case 2:	;2 columns: Triggerstring Tips + Triggerstring Trigger
-					     Loop, Parse, % a_Combined[A_Index], |
+					     Loop, Parse, % a_Combined[A_Index], % c_TTDelimiter
 					     {
 					     	if (A_Index = 1)
 					     		a_Tips.Push(A_LoopField)
@@ -9214,7 +9240,7 @@ F_PTTTQ(string) ;Function_ Prepare Triggerstring Tips Tables Question mark (rela
 					     		a_TipsEnDis.Push(A_LoopField)
 					     }
 					Case 3, 4:	;3 columns: Triggerstring Tips + Triggerstring Trigger + Triggerstring Hotstring
-					     Loop, Parse, % a_Combined[A_Index], |
+					     Loop, Parse, % a_Combined[A_Index], % c_TTDelimiter
 					     {
 					     	if (A_Index = 1)
 					     		a_Tips.Push(A_LoopField)
@@ -9727,12 +9753,11 @@ F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 	a_EnableDisable	.Push(EnDis)
 	a_Hotstring		.Push(TextInsert)
 	a_Comment			.Push(v_Comment)
-	a_Combined		.Push(v_Triggerstring . "|" . NewOptions . "|" . EnDis . "|" . TextInsert)
+	a_Combined		.Push(v_Triggerstring . c_TTDelimiter . NewOptions . c_TTDelimiter . EnDis . c_TTDelimiter . TextInsert)
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ChangeDefInArrays(key, NewOptions, SendFun, TextInsert, v_Comment)
-; F_ChangeDefInArrays(key, EnDis, NewOptions, SendFun, TextInsert, v_Comment)
 {
 	global	;assume-global mode of operation
 	local	index := 0
@@ -9741,10 +9766,9 @@ F_ChangeDefInArrays(key, NewOptions, SendFun, TextInsert, v_Comment)
 , 	a_TriggerOptions[key] 	:= NewOptions
 , 	a_OutputFunction[key] 	:= SendFun
 , 	a_Hotstring[key] 		:= TextInsert
-; , 	a_EnableDisable[key] 	:= EnDis
 , 	a_Comment[key] 		:= v_Comment
 	for index in a_Combined	;recreate array a_Combined
-		a_Combined[index] := a_Triggerstring[index] . "|" . a_TriggerOptions[index] . "|" . a_EnableDisable[index] . "|" . a_Hotstring[index]
+		a_Combined[index] := a_Triggerstring[index] . c_TTDelimiter . a_TriggerOptions[index] . c_TTDelimiter . a_EnableDisable[index] . c_TTDelimiter . a_Hotstring[index]
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11503,7 +11527,7 @@ F_LV1_EnDisDefinition()
 	
 	a_EnableDisable[key] := EnDis
 	for index in a_Combined	;recreate array a_Combined
-		a_Combined[index] := a_Triggerstring[index] . "|" . a_TriggerOptions[index] . "|" . a_EnableDisable[index] . "|" . a_Hotstring[index]
+		a_Combined[index] := a_Triggerstring[index] . c_TTDelimiter . a_TriggerOptions[index] . c_TTDelimiter . a_EnableDisable[index] . c_TTDelimiter . a_Hotstring[index]
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 	;3. Modify content of ListView
 	Loop, % LV_GetCount()
@@ -12795,7 +12819,7 @@ F_LoadTriggTipsFromFile(LibraryFilename)
 				Case 5:	tmp4 := A_LoopField
 			}
 		}
-		a_Combined.Push(tmp1 . "|" . tmp2 . "|" . tmp3 . "|" . tmp4)
+		a_Combined.Push(tmp1 . c_TTDelimiter . tmp2 . c_TTDelimiter . tmp3 . c_TTDelimiter . tmp4)
 	}	
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -12837,7 +12861,7 @@ F_Recreate_CombinedTable()
 			{
 				for key2 in a_Library
 					if (a_Library[key2] = SubStr(key, 1, -4))	;remove extension
-						a_Combined.Push(a_Triggerstring[key2] . "|" . a_TriggerOptions[key2] . "|" . a_EnableDisable[key2] . "|" . a_Hotstring[key2])
+						a_Combined.Push(a_Triggerstring[key2] . c_TTDelimiter . a_TriggerOptions[key2] . c_TTDelimiter . a_EnableDisable[key2] . c_TTDelimiter . a_Hotstring[key2])
 			}
 		}
 }
@@ -15387,8 +15411,7 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 	
 	if (ini_TTCn != 4)	;if not static window, draw small simple GUI
 	{
-		Gui, HMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuAHKHwnd
-		Gui, HMenuAHK: +Delimiter¦	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
+		Gui, HMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuAHKHwnd +Delimiter%c_TTDelimiter%	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 		Gui, HMenuAHK: Margin, 0, 0
 		if (ini_HMBgrCol = "custom")
 			Gui, HMenuAHK: Color,, % ini_HMBgrColCus
