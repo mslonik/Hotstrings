@@ -2918,20 +2918,20 @@ F_OneCharPressed(ih, Char)
 		else
 			f_EndCharDetected := false
 	}
-	; OutputDebug, % "BL:" . BeforeLast . "|" A_Space . "f_ECD:" . f_EndCharDetected . "|" . "`n"
-	if (!f_LastTip) and (f_EndCharDetected)	;I'm not sure of that ; if (!f_LastTip) and (f_EndCharDetected)
-	{
+	; OutputDebug, % "IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_ECD:" . f_EndCharDetected . "|" . "`n"
+	if (!f_LastTip) and (f_EndCharDetected)	;if there is no more tips (!f_LastTip) and previous character was EndChar, then leave only last character
 		v_InputString := Char 
-	}
-	; OutputDebug, % "IS after trim:" . v_InputString . "|" . "`n" 
-	
-	if (f_LastTip) and (f_EndCharDetected) and (!f_ExpEndChar)
+
+	; OutputDebug, % "IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_ECD:" . f_EndCharDetected . "|" . A_Space . "f_EE:" . f_ExpEndChar . "`n"
+	if (f_LastTip) and (f_EndCharDetected) and (!f_ExpEndChar) ;if there are still tips and previous character was EndChar, but last character is not EndChar
 	{
 		f_LastTip 	:= false
-	,	v_InputString 	:= SubStr(v_InputString, 0)	;Last char only
+	; ,	v_InputString 	:= SubStr(v_InputString, 0)	;Last char only
+	,	v_InputString 	:= Char
 	}
 
-	if (f_LastTip) and (f_ExpEndChar)	;exception and test-case: "slowo, np. ADC" and F_Undo.
+	; OutputDebug, % "IS:" . v_InputString . "|" . A_Space . "QS:" . v_Qinput . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_ECD:" . f_EndCharDetected . "|" . A_Space . "f_EE:" . f_ExpEndChar . "`n"
+	if (f_LastTip) and (f_ExpEndChar) and (v_Qinput)	;exception and test-case: "slowo, np. ADC" and F_Undo.
 	{
 		f_LastTip 	:= false
 	,	v_InputString 	:= v_Qinput
@@ -2986,7 +2986,14 @@ F_OneCharPressed(ih, Char)
 		}
 	}
 	Critical, Off
-	; OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "Char:" . Char . "|" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "f_EE:" . f_ExpEndChar . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "E" 
+	; 	. A_Space . "Char:" . Char . "|" 
+	; 	. A_Space . "v_IS:" . v_InputString . "|" 
+	; 	. A_Space . "v_QI:" . v_Qinput . "|" 
+	; 	. A_Space . "f_LT:" . f_LastTip 
+	; 	. A_Space . "f_EC:" . f_EndCharDetected 
+	; 	. A_Space . "f_EE:" . f_ExpEndChar 
+	; 	. "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
@@ -3853,9 +3860,9 @@ F_TT_C4_B1()	;Button: save position of "static" triggerstring / hotstring window
 F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestTriggerstring, LongestHotstring)
 {
 	global	;assume-global mode of operation
-	local  vOutput1 := 0, vOutput1X := 0, vOutput1Y := 0, vOutput1W := 0, vOutput1H := 0
-		, W_LB1 := 0, W_LB2 := 0, W_LB3 := 0, X_LB2 := 0, Y_LB2 := 0, X_LB3 := 0, Y_LB3 := 0
-		, cListboxMargin :=  4
+	local  	vOutput1 := 0, vOutput1X := 0, vOutput1Y := 0, vOutput1W := 0, vOutput1H := 0
+		, 	W_LB1 := 0, W_LB2 := 0, W_LB3 := 0, X_LB2 := 0, Y_LB2 := 0, X_LB3 := 0, Y_LB3 := 0
+		,	cListboxMargin := 4
 	
 	Gui, TT_C3: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C3_Hwnd +Delimiter%c_TTDelimiter%	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 	Gui, TT_C3: Margin, 0, 0
@@ -3888,11 +3895,12 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestTriggerstring, LongestHotstring)
 	W_LB1 	:= vOutput1W + cListboxMargin
 	Gui, TT_C3: Add, Text, 		% "HwndIdTT_C3_T2 x0 y0", % LongestHotstring
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_T2
-	W_LB3	:= vOutput1W
+	W_LB3	:= vOutput1W + cListboxMargin
 	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB1 x0 y0" . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB1 + cListboxMargin . A_Space . "g" . "F_TTMenuStatic_Mouse"
 	Gui, TT_C3: Add, Text, 		% "HwndIdTT_C3_T3 x0 y0", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_T3
-	W_LB2 	:= vOutput1W
+	W_LB2 	:= vOutput1W + cListboxMargin
+	; OutputDebug, % "W_LB2:" . W_LB2 . "`n"
 	GuiControlGet, vOutput1, Pos, % IdTT_C3_LB1
 	X_LB2 	:= vOutput1X + vOutput1W, Y_LB2	:= vOutput1Y
 	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB2" . A_Space . "x" . X_LB2 . A_Space . "y" . Y_LB2 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB2 + cListboxMargin . A_Space . "g" . "F_TTMenuStatic_Mouse"
@@ -3939,8 +3947,9 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestTriggerstring, LongestHotstring)
 F_GuiTrigTipsMenuDefC2(AmountOfRows, LongestString)
 {
 	global	;assume-global mode
-	local  vOutput := 0, vOutputX := 0, vOutputY := 0, vOutputW := 0, vOutputH := 0, OutputString := ""
-		, W_LB1 := 0, W_LB2 := 0, X_LB2 := 0, Y_LB2 := 0
+	local  	vOutput := 0, vOutputX := 0, vOutputY := 0, vOutputW := 0, vOutputH := 0, OutputString := ""
+		,	W_LB1 := 0, W_LB2 := 0, X_LB2 := 0, Y_LB2 := 0
+		,	cListboxMargin := 4
 	
 	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
 		OutputString .= "w"		;the widest ordinary letter in alphabet
@@ -3971,11 +3980,11 @@ F_GuiTrigTipsMenuDefC2(AmountOfRows, LongestString)
 
 	Gui, TT_C2: Add, Text, % "HwndIdTT_C2_T1 x0 y0", % OutputString
 	GuiControlGet, vOutput, Pos, % IdTT_C2_T1
-	W_LB1 	:= vOutputW
+	W_LB1 	:= vOutputW + cListboxMargin
 	Gui, TT_C2: Add, Listbox, 	% "HwndIdTT_C2_LB1 x0 y0" . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB1 + 4 . A_Space . "g" . "F_TTMenuStatic_Mouse"	;thanks to "g" it will not be a separate thread even upon mouse click
 	Gui, TT_C2: Add, Text, 		% "HwndIdTT_C2_T2 x0 y0", W	;the widest latin letter; unfortunately once set Text has width which can not be easily changed. Therefore it's easiest to add the next one to measure its width.
 	GuiControlGet, vOutput, Pos, % IdTT_C2_T2
-	W_LB2 	:= vOutputW
+	W_LB2 	:= vOutputW + cListboxMargin
 	GuiControlGet, vOutput, Pos, % IdTT_C2_LB1
 	X_LB2 	:= vOutputX + vOutputW, Y_LB2	:= vOutputY
 	Gui, TT_C2: Add, Listbox, % "HwndIdTT_C2_LB2" . A_Space . "x" . X_LB2 . A_Space . "y" . Y_LB2 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB2 + 4 . A_Space . "g" . "F_TTMenuStatic_Mouse"
@@ -8946,7 +8955,7 @@ F_Undo()	;turning off of * option requires special conditions.
 	local	TriggerOpt := "", HowManyBackSpaces := 0, HowManyBackSpaces2 := 0
 			,ThisHotkey := A_ThisHotkey, PriorHotkey := A_PriorHotkey, OrigTriggerstring := "", HowManySpecials := 0
 	
-	OutputDebug, % "v_UndoTriggerstring:" . v_UndoTriggerstring . "|" . A_Space . "v_UndoHotstring:" . v_UndoHotstring . "|" . "`n"
+	; OutputDebug, % "v_UndoTriggerstring:" . v_UndoTriggerstring . "|" . A_Space . "v_UndoHotstring:" . v_UndoHotstring . "|" . "`n"
 	if (v_UndoTriggerstring)
 	{	
 		if (!(InStr(v_Options, "*")) and !(InStr(v_Options, "O")))
