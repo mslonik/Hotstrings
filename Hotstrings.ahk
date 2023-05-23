@@ -776,7 +776,7 @@ return
 ~*PgDn::
 ~*WheelLeft::
 ~*WheelRight::
-~*LButton::	;as above, but without F_DestroyTriggerstringTips()
+~*LButton::	
 	ToolTip,	;this line is necessary to close tooltips.
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
@@ -787,16 +787,17 @@ return
 	; OutputDebug, % "v_InputString after:" . v_InputString . "|" . "`n"
 return
 
-~Control UP::
-	if (A_PriorKey = "LControl") or (A_PriorKey = "RControl")
+~*Control UP::	;whenever any combination with control (e.g. ctrl + v) is applied on time when triggestring is entered, hotstring recognizer is reset. Without "UP" modifier it is in conflict with other hotkeys
+	ToolTip,	;this line is necessary to close tooltips.
+	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
+	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
+	F_DestroyTriggerstringTips(ini_TTCn)
+	if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
 	{
-		ToolTip,	;this line is necessary to close tooltips.
-		Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
-		Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
-		F_DestroyTriggerstringTips(ini_TTCn)
-		if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
-			v_InputString := ""
-	}
+		; OutputDebug, % "Hotstring(""reset"")" . "`n"
+		Hotstring("Reset")
+		v_InputString := ""
+	}	
 return		
 
 ~*Esc::	;the only difference in comparison to previous section is that Esc also resets hotstring recognizer.
@@ -15368,10 +15369,10 @@ F_HMenu_Mouse(SendFun) ; Handling of mouse events for F_HMenu_Output;The subrout
 		Switch SendFun
 		{
 			Case "MSI":
-				OutputDebug, % "OutputVarTemp:" . OutputVarTemp . "|" . "SendFun:" . SendFun . "|" . "`n"
+				; OutputDebug, % "OutputVarTemp:" . OutputVarTemp . "|" . "SendFun:" . SendFun . "|" . "`n"
 				F_SendIsOflag(OutputVarTemp, Ovar, "SI")
 			Case "MCL":
-				OutputDebug, % "OutputVarTemp:" . OutputVarTemp . "|" . "SendFun:" . SendFun . "|" . "`n"
+				; OutputDebug, % "OutputVarTemp:" . OutputVarTemp . "|" . "SendFun:" . SendFun . "|" . "`n"
 				F_ClipboardPaste(OutputVarTemp, Ovar, v_EndChar)
 		}
 
@@ -15621,7 +15622,7 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output F
 {
 	global	;assume-global mode of operation
 	Critical, On
-	local	ThisHotkey := A_ThisHotkey, EndChar := A_EndChar, temp := 0, FirstPart := "", SecondPart := ""
+	local	ThisHotkey := A_ThisHotkey, EndChar := A_EndChar, temp := 0
 
 	; OutputDebug, % A_ThisFunc . A_Space . "ReplacementString:" . ReplacementString . "|" . "SendFun:" . SendFun . "|" . "`n"
 	F_DestroyTriggerstringTips(ini_TTCn)
