@@ -509,10 +509,15 @@ Critical, Off
 	^WheelDown::
 	^MButton::
 		Critical, On
+		; OutputDebug, % "1)A_ThisHotkey:" . A_ThisHotKey . "`n"
 		SetTimer, TurnOff_Ttt, Off
-		; OutputDebug, % "WinExist(ahk_id TT_C1_Hwnd) or WinExist(ahk_id TT_C2_Hwnd) or WinExist(ahk_id TT_C3_Hwnd)" . "`n"
 		F_TTMenu_Keyboard()
-	return
+		return
+		
+	~*Control::
+		; OutputDebug, % "2)A_ThisHotkey:" . A_ThisHotKey . "`n"
+		Hotstring("Reset")
+	return	
 
 	~LButton::			;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected → F_TTMenu_Mouse().
 		F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_Mouse is lower than this "interrupt"
@@ -787,7 +792,7 @@ return
 	; OutputDebug, % "v_InputString after:" . v_InputString . "|" . "`n"
 return
 
-~*Control UP::	;whenever any combination with control (e.g. ctrl + v) is applied on time when triggestring is entered, hotstring recognizer is reset. Without "UP" modifier it is in conflict with other hotkeys
+ ~*Control::	;whenever any combination with control (e.g. ctrl + v) is applied on time when triggestring is entered AND active triggerstrings are disabled, hotstring recognizer is reset. Without "UP" modifier it is in conflict with other hotkeys
 	ToolTip,	;this line is necessary to close tooltips.
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
@@ -827,7 +832,7 @@ return
 return
 	
 ~*Enter UP::	;if user switches between windows by keyboard (Alt+Tab or Win+Alt) clicking and e.g. "Search Hotstring" window was active
-~*Alt UP::	;for hotkeys used to switch windows it is important to add "up" modifier. When windows are switched, switch off suspend for hotkeys and hotstrings.
+~*Alt UP::	;for hotkeys applicable to switch between operating system windows it is important to add "up" modifier. When windows are switched, switch off suspend for hotkeys and hotstrings.
 	Suspend, Permit	;Suspend, On is set for "Search Hotstrings" window
 	; OutputDebug, % "A_ThisHotkey:" . A_ThisHotkey . "`n"
 	Sleep, 100	;100 ms = default value of SetWinDelay; for some reasons SetWinDelay isn't set for WinActive command. A window sometimes needs a period of "rest" after being activated (description copied from SetWinDelay).
@@ -4109,11 +4114,10 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 		WinActivate, % "ahk_id" PreviousWindowID
 	F_DestroyTriggerstringTips(ini_TTCn)
 	; OutputDebug, % "Temp1:" . Temp1 . "|" . "v_Qinput:" . v_Qinput . "|" . "v_InputString:" . v_InputString . "|" . "`n"
-	F_BackFeed(Temp1)
-	v_InputString 		:= ""
-,	IsCursorPressed 	:= false
+	IsCursorPressed 	:= false
 , 	IntCnt 			:= 0
 , 	MenuMax 			:= 0
+	F_BackFeed(Temp1)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_BackFeed(MyInput)
@@ -4124,8 +4128,9 @@ F_BackFeed(MyInput)
 	else
 		SendInput, % "{BackSpace" . A_Space . StrLen(v_InputString) . "}"
 	Hotstring("Reset")
-	MyInput := F_ConvertEscapeSequences(MyInput)
-,	MyInput := F_ConvertEscapeSequences2(MyInput)
+	MyInput 		:= F_ConvertEscapeSequences(MyInput)
+,	MyInput 		:= F_ConvertEscapeSequences2(MyInput)
+,	v_InputString 	:= ""
 	SendLevel, 	% ini_SendLevel	;to backtrigger it must be higher than the input level of the hotstrings
 	SendInput,	% MyInput			;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
 	SendLevel, 	0
