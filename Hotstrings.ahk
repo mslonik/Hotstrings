@@ -15,6 +15,7 @@
 #KeyHistory, 			10			; KeyHistory is necessary for A_PriorKey
 #HotkeyInterval, 		1000			; Specifies the rate of hotkey activations beyond which a warning dialog will be displayed. Default value = 2000 ms.
 #MaxHotkeysPerInterval, 	200			; Specifies the rate of hotkey activations beyond which a warning dialog will be displayed. Default value = 70.
+#MenuMaskKey, 			vkFF  		; vkFF is no mapping; this is important for F_Undo if triggerstring contained "l" and #z (Win + z) is applied as undo character
 ListLines, 			Off			; ListLines is disabled to make it harder to determine how script works.
 SendMode, 			Input		; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir, 		% A_ScriptDir	; Ensures a consistent starting directory.
@@ -4122,7 +4123,7 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_BackFeed(MyInput)
 {
-	global ;assume-global mode
+	global 	;assume-global mode of operation
 	if (v_Qinput != "")
 		SendInput, % "{BackSpace" . A_Space . StrLen(v_Qinput) . "}"
 	else
