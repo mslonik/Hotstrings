@@ -2886,8 +2886,7 @@ F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_Simple_Output, F_Simple_Output etc.). Therefore v_InputString cannot be cleared by this function.
 	global	;assume-global mode of operation
 	Critical, On
-	static	f_ExpEndChar 	:= false	;when triggerstring contains EndChars, e.g. two words separated with space
-		,	f_LastTip 	:= false	;this flag is set if in next run of this function is expected that EndChar will be pressed by user
+	static	f_FoundTT 	:= false	;this flag is set if triggerstring tip (TT) was found
 	local	InputLength 	:= 0		;
 		,	f_EndCharDetected := false	;flag set when EndChar is detected
 		,	index := 0, value := ""	;usual set of variables applicable for "for" function
@@ -2898,12 +2897,23 @@ F_OneCharPressed(ih, Char)
 	if (WinActive("ahk_id" TT_C4_Hwnd))
 		return
 
-	; OutputDebug, % "1)v_IS:" . v_InputString . "|" . "f_LT:" . f_LastTip . A_Space . "f_EC:" . f_EndCharDetected . A_Space . "Char:" . Char . "|" . "`n"
-	if (v_InputString = "")
+	; OutputDebug, % "1)IS:" . v_InputString . "|" . A_Space 
+	; 	. "QS:" . v_Qinput . "|" . A_Space 
+	; 	. "f_LT:" . f_FoundTT . A_Space 
+	; 	. "f_EC:" . f_EndCharDetected . A_Space 
+	; 	. "Char:" . Char . "|" 
+	; 	. "`n"
+	if (v_InputString = "")	;always true after any hotstring
 	{
-		v_Qinput 		:= ""
-	,	f_ExpEndChar 	:= false
-	}
+		f_FoundTT := false
+		v_Qinput 	:= ""
+	}	
+
+	if (!f_FoundTT)	;no triggerstring tip was found among v_InputString and v_Qinput
+	{
+		v_InputString := ""
+	,	v_Qinput := ""	
+	}	
 
 	v_InputString .= Char
 	if (v_Qinput)
@@ -2919,27 +2929,18 @@ F_OneCharPressed(ih, Char)
 		else
 			f_EndCharDetected := false
 	}
-	; OutputDebug, % "IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_ECD:" . f_EndCharDetected . "|" . "`n"
-	if (!f_LastTip) and (f_EndCharDetected)	;if there is no more tips (!f_LastTip) and previous character was EndChar, then leave only last character
-		v_InputString := Char 
 
-	; OutputDebug, % "IS:" . v_InputString . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_ECD:" . f_EndCharDetected . "|" . A_Space . "f_EE:" . f_ExpEndChar . "`n"
-	if (f_LastTip) and (f_EndCharDetected) and (!f_ExpEndChar) ;if there are still tips and previous character was EndChar, but last character is not EndChar
+	if (f_EndCharDetected) and (v_Qinput)
 	{
-		f_LastTip 	:= false
-	; ,	v_InputString 	:= SubStr(v_InputString, 0)	;Last char only
-	,	v_InputString 	:= Char
+		f_FoundTT 	:= false
+		v_InputString 	:= Char
+	,	v_Qinput := ""
+		; OutputDebug, % "fikumiku" . "`n"
 	}
 
-	; OutputDebug, % "IS:" . v_InputString . "|" . A_Space . "QS:" . v_Qinput . "|" . A_Space . "f_LT:" . f_LastTip . A_Space . "f_ECD:" . f_EndCharDetected . "|" . A_Space . "f_EE:" . f_ExpEndChar . "`n"
-	if (f_LastTip) and (f_ExpEndChar) and (v_Qinput)	;exception and test-case: "slowo, np. ADC" and F_Undo.
-	{
-		f_LastTip 	:= false
-	,	v_InputString 	:= v_Qinput
-	}	
 	; OutputDebug, % "2)v_IS:" . v_InputString . "|" . A_Space 
 	; 			. "IL:" 	. EndNoChar . A_Space 
-	; 			. "f_LT:" . f_LastTip . A_Space 
+	; 			. "f_LT:" . f_FoundTT . A_Space 
 	; 			. "f_EC:" . f_EndCharDetected . A_Space 
 	; 			. "f_EE:" . f_ExpEndChar . A_Space 
 	; 			. "v_QI:" . v_Qinput . "|" 
@@ -2953,47 +2954,27 @@ F_OneCharPressed(ih, Char)
 		else
 			F_PTTT(v_InputString)	;Variant when new sequence starts from EndChar.
 
-		; OutputDebug, % "v_Qinput:" . v_Qinput . "|" . "f_ExpEndChar:" . f_ExpEndChar . "`n"
+		; OutputDebug, % "v_Qinput:" . v_Qinput . "|" . A_Space 
+		; . "`n"
 		F_DestroyTriggerstringTips(ini_TTCn)
 		if (a_Tips.Count())	;if tips are available display then
 		{
-			; OutputDebug, % "B1 a_Tips.Count():" . a_Tips.Count() . "`n"
-			f_LastTip := true
+			f_FoundTT := true
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
-			if (v_Qinput)
-			{
-				if (InStr(HotstringEndChars, SubStr(v_Qinput, 0)))	;if last char of v_Qinput is EndChar and existed triggerstring tip, then in next iteration v_InputString should not be trimmed or erased, so f_ExpEndChar is set
-				{
-					f_ExpEndChar := true
-					; OutputDebug, % "if (v_Qinput):" . f_ExpEndChar . "`n"
-				}					
-				else
-					f_ExpEndChar := false
-			}
-			else
-			{
-				if (InStr(HotstringEndChars, SubStr(v_InputString, 0)))	;if last char of v_InputString is EndChar and existed triggerstring tip, then in next iteration v_InputString should not be trimmed or erased, so f_ExpEndChar is set
-				{
-					f_ExpEndChar := true
-					; OutputDebug, % "else:" . f_ExpEndChar . "`n"
-				}	
-				else
-					f_ExpEndChar := false
-			}
 			
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD
-			; OutputDebug, % "Return 1" . A_Space . "v_IS:" . v_InputString . "|" . A_Space . "a_Tips.Count():" . a_Tips.Count() . A_Space . "f_LT:" . f_LastTip . "|" . A_Space . "v_QI:" . v_Qinput . "|" . A_Space . "a_TipsOpt:" . a_TipsOpt[1] . "|" . A_Space . "f_EE:" . f_ExpEndChar . "`n"
 		}
+		else	;no triggerstring tip is found
+			f_FoundTT := false
 	}
 	Critical, Off
 	; OutputDebug, % A_ThisFunc . A_Space . "E" 
 	; 	. A_Space . "Char:" . Char . "|" 
 	; 	. A_Space . "v_IS:" . v_InputString . "|" 
 	; 	. A_Space . "v_QI:" . v_Qinput . "|" 
-	; 	. A_Space . "f_LT:" . f_LastTip 
+	; 	. A_Space . "f_LT:" . f_FoundTT 
 	; 	. A_Space . "f_EC:" . f_EndCharDetected 
-	; 	. A_Space . "f_EE:" . f_ExpEndChar 
 	; 	. "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9141,7 +9122,7 @@ F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 		,	InStrLen			:= StrLen(string)
 
 	; OutputDebug, % A_ThisFunc . A_Space . "`n"
-	; OutputDebug, % A_ThisFunc . A_Space . "string:" . string . "|" . "LC:" . LastChar . "|" . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "string:" . string . "|" . A_Space . "QS:" . v_Qinput . "|" . A_Space . "LC:" . LastChar . "|" . "`n"
 	if (InStrLen > 1)
 	{
 		TwoLastChars := SubStr(string, -1)
