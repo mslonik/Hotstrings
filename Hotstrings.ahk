@@ -12671,48 +12671,29 @@ F_SaveGUIPos(param*) ;Save to Config.ini
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadHotstringsFromLibraries()
 {
-	global ; assume-global mode
-	local key := "", value := "", temp := ""
-	a_Library 				:= []	;initialization of global variable
-	, a_TriggerOptions 			:= []
-	, a_Triggerstring 			:= []
-	, a_OutputFunction 			:= []
-	, a_EnableDisable 			:= []
-	, a_Hotstring				:= []
-	, a_Comment 				:= []
-	, a_Combined				:= []
+	global ; assume-global mode of operation
+	local key := "", value := ""
+
+	a_Library 		:= []	;initialization of global variable
+, 	a_TriggerOptions 	:= []
+, 	a_Triggerstring 	:= []
+, 	a_OutputFunction 	:= []
+, 	a_EnableDisable 	:= []
+, 	a_Hotstring		:= []
+, 	a_Comment 		:= []
+, 	a_Combined		:= []
+,	v_LibHotstringCnt 	:= 0
+,	v_TotalHotstringCnt := 0
 	
-; Prepare TrayTip message taking into account value of command line parameter.
+	; Prepare TrayTip message taking into account value of command line parameter.
 	if (v_SilentMode == "l")
 		TrayTip, %A_ScriptName% - Lite mode, 	% TransA["Loading hotstrings from libraries..."], 1
 	else	
 		TrayTip, %A_ScriptName%,				% TransA["Loading hotstrings from libraries..."], 1
 	
-; Load (triggerstring, hotstring) definitions if enabled and triggerstring tips if enabled.
-	v_LibHotstringCnt 	:= 0
-,	v_TotalHotstringCnt := 0
-	
-	for key, value in ini_LoadLib
-	{
-		temp := SubStr(key, 1, 2)	;extract the first 2 characters
-		if (temp != "S1") and (temp != "S2") and (value)
+	for key, value in ini_LoadLib ; Load (triggerstring, hotstring) definitions if enabled
+		if (value)
 			F_LoadDefinitionsFromFile(key)
-	}
-	key := "", value := 0
-	for key, value in ini_LoadLib
-	{
-		temp := SubStr(key, 1, 2)	;extract the first 2 characters
-		if (temp = "S1") and (value)
-			F_LoadDefinitionsFromFile(key)
-	}
-
-	key := "", value := 0
-	for key, value in ini_LoadLib
-	{
-		temp := SubStr(key, 1, 2)	;extract the first 2 characters
-		if (temp = "S2") and (value)
-			F_LoadDefinitionsFromFile(key)
-	}
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_LoadTTperLibrary()	;Load Triggerstring Tips per library, as specified in Config.ini (variable ini_ShowTipsLib)
