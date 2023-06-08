@@ -2900,7 +2900,7 @@ F_OneCharPressed(ih, Char)
 		,	LastChar		:= ""	;last character of input buffer (v_InputString)
 		,	TwoLastChar	:= ""	;two last characters of input buffer (v_InputString)
 
-	if (WinActive("ahk_id" TT_C4_Hwnd))
+	if (WinActive("ahk_id" TT_C4_Hwnd)) or (WinExist("ahk_id" HMenuCliHwnd)) or (WinExist("ahk_id" HMenuAHKHwnd))
 		return
 
 	; OutputDebug, % "1)IS:" . v_InputString . "|" . A_Space 
