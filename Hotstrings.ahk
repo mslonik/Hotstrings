@@ -15,7 +15,7 @@
 #KeyHistory, 			10			; KeyHistory is necessary for A_PriorKey
 #HotkeyInterval, 		1000			; Specifies the rate of hotkey activations beyond which a warning dialog will be displayed. Default value = 2000 ms.
 #MaxHotkeysPerInterval, 	200			; Specifies the rate of hotkey activations beyond which a warning dialog will be displayed. Default value = 70.
-#MenuMaskKey, 			vkFF  		; vkFF is no mapping; this is important for F_Undo if triggerstring contained "l" and #z (Win + z) is applied as undo character
+#MenuMaskKey, 			vkE8  		; vkE8 is something unassigned; this is important for F_Undo if triggerstring contained "l" and #z (Win + z) is applied as undo character
 ListLines, 			Off			; ListLines is disabled to make it harder to determine how script works.
 SendMode, 			Input		; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir, 		% A_ScriptDir	; Ensures a consistent starting directory.
@@ -2231,7 +2231,8 @@ F_HMenu_Keyboard(PressedKey, SendFun)
 	v_InputH.VisibleText 	:= true
 	if (InStr(v_Options, "z", false))	;fundamental change, now "z" parameter metters
 		Hotstring("Reset")
-	temp := F_DetermineGain2(v_InputString, Temp1)
+	v_InputString := ""
+,	temp := F_DetermineGain2(v_InputString, Temp1)
 	v_CntCumGain += temp
 ;#c/* commercial only beginning
 	if (ini_THLog)
@@ -9028,7 +9029,11 @@ F_Undo()	;turning off of * option requires special conditions.
 				Switch A_LoopField
 				{
 					Case "^", "+", "!", "#", "{", "}":	SendRaw, 	% A_LoopField
-					Default:						Send, 	% A_LoopField
+					Case "l":						if A_LoopField is lower	; This is dirty trick to block Win + l behavior. Nothing else worked. `Switch` is not case sensitive, but if I turn on / off case sentitiveness temporarily it didn't work either. Hotkeys using the "reg" method are incapable of distinguishing physical and artificial input, so are not affected by SendLevel. However, hotkeys above level 0 always use the keyboard or mouse hook.
+													Send, {U+006C}	; small latin letter 'l'
+												else if A_LoopField is upper
+													Send, {U+004C} ; capital latin letter 'L'
+					Default:						Send, 		% A_LoopField
 				}
 		}
 		v_UndoTriggerstring := ""
@@ -15492,7 +15497,7 @@ ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
 	return ShorterInputString
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenuSI_Keyboard() -> F_SendIsOflag; F_HMenu_Mouse -> F_SendIsOflag; F_SimpleOutput -> F_SendIsOflag
+F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; F_HMenu_Mouse -> F_SendIsOflag; F_SimpleOutput -> F_SendIsOflag
 {
 	global	;assume-global mode of operation
 
@@ -15689,6 +15694,7 @@ F_FollowCaseConformity(ReplacementString, InputString, Options)
 		if (fFirstLetterCap and fRestOfLettersCap)
 		{
 			StringUpper, NewReplacementString, ReplacementString
+			NewReplacementString := StrReplace(NewReplacementString, "``N", "``n")	;if hotstring contains special combination "`n" it is initially converted to "`N" and then again it must be converted to "`n" in order to work correctly.
 			return NewReplacementString
 		}
 		if (fFirstLetterCap and !fRestOfLettersCap)
