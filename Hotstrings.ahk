@@ -106,6 +106,10 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		f_100msRun 			:= false				;global flag: timer is running, 100 ms, for concurrent press of Shift keys
 ,		f_WasReset			:= false				;global flag: Shift key memory reset (to reset hotstring recognizer)
 ,		c_TTDelimiter			:= "¦"				;global constant: unique character applied as delimiter for triggerstring tips
+,		c_dHK_UndoLH			:= "~#z"				;global constant: default (d) hotkey (HK) for Undo
+,		c_dHK_CopyClip			:= "~^#c"				;global constant: default (d) hotkey (HK) for Copy to clipboard future hotstring content
+,		c_dHK_CallGUI 			:= "#^h"				;global constant: default (d) hotkey (HK) for calling main application GUI
+,		c_dHK_ToggleTt			:= "none"				;global constant: default (d) hotkey (HK) for toggling the triggestring tips
 ;#c/* commercial only beginning
 ,		v_ValidTill			:= "inf"				;"inf" for infinity, "limited" for other cases
 ,		f_RShiftDown 			:= false
@@ -3398,7 +3402,7 @@ F_PasteFromClipboard()
 	global	;assume-global mode
 	local	ContentOfClipboard := ""
 	
-	if (ini_HK_IntoEdit != "~^#c")
+	if (ini_HK_IntoEdit != c_dHK_CopyClip)
 		Send, ^c
 	Sleep, % ini_CPDelay
 	ContentOfClipboard := Clipboard
@@ -3519,7 +3523,7 @@ ShortDefGuiEscape()
 		Gui, HS3: -Disabled
 	if (WinExist("ahk_id" HS4GuiHwnd))
 		Gui, HS4: -Disabled	
-	Gui, ShortDef: Hide
+	Gui, ShortDef: Destroy
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ShortDefGuiClose()
@@ -4180,11 +4184,11 @@ F_LoadConfiguration()
 		ini_ShowIntro 			:= true
 		Iniwrite, % ini_ShowIntro, % ini_HADConfig, Configuration, ShowIntro
 	}
-	ini_HK_Main				:= "#^h"
+	ini_HK_Main				:= c_dHK_CallGUI	;set default (d) hotkey (HK) for calling main application GUI 
 	IniRead, ini_HK_Main,					% ini_HADConfig, Configuration, HK_Main,				% A_Space	;To store a blank value (empty string), specify % A_Space.
 	if (ini_HK_Main = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
-		ini_HK_Main 			:= "#^h"
+		ini_HK_Main 			:= c_dHK_CallGUI
 		IniWrite, % ini_HK_Main, % ini_HADConfig, Configuration, HK_Main
 	}
 	if (ini_HK_Main != "none")
@@ -4195,32 +4199,31 @@ F_LoadConfiguration()
 		Hotkey, If			;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 	}
 	
-	ini_HK_IntoEdit			:= "~^#c"
+	ini_HK_IntoEdit			:= c_dHK_CopyClip	;set default (d) hotkey (HK) for copying content of future hotstring
 	IniRead, ini_HK_IntoEdit,				% ini_HADConfig, Configuration, HK_IntoEdit,				% A_Space	;To store a blank value (empty string), specify % A_Space.
 	if (ini_HK_IntoEdit = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
-		ini_HK_IntoEdit := "~^#c"
+		ini_HK_IntoEdit := c_dHK_CopyClip
 		IniWrite, % ini_HK_IntoEdit, % ini_HADConfig, Configuration, HK_IntoEdit
 	}
 	
-	ini_HK_UndoLH				:= "~#z"
+	ini_HK_UndoLH				:= c_dHK_UndoLH	;set default (d) hotkey (HK) for F_Undo
 	IniRead, ini_HK_UndoLH,					% ini_HADConfig, Configuration, HK_UndoLH,				% A_Space	;To store a blank value (empty string), specify % A_Space.
 	if (ini_HK_UndoLH = "")		;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
-		ini_HK_UndoLH 			:= "~#z"
+		ini_HK_UndoLH 			:= c_dHK_UndoLH	;set default (d) hotkey (HK) for F_Undo
 		IniWrite, % ini_HK_UndoLH, % ini_HADConfig, Configuration, HK_UndoLH
 	}
 	if (ini_HK_UndoLH != "none")
 		Hotkey, % ini_HK_UndoLH, F_Undo, On
 
-	ini_HK_ToggleTt			:= "none"	;HK = HotKey, ToggleTt = Toggle Triggerstring tips
+	ini_HK_ToggleTt			:= c_dHK_ToggleTt	; c (constant), d (default), HK = HotKey, ToggleTt = Toggle Triggerstring tips
 	IniRead, ini_HK_ToggleTt,				% ini_HADConfig, Configuration, HK_ToggleTt,				% A_Space	;To store a blank value (empty string), specify % A_Space.
 	if (ini_HK_ToggleTt = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
-		ini_HK_ToggleTt 		:= "none"
+		ini_HK_ToggleTt 		:= c_dHK_ToggleTt
 		IniWrite, % ini_HK_ToggleTt, % ini_HADConfig, Configuration, HK_ToggleTt
 	}
-
 	if (ini_HK_ToggleTt != "none")
      {
 		Hotkey, % ini_HK_ToggleTt, F_ToggleTt, On
@@ -8177,7 +8180,13 @@ F_GuiShortDef_DetermineConstraints()
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
 	GuiControl, Move, % IdShortDefT3, % "x" . v_xNext . "y" . v_yNext		;% ShortcutLong
 	v_xNext := c_xmarg
-,	v_yNext += 2 * c_HofText
+,	v_yNext += c_HofText
+	GuiControl, Move, % IdShortDefT9, % "x" . v_xNext . "y" . v_yNext		;Default shortcut (hotkey):
+	v_xNext := v_OutVarTempX + v_OutVarTempW + 2 * c_xmarg
+	GuiControl, Move, % IdShortDefT10, % "x" . v_xNext . "y" . v_yNext		;Default shortcut (hotkey):
+	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefT10
+	v_xNext := c_xmarg
+	v_yNext += 2 * c_HofText
 	GuiControl, Move, % IdShortDefT5, % "x" . v_xNext . "y" . v_yNext		;New shortcut (hotkey)
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefT5
 	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
@@ -8215,9 +8224,6 @@ F_GuiShortDef_DetermineConstraints()
 	GuiControlGet, v_OutVarTemp, Pos, % IdShortDefB1
 	v_xNext := v_OutVarTempX + v_OutVarTempW + c_xmarg
 	GuiControl, Move, % IdShortDefB2, % "x" . v_xNext . "y" . v_yNext
-	v_xNext := c_xmarg
-,	v_yNext += c_HofButton + c_HofText
-	GuiControl, Move, % IdShortDefT8, % "x" . v_xNext . "y" . v_yNext
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ParseHotkey(WhichItem, space*)
@@ -8352,15 +8358,28 @@ F_GuiShortDef_CreateObjects(ItemName)
 		Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT1,	% TransA["Toggle triggerstring tips"]
 	
 	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT2,				% TransA["Current shortcut (hotkey):"]
+	Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT9,				% TransA["Default shortcut (hotkey):"]
 	
 	if (InStr(ItemName, TransA["Call Graphical User Interface"]))
+	{
 		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_Main, 		"space")
+		Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT10,	% F_ParseHotkey(c_dHK_CallGUI, 	"space")
+	}	
 	if (InStr(ItemName, TransA["Copy clipboard content into ""Enter hotstring"""]))
+	{
 		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_IntoEdit, 	"space")
+		Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT10,	% F_ParseHotkey(c_dHK_CopyClip, 	"space")
+	}	
 	if (InStr(ItemName, TransA["Undo the last hotstring"]))
+	{
 		Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT3, 	% F_ParseHotkey(ini_HK_UndoLH, 	"space")
+		Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT10,	% F_ParseHotkey(c_dHK_UndoLH, 	"space")
+	}	
 	if (InStr(ItemName, TransA["Toggle triggerstring tips"]))
+	{
 		Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT3,	% F_ParseHotkey(ini_HK_ToggleTt, 	"space")
+		Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortDefT10,	% F_ParseHotkey(c_dHK_ToggleTt, 	"space")
+	}	
 
 	Gui, ShortDef: Font, 	% "s" . c_FontSize + 2 . A_Space . "cBlue",		% c_FontType
 	Gui, ShortDef: Add, 	Text,    	x0 y0 HwndIdShortDefT4,				ⓘ
@@ -8416,8 +8435,7 @@ F_GuiShortDef_CreateObjects(ItemName)
 	F_HK_TildeModInfo := func("F_ShowLongTooltip").bind(TransA["F_HK_TildeModInfo"])
 	GuiControl +g, % IdShortDefT7, % F_HK_TildeModInfo
 	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB1 gF_ShortDefB1_SaveHotkey,					% TransA["Apply new hotkey"]
-	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB2 gF_ShortDefB2_RestoreHotkey,				% TransA["Apply default hotkey"]
-	Gui, ShortDef: Add,		Text,	x0 y0 HwndIdShortdefT8,										% TransA["Press Esc when you've finished"]
+	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB2 gF_ShortDefB2_RestoreHotkey,				% TransA["Restore default hotkey"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ShortDefB2_RestoreHotkey()
@@ -8437,7 +8455,7 @@ F_ShortDefB2_RestoreHotkey()
 	{
 		if (OldHotkey != "none")	
 			Hotkey, % OldHotkey, F_GUIInit, Off
-		ini_HK_Main := "#^h"
+		ini_HK_Main := c_dHK_CallGUI
 		GuiControl,, % IdShortDefCB3, 0
 		GuiControl,, % IdShortDefCB4, 0
 		GuiControl,, % IdShortDefCB5, 0
@@ -8459,7 +8477,7 @@ F_ShortDefB2_RestoreHotkey()
 			Hotkey, % OldHotkey, F_PasteFromClipboard, Off
 			Hotkey, IfWinExist				;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 		}
-		ini_HK_IntoEdit := "~^#c"
+		ini_HK_IntoEdit := c_dHK_CopyClip
 		GuiControl,, % IdShortDefCB3, 0
 		GuiControl,, % IdShortDefCB4, 0
 		GuiControl,, % IdShortDefCB5, 0
@@ -8480,14 +8498,14 @@ F_ShortDefB2_RestoreHotkey()
 			; OutputDebug, % "OldHotkey:" . A_Space . OldHotkey . "`n"
 			if (OldHotkey != "none")
 				Hotkey, % OldHotkey, 	F_Undo, Off
-			ini_HK_UndoLH := "~#z"
+			ini_HK_UndoLH := c_dHK_UndoLH	;set default (d) hotkey (HK)
 			Hotkey, % ini_HK_UndoLH, F_Undo, On
 		}
 		else
 		{
 			if (OldHotkey != "none")
 				Hotkey, % OldHotkey, 	F_Undo, Off
-			ini_HK_UndoLH := "~#z"
+			ini_HK_UndoLH := c_dHK_UndoLH	;set default (d) hotkey (HK)
 			Hotkey, % ini_HK_UndoLH, F_Undo, Off
 		}
 		GuiControl,, % IdShortDefCB3, 0
@@ -8496,7 +8514,7 @@ F_ShortDefB2_RestoreHotkey()
 		GuiControl,, % IdShortDefT3, % F_ParseHotkey(ini_HK_UndoLH, "space")
 		IniWrite, % ini_HK_UndoLH, % ini_HADConfig, Configuration, HK_UndoLH
 		; OutputDebug, % "A_ThisMenuItem:" . A_Space . A_ThisMenuItem . "ini_HK_UndoLH:" . A_Space . ini_HK_UndoLH . "`n"
-		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Undo the last hotstring"] . "`t" . F_ParseHotkey(ini_HK_UndoLH, 	"space")
+		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Undo the last hotstring"] . "`t" . F_ParseHotkey(ini_HK_UndoLH, "space")
 	}
 
 	if (InStr(A_ThisMenuitem, TransA["Toggle triggerstring tips"]))
@@ -8513,6 +8531,7 @@ F_ShortDefB2_RestoreHotkey()
 		IniWrite, % ini_HK_ToggleTt, % ini_HADConfig, Configuration, HK_ToggleTt
 		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Toggle triggerstring tips"] . "`t" . F_ParseHotkey(ini_HK_ToggleTt, "space")
 	}
+	ShortDefGuiEscape()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InterpretNewDynHK(WhichHK)
@@ -8661,7 +8680,7 @@ F_ShortDefB1_SaveHotkey()
 			if (OldHotkey != "None")
 				Hotkey, % OldHotkey, 	F_Undo, Off
 		}	
-		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Undo the last hotstring"] . "`t" . F_ParseHotkey(ini_HK_UndoLH, 	"space")
+		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Undo the last hotstring"] . "`t" . F_ParseHotkey(ini_HK_UndoLH, "space")
 	}
 
 	if (InStr(A_ThisMenuitem, TransA["Toggle triggerstring tips"]))
@@ -8691,6 +8710,7 @@ F_ShortDefB1_SaveHotkey()
 		}
 		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Toggle triggerstring tips"] . "`t" . F_ParseHotkey(ini_HK_ToggleTt, "space")
 	}
+	ShortDefGuiEscape()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_UpdateStateOfLockKeys(ini_HK_ToggleTt, ini_TTTtEn)
@@ -12980,7 +13000,7 @@ Application mode										= Application mode
 Application statistics									= Application statistics
 Application will exit now.								= Application will exit now.
 Apply												= &Apply
-Apply default hotkey									= Apply default hotkey
+Restore default hotkey									= Restore default hotkey
 Apply new hotkey										= Apply new hotkey
 aqua													= aqua
 Are you sure?											= Are you sure?
@@ -13067,6 +13087,7 @@ Customer id											= Customer id
 Customer name											= Customer name
 Dark													= Dark
 default 												= default
+Default shortcut (hotkey):								= Default shortcut (hotkey):
 Default mode											= Default mode
 Delete selected library file								= Delete selected library file
 Delete hotstring (F8) 									= Delete hotstring (F8)
@@ -13314,7 +13335,6 @@ Please try again.										= Please try again.
 Please wait, uploading .csv files... 						= Please wait, uploading .csv files...
 Position of this window is saved in Config.ini.				= Position of this window is saved in Config.ini.	
 Preview												= &Preview
-Press Esc when you've finished							= Press Esc when you've finished
 Public library:										= Public library:
 purple												= purple
 question												= question
