@@ -2894,11 +2894,11 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_OneCharPressed(ih, Char)
-{	;This function is always run BEFORE the hotstring functions (eg. F_Simple_Output, F_Simple_Output etc.). Therefore v_InputString cannot be cleared by this function.
+{	;This function is always run BEFORE the hotstring functions (eg. F_Simple_Output, F_Simple_Output etc.). Therefore v_InputString cannot be cleared by this function. The algorithm: two buffers: v_IS and v_Q. At first triggerstring tips are searched over v_IS. v_IS is longer by one character each time user presses something. When no longer characters are found among v_IS, then v_Q is incremented by one character per loop. Always at fist v_Q is searched as the string which could be used to display triggerstring tips.
 	global	;assume-global mode of operation
 	Critical, On
 	static	f_FoundTT 	:= false	;this flag is set if triggerstring tip (TT) was found
-		,	TrigTipsStr	:= ""
+		; ,	TrigTipsStr	:= ""
 	local	InputLength 	:= 0		;
 		,	f_EndCharDetected := false	;flag set when EndChar is detected
 		,	index := 0, value := ""	;usual set of variables applicable for "for" function
@@ -2921,18 +2921,19 @@ F_OneCharPressed(ih, Char)
 	,	v_Qinput 	:= ""
 	,	TrigTipsStr := ""
 	}	
-
-	if (!f_FoundTT)	;no triggerstring tip was found among v_InputString and v_Qinput
-	{
-		; v_InputString := ""
-		v_Qinput := ""	
-	,	TrigTipsStr := ""
-	}	
-
+	
 	v_InputString .= Char
-,	TrigTipsStr .= Char
+	; ,	TrigTipsStr .= Char
 	if (v_Qinput)
 		v_Qinput .= Char
+
+	; if (!f_FoundTT)	;no triggerstring tip was found among v_InputString and v_Qinput
+	; {
+		; v_InputString := ""
+		; v_Qinput .= Char
+		; v_Qinput := ""	
+	; ,	TrigTipsStr := ""
+	; }	
 
 	InputLength := StrLen(v_InputString)		;after concatenation
 	if (InputLength > 1)
@@ -2967,8 +2968,7 @@ F_OneCharPressed(ih, Char)
 		if (v_Qinput)
 			F_PTTTQ(v_Qinput)
 		else
-			F_PTTT(TrigTipsStr)	;Variant when new sequence starts from EndChar.
-			; F_PTTT(v_InputString)	;Variant when new sequence starts from EndChar.
+			F_PTTT(v_InputString)	;Variant when new sequence starts from EndChar.
 
 		; OutputDebug, % "v_Qinput:" . v_Qinput . "|" . A_Space 
 		; . "`n"
