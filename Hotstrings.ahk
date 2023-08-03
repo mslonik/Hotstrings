@@ -2907,12 +2907,12 @@ F_OneCharPressed(ih, Char)
 	if (WinActive("ahk_id" TT_C4_Hwnd)) or (WinExist("ahk_id" HMenuCliHwnd)) or (WinExist("ahk_id" HMenuAHKHwnd))
 		return
 
-	OutputDebug, % "1)IS:" . v_InputString . "|" . A_Space 
-		. "QS:" . v_Qinput . "|" . A_Space 
+	; OutputDebug, % "1)IS:" . v_InputString . "|" . A_Space 
+		; . "QS:" . v_Qinput . "|" . A_Space 
 	; 	. "f_LT:" . f_FoundTT . A_Space 
 	; 	. "f_EC:" . f_EndCharDetected . A_Space 
-		. "Char:" . Char . "|" 
-		. "`n"
+		; . "Char:" . Char . "|" 
+		; . "`n"
 	if (v_InputString = "")	;always true after any hotstring
 		v_Qinput 	:= ""
 	
@@ -2935,20 +2935,20 @@ F_OneCharPressed(ih, Char)
 		v_InputString 	:= Char
 	,	v_Qinput 		:= ""
 	}
-	if (f_EndCharDetected) and (FoundTips) and (v_Qinput) ;exception: double space
+	if (f_EndCharDetected) and (FoundTips) and (v_Qinput) ;exception: triggerstring contains double space (e.g. S2_DoubleSpace.csv)
 	{
 		v_InputString 	:= Char
 	,	v_Qinput 		:= ""
 	}	
 
-	OutputDebug, % "2)v_IS:" . v_InputString . "|" . A_Space 
+	; OutputDebug, % "2)v_IS:" . v_InputString . "|" . A_Space 
 				; . "IL:" 	. EndNoChar . A_Space 
 	; 			. "f_LT:" . f_FoundTT . A_Space 
-				. "f_EC:" . f_EndCharDetected . A_Space 
+				; . "f_EC:" . f_EndCharDetected . A_Space 
 	; 			. "f_EE:" . f_ExpEndChar . A_Space 
-				 . "v_QI:" . v_Qinput . "|" 
-				 . "FoundTips:" . FoundTips . "|"
-				 . "`n"
+				;  . "v_QI:" . v_Qinput . "|" 
+				;  . "FoundTips:" . FoundTips . "|"
+				;  . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -2972,14 +2972,14 @@ F_OneCharPressed(ih, Char)
 		else
 			FoundTips := false
 	}
-	OutputDebug, % A_ThisFunc . A_Space . "E" 
-		. A_Space . "Char:" . Char . "|" 
-		. A_Space . "v_IS:" . v_InputString . "|" 
-		. A_Space . "v_QI:" . v_Qinput . "|" 
-		. A_Space . "FoundTips:" . FoundTips . "|"
+	; OutputDebug, % A_ThisFunc . A_Space . "E" 
+		; . A_Space . "Char:" . Char . "|" 
+		; . A_Space . "v_IS:" . v_InputString . "|" 
+		; . A_Space . "v_QI:" . v_Qinput . "|" 
+		; . A_Space . "FoundTips:" . FoundTips . "|"
 	; 	. A_Space . "f_LT:" . f_FoundTT 
 	; 	. A_Space . "f_EC:" . f_EndCharDetected 
-		. "`n"
+		; . "`n"
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
