@@ -26,7 +26,7 @@ CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in t
 ; - - - - - - - - - - - - - - - - - - - - - - - E X E  CONVERSION / INSTALLATOR S E C T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.16"	;starting on 2023-05-14 (Sunday). 
+global AppVersion				:= "3.6.16"	;starting on 2023-08-06 (Sunday). 
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -111,7 +111,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_dHK_CallGUI 			:= "#^h"				;global constant: default (d) hotkey (HK) for calling main application GUI
 ,		c_dHK_ToggleTt			:= "none"				;global constant: default (d) hotkey (HK) for toggling the triggestring tips
 ;#c/* commercial only beginning
-,		v_ValidTill			:= "inf"				;"inf" for infinity, "limited" for other cases
+,		v_ValidTill			:= "limited"				;"inf" for infinity, "limited" for other cases
 ,		f_RShiftDown 			:= false
 ,		f_LShiftDown 			:= false
 ,		v_SendFun				:= ""				;last used output function; important for F_Undo
@@ -1025,8 +1025,9 @@ F_LicenseDetails()	;dedicated script: LemonAPI.ahk, structure:
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SupportContact()
 {
-	c_MsgBoxIconError	:= 16
-,	c_ASCII_NewLine 	:= "`%0A"
+	global						;assume-global mode of operation
+
+	c_ASCII_NewLine 	:= "`%0A"
 ,	c_ASCII_HorTab 	:= "`%09"
 ,	c_ASCII_Space		:= "`%20"
 ,	c_MailToTechnical	:= "support@hotstrings.technology"
@@ -1126,8 +1127,8 @@ F_CheckCommercialConditions()
 	local	LicenseInfo := {}
 		,	ElapsedTime := 0
 		,	LicenseDateTimeStamp := 0
-		,	c_MsgBoxIconError := 16
 		,	c_MsgBoxIconExclamation := 48
+		,	c_1minute := 60 
 
 	ElapsedTime := A_Now	
 
@@ -1135,23 +1136,22 @@ F_CheckCommercialConditions()
 	{
 		ini_LicenseKey	:= ""			;global variable, default value
 		IniRead, ini_LicenseKey, 		% ini_HADConfig, LicenseInfo, LicenseKey, % A_Space
-		if (ini_LicenseKey = "")
-		{
-			MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
-				, % TransA["No license key was found in Config.ini."]
-				. "`n`n"
-				. TransA["The [LicenseInfo] section will be removed from Congig.ini. When run next time, prompt to enter valid license key will be displayed."]
-				. "`n`n"
-				. TransA["Application will exit now."]
-				. "`n`n"
-				. TransA["Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference."]
-			IniDelete, % ini_HADConfig, LicenseInfo
-			ExitApp, 12	;12 = no license key was found within Config.ini.
-		}
+		; if (ini_LicenseKey = "")
+		; {
+		; 	MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+		; 		, % TransA["No license key was found in Config.ini."]
+		; 		. "`n`n"
+		; 		. TransA["The [LicenseInfo] section will be removed from Congig.ini. When run next time, prompt to enter valid license key will be displayed."]
+		; 		. "`n`n"
+		; 		. TransA["Application will exit now."]
+		; 		. "`n`n"
+		; 		. TransA["Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference."]
+		; 	IniDelete, % ini_HADConfig, LicenseInfo
+		; 	ExitApp, 12	;12 = no license key was found within Config.ini.
+		; }
 
 		if (ini_LicenseKey = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 		{
-			F_GUIInit()
 			F_GuiEnterLicense_CreateGui()
 			F_GuiEnterLicense_DetermineConstraints()
 			F_GuiEnterLicense()
@@ -1169,6 +1169,7 @@ F_CheckCommercialConditions()
 					. TransA["Application will exit now."]
 					. "`n`n"
 					. TransA["Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference."]
+					, % c_1minute
 					if (ini_THLog)
 						FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . TransA["License instance was not found on this PC / user domain account."] . A_Space . TransA["License key"] . ":" . A_Space . LicenseInfo.key . "." . A_Space . TransA["Exiting"] . "." . "`n", % v_LogFileName
 					ExitApp, 11	;11 = license key not found on this PC / user domain account.
