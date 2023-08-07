@@ -26,7 +26,7 @@ CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in t
 ; - - - - - - - - - - - - - - - - - - - - - - - E X E  CONVERSION / INSTALLATOR S E C T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.15"	;starting on 2023-05-14 (Sunday). 
+global AppVersion				:= "3.6.16"	;starting on 2023-08-06 (Sunday). 
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -864,8 +864,9 @@ return
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SupportContact()
 {
-	c_MsgBoxIconError	:= 16
-,	c_ASCII_NewLine 	:= "`%0A"
+	global						;assume-global mode of operation
+
+	c_ASCII_NewLine 	:= "`%0A"
 ,	c_ASCII_HorTab 	:= "`%09"
 ,	c_ASCII_Space		:= "`%20"
 ,	c_MailToTechnical	:= "support@hotstrings.technology"
@@ -1978,8 +1979,8 @@ F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_Simple_Output, F_Simple_Output etc.). Therefore v_InputString cannot be cleared by this function. The algorithm: two buffers: v_IS and v_Q. At first triggerstring tips are searched over v_IS. v_IS is longer by one character each time user presses something. When no longer characters are found among v_IS, then v_Q is incremented by one character per loop. Always at the first priority v_Q is searched as the string which could be used to display triggerstring tips.
 	global	;assume-global mode of operation
 	Critical, On
-	local	InputLength 	:= 0		;
-		,	f_EndCharDetected := false	;flag set when EndChar is detected
+	static	FoundTips		:= false
+	local	f_EndCharDetected := false	;flag set when EndChar is detected
 		,	index := 0, value := ""	;usual set of variables applicable for "for" function
 		, 	BeforeLast 	:= ""	;not last, but one before last character
 		,	LastChar		:= ""	;last character of input buffer (v_InputString)
@@ -2001,8 +2002,7 @@ F_OneCharPressed(ih, Char)
 	if (v_Qinput)
 		v_Qinput .= Char
 
-	InputLength := StrLen(v_InputString)		;after concatenation
-	if (InputLength > 1)
+	if (StrLen(v_InputString) > 1)
 	{
 		TwoLastChar := SubStr(v_InputString, -1)
 	,	BeforeLast := SubStr(TwoLastChar, 1, 1)	;two last chars and then first char
@@ -2012,11 +2012,16 @@ F_OneCharPressed(ih, Char)
 			f_EndCharDetected := false
 	}
 
-	if (f_EndCharDetected)
+	if (f_EndCharDetected) and (!FoundTips)	;exception: TS = "-/" (starts from EndChar). It is necessary to remember (static variable) if in previous step was found any triggerstring tip.
 	{
 		v_InputString 	:= Char
-	,	v_Qinput := ""
+	,	v_Qinput 		:= ""
 	}
+	if (f_EndCharDetected) and (FoundTips) and (v_Qinput) ;exception: triggerstring contains double space (e.g. S2_DoubleSpace.csv)
+	{
+		v_InputString 	:= Char
+	,	v_Qinput 		:= ""
+	}	
 
 	; OutputDebug, % "2)v_IS:" . v_InputString . "|" . A_Space 
 				; . "IL:" 	. EndNoChar . A_Space 
@@ -2024,6 +2029,7 @@ F_OneCharPressed(ih, Char)
 				; . "f_EC:" . f_EndCharDetected . A_Space 
 	; 			. "f_EE:" . f_ExpEndChar . A_Space 
 				;  . "v_QI:" . v_Qinput . "|" 
+				;  . "FoundTips:" . FoundTips . "|"
 				;  . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
@@ -2039,20 +2045,24 @@ F_OneCharPressed(ih, Char)
 		F_DestroyTriggerstringTips(ini_TTCn)
 		if (a_Tips.Count())	;if tips are available display then
 		{
+			FoundTips := true
 			F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 			
 			if (ini_TTTD > 0)
 				SetTimer, TurnOff_Ttt, % "-" . ini_TTTD
 		}
+		else
+			FoundTips := false
 	}
-	Critical, Off
 	; OutputDebug, % A_ThisFunc . A_Space . "E" 
-	; 	. A_Space . "Char:" . Char . "|" 
-	; 	. A_Space . "v_IS:" . v_InputString . "|" 
-	; 	. A_Space . "v_QI:" . v_Qinput . "|" 
+		; . A_Space . "Char:" . Char . "|" 
+		; . A_Space . "v_IS:" . v_InputString . "|" 
+		; . A_Space . "v_QI:" . v_Qinput . "|" 
+		; . A_Space . "FoundTips:" . FoundTips . "|"
 	; 	. A_Space . "f_LT:" . f_FoundTT 
 	; 	. A_Space . "f_EC:" . f_EndCharDetected 
-	; 	. "`n"
+		; . "`n"
+	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_InitiateInputHook()	;why InputHook: to process triggerstring tips.
@@ -8964,7 +8974,6 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 		FileAppend, % LibraryHeader, % ini_HADL . "\" . SourceLibrary, UTF-8
 	FileAppend, % F_ConvertListViewIntoTxt(), % ini_HADL . "\" . SourceLibrary, UTF-8
 	F_LoadLibrariesToTables()	; Hotstrings are already loaded by function F_LoadHotstringsFromLibraries(), but auxiliary tables have to be loaded again. Those (auxiliary) tables are used among others to fill in LV_ variables.
-	; F_LoadTTperLibrary()
 	GuiControl, ChooseString, % IdDDL2, % DestinationLibrary
 	Gui, HS3: 		Submit, NoHide	;this line is necessary to v_SelectHotstringLibrary <- DestinationLibrary
 	F_SelectLibrary()	;DestinationLibrary
@@ -13688,7 +13697,7 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 		,	WhatWasPressed := ""
 		,	f_Shift := false
 
-	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
+	OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
 	v_InputH.VisibleText 	:= false
 ,	v_UndoHotstring		:= ReplacementString	;important for F_Undo	
 ,	v_Options 			:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
