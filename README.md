@@ -1,8 +1,8 @@
 # Hotstrings
 
-Description: Advanced, configurable, text replacement tool written in AutoHotkey language, dedicated to Microsoft Windows. 
+Description: Advanced, configurable, text replacement tool written in [AutoHotkey language](https://www.autohotkey.com/), dedicated to Microsoft Windows. 
 Copyright ©: Maciej Słojewski, mslonik (🐘).
-Licensed according to MIT license.
+Licensed according to [MIT license](https://github.com/mslonik/Hotstrings/blob/master/LICENSE_MIT).
 
 This repositiory keeps free edition of Hotstrings application. If you wish to know more about commercial edition, please visit [this page](https://hotstrings.technology/).
 For comparison between free and commercial edition please see the file [20221204_HotstringsForAll.pdf](https://github.com/mslonik/Hotstrings/blob/master/20221204_HotstringsForAll.pdf) available in this repository.
