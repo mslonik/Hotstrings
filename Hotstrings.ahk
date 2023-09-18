@@ -8504,6 +8504,23 @@ F_GuiShortDef_CreateObjects(ItemName)
 	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB2 gF_ShortDefB2_RestoreHotkey,				% TransA["Restore default hotkey"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ChangeMainWindowTitle()
+{
+	global	;assume-global mode of operation
+
+	Switch F_WhichGui()
+	{
+		Case "HS3":
+			Gui, HS3: Show, Hide, % A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(" . F_ParseHotkey(ini_HK_Main, "space") . ")"
+			Gui, HS3: Show
+			Gui, HS4: Show, Hide, % A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(" . F_ParseHotkey(ini_HK_Main, "space") . ")"
+		Case "HS4": 
+			Gui, HS4: Show, Hide, % A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(" . F_ParseHotkey(ini_HK_Main, "space") . ")"
+			Gui, HS4: Show
+			Gui, HS3: Show, Hide, % A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(" . F_ParseHotkey(ini_HK_Main, "space") . ")"
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ShortDefB2_RestoreHotkey()
 {
 	global	;assume-global mode of operation
@@ -8531,6 +8548,7 @@ F_ShortDefB2_RestoreHotkey()
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
 		IniWrite, % ini_HK_Main, % ini_HADConfig, Configuration, HK_Main
 		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Call Graphical User Interface"] . "`t" . F_ParseHotkey(ini_HK_Main, 	"space")
+		F_ChangeMainWindowTitle()
 	}
 
 	if (InStr(A_ThisMenuitem, TransA["Copy clipboard content into ""Enter hotstring"""]))
@@ -8700,7 +8718,8 @@ F_ShortDefB1_SaveHotkey()
 			Hotkey, % OldHotkey, F_GUIInit, Off
 			Hotkey, If				;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 		}	
-		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Call Graphical User Interface"] . "`t" . F_ParseHotkey(ini_HK_Main, 	"space")
+		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Call Graphical User Interface"] . "`t" . F_ParseHotkey(ini_HK_Main, "space")
+		F_ChangeMainWindowTitle()
 	}
 
 	if (InStr(A_ThisMenuitem, TransA["Copy clipboard content into ""Enter hotstring"""]))
@@ -14064,7 +14083,7 @@ F_GuiHS4_Create()
 	local x0 := 0, y0 := 0
 	
 ;1. Definition of HS4 GUI.
-	Gui, 	HS4: New, 	-Resize +HwndHS4GuiHwnd +OwnDialogs -MaximizeBox, % A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(Ctrl + Win + H)"
+	Gui, 	HS4: New, 	-Resize +HwndHS4GuiHwnd +OwnDialogs -MaximizeBox, % A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(" . F_ParseHotkey(ini_HK_Main, "space") . ")"
 	Gui, 	HS4: Margin,	% c_xmarg, % c_ymarg
 	Gui,		HS4: Color,	% c_WindowColor, % c_ControlColor
 	
@@ -14294,7 +14313,7 @@ F_GuiHS3_Create()
 	
 ;1. Definition of HS3 GUI.
 ;+Border doesn't work in Microsoft Windows 10
-	Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs,			 						% A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(Ctrl + Win + H)"
+	Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs,			 						% A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(" . F_ParseHotkey(ini_HK_Main, "space") . ")"
 	Gui, 		HS3: Margin,		% c_xmarg, % c_ymarg
 	Gui,			HS3: Color,		% c_WindowColor, % c_ControlColor
 	
