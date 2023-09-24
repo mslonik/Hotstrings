@@ -42,7 +42,6 @@ global AppVersion				:= "3.6.17"	;starting on 2023-08-06 (Sunday).
 ;@Ahk2Exe-SetProductName Hotstrings
 ;@Ahk2Exe-SetProductVersion %U_vAppVersion% 
 ;@Ahk2Exe-SetVersion %U_vAppVersion% 
-FileInstall, hotstrings.ico, 	% AppIcon, 		0
 ;#f/* free version only beginning
 ; FileInstall, LICENSE_MIT, 	LICENSE_MIT,		0
 ;#f*/ free version only end
@@ -114,7 +113,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_dHK_CallGUI 			:= "#^h"				;global constant: default (d) hotkey (HK) for calling main application GUI
 ,		c_dHK_ToggleTt			:= "none"				;global constant: default (d) hotkey (HK) for toggling the triggestring tips
 ;#c/* commercial only beginning
-,		v_ValidTill			:= "limited"				;"inf" for infinity, "limited" for other cases
+,		v_ValidTill			:= "limited"			;"inf" for infinity, "limited" for other cases
 ,		f_RShiftDown 			:= false
 ,		f_LShiftDown 			:= false
 ,		v_SendFun				:= ""				;last used output function; important for F_Undo
@@ -1224,7 +1223,6 @@ F_GuiEnterLicense_CreateGui()
 	Gui, EnterLicense: Add, 		Text,    	x0 y0 HwndIdEnterLicenseT2, 								% TransA["You should receive it by e-mail"]
 	Gui, EnterLicense: Add,		Edit,	x0 y0 HwndIdEnterLicenseE1 r1 Limit36,						12345678-ABCD-1234-ABCD-012345678901	;8 + 1 + 4 + 1 + 4 + 1 + 4 + 1 + 12 = 36
 	Gui, EnterLicense: Add,		Button,  	x0 y0 HwndIdEnterLicenseB1 gF_EnterLicenseB1 Default,			% TransA["OK"]
-	; Gui, MyAbout: Add,		Picture, 	x0 y0 HwndIdAboutPicture w96 h96, 							% AppIcon
 }
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1251,10 +1249,6 @@ F_GuiEnterLicense_DetermineConstraints()
 ,	xNext := (OutVarTempW // 2) - (wNext // 2)
 ,	yNext += OutVarTempH + c_ymarg
 	GuiControl, Move, % IdEnterLicenseB1, % "x" . xNext . A_Space . "y" . yNext . A_Space . "w" . wNext	;ok
-	
-	; xNext := OutVarTemp1X + OutVarTemp1W - 96 ;96 = chosen size of icon
-; ,	yNext := OutVarTemp1Y + OutVarTemp1H
-	; GuiControl, Move, % IdAboutPicture, % "x" . xNext . A_Space . "y" . yNext 
 }
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3700,16 +3694,23 @@ F_InitiateTrayMenus(v_SilentMode)
 ;#c/* commercial only beginning		
 		Case "l":
 		Menu, Tray, NoStandard									; remove all the rest of standard tray menu
-		if (!FileExist(AppIcon))
+		if (!FileExist(AppIcon)) and (!A_IsCompiled)					; if the file is compiled, then icon is inside of .exe file.
 		{
 			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Information"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." 
 				. A_Space . TransA["Would you like to download the icon file?"] . "`n`n" . TransA["If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used."]
 			IfMsgBox, Yes
-				URLDownloadToFile, https://raw.githubusercontent.com/mslonik/Hotstrings/master/hotstrings.ico, % AppIcon	;2022-01-28
+			{
+				URLDownloadToFile, https://raw.githubusercontent.com/mslonik/Hotstrings/master/hotstrings.ico, % AppIcon
+				Menu, Tray, Icon,		% AppIcon 				;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
+			}	
 			IfMsgBox, No
-				AppIcon := "*"
+				Menu, Tray, Icon,		* 						;Specify an asterisk (*) for FileName to restore the script to its default icon.
 		}
-		Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
+		if (A_IsCompiled)
+			Menu, Tray, Icon,			* 						;Specify an asterisk (*) for FileName to restore the script to its default icon.
+		else
+			Menu, Tray, Icon,			% AppIcon 				;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
+			
 		Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"], 		F_GuiAbout
 		Menu, Tray, Default,	% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Silent mode"]
 		Menu, Tray, Add, 		% TransA["Reload in default mode"] . "`tShift+Ctrl+R", 			 		F_ReloadApplication	;it is possible to reload, but then application will be run in default mode of operation (opposit to silent mode)
@@ -3720,20 +3721,25 @@ F_InitiateTrayMenus(v_SilentMode)
 ;#c*/ commercial only end
 		Case "":
 			Menu, Tray, NoStandard									; remove all the rest of standard tray menu
-			; OutputDebug, % "AppIcon:" . AppIcon . A_Tab . "A_ScriptDir:" . A_Tab . A_ScriptDir .  A_Tab . "A_WorkingDir:" . A_Tab . A_WorkingDir . "`n"
-			if (!FileExist(AppIcon))
+			; OutputDebug, % "AppIcon:" . AppIcon . "`n" . "A_ScriptDir:" . A_Tab . A_ScriptDir .  "`n" . "A_WorkingDir:" . A_Tab . A_WorkingDir . "`n" . "FileExist(AppIcon):" . A_Tab . FileExist(AppIcon) . "`n"
+			if (!FileExist(AppIcon)) and (!A_IsCompiled)				; if the file is compiled, then icon is inside of .exe file.
 			{
 				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Information"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." 
 					. A_Space . TransA["Would you like to download the icon file?"] . "`n`n" . TransA["If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used."]
 				IfMsgBox, Yes
 				{
-					OutputDebug, % "AppIcon:" . A_Tab . AppIcon
-					URLDownloadToFile, 	https://raw.githubusercontent.com/mslonik/Hotstrings/master/hotstrings.ico, % AppIcon	;2022-01-28
+					; OutputDebug, % "AppIcon:" . A_Tab . AppIcon
+					URLDownloadToFile, 	https://raw.githubusercontent.com/mslonik/Hotstrings/master/hotstrings.ico, % AppIcon
+					Menu, Tray, Icon,		% AppIcon 				;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
 				}
 				IfMsgBox, No
-					AppIcon := "*"
+					Menu, Tray, Icon,		* 						;Specify an asterisk (*) for FileName to restore the script to its default icon.
 			}
-			Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
+			if (A_IsCompiled)
+				Menu, Tray, Icon,			* 						;Specify an asterisk (*) for FileName to restore the script to its default icon.
+			else
+				Menu, Tray, Icon,			% AppIcon 				;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
+
 			Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Default mode"], 	F_GuiAbout
 			Menu, Tray, Add																	;line separator 
 			Menu, Tray, Add, 		% TransA["Edit Hotstrings"] . "`tCtrl + Win + H",						F_GUIinit
@@ -8997,12 +9003,16 @@ F_GuiShowIntro()
 	Gui, ShowIntro: Add, 	Text,    x0 y0 HwndIdIntroLine2,									% TransA["ShowInfoText"]
 	Gui, ShowIntro: Add, 	Text,    x0 y0 HwndIdIntroLine3,									% TransA["I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)!"]
 	Gui, ShowIntro: Add, 	Button,  x0 y0 HwndIdIntroOkButton gShowIntroGuiClose,					% TransA["OK"]
-	Gui, ShowIntro: Add,	Picture, x0 y0 HwndIdAboutPicture w96 h96, 							% AppIcon
+	if (A_IsCompiled)
+		Gui, ShowIntro: Add,		Picture, 	x0 y0 HwndIdIntroPicture w96 h96 Icon,				% A_ScriptFullPath
+	else
+		Gui, ShowIntro: Add,		Picture, 	x0 y0 HwndIdIntroPicture w96 h96, 					% AppIcon
+
 	Gui, ShowIntro: Add,	CheckBox, x0 y0 HwndIdIntroCheckbox vIntroCheckbox gF_ShowIntroCheckbox,	% TransA["Show Introduction window after application is restarted?"]
-	
+
 	;3. Determine constraints
 	v_xNext := c_xmarg
-	v_yNext := c_ymarg
+,	v_yNext := c_ymarg
 	GuiControl, Move,			% IdIntroLine1, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdIntroLine1
 	v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg
@@ -9012,16 +9022,16 @@ F_GuiShowIntro()
 	GuiControl, Move,			% IdIntroLine3, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdIntroLine3
 	v_xNext := v_OutVarTempW // 2
-	v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg
+,	v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg
 	GuiControlGet, v_OutVarTemp1, Pos, % IdIntroOkButton
 	v_wNext := v_OutVarTemp1W + 2 * c_xmarg
 	GuiControl, Move,			% IdIntroOkButton, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 10 * c_xmarg
-	v_yNext := v_OutVarTempY
-	GuiControl, Move,			% IdAboutPicture, % "x" . v_xNext . "y" . v_yNext
+,	v_yNext := v_OutVarTempY
+	GuiControl, Move,			% IdIntroPicture, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdIntroOkButton
 	v_xNext := c_xmarg
-	v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
+,	v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
 	GuiControl, Move,			% IdIntroCheckbox, % "x" . v_xNext . "y" . v_yNext
 	
 	GuiControl,, % IdIntroCheckbox, % ini_ShowIntro	;load initial value
@@ -9573,22 +9583,25 @@ F_ToggleEndChars()
 F_AddToAutostart()
 {
 	global	;assume-global mode
-	local Target := "", LinkFile_DM := "", LinkFile_SM := "", Args_DM := "", Args_SM := "", Description := "", IconFile := "", WorkingDir := ""
-	
-	Target 		:= A_ScriptFullPath
-	LinkFile_DM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_DM" . "." . "lnk"
-	LinkFile_SM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_SM" . "." . "lnk"
-	WorkingDir 	:= A_ScriptDir
-	Args_DM 		:= ""
-	Args_SM		:= "l"
-	Description 	:= TransA["Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries"] . "."
-	IconFile 		:= A_ScriptDir . "\" . AppIcon
+	local 	Target 		:= A_ScriptFullPath
+	,		LinkFile_DM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_DM" . "." . "lnk"
+	,		LinkFile_SM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_SM" . "." . "lnk"
+	,		WorkingDir 	:= A_ScriptDir
+	,		Args_DM 		:= ""
+	,		Args_SM		:= "l"
+	,		Description 	:= TransA["Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries"] . "."
+	,		IconFile 		:= AppIcon
 	
 	Switch A_ThisMenuItem
 	{
 		Case TransA["Default mode"]:
 			Try
-				FileCreateShortcut, % Target, % LinkFile_DM, % WorkingDir, % Args_DM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+			{
+				if (A_IsCompiled)
+					FileCreateShortcut, % Target, % LinkFile_SM, % WorkingDir, % Args_SM, % Description, A_ScriptFullPath, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+				else	
+					FileCreateShortcut, % Target, % LinkFile_DM, % WorkingDir, % Args_DM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+			}
 			Catch
 			{
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with link file (.lnk) creation"] . ":" 
@@ -9600,7 +9613,12 @@ F_AddToAutostart()
 					. A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_DM" . "." . "lnk" . "," . A_Space . TransA["Default mode"]
 		Case TransA["Silent mode"]:
 			Try
-				FileCreateShortcut, % Target, % LinkFile_SM, % WorkingDir, % Args_SM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+			{
+				if (A_IsCompiled)
+					FileCreateShortcut, % Target, % LinkFile_SM, % WorkingDir, % Args_SM, % Description, A_ScriptFullPath, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+				else	
+					FileCreateShortcut, % Target, % LinkFile_SM, % WorkingDir, % Args_SM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+			}
 			Catch
 			{
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with link file (.lnk) creation"] . ":" 
@@ -10660,7 +10678,10 @@ F_Searching()	;after pressing F3
 {
 	DetectHiddenWindows, On
 	Suspend, On			;To disable all hotstrings definitions within search window.
-	Menu, Tray, Icon,		% AppIcon, , 1	;When a script's hotkeys are suspended, its tray icon changes to the letter S. This can be avoided by freezing the icon, which is done by specifying 1 for the last parameter of the Menu command.
+	if (A_IsCompiled)
+		Menu, Tray, Icon,		A_ScriptFullPath, , 1	;When a script's hotkeys are suspended, its tray icon changes to the letter S. This can be avoided by freezing the icon, which is done by specifying 1 for the last parameter of the Menu command.
+	else	
+		Menu, Tray, Icon,		% AppIcon, , 1	;When a script's hotkeys are suspended, its tray icon changes to the letter S. This can be avoided by freezing the icon, which is done by specifying 1 for the last parameter of the Menu command.
 	if (WinExist("ahk_id" HS3SearchHwnd))
 		{
 			Gui, HS3: 		+Disabled
@@ -14993,7 +15014,10 @@ F_GuiAbout_CreateObjects()
 	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 		% c_FontType
 	Gui, MyAbout: Add, 		Text,    	x0 y0 HwndIdLine2, 										% TransA["Enables Convenient Definition"]
 	Gui, MyAbout: Add, 		Button,  	x0 y0 HwndIdAboutOkButton gMyAboutGuiClose Default,			% TransA["OK"]
-	Gui, MyAbout: Add,		Picture, 	x0 y0 HwndIdAboutPicture w96 h96, 							% AppIcon
+	if (A_IsCompiled)
+		Gui, MyAbout: Add,		Picture, 	x0 y0 HwndIdAboutPicture w96 h96 Icon,					% A_ScriptFullPath
+	else
+		Gui, MyAbout: Add,		Picture, 	x0 y0 HwndIdAboutPicture w96 h96, 						% AppIcon
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT1,									% TransA["Version"] . ":"
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT2,									% AppVersion
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT3,									% TransA["Mode of operation"] . ":"
@@ -15052,7 +15076,7 @@ F_GuiAbout_DetermineConstraints()
 	MaxText := Max(OutVarTemp1W, OutVarTemp2W, OutVarTemp3W, OutVarTemp4W)
 	GuiControlGet, OutVarTemp, Pos, % IdLine2
 	xNext := c_xmarg, yNext := OutVarTempY + OutVarTempH + 2 * c_ymarg
-	GuiControl, Move, % IdAboutT1, % "x" . xNext . A_Space . "y" . yNext
+	GuiControl, Move, % IdAboutT1, % "x" . xNext . A_Space . "y" . yNext	;Version
 	xNext := MaxText + 3 * c_xmarg
 	GuiControl, Move, % IdAboutT2, % "x" . xNext . A_Space . "y" . yNext
 	xNext := c_xmarg, yNext += c_HofText
@@ -15099,9 +15123,9 @@ F_GuiAbout_DetermineConstraints()
 	GuiControlGet, OutVarTemp, Pos, % IdLine2
 	yNext := OutVarTempY + OutVarTempH + 7 * c_HofText + c_ymarg
 	GuiControl, Move, % IdAboutOkButton, % "x" . xNext . "y" . A_Space . yNext . "w" . wNext
-	
+	GuiControlGet, OutVarTemp3, Pos, % IdAboutT1	;Version
 	xNext := OutVarTemp1X + OutVarTemp1W - 96 ;96 = chosen size of icon
-,	yNext := OutVarTemp1Y + OutVarTemp1H
+,	yNext := OutVarTemp3Y
 	GuiControl, Move, % IdAboutPicture, % "x" . xNext . A_Space . "y" . yNext 
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
