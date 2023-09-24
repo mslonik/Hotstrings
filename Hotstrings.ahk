@@ -3,7 +3,7 @@
  	Purpose:     	Facilitate maintenance of (triggerstring, hotstring) concept.
  	Description: 	Hotstrings AutoHotkey concept expanded, editable with GUI and many more options.
  	License:     	MIT License
-	Year:		2022
+	Year:		2022 / 2023
 */
 ; -----------Beginning of auto-execute section of the script, directives and general settings -------------------------------------------------
 ; After the script has been loaded, it begins executing at the top line, continuing until a Return, Exit, hotkey/hotstring label, or the physical end of the script is encountered (whichever comes first). 
@@ -26,7 +26,7 @@ CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in t
 ; - - - - - - - - - - - - - - - - - - - - - - - E X E  CONVERSION / INSTALLATOR S E C T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.16"	;starting on 2023-08-06 (Sunday). 
+global AppVersion				:= "3.6.17"	;starting on 2023-08-06 (Sunday). 
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -42,7 +42,6 @@ global AppVersion				:= "3.6.16"	;starting on 2023-08-06 (Sunday).
 ;@Ahk2Exe-SetProductName Hotstrings
 ;@Ahk2Exe-SetProductVersion %U_vAppVersion% 
 ;@Ahk2Exe-SetVersion %U_vAppVersion% 
-FileInstall, hotstrings.ico, 	% AppIcon, 		0
 ;#f/* free version only beginning
  FileInstall, LICENSE_MIT, 	LICENSE_MIT,		0
 ;#f*/ free version only end
@@ -81,6 +80,8 @@ FileInstall, hotstrings.ico, 	% AppIcon, 		0
 ,		v_Qinput				:= "" 		; to store substring of v_InputString related to possible question mark (inside) option
 ,		c_MsgBoxIconError		:= 16		;constant, MsgBox icon hand (stop/error)
 ,		c_MsgBoxIconExclamation	:= 48		;constant, MsgBox icon exclamation
+,		v_Triggerstring		:= ""		;to store d(t, o, h) -> t entered by user in GUI.
+,		ini_ShowWhiteChars		:= false		;show white characters (e.g. space) within GUI in form of special characters. For example <space> = U+2423 (open box ␣)
 ;#f/* free version only beginning
  ,		v_LicenseType			:= "free"		;"commercial" or "free"
 ;#f*/ free version only end
@@ -101,7 +102,8 @@ FileInstall, hotstrings.ico, 	% AppIcon, 		0
 ,		c_FontType 			:= "Consolas"
 ,		f_100msRun 			:= false				;global flag: timer is running, 100 ms, for concurrent press of Shift keys
 ,		f_WasReset			:= false				;global flag: Shift key memory reset (to reset hotstring recognizer)
-,		c_TTDelimiter			:= "¦"				;global constant: unique character applied as delimiter for triggerstring tips
+,		c_MHDelimiter			:= "¦"				;global constant: unique character applied as delimiter for menu hotstrings
+,		c_TextDelimiter		:= "‖"				;global constant: unique character applied as delimiter for text
 ,		c_dHK_UndoLH			:= "~#z"				;global constant: default (d) hotkey (HK) for Undo
 ,		c_dHK_CopyClip			:= "~^#c"				;global constant: default (d) hotkey (HK) for Copy to clipboard future hotstring content
 ,		c_dHK_CallGUI 			:= "#^h"				;global constant: default (d) hotkey (HK) for calling main application GUI
@@ -382,7 +384,8 @@ Menu, SubmenuReload, 	Add,	% TransA["Reload in default mode"] . "`tShift + Ctrl 
 ;#f*/ free version only end
 Menu, AppSubmenu, 		Add,	% TransA["Reload"],												:SubmenuReload
 
-Menu, AppSubmenu,		Add, % TransA["Suspend Hotstrings"] . "`tF10",							F_TraySuspendHotkeys
+Menu, AppSubmenu,		Add, % TransA["Suspend Hotstrings and all tips"] . "`tF10",					F_SuspendTipsAndHotkeys
+Menu, AppSubmenu,		Add, % TransA["Suspend all tips"] . "`tF11",								F_SuspendAllTips
 Menu, AppSubmenu,		Add, % TransA["Exit"],												F_Exit
 Menu, AppSubmenu,		Add	;To add a menu separator line, omit all three parameters.
 Menu, AppSubmenu,		Add, % TransA["Application hotstrings && hotkeys"],						F_InternalHot
@@ -596,9 +599,12 @@ Critical, Off
 	return
 	
 	F10:: ;new thread starts here
-		Suspend, Permit	;Any hotkey/hotstring subroutine whose very first line is Suspend, Permit will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON. This allows suspension to be turned off via such a hotkey.
-		F_TraySuspendHotkeys()							;suspend hotstrings
+		F_SuspendTipsAndHotkeys()							;suspend hotstrings
 	return
+
+	F11::
+		F_SuspendAllTips("toggle", true)
+	return	
 
 	^+r::	;new thread starts here
 		F_ReloadApplication()							;reload into default mode of operation
@@ -645,15 +651,15 @@ return
 return
 
 :*:hsenable/::
-	F_TraySuspendHotkeys("enable")
+	F_SuspendTipsAndHotkeys("enable")
 return
 
 :*:hsdisable/::
-	F_TraySuspendHotkeys("disable")
+	F_SuspendTipsAndHotkeys("disable")
 return
 
 :*:hssuspend/::									;toggle suspend hotstrings and triggerstrings
-	F_TraySuspendHotkeys()
+	F_SuspendTipsAndHotkeys()
 return
 
 :*:hsrestart/::									;reload into default mode of operation
@@ -835,7 +841,7 @@ return
 		F_StaticMenu_Keyboard()
 		return
 	~Esc::	;tilde in order to run function TT_C4GuiEscape
-		GuiControl,, % IdTT_C4_LB4, ¦
+		GuiControl,, % IdTT_C4_LB4, % c_MHDelimiter
 		;OutputDebug, % "v_InputString:" . A_Tab . v_InputString . A_Tab . "v_EndChar:" . A_Tab . v_EndChar
 		v_InputString 			:= ""	
 		return
@@ -1602,7 +1608,6 @@ F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_MouseMouse is lower than this
 				Case 3: Gui, TT_C3: Destroy
 			}
 	}
-	; ToolTip, ;switch off tooltips created when Unicode symbol is clicked	2022-02-06: I'm not sure if this line is necessary
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ActiveControlIsOfClass(Class)	;https://www.autohotkey.com/docs/commands/_If.htm
@@ -1869,40 +1874,46 @@ F_TrigTipsSecondColumn(a_array1, a_array2)
 
 	for key, value in a_array1
 	{
+		; OutputDebug, % "value:" . value . "|" . "key:" . key . "|" . "a_array2[key]:" . a_array2[key] . "`n"
 		if (a_array2[key] = "En") and (InStr(value, "*")) and (InStr(value, "?"))
 		{
 			if (key != AmountOfItems)
-				ThisValue .= "?" . c_TTDelimiter
+				ThisValue .= "?" . c_TextDelimiter
 			else
 				ThisValue .= "?"
-			Continue
+			; OutputDebug, % "First c" . "`n"
+			Continue	;Skips the rest of a loop statement's current iteration and begins a new one.
 		}	
 		if (a_array2[key] = "En") and (InStr(value, "*"))
 		{
 			if (key != AmountOfItems)
-				ThisValue .= "✓" . c_TTDelimiter
+				ThisValue .= "✓" . c_TextDelimiter
 			else
 				ThisValue .= "✓"
-			Continue
+			; OutputDebug, % "Second c" . "`n"
+			Continue	;Skips the rest of a loop statement's current iteration and begins a new one.
 		}	
 		if (a_array2[key] = "En") and (InStr(value, "?"))
 		{
 			if (key != AmountOfItems)
-				ThisValue .= "?" . c_TTDelimiter
+				ThisValue .= "?" . c_TextDelimiter
 			else
 				ThisValue .= "?"
+			; OutputDebug, % "First ?" . "`n"
+			Continue
 		}	
 		if (a_array2[key] = "En") and (!InStr(value, "*"))
 		{
 			if (key != AmountOfItems)
-				ThisValue .= "↓" . c_TTDelimiter
+				ThisValue .= "↓" . c_TextDelimiter
 			else
 				ThisValue .= "↓"
+			; OutputDebug, % "First ↓" . "`n"
 		}	
 		if (a_array2[key] = "Dis")
 		{
 			if (key != AmountOfItems)
-				ThisValue .= "╳" . c_TTDelimiter
+				ThisValue .= "╳" . c_TextDelimiter
 			else
 				ThisValue .= "╳"
 		}	
@@ -1918,10 +1929,11 @@ F_ConvertArrayToString(a_array)
 	for key, value in a_array
 	{
 		if (key != AmountOfItems)
-			ThisValue .= value . c_TTDelimiter
+			ThisValue .= value . c_TextDelimiter
 		else
 			ThisValue .= value
-	}	
+	}
+	; OutputDebug, % "ThisValue:" . ThisValue . "`n"
 	return ThisValue
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1975,6 +1987,17 @@ F_FlipMenu(WindowHandle, MenuX, MenuY, GuiName)
 	Gui, % GuiName . ": Show", x%NewX% y%NewY% NoActivate
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_CheckBeforeLastChar(InputString) ;check if before last character is EndChar
+{
+	local TwoLastChar := "", BeforeLast := ""
+	TwoLastChar := SubStr(InputString, -1)
+,	BeforeLast := SubStr(TwoLastChar, 1, 1)	;two last chars and then first char
+	if (InStr(HotstringEndChars, BeforeLast))
+		return true
+	else
+		return false
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_OneCharPressed(ih, Char)
 {	;This function is always run BEFORE the hotstring functions (eg. F_Simple_Output, F_Simple_Output etc.). Therefore v_InputString cannot be cleared by this function. The algorithm: two buffers: v_IS and v_Q. At first triggerstring tips are searched over v_IS. v_IS is longer by one character each time user presses something. When no longer characters are found among v_IS, then v_Q is incremented by one character per loop. Always at the first priority v_Q is searched as the string which could be used to display triggerstring tips.
 	global	;assume-global mode of operation
@@ -1990,11 +2013,10 @@ F_OneCharPressed(ih, Char)
 		return
 
 	; OutputDebug, % "1)IS:" . v_InputString . "|" . A_Space 
-		; . "QS:" . v_Qinput . "|" . A_Space 
-	; 	. "f_LT:" . f_FoundTT . A_Space 
+	; 	. "QS:" . v_Qinput . "|" . A_Space 
 	; 	. "f_EC:" . f_EndCharDetected . A_Space 
-		; . "Char:" . Char . "|" 
-		; . "`n"
+	; 	. "Char:" . Char . "|" 
+	; 	. "`n"
 	if (v_InputString = "")	;always true after any hotstring
 		v_Qinput 	:= ""
 	
@@ -2003,14 +2025,7 @@ F_OneCharPressed(ih, Char)
 		v_Qinput .= Char
 
 	if (StrLen(v_InputString) > 1)
-	{
-		TwoLastChar := SubStr(v_InputString, -1)
-	,	BeforeLast := SubStr(TwoLastChar, 1, 1)	;two last chars and then first char
-		if (InStr(HotstringEndChars, BeforeLast))
-			f_EndCharDetected := true
-		else
-			f_EndCharDetected := false
-	}
+		f_EndCharDetected := F_CheckBeforeLastChar(v_InputString)
 
 	if (f_EndCharDetected) and (!FoundTips)	;exception: TS = "-/" (starts from EndChar). It is necessary to remember (static variable) if in previous step was found any triggerstring tip.
 	{
@@ -2024,13 +2039,10 @@ F_OneCharPressed(ih, Char)
 	}	
 
 	; OutputDebug, % "2)v_IS:" . v_InputString . "|" . A_Space 
-				; . "IL:" 	. EndNoChar . A_Space 
-	; 			. "f_LT:" . f_FoundTT . A_Space 
-				; . "f_EC:" . f_EndCharDetected . A_Space 
-	; 			. "f_EE:" . f_ExpEndChar . A_Space 
-				;  . "v_QI:" . v_Qinput . "|" 
-				;  . "FoundTips:" . FoundTips . "|"
-				;  . "`n"
+	; 			. "f_EC:" . f_EndCharDetected . A_Space 
+	; 			 . "v_QI:" . v_Qinput . "|" 
+	; 			 . "FoundTips:" . FoundTips . "|"
+	; 			 . "`n"
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	if (ini_TTTtEn)
@@ -2040,7 +2052,7 @@ F_OneCharPressed(ih, Char)
 		else
 			F_PTTT(v_InputString)	;Variant when new sequence starts from EndChar.
 
-		; OutputDebug, % "v_Qinput:" . v_Qinput . "|" . A_Space 
+		; OutputDebug, % "IS:" . v_InputString . "|" . A_Space 
 		; . "`n"
 		F_DestroyTriggerstringTips(ini_TTCn)
 		if (a_Tips.Count())	;if tips are available display then
@@ -2055,13 +2067,12 @@ F_OneCharPressed(ih, Char)
 			FoundTips := false
 	}
 	; OutputDebug, % A_ThisFunc . A_Space . "E" 
-		; . A_Space . "Char:" . Char . "|" 
-		; . A_Space . "v_IS:" . v_InputString . "|" 
-		; . A_Space . "v_QI:" . v_Qinput . "|" 
-		; . A_Space . "FoundTips:" . FoundTips . "|"
-	; 	. A_Space . "f_LT:" . f_FoundTT 
+	; 	. A_Space . "Char:" . Char . "|" 
+	; 	. A_Space . "v_IS:" . v_InputString . "|" 
+	; 	. A_Space . "v_QI:" . v_Qinput . "|" 
+	; 	. A_Space . "FoundTips:" . FoundTips . "|"
 	; 	. A_Space . "f_EC:" . f_EndCharDetected 
-		; . "`n"
+	; 	. "`n"
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2518,52 +2529,125 @@ F_TrayExit()
 	ExitApp, 2	;2 = by Tray
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_TraySuspendHotkeys(parameter*)
+F_SuspendTipsAndHotkeys(parameter*)	;F10
 {
 	global	;assume-global mode: v_InputH
+	static	PreviousState := true
 
 	Switch parameter[1]
 	{
 		Case "enable":
+		EnableTipsAndHotkeys:
 			v_InputH.Start()
-			Suspend, Off
+			F_SuspendAllTips(true, false)	;enable all triggerstring tips
+			F_SwitchHotstrings("enabled")
+			Switch WhichGuiEnable := F_WhichGui()	;Disable all GuiControls for time of adding / editing of d(t, o, h)	
+			{
+				Case "HS3":	F_GuiHS3_EnDis("Enable")
+				Case "HS4": 	F_GuiHS4_EnDis("Enaable")
+			}
 			Hotstring("Reset")
 			v_InputString := ""
-			Menu, Tray, 		UnCheck, % TransA["Suspend Hotstrings"] . "`tF10"
-			Menu, AppSubmenu, 	UnCheck, % TransA["Suspend Hotstrings"] . "`tF10"
+			Menu, Tray, 		UnCheck, % TransA["Suspend Hotstrings and all tips"] . "`tF10"
+			Menu, AppSubmenu, 	UnCheck, % TransA["Suspend Hotstrings and all tips"] . "`tF10"
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now ACTIVE."]
 				. "`n`n" . TransA["It means triggerstring tips state is restored and hotstring definitions will be triggered as usual."]
 
 		Case "disable":
+		DisableTipsAndHotkeys:
 			v_InputH.Stop()
-			Suspend, On
-			Menu, Tray, 		Check, % TransA["Suspend Hotstrings"] . "`tF10"
-			Menu, AppSubmenu, 	Check, % TransA["Suspend Hotstrings"] . "`tF10"
+			F_SuspendAllTips(false, false)	;disable all triggerstring tips
+			F_DestroyTriggerstringTips(ini_TTCn)
+			F_SwitchHotstrings("disabled")
+			Switch WhichGuiEnable := F_WhichGui()	;Disable all GuiControls for time of adding / editing of d(t, o, h)	
+			{
+				Case "HS3":	F_GuiHS3_EnDis("Disable")
+				Case "HS4": 	F_GuiHS4_EnDis("Disable")
+			}
+			Menu, Tray, 		Check, % TransA["Suspend Hotstrings and all tips"] . "`tF10"
+			Menu, AppSubmenu, 	Check, % TransA["Suspend Hotstrings and all tips"] . "`tF10"
 			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now SUSPENDED."]
 				. "`n`n" . TransA["It means other script threads are still running. Triggerstring tips are off for your convenience."]
 
-		Default:
-			if (v_InputH.InProgress)
-			{
-				v_InputH.Stop()
-				Suspend, On
-				Menu, Tray, 		Check, % TransA["Suspend Hotstrings"] . "`tF10"
-				Menu, AppSubmenu, 	Check, % TransA["Suspend Hotstrings"] . "`tF10"
-				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now SUSPENDED."]
-					. "`n`n" . TransA["It means other script threads are still running. Triggerstring tips are off for your convenience."]
-			}
+		Default:	;including "toggle"
+			PreviousState := !PreviousState
+			if (PreviousState)
+				Goto EnableTipsAndHotkeys
 			else
-			{
-				v_InputH.Start()
-				Suspend, Off
-				Hotstring("Reset")
-				v_InputString := ""
-				Menu, Tray, 		UnCheck, % TransA["Suspend Hotstrings"] . "`tF10"
-				Menu, AppSubmenu, 	UnCheck, % TransA["Suspend Hotstrings"] . "`tF10"
-				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring definitions are now ACTIVE."]
-					. "`n`n" . TransA["It means triggerstring tips state is restored and hotstring definitions will be triggered as usual."]
-			}
+				Goto DisableTipsAndHotkeys
 	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SuspendAllTips(AllTipsState, MsgBoxState)	;F11
+{
+	global	;assume global mode
+	static	temp_ini_OHTtEn := true	;set of variables to store in memory state of variables
+		,	temp_ini_UHTtEn := true
+		,	temp_ini_TTTtEn := true
+		,	PreviousState := true
+
+	Switch AllTipsState
+	{
+		Case true:	;enable previously disabled tooltips
+		enable:
+			if (temp_ini_OHTtEn)
+				ini_OHTtEn := true
+			if (temp_ini_UHTtEn)
+				ini_UHTtEn := true
+			if (temp_ini_TTTtEn)
+				ini_TTTtEn := true
+			Hotstring("Reset")
+			v_InputString := ""
+			Menu, Tray, 		UnCheck, % TransA["Suspend all tips"] . "`tF11"
+			Menu, AppSubmenu, 	UnCheck, % TransA["Suspend all tips"] . "`tF11"
+			if (MsgBoxState)
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["All tips (e.g. triggerstring tips, tips displayed after definition is completed, udno) are now ACTIVE."]
+					. "`n`n" . TransA["Hotstring definitions are still active."]
+
+		Case false: 	;disable tooltips
+		disable:
+			temp_ini_OHTtEn := ini_OHTtEn
+		,	temp_ini_UHTtEn := ini_UHTtEn
+		,	temp_ini_TTTtEn := ini_TTTtEn
+
+			if (ini_OHTtEn)	;Ordinary Hotstring Triggerstring tip Enable
+				ini_OHTtEn := false
+			if (ini_UHTtEn)	;Undid Hotstring Triggerstring tip Enable
+				ini_UHTtEn := false
+			if (ini_TTTtEn)	;Triggerstring Tips Enable
+				ini_TTTtEn := false
+			F_DestroyTriggerstringTips(ini_TTCn)
+			Menu, Tray, 		Check, % TransA["Suspend all tips"] . "`tF11"
+			Menu, AppSubmenu, 	Check, % TransA["Suspend all tips"] . "`tF11"
+			if (MsgBoxState)
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["All tips (e.g. triggerstring tips, tips displayed after definition is completed, udno) are now SUSPENDED."]
+					. "`n`n" . TransA["Hotstring definitions are still active."]
+		Default:		;including "toggle"
+			PreviousState := !PreviousState
+			if (PreviousState)
+				Goto enable
+			else
+				Goto disable
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SwitchHotstrings(decision)	;to enable or disable all hotstring definitions
+{
+	global	;assume global mode
+	local key := 0, value := ""
+
+	for key, value in a_EnableDisable
+	{
+		if (value = "En")	;turn off existing hotstring
+		{
+			Try
+				Hotstring(":" . a_TriggerOptions[key] . ":" . F_ConvertEscapeSequences(a_Triggerstring[key]), , (decision = "disabled" ? "Off" : "On"))
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
+					. "`n" . (decision = "disabled" ? TransA["Something went wrong with disabling of existing hotstring"] : TransA["Something went wrong with enabling of existing hotstring"]) . ":" . "`n`n"
+					. "Hotstring(:" . a_TriggerOptions[key] . ":" . a_Triggerstring[key] . "," . A_Space . (decision = "disabled" ? "Off" : "On") . ")"
+		}	
+	}	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ShowIntroGuiEscape()	;Gui event
@@ -2683,9 +2767,9 @@ F_DestroyTriggerstringTips(ini_TTCn)
 		Case 2: Gui, TT_C2: Destroy
 		Case 3: Gui, TT_C3: Destroy
 		Case 4:
-			GuiControl,, % IdTT_C4_LB1, ¦
-			GuiControl,, % IdTT_C4_LB2, ¦
-			GuiControl,, % IdTT_C4_LB3, ¦
+			GuiControl,, % IdTT_C4_LB1, % c_MHDelimiter
+			GuiControl,, % IdTT_C4_LB2, % c_MHDelimiter
+			GuiControl,, % IdTT_C4_LB3, % c_MHDelimiter
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2698,20 +2782,25 @@ F_InitiateTrayMenus(v_SilentMode)
 ;#c*/ commercial only end
 		Case "":
 			Menu, Tray, NoStandard									; remove all the rest of standard tray menu
-			; OutputDebug, % "AppIcon:" . AppIcon . A_Tab . "A_ScriptDir:" . A_Tab . A_ScriptDir .  A_Tab . "A_WorkingDir:" . A_Tab . A_WorkingDir . "`n"
-			if (!FileExist(AppIcon))
+			; OutputDebug, % "AppIcon:" . AppIcon . "`n" . "A_ScriptDir:" . A_Tab . A_ScriptDir .  "`n" . "A_WorkingDir:" . A_Tab . A_WorkingDir . "`n" . "FileExist(AppIcon):" . A_Tab . FileExist(AppIcon) . "`n"
+			if (!FileExist(AppIcon)) and (!A_IsCompiled)				; if the file is compiled, then icon is inside of .exe file.
 			{
 				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Information"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." 
 					. A_Space . TransA["Would you like to download the icon file?"] . "`n`n" . TransA["If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used."]
 				IfMsgBox, Yes
 				{
-					OutputDebug, % "AppIcon:" . A_Tab . AppIcon
-					URLDownloadToFile, 	https://raw.githubusercontent.com/mslonik/Hotstrings/master/hotstrings.ico, % AppIcon	;2022-01-28
+					; OutputDebug, % "AppIcon:" . A_Tab . AppIcon
+					URLDownloadToFile, 	https://raw.githubusercontent.com/mslonik/Hotstrings/master/hotstrings.ico, % AppIcon
+					Menu, Tray, Icon,		% AppIcon 				;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
 				}
 				IfMsgBox, No
-					AppIcon := "*"
+					Menu, Tray, Icon,		* 						;Specify an asterisk (*) for FileName to restore the script to its default icon.
 			}
-			Menu, Tray, Icon,		% AppIcon 						;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
+			if (A_IsCompiled)
+				Menu, Tray, Icon,			* 						;Specify an asterisk (*) for FileName to restore the script to its default icon.
+			else
+				Menu, Tray, Icon,			% AppIcon 				;GUI window uses the tray icon that was in effect at the time the window was created. FlatIcon: https://www.flaticon.com/ Cloud Convert: https://www.cloudconvert.com/
+
 			Menu, Tray, Add,		% SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Default mode"], 	F_GuiAbout
 			Menu, Tray, Add																	;line separator 
 			Menu, Tray, Add, 		% TransA["Edit Hotstrings"] . "`tCtrl + Win + H",						F_GUIinit
@@ -2726,7 +2815,8 @@ F_InitiateTrayMenus(v_SilentMode)
 			Menu  Tray, Add																	;line separator 
 			Menu, Tray, Add, 		% TransA["Application statistics"],								F_AppStats
 			Menu, Tray, Add																	;line separator 
-			Menu, Tray, Add,		% TransA["Suspend Hotstrings"] . "`tF10",							F_TraySuspendHotkeys
+			Menu, Tray, Add,		% TransA["Suspend Hotstrings and all tips"] . "`tF10",					F_SuspendTipsAndHotkeys
+			Menu, Tray, Add,		% TransA["Suspend all tips"] . "`tF11", 							F_SuspendAllTips
 			Menu  Tray, Add,		% TransA["Exit application"],										F_TrayExit
 	}
 }
@@ -2838,7 +2928,7 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestTriggerstring, LongestHotstring)
 		, 	W_LB1 := 0, W_LB2 := 0, W_LB3 := 0, X_LB2 := 0, Y_LB2 := 0, X_LB3 := 0, Y_LB3 := 0
 		,	cListboxMargin := 4
 	
-	Gui, TT_C3: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C3_Hwnd +Delimiter%c_TTDelimiter%	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
+	Gui, TT_C3: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C3_Hwnd +Delimiter%c_TextDelimiter%	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 	Gui, TT_C3: Margin, 0, 0
 	if (ini_ATEn)
 	{
@@ -2885,7 +2975,7 @@ F_GuiTrigTipsMenuDefC3(AmountOfRows, LongestTriggerstring, LongestHotstring)
 	Gui, TT_C3: Add, Listbox, 	% "HwndIdTT_C3_LB3" . A_Space . "x" . X_LB3 . A_Space . "y" . Y_LB3 . A_Space . "r" . AmountOfRows . A_Space . "w" . W_LB3 + cListboxMargin . A_Space . "g" . "F_TTMenuStatic_Mouse"
 	; Gui, TT_C3: Show, x0 y0	;for debugging purpose only
 	Gui, TT_C3: Destroy	;unfortunately even when gui object are hidden, still background is visible; I don't want to have temporary (dummy) text object to be visible. therefore I destroy the whole gui and create it again.
-	Gui, TT_C3: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C3_Hwnd +Delimiter%c_TTDelimiter%	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
+	Gui, TT_C3: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C3_Hwnd +Delimiter%c_TextDelimiter%	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 	Gui, TT_C3: Margin, 0, 0
 	if (ini_ATEn)
 	{
@@ -2927,7 +3017,7 @@ F_GuiTrigTipsMenuDefC2(AmountOfRows, LongestString)
 	
 	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
 		OutputString .= "w"		;the widest ordinary letter in alphabet
-	Gui, TT_C2: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C2_Hwnd +Delimiter%c_TTDelimiter%	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
+	Gui, TT_C2: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C2_Hwnd +Delimiter%c_TextDelimiter%	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 	Gui, TT_C2: Margin, 0, 0
 	if (ini_ATEn)
 	{
@@ -2975,7 +3065,7 @@ F_GuiTrigTipsMenuDefC1(AmountOfRows, LongestString)
 	
 	Loop, Parse, LongestString	;exchange all letters into "w" which is the widest letter in latin alphabet (the worst case scenario)
 		OutputString .= "w"		;the widest ordinary letter in alphabet
-	Gui, TT_C1: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C1_Hwnd +Delimiter%c_TTDelimiter%	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
+	Gui, TT_C1: New, +AlwaysOnTop -Caption +ToolWindow +HwndTT_C1_Hwnd +Delimiter%c_TextDelimiter%	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 	Gui, TT_C1: Margin, 0, 0
 	if (ini_ATEn)
 	{
@@ -4065,7 +4155,7 @@ F_EvTt_B1()	;Event Tooltip (is triggered) Button Tooltip test
 				, a_TipsEnDis[A_Index]	:= "En"
 				, a_TipsHS[A_Index]		:= "Ex HotString" . A_Index
 			}
-			a_Combined[A_Index]			:= a_Tips[A_Index] . c_TTDelimiter . a_TipsOpt[A_Index] . c_TTDelimiter . a_TipsEnDis[A_Index] . c_TTDelimiter . a_TipsHS[A_Index]
+			a_Combined[A_Index]			:= a_Tips[A_Index] . c_TextDelimiter . a_TipsOpt[A_Index] . c_TextDelimiter . a_TipsEnDis[A_Index] . c_TextDelimiter . a_TipsHS[A_Index]
 		}
 		F_Sort_a_Triggers(a_Combined, EvTt_C1, EvTt_C2)
 		F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, EvTt_DDL2)
@@ -6597,10 +6687,6 @@ F_ShowTriggerstringTips2(a_Tips, a_TipsOpt, a_TipsEnDis, a_TipsHS, ini_TTCn)
 
 		Case 4:
 			PreviousWindowID := WinExist("A")
-			; OutputDebug, % "PreviousWindowID:" . A_Tab . PreviousWindowID . "`n"
-			; GuiControl,, % IdTT_C4_LB1, ¦	;this line is necessary to display new menu each time this function is called.
-			; GuiControl,, % IdTT_C4_LB2, ¦	;this line is necessary to display new menu each time this function is called.
-			; GuiControl,, % IdTT_C4_LB3, ¦	;this line is necessary to display new menu each time this function is called.
 			GuiControl,, % IdTT_C4_LB1, % F_ConvertArrayToString(a_Tips)
 			GuiControl,, % IdTT_C4_LB2, % F_TrigTipsSecondColumn(a_TipsOpt, a_TipsEnDis)
 			GuiControl,, % IdTT_C4_LB3, % F_ConvertArrayToString(a_TipsHS)
@@ -7168,6 +7254,23 @@ F_GuiShortDef_CreateObjects(ItemName)
 	Gui, ShortDef: Add, 	Button,  	x0 y0 HwndIdShortDefB2 gF_ShortDefB2_RestoreHotkey,				% TransA["Restore default hotkey"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ChangeMainWindowTitle()
+{
+	global	;assume-global mode of operation
+
+	Switch F_WhichGui()
+	{
+		Case "HS3":
+			Gui, HS3: Show, Hide, % A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(" . F_ParseHotkey(ini_HK_Main, "space") . ")"
+			Gui, HS3: Show
+			Gui, HS4: Show, Hide, % A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(" . F_ParseHotkey(ini_HK_Main, "space") . ")"
+		Case "HS4": 
+			Gui, HS4: Show, Hide, % A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(" . F_ParseHotkey(ini_HK_Main, "space") . ")"
+			Gui, HS4: Show
+			Gui, HS3: Show, Hide, % A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(" . F_ParseHotkey(ini_HK_Main, "space") . ")"
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ShortDefB2_RestoreHotkey()
 {
 	global	;assume-global mode of operation
@@ -7195,6 +7298,7 @@ F_ShortDefB2_RestoreHotkey()
 		GuiControl, , % IdShortDefT3, % F_ParseHotkey(ini_HK_Main, "space")
 		IniWrite, % ini_HK_Main, % ini_HADConfig, Configuration, HK_Main
 		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Call Graphical User Interface"] . "`t" . F_ParseHotkey(ini_HK_Main, 	"space")
+		F_ChangeMainWindowTitle()
 	}
 
 	if (InStr(A_ThisMenuitem, TransA["Copy clipboard content into ""Enter hotstring"""]))
@@ -7364,7 +7468,8 @@ F_ShortDefB1_SaveHotkey()
 			Hotkey, % OldHotkey, F_GUIInit, Off
 			Hotkey, If				;To turn off context sensitivity (that is, to make subsequently-created hotkeys work in all windows)
 		}	
-		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Call Graphical User Interface"] . "`t" . F_ParseHotkey(ini_HK_Main, 	"space")
+		Menu, Submenu1Shortcuts, Rename, % A_ThisMenuItem, % TransA["Call Graphical User Interface"] . "`t" . F_ParseHotkey(ini_HK_Main, "space")
+		F_ChangeMainWindowTitle()
 	}
 
 	if (InStr(A_ThisMenuitem, TransA["Copy clipboard content into ""Enter hotstring"""]))
@@ -7642,12 +7747,16 @@ F_GuiShowIntro()
 	Gui, ShowIntro: Add, 	Text,    x0 y0 HwndIdIntroLine2,									% TransA["ShowInfoText"]
 	Gui, ShowIntro: Add, 	Text,    x0 y0 HwndIdIntroLine3,									% TransA["I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)!"]
 	Gui, ShowIntro: Add, 	Button,  x0 y0 HwndIdIntroOkButton gShowIntroGuiClose,					% TransA["OK"]
-	Gui, ShowIntro: Add,	Picture, x0 y0 HwndIdAboutPicture w96 h96, 							% AppIcon
+	if (A_IsCompiled)
+		Gui, ShowIntro: Add,		Picture, 	x0 y0 HwndIdIntroPicture w96 h96 Icon,				% A_ScriptFullPath
+	else
+		Gui, ShowIntro: Add,		Picture, 	x0 y0 HwndIdIntroPicture w96 h96, 					% AppIcon
+
 	Gui, ShowIntro: Add,	CheckBox, x0 y0 HwndIdIntroCheckbox vIntroCheckbox gF_ShowIntroCheckbox,	% TransA["Show Introduction window after application is restarted?"]
-	
+
 	;3. Determine constraints
 	v_xNext := c_xmarg
-	v_yNext := c_ymarg
+,	v_yNext := c_ymarg
 	GuiControl, Move,			% IdIntroLine1, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdIntroLine1
 	v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg
@@ -7657,16 +7766,16 @@ F_GuiShowIntro()
 	GuiControl, Move,			% IdIntroLine3, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdIntroLine3
 	v_xNext := v_OutVarTempW // 2
-	v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg
+,	v_yNext := v_OutVarTempY + v_OutVarTempH + 2 * c_ymarg
 	GuiControlGet, v_OutVarTemp1, Pos, % IdIntroOkButton
 	v_wNext := v_OutVarTemp1W + 2 * c_xmarg
 	GuiControl, Move,			% IdIntroOkButton, % "x" . v_xNext . "y" . v_yNext . "w" . v_wNext
 	v_xNext := v_OutVarTempX + v_OutVarTempW + 10 * c_xmarg
-	v_yNext := v_OutVarTempY
-	GuiControl, Move,			% IdAboutPicture, % "x" . v_xNext . "y" . v_yNext
+,	v_yNext := v_OutVarTempY
+	GuiControl, Move,			% IdIntroPicture, % "x" . v_xNext . "y" . v_yNext
 	GuiControlGet, v_OutVarTemp, Pos, % IdIntroOkButton
 	v_xNext := c_xmarg
-	v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
+,	v_yNext := v_OutVarTempY + v_OutVarTempH + c_ymarg
 	GuiControl, Move,			% IdIntroCheckbox, % "x" . v_xNext . "y" . v_yNext
 	
 	GuiControl,, % IdIntroCheckbox, % ini_ShowIntro	;load initial value
@@ -7874,23 +7983,14 @@ F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 {
 	global	;assume-global mode of operation
 	local	HitCnt 			:= 0
-		,	TwoLastChars		:= ""
-		,	PreviousButLast 	:= ""
-		,	f_IsAlpha 		:= false
 		,	f_FirstPart		:= false
 		,	LastChar			:= SubStr(string, 0)
-		, 	f_PBLIsAlphanum	:= false	;local flag: Previous But Last character in input string is AlphaNumeric
 		,	InStrLen			:= StrLen(string)
+		,	f_EndCharDetected	:= false
 
-	; OutputDebug, % A_ThisFunc . A_Space . "`n"
-	; OutputDebug, % A_ThisFunc . A_Space . "string:" . string . "|" . A_Space . "QS:" . v_Qinput . "|" . A_Space . "LC:" . LastChar . "|" . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "string:" . string . "|" . A_Space . "QS:" . v_Qinput . "|" . A_Space . "LC:" . LastChar . "|" . A_Space . "ini_MNTT:" . ini_MNTT "`n"
 	if (InStrLen > 1)
-	{
-		TwoLastChars := SubStr(string, -1)
-	,	PreviousButLast := SubStr(TwoLastChars, 1, 1)
-		if PreviousButLast is alnum
-			f_PBLIsAlphanum := true
-	}
+		f_EndCharDetected := F_CheckBeforeLastChar(string)
 
 	if (StrLen(string) > ini_TASAC - 1)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{
@@ -7907,11 +8007,11 @@ F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 				Switch ini_TTCn
 				{
 					Case 1:	;only column 1: Triggerstring Tips
-					     Loop, Parse, % a_Combined[A_Index], % c_TTDelimiter
+					     Loop, Parse, % a_Combined[A_Index], % c_TextDelimiter
 					     	if (A_Index = 1)
 					     		a_Tips.Push(A_LoopField)
 					Case 2:	;2 columns: Triggerstring Tips + Triggerstring Trigger
-					     Loop, Parse, % a_Combined[A_Index], % c_TTDelimiter
+					     Loop, Parse, % a_Combined[A_Index], % c_TextDelimiter
 					     {
 					     	if (A_Index = 1)
 					     		a_Tips.Push(A_LoopField)
@@ -7921,7 +8021,7 @@ F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 					     		a_TipsEnDis.Push(A_LoopField)
 					     }
 					Case 3, 4:	;3 columns: Triggerstring Tips + Triggerstring Trigger + Triggerstring Hotstring
-					     Loop, Parse, % a_Combined[A_Index], % c_TTDelimiter
+					     Loop, Parse, % a_Combined[A_Index], % c_TextDelimiter
 					     {
 					     	if (A_Index = 1)
 					     		a_Tips.Push(A_LoopField)
@@ -7936,17 +8036,22 @@ F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 				HitCnt++
 				if (HitCnt = ini_MNTT)	; MNTT = Maximum Number of Triggerstring Tips
 					Break
-				f_FirstPart := true	;if string was not find among available strings within a_Combined tables, then try to search for a substring related to question mark triggerstrings (Q)
+				f_FirstPart := true	;if string was not found among available strings within a_Combined tables, then try to search for a substring related to question mark triggerstrings (Q)
 			}
 		}
 
+		; OutputDebug, % A_ThisFunc . A_Space . "f_FirstPart:" . f_FirstPart . "|" . A_Space . "f_EndCharDetected:" . f_EndCharDetected . "`n"
+		if (!f_FirstPart) and (InStrLen > 1) and (f_EndCharDetected)
+		{
+			F_PTTT(v_InputString := LastChar)
+			return
+		}	
 		if (!f_FirstPart) and (InStrLen > 1)
 		{
 			; OutputDebug, % A_ThisFunc . A_Space . "InStrLen:" . InStrLen . "|" . A_Space . "f_FirstPart:" . f_FirstPart . A_Space . "v_Qinput:" . LastChar . "|" . "`n"
 			F_PTTTQ(v_Qinput := LastChar)
 		}
 	}
-	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . A_Space . "E" . "`n"
 	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7970,19 +8075,18 @@ F_PTTTQ(string) ;Function_ Prepare Triggerstring Tips Tables Question mark (rela
 		Loop, % a_Combined.MaxIndex()
 		{
 			QuestionMarkPos 	:= InStr(a_Combined[A_Index], "?")
-		,	SecSeparatorPos	:= InStr(a_Combined[A_Index], c_TTDelimiter, false, 1, NoOccurrence)
+		,	SecSeparatorPos	:= InStr(a_Combined[A_Index], c_TextDelimiter, false, 1, NoOccurrence)
 			if (QuestionMarkPos) and (QuestionMarkPos < SecSeparatorPos) and (InStr(a_Combined[A_Index], string) = 1)
 			{
-				; OutputDebug, % "string:" . string . "|" . "`n"
-				; OutputDebug, % "InStr(a_Combined[A_Index], string) = 1:" . a_Combined[A_Index] . "`n"
+				; OutputDebug, % "a_Combined[A_Index]:" . a_Combined[A_Index] . "`n"
 				Switch ini_TTCn
 				{
 					Case 1:	;only column 1: Triggerstring Tips
-					     Loop, Parse, % a_Combined[A_Index], % c_TTDelimiter
+					     Loop, Parse, % a_Combined[A_Index], % c_TextDelimiter
 					     	if (A_Index = 1)
 					     		a_Tips.Push(A_LoopField)
 					Case 2:	;2 columns: Triggerstring Tips + Triggerstring Trigger
-					     Loop, Parse, % a_Combined[A_Index], % c_TTDelimiter
+					     Loop, Parse, % a_Combined[A_Index], % c_TextDelimiter
 					     {
 					     	if (A_Index = 1)
 					     		a_Tips.Push(A_LoopField)
@@ -7992,7 +8096,7 @@ F_PTTTQ(string) ;Function_ Prepare Triggerstring Tips Tables Question mark (rela
 					     		a_TipsEnDis.Push(A_LoopField)
 					     }
 					Case 3, 4:	;3 columns: Triggerstring Tips + Triggerstring Trigger + Triggerstring Hotstring
-					     Loop, Parse, % a_Combined[A_Index], % c_TTDelimiter
+					     Loop, Parse, % a_Combined[A_Index], % c_TextDelimiter
 					     {
 					     	if (A_Index = 1)
 					     		a_Tips.Push(A_LoopField)
@@ -8223,22 +8327,25 @@ F_ToggleEndChars()
 F_AddToAutostart()
 {
 	global	;assume-global mode
-	local Target := "", LinkFile_DM := "", LinkFile_SM := "", Args_DM := "", Args_SM := "", Description := "", IconFile := "", WorkingDir := ""
-	
-	Target 		:= A_ScriptFullPath
-	LinkFile_DM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_DM" . "." . "lnk"
-	LinkFile_SM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_SM" . "." . "lnk"
-	WorkingDir 	:= A_ScriptDir
-	Args_DM 		:= ""
-	Args_SM		:= "l"
-	Description 	:= TransA["Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries"] . "."
-	IconFile 		:= A_ScriptDir . "\" . AppIcon
+	local 	Target 		:= A_ScriptFullPath
+	,		LinkFile_DM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_DM" . "." . "lnk"
+	,		LinkFile_SM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_SM" . "." . "lnk"
+	,		WorkingDir 	:= A_ScriptDir
+	,		Args_DM 		:= ""
+	,		Args_SM		:= "l"
+	,		Description 	:= TransA["Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries"] . "."
+	,		IconFile 		:= AppIcon
 	
 	Switch A_ThisMenuItem
 	{
 		Case TransA["Default mode"]:
 			Try
-				FileCreateShortcut, % Target, % LinkFile_DM, % WorkingDir, % Args_DM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+			{
+				if (A_IsCompiled)
+					FileCreateShortcut, % Target, % LinkFile_SM, % WorkingDir, % Args_SM, % Description, A_ScriptFullPath, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+				else	
+					FileCreateShortcut, % Target, % LinkFile_DM, % WorkingDir, % Args_DM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+			}
 			Catch
 			{
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with link file (.lnk) creation"] . ":" 
@@ -8250,7 +8357,12 @@ F_AddToAutostart()
 					. A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_DM" . "." . "lnk" . "," . A_Space . TransA["Default mode"]
 		Case TransA["Silent mode"]:
 			Try
-				FileCreateShortcut, % Target, % LinkFile_SM, % WorkingDir, % Args_SM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+			{
+				if (A_IsCompiled)
+					FileCreateShortcut, % Target, % LinkFile_SM, % WorkingDir, % Args_SM, % Description, A_ScriptFullPath, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+				else	
+					FileCreateShortcut, % Target, % LinkFile_SM, % WorkingDir, % Args_SM, % Description, % IconFile, h, , 7 ;h = shortcut: Ctrl + Shift + h, 7 = Minimized
+			}
 			Catch
 			{
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with link file (.lnk) creation"] . ":" 
@@ -8485,7 +8597,7 @@ F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 	a_EnableDisable	.Push(EnDis)
 	a_Hotstring		.Push(TextInsert)
 	a_Comment			.Push(v_Comment)
-	a_Combined		.Push(v_Triggerstring . c_TTDelimiter . NewOptions . c_TTDelimiter . EnDis . c_TTDelimiter . TextInsert)
+	a_Combined		.Push(v_Triggerstring . c_TextDelimiter . NewOptions . c_TextDelimiter . EnDis . c_TextDelimiter . TextInsert)
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8500,7 +8612,7 @@ F_ChangeDefInArrays(key, NewOptions, SendFun, TextInsert, v_Comment)
 , 	a_Hotstring[key] 		:= TextInsert
 , 	a_Comment[key] 		:= v_Comment
 	for index in a_Combined	;recreate array a_Combined
-		a_Combined[index] := a_Triggerstring[index] . c_TTDelimiter . a_TriggerOptions[index] . c_TTDelimiter . a_EnableDisable[index] . c_TTDelimiter . a_Hotstring[index]
+		a_Combined[index] := a_Triggerstring[index] . c_TextDelimiter . a_TriggerOptions[index] . c_TextDelimiter . a_EnableDisable[index] . c_TextDelimiter . a_Hotstring[index]
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8546,7 +8658,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 
 		;turn off existing hotstring
 		Try
-			Hotstring(":" . OldOptions . ":" . FoundTriggerstring, , "Off")
+			Hotstring(":" . OldOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), , "Off")
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
 				. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -8564,7 +8676,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_SimpleOutput").bind(TextInsert, true, SendFun), OnOffToggle)
+					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_SimpleOutput").bind(TextInsert, true, SendFun), OnOffToggle)
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
 						. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -8579,7 +8691,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . FoundTriggerstring, func("F_SimpleOutput").bind(TextInsert, false, SendFun), OnOffToggle)
+					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_SimpleOutput").bind(TextInsert, false, SendFun), OnOffToggle)
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
 						. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -8612,58 +8724,58 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 			return, true
 	if InStr(v_SelectFunction, "Menu")
 	{
-		if ((Trim(v_EnterHotstring) = "") and (Trim(v_EnterHotstring1) = "") and (Trim(v_EnterHotstring2) = "") and (Trim(v_EnterHotstring3) = "") and (Trim(v_EnterHotstring4) = "") and (Trim(v_EnterHotstring5) = "") and (Trim(v_EnterHotstring6) = ""))
+		if ((RTrim(v_EnterHotstring) = "") and (RTrim(v_EnterHotstring1) = "") and (RTrim(v_EnterHotstring2) = "") and (RTrim(v_EnterHotstring3) = "") and (RTrim(v_EnterHotstring4) = "") and (RTrim(v_EnterHotstring5) = "") and (RTrim(v_EnterHotstring6) = "")) ;hotstring can start from white character
 		{
 			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring text is blank. Do you want to proceed?"]
 			IfMsgBox, No
 				return, true
 		}
-		v_EnterHotstring := Trim(v_EnterHotstring)
+		v_EnterHotstring := RTrim(v_EnterHotstring) ;hotstring can start from white character
 		if (v_EnterHotstring != "")
 		{
 			v_EnterHotstring := StrReplace(v_EnterHotstring, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
 			TextInsert .=  v_EnterHotstring
 		}
-		v_EnterHotstring1 := Trim(v_EnterHotstring1)
+		v_EnterHotstring1 := RTrim(v_EnterHotstring1) ;hotstring can start from white character
 		if (v_EnterHotstring1 != "")
 		{
 			v_EnterHotstring1 := StrReplace(v_EnterHotstring1, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
-			TextInsert .= "¦" . v_EnterHotstring1
+			TextInsert .= c_MHDelimiter . v_EnterHotstring1
 		}
-		v_EnterHotstring2 := Trim(v_EnterHotstring2)
+		v_EnterHotstring2 := RTrim(v_EnterHotstring2) ;hotstring can start from white character
 		if (v_EnterHotstring2 != "")
 		{
 			v_EnterHotstring2 := StrReplace(v_EnterHotstring2, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
-			TextInsert .= "¦" . v_EnterHotstring2
+			TextInsert .= c_MHDelimiter . v_EnterHotstring2
 		}
-		v_EnterHotstring3 := Trim(v_EnterHotstring3)
+		v_EnterHotstring3 := RTrim(v_EnterHotstring3) ;hotstring can start from white character
 		if (v_EnterHotstring3 != "")
 		{
 			v_EnterHotstring3 := StrReplace(v_EnterHotstring3, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
-			TextInsert .= "¦" . v_EnterHotstring3
+			TextInsert .= c_MHDelimiter . v_EnterHotstring3
 		}
-		v_EnterHotstring4 := Trim(v_EnterHotstring4)
+		v_EnterHotstring4 := RTrim(v_EnterHotstring4) ;hotstring can start from white character
 		if (v_EnterHotstring4 != "")
 		{
 			v_EnterHotstring4 := StrReplace(v_EnterHotstring4, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
-			TextInsert .= "¦" . v_EnterHotstring4
+			TextInsert .= c_MHDelimiter . v_EnterHotstring4
 		}
-		v_EnterHotstring5 := Trim(v_EnterHotstring5)
+		v_EnterHotstring5 := RTrim(v_EnterHotstring5) ;hotstring can start from white character
 		if (v_EnterHotstring5 != "")
 		{
 			v_EnterHotstring5 := StrReplace(v_EnterHotstring5, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
-			TextInsert .= "¦" . v_EnterHotstring5
+			TextInsert .= c_MHDelimiter . v_EnterHotstring5
 		}
-		v_EnterHotstring6 := Trim(v_EnterHotstring6)
+		v_EnterHotstring6 := RTrim(v_EnterHotstring6) ;hotstring can start from white character
 		if (v_EnterHotstring6 != "")
 		{
 			v_EnterHotstring6 := StrReplace(v_EnterHotstring6, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
-			TextInsert .= "¦" . v_EnterHotstring6
+			TextInsert .= c_MHDelimiter . v_EnterHotstring6
 		}
 	}
 	else
 	{
-		v_EnterHotstring := Trim(v_EnterHotstring)
+		v_EnterHotstring := RTrim(v_EnterHotstring)
 		if (v_EnterHotstring = "")
 		{
 			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring text is blank. Do you want to proceed?"] 
@@ -8673,7 +8785,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 		else
 		{
 			v_EnterHotstring := StrReplace(v_EnterHotstring, "`n", "``n")	;in case of multiline content all CR & LF are automatically converted to `n
-			TextInsert := v_EnterHotstring
+		,	TextInsert := v_EnterHotstring
 		}
 	}
 	if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
@@ -9270,7 +9382,10 @@ F_Searching()	;after pressing F3
 {
 	DetectHiddenWindows, On
 	Suspend, On			;To disable all hotstrings definitions within search window.
-	Menu, Tray, Icon,		% AppIcon, , 1	;When a script's hotkeys are suspended, its tray icon changes to the letter S. This can be avoided by freezing the icon, which is done by specifying 1 for the last parameter of the Menu command.
+	if (A_IsCompiled)
+		Menu, Tray, Icon,		A_ScriptFullPath, , 1	;When a script's hotkeys are suspended, its tray icon changes to the letter S. This can be avoided by freezing the icon, which is done by specifying 1 for the last parameter of the Menu command.
+	else	
+		Menu, Tray, Icon,		% AppIcon, , 1	;When a script's hotkeys are suspended, its tray icon changes to the letter S. This can be avoided by freezing the icon, which is done by specifying 1 for the last parameter of the Menu command.
 	if (WinExist("ahk_id" HS3SearchHwnd))
 		{
 			Gui, HS3: 		+Disabled
@@ -9684,7 +9799,7 @@ F_ConvertListViewIntoTxt()
 		LV_GetText(txt4, A_Index, 1)	;EnDis
 		LV_GetText(txt5, A_Index, 5)	;hotstring
 		LV_GetText(txt6, A_Index, 6)	;comment
-		txt .= txt1 . "‖" . txt2 . "‖" . txt3 . "‖" . txt4 . "‖" . txt5 . "‖" . txt6 . "`n"	;library file format: options‖triggerstring‖function‖EnDis‖hotstring‖comment
+		txt .= txt1 . c_TextDelimiter . txt2 . c_TextDelimiter . txt3 . c_TextDelimiter . txt4 . c_TextDelimiter . txt5 . c_TextDelimiter . txt6 . "`n"	;library file format: options‖triggerstring‖function‖EnDis‖hotstring‖comment
 	}
 	return txt
 }
@@ -10136,7 +10251,7 @@ F_LV1_EnDisDefinition()
 	
 	a_EnableDisable[key] := EnDis
 	for index in a_Combined	;recreate array a_Combined
-		a_Combined[index] := a_Triggerstring[index] . c_TTDelimiter . a_TriggerOptions[index] . c_TTDelimiter . a_EnableDisable[index] . c_TTDelimiter . a_Hotstring[index]
+		a_Combined[index] := a_Triggerstring[index] . c_TextDelimiter . a_TriggerOptions[index] . c_TextDelimiter . a_EnableDisable[index] . c_TextDelimiter . a_Hotstring[index]
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 	;3. Modify content of ListView
 	Loop, % LV_GetCount()
@@ -10348,7 +10463,7 @@ F_LV1_CopyContentToHS3()
 	LV_GetText(vHotstring, 	SelectedRow, 5)
 	if ((Fun = "MCL") or (Fun = "MSI"))
 	{
-		OTextMenu := StrSplit(vHotstring, "¦")
+		OTextMenu := StrSplit(vHotstring, c_MHDelimiter)
 		GuiControl, HS3:, v_EnterHotstring,  % OTextMenu[1]
 		GuiControl, HS4:, v_EnterHotstring,  % OTextMenu[1]
 		GuiControl, HS3:, v_EnterHotstring1, % OTextMenu[2]
@@ -11118,7 +11233,7 @@ F_LoadTriggTipsFromFile(LibraryFilename)
 			Continue
 		
           ExternalIndex++
-		Loop, Parse, A_LoopField, ‖
+		Loop, Parse, A_LoopField, % c_TextDelimiter
 		{
 			Switch A_Index
 			{
@@ -11128,7 +11243,7 @@ F_LoadTriggTipsFromFile(LibraryFilename)
 				Case 5:	tmp4 := A_LoopField
 			}
 		}
-		a_Combined.Push(tmp1 . c_TTDelimiter . tmp2 . c_TTDelimiter . tmp3 . c_TTDelimiter . tmp4)
+		a_Combined.Push(tmp1 . c_TextDelimiter . tmp2 . c_TextDelimiter . tmp3 . c_TextDelimiter . tmp4)
 	}	
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
@@ -11165,14 +11280,14 @@ F_Recreate_CombinedTable()
 
 	a_Combined := []
 	for key, value in ini_ShowTipsLib
+	{
+		if (value)
 		{
-			if (value)
-			{
-				for key2 in a_Library
-					if (a_Library[key2] = SubStr(key, 1, -4))	;remove extension
-						a_Combined.Push(a_Triggerstring[key2] . c_TTDelimiter . a_TriggerOptions[key2] . c_TTDelimiter . a_EnableDisable[key2] . c_TTDelimiter . a_Hotstring[key2])
-			}
+			for key2 in a_Library
+				if (a_Library[key2] = SubStr(key, 1, -4))	;remove extension
+					a_Combined.Push(a_Triggerstring[key2] . c_TextDelimiter . a_TriggerOptions[key2] . c_TextDelimiter . a_EnableDisable[key2] . c_TextDelimiter . a_Hotstring[key2])
 		}
+	}
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_ToggleLibrary()	;load / unload d(t, o, h)
@@ -11291,6 +11406,8 @@ Add to Autostart										= Add to Autostart
 After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder into memory? = After downloading libraries aren't automaticlly loaded into memory. Would you like to upload content of libraries folder into memory?
 A library with that name already exists! 					= A library with that name already exists!
 All of them are ""immediate execute"" (*)					= All of them are ""immediate execute"" (*)
+All tips (e.g. triggerstring tips, tips displayed after definition is completed, udno) are now ACTIVE. = All tips (e.g. triggerstring tips, tips displayed after definition is completed, udno) are now ACTIVE.
+All tips (e.g. triggerstring tips, tips displayed after definition is completed, udno) are now SUSPENDED. = All tips (e.g. triggerstring tips, tips displayed after definition is completed, udno) are now SUSPENDED.
 Alphabetically 										= Alphabetically
 already exists in another library							= already exists in another library
 and active in whole operating system (any window)				= and active in whole operating system (any window)
@@ -11470,6 +11587,9 @@ free													= free
 Graphical User Interface									= Graphical User Interface
 gray													= gray
 green												= green
+)"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
+	TransConst .= "`n
+(Join`n `
 has been created. 										= has been created.
 has been downloaded to the location						= has been downloaded to the location
 has been renamed to										= has been renamed to
@@ -11482,6 +11602,7 @@ Hotstring added to the file								= Hotstring added to the file
 Hotstrings application technical support e-mail: support@hotstrings.com = Hotstrings application technical support e-mail: support@hotstrings.com
 Hotstring definitions are now ACTIVE.						= Hotstring definitions are now ACTIVE.
 Hotstring definitions are now SUSPENDED.					= Hotstring definitions are now SUSPENDED.
+Hotstring definitions are still active.						= Hotstring definitions are still active.
 Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv) = Hotstring has been deleted. Now application will restart itself in order to apply changes, reload the libraries (.csv)
 Hotstring menu styling									= Hotstring menu styling
 Hotstring was triggered! 								= Hotstring was triggered!
@@ -11491,9 +11612,6 @@ Hotstring paste from Clipboard delay 						= Hotstring paste from Clipboard dela
 Hotstrings											= Hotstrings
 Hotstrings have been loaded 								= Hotstrings have been loaded
 HTML color RGB value, e.g. 00FF00							= HTML color RGB value, e.g. 00FF00
-)"	;A continuation section cannot produce a line whose total length is greater than 16,383 characters. See documentation for workaround.
-	TransConst .= "`n
-(Join`n `
 I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)! = I wish you good work with Hotstrings and DFTBA (Don't Forget to be Awsome)!
 If not finite, define tooltip timeout						= If not finite, define tooltip timeout
 If sound is enabled, define it							= If sound is enabled, define it
@@ -11576,6 +11694,7 @@ Local version											= Local version
 Logging of d(t, o, h)									= Logging of d(t, o, h)
 Logon name					= Logon name
 Log triggered hotstrings									= Log triggered hotstrings
+LS:													= LS:
 maroon												= maroon
 Max. no. of shown tips									= Max. no. of shown tips
 Menu hotstring is triggered								= Menu hotstring is triggered
@@ -11644,6 +11763,9 @@ Preview												= &Preview
 Public library:										= Public library:
 purple												= purple
 question												= question
+)"
+	TransConst .= "`n
+(Join`n `
 Recognized encoding of the file:							= Recognized encoding of the file:
 red													= red
 Reload												= Reload
@@ -11660,9 +11782,6 @@ Restore default										= Restore default
 Restore default configuration								= Restore default configuration
 Row													= Row
 run web browser, enter Hotstrings webpage					= run web browser, enter Hotstrings webpage
-)"
-	TransConst .= "`n
-(Join`n `
 Sandbox												= Sandbox
 Save && Close											= Save && Close
 Save position of application window	 					= &Save position of application window
@@ -11743,8 +11862,13 @@ Static triggerstring / hotstring menus						= Static triggerstring / hotstring m
 Style of GUI											= Style of GUI
 Such file already exists									= Such file already exists
 Support: technical issue request							= Support: technical issue request
-Suspend Hotstrings										= Suspend Hotstrings
+Suspend all tips										= Suspend all tips
+Suspend Hotstrings and all tips							= Suspend Hotstrings and all tips
 suspend triggerstrings tips and hotstrings					= suspend triggerstrings tips and hotstrings
+)"
+
+TransConst .= "`n
+(Join`n `
 Tab 													= Tab 
 teal													= teal
 Test styling											= Test styling
@@ -11809,7 +11933,6 @@ Tooltip enable											= Tooltip enable
 Tooltip position										= Tooltip position
 Tooltip test											= Tooltip test
 Tooltip timeout										= Tooltip timeout
-LS:													= LS:
 to undo.												= to undo.
 (triggerstring, hotstring) definitions						= (triggerstring, hotstring) definitions
 Trigger Opt.											= Trigger Opt.
@@ -11831,6 +11954,7 @@ Typeface color											= Typeface color
 Typeface font											= Typeface font
 Typeface size											= Typeface size
 )"
+
 TransConst .= "`n
 (Join`n `
 Underscore _											= Underscore _
@@ -11985,7 +12109,7 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 			Continue
 		
 		F_CreateHotstring(A_LoopField, nameoffile)
-		Loop, Parse, A_LoopField, ‖
+		Loop, Parse, A_LoopField, % c_TextDelimiter
 		{
 			Switch A_Index
 			{
@@ -11999,7 +12123,7 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 				Case 4:	a_EnableDisable.Push(A_LoopField)
 				Case 5:	
 					Hotstring := A_LoopField
-					if (InStr(A_LoopField, "¦"))
+					if (InStr(A_LoopField, c_MHDelimiter))
 						options := "multi"
 					else
 						options := ""
@@ -12301,7 +12425,7 @@ F_GuiHS4_Create()
 	local x0 := 0, y0 := 0
 	
 ;1. Definition of HS4 GUI.
-	Gui, 	HS4: New, 	-Resize +HwndHS4GuiHwnd +OwnDialogs -MaximizeBox, % A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(Ctrl + Win + H)"
+	Gui, 	HS4: New, 	-Resize +HwndHS4GuiHwnd +OwnDialogs -MaximizeBox, % A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(" . F_ParseHotkey(ini_HK_Main, "space") . ")"
 	Gui, 	HS4: Margin,	% c_xmarg, % c_ymarg
 	Gui,		HS4: Color,	% c_WindowColor, % c_ControlColor
 	
@@ -12530,7 +12654,7 @@ F_GuiHS3_Create()
 	
 ;1. Definition of HS3 GUI.
 ;+Border doesn't work in Microsoft Windows 10
-	Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs,			 						% A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(Ctrl + Win + H)"
+	Gui, 		HS3: New, 		+Resize +HwndHS3GuiHwnd +OwnDialogs,			 						% A_ScriptName . A_Space . A_Space . A_Space . A_Space . A_Space . "(" . F_ParseHotkey(ini_HK_Main, "space") . ")"
 	Gui, 		HS3: Margin,		% c_xmarg, % c_ymarg
 	Gui,			HS3: Color,		% c_WindowColor, % c_ControlColor
 	
@@ -12543,7 +12667,7 @@ F_GuiHS3_Create()
 	GuiControl +g, % IdTextInfo1, % F_TI_EnterTriggerstring
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
-	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString Limit	;Limit: Restricts the user's input to the visible width of the edit field.
+	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit1 vv_TriggerString Limit gF_TriggerString	;Limit: Restricts the user's input to the visible width of the edit field.
 	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui,			HS3: Add,			GroupBox, 	x0 y0 HwndIdGroupBox1, 									% TransA["Select triggerstring option(s)"]
@@ -12604,7 +12728,6 @@ F_GuiHS3_Create()
 ;#c/* commercial only beginning
 ;#c*/ commercial only end																								
 																								. "SendRaw (SR)|SendPlay (SP)|SendEvent (SE)"
-	
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, 		HS3: Add, 		Text, 		x0 y0 HwndIdText4,					 					% TransA["Enter hotstring"]
 	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2	
@@ -12674,6 +12797,22 @@ F_GuiHS3_Create()
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 			% c_FontType
 	Gui, 		HS3: Add, 		Edit, 		x0 y0 HwndIdEdit10 vv_Sandbox r3 						; r3 = 3x rows of text
 	Gui, 		HS3: Add, 		Button, Hidden Default gF_HSLV	;trick to catch if user presses Enter on ListView1
+}
+; ------------------------------------------------------------------------------------------------------------------------------------
+F_TriggerString()	; To be launched automatically whenever the user or the script changes the contents of the control. Replace space with U+2423 (open box ␣)
+{
+	global ;assume-global mode 
+
+	if (ini_ShowWhiteChars)
+	{
+		Gui, % A_Gui . ": Submit", NoHide	;Saves the contents of each control to its associated variable
+		if (InStr(v_TriggerString, A_Space)) ;If <space> is detected within v_TriggerString
+		{
+			v_TriggerString := StrReplace(v_TriggerString, A_Space, "␣") ;Replace <space> with U+2423 (open box ␣)
+			GuiControl, % A_Gui . ":", % IdEdit1, % v_TriggerString ;put new value into GuiControl
+			ControlSend, Edit1, {End}, A	;send to Edit1 {End} character. Without that cursor is moved to the beginning of Edit field.
+		}	
+	}	
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 HS3GuiContextMenu(GuiHwnd, CtrlHwnd, EventInfo, IsRightClick, X, Y)
@@ -13194,7 +13333,10 @@ F_GuiAbout_CreateObjects()
 	Gui,	MyAbout: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, 		% c_FontType
 	Gui, MyAbout: Add, 		Text,    	x0 y0 HwndIdLine2, 										% TransA["Enables Convenient Definition"]
 	Gui, MyAbout: Add, 		Button,  	x0 y0 HwndIdAboutOkButton gMyAboutGuiClose Default,			% TransA["OK"]
-	Gui, MyAbout: Add,		Picture, 	x0 y0 HwndIdAboutPicture w96 h96, 							% AppIcon
+	if (A_IsCompiled)
+		Gui, MyAbout: Add,		Picture, 	x0 y0 HwndIdAboutPicture w96 h96 Icon,					% A_ScriptFullPath
+	else
+		Gui, MyAbout: Add,		Picture, 	x0 y0 HwndIdAboutPicture w96 h96, 						% AppIcon
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT1,									% TransA["Version"] . ":"
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT2,									% AppVersion
 	Gui, MyAbout: Add,		Text,	x0 y0 HwndIdAboutT3,									% TransA["Mode of operation"] . ":"
@@ -13253,7 +13395,7 @@ F_GuiAbout_DetermineConstraints()
 	MaxText := Max(OutVarTemp1W, OutVarTemp2W, OutVarTemp3W, OutVarTemp4W)
 	GuiControlGet, OutVarTemp, Pos, % IdLine2
 	xNext := c_xmarg, yNext := OutVarTempY + OutVarTempH + 2 * c_ymarg
-	GuiControl, Move, % IdAboutT1, % "x" . xNext . A_Space . "y" . yNext
+	GuiControl, Move, % IdAboutT1, % "x" . xNext . A_Space . "y" . yNext	;Version
 	xNext := MaxText + 3 * c_xmarg
 	GuiControl, Move, % IdAboutT2, % "x" . xNext . A_Space . "y" . yNext
 	xNext := c_xmarg, yNext += c_HofText
@@ -13300,9 +13442,9 @@ F_GuiAbout_DetermineConstraints()
 	GuiControlGet, OutVarTemp, Pos, % IdLine2
 	yNext := OutVarTempY + OutVarTempH + 7 * c_HofText + c_ymarg
 	GuiControl, Move, % IdAboutOkButton, % "x" . xNext . "y" . A_Space . yNext . "w" . wNext
-	
+	GuiControlGet, OutVarTemp3, Pos, % IdAboutT1	;Version
 	xNext := OutVarTemp1X + OutVarTemp1W - 96 ;96 = chosen size of icon
-,	yNext := OutVarTemp1Y + OutVarTemp1H
+,	yNext := OutVarTemp3Y
 	GuiControl, Move, % IdAboutPicture, % "x" . xNext . A_Space . "y" . yNext 
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -13477,7 +13619,7 @@ F_LoadLibrariesToTables()
 				continue
 
 			name 	:= SubStr(A_LoopFileName, 1, -4)
-,			tabSearch := StrSplit(varSearch, "‖")
+,			tabSearch := StrSplit(varSearch, c_TextDelimiter)
 ,			a_Library			.Push(name)
 ,			a_TriggerOptions	.Push(tabSearch[1])
 ,			a_Triggerstring	.Push(tabSearch[2])
@@ -13495,7 +13637,7 @@ F_CreateHotstring(txt, nameoffile)
 	global	;assume-global mode
 	local Options := "", SendFun := "", EnDis := "", TextInsert := "", Oflag := false, Triggerstring := "", LenStr := 0
 
-	Loop, Parse, txt, ‖
+	Loop, Parse, txt, % c_TextDelimiter
 	{
 		Switch A_Index
 		{
@@ -13697,7 +13839,7 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 		,	WhatWasPressed := ""
 		,	f_Shift := false
 
-	OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
 	v_InputH.VisibleText 	:= false
 ,	v_UndoHotstring		:= ReplacementString	;important for F_Undo	
 ,	v_Options 			:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
@@ -13711,12 +13853,12 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 	F_DestroyTriggerstringTips(ini_TTCn)
 	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop 
 		SoundBeep, % ini_MHSF, % ini_MHSD
-	Loop, Parse, ReplacementString, ¦	;determine amount of rows for Listbox
+	Loop, Parse, ReplacementString, % c_MHDelimiter	;determine amount of rows for Listbox
 		v_MenuMax := A_Index
 	
 	if (ini_TTCn != 4)	;if not static window, draw small simple GUI
 	{
-		Gui, HMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuAHKHwnd +Delimiter%c_TTDelimiter%	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
+		Gui, HMenuAHK: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuAHKHwnd +Delimiter%c_MHDelimiter%	;This trick changes delimiter for GuiControl,, ListBox from default "|" to that one
 		Gui, HMenuAHK: Margin, 0, 0
 		if (ini_HMBgrCol = "custom")
 			Gui, HMenuAHK: Color,, % ini_HMBgrColCus
@@ -13729,8 +13871,8 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 		Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax ;. A_Space . "g" . "F_HMenu_Mouse"
 		Func_HMenu_Mouse := func("F_HMenu_Mouse").bind(SendFun)
 		GuiControl +g, % Id_LB_HMenuAHK, % Func_HMenu_Mouse
-		Loop, Parse, ReplacementString, ¦	;second parse of the same variable, this time in order to fill in the Listbox
-			GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . "¦"
+		Loop, Parse, ReplacementString, % c_MHDelimiter	;second parse of the same variable, this time in order to fill in the Listbox
+			GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . c_MHDelimiter
 
 		a_MCSIMenuPos := F_WhereDisplayMenu(ini_MHMP)
 		F_FlipMenu(HMenuAHKHwnd, a_MCSIMenuPos[1], a_MCSIMenuPos[2], "HMenuAHK")
@@ -13739,8 +13881,8 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 	else	;(ini_TTCn = 4)
 	{
 		; OutputDebug, % "PreviousWindowID1:" . A_Tab . PreviousWindowID . "`n"
-		Loop, Parse, ReplacementString, ¦	;second parse of the same variable, this time in order to fill in the Listbox
-			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . "¦"
+		Loop, Parse, ReplacementString, % c_MHDelimiter	;second parse of the same variable, this time in order to fill in the Listbox
+			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . c_MHDelimiter
 		GuiControl, Choose, % IdTT_C4_LB4, 1
 		Gui, TT_C4: Flash	;future: flashing (blinking) in a loop until user do not take action
 		WhichMenu := "SI"	;this setting will be used within F_MouseMenuCombined() to handle mouse event
@@ -14103,7 +14245,7 @@ F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid i
 		GuiControl, Choose, % OutputVarControl, % ChoicePos
 		GuiControlGet, OutputVarTemp, , % OutputVarControl
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
-		GuiControl,, % IdTT_C4_LB4, ¦
+		GuiControl,, % IdTT_C4_LB4, % c_MHDelimiter
 		WinActivate, % "ahk_id" PreviousWindowID
 		v_UndoHotstring 	:= OutputVarTemp
 	,	ReplacementString 	:= F_ReplaceAHKconstants(OutputVarTemp)
@@ -14326,7 +14468,7 @@ F_ImportLibrary()
 		LV_GetText(Options, 	A_Index, 1)
 		LV_GetText(Trigger, 	A_Index, 2)
 		LV_GetText(Hotstring, 	A_Index, 3)
-		line := Options . "‖" . Trigger . "‖" . OutFun . "‖" . EnDis "‖" . Hotstring . "‖" . Comment
+		line := Options . c_TextDelimiter . Trigger . c_TextDelimiter . OutFun . c_TextDelimiter . EnDis . c_TextDelimiter . Hotstring . c_TextDelimiter . Comment
 		TheWholeFile .= line . "`n"
 		Progress := Round((A_Index / TotalLines) * 100)
 		GuiControl,, % IdImport_P1, % Progress
@@ -14497,15 +14639,15 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 		if (!A_LoopField)	;ignore empty lines
 			Continue
 		
-		Loop, Parse, A_LoopField, ‖, %A_Space%%A_Tab%
+		Loop, Parse, A_LoopField, % c_TextDelimiter, %A_Space%%A_Tab%
 		{
 			Switch A_Index
 			{
 				Case 1: Options 	:= A_LoopField
 				Case 2: Trigger 	:= A_LoopField
 				Case 3: Function 	:= A_LoopField
-				Case 4: EnDis 	:= A_LoopField
-				Case 5: Hotstring := A_LoopField
+				Case 4: EnDis 		:= A_LoopField
+				Case 5: Hotstring 	:= A_LoopField
 				Case 6: Comment 	:= A_LoopField
 			}
 		}
@@ -14515,7 +14657,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 		}
 		if (InStr(Function, "M"))
 		{
-			a_MenuHotstring := StrSplit(Hotstring,"¦")
+			a_MenuHotstring := StrSplit(Hotstring, c_MHDelimiter)
 			Loop, % a_MenuHotstring.MaxIndex()
 			{
 				if (A_Index = 1)
@@ -14669,15 +14811,15 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 		if (SubStr(A_LoopField, 1, 1) = ";")	;ignore comments
 			Continue
 		
-		Loop, Parse, A_LoopField, ‖, %A_Space%%A_Tab%
+		Loop, Parse, A_LoopField, % c_TextDelimiter, %A_Space%%A_Tab%
 		{
 			Switch A_Index
 			{
 				Case 1: Options 	:= A_LoopField
 				Case 2: Trigger 	:= A_LoopField
 				Case 3: Function 	:= A_LoopField
-				Case 4: EnDis 	:= A_LoopField
-				Case 5: Hotstring := A_LoopField
+				Case 4: EnDis 		:= A_LoopField
+				Case 5: Hotstring 	:= A_LoopField
 				Case 6: Comment 	:= A_LoopField
 			}
 		}
@@ -14687,7 +14829,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 		}
 		if (InStr(Function, "M"))
 		{
-			a_MenuHotstring := StrSplit(Hotstring,"¦")
+			a_MenuHotstring := StrSplit(Hotstring, c_MHDelimiter)
 			Loop, % a_MenuHotstring.MaxIndex()
 			{
 				if (A_Index = 1)
