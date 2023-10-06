@@ -26,7 +26,7 @@ CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in t
 ; - - - - - - - - - - - - - - - - - - - - - - - E X E  CONVERSION / INSTALLATOR S E C T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.17"	;starting on 2023-08-06 (Sunday). 
+global AppVersion				:= "3.6.18"	;starting on 2023-08-06 (Sunday). 
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -113,7 +113,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_dHK_CallGUI 			:= "#^h"				;global constant: default (d) hotkey (HK) for calling main application GUI
 ,		c_dHK_ToggleTt			:= "none"				;global constant: default (d) hotkey (HK) for toggling the triggestring tips
 ;#c/* commercial only beginning
-,		v_ValidTill			:= "limited"			;"inf" for infinity, "limited" for other cases
+,		v_ValidTill			:= "inf"			;"inf" for infinity, "limited" for other cases
 ,		f_RShiftDown 			:= false
 ,		f_LShiftDown 			:= false
 ,		v_SendFun				:= ""				;last used output function; important for F_Undo
@@ -1174,6 +1174,19 @@ F_CheckCommercialConditions()
 		,	LicenseDateTimeStamp := StrReplace(LicenseDateTimeStamp, " ", "")
 			EnvSub, ElapsedTime, LicenseDateTimeStamp, Days	;Sets a variable to itself minus the given value (can also compare date-time values). 
 			; OutputDebug, % "LicenseInfo.expires_at:" . LicenseInfo.expires_at . "`n"
+			if (LicenseInfo.activated = "false")
+			{	
+				MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+					, % TransA["License activation unsuccessful."]
+					. "`n`n"
+					. TransA["Entered license key"] . ":" . A_Tab . EditValue			. "`n"
+					. "`n"
+					. TransA["Error"] . ":" . A_Space . LicenseInfo.error					. "`n`n"
+					. TransA["Application will exit now."]
+					. "`n`n" 
+					. TransA["Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference."]
+				ExitApp, 8	;lemon squeezy: activation = false
+			}
 			if (LicenseInfo.status = "expired") or (LicenseInfo.status = "disabled")
 			{
 				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
@@ -1197,10 +1210,10 @@ F_CheckCommercialConditions()
 					. "`n`n"
 					. TransA["Expiration date"] . ":" . A_Space . LicenseInfo.expires_at
 			if (LicenseInfo.status = "active")
-				{
-					if (ini_THLog)
-						FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . TransA["License key was validated"] . "." . "`n", % v_LogFileName			
-				}	
+			{
+				if (ini_THLog)
+					FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . TransA["License key was validated"] . "." . "`n", % v_LogFileName			
+			}	
 		}
 	}
 }
@@ -10297,7 +10310,10 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 ,			WhichRow := 0, TheWholeFile := "", LibraryHeader := ""
 
 	F_GuiHS3_EnDis("Disable")			;Disable all GuiControls for deletion time d(t, o, h)
-	Gui, HS3Search:	+Disabled
+	DetectHiddenWindows, On
+	if WinExist("ahk_id"  HS3SearchHwnd)	;In case HS3Search was available (only hidden) on time of Move, it must be destroyed. If it is not destroyed, it shows old search results, so before Move.
+		Gui, HS3Search: Destroy
+	DetectHiddenWindows, Off
 	Gui, HS3:			+Disabled
 	Gui, MoveLibs: 	Default
 	Gui, MoveLibs: 	Submit, NoHide
@@ -10394,7 +10410,7 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 			break
 		}
 	}
-	F_GuiHS3_EnDis("Enable")			;Enable all GuiControls for deletion time d(t, o, h)
+	F_GuiHS3_EnDis("Enable")			;Enable all GuiControls after deletion
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiMoveLibs_CreateDetermine()
@@ -10679,7 +10695,7 @@ F_Searching()	;after pressing F3
 	DetectHiddenWindows, On
 	Suspend, On			;To disable all hotstrings definitions within search window.
 	if (A_IsCompiled)
-		Menu, Tray, Icon,		A_ScriptFullPath, , 1	;When a script's hotkeys are suspended, its tray icon changes to the letter S. This can be avoided by freezing the icon, which is done by specifying 1 for the last parameter of the Menu command.
+		Menu, Tray, Icon,		% A_ScriptFullPath, , 1	;When a script's hotkeys are suspended, its tray icon changes to the letter S. This can be avoided by freezing the icon, which is done by specifying 1 for the last parameter of the Menu command.
 	else	
 		Menu, Tray, Icon,		% AppIcon, , 1	;When a script's hotkeys are suspended, its tray icon changes to the letter S. This can be avoided by freezing the icon, which is done by specifying 1 for the last parameter of the Menu command.
 	if (WinExist("ahk_id" HS3SearchHwnd))
@@ -10690,7 +10706,7 @@ F_Searching()	;after pressing F3
 		}
 	else	;if not exists, create it
 	{
-		F_HS3Search_Create()
+		F_Gui_HS3Search_Create()
 		F_HS3Search_DetermineConstraints()
 		F_HS3Search_PlotWindow()
 		F_SearchPhrase()
@@ -10698,7 +10714,7 @@ F_Searching()	;after pressing F3
 	DetectHiddenWindows, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HS3Search_Create()
+F_Gui_HS3Search_Create()
 {
 	global	;assume-global mode
 	
