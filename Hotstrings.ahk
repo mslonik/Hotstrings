@@ -15663,35 +15663,50 @@ ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
 F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; F_HMenu_Mouse -> F_SendIsOflag; F_SimpleOutput -> F_SendIsOflag
 {
 	global	;assume-global mode of operation
+	local	LastChar := ""
 
 	SetKeyDelay, -1, -1	;Delay = -1, PressDuration = -1, -1: no delay at all; this can be necessary if SendInput is reduced to SendEvent (in case low level input hook is active in another script)
-	; OutputDebug, % "A_SendLevel:" . A_Tab . A_SendLevel . "`n"
 	Switch SendFun
 	{
 		Case "SI":	;SendInput
-			; OutputDebug, % "SendInput:" . OutputString . "`n"
+			; OutputDebug, % "A_SendLevel:" . A_Tab . A_SendLevel . "`n"
+			; OutputDebug, % "SendInput:" . OutputString . "|" . A_Space . "A_EndChar:" . A_EndChar . "|" . "`n"
 			if (Oflag = false)
+			{
+				if (A_EndChar)
 				{
 					SendInput, 	% OutputString
 					SendRaw, 		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
-					; OutputDebug, % "Finished SendInput" . "`n"
 				}
+				else	;immediate definitions (*) option:
+				{
+					LastChar 		:= SubStr(OutputString, 0)		;only last character is copied
+				,	OutputString 	:= SubStr(OutputString, 1, -1)	;all but last characters are copied back to OutputString
+					; OutputDebug, % "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
+					SendInput, 	% OutputString
+					SendLevel, 	2	;only for ShiftFunctions for which InputLevel MinSendLevel is set to 2.
+					SendInput, 	% LastChar	;only last character of definition is send with different level of SendLevel; thanks to that ShiftFunctions can alter it into diacritics.
+					SendLevel, 	0
+				}	
+				; OutputDebug, % "Finished SendInput" . "`n"
+			}
 			else
 				SendInput, % OutputString
 		Case "SE":	;SendEvent
 			if (Oflag = false)
-				{
-					SendEvent, 	% OutputString
+			{
+				SendEvent, 	% OutputString
+				if (A_EndChar)
 					SendRaw,		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
-				}
+			}
 			else
 				SendEvent, % OutputString
 		Case "SP":	;SendPlay does not trigger hotkeys or hotstrings
 			if (Oflag = false)
-				{
-					SendPlay, % OutputString . A_EndChar	;It seems that for SendPlay EndChars do not require escaping
-					; OutputDebug, % "SendPlay:" . A_Space . OutputString . "`n"
-				}
+			{
+				SendPlay, % OutputString . A_EndChar	;It seems that for SendPlay EndChars do not require escaping
+				; OutputDebug, % "SendPlay:" . A_Space . OutputString . "`n"
+			}
 			else
 				SendPlay, % OutputString
 		Case "SR":	;SendRaw
@@ -15707,47 +15722,50 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 			SecondPart		:= SubStr(OutputString, 0)	 ;extracts the last character
 			; OutputDebug, % "First part:" . FirstPart . A_Space . "Second part:" . SecondPart . "|" . "`n"
 			if (Oflag = false)
-				{
-					SendInput, 	% FirstPart 
+			{
+				SendInput, 	% FirstPart 
+				if (A_EndChar)
 					SendRaw,		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
-				}
+			}
 			else
 				SendInput, % FirstPart
 			Hotstring("Reset")
 			SendLevel, % ini_SendLevel
 			if (Oflag = false)
-				{
-					SendInput, 	% SecondPart
+			{
+				SendInput, 	% SecondPart
+				if (A_EndChar)
 					SendRaw,		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
-				}
+			}
 			else
 				SendInput, % SecondPart
 			SendLevel, 0
 		Case "S2":
-			OutputDebug, % "ini_SendLevel:" . A_Space . ini_SendLevel . "`n"
+			; OutputDebug, % "ini_SendLevel:" . A_Space . ini_SendLevel . "`n"
 			SendLevel, % ini_SendLevel
 			if (OutputString = "{NumLock}") or (OutputString = "{ScrollLock}") or (OutputString = "{CapsLock}")
 				Switch OutputString
-					{
-						Case "{NumLock}":
-							Send, {NumLock}
-     						SendLevel, 0
-							return
-						Case "{ScrollLock}":
-							Send, {ScrollLock}
-							SendLevel, 0
-							return
-						Case "{CapsLock}":
-							SetStoreCapslockMode, Off	;it doesn't work on all keyboards!
-							Send, {CapsLock}
-							SendLevel, 0
-							return
-					}
-			if (Oflag = false)
 				{
-					SendInput, 	% OutputString
-					SendRaw,		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
+					Case "{NumLock}":
+						Send, {NumLock}
+     					SendLevel, 0
+						return
+					Case "{ScrollLock}":
+						Send, {ScrollLock}
+						SendLevel, 0
+						return
+					Case "{CapsLock}":
+						SetStoreCapslockMode, Off	;it doesn't work on all keyboards!
+						Send, {CapsLock}
+						SendLevel, 0
+						return
 				}
+			if (Oflag = false)
+			{
+				SendInput, 	% OutputString
+				if (A_EndChar)
+					SendRaw,		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
+			}
 			else
 				SendInput, % OutputString
 			SendLevel, 0
