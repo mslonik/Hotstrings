@@ -9256,6 +9256,7 @@ F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 		,	LastChar			:= SubStr(string, 0)
 		,	InStrLen			:= StrLen(string)
 		,	f_EndCharDetected	:= false
+		,	AllButFirstChar	:= SubStr(string, 2)
 
 	; OutputDebug, % A_ThisFunc . A_Space . "string:" . string . "|" . A_Space . "QS:" . v_Qinput . "|" . A_Space . "LC:" . LastChar . "|" . A_Space . "ini_MNTT:" . ini_MNTT "`n"
 	if (InStrLen > 1)
@@ -9318,7 +9319,7 @@ F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 		if (!f_FirstPart) and (InStrLen > 1)
 		{
 			; OutputDebug, % A_ThisFunc . A_Space . "InStrLen:" . InStrLen . "|" . A_Space . "f_FirstPart:" . f_FirstPart . A_Space . "v_Qinput:" . LastChar . "|" . "`n"
-			F_PTTTQ(v_Qinput := LastChar)
+			F_PTTTQ(v_Qinput := AllButFirstChar)
 		}
 	}
 	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
@@ -15689,7 +15690,7 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 						if (IsLCalpha)
 						{
 							OutputString 	:= SubStr(OutputString, 1, -1)	;all but last characters are copied back to OutputString
-							OutputDebug, % "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
+							; OutputDebug, % "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
 							SendInput, 	% OutputString
 							SendLevel, 	2	;only for ShiftFunctions for which InputLevel MinSendLevel is set to 2.
 							SendInput, 	% LastChar	;only last character of definition is send with different level of SendLevel; thanks to that ShiftFunctions can alter it into diacritics.
