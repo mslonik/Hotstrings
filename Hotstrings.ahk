@@ -15663,7 +15663,7 @@ ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
 F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; F_HMenu_Mouse -> F_SendIsOflag; F_SimpleOutput -> F_SendIsOflag
 {
 	global	;assume-global mode of operation
-	local	LastChar := ""
+	local	LastChar := "", IsLCalpha := false
 
 	SetKeyDelay, -1, -1	;Delay = -1, PressDuration = -1, -1: no delay at all; this can be necessary if SendInput is reduced to SendEvent (in case low level input hook is active in another script)
 	Switch SendFun
@@ -15680,13 +15680,26 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 				}
 				else	;immediate definitions (*) option:
 				{
-					LastChar 		:= SubStr(OutputString, 0)		;only last character is copied
-				,	OutputString 	:= SubStr(OutputString, 1, -1)	;all but last characters are copied back to OutputString
-					; OutputDebug, % "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
-					SendInput, 	% OutputString
-					SendLevel, 	2	;only for ShiftFunctions for which InputLevel MinSendLevel is set to 2.
-					SendInput, 	% LastChar	;only last character of definition is send with different level of SendLevel; thanks to that ShiftFunctions can alter it into diacritics.
-					SendLevel, 	0
+					Process, Exist, ShiftFunctions.exe	;detects if ShiftFunctions.exe exists. Answer to this question is available in ErrorLevel.
+					if (ErrorLevel)
+					{
+						LastChar 		:= SubStr(OutputString, 0)		;only last character is copied
+						if LastChar is alpha
+							IsLCalpha := true
+						if (IsLCalpha)
+						{
+							OutputString 	:= SubStr(OutputString, 1, -1)	;all but last characters are copied back to OutputString
+							OutputDebug, % "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
+							SendInput, 	% OutputString
+							SendLevel, 	2	;only for ShiftFunctions for which InputLevel MinSendLevel is set to 2.
+							SendInput, 	% LastChar	;only last character of definition is send with different level of SendLevel; thanks to that ShiftFunctions can alter it into diacritics.
+							SendLevel, 	0
+						}
+						else
+							SendInput, 	% OutputString
+					}
+					else
+						SendInput, 	% OutputString
 				}	
 				; OutputDebug, % "Finished SendInput" . "`n"
 			}
