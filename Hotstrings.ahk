@@ -82,6 +82,8 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		v_Qinput				:= "" 		; to store substring of v_InputString related to possible question mark (inside) option
 ,		c_MsgBoxIconError		:= 16		;constant, MsgBox icon hand (stop/error)
 ,		c_MsgBoxIconExclamation	:= 48		;constant, MsgBox icon exclamation
+,		c_MsgBoxIconQuestion	:= 32		;constant, MsgBox icon question
+,		c_MsgBoxButtYesNo		:= 4			;constant, MsgBox buttons, Yes/No
 ,		v_Triggerstring		:= ""		;to store d(t, o, h) -> t entered by user in GUI.
 ,		ini_ShowWhiteChars		:= false		;show white characters (e.g. space) within GUI in form of special characters. For example <space> = U+2423 (open box ␣)
 ;#f/* free version only beginning
@@ -9744,7 +9746,7 @@ F_AddHotstring()
 			LibraryHeader 	:= F_ExtractHeader(TheWholeFile)
 			if (LibraryHeader)
 				LibraryHeader 	:= "/*`n" . LibraryHeader . "`n*/`n`n"
-,				TheWholeFile	:= ""
+			,	TheWholeFile	:= ""
 			FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary
 
 			;8. Save List View into the library file.
@@ -9802,6 +9804,26 @@ F_AddHotstring()
 					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . true . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
+		if (SendFun = "P")
+		{
+			Try
+				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_PictureShow").bind(vHotstring, true, SendFun), true)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
+					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_PictureShow"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . true . ")"
+					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
+		}	
+		if (SendFun = "R")
+		{
+			Try
+				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HMenu_Output").bind(vHotstring, true, SendFun), true)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
+					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . true . ")"
+					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
+		}	
 ;#c*/ commercial only end		
 	}
 	else
@@ -9827,6 +9849,26 @@ F_AddHotstring()
 					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . vHotstring . "," . A_Space . false . "," . A_Space . SendFun . ")," . A_Space . true . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
+		if (SendFun = "P")
+		{
+			Try
+				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_PictureShow").bind(vHotstring, false, SendFun), true)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
+					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_PictureShow"").bind(" . vHotstring . "," . A_Space . false . "," . A_Space . SendFun . ")," . A_Space . true . ")"
+					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
+		}	
+		if (SendFun = "R")
+		{
+			Try
+				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_RunApplication").bind(vHotstring, false, SendFun), true)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
+					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_RunApplication"").bind(" . vHotstring . "," . A_Space . false . "," . A_Space . SendFun . ")," . A_Space . true . ")"
+					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
+		}	
 ;#c*/ commercial only end		
 	}
 	; 5. Update global arrays
@@ -9923,6 +9965,87 @@ F_ModifyLV(v_Triggerstring, NewOptions, SendFun, TextInsert, v_Comment)
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_PictureShow(PHotstring, Oflag, SendFun)
+{
+;#c/* commercial only beginning
+	global	;v_PictureMenu := ""
+	local	CurLength := 0, MaxLength := 0, WhichIndex := 0
+		, 	a_AllTexts := [TransA["Copy picture to Clipboard"], TransA["Copy picture to Clipboard and close"], TransA["Copy picture path to clipboard"], TransA["Copy picture path to clipboard and close"]]
+		,	index := 1
+		,	GCSize_X := 0, GCSize_Y := 0, GCSize_W := 0, GCSize_H := 0, GCSize_ := 0
+		,	Margin := 8	;pixels
+		,	WS_CLIPSIBLINGS := 0x4000000
+
+	F_DestroyTriggerstringTips(ini_TTCn)
+	Gui, New, +Resize -DPIScale	;-DPIScale is required for MouseGetPos in F_PictureControl()
+	for index in a_AllTexts
+	{
+		CurLength := StrLen(a_AllTexts[index])
+		if (CurLength > MaxLength) 
+		{
+			MaxLength := CurLength
+		,	WhichIndex := index
+		}	
+	}
+	Gui, Add, Text, HwndDummyTextHwnd, % a_AllTexts[WhichIndex]
+	GuiControl, Hide, % DummyTextHwnd
+	GuiControlGet, GCSize_, Pos, % DummyTextHwnd
+	Gui, Add, Listbox, % "r" . a_AllTexts.MaxIndex() . A_Space . "w" . GCSize_W + Margin . A_Space . "v" . "v_PictureMenu" . A_Space . "g" . "F_PictureListbox" . A_Space . "Hwnd" . "IDPictureHwnd", |	;order matters: the picture must be add as the last one
+	Func_PictureListbox_Hotstring := func("F_PictureListbox").bind(PHotstring)
+	GuiControl +g, % IDPictureHwnd, % Func_PictureListbox_Hotstring
+	Gui, Add, Picture, WS_CLIPSIBLINGS gF_PictureControl vv_PictureID, % PHotstring ;Official Help: if controls are input-capable and the picture has a g-label, create the picture after the other controls and include 0x4000000 (which is WS_CLIPSIBLINGS) in the picture's Options
+	Gui, Show, Center AutoSize, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . PHotstring
+;#c*/ commercial only end
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
+F_PictureControl()	;function called from function F_PictureShow
+{
+	global	;assume-global mode of operation
+	OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
+	local	MousePosX := 0, MousePosY := 0, OutputVarTemp := ""
+	
+	MouseGetPos, MousePosX, MousePosY, , OutputVarTemp			;to store the name (ClassNN) of the control under the mouse cursor
+	GuiControl,, v_PictureMenu, |
+	GuiControl, Move, v_PictureMenu, % "x" . MousePosX . A_Space . "y" . MousePosY
+	Sleep, 1	;unfortunately even such minimal Sleep is required.
+	GuiControl,, v_PictureMenu, % "|" . TransA["Copy picture to Clipboard"] . "|" . TransA["Copy picture to Clipboard and close"] . "|" . TransA["Copy picture path to clipboard"] . "|" . TransA["Copy picture path to clipboard and close"]
+}
+;#c*/ commercial only end
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;#c/* commercial only beginning
+F_PictureListbox(PHotstring)	;function called from F_PictureShow, it gets Hotstring argument thanks to bind method
+{
+	global	;assume-global mode of operation
+	local	OutputVarTemp := "", ChoicePos := 0, OutputVarTemp := ""
+
+	OutputDebug, % A_ThisFunc . "`n"
+	MouseGetPos, , , , OutputVarTemp			;to store the name (ClassNN) of the control under the mouse cursor
+	SendMessage, 0x0188, 0, 0, % OutputVarTemp	;retrieve the position of the selected item
+	ChoicePos := (ErrorLevel<<32>>32) + 1		;Convert UInt to Int to have -1 if there is no item selected. Convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.
+	OutputDebug, % "ChoicePos:" . ChoicePos . A_Space . "PHotstring:" . PHotstring . "`n"
+	Switch ChoicePos
+	{
+		Case 1: ;TransA["Copy picture to Clipboard"]
+			FileRead, Clipboard, % "*c" . A_Space . PHotstring	;ClipboardAll contains all binary content of Clipboard, but it's not possible to load it in Windows from a file
+		Case 2: ;TransA["Copy picture to Clipboard and close"]
+			FileRead, Clipboard, % "*c" . A_Space . PHotstring	;ClipboardAll contains all binary content of Clipboard, but it's not possible to load it in Windows from a file
+			Gui, Destroy
+		Case 3: ;TransA["Copy picture path to clipboard"]
+			A_Clipboard := PHotstring
+		Case 4: ;TransA["Copy picture path to clipboard and close"]
+			A_Clipboard := PHotstring
+			Gui, Destroy
+	}
+}
+;#c*/ commercial only end
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_RunApplication()
+{
+;#c/* commercial only beginning
+;#c*/ commercial only end
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun, TextInsert, OldEnDis)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
 {
 	global	;v_EnDis ;assume-global mode of operation
@@ -9984,6 +10107,27 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_HMenu_Output"").bind(" . TextInsert . "," . A_Space . Oflag . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
 						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
 			}
+			if (SendFun = "P")
+			{
+				Try
+					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_PictureShow").bind(TextInsert, true, SendFun), OnOffToggle)
+				Catch	
+					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
+						. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_PictureShow"").bind(" . TextInsert . "," . A_Space . Oflag . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
+						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
+			}	
+
+			if (SendFun = "R")
+			{
+				Try
+					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_RunApplication").bind(TextInsert, true, SendFun), OnOffToggle)
+				Catch	
+					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
+						. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_RunApplication"").bind(" . TextInsert . "," . A_Space . Oflag . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
+						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
+			}
 ;#c*/ commercial only end			
 		}
 		else
@@ -10009,6 +10153,26 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_HMenu_Output"").bind(" . TextInsert . "," . A_Space . Oflag . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
 						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
 			}
+			if (SendFun = "P")
+			{
+				Try
+					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_PictureShow").bind(TextInsert, false, SendFun), OnOffToggle)
+				Catch
+					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n"
+						 . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_PictureShow"").bind(" . TextInsert . "," . A_Space . Oflag . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
+						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
+			}
+			if (SendFun = "R")
+			{
+				Try
+					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_RunApplication").bind(TextInsert, false, SendFun), OnOffToggle)
+				Catch
+					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n"
+						 . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_RunApplication"").bind(" . TextInsert . "," . A_Space . Oflag . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
+						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
+			}	
 ;#c*/ commercial only end			
 		}
 		return, "Yes"
@@ -10086,9 +10250,9 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 	else
 	{
 		v_EnterHotstring := RTrim(v_EnterHotstring)
-		if (v_EnterHotstring = "")
+		if (v_EnterHotstring = "") and (v_SelectFunction != TransA["Picture (P)"]) and (v_SelectFunction != TransA["Run (R)"])
 		{
-			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring text is blank. Do you want to proceed?"] 
+			MsgBox, % c_MsgBoxIconQuestion + c_MsgBoxButtYesNo, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring text is blank. Do you want to proceed?"] 
 			IfMsgBox, No
 				return, true
 		}
@@ -10098,6 +10262,34 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 		,	TextInsert := v_EnterHotstring
 		}
 	}
+	if (v_SelectFunction == TransA["Picture (P)"])	;validation of v_EnterHotstring
+	{
+		if (v_EnterHotstring = "")
+		{
+			MsgBox, % c_MsgBoxIconQuestion + c_MsgBoxButtYesNo, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Path to picture file is blank. Do you want to select it now from inteactive GUI?"] 
+			IfMsgBox, No
+				return, true
+			IfMsgBox, Yes
+				FileSelectFile, v_EnterHotstring, 3, % A_MyDocuments, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Select picture filename"], *.jpg; *.png; *.gif
+			TextInsert := v_EnterHotstring
+		}
+		else
+		{
+			v_EnterHotstring := Trim(v_EnterHotstring)
+		,	TextInsert := v_EnterHotstring
+		}
+		if (!FileExist(v_EnterHotstring))
+		{
+			MsgBox, % c_MsgBoxIconQuestion, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Content of this text field is not file path or file wasn't found. For ouput function ""Picture (P)"" it is required to enter correct filepath."] 
+				. "`n`n"	
+				. TransA["Leave this field empty and then press ""Add/Edit hotstring (F9)"" again to get GUI enabling file selection."] 
+			return, true
+		}	
+	}
+	if (v_SelectFunction == "R")
+	{
+
+	}	
 	if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Choose existing hotstring library file before saving new (triggerstring, hotstring) definition!"]
@@ -10120,16 +10312,20 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 		NewOptions .= "Z"
 	Switch v_SelectFunction
 	{
-		Case "Clipboard (CL)":			SendFun := "CL"
-		Case "SendInput (SI)": 			SendFun := "SI"
-		Case "Menu & Clipboard (MCL)": 	SendFun := "MCL"
-		Case "Menu & SendInput (MSI)": 	SendFun := "MSI"
-		Case "SendRaw (SR)":			SendFun := "SR"
-		Case "SendPlay (SP)":			SendFun := "SP"
-		Case "SendEvent (SE)":			SendFun := "SE"
+		Case "Clipboard (CL)":				SendFun := "CL"
+		Case "SendInput (SI)": 				SendFun := "SI"
+		Case "Menu & Clipboard (MCL)": 		SendFun := "MCL"
+		Case "Menu & SendInput (MSI)": 		SendFun := "MSI"
+		Case "SendRaw (SR)":				SendFun := "SR"
+		Case "SendPlay (SP)":				SendFun := "SP"
+		Case "SendEvent (SE)":				SendFun := "SE"
+		Case TransA["Special function 1 (S1)"]: SendFun := "S1"
+		Case TransA["Special function 2 (S2)"]: SendFun := "S2"
+		Case TransA["Picture (P)"]:			SendFun := "P"
+		Case TransA["Run (R)"]:				SendFun := "R"
 	}
 
-	if (SendFun = "SI") or (SendFun = "MSI") or (SendFun = "SE")
+	if (SendFun = "SI") or (SendFun = "MSI") or (SendFun = "SE") or (SendFun = "S1") or (SendFun = "S2")
 		{	; provide warning to user if definition contains one of the escaped characters: {}^!+#
 			WhichEscape := "{"
 			if (InStr(TextInsert, WhichEscape))
@@ -11634,6 +11830,24 @@ F_LV1_EnDisDefinition()
 					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . vHotstring . "," . A_Space . true . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
+		if (SendFun = "P")
+		{
+			Try
+				Hotstring(":" . Options . ":" . Triggerstring, func("F_PictureShow").bind(vHotstring, true, SendFun), OnOffToggle)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_PictureShow"").bind(" . vHotstring . "," . A_Space . true . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
+					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
+		}
+		if (SendFun = "R")
+		{
+			Try
+				Hotstring(":" . Options . ":" . Triggerstring, func("F_RunApplication").bind(vHotstring, true, SendFun), OnOffToggle)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_RunApplication"").bind(" . vHotstring . "," . A_Space . true . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
+					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
+		}
 	}
 	else
 	{
@@ -11653,6 +11867,24 @@ F_LV1_EnDisDefinition()
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . vHotstring . "," . A_Space . false . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
+					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
+		}
+		if (SendFun = "P")
+		{
+			Try
+				Hotstring(":" . Options . ":" . Triggerstring, func("F_PictureShow").bind(vHotstring, false, SendFun), OnOffToggle)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_PictureShow"").bind(" . vHotstring . "," . A_Space . false . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
+					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
+		}
+		if (SendFun = "R")
+		{
+			Try
+				Hotstring(":" . Options . ":" . Triggerstring, func("F_RunApplication").bind(vHotstring, false, SendFun), OnOffToggle)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_RunApplication"").bind(" . vHotstring . "," . A_Space . false . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
 	}
@@ -11847,26 +12079,38 @@ F_LV1_CopyContentToHS3()
 	Switch Fun
 	{
 		Case "SI":	;SendFun := "F_Simple_Output"
-		GuiControl, HS3: ChooseString, % IdDDL1, 	SendInput (SI)
-		GuiControl, HS4: ChooseString, % IdDDL1b, 	SendInput (SI)
+			GuiControl, HS3: ChooseString, % IdDDL1, 	SendInput (SI)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	SendInput (SI)
 		Case "CL":	;SendFun := "F_Simple_Output"
-		GuiControl, HS3: ChooseString, % IdDDL1, 	Clipboard (CL)
-		GuiControl, HS4: ChooseString, % IdDDL1b, 	Clipboard (CL)
+			GuiControl, HS3: ChooseString, % IdDDL1, 	Clipboard (CL)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	Clipboard (CL)
 		Case "MCL":	;SendFun := "F_HMenu_Output"
-		GuiControl, HS3: ChooseString, % IdDDL1, 	Menu & Clipboard (MCL)
-		GuiControl, HS4: ChooseString, % IdDDL1b, 	Menu & Clipboard (MCL)
+			GuiControl, HS3: ChooseString, % IdDDL1, 	Menu & Clipboard (MCL)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	Menu & Clipboard (MCL)
 		Case "MSI":	;SendFun := "F_HMenu_Output"
-		GuiControl, HS3: ChooseString, % IdDDL1, 	Menu & SendInput (MSI)
-		GuiControl, HS4: ChooseString, % IdDDL1b, 	Menu & SendInput (MSI)
-		Case "SR":	
-		GuiControl, HS3: ChooseString, % IdDDL1, 	SendRaw (SR)
-		GuiControl, HS4: ChooseString, % IdDDL1b, 	SendRaw (SR)
-		Case "SP":
-		GuiControl, HS3: ChooseString, % IdDDL1, 	SendPlay (SP)
-		GuiControl, HS4: ChooseString, % IdDDL1b, 	SendPlay (SP)
-		Case "SE":
-		GuiControl, HS3: ChooseString, % IdDDL1, 	SendEvent (SE)
-		GuiControl, HS4: ChooseString, % IdDDL1b, 	SendEvent (SE)
+			GuiControl, HS3: ChooseString, % IdDDL1, 	Menu & SendInput (MSI)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	Menu & SendInput (MSI)
+		Case "SR":	;SendFun := "F_Simple_Output"
+			GuiControl, HS3: ChooseString, % IdDDL1, 	SendRaw (SR)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	SendRaw (SR)
+		Case "SP":	;SendFun := "F_Simple_Output"
+			GuiControl, HS3: ChooseString, % IdDDL1, 	SendPlay (SP)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	SendPlay (SP)
+		Case "SE":	;SendFun := "F_Simple_Output"
+			GuiControl, HS3: ChooseString, % IdDDL1, 	SendEvent (SE)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	SendEvent (SE)
+		Case "S1":	;SendFun := "F_Simple_Output"
+			GuiControl, HS3: ChooseString, % IdDDL1, 	% TransA["Special function 1 (S1)"]
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	% TransA["Special function 1 (S1)"]
+		Case "S2":	;SendFun := "F_Simple_Output"
+			GuiControl, HS3: ChooseString, % IdDDL1, 	% TransA["Special function 2 (S2)"]
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	% TransA["Special function 2 (S2)"]
+		Case "P":		;SendFun := "F_PictureShow"
+			GuiControl, HS3: ChooseString, % IdDDL1, 	% TransA["Picture (P)"]
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	% TransA["Picture (P)"]
+		Case "R":		;SendFun := "F_RunApplication"
+			GuiControl, HS3: ChooseString, % IdDDL1, 	% TransA["Run (R)"]
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	% TransA["Run (R)"]
 	}
 	
 	LV_GetText(EnDis,		SelectedRow, 1)
@@ -13183,6 +13427,7 @@ Config.ini file was successfully moved to the new location.		= Config.ini file w
 Config.ini wasn't found. The default Config.ini has now been created in location: = Config.ini wasn't found. The default Config.ini has now been created in location:
 Configuration 											= &Configuration
 Content of clipboard contain new line characters. Do you want to remove them? = Content of clipboard contain new line characters. Do you want to remove them?
+Content of this text field is not file path or file wasn't found. For ouput function ""Picture (P)"" it is required to enter correct filepath. = Content of this text field is not file path or file wasn't found. For ouput function ""Picture (P)"" it is required to enter correct filepath.
 Continue reading the library file? If you answer ""No"" then application will exit! = Continue reading the library file? If you answer ""No"" then application will exit!
 Conversion of .ahk file into new .csv file (library) and loading of that new library = Conversion of .ahk file into new .csv file (library) and loading of that new library
 Conversion of .csv library file into new .ahk file containing static (triggerstring, hotstring) definitions = Conversion of .csv library file into new .ahk file containing static (triggerstring, hotstring) definitions
@@ -13192,6 +13437,10 @@ Copy clipboard content into ""Enter hotstring""				= Copy clipboard content into
 Copy Config.ini folder path to Clipboard					= Copy Config.ini folder path to Clipboard
 Copy Libraries folder path to Clipboard						= Copy Libraries folder path to Clipboard
 Copy Log folder path to Clipboard							= Copy Log folder path to Clipboard
+Copy picture to Clipboard								= Copy picture to Clipboard
+Copy picture to Clipboard and close						= Copy picture to Clipboard and close
+Copy picture path to clipboard							= Copy picture path to clipboard
+Copy picture path to clipboard and close					= Copy picture path to clipboard and close
 Created at											= Created at
 Cumulative gain [characters]								= Cumulative gain [characters]
 Current Config.ini file location:							= Current Config.ini file location:
@@ -13353,6 +13602,7 @@ Keyboard or mouse scrolling								= Keyboard or mouse scrolling
 Keyboard or mouse selection								= Keyboard or mouse selection
 \Languages\`nMind that Config.ini Language variable is equal to 	= \Languages\`nMind that Config.ini Language variable is equal to
 Last hotstring undo function is currently unsuported for those characters, sorry. = Last hotstring undo function is currently unsuported for those characters, sorry.
+Leave this field empty and then press ""Add/Edit hotstring (F9)"" again to get GUI enabling file selection. = Leave this field empty and then press ""Add/Edit hotstring (F9)"" again to get GUI enabling file selection.
 Let's make your PC personal again... 						= Let's make your PC personal again...
 Libraries folder: move it to new location					= Libraries folder: move it to new location
 Libraries folder: restore it to default location				= Libraries folder: restore it to default location
@@ -13446,9 +13696,11 @@ Out. Fun.												= Out. Fun.
 question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
+Path to picture file is blank. Do you want to select it now from inteactive GUI?			= Path to picture file is blank. Do you want to select it now from inteactive GUI?
 Pause												= Pause
 Perhaps check if any other application (like File Manager) do not occupy folder to be removed. = Perhaps check if any other application (like File Manager) do not occupy folder to be removed.
 Phrase to search for:									= Phrase to search for:
+Picture (P)											= Picture (P)
 pixels												= pixels
 Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference. = Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference.
 Please enter below your license number						= Please enter below your license number
@@ -13477,6 +13729,7 @@ Reset Recognizer (Z)									= Reset Recognizer (Z)
 Restore default										= Restore default
 Restore default configuration								= Restore default configuration
 Row													= Row
+Run (R)												= Run (R)
 run web browser, enter Hotstrings webpage					= run web browser, enter Hotstrings webpage
 Sandbox												= Sandbox
 Save && Close											= Save && Close
@@ -13496,6 +13749,7 @@ Select hotstring library									= Select hotstring library
 Selected definition d(t, o, h) will be deleted. Do you want to proceed? 	= Selected definition d(t, o, h) will be deleted. Do you want to proceed?
 Select hotstring output function 							= Select hotstring output function
 Select library file to be deleted							= Select library file to be deleted
+Select picture filename									= Select picture filename
 Select the target library: 								= Select the target library:
 Select triggerstring option(s)							= Select triggerstring option(s)
 selection												= selection
@@ -13549,6 +13803,8 @@ Sorry, your computer data do not match with license information. Application wil
 Sorry, your license is no longer active.					= Sorry, your license is no longer active.
 ""SP"" or SendPlay may have no effect at all if UAC is enabled, even if the script is running as an administrator. For more information, refer to the AutoHotkey FAQ (help). = ""SP"" or SendPlay may have no effect at all if UAC is enabled, even if the script is running as an administrator. For more information, refer to the AutoHotkey FAQ (help).
 Space												= Space
+Special function 1 (S1)									= Special function 1 (S1)
+Special function 2 (S2)									= Special function 2 (S2)
 Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
 Standard executable (Ahk2Exe.exe)							= Standard executable (Ahk2Exe.exe)
 started												= started
@@ -14196,6 +14452,10 @@ F_GuiHS4_Create()
 	Gui, 	HS4: Add, 	DropDownList, 	x0 y0 HwndIdDDL1b vv_SelectFunction gF_SelectFunction, 		% "SendInput (SI)||Clipboard (CL)|"
 ;#c/* commercial only beginning	
 																						. "Menu & SendInput (MSI)|Menu & Clipboard (MCL)|"
+																						. TransA["Special function 1 (S1)"] . "|"
+																						. TransA["Special function 2 (S2)"] . "|"
+																						. TransA["Picture (P)"] . "|"
+																						. TransA["Run (R)"] . "|"
 ;#c*/ commercial only end																						
 																						. "SendRaw (SR)|SendPlay (SP)|SendEvent (SE)"
 	
@@ -14424,6 +14684,10 @@ F_GuiHS3_Create()
 	Gui, 		HS3: Add, 		DropDownList, 	x0 y0 HwndIdDDL1 vv_SelectFunction gF_SelectFunction, 			% "SendInput (SI)||Clipboard (CL)|"
 ;#c/* commercial only beginning
 																								. "Menu & SendInput (MSI)|Menu & Clipboard (MCL)|"
+																								. TransA["Special function 1 (S1)"] . "|"
+																								. TransA["Special function 2 (S2)"] . "|"
+																								. TransA["Picture (P)"] . "|"
+																								. TransA["Run (R)"] . "|"
 ;#c*/ commercial only end																								
 																								. "SendRaw (SR)|SendPlay (SP)|SendEvent (SE)"
 	Gui,			HS3: Font,		% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
@@ -15395,6 +15659,24 @@ F_CreateHotstring(txt, nameoffile)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(""F_HMenu_Output"").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")"
+					. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
+		}
+		if (SendFun = "P")
+		{
+			Try
+				Hotstring(":" . Options . ":" . Triggerstring, func("F_PictureShow").bind(TextInsert, Oflag, SendFun), EnDis)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(""F_PictureShow"").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")"
+					. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
+		}
+		if (SendFun = "R")
+		{
+			Try
+				Hotstring(":" . Options . ":" . Triggerstring, func("F_RunApplication").bind(TextInsert, Oflag, SendFun), EnDis)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(""F_RunApplication"").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 		}
 	}
