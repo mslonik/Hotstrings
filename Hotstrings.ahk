@@ -9970,79 +9970,129 @@ F_PictureShow(PHotstring, Oflag, SendFun)
 ;#c/* commercial only beginning
 	global	;v_PictureMenu := ""
 	local	CurLength := 0, MaxLength := 0, WhichIndex := 0
-		, 	a_AllTexts := [TransA["Copy picture to Clipboard"], TransA["Copy picture to Clipboard and close"], TransA["Copy picture path to clipboard"], TransA["Copy picture path to clipboard and close"]]
+		, 	a_AllTexts := [TransA["Open picture in MSPaint and copy to Clipboard"], TransA["Copy picture to Clipboard over MSPaint"], TransA["Copy picture path to clipboard"]]
 		,	index := 1
 		,	GCSize_X := 0, GCSize_Y := 0, GCSize_W := 0, GCSize_H := 0, GCSize_ := 0
 		,	Margin := 8	;pixels
-		,	WS_CLIPSIBLINGS := 0x4000000
+		,	ThisHotkey := A_ThisHotkey, EndChar := A_EndChar
+		,	SingleKey := ""
+		,	WhatWasPressed := ""
+		,	OutputVarPID := 0
 
+	v_InputH.VisibleText 	:= false
+,	v_UndoHotstring		:= PHotstring	;important for F_Undo	
+,	v_Options 			:= F_DetermineOptions(Triggerstring := SubStr(ThisHotkey, InStr(ThisHotkey, ":", true, 2, 1) + 1))
+,	v_EndChar 			:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
+	if (InStr(v_Options, "?"))
+		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
+	v_UndoTriggerstring 	:= v_InputString		;important for F_Undo
+,	v_SendFun				:= SendFun			;important for F_Undo
+		
 	F_DestroyTriggerstringTips(ini_TTCn)
-	Gui, New, +Resize -DPIScale	;-DPIScale is required for MouseGetPos in F_PictureControl()
-	for index in a_AllTexts
-	{
-		CurLength := StrLen(a_AllTexts[index])
-		if (CurLength > MaxLength) 
-		{
-			MaxLength := CurLength
-		,	WhichIndex := index
-		}	
-	}
-	Gui, Add, Text, HwndDummyTextHwnd, % a_AllTexts[WhichIndex]
-	GuiControl, Hide, % DummyTextHwnd
-	GuiControlGet, GCSize_, Pos, % DummyTextHwnd
-	Gui, Add, Listbox, % "r" . a_AllTexts.MaxIndex() . A_Space . "w" . GCSize_W + Margin . A_Space . "v" . "v_PictureMenu" . A_Space . "g" . "F_PictureListbox" . A_Space . "Hwnd" . "IDPictureHwnd", |	;order matters: the picture must be add as the last one
-	Func_PictureListbox_Hotstring := func("F_PictureListbox").bind(PHotstring)
-	GuiControl +g, % IDPictureHwnd, % Func_PictureListbox_Hotstring
-	Gui, Add, Picture, WS_CLIPSIBLINGS gF_PictureControl vv_PictureID, % PHotstring ;Official Help: if controls are input-capable and the picture has a g-label, create the picture after the other controls and include 0x4000000 (which is WS_CLIPSIBLINGS) in the picture's Options
-	Gui, Show, Center AutoSize, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . PHotstring
-;#c*/ commercial only end
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;#c/* commercial only beginning
-F_PictureControl()	;function called from function F_PictureShow
-{
-	global	;assume-global mode of operation
-	OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
-	local	MousePosX := 0, MousePosY := 0, OutputVarTemp := ""
-	
-	MouseGetPos, MousePosX, MousePosY, , OutputVarTemp			;to store the name (ClassNN) of the control under the mouse cursor
-	GuiControl,, v_PictureMenu, |
-	GuiControl, Move, v_PictureMenu, % "x" . MousePosX . A_Space . "y" . MousePosY
-	Sleep, 1	;unfortunately even such minimal Sleep is required.
-	GuiControl,, v_PictureMenu, % "|" . TransA["Copy picture to Clipboard"] . "|" . TransA["Copy picture to Clipboard and close"] . "|" . TransA["Copy picture path to clipboard"] . "|" . TransA["Copy picture path to clipboard and close"]
-}
-;#c*/ commercial only end
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;#c/* commercial only beginning
-F_PictureListbox(PHotstring)	;function called from F_PictureShow, it gets Hotstring argument thanks to bind method
-{
-	global	;assume-global mode of operation
-	local	OutputVarTemp := "", ChoicePos := 0, OutputVarTemp := ""
+	if (ini_MHSEn)		;Second beep will be produced on purpose by main loop 
+		SoundBeep, % ini_MHSF, % ini_MHSD
 
-	OutputDebug, % A_ThisFunc . "`n"
-	MouseGetPos, , , , OutputVarTemp			;to store the name (ClassNN) of the control under the mouse cursor
-	SendMessage, 0x0188, 0, 0, % OutputVarTemp	;retrieve the position of the selected item
-	ChoicePos := (ErrorLevel<<32>>32) + 1		;Convert UInt to Int to have -1 if there is no item selected. Convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.
-	OutputDebug, % "ChoicePos:" . ChoicePos . A_Space . "PHotstring:" . PHotstring . "`n"
-	Switch ChoicePos
-	{
-		Case 1: ;TransA["Copy picture to Clipboard"]
-			FileRead, Clipboard, % "*c" . A_Space . PHotstring	;ClipboardAll contains all binary content of Clipboard, but it's not possible to load it in Windows from a file
-		Case 2: ;TransA["Copy picture to Clipboard and close"]
-			FileRead, Clipboard, % "*c" . A_Space . PHotstring	;ClipboardAll contains all binary content of Clipboard, but it's not possible to load it in Windows from a file
-			Gui, Destroy
-		Case 3: ;TransA["Copy picture path to clipboard"]
-			A_Clipboard := PHotstring
-		Case 4: ;TransA["Copy picture path to clipboard and close"]
-			A_Clipboard := PHotstring
-			Gui, Destroy
+	Gui, HMenuP: New, +AlwaysOnTop -Caption +ToolWindow +HwndHMenuPHwnd
+	Gui, HMenuP: Margin, 0, 0
+	if (ini_HMBgrCol = "custom")
+		Gui, HMenuP: Color,, % ini_HMBgrColCus
+	else
+		Gui, HMenuP: Color,, % ini_HMBgrCol
+	if (ini_HMTyFaceCol = "custom")	
+		Gui, HMenuP: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
+	else
+		Gui, HMenuP: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
+
+	for index in a_AllTexts
+		{
+			CurLength := StrLen(a_AllTexts[index])
+			if (CurLength > MaxLength) 
+			{
+				MaxLength := CurLength
+			,	WhichIndex := index
+			}	
+		}
+
+	Gui, HMenuP: Add, Text, HwndDummyTextHwnd, % a_AllTexts[WhichIndex]
+	GuiControl, HMenuP: Hide, % DummyTextHwnd
+	GuiControlGet, GCSize_, HMenuP: Pos, % DummyTextHwnd
+	Gui, HMenuP: Add, Listbox, % "x0 y0" . A_Space . "r" . a_AllTexts.MaxIndex() . A_Space . "w" . GCSize_W + Margin . A_Space . "Hwnd" . "Id_LB_HMenuP", % TransA["Open picture in MSPaint and copy to Clipboard"] . "|" . TransA["Copy picture to Clipboard over MSPaint"] . "|" . TransA["Copy picture path to clipboard"]
+	; Func_HMenu_Mouse := func("F_HMenu_Mouse").bind(SendFun)
+	; GuiControl +g, % Id_LB_HMenuP, % Func_HMenu_Mouse
+
+	a_MCSIMenuPos := F_WhereDisplayMenu(ini_MHMP)
+	F_FlipMenu(HMenuPHwnd, a_MCSIMenuPos[1], a_MCSIMenuPos[2], "HMenuP")
+	GuiControl, Choose, % Id_LB_HMenuP, 1
+
+	Ovar := Oflag
+
+	Loop
+	{	
+		if (ErrorLevel = "NewInput")	;when user used mouse to make a choice from menu
+			break
+		Input, SingleKey, L1 E, 123{Esc}
+		; Input, SingleKey, L1 E, {Tab}{Up}{Down}123{Enter}{Esc}
+		if (SingleKey) and (ini_MHSEn)	;Sound is produced each time user presses other key than EndKey. Assumption: it will help to focus user's attention to on screen menu.
+			SoundBeep, % ini_MHSF, % ini_MHSD	
+
+		if (InStr(ErrorLevel, "EndKey:"))
+		{
+			WhatWasPressed := SubStr(ErrorLevel, 8)	;8 = EndKey: + 1
+			; OutputDebug, % "Terminated by EndKey:" . WhatWasPressed . "|" . "`n"	
+			if (WhatWasPressed = "Escape")
+			{
+				Gui, HMenuP: Destroy
+				SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
+				v_InputString 			:= ""
+			,	v_InputH.VisibleText 	:= true
+				break
+			}
+
+			if (WhatWasPressed  = "1")	;TransA["Open picture in MSPaint and copy to Clipboard"]
+			{
+				Run, % "MSPaint.exe" . A_Space . PHotstring,,, OutputVarPID
+				WinWaitActive, % "ahk_pid" . A_Space . OutputVarPID
+				Send, ^a				;Ctrl + A = "select all"
+				Sleep, 1000
+				Send, ^c				;Ctrl + C = "copy to clipboard"
+				ClipWait,, 1
+				Send, !{tab}			;return to previous window
+				Gui, HMenuP: Destroy
+				v_InputH.VisibleText 	:= true
+				break
+			}	
+
+			if (WhatWasPressed  = "2")	;TransA["Copy picture to Clipboard over MSPaint"]
+			{
+				Run, % "MSPaint.exe" . A_Space . PHotstring,,, OutputVarPID
+				WinWaitActive, % "ahk_pid" . A_Space . OutputVarPID
+				Send, ^a				;Ctrl + A = "select all"
+				Sleep, 1000
+				Send, ^c				;Ctrl + C = "copy to clipboard"
+				ClipWait,, 1
+				WinClose, % "ahk_pid" . A_Space . OutputVarPID
+				Gui, HMenuP: Destroy
+				v_InputH.VisibleText 	:= true
+				break
+			}	
+
+			if (WhatWasPressed  = "3")	;TransA["Copy picture path to clipboard"]
+			{
+				A_Clipboard := PHotstring
+				Gui, HMenuP: Destroy
+				v_InputH.VisibleText 	:= true
+				break
+			}	
+		}
 	}
-}
+	; OutputDebug, % A_ThisFunc . A_Space . "end" . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
 ;#c*/ commercial only end
+}
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_RunApplication()
+F_RunApplication(PHotstring, Oflag, SendFun)
 {
 ;#c/* commercial only beginning
+	Run, % PHotstring
 ;#c*/ commercial only end
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10270,7 +10320,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 			IfMsgBox, No
 				return, true
 			IfMsgBox, Yes
-				FileSelectFile, v_EnterHotstring, 3, % A_MyDocuments, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Select picture filename"], *.jpg; *.png; *.gif
+				FileSelectFile, v_EnterHotstring, 3, % A_MyDocuments, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Select picture filename"], *.jpg; *.png; *.gif	;3 = 1 (File Must Exist) + 2 (Path Must Exist)
 			TextInsert := v_EnterHotstring
 		}
 		else
@@ -10286,9 +10336,29 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 			return, true
 		}	
 	}
-	if (v_SelectFunction == "R")
+	if (v_SelectFunction == TransA["Run (R)"])
 	{
-
+		if (v_EnterHotstring = "")
+		{
+			MsgBox, % c_MsgBoxIconQuestion + c_MsgBoxButtYesNo, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Path to executable file is blank. Do you want to select it now from inteactive GUI?"] 
+			IfMsgBox, No
+				return, true
+			IfMsgBox, Yes
+				FileSelectFile, v_EnterHotstring, 3, % A_MyDocuments, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Select executable file"], *.exe	;3 = 1 (File Must Exist) + 2 (Path Must Exist)
+			TextInsert := v_EnterHotstring
+		}
+		else
+		{
+			v_EnterHotstring := Trim(v_EnterHotstring)
+		,	TextInsert := v_EnterHotstring
+		}
+		if (!FileExist(v_EnterHotstring))
+		{
+			MsgBox, % c_MsgBoxIconQuestion, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Content of this text field is not file path or file wasn't found. For ouput function ""Run (R)"" it is required to enter correct filepath."] 
+				. "`n`n"	
+				. TransA["Leave this field empty and then press ""Add/Edit hotstring (F9)"" again to get GUI enabling file selection."] 
+			return, true
+		}	
 	}	
 	if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
 	{
@@ -13428,6 +13498,7 @@ Config.ini wasn't found. The default Config.ini has now been created in location
 Configuration 											= &Configuration
 Content of clipboard contain new line characters. Do you want to remove them? = Content of clipboard contain new line characters. Do you want to remove them?
 Content of this text field is not file path or file wasn't found. For ouput function ""Picture (P)"" it is required to enter correct filepath. = Content of this text field is not file path or file wasn't found. For ouput function ""Picture (P)"" it is required to enter correct filepath.
+Content of this text field is not file path or file wasn't found. For ouput function ""Run (R)"" it is required to enter correct filepath. = Content of this text field is not file path or file wasn't found. For ouput function ""Run (R)"" it is required to enter correct filepath.
 Continue reading the library file? If you answer ""No"" then application will exit! = Continue reading the library file? If you answer ""No"" then application will exit!
 Conversion of .ahk file into new .csv file (library) and loading of that new library = Conversion of .ahk file into new .csv file (library) and loading of that new library
 Conversion of .csv library file into new .ahk file containing static (triggerstring, hotstring) definitions = Conversion of .csv library file into new .ahk file containing static (triggerstring, hotstring) definitions
@@ -13437,8 +13508,8 @@ Copy clipboard content into ""Enter hotstring""				= Copy clipboard content into
 Copy Config.ini folder path to Clipboard					= Copy Config.ini folder path to Clipboard
 Copy Libraries folder path to Clipboard						= Copy Libraries folder path to Clipboard
 Copy Log folder path to Clipboard							= Copy Log folder path to Clipboard
-Copy picture to Clipboard								= Copy picture to Clipboard
-Copy picture to Clipboard and close						= Copy picture to Clipboard and close
+Open picture in MSPaint and copy to Clipboard								= Open picture in MSPaint and copy to Clipboard
+Copy picture to Clipboard over MSPaint						= Copy picture to Clipboard over MSPaint
 Copy picture path to clipboard							= Copy picture path to clipboard
 Copy picture path to clipboard and close					= Copy picture path to clipboard and close
 Created at											= Created at
@@ -13696,6 +13767,7 @@ Out. Fun.												= Out. Fun.
 question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
+Path to executable file is blank. Do you want to select it now from inteactive GUI? = Path to executable file is blank. Do you want to select it now from inteactive GUI?
 Path to picture file is blank. Do you want to select it now from inteactive GUI?			= Path to picture file is blank. Do you want to select it now from inteactive GUI?
 Pause												= Pause
 Perhaps check if any other application (like File Manager) do not occupy folder to be removed. = Perhaps check if any other application (like File Manager) do not occupy folder to be removed.
@@ -13743,6 +13815,7 @@ Search by: 											= Search by:
 Search Hotstrings 										= Search Hotstrings
 Search (F3)											= &Search (F3)
 Select a row in the list-view, please! 						= Select a row in the list-view, please!
+Select executable file									= Select executable file
 Select folder where ""Hotstrings"" folder will be moved.		= Select folder where ""Hotstrings"" folder will be moved.
 Select folder where libraries (*.csv  files) will be moved.		= Select folder where libraries (*.csv  files) will be moved.
 Select hotstring library									= Select hotstring library
