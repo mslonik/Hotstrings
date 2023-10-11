@@ -23,6 +23,7 @@ FileEncoding, 			UTF-16		; Sets the default encoding for FileRead, FileReadLine,
 CoordMode, Caret,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs. 
 CoordMode, ToolTip,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs. 
 CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs.
+#Include, %A_ScriptDir%\includes\Gdip_Part.ahk
 ; - - - - - - - - - - - - - - - - - - - - - - - E X E  CONVERSION / INSTALLATOR S E C T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
@@ -81,8 +82,9 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		ini_TTCn				:= 0 		;this variable could be triggered by left mouse click when script is initialized.
 ,		v_Qinput				:= "" 		; to store substring of v_InputString related to possible question mark (inside) option
 ,		c_MsgBoxIconError		:= 16		;constant, MsgBox icon hand (stop/error)
-,		c_MsgBoxIconExclamation	:= 48		;constant, MsgBox icon exclamation
 ,		c_MsgBoxIconQuestion	:= 32		;constant, MsgBox icon question
+,		c_MsgBoxIconExclamation	:= 48		;constant, MsgBox icon exclamation
+,		c_MsgBoxIconInfo		:= 64		;constant, MsgBox icon asterisk (info)
 ,		c_MsgBoxButtYesNo		:= 4			;constant, MsgBox buttons, Yes/No
 ,		v_Triggerstring		:= ""		;to store d(t, o, h) -> t entered by user in GUI.
 ,		ini_ShowWhiteChars		:= false		;show white characters (e.g. space) within GUI in form of special characters. For example <space> = U+2423 (open box ␣)
@@ -3163,7 +3165,7 @@ F_DetermineMonitors()	; Multi monitor environment, initialization of monitor wid
 ,		MonitorCoordinates[A_Index].Top 		:= TempTop
 ,		MonitorCoordinates[A_Index].Bottom 	:= TempBottom
 ,		MonitorCoordinates[A_Index].Width 		:= TempRight - TempLeft
-,		MonitorCoordinates[A_Index].Height 	:= TempBottom - TempTop
+,		MonitorCoordinates[A_Index].Height	 	:= TempBottom - TempTop
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9970,7 +9972,7 @@ F_PictureShow(PHotstring, Oflag, SendFun)
 ;#c/* commercial only beginning
 	global	;v_PictureMenu := ""
 	local	CurLength := 0, MaxLength := 0, WhichIndex := 0
-		, 	a_AllTexts := [TransA["Open picture in MSPaint and copy to Clipboard"], TransA["Copy picture to Clipboard over MSPaint"], TransA["Copy picture path to clipboard"]]
+		, 	a_AllTexts := [TransA["Open picture in MSPaint and copy to Clipboard"], TransA["Copy picture to Clipboard"], TransA["Copy picture path to Clipboard"]]
 		,	index := 1
 		,	GCSize_X := 0, GCSize_Y := 0, GCSize_W := 0, GCSize_H := 0, GCSize_ := 0
 		,	Margin := 8	;pixels
@@ -9978,6 +9980,7 @@ F_PictureShow(PHotstring, Oflag, SendFun)
 		,	SingleKey := ""
 		,	WhatWasPressed := ""
 		,	OutputVarPID := 0
+		,	pToken := "", pBitmap := ""
 
 	v_InputH.VisibleText 	:= false
 ,	v_UndoHotstring		:= PHotstring	;important for F_Undo	
@@ -10004,19 +10007,23 @@ F_PictureShow(PHotstring, Oflag, SendFun)
 		Gui, HMenuP: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
 
 	for index in a_AllTexts
+	{
+		CurLength := StrLen(a_AllTexts[index]) + 3 ;3 = "1. ", so digit character, dot and a space.
+		if (CurLength > MaxLength) 
 		{
-			CurLength := StrLen(a_AllTexts[index])
-			if (CurLength > MaxLength) 
-			{
-				MaxLength := CurLength
-			,	WhichIndex := index
-			}	
-		}
+			MaxLength := CurLength
+		,	WhichIndex := index
+		}	
+	}
 
 	Gui, HMenuP: Add, Text, HwndDummyTextHwnd, % a_AllTexts[WhichIndex]
 	GuiControl, HMenuP: Hide, % DummyTextHwnd
 	GuiControlGet, GCSize_, HMenuP: Pos, % DummyTextHwnd
-	Gui, HMenuP: Add, Listbox, % "x0 y0" . A_Space . "r" . a_AllTexts.MaxIndex() . A_Space . "w" . GCSize_W + Margin . A_Space . "Hwnd" . "Id_LB_HMenuP", % TransA["Open picture in MSPaint and copy to Clipboard"] . "|" . TransA["Copy picture to Clipboard over MSPaint"] . "|" . TransA["Copy picture path to clipboard"]
+	Gui, HMenuP: Add, Listbox, % "x0 y0" . A_Space . "r" . a_AllTexts.MaxIndex() . A_Space . "w" . GCSize_W + Margin . A_Space . "Hwnd" . "Id_LB_HMenuP" 
+		,% "1." . A_Space . TransA["Open picture in MSPaint and copy to Clipboard"] . "|" 
+		 . "2." . A_Space . TransA["Copy picture to Clipboard"] . "|" 
+		 . "3." . A_Space . TransA["Copy picture path to Clipboard"]
+	; future: add mouse handling of user's choice
 	; Func_HMenu_Mouse := func("F_HMenu_Mouse").bind(SendFun)
 	; GuiControl +g, % Id_LB_HMenuP, % Func_HMenu_Mouse
 
@@ -10030,8 +10037,7 @@ F_PictureShow(PHotstring, Oflag, SendFun)
 	{	
 		if (ErrorLevel = "NewInput")	;when user used mouse to make a choice from menu
 			break
-		Input, SingleKey, L1 E, 123{Esc}
-		; Input, SingleKey, L1 E, {Tab}{Up}{Down}123{Enter}{Esc}
+		Input, SingleKey, L1 E, 123{Esc} ;future: restore additional keyboard keys choice: Input, SingleKey, L1 E, {Tab}{Up}{Down}123{Enter}{Esc}
 		if (SingleKey) and (ini_MHSEn)	;Sound is produced each time user presses other key than EndKey. Assumption: it will help to focus user's attention to on screen menu.
 			SoundBeep, % ini_MHSF, % ini_MHSD	
 
@@ -10050,33 +10056,33 @@ F_PictureShow(PHotstring, Oflag, SendFun)
 
 			if (WhatWasPressed  = "1")	;TransA["Open picture in MSPaint and copy to Clipboard"]
 			{
-				Run, % "MSPaint.exe" . A_Space . PHotstring,,, OutputVarPID
+				Run, % "MSPaint.exe" . A_Space . PHotstring,, Max UseErrorLevel, OutputVarPID
+				if (ErrorLevel = "ERROR")
+					MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["MSPaint.exe (Paint application) wasn't found or couldn't be run."]
 				WinWaitActive, % "ahk_pid" . A_Space . OutputVarPID
-				Send, ^a				;Ctrl + A = "select all"
-				Sleep, 1000
-				Send, ^c				;Ctrl + C = "copy to clipboard"
-				ClipWait,, 1
-				Send, !{tab}			;return to previous window
+
+				pToken := Gdip_Startup()	;all Gdip_ functions come from Gdip_ library based on Gdip standard library version 1.96 by Marius Șucan; https://github.com/marius-sucan/AHK-GDIp-Library-Compilation/blob/master/ahk-v1-1/Gdip_All.ahk
+				Gdip_SetBitmapToClipboard(pBitmap := Gdip_CreateBitmapFromFile(PHotstring))
+				Gdip_DisposeImage(pBitmap)
+				Gdip_Shutdown(pToken)
 				Gui, HMenuP: Destroy
 				v_InputH.VisibleText 	:= true
 				break
 			}	
 
-			if (WhatWasPressed  = "2")	;TransA["Copy picture to Clipboard over MSPaint"]
+			if (WhatWasPressed  = "2")	;TransA["Copy picture to Clipboard"]
 			{
-				Run, % "MSPaint.exe" . A_Space . PHotstring,,, OutputVarPID
-				WinWaitActive, % "ahk_pid" . A_Space . OutputVarPID
-				Send, ^a				;Ctrl + A = "select all"
-				Sleep, 1000
-				Send, ^c				;Ctrl + C = "copy to clipboard"
-				ClipWait,, 1
-				WinClose, % "ahk_pid" . A_Space . OutputVarPID
+				pToken := Gdip_Startup()	;all Gdip_ functions come from Gdip_ library based on Gdip standard library version 1.96 by Marius Șucan; https://github.com/marius-sucan/AHK-GDIp-Library-Compilation/blob/master/ahk-v1-1/Gdip_All.ahk
+				Gdip_SetBitmapToClipboard(pBitmap := Gdip_CreateBitmapFromFile(PHotstring))
+				Gdip_DisposeImage(pBitmap)
+				Gdip_Shutdown(pToken)
+				Gui, HMenuP: Destroy
 				Gui, HMenuP: Destroy
 				v_InputH.VisibleText 	:= true
 				break
 			}	
 
-			if (WhatWasPressed  = "3")	;TransA["Copy picture path to clipboard"]
+			if (WhatWasPressed  = "3")	;TransA["Copy picture path to Clipboard"]
 			{
 				A_Clipboard := PHotstring
 				Gui, HMenuP: Destroy
@@ -10092,13 +10098,16 @@ F_PictureShow(PHotstring, Oflag, SendFun)
 F_RunApplication(PHotstring, Oflag, SendFun)
 {
 ;#c/* commercial only beginning
-	Run, % PHotstring
+	global	;assume-global mode of operation
+	Run, % PHotstring,, Max UseErrorLevel
+	if (ErrorLevel = "ERROR")
+		MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Application"] . ":" . "`n`n" . PHotstring . "`n`n" . TransA["wasn't found or couldn't be run"] . "."
 ;#c*/ commercial only end
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun, TextInsert, OldEnDis)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
 {
-	global	;v_EnDis ;assume-global mode of operation
+	global	;assume-global mode of operation
 	local	OnOffToggle := false
 
 	MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
@@ -13508,10 +13517,9 @@ Copy clipboard content into ""Enter hotstring""				= Copy clipboard content into
 Copy Config.ini folder path to Clipboard					= Copy Config.ini folder path to Clipboard
 Copy Libraries folder path to Clipboard						= Copy Libraries folder path to Clipboard
 Copy Log folder path to Clipboard							= Copy Log folder path to Clipboard
-Open picture in MSPaint and copy to Clipboard								= Open picture in MSPaint and copy to Clipboard
-Copy picture to Clipboard over MSPaint						= Copy picture to Clipboard over MSPaint
-Copy picture path to clipboard							= Copy picture path to clipboard
-Copy picture path to clipboard and close					= Copy picture path to clipboard and close
+Open picture in MSPaint and copy to Clipboard				= Open picture in MSPaint and copy to Clipboard
+Copy picture to Clipboard								= Copy picture to Clipboard
+Copy picture path to Clipboard							= Copy picture path to Clipboard
 Created at											= Created at
 Cumulative gain [characters]								= Cumulative gain [characters]
 Current Config.ini file location:							= Current Config.ini file location:
@@ -13546,6 +13554,7 @@ Do you want to proceed? 									= Do you want to proceed?
 Dot . 												= Dot .
 Do you want to reload application now?						= Do you want to reload application now?
 doesn't exist in application folder						= doesn't exist in application folder
+down													= down
 Download repository version								= Download repository version
 Downloading public library files							= Downloading public library files
 Dynamic hotstrings 										= &Dynamic hotstrings
@@ -13724,10 +13733,8 @@ MIT license											= MIT license
 Mode of operation										= Mode of operation
 Move definition to another library							= Move definition to another library
 Move (F8)												= Move (F8)
-down													= down
-up													= up
+MSPaint.exe (Paint application) wasn't found or couldn't be run. = MSPaint.exe (Paint application) wasn't found or couldn't be run.
 navy													= navy
-reloaded and fresh language file (English.txt) will be recreated. = reloaded and fresh language file (English.txt) will be recreated.
 New definition is identical with existing one. Please try again.	= New definition is identical with existing one. Please try again.
 New location:											= New location:
 New location (default):									= New location (default):
@@ -13780,6 +13787,7 @@ Please try again.										= Please try again.
 Please wait, uploading .csv files... 						= Please wait, uploading .csv files...
 Position of this window is saved in Config.ini.				= Position of this window is saved in Config.ini.	
 Preview												= &Preview
+Programm												= Programm
 Public library:										= Public library:
 purple												= purple
 question												= question
@@ -13792,6 +13800,7 @@ Reload												= Reload
 reload Hotstrings application								= reload Hotstrings application
 Reload in default mode									= Reload in default mode
 Reload in silent mode									= Reload in silent mode
+reloaded and fresh language file (English.txt) will be recreated. = reloaded and fresh language file (English.txt) will be recreated.
 Rename selected library filename							= Rename selected library filename
 Hotstring text is blank. Do you want to proceed? 				= Hotstring text is blank. Do you want to proceed?
 Repository version										= Repository version
@@ -13985,6 +13994,7 @@ TransConst .= "`n
 Underscore _											= Underscore _
 Undo the last hotstring									= Undo the last hotstring
 Undo the last hotstring									= Undo the last hotstring
+up													= up
 Undid the last hotstring 								= Undid the last hotstring
 Valid till											= Valid till
 Version / Update										= Version / Update
@@ -13994,6 +14004,7 @@ warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
 was just deleted from									= was just deleted from
 was successfully downloaded.								= was successfully downloaded.
+wasn't found or couldn't be run							= wasn't found or couldn't be run
 Welcome to Hotstrings application!							= Welcome to Hotstrings application!
 Windows key modifier									= Windows key modifier
 When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
@@ -16019,7 +16030,7 @@ ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
 F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; F_HMenu_Mouse -> F_SendIsOflag; F_SimpleOutput -> F_SendIsOflag
 {
 	global	;assume-global mode of operation
-	local	LastChar := "", IsLCalpha := false
+	local	LastChar := "", IsLCalpha := false, IsLower := false
 
 	SetKeyDelay, -1, -1	;Delay = -1, PressDuration = -1, -1: no delay at all; this can be necessary if SendInput is reduced to SendEvent (in case low level input hook is active in another script)
 	Switch SendFun
@@ -16044,12 +16055,53 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 							IsLCalpha := true
 						if (IsLCalpha)
 						{
-							OutputString 	:= SubStr(OutputString, 1, -1)	;all but last characters are copied back to OutputString
-							; OutputDebug, % "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
-							SendInput, 	% OutputString
-							SendLevel, 	2	;only for ShiftFunctions for which InputLevel MinSendLevel is set to 2.
-							SendInput, 	% LastChar	;only last character of definition is send with different level of SendLevel; thanks to that ShiftFunctions can alter it into diacritics.
-							SendLevel, 	0
+							if LastChar is lower
+								IsLower := true
+							if (IsLower)
+							{
+								OutputString 	:= SubStr(OutputString, 1, -1)	;all but last characters are copied back to OutputString
+								OutputDebug, % "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
+								SendInput, 	% OutputString
+								SendLevel, 	2	;only for ShiftFunctions for which InputLevel MinSendLevel is set to 2.
+								SendInput, 	% LastChar	;only last character of definition is send with different level of SendLevel; thanks to that ShiftFunctions can alter it into diacritics.
+								SendLevel, 	0
+							}
+							else
+							{	
+								OutputString 	:= SubStr(OutputString, 1, -1)	;all but last characters are copied back to OutputString
+								SendInput, 	% OutputString	
+								SendLevel, 2
+								Switch LastChar				
+								{
+									Case "A":	Send, {U+0041}	;A
+									Case "B":	Send, {U+0042}	;B
+									Case "C":	Send, {U+0043}	;C
+									Case "D":	Send, {U+0044}	;D
+									Case "E":	Send, {U+0045}	;E
+									Case "F":	Send, {U+0046}	;F
+									Case "G":	Send, {U+0047}	;G
+									Case "H":	Send, {U+0048}	;H
+									Case "I":	Send, {U+0049}	;I
+									Case "J":	Send, {U+004a}	;J
+									Case "K":	Send, {U+004b}	;K
+									Case "L":	Send, {U+004c}	;L
+									Case "M":	Send, {U+004d}	;M
+									Case "N":	Send, {U+004e}	;N
+									Case "O":	Send, {U+004f}	;O
+									Case "P":	Send, {U+0050}	;P
+									Case "Q":	Send, {U+0051}	;Q
+									Case "R":	Send, {U+0052}	;R
+									Case "S":	Send, {U+0053}	;S
+									Case "T":	Send, {U+0054}	;T
+									Case "U":	Send, {U+0055}	;U
+									Case "V":	Send, {U+0056}	;V
+									Case "W":	Send, {U+0057}	;W
+									Case "X":	Send, {U+0058}	;X
+									Case "Y":	Send, {U+0059}	;Y
+									Case "Z":	Send, {U+005a}	;Z
+								}
+								SendLevel, 0
+							}
 						}
 						else
 							SendInput, 	% OutputString
