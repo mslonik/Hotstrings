@@ -2208,6 +2208,13 @@ F_HMenu_Keyboard(PressedKey, SendFun)
 		PressedKey 		:= IntCnt
 ,		IsCursorPressed 	:= false
 ,		IntCnt 			:= 1
+		Process, Exist, Hotstrings2.exe	;This is very dirty trick. As <Enter> is pressed physically for the second instance of Hotstrings application and last character is send back by ShiftFunctions, the second instance of Hotstrings (Hotstrings2) and its library S2_CapitalLetters will detect it as (`n . letter) and trigger corresponding hotkey what in turn will alter last letter into capital letter. So in case there is running second instance of Hotstrings application (Hotstrings2.exe) the {BS} is send back. name is not case sensitive; it must be executable
+		if (ErrorLevel)	;name of the process is returned in ErrorLevel variable if it is different than 0
+		{
+			SendLevel, % ini_SendLevel	;send it back to Hotstrings2.exe
+			Send, {BS}
+			SendLevel, 0
+		}	
 	}
 	if (PressedKey > v_MenuMax)
 	{
@@ -16047,7 +16054,7 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 				}
 				else	;immediate definitions (*) option:
 				{
-					Process, Exist, ShiftFunctions.exe	;detects if ShiftFunctions.exe exists. Answer to this question is available in ErrorLevel.
+					Process, Exist, ShiftFunctions.exe	;detects if ShiftFunctions.exe exists. Answer to this question is available in ErrorLevel. If it exists, send out the last character with SendLevel high enough to get to ShiftFunctions. Caveat: also second instance of Hotstrings will get it.
 					if (ErrorLevel)
 					{
 						LastChar 		:= SubStr(OutputString, 0)		;only last character is copied
