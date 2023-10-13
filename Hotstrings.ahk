@@ -3158,7 +3158,8 @@ F_DetermineMonitors()	; Multi monitor environment, initialization of monitor wid
 {
 	global	;assume-global mode
 	local	NoOfMonitors
-			,Temp := 0, TempLeft := 0, TempRight := 0, TempTop := 0, TempBottom := 0, TempWidth := 0, TempHeight := 0
+		,	Temp := 0, TempLeft := 0, TempRight := 0, TempTop := 0, TempBottom := 0, TempWidth := 0, TempHeight := 0
+		,	Left := 0, Right := 0, Top := 0, Bottom := 0, Width := 0, Height := 0
 	
 	MonitorCoordinates := {} ;global variable
 	
@@ -15907,6 +15908,7 @@ F_HMenu_Mouse(SendFun) ; Handling of mouse events for F_HMenu_Output;The subrout
 F_HMenu_Output(ReplacementString, Oflag, SendFun)
 {
 	global	;assume-global mode
+	Critical, On	;This line is necessary to protect against two concurretnt Hotstrings listboxes on the screen: HMenu and triggerstring tips. Without this line the F_OneCharPressed interrupts this function.
 	local	a_MCSIMenuPos := [], ThisHotkey := A_ThisHotkey, EndChar := A_EndChar
 		,	SingleKey := ""
 		,	WhatWasPressed := ""
@@ -15979,7 +15981,8 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 				Gui, HMenuAHK: Destroy
 				SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
 				v_InputString 			:= ""
-			,	v_InputH.VisibleText 	:= true
+				v_InputH.Start()
+				v_InputH.VisibleText 	:= true
 				break
 			}	
 
@@ -15998,6 +16001,7 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 		}
 	}
 	; OutputDebug, % A_ThisFunc . A_Space . "end" . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
+	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DetermineOptions(Triggerstring)	;
