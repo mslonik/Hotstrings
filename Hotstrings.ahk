@@ -23,10 +23,12 @@ FileEncoding, 			UTF-16		; Sets the default encoding for FileRead, FileReadLine,
 CoordMode, Caret,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs. 
 CoordMode, ToolTip,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs. 
 CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs.
+;#c/* commercial only beginning
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - E X E  CONVERSION / INSTALLATOR S E C T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.17"	;starting on 2023-08-06 (Sunday). 
+global AppVersion				:= "3.6.18"	;starting on 2023-08-06 (Sunday). 
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
@@ -79,7 +81,10 @@ global AppVersion				:= "3.6.17"	;starting on 2023-08-06 (Sunday).
 ,		ini_TTCn				:= 0 		;this variable could be triggered by left mouse click when script is initialized.
 ,		v_Qinput				:= "" 		; to store substring of v_InputString related to possible question mark (inside) option
 ,		c_MsgBoxIconError		:= 16		;constant, MsgBox icon hand (stop/error)
+,		c_MsgBoxIconQuestion	:= 32		;constant, MsgBox icon question
 ,		c_MsgBoxIconExclamation	:= 48		;constant, MsgBox icon exclamation
+,		c_MsgBoxIconInfo		:= 64		;constant, MsgBox icon asterisk (info)
+,		c_MsgBoxButtYesNo		:= 4			;constant, MsgBox buttons, Yes/No
 ,		v_Triggerstring		:= ""		;to store d(t, o, h) -> t entered by user in GUI.
 ,		ini_ShowWhiteChars		:= false		;show white characters (e.g. space) within GUI in form of special characters. For example <space> = U+2423 (open box ␣)
 ;#f/* free version only beginning
@@ -1541,6 +1546,13 @@ F_HMenu_Keyboard(PressedKey, SendFun)
 		PressedKey 		:= IntCnt
 ,		IsCursorPressed 	:= false
 ,		IntCnt 			:= 1
+		Process, Exist, Hotstrings2.exe	;This is very dirty trick. As <Enter> is pressed physically for the second instance of Hotstrings application and last character is send back by ShiftFunctions, the second instance of Hotstrings (Hotstrings2) and its library S2_CapitalLetters will detect it as (`n . letter) and trigger corresponding hotkey what in turn will alter last letter into capital letter. So in case there is running second instance of Hotstrings application (Hotstrings2.exe) the {BS} is send back. name is not case sensitive; it must be executable
+		if (ErrorLevel)	;name of the process is returned in ErrorLevel variable if it is different than 0
+		{
+			SendLevel, % ini_SendLevel	;send it back to Hotstrings2.exe
+			Send, {BS}
+			SendLevel, 0
+		}	
 	}
 	if (PressedKey > v_MenuMax)
 	{
@@ -2225,7 +2237,8 @@ F_DetermineMonitors()	; Multi monitor environment, initialization of monitor wid
 {
 	global	;assume-global mode
 	local	NoOfMonitors
-			,Temp := 0, TempLeft := 0, TempRight := 0, TempTop := 0, TempBottom := 0, TempWidth := 0, TempHeight := 0
+		,	Temp := 0, TempLeft := 0, TempRight := 0, TempTop := 0, TempBottom := 0, TempWidth := 0, TempHeight := 0
+		,	Left := 0, Right := 0, Top := 0, Bottom := 0, Width := 0, Height := 0
 	
 	MonitorCoordinates := {} ;global variable
 	
@@ -2239,7 +2252,7 @@ F_DetermineMonitors()	; Multi monitor environment, initialization of monitor wid
 ,		MonitorCoordinates[A_Index].Top 		:= TempTop
 ,		MonitorCoordinates[A_Index].Bottom 	:= TempBottom
 ,		MonitorCoordinates[A_Index].Width 		:= TempRight - TempLeft
-,		MonitorCoordinates[A_Index].Height 	:= TempBottom - TempTop
+,		MonitorCoordinates[A_Index].Height	 	:= TempBottom - TempTop
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7987,6 +8000,7 @@ F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 		,	LastChar			:= SubStr(string, 0)
 		,	InStrLen			:= StrLen(string)
 		,	f_EndCharDetected	:= false
+		,	AllButFirstChar	:= SubStr(string, 2)
 
 	; OutputDebug, % A_ThisFunc . A_Space . "string:" . string . "|" . A_Space . "QS:" . v_Qinput . "|" . A_Space . "LC:" . LastChar . "|" . A_Space . "ini_MNTT:" . ini_MNTT "`n"
 	if (InStrLen > 1)
@@ -8049,7 +8063,7 @@ F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 		if (!f_FirstPart) and (InStrLen > 1)
 		{
 			; OutputDebug, % A_ThisFunc . A_Space . "InStrLen:" . InStrLen . "|" . A_Space . "f_FirstPart:" . f_FirstPart . A_Space . "v_Qinput:" . LastChar . "|" . "`n"
-			F_PTTTQ(v_Qinput := LastChar)
+			F_PTTTQ(v_Qinput := AllButFirstChar)
 		}
 	}
 	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
@@ -8474,7 +8488,7 @@ F_AddHotstring()
 			LibraryHeader 	:= F_ExtractHeader(TheWholeFile)
 			if (LibraryHeader)
 				LibraryHeader 	:= "/*`n" . LibraryHeader . "`n*/`n`n"
-,				TheWholeFile	:= ""
+			,	TheWholeFile	:= ""
 			FileDelete, % ini_HADL . "\" . v_SelectHotstringLibrary
 
 			;8. Save List View into the library file.
@@ -8633,9 +8647,21 @@ F_ModifyLV(v_Triggerstring, NewOptions, SendFun, TextInsert, v_Comment)
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_PictureShow(PHotstring, Oflag, SendFun)
+{
+;#c/* commercial only beginning
+;#c*/ commercial only end
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_RunApplication(PHotstring, Oflag, SendFun)
+{
+;#c/* commercial only beginning
+;#c*/ commercial only end
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun, TextInsert, OldEnDis)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
 {
-	global	;v_EnDis ;assume-global mode of operation
+	global	;assume-global mode of operation
 	local	OnOffToggle := false
 
 	MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
@@ -8776,9 +8802,9 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 	else
 	{
 		v_EnterHotstring := RTrim(v_EnterHotstring)
-		if (v_EnterHotstring = "")
+		if (v_EnterHotstring = "") and (v_SelectFunction != TransA["Picture (P)"]) and (v_SelectFunction != TransA["Run (R)"])
 		{
-			MsgBox, 324, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring text is blank. Do you want to proceed?"] 
+			MsgBox, % c_MsgBoxIconQuestion + c_MsgBoxButtYesNo, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring text is blank. Do you want to proceed?"] 
 			IfMsgBox, No
 				return, true
 		}
@@ -8788,6 +8814,54 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 		,	TextInsert := v_EnterHotstring
 		}
 	}
+	if (v_SelectFunction == TransA["Picture (P)"])	;validation of v_EnterHotstring
+	{
+		if (v_EnterHotstring = "")
+		{
+			MsgBox, % c_MsgBoxIconQuestion + c_MsgBoxButtYesNo, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Path to picture file is blank. Do you want to select it now from inteactive GUI?"] 
+			IfMsgBox, No
+				return, true
+			IfMsgBox, Yes
+				FileSelectFile, v_EnterHotstring, 3, % A_MyDocuments, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Select picture filename"], *.jpg; *.png; *.gif	;3 = 1 (File Must Exist) + 2 (Path Must Exist)
+			TextInsert := v_EnterHotstring
+		}
+		else
+		{
+			v_EnterHotstring := Trim(v_EnterHotstring)
+		,	TextInsert := v_EnterHotstring
+		}
+		if (!FileExist(v_EnterHotstring))
+		{
+			MsgBox, % c_MsgBoxIconQuestion, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Content of this text field is not file path or file wasn't found. For ouput function ""Picture (P)"" it is required to enter correct filepath."] 
+				. "`n`n"	
+				. TransA["Leave this field empty and then press ""Add/Edit hotstring (F9)"" again to get GUI enabling file selection."] 
+			return, true
+		}	
+	}
+	if (v_SelectFunction == TransA["Run (R)"])
+	{
+		if (v_EnterHotstring = "")
+		{
+			MsgBox, % c_MsgBoxIconQuestion + c_MsgBoxButtYesNo, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Path to executable file is blank. Do you want to select it now from inteactive GUI?"] 
+			IfMsgBox, No
+				return, true
+			IfMsgBox, Yes
+				FileSelectFile, v_EnterHotstring, 3, % A_MyDocuments, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Select executable file"], *.exe	;3 = 1 (File Must Exist) + 2 (Path Must Exist)
+			TextInsert := v_EnterHotstring
+		}
+		else
+		{
+			v_EnterHotstring := Trim(v_EnterHotstring)
+		,	TextInsert := v_EnterHotstring
+		}
+		if (!FileExist(v_EnterHotstring))
+		{
+			MsgBox, % c_MsgBoxIconQuestion, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Content of this text field is not file path or file wasn't found. For ouput function ""Run (R)"" it is required to enter correct filepath."] 
+				. "`n`n"	
+				. TransA["Leave this field empty and then press ""Add/Edit hotstring (F9)"" again to get GUI enabling file selection."] 
+			return, true
+		}	
+	}	
 	if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
 	{
 		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Choose existing hotstring library file before saving new (triggerstring, hotstring) definition!"]
@@ -8810,16 +8884,20 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 		NewOptions .= "Z"
 	Switch v_SelectFunction
 	{
-		Case "Clipboard (CL)":			SendFun := "CL"
-		Case "SendInput (SI)": 			SendFun := "SI"
-		Case "Menu & Clipboard (MCL)": 	SendFun := "MCL"
-		Case "Menu & SendInput (MSI)": 	SendFun := "MSI"
-		Case "SendRaw (SR)":			SendFun := "SR"
-		Case "SendPlay (SP)":			SendFun := "SP"
-		Case "SendEvent (SE)":			SendFun := "SE"
+		Case "Clipboard (CL)":				SendFun := "CL"
+		Case "SendInput (SI)": 				SendFun := "SI"
+		Case "Menu & Clipboard (MCL)": 		SendFun := "MCL"
+		Case "Menu & SendInput (MSI)": 		SendFun := "MSI"
+		Case "SendRaw (SR)":				SendFun := "SR"
+		Case "SendPlay (SP)":				SendFun := "SP"
+		Case "SendEvent (SE)":				SendFun := "SE"
+		Case TransA["Special function 1 (S1)"]: SendFun := "S1"
+		Case TransA["Special function 2 (S2)"]: SendFun := "S2"
+		Case TransA["Picture (P)"]:			SendFun := "P"
+		Case TransA["Run (R)"]:				SendFun := "R"
 	}
 
-	if (SendFun = "SI") or (SendFun = "MSI") or (SendFun = "SE")
+	if (SendFun = "SI") or (SendFun = "MSI") or (SendFun = "SE") or (SendFun = "S1") or (SendFun = "S2")
 		{	; provide warning to user if definition contains one of the escaped characters: {}^!+#
 			WhichEscape := "{"
 			if (InStr(TextInsert, WhichEscape))
@@ -9001,7 +9079,10 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 ,			WhichRow := 0, TheWholeFile := "", LibraryHeader := ""
 
 	F_GuiHS3_EnDis("Disable")			;Disable all GuiControls for deletion time d(t, o, h)
-	Gui, HS3Search:	+Disabled
+	DetectHiddenWindows, On
+	if WinExist("ahk_id"  HS3SearchHwnd)	;In case HS3Search was available (only hidden) on time of Move, it must be destroyed. If it is not destroyed, it shows old search results, so before Move.
+		Gui, HS3Search: Destroy
+	DetectHiddenWindows, Off
 	Gui, HS3:			+Disabled
 	Gui, MoveLibs: 	Default
 	Gui, MoveLibs: 	Submit, NoHide
@@ -9098,7 +9179,7 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 			break
 		}
 	}
-	F_GuiHS3_EnDis("Enable")			;Enable all GuiControls for deletion time d(t, o, h)
+	F_GuiHS3_EnDis("Enable")			;Enable all GuiControls after deletion
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_GuiMoveLibs_CreateDetermine()
@@ -9383,7 +9464,7 @@ F_Searching()	;after pressing F3
 	DetectHiddenWindows, On
 	Suspend, On			;To disable all hotstrings definitions within search window.
 	if (A_IsCompiled)
-		Menu, Tray, Icon,		A_ScriptFullPath, , 1	;When a script's hotkeys are suspended, its tray icon changes to the letter S. This can be avoided by freezing the icon, which is done by specifying 1 for the last parameter of the Menu command.
+		Menu, Tray, Icon,		% A_ScriptFullPath, , 1	;When a script's hotkeys are suspended, its tray icon changes to the letter S. This can be avoided by freezing the icon, which is done by specifying 1 for the last parameter of the Menu command.
 	else	
 		Menu, Tray, Icon,		% AppIcon, , 1	;When a script's hotkeys are suspended, its tray icon changes to the letter S. This can be avoided by freezing the icon, which is done by specifying 1 for the last parameter of the Menu command.
 	if (WinExist("ahk_id" HS3SearchHwnd))
@@ -9394,7 +9475,7 @@ F_Searching()	;after pressing F3
 		}
 	else	;if not exists, create it
 	{
-		F_HS3Search_Create()
+		F_Gui_HS3Search_Create()
 		F_HS3Search_DetermineConstraints()
 		F_HS3Search_PlotWindow()
 		F_SearchPhrase()
@@ -9402,7 +9483,7 @@ F_Searching()	;after pressing F3
 	DetectHiddenWindows, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HS3Search_Create()
+F_Gui_HS3Search_Create()
 {
 	global	;assume-global mode
 	
@@ -10219,6 +10300,24 @@ F_LV1_EnDisDefinition()
 					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . vHotstring . "," . A_Space . true . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
+		if (SendFun = "P")
+		{
+			Try
+				Hotstring(":" . Options . ":" . Triggerstring, func("F_PictureShow").bind(vHotstring, true, SendFun), OnOffToggle)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_PictureShow"").bind(" . vHotstring . "," . A_Space . true . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
+					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
+		}
+		if (SendFun = "R")
+		{
+			Try
+				Hotstring(":" . Options . ":" . Triggerstring, func("F_RunApplication").bind(vHotstring, true, SendFun), OnOffToggle)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_RunApplication"").bind(" . vHotstring . "," . A_Space . true . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
+					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
+		}
 	}
 	else
 	{
@@ -10238,6 +10337,24 @@ F_LV1_EnDisDefinition()
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . vHotstring . "," . A_Space . false . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
+					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
+		}
+		if (SendFun = "P")
+		{
+			Try
+				Hotstring(":" . Options . ":" . Triggerstring, func("F_PictureShow").bind(vHotstring, false, SendFun), OnOffToggle)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_PictureShow"").bind(" . vHotstring . "," . A_Space . false . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
+					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
+		}
+		if (SendFun = "R")
+		{
+			Try
+				Hotstring(":" . Options . ":" . Triggerstring, func("F_RunApplication").bind(vHotstring, false, SendFun), OnOffToggle)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_RunApplication"").bind(" . vHotstring . "," . A_Space . false . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
 		}
 	}
@@ -10432,26 +10549,38 @@ F_LV1_CopyContentToHS3()
 	Switch Fun
 	{
 		Case "SI":	;SendFun := "F_Simple_Output"
-		GuiControl, HS3: ChooseString, % IdDDL1, 	SendInput (SI)
-		GuiControl, HS4: ChooseString, % IdDDL1b, 	SendInput (SI)
+			GuiControl, HS3: ChooseString, % IdDDL1, 	SendInput (SI)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	SendInput (SI)
 		Case "CL":	;SendFun := "F_Simple_Output"
-		GuiControl, HS3: ChooseString, % IdDDL1, 	Clipboard (CL)
-		GuiControl, HS4: ChooseString, % IdDDL1b, 	Clipboard (CL)
+			GuiControl, HS3: ChooseString, % IdDDL1, 	Clipboard (CL)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	Clipboard (CL)
 		Case "MCL":	;SendFun := "F_HMenu_Output"
-		GuiControl, HS3: ChooseString, % IdDDL1, 	Menu & Clipboard (MCL)
-		GuiControl, HS4: ChooseString, % IdDDL1b, 	Menu & Clipboard (MCL)
+			GuiControl, HS3: ChooseString, % IdDDL1, 	Menu & Clipboard (MCL)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	Menu & Clipboard (MCL)
 		Case "MSI":	;SendFun := "F_HMenu_Output"
-		GuiControl, HS3: ChooseString, % IdDDL1, 	Menu & SendInput (MSI)
-		GuiControl, HS4: ChooseString, % IdDDL1b, 	Menu & SendInput (MSI)
-		Case "SR":	
-		GuiControl, HS3: ChooseString, % IdDDL1, 	SendRaw (SR)
-		GuiControl, HS4: ChooseString, % IdDDL1b, 	SendRaw (SR)
-		Case "SP":
-		GuiControl, HS3: ChooseString, % IdDDL1, 	SendPlay (SP)
-		GuiControl, HS4: ChooseString, % IdDDL1b, 	SendPlay (SP)
-		Case "SE":
-		GuiControl, HS3: ChooseString, % IdDDL1, 	SendEvent (SE)
-		GuiControl, HS4: ChooseString, % IdDDL1b, 	SendEvent (SE)
+			GuiControl, HS3: ChooseString, % IdDDL1, 	Menu & SendInput (MSI)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	Menu & SendInput (MSI)
+		Case "SR":	;SendFun := "F_Simple_Output"
+			GuiControl, HS3: ChooseString, % IdDDL1, 	SendRaw (SR)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	SendRaw (SR)
+		Case "SP":	;SendFun := "F_Simple_Output"
+			GuiControl, HS3: ChooseString, % IdDDL1, 	SendPlay (SP)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	SendPlay (SP)
+		Case "SE":	;SendFun := "F_Simple_Output"
+			GuiControl, HS3: ChooseString, % IdDDL1, 	SendEvent (SE)
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	SendEvent (SE)
+		Case "S1":	;SendFun := "F_Simple_Output"
+			GuiControl, HS3: ChooseString, % IdDDL1, 	% TransA["Special function 1 (S1)"]
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	% TransA["Special function 1 (S1)"]
+		Case "S2":	;SendFun := "F_Simple_Output"
+			GuiControl, HS3: ChooseString, % IdDDL1, 	% TransA["Special function 2 (S2)"]
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	% TransA["Special function 2 (S2)"]
+		Case "P":		;SendFun := "F_PictureShow"
+			GuiControl, HS3: ChooseString, % IdDDL1, 	% TransA["Picture (P)"]
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	% TransA["Picture (P)"]
+		Case "R":		;SendFun := "F_RunApplication"
+			GuiControl, HS3: ChooseString, % IdDDL1, 	% TransA["Run (R)"]
+			GuiControl, HS4: ChooseString, % IdDDL1b, 	% TransA["Run (R)"]
 	}
 	
 	LV_GetText(EnDis,		SelectedRow, 1)
@@ -11487,6 +11616,8 @@ Config.ini file was successfully moved to the new location.		= Config.ini file w
 Config.ini wasn't found. The default Config.ini has now been created in location: = Config.ini wasn't found. The default Config.ini has now been created in location:
 Configuration 											= &Configuration
 Content of clipboard contain new line characters. Do you want to remove them? = Content of clipboard contain new line characters. Do you want to remove them?
+Content of this text field is not file path or file wasn't found. For ouput function ""Picture (P)"" it is required to enter correct filepath. = Content of this text field is not file path or file wasn't found. For ouput function ""Picture (P)"" it is required to enter correct filepath.
+Content of this text field is not file path or file wasn't found. For ouput function ""Run (R)"" it is required to enter correct filepath. = Content of this text field is not file path or file wasn't found. For ouput function ""Run (R)"" it is required to enter correct filepath.
 Continue reading the library file? If you answer ""No"" then application will exit! = Continue reading the library file? If you answer ""No"" then application will exit!
 Conversion of .ahk file into new .csv file (library) and loading of that new library = Conversion of .ahk file into new .csv file (library) and loading of that new library
 Conversion of .csv library file into new .ahk file containing static (triggerstring, hotstring) definitions = Conversion of .csv library file into new .ahk file containing static (triggerstring, hotstring) definitions
@@ -11496,6 +11627,9 @@ Copy clipboard content into ""Enter hotstring""				= Copy clipboard content into
 Copy Config.ini folder path to Clipboard					= Copy Config.ini folder path to Clipboard
 Copy Libraries folder path to Clipboard						= Copy Libraries folder path to Clipboard
 Copy Log folder path to Clipboard							= Copy Log folder path to Clipboard
+Open picture in MSPaint and copy to Clipboard				= Open picture in MSPaint and copy to Clipboard
+Copy picture to Clipboard								= Copy picture to Clipboard
+Copy picture path to Clipboard							= Copy picture path to Clipboard
 Created at											= Created at
 Cumulative gain [characters]								= Cumulative gain [characters]
 Current Config.ini file location:							= Current Config.ini file location:
@@ -11530,6 +11664,7 @@ Do you want to proceed? 									= Do you want to proceed?
 Dot . 												= Dot .
 Do you want to reload application now?						= Do you want to reload application now?
 doesn't exist in application folder						= doesn't exist in application folder
+down													= down
 Download repository version								= Download repository version
 Downloading public library files							= Downloading public library files
 Dynamic hotstrings 										= &Dynamic hotstrings
@@ -11657,6 +11792,7 @@ Keyboard or mouse scrolling								= Keyboard or mouse scrolling
 Keyboard or mouse selection								= Keyboard or mouse selection
 \Languages\`nMind that Config.ini Language variable is equal to 	= \Languages\`nMind that Config.ini Language variable is equal to
 Last hotstring undo function is currently unsuported for those characters, sorry. = Last hotstring undo function is currently unsuported for those characters, sorry.
+Leave this field empty and then press ""Add/Edit hotstring (F9)"" again to get GUI enabling file selection. = Leave this field empty and then press ""Add/Edit hotstring (F9)"" again to get GUI enabling file selection.
 Let's make your PC personal again... 						= Let's make your PC personal again...
 Libraries folder: move it to new location					= Libraries folder: move it to new location
 Libraries folder: restore it to default location				= Libraries folder: restore it to default location
@@ -11707,10 +11843,8 @@ MIT license											= MIT license
 Mode of operation										= Mode of operation
 Move definition to another library							= Move definition to another library
 Move (F8)												= Move (F8)
-down													= down
-up													= up
+MSPaint.exe (Paint application) wasn't found or couldn't be run. = MSPaint.exe (Paint application) wasn't found or couldn't be run.
 navy													= navy
-reloaded and fresh language file (English.txt) will be recreated. = reloaded and fresh language file (English.txt) will be recreated.
 New definition is identical with existing one. Please try again.	= New definition is identical with existing one. Please try again.
 New location:											= New location:
 New location (default):									= New location (default):
@@ -11750,9 +11884,12 @@ Out. Fun.												= Out. Fun.
 question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
+Path to executable file is blank. Do you want to select it now from inteactive GUI? = Path to executable file is blank. Do you want to select it now from inteactive GUI?
+Path to picture file is blank. Do you want to select it now from inteactive GUI?			= Path to picture file is blank. Do you want to select it now from inteactive GUI?
 Pause												= Pause
 Perhaps check if any other application (like File Manager) do not occupy folder to be removed. = Perhaps check if any other application (like File Manager) do not occupy folder to be removed.
 Phrase to search for:									= Phrase to search for:
+Picture (P)											= Picture (P)
 pixels												= pixels
 Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference. = Please contact support at support@hotstrings.com if in doubts. Press Ctrl + C to copy this message into clipboard for future reference.
 Please enter below your license number						= Please enter below your license number
@@ -11760,6 +11897,7 @@ Please try again.										= Please try again.
 Please wait, uploading .csv files... 						= Please wait, uploading .csv files...
 Position of this window is saved in Config.ini.				= Position of this window is saved in Config.ini.	
 Preview												= &Preview
+Programm												= Programm
 Public library:										= Public library:
 purple												= purple
 question												= question
@@ -11772,6 +11910,7 @@ Reload												= Reload
 reload Hotstrings application								= reload Hotstrings application
 Reload in default mode									= Reload in default mode
 Reload in silent mode									= Reload in silent mode
+reloaded and fresh language file (English.txt) will be recreated. = reloaded and fresh language file (English.txt) will be recreated.
 Rename selected library filename							= Rename selected library filename
 Hotstring text is blank. Do you want to proceed? 				= Hotstring text is blank. Do you want to proceed?
 Repository version										= Repository version
@@ -11781,6 +11920,7 @@ Reset Recognizer (Z)									= Reset Recognizer (Z)
 Restore default										= Restore default
 Restore default configuration								= Restore default configuration
 Row													= Row
+Run (R)												= Run (R)
 run web browser, enter Hotstrings webpage					= run web browser, enter Hotstrings webpage
 Sandbox												= Sandbox
 Save && Close											= Save && Close
@@ -11794,12 +11934,14 @@ Search by: 											= Search by:
 Search Hotstrings 										= Search Hotstrings
 Search (F3)											= &Search (F3)
 Select a row in the list-view, please! 						= Select a row in the list-view, please!
+Select executable file									= Select executable file
 Select folder where ""Hotstrings"" folder will be moved.		= Select folder where ""Hotstrings"" folder will be moved.
 Select folder where libraries (*.csv  files) will be moved.		= Select folder where libraries (*.csv  files) will be moved.
 Select hotstring library									= Select hotstring library
 Selected definition d(t, o, h) will be deleted. Do you want to proceed? 	= Selected definition d(t, o, h) will be deleted. Do you want to proceed?
 Select hotstring output function 							= Select hotstring output function
 Select library file to be deleted							= Select library file to be deleted
+Select picture filename									= Select picture filename
 Select the target library: 								= Select the target library:
 Select triggerstring option(s)							= Select triggerstring option(s)
 selection												= selection
@@ -11853,6 +11995,8 @@ Sorry, your computer data do not match with license information. Application wil
 Sorry, your license is no longer active.					= Sorry, your license is no longer active.
 ""SP"" or SendPlay may have no effect at all if UAC is enabled, even if the script is running as an administrator. For more information, refer to the AutoHotkey FAQ (help). = ""SP"" or SendPlay may have no effect at all if UAC is enabled, even if the script is running as an administrator. For more information, refer to the AutoHotkey FAQ (help).
 Space												= Space
+Special function 1 (S1)									= Special function 1 (S1)
+Special function 2 (S2)									= Special function 2 (S2)
 Specified definition of hotstring has been deleted			= Specified definition of hotstring has been deleted
 Standard executable (Ahk2Exe.exe)							= Standard executable (Ahk2Exe.exe)
 started												= started
@@ -11960,6 +12104,7 @@ TransConst .= "`n
 Underscore _											= Underscore _
 Undo the last hotstring									= Undo the last hotstring
 Undo the last hotstring									= Undo the last hotstring
+up													= up
 Undid the last hotstring 								= Undid the last hotstring
 Valid till											= Valid till
 Version / Update										= Version / Update
@@ -11969,6 +12114,7 @@ warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
 was just deleted from									= was just deleted from
 was successfully downloaded.								= was successfully downloaded.
+wasn't found or couldn't be run							= wasn't found or couldn't be run
 Welcome to Hotstrings application!							= Welcome to Hotstrings application!
 Windows key modifier									= Windows key modifier
 When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
@@ -13699,6 +13845,24 @@ F_CreateHotstring(txt, nameoffile)
 					. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(""F_HMenu_Output"").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")"
 					. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
 		}
+		if (SendFun = "P")
+		{
+			Try
+				Hotstring(":" . Options . ":" . Triggerstring, func("F_PictureShow").bind(TextInsert, Oflag, SendFun), EnDis)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(""F_PictureShow"").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")"
+					. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
+		}
+		if (SendFun = "R")
+		{
+			Try
+				Hotstring(":" . Options . ":" . Triggerstring, func("F_RunApplication").bind(TextInsert, Oflag, SendFun), EnDis)
+			Catch
+				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+					. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(""F_RunApplication"").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")"
+					. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
+		}
 	}
 }
 
@@ -13834,6 +13998,7 @@ F_HMenu_Mouse(SendFun) ; Handling of mouse events for F_HMenu_Output;The subrout
 F_HMenu_Output(ReplacementString, Oflag, SendFun)
 {
 	global	;assume-global mode
+	Critical, On	;This line is necessary to protect against two concurretnt Hotstrings listboxes on the screen: HMenu and triggerstring tips. Without this line the F_OneCharPressed interrupts this function.
 	local	a_MCSIMenuPos := [], ThisHotkey := A_ThisHotkey, EndChar := A_EndChar
 		,	SingleKey := ""
 		,	WhatWasPressed := ""
@@ -13906,7 +14071,8 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 				Gui, HMenuAHK: Destroy
 				SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
 				v_InputString 			:= ""
-			,	v_InputH.VisibleText 	:= true
+				v_InputH.Start()
+				v_InputH.VisibleText 	:= true
 				break
 			}	
 
@@ -13925,6 +14091,7 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 		}
 	}
 	; OutputDebug, % A_ThisFunc . A_Space . "end" . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
+	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DetermineOptions(Triggerstring)	;
@@ -13964,35 +14131,104 @@ ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
 F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; F_HMenu_Mouse -> F_SendIsOflag; F_SimpleOutput -> F_SendIsOflag
 {
 	global	;assume-global mode of operation
+	local	LastChar := "", IsLCalpha := false, IsLower := false
 
 	SetKeyDelay, -1, -1	;Delay = -1, PressDuration = -1, -1: no delay at all; this can be necessary if SendInput is reduced to SendEvent (in case low level input hook is active in another script)
-	; OutputDebug, % "A_SendLevel:" . A_Tab . A_SendLevel . "`n"
 	Switch SendFun
 	{
 		Case "SI":	;SendInput
-			; OutputDebug, % "SendInput:" . OutputString . "`n"
+			; OutputDebug, % "A_SendLevel:" . A_Tab . A_SendLevel . "`n"
+			; OutputDebug, % "SendInput:" . OutputString . "|" . A_Space . "A_EndChar:" . A_EndChar . "|" . "`n"
 			if (Oflag = false)
+			{
+				if (A_EndChar)
 				{
 					SendInput, 	% OutputString
 					SendRaw, 		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
-					; OutputDebug, % "Finished SendInput" . "`n"
 				}
+				else	;immediate definitions (*) option:
+				{
+					Process, Exist, ShiftFunctions.exe	;detects if ShiftFunctions.exe exists. Answer to this question is available in ErrorLevel. If it exists, send out the last character with SendLevel high enough to get to ShiftFunctions. Caveat: also second instance of Hotstrings will get it.
+					if (ErrorLevel)
+					{
+						LastChar 		:= SubStr(OutputString, 0)		;only last character is copied
+						if LastChar is alpha
+							IsLCalpha := true
+						if (IsLCalpha)
+						{
+							if LastChar is lower
+								IsLower := true
+							if (IsLower)
+							{
+								OutputString 	:= SubStr(OutputString, 1, -1)	;all but last characters are copied back to OutputString
+								OutputDebug, % "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
+								SendInput, 	% OutputString
+								SendLevel, 	2	;only for ShiftFunctions for which InputLevel MinSendLevel is set to 2.
+								SendInput, 	% LastChar	;only last character of definition is send with different level of SendLevel; thanks to that ShiftFunctions can alter it into diacritics.
+								SendLevel, 	0
+							}
+							else
+							{	
+								OutputString 	:= SubStr(OutputString, 1, -1)	;all but last characters are copied back to OutputString
+								SendInput, 	% OutputString	
+								SendLevel, 2
+								Switch LastChar				
+								{
+									Case "A":	Send, {U+0041}	;A
+									Case "B":	Send, {U+0042}	;B
+									Case "C":	Send, {U+0043}	;C
+									Case "D":	Send, {U+0044}	;D
+									Case "E":	Send, {U+0045}	;E
+									Case "F":	Send, {U+0046}	;F
+									Case "G":	Send, {U+0047}	;G
+									Case "H":	Send, {U+0048}	;H
+									Case "I":	Send, {U+0049}	;I
+									Case "J":	Send, {U+004a}	;J
+									Case "K":	Send, {U+004b}	;K
+									Case "L":	Send, {U+004c}	;L
+									Case "M":	Send, {U+004d}	;M
+									Case "N":	Send, {U+004e}	;N
+									Case "O":	Send, {U+004f}	;O
+									Case "P":	Send, {U+0050}	;P
+									Case "Q":	Send, {U+0051}	;Q
+									Case "R":	Send, {U+0052}	;R
+									Case "S":	Send, {U+0053}	;S
+									Case "T":	Send, {U+0054}	;T
+									Case "U":	Send, {U+0055}	;U
+									Case "V":	Send, {U+0056}	;V
+									Case "W":	Send, {U+0057}	;W
+									Case "X":	Send, {U+0058}	;X
+									Case "Y":	Send, {U+0059}	;Y
+									Case "Z":	Send, {U+005a}	;Z
+								}
+								SendLevel, 0
+							}
+						}
+						else
+							SendInput, 	% OutputString
+					}
+					else
+						SendInput, 	% OutputString
+				}	
+				; OutputDebug, % "Finished SendInput" . "`n"
+			}
 			else
 				SendInput, % OutputString
 		Case "SE":	;SendEvent
 			if (Oflag = false)
-				{
-					SendEvent, 	% OutputString
+			{
+				SendEvent, 	% OutputString
+				if (A_EndChar)
 					SendRaw,		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
-				}
+			}
 			else
 				SendEvent, % OutputString
 		Case "SP":	;SendPlay does not trigger hotkeys or hotstrings
 			if (Oflag = false)
-				{
-					SendPlay, % OutputString . A_EndChar	;It seems that for SendPlay EndChars do not require escaping
-					; OutputDebug, % "SendPlay:" . A_Space . OutputString . "`n"
-				}
+			{
+				SendPlay, % OutputString . A_EndChar	;It seems that for SendPlay EndChars do not require escaping
+				; OutputDebug, % "SendPlay:" . A_Space . OutputString . "`n"
+			}
 			else
 				SendPlay, % OutputString
 		Case "SR":	;SendRaw
@@ -14008,47 +14244,50 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 			SecondPart		:= SubStr(OutputString, 0)	 ;extracts the last character
 			; OutputDebug, % "First part:" . FirstPart . A_Space . "Second part:" . SecondPart . "|" . "`n"
 			if (Oflag = false)
-				{
-					SendInput, 	% FirstPart 
+			{
+				SendInput, 	% FirstPart 
+				if (A_EndChar)
 					SendRaw,		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
-				}
+			}
 			else
 				SendInput, % FirstPart
 			Hotstring("Reset")
 			SendLevel, % ini_SendLevel
 			if (Oflag = false)
-				{
-					SendInput, 	% SecondPart
+			{
+				SendInput, 	% SecondPart
+				if (A_EndChar)
 					SendRaw,		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
-				}
+			}
 			else
 				SendInput, % SecondPart
 			SendLevel, 0
 		Case "S2":
-			OutputDebug, % "ini_SendLevel:" . A_Space . ini_SendLevel . "`n"
+			; OutputDebug, % "ini_SendLevel:" . A_Space . ini_SendLevel . "`n"
 			SendLevel, % ini_SendLevel
 			if (OutputString = "{NumLock}") or (OutputString = "{ScrollLock}") or (OutputString = "{CapsLock}")
 				Switch OutputString
-					{
-						Case "{NumLock}":
-							Send, {NumLock}
-     						SendLevel, 0
-							return
-						Case "{ScrollLock}":
-							Send, {ScrollLock}
-							SendLevel, 0
-							return
-						Case "{CapsLock}":
-							SetStoreCapslockMode, Off	;it doesn't work on all keyboards!
-							Send, {CapsLock}
-							SendLevel, 0
-							return
-					}
-			if (Oflag = false)
 				{
-					SendInput, 	% OutputString
-					SendRaw,		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
+					Case "{NumLock}":
+						Send, {NumLock}
+     					SendLevel, 0
+						return
+					Case "{ScrollLock}":
+						Send, {ScrollLock}
+						SendLevel, 0
+						return
+					Case "{CapsLock}":
+						SetStoreCapslockMode, Off	;it doesn't work on all keyboards!
+						Send, {CapsLock}
+						SendLevel, 0
+						return
 				}
+			if (Oflag = false)
+			{
+				SendInput, 	% OutputString
+				if (A_EndChar)
+					SendRaw,		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
+			}
 			else
 				SendInput, % OutputString
 			SendLevel, 0
