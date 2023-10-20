@@ -9678,6 +9678,7 @@ F_AddHotstring()
 	global ;v_EnDis ;assume-global mode of operation
 	local 	vHotstring := "", NewOptions := "", OldOptions := "", f_ChangeExistingDef := false
  		,	SendFun := "", Overwrite := "",	key := 0, value := "", WhichGuiEnable := "", TheWholeFile := "", LibraryHeader := ""
+		,	HC2SubstOpt := ""	;hotstring (definition) C2 substitute options (string); variable to keep that user wants to set up C2 option for order of letters; actually what is set for Hotstring function is "" option instead of "C2" option
 
 	;1. Read all inputs.
 	WhichGuiEnable := F_WhichGui()
@@ -9793,12 +9794,16 @@ F_AddHotstring()
 		Case "HS4": 	F_GuiHS4_EnDis("Disable")
 	}
 	;OutputDebug, % "NewOptions:" . A_Space . NewOptions . A_Tab . "OldOptions:" . A_Space . OldOptions . A_Tab . "v_Triggerstring:" . A_Space . v_Triggerstring
+	if (InStr(NewOptions, "C2"))	;actually "C2" isn't allowed / existing argument of "Hotstring" function can understand so just before this function is called the "NewOptions" string is checked if there is "C2" available. If it does, "C2" is replaced with "".
+		HC2SubstOpt := StrReplace(NewOptions, "C2", "")
+	else
+		HC2SubstOpt := NewOptions
 	if (InStr(NewOptions, "O"))
 	{
 		if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_SimpleOutput").bind(vHotstring, true, SendFun), true)
+				Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_SimpleOutput").bind(vHotstring, true, SendFun), true)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
 					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -9809,7 +9814,7 @@ F_AddHotstring()
 		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HMenu_Output").bind(vHotstring, true, SendFun), true)
+				Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HMenu_Output").bind(vHotstring, true, SendFun), true)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
 					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -9819,7 +9824,7 @@ F_AddHotstring()
 		if (SendFun = "P")
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_PictureShow").bind(vHotstring, true, SendFun), true)
+				Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_PictureShow").bind(vHotstring, true, SendFun), true)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
 					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -9829,7 +9834,7 @@ F_AddHotstring()
 		if (SendFun = "R")
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HMenu_Output").bind(vHotstring, true, SendFun), true)
+				Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HMenu_Output").bind(vHotstring, true, SendFun), true)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
 					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -9843,7 +9848,7 @@ F_AddHotstring()
 		if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_SimpleOutput").bind(vHotstring, false, SendFun), true)
+				Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_SimpleOutput").bind(vHotstring, false, SendFun), true)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
 					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -9854,7 +9859,7 @@ F_AddHotstring()
 		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HMenu_Output").bind(vHotstring, false, SendFun), true)
+				Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HMenu_Output").bind(vHotstring, false, SendFun), true)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
 					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -9864,7 +9869,7 @@ F_AddHotstring()
 		if (SendFun = "P")
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_PictureShow").bind(vHotstring, false, SendFun), true)
+				Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_PictureShow").bind(vHotstring, false, SendFun), true)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
 					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -9874,7 +9879,7 @@ F_AddHotstring()
 		if (SendFun = "R")
 		{
 			Try
-				Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_RunApplication").bind(vHotstring, false, SendFun), true)
+				Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_RunApplication").bind(vHotstring, false, SendFun), true)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
 					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -10119,10 +10124,11 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 {
 	global	;assume-global mode of operation
 	local	OnOffToggle := false
+		,	HC2SubstOpt := ""	;hotstring (definition) C2 substitute options (string); variable to keep that user wants to set up C2 option for order of letters; actually what is set for Hotstring function is "" option instead of "C2" option
 
 	MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
 		, % TransA["The triggerstring"] . A_Space . """" .  FoundTriggerstring . """" . A_Space .  TransA["exists in the currently selected library"] . ":" . A_Space . Library 
-		. ".csv" . "." . "`n`n" . TransA["Do you want to proceed?"]	. "`n`n" . TransA["If you answer ""Yes"" it will overwritten with chosen settings."]
+		. ".csv" . "." . "`n`n" . TransA["Do you want to proceed?"]	. "`n`n" . TransA["If you answer ""Yes"" it will be overwritten with chosen settings."]
 	IfMsgBox, No
 		return, "No"
 
@@ -10137,10 +10143,12 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			NewOptions := StrReplace(OldOptions, "B0", "B")
 		if (InStr(OldOptions, "Z") and !InStr(NewOptions, "Z"))
 			NewOptions := StrReplace(OldOptions, "Z", "Z0")
+		if (InStr(OldOptions, "C2")) and !InStr(NewOptions, "C2")	;actually "C2" isn't allowed / existing argument of "Hotstring" function can understand so just before this function is called the "NewOptions" string is checked if there is "C2" available. If it does, "C2" is replaced with "".
+			HC2SubstOpt := StrReplace(OldOptions, "C2", "")
 
 		;turn off existing hotstring
 		Try
-			Hotstring(":" . OldOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), , "Off")
+			Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), , "Off")
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
 				. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -10153,12 +10161,17 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			Case "Dis":	OnOffToggle := "Off"
 		}
 
+		if (InStr(NewOptions, "C2"))	;actually "C2" isn't allowed / existing argument of "Hotstring" function can understand so just before this function is called the "NewOptions" string is checked if there is "C2" available. If it does, "C2" is replaced with "".
+			HC2SubstOpt := StrReplace(NewOptions, "C2", "")
+		else
+			HC2SubstOpt := NewOptions
+	
 		if (InStr(NewOptions, "O"))	;Add new hotstring which replaces the old one
 		{
 			if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_SimpleOutput").bind(TextInsert, true, SendFun), OnOffToggle)
+					Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_SimpleOutput").bind(TextInsert, true, SendFun), OnOffToggle)
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
 						. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -10169,7 +10182,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			if (SendFun = "MSI") or (SendFun = "MCL")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_HMenu_Output").bind(TextInsert, true, SendFun), OnOffToggle)
+					Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_HMenu_Output").bind(TextInsert, true, SendFun), OnOffToggle)
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
 						. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -10179,7 +10192,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			if (SendFun = "P")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_PictureShow").bind(TextInsert, true, SendFun), OnOffToggle)
+					Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_PictureShow").bind(TextInsert, true, SendFun), OnOffToggle)
 				Catch	
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
 						. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -10190,7 +10203,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			if (SendFun = "R")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_RunApplication").bind(TextInsert, true, SendFun), OnOffToggle)
+					Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_RunApplication").bind(TextInsert, true, SendFun), OnOffToggle)
 				Catch	
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
 						. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -10204,7 +10217,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_SimpleOutput").bind(TextInsert, false, SendFun), OnOffToggle)
+					Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_SimpleOutput").bind(TextInsert, false, SendFun), OnOffToggle)
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
 						. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -10215,7 +10228,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			if (SendFun = "MSI") or (SendFun = "MCL")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_HMenu_Output").bind(TextInsert, false, SendFun), OnOffToggle)
+					Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_HMenu_Output").bind(TextInsert, false, SendFun), OnOffToggle)
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n"
 						 . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -10225,7 +10238,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			if (SendFun = "P")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_PictureShow").bind(TextInsert, false, SendFun), OnOffToggle)
+					Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_PictureShow").bind(TextInsert, false, SendFun), OnOffToggle)
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n"
 						 . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -10235,7 +10248,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			if (SendFun = "R")
 			{
 				Try
-					Hotstring(":" . NewOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_RunApplication").bind(TextInsert, false, SendFun), OnOffToggle)
+					Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_RunApplication").bind(TextInsert, false, SendFun), OnOffToggle)
 				Catch
 					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n"
 						 . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -10390,6 +10403,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 	{
 		Case 2: NewOptions .= "C"
 		Case 3: NewOptions .= "C1"
+		Case 4: NewOptions .= "C2"
 	}
 	if (v_OptionNoBackspace)
 		NewOptions .= "B0"
@@ -11432,6 +11446,8 @@ F_DeleteHotstring()
 	;In order to switch off, some options have to run in "reversed" state:
 	if (EnDis = "En")	;only if definition is enabled, at first try to disable it (if it is disabled, just delete it)
 	{
+		if (InStr(options, "C2"))
+			options := StrReplace(options, "C2", "")	;actually "C2" isn't allowed / existing argument of "Hotstring" function can understand so just before this function is called the "NewOptions" string is checked if there is "C2" available. If it does, "C2" is replaced with "".
 		if (InStr(options, "*"))
 			options := StrReplace(options, "*", "*0")
 		if (InStr(options, "B0"))
@@ -12070,7 +12086,18 @@ F_LV1_CopyContentToHS3()
 		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
 		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
 	}
-	if (!InStr(Options, "C1")) and (!InStr(Options, "C"))
+	if (InStr(Options, "C2"))
+		{
+			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+			GuiControl, HS3: Font, % TransA["Capitalize each word (C2)"]
+			GuiControl, HS4: Font, % TransA["Capitalize each word (C2)"]
+			GuiControl, HS3:, % TransA["Capitalize each word (C2)"], 1
+			GuiControl, HS4:, % TransA["Capitalize each word (C2)"], 1
+			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+		}
+	if (!InStr(Options, "C1")) and (!InStr(Options, "C")) and (!InStr(Options, "C2"))
 	{
 		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
 		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
@@ -12080,6 +12107,8 @@ F_LV1_CopyContentToHS3()
 		GuiControl, HS4: Font, % TransA["Case-Conforming"]
 		GuiControl, HS3: Font, % TransA["Not Case-Conforming (C1)"]
 		GuiControl, HS4: Font, % TransA["Not Case-Conforming (C1)"]
+		GuiControl, HS3: Font, % TransA["Capitalize each word (C2)"]
+		GuiControl, HS4: Font, % TransA["Capitalize each word (C2)"]
 		GuiControl, HS3:, % TransA["Case-Conforming"], 1
 		GuiControl, HS4:, % TransA["Case-Conforming"], 1
 	}
@@ -13653,7 +13682,7 @@ If sound is enabled, define it							= If sound is enabled, define it
 (Any existing files in destination folder will be overwritten). 	= (Any existing files in destination folder will be overwritten).
 If you answer ""Yes"" it will overwritten.					= If you answer ""Yes"" it will overwritten.
 If you answer ""Yes"" definition existing in another library will not be changed. = If you answer ""Yes"" definition existing in another library will not be changed.
-If you answer ""Yes"" it will overwritten with chosen settings. = If you answer ""Yes"" it will overwritten with chosen settings.
+If you answer ""Yes"" it will be overwritten with chosen settings. = If you answer ""Yes"" it will be overwritten with chosen settings.
 If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used. = If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used.
 If you answer ""Yes"", the existing file will be overwritten. This is recommended choice. If you answer ""No"", new content will be added to existing file. = If you answer ""Yes"", the existing file will be overwritten. This is recommended choice. If you answer ""No"", new content will be added to existing file.
 If you answer ""Yes"", then new definition will be created, but seleced special character will not be visible. = If you answer ""Yes"", then new definition will be created, but seleced special character will not be visible.
@@ -13758,6 +13787,7 @@ No EndChar (O) 										= No EndChar (O)
 No libraries have been found!								= No libraries have been found!
 No license key was found in Config.ini.						= No license key was found in Config.ini.
 Not Case-Conforming (C1)									= Not Case-Conforming (C1)
+Capitalize each word (C2)								= Capitalize each word (C2)
 Nothing to do to me, Config.ini is already where you want it.	= Nothing to do to me, Config.ini is already where you want it.
 Now application must be restarted (into default mode) in order to apply settings from new location. = Now application must be restarted (into default mode) in order to apply settings from new location.
 Now application must be restarted (into default mode) in order to exit administrator mode. = Now application must be restarted (into default mode) in order to exit administrator mode.
@@ -14051,6 +14081,7 @@ F_TI_OptionResetRecognizer								= Z: Resets the hotstring recognizer after eac
 F_TI_CaseConforming										= By default (if option Case-Sensitive (C) or Not-Case-Sensitive (C1) aren't set) `ncase-conforming hotstrings produce their replacement text in all caps `nif you type the triggerstring in all caps. `n`nIf you type the first letter in caps, `nthe first letter of the replacement will also be capitalized (if it is a letter). `n`nIf you type the case in any other way, the replacement is sent exactly as defined.
 F_TI_CaseSensitive										= C: Case sensitive: `n`nWhen you type a triggerstring, `nit must exactly match the case defined.
 F_TI_NotCaseConforming									= C1: Do not conform to typed case. `n`nUse this option to make hotstrings case insensitive `nand prevent them from conforming to the case of the characters you actually type.
+F_TI_CapitalizeEachWord									= C2: Capitalize each word. `n`nUse this option to capitalize first letter of each word in hotstring `nif the first letter in triggerstring is capital. `nIf the first letter is ordinary, the hotstring will conform casing.
 F_TI_EnterTriggerstring									= Enter text of triggerstring. `n`nTip1: If you want to change capitalization in abbreviation, use no triggerstring options. `nE.g. ascii → ASCII. `n`nTip2: If you want exchange triggerstring of abbreviation into full phrase, `nend your triggerstring with ""/"" and `napply Immediate Execute (*) triggerstring option.
 F_TI_OptionDisable										= Disables the hotstring. `n`nIf ticked, this option is shown in red color. `nBe aware that triggerstring tooltips (if enabled) `nare displayed even for disabled (triggerstring, hotstring) definitions.
 TI_SHOF												= Select function, which will be used to show up hotstring. `n`nAvailable options: `n`nSendInput (SI): SendInput is generally the preferred method because of its superior speed and reliability. `nUnder most conditions, SendInput is nearly instantaneous, even when sending long strings. `nSince SendInput is so fast, it is also more reliable because there is less opportunity for some other window to pop up unexpectedly `nand intercept the keystrokes. Reliability is further improved by the fact `nthat anything the user types during a SendInput is postponed until afterward. `n`nClipboard (CL): hotstring is copied from clipboard. `nIn case of long hotstrings this is the fastest method. The downside of this method is delay `nrequired for operating system to paste content into specific window. `nIn order to change value of this delay see ""Clipboard Delay (F7)"" option in menu. `n`nMenu and SendInput (MSI): One triggerstring can be used to enter up to 7 hotstrings which are desplayed in form of list (menu). `nFor entering of chosen hotstring again SendInput (SI) is used. `n`nMenu & Clipboard (MCL): One triggerstring can be used to enter up to 7 hotstrings which are desplayed in form of list (menu). `nFor entering of chosen hotstring Clipboard (CL) is used. `n`nSenRaw (R): All subsequent characters, including the special characters ^+!#{}, `nto be interpreted literally rather than translating {Enter} to Enter, ^c to Ctrl+C, etc. `n`nSendPlay (SP): SendPlay's biggest advantage is its ability to ""play back"" keystrokes and mouse clicks in a broader variety of games `nthan the other modes. `nFor example, a particular game may accept hotstrings only when they have the SendPlay option. `n`nSendEvent (SE): SendEvent sends keystrokes using the same method as the pre-1.0.43 Send command.
@@ -14498,6 +14529,7 @@ F_GuiHS4_Create()
 	Gui,		HS4: Add,		Radio,		x0 y0 HwndIdRadioCaseCCb AltSubmit vv_RadioCaseGroup Checked gF_RadioCaseCol,	% TransA["Case-Conforming"]	;these lines have to stay together in order to keep the same variable for group of radios
 	Gui,		HS4: Add,		Radio,		x0 y0 HWndIdRadioCaseCSb AltSubmit gF_RadioCaseCol,			% TransA["Case Sensitive (C)"]
 	Gui,		HS4: Add,		Radio,		x0 y0 HwndIdRadioCaseC1b AltSubmit gF_RadioCaseCol,			% TransA["Not Case-Conforming (C1)"]
+	Gui,		HS4: Add,		Radio,		x0 y0 HwndIdRadioCaseC2b AltSubmit gF_RadioCaseCol,			% TransA["Capitalize each word (C2)"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
 	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo3b,									ⓘ
 	GuiControl +g, % IdTextInfo3b, % F_TI_CaseConforming
@@ -14523,12 +14555,17 @@ F_GuiHS4_Create()
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
 	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo7b,									ⓘ
 	GuiControl +g, % IdTextInfo7b, % F_TI_NotCaseConforming
-	
+
+	Gui, 	HS4: Font, 	% "s" . c_FontSize
+	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
+	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo9b,									ⓘ
+	GuiControl +g, % IdTextInfo9b, % F_TI_CapitalizeEachWord
+
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
 	Gui, 	HS4: Add,		CheckBox, 	x0 y0 HwndIdCheckBox5b gF_Checkbox vv_OptionNoEndChar, 		% TransA["No EndChar (O)"]
 	Gui, 	HS4: Font, 	% "s" . c_FontSize + 2
 	Gui,		HS4: Add,		Text,		x0 y0 HwndIdTextInfo8b,									ⓘ
-	GuiControl +g, % IdTextInfo8b, % F_TI_NotCaseConforming
+	GuiControl +g, % IdTextInfo8b, % F_TI_NoEndChar
 	
 	Gui, 	HS4: Font, 	% "s" . c_FontSize
 	Gui,		HS4: Add,		CheckBox,		x0 y0 HwndIdCheckBox8b gF_Checkbox vv_OptionReset,			% TransA["Reset Recognizer (Z)"]
@@ -14734,16 +14771,20 @@ F_GuiHS3_Create()
 	Gui,			HS3: Add,			Radio,		x0 y0 HwndIdRadioCaseCC AltSubmit vv_RadioCaseGroup Checked gF_RadioCaseCol,	% TransA["Case-Conforming"]
 	Gui,			HS3: Add,			Radio,		x0 y0 HWndIdRadioCaseCS AltSubmit gF_RadioCaseCol,			% TransA["Case Sensitive (C)"]
 	Gui,			HS3: Add,			Radio,		x0 y0 HwndIdRadioCaseC1 AltSubmit gF_RadioCaseCol,			% TransA["Not Case-Conforming (C1)"]
+	Gui,			HS3: Add,			Radio,		x0 y0 HwndIdRadioCaseC2 AltSubmit gF_RadioCaseCol,			% TransA["Capitalize each word (C2)"]
 	Gui, 		HS3: Font, 		% "s" . c_FontSize + 2
 	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo3,									ⓘ
 	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo5,									ⓘ
 	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo7,									ⓘ
+	Gui,			HS3: Add,			Text,		x0 y0 HwndIdTextInfo9,									ⓘ
 	F_TI_CaseConforming 	:= func("F_ShowLongTooltip").bind(TransA["F_TI_CaseConforming"])
 ,	F_TI_CaseSensitive		:= func("F_ShowLongTooltip").bind(TransA["F_TI_CaseSensitive"])
 ,	F_TI_NotCaseConforming	:= func("F_ShowLongTooltip").bind(TransA["F_TI_NotCaseConforming"])
+,	F_TI_CapitalizeEachWord	:= func("F_ShowLongTooltip").bind(TransA["F_TI_CapitalizeEachWord"])
 	GuiControl +g, % IdTextInfo3, % F_TI_CaseConforming
 	GuiControl +g, % IdTextInfo5, % F_TI_CaseSensitive
 	GuiControl +g, % IdTextInfo7, % F_TI_NotCaseConforming
+	GuiControl +g, % IdTextInfo9, % F_TI_CapitalizeEachWord
 	
 	Gui, 		HS3: Font, 		% "s" . c_FontSize
 	Gui, 		HS3: Add,			CheckBox, 	x0 y0 HwndIdCheckBox3 gF_Checkbox vv_OptionNoBackspace,		% TransA["No Backspace (B0)"]
@@ -14921,26 +14962,37 @@ F_HS3RadioCaseGroup(v_RadioCaseGroup)
 	Switch v_RadioCaseGroup
 	{
 		Case 1:
-		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-		GuiControl, HS3: Font, % TransA["Case Sensitive (C)"]
-		GuiControl, HS3: Font, % TransA["Case-Conforming"]
-		GuiControl, HS3: Font, % TransA["Not Case-Conforming (C1)"]
-		GuiControl, HS3:, % TransA["Case-Conforming"], 1
+			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+			GuiControl, HS3: Font, % TransA["Case Sensitive (C)"]
+			GuiControl, HS3: Font, % TransA["Case-Conforming"]
+			GuiControl, HS3: Font, % TransA["Not Case-Conforming (C1)"]
+			GuiControl, HS3: Font, % TransA["Capitalize each word (C2)"]
+			GuiControl, HS3:, % TransA["Case-Conforming"], 1
 		Case 2:
-		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
-		GuiControl, HS3: Font, % TransA["Case Sensitive (C)"]
-		GuiControl, HS3:, % TransA["Case Sensitive (C)"], 1
-		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-		GuiControl, HS3: Font, % TransA["Case-Conforming"]
-		GuiControl, HS3: Font, % TransA["Not Case-Conforming (C1)"]
+			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+			GuiControl, HS3: Font, % TransA["Case Sensitive (C)"]
+			GuiControl, HS3:, % TransA["Case Sensitive (C)"], 1
+			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+			GuiControl, HS3: Font, % TransA["Case-Conforming"]
+			GuiControl, HS3: Font, % TransA["Not Case-Conforming (C1)"]
+			GuiControl, HS3: Font, % TransA["Capitalize each word (C2)"]
 		Case 3:
-		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
-		GuiControl, HS3: Font, % TransA["Not Case-Conforming (C1)"]
-		GuiControl, HS3:, % TransA["Not Case-Conforming (C1)"], 1
-		Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType					
-		GuiControl, HS3: Font, % TransA["Case Sensitive (C)"]
-		GuiControl, HS3: Font, % TransA["Case-Conforming"]
-	}
+			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+			GuiControl, HS3: Font, % TransA["Not Case-Conforming (C1)"]
+			GuiControl, HS3:, % TransA["Not Case-Conforming (C1)"], 1
+			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType					
+			GuiControl, HS3: Font, % TransA["Case Sensitive (C)"]
+			GuiControl, HS3: Font, % TransA["Case-Conforming"]
+			GuiControl, HS3: Font, % TransA["Capitalize each word (C2)"]
+		Case 4: 
+			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+			GuiControl, HS3: Font, % TransA["Capitalize each word (C2)"]
+			GuiControl, HS3:, % TransA["Capitalize each word (C2)"], 1
+			Gui, HS3: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+			GuiControl, HS3: Font, % TransA["Case Sensitive (C)"]
+			GuiControl, HS3: Font, % TransA["Case-Conforming"]
+			GuiControl, HS3: Font, % TransA["Not Case-Conforming (C1)"]
+		}
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
 F_HS4RadioCaseGroup(v_RadioCaseGroup)
@@ -14949,25 +15001,36 @@ F_HS4RadioCaseGroup(v_RadioCaseGroup)
 	Switch v_RadioCaseGroup
 	{
 		Case 1:
-		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-		GuiControl, HS4: Font, % TransA["Case Sensitive (C)"]
-		GuiControl, HS4: Font, % TransA["Case-Conforming"]
-		GuiControl, HS4: Font, % TransA["Not Case-Conforming (C1)"]
-		GuiControl, HS4:, % TransA["Case-Conforming"], 1
+			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+			GuiControl, HS4: Font, % TransA["Case Sensitive (C)"]
+			GuiControl, HS4: Font, % TransA["Case-Conforming"]
+			GuiControl, HS4: Font, % TransA["Not Case-Conforming (C1)"]
+			GuiControl, HS4: Font, % TransA["Capitalize each word (C2)"]
+			GuiControl, HS4:, % TransA["Case-Conforming"], 1
 		Case 2:
-		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
-		GuiControl, HS4: Font, % TransA["Case Sensitive (C)"]
-		GuiControl, HS4:, % TransA["Case Sensitive (C)"], 1
-		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-		GuiControl, HS4: Font, % TransA["Case-Conforming"]
-		GuiControl, HS4: Font, % TransA["Not Case-Conforming (C1)"]
+			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+			GuiControl, HS4: Font, % TransA["Case Sensitive (C)"]
+			GuiControl, HS4:, % TransA["Case Sensitive (C)"], 1
+			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+			GuiControl, HS4: Font, % TransA["Case-Conforming"]
+			GuiControl, HS4: Font, % TransA["Not Case-Conforming (C1)"]
+			GuiControl, HS4: Font, % TransA["Capitalize each word (C2)"]
 		Case 3: 
-		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
-		GuiControl, HS4: Font, % TransA["Not Case-Conforming (C1)"]
-		GuiControl, HS4:, % TransA["Not Case-Conforming (C1)"], 1
-		Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
-		GuiControl, HS4: Font, % TransA["Case Sensitive (C)"]
-		GuiControl, HS4: Font, % TransA["Case-Conforming"]
+			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+			GuiControl, HS4: Font, % TransA["Not Case-Conforming (C1)"]
+			GuiControl, HS4:, % TransA["Not Case-Conforming (C1)"], 1
+			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+			GuiControl, HS4: Font, % TransA["Case Sensitive (C)"]
+			GuiControl, HS4: Font, % TransA["Case-Conforming"]
+			GuiControl, HS4: Font, % TransA["Capitalize each word (C2)"]
+		Case 4: 
+			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "cGreen Norm", % c_FontType
+			GuiControl, HS4: Font, % TransA["Capitalize each word (C2)"]
+			GuiControl, HS4:, % TransA["Capitalize each word (C2)"], 1
+			Gui, HS4: Font, % "s" . c_FontSize . A_Space . "c" . c_FontColor . A_Space . "Norm", % c_FontType
+			GuiControl, HS4: Font, % TransA["Case Sensitive (C)"]
+			GuiControl, HS4: Font, % TransA["Case-Conforming"]
+			GuiControl, HS4:, % TransA["Not Case-Conforming (C1)"]
 	}
 }
 ;------------------------------------------------------------------------------------------------------------------------------------
@@ -15062,13 +15125,18 @@ F_GuiHS4_DetermineConstraints()
 	GuiControlGet, OutVarTemp1, Pos, % IdRadioCaseC1b
 	xNext += OutVarTemp1W
 	GuiControl, Move, % IdTextInfo7b, % "x" . xNext . "y" . yNext
-;5.1.2.4. Raw 4: No EndChar (O)
+;5.1.2.4. Raw 4: No EndChar (O) + Capitalize each word (C2)
 	xNext := c_xmarg * 2
 ,	yNext += c_HofCheckBox
 	GuiControl, Move, % IdCheckBox5b, % "x" . xNext . "y" . yNext	
 	GuiControlGet, OutVarTemp1, Pos, % IdCheckBox5
 	xNext += OutVarTemp1W
 	GuiControl, Move, % IdTextInfo8b, % "x" . xNext . "y" . yNext 
+	xNext := c_xmarg * 2 + W_C1 + c_xmarg
+	GuiControl, Move, % IdRadioCaseC2b, % "x" . xNext . "y" . yNext
+	GuiControlGet, OutVarTemp1, Pos, % IdRadioCaseC2b
+	xNext += OutVarTemp1W
+	GuiControl, Move, % IdTextInfo9b, % "x" . xNext . "y" . yNext
 ;5.1.2.6. Raw 5: Reset Recognizer (Z) + Disable
 	xNext := c_xmarg * 2
 ,	yNext += c_HofCheckBox
@@ -15268,13 +15336,18 @@ F_GuiHS3_DetermineConstraints()
 	GuiControlGet, OutVarTemp1, Pos, % IdRadioCaseC1
 	xNext += OutVarTemp1W
 	GuiControl, Move, % IdTextInfo7, % "x" . xNext . "y" . yNext
-;5.1.2.4. Raw 4: No EndChar (O)
+;5.1.2.4. Raw 4: No EndChar (O) + Capitalize each word (C2)
 	xNext := c_xmarg * 2
 ,	yNext += c_HofCheckBox
 	GuiControl, Move, % IdCheckBox5, % "x" . xNext . "y" . yNext	
 	GuiControlGet, OutVarTemp1, Pos, % IdCheckBox5
 	xNext += OutVarTemp1W
 	GuiControl, Move, % IdTextInfo8, % "x" . xNext . "y" . yNext 
+	xNext := c_xmarg * 2 + W_C1 + c_xmarg
+	GuiControl, Move, % IdRadioCaseC2, % "x" . xNext . "y" . yNext
+	GuiControlGet, OutVarTemp1, Pos, % IdRadioCaseC2
+	xNext += OutVarTemp1W
+	GuiControl, Move, % IdTextInfo9, % "x" . xNext . "y" . yNext
 ;5.1.2.6. Raw 5: Reset Recognizer (Z) + Disable
 	xNext := c_xmarg * 2
 ,	yNext += c_HofCheckBox
@@ -15699,11 +15772,13 @@ F_CreateHotstring(txt, nameoffile)
 		{
 			Case 1:
 				Options 	:= A_LoopField
-,				Oflag 	:= false
+			,	Oflag 	:= false
 				if (InStr(Options, "O", false))
 					Oflag := true
 				else
 					Oflag := false
+				if (InStr(Options, "C2"))	;actually "C2" isn't allowed / existing argument of "Hotstring" function can understand so just before this function is called the "NewOptions" string is checked if there is "C2" available. If it does, "C2" is replaced with "".
+					Options := StrReplace(Options, "C2", "")
 			Case 2:
 				Triggerstring := F_ConvertEscapeSequences(A_LoopField)
 			Case 3:
@@ -16297,10 +16372,10 @@ F_FollowCaseConformity(ReplacementString, InputString, Options)
 	global	;assume-global mode
 	local vFirstLetter1 := "", vFirstLetter2 := "", NewReplacementString := "", vRestOfLetters := "", fRestOfLettersCap := false, fFirstLetterCap := false, key := "", value := "", ThisHotkey := ""
 	
-	if (!InStr(Options, "C")) and (!InStr(Options, "C1"))	;v_Options is global variable, which value comes from F_DeterminePartStrings
+	if  (!InStr(Options, "C")) and (!InStr(Options, "C1")) and (!InStr(Options, "C2"))	;v_Options is global variable, which value comes from F_DeterminePartStrings
 	{
 		vFirstLetter1 		:= SubStr(InputString, 1, 1)	;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
-		vRestOfLetters 	:= SubStr(InputString, 2)		;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
+	,	vRestOfLetters 	:= SubStr(InputString, 2)		;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
 		if vFirstLetter1 is upper
 			fFirstLetterCap 	:= true
 		if (RegExMatch(InputString, "^[[:punct:][:digit:][:upper:][:space:]]*$"))
@@ -16322,6 +16397,26 @@ F_FollowCaseConformity(ReplacementString, InputString, Options)
 		if (!fFirstLetterCap)
 			return ReplacementString
 	}
+	if (InStr(v_Options, "C2"))
+	{
+		vFirstLetter1 		:= SubStr(InputString, 1, 1)	;it must be v_InputString, because A_ThisHotkey do not preserve letter size!
+	,	vRestOfLetters 	:= SubStr(InputString, 2)		;it must be v_InputString, because A_ThisHotkey do not preserve letter size!		
+		if vFirstLetter1 is upper
+			fFirstLetterCap 	:= true
+		if (RegExMatch(InputString, "^[[:punct:][:digit:][:upper:][:space:]]*$"))
+			fRestOfLettersCap 	:= true
+		if (fFirstLetterCap and fRestOfLettersCap)
+		{
+			StringUpper, NewReplacementString, ReplacementString
+			NewReplacementString := StrReplace(NewReplacementString, "``N", "``n")	;if hotstring contains special combination "`n" it is initially converted to "`N" and then again it must be converted to "`n" in order to work correctly.
+			return NewReplacementString
+		}
+		if (fFirstLetterCap and !fRestOfLettersCap)
+		{
+			NewReplacementString := RegexReplace(ReplacementString, "(^[a-z])|((\s)[a-z])|(-[a-z])", "$U0")
+			return NewReplacementString
+		}				
+	}	
 	if (InStr(v_Options, "C") or InStr(v_Options, "C1"))
 		return ReplacementString
 }
