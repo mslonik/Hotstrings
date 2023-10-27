@@ -20,7 +20,7 @@ ListLines, 			Off			; ListLines is disabled to make it harder to determine how s
 SendMode, 			Input		; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir, 		% A_ScriptDir	; Ensures a consistent starting directory.
 FileEncoding, 			UTF-16		; Sets the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen(). Unicode UTF-16, little endian byte order (BMP of ISO 10646). Useful for .ini files which by default are coded as UTF-16. https://docs.microsoft.com/pl-pl/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN Warning! UTF-16 is not recognized by Notepad++ editor (2021), which recognizes correctly UCS-2 (defined by the International Standard ISO/IEC 10646). BMP = Basic Multilingual Plane.
-CoordMode, Caret,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs. 
+CoordMode, Caret,		Screen		; Only Screen makes sense for functiofirmadd/ns prepared in this script to handle position of on screen GUIs. 
 CoordMode, ToolTip,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs. 
 CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs.
 ;#c/* commercial only beginning
@@ -798,12 +798,12 @@ return
 ~*PgDn::
 ~*WheelLeft::
 ~*WheelRight::
-~*LButton::	
+~*LButton::
+	; OutputDebug, % "LButton down:" . "`n"
 	ToolTip,	;this line is necessary to close tooltips.
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
 	F_DestroyTriggerstringTips(ini_TTCn)
-	; OutputDebug, % "v_InputString before:" . v_InputString . "|" . A_Space . "A_ThisHotkey:" . A_ThisHotkey . A_Space . "A_PriorKey:" . A_PriorKey . "`n"
 	if (!WinExist("ahk_id" HMenuCliHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
 		v_InputString := ""
 	; OutputDebug, % "v_InputString after:" . v_InputString . "|" . "`n"
@@ -834,6 +834,7 @@ return
 return
 
 ~*LButton UP::	;if user switches between windows by mouse clicking and e.g. "Search Hotstring" window was active
+	; OutputDebug, % "LButton UP:" . "`n"
 	Suspend, Permit	;Suspend, On is set for "Search Hotstrings" window
 	if (WinActive("ahk_id" HS3SearchHwnd))
 		{
@@ -2241,6 +2242,7 @@ F_HMenu_Keyboard(PressedKey, SendFun)
 	if (ini_TTCn = 4)
 		WinActivate, % "ahk_id" PreviousWindowID
 	Gui, HMenuAHK: Destroy
+	v_InputH.VisibleText 	:= true
 	Switch SendFun
 	{
 		Case "MSI":
@@ -2248,7 +2250,6 @@ F_HMenu_Keyboard(PressedKey, SendFun)
 		Case "MCL":
 			F_ClipboardPaste(Temp1, Ovar, v_EndChar)
 	}
-	v_InputH.VisibleText 	:= true
 	if (InStr(v_Options, "z", false))	;fundamental change, now "z" parameter metters
 		Hotstring("Reset")
 	v_InputString := ""
@@ -15953,7 +15954,7 @@ F_HMenu_Mouse(SendFun) ; Handling of mouse events for F_HMenu_Output;The subrout
 ,		OutputVarTemp 		:= F_ReplaceAHKconstants(OutputVarTemp)
 ,		OutputVarTemp 		:= F_FollowCaseConformity(OutputVarTemp, v_InputString, v_Options)
 ,		OutputVarTemp 		:= F_ConvertEscapeSequences(OutputVarTemp)
-		
+,		v_InputH.VisibleText 	:= true
 		Switch SendFun
 		{
 			Case "MSI":
@@ -15975,8 +15976,7 @@ F_HMenu_Mouse(SendFun) ; Handling of mouse events for F_HMenu_Output;The subrout
 			FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . ++v_LogCounter . "|" . "MSI" . "|" . v_InputString . "|" . v_EndChar . "|" . v_Options . "|" . OutputVarTemp . "|" . temp . "|" . v_CntCumGain . "|" . "`n", % v_LogFileName
 ;#c*/ commercial only end			
 		v_UndoTriggerstring 	:= v_InputString
-,		v_InputString 			:= ""
-,		v_InputH.VisibleText 	:= true
+	,	v_InputString 			:= ""
 	}
 	; OutputDebug, % A_ThisFunc . A_Space . "E" . A_Space . "ErrorLevel:" . ErrorLevel . "|" . "`n"
 	Critical, Off
@@ -16020,12 +16020,12 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 			Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceColCus, % ini_HMTyFaceFont
 		else
 			Gui, HMenuAHK: Font, % "s" . ini_HMTySize . A_Space . "c" . ini_HMTyFaceCol, % ini_HMTyFaceFont
-		Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax ;. A_Space . "g" . "F_HMenu_Mouse"
+		Gui, HMenuAHK: Add, Listbox, % "x0 y0 w250 HwndId_LB_HMenuAHK" . A_Space . "r" . v_MenuMax
 		Func_HMenu_Mouse := func("F_HMenu_Mouse").bind(SendFun)
 		GuiControl +g, % Id_LB_HMenuAHK, % Func_HMenu_Mouse
 		Loop, Parse, ReplacementString, % c_MHDelimiter	;second parse of the same variable, this time in order to fill in the Listbox
 			GuiControl,, % Id_LB_HMenuAHK, % A_Index . ". " . A_LoopField . c_MHDelimiter
-
+		
 		a_MCSIMenuPos := F_WhereDisplayMenu(ini_MHMP)
 		F_FlipMenu(HMenuAHKHwnd, a_MCSIMenuPos[1], a_MCSIMenuPos[2], "HMenuAHK")
 		GuiControl, Choose, % Id_LB_HMenuAHK, 1
@@ -16148,7 +16148,7 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 							if (IsLower)
 							{
 								OutputString 	:= SubStr(OutputString, 1, -1)	;all but last characters are copied back to OutputString
-								OutputDebug, % "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
+								; OutputDebug, % "A_SendLevel:" . A_SendLevel . "|" . A_Space . "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
 								SendInput, 	% OutputString
 								SendLevel, 	2	;only for ShiftFunctions for which InputLevel MinSendLevel is set to 2.
 								SendInput, 	% LastChar	;only last character of definition is send with different level of SendLevel; thanks to that ShiftFunctions can alter it into diacritics.
@@ -16157,6 +16157,7 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 							else
 							{	
 								OutputString 	:= SubStr(OutputString, 1, -1)	;all but last characters are copied back to OutputString
+								; OutputDebug, % "A_SendLevel:" . A_SendLevel . "|" . A_Space . "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
 								SendInput, 	% OutputString	
 								SendLevel, 2
 								Switch LastChar				
@@ -17144,4 +17145,4 @@ TurnOff_UHE:
 
 TurnOff_Ttt:
 	F_DestroyTriggerstringTips(ini_TTCn)
-	return
+	return	
