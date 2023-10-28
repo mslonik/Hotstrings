@@ -560,6 +560,69 @@ Critical, Off
 ;#c*/ commercial only end		
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#If WinExist("ahk_id" HMenuAHKHwnd) or WinExist("ahk_id" HMenuCliHwnd)	;this part of code will be run after InputHook processed a character; If HMenu is present on the screen
+
+	Tab::	;new thread starts here
+	+Tab::
+	Up::
+	Down::
+	WheelUp::
+	WheelDown::
+	MButton::
+	1::
+	2::
+	3::
+	4::
+	5::
+	6::
+	7::
+		Critical, On
+		; OutputDebug, % "A_ThisHotkey:" . A_ThisHotKey . "`n"
+		SetTimer, TurnOff_Ttt, Off
+		if (WinExist("ahk_id" HMenuAHKHwnd))
+			F_HMenu_Keyboard("MSI")
+		if (WinExist("ahk_id" HMenuCliHwnd))
+			F_HMenu_Keyboard("MCL")
+	return
+
+	Enter::
+		if (WinExist(SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]))	;if msgbox explaining shortcuts for this menu is open, close it upon enter
+		{
+			WinClose, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+			return
+		}	
+		else	;if not, handle choice made by user
+		{
+			Critical, On
+			; OutputDebug, % "A_ThisHotkey:" . A_ThisHotKey . "`n"
+			SetTimer, TurnOff_Ttt, Off
+			if (WinExist("ahk_id" HMenuAHKHwnd))
+				F_HMenu_Keyboard("MSI")
+			if (WinExist("ahk_id" HMenuCliHwnd))
+				F_HMenu_Keyboard("MCL")
+			return
+		}	
+
+	~LButton UP::				;if LButton is UP; the UP modifier is crucial here
+		Critical, On
+		if (WinExist("ahk_id" HMenuAHKHwnd))
+			F_HMenu_Mouse("MSI")
+		if (WinExist("ahk_id" HMenuCliHwnd))
+			F_HMenu_Mouse("MCL")
+	return
+
+	?::						;to display short-hand information about hotkeys active for HMenu
+		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Shortcuts available for hotstring menu:"] . "`n`n" ;it cannot be modal (always on top) as HMenuAHKHwnd has already feature "always on top"
+			. "Tab" . A_Tab . A_Tab . A_Tab .	 	 TransA["down"] . "`n"
+			. "Shift + Tab" . A_Tab . A_Tab . 	 	 TransA["up"] . "`n"
+			. "↓" . A_Tab . A_Tab . A_Tab .   	 	 TransA["down"] . "`n"
+			. "↑" . A_Tab . A_Tab . A_Tab .   	 	 TransA["up"] . "`n"
+			. "Enter" . A_Tab . A_Tab . A_Tab .	 TransA["enter selected hotstring"] . "`n"
+			. "Left Mouse Button" . A_Tab . A_Tab .	 TransA["enter selected hotstring"] . "`n"
+			. "Esc" . A_Tab . A_Tab . A_Tab .		 TransA["Close and interrupt"]
+	return
+#If
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If WinActive("ahk_id" HS3SearchHwnd)
 	^f::
 	^s::
@@ -865,21 +928,6 @@ return
 		; OutputDebug, % "S Off" . "`n"
 	}	
 return
-
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#If WinExist("ahk_id" HMenuAHKHwnd) or WinExist("ahk_id" HMenuCliHwnd)	;MSI or MCL
-	^?::
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Shortcuts available for hotstring menu:"] . "`n`n" ;it cannot be modal (always on top) as HMenuAHKHwnd has already feature "always on top"
-			. "Tab" . A_Tab . A_Tab . A_Tab .	 	 TransA["down"] . "`n"
-			. "Shift + Tab" . A_Tab . A_Tab . 	 	 TransA["up"] . "`n"
-			. "↓" . A_Tab . A_Tab . A_Tab .   	 	 TransA["down"] . "`n"
-			. "↑" . A_Tab . A_Tab . A_Tab .   	 	 TransA["up"] . "`n"
-			. "Enter" . A_Tab . A_Tab . A_Tab .	 TransA["enter selected hotstring"] . "`n"
-			. "Left Mouse Button" . A_Tab . A_Tab .	 TransA["enter selected hotstring"] . "`n"
-			. "Esc" . A_Tab . A_Tab . A_Tab .		 TransA["Close and interrupt"]
-		return
-#If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If WinActive("ahk_id" TT_C4_Hwnd)	;Static triggerstring tips (inside separate window). User case scenario: if user decided to switch into static window (makes it active)
 	Tab::	
@@ -2157,7 +2205,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 ;#c*/ commercial only end
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_HMenu_Keyboard(PressedKey, SendFun)
+F_HMenu_Keyboard(SendFun)
 {
 	global	;assume-global mode of operation
 	local	Temp1 := ""
@@ -2165,11 +2213,13 @@ F_HMenu_Keyboard(PressedKey, SendFun)
 		,	ReplacementString := ""
 		, 	temp := 0
 		,	WhichControl := ""
+		,	PressedKey := A_ThisHotkey
 	static 	IfUpF := false
 		,	IfDownF := false
 		,	IsCursorPressed := false
 		,	IntCnt := 1
 	
+	; OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
 	if (InStr(PressedKey, "Up") or InStr(PressedKey, "+Tab"))	;the same as "up"
 	{
 		IsCursorPressed := true
@@ -2250,6 +2300,8 @@ F_HMenu_Keyboard(PressedKey, SendFun)
 		Case "MCL":
 			F_ClipboardPaste(Temp1, Ovar, v_EndChar)
 	}
+	if (ini_MHSEn)
+		SoundBeep, % ini_MHSF, % ini_MHSD
 	if (InStr(v_Options, "z", false))	;fundamental change, now "z" parameter metters
 		Hotstring("Reset")
 	v_InputString := ""
@@ -2938,14 +2990,14 @@ F_OneCharPressed(ih, Char)
 		,	LastChar		:= ""	;last character of input buffer (v_InputString)
 		,	TwoLastChar	:= ""	;two last characters of input buffer (v_InputString)
 
+	; OutputDebug, % "1)IS:" . v_InputString . "|" . A_Space 
+		; . "QS:" . v_Qinput . "|" . A_Space 
+		; . "f_EC:" . f_EndCharDetected . A_Space 
+		; . "Char:" . Char . "|" 
+		; . "`n"
 	if (WinActive("ahk_id" TT_C4_Hwnd)) or (WinExist("ahk_id" HMenuCliHwnd)) or (WinExist("ahk_id" HMenuAHKHwnd))
 		return
 
-	; OutputDebug, % "1)IS:" . v_InputString . "|" . A_Space 
-	; 	. "QS:" . v_Qinput . "|" . A_Space 
-	; 	. "f_EC:" . f_EndCharDetected . A_Space 
-	; 	. "Char:" . Char . "|" 
-	; 	. "`n"
 	if (v_InputString = "")	;always true after any hotstring
 		v_Qinput 	:= ""
 	
@@ -4475,8 +4527,8 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Text,	HwndIdEvMH_T1,						% TransA["Menu position"] . ":"
 	Gui, GuiEvents: Font,	% "s" . c_FontSize + 2 . A_Space . "norm" . A_Space . "c" . c_FontColorHighlighted, % c_FontType
 	Gui, GuiEvents: Add,	Text,	HwndIdEvMH_T2,						ⓘ
-	T_MenuPosition := func("F_ShowLongTooltip").bind(TransA["T_MenuPosition"])
-	GuiControl, +g, % IdEvMH_T2, % T_MenuPosition
+	T_HMenuPosition := func("F_ShowLongTooltip").bind(TransA["T_HMenuPosition"])
+	GuiControl, +g, % IdEvMH_T2, % T_HMenuPosition
 	Gui, GuiEvents: Font,	% "s" . c_FontSize . A_Space . "norm" . A_Space . "c" . c_FontColor, % c_FontType
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvMH_R1 vEvMH_R1R2,			% TransA["caret"]
 	Gui, GuiEvents: Add,	Radio,	HwndIdEvMH_R2,						% TransA["cursor"]
@@ -14098,6 +14150,7 @@ F_HK_ClipCopyInfo										= Remark: this hotkey is operating system wide, so be
 F_HK_UndoInfo											= Remark: this hotkey is operating system wide, so before changing it be sure it's not in conflict with any other system wide hotkey.`n`n When pressed, it undo the very last hotstring. Please note that result of undo depends on cursor position.
 F_HK_TildeModInfo										= When the hotkey fires, its key's native function will not be blocked (hidden from the system). 
 F_HK_ToggleTtInfo										= Toggle visibility of all triggerstring tips. Advice: use ScrollLock or CapsLock for that purpose.
+T_HMenuPosition										= Specify where ""hotstring menu"" should be displayed by default.`n`nWarning: some applications do not accept ""caret"" position. `n`nThen automatically ""cursor"" position is followed.
 T_SBackgroundColorInfo									= Select from drop down list predefined color (one of 16 HTML colors) `nor select Custom one and then provide RGB value in HEX format (e.g. FF0000 for red). `nThe selected color will be displayed as background for on-screen menu.
 T_STypefaceColor										= Select from drop down list predefined color (one of 16 HTML colors) `nor select Custom one and then provide RGB value in HEX format (e.g. FF0000 for red). `nThe selected color will be displayed as font color for on-screen menu.
 T_STypefaceFont										= Select from drop down list predefined font type. `nThe selected font type will be used in on screen menu.
@@ -14105,7 +14158,7 @@ T_STypefaceSize										= Select from drop down list predefined size of font. `
 T_StylPreview											= Press the ""Test styling"" button to get look & feel of selected styling settings below.
 T_SoundEnable											= Sound can be emitted each time when event takes place. `nOne can specify sound frequency and duration.`n`nYou may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 50 [ms]; `nInterval:         150 [ms]; `nRange:            50 ÷ 2 000 [ms]. `n`nTip: Recommended time is between 200 to 400 ms. `n`nPgUp / PgDn step: 50 [ms]; `nInterval:         150 [ms]; `nRange:            50 ÷ 2 000 [ms]. `n`nTip: Recommended time is between 200 to 400 ms.
 T_TooltipEnable										= You can enable or disable the following tooltip: ""Hotstring was triggered! [Shortcut] to undo."" `nIf enabled, this tooltip is shown each time when even of displaying hotstring upon triggering it takes place. `nNext you can set accompanying features like timeout, position and even sound. 
-T_TooltipPosition										= Specify where tooltip should be displayed by default.`n`nWarning: some applications do not accept caret position. `n`nThen automatically cursor position is followed.
+T_TooltipPosition										= Specify where tooltip should be displayed by default.`n`nWarning: some applications do not accept ""caret"" position. `n`nThen automatically ""cursor"" position is followed.
 T_TooltipTimeout										= The infinite tooltip stays displayed on a screen till next event is triggered. `nIt's adviced to set finite tooltip. `n`nYou may slide the control by the following means: `n`n1) dragging the bar with the mouse; `n2) clicking inside the bar's track area with the mouse; `n3) turning the mouse wheel while the control has focus or `n4) pressing the following keys while the control has focus: ↑, →, ↓, ←, PgUp, PgDn, Home, and End. `n`nPgUp / PgDn step: 500 [ms]; `nInterval:         500 [ms]; `nRange:            1000 ÷ 10 000 [ms].
 T_TriggerstringTips										= The triggerstring tips are displayed to help you recognize which triggerstrings are defined or available. `nThey are displayed in form of short list (tooltips).`n`nYou can define styling of triggerstring tips: Menu → Configuration.
 T_TtSortingOrder										= The sorting order let you define how the triggerstring tips list positions are sorted out. `nThere are two options, which can be active on the same time: alphabetically or by length. `nYou can check out the differences by pressing the Tooltip test button.
@@ -15937,17 +15990,19 @@ F_HMenu_Mouse(SendFun) ; Handling of mouse events for F_HMenu_Output;The subrout
 {	
 	global	;assume-global mode of operation
 	Critical, On
-	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0, temp := 0, ThisHotkey := A_ThisHotkey
+	local	OutputVarTemp := "", ReplacementString := "", ChoicePos := 0, temp := 0, ThisHotkey := A_ThisHotkey
+		,	OutputVarControl := 0	; OutputVarControl: to store the name (ClassNN) of the control under the mouse cursor.
+		,	OutputVarWin := ""		;The name of the output variable in which to store the unique ID number of the window under the mouse cursor. If the window cannot be determined, this variable will be made blank.
 
-	; OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "B" . A_Space . "ThisHotkey:" . ThisHotkey . "`n"
 	if (InStr(ThisHotkey, "LButton"))
 	{
-		Input									;terminates Input from within F_HMenu_Output and sets ErrorLevel to value "NewInput"
-		MouseGetPos, , , , OutputVarControl			;to store the name (ClassNN) of the control under the mouse cursor
-		SendMessage, 0x0188, 0, 0, % OutputVarControl	;retrieve the position of the selected item
+		MouseGetPos, , , OutputVarWin, OutputVarControl
+		if (InStr(OutputVarControl, "Button"))
+			return
+		SendMessage, 0x0188, 0, 0, % OutputVarControl, % "ahk_id" . OutputVarWin	;retrieve the position of the selected item; https://www.autohotkey.com/docs/v1/lib/ControlGet.htm
 		ChoicePos := (ErrorLevel<<32>>32) + 1			;Convert UInt to Int to have -1 if there is no item selected and convert from 0-based to 1-based, i.e. so that the first item is known as 1, not 0.
-		GuiControl, Choose, % OutputVarControl, % ChoicePos
-		GuiControlGet, OutputVarTemp, , % OutputVarControl
+		GuiControlGet, OutputVarTemp, HMenuAHK:, % OutputVarControl ;alternative: GuiControlGet, OutputVarTemp, , % Id_LB_HMenuAHK	
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
 		Gui, HMenuAHK: Destroy
 		v_UndoHotstring 	:= OutputVarTemp
@@ -16040,43 +16095,6 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 		WhichMenu := "SI"	;this setting will be used within F_MouseMenuCombined() to handle mouse event
 	}
 	Ovar := Oflag
-
-	Loop
-	{	
-		if (ErrorLevel = "NewInput")	;when user used mouse to make a choice from menu
-			break
-		Input, SingleKey, L1 E, {Tab}{Up}{Down}1234567{Enter}{Esc}
-		if (SingleKey) and (ini_MHSEn)	;Sound is produced each time user presses other key than EndKey. Assumption: it will help to focus user's attention to on screen menu.
-			SoundBeep, % ini_MHSF, % ini_MHSD	
-
-		if (InStr(ErrorLevel, "EndKey:"))
-		{
-			WhatWasPressed := SubStr(ErrorLevel, 8)	;8 = EndKey: + 1
-			; OutputDebug, % "Terminated by EndKey:" . WhatWasPressed . "|" . "`n"	
-			if (WhatWasPressed = "Escape")
-			{
-				Gui, HMenuAHK: Destroy
-				SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
-				v_InputString 			:= ""
-				v_InputH.Start()
-				v_InputH.VisibleText 	:= true
-				break
-			}	
-
-			if (WhatWasPressed = "Tab")
-			{
-				if (GetKeyState("LShift")) or (GetKeyState("RShift"))
-					WhatWasPressed := "+Tab"
-				if (F_HMenu_Keyboard(WhatWasPressed, SendFun))
-					break
-			}
-			else 
-			{	
-				if (F_HMenu_Keyboard(WhatWasPressed, SendFun))
-					break
-			}	
-		}
-	}
 	; OutputDebug, % A_ThisFunc . A_Space . "end" . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
 	Critical, Off
 }
@@ -16480,7 +16498,7 @@ F_TTMenuStatic_Mouse() ;The subroutine may consult the following built-in variab
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid if static triggerstring / hotstring menus GUI is available. "Combined" because it chooses between "MSI" and "MCLI".
+F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid if static triggerstring / hotstring menus GUI is available. "Combined" because it chooses between "MSI" and "MCL".
 {
 	global	;assume-global mode of operation
 	local	OutputVarControl := 0, OutputVarTemp := "", ReplacementString := "", ChoicePos := 0, temp := 0
