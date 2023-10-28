@@ -1068,20 +1068,38 @@ F_LicenseDetails()	;dedicated script: LemonAPI.ahk, structure:
 	global						;assume-global mode of operation
 	local c_MsgBoxIconAsterisk	:= 64
 	,	c_License				:= "LICENSE_EULA.md"
-	,	LicenseInfo			:= F_LicenseHttpRequest(WhatRequest := "validate", ini_LicenseKey, ini_LicenseInstanceId, WhatInstance := "instance_id")
 
-	MsgBox, % c_MsgBoxIconAsterisk, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-		, % TransA["License details"] . ":"										. "`n`n"
-		. TransA["Type"] . ":" 				. A_Tab . v_LicenseType 					. "`n"
-		. TransA["License"] . ":" 			. A_Tab . A_ScriptDir . "\" . c_License 	. "`n"
-		. TransA["License status"] . ":" 		. A_Tab . LicenseInfo.status				. "`n"
-		. TransA["License key"] . ":" 		. A_Tab . LicenseInfo.key 				. "`n"
-		. TransA["Activation limit"] . ":" 	. A_Tab . LicenseInfo.activation_limit 		. "`n"
-		. TransA["Activation usage"] . ":" 	. A_Tab . LicenseInfo.activation_usage		. "`n"
-		. TransA["Created at"] . ":" 			. A_Tab . LicenseInfo.created_at			. "`n"
-		. TransA["Expires at"] . ":" 			. A_Tab . LicenseInfo.expires_at			. "`n"
-		. TransA["Customer name"] . ":" 		. A_Tab . LicenseInfo.customer_name		. "`n"
-		. TransA["Customer id"] . ":" 		. A_Tab . LicenseInfo.customer_id			. "`n"
+	if (v_ValidTill = "inf")
+		MsgBox, % c_MsgBoxIconAsterisk, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+			, % TransA["License details"] . ":"										. "`n`n"
+			. TransA["Type"] . ":" 				. A_Tab . v_LicenseType 					. "`n"
+			. TransA["License"] . ":" 			. A_Tab . A_ScriptDir . "\" . c_License 	. "`n"
+			. TransA["License status"] . ":" 		. A_Tab . TransA["valid"]				. "`n"
+			. TransA["License key"] . ":" 		. A_Tab . TransA["not relevant"] 			. "`n"
+			. TransA["Activation limit"] . ":" 	. A_Tab . TransA["not relevant"]	 		. "`n"
+			. TransA["Activation usage"] . ":" 	. A_Tab . TransA["not relevant"]			. "`n"
+			. TransA["Created at"] . ":" 			. A_Tab . TransA["not relevant"]			. "`n"
+			. TransA["Expires at"] . ":" 			. A_Tab . TransA["never"]				. "`n"
+			. TransA["Customer name"] . ":" 		. A_Tab . TransA["not relevant"]			. "`n"
+			. TransA["Customer id"] . ":" 		. A_Tab . TransA["not relevant"]			. "`n"
+
+	else
+	{
+		LicenseInfo			:= F_LicenseHttpRequest(WhatRequest := "validate", ini_LicenseKey, ini_LicenseInstanceId, WhatInstance := "instance_id")
+		MsgBox, % c_MsgBoxIconAsterisk, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+			, % TransA["License details"] . ":"										. "`n`n"
+			. TransA["Type"] . ":" 				. A_Tab . v_LicenseType 					. "`n"
+			. TransA["License"] . ":" 			. A_Tab . A_ScriptDir . "\" . c_License 	. "`n"
+			. TransA["License status"] . ":" 		. A_Tab . LicenseInfo.status				. "`n"
+			. TransA["License key"] . ":" 		. A_Tab . LicenseInfo.key 				. "`n"
+			. TransA["Activation limit"] . ":" 	. A_Tab . LicenseInfo.activation_limit 		. "`n"
+			. TransA["Activation usage"] . ":" 	. A_Tab . LicenseInfo.activation_usage		. "`n"
+			. TransA["Created at"] . ":" 			. A_Tab . LicenseInfo.created_at			. "`n"
+			. TransA["Expires at"] . ":" 			. A_Tab . LicenseInfo.expires_at			. "`n"
+			. TransA["Customer name"] . ":" 		. A_Tab . LicenseInfo.customer_name		. "`n"
+			. TransA["Customer id"] . ":" 		. A_Tab . LicenseInfo.customer_id			. "`n"
+	}	
+
 }
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -13832,6 +13850,7 @@ New location:											= New location:
 New location (default):									= New location (default):
 New settings are now applied.							     = New settings are now applied.
 New shortcut (hotkey)									= New shortcut (hotkey)
+never												= never
 Next the default language file (English.txt) will be deleted,	= Next the default language file (English.txt) will be deleted,
 No													= No
 no													= no
@@ -13840,6 +13859,7 @@ No EndChar (O) 										= No EndChar (O)
 No libraries have been found!								= No libraries have been found!
 No license key was found in Config.ini.						= No license key was found in Config.ini.
 Not Case-Conforming (C1)									= Not Case-Conforming (C1)
+not relevant											= not relevant
 Capitalize each word (C2)								= Capitalize each word (C2)
 Nothing to do to me, Config.ini is already where you want it.	= Nothing to do to me, Config.ini is already where you want it.
 Now application must be restarted (into default mode) in order to apply settings from new location. = Now application must be restarted (into default mode) in order to apply settings from new location.
@@ -14089,6 +14109,7 @@ Undo the last hotstring									= Undo the last hotstring
 Undo the last hotstring									= Undo the last hotstring
 up													= up
 Undid the last hotstring 								= Undid the last hotstring
+valid												= valid
 Valid till											= Valid till
 Version / Update										= Version / Update
 Version												= Version
@@ -16006,10 +16027,10 @@ F_HMenu_Mouse(SendFun) ; Handling of mouse events for F_HMenu_Output;The subrout
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
 		Gui, HMenuAHK: Destroy
 		v_UndoHotstring 	:= OutputVarTemp
-,		OutputVarTemp 		:= F_ReplaceAHKconstants(OutputVarTemp)
-,		OutputVarTemp 		:= F_FollowCaseConformity(OutputVarTemp, v_InputString, v_Options)
-,		OutputVarTemp 		:= F_ConvertEscapeSequences(OutputVarTemp)
-,		v_InputH.VisibleText 	:= true
+	,	OutputVarTemp 		:= F_ReplaceAHKconstants(OutputVarTemp)
+	,	OutputVarTemp 		:= F_FollowCaseConformity(OutputVarTemp, v_InputString, v_Options)
+	,	OutputVarTemp 		:= F_ConvertEscapeSequences(OutputVarTemp)
+	,	v_InputH.VisibleText 	:= true
 		Switch SendFun
 		{
 			Case "MSI":
