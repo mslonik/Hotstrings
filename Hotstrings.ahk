@@ -119,7 +119,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_dHK_CallGUI 			:= "#^h"				;global constant: default (d) hotkey (HK) for calling main application GUI
 ,		c_dHK_ToggleTt			:= "none"				;global constant: default (d) hotkey (HK) for toggling the triggestring tips
 ;#c/* commercial only beginning
-,		v_ValidTill			:= "limited"			;"inf" for infinity, "limited" for other cases
+,		v_ValidTill			:= "inf"			;"inf" for infinity, "limited" for other cases
 ,		f_RShiftDown 			:= false
 ,		f_LShiftDown 			:= false
 ,		v_SendFun				:= ""				;last used output function; important for F_Undo
@@ -127,7 +127,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
 F_LoadCreateTranslationTxt() 			;default set of text string definitions (English) is loaded into memory at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
-F_CheckCreateConfigIni() 			;Try to load up configuration file. If those files do not exist, create them.
+F_CheckCreateConfigIni() 			;Try to load up configuration file. If those files do not exist, create them. If it isn't possible, exit.
 F_CheckIfMoveToProgramFiles()			;Checks if move Hotstrings folder to Program Files folder and then restarts application.
 F_CheckIfRemoveOldDir()				;Checks content of Config.ini in order to remove old script directory.
 F_CheckFileEncoding(A_ScriptFullPath)	;checks if script is utf-8 compliant. it has plenty to do wiith github download etc.
@@ -159,9 +159,15 @@ if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_Gui
 
 if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "Languages" subfolder 
 {
-	FileCreateDir, %A_ScriptDir%\Languages							; Future: check against errors
-	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["There was no Languages subfolder, so one now is created."] . A_Space . "`n" 
-	. A_ScriptDir . "\Languages"
+	FileCreateDir, %A_ScriptDir%\Languages
+	if (ErrorLevel)
+	{
+		MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["""Languages"" subfolder wasn't created for some reason."]
+		ExitApp, 9 ;""Languages"" subfolder wasn't created for some reason.
+	}	
+	else	
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["There was no Languages subfolder, so one now is created."] . A_Space . "`n" 
+			. A_ScriptDir . "\Languages"
 }
 
 F_Load_ini_Language()
@@ -8098,8 +8104,8 @@ F_CheckFileEncoding(FullFilePath)
 	if (!A_IsCompiled)
 	{
 		file := FileOpen(FullFilePath, "r")
-		RetrievedEncoding := file.Encoding
-		FilePos := file.Pos
+	,	RetrievedEncoding := file.Encoding
+	,	FilePos := file.Pos
 		if !(((RetrievedEncoding = "UTF-8") and (FilePos = 3)) or ((RetrievedEncoding = "UTF-16") and (FilePos = 2)))
 		{
 			MsgBox, 16, % A_ScriptName . ":" . A_Space . TransA["Error"], % TransA["Recognized encoding of the file:"] 
@@ -13197,12 +13203,32 @@ ConfigIni := "
 	{
 		; OutputDebug, % "HADConfig_AppData:" . A_Tab . HADConfig_AppData . "`n" . "HADConfig_App:" . A_Tab . HADConfig_App . "`n`n"
 		if (!InStr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4)), "D"))	;if there is no folder...
-			FileCreateDir, % A_AppData . "\" . SubStr(A_ScriptName, 1, -4)	;future: check against errors
+		{
+			FileCreateDir, % A_AppData . "\" . SubStr(A_ScriptName, 1, -4)		;create it
+			if (ErrorLevel)											;if folder couldn't be created, then exit.
+			{
+				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["""AppData\Hotstrings"" subfolder wasn't created for some reason. Exiting."]
+					. "`n`n" . A_AppData . "\" . SubStr(A_ScriptName, 1, -4)
+				ExitApp, 13	;For some reasons folder AppData\Hotstrings couldn't be created.
+			}	
+		}	
 		FileAppend, % ConfigIni, % HADConfig_AppData
-		if (FileExist(A_ScriptDir . "\Languages\English.txt"))	;if there is no Config.ini, then English.txt should be recreated.
-			FileDelete, % A_ScriptDir . "\Languages\English.txt"	;future: check against errors
+		if (ErrorLevel)
+		{
+			MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["Config.ini file couldn't be created for some reason. Exiting."]
+			ExitApp, 14		;Config.ini file couldn't be created for some reason. Exiting.
+		}	
 		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"] . "`n`n" . HADConfig_AppData
 			. "`n`n" . TransA["As a consequence the default language file English.txt will be recreated."]
+		if (FileExist(A_ScriptDir . "\Languages\English.txt"))	;if there is no Config.ini, then English.txt should be recreated.
+		{
+			FileDelete, % A_ScriptDir . "\Languages\English.txt"
+			if (ErrorLevel)
+			{
+				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["Unexpected problem on time of deleting the file ""\Languages\English.txt"". Exiting."]
+				ExitApp, 15	;Unexpected problem on time of deleting the file ""\Languages\English.txt"".
+			}	
+		}	
 		ini_HADConfig := HADConfig_AppData
 		return
 	}
@@ -13512,7 +13538,7 @@ F_LoadCreateTranslationTxt(decision*)
 {
 	global ;assume-global mode
 	local TransConst := "" ; variable which is used as default content of Languages/English.ini. Join lines with `n separator and escape all ` occurrences. Thanks to that string lines where 'n is present 'aren't separated.
-	,v_TheWholeFile := "", key := "", val := "", tick := false
+	,	v_TheWholeFile := "", key := "", val := "", tick := false
 	
 ;Warning. If right side contains `n chars it's necessary to replace them with StrReplace, e.g. TransA["Enables Convenient Definition"] := StrReplace(TransA["Enables Convenient Definition"], "``n", "`n")
 	TransConst := "
@@ -13548,6 +13574,7 @@ Alphabetically 										= Alphabetically
 already exists in another library							= already exists in another library
 and active in whole operating system (any window)				= and active in whole operating system (any window)
 Apostrophe ' 											= Apostrophe '
+""AppData\Hotstrings"" subfolder wasn't created for some reason. Exiting. = ""AppData\Hotstrings"" subfolder wasn't created for some reason. Exiting.
 Application											= A&pplication
 Application has been running since							= Application has been running since
 Application help										= Application help
@@ -13611,8 +13638,6 @@ Colon : 												= Colon :
 Comma , 												= Comma ,
 Comment												= Comment
 commercial											= commercial
-Content of current log file (read only)						= Content of current log file (read only)
-Convert to executable (.exe)								= Convert to executable (.exe)
 Composition of triggerstring tips							= Composition of triggerstring tips
 Compressed executable (upx.exe)							= Compressed executable (upx.exe)
 Compressed executable (mpress.exe)							= Compressed executable (mpress.exe)
@@ -13620,8 +13645,11 @@ Computer name											= Computer name
 Config.ini file: move it to script / app location				= Config.ini file: move it to script / app location
 Config.ini file: restore it to default location				= Config.ini file: restore it to default location
 Config.ini file was successfully moved to the new location.		= Config.ini file was successfully moved to the new location.
+Config.ini file couldn't be created for some reason. Exiting.	= Config.ini file couldn't be created for some reason. Exiting.
 Config.ini wasn't found. The default Config.ini has now been created in location: = Config.ini wasn't found. The default Config.ini has now been created in location:
 Configuration 											= &Configuration
+Content of current log file (read only)						= Content of current log file (read only)
+Convert to executable (.exe)								= Convert to executable (.exe)
 Content of clipboard contain new line characters. Do you want to remove them? = Content of clipboard contain new line characters. Do you want to remove them?
 Content of this text field is not file path or file wasn't found. For ouput function ""Picture (P)"" it is required to enter correct filepath. = Content of this text field is not file path or file wasn't found. For ouput function ""Picture (P)"" it is required to enter correct filepath.
 Content of this text field is not file path or file wasn't found. For ouput function ""Run (R)"" it is required to enter correct filepath. = Content of this text field is not file path or file wasn't found. For ouput function ""Run (R)"" it is required to enter correct filepath.
@@ -13637,6 +13665,7 @@ Copy Log folder path to Clipboard							= Copy Log folder path to Clipboard
 Open picture in MSPaint and copy to Clipboard				= Open picture in MSPaint and copy to Clipboard
 Copy picture to Clipboard								= Copy picture to Clipboard
 Copy picture path to Clipboard							= Copy picture path to Clipboard
+""Languages"" subfolder wasn't created for some reason.		= ""Languages"" subfolder wasn't created for some reason.
 Created at											= Created at
 Cumulative gain [characters]								= Cumulative gain [characters]
 Current Config.ini file location:							= Current Config.ini file location:
@@ -14116,6 +14145,7 @@ Undo the last hotstring									= Undo the last hotstring
 Undo the last hotstring									= Undo the last hotstring
 up													= up
 Undid the last hotstring 								= Undid the last hotstring
+Unexpected problem on time of deleting the file ""\Languages\English.txt"". Exiting. = Unexpected problem on time of deleting the file ""\Languages\English.txt"". Exiting.
 valid												= valid
 Valid till											= Valid till
 Version / Update										= Version / Update
