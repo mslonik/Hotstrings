@@ -119,7 +119,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_dHK_CallGUI 			:= "#^h"				;global constant: default (d) hotkey (HK) for calling main application GUI
 ,		c_dHK_ToggleTt			:= "none"				;global constant: default (d) hotkey (HK) for toggling the triggestring tips
 ;#c/* commercial only beginning
-,		v_ValidTill			:= "inf"			;"inf" for infinity, "limited" for other cases
+,		v_ValidTill			:= "limited"			;"inf" for infinity, "limited" for other cases
 ,		f_RShiftDown 			:= false
 ,		f_LShiftDown 			:= false
 ,		v_SendFun				:= ""				;last used output function; important for F_Undo
@@ -561,6 +561,13 @@ Critical, Off
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If WinExist("ahk_id" HMenuAHKHwnd) or WinExist("ahk_id" HMenuCliHwnd)	;this part of code will be run after InputHook processed a character; If HMenu is present on the screen
+
+	Esc::
+		Gui, HMenuAHK: Destroy
+		SendRaw, % v_InputString	;SendRaw in order to correctly produce escape sequences from v_InputString ({}^!+#)
+		v_InputString 			:= ""
+	,	v_InputH.VisibleText 	:= true
+	return
 
 	Tab::	;new thread starts here
 	+Tab::
