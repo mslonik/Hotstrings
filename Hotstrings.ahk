@@ -10227,12 +10227,12 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 			NewOptions := StrReplace(OldOptions, "B0", "B")
 		if (InStr(OldOptions, "Z") and !InStr(NewOptions, "Z"))
 			NewOptions := StrReplace(OldOptions, "Z", "Z0")
-		if (InStr(OldOptions, "C2")) and !InStr(NewOptions, "C2")	;actually "C2" isn't allowed / existing argument of "Hotstring" function can understand so just before this function is called the "NewOptions" string is checked if there is "C2" available. If it does, "C2" is replaced with "".
-			HC2SubstOpt := StrReplace(OldOptions, "C2", "")
+		if (InStr(OldOptions, "C2")) 	;actually "C2" isn't allowed / existing argument of "Hotstring" function can understand so just before this function is called the "NewOptions" string is checked if there is "C2" available. If it does, "C2" is replaced with "".
+			OldOptions := StrReplace(OldOptions, "C2", "")
 
 		;turn off existing hotstring
 		Try
-			Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), , "Off")
+			Hotstring(":" . OldOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), , "Off")
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
 				. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
@@ -14777,6 +14777,7 @@ F_GuiHS3_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, %  EnDis, % IdRadioCaseCC
 	GuiControl, %  EnDis, % IdRadioCaseCS
 	GuiControl, %  EnDis, % IdRadioCaseC1
+	GuiControl, %  EnDis, % IdRadioCaseC2
 	GuiControl, %  EnDis, % IdTextInfo3
 	GuiControl, %  EnDis, % IdTextInfo5
 	GuiControl, %  EnDis, % IdTextInfo7
