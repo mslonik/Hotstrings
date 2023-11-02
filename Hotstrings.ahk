@@ -14553,6 +14553,7 @@ F_GuiHS4_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, % EnDis, % IdRadioCaseCCb
 	GuiControl, % EnDis, % IdRadioCaseCSb
 	GuiControl, % EnDis, % IdRadioCaseC1b
+	GuiControl, % EnDis, % IdRadioCaseC2b
 	GuiControl, % EnDis, % IdTextInfo3b
 	GuiControl, % EnDis, % IdCheckBox3b
 	GuiControl, % EnDis, % IdTextInfo4b
@@ -14563,6 +14564,7 @@ F_GuiHS4_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, % EnDis, % IdCheckBox5b
 	GuiControl, % EnDis, % IdTextInfo8b
 	GuiControl, % EnDis, % IdCheckBox8b
+	GuiControl, % EnDis, % IdTextInfo9b
 	GuiControl, % EnDis, % IdTextInfo10b
 	GuiControl, % EnDis, % IdText3b
 	GuiControl, % EnDis, % IdTextInfo12b
@@ -14787,6 +14789,7 @@ F_GuiHS3_EnDis(EnDis)	;EnDis = "Disable" or "Enable"
 	GuiControl, %  EnDis, % IdTextInfo4
 	GuiControl, %  EnDis, % IdTextInfo6
 	GuiControl, %  EnDis, % IdTextInfo8
+	GuiControl, %  EnDis, % IdTextInfo9
 	GuiControl, %  EnDis, % IdCheckBox8
 	GuiControl, %  EnDis, % IdTextInfo10
 	GuiControl, %  EnDis, % IdText3
