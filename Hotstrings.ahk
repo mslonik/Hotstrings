@@ -49,7 +49,7 @@ global AppVersion				:= "3.6.19"	;starting on 2023-10-16 (Sunday).
 ; FileInstall, LICENSE_MIT, 	LICENSE_MIT,		0
 ;#f*/ free version only end
 ;#c/* commercial only beginning
-FileInstall, LICENSE_EULA.md, LICENSE_EULA.md,	0
+FileInstall, LICENSE_EULA.md, LICENSE_EULA.md,	0	;0: Do not overwrite existing files. 
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - S E C T I O N    O F    G L O B A L     V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ;#c/* commercial only beginning
@@ -123,6 +123,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		f_RShiftDown 			:= false
 ,		f_LShiftDown 			:= false
 ,		v_SendFun				:= ""				;last used output function; important for F_Undo
+,		c_AppDataLocal			:= SubStr(A_Desktop, 1, -7) . "AppData\Local"	;default location for folders of Hotstrings application: ;C:\Users\<User>\AppData\Local\. The same location is used in the NSIS installer.
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
@@ -338,15 +339,12 @@ Menu, Configuration,		Add, % TransA["Open Config.ini in your default editor"],		
 Menu, Configuration,		Add, % TransA["Copy Config.ini folder path to Clipboard"],					F_PathtoClipboard
 Menu, Configuration,		Add	;line separator		
 ;#c/* commercial only beginning
-Menu, SubmenuPath,		Add, % TransA["Libraries folder: restore it to default location"], 			F_PathLibrariesRestoreDefault
-Menu, SubmenuPath,		Add, % TransA["Libraries folder: move it to new location"],					F_PathToLibraries
-Menu, SubmenuPath,		Add		
-Menu, SubmenuPath,		Add, % TransA["Config.ini file: restore it to default location"],			F_PathConfigIniRestoreDefault
-Menu, SubmenuPath,		Add, % TransA["Config.ini file: move it to script / app location"],			F_PathConfigIni
-Menu, SubmenuPath,		Add
-Menu, SubmenuPath,		Add, % TransA["Script/application folder: restore it to default location"],	F_PathRestoreDefaultAppFolder
-Menu, SubmenuPath,		Add, % TransA["Script/application folder: move it to new location"],			F_PathMoveAppFolder
-Menu, Configuration, 	Add, % TransA["Location of application specific data"],					:SubmenuPath
+; Menu, SubmenuPath,		Add, % TransA["User Data: restore it to default location"], 				F_RestoreDefaultUserDataFolder
+; Menu, SubmenuPath,		Add, % TransA["User Data: move it to new location"],						F_MoveUserData
+; Menu, SubmenuPath,		Add		
+;Menu, SubmenuPath,		Add, % TransA["Application Data: restore it to default location"],				F_RestoreDefaultAppDataFolder
+;Menu, SubmenuPath,		Add, % TransA["Application Data: move it to new location"],						F_MoveAppData
+; Menu, Configuration, 	Add, % TransA["Location of application specific data"],						:SubmenuPath		
 ; Menu, Configuration,	Add	;To add a menu separator line, omit all three parameters.
 ; Menu, SendLevelSumbmenu,	Add, 0,															F_SetSendLevel
 ; Menu, SendLevelSumbmenu,	Add, 1,															F_SetSendLevel
@@ -362,23 +360,23 @@ Menu, Configuration, 	Add, % TransA["Location of application specific data"],			
 ; Menu, MinSendLevelSubm, 	Check, 	% ini_MinSendLevel
 ;#c*/ commercial only end
 ;#f/* free version only beginning
-; Menu, SubmenuPath,		Add, % TransA["Libraries folder: restore it to default location"], 			F_Empty
-; Menu, SubmenuPath,		Add, % TransA["Libraries folder: move it to new location"],					F_Empty
+; Menu, SubmenuPath,		Add, % TransA["User Data: restore it to default location"], 			F_Empty
+; Menu, SubmenuPath,		Add, % TransA["User Data: move it to new location"],					F_Empty
 ; Menu, SubmenuPath,		Add		
 ; Menu, SubmenuPath,		Add, % TransA["Config.ini file: restore it to default location"],			F_Empty
 ; Menu, SubmenuPath,		Add, % TransA["Config.ini file: move it to script / app location"],			F_Empty
 ; Menu, SubmenuPath,		Add
-; Menu, SubmenuPath,		Add, % TransA["Script/application folder: restore it to default location"],	F_Empty
-; Menu, SubmenuPath,		Add, % TransA["Script/application folder: move it to new location"],			F_Empty
+; Menu, SubmenuPath,		Add, % TransA["Application Data: restore it to default location"],	F_Empty
+; Menu, SubmenuPath,		Add, % TransA["Application Data: move it to new location"],			F_Empty
 ; Menu, Configuration, 		Add, % TransA["Location of application specific data"],					:SubmenuPath
-; Menu, SubmenuPath,		Disable, % TransA["Libraries folder: restore it to default location"]
-; Menu, SubmenuPath,		Disable, % TransA["Libraries folder: move it to new location"]
+; Menu, SubmenuPath,		Disable, % TransA["User Data: restore it to default location"]
+; Menu, SubmenuPath,		Disable, % TransA["User Data: move it to new location"]
 ; Menu, SubmenuPath,		Add
 ; Menu, SubmenuPath,		Disable, % TransA["Config.ini file: restore it to default location"]
 ; Menu, SubmenuPath,		Disable, % TransA["Config.ini file: move it to script / app location"]
 ; Menu, SubmenuPath,		Add
-; Menu, SubmenuPath,		Disable, % TransA["Script/application folder: restore it to default location"]
-; Menu, SubmenuPath,		Disable, % TransA["Script/application folder: move it to new location"]
+; Menu, SubmenuPath,		Disable, % TransA["Application Data: restore it to default location"]
+; Menu, SubmenuPath,		Disable, % TransA["Application Data: move it to new location"]
 ; Menu, Configuration, 		Disable, % TransA["Location of application specific data"]
 ;#f*/ free version only end
 Menu, HSMenu, 			Add, % TransA["Configuration"], 										:Configuration
@@ -2014,7 +2012,7 @@ F_AppStats()
 		. TransA["Logging of d(t, o, h)"] . A_Tab . A_Tab . TransA["no"]
 ;#f*/ free version only end
 ;#c/* commercial only beginning
-		. TransA["Logging of d(t, o, h)"] . A_Tab . A_Tab . (ini_THLog ? TransA["yes"] : TransA["no"])	;tu jestem
+		. TransA["Logging of d(t, o, h)"] . A_Tab . A_Tab . (ini_THLog ? TransA["yes"] : TransA["no"])
 ;#c*/ commercial only end		
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2490,7 +2488,7 @@ F_CheckIfRemoveOldDir()
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;#c/* commercial only beginning
-F_PathMoveAppFolder()
+F_MoveAppData()	;future: this function should move only specific files, not the whole directory. For example folder Libraries, Log and Config.ini should stay where they are.
 {
 	global	;assume-global mode of operation
 	local	  OldScriptDir := A_ScriptDir, OldScriptPID := 0
@@ -2506,26 +2504,24 @@ F_PathMoveAppFolder()
 		NewScriptDir .= "\" . SubStr(A_ScriptName, 1, -4)
 		if (NewScriptDir = OldScriptDir)
 		{
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Nothing to do to me, Config.ini is already where you want it."]
+			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Nothing to do to me, Config.ini is already where you want it to be."]
 			return
 		}
 		MsgBox, 35, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["question"], % TransA["Are you sure you want to move ""Hotstrings"" folder and all its content to the new location?"]
 			. "`n`n" . TransA ["Old location:"] . "`n" . OldScriptDir . "`n`n" . TransA["New location:"] . "`n" . NewScriptDir	; Yes/No/Cancel + Icon Question
 		IfMsgBox, Yes
 		{
-			FileCopyDir, % OldScriptDir, % NewScriptDir, 1				;1: Overwrite existing files
+			IniWrite, % NewScriptDir . "\" . "Libraries", 	% ini_HADConfig, Configuration, HADL		;After application restart it will read libaries from the new script location
+			IniWrite, % OldScriptDir, 					% ini_HADConfig, Configuration, OldScriptDir	;After application restart it will try to remove old folder by call to F_CheckIfRemoveOldDir
+			FileCopyDir, % OldScriptDir, % NewScriptDir, 1				;1: Overwrite existing files ;future: only specific files and folders should be moved. For example Libraries, Log and Config.ini should remain where they are.
 			if (!ErrorLevel)
 			{
 				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The ""Hotstrings"" folder was successfully moved to the new location:"]
 					. "`n`n" . NewScriptDir
 					. "`n`n" . TransA["Now application must be restarted (into default mode) in order to reload libary files from new location."]
 				IniWrite, % OldScriptDir, % ini_HADConfig, Configuration, OldScriptDir
-				; OldScriptPID := DllCall("GetCurrentProcessId")
-				; IniWrite, % OldScriptPID, % ini_HADConfig, Configuration, OldScriptPID
 				F_ReloadApplication("Run from new location", NewScriptDir)	;reload into default mode of operation
 				; OutputDebug, % "ExitApp" . A_Space . "A_ScriptDir:" . A_Tab . A_ScriptDir
-				try	;if no try, some warnings are still catched; with try no more warnings
-					ExitApp, 0
 			}
 			else
 			{
@@ -2546,12 +2542,14 @@ F_PathMoveAppFolder()
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;#c/* commercial only beginning
-F_PathRestoreDefaultAppFolder()
+F_RestoreDefaultAppDataFolder()	;for future use only. The idea behind is to separate UserData from ApplicationData. ApplicationData (Hotstrings.exe) should be installed by HotstringsInstaller.exe. Also installer can move UserData (Log folder, Libraries folder) to a different location.
 {
 	global	;assume-global mode of operation
 	local	  OldScriptDir := A_ScriptDir
-			, NewScriptDir := "C:\Program Files\Hotstrings" 
+			, NewScriptDir := c_AppDataLocal
 
+	;future: check if NewScriptDir = OldScriptDir
+	;future actually move application		
 	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Would you like to move ""Hotstrings"" script / application to default location?"]
 		. A_Space . TransA["(Together with accompanying files and subfolders)."]
 		. "`n`n" . TransA["Current script / application location:"]
@@ -2590,97 +2588,10 @@ F_PathRestoreDefaultAppFolder()
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;#c/* commercial only beginning
-F_PathConfigIni()
-{
-	global	;assume-global mode of operation
-	local	  Old_HADConfig 		:= ini_HADConfig	;HAD = Hotstrings Application Data
-			, HADConfig_AppData  	:= A_AppData   . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Config.ini"	;Hotstrings Application Data Config .ini
-			, HADConfig_App		:= A_ScriptDir . "\" . "Config.ini"
-
-	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Would you like to change Config.ini file location to folder where is ""Hotstrings"" script / app?"] 
-		. "`n`n" . TransA["Current Config.ini file location:"]
-		. "`n" . Old_HADConfig	;Yes/No/Cancel + Icon Asterisk (info)
-	IfMsgBox, Yes
-	{		
-		if (Old_HADConfig = HADConfig_App)
-		{
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Nothing to do to me, Config.ini is already where you want it."]
-			return
-		}
-		if (Old_HADConfig = HADConfig_AppData)
-		{
-			FileMove, % HADConfig_AppData, *.*, Overwrite := true
-			ini_HADConfig := HADConfig_App
-			if (!ErrorLevel)
-			{
-				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Config.ini file was successfully moved to the new location."]
-					. "`n`n" . TransA["Now application must be restarted (into default mode) in order to apply settings from new location."]
-				IniWrite, % ini_HADConfig, % ini_HADConfig, Configuration, HADConfig	;HADconfig = Hotstrings Application Data Config (.ini)
-				F_ReloadApplication()							;reload into default mode of operation
-			}
-			else
-			{
-				MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Something went wrong on time of moving Config.ini file. This operation is aborted."]
-				return
-			}
-		}
-	}
-	IfMsgBox, No
-		return
-	IfMsgBox, Cancel
-		return
-}
-;#c*/ commercial only end
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;#c/* commercial only beginning
-F_PathConfigIniRestoreDefault()
-{
-	global	;assume-global mode of operation
-	local	  Old_HADConfig := ini_HADConfig	;HAD = Hotstrings Application Data
-			, HADConfig_AppData  	:= A_AppData   . "\" . SubStr(A_ScriptName, 1, -4)	;Hotstrings Application Data Config .ini
-			, HADConfig_App		:= A_ScriptDir . "\" . "Config.ini"
-
-	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Would you like to change Config.ini file location to default one (AppData)?"]
-		. TransA["(In default folder Config.ini is protected among others against changes implied by other users)."]
-		. "`n`n" . TransA["Current Config.ini file location:"]
-		. "`n" . Old_HADConfig	;Yes/No/Cancel + Icon Asterisk (info)
-	IfMsgBox, Yes
-	{		
-		if (Old_HADConfig = HADConfig_AppData)
-		{
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Nothing to do to me, Config.ini is already where you want it."]
-			return
-		}
-		if (Old_HADConfig = HADConfig_App)
-		{
-			FileMove, % HADConfig_App, % HADConfig_AppData . "\*.*", Overwrite := true
-			ini_HADConfig := HADConfig_AppData
-			if (!ErrorLevel)
-			{
-				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Config.ini file was successfully moved to the new location."]
-					. "`n`n" . TransA["Now application must be restarted (into default mode) in order to apply settings from new location."]
-				IniWrite, % ini_HADConfig, % ini_HADConfig, Configuration, HADConfig	;HADconfig = Hotstrings Application Data Config (.ini)
-				F_ReloadApplication()							;reload into default mode of operation
-			}
-			else
-			{
-				MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Something went wrong on time of moving Config.ini file. This operation is aborted."]
-				return
-			}
-		}
-	}
-	IfMsgBox, No
-		return
-	IfMsgBox, Cancel
-		return
-}
-;#c*/ commercial only end
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;#c/* commercial only beginning
-F_PathLibrariesRestoreDefault()
+F_RestoreDefaultUserDataFolder()	;future: This function can be used to move UserData (Libraries, Log, Config.ini) to another location. It must be synchronized with Installer / Uninstaller.
 {
 	global	;assume-global mode
-	local	HADL_DefaultLocation := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
+	local	HADL_DefaultLocation := c_AppDataLocal . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
 
 	MsgBox, 67, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["By default library files (*.csv) are located in Users subfolder which is protected against other computer users."] 
 		. "`n`n" . TransA["Would you like to move ""Libraries"" folder to this location?"]
@@ -2714,80 +2625,22 @@ F_PathLibrariesRestoreDefault()
 }
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Load_ini_HADL()
+F_Load_ini_HADL()	;HADL = Hotstrings Application Data Library
 {
 	global	;assume-global mode
 	local	LibLocation_ScriptDir := false, LibLocation_AppData := false, IsLibraryFolderEmpty1 := true, IsLibraryFolderEmpty2 := true, LibCounter1 := 0, LibCounter2 := 0
 
-	IniRead, ini_HADL, % ini_HADConfig, Configuration, HADL, % A_Space	;Default parameter. The value to store in OutputVar (ini_HADL) if the requested key is not found. If omitted, it defaults to the word ERROR. To store a blank value (empty string), specify %A_Space%.
+	IniRead, ini_HADL, % ini_HADConfig, Configuration, HADL, % A_Space	;Inexplicite declaration of global variable  ini_HADL. Default parameter. The value to store in OutputVar (ini_HADL) if the requested key is not found. If omitted, it defaults to the word ERROR. To store a blank value (empty string), specify %A_Space%.
 	if (ini_HADL = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{	;folder Libraries can be present only in 2 locations: by default in A_AppData or in A_ScriptDir
-		ini_HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
+		ini_HADL := c_AppDataLocal . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
 		IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
 		return
-	}
-	if (InStr(FileExist(A_ScriptDir . "\" . "Libraries"), "D"))
-	{
-		ini_HADL := A_ScriptDir . "\" . "Libraries"
-		LibLocation_ScriptDir := true
-		Loop, Files, % ini_HADL . "\*.csv"
-		{
-			IsLibraryFolderEmpty1 := false
-			LibCounter1++
-		}
-	}
-	if (InStr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"), "D"))	;if there is no folder...
-	{
-		ini_HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
-		LibLocation_AppData := true
-		Loop, Files, % ini_HADL . "\*.csv"
-		{
-			IsLibraryFolderEmpty2 := false
-			LibCounter2++
-		}
-	}
-	if (IsLibraryFolderEmpty1) and (IsLibraryFolderEmpty2)
-	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Both optional locations for library folder are empty (do not contain any library files). The second one will be used."] 
-			. "`n`n"
-			. A_ScriptDir . "\" . "Libraries" . "`n"
-			. A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"
-		IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
-		return	
-	}
-	if (!IsLibraryFolderEmpty1) and (IsLibraryFolderEmpty2)
-	{
-		ini_HADL := A_ScriptDir . "\" . "Libraries"
-		IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
-		return	
-	}
-	if (IsLibraryFolderEmpty1) and (!IsLibraryFolderEmpty2)
-	{
-		ini_HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
-		IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
-		return	
-	}
-	if (!IsLibraryFolderEmpty1) and (!IsLibraryFolderEmpty2)
-	{
-		MsgBox,  % 64 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Both optional library folder locations contain *.csv files. Would you like to use the first one?"] . A_Space
-			. "(If you answer ""No"", the second one will be used)." . "`n`n"
-			. A_ScriptDir . "\" . "Libraries" . "`n"
-			. A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"
-		IfMsgBox, Yes
-		{
-			ini_HADL := A_ScriptDir . "\" . "Libraries"
-			IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
-		}
-		IfMsgBox, No
-		{
-			ini_HADL := A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
-			IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
-		}
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;#c/* commercial only beginning
-F_PathToLibraries()
+F_MoveUserData()	;future: This function can be used to move UserData (Libraries, Log, Config.ini) to another location. It must be synchronized with Installer / Uninstaller.
 {
 	global	;assume-global mode of operation
 	local	Old_HADL := ini_HADL
@@ -3360,13 +3213,13 @@ F_GUIInit()
 ;#c/* commercial only beginning
 F_OpenLogFolder()
 {
-	Run, % "explore" . A_Space . A_AppData . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log" 
+	Run, % "explore" . A_Space . c_AppDataLocal . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log" 
 }
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_OpenConfigIniLocation()
 {
-	Run, % "explore" . A_Space . A_AppData . "\" . SubStr(A_ScriptName, 1, -4)	
+	Run, % "explore" . A_Space . c_AppDataLocal . "\" . SubStr(A_ScriptName, 1, -4)	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_OpenConfigIniInEditor()
@@ -3947,11 +3800,11 @@ F_Load_ini_GuiReload()
 F_Load_ini_Language()
 {
 	global	;assume global-mode
-	IniRead ini_Language, % ini_HADConfig, GraphicalUserInterface, Language				; Load from Config.ini file specific parameter: language into variable ini_Language, e.g. ini_Language = English.txt
+	IniRead ini_Language, % ini_HADConfig, GraphicalUserInterface, Language, 		% A_Space		; Load from Config.ini file specific parameter: language into variable ini_Language, e.g. ini_Language = English.txt
 	if (ini_Language = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 	{
 		ini_Language := "English.txt"
-		IniWrite, % ini_Language, % ini_HADConfig,  GraphicalUserInterface, Language
+		IniWrite, % ini_Language, % ini_HADConfig, GraphicalUserInterface, Language
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11202,7 +11055,7 @@ F_RestoreDefaultConfig()
 	IfMsgBox, Yes
 	{
 		FileDelete, % ini_HADConfig
-		F_CheckCreateConfigIni(ini_HADConfig)
+		F_CheckCreateConfigIni()
 		Reload
 	}
 	IfMsgBox, No
@@ -12790,7 +12643,9 @@ F_ReloadApplication(params*)	;ItemName, ItemPos, MenuName
 	 {
 		Switch A_IsCompiled
 		{
-			Case % true:	Run, % A_AhkPath . A_Space . """" . params[2] . """" . "\" . SubStr(A_ScriptName, 1, -4) . ".exe"
+			Case % true:
+				Run, % "" . params[2] . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . ""
+			; Case % true:	Run, % A_AhkPath . A_Space . """" . params[2] . """" . "\" . SubStr(A_ScriptName, 1, -4) . ".exe"
 			Case "": 		Run, % A_AhkPath . A_Space . """" . params[2] . """" . "\" . A_ScriptName	;double quotes ("") are necessary to escape " and to run script if its path contains space.
 		}
 		try	;if no try, some warnings are still catched; with try no more warnings
@@ -12923,7 +12778,6 @@ F_CheckCreateConfigIni(params*)
 {
 	global ;assume-global mode
 	local  ConfigIni 	:= ""	; variable which is used as default content of Config.ini
-		, HADConfig_AppData  	:= A_AppData   . "\" . SubStr(A_ScriptName, 1, -4) . "\"	. "Config.ini"	;Hotstrings Application Data Config .ini
 		, HADConfig_App		:= A_ScriptDir . "\" . "Config.ini"
 
 ;#c/* commercial only beginning
@@ -13189,37 +13043,20 @@ ConfigIni := "
 	; 	)"
 ;#f*/ free version only end
 
-	if (params[1])
+	if (!FileExist(HADConfig_App))
 	{
-		Switch params[1]
-		{
-			Case HADConfig_AppData:	FileAppend, %ConfigIni%, % HADConfig_AppData
-			Case HADConfig_App:		FileAppend, %ConfigIni%, % HADConfig_App
-		}
-		return
-	}
-
-	if (!FileExist(HADConfig_AppData)) and (!FileExist(HADConfig_App))
-	{
-		; OutputDebug, % "HADConfig_AppData:" . A_Tab . HADConfig_AppData . "`n" . "HADConfig_App:" . A_Tab . HADConfig_App . "`n`n"
-		if (!InStr(FileExist(A_AppData . "\" . SubStr(A_ScriptName, 1, -4)), "D"))	;if there is no folder...
-		{
-			FileCreateDir, % A_AppData . "\" . SubStr(A_ScriptName, 1, -4)		;create it
-			if (ErrorLevel)											;if folder couldn't be created, then exit.
-			{
-				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["""AppData\Hotstrings"" subfolder wasn't created for some reason. Exiting."]
-					. "`n`n" . A_AppData . "\" . SubStr(A_ScriptName, 1, -4)
-				ExitApp, 13	;For some reasons folder AppData\Hotstrings couldn't be created.
-			}	
-		}	
-		FileAppend, % ConfigIni, % HADConfig_AppData
+		FileAppend, % ConfigIni, % HADConfig_App
 		if (ErrorLevel)
 		{
 			MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["Config.ini file couldn't be created for some reason. Exiting."]
+				. "`n`n"
+				. HADConfig_App
 			ExitApp, 14		;Config.ini file couldn't be created for some reason. Exiting.
 		}	
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"] . "`n`n" . HADConfig_AppData
-			. "`n`n" . TransA["As a consequence the default language file English.txt will be recreated."]
+		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"]
+			. HADConfig_App
+			. "`n`n" 
+			. TransA["As a consequence the default language file English.txt will be recreated."]
 		if (FileExist(A_ScriptDir . "\Languages\English.txt"))	;if there is no Config.ini, then English.txt should be recreated.
 		{
 			FileDelete, % A_ScriptDir . "\Languages\English.txt"
@@ -13229,12 +13066,7 @@ ConfigIni := "
 				ExitApp, 15	;Unexpected problem on time of deleting the file ""\Languages\English.txt"".
 			}	
 		}	
-		ini_HADConfig := HADConfig_AppData
-		return
-	}
-	if (FileExist(HADConfig_AppData))
-	{
-		ini_HADConfig := HADConfig_AppData
+		ini_HADConfig := HADConfig_App
 		return
 	}
 	if (FileExist(HADConfig_App))
@@ -13680,6 +13512,7 @@ Customer id											= Customer id
 Customer name											= Customer name
 Dark													= Dark
 default 												= default
+Default Config.ini file location:							= Default Config.ini file location:
 Default shortcut (hotkey):								= Default shortcut (hotkey):
 Default mode											= Default mode
 Delete selected library file								= Delete selected library file
@@ -13830,8 +13663,8 @@ Keyboard or mouse selection								= Keyboard or mouse selection
 Last hotstring undo function is currently unsuported for those characters, sorry. = Last hotstring undo function is currently unsuported for those characters, sorry.
 Leave this field empty and then press ""Add/Edit hotstring (F9)"" again to get GUI enabling file selection. = Leave this field empty and then press ""Add/Edit hotstring (F9)"" again to get GUI enabling file selection.
 Let's make your PC personal again... 						= Let's make your PC personal again...
-Libraries folder: move it to new location					= Libraries folder: move it to new location
-Libraries folder: restore it to default location				= Libraries folder: restore it to default location
+User Data: move it to new location					= User Data: move it to new location
+User Data: restore it to default location				= User Data: restore it to default location
 Libraries 											= &Libraries
 Library content (F2, context menu)							= Library content (F2, context menu)
 Library 												= Library
@@ -13897,7 +13730,7 @@ No license key was found in Config.ini.						= No license key was found in Confi
 Not Case-Conforming (C1)									= Not Case-Conforming (C1)
 not relevant											= not relevant
 Capitalize each word (C2)								= Capitalize each word (C2)
-Nothing to do to me, Config.ini is already where you want it.	= Nothing to do to me, Config.ini is already where you want it.
+Nothing to do to me, Config.ini is already where you want it to be.	= Nothing to do to me, Config.ini is already where you want it to be.
 Now application must be restarted (into default mode) in order to apply settings from new location. = Now application must be restarted (into default mode) in order to apply settings from new location.
 Now application must be restarted (into default mode) in order to exit administrator mode. = Now application must be restarted (into default mode) in order to exit administrator mode.
 Now application must be restarted (into default mode) in order to reload libary files from new location. = Now application must be restarted (into default mode) in order to reload libary files from new location.
@@ -13967,8 +13800,8 @@ Save position of application window	 					= &Save position of application window
 Save window position									= Save window position
 Saved												= Saved
 Saving of sorted content into .csv file (library)				= Saving of sorted content into .csv file (library)
-Script/application folder: move it to new location			= Script/application folder: move it to new location
-Script/application folder: restore it to default location		= Script/application folder: restore it to default location
+Application Data: move it to new location			= Application Data: move it to new location
+Application Data: restore it to default location		= Application Data: restore it to default location
 Search by: 											= Search by:
 Search Hotstrings 										= Search Hotstrings
 Search (F3)											= &Search (F3)
@@ -14161,7 +13994,7 @@ Windows key modifier									= Windows key modifier
 When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
 white												= white
 Would you like to change the current ""Libraries"" folder location? = Would you like to change the current ""Libraries"" folder location?
-Would you like to change Config.ini file location to default one (AppData)? = Would you like to change Config.ini file location to default one (AppData)?
+Would you like to change Config.ini file location to default one? = Would you like to change Config.ini file location to default one?
 Would you like to change Config.ini file location to folder where is ""Hotstrings"" script / app? = Would you like to change Config.ini file location to folder where is ""Hotstrings"" script / app?
 Would you like to download the icon file?					= Would you like to download the icon file?
 Would you like to move ""Libraries"" folder and all *.csv files to the new location? = Would you like to move ""Libraries"" folder and all *.csv files to the new location?
