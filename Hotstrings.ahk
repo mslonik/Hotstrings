@@ -33,17 +33,40 @@ global AppVersion				:= "3.6.19"	;starting on 2023-10-16 (Sunday).
 ;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
 ;Overrides the custom EXE icon used for compilation
 ;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
-;@Ahk2Exe-SetCompanyName © by Maciej Słojewski http://mslonik.pl
+;#f/* free version only beginning
+;@Ahk2Exe-SetCompanyName http://mslonik.pl Maciej Słojewski
+;#f*/ free version only end
+;#c/* commercial only beginning
+;@Ahk2Exe-SetCompanyName Damian Damaszke Dam IT
+;@Ahk2Exe-ExeName %A_ScriptName~\.[^\.]+$~Pro.exe%
+;#c*/ commercial only end
+;#f/* free version only beginning
 ;@Ahk2Exe-SetCopyright MIT License
+;#f*/ free version only end
+;#c/* commercial only beginning
+;@Ahk2Exe-SetCopyright LICENSE_EULA.md
+;#c*/ commercial only end
+;@Ahk2Exe-Base C:\Program Files\AutoHotkey\Compiler\Unicode 64-bit.bin,, 65001
+;@Ahk2Exe-PostExec "MPRESS.exe" "%A_WorkFileName%" -q -x, 0,, 1
 ;@Ahk2Exe-SetDescription Advanced tool for text replacement management.
 ;@Ahk2Exe-SetFileVersion %U_vAppVersion% 
 ;@Ahk2Exe-SetInternalName Hotstrings 1
 ;@Ahk2Exe-SetLanguage 0x0409
-;@Ahk2Exe-SetLegalTrademarks Personal license: FirstName SecondName
+;@Ahk2Exe-SetLegalTrademarks Damian Damaszke Dam IT
 ;@Ahk2Exe-SetName Hotstrings 2
-;@Ahk2Exe-SetOrigFilename Commercial release
+;#f/* free version only beginning
+;@Ahk2Exe-SetOrigFilename Free release
+;#f*/ free version only end
+;#c/* commercial only beginning
+;@Ahk2Exe-SetOrigFilename Pro release
+;#c*/ commercial only end
 ;@Ahk2Exe-SetProductName Hotstrings
-;@Ahk2Exe-SetProductVersion %U_vAppVersion% 
+;#f/* free version only beginning
+;@Ahk2Exe-SetProductVersion %A_ScriptName% Free
+;#f*/ free version only end
+;#c/* commercial only beginning
+;@Ahk2Exe-SetProductVersion %A_ScriptName% Pro
+;#c*/ commercial only end
 ;@Ahk2Exe-SetVersion %U_vAppVersion% 
 ;#f/* free version only beginning
 ; FileInstall, LICENSE_MIT, 	LICENSE_MIT,		0
@@ -91,10 +114,10 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		v_Triggerstring		:= ""		;to store d(t, o, h) -> t entered by user in GUI.
 ,		ini_ShowWhiteChars		:= false		;show white characters (e.g. space) within GUI in form of special characters. For example <space> = U+2423 (open box ␣)
 ;#f/* free version only beginning
-; ,		v_LicenseType			:= "free"		;"commercial" or "free"
+; ,		v_LicenseType			:= "free"		;"pro" or "free"
 ;#f*/ free version only end
 ;#c/* commercial only beginning
-,		v_LicenseType			:= "commercial"		;"commercial" or "free"
+,		v_LicenseType			:= "pro"		;"pro" or "free"
 ;#c*/ commercial only end
 ;#c/* commercial only beginning
 ,		v_LicenseName			:= "EULA license"
@@ -119,7 +142,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_dHK_CallGUI 			:= "#^h"				;global constant: default (d) hotkey (HK) for calling main application GUI
 ,		c_dHK_ToggleTt			:= "none"				;global constant: default (d) hotkey (HK) for toggling the triggestring tips
 ;#c/* commercial only beginning
-,		v_ValidTill			:= "inf"			;"inf" for infinity, "limited" for other cases
+,		v_ValidTill			:= "limited"			;"inf" for infinity, "limited" for other cases
 ,		f_RShiftDown 			:= false
 ,		f_LShiftDown 			:= false
 ,		v_SendFun				:= ""				;last used output function; important for F_Undo
@@ -505,7 +528,7 @@ if (ini_GuiReload) and (v_SilentMode != "l")
 	F_GUIInit()
 
 ;#c/* commercial only beginning
-if (v_LicenseType = "commercial") and (v_ValidTill != "inf")
+if (v_LicenseType = "pro") and (v_ValidTill != "inf")
 {
 	F_CheckCommercialConditions()			;check Lemon squeezy
 	SetTimer, F_CheckCommTime, % 1000 * 3600	;1 hour = 1000 ms * 3 600
@@ -1223,7 +1246,7 @@ F_CheckCommercialConditions()
 
 	ElapsedTime := A_Now	
 
-	if (v_LicenseType = "commercial") and (v_ValidTill != "inf")
+	if (v_LicenseType = "pro") and (v_ValidTill != "inf")
 	{
 		ini_LicenseKey	:= ""			;global variable, default value
 		IniRead, ini_LicenseKey, 		% ini_HADConfig, LicenseInfo, LicenseKey, % A_Space
@@ -3213,12 +3236,14 @@ F_GUIInit()
 ;#c/* commercial only beginning
 F_OpenLogFolder()
 {
+	global	;assume-global mode of operation
 	Run, % "explore" . A_Space . c_AppDataLocal . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log" 
 }
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_OpenConfigIniLocation()
 {
+	global	;assume-global mode of operation
 	Run, % "explore" . A_Space . c_AppDataLocal . "\" . SubStr(A_ScriptName, 1, -4)	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -13469,7 +13494,6 @@ Closing Square Bracket ] 								= Closing Square Bracket ]
 Colon : 												= Colon :
 Comma , 												= Comma ,
 Comment												= Comment
-commercial											= commercial
 Composition of triggerstring tips							= Composition of triggerstring tips
 Compressed executable (upx.exe)							= Compressed executable (upx.exe)
 Compressed executable (mpress.exe)							= Compressed executable (mpress.exe)
@@ -13768,6 +13792,7 @@ Please enter below your license number						= Please enter below your license nu
 Please try again.										= Please try again.
 Please wait, uploading .csv files... 						= Please wait, uploading .csv files...
 Position of this window is saved in Config.ini.				= Position of this window is saved in Config.ini.	
+premium												= premium
 Preview												= &Preview
 Programm												= Programm
 Public library:										= Public library:
@@ -15500,7 +15525,7 @@ F_GuiAbout_DetermineConstraints()
 	GuiControl, Move, % IdAboutT9, % "x" . xNext . A_Space . "y" . yNext	;License:
 	xNext := MaxText + 3 * c_xmarg
 	GuiControl, Move, % IdAboutT10, % "x" . xNext . A_Space . "y" . yNext	;EULA or MIT 
-	if (v_LicenseType = "commercial")
+	if (v_LicenseType = "pro")
 		GuiControl, , % IdAboutT10, % "EULA" . A_Space . TransA["license"]
 	if (v_LicenseType = "free")
 		GuiControl, , % IdAboutT10, % "MIT" . A_Space . TransA["license"]
@@ -15508,8 +15533,8 @@ F_GuiAbout_DetermineConstraints()
 	GuiControl, Move, % IdAboutT11, % "x" . xNext . A_Space . "y" . yNext	;License type:
 	xNext := MaxText + 3 * c_xmarg
 	GuiControl, Move, % IdAboutT12, % "x" . xNext . A_Space . "y" . yNext	;type
-	if (v_LicenseType = "commercial")
-		GuiControl, , % IdAboutT12, % TransA["commercial"]
+	if (v_LicenseType = "pro")
+		GuiControl, , % IdAboutT12, % TransA["pro"]
 	if (v_LicenseType = "free")
 		GuiControl, , % IdAboutT12, % TransA["free"]
 	xNext := c_xmarg, yNext += c_HofText
