@@ -12,11 +12,6 @@
                     "command": 	"c:\\Program Files\\AutoHotkey\\Compiler\\Ahk2Exe.exe",
                     "args":   	[
                               	"/in",         "${file}", 
-                              	"/out",        "${fileBasenameNoExtension}.exe", 
-                              	"/icon",       "${fileBasenameNoExtension}.ico",
-                              	"/bin",        "c:\\Program Files\\AutoHotkey\\Compiler\\Unicode 64-bit.bin",
-                              	"/cp",         "65001",                                                          //Unicode (UTF-8)
-                              	"/compress",   "2"                                                               //2 = Upx.exe 
                               	]
                },
                "group": "build",

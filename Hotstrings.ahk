@@ -24,56 +24,72 @@ CoordMode, Caret,		Screen		; Only Screen makes sense for functiofirmadd/ns prepa
 CoordMode, ToolTip,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs. 
 CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs.
 ;#c/* commercial only beginning
-#Include, %A_ScriptDir%\includes\Gdip_Part.ahk	;output function "P (Picture)"
+#Include, %A_ScriptDir%\includes\Gdip_Part.ahk		;output function "P (Picture)"
+#Include, %A_ScriptDir%\includes\ScriptGuard1.ahk 	;https://www.autohotkey.com/boards/viewtopic.php?f=6&t=80229 to encrypt content
 ;#c*/ commercial only end
-; - - - - - - - - - - - - - - - - - - - - - - - E X E  CONVERSION / INSTALLATOR S E C T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-global AppIcon					:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
-;@Ahk2Exe-Let vAppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-global AppVersion				:= "3.6.19"	;starting on 2023-10-16 (Sunday). 
-;@Ahk2Exe-Let vAppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep these lines together
-;Overrides the custom EXE icon used for compilation
-;@Ahk2Exe-SetMainIcon  %U_vAppIcon%
+; - - - - - - - - - - - - - - - - - - - - - - - E X E  CONVERSION  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+;Parameters in this section can be used to prepare executable file of ahk2exe.exe without GUI interface. All options are set within this file. The executable is made as little as possible by exchanging .exe with .bin file. Also other tricks are applied. 
+global AppIcon			:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
+;@Ahk2Exe-Let 			U_AppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% 	; Keep this line and the previous one together
+;@Ahk2Exe-SetMainIcon  	%U_AppIcon%
+global AppVersion		:= "3.6.19"	;starting on 2023-10-16 (Sunday). 
+;@Ahk2Exe-Let 			U_AppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep this line and the previous one together
+
+;The compiler will be run at least once for each Base directive line. Only for .exe  Base it is possible to encrypt content!
+; @Ahk2Exe-Base 			Unicode 64-bit.bin,, 65001 
+;@Ahk2Exe-Base 			..\AutoHotkeyU64.exe,, 65001 
+
+;EXE file header, settings common for commercial and free releases
+;@Ahk2Exe-SetFileVersion 	%U_AppVersion% 
+;@Ahk2Exe-SetInternalName 	Hotstrings
+;@Ahk2Exe-SetLanguage 		0x0409
+;@Ahk2Exe-SetLegalTrademarks 	Damian Damaszke Dam IT
+;@Ahk2Exe-SetVersion 		%U_AppVersion% 
+;@Ahk2Exe-SetDescription 	Advanced tool for text replacement management.
+;@Ahk2Exe-Let	 			U_BinExe=%A_BasePath~.*[\.]%		;only extension
+;@Ahk2Exe-Obey 			U_bits, = %A_PtrSize% * 8
+;@Ahk2Exe-Obey 			U_type, = "%A_IsUnicode%" ? "Unicode" : "ANSI"
+;@Ahk2Exe-ExeName 			%A_ScriptName~\.[^\.]+$%_%U_type%_%U_bits%_%U_BinExe%
+
+;U_bin: bin → Cont, EXE → Nop
+;The next lines comes from here: https://github.com/AutoHotkey/Ahk2Exe/blob/master/BinMod.ahk
+; @Ahk2Exe-Debug 			A_BasePath: %A_BasePath%
+;@Ahk2Exe-Obey 			U_Bin, = "%A_BasePath~^.+\.%" = "bin" ? "Cont" : "Nop" ; .bin?
+; @Ahk2Exe-Debug 			U_Bin: %U_Bin%
+;@Ahk2Exe-Obey 			U_au, = "%A_IsUnicode%" ? 2 : 1 ; Base file ANSI or Unicode?
+;Now encryption:
+;@Ahk2Exe-PostExec 			"BinMod.exe" "%A_WorkFileName%"
+;@Ahk2Exe-%U_Bin%  			"1%U_au%2.>AUTOHOTKEY SCRIPT<. RANDOM"
+;@Ahk2Exe-Cont  			"%U_au%.AutoHotkeyGUI.RANDOM"
+;@Ahk2Exe-Cont  			/ScriptGuard2
+;Now compression
+;@Ahk2Exe-PostExec 			"UPX.exe" "%A_WorkFileName%"
+;@Ahk2Exe-Cont  			-q --all-methods --compress-icons=0, 0,, 1
+;Now securing compressed file against decompression
+;@Ahk2Exe-PostExec 			"BinMod.exe" "%A_WorkFileName%" "11.UPX." "1.UPX!.", 2
+;EXE mainfest cleanup
+;@Ahk2Exe-UpdateManifest 0 ,.
+
 ;#f/* free version only beginning
-;@Ahk2Exe-SetCompanyName http://mslonik.pl Maciej Słojewski
+;@Ahk2Exe-SetCompanyName 	http://mslonik.pl Maciej Słojewski
+;@Ahk2Exe-SetCopyright 		MIT License
+;@Ahk2Exe-SetName 			%A_ScriptName~\.[^\.]+$%
+;@Ahk2Exe-SetOrigFilename 	Free release
+;@Ahk2Exe-SetProductName 	%A_ScriptName~\.[^\.]+$%
+;@Ahk2Exe-SetProductVersion 	%U_AppVersion%
 ;#f*/ free version only end
+
 ;#c/* commercial only beginning
-;@Ahk2Exe-SetCompanyName Damian Damaszke Dam IT
-;@Ahk2Exe-ExeName %A_ScriptName~\.[^\.]+$~Pro.exe%
+;@Ahk2Exe-SetCompanyName 	Damian Damaszke Dam IT
+;@Ahk2Exe-SetCopyright 		LICENSE_EULA.md
+;@Ahk2Exe-SetName 			%A_ScriptName~\.[^\.]+$%Pro
+;@Ahk2Exe-SetOrigFilename 	Pro release
+;@Ahk2Exe-SetProductName 	%A_ScriptName~\.[^\.]+$%Pro
+;@Ahk2Exe-SetProductVersion 	%U_AppVersion%
 ;#c*/ commercial only end
-;#f/* free version only beginning
-;@Ahk2Exe-SetCopyright MIT License
-;#f*/ free version only end
-;#c/* commercial only beginning
-;@Ahk2Exe-SetCopyright LICENSE_EULA.md
-;#c*/ commercial only end
-;@Ahk2Exe-Base C:\Program Files\AutoHotkey\Compiler\Unicode 64-bit.bin,, 65001
-;@Ahk2Exe-PostExec "MPRESS.exe" "%A_WorkFileName%" -q -x, 0,, 1
-;@Ahk2Exe-SetDescription Advanced tool for text replacement management.
-;@Ahk2Exe-SetFileVersion %U_vAppVersion% 
-;@Ahk2Exe-SetInternalName Hotstrings 1
-;@Ahk2Exe-SetLanguage 0x0409
-;@Ahk2Exe-SetLegalTrademarks Damian Damaszke Dam IT
-;@Ahk2Exe-SetName Hotstrings 2
-;#f/* free version only beginning
-;@Ahk2Exe-SetOrigFilename Free release
-;#f*/ free version only end
-;#c/* commercial only beginning
-;@Ahk2Exe-SetOrigFilename Pro release
-;#c*/ commercial only end
-;@Ahk2Exe-SetProductName Hotstrings
-;#f/* free version only beginning
-;@Ahk2Exe-SetProductVersion %A_ScriptName% Free
-;#f*/ free version only end
-;#c/* commercial only beginning
-;@Ahk2Exe-SetProductVersion %A_ScriptName% Pro
-;#c*/ commercial only end
-;@Ahk2Exe-SetVersion %U_vAppVersion% 
-;#f/* free version only beginning
-; FileInstall, LICENSE_MIT, 	LICENSE_MIT,		0
-;#f*/ free version only end
-;#c/* commercial only beginning
-FileInstall, LICENSE_EULA.md, LICENSE_EULA.md,	0	;0: Do not overwrite existing files. 
-;#c*/ commercial only end
+
+;@Ahk2Exe-Debug 		End of processing: %A_ScriptName~\.[^\.]+$%_%U_type%_%U_bits%_%U_BinExe%
+
 ; - - - - - - - - - - - - - - - - - - - - - - - S E C T I O N    O F    G L O B A L     V A R I A B L E S - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ;#c/* commercial only beginning
 global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app available to user: l like "siLent mode"
@@ -142,7 +158,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_dHK_CallGUI 			:= "#^h"				;global constant: default (d) hotkey (HK) for calling main application GUI
 ,		c_dHK_ToggleTt			:= "none"				;global constant: default (d) hotkey (HK) for toggling the triggestring tips
 ;#c/* commercial only beginning
-,		v_ValidTill			:= "limited"			;"inf" for infinity, "limited" for other cases
+,		v_ValidTill			:= "inf"				;"inf" for infinity, "limited" for other cases
 ,		f_RShiftDown 			:= false
 ,		f_LShiftDown 			:= false
 ,		v_SendFun				:= ""				;last used output function; important for F_Undo
