@@ -4,7 +4,7 @@
      "version": "2.0.0",
      "tasks": 
 	[
-          {
+          {	//task 1
                "label": 	"Hotstrings.ahk  → Hotstrings.exe and compress",
                "type": 	"shell",
                "windows":
@@ -14,40 +14,70 @@
                               	"/in",         "${file}", 
                               	]
                },
-               "group": "build",
+               "group": 
+			{
+				"kind": 			"build",
+				"isDefault": 		false
+			},
                "presentation": 
 			{
+                    "echo": 			true,		//Controls whether the command associated with the task is echoed in the user interface. Defaults to `true`.
+				"reveal": 	     "always",		//Controls whether the task output is reveal in the user interface. Defaults to `always`.
+                    "focus": 			false,		//Controls whether the panel showing the task output is taking focus. Defaults to `false`.
+                    "panel": 			"shared",		//Controls if the task panel is used for this task only (dedicated), shared between tasks (shared) or if a new panel is created on every task execution (new). Defaults to `shared`.
+                    "showReuseMessage": false,		//Controls whether to show the `Terminal will be reused by tasks, press any key to close it` message.
+                    "clear": 			false			//Controls whether the terminal is cleared before this task is run. Defaults to `false`.
+											//group: Controls whether the task is executed in a specific terminal group using split panes. Tasks in the same group (specified by a string value) will use split terminals to present instead of a new terminal panel.
+               },
+          },
+          {	//task 2
+               "label": 		"Echo after ahk2exe",
+               "type": 		"shell",
+			"windows":
+			{
+				"command": 	"Write-Output",
+				"args": 		["Compilation and compression completed successfully!"],
+			},
+               "group": 
+               {
+                    "kind": 			"build",
+                    "isDefault": 		false
+               },
+               "presentation": {
                     "echo": 			false,
-				"revealProblems": 	"onProblem",
+                    "reveal": 		"always",
                     "focus": 			false,
                     "panel": 			"shared",
                     "showReuseMessage": false,
-                    "clear": 			true
-               }
+                    "clear": 			false
+               },
+			// "dependsOrder": 		"sequence",
+              	// "dependsOn":			["Hotstrings.ahk  → Hotstrings.exe and compress"]
           },
-		{
+		{	//task 3
 			"label": 	"Prepare Hotstrings2.exe",
 			"type": 	"shell",
 			"windows":
 			{
 				"command": 	"Copy-Item",
 				"args": 		[
-							"c:\\Users\\macie\\Documents\\GitHub\\Hotstrings\\Hotstrings.exe",
-							"-Destination",
-							"c:\\Users\\macie\\Documents\\GitHub\\Hotstrings2\\Hotstrings2.exe"
-							],
+							"-Path",
+							"C:\\Users\\macie\\Documents\\GitHub\\Hotstrings\\Hotstrings_Unicode_64_exe.exe",
+							"C:\\Users\\macie\\Documents\\GitHub\\Hotstrings2\\Hotstrings2.exe",
+							"-PassThru"
+							]
 			},
-			"dependsOrder":	"sequence",
-			"dependsOn":		["Hotstrings.ahk  → Hotstrings.exe and compress"],
+			// "dependsOrder":	"sequence",
+			// "dependsOn":		["Hotstrings.ahk  → Hotstrings.exe and compress"],
 			"group": 			"build",
 			"presentation":
 			{
                     "echo": 			false,
-                    "revealProblems": 	"onProblem",
+                    "revealProblems": 	"always",
                     "focus": 			false,
                     "panel": 			"shared",
                     "showReuseMessage": false,
-                    "clear": 			true
+                    "clear": 			false
                }
 		},
 	]
