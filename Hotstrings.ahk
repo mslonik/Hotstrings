@@ -32,7 +32,7 @@ CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in t
 global AppIcon			:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let 			U_AppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% 	; Keep this line and the previous one together
 ;@Ahk2Exe-SetMainIcon  	%U_AppIcon%
-global AppVersion		:= "3.6.19"	;starting on 2023-10-16 (Sunday). 
+global AppVersion		:= "3.6.20"	;starting on 2023-10-16 (Sunday). 
 ;@Ahk2Exe-Let 			U_AppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep this line and the previous one together
 
 ;The compiler will be run at least once for each Base directive line. Only for .exe  Base it is possible to encrypt content!
@@ -51,6 +51,7 @@ global AppVersion		:= "3.6.19"	;starting on 2023-10-16 (Sunday).
 ;@Ahk2Exe-Obey 			U_type, = "%A_IsUnicode%" ? "Unicode" : "ANSI"
 ;@Ahk2Exe-ExeName 			%A_ScriptName~\.[^\.]+$%_%U_type%_%U_bits%_%U_BinExe%
 
+;#c/* commercial only beginning
 ;U_bin: bin → Cont, EXE → Nop
 ;The next lines comes from here: https://github.com/AutoHotkey/Ahk2Exe/blob/master/BinMod.ahk
 ; @Ahk2Exe-Debug 			A_BasePath: %A_BasePath%
@@ -69,6 +70,7 @@ global AppVersion		:= "3.6.19"	;starting on 2023-10-16 (Sunday).
 ;@Ahk2Exe-PostExec 			"BinMod.exe" "%A_WorkFileName%" "11.UPX." "1.UPX!.", 2
 ;EXE mainfest cleanup
 ;@Ahk2Exe-UpdateManifest 0 ,.
+;#c*/ commercial only end
 
 ;#f/* free version only beginning
 ;@Ahk2Exe-SetCompanyName 	http://mslonik.pl Maciej Słojewski
