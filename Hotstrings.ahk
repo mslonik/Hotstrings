@@ -32,7 +32,7 @@ CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in t
 global AppIcon			:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let 			U_AppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% 	; Keep this line and the previous one together
 ;@Ahk2Exe-SetMainIcon  	%U_AppIcon%
-global AppVersion		:= "3.6.21"	;starting on 2023-10-16 (Sunday). 
+global AppVersion		:= "3.6.21"	;starting on 2023-11-24 (Friday). 
 ;@Ahk2Exe-Let 			U_AppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep this line and the previous one together
 
 ;The compiler will be run at least once for each Base directive line. Only for .exe  Base it is possible to encrypt content!
@@ -365,40 +365,40 @@ Menu, SubmenuEndChars, Add, % TransA["Tab"], 												F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 											F_ToggleEndChars
 F_ToggleEndChars()
 Func_GuiEventsMenu		:= func("F_GuiEvents")
-Menu, Configuration,		Add, % TransA["Events: signalling"],									% Func_GuiEventsMenu
+Menu, Configuration,		Add, % TransA["Events: signalling"],								% Func_GuiEventsMenu
 Func_GuiEventsMenu.Call(true)
 Func_GuiStylingMenu		:= func("F_EventsStyling")
-Menu, Configuration,		Add, % TransA["Events: styling"],										% Func_GuiStylingMenu
-Func_GuiStylingMenu.Call(true)		
-Menu, Configuration,		Add, % TransA["Graphical User Interface"], 								:ConfGUI
-Menu, Configuration,		Add		
-Menu, Configuration,  	   	Add, % TransA["Toggle trigger characters (↓ or EndChars)"], 				:SubmenuEndChars
-Menu, Configuration,  	   	Add		
-Menu, Configuration,	 	Add, % TransA["Restore default configuration"],							F_RestoreDefaultConfig
-Menu, Configuration,		Add, % TransA["Open Config.ini folder in Windows Explorer"],				F_OpenConfigIniLocation	
-Menu, Configuration,		Add, % TransA["Open Config.ini in your default editor"],					F_OpenConfigIniInEditor
-Menu, Configuration,		Add, % TransA["Copy Config.ini folder path to Clipboard"],					F_PathtoClipboard
-Menu, Configuration,		Add	;line separator		
-;#c/* commercial only beginning
-; Menu, SubmenuPath,		Add, % TransA["User Data: restore it to default location"], 				F_RestoreDefaultUserDataFolder
-; Menu, SubmenuPath,		Add, % TransA["User Data: move it to new location"],						F_MoveUserData
-; Menu, SubmenuPath,		Add		
-;Menu, SubmenuPath,		Add, % TransA["Application Data: restore it to default location"],				F_RestoreDefaultAppDataFolder
-;Menu, SubmenuPath,		Add, % TransA["Application Data: move it to new location"],						F_MoveAppData
-; Menu, Configuration, 	Add, % TransA["Location of application specific data"],						:SubmenuPath		
+Menu, Configuration,		Add, % TransA["Events: styling"],									% Func_GuiStylingMenu
+Func_GuiStylingMenu.Call(true)	
+Menu, Configuration,		Add, % TransA["Graphical User Interface"], 							:ConfGUI
+Menu, Configuration,		Add	
+Menu, Configuration,  	   	Add, % TransA["Toggle trigger characters (↓ or EndChars)"], 			:SubmenuEndChars
+Menu, Configuration,  	   	Add	
+Menu, Configuration,	 	Add, % TransA["Restore default configuration"],						F_RestoreDefaultConfig
+Menu, Configuration,		Add, % TransA["Open Config.ini folder in Windows Explorer"],			F_OpenConfigIniLocation	
+Menu, Configuration,		Add, % TransA["Open Config.ini in your default editor"],				F_OpenConfigIniInEditor
+Menu, Configuration,		Add, % TransA["Copy Config.ini folder path to Clipboard"],				F_PathtoClipboard
+Menu, Configuration,		Add	;line separator	
+;#c/* commercial only beginnin
+; Menu, SubmenuPath,		Add, % TransA["User Data: restore it to default location"], 			F_RestoreDefaultUserDataFolder
+; Menu, SubmenuPath,		Add, % TransA["User Data: move it to new location"],					F_MoveUserData
+; Menu, SubmenuPath,		Add	
+;Menu, SubmenuPath,		Add, % TransA["Application Data: restore it to default location"],			F_RestoreDefaultAppDataFolder
+;Menu, SubmenuPath,		Add, % TransA["Application Data: move it to new location"],					F_MoveAppData
+; Menu, Configuration, 	Add, % TransA["Location of application specific data"],					:SubmenuPath		
 ; Menu, Configuration,	Add	;To add a menu separator line, omit all three parameters.
-; Menu, SendLevelSumbmenu,	Add, 0,															F_SetSendLevel
-; Menu, SendLevelSumbmenu,	Add, 1,															F_SetSendLevel
-; Menu, SendLevelSumbmenu,	Add, 2,															F_SetSendLevel
-; Menu, SendLevelSumbmenu,	Add, 3,															F_SetSendLevel
-; Menu, Configuration, 	Add, % TransA["SendLevel value"],										:SendLevelSumbmenu
-; Menu, SendLevelSumbmenu, Check, 	% ini_SendLevel
-; Menu, MinSendLevelSubm,	Add, 0,															F_SetMinSendLevel
-; Menu, MinSendLevelSubm,	Add, 1,															F_SetMinSendLevel
-; Menu, MinSendLevelSubm,	Add, 2,															F_SetMinSendLevel
-; Menu, MinSendLevelSubm,	Add, 3,															F_SetMinSendLevel
-; Menu, Configuration,	Add, % TransA["MinSendLevel value"],									:MinSendLevelSubm
-; Menu, MinSendLevelSubm, 	Check, 	% ini_MinSendLevel
+Menu, SendLevelSumbmenu,	Add, 0,															F_SetSendLevel
+Menu, SendLevelSumbmenu,	Add, 1,															F_SetSendLevel
+Menu, SendLevelSumbmenu,	Add, 2,															F_SetSendLevel
+Menu, SendLevelSumbmenu,	Add, 3,															F_SetSendLevel
+Menu, Configuration, 	Add, % TransA["Output (SendLevel) value"],								:SendLevelSumbmenu
+Menu, SendLevelSumbmenu, Check, 	% ini_SendLevel
+Menu, MinSendLevelSubm,	Add, 0,															F_SetMinSendLevel
+Menu, MinSendLevelSubm,	Add, 1,															F_SetMinSendLevel
+Menu, MinSendLevelSubm,	Add, 2,															F_SetMinSendLevel
+Menu, MinSendLevelSubm,	Add, 3,															F_SetMinSendLevel
+Menu, Configuration,	Add, % TransA["Input (MinSendLevel) value"],								:MinSendLevelSubm
+Menu, MinSendLevelSubm, 	Check, 	% ini_MinSendLevel
 ;#c*/ commercial only end
 ;#f/* free version only beginning
 ; Menu, SubmenuPath,		Add, % TransA["User Data: restore it to default location"], 			F_Empty
@@ -11900,7 +11900,7 @@ F_LV1_EnDisDefinition()
 		if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 		{
 			Try
-				Hotstring(":" . Options . ":" . Triggerstring, func("F_SimpleOutput").bind(vHotstring, true, SendFun), OnOffToggle)
+				Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_SimpleOutput").bind(vHotstring, true, SendFun), OnOffToggle)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""SimpleOutput"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
@@ -11909,7 +11909,7 @@ F_LV1_EnDisDefinition()
 		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
 			Try
-				Hotstring(":" . Options . ":" . Triggerstring, func("F_HMenu_Output").bind(vHotstring, true, SendFun), OnOffToggle)
+				Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_HMenu_Output").bind(vHotstring, true, SendFun), OnOffToggle)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . vHotstring . "," . A_Space . true . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
@@ -11918,7 +11918,7 @@ F_LV1_EnDisDefinition()
 		if (SendFun = "P")
 		{
 			Try
-				Hotstring(":" . Options . ":" . Triggerstring, func("F_PictureShow").bind(vHotstring, true, SendFun), OnOffToggle)
+				Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_PictureShow").bind(vHotstring, true, SendFun), OnOffToggle)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_PictureShow"").bind(" . vHotstring . "," . A_Space . true . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
@@ -11927,7 +11927,7 @@ F_LV1_EnDisDefinition()
 		if (SendFun = "R")
 		{
 			Try
-				Hotstring(":" . Options . ":" . Triggerstring, func("F_RunApplication").bind(vHotstring, true, SendFun), OnOffToggle)
+				Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_RunApplication").bind(vHotstring, true, SendFun), OnOffToggle)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_RunApplication"").bind(" . vHotstring . "," . A_Space . true . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
@@ -11939,7 +11939,7 @@ F_LV1_EnDisDefinition()
 		if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
 		{
 			Try
-				Hotstring(":" . Options . ":" . Triggerstring, func("F_SimpleOutput").bind(vHotstring, false, SendFun), OnOffToggle)
+				Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_SimpleOutput").bind(vHotstring, false, SendFun), OnOffToggle)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_SimpleOutput"").bind(" . vHotstring . "," . A_Space . false . "," . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
@@ -11948,7 +11948,7 @@ F_LV1_EnDisDefinition()
 		if (SendFun = "MSI") or (SendFun = "MCL")
 		{
 			Try
-				Hotstring(":" . Options . ":" . Triggerstring, func("F_HMenu_Output").bind(vHotstring, false, SendFun), OnOffToggle)
+				Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_HMenu_Output").bind(vHotstring, false, SendFun), OnOffToggle)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . vHotstring . "," . A_Space . false . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
@@ -11957,7 +11957,7 @@ F_LV1_EnDisDefinition()
 		if (SendFun = "P")
 		{
 			Try
-				Hotstring(":" . Options . ":" . Triggerstring, func("F_PictureShow").bind(vHotstring, false, SendFun), OnOffToggle)
+				Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_PictureShow").bind(vHotstring, false, SendFun), OnOffToggle)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_PictureShow"").bind(" . vHotstring . "," . A_Space . false . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
@@ -11966,7 +11966,7 @@ F_LV1_EnDisDefinition()
 		if (SendFun = "R")
 		{
 			Try
-				Hotstring(":" . Options . ":" . Triggerstring, func("F_RunApplication").bind(vHotstring, false, SendFun), OnOffToggle)
+				Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_RunApplication").bind(vHotstring, false, SendFun), OnOffToggle)
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_RunApplication"").bind(" . vHotstring . "," . A_Space . false . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
@@ -13739,7 +13739,7 @@ Loading imported library. Please wait...					= Loading imported library. Please 
 Loaded												= Loaded
 Local version											= Local version
 Logging of d(t, o, h)									= Logging of d(t, o, h)
-Logon name					= Logon name
+Logon name											= Logon name
 Log triggered hotstrings									= Log triggered hotstrings
 LS:													= LS:
 maroon												= maroon
@@ -13748,7 +13748,7 @@ Menu hotstring is triggered								= Menu hotstring is triggered
 Menu position											= Menu position
 Menu position: caret									= Menu position: caret
 Menu position: cursor									= Menu position: cursor
-MinSendLevel value										= MinSendLevel value
+Input (MinSendLevel) value								= Input (MinSendLevel) value
 Minus - 												= Minus -
 MIT license											= MIT license
 Mode of operation										= Mode of operation
@@ -13843,8 +13843,8 @@ Save position of application window	 					= &Save position of application window
 Save window position									= Save window position
 Saved												= Saved
 Saving of sorted content into .csv file (library)				= Saving of sorted content into .csv file (library)
-Application Data: move it to new location			= Application Data: move it to new location
-Application Data: restore it to default location		= Application Data: restore it to default location
+Application Data: move it to new location					= Application Data: move it to new location
+Application Data: restore it to default location				= Application Data: restore it to default location
 Search by: 											= Search by:
 Search Hotstrings 										= Search Hotstrings
 Search (F3)											= &Search (F3)
@@ -13861,7 +13861,7 @@ Select the target library: 								= Select the target library:
 Select triggerstring option(s)							= Select triggerstring option(s)
 selection												= selection
 Semicolon ; 											= Semicolon ;
-SendLevel value										= SendLevel value
+Output (SendLevel) value									= Output (SendLevel) value
 Send Raw (R)											= Send Raw (R)
 Set Clipboard Delay										= Set Clipboard Delay
 Set delay												= Set delay
@@ -16075,6 +16075,7 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 {
 	global	;assume-global mode of operation
 	local	LastChar := "", IsLCalpha := false, IsLower := false
+		,	ini_OutSF := 1	;Output for ShiftFunctions, used to be 2
 
 	SetKeyDelay, -1, -1	;Delay = -1, PressDuration = -1, -1: no delay at all; this can be necessary if SendInput is reduced to SendEvent (in case low level input hook is active in another script)
 	Switch SendFun
@@ -16106,7 +16107,8 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 								OutputString 	:= SubStr(OutputString, 1, -1)	;all but last characters are copied back to OutputString
 								; OutputDebug, % "A_SendLevel:" . A_SendLevel . "|" . A_Space . "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
 								SendInput, 	% OutputString
-								SendLevel, 	2	;only for ShiftFunctions for which InputLevel MinSendLevel is set to 2.
+								SendLevel, 	% ini_OutSF	;only for ShiftFunctions for which InputLevel MinSendLevel used to be set to 2.
+								; OutputDebug, % "A_SendLevel:" . A_SendLevel . "|" . A_Space . "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
 								SendInput, 	% LastChar	;only last character of definition is send with different level of SendLevel; thanks to that ShiftFunctions can alter it into diacritics.
 								SendLevel, 	0
 							}
@@ -16115,7 +16117,7 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 								OutputString 	:= SubStr(OutputString, 1, -1)	;all but last characters are copied back to OutputString
 								; OutputDebug, % "A_SendLevel:" . A_SendLevel . "|" . A_Space . "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
 								SendInput, 	% OutputString	
-								SendLevel, 2
+								SendLevel, 	% ini_OutSF	;only for ShiftFunctions for which InputLevel MinSendLevel used to be set to 2.
 								Switch LastChar				
 								{
 									Case "A":	Send, {U+0041}	;A
