@@ -3561,11 +3561,11 @@ F_SwitchHotstrings(decision)	;to enable or disable all hotstring definitions
 		if (value = "En")	;turn off existing hotstring
 		{
 			Try
-				Hotstring(":" . a_TriggerOptions[key] . ":" . F_ConvertEscapeSequences(a_Triggerstring[key]), , (decision = "disabled" ? "Off" : "On"))
+				Hotstring(":" . a_Options[key] . ":" . F_ConvertEscapeSequences(a_Triggerstring[key]), , (decision = "disabled" ? "Off" : "On"))
 			Catch
 				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
 					. "`n" . (decision = "disabled" ? TransA["Something went wrong with disabling of existing hotstring"] : TransA["Something went wrong with enabling of existing hotstring"]) . ":" . "`n`n"
-					. "Hotstring(:" . a_TriggerOptions[key] . ":" . a_Triggerstring[key] . "," . A_Space . (decision = "disabled" ? "Off" : "On") . ")"
+					. "Hotstring(:" . a_Options[key] . ":" . a_Triggerstring[key] . "," . A_Space . (decision = "disabled" ? "Off" : "On") . ")"
 		}	
 	}	
 }
@@ -5276,7 +5276,7 @@ F_EvTt_B1()	;Event Tooltip (is triggered) Button Tooltip test
 {
 	global ;assume-global mode of operation
 	local a_Tips 		:= []
-		, a_TipsOpt	:= []	;collect withing global array a_TipsOpt subset from full set a_TriggerOptions; next it will be used to show triggering character in F_ShowTriggerstringTips2()
+		, a_TipsOpt	:= []	;collect withing global array a_TipsOpt subset from full set a_Options; next it will be used to show triggering character in F_ShowTriggerstringTips2()
 		, a_TipsEnDis	:= []
 		, a_TipsHS	:= []	;HS = Hotstrings
 		, a_Combined	:= []
@@ -9259,7 +9259,7 @@ F_PTTT(string)	; Function_ Prepare Triggerstring Tips Tables
 	if (StrLen(string) > ini_TASAC - 1)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{
 		a_Tips 		:= []	;collect within global array a_Tips subset from full set a_Combined
-		, a_TipsOpt	:= []	;collect withing global array a_TipsOpt subset from full set a_TriggerOptions; next it will be used to show triggering character in F_ShowTriggerstringTips2()
+		, a_TipsOpt	:= []	;collect withing global array a_TipsOpt subset from full set a_Options; next it will be used to show triggering character in F_ShowTriggerstringTips2()
 		, a_TipsEnDis	:= []
 		, a_TipsHS	:= []	;HS = Hotstrings
 		Loop, % a_Combined.MaxIndex()
@@ -9332,7 +9332,7 @@ F_PTTTQ(string) ;Function_ Prepare Triggerstring Tips Tables Question mark (rela
 	if (StrLen(string) > ini_TASAC - 1)	;TASAC = TipsAreShownAfterNoOfCharacters
 	{
 		a_Tips 		:= []	;collect within global array a_Tips subset from full set a_Combined
-		, a_TipsOpt	:= []	;collect withing global array a_TipsOpt subset from full set a_TriggerOptions; next it will be used to show triggering character in F_ShowTriggerstringTips2()
+		, a_TipsOpt	:= []	;collect withing global array a_TipsOpt subset from full set a_Options; next it will be used to show triggering character in F_ShowTriggerstringTips2()
 		, a_TipsEnDis	:= []
 		, a_TipsHS	:= []	;HS = Hotstrings
 
@@ -9666,31 +9666,42 @@ F_AddHotstring()
 		return
 	
 	;2. Create or modify (triggerstring, hotstring) definition according to inputs. 
-	Gui, HS3: Default			;All of the ListView function operate upon the current default GUI window.
-	for key, value in a_Triggerstring
+	Gui, HS3: Default				;All of the ListView function operate upon the current default GUI window.
+	for key, value in a_Triggerstring	;at first check if the same triggerstring does not exist in the same library
 	{
-		if (a_Triggerstring[key] == v_Triggerstring) and (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))	;case sensitive string comparison!
+		if (a_Triggerstring[key] == v_Triggerstring) 
+			and (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))	;case sensitive string comparison!
 		{
-			OldOptions 		:= a_TriggerOptions[key]
-		,	f_ChangeExistingDef := true
+			OldOptions 		:= a_Options[key]
+		,	f_ChangeExistingDef := true	;if exist in the same library, no new definition is required, so set the flag (existing definition will be just changed)
 			break
 		}
-		if (a_Triggerstring[key] = v_Triggerstring) and (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))	;case insensitive string comparison!
+	}
+	if (!f_ChangeExistingDef)		;second check, look into the same library / definition if they do not differ from each other when case is checked
+		for key, value in a_Triggerstring
 		{
-			OldOptions 		:= a_TriggerOptions[key]
-			if (InStr(OldOptions, "C", false)) and (InStr(NewOptions, "C", false))	;if old definitions had C option set and new definition has C option set and they are not identical.
+			if (a_Triggerstring[key] = v_Triggerstring) 
+				and (a_Library[key] = SubStr(v_SelectHotstringLibrary, 1, -4))	;case insensitive string comparison!
 			{
-				f_ChangeExistingDef := false
-				break
-			}
-			else
-			{
-				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-					, % TransA["In order to add similar definition to existing one use C option for both definitions (old and new) and change the case of triggerstrings."]
-				return
+				OldOptions 		:= a_Options[key]
+				if (InStr(OldOptions, "C", false)) and (InStr(NewOptions, "C", false))	;if old definitions had C option set and new definition has C option set and they are not identical.
+				{
+					f_ChangeExistingDef := false
+					break
+				}
+				else
+				{
+					MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+						, % TransA["In order to add similar definition to existing one use C option for both definitions (old and new) and change the case of triggerstrings."]
+					return
+				}
 			}
 		}
-		if (a_Triggerstring[key] = v_Triggerstring) and (a_Library[key] != SubStr(v_SelectHotstringLibrary, 1, -4))	;case insensitive string comparison!
+
+	for key, value in a_Triggerstring	;third check, this time check all other libraries if the same definition does not exist elsewhere. If it does, ask user what to do.
+	{
+		if (a_Library[key] != SubStr(v_SelectHotstringLibrary, 1, -4))	
+			and (a_Triggerstring[key] = v_Triggerstring)				;case insensitive string comparison!
 		{
 			f_ChangeExistingDef := false
 			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
@@ -9921,7 +9932,7 @@ F_UpdateGlobalArrays(NewOptions, SendFunFileFormat, EnDis, TextInsert)
 	local	temp := ""
 	a_Library			.Push(SubStr(v_SelectHotstringLibrary, 1, -4))
 	a_Triggerstring	.Push(v_Triggerstring)
-	a_TriggerOptions	.Push(NewOptions)
+	a_Options	.Push(NewOptions)
 	a_OutputFunction	.Push(SendFunFileFormat)
 	a_EnableDisable	.Push(EnDis)
 	a_Hotstring		.Push(TextInsert)
@@ -9936,12 +9947,12 @@ F_ChangeDefInArrays(key, NewOptions, SendFun, TextInsert, v_Comment)
 	local	index := 0
 
 	a_Triggerstring[key] 	:= v_Triggerstring
-, 	a_TriggerOptions[key] 	:= NewOptions
+, 	a_Options[key] 	:= NewOptions
 , 	a_OutputFunction[key] 	:= SendFun
 , 	a_Hotstring[key] 		:= TextInsert
 , 	a_Comment[key] 		:= v_Comment
 	for index in a_Combined	;recreate array a_Combined
-		a_Combined[index] := a_Triggerstring[index] . c_TextDelimiter . a_TriggerOptions[index] . c_TextDelimiter . a_EnableDisable[index] . c_TextDelimiter . a_Hotstring[index]
+		a_Combined[index] := a_Triggerstring[index] . c_TextDelimiter . a_Options[index] . c_TextDelimiter . a_EnableDisable[index] . c_TextDelimiter . a_Hotstring[index]
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10857,10 +10868,10 @@ F_HS3Search_LoadLV()
 				if (v_SearchTerm)
 				{
 					if (InStr(value, v_SearchTerm) = 1) ; for matching at the start ;for overall matching without = 1
-						LV_Add("", value, a_EnableDisable[index], a_Library[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
+						LV_Add("", value, a_EnableDisable[index], a_Library[index], a_Options[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 				}
 				else
-					LV_Add("", value, a_EnableDisable[index], a_Library[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
+					LV_Add("", value, a_EnableDisable[index], a_Library[index], a_Options[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 			}
 		Case 2:	;search by Hotstring
 			for index, value in a_Hotstring
@@ -10868,10 +10879,10 @@ F_HS3Search_LoadLV()
 				if (v_SearchTerm)
 				{
 					if (InStr(value, v_SearchTerm)) ; for overall matching
-						LV_Add("", value, a_EnableDisable[index], a_Library[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Comment[index])
+						LV_Add("", value, a_EnableDisable[index], a_Library[index], a_Triggerstring[index], a_Options[index], a_OutputFunction[index], a_Comment[index])
 				}
 				else
-					LV_Add("", value, a_EnableDisable[index], a_Library[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Comment[index])
+					LV_Add("", value, a_EnableDisable[index], a_Library[index], a_Triggerstring[index], a_Options[index], a_OutputFunction[index], a_Comment[index])
 			}
 		Case 3:	;search by Library
 			for index, value in a_Library
@@ -10879,10 +10890,10 @@ F_HS3Search_LoadLV()
 				if (v_SearchTerm)
 				{
 					if (InStr(value, v_SearchTerm)) ; for overall matching
-						LV_Add("", value, a_EnableDisable[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
+						LV_Add("", value, a_EnableDisable[index], a_Triggerstring[index], a_Options[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 				}
 				else
-					LV_Add("", value, a_EnableDisable[index], a_Triggerstring[index], a_TriggerOptions[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
+					LV_Add("", value, a_EnableDisable[index], a_Triggerstring[index], a_Options[index], a_OutputFunction[index], a_Hotstring[index], a_Comment[index])
 			}
 	}
 }
@@ -11465,7 +11476,7 @@ F_DeleteHotstring()
 		{
 			a_Library			.RemoveAt(key)
 			a_Triggerstring	.RemoveAt(key)
-			a_TriggerOptions	.RemoveAt(key)
+			a_Options	.RemoveAt(key)
 			a_OutputFunction	.RemoveAt(key)
 			a_EnableDisable	.RemoveAt(key)
 			a_Hotstring		.RemoveAt(key)
@@ -11829,7 +11840,7 @@ F_SelectLibrary()
 		{
 			str1[1] := a_EnableDisable[key]
 ,			str1[2] := a_Triggerstring[key]
-,			str1[3] := a_TriggerOptions[key]
+,			str1[3] := a_Options[key]
 ,			str1[4] := a_OutputFunction[key]
 ,			str1[5] := a_Hotstring[key]
 ,			str1[6] := a_Comment[key]
@@ -11859,10 +11870,71 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 	Critical, Off
 }	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_LV1_EnDisDefinition()
+F_ModifyHDef(Triggerstring, Options, Hotstring, OutFun, DefOnOff, Library) ;tu jestem
 {
-	global	;a_Triggerstring, a_TriggerOptions, a_EnableDisable, a_Combined, a_Hotstring, ini_TipsSortAlphabetically, ini_TipsSortByLength, v_SelectHotstringLibrary ;assume-global mode of operation
-	local	EnDis := "", SelectedRow := 0, OnOffToggle := false, Triggerstring := "", Options := "", key := 0, value := "", index := 0, Temp1 := "", vHotstring := "", SendFun := "", Oflag := false, TheWholeFile	:= "", LibraryHeader := ""
+	global	;assume-global mode of operation
+	local	Oflag := false
+
+	if (InStr(Options, "O"))
+		Oflag := true
+	else
+		Oflag := false
+
+	if (OutFun = "SI") or (OutFun = "SE") or (OutFun = "SP") or (OutFun = "SR") or (OutFun = "CL") or (OutFun = "S1") or (OutFun = "S2")
+	{
+		Try
+			Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_SimpleOutput").bind(Hotstring, Oflag, OutFun), DefOnOff)
+		Catch
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+				. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""SimpleOutput"").bind(" . Hotstring . "," . A_Space . Oflag . "," . A_Space . OutFun . ")," . A_Space . DefOnOff . ")"
+				. "`n`n" . TransA["Library name:"] . A_Tab . Library
+	}
+	if (OutFun = "MSI") or (OutFun = "MCL")
+	{
+		Try
+			Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_HMenu_Output").bind(Hotstring, Oflag, OutFun), DefOnOff)
+		Catch
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+				. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . Hotstring . "," . A_Space . true . A_Space . OutFun . ")," . A_Space . DefOnOff . ")"
+				. "`n`n" . TransA["Library name:"] . A_Tab . Library
+	}
+	if (OutFun = "P")
+	{
+		Try
+			Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_PictureShow").bind(Hotstring, Oflag, OutFun), DefOnOff)
+		Catch
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+				. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_PictureShow"").bind(" . Hotstring . "," . A_Space . true . A_Space . OutFun . ")," . A_Space . DefOnOff . ")"
+				. "`n`n" . TransA["Library name:"] . A_Tab . Library
+	}
+	if (OutFun = "R")
+	{
+		Try
+			Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_RunApplication").bind(Hotstring, Oflag, OutFun), DefOnOff)
+		Catch
+			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
+				. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_RunApplication"").bind(" . Hotstring . "," . A_Space . true . A_Space . OutFun . ")," . A_Space . DefOnOff . ")"
+				. "`n`n" . TransA["Library name:"] . A_Tab . Library
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_LV1_EnDisDefinition()	;enable or disable d(t, o, h)
+{
+	global	;a_Triggerstring, a_Options, a_EnableDisable, a_Combined, a_Hotstring, ini_TipsSortAlphabetically, ini_TipsSortByLength, v_SelectHotstringLibrary ;assume-global mode of operation
+	local	EnDis := ""
+		, 	SelectedRow := 0
+		, 	Triggerstring := ""
+		, 	Options := ""
+		, 	Hotstring := ""
+		, 	OutFun := ""
+		,	DefOnOff := false
+		, 	key := 0
+		, 	value := ""
+		, 	index := 0
+		, 	Temp1 := ""
+		, 	Oflag := false
+		, 	TheWholeFile	:= ""
+		, 	LibraryHeader := ""
 
 	F_GuiHS3_EnDis("Disable")
 	Gui, HS3: Default	;in order to activate ListView
@@ -11872,16 +11944,16 @@ F_LV1_EnDisDefinition()
 	Switch EnDis
 	{
 		Case "En":
-			OnOffToggle 	:= false	;reverse logic
+			DefOnOff 		:= false	;reverse logic
 ,			EnDis		:= "Dis"
 		Case "Dis":
-			OnOffToggle 	:= true	;reverse logic
+			DefOnOff 		:= true	;reverse logic
 ,			EnDis		:= "En"
 	}
 	LV_GetText(Triggerstring, 	SelectedRow, 	2)
 	LV_GetText(Options, 		SelectedRow, 	3)
-	LV_GetText(SendFun,			SelectedRow, 	4)
-	LV_GetText(vHotstring, 		SelectedRow, 	5)
+	LV_GetText(OutFun,			SelectedRow, 	4)
+	LV_GetText(Hotstring, 		SelectedRow, 	5)
 
 	if (EnDis = "Dis")	;;the following lines are necessary for the scenario when definition is swtiched off in one library and created with different set of options in another one.
 	{
@@ -11894,85 +11966,8 @@ F_LV1_EnDisDefinition()
 	}
 
 	;1. Modify Hotstring definition
-	; OutputDebug, % "Options:" . Options . A_Space . "Triggerstring:" . Triggerstring . A_Space . "OnOffToggle:" . OnOffToggle . "`n"
-	if (InStr(Options, "O"))
-	{
-		if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
-		{
-			Try
-				Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_SimpleOutput").bind(vHotstring, true, SendFun), OnOffToggle)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""SimpleOutput"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
-		}
-		if (SendFun = "MSI") or (SendFun = "MCL")
-		{
-			Try
-				Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_HMenu_Output").bind(vHotstring, true, SendFun), OnOffToggle)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . vHotstring . "," . A_Space . true . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
-		}
-		if (SendFun = "P")
-		{
-			Try
-				Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_PictureShow").bind(vHotstring, true, SendFun), OnOffToggle)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_PictureShow"").bind(" . vHotstring . "," . A_Space . true . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
-		}
-		if (SendFun = "R")
-		{
-			Try
-				Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_RunApplication").bind(vHotstring, true, SendFun), OnOffToggle)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_RunApplication"").bind(" . vHotstring . "," . A_Space . true . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
-		}
-	}
-	else
-	{
-		if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
-		{
-			Try
-				Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_SimpleOutput").bind(vHotstring, false, SendFun), OnOffToggle)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_SimpleOutput"").bind(" . vHotstring . "," . A_Space . false . "," . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
-		}
-		if (SendFun = "MSI") or (SendFun = "MCL")
-		{
-			Try
-				Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_HMenu_Output").bind(vHotstring, false, SendFun), OnOffToggle)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . vHotstring . "," . A_Space . false . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
-		}
-		if (SendFun = "P")
-		{
-			Try
-				Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_PictureShow").bind(vHotstring, false, SendFun), OnOffToggle)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_PictureShow"").bind(" . vHotstring . "," . A_Space . false . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
-		}
-		if (SendFun = "R")
-		{
-			Try
-				Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_RunApplication").bind(vHotstring, false, SendFun), OnOffToggle)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_RunApplication"").bind(" . vHotstring . "," . A_Space . false . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
-		}
-	}
+	; OutputDebug, % "Options:" . Options . A_Space . "Triggerstring:" . Triggerstring . A_Space . "DefOnOff:" . DefOnOff . "`n"
+	F_ModifyHDef(Triggerstring, Options, Hotstring, OutFun, DefOnOff, Library := v_SelectHotstringLibrary)
 
 	;2. Modify a_tables
 	for key, value in a_Triggerstring
@@ -11983,7 +11978,7 @@ F_LV1_EnDisDefinition()
 	
 	a_EnableDisable[key] := EnDis
 	for index in a_Combined	;recreate array a_Combined
-		a_Combined[index] := a_Triggerstring[index] . c_TextDelimiter . a_TriggerOptions[index] . c_TextDelimiter . a_EnableDisable[index] . c_TextDelimiter . a_Hotstring[index]
+		a_Combined[index] := a_Triggerstring[index] . c_TextDelimiter . a_Options[index] . c_TextDelimiter . a_EnableDisable[index] . c_TextDelimiter . a_Hotstring[index]
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)
 	;3. Modify content of ListView
 	Loop, % LV_GetCount()
@@ -12009,6 +12004,16 @@ F_LV1_EnDisDefinition()
 	F_GuiHS3_EnDis("Enable")	;Enable all GuiControls
 	GuiControl, Focus, % IdListView1
 	LV_Modify(key, "Select" . A_Space . "Focus")
+
+	;5. Search for duplicated definitions and enable the first one.
+	for key, value in a_Triggerstring
+	{
+		if (a_Triggerstring[key] == Triggerstring) ;case sensitive string comparison!
+		; and (a_Library[key] != SubStr(v_SelectHotstringLibrary, 1, -4))	
+		and (a_EnableDisable[key] = "En")
+			F_ModifyHDef(a_Triggerstring[key], a_Options[key], a_Hotstring[key], a_OutputFunction[key], true, a_Library[key])
+	}
+
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["New settings are now applied."], 10	;dissapears after 10 s
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -13158,7 +13163,7 @@ F_LoadHotstringsFromLibraries()
 	local key := "", value := ""
 
 	a_Library 		:= []	;initialization of global variable
-, 	a_TriggerOptions 	:= []
+, 	a_Options 		:= []
 , 	a_Triggerstring 	:= []
 , 	a_OutputFunction 	:= []
 , 	a_EnableDisable 	:= []
@@ -13296,15 +13301,15 @@ F_UnloadTriggTipsFromMemory(LibraryFilename)
 		if (value = LibraryName)
 		{
 			while (a_Library[key] = LibraryName)
-				{
-					a_Library			.RemoveAt(key)
-					a_Triggerstring	.RemoveAt(key)
-					a_TriggerOptions	.RemoveAt(key)
-					a_EnableDisable	.RemoveAt(key)
-					a_OutputFunction	.RemoveAt(key)
-					a_Hotstring		.RemoveAt(key)
-					a_Comment			.RemoveAt(key)
-				}
+			{
+				a_Library			.RemoveAt(key)
+				a_Triggerstring	.RemoveAt(key)
+				a_Options			.RemoveAt(key)
+				a_EnableDisable	.RemoveAt(key)
+				a_OutputFunction	.RemoveAt(key)
+				a_Hotstring		.RemoveAt(key)
+				a_Comment			.RemoveAt(key)
+			}
 		}
 	}
 	F_Recreate_CombinedTable()
@@ -13322,7 +13327,7 @@ F_Recreate_CombinedTable()
 		{
 			for key2 in a_Library
 				if (a_Library[key2] = SubStr(key, 1, -4))	;remove extension
-					a_Combined.Push(a_Triggerstring[key2] . c_TextDelimiter . a_TriggerOptions[key2] . c_TextDelimiter . a_EnableDisable[key2] . c_TextDelimiter . a_Hotstring[key2])
+					a_Combined.Push(a_Triggerstring[key2] . c_TextDelimiter . a_Options[key2] . c_TextDelimiter . a_EnableDisable[key2] . c_TextDelimiter . a_Hotstring[key2])
 		}
 	}
 }
@@ -13367,7 +13372,7 @@ F_UnloadHotstringsFromFile(nameoffile)
 	{
 		if (value = FilenameWitoutExt)
 		{
-			Options := a_TriggerOptions[key]
+			Options := a_Options[key]
 			if (InStr(Options, "*"))
 				Options := StrReplace(Options, "*", "*0")
 			if (InStr(Options, "B0"))
@@ -13394,16 +13399,16 @@ F_UnloadHotstringsFromFile(nameoffile)
 		if (value = FilenameWitoutExt)
 		{
 			while (a_Library[key] = FilenameWitoutExt)
-				{
-					a_Library			.RemoveAt(key)
-					a_Triggerstring	.RemoveAt(key)
-					a_TriggerOptions	.RemoveAt(key)
-					a_EnableDisable	.RemoveAt(key)
-					a_OutputFunction	.RemoveAt(key)
-					a_Hotstring		.RemoveAt(key)
-					a_Comment			.RemoveAt(key)
-					--v_TotalHotstringCnt
-				}
+			{
+				a_Library			.RemoveAt(key)
+				a_Triggerstring	.RemoveAt(key)
+				a_Options			.RemoveAt(key)
+				a_EnableDisable	.RemoveAt(key)
+				a_OutputFunction	.RemoveAt(key)
+				a_Hotstring		.RemoveAt(key)
+				a_Comment			.RemoveAt(key)
+				--v_TotalHotstringCnt
+			}
 		}
 	}
 	UpdateLibraryCounter(v_LibHotstringCnt, v_TotalHotstringCnt)
@@ -14180,7 +14185,7 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 			{
 				Case 1:	
 					options := A_LoopField
-					a_TriggerOptions.Push(A_LoopField)
+					a_Options.Push(A_LoopField)
 				Case 2:	
 					Triggerstring := A_LoopField
 					a_Triggerstring.Push(Triggerstring)
@@ -15701,7 +15706,7 @@ F_LoadLibrariesToTables()
 	local 	name := "", varSearch := "", tabSearch := "", BegCom := false
 
 		a_Library 				:= []
-	,	a_TriggerOptions 			:= []
+	,	a_Options 			:= []
 	,	a_Triggerstring 			:= []
 	,	a_OutputFunction 			:= []
 	,	a_EnableDisable 			:= []
@@ -15742,7 +15747,7 @@ F_LoadLibrariesToTables()
 			name 	:= SubStr(A_LoopFileName, 1, -4)
 ,			tabSearch := StrSplit(varSearch, c_TextDelimiter)
 ,			a_Library			.Push(name)
-,			a_TriggerOptions	.Push(tabSearch[1])
+,			a_Options	.Push(tabSearch[1])
 ,			a_Triggerstring	.Push(tabSearch[2])
 ,			a_OutputFunction	.Push(tabSearch[3])
 ,			a_EnableDisable	.Push(tabSearch[4])
@@ -16045,7 +16050,7 @@ F_DetermineOptions(Triggerstring)	;
 	for key, value in a_Triggerstring
 		if (Triggerstring = a_Triggerstring[key])
 			{
-				Options := a_TriggerOptions[key]
+				Options := a_Options[key]
 				break
 			}
 	return Options
