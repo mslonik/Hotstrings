@@ -9677,7 +9677,9 @@ F_AddHotstring()
 			break
 		}
 	}
-	if (!f_ChangeExistingDef)		;second check, look into the same library / definition if they do not differ from each other when case is checked
+	if (!f_ChangeExistingDef)
+	{			;second check, look into the same library / definition if they do not differ from each other when case is checked
+		key := 0	;the seconu use of "for" loop require zeroing of index variable
 		for key, value in a_Triggerstring
 		{
 			if (a_Triggerstring[key] = v_Triggerstring) 
@@ -9697,7 +9699,9 @@ F_AddHotstring()
 				}
 			}
 		}
+	}
 
+	key := 0	;the seconu use of "for" loop require zeroing of index variable
 	for key, value in a_Triggerstring	;third check, this time check all other libraries if the same definition does not exist elsewhere. If it does, ask user what to do.
 	{
 		if (a_Library[key] != SubStr(v_SelectHotstringLibrary, 1, -4))	
@@ -12006,6 +12010,7 @@ F_LV1_EnDisDefinition()	;enable or disable d(t, o, h)
 	LV_Modify(key, "Select" . A_Space . "Focus")
 
 	;5. Search for duplicated definitions and enable the first one.
+	key := 0	;the seconu use of "for" loop require zeroing of index variable
 	for key, value in a_Triggerstring
 	{
 		if (a_Triggerstring[key] == Triggerstring) ;case sensitive string comparison!
