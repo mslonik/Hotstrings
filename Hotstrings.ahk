@@ -124,11 +124,12 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		v_LibHotstringCnt		:= 0 		;no of (triggerstring, hotstring) definitions in single library
 ,		ini_TTCn				:= 0 		;this variable could be triggered by left mouse click when script is initialized.
 ,		v_Qinput				:= "" 		; to store substring of v_InputString related to possible question mark (inside) option
-,		c_MsgBoxIconError		:= 16		;constant, MsgBox icon hand (stop/error)
-,		c_MsgBoxIconQuestion	:= 32		;constant, MsgBox icon question
-,		c_MsgBoxIconExclamation	:= 48		;constant, MsgBox icon exclamation
-,		c_MsgBoxIconInfo		:= 64		;constant, MsgBox icon asterisk (info)
-,		c_MsgBoxButtYesNo		:= 4			;constant, MsgBox buttons, Yes/No
+,		c_MB_I_Error			:= 16		;constant, MsgBox icon hand (stop/error)
+,		c_MB_I_Question		:= 32		;constant, MsgBox icon question
+,		c_MB_I_Exclamation		:= 48		;constant, MsgBox icon exclamation
+,		c_MB_I_Info			:= 64		;constant, MsgBox icon asterisk (info)
+,		c_MB_B_YesNo			:= 4			;constant, MsgBox buttons, Yes/No
+,		c_MB_M_AonTop			:= 4096		;constant, MsgBox modality, System Modal (always on top)
 ,		v_Triggerstring		:= ""		;to store d(t, o, h) -> t entered by user in GUI.
 ,		ini_ShowWhiteChars		:= false		;show white characters (e.g. space) within GUI in form of special characters. For example <space> = U+2423 (open box ␣)
 ;#f/* free version only beginning
@@ -204,7 +205,7 @@ if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "L
 	FileCreateDir, %A_ScriptDir%\Languages
 	if (ErrorLevel)
 	{
-		MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["""Languages"" subfolder wasn't created for some reason."]
+		MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["""Languages"" subfolder wasn't created for some reason."]
 		ExitApp, 9 ;""Languages"" subfolder wasn't created for some reason.
 	}	
 	else	
@@ -1045,7 +1046,7 @@ F_CheckCommTime()
 	LicenseInfo := F_LicenseHttpRequest(WhatRequest := "validate", ini_LicenseKey, ini_LicenseInstanceId, WhatInstance := "instance_id")
 	if (LicenseInfo.status = "expired") or (LicenseInfo.status = "disabled")
 	{
-		MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+		MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
 			, % TransA["Sorry, your license is no longer active."] . A_Space . TransA["It had expired."]
 			. "`n`n"
 			. TransA["Expiration date"] . ":"		. A_Tab . LicenseInfo.expires_at			. "`n"
@@ -1172,7 +1173,7 @@ F_SupportContact()
 		. "The proud Hotstrings team and Maciej Słojewski", , UseErrorLevel
 	if (ErrorLevel = "ERROR")
 	{
-		MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . A_Space . "error", % "Something went wrong, e-mail client wasn't found?" . "`n`n"
+		MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) . A_Space . "error", % "Something went wrong, e-mail client wasn't found?" . "`n`n"
 			. "Please prepare it manually: press Ctrl + C, open your e-mail application and press Ctrl + V." . "`n`n"
 			. "To:" . A_Tab . c_MailToTechnical			. "`n"
 			. "Logon user name:" . A_Tab . A_UserName 		. "`n"
@@ -1259,7 +1260,7 @@ F_CheckCommercialConditions()
 	local	LicenseInfo := {}
 		,	ElapsedTime := 0
 		,	LicenseDateTimeStamp := 0
-		,	c_MsgBoxIconExclamation := 48
+		,	c_MB_I_Exclamation := 48
 		,	c_1minute := 60 
 
 	ElapsedTime := A_Now	
@@ -1280,7 +1281,7 @@ F_CheckCommercialConditions()
 			RegRead, ini_LicenseInstanceId, HKCU, SOFTWARE\TRT,	;	IniRead, ini_LicenseInstanceId, 	% ini_HADConfig, LicenseInfo, InstanceId, % A_Space
 			if (ErrorLevel)
 			{
-				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+				MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
 					, % TransA["License instance was not found on this PC / user domain account."]
 					. "`n`n"
 					. TransA["License key"] . ":" 		. A_Tab . ini_LicenseKey
@@ -1301,7 +1302,7 @@ F_CheckCommercialConditions()
 			; OutputDebug, % "LicenseInfo.expires_at:" . LicenseInfo.expires_at . "`n"
 			if (LicenseInfo.activated = "false")
 			{	
-				MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+				MsgBox, % c_MB_I_Exclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
 					, % TransA["License activation unsuccessful."]
 					. "`n`n"
 					. TransA["Entered license key"] . ":" . A_Tab . EditValue			. "`n"
@@ -1314,7 +1315,7 @@ F_CheckCommercialConditions()
 			}
 			if (LicenseInfo.status = "expired") or (LicenseInfo.status = "disabled")
 			{
-				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+				MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
 					, % TransA["Sorry, your license is no longer active."] . A_Space . TransA["It had expired."]
 					. "`n`n"
 					. TransA["Expiration date"] . ":"		. A_Tab . LicenseInfo.expires_at			. "`n"
@@ -1331,7 +1332,7 @@ F_CheckCommercialConditions()
 				ExitApp, 5	;5 = expired or disabled
 			}
 			if (ElapsedTime > -3)	;less than 3 days till the end of license time
-				MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % "Your license is about to expire. It will remain active for less than 3 days."
+				MsgBox, % c_MB_I_Exclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % "Your license is about to expire. It will remain active for less than 3 days."
 					. "`n`n"
 					. TransA["Expiration date"] . ":" . A_Space . LicenseInfo.expires_at
 			if (LicenseInfo.status = "active")
@@ -1394,10 +1395,10 @@ F_GuiEnterLicense_DetermineConstraints()
 EnterLicenseGuiClose()
 {
 	global	;assume-global mode of operation
-	local	c_MsgBoxIconExclamation 	:= 48
+	local	c_MB_I_Exclamation 	:= 48
 	,		c_MsgBoxButtonsYes		:= 4	
 
-	MsgBox, % c_MsgBoxIconExclamation + c_MsgBoxButtonsYes, % SubStr(A_ScriptName, 1, -4)
+	MsgBox, % c_MB_I_Exclamation + c_MsgBoxButtonsYes, % SubStr(A_ScriptName, 1, -4)
 		, % TransA["Are you sure you want to close this window?"] .  "`n`n"
 		. TransA["Closing it will exit application."]
 	IfMsgBox, Yes
@@ -1412,7 +1413,7 @@ F_EnterLicenseB1()
 {
 	global	;assume-global mode of operation
 	local	EditValue
-		,	c_MsgBoxIconExclamation 	:= 48
+		,	c_MB_I_Exclamation 	:= 48
 		,	c_MsgBoxButtonsYes		:= 4	
 		,	c_MsgBoxIconAsterisk	:= 64
 		,	LicenseInfo			:= {}
@@ -1424,7 +1425,7 @@ F_EnterLicenseB1()
 	; OutputDebug, % "EditValue:" . EditValue . "`n"
 	if (EditValue = "12345678-ABCD-1234-ABCD-012345678901")	;default / dummy value
 	{
-		MsgBox, % c_MsgBoxIconExclamation + c_MsgBoxButtonsYes, % SubStr(A_ScriptName, 1, -4)
+		MsgBox, % c_MB_I_Exclamation + c_MsgBoxButtonsYes, % SubStr(A_ScriptName, 1, -4)
 			, % TransA["This isn't correct license key. Do you want to try again?"] . "`n`n"
 			. TransA["If you answer ""No"" application will exit."]
 		IfMsgBox, Yes
@@ -1438,7 +1439,7 @@ F_EnterLicenseB1()
 	}
 	if (StrLen(EditValue) < 36)	;license key length is always 36 characters
 	{
-		MsgBox, % c_MsgBoxIconExclamation + c_MsgBoxButtonsYes, % SubStr(A_ScriptName, 1, -4)
+		MsgBox, % c_MB_I_Exclamation + c_MsgBoxButtonsYes, % SubStr(A_ScriptName, 1, -4)
 			, % TransA["Insufficient length of license key. Do you want to try again?"] . "`n`n"
 			. TransA["If you answer ""No"" application will exit."]
 		IfMsgBox, Yes
@@ -1454,7 +1455,7 @@ F_EnterLicenseB1()
 
 	if (LicenseInfo.store_id != LS_StoreId) or (LicenseInfo.product_id != LS_ProductId)	;Important: You should verify that the store_id, product_id and/or variant_id from this response match the IDs of your Lemon Squeezy product. If you don't do this, someone using a license key from another Lemon Squeezy product could use it to get access to your product. We recommend hard-coding the store_id, product_id and/or variant_id into your client and using them to validate that the key belongs to your product.
 	{
-		MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+		MsgBox, % c_MB_I_Exclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
 			, % TransA["License server response do not contain correct id of store or product."] 
 			. "`n`n"
 			. TransA["Application will exit now."]
@@ -1465,7 +1466,7 @@ F_EnterLicenseB1()
 	
 	if (LicenseInfo.activated = "false") and (LicenseInfo.error = "license_key not found.")
 	{	
-		MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+		MsgBox, % c_MB_I_Exclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
 			, % TransA["License activation unsuccessful."] . A_Space . TransA["Entered license key was not found."]
 			. "`n`n"
 			. TransA["Entered license key"] . ":" . A_Tab . EditValue			. "`n"
@@ -1478,7 +1479,7 @@ F_EnterLicenseB1()
 
 	if (LicenseInfo.activated = "false")
 	{	
-		MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+		MsgBox, % c_MB_I_Exclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
 			, % TransA["License activation unsuccessful."]
 			. "`n`n"
 			. TransA["Entered license key"] . ":" . A_Tab . EditValue			. "`n"
@@ -1510,7 +1511,7 @@ F_EnterLicenseB1()
 	RegWrite, REG_SZ, HKCU, SOFTWARE\TRT, , % LicenseInfo.id	;IniWrite, % LicenseInfo.id, 			% ini_HADConfig, LicenseInfo,	InstanceId
 	if (ErrorLevel)
 	{
-		MsgBox, % c_MsgBoxIconExclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+		MsgBox, % c_MB_I_Exclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
 			, % "Internal application problem" . "."
 			. "`n`n"
 			. TransA["Application will exit now."]
@@ -3559,14 +3560,7 @@ F_SwitchHotstrings(decision)	;to enable or disable all hotstring definitions
 	for key, value in a_EnableDisable
 	{
 		if (value = "En")	;turn off existing hotstring
-		{
-			Try
-				Hotstring(":" . a_Options[key] . ":" . F_ConvertEscapeSequences(a_Triggerstring[key]), , (decision = "disabled" ? "Off" : "On"))
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
-					. "`n" . (decision = "disabled" ? TransA["Something went wrong with disabling of existing hotstring"] : TransA["Something went wrong with enabling of existing hotstring"]) . ":" . "`n`n"
-					. "Hotstring(:" . a_Options[key] . ":" . a_Triggerstring[key] . "," . A_Space . (decision = "disabled" ? "Off" : "On") . ")"
-		}	
+			F_ModifyHDef(a_Triggerstring[key], a_Options[key], a_Hotstring[key], a_OutputFunction[key], false, a_Library[key])
 	}	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9976,7 +9970,7 @@ F_PictureShow(PHotstring, Oflag, SendFun)
 			{
 				Run, % "MSPaint.exe" . A_Space . PHotstring,, Max UseErrorLevel, OutputVarPID
 				if (ErrorLevel = "ERROR")
-					MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["MSPaint.exe (Paint application) wasn't found or couldn't be run."]
+					MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["MSPaint.exe (Paint application) wasn't found or couldn't be run."]
 				WinWaitActive, % "ahk_pid" . A_Space . OutputVarPID
 
 				pToken := Gdip_Startup()	;all Gdip_ functions come from Gdip_ library based on Gdip standard library version 1.96 by Marius Șucan; https://github.com/marius-sucan/AHK-GDIp-Library-Compilation/blob/master/ahk-v1-1/Gdip_All.ahk
@@ -10019,7 +10013,7 @@ F_RunApplication(PHotstring, Oflag, SendFun)
 	global	;assume-global mode of operation
 	Run, % PHotstring,, Max UseErrorLevel
 	if (ErrorLevel = "ERROR")
-		MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Application"] . ":" . "`n`n" . PHotstring . "`n`n" . TransA["wasn't found or couldn't be run"] . "."
+		MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["Application"] . ":" . "`n`n" . PHotstring . "`n`n" . TransA["wasn't found or couldn't be run"] . "."
 ;#c*/ commercial only end
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10049,117 +10043,11 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 		if (InStr(OldOptions, "C2")) 	;actually "C2" isn't allowed / existing argument of "Hotstring" function can understand so just before this function is called the "NewOptions" string is checked if there is "C2" available. If it does, "C2" is replaced with "".
 			OldOptions := StrReplace(OldOptions, "C2", "")
 
-		;turn off existing hotstring
-		Try
-			Hotstring(":" . OldOptions . ":" . F_ConvertEscapeSequences(FoundTriggerstring), , "Off")
-		Catch
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
-				. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-				. "Hotstring(:" . OldOptions . ":" . FoundTriggerstring . "," . A_Space . "Off" . ")"
-				. "`n`n" . TransA["Library name:"] . A_Tab . Library
+		;turn off existing d(t, o, h)
+		F_ModifyHDef(FoundTriggerstring, OldOptions, TextInsert, SendFun, false, Library)
 
-		Switch OldEnDis
-		{
-			Case "En":	OnOffToggle := "On"
-			Case "Dis":	OnOffToggle := "Off"
-		}
-
-		if (InStr(NewOptions, "C2"))	;actually "C2" isn't allowed / existing argument of "Hotstring" function can understand so just before this function is called the "NewOptions" string is checked if there is "C2" available. If it does, "C2" is replaced with "".
-			HC2SubstOpt := StrReplace(NewOptions, "C2", "")
-		else
-			HC2SubstOpt := NewOptions
-	
-		if (InStr(NewOptions, "O"))	;Add new hotstring which replaces the old one
-		{
-			if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
-			{
-				Try
-					Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_SimpleOutput").bind(TextInsert, true, SendFun), OnOffToggle)
-				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
-						. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
-						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
-			}
-;#c/* commercial only beginning			
-			if (SendFun = "MSI") or (SendFun = "MCL")
-			{
-				Try
-					Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_HMenu_Output").bind(TextInsert, true, SendFun), OnOffToggle)
-				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
-						. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_HMenu_Output"").bind(" . TextInsert . "," . A_Space . Oflag . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
-						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
-			}
-			if (SendFun = "P")
-			{
-				Try
-					Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_PictureShow").bind(TextInsert, true, SendFun), OnOffToggle)
-				Catch	
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
-						. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_PictureShow"").bind(" . TextInsert . "," . A_Space . Oflag . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
-						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
-			}	
-
-			if (SendFun = "R")
-			{
-				Try
-					Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_RunApplication").bind(TextInsert, true, SendFun), OnOffToggle)
-				Catch	
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc 
-						. "`n" . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_RunApplication"").bind(" . TextInsert . "," . A_Space . Oflag . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
-						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
-			}
-;#c*/ commercial only end			
-		}
-		else
-		{
-			if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
-			{
-				Try
-					Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_SimpleOutput").bind(TextInsert, false, SendFun), OnOffToggle)
-				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
-						. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . v_SendFun . ")," . A_Space . OnOffToggle . ")"
-						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
-			}
-;#c/* commercial only beginning			
-			if (SendFun = "MSI") or (SendFun = "MCL")
-			{
-				Try
-					Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_HMenu_Output").bind(TextInsert, false, SendFun), OnOffToggle)
-				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n"
-						 . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_HMenu_Output"").bind(" . TextInsert . "," . A_Space . Oflag . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
-						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
-			}
-			if (SendFun = "P")
-			{
-				Try
-					Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_PictureShow").bind(TextInsert, false, SendFun), OnOffToggle)
-				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n"
-						 . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_PictureShow"").bind(" . TextInsert . "," . A_Space . Oflag . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
-						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
-			}
-			if (SendFun = "R")
-			{
-				Try
-					Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(FoundTriggerstring), func("F_RunApplication").bind(TextInsert, false, SendFun), OnOffToggle)
-				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n"
-						 . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-						. "Hotstring(:" . NewOptions . ":" . FoundTriggerstring . "," . "func(""F_RunApplication"").bind(" . TextInsert . "," . A_Space . Oflag . A_Space . SendFun . ")," . A_Space . OnOffToggle . ")"
-						. "`n`n" . TransA["Library name:"] . A_Tab .  Library
-			}	
-;#c*/ commercial only end			
-		}
+		;turn on modified d(t, o, h)
+		F_ModifyHDef(FoundTriggerstring, NewOptions, TextInsert, SendFun, true, Library)
 		return, "Yes"
 	}
 }
@@ -10237,7 +10125,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 		v_EnterHotstring := RTrim(v_EnterHotstring)
 		if (v_EnterHotstring = "") and (v_SelectFunction != TransA["Picture (P)"]) and (v_SelectFunction != TransA["Run (R)"])
 		{
-			MsgBox, % c_MsgBoxIconQuestion + c_MsgBoxButtYesNo, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring text is blank. Do you want to proceed?"] 
+			MsgBox, % c_MB_I_Question + c_MB_B_YesNo, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring text is blank. Do you want to proceed?"] 
 			IfMsgBox, No
 				return, true
 		}
@@ -10251,7 +10139,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 	{
 		if (v_EnterHotstring = "")
 		{
-			MsgBox, % c_MsgBoxIconQuestion + c_MsgBoxButtYesNo, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Path to picture file is blank. Do you want to select it now from inteactive GUI?"] 
+			MsgBox, % c_MB_I_Question + c_MB_B_YesNo, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Path to picture file is blank. Do you want to select it now from inteactive GUI?"] 
 			IfMsgBox, No
 				return, true
 			IfMsgBox, Yes
@@ -10265,7 +10153,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 		}
 		if (!FileExist(v_EnterHotstring))
 		{
-			MsgBox, % c_MsgBoxIconQuestion, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Content of this text field is not file path or file wasn't found. For ouput function ""Picture (P)"" it is required to enter correct filepath."] 
+			MsgBox, % c_MB_I_Question, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Content of this text field is not file path or file wasn't found. For ouput function ""Picture (P)"" it is required to enter correct filepath."] 
 				. "`n`n"	
 				. TransA["Leave this field empty and then press ""Add/Edit hotstring (F9)"" again to get GUI enabling file selection."] 
 			return, true
@@ -10275,7 +10163,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 	{
 		if (v_EnterHotstring = "")
 		{
-			MsgBox, % c_MsgBoxIconQuestion + c_MsgBoxButtYesNo, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Path to executable file is blank. Do you want to select it now from inteactive GUI?"] 
+			MsgBox, % c_MB_I_Question + c_MB_B_YesNo, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Path to executable file is blank. Do you want to select it now from inteactive GUI?"] 
 			IfMsgBox, No
 				return, true
 			IfMsgBox, Yes
@@ -10289,7 +10177,7 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 		}
 		if (!FileExist(v_EnterHotstring))
 		{
-			MsgBox, % c_MsgBoxIconQuestion, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Content of this text field is not file path or file wasn't found. For ouput function ""Run (R)"" it is required to enter correct filepath."] 
+			MsgBox, % c_MB_I_Question, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Content of this text field is not file path or file wasn't found. For ouput function ""Run (R)"" it is required to enter correct filepath."] 
 				. "`n`n"	
 				. TransA["Leave this field empty and then press ""Add/Edit hotstring (F9)"" again to get GUI enabling file selection."] 
 			return, true
@@ -11932,7 +11820,7 @@ F_LV1_EnDisDefinition()	;enable or disable d(t, o, h)
 			if (a_Triggerstring[key] == Triggerstring) ;case sensitive string comparison!
 			and (a_EnableDisable[key] = "En")
 			{
-				MsgBox, % c_MsgBoxIconInfo, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Found another definition which will be enabled"] . ":"
+				MsgBox, % c_MB_I_Info, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Found another definition which will be enabled"] . ":"
 					. "`n`n"
 					. TransA["triggerstring"] . ":" . A_Space .  a_Triggerstring[key] . "`n"
 					. TransA["options"] . ":" . A_Space . a_Options[key] . "`n"
@@ -13025,7 +12913,7 @@ ConfigIni := "
 		FileAppend, % ConfigIni, % HADConfig_App
 		if (ErrorLevel)
 		{
-			MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["Config.ini file couldn't be created for some reason. Exiting."]
+			MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["Config.ini file couldn't be created for some reason. Exiting."]
 				. "`n`n"
 				. HADConfig_App
 			ExitApp, 14		;Config.ini file couldn't be created for some reason. Exiting.
@@ -13039,7 +12927,7 @@ ConfigIni := "
 			FileDelete, % A_ScriptDir . "\Languages\English.txt"
 			if (ErrorLevel)
 			{
-				MsgBox, % c_MsgBoxIconError, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["Unexpected problem on time of deleting the file ""\Languages\English.txt"". Exiting."]
+				MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["Unexpected problem on time of deleting the file ""\Languages\English.txt"". Exiting."]
 				ExitApp, 15	;Unexpected problem on time of deleting the file ""\Languages\English.txt"".
 			}	
 		}	
@@ -13294,8 +13182,14 @@ F_ToggleLibrary()	;load / unload d(t, o, h)
 F_UnloadHotstringsFromFile(nameoffile)
 {	
 	global ;assume-global mode of operation
-	local	v_TheWholeFile := "",	Options := "",	TriggerString := "", key := 0, value := ""
-, 			FilenameWitoutExt := SubStr(nameoffile, 1, -4)
+	local	v_TheWholeFile := ""
+		,	TriggerString 	:= ""
+		,	Options 		:= ""
+		,	HotString 	:= ""
+		,	OutFun		:= ""
+		,	Library		:= ""
+		, 	key := 0, value := ""
+		,	FilenameWitoutExt := SubStr(nameoffile, 1, -4)
 	
 	for key, value in a_Library
 	{
@@ -13310,16 +13204,12 @@ F_UnloadHotstringsFromFile(nameoffile)
 				Options := StrReplace(Options, "O", "O0")
 			if (InStr(Options, "Z"))
 				Options := StrReplace(Options, "Z", "Z0")
-			TriggerString := a_Triggerstring[key]
+			TriggerString 	:= a_Triggerstring[key]
+		,	HotString		:= a_Hotstring[key]
+		,	OutFun		:= a_Library[key]
+
 			if (a_EnableDisable[key] = "En")
-			{
-				Try
-					Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(TriggerString), , "Off") ;Disable existing hotstring definitions: only those which have been configured to be off.
-				Catch
-					MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with disabling of existing hotstring"] 
-					. ":" . "`n`n" . "TriggerString:" . A_Space . TriggerString . "`n" . A_Space . "Options:" . A_Space . Options . "`n`n" . TransA["Library name:"] 
-					. A_Space . nameoffile 				
-			}
+				F_ModifyHDef(TriggerString, Options, HotString, OutFun, false, Library)	
 		}
 	}
 	key := 0, value := ""
@@ -15692,7 +15582,12 @@ F_LoadLibrariesToTables()
 F_CreateHotstring(txt, nameoffile)
 { 
 	global	;assume-global mode
-	local Options := "", SendFun := "", EnDis := "", TextInsert := "", Oflag := false, Triggerstring := "", LenStr := 0
+	local 	Triggerstring 	:= ""
+		,	Options 		:= ""
+		, 	Hotstring 	:= ""
+		, 	OutFun 		:= ""
+		, 	DefOnOff 		:= ""
+		,	Library		:= nameoffile
 
 	Loop, Parse, txt, % c_TextDelimiter
 	{
@@ -15700,83 +15595,51 @@ F_CreateHotstring(txt, nameoffile)
 		{
 			Case 1:
 				Options 	:= A_LoopField
-			,	Oflag 	:= false
-				if (InStr(Options, "O", false))
-					Oflag := true
-				else
-					Oflag := false
-				if (InStr(Options, "C2"))	;actually "C2" isn't allowed / existing argument of "Hotstring" function can understand so just before this function is called the "NewOptions" string is checked if there is "C2" available. If it does, "C2" is replaced with "".
-					Options := StrReplace(Options, "C2", "")
 			Case 2:
-				Triggerstring := F_ConvertEscapeSequences(A_LoopField)
+				Triggerstring := A_LoopField
 			Case 3:
-				SendFun := A_LoopField
+				OutFun := A_LoopField
 			Case 4: 
 				Switch A_LoopField
 				{
-					Case "En":	EnDis := true
-					Case "Dis":	EnDis := false
+					Case "En":	DefOnOff := true
+					Case "Dis":	DefOnOff := false
+					Default:		DefOnOff := ""
 				}
 			Case 5:
-				TextInsert := A_LoopField
+				Hotstring := A_LoopField
 		}
 	}
 	
-	if ((Triggerstring == "") and (Options or SendFun or EnDis or TextInsert))	; previous version: if ((!Triggerstring) and (Options or SendFun or EnDis or TextInsert))
+	if ((Triggerstring == "") and (Options or OutFun or DefOnOff or Hotstring))	; previous version: if ((!Triggerstring) and (Options or OutFun or DefOnOff or Hotstring))
 	{
-		MsgBox, 262420, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Error reading library file:"] . "`n`n" . nameoffile . "`n`n" . TransA["the following line is found:"] 
-					. "`n" . txt . "`n`n" . TransA["This line do not comply to format required by this application."] . "`n`n" 
-					. TransA["Continue reading the library file? If you answer ""No"" then application will exit!"]
+		MsgBox, % c_MB_M_AonTop + c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Error reading library file:"] . "`n`n" . nameoffile 
+			. "`n`n" 
+			. TransA["the following line is found:"] 
+			. "`n" . txt 
+			. "`n`n" 
+			. TransA["This line do not comply to format required by this application."] 
+			. "`n`n" 
+			. TransA["Continue reading the library file? If you answer ""No"" then application will exit!"]
 		IfMsgBox, No
 			try	;if no try, some warnings are still catched; with try no more warnings
 				ExitApp, 1	;error reading library file
 		IfMsgBox, Yes
 			return
 	}
-	if (EnDis = "")	;This is consequence of hard lesson: mismatch of "column name". This line hopefully protects against this kind of event in the future.
-		MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . "`n`n" . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-			. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(" . SendFun . ").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")" . "`n"
+	if (DefOnOff = "")	;This is consequence of hard lesson: mismatch of "column name". This line hopefully protects against this kind of event in the future.
+		MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"]
+			, % A_ThisFunc 
+			. "`n`n" 
+			. A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" 
+			. "`n`n"
+			. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(" . OutFun . ").bind(" . Hotstring . "," . A_Space . Oflag . ")," . A_Space . DefOnOff . ")" . "`n"
 			. TransA["OnOff parameter is missing."]
-			. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
+			. "`n`n" 
+			. TransA["Library name:"] . A_Tab . nameoffile
 	
-	if (Triggerstring != "") and (EnDis)
-	{
-		if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
-		{
-			Try
-				Hotstring(":" . Options . ":" . Triggerstring, func("F_SimpleOutput").bind(TextInsert, Oflag, SendFun), EnDis)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(""F_SimpleOutput"").bind(" . TextInsert . "," . A_Space . Oflag . "," . A_Space . SendFun . ")," . A_Space . EnDis . ")"
-		}
-		if (SendFun = "MSI") or (SendFun = "MCL")
-		{
-			Try
-				Hotstring(":" . Options . ":" . Triggerstring, func("F_HMenu_Output").bind(TextInsert, Oflag, SendFun), EnDis)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(""F_HMenu_Output"").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
-		}
-		if (SendFun = "P")
-		{
-			Try
-				Hotstring(":" . Options . ":" . Triggerstring, func("F_PictureShow").bind(TextInsert, Oflag, SendFun), EnDis)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(""F_PictureShow"").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
-		}
-		if (SendFun = "R")
-		{
-			Try
-				Hotstring(":" . Options . ":" . Triggerstring, func("F_RunApplication").bind(TextInsert, Oflag, SendFun), EnDis)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . Options . ":" . Triggerstring . "," . "func(""F_RunApplication"").bind(" . TextInsert . "," . A_Space . Oflag . ")," . A_Space . EnDis . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . nameoffile
-		}
-	}
+	if (Triggerstring != "") and (DefOnOff)
+		F_ModifyHDef(Triggerstring, Options, Hotstring, OutFun, DefOnOff, Library)
 }
 
 ; =================================================================================
