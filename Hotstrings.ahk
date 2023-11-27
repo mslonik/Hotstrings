@@ -130,6 +130,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_MB_I_Info			:= 64		;constant, MsgBox icon asterisk (info)
 ,		c_MB_B_YesNo			:= 4			;constant, MsgBox buttons, Yes/No
 ,		c_MB_M_AonTop			:= 4096		;constant, MsgBox modality, System Modal (always on top)
+,		c_MB_DB_2nd			:= 256		;constant, MsgBox default button, second
 ,		v_Triggerstring		:= ""		;to store d(t, o, h) -> t entered by user in GUI.
 ,		ini_ShowWhiteChars		:= false		;show white characters (e.g. space) within GUI in form of special characters. For example <space> = U+2423 (open box ␣)
 ;#f/* free version only beginning
@@ -9703,9 +9704,15 @@ F_AddHotstring()
 			and (a_Triggerstring[key] = v_Triggerstring)				;case insensitive string comparison!
 		{
 			f_ChangeExistingDef := false
-			MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
-				, % TransA["The triggerstring"] . A_Space . """" .  v_Triggerstring . """" . A_Space .  TransA["already exists in another library"] . ":" . A_Space . a_Library[key] . "." . "csv" . "`n`n" 
-				. TransA["Do you want to proceed?"] . "`n`n" . TransA["If you answer ""No"" edition of the current definition will be interrupted."]
+			MsgBox, % c_MB_I_Info + c_MB_B_YesNo, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+				, % TransA["The triggerstring"] . A_Space 
+				. """" .  v_Triggerstring . """" . A_Space 
+				.  TransA["already exists in another library"] . ":" . A_Space 
+				. a_Library[key] . "." . "csv" 
+				. "`n`n" 
+				. TransA["Do you want to proceed?"] 
+				. "`n`n" 
+				. TransA["If you answer ""No"" edition of the current definition will be interrupted."]
 				. "`n" . TransA["If you answer ""Yes"" definition existing in another library will not be changed."]
 			IfMsgBox, No
 			{
@@ -9728,7 +9735,7 @@ F_AddHotstring()
 	{
 		if (NewOptions = OldOptions) and (vHotstring == a_Hotstring[key]) and (SendFun = a_OutputFunction[key]) and (v_Comment == a_Comment[key])
 		{
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+			MsgBox, % c_MB_I_Info, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
 				, % TransA["New definition is identical with existing one. Please try again."]
 			return
 		}
@@ -9761,7 +9768,7 @@ F_AddHotstring()
 				Case "HS3":	F_GuiHS3_EnDis("Enable")	
 				Case "HS4": 	F_GuiHS4_EnDis("Enable")
 			}
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["New settings are now applied."], 10	;dissapears after 10 s
+			MsgBox, % c_MB_I_Info, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["New settings are now applied."], 10	;dissapears after 10 s
 			return
 		}
 		if (Overwrite = "No")
@@ -9814,7 +9821,8 @@ F_AddHotstring()
 		Case "HS3":	F_GuiHS3_EnDis("Enable")
 		Case "HS4": 	F_GuiHS4_EnDis("Enable")
 	}
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Hotstring added to the file"] . A_Space . v_SelectHotstringLibrary . "!", 10 ;this line should be the very last and user confirmation shouldn't be required (10 s, last parameter)
+	MsgBox, % c_MB_I_Info, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+		, % TransA["Hotstring added to the file"] . A_Space . v_SelectHotstringLibrary . "!", 10 ;this line should be the very last and user confirmation shouldn't be required (10 s, last parameter)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 UpdateLibraryCounter(v_LibHotstringCnt, v_TotalHotstringCnt)
@@ -11194,7 +11202,12 @@ F_DeleteHotstring()
 	global ;assume-global mode
 	local 	LibraryFullPathAndName := ini_HADL . "\" . v_SelectHotstringLibrary, TheWholeFile := "", LibraryHeader := ""
 	,		SelectedRow := 0, index := 0
-	,		key := 0, val := "", options := "", triggerstring := "", EnDis := "", hotstring := "", OldOptions := ""
+	,		key := 0, val := ""
+	, 		EnDis := "", OldOptions := ""
+	,		triggerstring 	:= ""
+	, 		options 		:= ""
+	, 		hotstring 	:= ""
+	,		outfun 		:= ""
 	,		key2 := 0
 
 	Gui, HS3: Default
@@ -11208,14 +11221,18 @@ F_DeleteHotstring()
 		F_GuiHS3_EnDis("Enable")			;Enable all GuiControls for deletion time d(t, o, h)	
 		return
 	}
+	LV_GetText(EnDis,			SelectedRow, 1)	;enabled or disabled definition
 	LV_GetText(triggerstring, 	SelectedRow, 2)	;triggerstring
 	LV_GetText(options, 		SelectedRow, 3)	;options
-	LV_GetText(EnDis,			SelectedRow, 1)	;enabled or disabled definition
-	LV_GetText(hotstring, 		SelectedRow, 5)
-	MsgBox, % 256 + 64 + 4, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Selected definition d(t, o, h) will be deleted. Do you want to proceed?"] . "`n`n"
+	LV_GetText(outfun, 			SelectedRow, 4)	;output function
+	LV_GetText(hotstring, 		SelectedRow, 5)	;hotstring
+	MsgBox, % c_MB_DB_2nd + c_MB_I_Info + c_MB_B_YesNo, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+		, % TransA["Selected definition d(t, o, h) will be deleted. Do you want to proceed?"] 
+		. "`n`n"
 		. TransA["triggerstring"] . ":" 	. A_Space . triggerstring . "`n" 
 		. TransA["options"] . ":" 		. A_Space . options . "`n"
-		. TransA["hotstring"] . ":" 		. A_Space . hotstring	. "`n`n" 
+		. TransA["hotstring"] . ":" 		. A_Space . hotstring	
+		. "`n`n" 
 		. TransA["If you remove one of the definitions which was multiplied (e.g. duplicated), none of definitions will be active. Therefore It is suggested in order to to enable the second one to reload the application."]
 	OldOptions := options		
 	IfMsgBox, No
@@ -11247,16 +11264,8 @@ F_DeleteHotstring()
 			options := StrReplace(options, "O", "O0")
 		if (InStr(options, "Z"))
 			options := StrReplace(options, "Z", "Z0")
-		Try
-			Hotstring(":" . options . ":" . F_ConvertEscapeSequences(triggerstring), , "Off")	;if duplicated definition exists, only one is active. As a consequence if one is removed, the second one is not activated automatically: none is enabled anymore till application is restarted.
-		Catch
-			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n`n" 
-				. TransA["Something went wrong with hotstring deletion"] . ":" . "`n`n" 
-				. TransA["riggerstring"] . ":" 	. A_Space . triggerstring . "`n" 
-				. TransA["options"] . ":" 		. A_Space . options . "`n" 
-				. TransA["hotstring"] . ":"		. A_Space . hotstring . "`n"
-				. TransA["Library name:"] 		. A_Space . v_SelectHotstringLibrary 
-				, 10	;10 s timeout
+
+		F_ModifyHDef(triggerstring, options, hotstring, outfun, false, v_SelectHotstringLibrary)	;disable this definition
 	}
 	
 	;3. Remove selected row from List View.
@@ -11276,7 +11285,7 @@ F_DeleteHotstring()
 		{
 			a_Library			.RemoveAt(key)
 			a_Triggerstring	.RemoveAt(key)
-			a_Options	.RemoveAt(key)
+			a_Options			.RemoveAt(key)
 			a_OutputFunction	.RemoveAt(key)
 			a_EnableDisable	.RemoveAt(key)
 			a_Hotstring		.RemoveAt(key)
@@ -11286,13 +11295,14 @@ F_DeleteHotstring()
 	F_Recreate_CombinedTable()
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	
 	F_GuiHS3_EnDis("Enable")			;Enable all GuiControls for deletion time d(t, o, h)
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The definition"] . ":" . "`n`n"
-			. TransA["Triggerstring"] . ":" 	. A_Space . v_Triggerstring . "`n" 
+	MsgBox, % c_MB_I_Info, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The definition"] . ":" . "`n`n"
+			. TransA["triggerstring"] . ":" 	. A_Space . triggerstring . "`n" 
 			. TransA["options"] . ":" 		. A_Space . OldOptions . "`n"
 			. TransA["hotstring"] . ":" 		. A_Space . hotstring . "`n`n"
 			. TransA["was just deleted from"] . "`n`n"
 			. TransA["Library name:"] 		. A_Space . v_SelectHotstringLibrary
 			, 10	;10 s timeout
+	F_SearchSimilarDef(triggerstring)		;try to enable other definition starting from the same triggestring
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ConvertListViewIntoTxt()
@@ -11813,25 +11823,32 @@ F_LV1_EnDisDefinition()	;enable or disable d(t, o, h)
 	LV_Modify(key, "Select" . A_Space . "Focus")
 
 	;5. If current definition was disabled, search for duplicated definitions and enable the first one.
-	key := 0	;the seconu use of "for" loop require zeroing of index variable
 	if (EnDis = "Dis")
-		for key, value in a_Triggerstring
-		{
-			if (a_Triggerstring[key] == Triggerstring) ;case sensitive string comparison!
-			and (a_EnableDisable[key] = "En")
-			{
-				MsgBox, % c_MB_I_Info, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Found another definition which will be enabled"] . ":"
-					. "`n`n"
-					. TransA["triggerstring"] . ":" . A_Space .  a_Triggerstring[key] . "`n"
-					. TransA["options"] . ":" . A_Space . a_Options[key] . "`n"
-					. TransA["hotstring"] . ":" . A_Space . a_Hotstring[key]
-					. TransA["output function"] . ":" . A_Space . a_OutputFunction[key]
-					. TransA["library"] . ":" . a_Library[key]
-				F_ModifyHDef(a_Triggerstring[key], a_Options[key], a_Hotstring[key], a_OutputFunction[key], true, a_Library[key])
-			}
-		}
+		F_SearchSimilarDef(Triggerstring)
 
-	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["New settings are now applied."], 10	;dissapears after 10 s
+	MsgBox, % c_MB_I_Info, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["New settings are now applied."], 10	;dissapears after 10 s
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_SearchSimilarDef(Triggerstring)	;search for similar definition and enable it
+{
+	global	;assume-global mode of operation
+	local	key := 0
+
+	for key in a_Triggerstring
+	{
+		if (a_Triggerstring[key] == Triggerstring) ;case sensitive string comparison!
+		and (a_EnableDisable[key] = "En")
+		{
+			MsgBox, % c_MB_I_Info, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Found another definition which will be enabled"] . ":"
+				. "`n`n"
+				. TransA["triggerstring"] . ":" 	. A_Space . a_Triggerstring[key] 	. "`n"
+				. TransA["options"] . ":" 		. A_Space . a_Options[key] 		. "`n"
+				. TransA["hotstring"] . ":" 		. A_Space . a_Hotstring[key] 		. "`n"
+				. TransA["output function"] . ":" 	. A_Space . a_OutputFunction[key] 	. "`n"
+				. TransA["library"] . ":" 		. A_Space . a_Library[key]
+			F_ModifyHDef(a_Triggerstring[key], a_Options[key], a_Hotstring[key], a_OutputFunction[key], true, a_Library[key])
+		}
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LV1_CopyContentToHS3()
