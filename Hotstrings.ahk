@@ -9656,7 +9656,8 @@ F_CreateMenu_SizeOfMargin()
 F_AddHotstring()
 {
 	global ;v_EnDis ;assume-global mode of operation
-	local 	vHotstring := "", NewOptions := "", OldOptions := "", f_ChangeExistingDef := false
+	local 	vHotstring := "", NewOptions := "", OldOptions := ""
+		, 	f_ChangeExistingDef := false	;this flag is set if only existing definition must be changed (no need to create a new one)
  		,	SendFun := "", Overwrite := "",	key := 0, value := "", WhichGuiEnable := "", TheWholeFile := "", LibraryHeader := ""
 		,	HC2SubstOpt := ""	;hotstring (definition) C2 substitute options (string); variable to keep that user wants to set up C2 option for order of letters; actually what is set for Hotstring function is "" option instead of "C2" option
 
@@ -9788,101 +9789,8 @@ F_AddHotstring()
 		Case "HS3":	F_GuiHS3_EnDis("Disable")
 		Case "HS4": 	F_GuiHS4_EnDis("Disable")
 	}
-	;OutputDebug, % "NewOptions:" . A_Space . NewOptions . A_Tab . "OldOptions:" . A_Space . OldOptions . A_Tab . "v_Triggerstring:" . A_Space . v_Triggerstring
-	if (InStr(NewOptions, "C2"))	;actually "C2" isn't allowed / existing argument of "Hotstring" function can understand so just before this function is called the "NewOptions" string is checked if there is "C2" available. If it does, "C2" is replaced with "".
-		HC2SubstOpt := StrReplace(NewOptions, "C2", "")
-	else
-		HC2SubstOpt := NewOptions
-	if (InStr(NewOptions, "O"))
-	{
-		if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
-		{
-			Try
-				Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_SimpleOutput").bind(vHotstring, true, SendFun), true)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
-					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . NewOptions . ":" . vTriggerstring . "," . A_Space . "func(""SimpleOutput"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . v_EnDis . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
-		}
-;#c/* commercial only beginning		
-		if (SendFun = "MSI") or (SendFun = "MCL")
-		{
-			Try
-				Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HMenu_Output").bind(vHotstring, true, SendFun), true)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
-					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . true . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
-		}
-		if (SendFun = "P")
-		{
-			Try
-				Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_PictureShow").bind(vHotstring, true, SendFun), true)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
-					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_PictureShow"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . true . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
-		}	
-		if (SendFun = "R")
-		{
-			Try
-				Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HMenu_Output").bind(vHotstring, true, SendFun), true)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
-					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . vHotstring . "," . A_Space . true . "," . A_Space . SendFun . ")," . A_Space . true . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
-		}	
-;#c*/ commercial only end		
-	}
-	else
-	{
-		if (SendFun = "SI") or (SendFun = "SE") or (SendFun = "SP") or (SendFun = "SR") or (SendFun = "CL") or (SendFun = "S1") or (SendFun = "S2")
-		{
-			Try
-				Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_SimpleOutput").bind(vHotstring, false, SendFun), true)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
-					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_SimpleOutput"").bind(" . vHotstring . "," . A_Space . false . "," . A_Space . SendFun . ")," . A_Space . true . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
-		}
-;#c/* commercial only beginning		
-		if (SendFun = "MSI") or (SendFun = "MCL")
-		{
-			Try
-				Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_HMenu_Output").bind(vHotstring, false, SendFun), true)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
-					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . vHotstring . "," . A_Space . false . "," . A_Space . SendFun . ")," . A_Space . true . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
-		}
-		if (SendFun = "P")
-		{
-			Try
-				Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_PictureShow").bind(vHotstring, false, SendFun), true)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
-					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_PictureShow"").bind(" . vHotstring . "," . A_Space . false . "," . A_Space . SendFun . ")," . A_Space . true . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
-		}	
-		if (SendFun = "R")
-		{
-			Try
-				Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(v_Triggerstring), func("F_RunApplication").bind(vHotstring, false, SendFun), true)
-			Catch
-				MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Function"] . ":" . A_Space . A_ThisFunc . "`n" 
-					. TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
-					. "Hotstring(:" . NewOptions . ":" . v_Triggerstring . "," . A_Space . "func(""F_RunApplication"").bind(" . vHotstring . "," . A_Space . false . "," . A_Space . SendFun . ")," . A_Space . true . ")"
-					. "`n`n" . TransA["Library name:"] . A_Tab . v_SelectHotstringLibrary
-		}	
-;#c*/ commercial only end		
-	}
+	F_ModifyHDef(v_Triggerstring, NewOptions, vHotstring, SendFun, true, v_SelectHotstringLibrary)
+
 	; 5. Update global arrays
 	F_UpdateGlobalArrays(NewOptions, SendFun, "En", vHotstring)
 
@@ -11874,20 +11782,27 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 	Critical, Off
 }	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ModifyHDef(Triggerstring, Options, Hotstring, OutFun, DefOnOff, Library) ;tu jestem
+F_ModifyHDef(Triggerstring, Options, Hotstring, OutFun, DefOnOff, Library)
 {
 	global	;assume-global mode of operation
 	local	Oflag := false
+		,	HC2SubstOpt := ""	;hotstring (definition) C2 substitute options (string); variable to keep that user wants to set up C2 option for order of letters; actually what is set for Hotstring function is "" option instead of "C2" option
 
 	if (InStr(Options, "O"))
 		Oflag := true
 	else
 		Oflag := false
 
+	if (InStr(Options, "C2"))	;actually "C2" isn't allowed / existing argument of "Hotstring" function can understand so just before this function is called the "NewOptions" string is checked if there is "C2" available. If it does, "C2" is replaced with "".
+		HC2SubstOpt := StrReplace(Options, "C2", "")
+	else
+		HC2SubstOpt := Options
+
+
 	if (OutFun = "SI") or (OutFun = "SE") or (OutFun = "SP") or (OutFun = "SR") or (OutFun = "CL") or (OutFun = "S1") or (OutFun = "S2")
 	{
 		Try
-			Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_SimpleOutput").bind(Hotstring, Oflag, OutFun), DefOnOff)
+			Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_SimpleOutput").bind(Hotstring, Oflag, OutFun), DefOnOff)
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 				. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""SimpleOutput"").bind(" . Hotstring . "," . A_Space . Oflag . "," . A_Space . OutFun . ")," . A_Space . DefOnOff . ")"
@@ -11896,7 +11811,7 @@ F_ModifyHDef(Triggerstring, Options, Hotstring, OutFun, DefOnOff, Library) ;tu j
 	if (OutFun = "MSI") or (OutFun = "MCL")
 	{
 		Try
-			Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_HMenu_Output").bind(Hotstring, Oflag, OutFun), DefOnOff)
+			Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_HMenu_Output").bind(Hotstring, Oflag, OutFun), DefOnOff)
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 				. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_HMenu_Output"").bind(" . Hotstring . "," . A_Space . true . A_Space . OutFun . ")," . A_Space . DefOnOff . ")"
@@ -11905,7 +11820,7 @@ F_ModifyHDef(Triggerstring, Options, Hotstring, OutFun, DefOnOff, Library) ;tu j
 	if (OutFun = "P")
 	{
 		Try
-			Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_PictureShow").bind(Hotstring, Oflag, OutFun), DefOnOff)
+			Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_PictureShow").bind(Hotstring, Oflag, OutFun), DefOnOff)
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 				. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_PictureShow"").bind(" . Hotstring . "," . A_Space . true . A_Space . OutFun . ")," . A_Space . DefOnOff . ")"
@@ -11914,7 +11829,7 @@ F_ModifyHDef(Triggerstring, Options, Hotstring, OutFun, DefOnOff, Library) ;tu j
 	if (OutFun = "R")
 	{
 		Try
-			Hotstring(":" . Options . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_RunApplication").bind(Hotstring, Oflag, OutFun), DefOnOff)
+			Hotstring(":" . HC2SubstOpt . ":" . F_ConvertEscapeSequences(Triggerstring), func("F_RunApplication").bind(Hotstring, Oflag, OutFun), DefOnOff)
 		Catch
 			MsgBox, 16, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % A_ThisFunc . A_Space . TransA["Something went wrong with (triggerstring, hotstring) creation"] . ":" . "`n`n"
 				. "Hotstring(:" . Options . ":" . Triggerstring . "," . A_Space . "func(""F_RunApplication"").bind(" . Hotstring . "," . A_Space . true . A_Space . OutFun . ")," . A_Space . DefOnOff . ")"
@@ -12009,15 +11924,24 @@ F_LV1_EnDisDefinition()	;enable or disable d(t, o, h)
 	GuiControl, Focus, % IdListView1
 	LV_Modify(key, "Select" . A_Space . "Focus")
 
-	;5. Search for duplicated definitions and enable the first one.
+	;5. If current definition was disabled, search for duplicated definitions and enable the first one.
 	key := 0	;the seconu use of "for" loop require zeroing of index variable
-	for key, value in a_Triggerstring
-	{
-		if (a_Triggerstring[key] == Triggerstring) ;case sensitive string comparison!
-		; and (a_Library[key] != SubStr(v_SelectHotstringLibrary, 1, -4))	
-		and (a_EnableDisable[key] = "En")
-			F_ModifyHDef(a_Triggerstring[key], a_Options[key], a_Hotstring[key], a_OutputFunction[key], true, a_Library[key])
-	}
+	if (EnDis = "Dis")
+		for key, value in a_Triggerstring
+		{
+			if (a_Triggerstring[key] == Triggerstring) ;case sensitive string comparison!
+			and (a_EnableDisable[key] = "En")
+			{
+				MsgBox, % c_MsgBoxIconInfo, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["Found another definition which will be enabled"] . ":"
+					. "`n`n"
+					. TransA["triggerstring"] . ":" . A_Space .  a_Triggerstring[key] . "`n"
+					. TransA["options"] . ":" . A_Space . a_Options[key] . "`n"
+					. TransA["hotstring"] . ":" . A_Space . a_Hotstring[key]
+					. TransA["output function"] . ":" . A_Space . a_OutputFunction[key]
+					. TransA["library"] . ":" . a_Library[key]
+				F_ModifyHDef(a_Triggerstring[key], a_Options[key], a_Hotstring[key], a_OutputFunction[key], true, a_Library[key])
+			}
+		}
 
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . A_Space . TransA["information"], % TransA["New settings are now applied."], 10	;dissapears after 10 s
 }
@@ -13630,6 +13554,7 @@ Export to .ahk with static definitions of hotstrings			= Export to .ahk with sta
 Export to .ahk with dynamic definitions of hotstrings			= Export to .ahk with dynamic definitions of hotstrings
 Exported												= Exported
 Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries = Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries
+Found another definition which will be enabled				= Found another definition which will be enabled
 F3 or Esc: Close Search hotstrings | ↓ ↑ → ←: to change position | Enter: Select definition and close = F3 or Esc: Close Search hotstrings | ↓ ↑ → ←: to change position | Enter: Select definition and close
 file! 												= file!
 file in Languages subfolder!								= file in Languages subfolder!
@@ -13805,6 +13730,7 @@ Opening Square Bracket [ 								= Opening Square Bracket [
 options												= options
 or													= or
 Out. Fun.												= Out. Fun.
+output function										= output function
 question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
