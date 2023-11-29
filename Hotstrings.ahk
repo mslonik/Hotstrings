@@ -722,14 +722,17 @@ Critical, Off
 
 #If WinActive("ahk_id" HS3GuiHwnd) or WinActive("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows are active at the moment. 
 	F1::	;new thread starts here
+		F_DestroyTriggerstringTips(ini_TTCn)
 		F_GuiAboutLink1()
 	return
 
 	^F1:: ;new thread starts here
+		F_DestroyTriggerstringTips(ini_TTCn)
 		F_GuiAboutLink2()
 	return
 
 	F2:: ;new thread starts here
+		F_DestroyTriggerstringTips(ini_TTCn)
 		Switch F_WhichGui()
 		{
 			Case "HS3":
@@ -754,35 +757,39 @@ Critical, Off
 
 	^f::
 	F3:: ;new thread starts here
+		F_DestroyTriggerstringTips(ini_TTCn)
 		Suspend, Permit		;Any hotkey/hotstring subroutine whose very first line is Suspend, Permit will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		F_Searching()	;To disable all hotstrings definitions within search window.
 	return
 
 	F4::	;new thread starts here
+		F_DestroyTriggerstringTips(ini_TTCn)
 		F_ToggleRightColumn()
 	return
 
 	F5::	;new thread starts here
+		F_DestroyTriggerstringTips(ini_TTCn)
 		F_WhichGui()
 		F_Clear()
 	return
 
 	F6::	;new thread starts here
+		F_DestroyTriggerstringTips(ini_TTCn)
 		if (!ini_Sandbox) or (A_Gui = "HS4")
 			return
 		else
-		{
 			GuiControl, Focus, % IdEdit10
-		}
 	return
 
 	F7:: ;new thread starts here
+		F_DestroyTriggerstringTips(ini_TTCn)
 		Gui, % F_WhichGui() . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 		F_GuiHSdelay()
 	return
 
 	F8::	;new thread starts here
 	~Del::
+		F_DestroyTriggerstringTips(ini_TTCn)
 		GuiControlGet, FocusedControl, HS3: Focus
 		; OutputDebug, % "FocusedControl2:" . FocusedControl2 . "`n"
 		if (FocusedControl = "SysListView321")
@@ -790,6 +797,7 @@ Critical, Off
 	return
 
 	F9::	;new thread starts here
+		F_DestroyTriggerstringTips(ini_TTCn)
 		F_AddHotstring()
 		v_InputString := ""	;in order to reset internal recognizer and let triggerstring tips to appear
 	return
@@ -807,10 +815,15 @@ Critical, Off
 	return
 
 	^F6::	;new thread starts here; only on time of degugging HS3GuiSize will be initiated!
+		F_DestroyTriggerstringTips(ini_TTCn)
 		F_ToggleSandbox()
 	return
 	+^s::
 		F_AppStats()									;show application statistics
+	return
+
+	F12::
+		F_DestroyTriggerstringTips(ini_TTCn)
 	return
 #If
 
@@ -10069,7 +10082,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
+F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun) ;return true (1) in case of any problem. 
 {
 	global 	;assume-global mode of operation
 	local	WhichGUI := F_WhichGui()
@@ -10194,10 +10207,16 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 		}
 		if (!FileExist(v_EnterHotstring))
 		{
-			MsgBox, % c_MB_I_Question, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Content of this text field is not file path or file wasn't found. For ouput function ""Run (R)"" it is required to enter correct filepath."] 
+			MsgBox, % c_MB_I_Question + c_MB_B_YesNo, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+				, % TransA["Content of this text field is not recognized as file path or file wasn't found."] 
+				. TransA["Do you want to continue?"]
 				. "`n`n"	
-				. TransA["Leave this field empty and then press ""Add/Edit hotstring (F9)"" again to get GUI enabling file selection."] 
-			return, true
+				. TransA["If you answer ""Yes"", new definition will be added just as you've entered it."] . "`n"
+				. TransA["If you answer ""No"", you'll get a chance to try again."]
+				. "`n`n"	
+				. TransA["Leave this field empty and then press ""Add/Edit hotstring (F9)"" again to get GUI enabling file selection."]
+			IfMsgBox, No
+				return, true
 		}	
 	}	
 	if (!v_SelectHotstringLibrary) or (v_SelectHotstringLibrary = TransA["↓ Click here to select hotstring library ↓"])
@@ -10221,6 +10240,17 @@ F_ReadUserInputs(ByRef TextInsert, ByRef NewOptions, ByRef SendFun)
 		NewOptions .= "O"
 	if (v_OptionReset)
 		NewOptions .= "Z"
+
+	if (NewOptions == "")
+		MsgBox, % c_MB_I_Question + c_MB_B_YesNo, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+			, % TransA["You've left no triggerstring option selected. It is strongly recommended to mark at least ""Z"". Unless you know what you're doing."]
+			. "`n`n"
+			. TransA["Do you want to continue?"] . "`n`n"
+			. TransA["If you answer ""Yes"", new definition will be added with no triggerstring option selected."] . "`n"
+			. TransA["If you answer ""No"", you'll get a chance to try again."]
+		IfMsgBox, No
+			return, true
+
 	Switch v_SelectFunction
 	{
 		Case "Clipboard (CL)":				SendFun := "CL"
@@ -13376,7 +13406,7 @@ Content of current log file (read only)						= Content of current log file (read
 Convert to executable (.exe)								= Convert to executable (.exe)
 Content of clipboard contain new line characters. Do you want to remove them? = Content of clipboard contain new line characters. Do you want to remove them?
 Content of this text field is not file path or file wasn't found. For ouput function ""Picture (P)"" it is required to enter correct filepath. = Content of this text field is not file path or file wasn't found. For ouput function ""Picture (P)"" it is required to enter correct filepath.
-Content of this text field is not file path or file wasn't found. For ouput function ""Run (R)"" it is required to enter correct filepath. = Content of this text field is not file path or file wasn't found. For ouput function ""Run (R)"" it is required to enter correct filepath.
+Content of this text field is not recognized as file path or file wasn't found.  = Content of this text field is not recognized as file path or file wasn't found. 
 Continue reading the library file? If you answer ""No"" then application will exit! = Continue reading the library file? If you answer ""No"" then application will exit!
 Conversion of .ahk file into new .csv file (library) and loading of that new library = Conversion of .ahk file into new .csv file (library) and loading of that new library
 Conversion of .csv library file into new .ahk file containing static (triggerstring, hotstring) definitions = Conversion of .csv library file into new .ahk file containing static (triggerstring, hotstring) definitions
@@ -13425,6 +13455,7 @@ Do you want to proceed? 									= Do you want to proceed?
 Dot . 												= Dot .
 Do you want to reload application now?						= Do you want to reload application now?
 doesn't exist in application folder						= doesn't exist in application folder
+Do you want to continue?									= Do you want to continue?
 down													= down
 Download repository version								= Download repository version
 Downloading public library files							= Downloading public library files
@@ -13516,11 +13547,14 @@ If sound is enabled, define it							= If sound is enabled, define it
 If you answer ""Yes"" it will overwritten.					= If you answer ""Yes"" it will overwritten.
 If you answer ""Yes"" definition existing in another library will not be changed. = If you answer ""Yes"" definition existing in another library will not be changed.
 If you answer ""Yes"" it will be overwritten with chosen settings. = If you answer ""Yes"" it will be overwritten with chosen settings.
+If you answer ""Yes"", new definition will be added just as you've entered it. = If you answer ""Yes"", new definition will be added just as you've entered it.
+If you answer ""Yes"", new definition will be added with no triggerstring option selected. = If you answer ""Yes"", new definition will be added with no triggerstring option selected.
 If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used. = If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used.
 If you answer ""Yes"", the existing file will be overwritten. This is recommended choice. If you answer ""No"", new content will be added to existing file. = If you answer ""Yes"", the existing file will be overwritten. This is recommended choice. If you answer ""No"", new content will be added to existing file.
 If you answer ""Yes"", then new definition will be created, but seleced special character will not be visible. = If you answer ""Yes"", then new definition will be created, but seleced special character will not be visible.
 If you answer ""No"" application will exit.					= If you answer ""No"" application will exit.
 If you answer ""No"" edition of the current definition will be interrupted. = If you answer ""No"" edition of the current definition will be interrupted.
+If you answer ""No"", you'll get a chance to try again.		= If you answer ""No"", you'll get a chance to try again.
 (If you answer ""No"", the second one will be used).			= (If you answer ""No"", the second one will be used).
 If you answer ""No"", then you will get a chance to fix your new created definition. = If you answer ""No"", then you will get a chance to fix your new created definition.
 If you apply ""SI"" or ""MSI"" or ""SE"" output function then some characters like = If you apply ""SI"" or ""MSI"" or ""SE"" output function then some characters like
@@ -13650,6 +13684,9 @@ output function										= output function
 question												= question
 Question Mark ? 										= Question Mark ?
 Quote "" 												= Quote ""
+)"
+	TransConst .= "`n
+(Join`n `
 Path to executable file is blank. Do you want to select it now from inteactive GUI? = Path to executable file is blank. Do you want to select it now from inteactive GUI?
 Path to picture file is blank. Do you want to select it now from inteactive GUI?			= Path to picture file is blank. Do you want to select it now from inteactive GUI?
 Pause												= Pause
@@ -13668,9 +13705,6 @@ Programm												= Programm
 Public library:										= Public library:
 purple												= purple
 question												= question
-)"
-	TransConst .= "`n
-(Join`n `
 Recognized encoding of the file:							= Recognized encoding of the file:
 red													= red
 Reload												= Reload
@@ -13904,6 +13938,7 @@ You cannot move existing definition to library which is DISABLED. = You cannot m
 You should receive it by e-mail							= You should receive it by e-mail
 You've cancelled this process.							= You've cancelled this process.
 You've changed at least one configuration parameter, but didn't yet apply it. = You've changed at least one configuration parameter, but didn't yet apply it.
+You've left no triggerstring option selected. It is strongly recommended to mark at least ""Z"". Unless you know what you're doing. = You've left no triggerstring option selected. It is strongly recommended to mark at least ""Z"". Unless you know what you're doing.
 Your hotstring definition contain one of the following characters: = Your hotstring definition contain one of the following characters:
 Your current screen coordinates have changed. For example you've unplugged your laptop from docking station. Your settings in .ini file will be adjusted accordingly. = Your current screen coordinates have changed. For example you've unplugged your laptop from docking station. Your settings in .ini file will be adjusted accordingly.
 ↓ Click here to select hotstring library ↓					= ↓ Click here to select hotstring library ↓
@@ -15761,7 +15796,7 @@ F_HMenu_Mouse(SendFun) ; Handling of mouse events for F_HMenu_Output;The subrout
 		,	OutputVarControl 	:= 0		; OutputVarControl: to store the name (ClassNN) of the control under the mouse cursor.
 		,	OutputVarWin 		:= ""	;The name of the output variable in which to store the unique ID number of the window under the mouse cursor. If the window cannot be determined, this variable will be made blank.
 
-	OutputDebug, % A_ThisFunc . A_Space . "B" . A_Space . "ThisHotkey:" . ThisHotkey . "`n"
+	; OutputDebug, % A_ThisFunc . A_Space . "B" . A_Space . "ThisHotkey:" . ThisHotkey . "`n"
 	if (InStr(ThisHotkey, "LButton"))
 	{
 		MouseGetPos, , , OutputVarWin, OutputVarControl
