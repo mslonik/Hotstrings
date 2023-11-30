@@ -9702,7 +9702,10 @@ F_AddHotstring()
 	global ;v_EnDis ;assume-global mode of operation
 	local 	vHotstring := "", NewOptions := "", OldOptions := ""
 		, 	f_ChangeExistingDef := false	;this flag is set if only existing definition must be changed (no need to create a new one)
- 		,	SendFun := "", Overwrite := "",	key := 0, value := "", WhichGuiEnable := "", TheWholeFile := "", LibraryHeader := ""
+ 		,	SendFun := "", Overwrite := ""
+		,	key := 0
+		,	DuplicatedKey := 0
+		, 	value := "", WhichGuiEnable := "", TheWholeFile := "", LibraryHeader := ""
 		,	HC2SubstOpt := ""	;hotstring (definition) C2 substitute options (string); variable to keep that user wants to set up C2 option for order of letters; actually what is set for Hotstring function is "" option instead of "C2" option
 
 	;1. Read all inputs.
@@ -9719,6 +9722,7 @@ F_AddHotstring()
 		{
 			OldOptions 		:= a_Options[key]
 		,	f_ChangeExistingDef := true	;if exist in the same library, no new definition is required, so set the flag (existing definition will be just changed)
+		,	DuplicatedKey		:= key
 			break
 		}
 	}
@@ -9782,7 +9786,7 @@ F_AddHotstring()
 	; 3. Modify existing definition
 	if (f_ChangeExistingDef)	;modify existing definition
 	{
-		if (NewOptions = OldOptions) and (vHotstring == a_Hotstring[key]) and (SendFun = a_OutputFunction[key]) and (v_Comment == a_Comment[key])
+		if (NewOptions = OldOptions) and (vHotstring == a_Hotstring[DuplicatedKey]) and (SendFun = a_OutputFunction[DuplicatedKey]) and (v_Comment == a_Comment[DuplicatedKey])
 		{
 			MsgBox, % c_MB_I_Info, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
 				, % TransA["New definition is identical with existing one. Please try again."]
@@ -9794,7 +9798,7 @@ F_AddHotstring()
 			Case "HS4": 	F_GuiHS4_EnDis("Disable")
 		}
 
-		Overwrite := F_ChangeExistingDef(OldOptions, NewOptions, a_Triggerstring[key], a_Library[key], SendFun, vHotstring, a_EnableDisable[key])
+		Overwrite := F_ChangeExistingDef(OldOptions, NewOptions, a_Triggerstring[DuplicatedKey], a_Library[DuplicatedKey], SendFun, vHotstring, a_EnableDisable[DuplicatedKey])
 		if (Overwrite = "Yes")
 		{
 			F_ChangeDefInArrays(key, NewOptions, SendFun, vHotstring, v_Comment)
