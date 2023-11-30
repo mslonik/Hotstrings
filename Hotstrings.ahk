@@ -23,10 +23,6 @@ FileEncoding, 			UTF-16		; Sets the default encoding for FileRead, FileReadLine,
 CoordMode, Caret,		Screen		; Only Screen makes sense for functiofirmadd/ns prepared in this script to handle position of on screen GUIs. 
 CoordMode, ToolTip,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs. 
 CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in this script to handle position of on screen GUIs.
-;#c/* commercial only beginning
-#Include, %A_ScriptDir%\includes\Gdip_Part.ahk		;output function "P (Picture)"
-#Include, %A_ScriptDir%\includes\ScriptGuard1.ahk 	;https://www.autohotkey.com/boards/viewtopic.php?f=6&t=80229 to encrypt content
-;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - E X E  CONVERSION  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ;Parameters in this section can be used to prepare executable file of ahk2exe.exe without GUI interface. All options are set within this file. The executable is made as little as possible by exchanging .exe with .bin file. Also other tricks are applied. 
 global AppIcon			:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
@@ -161,21 +157,41 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_dHK_CopyClip			:= "~^#c"				;global constant: default (d) hotkey (HK) for Copy to clipboard future hotstring content
 ,		c_dHK_CallGUI 			:= "#^h"				;global constant: default (d) hotkey (HK) for calling main application GUI
 ,		c_dHK_ToggleTt			:= "none"				;global constant: default (d) hotkey (HK) for toggling the triggestring tips
-,		c_AppDataLocal			:= SubStr(A_Desktop, 1, -7) . "\" . "AppData\Local"	;default location for folders of Hotstrings application: ;C:\Users\<User>\AppData\Local\. The same location is used in the NSIS installer.
+,		c_AppDataLocal			:= SubStr(A_Desktop, 1, -7) . "AppData\Local"	;default location for folders of Hotstrings application: ;C:\Users\<User>\AppData\Local\. The same location is used in the NSIS installer.
 ;#c/* commercial only beginning
 ,		v_ValidTill			:= "inf"				;"inf" for infinity, "limited" for other cases
 ,		f_RShiftDown 			:= false
 ,		f_LShiftDown 			:= false
 ,		v_SendFun				:= ""				;last used output function; important for F_Undo
 ;#c*/ commercial only end
+,		ini_LicenseKey			:= ""				;global variable
+,		ini_HADConfig			:= c_AppDataLocal . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Config.ini"	;default value
+,		v_ScriptDir			:= c_AppDataLocal . "\" . SubStr(A_ScriptName, 1, -4)
+,		ini_HADL				:= c_AppDataLocal . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries"  ;default value
+,		ini_THLog				:= ""
+;#c/* commercial only beginning
+#Include, %A_ScriptDir%\includes\Gdip_Part.ahk		;output function "P (Picture)"
+#Include, %A_ScriptDir%\includes\ScriptGuard1.ahk 	;https://www.autohotkey.com/boards/viewtopic.php?f=6&t=80229 to encrypt content
+;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
 F_LoadCreateTranslationTxt() 			;default set of text string definitions (English) is loaded into memory at the very beginning in case if Config.ini doesn't exist yet, but some MsgBox have to be shown.
-F_CheckCreateConfigIni() 			;Try to load up configuration file. If those files do not exist, create them. If it isn't possible, exit.
-F_CheckIfMoveToProgramFiles()			;Checks if move Hotstrings folder to Program Files folder and then restarts application.
-F_CheckIfRemoveOldDir()				;Checks content of Config.ini in order to remove old script directory.
-F_CheckFileEncoding(A_ScriptFullPath)	;checks if script is utf-8 compliant. it has plenty to do wiith github download etc.
-F_Load_ini_HADL()					;HADL = Hotstrings Application Data Libraries
+F_CheckCreateConfigIni() 	;Try to load up configuration file. If this file do not exists, create it. If it isn't possible, exit.
+;#c/* commercial only beginning
+if (v_LicenseType = "pro") and (v_ValidTill != "inf")
+{
+	F_CheckCommercialConditions()		;check Lemon squeezy
+	SetTimer, F_CheckCommTime, % 1000 * 3600	;1 hour = 1000 ms * 3 600
+	return
+}
+;#c*/ commercial only end
+	
+; F_CheckIfMoveToProgramFiles()		;Checks if move Hotstrings folder to Program Files folder and then restarts application.
+; F_CheckIfRemoveOldDir()			;Checks content of Config.ini in order to remove old script directory.
+F_CheckFileEncoding()				;checks if script is utf-8 compliant. it has plenty to do wiith github download etc.
+
+F_Validate_IniParam(ini_HADL, ini_HADConfig, "Configuration", "HADL")
+
 F_Load_ini_GuiReload()
 F_Load_ini_CheckRepo()
 F_Load_ini_DownloadRepo()
@@ -201,9 +217,9 @@ if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_Gui
 	}
 }
 
-if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "Languages" subfolder 
+if ( !Instr(FileExist(v_ScriptDir . "\Languages"), "D"))				; if  there is no "Languages" subfolder 
 {
-	FileCreateDir, %A_ScriptDir%\Languages
+	FileCreateDir, % v_ScriptDir . "\Languages"
 	if (ErrorLevel)
 	{
 		MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["""Languages"" subfolder wasn't created for some reason."]
@@ -211,19 +227,19 @@ if ( !Instr(FileExist(A_ScriptDir . "\Languages"), "D"))				; if  there is no "L
 	}	
 	else	
 		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["warning"], % TransA["There was no Languages subfolder, so one now is created."] . A_Space . "`n" 
-			. A_ScriptDir . "\Languages"
+			. v_ScriptDir . "\Languages"
 }
-
+;tu jestem
 F_Load_ini_Language()
-if (!FileExist(A_ScriptDir . "\Languages\" . ini_Language))			; if there is no ini_language .ini file, e.g. v_langugae == Polish.txt and there is no such file in Languages folder
+if (!FileExist(v_ScriptDir . "\Languages\" . ini_Language))			; if there is no ini_language .ini file, e.g. v_langugae == Polish.txt and there is no such file in Languages folder
 {
 	MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no"] . A_Space . ini_Language . A_Space . TransA["file in Languages subfolder!"]
 		. "`n`n" 
 		. TransA["The default"] . A_Space . "English.txt" . A_Space . TransA["file is now created in the following subfolder:"] 
 		. "`n`n" 
-		. A_ScriptDir . "\Languages\"
+		. v_ScriptDir . "\Languages\"
 	ini_Language := "English.txt"
-	if (!FileExist(A_ScriptDir . "\Languages\" . "English.txt"))
+	if (!FileExist(v_ScriptDir . "\Languages\" . "English.txt"))
 		F_LoadCreateTranslationTxt("create")
 	else
 		F_LoadCreateTranslationTxt("load")	
@@ -289,7 +305,7 @@ F_InitiateInputHook()
 TrayTip, % A_ScriptName, % TransA["Hotstrings have been loaded"], , 1 ;1 = Info icon
 SetTimer, HideTrayTip, -5000				;more general approach; for details see https://www.autohotkey.com/docs/commands/TrayTip.htm#Remarks
 
-Loop, Files, %A_ScriptDir%\Languages\*.txt
+Loop, Files, % v_ScriptDir . "\Languages\*.txt"
 	Menu, SubmenuLanguage, Add, %A_LoopFileName%, F_ChangeLanguage
 F_ChangeLanguage()
 
@@ -547,14 +563,6 @@ if (ini_TTCn = 4)	;static triggerstring / hotstring GUI
 if (ini_GuiReload) and (v_SilentMode != "l")
 	F_GUIInit()
 
-;#c/* commercial only beginning
-if (v_LicenseType = "pro") and (v_ValidTill != "inf")
-{
-	F_CheckCommercialConditions()			;check Lemon squeezy
-	SetTimer, F_CheckCommTime, % 1000 * 3600	;1 hour = 1000 ms * 3 600
-}
-;#c*/ commercial only end
-
 AppStartTime := A_Now	;Date and time math can be performed with EnvAdd and EnvSub. Also, FormatTime can format the date and/or time according to your locale or preferences.
 Critical, Off
 ; -------------------------- SECTION OF HOTKEYS ---------------------------
@@ -791,7 +799,7 @@ Critical, Off
 	~Del::
 		F_DestroyTriggerstringTips(ini_TTCn)
 		GuiControlGet, FocusedControl, HS3: Focus
-		; OutputDebug, % "FocusedControl2:" . FocusedControl2 . "`n"
+		OutputDebug, % "FocusedControl2:" . FocusedControl . "`n"
 		if (FocusedControl = "SysListView321")
 			F_DeleteHotstring()
 	return
@@ -1274,20 +1282,20 @@ F_GuiEnterLicense()
 F_CheckCommercialConditions()
 {
 	global	;assume-global mode of operation
-	local	LicenseInfo := {}
-		,	ElapsedTime := 0
-		,	LicenseDateTimeStamp := 0
-		,	c_MB_I_Exclamation := 48
-		,	c_1minute := 60 
+	local	LicenseInfo 			:= {}
+		,	ElapsedTime 			:= 0
+		,	LicenseDateTimeStamp 	:= 0
+		,	c_MB_I_Exclamation 		:= 48
+		,	c_1minute 			:= 60 
+		,	temp					:= ""	;for F_Read_IniParam
 
 	ElapsedTime := A_Now	
 
 	if (v_LicenseType = "pro") and (v_ValidTill != "inf")
 	{
-		ini_LicenseKey	:= ""			;global variable, default value
-		IniRead, ini_LicenseKey, 		% ini_HADConfig, LicenseInfo, LicenseKey, % A_Space
-
-		if (ini_LicenseKey = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
+		; ini_LicenseKey := F_IniRead_ValidityError(temp, "LicenseKey", "LicenseInfo", ini_HADConfig, "", "SaveDefault", "ERROR")	;IfExit = {"Exit", "SaveDefault", "LetDecide"}		
+		temp := F_Read_IniParam(ini_LicenseKey, ini_HADConfig, "LicenseKey", "LicenseInfo")
+		if (temp = "")	or (temp = "ERROR") ;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 		{
 			F_GuiEnterLicense_CreateGui()
 			F_GuiEnterLicense_DetermineConstraints()
@@ -1295,7 +1303,7 @@ F_CheckCommercialConditions()
 		}
 		else
 		{
-			RegRead, ini_LicenseInstanceId, HKCU, SOFTWARE\TRT,	;	IniRead, ini_LicenseInstanceId, 	% ini_HADConfig, LicenseInfo, InstanceId, % A_Space
+			RegRead, ini_LicenseInstanceId, HKCU, SOFTWARE\TRT,	
 			if (ErrorLevel)
 			{
 				MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
@@ -2690,18 +2698,35 @@ F_RestoreDefaultUserDataFolder()	;future: This function can be used to move User
 }
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Load_ini_HADL()	;HADL = Hotstrings Application Data Library
+F_Read_IniParam(ByRef IniParam, IniFilename, Section, Parameter)
 {
 	global	;assume-global mode
-	local	LibLocation_ScriptDir := false, LibLocation_AppData := false, IsLibraryFolderEmpty1 := true, IsLibraryFolderEmpty2 := true, LibCounter1 := 0, LibCounter2 := 0
+	local	temp := ""
 
-	IniRead, ini_HADL, % ini_HADConfig, Configuration, HADL, % A_Space	;Inexplicite declaration of global variable  ini_HADL. Default parameter. The value to store in OutputVar (ini_HADL) if the requested key is not found. If omitted, it defaults to the word ERROR. To store a blank value (empty string), specify %A_Space%.
-	if (ini_HADL = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-	{	;folder Libraries can be present only in 2 locations: by default in A_AppData or in A_ScriptDir
-		ini_HADL := c_AppDataLocal . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Libraries" 	; Hotstrings Application Data Libraries	default location ;global variable
-		IniWrite, % ini_HADL, % ini_HADConfig, Configuration, HADL
-		return
+	IniRead, temp, % IniFilename, % Section, % Parameter
+	if (temp != "ERROR") and (temp != "")
+	{
+		IniParam := temp
+		return "correct"
+	}	
+
+	if (temp = "ERROR")
+	{
+		MsgBox, % c_MB_I_Exclamation, % A_ScriptName
+			, % "Problem with reading parameter" . A_Space . Parameter . A_Space . "from the file" . "`n"
+			. IniFilename . "`n`n"
+			. "ERROR was read" . "`n"
+			. "Parameter is missing within Config.ini or file is corrupted."
+		return "ERROR"
 	}
+	if (temp = "")
+	{
+		MsgBox, % c_MB_I_Exclamation, % A_ScriptName
+			, % "Problem with reading parameter" . A_Space . Parameter . A_Space . "from the file" . "`n"
+			. IniFilename . "`n`n"
+			. "Parameter has no no value." . "`n"
+		return ""
+	}	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;#c/* commercial only beginning
@@ -3747,7 +3772,7 @@ F_InitiateTrayMenus(v_SilentMode)
 ;#c*/ commercial only end
 		Case "":
 			Menu, Tray, NoStandard									; remove all the rest of standard tray menu
-			; OutputDebug, % "AppIcon:" . AppIcon . "`n" . "A_ScriptDir:" . A_Tab . A_ScriptDir .  "`n" . "A_WorkingDir:" . A_Tab . A_WorkingDir . "`n" . "FileExist(AppIcon):" . A_Tab . FileExist(AppIcon) . "`n"
+			; OutputDebug, % "AppIcon:" . AppIcon . "`n" . "v_ScriptDir:" . A_Tab . v_ScriptDir .  "`n" . "A_WorkingDir:" . A_Tab . A_WorkingDir . "`n" . "FileExist(AppIcon):" . A_Tab . FileExist(AppIcon) . "`n"
 			if (!FileExist(AppIcon)) and (!A_IsCompiled)				; if the file is compiled, then icon is inside of .exe file.
 			{
 				MsgBox, 68, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Information"], % TransA["The icon file"] . ":" . "`n`n" . AppIcon . "`n`n" . TransA["doesn't exist in application folder"] . "." 
@@ -3793,7 +3818,7 @@ F_ChangeLanguage()
 	
 	if (OneTimeOnly)
 	{
-		Loop, Files, %A_ScriptDir%\Languages\*.txt
+		Loop, Files, % v_ScriptDir . "\Languages\*.txt"
 		{
 			if (ini_Language == A_LoopFileName)
 				Menu, SubmenuLanguage, Check, %A_LoopFileName%
@@ -3806,7 +3831,7 @@ F_ChangeLanguage()
 	{
 		ini_Language := A_ThisMenuitem
 		IniWrite, %ini_Language%, % ini_HADConfig, GraphicalUserInterface, Language
-		Loop, Files, %A_ScriptDir%\Languages\*.txt
+		Loop, Files, % v_ScriptDir . "\Languages\*.txt"
 		{
 			if (ini_Language == A_LoopFileName)
 				Menu, SubmenuLanguage, Check, %A_LoopFileName%
@@ -8012,19 +8037,19 @@ TT_C4GuiEscape()
 		Gui, TT_C4: Hide
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_CheckFileEncoding(FullFilePath)
+F_CheckFileEncoding()
 {	;https://www.autohotkey.com/boards/viewtopic.php?t=65049
 	local file := "", RetrievedEncoding := "", FilePos := 0
 
 	if (!A_IsCompiled)
 	{
-		file := FileOpen(FullFilePath, "r")
+		file := FileOpen(A_ScriptFullPath, "r")
 	,	RetrievedEncoding := file.Encoding
 	,	FilePos := file.Pos
 		if !(((RetrievedEncoding = "UTF-8") and (FilePos = 3)) or ((RetrievedEncoding = "UTF-16") and (FilePos = 2)))
 		{
 			MsgBox, 16, % A_ScriptName . ":" . A_Space . TransA["Error"], % TransA["Recognized encoding of the file:"] 
-				. "`n" . FullFilePath
+				. "`n" . A_ScriptFullPath
 				. "`n`n" . RetrievedEncoding . A_Space . "no-BOM"
 				. "`n`n" . TransA["Required encoding: UTF-8 with BOM. Application will exit now."]
 			try	;if no try, some warnings are still catched; with try no more warnings
@@ -9613,7 +9638,7 @@ F_AddToAutostart()
 	local 	Target 		:= A_ScriptFullPath
 	,		LinkFile_DM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_DM" . "." . "lnk"
 	,		LinkFile_SM	:= A_Startup . "\" . SubStr(A_ScriptName, 1, -4) . "_SM" . "." . "lnk"
-	,		WorkingDir 	:= A_ScriptDir
+	,		WorkingDir 	:= v_ScriptDir
 	,		Args_DM 		:= ""
 	,		Args_SM		:= "l"
 	,		Description 	:= TransA["Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries"] . "."
@@ -10005,23 +10030,23 @@ F_PictureShow(PHotstring, Oflag, SendFun)
 					MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"], % TransA["MSPaint.exe (Paint application) wasn't found or couldn't be run."]
 				WinWaitActive, % "ahk_pid" . A_Space . OutputVarPID
 
-				pToken := Gdip_Startup()	;all Gdip_ functions come from Gdip_ library based on Gdip standard library version 1.96 by Marius Șucan; https://github.com/marius-sucan/AHK-GDIp-Library-Compilation/blob/master/ahk-v1-1/Gdip_All.ahk
-				Gdip_SetBitmapToClipboard(pBitmap := Gdip_CreateBitmapFromFile(PHotstring))
-				Gdip_DisposeImage(pBitmap)
-				Gdip_Shutdown(pToken)
-				Gui, HMenuP: Destroy
+				; pToken := Gdip_Startup()	;all Gdip_ functions come from Gdip_ library based on Gdip standard library version 1.96 by Marius Șucan; https://github.com/marius-sucan/AHK-GDIp-Library-Compilation/blob/master/ahk-v1-1/Gdip_All.ahk
+				; Gdip_SetBitmapToClipboard(pBitmap := Gdip_CreateBitmapFromFile(PHotstring))
+				; Gdip_DisposeImage(pBitmap)
+				; Gdip_Shutdown(pToken)
+				; Gui, HMenuP: Destroy
 				v_InputH.VisibleText 	:= true
 				break
 			}	
 
 			if (WhatWasPressed  = "2")	;TransA["Copy picture to Clipboard"]
 			{
-				pToken := Gdip_Startup()	;all Gdip_ functions come from Gdip_ library based on Gdip standard library version 1.96 by Marius Șucan; https://github.com/marius-sucan/AHK-GDIp-Library-Compilation/blob/master/ahk-v1-1/Gdip_All.ahk
-				Gdip_SetBitmapToClipboard(pBitmap := Gdip_CreateBitmapFromFile(PHotstring))
-				Gdip_DisposeImage(pBitmap)
-				Gdip_Shutdown(pToken)
-				Gui, HMenuP: Destroy
-				Gui, HMenuP: Destroy
+				; pToken := Gdip_Startup()	;all Gdip_ functions come from Gdip_ library based on Gdip standard library version 1.96 by Marius Șucan; https://github.com/marius-sucan/AHK-GDIp-Library-Compilation/blob/master/ahk-v1-1/Gdip_All.ahk
+				; Gdip_SetBitmapToClipboard(pBitmap := Gdip_CreateBitmapFromFile(PHotstring))
+				; Gdip_DisposeImage(pBitmap)
+				; Gdip_Shutdown(pToken)
+				; Gui, HMenuP: Destroy
+				; Gui, HMenuP: Destroy
 				v_InputH.VisibleText 	:= true
 				break
 			}	
@@ -11248,6 +11273,7 @@ F_DeleteHotstring()
 	, 		hotstring 	:= ""
 	,		outfun 		:= ""
 	,		key2 		:= 0
+	,		temp			:= ""
 
 	Gui, HS3: Default
 	F_GuiHS3_EnDis("Disable")			;Disable all GuiControls for deletion time d(t, o, h)	
@@ -11271,8 +11297,6 @@ F_DeleteHotstring()
 		. TransA["triggerstring"] . ":" 	. A_Space . triggerstring . "`n" 
 		. TransA["options"] . ":" 		. A_Space . options . "`n"
 		. TransA["hotstring"] . ":" 		. A_Space . hotstring	
-		. "`n`n" 
-		. TransA["If you remove one of the definitions which was multiplied (e.g. duplicated), none of definitions will be active. Therefore It is suggested in order to to enable the second one to reload the application."]
 	OldOptions := options		
 	IfMsgBox, No
 	{
@@ -11319,8 +11343,9 @@ F_DeleteHotstring()
 	UpdateLibraryCounter(--v_LibHotstringCnt, --v_TotalHotstringCnt)
 	
 	;6. Remove from "Search" tables. Unfortunately index (SelectedRow) is sufficient only for one table, and in Searching there is "super table" containing all definitions from all available tables.
+	temp := SubStr(v_SelectHotstringLibrary, 1, -4)
 	for key, val in a_Triggerstring
-		if (val == triggerstring)
+		if (val == triggerstring) and (a_Library[key] = temp)
 		{
 			a_Library			.RemoveAt(key)
 			a_Triggerstring	.RemoveAt(key)
@@ -11329,11 +11354,13 @@ F_DeleteHotstring()
 			a_EnableDisable	.RemoveAt(key)
 			a_Hotstring		.RemoveAt(key)
 			a_Comment			.RemoveAt(key)
+			break
 		}
 	;7. Recreate triggerstring tips.
 	F_Recreate_CombinedTable()
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	
 	F_GuiHS3_EnDis("Enable")			;Enable all GuiControls for deletion time d(t, o, h)
+	Gui, HS3Search: Destroy
 	MsgBox, % c_MB_I_Info, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The definition"] . ":" . "`n`n"
 			. TransA["triggerstring"] . ":" 	. A_Space . triggerstring . "`n" 
 			. TransA["options"] . ":" 		. A_Space . OldOptions . "`n"
@@ -12450,106 +12477,106 @@ F_Compile()
 		Case "AhkBitSubmenu":
 		if (A_ThisMenuItem = "64-bit")
 		{
-			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
-				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+			if (FileExist(v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
-				. A_Space . "/in"       . A_Space . A_ScriptDir . "\" . A_ScriptName 
-				. A_Space . "/out"      . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
-				. A_Space . "/icon"     . A_Space . A_ScriptDir . "\" . AppIcon
+				. A_Space . "/in"       . A_Space . v_ScriptDir . "\" . A_ScriptName 
+				. A_Space . "/out"      . A_Space . v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+				. A_Space . "/icon"     . A_Space . v_ScriptDir . "\" . AppIcon
 				. A_Space . "/bin"      . A_Space . """" . v_TempOutStr . "Unicode 64-bit.bin" . """"
 				. A_Space . "/cp"       . A_Space . "65001"	;Unicode (UTF-8)
 				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" . A_Space . "0"
 			if (!ErrorLevel)		
 				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe, but not compressed:"]
-					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
+					. "`n`n" . v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
 					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
 		}
 		if (A_ThisMenuItem = "32-bit")
 		{
-			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
-				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+			if (FileExist(v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
-				. A_Space . "/in"       . A_Space . A_ScriptDir . "\" . A_ScriptName 
-				. A_Space . "/out"      . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
-				. A_Space . "/icon"     . A_Space . A_ScriptDir . "\" . AppIcon
+				. A_Space . "/in"       . A_Space . v_ScriptDir . "\" . A_ScriptName 
+				. A_Space . "/out"      . A_Space . v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+				. A_Space . "/icon"     . A_Space . v_ScriptDir . "\" . AppIcon
 				. A_Space . "/bin"      . A_Space . """" . v_TempOutStr . "Unicode 32-bit.bin" . """"
 				. A_Space . "/cp"       . A_Space . "65001"	;Unicode (UTF-8)
 				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" . A_Space . "0"
 			if (!ErrorLevel)		
 				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe, but not compressed:"]
-					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 32-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
+					. "`n`n" . v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 32-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
 					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
 		}
 		Case "UpxBitSubmenu":
 		if (A_ThisMenuItem = "64-bit")
 		{
-			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
-				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+			if (FileExist(v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
-				. A_Space . "/in"   	. A_Space . A_ScriptDir . "\" . A_ScriptName 
-				. A_Space . "/out"  	. A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
-				. A_Space . "/icon" 	. A_Space . A_ScriptDir . "\" . AppIcon 
+				. A_Space . "/in"   	. A_Space . v_ScriptDir . "\" . A_ScriptName 
+				. A_Space . "/out"  	. A_Space . v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+				. A_Space . "/icon" 	. A_Space . v_ScriptDir . "\" . AppIcon 
 				. A_Space . "/bin"      . A_Space . """" . v_TempOutStr . "Unicode 64-bit.bin" . """"
 				. A_Space . "/cp"   	. A_Space . "65001"	;Unicode (UTF-8)
 				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" 	. A_Space . "2" 
 			if (!ErrorLevel)		
 				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["The executable file is prepared by Ahk2Exe and compressed by upx.exe:"]
-					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
+					. "`n`n" . v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
 					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
 		}
 		if (A_ThisMenuItem = "32-bit")
 		{
-			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
-				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+			if (FileExist(v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
-				. A_Space . "/in"   	. A_Space . A_ScriptDir . "\" . A_ScriptName 
-				. A_Space . "/out"  	. A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
-				. A_Space . "/icon" 	. A_Space . A_ScriptDir . "\" . AppIcon 
+				. A_Space . "/in"   	. A_Space . v_ScriptDir . "\" . A_ScriptName 
+				. A_Space . "/out"  	. A_Space . v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+				. A_Space . "/icon" 	. A_Space . v_ScriptDir . "\" . AppIcon 
 				. A_Space . "/bin"      . A_Space . """" . v_TempOutStr . "Unicode 32-bit.bin" . """"
 				. A_Space . "/cp"   	. A_Space . "65001"	;Unicode (UTF-8)
 				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" 	. A_Space . "2" 
 			if (!ErrorLevel)		
 				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["The executable file is prepared by Ahk2Exe and compressed by upx.exe:"]
-					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 32-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
+					. "`n`n" . v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 32-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
 					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
 		}
 		Case "MpressBitSubmenu":
 		if (A_ThisMenuItem = "64-bit")
 		{
-			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
-				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+			if (FileExist(v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
-				. A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName 
-				. A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
-				. A_Space . "/icon" . A_Space . A_ScriptDir . "\" . AppIcon 
+				. A_Space . "/in" . A_Space . v_ScriptDir . "\" . A_ScriptName 
+				. A_Space . "/out" . A_Space . v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+				. A_Space . "/icon" . A_Space . v_ScriptDir . "\" . AppIcon 
 				. A_Space . "/bin"      . A_Space . """" . v_TempOutStr . "Unicode 64-bit.bin" . """"
 				. A_Space . "/cp"   	. A_Space . "65001"	;Unicode (UTF-8)
 				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" . A_Space . "1"
 			if (!ErrorLevel)
 				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe and compressed by mpress.exe:"]
-					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
+					. "`n`n" . v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 64-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
 					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion
 		}
 		if (A_ThisMenuItem = "32-bit")
 		{
-			if (FileExist(A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
-				FileDelete, % A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+			if (FileExist(v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"))
+				FileDelete, % v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
 			RunWait, % v_TempOutStr . "Ahk2Exe.exe" 
-				. A_Space . "/in" . A_Space . A_ScriptDir . "\" . A_ScriptName 
-				. A_Space . "/out" . A_Space . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
-				. A_Space . "/icon" . A_Space . A_ScriptDir . "\" . AppIcon 
+				. A_Space . "/in" . A_Space . v_ScriptDir . "\" . A_ScriptName 
+				. A_Space . "/out" . A_Space . v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . "." . "exe"
+				. A_Space . "/icon" . A_Space . v_ScriptDir . "\" . AppIcon 
 				. A_Space . "/bin"      . A_Space . """" . v_TempOutStr . "Unicode 32-bit.bin" . """"
 				. A_Space . "/cp"   	. A_Space . "65001"	;Unicode (UTF-8)
 				;. A_Space . "/ahk"      . A_Space . """" . v_TempOutStr . "\" . "AutoHotkey.exe" . """" ;not clear yet when this option should be applied
 				. A_Space . "/compress" . A_Space . "1"
 			if (!ErrorLevel)
 				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["The executable file is prepared by Ahk2Exe and compressed by mpress.exe:"]
-					. "`n`n" . A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 32-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
+					. "`n`n" . v_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".exe" . "`n`n" . "/bin" . ":" . A_Space . "Unicode 32-bit.bin" . A_Space . "cp:" . A_Space . "65001" . A_Space . "(Unicode (UTF-8))"
 					. "`n" . TransA["Built with Autohotkey.exe version"] . ":" . A_Space . A_AhkVersion			
 		}
 	}
@@ -12695,11 +12722,9 @@ F_LoadGUIPos()
 	; OutputDebug, % A_ThisFunc . A_Space . "ini_HS3WindoPos.X:" . A_Space . ini_HS3WindoPos.X . A_Space . "ini_HS3WindoPos.Y:" . A_Space . ini_HS3WindoPos.Y . "`n"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_CheckCreateConfigIni(params*)
+F_CheckCreateConfigIni()
 {
 	global ;assume-global mode
-	local  ConfigIni 	:= ""	; variable which is used as default content of Config.ini
-		, HADConfig_App		:= A_ScriptDir . "\" . "Config.ini"
 
 ;#c/* commercial only beginning
 ConfigIni := "			
@@ -12964,36 +12989,38 @@ ConfigIni := "
 	; 	)"
 ;#f*/ free version only end
 
-	if (!FileExist(HADConfig_App))
+	if (FileExist(ini_HADConfig)) ;if Config.ini exists in default location, just return
+		return
+	if (FileExist(v_ScriptDir . "\" . "Config.ini"))	;if Config.ini exists in second location, change variable value to that location and return 
 	{
-		FileAppend, % ConfigIni, % HADConfig_App
+		v_ScriptDir := v_ScriptDir
+		ini_HADConfig := v_ScriptDir . "\" . "Config.ini"
+		return
+	}	
+
+	if (!FileExist(ini_HADConfig))
+	{
+		FileAppend, % ConfigIni, % ini_HADConfig
 		if (ErrorLevel)
 		{
 			MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["Config.ini file couldn't be created for some reason. Exiting."]
 				. "`n`n"
-				. HADConfig_App
+				. ini_HADConfig
 			ExitApp, 14		;Config.ini file couldn't be created for some reason. Exiting.
 		}	
 		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"]
-			. HADConfig_App
+			. ini_HADConfig
 			. "`n`n" 
 			. TransA["As a consequence the default language file English.txt will be recreated."]
-		if (FileExist(A_ScriptDir . "\Languages\English.txt"))	;if there is no Config.ini, then English.txt should be recreated.
+		if (FileExist(c_AppDataLocal . "\" . SubStr(A_ScriptName, 1, -4) . "\Languages\English.txt"))	;if there is default language file, delete it 
 		{
-			FileDelete, % A_ScriptDir . "\Languages\English.txt"
+			FileDelete, % v_ScriptDir . "\Languages\English.txt"
 			if (ErrorLevel)
 			{
 				MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["Unexpected problem on time of deleting the file ""\Languages\English.txt"". Exiting."]
 				ExitApp, 15	;Unexpected problem on time of deleting the file ""\Languages\English.txt"".
 			}	
 		}	
-		ini_HADConfig := HADConfig_App
-		return
-	}
-	if (FileExist(HADConfig_App))
-	{
-		ini_HADConfig := HADConfig_App
-		return
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -13559,7 +13586,6 @@ If you answer ""No"", you'll get a chance to try again.		= If you answer ""No"",
 If you answer ""No"", then you will get a chance to fix your new created definition. = If you answer ""No"", then you will get a chance to fix your new created definition.
 If you apply ""SI"" or ""MSI"" or ""SE"" output function then some characters like = If you apply ""SI"" or ""MSI"" or ""SE"" output function then some characters like
 If you don't apply it, previous changes will be lost.			= If you don't apply it, previous changes will be lost.
-If you remove one of the definitions which was multiplied (e.g. duplicated), none of definitions will be active. Therefore It is suggested in order to to enable the second one to reload the application. = If you remove one of the definitions which was multiplied (e.g. duplicated), none of definitions will be active. Therefore It is suggested in order to to enable the second one to reload the application.
 Immediate Execute (*) 									= Immediate Execute (*)
 Import from .ahk to .csv 								= &Import from .ahk to .csv
 Incorrect value. Select custom RGB hex value. Please try again.	= Incorrect value. Select custom RGB hex value. Please try again.
@@ -13992,11 +14018,11 @@ T_SMT2												= This option let's you to display permanent, ""static"" windo
 	TransA					:= {}	;this associative array (global) is used to store translations of this application text strings
 	
 	if (decision[1] = "create")
-		FileAppend, % TransConst, % A_ScriptDir . "\Languages\English.txt", UTF-8 
+		FileAppend, % TransConst, % v_ScriptDir . "\Languages\English.txt", UTF-8 
 	
 	if (decision[1] = "load")
 	{
-		FileRead, v_TheWholeFile, % A_ScriptDir . "\Languages\" . ini_Language
+		FileRead, v_TheWholeFile, % v_ScriptDir . "\Languages\" . ini_Language
 		F_ParseLanguageFile(v_TheWholeFile)
 		return
 	}
@@ -14038,7 +14064,7 @@ F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library
 ,			BegCom := false
 ,			Triggerstring := "", Hotstring := "", options := ""
 	
-	F_CheckFileEncoding(ini_HADL . "\" . nameoffile)	;additional check if library files encoding is equal to UTF-8 with BOM 
+	F_CheckFileEncoding()	;additional check if library files encoding is equal to UTF-8 with BOM 
 	FileRead, TheWholeFile, % ini_HADL . "\" . nameoffile
 
 	Loop, Parse, TheWholeFile, `n, `r%A_Space%%A_Tab%
@@ -16435,7 +16461,7 @@ F_ImportLibrary()
 
 	WhichGUI := F_WhichGui()
 	Gui, % WhichGUI . ":" . A_Space . "+OwnDialogs"
-	FileSelectFile, LibraryName, 3, %A_ScriptDir%, % TransA["Choose (.ahk) file containing (triggerstring, hotstring) definitions for import"], AutoHotkey (*.ahk)
+	FileSelectFile, LibraryName, 3, % v_ScriptDir, % TransA["Choose (.ahk) file containing (triggerstring, hotstring) definitions for import"], AutoHotkey (*.ahk)
 	if (!LibraryName)
 		return
 	SplitPath, LibraryName, ,,, OutNameNoExt
@@ -16952,6 +16978,28 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	Gui, Export: Destroy
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been exported"] . ":" . "`n`n" . OutputFile
 }
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_Validate_IniParam(IniParam, IniFilename, Section, Parameter)
+{
+	global	;assume-global mode of operation
+	local	temp := ""
+
+	temp := F_Read_IniParam(IniParam, IniFilename, Section, Parameter)					;HADL = Hotstrings Application Data Libraries
+	if (temp = "ERROR") or (temp = "")
+	{
+		IniWrite, % IniParam, % IniFilename, % Section, % Parameter
+		if (ErrorLevel)
+		{
+			MsgBox, % c_MB_I_Exclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
+				,  % "Problem with writing parameter" . A_Space . Parameter . A_Space . "to the file" . "`n"
+				. IniFilename . "`n`n"
+				. "Non-existing or corrupted file."
+				. "The default value of parameter" . A_Space . 
+				. IniParam
+				. "will be used."
+		}	
+	}
+}	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HideTrayTip() 
 {
