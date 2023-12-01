@@ -158,6 +158,9 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_dHK_CallGUI 			:= "#^h"				;global constant: default (d) hotkey (HK) for calling main application GUI
 ,		c_dHK_ToggleTt			:= "none"				;global constant: default (d) hotkey (HK) for toggling the triggestring tips
 ,		c_AppDataLocal			:= SubStr(A_Desktop, 1, -7) . "AppData\Local"	;default location for folders of Hotstrings application: ;C:\Users\<User>\AppData\Local\. The same location is used in the NSIS installer.
+,		IdTT_C4_LB1			:= 0					;in order to get rid of warnings in specific situation: file BOM is incorrect and user clicked somethint
+,		IdTT_C4_LB2			:= 0					;in order to get rid of warnings in specific situation: file BOM is incorrect and user clicked somethint
+,		IdTT_C4_LB3			:= 0					;in order to get rid of warnings in specific situation: file BOM is incorrect and user clicked somethint
 ;#c/* commercial only beginning
 ,		v_ValidTill			:= "inf"				;"inf" for infinity, "limited" for other cases
 ,		f_RShiftDown 			:= false
@@ -188,7 +191,7 @@ if (v_LicenseType = "pro") and (v_ValidTill != "inf")
 	
 ; F_CheckIfMoveToProgramFiles()		;Checks if move Hotstrings folder to Program Files folder and then restarts application.
 ; F_CheckIfRemoveOldDir()			;Checks content of Config.ini in order to remove old script directory.
-F_CheckFileEncoding()				;checks if script is utf-8 compliant. it has plenty to do wiith github download etc.
+F_CheckFileEncoding(A_ScriptFullPath)	;checks if script is utf-8 compliant. it has plenty to do wiith github download etc.
 
 F_Validate_IniParam(ini_HADL, ini_HADConfig, "Configuration", "HADL")
 
@@ -8050,23 +8053,75 @@ TT_C4GuiEscape()
 		Gui, TT_C4: Hide
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_CheckFileEncoding()
-{	;https://www.autohotkey.com/boards/viewtopic.php?t=65049
-	local file := "", RetrievedEncoding := "", FilePos := 0
+F_CheckFileEncoding(filepath)
+{	;https://www.autohotkey.com/boards/viewtopic.php?t=65049 Microsoft Windows uses LE = Little Endian. BOM = Chr(0xEF) . Chr(0xBB) . Chr(0xBF), UTF8 = P65001
+	local 	FileObj 			:= ""
+		, 	RetrievedEncoding 	:= ""
+		, 	FilePos 			:= 0
+		,	FileNameNoExt		:= ""
+		,	FileContent		:= ""
+		,	FileDirectory		:= ""	;including driver letter
+		,	FileExt			:= ""
+		,	Overwrite			:= true
+		,	CP				:= ""
 
 	if (!A_IsCompiled)
 	{
-		file := FileOpen(A_ScriptFullPath, "r")
-	,	RetrievedEncoding := file.Encoding
-	,	FilePos := file.Pos
+		FileObj := FileOpen(filepath, "r")
+	,	RetrievedEncoding := FileObj.Encoding
+	,	FilePos := FileObj.Pos
+		FileObj.Close()
+		FileObj := ""
+		; OutputDebug, % "RetrievedEncoding:" . RetrievedEncoding . A_Space . "FilePos:" . FilePos . "`n"
 		if !(((RetrievedEncoding = "UTF-8") and (FilePos = 3)) or ((RetrievedEncoding = "UTF-16") and (FilePos = 2)))
 		{
-			MsgBox, 16, % A_ScriptName . ":" . A_Space . TransA["Error"], % TransA["Recognized encoding of the file:"] 
-				. "`n" . A_ScriptFullPath
+			if (RetrievedEncoding = "UTF-16") and (FilePos = 0)
+			{
+				RetrievedEncoding := "UTF-8"
+				CP := 65001	;UTF-8
+			}	
+			MsgBox, % c_MB_I_Exclamation + c_MB_B_YesNo
+				, % A_ScriptName . ":" . A_Space . TransA["Error"], % TransA["Recognized encoding of the file:"] 
+				. "`n" . filepath
 				. "`n`n" . RetrievedEncoding . A_Space . "no-BOM"
-				. "`n`n" . TransA["Required encoding: UTF-8 with BOM. Application will exit now."]
-			try	;if no try, some warnings are still catched; with try no more warnings
+				. "`n`n" . TransA["Required encoding: UTF-8 with BOM."]
+				. "`n`n"
+				. TransA["Would you like now to add BOM to this file?"] 
+				. "`n`n"
+				. TransA["If you answer ""Yes"", the old file will be saved with extension changed from .csv to .old and new file with the filename and BOM will be saved."] . "`n"
+				. TransA["If you answer ""No"", the application will exit with error no. 3 (not-recognized bom)."]
+			IfMsgBox, No
+			{
+				try	;if no try, some warnings are still catched; with try no more warnings
+				MsgBox, % c_MB_I_Exclamation
+					, % A_ScriptName . ":" . A_Space . TransA["Error"]
+					, % TransA["Application will exit with error no. 3 (not-recognized bom)."]
 				ExitApp, 3	;no-bom
+			}
+			IfMsgBox, Yes
+			{
+				SplitPath, filepath, , FileDirectory, FileExt, FileNameNoExt
+				FileRead, FileContent, % "*P" . CP . A_Space . filepath
+				; OutputDebug, % "FileContent:" . FileContent . "|" . "`n"
+				FileCopy, % filepath, % FileDirectory . "\" . FileNameNoExt . "." . "old", % Overwrite
+				if (ErrorLevel)
+				{
+					MsgBox, % c_MB_I_Exclamation
+					, % A_ScriptName . ":" . A_Space . TransA["Error"]
+					, TransA["Filecopy was not susscessful."] . "`n"
+					. TransA["Application will exit with error no. 3 (not-recognized bom)."]
+				}	
+				FileDelete, % filepath
+				if (ErrorLevel)
+				{
+					MsgBox, % c_MB_I_Exclamation
+					, % A_ScriptName . ":" . A_Space . TransA["Error"]
+					, "Filedelete was not susscessful." . "`n"
+					. TransA["Application will exit with error no. 3 (not-recognized bom)."]
+				}
+				FileAppend, % FileContent, % FileDirectory . "\" . FileNameNoExt . "." . FileExt, UTF-8	;When a UTF-8 or UTF-16 file is created, a byte order mark is written to the file unless Encoding (or A_FileEncoding if Encoding is omitted) contains UTF-8-RAW or UTF-16-RAW.
+				F_ReloadApplication()	;reload into default mode of application
+			}	
 		}
 	}
 }
@@ -13400,7 +13455,7 @@ Application language changed to: 							= Application language changed to:
 Application mode										= Application mode
 Application statistics									= Application statistics
 Application will exit now.								= Application will exit now.
-Apply												= &Apply
+Application will exit with error no. 3 (not-recognized bom).	= Application will exit with error no. 3 (not-recognized bom).
 Restore default hotkey									= Restore default hotkey
 Apply new hotkey										= Apply new hotkey
 aqua													= aqua
@@ -13563,6 +13618,8 @@ Exported												= Exported
 Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries = Facilitate working with AutoHotkey triggerstring and hotstring concept, with GUI and libraries
 Found another definition which will be enabled				= Found another definition which will be enabled
 F3 or Esc: Close Search hotstrings | ↓ ↑ → ←: to change position | Enter: Select definition and close = F3 or Esc: Close Search hotstrings | ↓ ↑ → ←: to change position | Enter: Select definition and close
+Filecopy was not susscessful.								= Filecopy was not susscessful.
+Filedelete was not susscessful.							= Filedelete was not susscessful.
 file! 												= file!
 file in Languages subfolder!								= file in Languages subfolder!
 file is now created in the following subfolder:				= file is now created in the following subfolder:
@@ -13610,9 +13667,11 @@ If you answer ""Yes"" it will be overwritten with chosen settings. = If you answ
 If you answer ""Yes"", new definition will be added just as you've entered it. = If you answer ""Yes"", new definition will be added just as you've entered it.
 If you answer ""Yes"", new definition will be added with no triggerstring option selected. = If you answer ""Yes"", new definition will be added with no triggerstring option selected.
 If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used. = If you answer ""Yes"", the icon file will be downloaded. If you answer ""No"", the default AutoHotkey icon will be used.
+If you answer ""Yes"", the old file will be saved with extension changed from .csv to .old and new file with the filename and BOM will be saved. = If you answer ""Yes"", the old file will be saved with extension changed from .csv to .old and new file with the filename and BOM will be saved.
 If you answer ""Yes"", the existing file will be overwritten. This is recommended choice. If you answer ""No"", new content will be added to existing file. = If you answer ""Yes"", the existing file will be overwritten. This is recommended choice. If you answer ""No"", new content will be added to existing file.
 If you answer ""Yes"", then new definition will be created, but seleced special character will not be visible. = If you answer ""Yes"", then new definition will be created, but seleced special character will not be visible.
-If you answer ""No"" application will exit.					= If you answer ""No"" application will exit.
+If you answer ""No"", application will exit.					= If you answer ""No"", application will exit.
+If you answer ""No"", the application will exit with error no. 3 (not-recognized bom). = If you answer ""No"", the application will exit with error no. 3 (not-recognized bom).
 If you answer ""No"" edition of the current definition will be interrupted. = If you answer ""No"" edition of the current definition will be interrupted.
 If you answer ""No"", you'll get a chance to try again.		= If you answer ""No"", you'll get a chance to try again.
 (If you answer ""No"", the second one will be used).			= (If you answer ""No"", the second one will be used).
@@ -13775,7 +13834,7 @@ Rename selected library filename							= Rename selected library filename
 Hotstring text is blank. Do you want to proceed? 				= Hotstring text is blank. Do you want to proceed?
 Repository version										= Repository version
 Required content is copied to the Clipboard					= Required content is copied to the Clipboard
-Required encoding: UTF-8 with BOM. Application will exit now.	= Required encoding: UTF-8 with BOM. Application will exit now.
+Required encoding: UTF-8 with BOM.	= Required encoding: UTF-8 with BOM.
 Reset Recognizer (Z)									= Reset Recognizer (Z)
 Restore default										= Restore default
 Restore default configuration								= Restore default configuration
@@ -13981,6 +14040,7 @@ Welcome to Hotstrings application!							= Welcome to Hotstrings application!
 Windows key modifier									= Windows key modifier
 When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
 white												= white
+Would you like now to add BOM to this file?					= Would you like now to add BOM to this file?
 Would you like to change the current ""Libraries"" folder location? = Would you like to change the current ""Libraries"" folder location?
 Would you like to change Config.ini file location to default one? = Would you like to change Config.ini file location to default one?
 Would you like to change Config.ini file location to folder where is ""Hotstrings"" script / app? = Would you like to change Config.ini file location to folder where is ""Hotstrings"" script / app?
@@ -14092,12 +14152,14 @@ F_ParseLanguageFile(argument)
 F_LoadDefinitionsFromFile(nameoffile) ; load definitions d(t, o, h) from library file (.csv) into memory and to tables: -> F_CreateHotstring
 {
 	global ;assume-global mode
-	local 	name := SubStr(nameoffile, 1, -4) ;filename without extension
-, 			TheWholeFile := ""
-,			BegCom := false
-,			Triggerstring := "", Hotstring := "", options := ""
+	local 	name 		:= SubStr(nameoffile, 1, -4) ;filename without extension
+		, 	TheWholeFile 	:= ""
+		,	BegCom 		:= false
+		,	Triggerstring 	:= ""
+		,	Hotstring := ""
+		, 	options := ""
 	
-	F_CheckFileEncoding()	;additional check if library files encoding is equal to UTF-8 with BOM 
+	F_CheckFileEncoding(ini_HADL . "\" . nameoffile)	;additional check if library files encoding is equal to UTF-8 with BOM 
 	FileRead, TheWholeFile, % ini_HADL . "\" . nameoffile
 
 	Loop, Parse, TheWholeFile, `n, `r%A_Space%%A_Tab%
@@ -15708,6 +15770,7 @@ F_CreateHotstring(txt, nameoffile)
 		, 	OutFun 		:= ""
 		, 	DefOnOff 		:= ""
 		,	Library		:= nameoffile
+		,	Oflag		:= false
 
 	Loop, Parse, txt, % c_TextDelimiter
 	{
@@ -15730,7 +15793,10 @@ F_CreateHotstring(txt, nameoffile)
 				Hotstring := A_LoopField
 		}
 	}
-	
+
+	if (InStr(Options, "O"))
+		Oflag := true
+
 	if ((Triggerstring == "") and (Options or OutFun or DefOnOff or Hotstring))	; previous version: if ((!Triggerstring) and (Options or OutFun or DefOnOff or Hotstring))
 	{
 		MsgBox, % c_MB_M_AonTop + c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["Error"], % TransA["Error reading library file:"] . "`n`n" . nameoffile 
