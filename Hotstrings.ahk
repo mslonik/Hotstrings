@@ -9798,10 +9798,11 @@ F_AddHotstring()
 			Case "HS4": 	F_GuiHS4_EnDis("Disable")
 		}
 
-		Overwrite := F_ChangeExistingDef(OldOptions, NewOptions, a_Triggerstring[DuplicatedKey], a_Library[DuplicatedKey], SendFun, vHotstring, a_EnableDisable[DuplicatedKey])
+		Overwrite := F_ChangeExistingDef(OldOptions, NewOptions, a_Triggerstring[DuplicatedKey], a_Library[DuplicatedKey], SendFun, vHotstring, v_Comment, a_EnableDisable[DuplicatedKey])
 		if (Overwrite = "Yes")
 		{
-			F_ChangeDefInArrays(key, NewOptions, SendFun, vHotstring, v_Comment)
+			Gui, HS3Search: Destroy
+			F_ChangeDefInArrays(DuplicatedKey, NewOptions, SendFun, vHotstring, v_Comment)
 			F_ModifyLV(v_Triggerstring, NewOptions, SendFun, vHotstring, v_Comment)
 
 			;7. Delete library file.
@@ -10078,7 +10079,7 @@ F_RunApplication(PHotstring, Oflag, SendFun)
 ;#c*/ commercial only end
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun, TextInsert, OldEnDis)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
+F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun, TextInsert, Comment, OldEnDis)	;FoundTriggerstring = a_Triggerstring[key]; Library = a_Library[key]
 {
 	global	;assume-global mode of operation
 
@@ -10104,7 +10105,7 @@ F_ChangeExistingDef(OldOptions, NewOptions, FoundTriggerstring, Library, SendFun
 
 		;turn off existing d(t, o, h)
 		F_ModifyHDef(FoundTriggerstring, OldOptions, TextInsert, SendFun, false, Library)
-
+		
 		;turn on modified d(t, o, h)
 		F_ModifyHDef(FoundTriggerstring, NewOptions, TextInsert, SendFun, true, Library)
 		return, "Yes"
@@ -11259,6 +11260,27 @@ F_RefreshListOfLibraries()
 ;#c*/ commercial only end
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_RemoveFromSearchTable(triggerstring)
+{
+	global	;assume-global mode of operation
+	local	temp 	:= SubStr(v_SelectHotstringLibrary, 1, -4)
+		,	key 		:= 0
+		,	value 	:= ""
+
+	for key, value in a_Triggerstring
+		if (value == triggerstring) and (a_Library[key] = temp)
+		{
+			a_Library			.RemoveAt(key)
+			a_Triggerstring	.RemoveAt(key)
+			a_Options			.RemoveAt(key)
+			a_OutputFunction	.RemoveAt(key)
+			a_EnableDisable	.RemoveAt(key)
+			a_Hotstring		.RemoveAt(key)
+			a_Comment			.RemoveAt(key)
+			break
+		}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeleteHotstring()
 {
 	;1. Remove selected library file.
@@ -11277,7 +11299,6 @@ F_DeleteHotstring()
 	, 		hotstring 	:= ""
 	,		outfun 		:= ""
 	,		key2 		:= 0
-	,		temp			:= ""
 
 	Gui, HS3: Default
 	F_GuiHS3_EnDis("Disable")			;Disable all GuiControls for deletion time d(t, o, h)	
@@ -11347,19 +11368,7 @@ F_DeleteHotstring()
 	UpdateLibraryCounter(--v_LibHotstringCnt, --v_TotalHotstringCnt)
 	
 	;6. Remove from "Search" tables. Unfortunately index (SelectedRow) is sufficient only for one table, and in Searching there is "super table" containing all definitions from all available tables.
-	temp := SubStr(v_SelectHotstringLibrary, 1, -4)
-	for key, val in a_Triggerstring
-		if (val == triggerstring) and (a_Library[key] = temp)
-		{
-			a_Library			.RemoveAt(key)
-			a_Triggerstring	.RemoveAt(key)
-			a_Options			.RemoveAt(key)
-			a_OutputFunction	.RemoveAt(key)
-			a_EnableDisable	.RemoveAt(key)
-			a_Hotstring		.RemoveAt(key)
-			a_Comment			.RemoveAt(key)
-			break
-		}
+	F_RemoveFromSearchTable(triggerstring)
 	;7. Recreate triggerstring tips.
 	F_Recreate_CombinedTable()
 	F_Sort_a_Triggers(a_Combined, ini_TipsSortAlphabetically, ini_TipsSortByLength)	
