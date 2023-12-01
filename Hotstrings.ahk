@@ -689,38 +689,43 @@ Critical, Off
 #If
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If WinActive("ahk_id" HS3SearchHwnd)
+	;if Enter:: or Del:: is pressed while the ListView has focus, see F_HSLV2
 	^f::
 	^s::
 	F3::		;To disable all hotstrings definitions within search window.
 		Suspend, Permit		;Any hotkey/hotstring subroutine whose very first line is Suspend, Permit  will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		HS3SearchGuiEscape()
 	return	;end of this thread
+
 	Down::
 		Suspend, Permit		;Any hotkey/hotstring subroutine whose very first line is Suspend, Permit will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		F_DestroyTriggerstringTips(ini_TTCn)
 		F_HS3Search_Down()
 	return
+
 	Up::
 		Suspend, Permit		;Any hotkey/hotstring subroutine whose very first line is Suspend, Permit will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		F_DestroyTriggerstringTips(ini_TTCn)
 		F_HS3Search_Up()
 	return
+
 	Right::
 		Suspend, Permit		;Any hotkey/hotstring subroutine whose very first line is Suspend, Permit will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		F_DestroyTriggerstringTips(ini_TTCn)
 		F_HS3SearchRight()
 	return
+
 	Left::
 		Suspend, Permit		;Any hotkey/hotstring subroutine whose very first line is Suspend, Permit will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 		F_DestroyTriggerstringTips(ini_TTCn)
 		F_HS3SearchLeft()
 	return
+
 	Tab::
 		Suspend, Permit		;Any hotkey/hotstring subroutine whose very first line is Suspend, Permit will be exempt from suspension. In other words, the hotkey will remain enabled even while suspension is ON.
 	return
 #If
-
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If WinActive("ahk_id" HotstringDelay)
 	F7::
 		HSDelGuiClose()	;Gui event!
@@ -11283,22 +11288,17 @@ F_RemoveFromSearchTable(triggerstring)
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_DeleteHotstring()
 {
-	;1. Remove selected library file.
-	;2. Create library file of the same name as selected. its content will contain List View but without selected row.
-	;3. Remove selected row from List View.
-	;4. Disable selected hotstring.
-	;5. Remove trigger hint.
-	;6. Decrement library counter.
 	global ;assume-global mode
-	local 	LibraryFullPathAndName := ini_HADL . "\" . v_SelectHotstringLibrary, TheWholeFile := "", LibraryHeader := ""
-	,		SelectedRow := 0, index := 0
-	,		key := 0, val := ""
-	, 		EnDis := "", OldOptions := ""
-	,		triggerstring 	:= ""
-	, 		options 		:= ""
-	, 		hotstring 	:= ""
-	,		outfun 		:= ""
-	,		key2 		:= 0
+	local 	LibraryFullPathAndName 	:= ini_HADL . "\" . v_SelectHotstringLibrary
+		, 	TheWholeFile 			:= ""
+		, 	LibraryHeader 			:= ""
+		,	SelectedRow 			:= 0, 
+		, 	EnDis 				:= ""
+		, 	OldOptions 			:= ""
+		,	triggerstring 			:= ""
+		, 	options 				:= ""
+		, 	hotstring 			:= ""
+		,	outfun 				:= ""
 
 	Gui, HS3: Default
 	F_GuiHS3_EnDis("Disable")			;Disable all GuiControls for deletion time d(t, o, h)	
@@ -11746,7 +11746,10 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 {
 	global	;assume global mode of operation
 	Critical, On
-	; OutputDebug, % "A_ThisFunc:" . A_Space . A_ThisFunc . A_Tab . "A_GuiEvent:" . A_Space . A_GuiEvent . A_Tab . "A_GuiControl:" . A_Space . A_GuiControl . A_Tab . "A_EventInfo:" . A_Space . A_EventInfo . A_Tab . "ErrorLevel:" . A_Space . ErrorLevel . "`n"
+	local	temp := ""
+
+	; OutputDebug, % "A_ThisFunc:" . A_ThisFunc . A_Space . "A_GuiEvent:" . A_GuiEvent . A_Space . "A_GuiControl:" . A_GuiControl . A_Space . "A_EventInfo:" . A_EventInfo . A_Space . "ErrorLevel:" . ErrorLevel . "`n"
+	; OutputDebug, % "Key:" . GetKeyName(Format("vk{:x}", A_EventInfo)) . "`n"
 	Switch A_GuiEvent
 	{
 		Default:
@@ -11755,6 +11758,15 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 		Case "Normal", "C":		
 			F_LV1_CopyContentToHS3()
 			GuiControl, Focus, % IdListView1
+		Case "K":	;The user has pressed a key while the ListView has focus
+			temp := GetKeyName(Format("vk{:x}", A_EventInfo))
+			if (InStr(temp, "Del"))
+			{
+				GuiControlGet, FocusedControl, HS3: Focus
+				; OutputDebug, % "FocusedControl2:" . FocusedControl . "`n"
+				if (FocusedControl = "SysListView321")
+					F_DeleteHotstring()				
+			}	
 	}
 	Critical, Off
 }	
