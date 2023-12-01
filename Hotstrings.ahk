@@ -804,7 +804,7 @@ Critical, Off
 	~Del::
 		F_DestroyTriggerstringTips(ini_TTCn)
 		GuiControlGet, FocusedControl, HS3: Focus
-		OutputDebug, % "FocusedControl2:" . FocusedControl . "`n"
+		; OutputDebug, % "FocusedControl2:" . FocusedControl . "`n"
 		if (FocusedControl = "SysListView321")
 			F_DeleteHotstring()
 	return
@@ -1025,7 +1025,7 @@ return
 	Enter:: 
 	Up::
 	Down::
-		; OutputDebug, % "WinActive(ahk_id TT_C4Hwnd)" . "`n"
+		OutputDebug, % "WinActive(ahk_id TT_C4Hwnd)" . "`n"
 		F_StaticMenu_Keyboard(CheckPreviousWindowID := true)
 		return
 #If
@@ -2129,14 +2129,21 @@ F_Tt_HWT()	;Tt_HWT = Tooltip_Hostring Was Triggered
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, ControlSend, determine number of items in ListBox: https://www.autohotkey.com/boards/viewtopic.php?t=43057
-{
+{	;tu jestem
 ;#c/* commercial only beginning
 	global	;assume-global mode of operation
-	local	PressedKey := A_ThisHotkey,	Temp1 := "", ShiftTabIsFound := false, ReplacementString := "", OutputVar1 := "", OutputVar2 := ""
-,			NoPosInList := 0, Temp2 := "", WhichLB := "", temp := ""
+	local	PressedKey 		:= A_ThisHotkey
+		, 	temp 			:= ""
+		,	Temp1 			:= ""
+		, 	Temp2 			:= ""
+		, 	ShiftTabIsFound 	:= false
+		, 	ReplacementString 	:= ""
+		, 	OutputVar1 		:= ""
+		, 	OutputVar2 		:= ""
+		,	NoPosInList 		:= 0
+		, 	WhichLB 			:= ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 
-	; OutputDebug, % "F_StaticMenu_Keyboard" . A_Tab . "PressedKey:" . A_Tab . PressedKey . "`n"
 	GuiControlGet, OutputVar1, , % IdTT_C4_LB1	;Retrieves the contents of the control to check if static window contains any information: triggerstring tips
 	GuiControlGet, OutputVar2, , % IdTT_C4_LB4	;Retrieves the contents of the control to check if static window contains any information: hotstrings
 	; OutputDebug, % "OutputVar1:" . A_Tab . OutputVar1 . A_Tab . "OutputVar2:" . A_Tab . OutputVar2 . "`n"
@@ -2144,10 +2151,11 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 		return
 	if (OutputVar1) and (!ini_ATEn)
 		return
+	OutputDebug, % A_ThisFunc . ":" . A_Space . "PressedKey:" . PressedKey . "`n"
 	if (OutputVar1)
 	{
-		if (!InStr(PressedKey, "^"))
-			return
+		; if (!InStr(PressedKey, "^"))
+			; return
 		WhichLB := "MTrig"
 		ControlGet, Temp2, List, , , % "ahk_id" IdTT_C4_LB1
 		Loop, Parse, Temp2, `n
@@ -2155,8 +2163,8 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 	}
 	if (OutputVar2)
 	{
-		if (InStr(PressedKey, "^"))
-			return
+		; if (InStr(PressedKey, "^"))
+			; return
 		WhichLB := "MHot"
 		ControlGet, Temp2, List, , , % "ahk_id" IdTT_C4_LB4
 		Loop, Parse, Temp2, `n
@@ -2166,7 +2174,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 	Switch WhichLB
 	{
 		Case "MTrig":
-			if (InStr(PressedKey, "^Up") or InStr(PressedKey, "+Tab"))
+			if (InStr(PressedKey, "Up") or InStr(PressedKey, "+Tab"))
 			{
 				IsCursorPressed := true
 ,				IntCnt--
@@ -2175,7 +2183,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB3
 				ShiftTabIsFound := true
 			}
-			if (InStr(PressedKey, "^Down") or InStr(PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+			if (InStr(PressedKey, "Down") or InStr(PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
 			{
 				IsCursorPressed := true
 ,				IntCnt++
@@ -11292,7 +11300,7 @@ F_DeleteHotstring()
 	local 	LibraryFullPathAndName 	:= ini_HADL . "\" . v_SelectHotstringLibrary
 		, 	TheWholeFile 			:= ""
 		, 	LibraryHeader 			:= ""
-		,	SelectedRow 			:= 0, 
+		,	SelectedRow 			:= 0
 		, 	EnDis 				:= ""
 		, 	OldOptions 			:= ""
 		,	triggerstring 			:= ""
@@ -15915,7 +15923,7 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 	Loop, Parse, ReplacementString, % c_MHDelimiter	;determine amount of rows for Listbox
 		v_MenuMax := A_Index
 	
-	if (ini_TTCn != 4)	;if not static window, draw small simple GUI ;tu jestem dodac menu CLI
+	if (ini_TTCn != 4)	;if not static window, draw small simple GUI
 	{
 		Switch SendFun
 		{
@@ -15996,7 +16004,9 @@ ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
 F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; F_HMenu_Mouse -> F_SendIsOflag; F_SimpleOutput -> F_SendIsOflag
 {
 	global	;assume-global mode of operation
-	local	LastChar := "", IsLCalpha := false, IsLower := false
+	local	LastChar 	:= ""
+		, 	IsLCalpha := false
+		, 	IsLower 	:= false
 		,	ini_OutSF := 1	;Output for ShiftFunctions, used to be 2
 
 	SetKeyDelay, -1, -1	;Delay = -1, PressDuration = -1, -1: no delay at all; this can be necessary if SendInput is reduced to SendEvent (in case low level input hook is active in another script)
@@ -16162,7 +16172,7 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_SimpleOutput(ReplacementString, Oflag, SendFun)	;Function _ Hotstring Output Function _ SendInput
+F_SimpleOutput(ReplacementString, Oflag, SendFun)
 {
 	global	;assume-global mode of operation
 	Critical, On
