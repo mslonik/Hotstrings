@@ -185,7 +185,7 @@ if (v_LicenseType = "pro") and (v_ValidTill != "inf")
 {
 	F_CheckCommercialConditions()		;check Lemon squeezy
 	SetTimer, F_CheckCommTime, % 1000 * 3600	;1 hour = 1000 ms * 3 600
-	return
+	return	;END OF INITIALIZATION
 }
 ;#c*/ commercial only end
 	
@@ -2158,7 +2158,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 	if (OutputVar1)
 	{
 		; if (!InStr(PressedKey, "^"))
-			; return
+		; 	return
 		WhichLB := "MTrig"
 		ControlGet, Temp2, List, , , % "ahk_id" IdTT_C4_LB1
 		Loop, Parse, Temp2, `n
@@ -2167,7 +2167,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 	if (OutputVar2)
 	{
 		; if (InStr(PressedKey, "^"))
-			; return
+		; 	return
 		WhichLB := "MHot"
 		ControlGet, Temp2, List, , , % "ahk_id" IdTT_C4_LB4
 		Loop, Parse, Temp2, `n
@@ -2728,19 +2728,19 @@ F_Read_IniParam(ByRef IniParam, IniFilename, Section, Parameter)
 
 	if (temp = "ERROR")
 	{
-		MsgBox, % c_MB_I_Exclamation, % A_ScriptName
-			, % "Problem with reading parameter" . A_Space . Parameter . A_Space . "from the file" . "`n"
+		MsgBox, % c_MB_I_Exclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+			, % TransA["Problem with reading parameter"] . A_Space . Parameter . A_Space . TransA["from the file"] . "`n"
 			. IniFilename . "`n`n"
-			. "ERROR was read" . "`n"
-			. "Parameter is missing within Config.ini or file is corrupted."
+			. TransA["ERROR was read"] . "`n"
+			. TransA["Parameter is missing within Config.ini or file is corrupted."]
 		return "ERROR"
 	}
 	if (temp = "")
 	{
-		MsgBox, % c_MB_I_Exclamation, % A_ScriptName
-			, % "Problem with reading parameter" . A_Space . Parameter . A_Space . "from the file" . "`n"
+		MsgBox, % c_MB_I_Exclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+			, % TransA["Problem with reading parameter"] . A_Space . Parameter . A_Space . TransA["from the file"] . "`n"
 			. IniFilename . "`n`n"
-			. "Parameter has no no value." . "`n"
+			. TransA["Parameter has no value."]
 		return ""
 	}	
 }
@@ -13456,7 +13456,7 @@ Application mode										= Application mode
 Application statistics									= Application statistics
 Application will exit now.								= Application will exit now.
 Application will exit with error no. 3 (not-recognized bom).	= Application will exit with error no. 3 (not-recognized bom).
-Restore default hotkey									= Restore default hotkey
+Apply												= Apply
 Apply new hotkey										= Apply new hotkey
 aqua													= aqua
 Are you sure?											= Are you sure?
@@ -13480,6 +13480,7 @@ By length 											= By length
 Call Graphical User Interface								= Call Graphical User Interface
 Cancel 												= &Cancel
 Cancel												= Cancel
+Capitalize each word (C2)								= Capitalize each word (C2)
 caret												= caret
 Case Sensitive (C) 										= Case Sensitive (C)
 Case-Conforming										= Case-Conforming
@@ -13552,6 +13553,7 @@ default 												= default
 Default Config.ini file location:							= Default Config.ini file location:
 Default shortcut (hotkey):								= Default shortcut (hotkey):
 Default mode											= Default mode
+Default value of										= Default value of
 Delete selected library file								= Delete selected library file
 Delete hotstring (F8) 									= Delete hotstring (F8)
 Delete selected definition								= Delete selected definition
@@ -13599,6 +13601,7 @@ Enter triggerstring										= Enter triggerstring
 Entered license key										= Entered license key
 Entered license key was not found.							= Entered license key was not found.
 Error												= Error
+ERROR was read											= ERROR was read
 ErrorLevel was triggered by NewInput error. 					= ErrorLevel was triggered by NewInput error.
 Error reading library file:								= Error reading library file:
 Events: styling										= Events: styling
@@ -13626,9 +13629,10 @@ file is now created in the following subfolder:				= file is now created in the 
 Finite timeout?										= Finite timeout?
 folder is now created									= folder is now created
 Font type												= Font type
+free													= free
+from the file											= from the file
 fuchsia												= fuchsia
 Function												= Function
-free													= free
 Graphical User Interface									= Graphical User Interface
 gray													= gray
 green												= green
@@ -13772,9 +13776,9 @@ No Backspace (B0) 										= No Backspace (B0)
 No EndChar (O) 										= No EndChar (O)
 No libraries have been found!								= No libraries have been found!
 No license key was found in Config.ini.						= No license key was found in Config.ini.
+Non-existing or corrupted file.							= Non-existing or corrupted file.
 Not Case-Conforming (C1)									= Not Case-Conforming (C1)
 not relevant											= not relevant
-Capitalize each word (C2)								= Capitalize each word (C2)
 Nothing to do to me, Config.ini is already where you want it to be.	= Nothing to do to me, Config.ini is already where you want it to be.
 Now application must be restarted (into default mode) in order to apply settings from new location. = Now application must be restarted (into default mode) in order to apply settings from new location.
 Now application must be restarted (into default mode) in order to exit administrator mode. = Now application must be restarted (into default mode) in order to exit administrator mode.
@@ -13805,6 +13809,8 @@ Quote "" 												= Quote ""
 )"
 	TransConst .= "`n
 (Join`n `
+Parameter has no value.									= Parameter has no value.
+Parameter is missing within Config.ini or file is corrupted.	= Parameter is missing within Config.ini or file is corrupted.
 Path to executable file is blank. Do you want to select it now from inteactive GUI? = Path to executable file is blank. Do you want to select it now from inteactive GUI?
 Path to picture file is blank. Do you want to select it now from inteactive GUI?			= Path to picture file is blank. Do you want to select it now from inteactive GUI?
 Pause												= Pause
@@ -13819,6 +13825,8 @@ Please wait, uploading .csv files... 						= Please wait, uploading .csv files..
 Position of this window is saved in Config.ini.				= Position of this window is saved in Config.ini.	
 premium												= premium
 Preview												= &Preview
+Problem with reading parameter							= Problem with reading parameter
+Problem with writing parameter							= Problem with writing parameter
 Programm												= Programm
 Public library:										= Public library:
 purple												= purple
@@ -13838,6 +13846,7 @@ Required encoding: UTF-8 with BOM.	= Required encoding: UTF-8 with BOM.
 Reset Recognizer (Z)									= Reset Recognizer (Z)
 Restore default										= Restore default
 Restore default configuration								= Restore default configuration
+Restore default hotkey									= Restore default hotkey
 Row													= Row
 Run (R)												= Run (R)
 run web browser, enter Hotstrings webpage					= run web browser, enter Hotstrings webpage
@@ -13950,6 +13959,7 @@ The already imported file already existed. As a consequence some (triggerstring,
 The ""Libraries"" folder was successfully moved to the new location. = The ""Libraries"" folder was successfully moved to the new location.
 The library  											= The library 
 The file path is: 										= The file path is:
+The following default value								= The following default value
 The following file(s) haven't been downloaded as they are already present in the location = The following file(s) haven't been downloaded as they are already present in the location
 the following line is found:								= the following line is found:
 The ""Hotstrings"" folder was successfully moved to the new location: = The ""Hotstrings"" folder was successfully moved to the new location:
@@ -13985,6 +13995,7 @@ Tips are shown after no. of characters						= Tips are shown after no. of charac
 to activate											= to activate
 To move folder into ""Program Files"" folder you must allow admin privileges to ""Hotstrings"", which will restart to move its folder. = To move folder into ""Program Files"" folder you must allow admin privileges to ""Hotstrings"", which will restart to move its folder.
 to toggle												= to toggle
+to the file											= to the file
 toggle triggerstrings tips and hotstrings					= toggle triggerstrings tips and hotstrings
 Toggle main GUI										= Toggle main GUI
 Toggle trigger characters (↓ or EndChars)					= &Toggle trigger characters (↓ or EndChars)
@@ -14035,11 +14046,13 @@ warning												= warning
 Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details. = Warning, code generated automatically for definitions based on menu, see documentation of Hotstrings application for further details.
 was just deleted from									= was just deleted from
 was successfully downloaded.								= was successfully downloaded.
+was written to the file									= was written to the file
 wasn't found or couldn't be run							= wasn't found or couldn't be run
 Welcome to Hotstrings application!							= Welcome to Hotstrings application!
 Windows key modifier									= Windows key modifier
 When triggerstring event takes place, sound is emitted according to the following settings. = When triggerstring event takes place, sound is emitted according to the following settings.
 white												= white
+will be used.											= will be used.
 Would you like now to add BOM to this file?					= Would you like now to add BOM to this file?
 Would you like to change the current ""Libraries"" folder location? = Would you like to change the current ""Libraries"" folder location?
 Would you like to change Config.ini file location to default one? = Would you like to change Config.ini file location to default one?
@@ -17085,20 +17098,27 @@ F_Validate_IniParam(IniParam, IniFilename, Section, Parameter)
 	global	;assume-global mode of operation
 	local	temp := ""
 
-	temp := F_Read_IniParam(IniParam, IniFilename, Section, Parameter)					;HADL = Hotstrings Application Data Libraries
+	temp := F_Read_IniParam(IniParam, IniFilename, Section, Parameter)
 	if (temp = "ERROR") or (temp = "")
 	{
 		IniWrite, % IniParam, % IniFilename, % Section, % Parameter
 		if (ErrorLevel)
 		{
 			MsgBox, % c_MB_I_Exclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["error"]
-				,  % "Problem with writing parameter" . A_Space . Parameter . A_Space . "to the file" . "`n"
+				, % TransA["Problem with writing parameter"] . A_Space . Parameter . A_Space . TransA["to the file"] . "`n"
 				. IniFilename . "`n`n"
-				. "Non-existing or corrupted file."
-				. "The default value of parameter" . A_Space . 
-				. IniParam
-				. "will be used."
-		}	
+				. TransA["Non-existing or corrupted file."]
+				. TransA["The following default value"] . "`n`n"
+				. IniParam . "`n"
+				. TransA["will be used."]
+		}
+		else
+			MsgBox, % c_MB_I_Info, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"]
+				, % TransA["Default value of"] . A_Space . Parameter . A_Space . TransA["was written to the file"] . "`n"
+				. IniFilename . "`n`n"
+				. TransA["The following default value"] . "`n`n"
+				. IniParam . "`n"
+				. TransA["will be used."]
 	}
 }	
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
