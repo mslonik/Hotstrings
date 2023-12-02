@@ -572,7 +572,6 @@ Critical, Off
 #If WinExist("ahk_id" TT_C1Hwnd) 		;Triggerstring Tips Composition no. 1: triggestring tips only;
 	or WinExist("ahk_id" TT_C2Hwnd) 	;Triggerstring Tips Composition no. 2: triggestring tips + triggers (2 columns)
 	or WinExist("ahk_id" TT_C3Hwnd)	;Triggerstring Tips Composition no. 3: triggestring tips + triggers + hotstrings (3 columns)
-	or WinExist("ahk_id" TT_C4Hwnd)	;Triggerstring Tips Composition no. 4: static triggerstring tips (static window)
 
 	^Tab::	;new thread starts here
 	+^Tab::
@@ -582,18 +581,20 @@ Critical, Off
 	^WheelUp::
 	^WheelDown::
 	^MButton::
+	~Control::
 		Critical, On
 		; OutputDebug, % "1)A_ThisHotkey:" . A_ThisHotKey . "`n"
 		SetTimer, TurnOff_Ttt, Off
 		F_TTMenu_Keyboard()
 		return
 		
-	~*Control::
-		; OutputDebug, % "2)A_ThisHotkey:" . A_ThisHotKey . "`n"
+	~Control UP::
+		F_DestroyTriggerstringTips(ini_TTCn)
 		Hotstring("Reset")
 	return	
 
 	~LButton::			;if LButton is pressed outside of MenuTT then MenuTT is destroyed; but when mouse click is on/in, it runs hotstring as expected → F_TTMenu_Mouse().
+		; OutputDebug, % "~LButton" . "`n"
 		F_TTMenu_Mouse()	;the priority of g F_TTMenuStatic_Mouse is lower than this "interrupt"
 	return
 ;#c/* commercial only beginning		
@@ -735,7 +736,7 @@ Critical, Off
 		HSDelGuiEscape()	;Gui event!
 	return
 #If
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If WinActive("ahk_id" HS3GuiHwnd) or WinActive("ahk_id" HS4GuiHwnd) ; the following hotkeys will be active only if Hotstrings windows are active at the moment. 
 	F1::	;new thread starts here
 		F_DestroyTriggerstringTips(ini_TTCn)
@@ -842,13 +843,13 @@ Critical, Off
 		F_DestroyTriggerstringTips(ini_TTCn)
 	return
 #If
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If WinActive("ahk_id" MoveLibsHwnd)
 	F8::
 		F_Move()
 	return
 #If
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #If F_IsItEdit()
 	AppsKey::	;blocks default context menu for Edit fields
 #If
@@ -894,7 +895,7 @@ return
 :*:hsstats/::										;show application statistics
 	F_AppStats()
 return
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ~*LShift::
 ~*RShift::			;Actually "Shifts" work a bit different as some keys like @ or ? are available only after pressing Shift.
 	ToolTip,			;this line is necessary to close tooltips.
@@ -958,10 +959,13 @@ return
 	; OutputDebug, % "v_InputString after:" . v_InputString . "|" . "`n"
 return
 
- ~*Control::	;whenever any combination with control (e.g. ctrl + v) is applied on time when triggestring is entered AND active triggerstrings are disabled, hotstring recognizer is reset. Without "UP" modifier it is in conflict with other hotkeys
+ ~*Control::	;whenever any combination with control (e.g. ctrl + v) is applied on time when triggestring is entered AND active triggerstrings are disabled, hotstring recognizer is reset.
+	; OutputDebug, % "Ordinary control" . "`n"
 	ToolTip,	;this line is necessary to close tooltips.
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
+	; if (ini_TTCn = 4)	;absolutely crucial line for static window; v_InputString cannot be cleared, triggerstring tips cannot be destroyed
+		; return	
 	F_DestroyTriggerstringTips(ini_TTCn)
 	if (!WinExist("ahk_id" HMenuCLIHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
 	{
@@ -986,16 +990,16 @@ return
 	; OutputDebug, % "LButton UP:" . "`n"
 	Suspend, Permit	;Suspend, On is set for "Search Hotstrings" window
 	if (WinActive("ahk_id" HS3SearchHwnd))
-		{
-			; OutputDebug, % "A_ThisHotkey:" . A_ThisHotkey . A_Space . "!WinActive(""ahk_id"" HS3GuiHwnd):" . !WinActive("ahk_id" HS3SearchHwnd) . A_Space . "!WinExist(""ahk_id"" HS3SearchHwnd):" . !WinExist("ahk_id" HS3SearchHwnd) . "`n"
-			Suspend, On
-			; OutputDebug, % "S On" . "`n"
-		}	
-		else
-		{
-			Suspend, Off
-			; OutputDebug, % "S Off" . "`n"
-		}	
+	{
+		; OutputDebug, % "A_ThisHotkey:" . A_ThisHotkey . A_Space . "!WinActive(""ahk_id"" HS3GuiHwnd):" . !WinActive("ahk_id" HS3SearchHwnd) . A_Space . "!WinExist(""ahk_id"" HS3SearchHwnd):" . !WinExist("ahk_id" HS3SearchHwnd) . "`n"
+		Suspend, On
+		; OutputDebug, % "S On" . "`n"
+	}	
+	else
+	{
+		Suspend, Off
+		; OutputDebug, % "S Off" . "`n"
+	}	
 return
 	
 ~*Enter UP::	;if user switches between windows by keyboard (Alt+Tab or Win+Alt) clicking and e.g. "Search Hotstring" window was active
@@ -1049,11 +1053,17 @@ return
 	~^Up::		;valid only for Triggerstring Menu
 	~Down::
 	~^Down::		;valid only for Triggerstring Menu
+	; OutputDebug, % "WinExist(ahk_id TT_C4Hwnd)" . "`n"
 		F_StaticMenu_Keyboard()
-		return
+	return
+
+	~*Control UP::
+		F_DestroyTriggerstringTips(ini_TTCn)
+	return
+
 	~Esc::	;tilde in order to run function TT_C4GuiEscape
-		GuiControl,, % IdTT_C4_LB4, % c_MHDelimiter
-		;OutputDebug, % "v_InputString:" . A_Tab . v_InputString . A_Tab . "v_EndChar:" . A_Tab . v_EndChar
+		GuiControl,, % IdTT_C4_LB4, % c_TextDelimiter
+		OutputDebug, % "v_InputString:" . A_Tab . v_InputString . A_Tab . "v_EndChar:" . A_Tab . v_EndChar
 		v_InputString 			:= ""	
 		return
 #If
@@ -2132,7 +2142,7 @@ F_Tt_HWT()	;Tt_HWT = Tooltip_Hostring Was Triggered
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, ControlSend, determine number of items in ListBox: https://www.autohotkey.com/boards/viewtopic.php?t=43057
-{	;tu jestem
+{
 ;#c/* commercial only beginning
 	global	;assume-global mode of operation
 	local	PressedKey 		:= A_ThisHotkey
@@ -2141,33 +2151,33 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 		, 	Temp2 			:= ""
 		, 	ShiftTabIsFound 	:= false
 		, 	ReplacementString 	:= ""
-		, 	OutputVar1 		:= ""
-		, 	OutputVar2 		:= ""
-		,	NoPosInList 		:= 0
+		, 	ContentLB1 		:= ""
+		, 	ContentLB4 		:= ""
+		,	NoPosInList 		:= 0		;how many positions are available on the list
 		, 	WhichLB 			:= ""
 	static 	IfUpF := false,	IfDownF := false, IsCursorPressed := false, IntCnt := 1
 
-	GuiControlGet, OutputVar1, , % IdTT_C4_LB1	;Retrieves the contents of the control to check if static window contains any information: triggerstring tips
-	GuiControlGet, OutputVar2, , % IdTT_C4_LB4	;Retrieves the contents of the control to check if static window contains any information: hotstrings
-	; OutputDebug, % "OutputVar1:" . A_Tab . OutputVar1 . A_Tab . "OutputVar2:" . A_Tab . OutputVar2 . "`n"
-	if (!OutputVar1) and (!OutputVar2)			;if no information, leave this functionfunction
+	GuiControlGet, ContentLB1, , % IdTT_C4_LB1	;Retrieves the contents of the control to check if static window contains any information: triggerstring tips
+	GuiControlGet, ContentLB4, , % IdTT_C4_LB4	;Retrieves the contents of the control to check if static window contains any information: hotstrings
+	; OutputDebug, % "ContentLB1:" . A_Tab . ContentLB1 . A_Tab . "ContentLB4:" . A_Tab . ContentLB4 . "`n"
+	if (!ContentLB1) and (!ContentLB4)			;if no information, leave this functionfunction
 		return
-	if (OutputVar1) and (!ini_ATEn)
+	if (ContentLB1) and (!ini_ATEn)
 		return
 	OutputDebug, % A_ThisFunc . ":" . A_Space . "PressedKey:" . PressedKey . "`n"
-	if (OutputVar1)
+	if (ContentLB1)
 	{
-		; if (!InStr(PressedKey, "^"))
-		; 	return
+		if (!InStr(PressedKey, "^"))	;MTrig = triggerstring menu is active only if user presses control + key
+			return
 		WhichLB := "MTrig"
 		ControlGet, Temp2, List, , , % "ahk_id" IdTT_C4_LB1
 		Loop, Parse, Temp2, `n
 			NoPosInList++
 	}
-	if (OutputVar2)
+	if (ContentLB4)
 	{
-		; if (InStr(PressedKey, "^"))
-		; 	return
+		if (InStr(PressedKey, "^"))	;MHot = hotstring menu is active only if user presses key without control
+			return
 		WhichLB := "MHot"
 		ControlGet, Temp2, List, , , % "ahk_id" IdTT_C4_LB4
 		Loop, Parse, Temp2, `n
@@ -2177,7 +2187,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 	Switch WhichLB
 	{
 		Case "MTrig":
-			if (InStr(PressedKey, "Up") or InStr(PressedKey, "+Tab"))
+			if (InStr(PressedKey, "^Up") or InStr(PressedKey, "+Tab"))
 			{
 				IsCursorPressed := true
 ,				IntCnt--
@@ -2186,7 +2196,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 				ControlSend, , {Up}, % "ahk_id" IdTT_C4_LB3
 				ShiftTabIsFound := true
 			}
-			if (InStr(PressedKey, "Down") or InStr(PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
+			if (InStr(PressedKey, "^Down") or InStr(PressedKey, "Tab")) and (!ShiftTabIsFound)	;the same as "down"
 			{
 				IsCursorPressed := true
 ,				IntCnt++
@@ -2250,7 +2260,7 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 			{
 				if (A_Index = PressedKey)
 				{
-					Temp1 := A_LoopField
+					Temp2 := A_LoopField
 					break
 				}
 			}
@@ -2260,12 +2270,12 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 			{
 				if (A_Index = PressedKey)
 				{
-					Temp1 := A_LoopField
+					Temp2 := SubStr(A_LoopField, 4)	;extract no. and dot.
 					break
 				}
 			}
-			v_UndoHotstring 	:= Temp1
-,			ReplacementString 	:= F_ReplaceAHKconstants(Temp1)
+			v_UndoHotstring 	:= Temp2
+,			ReplacementString 	:= F_ReplaceAHKconstants(Temp2)
 ,			ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options) ;F_FollowCaseConformity(ReplacementString)
 ,			ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
 	}
@@ -2279,19 +2289,19 @@ F_StaticMenu_Keyboard(IsPreviousWindowIDvital*)	;future: get rid of ControlGet, 
 	Switch WhichLB
 	{
 		Case "MTrig":
-			GuiControl,, % IdTT_C4_LB1, % c_MHDelimiter
-			GuiControl,, % IdTT_C4_LB2, % c_MHDelimiter
-			GuiControl,, % IdTT_C4_LB3, % c_MHDelimiter
+			GuiControl,, % IdTT_C4_LB1, % c_TextDelimiter
+			GuiControl,, % IdTT_C4_LB2, % c_TextDelimiter
+			GuiControl,, % IdTT_C4_LB3, % c_TextDelimiter
 			; OutputDebug, % "v_InputStringOutput:" . A_Tab . v_InputString . A_Tab . "Temp1:" . A_Tab . Temp1 . A_Tab . "A_IsCritical:" . A_Tab . A_IsCritical . "`n"
-			F_BackFeed(Temp1)
-			v_InputString := 0
+			F_BackFeed(Temp2)
+			v_InputString := ""
 		Case "MHot":
 			Switch WhichMenu
 			{
 				Case "SI":	F_SendIsOflag(ReplacementString, Ovar, "SI")
 				Case "CLI":	F_ClipboardPaste(ReplacementString, Ovar, v_EndChar)
 			}
-			GuiControl,, % IdTT_C4_LB4, % c_MHDelimiter
+			GuiControl,, % IdTT_C4_LB4, % c_TextDelimiter
 			if (ini_MHSEn)
 				SoundBeep, % ini_MHSF, % ini_MHSD	
 			if (InStr(A_ThisHotkey, "?"))
@@ -3747,9 +3757,9 @@ F_DestroyTriggerstringTips(ini_TTCn)
 		Case 2: Gui, TT_C2: Destroy
 		Case 3: Gui, TT_C3: Destroy
 		Case 4:
-			GuiControl,, % IdTT_C4_LB1, % c_MHDelimiter
-			GuiControl,, % IdTT_C4_LB2, % c_MHDelimiter
-			GuiControl,, % IdTT_C4_LB3, % c_MHDelimiter
+			GuiControl,, % IdTT_C4_LB1, % c_TextDelimiter
+			GuiControl,, % IdTT_C4_LB2, % c_TextDelimiter
+			GuiControl,, % IdTT_C4_LB3, % c_TextDelimiter
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3980,6 +3990,7 @@ F_GuiTrigTipsMenuDefC4()	;static gui for triggerstring tips and hotstrings
 		Gui, TT_C4: Show, Center AutoSize NoActivate
 	else
 		Gui, TT_C4: Show, % "X" . ini_SWPos.X . A_Space . "Y" . ini_SWPos["Y"] . A_Space . "NoActivate" . A_Space . "AutoSize"
+	; OutputDebug, % A_ThisFunc . A_Space . "E" . "`n"
 ;#c*/ commercial only end		
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4272,6 +4283,8 @@ F_TTMenu_Keyboard()	;this is separate, dedicated function to handle "interrupt" 
 F_BackFeed(MyInput)
 {
 	global 	;assume-global mode of operation
+
+	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "`n"
 	if (v_Qinput != "")
 		SendInput, % "{BackSpace" . A_Space . StrLen(v_Qinput) . "}"
 	else
@@ -4280,8 +4293,8 @@ F_BackFeed(MyInput)
 	MyInput 		:= F_ConvertEscapeSequences(MyInput)
 ,	MyInput 		:= F_ConvertEscapeSequences2(MyInput)
 ,	v_InputString 	:= ""
-	SendLevel, 	% ini_SendLevel	;to backtrigger it must be higher than the input level of the hotstrings
-	SendInput,	% MyInput			;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to SendEvent 
+	SendLevel, 	% ini_SendLevel 	;to backtrigger it must be equal or higher than the MinSendLevel
+	SendInput,	% MyInput			;If a script other than the one executing SendInput has a low-level keyboard hook installed, SendInput automatically reverts to 
 	SendLevel, 	0
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -16036,7 +16049,7 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 	{
 		; OutputDebug, % "PreviousWindowID1:" . A_Tab . PreviousWindowID . "`n"
 		Loop, Parse, ReplacementString, % c_MHDelimiter	;second parse of the same variable, this time in order to fill in the Listbox
-			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . c_MHDelimiter
+			GuiControl,, % IdTT_C4_LB4, % A_Index . ". " . A_LoopField . c_TextDelimiter
 		GuiControl, Choose, % IdTT_C4_LB4, 1
 		Gui, TT_C4: Flash	;future: flashing (blinking) in a loop until user do not take action
 		WhichMenu := "SI"	;this setting will be used within F_MouseMenuCombined() to handle mouse event
@@ -16464,7 +16477,7 @@ F_MouseMenuCombined() ;Handling of mouse events for static menus window; Valid i
 		GuiControl, Choose, % OutputVarControl, % ChoicePos
 		GuiControlGet, OutputVarTemp, , % OutputVarControl
 		OutputVarTemp := SubStr(OutputVarTemp, 4)
-		GuiControl,, % IdTT_C4_LB4, % c_MHDelimiter
+		GuiControl,, % IdTT_C4_LB4, % c_TextDelimiter
 		WinActivate, % "ahk_id" PreviousWindowID
 		v_UndoHotstring 	:= OutputVarTemp
 	,	ReplacementString 	:= F_ReplaceAHKconstants(OutputVarTemp)
