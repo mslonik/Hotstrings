@@ -28,7 +28,7 @@ CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in t
 global AppIcon			:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let 			U_AppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% 	; Keep this line and the previous one together
 ;@Ahk2Exe-SetMainIcon  	%U_AppIcon%
-global AppVersion		:= "3.6.21"	;starting on 2023-11-24 (Friday). 
+global AppVersion		:= "3.6.22"	;starting on 2023-12-03 (Sunday). 
 ;@Ahk2Exe-Let 			U_AppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep this line and the previous one together
 
 ;The compiler will be run at least once for each Base directive line. Only for .exe  Base it is possible to encrypt content!
@@ -13142,10 +13142,10 @@ ConfigIni := "
 
 	if (FileExist(ini_HADConfig)) ;if Config.ini exists in default location, just return
 		return
-	if (FileExist(v_ScriptDir . "\" . "Config.ini"))	;if Config.ini exists in second location, change variable value to that location and return 
+	if (FileExist(A_ScriptDir . "\" . "Config.ini"))	;if Config.ini exists in second location, change variable value to that location and return 
 	{
-		v_ScriptDir := v_ScriptDir
-		ini_HADConfig := v_ScriptDir . "\" . "Config.ini"
+		v_ScriptDir := A_ScriptDir
+		ini_HADConfig := A_ScriptDir . "\" . "Config.ini"
 		return
 	}	
 
@@ -13157,6 +13157,7 @@ ConfigIni := "
 			MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["Config.ini file couldn't be created for some reason. Exiting."]
 				. "`n`n"
 				. ini_HADConfig
+			;tu jestem. Spróbować utworzyć folder w v_ScriptDir . "\" . "Congig.ini"
 			ExitApp, 14		;Config.ini file couldn't be created for some reason. Exiting.
 		}	
 		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"]
