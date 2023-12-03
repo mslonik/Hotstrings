@@ -385,12 +385,10 @@ Menu, SubmenuEndChars, Add, % TransA["Space"],												F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Tab"], 												F_ToggleEndChars
 Menu, SubmenuEndChars, Add, % TransA["Underscore _"], 											F_ToggleEndChars
 F_ToggleEndChars()
-Func_GuiEventsMenu		:= func("F_GuiEvents")
-Menu, Configuration,		Add, % TransA["Events: signalling"],								% Func_GuiEventsMenu
-Func_GuiEventsMenu.Call(true)
+Menu, Configuration,		Add, % TransA["Events: signalling"],								F_GuiEvents
 Func_GuiStylingMenu		:= func("F_EventsStyling")
 Menu, Configuration,		Add, % TransA["Events: styling"],									% Func_GuiStylingMenu
-Func_GuiStylingMenu.Call(true)	
+Func_GuiStylingMenu.Call(true)	;tu jestem
 Menu, Configuration,		Add, % TransA["Graphical User Interface"], 							:ConfGUI
 Menu, Configuration,		Add	
 Menu, Configuration,  	   	Add, % TransA["Toggle trigger characters (↓ or EndChars)"], 			:SubmenuEndChars
@@ -565,6 +563,34 @@ if (ini_TTCn = 4)	;static triggerstring / hotstring GUI
 	F_GuiTrigTipsMenuDefC4()
 if (ini_GuiReload) and (v_SilentMode != "l")
 	F_GUIInit()
+
+;block for handling GuiEvents
+F_GuiEvents_CreateObjects()
+F_GuiEvents_DetermineConstraints()
+F_GuiEvents_LoadValues()	;load values to guicontrols
+F_EvBH_R1R2()
+F_EvBH_R3R4()
+F_EvBH_R7R8()
+F_EvBH_S1()
+F_EvBH_S2()
+F_EvBH_S3()
+F_EvMH_R3R4()
+F_EvMH_S1()
+F_EvMH_S2()
+F_EvUH_R1R2()
+F_EvUH_R3R4()
+F_EvUH_R7R8()
+F_EvUH_S1()
+F_EvUH_S2()
+F_EvUH_S3()
+F_EvTt_R1R2()
+F_EvTt_R3R4()
+F_EvTt_S1()
+F_EvTt_S2()
+F_EvSM_R1R2()
+;#c/* commercial only beginning	
+F_EvAT_R1R2()
+;#c*/ commercial only end
 
 AppStartTime := A_Now	;Date and time math can be performed with EnvAdd and EnvSub. Also, FormatTime can format the date and/or time according to your locale or preferences.
 Critical, Off
@@ -2806,7 +2832,7 @@ GuiEventsGuiClose()	;GUI event (close)
 	if (WinExist("ahk_id" HS4GuiHwnd))
 		Gui, HS4: -Disabled	
 	Gui, TTDemo: 		Destroy
-	Gui, GuiEvents: 	Destroy
+	Gui, GuiEvents: 	Hide
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 GuiEventsGuiEscape()	;GUI event (close)	;this function is somehow blocked (dead code)
@@ -2817,7 +2843,7 @@ GuiEventsGuiEscape()	;GUI event (close)	;this function is somehow blocked (dead 
 	if (WinExist("ahk_id" HS4GuiHwnd))
 		Gui, HS4: -Disabled	
 	Gui, TTDemo: 		Destroy
-	Gui, GuiEvents: 	Destroy
+	Gui, GuiEvents: 	Hide
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_WhereDisplayMenu(ini_TTTP)
@@ -4396,57 +4422,48 @@ F_LoadConfiguration()
 ;#c*/ commercial only end	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_GuiEvents(OneTime*)
+F_GuiEvents()
 {
 	global ;assume-global mode
-	local Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0, Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0, NewWinPosX := 0, NewWinPosY := 0
-	if (OneTime[3])	;this is a trick: if F_GuiEvents is called from menu, its parameter is Array of 3 elements.
-		Gui, % A_Gui . ": +Disabled"	;in order to block user interaction with background window
-	F_GuiEvents_CreateObjects()
-	F_GuiEvents_DetermineConstraints()
-	F_GuiEvents_LoadValues()	;load values to guicontrols
-	F_EvBH_R1R2()
-	F_EvBH_R3R4()
-	F_EvBH_R7R8()
-	F_EvBH_S1()
-	F_EvBH_S2()
-	F_EvBH_S3()
-	F_EvMH_R3R4()
-	F_EvMH_S1()
-	F_EvMH_S2()
-	F_EvUH_R1R2()
-	F_EvUH_R3R4()
-	F_EvUH_R7R8()
-	F_EvUH_S1()
-	F_EvUH_S2()
-	F_EvUH_S3()
-	F_EvTt_R1R2()
-	F_EvTt_R3R4()
-	F_EvTt_S1()
-	F_EvTt_S2()
-	F_EvSM_R1R2()
-;#c/* commercial only beginning	
-	F_EvAT_R1R2()
-;#c*/ commercial only end
-	F_EvTab3(OneTime[1])	;OneTime is used
+	local 	Window1X := 0, Window1Y := 0, Window1W := 0, Window1H := 0
+		, 	Window2X := 0, Window2Y := 0, Window2W := 0, Window2H := 0
+		, 	NewWinPosX := 0, NewWinPosY := 0
+
+	if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
+		WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
+	Gui, GuiEvents: Show, Hide
 	
-	if (OneTime[3])
+	DetectHiddenWindows, On
+	WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . GuiEventsHwnd
+	DetectHiddenWindows, Off
+	if (Window1W)
 	{
-		if (WinExist("ahk_id" . HS3GuiHwnd) or WinExist("ahk_id" . HS4GuiHwnd))
-			WinGetPos, Window1X, Window1Y, Window1W, Window1H, A
-		Gui, GuiEvents: Show, Hide
-		
-		DetectHiddenWindows, On
-		WinGetPos, Window2X, Window2Y, Window2W, Window2H, % "ahk_id" . GuiEventsHwnd
-		DetectHiddenWindows, Off
-		if (Window1W)
-		{
-			NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
-,			NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
-			Gui, GuiEvents: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Events: styling"]
-		}
-		else
-			Gui, GuiEvents: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Events: styling"]
+		NewWinPosX := Round(Window1X + (Window1W / 2) - (Window2W / 2))
+	,	NewWinPosY := Round(Window1Y + (Window1H / 2) - (Window2H / 2))
+		Gui, GuiEvents: Show, % "AutoSize" . A_Space . "x" . NewWinPosX . A_Space . "y" . NewWinPosY, % A_ScriptName . ":" . A_Space . TransA["Events: styling"]
+	}
+	else
+		Gui, GuiEvents: Show, Center AutoSize, % A_ScriptName . ":" . A_Space . TransA["Events: styling"]
+
+	F_GuiMain("Disabled")
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_GuiMain(Parameter)	;Parameter := {"Enabled", "Disabled"}
+{
+	global ;assume-global mode
+	Switch Parameter
+	{
+		Case "Enabled":
+			if (WinExist("ahk_id" . HS3GuiHwnd))
+				Gui, HS3: -Disabled
+			if (WinExist("ahk_id" . HS4GuiHwnd))
+				Gui, HS4: -Disabled
+
+		Case "Disabled":
+			if (WinExist("ahk_id" . HS3GuiHwnd))
+				Gui, HS3: +Disabled
+			if (WinExist("ahk_id" . HS4GuiHwnd))
+				Gui, HS4: +Disabled
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4719,51 +4736,84 @@ F_GuiEvents_CreateObjects()
 	Gui, GuiEvents: Add,	Button,	HwndIdEvSM_B4 gF_EvSM_B4,			% TransA["Cancel"]
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_CloseSubGui(WhatGuiToDestroy)
+F_DestroySubGui(WhatGuiToDestroy)
 {
      global ;assume-global mode of operation
-	if (WinExist("ahk_id" HS3GuiHwnd))
-     {
-		Gui, HS3: -Disabled 
-          WinActivate, % "ahk_id" HS3GuiHwnd
-     }
-	if (WinExist("ahk_id" HS4GuiHwnd))
-     {
-		Gui, HS4: -Disabled	
-          WinActivate, % "ahk_id" HS4GuiHwnd
-     }
+	F_GuiMain("Enabled")	;Parameter := {"Enabled", "Disabled"}
 	Gui, % WhatGuiToDestroy . ":" . A_Space . "Destroy"
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_EvTab3(OneTime*)
+F_EvTab3()
 {
 	global ;assume-global mode of operation
-	static PreviousEvTab3 := ""
-			, PreviousEvBH_R1R2 := "", PreviousEvBH_R3R4 := "", PreviousEvBH_R5R6 := "", PreviousEvBH_R7R8 := "", PreviousEvBH_S1 := "", PreviousEvBH_S2 := "", PreviousEvBH_S3 := ""
-			, PreviousEvMH_R1R2 := "", PreviousEvMH_R3R4 := "", PreviousEvMH_S1 := "", PreviousEvMH_S2 := ""
-			, PreviousEvUH_R1R2 := "", PreviousEvUH_R3R4 := "", PreviousEvUH_R5R6 := "", PreviousEvUH_R7R8 := "", PreviousEvUH_S1 := "", PreviousEvUH_S2 := "", PreviousEvUH_S3 := ""
-			, PreviousEvTt_R1R2 := "", PreviousEvTt_R3R4 := "", PreviousEvTt_R5R6 := "", PreviousEvTt_C1 := "", PreviousEvTt_C2 := "", PreviousEvTt_S1 := "", PreviousEvTt_S2 := "", PreviousEvTt_DDL1 := "", PreviousEvTt_DDL2 := ""
+	static PreviousEvTab3 	:= ""                            
+		, PreviousEvBH_R1R2 := ""
+		, PreviousEvBH_R3R4 := ""
+		, PreviousEvBH_R5R6 := ""
+		, PreviousEvBH_R7R8 := ""
+		, PreviousEvBH_S1 	:= ""
+		, PreviousEvBH_S2 	:= ""
+		, PreviousEvBH_S3 	:= ""
+		, PreviousEvMH_R1R2 := ""
+		, PreviousEvMH_R3R4 := ""
+		, PreviousEvMH_S1 	:= ""
+		, PreviousEvMH_S2 	:= ""
+		, PreviousEvUH_R1R2 := ""
+		, PreviousEvUH_R3R4 := ""
+		, PreviousEvUH_R5R6 := ""
+		, PreviousEvUH_R7R8 := ""
+		, PreviousEvUH_S1 	:= ""
+		, PreviousEvUH_S2 	:= ""
+		, PreviousEvUH_S3 	:= ""
+		, PreviousEvTt_R1R2 := ""
+		, PreviousEvTt_R3R4 := ""
+		, PreviousEvTt_R5R6 := ""
+		, PreviousEvTt_C1 	:= ""
+		, PreviousEvTt_C2 	:= ""
+		, PreviousEvTt_S1 	:= ""
+		, PreviousEvTt_S2 	:= ""
+		, PreviousEvTt_DDL1 := ""
+		, PreviousEvTt_DDL2 := ""
 ;#c/* commercial only beginning
-			, PreviousEvAT_R1R2 := ""
+		, PreviousEvAT_R1R2 := ""
 ;#c*/ commercial only end
-			, PreviousEvSM_R1R2 := ""
-	;OutputDebug, % "OneTime[1]:" . A_Tab . OneTime[1]
-	Gui, GuiEvents: Submit, NoHide	;Loads EvTab3 with current value 
-	if (OneTime[1] = true)
-	{
-		PreviousEvTab3 := EvTab3
-		, PreviousEvBH_R1R2 := EvBH_R1R2, PreviousEvBH_R3R4 := EvBH_R3R4, PreviousEvBH_R5R6 := EvBH_R5R6, PreviousEvBH_R7R8 := EvBH_R7R8, PreviousEvBH_S1 := EvBH_S1, PreviousEvBH_S2 := EvBH_S2, PreviousEvBH_S3 := EvBH_S3
-		, PreviousEvMH_R1R2 := EvMH_R1R2, PreviousEvMH_R3R4 := EvMH_R3R4, PreviousEvMH_S1 := EvMH_S1, PreviousEvMH_S2 := EvMH_S1
-		, PreviousEvUH_R1R2 := EvUH_R1R2, PreviousEvUH_R3R4 := EvUH_R3R4, PreviousEvUH_R5R6 := EvUH_R5R6, PreviousEvUH_R7R8 := EvUH_R7R8, PreviousEvUH_S1 := EvUH_S1, PreviousEvUH_S2 := EvUH_S2, PreviousEvUH_S3 := EvUH_S3
-		, PreviousEvTt_R1R2 := EvTt_R1R2, PreviousEvTt_R3R4 := EvTt_R3R4, PreviousEvTt_R5R6 := EvTt_R5R6, PreviousEvTt_C1 := EvTt_C1, PreviousEvTt_C2 := EvTt_C2, PreviousEvTt_S1 := EvTt_S1, PreviousEvTt_S2 := EvTt_S2, PreviousEvTt_DDL1 := EvTt_DDL1, PreviousEvTt_DDL2 := EvTt_DDL2
+		, PreviousEvSM_R1R2 := ""	;SM = Static Menus (triggerstring and hotstring)
+
+	; Gui, GuiEvents: Submit, NoHide	;Loads EvTab3 with current value 
+	PreviousEvTab3 	:= EvTab3
+, 	PreviousEvBH_R1R2 	:= EvBH_R1R2
+, 	PreviousEvBH_R3R4 	:= EvBH_R3R4
+, 	PreviousEvBH_R5R6 	:= EvBH_R5R6
+, 	PreviousEvBH_R7R8 	:= EvBH_R7R8
+, 	PreviousEvBH_S1 	:= EvBH_S1
+, 	PreviousEvBH_S2 	:= EvBH_S2
+, 	PreviousEvBH_S3 	:= EvBH_S3
+, 	PreviousEvMH_R1R2 	:= EvMH_R1R2
+, 	PreviousEvMH_R3R4 	:= EvMH_R3R4
+, 	PreviousEvMH_S1 	:= EvMH_S1
+, 	PreviousEvMH_S2 	:= EvMH_S1
+, 	PreviousEvUH_R1R2 	:= EvUH_R1R2
+, 	PreviousEvUH_R3R4 	:= EvUH_R3R4
+, 	PreviousEvUH_R5R6 	:= EvUH_R5R6
+, 	PreviousEvUH_R7R8 	:= EvUH_R7R8
+, 	PreviousEvUH_S1 	:= EvUH_S1
+, 	PreviousEvUH_S2 	:= EvUH_S2
+, 	PreviousEvUH_S3 	:= EvUH_S3
+, 	PreviousEvTt_R1R2 	:= EvTt_R1R2
+, 	PreviousEvTt_R3R4 	:= EvTt_R3R4
+, 	PreviousEvTt_R5R6 	:= EvTt_R5R6
+, 	PreviousEvTt_C1 	:= EvTt_C1
+, 	PreviousEvTt_C2 	:= EvTt_C2
+, 	PreviousEvTt_S1 	:= EvTt_S1
+, 	PreviousEvTt_S2 	:= EvTt_S2
+, 	PreviousEvTt_DDL1 	:= EvTt_DDL1
+, 	PreviousEvTt_DDL2 	:= EvTt_DDL2
 ;#c/* commercial only beginning		
-		, PreviousEvAT_R1R2 := EvAT_R1R2
+, 	PreviousEvAT_R1R2 	:= EvAT_R1R2
 ;#c*/ commercial only end		
-		, PreviousEvSM_R1R2 := EvSM_R1R2
-		return
-	}
+, 	PreviousEvSM_R1R2 	:= EvSM_R1R2	;SM = Static Menus (triggerstring and hotstring)
 	
-	; OutputDebug, % "EvTab3:" . A_Tab . EvTab3 . A_Tab . "PreviousEvTab3" . A_Tab . PreviousEvTab3 . "`n"
+	; OutputDebug, % "EvTab3:" . EvTab3 . A_Space . "PreviousEvTab3:" . PreviousEvTab3 . "`n"
 	F_EvUpdateTab()
 	if (EvTab3 != PreviousEvTab3)
 	{
@@ -5165,7 +5215,8 @@ F_EvSM_B4()	;static menus, button Cancel
 {
 	global ;assume-global mode
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
+     Gui, GuiEvents: Hide
+	F_GuiMain("Enabled")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvSM_B2()	;static menus, button Apply
@@ -5175,21 +5226,20 @@ F_EvSM_B2()	;static menus, button Apply
 	Switch EvSM_R1R2	;static triggerstring / hostring menu enable / disable
 	{
 		Case 1:	;enable
-		Switch ini_TTCn	;previous value of ini_TTCn
-		{
-			Case 1: Gui, TT_C1:		Destroy
-			Case 2: Gui, TT_C2:		Destroy
-			Case 3: Gui, TT_C3:		Destroy
-		}
-		ini_TTCn := 4	;enable
-		F_GuiTrigTipsMenuDefC4()	
+			Switch ini_TTCn	;previous value of ini_TTCn
+			{
+				Case 1: Gui, TT_C1:		Destroy
+				Case 2: Gui, TT_C2:		Destroy
+				Case 3: Gui, TT_C3:		Destroy
+			}
+			ini_TTCn := 4	;enable
+			F_GuiTrigTipsMenuDefC4()	
 		Case 2:	;disable: 
-		Gui, TT_C4:		Destroy
-		ini_TTCn := 2	; default value: Composition of triggerstring tips = Triggerstring tips + triggers
+			Gui, TT_C4:		Destroy
+			ini_TTCn := 2	; default value: Composition of triggerstring tips = Triggerstring tips + triggers
 	}
 	IniWrite, % ini_TTCn,	% ini_HADConfig, Event_TriggerstringTips,	TTCn
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered	
-	F_EvTab3(true)	;to memory that something was applied
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvSM_B3()	;static menus, button Close
@@ -5199,22 +5249,22 @@ F_EvSM_B3()	;static menus, button Close
 	Switch EvSM_R1R2	;static triggerstring / hostring menu enable / disable
 	{
 		Case 1:	;enable
-		Switch ini_TTCn	;previous value of ini_TTCn
-		{
-			Case 1: Gui, TT_C1:		Destroy
-			Case 2: Gui, TT_C2:		Destroy
-			Case 3: Gui, TT_C3:		Destroy
-		}
-		ini_TTCn := 4	;enable
-		F_GuiTrigTipsMenuDefC4()	
+			Switch ini_TTCn	;previous value of ini_TTCn
+			{
+				Case 1: Gui, TT_C1:		Destroy
+				Case 2: Gui, TT_C2:		Destroy
+				Case 3: Gui, TT_C3:		Destroy
+			}
+			ini_TTCn := 4	;enable
+			F_GuiTrigTipsMenuDefC4()	
 		Case 2:	;disable: 
-		Gui, TT_C4:		Destroy
-		ini_TTCn := 2	; default value: Composition of triggerstring tips = Triggerstring tips + triggers
+			Gui, TT_C4:		Destroy
+			ini_TTCn := 2	; default value: Composition of triggerstring tips = Triggerstring tips + triggers
 	}
 	IniWrite, % ini_TTCn,	% ini_HADConfig, Event_TriggerstringTips,	TTCn
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-	F_EvTab3(true)	;to memory that something was applied
-     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
+	Gui, GuiEvents: Hide
+	F_GuiMain("Enabled")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvSM_B1()	;static menus, button Preview	
@@ -5265,7 +5315,8 @@ F_EvAT_B4()	;Event Active Triggerstring Tips Button Cancel
 {
 	global ;assume-global mode
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
+	Gui, GuiEvents: Hide
+	F_GuiMain("Enabled")
 }
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5281,7 +5332,6 @@ F_EvAT_B2()	;Event Active Triggerstring Tips Button Apply
 	}
 	IniWrite, % ini_ATEn, 	% ini_HADConfig, Event_ActiveTriggerstringTips, 	ATEn
 	Gui, Tt_HWT: Hide		;Tooltip: Basic hotstring was triggered
-	F_EvTab3(true)			;to memory that something was applied
 	if (ini_TTCn = 4)		;static triggerstring / hotstring GUI 
 	{
 		Gui, TT_C4: Destroy
@@ -5302,8 +5352,8 @@ F_EvAT_B3()	;Event Active Triggerstring Tips Button Close
 	}
 	IniWrite, % ini_ATEn, 	% ini_HADConfig, Event_ActiveTriggerstringTips, 	ATEn
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-	F_EvTab3(true)	;to memory that something was applied
-     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
+     Gui, GuiEvents: Hide
+	F_GuiMain("Enabled")
 	if (ini_TTCn = 4)		;static triggerstring / hotstring GUI 
 	{
 		Gui, TT_C4: Destroy
@@ -5411,7 +5461,6 @@ F_EvTt_B2()	;Event Tooltip (is triggered) Button Apply
 	IniWrite, % ini_TASAC,	% ini_HADConfig, Event_TriggerstringTips,	TipsAreShownAfterNoOfCharacters
 	IniWrite, % ini_TTCn,	% ini_HADConfig, Event_TriggerstringTips,	TTCn
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered	
-	F_EvTab3(true)	;to memory that something was applied
 	F_UpdateStateOfLockKeys(ini_HK_ToggleTt, ini_TTTtEn)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5444,8 +5493,8 @@ F_EvTt_B3()	;Event Tooltip (is triggered) Button Close
 	IniWrite, % ini_TASAC,	% ini_HADConfig, Event_TriggerstringTips,	TipsAreShownAfterNoOfCharacters
 	IniWrite, % ini_TTCn,	% ini_HADConfig, Event_TriggerstringTips,	TTCn
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-	F_EvTab3(true)	;to memory that something was applied
-     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
+     Gui, GuiEvents: Hide
+	F_GuiMain("Enabled")
 	F_UpdateStateOfLockKeys(ini_HK_ToggleTt, ini_TTTtEn)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5453,7 +5502,8 @@ F_EvTt_B4()	;Event Tooltip (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
+	Gui, GuiEvents: Hide
+	F_GuiMain("Enabled")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvTt_S2()
@@ -5638,7 +5688,6 @@ F_EvUH_B3()	;Event Undo Hotstring (is triggered) Button Apply
 	IniWrite, % ini_UHSF,	% ini_HADConfig, Event_UndoHotstring,	UHSF
 	IniWrite, % ini_UHSD,	% ini_HADConfig, Event_UndoHotstring,	UHSD
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered	
-	F_EvTab3(true)	;to memory that something was applied
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvUH_B4()	;Event Undo Hotstring (is triggered) Button Close
@@ -5673,15 +5722,16 @@ F_EvUH_B4()	;Event Undo Hotstring (is triggered) Button Close
 	IniWrite, % ini_UHSF,	% ini_HADConfig, Event_UndoHotstring,	UHSF
 	IniWrite, % ini_UHSD,	% ini_HADConfig, Event_UndoHotstring,	UHSD
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-	F_EvTab3(true)	;to memory that something was applied
-     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
+     Gui, GuiEvents: Hide
+	F_GuiMain("Enabled")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvUH_B5()	;Event Undo Hotstring (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
+	Gui, GuiEvents: Hide
+	F_GuiMain("Enabled")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvUH_S3()
@@ -5795,7 +5845,8 @@ F_EvMH_B4()	;Menu Hotstring (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
+	Gui, A_GuiEvent: Hide
+	F_GuiMain("Enabled")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvMH_B2()	;Apply Button
@@ -5818,7 +5869,6 @@ F_EvMH_B2()	;Apply Button
 	IniWrite, % ini_MHSF,	% ini_HADConfig, Event_MenuHotstring,		MHSF
 	IniWrite, % ini_MHSD,	% ini_HADConfig, Event_MenuHotstring,		MHSD
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered	
-	F_EvTab3(true)	;to memory that something was applied
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvMH_B3()	;Button Close	
@@ -5841,8 +5891,8 @@ F_EvMH_B3()	;Button Close
 	IniWrite, % ini_MHSF,	% ini_HADConfig, Event_MenuHotstring,		MHSF
 	IniWrite, % ini_MHSD,	% ini_HADConfig, Event_MenuHotstring,		MHSD
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-	F_EvTab3(true)	;to memory that something was applied
-     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
+	Gui, GuiEvents: Hide
+	F_GuiMain("Enabled")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvMH_B1()	;Sound test
@@ -6486,7 +6536,8 @@ F_EvBH_B5()	;Events Basic Hotstring (is triggered) Button Cancel
 {
 	global ;assume-global mode
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
+	Gui, GuiEvents: Hide
+	F_GuiMain("Enabled")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvBH_B3()	;Events Basic Hotstring (is triggered) Button Apply
@@ -6521,7 +6572,6 @@ F_EvBH_B3()	;Events Basic Hotstring (is triggered) Button Apply
 	IniWrite, % ini_OHSF,	% ini_HADConfig, Event_BasicHotstring,	OHSF
 	IniWrite, % ini_OHSD,	% ini_HADConfig, Event_BasicHotstring,	OHSD
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-	F_EvTab3(true)	;to memory that something was applied
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvBH_B4()	;Events Basic Hotstring (is triggered) Button Close
@@ -6556,8 +6606,8 @@ F_EvBH_B4()	;Events Basic Hotstring (is triggered) Button Close
 	IniWrite, % ini_OHSF,	% ini_HADConfig, Event_BasicHotstring,	OHSF
 	IniWrite, % ini_OHSD,	% ini_HADConfig, Event_BasicHotstring,	OHSD
 	Gui, Tt_HWT: Hide			;Tooltip: Basic hotstring was triggered
-	F_EvTab3(true)	;to memory that something was applied
-     F_CloseSubGui(WhatGuiToDestroy := "GuiEvents")
+     Gui, GuiEvents: Hide
+	F_GuiMain("Enabled")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EvBH_S3()
@@ -7528,7 +7578,7 @@ F_EventsStyling_Close(WhichTab)
 	IniWrite, % %DynVarRef1%, % ini_HADConfig, % "EvStyle_" . WhichTab, % WhichTab . "TypefaceFont"
 	DynVarRef1 	:= "ini_" . WhichTab . "TySize"
 	IniWrite, % %DynVarRef1%, % ini_HADConfig, % "EvStyle_" . WhichTab, % WhichTab . "TypefaceSize"
-	F_CloseSubGui(WhatGuiToDestroy := WhichTab . "Demo")
+	F_DestroySubGui(WhatGuiToDestroy := WhichTab . "Demo")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_EventsStyling_B7()	;button: Close
@@ -7560,22 +7610,22 @@ F_EventsStyling_B8()	;button: Cancel
 	Switch EventsStylingTab3
 	{
 		Case % TransA["Triggerstring tips styling"]:				
-			F_CloseSubGui(WhatGuiToDestroy := "TTDemo")
-			F_CloseSubGui(WhatGuiToDestroy := "EventsStyling")
+			F_DestroySubGui(WhatGuiToDestroy := "TTDemo")
+			F_DestroySubGui(WhatGuiToDestroy := "EventsStyling")
 		Case % TransA["Hotstring menu styling"]:				
-			F_CloseSubGui(WhatGuiToDestroy := "HMDemo")
-			F_CloseSubGui(WhatGuiToDestroy := "EventsStyling")
+			F_DestroySubGui(WhatGuiToDestroy := "HMDemo")
+			F_DestroySubGui(WhatGuiToDestroy := "EventsStyling")
 ;#c/* commercial only beginning			
 		Case % TransA["Active triggerstring tips styling"]:		
-			F_CloseSubGui(WhatGuiToDestroy := "ATDemo")
-			F_CloseSubGui(WhatGuiToDestroy := "EventsStyling")
+			F_DestroySubGui(WhatGuiToDestroy := "ATDemo")
+			F_DestroySubGui(WhatGuiToDestroy := "EventsStyling")
 ;#c*/ commercial only end			
 		Case % TransA["Tooltip: ""Hotstring was triggered"""]:		
-			F_CloseSubGui(WhatGuiToDestroy := "HTDemo")
-			F_CloseSubGui(WhatGuiToDestroy := "EventsStyling")
+			F_DestroySubGui(WhatGuiToDestroy := "HTDemo")
+			F_DestroySubGui(WhatGuiToDestroy := "EventsStyling")
 		Case % TransA["Tooltip: ""Undid the last hotstring"""]:	
-			F_CloseSubGui(WhatGuiToDestroy := "UHDemo")
-			F_CloseSubGui(WhatGuiToDestroy := "EventsStyling")
+			F_DestroySubGui(WhatGuiToDestroy := "UHDemo")
+			F_DestroySubGui(WhatGuiToDestroy := "EventsStyling")
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
