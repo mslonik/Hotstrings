@@ -219,7 +219,6 @@ if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_Gui
 					. "`n`n" . "Exception" . A_Tab . e
 	}
 }
-
 if ( !Instr(FileExist(v_ScriptDir . "\Languages"), "D"))				; if  there is no "Languages" subfolder 
 {
 	FileCreateDir, % v_ScriptDir . "\Languages"
@@ -12877,8 +12876,9 @@ F_CheckCreateConfigIni()
 {
 	global ;assume-global mode
 
+	local 	ExitValue := 0
 ;#c/* commercial only beginning
-ConfigIni := "			
+	local 	ConfigIni := "			
 	( LTrim
 	[Configuration]
 	ClipBoardPasteDelay=300
@@ -13010,7 +13010,7 @@ ConfigIni := "
 ;#c*/ commercial version only end
 		
 ;#f/* free version only beginning
-	; ConfigIni := "			
+	; local ConfigIni := "			
 	; 	( LTrim
 	; 	[Configuration]
 	; 	ClipBoardPasteDelay=300
@@ -13145,35 +13145,110 @@ ConfigIni := "
 	if (FileExist(A_ScriptDir . "\" . "Config.ini"))	;if Config.ini exists in second location, change variable value to that location and return 
 	{
 		v_ScriptDir := A_ScriptDir
-		ini_HADConfig := A_ScriptDir . "\" . "Config.ini"
+	,	ini_HADConfig := A_ScriptDir . "\" . "Config.ini"
 		return
 	}	
 
-	if (!FileExist(ini_HADConfig))
+	if (!FileExist(ini_HADConfig)) ;if Config.ini doesn't exist in default location 
 	{
-		FileAppend, % ConfigIni, % ini_HADConfig
-		if (ErrorLevel)
-		{
-			MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["Config.ini file couldn't be created for some reason. Exiting."]
-				. "`n`n"
-				. ini_HADConfig
-			;tu jestem. Spróbować utworzyć folder w v_ScriptDir . "\" . "Congig.ini"
-			ExitApp, 14		;Config.ini file couldn't be created for some reason. Exiting.
-		}	
-		MsgBox, 48, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["Config.ini wasn't found. The default Config.ini has now been created in location:"]
+		SetTimer, F_ChangeButtonNames, 50
+		MsgBox, % c_MB_B_YesNo + c_MB_I_Question, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["question"] . A_Space . TransA["1 or 2"]
+			, % TransA["The Config.ini does not exist. Where would you like to create it?"]
+			. "`n`n"
+			. "1." . A_Space . TransA["Default location"] . ":" . "`n"
 			. ini_HADConfig
-			. "`n`n" 
-			. TransA["As a consequence the default language file English.txt will be recreated."]
-		if (FileExist(c_AppDataLocal . "\" . SubStr(A_ScriptName, 1, -4) . "\Languages\English.txt"))	;if there is default language file, delete it 
+			. "`n`n"
+			. "2." . A_Space . TransA["Current script / application location"] . ":" . "`n"
+			. "`n`n"
+			. A_ScriptName
+		IfMsgBox, Yes	;1 = Default location
 		{
-			FileDelete, % v_ScriptDir . "\Languages\English.txt"
-			if (ErrorLevel)
+			if ( !Instr(FileExist(v_ScriptDir), "D"))				; if  there is no "Languages" subfolder 
 			{
-				MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"], % TransA["Unexpected problem on time of deleting the file ""\Languages\English.txt"". Exiting."]
-				ExitApp, 15	;Unexpected problem on time of deleting the file ""\Languages\English.txt"".
+				FileCreateDir, % v_ScriptDir
+				if (ErrorLevel)
+				{
+					ExitValue := 9
+					MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"]
+						, % TransA[ "The following folder wasn't created for some reason"] . ":"
+						. "`n`n"
+						. v_ScriptDir . A_Space . TransA["Folder couldn't be created for some reason."] . "`n"
+						. TransA["Exiting"] . "." 
+						. "`n`n"	
+						. TransA["Error no."] . A_Space . ExitValue . "."
+					ExitApp, % ExitValue ; subfolder wasn't created for some reason.
+				}	
+				FileAppend, % ConfigIni, % ini_HADConfig	
+				if (ErrorLevel)
+				{
+					ExitValue := 14
+					MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"]
+						, % "Config.ini" . A_Space . TransA["file couldn't be created for some reason."] . A_Space
+						. TransA["Exiting."]
+						. "`n`n"
+						. ini_HADConfig 
+						. "`n`n"
+						. TransA["Error no."] . A_Space . ExitValue . "."
+					ExitApp, % ExitValue		;Config.ini file couldn't be created for some reason. Exiting.
+				}
+				MsgBox, % c_MB_I_Info, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["information"]
+					, % TransA["The default Config.ini has now been created in location:"]
+					. "`n`n"
+					. ini_HADConfig	
+			}	
+			if (FileExist(c_AppDataLocal . "\" . SubStr(A_ScriptName, 1, -4) . "\Languages\English.txt"))	;if default language file exists, delete it 
+			{
+				FileDelete, % v_ScriptDir . "\Languages\English.txt"
+				if (ErrorLevel)
+				{
+					ExitValue := 15
+					MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"]
+						, % "English.txt" . A_Space . TransA["file couldn't be deleted for some reason."]
+						. TransA["Exiting."]
+						. "`n`n"
+						. v_ScriptDir . "\Languages\English.txt" 
+						. "`n`n"
+						. TransA["Error no."] . A_Space . ExitValue . "."
+					ExitApp, % ExitValue	;Unexpected problem on time of deleting the file ""\Languages\English.txt"".
+				}	
 			}	
 		}	
+
+		IfMsgBox, No	;2 = Current script / application location, scenario when script is run e.g. from USB pendrive
+		{
+			v_ScriptDir := A_ScriptDir
+		,	ini_HADConfig := A_ScriptDir . "\" . "Config.ini"
+			FileAppend, % ConfigIni, % ini_HADConfig	
+			if (ErrorLevel)
+			{
+				ExitValue := 14
+				MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"]
+					, % "Config.ini" . A_Space . TransA["file couldn't be created for some reason."] . "`n"
+					. TransA["Exiting."]
+					. "`n`n"
+					. ini_HADConfig 
+					. "`n`n"
+					. TransA["Error no."] . A_Space . ExitValue . "."
+				ExitApp, % ExitValue		;Config.ini file couldn't be created for some reason. Exiting.
+			}
+			MsgBox, % c_MB_I_Info, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["information"]
+				, % TransA["The default Config.ini has now been created in location:"]
+				. "`n`n"
+				. ini_HADConfig	
+		}	
 	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+F_ChangeButtonNames()
+{
+	global 	;assume-global mode
+	
+	IfWinNotExist, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["question"] . A_Space . TransA["1 or 2"]
+	return  ; Keep waiting.
+	SetTimer, , Off ; If Label is omitted, A_ThisLabel will be used.
+	WinActivate 
+	ControlSetText, Button1, &1 
+	ControlSetText, Button2, &2 
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 F_SaveGUIPos(param*) ;Save to Config.ini
@@ -13484,6 +13559,7 @@ F_LoadCreateTranslationTxt(decision*)
 
 	TransConst .= "`n`n
 (Join`n `
+1 or 2												= 1 or 2
 About / Help 											= &About / Help
 About this application...								= About this application...
 Above information is saved to configuration file.				= Above information is saved to configuration file.
@@ -13579,8 +13655,7 @@ Computer name											= Computer name
 Config.ini file: move it to script / app location				= Config.ini file: move it to script / app location
 Config.ini file: restore it to default location				= Config.ini file: restore it to default location
 Config.ini file was successfully moved to the new location.		= Config.ini file was successfully moved to the new location.
-Config.ini file couldn't be created for some reason. Exiting.	= Config.ini file couldn't be created for some reason. Exiting.
-Config.ini wasn't found. The default Config.ini has now been created in location: = Config.ini wasn't found. The default Config.ini has now been created in location:
+The default Config.ini has now been created in location: = The default Config.ini has now been created in location:
 Configuration 											= &Configuration
 Content of current log file (read only)						= Content of current log file (read only)
 Convert to executable (.exe)								= Convert to executable (.exe)
@@ -13605,7 +13680,7 @@ Cumulative gain [characters]								= Cumulative gain [characters]
 Current Config.ini file location:							= Current Config.ini file location:
 (Current configuration will be saved befor reload takes place).	= (Current configuration will be saved befor reload takes place).
 Current ""Libraries"" location:							= Current ""Libraries"" location:
-Current script / application location:						= Current script / application location:
+Current script / application location						= Current script / application location
 Current shortcut (hotkey):								= Current shortcut (hotkey):
 Current time											= Current time
 cursor												= cursor
@@ -13618,6 +13693,7 @@ Default Config.ini file location:							= Default Config.ini file location:
 Default shortcut (hotkey):								= Default shortcut (hotkey):
 Default mode											= Default mode
 Default value of										= Default value of
+Default location										= Default location
 Delete selected library file								= Delete selected library file
 Delete hotstring (F8) 									= Delete hotstring (F8)
 Delete selected definition								= Delete selected definition
@@ -13665,6 +13741,7 @@ Enter triggerstring										= Enter triggerstring
 Entered license key										= Entered license key
 Entered license key was not found.							= Entered license key was not found.
 Error												= Error
+Error no.												= Error no.
 ERROR was read											= ERROR was read
 ErrorLevel was triggered by NewInput error. 					= ErrorLevel was triggered by NewInput error.
 Error reading library file:								= Error reading library file:
@@ -13687,6 +13764,7 @@ Found another definition which will be enabled				= Found another definition whi
 F3 or Esc: Close Search hotstrings | ↓ ↑ → ←: to change position | Enter: Select definition and close = F3 or Esc: Close Search hotstrings | ↓ ↑ → ←: to change position | Enter: Select definition and close
 Filecopy was not susscessful.								= Filecopy was not susscessful.
 Filedelete was not susscessful.							= Filedelete was not susscessful.
+File couldn't be created for some reason.					= File couldn't be created for some reason.
 file! 												= file!
 file in Languages subfolder!								= file in Languages subfolder!
 file is now created in the following subfolder:				= file is now created in the following subfolder:
@@ -14010,6 +14088,7 @@ teal													= teal
 Test styling											= Test styling
 The application										= The application
 The application will be reloaded with the new language file. 	= The application will be reloaded with the new language file.
+The Config.ini does not exist. Where would you like to create it? = The Config.ini does not exist. Where would you like to create it?
 The default											= The default
 The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually. = The default language file (English.txt) will be deleted (it will be automatically recreated after restart). However if you use localized version of language file, you'd need to download it manually.
 The definition											= The definition
@@ -14017,6 +14096,7 @@ The executable file is prepared by Ahk2Exe and compressed by mpress.exe: = The e
 The executable file is prepared by Ahk2Exe and compressed by upx.exe: = The executable file is prepared by Ahk2Exe and compressed by upx.exe:
 The executable file is prepared by Ahk2Exe, but not compressed:	= The executable file is prepared by Ahk2Exe, but not compressed:
 The file which you want to download from Internet, already exists on your local harddisk. Are you sure you want to download it? = The file which you want to download from Internet, already exists on your local harddisk. Are you sure you want to download it? `n`n If you answer ""yes"", your local file will be overwritten. If you answer ""no"", download will be continued.
+The following folder wasn't created for some reason			= The following folder wasn't created for some reason
 The ""Hotstrings"" folder was successfully moved to the new location. = The ""Hotstrings"" folder was successfully moved to the new location.
 The icon file											= The icon file
 The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes. = The already imported file already existed. As a consequence some (triggerstring, hotstring) definitions could also exist and ""Total"" could be incredible. Therefore application will be now restarted in order to correctly apply the changes.
@@ -14100,7 +14180,6 @@ Undo the last hotstring									= Undo the last hotstring
 Undo the last hotstring									= Undo the last hotstring
 up													= up
 Undid the last hotstring 								= Undid the last hotstring
-Unexpected problem on time of deleting the file ""\Languages\English.txt"". Exiting. = Unexpected problem on time of deleting the file ""\Languages\English.txt"". Exiting.
 valid												= valid
 Valid till											= Valid till
 Version / Update										= Version / Update
