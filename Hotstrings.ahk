@@ -13121,8 +13121,9 @@ F_CheckCreateConfigIni()
 		return
 	if (FileExist(A_ScriptDir . "\" . "Config.ini"))	;if Config.ini exists in second location, change variable value to that location and return 
 	{
-		v_ScriptDir := A_ScriptDir
-	,	ini_HADConfig := v_ScriptDir . "\" . "Config.ini"
+		v_ScriptDir 	:= A_ScriptDir
+	,	ini_HADConfig 	:= v_ScriptDir . "\" . "Config.ini"
+	,	ini_HADL 		:= v_ScriptDir . "\" . "Libraries"
 		return
 	}	
 
@@ -13192,8 +13193,9 @@ F_CheckCreateConfigIni()
 
 		IfMsgBox, No	;2 = Current script / application location, scenario when script is run e.g. from USB pendrive
 		{
-			v_ScriptDir := A_ScriptDir
-		,	ini_HADConfig := A_ScriptDir . "\" . "Config.ini"
+			v_ScriptDir 	:= A_ScriptDir
+		,	ini_HADConfig 	:= A_ScriptDir . "\" . "Config.ini"
+		,	ini_HADL 		:= A_ScriptDir . "\" . "Libraries"
 			FileAppend, % ConfigIni, % ini_HADConfig	
 			if (ErrorLevel)
 			{
@@ -15756,7 +15758,8 @@ F_GuiAbout()
 F_CheckCreateLogFolder()
 {
 	global 	;assume-global mode of operation
-	local	DefaultFolder := c_AppDataLocal . "\" . SubStr(A_ScriptName, 1, -4) . "\" . "Log"	
+	local	DefaultFolder := v_ScriptDir . "\" . "Log"	;Libraries folder already exists
+	; local	DefaultFolder := SubStr(ini_HADL, 1, -StrLen("Libraries") - 1) . "\" . "Log"	;Libraries folder already exists
 		,	SecondFolder := A_ScriptDir . "\" . "Log"
 
 	if (!Instr(FileExist(DefaultFolder), "D"))
@@ -15819,7 +15822,6 @@ F_CheckCreateLibraryFolder()
 		}
 		MsgBox, % c_MB_I_Exclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % TransA["There is no Libraries subfolder and no lbrary (*.csv) file exists!"] 
 			. "`n`n" . ini_HADL . "`n`n" . TransA["folder was created"] . "."
-
 	}	
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
