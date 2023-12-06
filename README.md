@@ -1,13 +1,19 @@
 # Hotstrings
 
 Description: Advanced, configurable, text replacement tool written in AutoHotkey language. 
+
 Copyright ©: Maciej Słojewski, mslonik (🐘).
+
 Licensed according to MIT license. This site was built using [MIT license](https://en.wikipedia.org/wiki/MIT_License).
+
 Microsoft Windows oriented software.
 
 This is free edition of Hotstrings application. If you wish to get commercial edition, visit [this page](https://hotstrings.technology/).
+
 For comparison between free and commercial edition please see the file 20221204_HotstringsForAll.pdf available in this repository.
+
 This project is present at [SourceForge](https://sourceforge.net/projects/hotstrings/).
+
 Please [buy me a coffee or support me in any other meaningful way](https://www.patreon.com/user?u=18185391).
 
 At your service! Kind regards, mslonik (🐘)
