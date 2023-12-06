@@ -1,23 +1,18 @@
 # Hotstrings
 
-Description: Advanced, configurable, text replacement tool written in AutoHotkey language. 
+Description: Advanced, configurable, text replacement tool written in AutoHotkey language. <br />
+Copyright ©: Maciej Słojewski, mslonik (🐘). <br />
+Licensed according to MIT license. This site was built using [MIT license](https://en.wikipedia.org/wiki/MIT_License). <br />
+Microsoft Windows oriented software. <br />
 
-Copyright ©: Maciej Słojewski, mslonik (🐘).
+This is free edition of Hotstrings application. If you wish to get commercial edition, visit [this page](https://hotstrings.technology/). <br />
+For comparison between free and commercial edition please see the file 20221204_HotstringsForAll.pdf available in this repository. <br />
+This project is present at [SourceForge](https://sourceforge.net/projects/hotstrings/). <br />
 
-Licensed according to MIT license. This site was built using [MIT license](https://en.wikipedia.org/wiki/MIT_License).
+Please [buy me a coffee or support me in any other meaningful way](https://www.patreon.com/user?u=18185391). <br />
+At your service! Kind regards, mslonik (🐘) <br />
 
-Microsoft Windows oriented software.
-
-This is free edition of Hotstrings application. If you wish to get commercial edition, visit [this page](https://hotstrings.technology/).
-
-For comparison between free and commercial edition please see the file 20221204_HotstringsForAll.pdf available in this repository.
-
-This project is present at [SourceForge](https://sourceforge.net/projects/hotstrings/).
-
-Please [buy me a coffee or support me in any other meaningful way](https://www.patreon.com/user?u=18185391).
-
-At your service! Kind regards, mslonik (🐘)
-
+<br />
 
 # Introduction
 
@@ -29,6 +24,8 @@ There are dedicated repositiories where you can find more information:
 - free set of Libraries: [Hotstrings-Libraries](https://github.com/mslonik/Hotstrings-Libraries)
 - localization of GUI: [Hotstrings-Languages](https://github.com/mslonik/Hotstrings-Languages)
 - additional conversion scripts and miscellaneous other files: [Hotstrings-Tools](https://github.com/mslonik/Hotstrings-Tools)
+
+<br />
 
 # How to install
 
@@ -43,6 +40,7 @@ Advantage: installer installs not only *Hotstrings* application, but also set of
 - Default location of all the files: *c:\users\<user>\AppData\Local\Hotstrings*.
 - Installer source code is available [here](https://github.com/mslonik/Hotstrings-NSIS_installer).
 
+<br />
 
 ## 2. Script (*Hotstrings.ahk*)
 
@@ -57,6 +55,7 @@ The script is prepared to create / prepare all necessary files and folders upon 
 
 Caveat: *Libraries* are not installed by script itself. You will need to download them manually from [here](https://github.com/mslonik/Hotstrings-Libraries) or from application menu.
 
+<br />
 
 ## 3. Executable (*Hotstrings.exe*)
 
@@ -68,10 +67,13 @@ Advantage:
 - You don't need to install any other executable, as the *AutoHotkey* interpreter is boundled with script in this executable.
 - The executable will create / prepare all necessary files and folders upon the first run. I strongly recommend you to install it in default folder (*c:\users\<user>\AppData\Local\Hotstrings*).
 
+<br />
 
 ## How to start using *Hotstrings*?
 
 You can watch [YouTube videos](https://youtu.be/O5TihlOUaAE?si=Hiq7GF3JXmVvEfa-) about *Hotstrings*.
+
+<br />
 
 ## How to get into touch?
 tbc
