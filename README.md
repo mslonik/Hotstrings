@@ -12,6 +12,7 @@ This project is present at [SourceForge](https://sourceforge.net/projects/hotstr
 If you wish to discuss 🗪 any issue 💬 I'm present at [this forum](https://www.autohotkey.com/boards/viewtopic.php?f=6&t=82352). <br />
 
 Please [buy me a coffee ☕ or support me 💪 in any other meaningful way](https://www.patreon.com/user?u=18185391). <br />
+Please 😌 spread the word about *Hotstrings*, write ✍ [review](https://sourceforge.net/projects/hotstrings/). <br />
 If you wish to be informed about news 🆕, please join [newsletter](https://hotstrings.technology/newsletter). <br />
 At your service! Kind regards, mslonik (🐘) <br />
 
