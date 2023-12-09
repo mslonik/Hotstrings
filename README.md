@@ -12,6 +12,7 @@ This project is present at [SourceForge](https://sourceforge.net/projects/hotstr
 If you wish to discuss 🗪 any issue 💬 I'm present at [this forum](https://www.autohotkey.com/boards/viewtopic.php?f=6&t=82352). <br />
 
 Please [buy me a coffee ☕ or support me 💪 in any other meaningful way](https://www.patreon.com/user?u=18185391). <br />
+Please 😌 spread the word about *Hotstrings*, write ✍ [review](https://sourceforge.net/projects/hotstrings/). <br />
 If you wish to be informed about news 🆕, please join [newsletter](https://hotstrings.technology/newsletter). <br />
 At your service! Kind regards, mslonik (🐘) <br />
 
@@ -67,7 +68,7 @@ Just download and run this file.
 Caveat: many anti-virus software may warn you about virus threat or threat related to installation of software from unknown source.
 
 Advantage: 
-- You don't need to install any other executable, as the *AutoHotkey* interpreter is boundled with script in this executable.
+- You don't need to install any other executable, as the *AutoHotkey* interpreter is bundled with script in this executable.
 - The executable will create / prepare all necessary files and folders upon the first run. I strongly recommend you to install it in default folder (*c:\users\<user>\AppData\Local\Hotstrings*).
 
 <br />
