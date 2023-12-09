@@ -68,7 +68,7 @@ Just download and run this file.
 Caveat: many anti-virus software may warn you about virus threat or threat related to installation of software from unknown source.
 
 Advantage: 
-- You don't need to install any other executable, as the *AutoHotkey* interpreter is boundled with script in this executable.
+- You don't need to install any other executable, as the *AutoHotkey* interpreter is bundled with script in this executable.
 - The executable will create / prepare all necessary files and folders upon the first run. I strongly recommend you to install it in default folder (*c:\users\<user>\AppData\Local\Hotstrings*).
 
 <br />
