@@ -13494,10 +13494,10 @@ F_UnloadHotstringsFromFile(nameoffile)
 				Options := StrReplace(Options, "Z", "Z0")
 			TriggerString 	:= a_Triggerstring[key]
 		,	HotString		:= a_Hotstring[key]
-		,	OutFun		:= a_Library[key]
+		,	OutFun		:= a_OutputFunction[key]
 
-			if (a_EnableDisable[key] = "En")
-				F_ModifyHDef(TriggerString, Options, HotString, OutFun, false, Library)	
+		if (a_EnableDisable[key] = "En")
+			F_ModifyHDef(TriggerString, Options, HotString, OutFun, false, FilenameWitoutExt)	
 		}
 	}
 	key := 0, value := ""
