@@ -129,7 +129,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		c_MB_M_AonTop			:= 4096		;constant, MsgBox modality, System Modal (always on top)
 ,		c_MB_DB_2nd			:= 256		;constant, MsgBox default button, second
 ,		v_Triggerstring		:= ""		;to store d(t, o, h) -> t entered by user in GUI.
-,		ini_ShowWhiteChars		:= false		;show white characters (e.g. space) within GUI in form of special characters. For example <space> = U+2423 (open box ␣)
+,		ini_ShowWhiteChars		:= false		;future: show white characters (e.g. space) within GUI in form of special characters. For example <space> = U+2423 (open box ␣)
 ;#f/* free version only beginning
 ; ,		v_LicenseType			:= "free"		;"pro" or "free"
 ;#f*/ free version only end
@@ -163,10 +163,11 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		IdTT_C4_LB2			:= 0					;in order to get rid of warnings in specific situation: file BOM is incorrect and user clicked somethint
 ,		IdTT_C4_LB3			:= 0					;in order to get rid of warnings in specific situation: file BOM is incorrect and user clicked somethint
 ;#c/* commercial only beginning
-,		v_ValidTill			:= "inf"				;"inf" for infinity, "limited" for other cases
+,		v_ValidTill			:= "inf"			;"inf" for infinity, "limited" for other cases
 ,		f_RShiftDown 			:= false
 ,		f_LShiftDown 			:= false
 ,		v_SendFun				:= ""				;last used output function; important for F_Undo
+,		f_CorrectLicenseEntered	:= false				;global flag, set when correct license was entered in F_GuiEnterLicense_CreateGui and pressed F_EnterLicenseB1 button .
 ;#c*/ commercial only end
 ,		ini_LicenseKey			:= ""				;global variable
 ,		v_ScriptDir			:= c_AppDataLocal 	. "\" . SubStr(A_ScriptName, 1, -4)	;default value
@@ -174,44 +175,51 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		ini_HADL				:= v_ScriptDir 	. "\" . "Libraries"  				;default value
 ,		ini_THLog				:= ""
 ,		ini_Language			:= "English.txt"		;default value
+,		ini_GuiReload			:= false				;default value, if true, application will be reloaded
+,		ini_CheckRepo			:= false				;default value, if true GitHub server is asked for presence of new application version
+,		ini_DownloadRepo		:= false				;default value, if true new version should be downloaded
 ;#c/* commercial only beginning
 #Include, %A_ScriptDir%\includes\Gdip_Part.ahk		;output function "P (Picture)"
 #Include, %A_ScriptDir%\includes\ScriptGuard1.ahk 	;https://www.autohotkey.com/boards/viewtopic.php?f=6&t=80229 to encrypt content
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
-F_LoadCreateTranslationTxt() 			;if this function is run without arguments it only loads default (English) text strings into memory
-F_CheckCreateConfigIni() 	;Try to load up configuration file. If this file do not exists, create it. If it isn't possible, exit.
+F_LoadCreateTranslationTxt() 			;Initially this function is run without arguments and then it loads default (English) text strings into memory, so they can be used at any moment when necessary. If run with arguments (later in the code flow) it loads definition from localization file defined in Config.ini. Until localization file is loaded, all the messages are displayed in English.
+F_CheckFileEncoding(A_ScriptFullPath)	;Checks, as early as possible, if script is utf-8 compliant. it has plenty to do wiith github download etc. If it's not compliant, it tries to change encoding. If it is not successful, it exits. 
+F_CheckCreateConfigIni() 			;Try to load up configuration file. If this file do not exists, create it. If it isn't possible, script exits.
 
 F_Validate_IniParam(ini_Language, ini_HADConfig, "GraphicalUserInterface", "Language")
-F_CheckCreateLanguageTxt(ini_Language)
-
-F_CheckFileEncoding(A_ScriptFullPath)	;checks if script is utf-8 compliant. it has plenty to do wiith github download etc.
+F_CheckCreateLanguageTxt(ini_Language)	; -> F_LoadCreateTranslationTxt. This is not only about the file creation, but also about loading of content. If everything is fine since this moment all messagges and GUIs are localized.
 
 ;#c/* commercial only beginning
 if (v_LicenseType = "pro") and (v_ValidTill != "inf")
 {
-	F_CheckCommercialConditions()		;check Lemon squeezy
-	SetTimer, F_CheckCommTime, % 1000 * 3600	;1 hour = 1000 ms * 3 600
-	return	;END OF INITIALIZATION
-}
-;#c*/ commercial only end
+	if (F_CheckCommercialConditions() = "stop")	;this is the only way I was able to figure out to stop script from running and stop till button (F_EnterLicenseB1) is pressed 
+	{
+		SetTimer, CheckIfLicenseEntered, 100	;100 ms, arbitrary time
+		return
+	}	
 	
+	SetTimer, F_CheckCommTime, % 1000 * 3600	;1 hour = 1000 ms * 3 600, this is 1 hour cycle to check validity of license / subscription, so access to Internet is necessary.
+}
+InitializationContinued:	;this is label valid only for commercial code, when entered license is correct, code returns here. This is the only way I was able to figure out. 
+;#c*/ commercial only end
+
 ; F_CheckIfMoveToProgramFiles()		;Checks if move Hotstrings folder to Program Files folder and then restarts application.
 ; F_CheckIfRemoveOldDir()			;Checks content of Config.ini in order to remove old script directory.
 
-F_Load_ini_GuiReload()
-F_Load_ini_CheckRepo()
-F_Load_ini_DownloadRepo()
-F_LoadSignalingParams()
+F_Validate_IniParam(ini_GuiReload, ini_HADConfig, "GraphicalUserInterface", "GuiReload")
+F_Validate_IniParam(ini_CheckRepo, ini_HADConfig, "Configuration", "CheckRepo")
+F_Validate_IniParam(ini_DownloadRepo, ini_HADConfig, "Configuration", "DownloadRepo")
 
-if (ini_CheckRepo)
-	F_VerUpdCheckServ("OnStartUp")
-if (ini_DownloadRepo) and (F_VerUpdCheckServ("ReturnResult"))
+if (ini_CheckRepo)					;if user selected tick "Check if update is availabe on startup" then information about version is displayed.
+	F_VerUpdCheckServ("OnStartUp")	;param[1] := {"OnStartUp", "ReturnResult" or by default just show server version}
+if (ini_DownloadRepo) 				;if user selected tick "Download if update is available on startup" then application is restarted (.ahk or .exe)
+	and (F_VerUpdCheckServ("ReturnResult"))	;param[1] := {"OnStartUp", "ReturnResult" or by default just show server version}
 {
 	ini_GuiReload := true
-	IniWrite, % ini_GuiReload, % ini_HADConfig, GraphicalUserInterface, GuiReload
-	F_VerUpdDownload()
+	F_Validate_IniParam(ini_GuiReload, ini_HADConfig, "GraphicalUserInterface", "GuiReload")
+	F_VerUpdDownload()				;-> F_ReloadApplication. Downloads, overwrites with new version and restarts script or executable.
 }
 if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_GuiReload is set also if Update function is run with Hostrings.exe. So after restart temp.exe is removed.
 {
@@ -227,9 +235,10 @@ if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_Gui
 
 F_Validate_IniParam(ini_HADL, ini_HADConfig, "Configuration", "HADL")
 F_CheckCreateLibraryFolder()
-F_ValidateIniLibSections() ;fills in ini_LoadLib[] and ini_ShowTipsLib[]
+F_ValidateIniLibSections() 			;fills in ini_LoadLib[] and ini_ShowTipsLib[]
 F_CheckCreateLogFolder()
 
+F_LoadSignalingParams()				;tu jestem
 ; 3. Load content of configuration file into configuration variables. The configuration variable names start with "ini_" prefix.
 ;Read all variables from specified language .ini file. In order to distinguish GUI text from any other string or variable used in this script, the GUI strings are defined with prefix "t_".
 F_LoadGUIPos()
@@ -1314,12 +1323,13 @@ F_CheckCommercialConditions()
 	if (v_LicenseType = "pro") and (v_ValidTill != "inf")
 	{
 		; ini_LicenseKey := F_IniRead_ValidityError(temp, "LicenseKey", "LicenseInfo", ini_HADConfig, "", "SaveDefault", "ERROR")	;IfExit = {"Exit", "SaveDefault", "LetDecide"}		
-		temp := F_Read_IniParam(ini_LicenseKey, ini_HADConfig, "LicenseKey", "LicenseInfo")
+		temp := F_Read_IniParam(ini_LicenseKey, ini_HADConfig, "LicenseInfo", "LicenseKey")
 		if (temp = "")	or (temp = "ERROR") ;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
 		{
 			F_GuiEnterLicense_CreateGui()
 			F_GuiEnterLicense_DetermineConstraints()
 			F_GuiEnterLicense()
+			return "stop"
 		}
 		else
 		{
@@ -1377,13 +1387,17 @@ F_CheckCommercialConditions()
 				ExitApp, 5	;5 = expired or disabled
 			}
 			if (ElapsedTime > -3)	;less than 3 days till the end of license time
+			{
 				MsgBox, % c_MB_I_Exclamation, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["warning"], % "Your license is about to expire. It will remain active for less than 3 days."
 					. "`n`n"
 					. TransA["Expiration date"] . ":" . A_Space . LicenseInfo.expires_at
+				return "run"
+			}	
 			if (LicenseInfo.status = "active")
 			{
 				if (ini_THLog)
 					FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . TransA["License key was validated"] . "." . "`n", % v_LogFileName			
+				return "run"
 			}	
 		}
 	}
@@ -1457,6 +1471,7 @@ EnterLicenseGuiClose()
 F_EnterLicenseB1()
 {
 	global	;assume-global mode of operation
+	OutputDebug, % A_ThisFunc . A_Space . "B" . "`n"
 	local	EditValue
 		,	c_MB_I_Exclamation 	:= 48
 		,	c_MsgBoxButtonsYes		:= 4	
@@ -1573,7 +1588,8 @@ F_EnterLicenseB1()
 	Gui, EnterLicense: Destroy
 	if (ini_THLog)
 		FileAppend, % A_Hour . ":" . A_Min . ":" . A_Sec . "|" . A_Space . "License key was activated" . "." . A_Space . TransA["License key"] . ":" . A_Space . LicenseInfo.key . "." . A_Space . TransA["Customer name"] . ":" . A_Space . LicenseInfo.customer_name . "." . A_Space . TransA["Customer id"] . ":" . A_Space . LicenseInfo.customer_id . "." . "`n"
-			, % v_LogFileName			
+			, % v_LogFileName
+	f_CorrectLicenseEntered := true
 }
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3873,42 +3889,6 @@ F_ChangeLanguage()
 		ini_GuiReload := true
 		IniWrite, % ini_GuiReload,		% ini_HADConfig, GraphicalUserInterface, GuiReload
 		Reload
-	}
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Load_ini_DownloadRepo()
-{
-	global	;assume-global mode
-	ini_DownloadRepo			:= false		;global variable
-	IniRead, ini_DownloadRepo,				% ini_HADConfig, Configuration, DownloadRepo,			% A_Space
-	if (ini_DownloadRepo = "") ;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-	{
-		ini_DownloadRepo := false
-		IniWrite, % ini_DownloadRepo, % ini_HADConfig, Configuration, DownloadRepo
-	}
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Load_ini_CheckRepo()
-{
-	global	;assume-global mode
-	ini_CheckRepo			:= false			;global variable
-	IniRead, ini_CheckRepo,					% ini_HADConfig, Configuration, CheckRepo,				% A_Space
-	if (ini_CheckRepo = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-	{
-		ini_CheckRepo := false
-		IniWrite, % ini_CheckRepo, % ini_HADConfig, Configuration, CheckRepo
-	}
-}
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Load_ini_GuiReload()
-{
-	global	;assume-global mode
-	ini_GuiReload			:= false			;global variable
-	IniRead, ini_GuiReload, 					% ini_HADConfig, GraphicalUserInterface, GuiReload,		% A_Space
-	if (ini_GuiReload = "")	;thanks to this trick existing Config.ini do not have to be erased if new configuration parameters are added.
-	{
-		ini_GuiReload := false
-		IniWrite, % ini_GuiReload, % ini_HADConfig, GraphicalUserInterface, GuiReload
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8294,8 +8274,8 @@ F_VerUpdDownload()
 			. A_Space . TransA["The old version is already overwritten."]
 			. "`n" . TransA["Next the default language file (English.txt) will be deleted,"]
 			. "`n" . TransA["reloaded and fresh language file (English.txt) will be recreated."]
-			FileDelete, % A_ScriptDir . "\Languages\English.txt" 	;this file is deleted because often after update of Hotstrings.exe the language definitions are updated too.
-			Gui, VersionUpdate: Hide
+			FileDelete, % v_ScriptDir . "\Languages\English.txt" 	;this file is deleted because often after update of Hotstrings.exe the language definitions are updated too.
+			Gui, VersionUpdate: Destroy
 			F_ReloadApplication()
 		}
 		return
@@ -8312,22 +8292,32 @@ F_VerUpdDownload()
 			. A_Space . TransA["The old version is already overwritten."]
 			. "`n" . TransA["Next the default language file (English.txt) will be deleted,"]
 			. "`n" . TransA["reloaded and fresh language file (English.txt) will be recreated."]
-			FileDelete, % A_ScriptDir . "\Languages\English.txt" 	;this file is deleted because often after update of Hotstrings.exe the language definitions are updated too.
-			Gui, VersionUpdate: Hide
+			FileDelete, % v_ScriptDir . "\Languages\English.txt" 	;this file is deleted because often after update of Hotstrings.exe the language definitions are updated too.
+			Gui, VersionUpdate: Destroy
 			F_ReloadApplication()
 			return
 		}
 	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_VerUpdCheckServ(param*)
+F_VerUpdCheckServ(param*)	;param[1] := {"OnStartUp", "ReturnResult" or by default just show server version}
 {
 	global	;assume-global mode
-	local	whr := "", URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings.ahk", ToBeFiltered := "", ServerVer := "", StartingPos := 0
-			, ServerVer1 := 0, ServerVer2 := 0, ServerVer3 := 0, AppVersion1 := 0, AppVersion2 := 0, AppVersion3 := 0,	
-	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-	whr.Open("GET", URLscript, true)
-	whr.Send()	; Using 'true' above and the call below allows the script to remain responsive.
+	local	whr := ""		;Win Http Request
+		, 	URLscript := "https://raw.githubusercontent.com/mslonik/Hotstrings/master/Hotstrings.ahk"
+		, 	ToBeFiltered := ""
+		, 	ServerVer := ""
+		, 	StartingPos := 0
+		, 	ServerVer1 := 0
+		, 	ServerVer2 := 0
+		, 	ServerVer3 := 0
+		, 	AppVersion1 := 0
+		, 	AppVersion2 := 0
+		, 	AppVersion3 := 0
+		, 	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+
+	whr.Open("GET", URLscript, true)	;Using 'true' allows the script to remain responsive.
+	whr.Send()	
 	whr.WaitForResponse()
 	ToBeFiltered := whr.ResponseText
 	
@@ -8340,47 +8330,49 @@ F_VerUpdCheckServ(param*)
 	Switch param[1]
 	{
 		Case "OnStartUp":
-		if (ServerVer != AppVersion)
-		{
-			MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["On start-up the local version of application was compared with repository version and difference was discovered:"]  
-					. "`n`n" . TransA["Local version"] . ":"	 . A_Tab . A_Tab . AppVersion
-					. "`n" .   TransA["Repository version"] . ":" . A_Tab . A_Tab . ServerVer
-		}
-		whr := ""		
+			if (ServerVer != AppVersion)
+			{
+				MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["On start-up the local version of application was compared with repository version and difference was discovered:"]  
+						. "`n`n" . TransA["Local version"] . ":"	 . A_Tab . A_Tab . AppVersion
+						. "`n" .   TransA["Repository version"] . ":" . A_Tab . A_Tab . ServerVer
+			}
+			whr := ""		
 		return
+
 		Case "ReturnResult":
-		whr := ""
-		if (ServerVer != AppVersion)
-		{
-			Loop, Parse, ServerVer, .
+			whr := ""
+			if (ServerVer != AppVersion)
 			{
-				Switch A_Index
+				Loop, Parse, ServerVer, .
 				{
-					Case 1: ServerVer1 := A_LoopField
-					Case 2: ServerVer2 := A_LoopField
-					Case 3: ServerVer3 := A_LoopField
+					Switch A_Index
+					{
+						Case 1: ServerVer1 := A_LoopField
+						Case 2: ServerVer2 := A_LoopField
+						Case 3: ServerVer3 := A_LoopField
+					}
 				}
-			}
-			Loop, Parse, AppVersion, .
-			{
-				Switch A_Index
+				Loop, Parse, AppVersion, .
 				{
-					Case 1: AppVersion1 := A_LoopField
-					Case 2: AppVersion2 := A_LoopField
-					Case 3: AppVersion3 := A_LoopField
+					Switch A_Index
+					{
+						Case 1: AppVersion1 := A_LoopField
+						Case 2: AppVersion2 := A_LoopField
+						Case 3: AppVersion3 := A_LoopField
+					}
 				}
+				if (ServerVer1 > AppVersion1)	
+					return true
+				if (ServerVer1 = AppVersion1) and (ServerVer2 > AppVersion2)
+					return true
+				if (ServerVer1 = AppVersion1) and (ServerVer2 = AppVersion2) and (ServerVer3 > AppVersion3)
+					return true
 			}
-			if (ServerVer1 > AppVersion1)	
-				return true
-			if (ServerVer1 = AppVersion1) and (ServerVer2 > AppVersion2)
-				return true
-			if (ServerVer1 = AppVersion1) and (ServerVer2 = AppVersion2) and (ServerVer3 > AppVersion3)
-				return true
-		}
 		return false
+
 		Default:
-		whr := ""
-		GuiControl, , % IdVerUpd4, % ServerVer
+			whr := ""
+			GuiControl, , % IdVerUpd4, % ServerVer
 		return
 	}
 }
@@ -13521,7 +13513,7 @@ F_UnloadHotstringsFromFile(nameoffile)
 	UpdateLibraryCounter(v_LibHotstringCnt, v_TotalHotstringCnt)
 }
 ; ------------------------------------------------------------------------------------------------------------------------------------
-F_LoadCreateTranslationTxt(decision*)
+F_LoadCreateTranslationTxt(decision*)	;decision[1] := {"create", "load"}, decision[1] := folder from where read definitions
 {
 	global ;assume-global mode
 	local 	TransConst := "" ; variable which is used as default content of Languages/English.ini. Join lines with `n separator and escape all ` occurrences. Thanks to that string lines where 'n is present 'aren't separated.
@@ -15843,7 +15835,7 @@ F_ValidateIniLibSections() ;fills in ini_LoadLib[] and ini_ShowTipsLib[]
 			
 	ini_LoadLib := {}, ini_ShowTipsLib := {}	; this associative array is used to store information about Libraries\*.csv files to be loaded
 	
-	IniRead, TempLoadLib,	% ini_HADConfig, LoadLibraries	;Load the whole section. No way to detect errors
+	IniRead, TempLoadLib, % ini_HADConfig, LoadLibraries	;Read the whole section. No way to detect errors.
 	
 	Loop, Files, % ini_HADL . "\*.csv"
 		o_Libraries.Push(A_LoopFileName)
@@ -15868,16 +15860,16 @@ F_ValidateIniLibSections() ;fills in ini_LoadLib[] and ini_ShowTipsLib[]
 	}
 	
 ;Delete and recreate [Libraries] section of Config.ini mirroring ini_LoadLib associative table.
-	IniDelete, % ini_HADConfig, LoadLibraries
+	IniDelete, % ini_HADConfig, LoadLibraries				;Delete the whole section. No way to detect errors.
 	for key, value in ini_LoadLib
 		SectionTemp .= key . "=" . value . "`n"
 	
-	IniWrite, % SectionTemp, % ini_HADConfig, LoadLibraries
+	IniWrite, % SectionTemp, % ini_HADConfig, LoadLibraries	;Write the whole section. No way to detect errors.
 	
 	SectionTemp := ""
 ;Check if Config.ini contains in section [ShowTipsLibraries] file names which are actually in library subfolder. Synchronize [Libraries] section with content of subfolder.
 ;Parse the TempLoadLib.
-	IniRead, TempShowTipsLib, % ini_HADConfig, ShowTipsLibraries
+	IniRead, TempShowTipsLib, % ini_HADConfig, ShowTipsLibraries	;Read the whole section. No way to detect errors.
 	for key, value in o_Libraries
 	{
 		FlagFound := false
@@ -15896,11 +15888,11 @@ F_ValidateIniLibSections() ;fills in ini_LoadLib[] and ini_ShowTipsLib[]
 	}
 	
 ;Delete and recreate [ShowTipsLibraries] section of Config.ini mirroring ini_ShowTipsLib associative table.
-	IniDelete, % ini_HADConfig, ShowTipsLibraries
+	IniDelete, % ini_HADConfig, ShowTipsLibraries			;Delete the whole section. No way to detect errors.
 	for key, value in ini_ShowTipsLib
 		SectionTemp .= key . "=" . value . "`n"
 
-	IniWrite, % SectionTemp, % ini_HADConfig, ShowTipsLibraries
+	IniWrite, % SectionTemp, % ini_HADConfig, ShowTipsLibraries	;Write the whole section. No way to detect errors.
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_LoadLibrariesToTables()
@@ -17324,7 +17316,7 @@ F_CheckCreateLanguageTxt(FileName)
 
 	if (!FileExist(v_ScriptDir . "\" . "Languages" . "\" . FileName))
 	{
-		SetTimer, F_ChangeButtonNames, 50
+		SetTimer, F_ChangeButtonNames, 50		;This is a trick to change label names of the following MsgBox
 		MsgBox, % c_MB_B_YesNo + c_MB_I_Question, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["question"] . A_Space . TransA["1 or 2"]
 			, % ini_Language . A_Space . TransA["does not exist. Instead default English.txt will be created. Where would you like to create it?"]
 			. "`n`n"
@@ -17346,24 +17338,24 @@ F_CheckFolderCreateTranslationTxt(folder)
 	ExitValue := 0
 
 	if (!Instr(FileExist(folder), "D"))				; if  there is no "Languages" subfolder 
+	{
+		FileCreateDir, % folder
+		if (ErrorLevel)
 		{
-			FileCreateDir, % folder
-			if (ErrorLevel)
-			{
-				ExitValue := 9
-				MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"]
-					, % TransA[ "The following folder wasn't created for some reason"] . ":"
-					. "`n`n"
-					. folder . "`n"
-					. TransA["Exiting"] . "." 
-					. "`n`n"	
-					. TransA["Error no."] . A_Space . ExitValue . "."
-				ExitApp, % ExitValue ; subfolder wasn't created for some reason.
-			}	
-			F_LoadCreateTranslationTxt("create", folder)
+			ExitValue := 9
+			MsgBox, % c_MB_I_Error, % SubStr(A_ScriptName, 1, -4) .  ":" . A_Space . TransA["error"]
+				, % TransA[ "The following folder wasn't created for some reason"] . ":"
+				. "`n`n"
+				. folder . "`n"
+				. TransA["Exiting"] . "." 
+				. "`n`n"	
+				. TransA["Error no."] . A_Space . ExitValue . "."
+			ExitApp, % ExitValue ; subfolder wasn't created for some reason.
 		}	
-		if (Instr(FileExist(folder), "D"))				; if  there is no "Languages" subfolder 	
-			F_LoadCreateTranslationTxt("create", folder)
+		F_LoadCreateTranslationTxt("create", folder)
+	}	
+	if (Instr(FileExist(folder), "D"))				; if  there is no "Languages" subfolder 	
+		F_LoadCreateTranslationTxt("create", folder)
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 HideTrayTip() 
@@ -17378,14 +17370,25 @@ HideTrayTip()
 }
 
 ; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
+;#c/* commercial only beginning
+CheckIfLicenseEntered:
+	if (f_CorrectLicenseEntered)
+	{
+		SetTimer, CheckIfLicenseEntered, Off
+		Goto, InitializationContinued
+	}	
+return
+;#c*/ commercial only end
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 TurnOff_OHE:
 	Gui, Tt_HWT: Hide	;Tooltip: Basic hotstring was triggered
 	return
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 TurnOff_UHE:
 	Gui, Tt_ULH: Hide	;Undid the last hotstring
 	return
-
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 TurnOff_Ttt:
 	F_DestroyTriggerstringTips(ini_TTCn)
-	return	
+	return
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
