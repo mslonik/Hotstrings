@@ -528,7 +528,7 @@ Menu, ListView1_ContextMenu, Add, % TransA["Show library header"],								F_Show
 Menu, ListView1_ContextMenu, Add, % TransA["Edit library header"],								F_EditLibHeader
 Menu, ListView1_ContextMenu, Add	
 Menu, ListView1_ContextMenu, Add, % TransA["Move definition to another library"],					F_MoveList
-Menu, ListView1_ContextMenu, Add, % TransA["Delete selected definition"],							F_DeleteHotstring
+Menu, ListView1_ContextMenu, Add, % TransA["Delete selected definition"] . A_Space . "(F8 / Del)",		F_DeleteHotstring
 Menu, ListView1_ContextMenu, Add, % TransA["Enable/disable selected definition"],					F_LV1_EnDisDefinition
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Menu / Context menus - - - - - - - - - - - - - - - - - -
 F_MenuLogEnDis()	;Position in Menu about loging
@@ -814,15 +814,6 @@ Critical, Off
 		F_DestroyTriggerstringTips(ini_TTCn)
 		Gui, % F_WhichGui() . ": +Disabled"	;thanks to this line user won't be able to interact with main hotstring window if TTStyling window is available
 		F_GuiHSdelay()
-	return
-
-	F8::	;new thread starts here
-	~Del::
-		F_DestroyTriggerstringTips(ini_TTCn)
-		GuiControlGet, FocusedControl, HS3: Focus
-		; OutputDebug, % "FocusedControl2:" . FocusedControl . "`n"
-		if (FocusedControl = "SysListView321")
-			F_DeleteHotstring()
 	return
 
 	F9::	;new thread starts here
@@ -10577,7 +10568,6 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 ,			Triggerstring := "", TriggOpt := "", OutFun := "", EnDis := "", Hotstring := "", Comment := ""
 ,			WhichRow := 0, TheWholeFile := "", LibraryHeader := ""
 
-	F_GuiHS3_EnDis("Disable")			;Disable all GuiControls for deletion time d(t, o, h)
 	DetectHiddenWindows, On
 	if WinExist("ahk_id"  HS3SearchHwnd)	;In case HS3Search was available (only hidden) on time of Move, it must be destroyed. If it is not destroyed, it shows old search results, so before Move.
 		Gui, HS3Search: Destroy
@@ -10585,13 +10575,18 @@ F_Move()	;activated by pressing button "Move (F8)" within GUI window MoveLibs
 	Gui, HS3:			+Disabled
 	Gui, MoveLibs: 	Default
 	Gui, MoveLibs: 	Submit, NoHide
-	NoOnTheList := LV_GetNext()
-	LV_GetText(DestinationLibrary, NoOnTheList) ;row number DestinationLibrary into OutputVar = v_SelectHotstringLibrary
-	if (!DestinationLibrary) 
+	NoOnTheList := LV_GetNext("S")
+	OutputDebug, % "NoOnTheList:" . NoOnTheList . "`n"
+	if (NoOnTheList = 0)
 	{
-		MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"],  % TransA["Select a row in the list-view, please!"]
+		MsgBox, % c_MB_I_Info, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["There is the only one library, so you can't move definition to another library."]
+		Gui, HS3:			-Disabled
+		Gui, MoveLibs: 	Destroy
 		return
-	}
+	}	
+	F_GuiHS3_EnDis("Disable")			;Disable all GuiControls for deletion time d(t, o, h)
+
+	LV_GetText(DestinationLibrary, NoOnTheList) ;row number DestinationLibrary into OutputVar = v_SelectHotstringLibrary
 	Gui, HS3:			-Disabled
 	Gui, MoveLibs: 	Destroy
 	GuiControlGet, SourceLibrary, , % IdDDL2
@@ -10734,6 +10729,8 @@ F_GuiMoveLibs_CreateDetermine()
 	for key, value in ini_LoadLib
 		if (value) and (key != SourceLibrary)
 			LV_Add("", key)
+	if (key)		;By default select the first position in list-view.
+		LV_Modify(1, "Select")
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_MoveList()
@@ -11844,7 +11841,7 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 	local	temp := ""
 
 	; OutputDebug, % "A_ThisFunc:" . A_ThisFunc . A_Space . "A_GuiEvent:" . A_GuiEvent . A_Space . "A_GuiControl:" . A_GuiControl . A_Space . "A_EventInfo:" . A_EventInfo . A_Space . "ErrorLevel:" . ErrorLevel . "`n"
-	; OutputDebug, % "Key:" . GetKeyName(Format("vk{:x}", A_EventInfo)) . "`n"
+	OutputDebug, % "Key:" . GetKeyName(Format("vk{:x}", A_EventInfo)) . "`n"
 	Switch A_GuiEvent
 	{
 		Default:
@@ -11855,10 +11852,10 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 			GuiControl, Focus, % IdListView1
 		Case "K":	;The user has pressed a key while the ListView has focus
 			temp := GetKeyName(Format("vk{:x}", A_EventInfo))
-			if (InStr(temp, "Del"))
+			if (InStr(temp, "Del")) or (InStr(temp, "F8"))
 			{
 				GuiControlGet, FocusedControl, HS3: Focus
-				; OutputDebug, % "FocusedControl2:" . FocusedControl . "`n"
+				OutputDebug, % "FocusedControl:" . FocusedControl . "`n"
 				if (FocusedControl = "SysListView321")
 					F_DeleteHotstring()				
 			}	
@@ -14083,6 +14080,7 @@ The library has been deleted, its content have been removed from memory. = The l
 The [LicenseInfo] section will be removed from Congig.ini. When run next time, prompt to enter valid license key will be displayed. = The [LicenseInfo] section will be removed from Congig.ini. When run next time, prompt to enter valid license key will be displayed.
 The old ""Hotstrings"" folder was successfully removed.		= The old ""Hotstrings"" folder was successfully removed.
 There is no Libraries subfolder and no lbrary (*.csv) file exists! = There is no Libraries subfolder and no lbrary (*.csv) file exists!
+There is the only one library, so you can't move definition to another library. = There is the only one library, so you can't move definition to another library.
 The parameter Language in section [GraphicalUserInterface] of Config.ini is missing. = The parameter Language in section [GraphicalUserInterface] of Config.ini is missing.
 The selected library file will be deleted. The content of this library will be unloaded from memory. = The selected library file will be deleted. The content of this library will be unloaded from memory.
 The script											= The script
