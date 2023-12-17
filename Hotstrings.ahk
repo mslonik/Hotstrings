@@ -186,6 +186,7 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 Critical, On
 F_LoadCreateTranslationTxt() 			;Initially this function is run without arguments and then it loads default (English) text strings into memory, so they can be used at any moment when necessary. If run with arguments (later in the code flow) it loads definition from localization file defined in Config.ini. Until localization file is loaded, all the messages are displayed in English.
 F_CheckFileEncoding(A_ScriptFullPath)	;Checks, as early as possible, if script is utf-8 compliant. it has plenty to do wiith github download etc. If it's not compliant, it tries to change encoding. If it is not successful, it exits. 
+F_CheckDuplicates()					;Checks if second instance of script or executable isn't running
 F_CheckCreateConfigIni() 			;Try to load up configuration file. If this file do not exists, create it. If it isn't possible, script exits.
 
 F_Validate_IniParam(ini_Language, ini_HADConfig, "GraphicalUserInterface", "Language")
@@ -16298,14 +16299,14 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 								; OutputDebug, % "A_SendLevel:" . A_SendLevel . "|" . A_Space . "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
 								SendInput, 	% OutputString
 								SendLevel, 	% ini_OutSF	;only for ShiftFunctions for which InputLevel MinSendLevel used to be set to 2.
-								; OutputDebug, % "A_SendLevel:" . A_SendLevel . "|" . A_Space . "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
+								OutputDebug, % "A_SendLevel:" . A_SendLevel . "|" . A_Space . "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
 								SendInput, 	% LastChar	;only last character of definition is send with different level of SendLevel; thanks to that ShiftFunctions can alter it into diacritics.
 								SendLevel, 	0
 							}
 							else
 							{	
 								OutputString 	:= SubStr(OutputString, 1, -1)	;all but last characters are copied back to OutputString
-								; OutputDebug, % "A_SendLevel:" . A_SendLevel . "|" . A_Space . "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
+								OutputDebug, % "A_SendLevel:" . A_SendLevel . "|" . A_Space . "LastChar:" . LastChar . "|" . A_Space . "OutputString:" . OutputString . "|" . "`n"
 								SendInput, 	% OutputString	
 								SendLevel, 	% ini_OutSF	;only for ShiftFunctions for which InputLevel MinSendLevel used to be set to 2.
 								Switch LastChar				
@@ -17367,6 +17368,30 @@ HideTrayTip()
         Sleep 200  ; It may be necessary to adjust this sleep.
         Menu Tray, Icon
     }
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_CheckDuplicates()	;Checks if second instance of script or executable isn't running
+{
+	global	;assume-global mode of operation
+	local	IfExistSF_exe 	:= false
+		,	IfExistSF_ahk 	:= false
+		,	ScriptNoExt	:= SubStr(A_ScriptName, 1, -4)
+		,	PID			:= DllCall("GetCurrentProcessId")
+
+	Process, Exist, % ScriptNoExt . ".exe"
+	if (ErrorLevel != 0) and (ErrorLevel != PID)	;name of the process is returned in ErrorLevel variable if it is different than 0
+		IfExistSF_exe := true
+	Process, Exist, % ScriptNoExt . ".ahk"
+	if (ErrorLevel != 0) and (ErrorLevel != PID)	;name of the process is returned in ErrorLevel variable if it is different than 0
+		IfExistSF_ahk := true
+
+	if (IfExistSF_exe) or (IfExistSF_ahk)
+	{
+		MsgBox, % c_MB_I_Exclamation, % A_ScriptName
+			, % "Second running instance of " . A_Space . ScriptNoExt . " detected:" . "`n"
+			. (IfExistSF_exe ? ScriptNoExt . ".exe" : ScriptNoExt . ".ahk") 
+	}	
+	; OutputDebug, % "IfExistSF_exe:" . IfExistSF_exe . A_Space . "IfExistSF_ahk:" . IfExistSF_ahk . "`n"
 }
 
 ; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
