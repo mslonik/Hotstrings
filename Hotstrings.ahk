@@ -943,8 +943,6 @@ return
 ~*Up::
 ~*Left::
 ~*Right::
-~*Insert::
-~*Del::
 ~*Home::
 ~*End::
 ~*PgUp::
@@ -960,6 +958,17 @@ return
 	if (!WinExist("ahk_id" HMenuCLIHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
 		v_InputString := ""
 	; OutputDebug, % "v_InputString after:" . v_InputString . "|" . "`n"
+return
+
+~*Insert::	;in particular Shift + Insert, Shift + Del
+~*Del::
+	Hotstring("Reset")
+	ToolTip,	;this line is necessary to close tooltips.
+	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
+	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
+	F_DestroyTriggerstringTips(ini_TTCn)
+	if (!WinExist("ahk_id" HMenuCLIHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
+		v_InputString := ""
 return
 
  ~*Control::	;whenever any combination with control (e.g. ctrl + v) is applied on time when triggestring is entered AND active triggerstrings are disabled, hotstring recognizer is reset.
@@ -11841,7 +11850,7 @@ F_HSLV() ; copy content of List View 1 to editable fields of HS3 Gui
 	local	temp := ""
 
 	; OutputDebug, % "A_ThisFunc:" . A_ThisFunc . A_Space . "A_GuiEvent:" . A_GuiEvent . A_Space . "A_GuiControl:" . A_GuiControl . A_Space . "A_EventInfo:" . A_EventInfo . A_Space . "ErrorLevel:" . ErrorLevel . "`n"
-	OutputDebug, % "Key:" . GetKeyName(Format("vk{:x}", A_EventInfo)) . "`n"
+	; OutputDebug, % "Key:" . GetKeyName(Format("vk{:x}", A_EventInfo)) . "`n"
 	Switch A_GuiEvent
 	{
 		Default:
