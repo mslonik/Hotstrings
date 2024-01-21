@@ -3140,17 +3140,13 @@ F_CheckIf100ms()	;To check if defined time elapsed for concurrent Shift keys pre
 {
 	global		;assume-global mode of operation
 
-	if (f_100msRun)
+	if (f_100msRun) and (f_LShiftDown) and (f_RShiftDown)
 	{
 		SetTimer, F_100msTimeout, Off
 		f_100msRun := false
-		if (f_LShiftDown) and (f_RShiftDown)
-		{
-			f_WasReset := true
-		,	f_LShiftDown := false
-		,	f_RShiftDown := false	
-		}	
-		; OutputDebug, % "concurrent" . "`n"
+	,	f_WasReset := true
+	,	f_LShiftDown := false
+	,	f_RShiftDown := false	
 	}
 	else
 	{
