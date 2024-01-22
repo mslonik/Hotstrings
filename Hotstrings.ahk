@@ -10066,7 +10066,7 @@ F_PictureShow(PHotstring, Oflag, SendFun)
 ,	v_EndChar 			:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
 	if (InStr(v_Options, "?"))
 		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
-	v_UndoTriggerstring 	:= v_InputString		;important for F_Undo
+	v_UndoTriggerstring 	:= F_CheckNonAlpha(ThisHotkey)		;important for F_Undo
 ,	v_SendFun				:= SendFun			;important for F_Undo
 		
 	F_DestroyTriggerstringTips(ini_TTCn)
@@ -16167,17 +16167,33 @@ F_HMenu_Mouse(SendFun) ; Handling of mouse events for F_HMenu_Output;The subrout
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_CheckNonAlpha(ThisHotkey)	;if v_InputString contains non-alpha characters, then they should be removed from v_UndoTriggerstring
+{
+	global	;assume-global mode
+	local	DefTriggStr	:= "" 	;triggerstring from definition
+		,	DefTriggLen	:= 0		;length of triggerstring from definition
+
+	DefTriggStr			:= SubStr(ThisHotkey, InStr(ThisHotkey, ":", false, 1, 2) + 1)	;extract all characters after the second ":"
+	DefTriggLen			:= StrLen(DefTriggStr)
+	if (StrLen(v_InputString) > DefTriggLen)
+		v_InputString		:= SubStr(v_InputString, -DefTriggLen + 1)
+	
+	return v_InputString
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HMenu_Output(ReplacementString, Oflag, SendFun)
 {
 	global	;assume-global mode
 	Critical, On	;This line is necessary to protect against two concurretnt Hotstrings listboxes on the screen: HMenu and triggerstring tips. Without this line the F_OneCharPressed interrupts this function.
-	local	a_MCSIMenuPos := [], ThisHotkey := A_ThisHotkey, EndChar := A_EndChar
+	local	a_MCSIMenuPos 	:= []
+		, 	ThisHotkey 	:= A_ThisHotkey
+		, 	EndChar 		:= A_EndChar
 		,	SingleKey 	:= ""
 		,	WhatWasPressed := ""
 		,	f_Shift 		:= false
 		,	GuiName 		:= ""
 		,	WindowRef		:= ""
-
+	
 	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
 	v_InputH.VisibleText 	:= false
 ,	v_UndoHotstring		:= ReplacementString	;important for F_Undo	
@@ -16185,7 +16201,7 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 ,	v_EndChar 			:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
 	if (InStr(v_Options, "?"))
 		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
-	v_UndoTriggerstring 	:= v_InputString		;important for F_Undo
+	v_UndoTriggerstring 	:= F_CheckNonAlpha(ThisHotkey)		;important for F_Undo
 ,	v_SendFun				:= SendFun			;important for F_Undo
 ,	v_MenuMax				:= 0	;global variable used in F_HMenuAHK
 
@@ -16483,7 +16499,7 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)
 	if (InStr(v_Options, "?"))
 		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
 	
-	v_UndoTriggerstring := v_InputString
+	v_UndoTriggerstring := F_CheckNonAlpha(ThisHotkey)
 ,	ReplacementString 	:= F_ReplaceAHKconstants(ReplacementString)
 	; OutputDebug, % "F_ReplaceAHKconstants" . A_Space . "ReplacementString:" . ReplacementString . "|" . "`n"
 ,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options)
