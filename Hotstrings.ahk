@@ -3077,12 +3077,12 @@ F_OneCharPressed(ih, Char)
 			FoundTips := false
 	}
 	; OutputDebug, % A_ThisFunc . A_Space . "E" 
-	; 	. A_Space . "Char:" . Char . "|" 
-	; 	. A_Space . "v_IS:" . v_InputString . "|" 
-	; 	. A_Space . "v_QI:" . v_Qinput . "|" 
-	; 	. A_Space . "FoundTips:" . FoundTips . "|"
-	; 	. A_Space . "f_EC:" . f_EndCharDetected 
-	; 	. "`n"
+	; . A_Space . "Char:" . Char . "|" 
+	; . A_Space . "v_IS:" . v_InputString . "|" 
+	; . A_Space . "v_QI:" . v_Qinput . "|" 
+	; . A_Space . "FoundTips:" . FoundTips . "|"
+	; . A_Space . "f_EC:" . f_EndCharDetected 
+	; . "`n"
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -17474,8 +17474,6 @@ F_ProcessRWin()
 	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
 	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
 	F_DestroyTriggerstringTips(ini_TTCn)
-	if (!WinExist("ahk_id" HMenuCLIHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
-		v_InputString := ""
 	Critical, Off
 }
 
