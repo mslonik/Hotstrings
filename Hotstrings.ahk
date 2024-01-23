@@ -16174,7 +16174,9 @@ F_CheckNonAlpha(ThisHotkey)	;if v_InputString contains non-alpha characters, the
 		,	DefTriggLen	:= 0		;length of triggerstring from definition
 
 	DefTriggStr			:= SubStr(ThisHotkey, InStr(ThisHotkey, ":", false, 1, 2) + 1)	;extract all characters after the second ":"
-	DefTriggLen			:= StrLen(DefTriggStr)
+,	DefTriggLen			:= StrLen(DefTriggStr)
+	if (A_EndChar)
+		v_InputString		:= SubStr(v_InputString, 1, -1)	;omit the last character
 	if (StrLen(v_InputString) > DefTriggLen)
 		v_InputString		:= SubStr(v_InputString, -DefTriggLen + 1)
 	
@@ -16297,6 +16299,7 @@ F_RWinEndChar()
 	{
 		Send, {BS}
 		f_EndChar := false
+	,	v_Options := "*"	;Backspacing after RWin works the same as if immediate option "*" was applied. The F_Undo function then do not send extra Backspace.
 	}	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
