@@ -17338,7 +17338,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been exported"] . ":" . "`n`n" . OutputFile
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Validate_IniParam(IniParam, IniFilename, Section, Parameter)
+F_Validate_IniParam(ByRef IniParam, IniFilename, Section, Parameter)
 {
 	global	;assume-global mode of operation
 	local	temp := ""
@@ -17463,18 +17463,21 @@ F_MenuTriggerRWin()
 {
 	global	;assume-global mode of operation
 
-	if (ini_RWin_EndChar)
+	if (A_ThisMenuItem) ;if user selected menu, then toggle, so if this function is called from within script, this statement isn't true
 	{
-		Menu, Configuration,	UnCheck, % TransA["Key to trigger definition"] . "`t" . TransA["Right Windows Key"]
-		Hotkey, ~RWin,  F_ProcessRWin, Off
+		ini_RWin_EndChar := !ini_RWin_EndChar
+		IniWrite, % ini_RWin_EndChar, % ini_HADConfig, Configuration, RWin_EndChar
 	}	
-	else
+	if (ini_RWin_EndChar)
 	{
 		Menu, Configuration,	Check, % TransA["Key to trigger definition"] . "`t" . TransA["Right Windows Key"]
 		Hotkey, ~RWin,  F_ProcessRWin, On
 	}	
-	ini_RWin_EndChar := !ini_RWin_EndChar
-	IniWrite, % ini_RWin_EndChar, % ini_HADConfig, Configuration, RWin_EndChar
+	else
+	{
+		Menu, Configuration,	UnCheck, % TransA["Key to trigger definition"] . "`t" . TransA["Right Windows Key"]
+		Hotkey, ~RWin,  F_ProcessRWin, Off
+	}
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_ProcessRWin()
