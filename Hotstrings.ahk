@@ -16491,7 +16491,12 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)
 {
 	global	;assume-global mode of operation
 	Critical, On
-	local	ThisHotkey := A_ThisHotkey, EndChar := A_EndChar, temp := 0
+	local	ThisHotkey 	:= A_ThisHotkey 
+		,	EndChar 		:= A_EndChar 
+		,	temp 		:= 0
+		,	LastChar 		:= SubStr(ReplacementString, 0)
+		,	TheRest 		:= ""
+		,	BeforeTheLast 	:= ""
 
 	; OutputDebug, % A_ThisFunc . A_Space . "ReplacementString:" . ReplacementString . "|" . "SendFun:" . SendFun . "|" . "`n"
 	F_DestroyTriggerstringTips(ini_TTCn)
@@ -16509,8 +16514,23 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)
 	; OutputDebug, % "F_FollowCaseConformity" . A_Space . "ReplacementString:" . ReplacementString . "|" . "`n"
 ,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
 	; OutputDebug, % "F_ConvertEscapeSequences" . A_Space . "ReplacementString:" . ReplacementString . "|" . "`n"
-	if (SubStr(ReplacementString, 0) = "``")	;extracts the last character
-		ReplacementString := SubStr(ReplacementString, 1, StrLen(ReplacementString) - 1)	;without last character
+	if (LastChar = "``")	;if the last char is backtick (which must be escaped in that case, so "``"), then check if character just before backtick is space or tab. If it is, output the string.
+	{
+		TheRest := SubStr(ReplacementString, 1, -1)	;all characters, but the last one
+	,	BeforeTheLast := SubStr(TheRest, 0)
+		if (BeforeTheLast = A_Space) or (BeforeTheLast = A_Tab)
+			ReplacementString := SubStr(ReplacementString, 1, StrLen(ReplacementString) - 1)	;without last character
+	}
+	if (LastChar = A_Space) or (LastChar = A_Tab)	;if the last char of the hotstring is tab or space, cut it down until this is another character and then output it
+	{
+		Loop,
+		{
+			ReplacementString := SubStr(ReplacementString, 1, StrLen(ReplacementString) - 1)
+		,	LastChar := SubStr(ReplacementString, 0)
+			if (LastChar != A_Space) and (LastChar != A_Tab)
+				break
+		}	
+	}	
 	
 	; OutputDebug, % A_ThisFunc . A_Space . "SendFun:" . SendFun . "|" . "`n"
 	F_SendIsOflag(ReplacementString, Oflag, SendFun)
