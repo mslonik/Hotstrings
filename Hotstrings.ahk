@@ -28,7 +28,7 @@ CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in t
 global AppIcon			:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let 			U_AppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% 	; Keep this line and the previous one together
 ;@Ahk2Exe-SetMainIcon  	%U_AppIcon%
-global AppVersion		:= "3.6.23"	;starting on 2023-12-03 (Sunday). 
+global AppVersion		:= "3.6.24"	;release on 2024-05-13 (Monday). 
 ;@Ahk2Exe-Let 			U_AppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep this line and the previous one together
 
 ;The compiler will be run at least once for each Base directive line. Only for .exe  Base it is possible to encrypt content!
@@ -137,6 +137,7 @@ global AppVersion		:= "3.6.23"	;starting on 2023-12-03 (Sunday).
 ,		IdTT_C4_LB3			:= 0					;in order to get rid of warnings in specific situation: file BOM is incorrect and user clicked somethint
 ;#c/* commercial only beginning
 ;#c*/ commercial only end
+,		f_EndChar				:= false				;global flag, set when RWin key is pressed and if user configured RWin to trigger EndChar
 ,		ini_LicenseKey			:= ""				;global variable
 ,		v_ScriptDir			:= c_AppDataLocal 	. "\" . SubStr(A_ScriptName, 1, -4)	;default value
 ,		ini_HADConfig			:= v_ScriptDir 	. "\" . "Config.ini"				;default value
@@ -146,6 +147,7 @@ global AppVersion		:= "3.6.23"	;starting on 2023-12-03 (Sunday).
 ,		ini_GuiReload			:= false				;default value, if true, application will be reloaded
 ,		ini_CheckRepo			:= false				;default value, if true GitHub server is asked for presence of new application version
 ,		ini_DownloadRepo		:= false				;default value, if true new version should be downloaded
+,		ini_RWin_EndChar		:= false				;default value, if true RWin key acts as EndChar
 ;#c/* commercial only beginning
 ;#c*/ commercial only end
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -190,6 +192,7 @@ if (ini_GuiReload) and (FileExist(A_ScriptDir . "\" . "temp.exe"))	;flag ini_Gui
 }
 
 F_Validate_IniParam(ini_HADL, ini_HADConfig, "Configuration", "HADL")
+F_Validate_IniParam(ini_RWin_EndChar, ini_HADConfig, "Configuration", "RWin_EndChar")
 F_CheckCreateLibraryFolder()
 F_ValidateIniLibSections() 			;fills in ini_LoadLib[] and ini_ShowTipsLib[]
 F_CheckCreateLogFolder()
@@ -341,6 +344,8 @@ Menu, Configuration,		Add, % TransA["Copy Config.ini folder path to Clipboard"],
 Menu, Configuration,		Add	;line separator	
 ;#c/* commercial only beginnin
 ;#c*/ commercial only end
+Menu, Configuration,	Add
+Menu, Configuration,	Add, % TransA["Key to trigger definition"] . "`t" . TransA["Right Windows Key"],F_MenuTriggerRWin
 ;#f/* free version only beginning
  Menu, SubmenuPath,		Add, % TransA["User Data: restore it to default location"], 			F_Empty
  Menu, SubmenuPath,		Add, % TransA["User Data: move it to new location"],					F_Empty
@@ -452,6 +457,10 @@ Menu, ListView1_ContextMenu, Add, % TransA["Move definition to another library"]
 Menu, ListView1_ContextMenu, Add, % TransA["Delete selected definition"] . A_Space . "(F8 / Del)",		F_DeleteHotstring
 Menu, ListView1_ContextMenu, Add, % TransA["Enable/disable selected definition"],					F_LV1_EnDisDefinition
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Menu / Context menus - - - - - - - - - - - - - - - - - -
+F_MenuTriggerRWin()
+if (ini_RWin_EndChar)
+	Hotkey, ~RWin,  F_ProcessRWin, On
+
 F_MenuLogEnDis()	;Position in Menu about loging
 F_GuiAbout_CreateObjects()
 F_GuiAbout_DetermineConstraints()
@@ -838,13 +847,10 @@ return
 ~*MButton::
 ~*RButton::
 ~*LWin::
-~*RWin::
 ~*Down::
 ~*Up::
 ~*Left::
 ~*Right::
-~*Insert::
-~*Del::
 ~*Home::
 ~*End::
 ~*PgUp::
@@ -860,6 +866,17 @@ return
 	if (!WinExist("ahk_id" HMenuCLIHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
 		v_InputString := ""
 	; OutputDebug, % "v_InputString after:" . v_InputString . "|" . "`n"
+return
+
+~*Insert::	;in particular Shift + Insert, Shift + Del
+~*Del::
+	Hotstring("Reset")
+	ToolTip,	;this line is necessary to close tooltips.
+	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
+	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
+	F_DestroyTriggerstringTips(ini_TTCn)
+	if (!WinExist("ahk_id" HMenuCLIHwnd)) and (!WinExist("ahk_id" HMenuAHKHwnd))
+		v_InputString := ""
 return
 
  ~*Control::	;whenever any combination with control (e.g. ctrl + v) is applied on time when triggestring is entered AND active triggerstrings are disabled, hotstring recognizer is reset.
@@ -2163,12 +2180,12 @@ F_OneCharPressed(ih, Char)
 			FoundTips := false
 	}
 	; OutputDebug, % A_ThisFunc . A_Space . "E" 
-	; 	. A_Space . "Char:" . Char . "|" 
-	; 	. A_Space . "v_IS:" . v_InputString . "|" 
-	; 	. A_Space . "v_QI:" . v_Qinput . "|" 
-	; 	. A_Space . "FoundTips:" . FoundTips . "|"
-	; 	. A_Space . "f_EC:" . f_EndCharDetected 
-	; 	. "`n"
+	; . A_Space . "Char:" . Char . "|" 
+	; . A_Space . "v_IS:" . v_InputString . "|" 
+	; . A_Space . "v_QI:" . v_Qinput . "|" 
+	; . A_Space . "FoundTips:" . FoundTips . "|"
+	; . A_Space . "f_EC:" . f_EndCharDetected 
+	; . "`n"
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2226,17 +2243,13 @@ F_CheckIf100ms()	;To check if defined time elapsed for concurrent Shift keys pre
 {
 	global		;assume-global mode of operation
 
-	if (f_100msRun)
+	if (f_100msRun) and (f_LShiftDown) and (f_RShiftDown)
 	{
 		SetTimer, F_100msTimeout, Off
 		f_100msRun := false
-		if (f_LShiftDown) and (f_RShiftDown)
-		{
-			f_WasReset := true
-		,	f_LShiftDown := false
-		,	f_RShiftDown := false	
-		}	
-		; OutputDebug, % "concurrent" . "`n"
+	,	f_WasReset := true
+	,	f_LShiftDown := false
+	,	f_RShiftDown := false	
 	}
 	else
 	{
@@ -12054,6 +12067,7 @@ Introduction											= Introduction
 It had expired.										= It had expired.
 It means other script threads are still running. Triggerstring tips are off for your convenience. = It means other script threads are still running. Triggerstring tips are off for your convenience.
 It means triggerstring tips state is restored and hotstring definitions will be triggered as usual.		= It means triggerstring tips state is restored and hotstring definitions will be triggered as usual.
+Key to trigger definition								= Key to trigger definition
 Keyboard or mouse scrolling								= Keyboard or mouse scrolling
 Keyboard or mouse selection								= Keyboard or mouse selection
 \Languages\`nMind that Config.ini Language variable is equal to 	= \Languages\`nMind that Config.ini Language variable is equal to
@@ -12187,6 +12201,7 @@ Reload in default mode									= Reload in default mode
 Reload in silent mode									= Reload in silent mode
 reloaded and fresh language file (English.txt) will be recreated. = reloaded and fresh language file (English.txt) will be recreated.
 Rename selected library filename							= Rename selected library filename
+Right Windows Key										= Right Windows Key
 Hotstring text is blank. Do you want to proceed? 				= Hotstring text is blank. Do you want to proceed?
 Repository version										= Repository version
 Required content is copied to the Clipboard					= Required content is copied to the Clipboard
@@ -14379,17 +14394,35 @@ F_HMenu_Mouse(SendFun) ; Handling of mouse events for F_HMenu_Output;The subrout
 	Critical, Off
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_CheckNonAlpha(ThisHotkey)	;if v_InputString contains non-alpha characters, then they should be removed from v_UndoTriggerstring
+{
+	global	;assume-global mode
+	local	DefTriggStr	:= "" 	;triggerstring from definition
+		,	DefTriggLen	:= 0		;length of triggerstring from definition
+
+	DefTriggStr			:= SubStr(ThisHotkey, InStr(ThisHotkey, ":", false, 1, 2) + 1)	;extract all characters after the second ":"
+,	DefTriggLen			:= StrLen(DefTriggStr)
+	if (A_EndChar)
+		v_InputString		:= SubStr(v_InputString, 1, -1)	;omit the last character
+	if (StrLen(v_InputString) > DefTriggLen)
+		v_InputString		:= SubStr(v_InputString, -DefTriggLen + 1)
+	
+	return v_InputString
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_HMenu_Output(ReplacementString, Oflag, SendFun)
 {
 	global	;assume-global mode
 	Critical, On	;This line is necessary to protect against two concurretnt Hotstrings listboxes on the screen: HMenu and triggerstring tips. Without this line the F_OneCharPressed interrupts this function.
-	local	a_MCSIMenuPos := [], ThisHotkey := A_ThisHotkey, EndChar := A_EndChar
+	local	a_MCSIMenuPos 	:= []
+		, 	ThisHotkey 	:= A_ThisHotkey
+		, 	EndChar 		:= A_EndChar
 		,	SingleKey 	:= ""
 		,	WhatWasPressed := ""
 		,	f_Shift 		:= false
 		,	GuiName 		:= ""
 		,	WindowRef		:= ""
-
+	
 	; OutputDebug, % A_ThisFunc . A_Space . "v_InputString:" . v_InputString . "|" . "`n"
 	v_InputH.VisibleText 	:= false
 ,	v_UndoHotstring		:= ReplacementString	;important for F_Undo	
@@ -14397,7 +14430,7 @@ F_HMenu_Output(ReplacementString, Oflag, SendFun)
 ,	v_EndChar 			:= F_DetermineEndChar(ThisHotkey, v_Options, EndChar)
 	if (InStr(v_Options, "?"))
 		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
-	v_UndoTriggerstring 	:= v_InputString		;important for F_Undo
+	v_UndoTriggerstring 	:= F_CheckNonAlpha(ThisHotkey)		;important for F_Undo
 ,	v_SendFun				:= SendFun			;important for F_Undo
 ,	v_MenuMax				:= 0	;global variable used in F_HMenuAHK
 
@@ -14485,13 +14518,25 @@ ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
 	return ShorterInputString
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_RWinEndChar()
+{
+	global	;assume-global mode of operation
+
+	if (f_EndChar)
+	{
+		Send, {BS}
+		f_EndChar := false
+	,	v_Options := "*"	;Backspacing after RWin works the same as if immediate option "*" was applied. The F_Undo function then do not send extra Backspace.
+	}	
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; F_HMenu_Mouse -> F_SendIsOflag; F_SimpleOutput -> F_SendIsOflag
 {
 	global	;assume-global mode of operation
 	local	LastChar 	:= ""
 		, 	IsLCalpha := false
 		, 	IsLower 	:= false
-		,	ini_OutSF := 1	;Output for ShiftFunctions, used to be 2
+		,	ini_OutSF := 2	;Output for ShiftFunctions, used to be 2
 
 	SetKeyDelay, -1, -1	;Delay = -1, PressDuration = -1, -1: no delay at all; this can be necessary if SendInput is reduced to SendEvent (in case low level input hook is active in another script)
 	Switch SendFun
@@ -14571,7 +14616,9 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 					}
 					else
 						SendInput, 	% OutputString
-				}	
+				}
+				if (ini_RWin_EndChar)
+					F_RWinEndChar()
 				; OutputDebug, % "Finished SendInput" . "`n"
 			}
 			else
@@ -14582,6 +14629,8 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 				SendEvent, 	% OutputString
 				if (A_EndChar)
 					SendRaw,		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
+				if (ini_RWin_EndChar)
+					F_RWinEndChar()
 			}
 			else
 				SendEvent, % OutputString
@@ -14589,13 +14638,18 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 			if (Oflag = false)
 			{
 				SendPlay, % OutputString . A_EndChar	;It seems that for SendPlay EndChars do not require escaping
-				; OutputDebug, % "SendPlay:" . A_Space . OutputString . "`n"
+				if (ini_RWin_EndChar)
+					F_RWinEndChar()
 			}
 			else
 				SendPlay, % OutputString
 		Case "SR":	;SendRaw
 			if (Oflag = false)
+			{
 				SendRaw, % OutputString . A_EndChar
+				if (ini_RWin_EndChar)
+					F_RWinEndChar()
+			}	
 			else
 				SendRaw, % OutputString
 		Case "CL":
@@ -14620,6 +14674,8 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 				SendInput, 	% SecondPart
 				if (A_EndChar)
 					SendRaw,		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
+				if (ini_RWin_EndChar)
+					F_RWinEndChar()
 			}
 			else
 				SendInput, % SecondPart
@@ -14649,6 +14705,8 @@ F_SendIsOflag(OutputString, Oflag, SendFun)	;F_HMenu_Output() -> F_SendIsOflag; 
 				SendInput, 	% OutputString
 				if (A_EndChar)
 					SendRaw,		% A_EndChar		;Some of the EndChars require escaping (e.g. {}! etc.). Therefore it is better to send out EndChar in SendRaw mode.
+				if (ini_RWin_EndChar)
+					F_RWinEndChar()
 			}
 			else
 				SendInput, % OutputString
@@ -14660,7 +14718,12 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)
 {
 	global	;assume-global mode of operation
 	Critical, On
-	local	ThisHotkey := A_ThisHotkey, EndChar := A_EndChar, temp := 0
+	local	ThisHotkey 	:= A_ThisHotkey 
+		,	EndChar 		:= A_EndChar 
+		,	temp 		:= 0
+		,	LastChar 		:= SubStr(ReplacementString, 0)
+		,	TheRest 		:= ""
+		,	BeforeTheLast 	:= ""
 
 	; OutputDebug, % A_ThisFunc . A_Space . "ReplacementString:" . ReplacementString . "|" . "SendFun:" . SendFun . "|" . "`n"
 	F_DestroyTriggerstringTips(ini_TTCn)
@@ -14671,15 +14734,30 @@ F_SimpleOutput(ReplacementString, Oflag, SendFun)
 	if (InStr(v_Options, "?"))
 		v_InputString := ProcessQuestionMark(v_Options, ThisHotkey, v_InputString, v_EndChar)
 	
-	v_UndoTriggerstring := v_InputString
+	v_UndoTriggerstring := F_CheckNonAlpha(ThisHotkey)
 ,	ReplacementString 	:= F_ReplaceAHKconstants(ReplacementString)
 	; OutputDebug, % "F_ReplaceAHKconstants" . A_Space . "ReplacementString:" . ReplacementString . "|" . "`n"
 ,	ReplacementString 	:= F_FollowCaseConformity(ReplacementString, v_InputString, v_Options)
 	; OutputDebug, % "F_FollowCaseConformity" . A_Space . "ReplacementString:" . ReplacementString . "|" . "`n"
 ,	ReplacementString 	:= F_ConvertEscapeSequences(ReplacementString)
 	; OutputDebug, % "F_ConvertEscapeSequences" . A_Space . "ReplacementString:" . ReplacementString . "|" . "`n"
-	if (SubStr(ReplacementString, 0) = "``")	;extracts the last character
-		ReplacementString := SubStr(ReplacementString, 1, StrLen(ReplacementString) - 1)	;without last character
+	if (LastChar = "``")	;if the last char is backtick (which must be escaped in that case, so "``"), then check if character just before backtick is space or tab. If it is, output the string.
+	{
+		TheRest := SubStr(ReplacementString, 1, -1)	;all characters, but the last one
+	,	BeforeTheLast := SubStr(TheRest, 0)
+		if (BeforeTheLast = A_Space) or (BeforeTheLast = A_Tab)
+			ReplacementString := SubStr(ReplacementString, 1, StrLen(ReplacementString) - 1)	;without last character
+	}
+	if (LastChar = A_Space) or (LastChar = A_Tab)	;if the last char of the hotstring is tab or space, cut it down until this is another character and then output it
+	{
+		Loop,
+		{
+			ReplacementString := SubStr(ReplacementString, 1, StrLen(ReplacementString) - 1)
+		,	LastChar := SubStr(ReplacementString, 0)
+			if (LastChar != A_Space) and (LastChar != A_Tab)
+				break
+		}	
+	}	
 	
 	; OutputDebug, % A_ThisFunc . A_Space . "SendFun:" . SendFun . "|" . "`n"
 	F_SendIsOflag(ReplacementString, Oflag, SendFun)
@@ -14800,12 +14878,21 @@ F_ClipboardPaste(string, Oflag, v_EndChar)
 	local 	ClipboardBackup := ClipboardAll
 
 	if (Oflag = false)
+	{
 		Clipboard := string . A_EndChar
+		ClipWait
+		Send, ^v
+		Sleep, %ini_CPDelay% ; this sleep is required surprisingly
+		if (ini_RWin_EndChar)
+			F_RWinEndChar()
+	}	
 	else
+	{
 		Clipboard := string
-	ClipWait
-	Send, ^v
-	Sleep, %ini_CPDelay% ; this sleep is required surprisingly
+		ClipWait
+		Send, ^v
+		Sleep, %ini_CPDelay% ; this sleep is required surprisingly
+	}	
 	Clipboard := ClipboardBackup	
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -15494,7 +15581,7 @@ FileEncoding, UTF-8		 		; Sets the default encoding for FileRead, FileReadLine, 
 	MsgBox, 64, % SubStr(A_ScriptName, 1, -4) . ":" . A_Space . TransA["information"], % TransA["Library has been exported"] . ":" . "`n`n" . OutputFile
 }
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-F_Validate_IniParam(IniParam, IniFilename, Section, Parameter)
+F_Validate_IniParam(ByRef IniParam, IniFilename, Section, Parameter)
 {
 	global	;assume-global mode of operation
 	local	temp := ""
@@ -15613,6 +15700,46 @@ F_CheckDuplicates()	;Checks if second instance of script or executable isn't run
 			. (IfExistSF_exe ? ScriptNoExt . ".exe" : ScriptNoExt . ".ahk") 
 	}	
 	; OutputDebug, % "IfExistSF_exe:" . IfExistSF_exe . A_Space . "IfExistSF_ahk:" . IfExistSF_ahk . "`n"
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_MenuTriggerRWin()
+{
+	global	;assume-global mode of operation
+
+	if (A_ThisMenuItem) ;if user selected menu, then toggle, so if this function is called from within script, this statement isn't true
+	{
+		ini_RWin_EndChar := !ini_RWin_EndChar
+		IniWrite, % ini_RWin_EndChar, % ini_HADConfig, Configuration, RWin_EndChar
+	}	
+	if (ini_RWin_EndChar)
+	{
+		Menu, Configuration,	Check, % TransA["Key to trigger definition"] . "`t" . TransA["Right Windows Key"]
+		Hotkey, ~RWin,  F_ProcessRWin, On
+	}	
+	else
+	{
+		Menu, Configuration,	UnCheck, % TransA["Key to trigger definition"] . "`t" . TransA["Right Windows Key"]
+		Hotkey, ~RWin,  F_ProcessRWin, Off
+	}
+}
+; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+F_ProcessRWin()
+{
+	global	;assume-global mode of operation
+	Critical, On
+
+	if (ini_RWin_EndChar) and (v_InputString != "") and (v_InputString != " ")	;if v_InputString is empty or contains only single space, then additional space will not be backfeeded
+	{
+		SendLevel, % ini_SendLevel	;send it back to Hotstrings2.exe
+		Send, {Space}		;backfeed space what triggers definitions.
+		SendLevel, 0
+		f_EndChar := true
+	}	
+	ToolTip,	;this line is necessary to close tooltips.
+	Gui, Tt_HWT: Hide	;Tooltip _ Hotstring Was Triggered
+	Gui, Tt_ULH: Hide	;Tooltip _ Undid the Last Hotstring
+	F_DestroyTriggerstringTips(ini_TTCn)
+	Critical, Off
 }
 
 ; --------------------------- SECTION OF LABELS ------------------------------------------------------------------------------------------------------------------------------
