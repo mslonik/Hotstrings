@@ -28,7 +28,7 @@ CoordMode, Mouse,		Screen		; Only Screen makes sense for functions prepared in t
 global AppIcon			:= "hotstrings.ico" ; Imagemagick: convert hotstrings.svg -alpha off -resize 96x96 -define icon:auto-resize="96,64,48,32,16" hotstrings.ico
 ;@Ahk2Exe-Let 			U_AppIcon=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% 	; Keep this line and the previous one together
 ;@Ahk2Exe-SetMainIcon  	%U_AppIcon%
-global AppVersion		:= "3.6.24"	;release on 2024-05-13 (Monday). 
+global AppVersion		:= "3.6.25"	;beginning on 2024-05-13 (Monday), only free version again 
 ;@Ahk2Exe-Let 			U_AppVersion=%A_PriorLine~U)^(.+"){1}(.+)".*$~$2% ; Keep this line and the previous one together
 
 ;The compiler will be run at least once for each Base directive line. Only for .exe  Base it is possible to encrypt content!
