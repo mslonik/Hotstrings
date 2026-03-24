@@ -148,8 +148,8 @@ global	v_SilentMode 			:= ""	 	; the only one parameter of Hotstrings app availa
 ,		ini_CheckRepo			:= false				;default value, if true GitHub server is asked for presence of new application version
 ,		ini_DownloadRepo		:= false				;default value, if true new version should be downloaded
 ,		ini_RWin_EndChar		:= false				;default value, if true RWin key acts as EndChar
-#Include, %A_ScriptDir%\includes\Gdip_Part.ahk		;output function "P (Picture)"
-#Include, %A_ScriptDir%\includes\ScriptGuard1.ahk 	;https://www.autohotkey.com/boards/viewtopic.php?f=6&t=80229 to encrypt content
+; #Include, %A_ScriptDir%\includes\Gdip_Part.ahk		;output function "P (Picture)"
+; #Include, %A_ScriptDir%\includes\ScriptGuard1.ahk 	;https://www.autohotkey.com/boards/viewtopic.php?f=6&t=80229 to encrypt content
 ; - - - - - - - - - - - - - - - - - - - - - - - B E G I N N I N G    O F    I N I T I A L I Z A T I O N - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Critical, On
 F_LoadCreateTranslationTxt() 			;Initially this function is run without arguments and then it loads default (English) text strings into memory, so they can be used at any moment when necessary. If run with arguments (later in the code flow) it loads definition from localization file defined in Config.ini. Until localization file is loaded, all the messages are displayed in English.
